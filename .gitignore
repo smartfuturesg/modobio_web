@@ -1,0 +1,22 @@
+# Project specific
+instance/
+
+# General Python and pip files
+*.py[cod]
+__pycache__/
+build/
+lib/
+dist/
+sdist/
+*.egg-info/
+
+# Sphinx
+.buildinfo
+.doctrees/
+
+# macOS
+.DS_Store
+
+# temporary
+*.jpg
+
