@@ -9,7 +9,8 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
+from odyssey.main.views import bp
+app.register_blueprint(bp)
 
-
-# from odyssey.intake.views import bp
-# app.register_blueprint(bp)
+from odyssey.intake.views import bp
+app.register_blueprint(bp)

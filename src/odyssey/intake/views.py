@@ -2,10 +2,10 @@ import datetime
 
 from flask import render_template, Blueprint, session, redirect, request, url_for
 from flask_wtf import FlaskForm
-from wtforms import DateField, RadioField, StringField, SelectField, SubmitField
+from wtforms import DateField, HiddenField, RadioField, StringField, SelectField
 from wtforms.validators import Email, InputRequired, NumberRange
 
-from odyssey.intake import db
+from odyssey import db
 from odyssey.intake.models import ClientInfo, HealthcareConsent
 from odyssey.constants import COUNTRIES, GENDERS, USSTATES, CONTACT_METHODS
 
@@ -37,9 +37,10 @@ class ClientInfoForm(FlaskForm):
 
 
 class HealthcareConsentForm(FlaskForm):
-    infectious_disease = RadioField('Infectious disease', choices=((False, 'No'), (True, 'Yes')))
+    infectious_disease = RadioField('Infectious disease',
+                                    choices=((0, 'No'), (1, 'Yes')))
+    signature = HiddenField()
     fullname = StringField('Full name')
-    signature = StringField('Signature')
     signdate = DateField('Date', default=datetime.date.today())
 
 
@@ -53,6 +54,10 @@ def clientinfo():
 
     db.session.add(ci)
     db.session.commit()
+
+    session['clientid'] = ci.clientid
+    session['client_name'] = f'{ci.firstname} {ci.lastname}'
+
     return redirect(url_for('intake.healthcare_consent'))
 
 @bp.route('/healthcare_consent', methods=['GET', 'POST'])
@@ -61,7 +66,11 @@ def healthcare_consent():
     if request.method == 'GET':
         return render_template('healthcare_consent.html', form=HealthcareConsentForm())
 
-    hcc = HealthcareConsent(**dict(request.form))
+    form = dict(request.form)
+    # Coercing did not work
+    form['infectious_disease'] = bool(int(form['infectious_disease']))
+    form['clientid'] = session['clientid']
+    hcc = HealthcareConsent(**form)
 
     db.session.add(hcc)
     db.session.commit()

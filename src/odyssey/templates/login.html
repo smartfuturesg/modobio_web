@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}Employee login{% endblock %}
+{% block content %}
+<form method="POST" action="{{ url_for('main.login') }}">
+    <div><span class="label">{{ form.email.label }}</span>
+         <span class="field">{{ form.email() }}</span></div>
+    <div><span class="label">{{ form.password.label }}</span>
+         <span class="field">{{ form.password() }}</span></div>
+    <div class="button"><input type="submit" value="Login"></div>
+</form>
+{% endblock %}

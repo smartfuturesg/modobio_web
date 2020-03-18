@@ -31,7 +31,7 @@
 <p>Please consult with your practitioner if you have any questions regarding the treatment above.</p>
 
 <p>Do you have any known disease or infection that can be transmitted through bodily fluids?</p>
-<div>
+<div style="padding-left: 2rem; background-color: #f9f99f80;">
     {% for subfield in form.infectious_disease %}
     {{ subfield }} {{ subfield.label }}
     {% endfor %}
@@ -62,15 +62,35 @@
 
 <p>I acknowledge receipt of this consent form; that I have reviewed and understood it; that I have had the opportunity to ask questions; and that I consent to the care provided at Modo Bio.</p>
 
-<div><span class="label">{{ form.fullname.label }}</span>
-     <span class="field">{{ form.fullname() }}</span></div>
-<div><span class="label">{{ form.signature.label }}</span>
-     <span class="field">{{ form.signature() }}</span></div>
+{{ form.signature() }}
 <div><span class="label">{{ form.signdate.label }}</span>
      <span class="field">{{ form.signdate(type='date') }}</span></div>
+<div><span class="label">{{ form.fullname.label }}</span>
+     <span class="field">{{ form.fullname() }}</span></div>
+<div><span class="label">Signature</span>
+     <span class="field"><canvas class="sigpad"></canvas></span></div>
+<div><span class="label">&nbsp;</span>
+     <span class="field"><button onclick="pad.clear(); return false;">Clear</button></span></div>
 <div>&nbsp;</div>
-<div><span style="text-align: right; font-size: 60%;">Document revision: 2020-03-17</span></div>
+<div><span class="docrev">Document revision: 2020-03-17</span></div>
 <div>&nbsp;</div>
-<div class="button"><input type="submit" value="Accept"></div>
+<div class="button"><input id="submitBtn" type="submit" value="Accept"></div>
 </form>
+
+{# Signature pad script: https://github.com/szimek/signature_pad #}
+<script src="{{ url_for('static', filename='signature_pad.2.3.2.min.js') }}"></script>
+<script>
+    var canvas = document.querySelector("canvas");
+    var pad = new SignaturePad(canvas);
+    var submit = document.getElementById('submitBtn');
+    var sigbox = document.getElementById('signature');
+    submit.addEventListener("click", function() {
+        if (pad.isEmpty()) {
+            alert("Please sign the document before clicking Accept.");
+            return false
+        } else {
+            sigbox.value = pad.toDataURL();
+        }
+    })
+</script>
 {% endblock %}

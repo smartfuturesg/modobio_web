@@ -1,11 +1,11 @@
-from odyssey.intake import db
+from odyssey import db
 
 
 class ClientInfo(db.Model):
     
     __tablename__ = 'ClientInfo'
     
-    userid = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    clientid = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
     firstname = db.Column(db.String(50))
     middlename = db.Column(db.String(50))
@@ -37,13 +37,11 @@ class HealthcareConsent(db.Model):
     __tablename__ = 'HealthcareConsent'
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    userid = db.Column(db.Integer, db.ForeignKey('ClientInfo.userid'), nullable=False)
+    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid'), nullable=False)
 
     infectious_disease = db.Column(db.Boolean)
-    fullname = db.Column(db.String(50))
-    signature = db.Column(db.String(50))
+    fullname = db.Column(db.String(100))
+    signature = db.Column(db.Text)
     signdate = db.Column(db.Date)
 
-
-# Where should this go?
 db.create_all()
