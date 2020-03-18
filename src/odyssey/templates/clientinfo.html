@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Client information{% endblock %}
+{% block content %}
+<form method="POST" action="{{ url_for('intake.clientinfo') }}">
+    <div><span class="label">{{ form.firstname.label }}</span>
+         <span class="field">{{ form.firstname() }}</span></div>
+    <div><span class="label">{{ form.middlename.label }}</span>
+         <span class="field">{{ form.middlename() }}</span></div>
+    <div><span class="label">{{ form.lastname.label }}</span>
+         <span class="field">{{ form.lastname() }}</span></div>
+    <div>&nbsp;</div>
+    <div><span class="label">{{ form.street.label }}</span>
+         <span class="field">{{ form.street() }}</span></div>
+    <div><span class="label">{{ form.city.label }}</span>
+         <span class="field">{{ form.city() }}</span></div>
+    <div><span class="label">{{ form.state.label }}</span>
+         <span class="field">{{ form.state() }}</span></div>
+    <div><span class="label">{{ form.zipcode.label }}</span>
+         <span class="field">{{ form.zipcode() }}</span></div>
+    <div><span class="label">{{ form.country.label }}</span>
+         <span class="field">{{ form.country() }}</span></div>
+    <div>&nbsp;</div>
+    <div><span class="label">{{ form.gender.label }}</span>
+         <span class="field">{{ form.gender() }}</span></div>
+    <div><span class="label">{{ form.dob.label }}</span>
+         <span class="field">{{ form.dob(type='date') }}</span></div>
+    <div>&nbsp;</div>
+    <div><span class="label">{{ form.email.label }}</span>
+         <span class="field">{{ form.email() }}</span></div>
+    <div><span class="label">{{ form.phone.label }}</span>
+         <span class="field">{{ form.phone() }}</span></div>
+    <div><span class="label">{{ form.preferred.label }}</span>
+         <span class="field">{{ form.preferred() }}</span></div>
+    <div>&nbsp;</div>
+    <div><span class="label">{{ form.emergency_contact.label }}</span>
+         <span class="field">{{ form.emergency_contact() }}</span></div>
+    <div><span class="label">{{ form.emergency_phone.label }}</span>
+         <span class="field">{{ form.emergency_phone() }}</span></div>
+    <div>&nbsp;</div>
+    <div><span class="label">{{ form.healthcare_contact.label }}</span>
+         <span class="field">{{ form.healthcare_contact() }}</span></div>
+    <div><span class="label">{{ form.healthcare_phone.label }}</span>
+         <span class="field">{{ form.healthcare_phone() }}</span></div>
+    <div>&nbsp;</div>
+    <div class="button"><input type="submit" value="Next"></div>
+</form>
+{% endblock %}

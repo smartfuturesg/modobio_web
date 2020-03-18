@@ -1,5 +1,6 @@
 # Project specific
 instance/
+docs/other/
 
 # General Python and pip files
 *.py[cod]
@@ -16,7 +17,4 @@ sdist/
 
 # macOS
 .DS_Store
-
-# temporary
-*.jpg
 

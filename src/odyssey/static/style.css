@@ -21,8 +21,8 @@ input[type=submit] {
 }
 input.danger { color: #cc2f2e; }
 
-.content span.label { float: left; width: 30%; }
-.content span.field { float: left; width: 70%; }
+.content span.label { float: left; width: 40%; }
+.content span.field { float: left; width: 60%; }
 .content div.button { text-align: center; width: 100%; }
 .content form { margin: 2em 0; padding: 0 5rem; display: flex; flex-direction: column; }
 .content form div { padding: 0.5rem 0; }

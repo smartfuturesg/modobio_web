@@ -308,3 +308,8 @@ GENDERS = (
     ('m', 'male'),
     ('o', 'other')
 )
+
+CONTACT_METHODS = (
+    (0, 'phone'),
+    (1, 'email')
+)
