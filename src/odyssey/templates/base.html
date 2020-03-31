@@ -5,12 +5,33 @@
     <meta charset="utf-8">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='icon.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    {# Signature pad script: https://github.com/szimek/signature_pad #}
+    <script src="{{ url_for('static', filename='signature_pad.2.3.2.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='library.js') }}"></script>
 </head>
 <body>
-<nav>
+{% if session.get('employee_id') %}
+<header class="login">
+    <span>{{ session.get('employee_name') }}</span>
+    <a href="{{ url_for('main.logout') }}"><button type="button">Log out</button></a>
+</header>
+{% endif %}
+<header class="main">
     <img src="{{ url_for('static', filename='logo.png') }}">
     <h1>{{ self.title() }}</h1>
-</nav>
+    {% if session.get('employee_id') %}
+        {% if session.get('clientid') %}
+        <span class="client">{{ session.get('client_name') }}</span>
+        <a href="{{ url_for('main.client_search') }}"><button type="button">Switch</button></a>
+        {% else %}
+        <span class="noclient">No client loaded</span>
+        <a href="{{ url_for('main.client_search') }}"><button type="button">Load</button></a>
+        {% endif %}
+    {% endif %}
+</header>
+{% if session.get('employee_id') %}
+{% include "menu.html" %}
+{% endif %}
 <section class="content">
     {% for message in get_flashed_messages() %}
         <div class="flash">{{ message }}</div>

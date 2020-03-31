@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Search client{% endblock %}
+{% block content %}
+<form class="input" method="GET" action="{{ url_for('intake.clientinfo') }}">
+    <div class="row center">To add a new client, click here</div>
+    <div class="row center"><input type="submit" value="New"></div>
+</form>
+<p>&nbsp;</p>
+<form class="input" method="POST" action="{{ url_for('main.client_search') }}">
+    <div class="row center">To search for an existing client, fill in one or more of the following fields.</div>
+    <div class="row">
+        <span class="label">{{ form.firstname.label }}</span>
+        <span class="field">{{ form.firstname() }}</span>
+    </div>
+    <div class="row">
+        <span class="label">{{ form.lastname.label }}</span>
+        <span class="field">{{ form.lastname() }}</span>
+    </div>
+    <div class="row">
+        <span class="label">{{ form.email.label }}</span>
+        <span class="field">{{ form.email() }}</span>
+    </div>
+    <div class="row">
+        <span class="label">{{ form.phone.label }}</span>
+        <span class="field">{{ form.phone() }}</span>
+    </div>
+    <div class="row center"><input type="submit" value="Search"></div>
+</form>
+{% endblock %}

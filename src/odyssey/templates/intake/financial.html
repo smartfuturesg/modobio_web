@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}Financial agreement{% endblock %}
+{% block content %}
+<p>Thank you for choosing to enter an with Modo Bio Health Systems LLC ("Modo Bio" or "MB"). We look forward to providing individualized continuous assessment and recommendations to help you reach your health goals.</p>
+
+<p>To reduce confusion and misunderstanding between Modo Bio and its clients, we ask you to enter into this Financial Agreement before any services are provided.</p>
+
+<ol>
+<li>Payment Required at Time of Service: MB requires that payment for all services and products be paid at the time of service. By signing this agreement, I understand that MB will not bill my insurance, and I understand that I am entering into a care relationship with MB as a cash-pay client at rates set by MB.</li>
+
+<li>Insurance Not Accepted: If I choose to submit insurance claims myself, I understand that my benefits for medical, physical therapy or other services or products received or purchased at MB are out-of-network and that MB does not guarantee reimbursement by my insurance provider.</li>
+
+<li>Form of Payment: I agree to pay MB for all treatments and products at time of service or purchase, by cash, check, or credit card, unless I have made other mutually agreed-upon arrangements with MB's General Manager. I understand that MB will not accept post-dated checks and that I will be charged a $25 fee for checks that are returned for non-sufficient funds. I understand that I must redeem a returned check within 14 days of being returned or I may be turned over to the Maricopa County Attorney’s Office.</li>
+
+<li>Cancellation Fee: I acknowledge that Modo Bio may charge a $100 cancellation fee for cancellation of my appointment within 24 hours of my scheduled appointment time. This amount will be added to my next payment/charged to the credit card in my file.</li>
+    
+<li>Discontinuance of service: I understand that if I discontinue my ongoing health enhancement relationship with MB, or if MB discontinues the relationship for any reason, I will not be entitled to a refund of any payment made for services or product rendered up to the date of cancellation.</li>
+
+<li>Disputes: I agree that if I choose to litigate any dispute with MB for any reason, I will do so through arbitration in Maricopa County, Arizona under American Arbitration Association rules, and that such a dispute will be governed by Arizona law.</li>
+</ol>
+
+<form class="input" action="{{ url_for('intake.financial') }}", method="POST">
+{{ form.signature() }}
+<div class="row">
+    <span class="label">{{ form.signdate.label }}</span>
+    <span class="field">{{ form.signdate() }}</span></div>
+<div class="row">
+    <span class="label">{{ form.fullname.label }}</span>
+    <span class="field">{{ form.fullname() }}</span></div>
+<div class="row">
+    <span class="label">Signature</span>
+    <span class="field"><canvas class="sigpad"></canvas></span></div>
+<div class="row">
+    <span class="label">&nbsp;</span>
+    <span class="field"><button onclick="pad.clear(); return false;">Clear</button></span></div>
+<div class="row">&nbsp;</div>
+<div class="row right">
+    <span style="font-size: 60%;">Document revision: 2020-03-17</span></div>
+<div class="row">&nbsp;</div>
+<div class="row center"><input id="submit" type="submit" value="Accept"></div>
+</form>
+
+<script>add_signature_pad('submit', 'signature')</script>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}Physical therapy history{% endblock %}
+{% block content %}
+<form class="input" method="POST" action="{{ url_for('pt.pthistory') }}">
+    <div class="row">
+        <span class="label">{{ form.has_exercise.label }}</span>
+        <span class="field">
+        {% for exc in form.has_exercise %}
+        {{ exc }} {{ exc.label }}
+        {% endfor %}
+        </span>
+    </div>
+    <div class="row">
+        <span class="label">{{ form.exercise.label }}</span>
+        <span class="field">{{ form.exercise() }}</span>
+    </div>
+    <div class="row">&nbsp;</div>
+    <div class="row">
+        <span class="label">{{ form.treatment.label }}</span>
+        <span class="field">{{ form.treatment() }}</span>
+    </div>
+    <div class="row">&nbsp;</div>
+    <div class="row">
+        <span class="label">{{ form.pain_areas.label }}</span>
+        <span class="field">{{ form.pain_areas() }}</span>
+    </div>
+    <div class="row">&nbsp;</div>
+    <p>Please rate your symptoms on scale of 0 to 10, with 0 = no pain and 10 = the worst pain imaginable, you need to go to emergency room.</p>
+    <div class="row">
+        <span class="label">{{ form.best_pain.label }}</span>
+        <span class="field">{{ form.best_pain() }}</span>
+    </div>
+    <div class="row">
+        <span class="label">{{ form.worst_pain.label }}</span>
+        <span class="field">{{ form.worst_pain() }}</span>
+    </div>
+    <div class="row">
+        <span class="label">{{ form.current_pain.label }}</span>
+        <span class="field">{{ form.current_pain() }}</span>
+    </div>
+    <div class="row">&nbsp;</div>
+    <div class="row">
+        <span class="label">{{ form.makes_worse.label }}</span>
+        <span class="field">{{ form.makes_worse() }}</span>
+    </div>
+    <div class="row">
+        <span class="label">{{ form.makes_better.label }}</span>
+        <span class="field">{{ form.makes_better() }}</span>
+    </div>
+    <div class="row">&nbsp;</div>
+    <div class="row center"><input type="submit" value="Next"></div>
+</form>
+{% endblock %}

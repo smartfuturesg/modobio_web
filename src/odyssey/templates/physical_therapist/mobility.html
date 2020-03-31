@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}Mobility assessment{% endblock %}
+{% block content %}
+<form class="input" method="POST" action="{{ url_for('pt.mobility') }}">
+    <div class="row">
+        <span class="label">{{ form.assessment_date.label }}</span>
+        <span class="field">{{ form.assessment_date() }}</span>
+    </div>
+    <div class="row">
+        <span class="label">{{ form.isa_left.label }}</span>
+        <span class="field">{{ form.isa_left() }}</span>
+    </div>
+    <div class="row">
+        <span class="label">{{ form.isa_right.label }}</span>
+        <span class="field">{{ form.isa_right() }}</span>
+    </div>
+    <div class="row">
+        <span class="label">{{ form.isa_dynamic.label }}</span>
+        <span class="field">{{ form.isa_dynamic() }}</span>
+    </div>
+    <div class="row">&nbsp;</div>
+    <div class="multicol">
+        <h1>Left shoulder</h1>
+        {% for element in form.left_shoulder %}
+        {% if element.type != 'CSRFTokenField' %}
+        <div class="row">
+            <span class="label">{{ element.label }}</span>
+            <span class="field">{{ element() }}</span>
+        </div>
+        {% endif %}
+        {% endfor %}
+        <h1>Right shoulder</h1>
+        {% for element in form.right_shoulder %}
+        {% if element.type != 'CSRFTokenField' %}
+        <div class="row">
+            <span class="label">{{ element.label }}</span>
+            <span class="field">{{ element() }}</span>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+    <div class="row">&nbsp;</div>
+    <div class="multicol">
+        <h1>Left hip</h1>
+        {% for element in form.left_hip %}
+        {% if element.type != 'CSRFTokenField' %}
+        <div class="row">
+            <span class="label">{{ element.label }}</span>
+            <span class="field">{{ element() }}</span>
+        </div>
+        {% endif %}
+        {% endfor %}
+        <h1>Right hip</h1>
+        {% for element in form.right_hip %}
+        {% if element.type != 'CSRFTokenField' %}
+        <div class="row">
+            <span class="label">{{ element.label }}</span>
+            <span class="field">{{ element() }}</span>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+    <div class="row">&nbsp;</div>
+    <div class="row center"><input type="submit" value="Next"></div>
+</form>
+{% endblock %}

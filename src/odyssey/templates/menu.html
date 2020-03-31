@@ -1,0 +1,52 @@
+<nav>
+<div class="menu-bar">
+    <input type="checkbox" id="menu-button">
+    <label for="menu-button">
+        <img class="menu-icon" src="{{ url_for('static', filename='menu-icon.svg') }}">
+    </label>
+    <div class="menu">
+        <span class="menuitem">Intake</span>
+        <div class="submenu">
+            <span class="submenuitem">
+                <a href="{{ url_for('intake.clientinfo') }}">Client info</a>
+            </span>
+            <span class="submenuitem">
+                <a href="{{ url_for('intake.consent') }}">Consent form</a>
+            </span>
+            <span class="submenuitem">
+                <a href="{{ url_for('intake.release') }}">Release form</a>
+            </span>
+            <span class="submenuitem">
+                <a href="{{ url_for('intake.financial') }}">Financial form</a>
+            </span>
+            <span class="submenuitem">
+                <a href="{{ url_for('intake.receive') }}">Send forms</a>
+            </span>
+        </div>
+        <span class="menuitem">Doctor</span>
+        <div class="submenu">
+            <span class="submenuitem">
+                <a href="{{ url_for('doctor.medicalhistory') }}">Medical history</a>
+            </span>
+        </div>
+        <span class="menuitem">Physical therapist</span>
+        <div class="submenu">
+            <span class="submenuitem">
+                <a href="{{ url_for('pt.pthistory') }}">Therapy history</a>
+            </span>
+            <span class="submenuitem">
+                <a href="{{ url_for('pt.mobility') }}">Mobility assessment</a>
+            </span>
+        </div>
+        <span class="menuitem">Trainer</span>
+        <div class="submenu">
+            <span class="submenuitem">
+                <a href="">Link 1</a>
+            </span>
+            <span class="submenuitem">
+                <a href="">Link 2</a>
+            </span>
+        </div>
+    </div>
+</div>
+</nav>

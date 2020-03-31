@@ -14,3 +14,9 @@ app.register_blueprint(bp)
 
 from odyssey.intake.views import bp
 app.register_blueprint(bp)
+
+from odyssey.doctor.views import bp
+app.register_blueprint(bp)
+
+from odyssey.physical_therapist.views import bp
+app.register_blueprint(bp)

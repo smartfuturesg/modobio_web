@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Odyssey{% endblock %}
+{% block content %}
+<div style="padding: 1rem;">
+<p><a href="{{ url_for('intake.clientinfo') }}">Client intake</a></p>
+<p><a href="{{ url_for('doctor.medicalhistory') }}">Doctor section</a></p>
+<p><a href="{{ url_for('pt.pthistory') }}">Physical therapist section</a></p>
+<p><a href="">Trainer section</a></p>
+</div>
+{% endblock %}

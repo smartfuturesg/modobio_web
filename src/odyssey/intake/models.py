@@ -32,9 +32,9 @@ class ClientInfo(db.Model):
     healthcare_phone = db.Column(db.String(20))
 
 
-class HealthcareConsent(db.Model):
+class ClientConsent(db.Model):
     
-    __tablename__ = 'HealthcareConsent'
+    __tablename__ = 'ClientConsent'
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid'), nullable=False)

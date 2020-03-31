@@ -1,10 +1,9 @@
 {% extends 'base.html' %}
 {% block title %}Consent form{% endblock %}
 {% block content %}
-<form method="POST" action="{{ url_for('intake.healthcare_consent') }}">
 <h1>General health care consent</h1>
 
-<p>I request and authorize Modo Bio and Adam Douglas, M.D., to provide outpatient care as Dr. Douglas, his assistants and designees deem advisable. This care may include, but is not limited to, physical examination, the drawing and testing of blood, medical advice,and prescriptions of medications, supplements, and other therapeutics. I authorize the health care team at Modo Bio to perform other additional or extended services in emergency situations if it may be necessary or advisable in order to preserve my life or health.</p>
+<p>I request and authorize Modo Bio Health Systems LLC ("Modo Bio") and Adam Douglas, M.D., to provide outpatient care as Dr. Douglas, his assistants and designees deem advisable. This care may include, but is not limited to, physical examination, the drawing and testing of blood, medical advice,and prescriptions of medications, supplements, and other therapeutics. I authorize the health care team at Modo Bio to perform other additional or extended services in emergency situations if it may be necessary or advisable in order to preserve my life or health.</p>
 
 <p>I am aware that the practice of medicine is not an exact science and I acknowledge that no guarantees or promises have been made to me with respect to the results of any diagnostic procedure or treatment.</p>
 
@@ -12,31 +11,21 @@
 
 <p><strong>Cooperation with treatment</strong>: In order for physical therapy treatment to be effective, I must come to scheduled appointments unless there are unusual circumstances. I understand and agree to cooperate with and perform the home physical therapy program intended for me. If I have trouble with any part of my treatment program, I will discuss it with my therapist.</p>
 
-<p><strong>Informed consent for treatment</strong>: The term &#8220;informed consent&#8221; means that the potential risks, benefits and alternatives of physical therapy treatment have been explained to me. The therapist provides a wide range of services and I understand that I will receive information at the initial visit concerning the treatment and options available for my condition.</p>
+<p><strong>Informed consent for treatment</strong>: The term "informed consent" means that the potential risks, benefits and alternatives of physical therapy treatment have been explained to me. The therapist provides a wide range of services and I understand that I will receive information at the initial visit concerning the treatment and options available for my condition.</p>
 
 <p><strong>No warranty</strong>: I understand that there are no guarantees regarding a cure for or improvement in my condition.</p>
 
 <p><strong>Potential risks</strong>: I may experience an increase in my current level of pain or discomfort, or an aggravation of my existing injury or condition. This discomfort is usually temporary; if it does not subside in a reasonable time period, I agree to contact my physical therapist.</p>
 
-<p><strong>Potential benefits</strong>: I may experience an improvement in my symptoms and an increase in my ability to perform daily activities. I may experience increase strength, awareness, flexibility, and endurance in my movements. I may experience decreased pain and discomfort. I should gain a greater knowledge about managing my condition and the resources available to me.</p>
+<p><strong>Potential benefits</strong>: I may experience an improvement in my symptoms and an increase in my ability to perform daily activities. I may experience increased strength, awareness, flexibility, and endurance in my movements. I may experience decreased pain and discomfort. I should gain a greater knowledge about managing my condition and the resources available to me.</p>
 
 <h1>Informed consent to Intramuscular Manual Therapy/Functional Dry Needling (IMT/FDN)</h1>
 
-<p>IMT/FDN is a valuable treatment for musculoskeletal related pain such as soft tissue and joint paint, as well as to increase muscle performance. IMT/FDN involves placing a small needle into the muscle at the trigger point which is typically in an area which the muscle is tight and may be tender with the intent of causing the muscle to contract and then release, improving the flexibility of the muscle and therefore decreasing the symptoms. The performing therapist will not stimulate any distal or auricular points during the dry needling treatment.</p>
+<p>IMT/FDN is a valuable treatment for musculoskeletal related pain such as soft tissue and joint pain, as well as to increase muscle performance. IMT/FDN involves placing a small needle into the muscle at the trigger point which is typically in an area in which the muscle is tight and may be tender with the intent of causing the muscle to contract and then release, improving the flexibility of the muscle and therefore decreasing the symptoms. The performing therapist will not stimulate any distal or auricular points during the dry needling treatment.</p>
 
 <p><strong>Risks of the procedure</strong>: Though unlikely, there are risks associated with this treatment. The most serious risk is accidental puncture of a lung (pneumothorax). If this were to occur, it may require only a chest X-ray and no further treatment as it can resolve on its own. A more severe lung puncture can require hospitalization and re-inflation of the lung. This is a rare complication and in skilled hands should not be a concern. If you feel any related symptoms, immediately contact your IMT/FDN provider. If a pneumothorax is suspected, you should seek medical attention from your physician or if necessary, go to the emergency room.</p>
 
 <p>Other risks may include bruising, infection and nerve injury. Please notify your provider if you have any conditions that can be transferred by blood, require blood anticoagulants or any other conditions that may have an adverse effect to needle punctures. Bruising is a common occurrence and should not be a concern unless you are taking a blood thinner. The likelihood of any significant tissue trauma from IMT/FDN is unlikely.</p>
-
-<p>Please consult with your practitioner if you have any questions regarding the treatment above.</p>
-
-<p>Do you have any known disease or infection that can be transmitted through bodily fluids?</p>
-<div style="padding-left: 2rem; background-color: #f9f99f80;">
-    {% for subfield in form.infectious_disease %}
-    {{ subfield }} {{ subfield.label }}
-    {% endfor %}
-</div>
-<p><strong>If you marked yes, please discuss with your practitioner.</strong></p>
 
 <h1>Informed consent to participation in physical fitness program</h1>
 
@@ -60,37 +49,38 @@
 <li>Will cease exercise immediately if I experience unusual discomfort and feel the need to stop.</li>
 </ul>
 
+<p>Please consult with your practitioner if you have any questions regarding the treatment above.</p>
+
+<form class="input" method="POST" action="{{ url_for('intake.consent') }}">
+<p>Do you have any known disease or infection that can be transmitted through bodily fluids?</p>
+<div style="padding-left: 2rem;">
+    {% for subfield in form.infectious_disease %}
+    {{ subfield }} {{ subfield.label }}
+    {% endfor %}
+</div>
+<p><strong>If you marked yes, please discuss with your practitioner.</strong></p>
+
 <p>I acknowledge receipt of this consent form; that I have reviewed and understood it; that I have had the opportunity to ask questions; and that I consent to the care provided at Modo Bio.</p>
 
 {{ form.signature() }}
-<div><span class="label">{{ form.signdate.label }}</span>
-     <span class="field">{{ form.signdate(type='date') }}</span></div>
-<div><span class="label">{{ form.fullname.label }}</span>
-     <span class="field">{{ form.fullname() }}</span></div>
-<div><span class="label">Signature</span>
-     <span class="field"><canvas class="sigpad"></canvas></span></div>
-<div><span class="label">&nbsp;</span>
-     <span class="field"><button onclick="pad.clear(); return false;">Clear</button></span></div>
-<div>&nbsp;</div>
-<div><span class="docrev">Document revision: 2020-03-17</span></div>
-<div>&nbsp;</div>
-<div class="button"><input id="submitBtn" type="submit" value="Accept"></div>
+<div class="row">
+    <span class="label">{{ form.signdate.label }}</span>
+    <span class="field">{{ form.signdate() }}</span></div>
+<div class="row">
+    <span class="label">{{ form.fullname.label }}</span>
+    <span class="field">{{ form.fullname() }}</span></div>
+<div class="row">
+    <span class="label">Signature</span>
+    <span class="field"><canvas class="sigpad"></canvas></span></div>
+<div class="row">
+    <span class="label">&nbsp;</span>
+    <span class="field"><button onclick="pad.clear(); return false;">Clear</button></span></div>
+<div class="row">&nbsp;</div>
+<div class="row right">
+    <span style="font-size: 60%;">Document revision: 2020-03-17</span></div>
+<div class="row">&nbsp;</div>
+<div class="row center"><input id="submit" type="submit" value="Accept"></div>
 </form>
 
-{# Signature pad script: https://github.com/szimek/signature_pad #}
-<script src="{{ url_for('static', filename='signature_pad.2.3.2.min.js') }}"></script>
-<script>
-    var canvas = document.querySelector("canvas");
-    var pad = new SignaturePad(canvas);
-    var submit = document.getElementById('submitBtn');
-    var sigbox = document.getElementById('signature');
-    submit.addEventListener("click", function() {
-        if (pad.isEmpty()) {
-            alert("Please sign the document before clicking Accept.");
-            return false
-        } else {
-            sigbox.value = pad.toDataURL();
-        }
-    })
-</script>
+<script>add_signature_pad('submit', 'signature');</script>
 {% endblock %}

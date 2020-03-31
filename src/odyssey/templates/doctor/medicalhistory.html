@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% block title %}Medical history{% endblock %}
+{% block content %}
+<form class="input" method="POST" action="{{ url_for('doctor.medicalhistory') }}"
+        oninput="ageout.value = age(new Date(dob.value));">
+    <div class="row">
+        <span class="label">{{ form.dob.label }}</span>
+        <span class="field">{{ form.dob() }}&nbsp;&nbsp;Age:&nbsp;<output name="ageout"></span>
+    </div>
+    <div class="row">
+        <span class="label">{{ form.healthcare_contact.label }}</span>
+        <span class="field">{{ form.healthcare_contact() }}</span>
+    </div>
+    <div class="row">
+        <span class="label">{{ form.healthcare_phone.label }}</span>
+        <span class="field">{{ form.healthcare_phone() }}</span>
+    </div>
+    <div class="row">&nbsp;</div>
+    <div class="row">
+        <span class="label">{{ form.last_examination_date.label }}</span>
+        <span class="field">{{ form.last_examination_date() }}</span>
+    </div>
+    <div class="row">
+        <span class="label">{{ form.last_examination_reason.label }}</span>
+        <span class="field">{{ form.last_examination_reason() }}</span>
+    </div>
+    <div class="row">&nbsp;</div>
+    <div class="row">
+        <span class="label">{{ form.goals.label }}</span>
+        <span class="field">{{ form.goals(rows=5) }}</span>
+    </div>
+    <div class="row">
+        <span class="label">{{ form.concerns.label }}</span>
+        <span class="field">{{ form.concerns() }}</span>
+    </div>
+    <div class="row">
+        <span class="label">{{ form.family_history.label }}</span>
+        <span class="field">{{ form.family_history() }}</span>
+    </div>
+    <div class="row">
+        <span class="label">{{ form.allergies.label }}</span>
+        <span class="field">{{ form.allergies() }}</span>
+    </div>
+    <div class="row">
+        <span class="label">{{ form.medication.label }}</span>
+        <span class="field">{{ form.medication() }}</span>
+    </div>
+    <div class="row">&nbsp;</div>
+    <h1>Diagnostic tests</h1>
+    <p>In the section below, please indicate which diagnostic testing you have recently had. Also describe the reason for the test and the results.</p>
+    {% for element in form.diagnostic %}
+        {% if element.type == 'BooleanField' %}
+        <div class="row">
+        <span class="label">{{ element() }}&nbsp;{{ element.label }}</span>
+        {% elif element.type == 'StringField' %}
+        <span class="field">{{ element() }}</span>
+        </div>
+        {% endif %}
+    {% endfor %}
+    <div class="row">&nbsp;</div>
+    <p>In the sections below, please indicate which medical issues you have had in the past, or are currently experiencing.</p>
+    {% for element in form.history %}
+        {% if element.type == 'BooleanField' %}
+        <div class="row">
+            {{ element() }}&nbsp;{{ element.label }}
+        </div>
+        {% elif element.type == 'HiddenField' %}
+        </div>
+        <div class="row">
+            <h1>{{ element.label }}</h1>
+        </div>
+        <div class="multicol">
+        {% elif element.type in ('StringField', 'IntegerField') %}
+        <div class="row">
+            {{ element() }}
+        </div>
+        {% endif %}
+    {% endfor %}    
+        </div>
+    
+    <div class="row">&nbsp;</div>
+    <div class="row center"><input type="submit" value="Next"></div>
+</form>
+<script>
+    window.onload = function(){
+        var ageout = document.getElementsByName('ageout')[0];
+        var dob = document.getElementsByName('dob')[0];
+        ageout.value = age(new Date(dob.value));
+    }
+</script>
+{% endblock %}

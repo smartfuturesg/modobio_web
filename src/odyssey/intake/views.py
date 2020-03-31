@@ -2,11 +2,11 @@ import datetime
 
 from flask import render_template, Blueprint, session, redirect, request, url_for
 from flask_wtf import FlaskForm
-from wtforms import DateField, HiddenField, RadioField, StringField, SelectField
+from wtforms import BooleanField, DateField, HiddenField, RadioField, StringField, SelectField
 from wtforms.validators import Email, InputRequired, NumberRange
 
 from odyssey import db
-from odyssey.intake.models import ClientInfo, HealthcareConsent
+from odyssey.intake.models import ClientInfo, ClientConsent
 from odyssey.constants import COUNTRIES, GENDERS, USSTATES, CONTACT_METHODS
 
 bp = Blueprint('intake', __name__)
@@ -15,6 +15,9 @@ class ClientInfoForm(FlaskForm):
     firstname = StringField('First name')
     middlename = StringField('Middle name(s)')
     lastname = StringField('Last name')
+
+    guardianname = StringField('Parent or guardian name')
+    guardianrole = StringField('Parent or guardian relationship')
 
     street = StringField('Address')
     city = StringField('City')
@@ -33,45 +36,115 @@ class ClientInfoForm(FlaskForm):
     healthcare_phone = StringField('Primary healthcare provider phone')
 
     gender = SelectField('Gender', choices=GENDERS)
-    dob = DateField('Date of birth')
+    dob = DateField('Date of birth', render_kw={'type': 'date'})
 
 
-class HealthcareConsentForm(FlaskForm):
+class ClientConsentForm(FlaskForm):
     infectious_disease = RadioField('Infectious disease',
                                     choices=((0, 'No'), (1, 'Yes')))
     signature = HiddenField()
     fullname = StringField('Full name')
-    signdate = DateField('Date', default=datetime.date.today())
+    signdate = DateField('Date', default=datetime.date.today(), render_kw={'type': 'date'})
+
+
+class ClientReleaseForm(FlaskForm):
+    fullname = StringField('Full name')
+    dob = DateField('Date of birth', render_kw={'type': 'date'})
+    address = StringField('Address')
+    phone = StringField('Phone', render_kw={'type': 'phone'})
+    email = StringField('Email', render_kw={'type': 'email'})
+
+    release_to_emergency_contact = BooleanField('Emergency contact')
+    release_to_primary_care_contact = BooleanField('Primary care contact')
+    release_of_all = RadioField('', choices=(('all', 'all'), ('other', 'other')))
+    release_of_other = StringField('other')
+
+    signature = HiddenField()
+    signdate = DateField('Date', default=datetime.date.today(), render_kw={'type': 'date'})
+
+
+class CientFinancialForm(FlaskForm):
+    signature = HiddenField()
+    fullname = StringField('Full name')
+    signdate = DateField('Date', default=datetime.date.today(), render_kw={'type': 'date'})
+
+
+class ClientReceiveForm(FlaskForm):
+    receive_docs = BooleanField('', default='checked')
 
 
 @bp.route('/clientinfo', methods=['GET', 'POST'])
 def clientinfo():
     """ Render a HTML page that asks for basic client info. """
-    if request.method =='GET':
-        return render_template('clientinfo.html', form=ClientInfoForm())
+    clientid = session.get('clientid')
 
-    ci = ClientInfo(**dict(request.form))
+    if not clientid:
+        if request.method =='GET':
+            return render_template('intake/clientinfo.html', form=ClientInfoForm())
 
-    db.session.add(ci)
-    db.session.commit()
+        ci = ClientInfo(**dict(request.form))
+        db.session.add(ci)
+        db.session.commit()
 
-    session['clientid'] = ci.clientid
-    session['client_name'] = f'{ci.firstname} {ci.lastname}'
+        session['clientid'] = ci.clientid
+        session['client_name'] = f'{ci.firstname} {ci.lastname}'
 
-    return redirect(url_for('intake.healthcare_consent'))
+        return redirect(url_for('.consent'))
 
-@bp.route('/healthcare_consent', methods=['GET', 'POST'])
-def healthcare_consent():
+    else:
+        ci = ClientInfo.query.filter_by(clientid=clientid).one()
+        form = ClientInfoForm(obj=ci)
+
+        if request.method =='GET':
+            return render_template('intake/clientinfo.html', form=form)
+
+        form.populate_obj(ci)
+        db.session.commit()
+
+        return redirect(url_for('.consent'))
+
+@bp.route('/consent', methods=('GET', 'POST'))
+def consent():
     """ DOC """
     if request.method == 'GET':
-        return render_template('healthcare_consent.html', form=HealthcareConsentForm())
+        return render_template('intake/consent.html', form=ClientConsentForm())
 
     form = dict(request.form)
     # Coercing did not work
-    form['infectious_disease'] = bool(int(form['infectious_disease']))
+    ifd = form.get('infectious_disease')
+    if ifd != None:
+        form['infectious_disease'] = bool(int(ifd))
     form['clientid'] = session['clientid']
-    hcc = HealthcareConsent(**form)
+    hcc = ClientConsent(**form)
 
     db.session.add(hcc)
     db.session.commit()
-    return 'Reroute to next page'
+    return redirect(url_for('.release'))
+
+@bp.route('/release', methods=('GET', 'POST'))
+def release():
+    """ DOC """
+    clientid = session['clientid']
+    fullname = session['client_name']
+    ci = ClientInfo.query.filter_by(clientid=clientid).one()
+    address = f'{ci.street}, {ci.city}, {ci.state}, {ci.zipcode}'
+    form = ClientReleaseForm(obj=ci, fullname=fullname, address=address)
+
+    if request.method == 'GET':
+        return render_template('intake/release.html', form=form)
+    return redirect(url_for('.financial'))
+
+@bp.route('/financial', methods=('GET', 'POST'))
+def financial():
+    """ DOC """
+    if request.method == 'GET':
+        return render_template('intake/financial.html', form=CientFinancialForm())
+    return redirect(url_for('.receive'))
+
+@bp.route('/receive', methods=('GET', 'POST'))
+def receive():
+    """ DOC """
+    if request.method == 'GET':
+        return render_template('intake/receive.html', form=ClientReceiveForm())
+    return redirect(url_for('main.index'))
+    

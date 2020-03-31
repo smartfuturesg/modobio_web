@@ -313,3 +313,12 @@ CONTACT_METHODS = (
     (0, 'phone'),
     (1, 'email')
 )
+
+THERAPIES = (
+    ('pt', 'Physical therapy'),
+    ('chiro', 'Chiropractor'),
+    ('massage', 'Massage therapy'),
+    ('surgery', 'Surgery'),
+    ('medication', 'Medication'),
+    ('acupuncture', 'Acupuncture')
+)
