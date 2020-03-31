@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Medical history{% endblock %}
 {% block content %}
-<form class="input" method="POST" action="{{ url_for('doctor.medicalhistory') }}"
+<form class="input" method="POST" action="{{ url_for('doctor.history') }}"
         oninput="ageout.value = age(new Date(dob.value));">
     <div class="row">
         <span class="label">{{ form.dob.label }}</span>

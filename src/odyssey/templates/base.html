@@ -22,10 +22,10 @@
     {% if session.get('employee_id') %}
         {% if session.get('clientid') %}
         <span class="client">{{ session.get('client_name') }}</span>
-        <a href="{{ url_for('main.client_search') }}"><button type="button">Switch</button></a>
+        <a href="{{ url_for('main.clientsearch') }}"><button type="button">Switch</button></a>
         {% else %}
         <span class="noclient">No client loaded</span>
-        <a href="{{ url_for('main.client_search') }}"><button type="button">Load</button></a>
+        <a href="{{ url_for('main.clientsearch') }}"><button type="button">Load</button></a>
         {% endif %}
     {% endif %}
 </header>

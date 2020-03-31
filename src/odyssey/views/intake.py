@@ -141,7 +141,7 @@ def financial():
     return redirect(url_for('.send'))
 
 @bp.route('/send', methods=('GET', 'POST'))
-def receive():
+def send():
     """ DOC """
     if request.method == 'GET':
         return render_template('intake/send.html', form=ClientReceiveForm())

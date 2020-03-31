@@ -13,10 +13,10 @@ from odyssey.views.main import bp
 app.register_blueprint(bp)
 
 from odyssey.views.intake import bp
-app.register_blueprint(bp, url_prefix='intake')
+app.register_blueprint(bp, url_prefix='/intake')
 
 from odyssey.views.doctor import bp
-app.register_blueprint(bp, url_prefix='doctor')
+app.register_blueprint(bp, url_prefix='/doctor')
 
 from odyssey.views.pt import bp
-app.register_blueprint(bp, url_prefix='pt')
+app.register_blueprint(bp, url_prefix='/pt')

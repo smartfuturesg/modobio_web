@@ -5,7 +5,7 @@
 
 <p>I understand that email is not a secure (encrypted) method of communication. I understand and accept that there are risks associated with unsecured communications, including that these emails could be intercepted or read by other people.</p>
 
-<form class="input" method="POST" action="{{ url_for('intake.receive') }}">
+<form class="input" method="POST" action="{{ url_for('intake.send') }}">
 <div class="row">
     {{ form.receive_docs() }} Please send me a copy of the signed documents.
 </div>

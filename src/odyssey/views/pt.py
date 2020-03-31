@@ -6,7 +6,7 @@ from wtforms import BooleanField, DateField, FormField, IntegerField, RadioField
 
 from odyssey import db
 from odyssey.constants import THERAPIES
-from odyssey.intake.models import ClientInfo
+from odyssey.models import ClientInfo
 
 bp = Blueprint('pt', __name__)
 
@@ -55,15 +55,15 @@ class MobilityAssessmentForm(FlaskForm):
     right_hip = FormField(MobilityAssessmentQuadrantForm)
 
 
-@bp.route('/pthistory', methods=('GET', 'POST'))
-def pthistory():
+@bp.route('/history', methods=('GET', 'POST'))
+def history():
     if request.method == 'GET':
-        return render_template('physical_therapist/pthistory.html', form=PTHistoryForm())
+        return render_template('pt/history.html', form=PTHistoryForm())
     return redirect(url_for('.mobility'))
 
 @bp.route('/mobility', methods=('GET', 'POST'))
 def mobility():
     if request.method == 'GET':
         flash('This needs some type of load/save functionality to recall previous assessments and scroll through them.')
-        return render_template('physical_therapist/mobility.html', form=MobilityAssessmentForm())
+        return render_template('pt/mobility.html', form=MobilityAssessmentForm())
     return redirect(url_for('main.index'))

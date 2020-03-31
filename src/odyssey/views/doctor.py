@@ -5,7 +5,7 @@ from flask_wtf import FlaskForm
 from wtforms import BooleanField, DateField, FormField, HiddenField, IntegerField, StringField, TextAreaField
 
 from odyssey import db
-from odyssey.intake.models import ClientInfo
+from odyssey.models import ClientInfo
 
 bp = Blueprint('doctor', __name__)
 
@@ -195,7 +195,7 @@ class MedicalHistoryForm(FlaskForm):
 
 
 @bp.route('/history', methods=('GET', 'POST'))
-def medicalhistory():
+def history():
     clientid = session['clientid']
     fullname = session['client_name']
     ci = ClientInfo.query.filter_by(clientid=clientid).one()
@@ -208,5 +208,5 @@ def medicalhistory():
     )
 
     if request.method == 'GET':
-        return render_template('doctor/medicalhistory.html', form=form)
+        return render_template('doctor/history.html', form=form)
     return redirect(url_for('main.index'))

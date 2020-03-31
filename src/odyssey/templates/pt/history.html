@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Physical therapy history{% endblock %}
 {% block content %}
-<form class="input" method="POST" action="{{ url_for('pt.pthistory') }}">
+<form class="input" method="POST" action="{{ url_for('pt.history') }}">
     <div class="row">
         <span class="label">{{ form.has_exercise.label }}</span>
         <span class="field">

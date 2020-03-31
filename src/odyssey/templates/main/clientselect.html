@@ -18,7 +18,7 @@
     <div class="details" style="display: none;" id="{{ loop.index0 }}">
         {{ client.street }}<br>
         {{ client.city }}, {{ client.state }} {{ client.zipcode }}
-        <form class="details" method="POST" action="{{ url_for('main.client_load') }}">
+        <form class="details" method="POST" action="{{ url_for('main.clientload') }}">
             <input type="hidden" name="clientid" value="{{ client.clientid }}">
             <input type="hidden" name="client_name" value="{{ client.firstname }} {{ client.lastname }}">
             <input class="center" type="submit" value="Load">

@@ -26,7 +26,7 @@ def index():
         return redirect(url_for('.login'))
 
     if not session.get('clientid'):
-        return redirect(url_for('.client_search'))
+        return redirect(url_for('.clientsearch'))
 
     return render_template('main/index.html')
 
@@ -54,7 +54,7 @@ def logout():
     return redirect(url_for('.index'))
 
 @bp.route('/clientsearch', methods=('GET', 'POST'))
-def client_search():
+def clientsearch():
     if request.method == 'GET':
         return render_template('main/clientsearch.html', form=ClientSearchForm())
 
@@ -78,7 +78,7 @@ def client_search():
 
 
 @bp.route('/clientload', methods=('POST',))
-def client_load():
+def clientload():
     session['clientid'] = request.form['clientid']
     session['client_name'] = request.form['client_name']
     return redirect(url_for('.index'))
