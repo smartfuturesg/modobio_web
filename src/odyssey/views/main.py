@@ -4,8 +4,7 @@ from wtforms import StringField, PasswordField
 from werkzeug.security import check_password_hash
 
 from odyssey import db
-from odyssey.main.models import Employees
-from odyssey.intake.models import ClientInfo
+from odyssey.models import Employees, ClientInfo
 
 bp = Blueprint('main', __name__)
 

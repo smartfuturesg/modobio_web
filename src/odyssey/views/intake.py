@@ -3,10 +3,9 @@ import datetime
 from flask import render_template, Blueprint, session, redirect, request, url_for
 from flask_wtf import FlaskForm
 from wtforms import BooleanField, DateField, HiddenField, RadioField, StringField, SelectField
-from wtforms.validators import Email, InputRequired, NumberRange
 
 from odyssey import db
-from odyssey.intake.models import ClientInfo, ClientConsent
+from odyssey.models import ClientInfo, ClientConsent
 from odyssey.constants import COUNTRIES, GENDERS, USSTATES, CONTACT_METHODS
 
 bp = Blueprint('intake', __name__)
@@ -139,12 +138,12 @@ def financial():
     """ DOC """
     if request.method == 'GET':
         return render_template('intake/financial.html', form=CientFinancialForm())
-    return redirect(url_for('.receive'))
+    return redirect(url_for('.send'))
 
-@bp.route('/receive', methods=('GET', 'POST'))
+@bp.route('/send', methods=('GET', 'POST'))
 def receive():
     """ DOC """
     if request.method == 'GET':
-        return render_template('intake/receive.html', form=ClientReceiveForm())
+        return render_template('intake/send.html', form=ClientReceiveForm())
     return redirect(url_for('main.index'))
     

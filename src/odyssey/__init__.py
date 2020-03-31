@@ -9,14 +9,14 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-from odyssey.main.views import bp
+from odyssey.views.main import bp
 app.register_blueprint(bp)
 
-from odyssey.intake.views import bp
-app.register_blueprint(bp)
+from odyssey.views.intake import bp
+app.register_blueprint(bp, url_prefix='intake')
 
-from odyssey.doctor.views import bp
-app.register_blueprint(bp)
+from odyssey.views.doctor import bp
+app.register_blueprint(bp, url_prefix='doctor')
 
-from odyssey.physical_therapist.views import bp
-app.register_blueprint(bp)
+from odyssey.views.pt import bp
+app.register_blueprint(bp, url_prefix='pt')

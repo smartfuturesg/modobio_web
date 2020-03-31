@@ -1,6 +1,16 @@
 from odyssey import db
 
 
+class Employees(db.Model):
+    __tablename__ = 'Employees'
+
+    employee_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    email = db.Column(db.String(50), nullable=False, unique=True)
+    firstname = db.Column(db.String(50), nullable=False)
+    lastname = db.Column(db.String(50), nullable=False)
+    password = db.Column(db.String(128))
+
+
 class ClientInfo(db.Model):
     
     __tablename__ = 'ClientInfo'
@@ -43,5 +53,20 @@ class ClientConsent(db.Model):
     fullname = db.Column(db.String(100))
     signature = db.Column(db.Text)
     signdate = db.Column(db.Date)
+
+
+class MedicalHistory(db.Model):
+    
+    __tablename__ = 'MedicalHistory'
+    
+    clientid = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
+
+class PTHistory(db.Model):
+    
+    __tablename__ = 'PTHistory'
+    
+    clientid = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
 
 db.create_all()
