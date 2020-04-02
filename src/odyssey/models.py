@@ -12,9 +12,9 @@ class Employees(db.Model):
 
 
 class ClientInfo(db.Model):
-    
+
     __tablename__ = 'ClientInfo'
-    
+
     clientid = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
     firstname = db.Column(db.String(50))
@@ -56,16 +56,16 @@ class ClientConsent(db.Model):
 
 
 class MedicalHistory(db.Model):
-    
+
     __tablename__ = 'MedicalHistory'
-    
+
     clientid = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
 
 class PTHistory(db.Model):
-    
+
     __tablename__ = 'PTHistory'
-    
+
     clientid = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
 
