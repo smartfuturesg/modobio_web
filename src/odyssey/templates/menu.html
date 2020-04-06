@@ -5,10 +5,14 @@
         <img class="menu-icon" src="{{ url_for('static', filename='menu-icon.svg') }}">
     </label>
     <div class="menu">
+        {% for item in menu %}
         <span class="menuitem">Intake</span>
         <div class="submenu">
             <span class="submenuitem">
                 <a href="{{ url_for('intake.clientinfo') }}">Client info</a>
+            </span>
+            <span class="submenuitem">
+                <a href="{{ url_for('intake.consult') }}">Initial consult contract</a>
             </span>
             <span class="submenuitem">
                 <a href="{{ url_for('intake.consent') }}">Consent form</a>
@@ -22,11 +26,18 @@
             <span class="submenuitem">
                 <a href="{{ url_for('intake.send') }}">Send forms</a>
             </span>
+            <hr>
+            <span class="submenuitem">
+                <a href="{{ url_for('intake.subscription') }}">Subscription contract</a>
+            </span>
         </div>
         <span class="menuitem">Doctor</span>
         <div class="submenu">
             <span class="submenuitem">
                 <a href="{{ url_for('doctor.history') }}">Medical history</a>
+            </span>
+            <span class="submenuitem">
+                <a href="{# { url_for('doctor.consult') }# }">Consult</a>
             </span>
         </div>
         <span class="menuitem">Physical therapist</span>
@@ -36,6 +47,9 @@
             </span>
             <span class="submenuitem">
                 <a href="{{ url_for('pt.mobility') }}">Mobility assessment</a>
+            </span>
+            <span class="submenuitem">
+                <a href="{# { url_for('pt.consult') } #}">Consult</a>
             </span>
         </div>
         <span class="menuitem">Trainer</span>

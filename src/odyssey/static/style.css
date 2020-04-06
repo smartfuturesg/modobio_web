@@ -57,6 +57,17 @@ h1 {
     margin: 1rem 0;
 }
 
+h2 {
+    font-weight: normal;
+    font-size: 135%;
+    margin: 1rem 0;    
+}
+
+hr {
+    border: 1px solid var(--mbblue);
+    width: 66%;
+}
+
 a {
     color: var(--mbblue);
     text-decoration: none;

@@ -38,6 +38,12 @@ class ClientInfoForm(FlaskForm):
     dob = DateField('Date of birth', render_kw={'type': 'date'})
 
 
+class ClientConsultContractForm(FlaskForm):
+    signature = HiddenField()
+    fullname = StringField('Full name')
+    signdate = DateField('Date', default=datetime.date.today(), render_kw={'type': 'date'})
+
+
 class ClientConsentForm(FlaskForm):
     infectious_disease = RadioField('Infectious disease',
                                     choices=((0, 'No'), (1, 'Yes')))
@@ -70,6 +76,12 @@ class CientFinancialForm(FlaskForm):
 
 class ClientReceiveForm(FlaskForm):
     receive_docs = BooleanField('', default='checked')
+
+
+class ClientSubscriptionContractForm(FlaskForm):
+    signature = HiddenField()
+    fullname = StringField('Full name')
+    signdate = DateField('Date', default=datetime.date.today(), render_kw={'type': 'date'})
 
 
 @bp.route('/clientinfo', methods=['GET', 'POST'])
@@ -146,4 +158,17 @@ def send():
     if request.method == 'GET':
         return render_template('intake/send.html', form=ClientReceiveForm())
     return redirect(url_for('main.index'))
-    
+
+@bp.route('/consult', methods=('GET', 'POST'))
+def consult():
+    """ DOC """
+    if request.method == 'GET':
+        return render_template('intake/consult.html', form=ClientConsultContractForm())
+    return redirect(url_for('main.index'))
+
+@bp.route('/subscription', methods=('GET', 'POST'))
+def subscription():
+    """ DOC """
+    if request.method == 'GET':
+        return render_template('intake/subscription.html', form=ClientSubscriptionContractForm())
+    return redirect(url_for('main.index'))
