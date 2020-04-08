@@ -224,21 +224,32 @@ a {
 
 /* Tables */
 div.table {
-    display: table;
     width: 100%;
-    margin: 0.5rem;
-    border-spacing: 0 1rem;
-    overflow-x: auto;
+    padding-bottom: 1rem;
 }
 
-div.table > div.header {
-    display: table-row;
+div.table-header {
+    width: 100%;
     font-weight: bold;
+    padding-bottom: 0.5em;
 }
 
-div.table > div.row { display: table-row; }
-div.table > div.row:hover { background-color: var(--mblightblue); }
-span.col { display: table-cell; }
+div.table > input[type=radio] {
+    display: none;
+}
+
+div.table > label:hover {
+    background-color: #eee;
+}
+
+div.table > input:checked + label {
+    background-color: var(--mblightblue);
+}
+
+div.table span.col {
+    width: 23%;
+    display: inline-block;
+}
 
 /* Lists */
 li { padding: 0.5rem 0; }

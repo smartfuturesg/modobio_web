@@ -1,30 +1,24 @@
 {% extends 'base.html' %}
 {% block title %}Select client{% endblock %}
 {% block content %}
-<div class="table">
-    <div class="header">
-        <span class="col">First name</span>
-        <span class="col">Last name</span>
-        <span class="col">Phone</span>
-        <span class="col">Email address</span>
+<form class="input" method="POST" action="{{ url_for('main.clientload') }}">
+    <div class="table">
+        <div class="table-header">
+            <span class="col">First name</span>
+            <span class="col">Last name</span>
+            <span class="col">Phone number</span>
+            <span class="col">Email address</span>
+        </div>
+    {% for client in clients %}
+        <input type="radio" id="{{ loop.index0 }}" name="clientid" value="{{ client.clientid }}">
+        <label for="{{ loop.index0 }}">
+            <span class="col">{{ client.firstname }}</span>
+            <span class="col">{{ client.lastname }}</span>
+            <span class="col">{{ client.phone }}</span>
+            <span class="col">{{ client.email }}</span>
+        </label>
+    {% endfor %}
     </div>
-{% for client in clients %}
-    <div class="row" data-id="{{ loop.index0 }}">
-        <span class="col">{{ client.firstname }}</span>
-        <span class="col">{{ client.lastname }}</span>
-        <span class="col">{{ client.phone }}</span>
-        <span class="col">{{ client.email }}</span>
-    </div>
-    <div class="details" style="display: none;" id="{{ loop.index0 }}">
-        {{ client.street }}<br>
-        {{ client.city }}, {{ client.state }} {{ client.zipcode }}
-        <form class="details" method="POST" action="{{ url_for('main.clientload') }}">
-            <input type="hidden" name="clientid" value="{{ client.clientid }}">
-            <input type="hidden" name="client_name" value="{{ client.firstname }} {{ client.lastname }}">
-            <input class="center" type="submit" value="Load">
-        </form>
-    </div>
-{% endfor %}
-</div>
-<script>add_toggles('div.row', 'div.details');</script>
+    <div class="row center"><input type="submit" value="Load"></div>
+</form>
 {% endblock %}

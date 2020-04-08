@@ -79,6 +79,11 @@ def clientsearch():
 
 @bp.route('/clientload', methods=('POST',))
 def clientload():
-    session['clientid'] = request.form['clientid']
-    session['client_name'] = request.form['client_name']
+    clientid = request.form['clientid']
+    ci = db.session.query(ClientInfo).filter_by(clientid=clientid).one()
+    fullname = f'{ci.firstname} {ci.lastname}'
+
+    session['clientid'] = clientid
+    session['client_name'] = fullname
+
     return redirect(url_for('.index'))
