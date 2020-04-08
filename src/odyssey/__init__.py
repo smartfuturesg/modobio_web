@@ -9,6 +9,12 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
+from odyssey.views.menu import menu
+
+@app.context_processor
+def render_menu():
+    return {'menu': menu}
+
 from odyssey.views.main import bp
 app.register_blueprint(bp)
 
@@ -20,3 +26,4 @@ app.register_blueprint(bp, url_prefix='/doctor')
 
 from odyssey.views.pt import bp
 app.register_blueprint(bp, url_prefix='/pt')
+

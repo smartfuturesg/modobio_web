@@ -1,25 +1,29 @@
-from collections import OrderedDict
+# Recursive navigation menu generation
+# 
+# A menu is a tuple () of dicts {}.
+# Each menu item dict has the keywords 'title' and either 'url' or 'submenu'.
+# The value for 'submenu' is another menu with the same structure.
 
-menu = OrderedDict(
-    {'title': 'Intake', 'items': OrderedDict(
+menu = (
+    {'title': 'Intake', 'submenu': (
         {'title': 'Client info', 'url': 'intake.clientinfo'},
-        {'title': 'Forms', 'items': OrderedDict(
+        {'title': 'Forms', 'submenu': (
             {'title': 'Consent form', 'url': 'intake.consent'},
             {'title': 'Release form', 'url': 'intake.release'},
             {'title': 'Financial form', 'url': 'intake.financial'},
             {'title': 'Send forms', 'url': 'intake.send'})},
-        {'title': 'Contracts', 'items': OrderedDict(
+        {'title': 'Contracts', 'submenu': (
             {'title': 'Initial consult', 'url': 'intake.consult'},
             {'title': 'Subscription', 'url': 'intake.subscription'})}
     )},
-    {'title': 'Doctor', 'items': OrderedDict(
+    {'title': 'Doctor', 'submenu': (
         {'title': 'Medical history', 'url': 'doctor.history'},
-        {'title': 'Consult', 'url': ''}
+        # {'title': 'Consult', 'url': ''}
     )},
-    {'title': 'Physical therpist', 'items': OrderedDict(
+    {'title': 'Physical therapist', 'submenu': (
         {'title': 'Therapy history', 'url': 'pt.history'},
         {'title': 'Mobility assessment', 'url': 'pt.mobility'},
-        {'title': 'Consult', 'url': ''}
+        # {'title': 'Consult', 'url': ''}
     )},
-    {'title': 'Trainer', 'items': OrderedDict()}
+    {'title': 'Trainer', 'submenu': ()}
 )

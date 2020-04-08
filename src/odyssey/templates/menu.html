@@ -1,65 +1,28 @@
 <nav>
 <div class="menu-bar">
-    <input type="checkbox" id="menu-button">
     <label for="menu-button">
         <img class="menu-icon" src="{{ url_for('static', filename='menu-icon.svg') }}">
     </label>
+    <input type="checkbox" class="menu-button" id="menu-button">
     <div class="menu">
-        {% for item in menu %}
-        <span class="menuitem">Intake</span>
-        <div class="submenu">
+        {% for item in menu recursive %}
+        {% if 'submenu' in item %}
+            <label for="menu-button-{{ loop.depth0 }}-{{ loop.index0 }}"
+                   class="menuitem submenu-depth-{{ loop.depth }}">
+                {{ item.title }}
+            </label>
+            <input id="menu-button-{{ loop.depth0 }}-{{ loop.index0 }}"
+                   class="menu-button"
+                   type="checkbox">
+            <div class="submenu submenu-depth-{{ loop.depth }}">
+                {{ loop(item.submenu) }}
+            </div>
+        {% else %}
             <span class="submenuitem">
-                <a href="{{ url_for('intake.clientinfo') }}">Client info</a>
+                <a href="{{ url_for(item.url) }}">{{ item.title }}</a>
             </span>
-            <span class="submenuitem">
-                <a href="{{ url_for('intake.consult') }}">Initial consult contract</a>
-            </span>
-            <span class="submenuitem">
-                <a href="{{ url_for('intake.consent') }}">Consent form</a>
-            </span>
-            <span class="submenuitem">
-                <a href="{{ url_for('intake.release') }}">Release form</a>
-            </span>
-            <span class="submenuitem">
-                <a href="{{ url_for('intake.financial') }}">Financial form</a>
-            </span>
-            <span class="submenuitem">
-                <a href="{{ url_for('intake.send') }}">Send forms</a>
-            </span>
-            <hr>
-            <span class="submenuitem">
-                <a href="{{ url_for('intake.subscription') }}">Subscription contract</a>
-            </span>
-        </div>
-        <span class="menuitem">Doctor</span>
-        <div class="submenu">
-            <span class="submenuitem">
-                <a href="{{ url_for('doctor.history') }}">Medical history</a>
-            </span>
-            <span class="submenuitem">
-                <a href="{# { url_for('doctor.consult') }# }">Consult</a>
-            </span>
-        </div>
-        <span class="menuitem">Physical therapist</span>
-        <div class="submenu">
-            <span class="submenuitem">
-                <a href="{{ url_for('pt.history') }}">Therapy history</a>
-            </span>
-            <span class="submenuitem">
-                <a href="{{ url_for('pt.mobility') }}">Mobility assessment</a>
-            </span>
-            <span class="submenuitem">
-                <a href="{# { url_for('pt.consult') } #}">Consult</a>
-            </span>
-        </div>
-        <span class="menuitem">Trainer</span>
-        <div class="submenu">
-            <span class="submenuitem">
-                <a href="">Link 1</a>
-            </span>
-            <span class="submenuitem">
-                <a href="">Link 2</a>
-            </span>
+        {% endif %}
+        {% endfor %}
         </div>
     </div>
 </div>
