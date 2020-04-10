@@ -3,7 +3,7 @@
 <head>
     <title>{% block title %}{% endblock %}</title>
     <meta charset="utf-8">
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='icon.png') }}">
+    <link rel="icon" href="{{ url_for('static', filename='icon.svg') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     {# Signature pad script: https://github.com/szimek/signature_pad #}
     <script src="{{ url_for('static', filename='signature_pad.2.3.2.min.js') }}"></script>
@@ -17,7 +17,7 @@
 </header>
 {% endif %}
 <header class="main">
-    <img src="{{ url_for('static', filename='logo.png') }}">
+    <img src="{{ url_for('static', filename='logo.svg') }}">
     <h1>{{ self.title() }}</h1>
     {% if session.get('employee_id') %}
         {% if session.get('clientid') %}
