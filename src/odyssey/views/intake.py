@@ -98,7 +98,7 @@ def clientinfo():
         db.session.commit()
 
         session['clientid'] = ci.clientid
-        session['client_name'] = f'{ci.firstname} {ci.lastname}'
+        session['clientname'] = f'{ci.firstname} {ci.lastname}'
 
         return redirect(url_for('.consent'))
 
@@ -136,7 +136,7 @@ def consent():
 def release():
     """ DOC """
     clientid = session['clientid']
-    fullname = session['client_name']
+    fullname = session['clientname']
     ci = ClientInfo.query.filter_by(clientid=clientid).one()
     address = f'{ci.street}, {ci.city}, {ci.state}, {ci.zipcode}'
     form = ClientReleaseForm(obj=ci, fullname=fullname, address=address)

@@ -4,11 +4,11 @@ from wtforms import StringField, PasswordField
 from werkzeug.security import check_password_hash
 
 from odyssey import db
-from odyssey.models import Employees, ClientInfo
+from odyssey.models import Staff, ClientInfo
 
 bp = Blueprint('main', __name__)
 
-class EmployeeLoginForm(FlaskForm):
+class StaffLoginForm(FlaskForm):
     email = StringField('Email', render_kw={'type': 'email'})
     password = PasswordField('Password')
 
@@ -22,7 +22,7 @@ class ClientSearchForm(FlaskForm):
 
 @bp.route('/')
 def index():
-    if not session.get('employee_id'):
+    if not session.get('staffid'):
         return redirect(url_for('.login'))
 
     if not session.get('clientid'):
@@ -34,19 +34,19 @@ def index():
 @bp.route('/login', methods=('GET', 'POST'))
 def login():
     if request.method == 'POST':
-        emp_email = request.form['email']
-        emp_pass = request.form['password']
-        emp = Employees.query.filter_by(email=emp_email).first()
+        email = request.form['email']
+        password = request.form['password']
+        staff = Staff.query.filter_by(email=email).first()
 
-        if emp and check_password_hash(emp.password, emp_pass):
+        if staff and check_password_hash(staff.password, password):
             session.clear()
-            session['employee_id'] = emp.employee_id
-            session['employee_name'] = f'{emp.firstname} {emp.lastname}'
+            session['staffid'] = staff.staffid
+            session['staffname'] = f'{staff.firstname} {staff.lastname}'
             return redirect(url_for('.index'))
 
         flash('Incorrect email or password')
 
-    return render_template('main/login.html', form=EmployeeLoginForm())
+    return render_template('main/login.html', form=StaffLoginForm())
 
 @bp.route('/logout')
 def logout():
@@ -84,6 +84,6 @@ def clientload():
     fullname = f'{ci.firstname} {ci.lastname}'
 
     session['clientid'] = clientid
-    session['client_name'] = fullname
+    session['clientname'] = fullname
 
     return redirect(url_for('.index'))

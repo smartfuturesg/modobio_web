@@ -197,7 +197,7 @@ class MedicalHistoryForm(FlaskForm):
 @bp.route('/history', methods=('GET', 'POST'))
 def history():
     clientid = session['clientid']
-    fullname = session['client_name']
+    fullname = session['clientname']
     ci = ClientInfo.query.filter_by(clientid=clientid).one()
     
     form = MedicalHistoryForm(

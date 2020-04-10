@@ -10,28 +10,26 @@
     <script src="{{ url_for('static', filename='library.js') }}"></script>
 </head>
 <body>
-{% if session.get('employee_id') %}
-<header class="login">
-    <span>{{ session.get('employee_name') }}</span>
-    <a href="{{ url_for('main.logout') }}"><button type="button">Log out</button></a>
-</header>
+{% if session.get('staffid') %}
+    <header class="login">
+        <span>{{ session.get('staffname') }}</span>
+        <a href="{{ url_for('main.logout') }}"><button type="button">Log out</button></a>
+    </header>
 {% endif %}
 <header class="main">
     <img src="{{ url_for('static', filename='logo.svg') }}">
     <h1>{{ self.title() }}</h1>
-    {% if session.get('employee_id') %}
+    {% if session.get('staffid') %}
         {% if session.get('clientid') %}
-        <span class="client">{{ session.get('client_name') }}</span>
-        <a href="{{ url_for('main.clientsearch') }}"><button type="button">Switch</button></a>
+            <span class="client">{{ session.get('clientname') }}</span>
+            <a href="{{ url_for('main.clientsearch') }}"><button type="button">Switch</button></a>
         {% else %}
-        <span class="noclient">No client loaded</span>
-        <a href="{{ url_for('main.clientsearch') }}"><button type="button">Load</button></a>
+            <span class="noclient">No client loaded</span>
+            <a href="{{ url_for('main.clientsearch') }}"><button type="button">Load</button></a>
         {% endif %}
     {% endif %}
 </header>
-{% if session.get('employee_id') %}
-{% include "menu.html" %}
-{% endif %}
+{% if session.get('staffid') %}{% include 'menu.html' %}{% endif %}
 <section class="content">
     {% for message in get_flashed_messages() %}
         <div class="flash">{{ message }}</div>
