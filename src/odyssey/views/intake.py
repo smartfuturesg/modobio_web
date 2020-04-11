@@ -6,7 +6,7 @@ from wtforms import BooleanField, DateField, HiddenField, RadioField, StringFiel
 
 from odyssey import db
 from odyssey.models import ClientInfo, ClientConsent
-from odyssey.constants import COUNTRIES, GENDERS, USSTATES, CONTACT_METHODS
+from odyssey.constants import COUNTRIES, GENDERS, USSTATES, CONTACT_METHODS, YESNO, BOOLIFY
 
 bp = Blueprint('intake', __name__)
 
@@ -45,8 +45,7 @@ class ClientConsultContractForm(FlaskForm):
 
 
 class ClientConsentForm(FlaskForm):
-    infectious_disease = RadioField('Infectious disease',
-                                    choices=((0, 'No'), (1, 'Yes')))
+    infectious_disease = RadioField('Infectious disease', choices=YESNO, coerce=BOOLIFY)
     signature = HiddenField()
     fullname = StringField('Full name')
     signdate = DateField('Date', default=datetime.date.today(), render_kw={'type': 'date'})
@@ -116,25 +115,25 @@ def clientinfo():
 
 @bp.route('/consent', methods=('GET', 'POST'))
 def consent():
-    """ DOC """
+    clientid = session.get('clientid')
+    cc = ClientConsent.query.filter_by(clientid=clientid).one_or_none()
+
+    form = ClientConsentForm(obj=cc)
+
     if request.method == 'GET':
-        return render_template('intake/consent.html', form=ClientConsentForm())
+        return render_template('intake/consent.html', form=form)
 
-    form = dict(request.form)
-    # Coercing did not work
-    ifd = form.get('infectious_disease')
-    if ifd != None:
-        form['infectious_disease'] = bool(int(ifd))
-    form['clientid'] = session['clientid']
-    hcc = ClientConsent(**form)
+    if not cc:
+        cc = ClientConsent(**dict(request.form), clientid=clientid)
+        db.session.add(cc)
+    else:
+        form.populate_obj(cc)
 
-    db.session.add(hcc)
     db.session.commit()
     return redirect(url_for('.release'))
 
 @bp.route('/release', methods=('GET', 'POST'))
 def release():
-    """ DOC """
     clientid = session['clientid']
     fullname = session['clientname']
     ci = ClientInfo.query.filter_by(clientid=clientid).one()
@@ -147,28 +146,24 @@ def release():
 
 @bp.route('/financial', methods=('GET', 'POST'))
 def financial():
-    """ DOC """
     if request.method == 'GET':
         return render_template('intake/financial.html', form=CientFinancialForm())
     return redirect(url_for('.send'))
 
 @bp.route('/send', methods=('GET', 'POST'))
 def send():
-    """ DOC """
     if request.method == 'GET':
         return render_template('intake/send.html', form=ClientReceiveForm())
     return redirect(url_for('main.index'))
 
 @bp.route('/consult', methods=('GET', 'POST'))
 def consult():
-    """ DOC """
     if request.method == 'GET':
         return render_template('intake/consult.html', form=ClientConsultContractForm())
     return redirect(url_for('main.index'))
 
 @bp.route('/subscription', methods=('GET', 'POST'))
 def subscription():
-    """ DOC """
     if request.method == 'GET':
         return render_template('intake/subscription.html', form=ClientSubscriptionContractForm())
     return redirect(url_for('main.index'))

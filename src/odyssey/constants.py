@@ -322,3 +322,12 @@ THERAPIES = (
     ('medication', 'Medication'),
     ('acupuncture', 'Acupuncture')
 )
+
+# To connect a RadioField with 2 options to a Boolean db column, use:
+# RadioField('label', choices=YESNO, coerce=BOOLIFY)
+YESNO = (
+    (0, 'No'),
+    (1, 'Yes')
+)
+
+BOOLIFY = lambda x: bool(int(x))
