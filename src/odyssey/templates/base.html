@@ -13,7 +13,8 @@
 {% if session.get('staffid') %}
     <header class="login">
         <span>{{ session.get('staffname') }}</span>
-        <a href="{{ url_for('main.logout') }}"><button type="button">Log out</button></a>
+        <form id="loghout" action="{{ url_for('main.logout') }}"></form>
+        <button type="submit" form="logout">Log out</button>
     </header>
 {% endif %}
 <header class="main">
@@ -22,10 +23,12 @@
     {% if session.get('staffid') %}
         {% if session.get('clientid') %}
             <span class="client">{{ session.get('clientname') }}</span>
-            <a href="{{ url_for('main.clientsearch') }}"><button type="button">Switch</button></a>
+            <form id="loadclient" action="{{ url_for('main.clientsearch') }}"></form>
+            <button type="submit" form="loadclient">Switch</button>
         {% else %}
             <span class="noclient">No client loaded</span>
-            <a href="{{ url_for('main.clientsearch') }}"><button type="button">Load</button></a>
+            <form id="loadclient" action="{{ url_for('main.clientsearch') }}"></form>
+            <button type="submit" form="loadclient">Load</button>
         {% endif %}
     {% endif %}
 </header>

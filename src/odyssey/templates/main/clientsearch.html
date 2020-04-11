@@ -3,7 +3,7 @@
 {% block content %}
 <form class="input" method="GET" action="{{ url_for('intake.clientinfo') }}">
     <div class="row center">To add a new client, click here</div>
-    <div class="row center"><input type="submit" value="New"></div>
+    <div class="row center"><button type="submit">New</button></div>
 </form>
 <p>&nbsp;</p>
 <form class="input" method="POST" action="{{ url_for('main.clientsearch') }}">
@@ -24,6 +24,6 @@
         <span class="label">{{ form.phone.label }}</span>
         <span class="field">{{ form.phone() }}</span>
     </div>
-    <div class="row center"><input type="submit" value="Search"></div>
+    <div class="row center"><button type="submit">Search</button></div>
 </form>
 {% endblock %}
