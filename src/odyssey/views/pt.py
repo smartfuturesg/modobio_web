@@ -41,10 +41,7 @@ class MobilityAssessmentQuadrantForm(FlaskForm):
 
 
 class MobilityAssessmentForm(FlaskForm):
-    assessment_date = DateField('Assessment date',
-        default=datetime.date.today(),
-        render_kw={'type': 'date'}
-    )
+    assessment_date = DateField('Assessment date', default=datetime.date.today())
     isa_left = IntegerField('ISA left')
     isa_right = IntegerField('ISA right')
     isa_dynamic = BooleanField('Dynamic?')

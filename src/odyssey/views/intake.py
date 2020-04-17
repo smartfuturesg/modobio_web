@@ -35,25 +35,27 @@ class ClientInfoForm(FlaskForm):
     healthcare_phone = StringField('Primary healthcare provider phone')
 
     gender = SelectField('Gender', choices=GENDERS)
-    dob = DateField('Date of birth', render_kw={'type': 'date'})
+    dob = DateField('Date of birth')
 
 
 class ClientConsultContractForm(FlaskForm):
     signature = HiddenField()
     fullname = StringField('Full name')
-    signdate = DateField('Date', default=datetime.date.today(), render_kw={'type': 'date'})
+    guardianname = StringField('Parent or guardian name')
+    signdate = DateField('Date', default=datetime.date.today())
 
 
 class ClientConsentForm(FlaskForm):
     infectious_disease = RadioField('Infectious disease', choices=YESNO, coerce=BOOLIFY)
     signature = HiddenField()
     fullname = StringField('Full name')
-    signdate = DateField('Date', default=datetime.date.today(), render_kw={'type': 'date'})
+    guardianname = StringField('Parent or guardian name')
+    signdate = DateField('Date', default=datetime.date.today())
 
 
 class ClientReleaseForm(FlaskForm):
     fullname = StringField('Full name')
-    dob = DateField('Date of birth', render_kw={'type': 'date'})
+    dob = DateField('Date of birth')
     address = StringField('Address')
     phone = StringField('Phone', render_kw={'type': 'phone'})
     email = StringField('Email', render_kw={'type': 'email'})
@@ -64,13 +66,15 @@ class ClientReleaseForm(FlaskForm):
     release_of_other = StringField('other')
 
     signature = HiddenField()
-    signdate = DateField('Date', default=datetime.date.today(), render_kw={'type': 'date'})
+    guardianname = StringField('Parent or guardian name')
+    signdate = DateField('Date', default=datetime.date.today())
 
 
 class CientFinancialForm(FlaskForm):
     signature = HiddenField()
     fullname = StringField('Full name')
-    signdate = DateField('Date', default=datetime.date.today(), render_kw={'type': 'date'})
+    guardianname = StringField('Parent or guardian name')
+    signdate = DateField('Date', default=datetime.date.today())
 
 
 class ClientReceiveForm(FlaskForm):
@@ -80,7 +84,8 @@ class ClientReceiveForm(FlaskForm):
 class ClientSubscriptionContractForm(FlaskForm):
     signature = HiddenField()
     fullname = StringField('Full name')
-    signdate = DateField('Date', default=datetime.date.today(), render_kw={'type': 'date'})
+    guardianname = StringField('Parent or guardian name')
+    signdate = DateField('Date', default=datetime.date.today())
 
 
 @bp.route('/clientinfo', methods=['GET', 'POST'])

@@ -176,12 +176,12 @@ class MedicalHistoryDiagnosticForm(FlaskForm):
 
 
 class MedicalHistoryForm(FlaskForm):
-    dob = DateField('Date of birth', render_kw={'type': 'date'})
+    dob = DateField('Date of birth')
 
     healthcare_contact = StringField('Primary healthcare provider name')
     healthcare_phone = StringField('Primary healthcare provider phone')
 
-    last_examination_date = DateField('Last doctor\'s visit', render_kw={'type': 'date'})
+    last_examination_date = DateField('Last doctor\'s visit')
     last_examination_reason = StringField('Reason for last visit')
 
     goals = TextAreaField('Goals')

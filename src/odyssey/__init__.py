@@ -9,6 +9,13 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
+# Override wtforms.DateTimeField so that it outputs <input type="date"> by default.
+import wtforms
+class DateInput(wtforms.widgets.Input):
+    input_type = 'date'
+
+wtforms.DateTimeField.widget = DateInput()
+
 from odyssey.views.menu import menu
 
 @app.context_processor
