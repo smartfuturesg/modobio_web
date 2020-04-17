@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Consent form{% endblock %}
 {% block content %}
+<div class="docrev">Document revision: 2020-03-17</div>
 <h1>General health care consent</h1>
 
 <p>I request and authorize Modo Bio Health Systems LLC ("Modo Bio") and Adam Douglas, M.D., to provide outpatient care as Dr. Douglas, his assistants and designees deem advisable. This care may include, but is not limited to, physical examination, the drawing and testing of blood, medical advice,and prescriptions of medications, supplements, and other therapeutics. I authorize the health care team at Modo Bio to perform other additional or extended services in emergency situations if it may be necessary or advisable in order to preserve my life or health.</p>
@@ -51,38 +52,15 @@
 
 <p>Please consult with your practitioner if you have any questions regarding the treatment above.</p>
 
-<form id="sigform" class="input" method="POST" action="{{ url_for('intake.consent') }}">
 <p>Do you have any known disease or infection that can be transmitted through bodily fluids?</p>
-<div style="padding-left: 2rem;">
-    {% for subfield in form.infectious_disease %}
-    {{ subfield }} {{ subfield.label }}
-    {% endfor %}
+<div>
+{% for choice in form.infectious_disease %}
+    {{ macros.radioinput(choice, formid='signform', pdf=pdf) }} {{ choice.label }}
+{% endfor %}
 </div>
 <p><strong>If you marked yes, please discuss with your practitioner.</strong></p>
 
 <p>I acknowledge receipt of this consent form; that I have reviewed and understood it; that I have had the opportunity to ask questions; and that I consent to the care provided at Modo Bio.</p>
 
-{{ form.signature() }}
-<div class="row">
-    <span class="label">{{ form.signdate.label }}</span>
-    <span class="field">{{ form.signdate() }}</span></div>
-<div class="row">
-    <span class="label">{{ form.fullname.label }}</span>
-    <span class="field">{{ form.fullname() }}</span></div>
-<div class="row">
-    <span class="label">Signature</span>
-    <span class="field"><canvas id="sigpad" class="sigpad"></canvas></span></div>
-<div class="row">
-    <span class="label">&nbsp;</span>
-    <span class="field">
-        <button id="clear" type="button">Clear</button>
-    </span></div>
-<div class="row">&nbsp;</div>
-<div class="row right">
-    <span style="font-size: 60%;">Document revision: 2020-03-17</span></div>
-<div class="row">&nbsp;</div>
-<div class="row center"><button type="submit">Accept</button></div>
-</form>
-
-<script>add_signature_pad('sigpad', 'sigform', 'clear', 'signature');</script>
+{{ macros.signform(form, 'signform', url_for('intake.consent'), pdf=pdf) }}
 {% endblock %}

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Subscription agreement{% endblock %}
 {% block content %}
-
+<div class="docrev">Document revision: 2020-03-17</div>
 <p>Congratulations! You are ready to take your next steps in developing and following a customized, proactive, and natural response to your personal health issues and goals. Modo Bio works with you, to create a highly personal, continuously assessed health solution, supported by data analysis.</p>
 
 <p>You have already completed your initial consultation. Now, together with your Modo Bio Team Members, you have a highly personalized and sustainable plan for optimization of your well-being, performance, and healthcare. This Subscription Agreement puts the plan into action. Together, you and Modo Bio will help you maximize your health and wellness.</p>
@@ -13,7 +13,6 @@
     <li>Two 30-minute consultations with Dr. Michael Kay on your physical movement and activity
     wearable device bio-data monitoring and analysis.</li>
 </ul>
-
 
 <p>Please note:
 <ul>
@@ -57,28 +56,5 @@
 
 <p><strong>After-hours policy</strong>: Modo Bio responds to client questions and concerns during regular business hours, M-F, 9 am to 5 pm. The Client Portal can be used after hours to submit questions; responses to routine questions, however, may take up to 2 business days via the portal. Do not submit emergent or urgent medical issues through the Portal. If you have a significant medical issue, you should directly proceed to the nearest emergency department or dial 911.</p>
 
-<form class="input" action="{{ url_for('intake.subscription') }}", method="POST">
-{{ form.signature() }}
-<p>I have read and I understand this Modo Bio Subscription Agreement and the Modo Bio Policies above.
-</p>
-<div class="row">
-    <span class="label">{{ form.signdate.label }}</span>
-    <span class="field">{{ form.signdate() }}</span></div>
-<div class="row">
-    <span class="label">{{ form.fullname.label }}</span>
-    <span class="field">{{ form.fullname() }}</span></div>
-<div class="row">
-    <span class="label">Signature</span>
-    <span class="field"><canvas class="sigpad"></canvas></span></div>
-<div class="row">
-    <span class="label">&nbsp;</span>
-    <span class="field"><button onclick="pad.clear(); return false;">Clear</button></span></div>
-<div class="row">&nbsp;</div>
-<div class="row right">
-    <span style="font-size: 60%;">Document revision: 2020-04-01</span></div>
-<div class="row">&nbsp;</div>
-<div class="row center"><button id="submit" type="submit">Accept</button></div>
-</form>
-
-<script>add_signature_pad('submit', 'signature')</script>
+{{ macros.signform(form, 'signform', url_for('intake.subscription'), pdf=pdf) }}
 {% endblock %}

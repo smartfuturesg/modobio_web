@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Financial agreement{% endblock %}
 {% block content %}
+<div class="docrev">Document revision: 2020-03-17</div>
 <p>Thank you for choosing to enter an with Modo Bio Health Systems LLC ("Modo Bio" or "MB"). We look forward to providing individualized continuous assessment and recommendations to help you reach your health goals.</p>
 
 <p>To reduce confusion and misunderstanding between Modo Bio and its clients, we ask you to enter into this Financial Agreement before any services are provided.</p>
@@ -19,26 +20,5 @@
 <li>Disputes: I agree that if I choose to litigate any dispute with MB for any reason, I will do so through arbitration in Maricopa County, Arizona under American Arbitration Association rules, and that such a dispute will be governed by Arizona law.</li>
 </ol>
 
-<form class="input" action="{{ url_for('intake.financial') }}", method="POST">
-{{ form.signature() }}
-<div class="row">
-    <span class="label">{{ form.signdate.label }}</span>
-    <span class="field">{{ form.signdate() }}</span></div>
-<div class="row">
-    <span class="label">{{ form.fullname.label }}</span>
-    <span class="field">{{ form.fullname() }}</span></div>
-<div class="row">
-    <span class="label">Signature</span>
-    <span class="field"><canvas class="sigpad"></canvas></span></div>
-<div class="row">
-    <span class="label">&nbsp;</span>
-    <span class="field"><button onclick="pad.clear(); return false;">Clear</button></span></div>
-<div class="row">&nbsp;</div>
-<div class="row right">
-    <span style="font-size: 60%;">Document revision: 2020-03-17</span></div>
-<div class="row">&nbsp;</div>
-<div class="row center"><button id="submit" type="submit">Accept</button></div>
-</form>
-
-<script>add_signature_pad('submit', 'signature')</script>
+{{ macros.signform(form, 'signform', url_for('intake.financial'), pdf=pdf) }}
 {% endblock %}
