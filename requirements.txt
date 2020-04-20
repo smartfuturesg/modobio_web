@@ -1,0 +1,6 @@
+Werkzeug
+Flask_WTF
+Flask
+Flask_WeasyPrint
+Flask_SQLAlchemy
+WTForms
