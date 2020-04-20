@@ -11,6 +11,9 @@ from odyssey.constants import COUNTRIES, GENDERS, USSTATES, CONTACT_METHODS, YES
 
 bp = Blueprint('intake', __name__)
 
+today = datetime.date.today()
+next_year = datetime.date(year=today.year + 1, month=today.month, day=today.day)
+
 class ClientInfoForm(FlaskForm):
     firstname = StringField('First name')
     middlename = StringField('Middle name(s)')
@@ -49,7 +52,7 @@ class ClientConsultContractForm(FlaskForm):
     signature = HiddenField()
     fullname = StringField('Full name')
     guardianname = StringField('Parent or guardian name')
-    signdate = DateField('Date', default=datetime.date.today())
+    signdate = DateField('Date', default=today)
 
 
 class ClientConsentForm(FlaskForm):
@@ -57,31 +60,39 @@ class ClientConsentForm(FlaskForm):
     signature = HiddenField()
     fullname = StringField('Full name')
     guardianname = StringField('Parent or guardian name')
-    signdate = DateField('Date', default=datetime.date.today())
+    signdate = DateField('Date', default=today)
 
 
 class ClientReleaseForm(FlaskForm):
+    release_by_other = StringField('')
+    release_to_other = StringField('')
+    release_of_all = RadioField('',
+                        choices=((1, 'all'), (0, 'other')),
+                        coerce=BOOLIFY,
+                        default=1)
+    release_of_other = StringField('')
+    release_date_limit = DateField('', default=next_year)
+    release_purpose = StringField('')
+
+    emergency_contact = StringField('Emergency contact name')
+    emergency_phone = StringField('Emergency contact phone')
+
     fullname = StringField('Full name')
     dob = DateField('Date of birth')
     address = StringField('Address')
     phone = StringField('Phone', render_kw={'type': 'phone'})
     email = StringField('Email', render_kw={'type': 'email'})
 
-    release_to_emergency_contact = BooleanField('')
-    release_to_primary_care_contact = BooleanField('')
-    release_of_all = RadioField('', choices=((1, 'all'), (0, 'other')), coerce=BOOLIFY)
-    release_of_other = StringField('other')
-
     signature = HiddenField()
     guardianname = StringField('Parent or guardian name')
-    signdate = DateField('Date', default=datetime.date.today())
+    signdate = DateField('Date', default=today)
 
 
 class ClientFinancialForm(FlaskForm):
     signature = HiddenField()
     fullname = StringField('Full name')
     guardianname = StringField('Parent or guardian name')
-    signdate = DateField('Date', default=datetime.date.today())
+    signdate = DateField('Date', default=today)
 
 
 class ClientReceiveForm(FlaskForm):
@@ -92,7 +103,7 @@ class ClientSubscriptionContractForm(FlaskForm):
     signature = HiddenField()
     fullname = StringField('Full name')
     guardianname = StringField('Parent or guardian name')
-    signdate = DateField('Date', default=datetime.date.today())
+    signdate = DateField('Date', default=today)
 
 
 @bp.route('/clientinfo', methods=['GET', 'POST'])
