@@ -189,10 +189,6 @@ h1 {
     padding: 1rem 0;
 }
 
-h1:first-child {
-    padding-top: 0;
-}
-
 a {
     color: var(--mbblue);
     text-decoration: none;
@@ -235,10 +231,6 @@ div.multicol {
     column-count: 2;
 }
 
-div.multicol > h1 {
-    padding-top: 0;
-}
-
 /* Forms */
 form.input {
     display: flex;
@@ -257,6 +249,19 @@ span.radiolabel { width: 95%; }
 span.radiofield { width: 5%; }
 .center { justify-content: center; }
 .right { justify-content: flex-end; }
+
+/* Special form with expanding hidden boxes */
+div.expandformrow { padding: 0.3em 0; }
+input.expandform { width: 5%; }
+label.expandform { width: 95%; }
+div.expandform {
+    display: none;
+    width: 100%;
+}
+
+input.expandform:checked ~ div.expandform {
+    display: block;
+}
 
 /* Input fields */
 input,

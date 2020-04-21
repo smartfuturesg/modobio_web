@@ -10,155 +10,175 @@ from odyssey.models import ClientInfo
 bp = Blueprint('doctor', __name__)
 
 
+class MedicalHistoryGeneralForm(FlaskForm):
+    title = 'General'
+    headaches = StringField('Headache or migranes')
+    blackouts = StringField('Blackouts')
+    vertigo = StringField('Dizziness or vertigo')
+    sinus = StringField('Sinus problems')
+    falling = StringField('History of falling')
+    balance = StringField('Balance issues')
+    vision = StringField('Vision loss')
+    hearing = StringField('Hearing loss')
+    memory = StringField('Memory loss')
+    insomnia = StringField('Insomnia')
+
+
+class MedicalHistoryBloodForm(FlaskForm):
+    title = 'Cardiovascular and blood'
+    bloodpressure = StringField('High blood pressure')
+    heartattack = StringField('Heart attack or myocardial infarction')
+    heartdissease = StringField('Hear dissease')
+    congesitive = StringField('Congestive heart failure')
+    aneurysm = StringField('Aneurysm')
+    bleeding = StringField('Bleeding disorder')
+    bloodclots = StringField('Blood clots or deep vein trombosis')
+    anemia = StringField('Anemia')
+    chestpain = StringField('Chest pain or angina')
+    arrythmia = StringField('Arrythmia')
+    cholesterol = StringField('High cholesterol')
+
+
+class MedicalHistoryDigestiveForm(FlaskForm):
+    title = 'Digestive'
+    irritablebowel = StringField('Irritable bowel syndrome')
+    crohns = StringField('Crohn\'s disease')
+    celiac = StringField('Celiac disease')
+    reflux = StringField('Gastro-esophageal reflux or gastritis')
+    ulcer = StringField('Ulcer')
+    loosestool = StringField('Frequent loose stools')
+    constipation = StringField('Frequent constipation')
+    eatingdiscomfort = StringField('Discomfort after meals')
+    hiatalhernia = StringField('Hiatal hernia')
+    swallowing = StringField('Swallowing dysfunction')
+    liver = StringField('Liver disorder')
+
+
+class MedicalHistorySkeletalForm(FlaskForm):
+    title = 'Musculoskeletal and orthopedic'
+    arthritis = StringField('Osteo-arthritis')
+    fractures = StringField('Fractures')
+    compressionfracture = StringField('Compression fracture')
+    stressfracture = StringField('Stress fracture')
+    dislocation = StringField('Dislocation')
+    inguinalhernia = StringField('Inguinal hernia')
+    otherhernia = StringField('Other hernia')
+    diastatis = StringField('Diastasis recti')
+    carpaltunnel = StringField('Carpal tunnel')
+    thoracicoutlet = StringField('Thoracic outlet syndrome')
+    spinalstenosis = StringField('Spinal stenosis')
+    sciatica = StringField('Sciatica')
+    spondylolisthesis = StringField('Spondylolisthesis')
+    dischernia = StringField('Herniated disc')
+    temporomandibular = StringField('Temporomandibular disorder')
+    otherortho = StringField('Other ortho injuries')
+
+
+class MedicalHistoryImmuneForm(FlaskForm):
+    title = 'Immune, endocrine, and metabolic'
+    diabetes1 = StringField('Diabetes type 1')
+    diabetes2 = StringField('Diabetes type 2')
+    lowbloodsugar = StringField('Low blood sugar')
+    hepatitisA = StringField('Hepatitis A')
+    hepatitisB = StringField('Hepatitis B')
+    hepatitisC = StringField('Hepatitis C')
+    hiv = StringField('HIV/AIDS')
+    tuberculosis = StringField('Tuberculosis')
+    cancer = StringField('Cancer')
+    thyroid = StringField('Thyroid dysfunction')
+    autoimmune = StringField('Autoimmune disease')
+    osteoporosis = StringField('Osteoporosis or osteopenia')
+    gout = StringField('Gout')
+    rheuma = StringField('Rheumatoid arthritis')
+    lupus = StringField('Lupus')
+    fibromyalgia = StringField('Fibromyalgia')
+    otherinflammatory = StringField('Other inflammatory condition')
+
+
+class MedicalHistorySurgicalForm(FlaskForm):
+    title = 'Surgical history'
+    bypass = StringField('Bypass or CABG surgery')
+    pacemaker = StringField('Pacemaker or defibrilator')
+    stents = StringField('Vascular surgery or stents')
+    abdominal = StringField('Abdominal surgery')
+    gastric = StringField('Gastric bypass surgery')
+    hysterectomy = StringField('Hysterectomy')
+    tuballigation = StringField('Tubal ligation')
+    laparoscopy = StringField('Laparoscopy')
+    bladder = StringField('Bladder surgery')
+    csection = StringField('C-section')
+    herniasurgery = StringField('Hernia surgery')
+    galbladder = StringField('Gal bladder surgery')
+    orthopedic = StringField('Orthopedic surgery')
+    back = StringField('Back or neck surgery')
+    plastic = StringField('Plastic surgery')
+    othersurgery = StringField('Other surgery')
+
+
+class MedicalHistoryUroForm(FlaskForm):
+    title = 'Urogenital and gynecological'
+    urological = StringField('Urological disorder')
+    kidney = StringField('Kidney disease')
+    incontinence = StringField('Incontinence')
+    endometriosis = StringField('Endometriosis')
+    gynecology = StringField('Gynecological disorder')
+    fibroids = StringField('Fibroids or cysts')
+    childbirth = StringField('Child birth')
+
+
+class MedicalHistoryRespiratoryForm(FlaskForm):
+    title = 'Respiratory'
+    smoke = StringField('Do you smoke?')
+    asthma = StringField('Asthma')
+    emphysema = StringField('Emphysema or COPD')
+    pneumonia = StringField('Pneumonia')
+    allergies = StringField('Allergies')
+    sleepapnea = StringField('Sleep apnea')
+    deviatedseptum = StringField('Deviated septum')
+    shortbreath = StringField('Shortness of breath')
+    otherlung = StringField('Other lung disorders')
+
+
+class MedicalHistoryNervousForm(FlaskForm):
+    title = 'Nervous system'
+    brain = StringField('Head or brain injury')
+    stroke = StringField('Stroke or TIA')
+    ms = StringField('Multiple Sclerosis')
+    neuropathy = StringField('Peripheral neuropathy')
+    epilepsy = StringField('Epilepsy or seizures')
+    parkinson = StringField('Parkinson\'s disease')
+    neuromuscular = StringField('Neuromuscular disorder')
+    otherneuro = StringField('Other neurological disorder')
+
+
+class MedicalHistoryTraumaForm(FlaskForm):
+    title = 'Trauma'
+    whiplash = StringField('Whiplash')
+    accident = StringField('Motor vehicle accident')
+    concussion = StringField('Concussion')
+    othertrauma = StringField('Other trauma')
+
+
+class MedicalHistoryNutritionForm(FlaskForm):
+    title = 'Nutritional'
+    nutritional = StringField('Nutritional deficiency')
+    foodallergiues = StringField('Food allergies')
+    eating = StringField('Eating disorder')    
+
+
 class MedicalHistoryCheckForm(FlaskForm):
-    # This is a long list of tick boxes with labels.
-    # They are grouped with a label (HiddenField, only
-    # render the label). This form is included in
-    # MedicalHistoryForm, so it can be in a loop.
-    label_general = HiddenField('General')
-    has_headaches = BooleanField('Headache or migranes')
-    has_blackouts = BooleanField('Blackouts')
-    has_vertigo = BooleanField('Dizziness or vertigo')
-    has_sinus = BooleanField('Sinus problems')
-    has_fallen = BooleanField('History of falling')
-    has_balance = BooleanField('Balance issues')
-    has_vision = BooleanField('Vision loss')
-    has_hearing = BooleanField('Hearing loss')
-    has_memory = BooleanField('Memory loss')
-    has_insomnia = BooleanField('Insomnia')
+    general = FormField(MedicalHistoryGeneralForm)
+    blood = FormField(MedicalHistoryBloodForm)
+    digestive = FormField(MedicalHistoryDigestiveForm)
+    skeletal = FormField(MedicalHistorySkeletalForm)
+    immune = FormField(MedicalHistoryImmuneForm)
+    surgical = FormField(MedicalHistorySurgicalForm)
+    uro = FormField(MedicalHistoryUroForm)
+    respiratory = FormField(MedicalHistoryRespiratoryForm)
+    nervous = FormField(MedicalHistoryNervousForm)
+    trauma = FormField(MedicalHistoryTraumaForm)
+    nutrition = FormField(MedicalHistoryNutritionForm)
 
-    label_blood = HiddenField('Cardiovascular and blood')
-    has_bloodpressure = BooleanField('High blood pressure')
-    has_heartattack = BooleanField('Heart attack or myocardial infarction')
-    has_heartdissease = BooleanField('Hear dissease')
-    has_congesitive = BooleanField('Congestive heart failure')
-    has_aneurysm = BooleanField('Aneurysm')
-    has_bleeding = BooleanField('Bleeding disorder')
-    has_bloodclots = BooleanField('Blood clots or deep vein trombosis')
-    has_anemia = BooleanField('Anemia')
-    has_chestpain = BooleanField('Chest pain or angina')
-    has_arrythmia = BooleanField('Arrythmia')
-    has_cholesterol = BooleanField('High cholesterol')
-
-    label_digestive = HiddenField('Digestive')
-    has_irritablebowel = BooleanField('Irritable bowel syndrome')
-    has_crohns = BooleanField('Crohn\'s disease')
-    has_celiac = BooleanField('Celiac disease')
-    has_reflux = BooleanField('Gastro-esophageal reflux or gastritis')
-    has_ulcer = BooleanField('Ulcer')
-    has_loosestool = BooleanField('Frequent loose stools')
-    has_constipation = BooleanField('Frequent constipation')
-    has_eatingdiscomfort = BooleanField('Discomfort after meals')
-    has_hiatalhernia = BooleanField('Hiatal hernia')
-    has_swallowing = BooleanField('Swallowing dysfunction')
-    has_liver = BooleanField('Liver disorder')
-
-    label_ortho = HiddenField('Musculoskeletal and orthopedic')
-    has_arthritis = BooleanField('Osteo-arthritis')
-    has_fractures = BooleanField('Fractures')
-    has_compressionfracture = BooleanField('Compression fracture')
-    has_stressfracture = BooleanField('Stress fracture')
-    has_dislocation = BooleanField('Dislocation')
-    has_inguinalhernia = BooleanField('Inguinal hernia')
-    has_otherhernia = BooleanField('Other hernia')
-    has_diastatis = BooleanField('Diastasis recti')
-    has_carpaltunnel = BooleanField('Carpal tunnel')
-    has_thoracicoutlet = BooleanField('Thoracic outlet syndrome')
-    has_spinalstenosis = BooleanField('Spinal stenosis')
-    has_sciatica = BooleanField('Sciatica')
-    has_spondylolisthesis = BooleanField('Spondylolisthesis')
-    has_dischernia = BooleanField('Herniated disc')
-    has_temporomandibular = BooleanField('Temporomandibular disorder')
-    has_otherortho = BooleanField('Other ortho injuries')
-    ortho = StringField('', render_kw={'placeholder': 'Please describe ortho injuries.'})
-
-    label_immune = HiddenField('Immune, endocrine, and metabolic')
-    has_diabetes1 = BooleanField('Diabetes type 1')
-    has_diabetes2 = BooleanField('Diabetes type 2')
-    has_lowbloodsugar = BooleanField('Low blood sugar')
-    has_hepatitisA = BooleanField('Hepatitis A')
-    has_hepatitisB = BooleanField('Hepatitis B')
-    has_hepatitisC = BooleanField('Hepatitis C')
-    has_hiv = BooleanField('HIV/AIDS')
-    has_tuberculosis = BooleanField('Tuberculosis')
-    has_cancer = BooleanField('Cancer')
-    cancer = StringField('', render_kw={'placeholder': 'Please describe type and status of cancer.'})
-    has_thyroid = BooleanField('Thyroid dysfunction')
-    has_autoimmune = BooleanField('Autoimmune disease')
-    autoimmune = StringField('', render_kw={'placeholder': 'Please describe autoimmune disease.'})
-    has_osteoporosis = BooleanField('Osteoporosis or osteopenia')
-    has_gout = BooleanField('Gout')
-    has_rheuma = BooleanField('Rheumatoid arthritis')
-    has_lupus = BooleanField('Lupus')
-    has_fibromyalgia = BooleanField('Fibromyalgia')
-    has_otherinflammatory = BooleanField('Other inflammatory condition')
-    inflammatory = StringField('', render_kw={'placeholder': 'Please describe type of inflammatory condition.'})
-
-    label_surgical = HiddenField('Surgical history')
-    has_bypass = BooleanField('Bypass or CABG surgery')
-    has_pacemaker = BooleanField('Pacemaker or defibrilator')
-    has_stents = BooleanField('Vascular surgery or stents')
-    has_abdominal = BooleanField('Abdominal surgery')
-    has_gastric = BooleanField('Gastric bypass surgery')
-    has_hysterectomy = BooleanField('Hysterectomy')
-    has_tuballigation = BooleanField('Tubal ligation')
-    has_laparoscopy = BooleanField('Laparoscopy')
-    has_bladder = BooleanField('Bladder surgery')
-    has_csection = BooleanField('C-section')
-    has_herniasurgery = BooleanField('Hernia surgery')
-    has_galbladder = BooleanField('Gal bladder surgery')
-    has_orthopedic = BooleanField('Orthopedic surgery')
-    has_back = BooleanField('Back or neck surgery')
-    has_plastic = BooleanField('Plastic surgery')
-    has_othersurgery = BooleanField('Other surgery')
-    surgery = StringField('', render_kw={'placeholder': 'Please describe surgeries.'})
-
-    label_urogenital = HiddenField('Urogenital and gynecological')
-    has_urological = BooleanField('Urological disorder')
-    has_kidney = BooleanField('Kidney disease')
-    has_incontinence = BooleanField('Incontinence')
-    has_endometriosis = BooleanField('Endometriosis')
-    has_gynecology = BooleanField('Gynecological disorder')
-    has_fibroids = BooleanField('Fibroids or cysts')
-    has_childbirth = BooleanField('Child birth')
-    childbirths = IntegerField('', render_kw={'placeholder': 'Please give number of child births.'})
-
-    label_respiatory = HiddenField('Respiratory')
-    has_smoke = BooleanField('Do you smoke?')
-    smoke = StringField('', render_kw={'placeholder': 'Please describe how often.'})
-    has_asthma = BooleanField('Asthma')
-    has_emphysema = BooleanField('Emphysema or COPD')
-    has_pneumonia = BooleanField('Pneumonia')
-    has_allergies = BooleanField('Allergies')
-    has_sleepapnea = BooleanField('Sleep apnea')
-    has_deviatedseptum = BooleanField('Deviated septum')
-    has_shortbreath = BooleanField('Shortness of breath')
-    has_otherlung = BooleanField('Other lung disorders')
-    lung = StringField('', render_kw={'placeholder': 'Please describe lung disorder.'})
-
-    label_nervous = HiddenField('Nervous system')
-    has_brain = BooleanField('Head or brain injury')
-    has_stroke = BooleanField('Stroke or TIA')
-    has_ms = BooleanField('Multiple Sclerosis')
-    has_neuropathy = BooleanField('Peripheral neuropathy')
-    has_epilepsy = BooleanField('Epilepsy or seizures')
-    has_parkinson = BooleanField('Parkinson\'s disease')
-    has_neuromuscular = BooleanField('Neuromuscular disorder')
-    has_otherneuro = BooleanField('Other neurological disorder')
-    neuro = StringField('', render_kw={'placeholder': 'Please describe neurological disorder.'})
-
-    label_trauma = HiddenField('Trauma')
-    has_whiplash = BooleanField('Whiplash')
-    has_accident = BooleanField('Motor vehicle accident')
-    has_concussion = BooleanField('Concussion')
-    has_othertrauma = BooleanField('Other trauma')
-    trauma = StringField('', render_kw={'placeholder': 'Please describe trauma.'})
-
-    label_nutritional = HiddenField('Nutritional')
-    has_nutritional = BooleanField('Nutritional deficiency')
-    has_foodallergiues = BooleanField('Food allergies')
-    has_eating = BooleanField('Eating disorder')    
-    
 
 class MedicalHistoryDiagnosticForm(FlaskForm):
     has_xray = BooleanField('X-ray')

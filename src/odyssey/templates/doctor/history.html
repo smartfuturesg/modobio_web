@@ -59,21 +59,25 @@
     {% endfor %}
     <div class="row">&nbsp;</div>
     <p>In the sections below, please indicate which medical issues you have had in the past, or are currently experiencing.</p>
-    {% for element in form.history %}
-        {% if element.type == 'BooleanField' %}
-        <div class="row">
-            {{ element() }}&nbsp;{{ element.label }}
-        </div>
-        {% elif element.type == 'HiddenField' %}
-        </div>
-        <div class="row">
-            <h1>{{ element.label }}</h1>
-        </div>
-        <div class="multicol">
-        {% elif element.type in ('StringField', 'IntegerField') %}
-        <div class="row">
-            {{ element() }}
-        </div>
+    {% for subform in form.history %}
+        {% if subform.type == 'FormField' %}
+            <div class="row">
+                <h1>{{ subform.title }}</h1>
+            </div>
+            <div class="multicol">
+            {% for element in subform %}
+                {% if element.type == 'StringField' %}
+                <div class="expandformrow">
+                    <input class="expandform" type="checkbox" id="{{ element.name }}"
+                        {% if element.value %}checked{% endif %}>
+                    <label class="expandform" for="{{ element.name }}">{{ element.label }}</label>
+                    <div class="expandform">
+                        {{ element() }}
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+            </div>
         {% endif %}
     {% endfor %}    
         </div>
