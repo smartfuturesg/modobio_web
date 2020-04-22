@@ -45,43 +45,24 @@
         <span class="label">{{ form.medication.label }}</span>
         <span class="field">{{ form.medication() }}</span>
     </div>
-    <div class="row">&nbsp;</div>
-    <h1>Diagnostic tests</h1>
-    <p>In the section below, please indicate which diagnostic testing you have recently had. Also describe the reason for the test and the results.</p>
-    {% for element in form.diagnostic %}
-        {% if element.type == 'BooleanField' %}
-        <div class="row">
-        <span class="label">{{ element() }}&nbsp;{{ element.label }}</span>
-        {% elif element.type == 'StringField' %}
-        <span class="field">{{ element() }}</span>
-        </div>
-        {% endif %}
-    {% endfor %}
-    <div class="row">&nbsp;</div>
-    <p>In the sections below, please indicate which medical issues you have had in the past, or are currently experiencing.</p>
-    {% for subform in form.history %}
-        {% if subform.type == 'FormField' %}
-            <div class="row">
-                <h1>{{ subform.title }}</h1>
-            </div>
-            <div class="multicol">
-            {% for element in subform %}
-                {% if element.type == 'StringField' %}
-                <div class="expandformrow">
-                    <input class="expandform" type="checkbox" id="{{ element.name }}"
-                        {% if element.value %}checked{% endif %}>
-                    <label class="expandform" for="{{ element.name }}">{{ element.label }}</label>
-                    <div class="expandform">
-                        {{ element() }}
-                    </div>
+    <p>In the sections below, please indicate which medical issues or diagnostic tests you have had in the past, or are currently experiencing.</p>
+    {% for subform in (form.diagnostic, form.general, form.blood, form.digestive, form.skeletal, form.immune, form.surgery, form.uro, form.respiratory, form.neuro, form.trauma, form.nutrition) %}
+        <h1>{{ subform.title }}</h1>
+        <div class="multicol">
+        {% for element in subform %}
+            {% if element.type == 'StringField' %}
+            <div class="expandformrow">
+                <input class="expandform" type="checkbox" id="{{ element.name }}"
+                    {% if element.data %}checked{% endif %}>
+                <label class="expandform" for="{{ element.name }}">{{ element.label }}</label>
+                <div class="expandform">
+                    {{ element() }}
                 </div>
-                {% endif %}
-            {% endfor %}
             </div>
-        {% endif %}
-    {% endfor %}    
+            {% endif %}
+        {% endfor %}
         </div>
-    
+    {% endfor %}
     <div class="row">&nbsp;</div>
     <div class="row center"><button type="submit">Next</button></div>
 </form>

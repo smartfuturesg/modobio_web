@@ -2,12 +2,22 @@ import datetime
 
 from flask import render_template, Blueprint, session, redirect, request, url_for
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, DateField, FormField, HiddenField, IntegerField, StringField, TextAreaField
+from wtforms import DateField, FormField, StringField, TextAreaField
 
 from odyssey import db
-from odyssey.models import ClientInfo
+from odyssey.models import ClientInfo, MedicalHistory
 
 bp = Blueprint('doctor', __name__)
+
+
+class MedicalHistoryDiagnosticForm(FlaskForm):
+    title = 'Diagnostic testing'
+    xray = StringField('X-ray')
+    ctscan = StringField('CT scan')
+    endoscopy = StringField('Endoscopy or colonoscopy')
+    mri = StringField('MRI')
+    ultrasound = StringField('Ultrasound')
+    other = StringField('Other diagnostic testing')
 
 
 class MedicalHistoryGeneralForm(FlaskForm):
@@ -22,6 +32,7 @@ class MedicalHistoryGeneralForm(FlaskForm):
     hearing = StringField('Hearing loss')
     memory = StringField('Memory loss')
     insomnia = StringField('Insomnia')
+    other = StringField('Other general')
 
 
 class MedicalHistoryBloodForm(FlaskForm):
@@ -29,7 +40,7 @@ class MedicalHistoryBloodForm(FlaskForm):
     bloodpressure = StringField('High blood pressure')
     heartattack = StringField('Heart attack or myocardial infarction')
     heartdissease = StringField('Hear dissease')
-    congesitive = StringField('Congestive heart failure')
+    congestive = StringField('Congestive heart failure')
     aneurysm = StringField('Aneurysm')
     bleeding = StringField('Bleeding disorder')
     bloodclots = StringField('Blood clots or deep vein trombosis')
@@ -37,6 +48,7 @@ class MedicalHistoryBloodForm(FlaskForm):
     chestpain = StringField('Chest pain or angina')
     arrythmia = StringField('Arrythmia')
     cholesterol = StringField('High cholesterol')
+    other = StringField('Other cardiovascular')
 
 
 class MedicalHistoryDigestiveForm(FlaskForm):
@@ -52,6 +64,7 @@ class MedicalHistoryDigestiveForm(FlaskForm):
     hiatalhernia = StringField('Hiatal hernia')
     swallowing = StringField('Swallowing dysfunction')
     liver = StringField('Liver disorder')
+    other = StringField('Other digestive disorder')
 
 
 class MedicalHistorySkeletalForm(FlaskForm):
@@ -71,17 +84,14 @@ class MedicalHistorySkeletalForm(FlaskForm):
     spondylolisthesis = StringField('Spondylolisthesis')
     dischernia = StringField('Herniated disc')
     temporomandibular = StringField('Temporomandibular disorder')
-    otherortho = StringField('Other ortho injuries')
+    other = StringField('Other ortho injuries')
 
 
 class MedicalHistoryImmuneForm(FlaskForm):
     title = 'Immune, endocrine, and metabolic'
-    diabetes1 = StringField('Diabetes type 1')
-    diabetes2 = StringField('Diabetes type 2')
+    diabetes = StringField('Diabetes')
     lowbloodsugar = StringField('Low blood sugar')
-    hepatitisA = StringField('Hepatitis A')
-    hepatitisB = StringField('Hepatitis B')
-    hepatitisC = StringField('Hepatitis C')
+    hepatitis = StringField('Hepatitis')
     hiv = StringField('HIV/AIDS')
     tuberculosis = StringField('Tuberculosis')
     cancer = StringField('Cancer')
@@ -92,10 +102,10 @@ class MedicalHistoryImmuneForm(FlaskForm):
     rheuma = StringField('Rheumatoid arthritis')
     lupus = StringField('Lupus')
     fibromyalgia = StringField('Fibromyalgia')
-    otherinflammatory = StringField('Other inflammatory condition')
+    other = StringField('Other inflammatory condition')
 
 
-class MedicalHistorySurgicalForm(FlaskForm):
+class MedicalHistorySurgeryForm(FlaskForm):
     title = 'Surgical history'
     bypass = StringField('Bypass or CABG surgery')
     pacemaker = StringField('Pacemaker or defibrilator')
@@ -107,12 +117,12 @@ class MedicalHistorySurgicalForm(FlaskForm):
     laparoscopy = StringField('Laparoscopy')
     bladder = StringField('Bladder surgery')
     csection = StringField('C-section')
-    herniasurgery = StringField('Hernia surgery')
+    hernia = StringField('Hernia surgery')
     galbladder = StringField('Gal bladder surgery')
     orthopedic = StringField('Orthopedic surgery')
     back = StringField('Back or neck surgery')
     plastic = StringField('Plastic surgery')
-    othersurgery = StringField('Other surgery')
+    other = StringField('Other surgery')
 
 
 class MedicalHistoryUroForm(FlaskForm):
@@ -124,6 +134,7 @@ class MedicalHistoryUroForm(FlaskForm):
     gynecology = StringField('Gynecological disorder')
     fibroids = StringField('Fibroids or cysts')
     childbirth = StringField('Child birth')
+    other = StringField('Other urogenital disorder')
 
 
 class MedicalHistoryRespiratoryForm(FlaskForm):
@@ -136,10 +147,10 @@ class MedicalHistoryRespiratoryForm(FlaskForm):
     sleepapnea = StringField('Sleep apnea')
     deviatedseptum = StringField('Deviated septum')
     shortbreath = StringField('Shortness of breath')
-    otherlung = StringField('Other lung disorders')
+    other = StringField('Other lung disorders')
 
 
-class MedicalHistoryNervousForm(FlaskForm):
+class MedicalHistoryNeuroForm(FlaskForm):
     title = 'Nervous system'
     brain = StringField('Head or brain injury')
     stroke = StringField('Stroke or TIA')
@@ -148,7 +159,7 @@ class MedicalHistoryNervousForm(FlaskForm):
     epilepsy = StringField('Epilepsy or seizures')
     parkinson = StringField('Parkinson\'s disease')
     neuromuscular = StringField('Neuromuscular disorder')
-    otherneuro = StringField('Other neurological disorder')
+    other = StringField('Other neurological disorder')
 
 
 class MedicalHistoryTraumaForm(FlaskForm):
@@ -156,43 +167,15 @@ class MedicalHistoryTraumaForm(FlaskForm):
     whiplash = StringField('Whiplash')
     accident = StringField('Motor vehicle accident')
     concussion = StringField('Concussion')
-    othertrauma = StringField('Other trauma')
+    other = StringField('Other trauma')
 
 
 class MedicalHistoryNutritionForm(FlaskForm):
     title = 'Nutritional'
-    nutritional = StringField('Nutritional deficiency')
-    foodallergiues = StringField('Food allergies')
-    eating = StringField('Eating disorder')    
-
-
-class MedicalHistoryCheckForm(FlaskForm):
-    general = FormField(MedicalHistoryGeneralForm)
-    blood = FormField(MedicalHistoryBloodForm)
-    digestive = FormField(MedicalHistoryDigestiveForm)
-    skeletal = FormField(MedicalHistorySkeletalForm)
-    immune = FormField(MedicalHistoryImmuneForm)
-    surgical = FormField(MedicalHistorySurgicalForm)
-    uro = FormField(MedicalHistoryUroForm)
-    respiratory = FormField(MedicalHistoryRespiratoryForm)
-    nervous = FormField(MedicalHistoryNervousForm)
-    trauma = FormField(MedicalHistoryTraumaForm)
-    nutrition = FormField(MedicalHistoryNutritionForm)
-
-
-class MedicalHistoryDiagnosticForm(FlaskForm):
-    has_xray = BooleanField('X-ray')
-    xray = StringField('')
-    has_ctscan = BooleanField('CT scan')
-    ctscan = StringField('')
-    has_endoscopy = BooleanField('Endoscopy or colonoscopy')
-    endoscopy = StringField('')
-    has_mri = BooleanField('MRI')
-    mri = StringField('')
-    has_ultrasound = BooleanField('Ultrasound')
-    ultrasound = StringField('')
-    has_otherdiagnostic = BooleanField('Other diagnostic testing')
-    otherdiagnostic = StringField('')
+    deficiency = StringField('Nutritional deficiency')
+    allergies = StringField('Food allergies')
+    eating = StringField('Eating disorder')
+    other = StringField('Other nutritional')
 
 
 class MedicalHistoryForm(FlaskForm):
@@ -210,23 +193,70 @@ class MedicalHistoryForm(FlaskForm):
     allergies = TextAreaField('Allergies and reactions')
     medication = TextAreaField('Current medication and supplements (include dosage)')
 
-    diagnostic = FormField(MedicalHistoryDiagnosticForm)
-    history = FormField(MedicalHistoryCheckForm)
+    diagnostic = FormField(MedicalHistoryDiagnosticForm, separator='_')
+    general = FormField(MedicalHistoryGeneralForm, separator='_')
+    blood = FormField(MedicalHistoryBloodForm, separator='_')
+    digestive = FormField(MedicalHistoryDigestiveForm, separator='_')
+    skeletal = FormField(MedicalHistorySkeletalForm, separator='_')
+    immune = FormField(MedicalHistoryImmuneForm, separator='_')
+    surgery = FormField(MedicalHistorySurgeryForm, separator='_')
+    uro = FormField(MedicalHistoryUroForm, separator='_')
+    respiratory = FormField(MedicalHistoryRespiratoryForm, separator='_')
+    neuro = FormField(MedicalHistoryNeuroForm, separator='_')
+    trauma = FormField(MedicalHistoryTraumaForm, separator='_')
+    nutrition = FormField(MedicalHistoryNutritionForm, separator='_')
 
 
 @bp.route('/history', methods=('GET', 'POST'))
 def history():
     clientid = session['clientid']
-    fullname = session['clientname']
     ci = ClientInfo.query.filter_by(clientid=clientid).one()
-    
+    md = MedicalHistory.query.filter_by(clientid=clientid).one_or_none()
+
+    # Map column_names to nested subform.name
+    table2form = {
+        'diagnostic': {},
+        'general': {},
+        'blood': {},
+        'digestive': {},
+        'skeletal': {},
+        'immune': {},
+        'surgery': {},
+        'uro': {},
+        'respiratory': {},
+        'neuro': {},
+        'trauma': {},
+        'nutrition': {}
+    }
+
+    if md:
+        for col in md.__table__.c:
+            parts = col.name.split('_')
+            if len(parts) > 1 and parts[0] in table2form:
+                table2form[parts[0]][parts[1]] = getattr(md, col.name, '')
+
     form = MedicalHistoryForm(
-        fullname=fullname,
+        obj=md,
         dob=ci.dob,
         healthcare_contact=ci.healthcare_contact,
-        healthcare_phone=ci.healthcare_phone
+        healthcare_phone=ci.healthcare_phone,
+        **table2form
     )
 
     if request.method == 'GET':
         return render_template('doctor/history.html', form=form)
+
+    if md:
+        form.populate_obj(md)
+    else:
+        form = dict(request.form)
+        form['clientid'] = clientid
+        form.pop('dob')
+        form.pop('healthcare_contact')
+        form.pop('healthcare_phone')
+        md = MedicalHistory(**form)
+        db.session.add(md)
+
+    db.session.commit()
+
     return redirect(url_for('main.index'))
