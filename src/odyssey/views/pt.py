@@ -103,7 +103,7 @@ def mobility():
             if len(parts) == 3:
                 subform = parts[0] + '_' + parts[1]
                 element = parts[2]
-                table2form[subform][element] = getattr(pt, col.name, '')
+                table2form[subform][element] = getattr(mb, col.name, '')
 
     form = MobilityAssessmentForm(obj=mb, **table2form)
 
