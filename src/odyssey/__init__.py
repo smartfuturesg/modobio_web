@@ -2,6 +2,8 @@ import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
+__version__ = '0.0.1'
+
 app = Flask(__name__)
 app.secret_key = 'dev'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://localhost/modobio'
