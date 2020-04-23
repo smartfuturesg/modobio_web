@@ -3,14 +3,6 @@
 {% block content %}
 <form class="input" method="POST" action="{{ url_for('pt.history') }}">
     <div class="row">
-        <span class="label">{{ form.has_exercise.label }}</span>
-        <span class="field">
-        {% for exc in form.has_exercise %}
-        {{ exc }} {{ exc.label }}
-        {% endfor %}
-        </span>
-    </div>
-    <div class="row">
         <span class="label">{{ form.exercise.label }}</span>
         <span class="field">{{ form.exercise() }}</span>
     </div>
@@ -25,7 +17,7 @@
         <span class="field">{{ form.pain_areas() }}</span>
     </div>
     <div class="row">&nbsp;</div>
-    <p>Please rate your symptoms on scale of 0 to 10, with 0 = no pain and 10 = the worst pain imaginable, you need to go to emergency room.</p>
+    <p>Please rate your symptoms on scale of 0 to 10, with 0 = no pain and 10 = the worst pain imaginable, you need to go to the emergency room.</p>
     <div class="row">
         <span class="label">{{ form.best_pain.label }}</span>
         <span class="field">{{ form.best_pain() }}</span>
