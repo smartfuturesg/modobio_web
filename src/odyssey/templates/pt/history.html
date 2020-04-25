@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Physical therapy history{% endblock %}
 {% block content %}
-<form class="input" method="POST" action="{{ url_for('pt.history') }}">
+<form id="pthistory" class="input" method="POST" action="{{ url_for('pt.history') }}">
     <div class="row">
         <span class="label">{{ form.exercise.label }}</span>
         <span class="field">{{ form.exercise() }}</span>
@@ -12,9 +12,24 @@
         <span class="field">{{ form.treatment() }}</span>
     </div>
     <div class="row">&nbsp;</div>
-    <div class="row">
-        <span class="label">{{ form.pain_areas.label }}</span>
-        <span class="field">{{ form.pain_areas() }}</span>
+    <p>Please indicate any areas of pain you are currently experiencing.</p>
+    {{ form.pain_areas() }}
+    <div class="painarealabel">
+        <span>Front</span>
+        <span>Back</span>
+    </div>
+    <div class="painarea">
+        <img class="painarea" src="{{ url_for('static', filename='human_silhouette.svg') }}">
+        <canvas class="painarea" id="pain"></canvas>
+    </div>
+    <div class="row center">
+        <span>Draw</span>
+        <label class="switch">
+            <input type="checkbox" id="draw">
+            <span class="slider"></span>
+        </label>
+        <span>Erase</span>&nbsp;&nbsp;
+        <button id="clear" type="button">Clear</button>
     </div>
     <div class="row">&nbsp;</div>
     <p>Please rate your symptoms on scale of 0 to 10, with 0 = no pain and 10 = the worst pain imaginable, you need to go to the emergency room.</p>
@@ -42,4 +57,6 @@
     <div class="row">&nbsp;</div>
     <div class="row center"><button type="submit">Next</button></div>
 </form>
+<script>add_pain_area_pad('pain', 'pthistory', 'clear', 'draw', '{{ form.pain_areas.id }}');
+</script>
 {% endblock %}

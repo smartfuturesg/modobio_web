@@ -288,6 +288,7 @@ input[type=submit], button {
     border-radius: 2.5px;
     min-width: 8em;
     width: initial;
+    margin-right: 2em;
 }
 
 /* Warnings */
@@ -303,6 +304,91 @@ input[type=submit], button {
     outline: 1px solid #dadada;
     width: 100%;
     height: 150px;
+}
+
+/* Pain area drawing */
+div.painarea {
+    position: relative;
+    width: 100%;
+    height: 600px;
+}
+
+img.painarea {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+}
+
+canvas.painarea {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+}
+
+div.painarealabel {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    font-weight: bold;
+}
+
+label.switch {
+  position: relative;
+  display: inline-block;
+  width: 2.2em;
+  height: 1.2em;
+  margin: 0 0.5em;
+}
+
+label.switch input {
+    display: none;
+}
+
+span.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #eee;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+span.slider:before {
+  position: absolute;
+  content: "";
+  height: 1em;
+  width: 1em;
+  top: 0.1em;
+  left: 0.1em;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + span.slider {
+  background-color: var(--mbwarn);
+}
+
+input:checked + span.slider:before {
+  -webkit-transform: translateX(1em);
+  -ms-transform: translateX(1em);
+  transform: translateX(1em);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
 }
 
 /* Document revision */

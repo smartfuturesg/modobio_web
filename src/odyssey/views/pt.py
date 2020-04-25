@@ -2,7 +2,7 @@ import datetime
 
 from flask import flash, render_template, Blueprint, session, redirect, request, url_for
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, DateTimeField, FormField, IntegerField, SelectMultipleField, StringField, TextAreaField
+from wtforms import BooleanField, FormField, HiddenField, IntegerField, SelectMultipleField, StringField, TextAreaField
 
 from odyssey import db
 from odyssey.constants import THERAPIES, YESNO, BOOLIFY
@@ -17,7 +17,7 @@ class PTHistoryForm(FlaskForm):
     treatment = SelectMultipleField('Did you receive any of the following treatments? Select all that apply.',
         choices=THERAPIES, render_kw={'size': len(THERAPIES)})
     
-    pain_areas = StringField('Mark areas of pain with an "X"', default='This will be implemented as a clickable silhouette of a human.')
+    pain_areas = HiddenField()
 
     best_pain = IntegerField('Best pain')
     worst_pain = IntegerField('Worst pain')

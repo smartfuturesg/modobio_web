@@ -216,7 +216,7 @@ class PTHistory(db.Model):
 
     treatment = db.Column(db.String(1024))
 
-    pain_areas = db.Column(db.String(1024))
+    pain_areas = db.Column(db.Text)
     best_pain = db.Column(db.Integer)
     worst_pain = db.Column(db.Integer)
     current_pain = db.Column(db.Integer)
