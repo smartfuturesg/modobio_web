@@ -63,8 +63,12 @@ function add_pain_area_pad(canvas_id, form_id, clear_button_id, draw_erase_id, p
     erase.addEventListener('change', function () {
         if (this.checked) {
             ctx.globalCompositeOperation = 'destination-out';
+            pad.minWidth = 20;
+            pad.maxWidth = 20;
         } else {
             ctx.globalCompositeOperation = 'source-over';
+            pad.minWidth = 0.5;
+            pad.maxWidth = 2.5;
         }
     });
 }
