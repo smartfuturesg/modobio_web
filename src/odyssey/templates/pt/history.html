@@ -8,8 +8,19 @@
     </div>
     <div class="row">&nbsp;</div>
     <div class="row">
-        <span class="label">{{ form.treatment.label }}</span>
-        <span class="field">{{ form.treatment() }}</span>
+        <span class="label">Please indicate if you have received any of the following treatments.</span>
+        <span class="field">
+            <div class="multicol">
+                {% for treatment in ( form.has_pt, form.has_chiro, form.has_massage,
+                                      form.has_surgery, form.has_medication,
+                                      form.has_acupuncture) %}
+                <div class="row">
+                    <span class="radiofield">{{ treatment() }}</span>&ensp;
+                    <span class="radiolabel">{{ treatment.label }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </span>
     </div>
     <div class="row">&nbsp;</div>
     <p>Please indicate any areas of pain you are currently experiencing.</p>
@@ -28,7 +39,7 @@
             <input type="checkbox" id="draw">
             <span class="slider"></span>
         </label>
-        <span>Erase</span>&nbsp;&nbsp;
+        <span>Erase</span>&emsp;&emsp;&emsp;
         <button id="clear" type="button">Clear</button>
     </div>
     <div class="row">&nbsp;</div>

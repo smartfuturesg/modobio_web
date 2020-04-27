@@ -314,15 +314,6 @@ CONTACT_METHODS = (
     (1, 'email')
 )
 
-THERAPIES = (
-    ('pt', 'Physical therapy'),
-    ('chiro', 'Chiropractor'),
-    ('massage', 'Massage therapy'),
-    ('surgery', 'Surgery'),
-    ('medication', 'Medication'),
-    ('acupuncture', 'Acupuncture')
-)
-
 # To connect a RadioField with 2 options to a Boolean db column, use:
 # RadioField('label', choices=YESNO, coerce=BOOLIFY)
 YESNO = (

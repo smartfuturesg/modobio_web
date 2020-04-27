@@ -2,10 +2,9 @@ import datetime
 
 from flask import flash, render_template, Blueprint, session, redirect, request, url_for
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, FormField, HiddenField, IntegerField, SelectMultipleField, StringField, TextAreaField
+from wtforms import BooleanField, FormField, HiddenField, IntegerField, StringField, TextAreaField
 
 from odyssey import db
-from odyssey.constants import THERAPIES, YESNO, BOOLIFY
 from odyssey.models import MobilityAssessment, PTHistory
 
 bp = Blueprint('pt', __name__)
@@ -14,9 +13,13 @@ bp = Blueprint('pt', __name__)
 class PTHistoryForm(FlaskForm):
     exercise = TextAreaField('Please describe your current exercise routine, how often, and where/with whom. Leave empty if you do not exercise.')
 
-    treatment = SelectMultipleField('Did you receive any of the following treatments? Select all that apply.',
-        choices=THERAPIES, render_kw={'size': len(THERAPIES)})
-    
+    has_pt = BooleanField('Physical therapy')
+    has_chiro = BooleanField('Chiropractor')
+    has_massage = BooleanField('Massage therapy')
+    has_surgery = BooleanField('Surgery')
+    has_medication = BooleanField('Medication')
+    has_acupuncture = BooleanField('Acupuncture')
+
     pain_areas = HiddenField()
 
     best_pain = IntegerField('Best pain')
@@ -74,10 +77,18 @@ def history():
     if request.method == 'GET':
         return render_template('pt/history.html', form=form)
 
+    form = dict(request.form)
+    for k in ('has_pt', 'has_chiro', 'has_massage', 'has_surgery',
+              'has_medication', 'has_acupuncture'):
+        if k in form and form[k]:
+            form[k] = True
+        else:
+            form[k] = False
+
     if pt:
-        form.populate_obj(pt)
+        pt.update(form)
     else:
-        pt = PTHistory(**request.form, clientid=clientid)
+        pt = PTHistory(**form, clientid=clientid)
         db.session.add(pt)
 
     db.session.commit()
@@ -112,7 +123,7 @@ def mobility():
         return render_template('pt/mobility.html', form=form)
 
     form = dict(request.form)
-    if form['isa_dynamic'] == 'y':
+    if 'isa_dynamic' in form and form['isa_dynamic']:
         form['isa_dynamic'] = True
     else:
         form['isa_dynamic'] = False

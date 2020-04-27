@@ -214,7 +214,12 @@ class PTHistory(db.Model):
 
     exercise = db.Column(db.Text)
 
-    treatment = db.Column(db.String(1024))
+    has_pt = db.Column(db.Boolean)
+    has_chiro = db.Column(db.Boolean)
+    has_massage = db.Column(db.Boolean)
+    has_surgery = db.Column(db.Boolean)
+    has_medication = db.Column(db.Boolean)
+    has_acupuncture = db.Column(db.Boolean)
 
     pain_areas = db.Column(db.Text)
     best_pain = db.Column(db.Integer)
