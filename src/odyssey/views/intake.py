@@ -1,226 +1,191 @@
-import datetime
-
 from flask import render_template, Blueprint, session, redirect, request, url_for
-from flask_wtf import FlaskForm
 from flask_weasyprint import HTML, render_pdf
-from wtforms import BooleanField, DateField, HiddenField, RadioField, StringField, SelectField
 
 from odyssey import db
-from odyssey.models import ClientInfo, ClientConsent
-from odyssey.constants import COUNTRIES, GENDERS, USSTATES, CONTACT_METHODS, YESNO, BOOLIFY
+from odyssey.forms.intake import ClientInfoForm, ClientConsentForm, ClientReleaseForm, \
+                                 ClientSignForm, ClientReceiveForm
+from odyssey.models.intake import ClientInfo, ClientConsent, ClientRelease, ClientFinancial, \
+                                  ClientConsultContract, ClientSubscriptionContract
 
 bp = Blueprint('intake', __name__)
 
-today = datetime.date.today()
-next_year = datetime.date(year=today.year + 1, month=today.month, day=today.day)
+@bp.route('/newclient', methods=('GET', 'POST'))
+def newclient():
+    session['clientid'] = None
+    session['clientname'] = ''
+    return redirect(url_for('.clientinfo'))
 
-class ClientInfoForm(FlaskForm):
-    firstname = StringField('First name')
-    middlename = StringField('Middle name(s)')
-    lastname = StringField('Last name')
-    s1 = HiddenField(id='spacer')
-
-    guardianname = StringField('Parent or guardian name')
-    guardianrole = StringField('Parent or guardian relationship')
-
-    s2 = HiddenField(id='spacer')
-    street = StringField('Address')
-    city = StringField('City')
-    state = SelectField('State', choices=USSTATES, default='AZ')
-    zipcode = StringField('Zip')
-    country = SelectField('Country', choices=COUNTRIES, default='US')
-
-    s3 = HiddenField(id='spacer')
-    email = StringField('Email address') 
-    phone = StringField('Phone')
-    preferred = SelectField('Preferred method of contact', choices=CONTACT_METHODS)
-
-    s4 = HiddenField(id='spacer')
-    emergency_contact = StringField('Emergency contact name')
-    emergency_phone = StringField('Emergency contact phone')
-
-    s5 = HiddenField(id='spacer')
-    healthcare_contact = StringField('Primary healthcare provider name')
-    healthcare_phone = StringField('Primary healthcare provider phone')
-
-    s6 = HiddenField(id='spacer')
-    gender = SelectField('Gender', choices=GENDERS)
-    dob = DateField('Date of birth')
-
-
-class ClientConsultContractForm(FlaskForm):
-    signature = HiddenField()
-    fullname = StringField('Full name')
-    guardianname = StringField('Parent or guardian name')
-    signdate = DateField('Date', default=today)
-
-
-class ClientConsentForm(FlaskForm):
-    infectious_disease = RadioField('', choices=YESNO, coerce=BOOLIFY)
-    signature = HiddenField()
-    fullname = StringField('Full name')
-    guardianname = StringField('Parent or guardian name')
-    signdate = DateField('Date', default=today)
-
-
-class ClientReleaseForm(FlaskForm):
-    release_by_other = StringField('')
-    release_to_other = StringField('')
-    release_of_all = RadioField('',
-                        choices=((1, 'all'), (0, 'other')),
-                        coerce=BOOLIFY,
-                        default=1)
-    release_of_other = StringField('')
-    release_date_limit = DateField('', default=next_year)
-    release_purpose = StringField('')
-
-    emergency_contact = StringField('Emergency contact name')
-    emergency_phone = StringField('Emergency contact phone')
-
-    fullname = StringField('Full name')
-    dob = DateField('Date of birth')
-    address = StringField('Address')
-    phone = StringField('Phone', render_kw={'type': 'phone'})
-    email = StringField('Email', render_kw={'type': 'email'})
-
-    signature = HiddenField()
-    guardianname = StringField('Parent or guardian name')
-    signdate = DateField('Date', default=today)
-
-
-class ClientFinancialForm(FlaskForm):
-    signature = HiddenField()
-    fullname = StringField('Full name')
-    guardianname = StringField('Parent or guardian name')
-    signdate = DateField('Date', default=today)
-
-
-class ClientReceiveForm(FlaskForm):
-    receive_docs = BooleanField('', default='checked')
-
-
-class ClientSubscriptionContractForm(FlaskForm):
-    signature = HiddenField()
-    fullname = StringField('Full name')
-    guardianname = StringField('Parent or guardian name')
-    signdate = DateField('Date', default=today)
-
-
-@bp.route('/clientinfo', methods=['GET', 'POST'])
+@bp.route('/clientinfo', methods=('GET', 'POST'))
 def clientinfo():
-    """ Render a HTML page that asks for basic client info. """
     clientid = session.get('clientid')
+    ci = ClientInfo.query.filter_by(clientid=clientid).one_or_none()
+    form = ClientInfoForm(request.form, obj=ci)
 
-    if not clientid:
-        if request.method =='GET':
-            return render_template('intake/clientinfo.html', form=ClientInfoForm())
+    if request.method =='GET':
+        return render_template('intake/clientinfo.html', form=form)
 
-        ci = ClientInfo(**dict(request.form))
+    fullname = f'{request.form["firstname"]} {request.form["lastname"]}'
+    address = f'{request.form["street"]}, {request.form["city"]}, {request.form["state"]} {request.form["zipcode"]}'
+
+    if not ci:
+        ci = ClientInfo(fullname=fullname, address=address)
+        form.populate_obj(ci)
         db.session.add(ci)
         db.session.commit()
 
         session['clientid'] = ci.clientid
-        session['clientname'] = f'{ci.firstname} {ci.lastname}'
-
-        return redirect(url_for('.consent'))
-
+        session['clientname'] = fullname
     else:
-        ci = ClientInfo.query.filter_by(clientid=clientid).one()
-        form = ClientInfoForm(obj=ci)
-
-        if request.method =='GET':
-            return render_template('intake/clientinfo.html', form=form)
-
         form.populate_obj(ci)
         db.session.commit()
 
-        return redirect(url_for('.consent'))
+    return redirect(url_for('.consent'))
 
 @bp.route('/consent', methods=('GET', 'POST'))
 def consent():
     clientid = session.get('clientid')
+    ci = ClientInfo.query.filter_by(clientid=clientid).one()
     cc = ClientConsent.query.filter_by(clientid=clientid).one_or_none()
 
-    form = ClientConsentForm(obj=cc)
+    form = ClientConsentForm(obj=cc, fullname=ci.fullname, guardianname=ci.guardianname)
 
     if request.method == 'GET':
         return render_template('intake/consent.html', form=form)
 
     if not cc:
-        cc = ClientConsent(**dict(request.form), clientid=clientid)
+        cc = ClientConsent(clientid=clientid)
+        form.populate_obj(cc)
         db.session.add(cc)
     else:
         form.populate_obj(cc)
     db.session.commit()
 
-    html = render_template('intake/consent.html', form=form, pdf=True)
     # TODO: this needs to be saved somewhere
-    # return render_pdf(HTML(string=html))
+    # html = render_template('intake/consent.html', form=form, pdf=True)
+    # pdf = render_pdf(HTML(string=html))
     return redirect(url_for('.release'))
 
 @bp.route('/release', methods=('GET', 'POST'))
 def release():
     clientid = session['clientid']
-    fullname = session['clientname']
     ci = ClientInfo.query.filter_by(clientid=clientid).one()
-    address = f'{ci.street}, {ci.city}, {ci.state}, {ci.zipcode}'
-    form = ClientReleaseForm(obj=ci, fullname=fullname, address=address)
+    cr = ClientRelease.query.filter_by(clientid=clientid).one_or_none()
+
+    form = ClientReleaseForm(obj=cr,
+                             fullname=ci.fullname,
+                             guardianname=ci.guardianname,
+                             emergency_contact=ci.emergency_contact,
+                             emergency_phone=ci.emergency_phone,
+                             dob=ci.dob,
+                             address=ci.address,
+                             phone=ci.phone,
+                             email=ci.email)
 
     if request.method == 'GET':
         return render_template('intake/release.html', form=form)
 
-    html = render_template('intake/release.html', form=form, pdf=True)
+    if not cr:
+        cr = ClientRelease(clientid=clientid)
+        form.populate_obj(cr)
+        db.session.add(cr)
+    else:
+        form.populate_obj(cr)
+    db.session.commit()
+
     # TODO: store pdf
-    # return render_pdf(HTML(string=html))
+    # html = render_template('intake/release.html', form=form, pdf=True)
+    # pdf = render_pdf(HTML(string=html))
     return redirect(url_for('.financial'))
 
 @bp.route('/financial', methods=('GET', 'POST'))
 def financial():
     clientid = session['clientid']
-    fullname = session['clientname']
     ci = ClientInfo.query.filter_by(clientid=clientid).one()
-    form = ClientFinancialForm(obj=ci, fullname=fullname)
+    cf = ClientFinancial.query.filter_by(clientid=clientid).one_or_none()
+
+    form = ClientSignForm(obj=cf, fullname=ci.fullname, guardianname=ci.guardianname)
 
     if request.method == 'GET':
         return render_template('intake/financial.html', form=form)
 
-    html = render_template('intake/financial.html', form=form, pdf=True)
+    if not cf:
+        cf = ClientFinancial(clientid=clientid)
+        form.populate_obj(cf)
+        db.session.add(cf)
+    else:
+        form.populate_obj(cf)
+    db.session.commit()
+
     # TODO: store pdf
-    # return render_pdf(HTML(string=html))
+    # html = render_template('intake/financial.html', form=form, pdf=True)
+    # pdf = render_pdf(HTML(string=html))
     return redirect(url_for('.send'))
 
 @bp.route('/send', methods=('GET', 'POST'))
 def send():
+    clientid = session['clientid']
+    ci = ClientInfo.query.filter_by(clientid=clientid).one()
+
+    if ci.receive_docs is None:
+        form = ClientReceiveForm()
+    else:
+        form = ClientReceiveForm(receive_docs=ci.receive_docs)
+
     if request.method == 'GET':
-        return render_template('intake/send.html', form=ClientReceiveForm())
+        return render_template('intake/send.html', form=form)
+
+    if 'receive_docs' in request.form and request.form['receive_docs']:
+        ci.receive_docs = True
+    else:
+        ci.receive_docs = False
+    db.session.commit()
+
     return redirect(url_for('main.index'))
 
 @bp.route('/consult', methods=('GET', 'POST'))
 def consult():
     clientid = session['clientid']
-    fullname = session['clientname']
     ci = ClientInfo.query.filter_by(clientid=clientid).one()
-    form = ClientConsultContractForm(obj=ci, fullname=fullname)
+    cc = ClientConsultContract.query.filter_by(clientid=clientid).one_or_none()
+
+    form = ClientSignForm(obj=cc, fullname=ci.fullname, guardianname=ci.guardianname)
 
     if request.method == 'GET':
         return render_template('intake/consult.html', form=form)
 
-    html = render_template('intake/consult.html', form=form, pdf=True)
+    if not cc:
+        cc = ClientConsultContract(clientid=clientid)
+        form.populate_obj(cc)
+        db.session.add(cc)
+    else:
+        form.populate_obj(cc)
+    db.session.commit()
+
     # TODO: store pdf
-    # return render_pdf(HTML(string=html))
+    # html = render_template('intake/consult.html', form=form, pdf=True)
+    # pdf = render_pdf(HTML(string=html))
     return redirect(url_for('main.index'))
 
 @bp.route('/subscription', methods=('GET', 'POST'))
 def subscription():
     clientid = session['clientid']
-    fullname = session['clientname']
     ci = ClientInfo.query.filter_by(clientid=clientid).one()
-    form = ClientSubscriptionContractForm(obj=ci, fullname=fullname)
+    cs = ClientSubscriptionContract.query.filter_by(clientid=clientid).one_or_none()
+
+    form = ClientSignForm(obj=cs, fullname=ci.fullname, guardianname=ci.guardianname)
 
     if request.method == 'GET':
         return render_template('intake/subscription.html', form=form)
 
-    html = render_template('intake/subscription.html', form=form, pdf=True)
+    if not cs:
+        cs = ClientSubscriptionContract(clientid=clientid)
+        form.populate_obj(cs)
+        db.session.add(cs)
+    else:
+        form.populate_obj(cs)
+    db.session.commit()
+
     # TODO: store pdf
-    # return render_pdf(HTML(string=html))
+    # html = render_template('intake/subscription.html', form=form, pdf=True)
+    # pdf = render_pdf(HTML(string=html))
     return redirect(url_for('main.index'))

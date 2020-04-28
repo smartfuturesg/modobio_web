@@ -1,24 +1,12 @@
 from flask import render_template, Blueprint, session, redirect, request, url_for, flash
-from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField
 from werkzeug.security import check_password_hash
 
 from odyssey import db
-from odyssey.models import Staff, ClientInfo
+from odyssey.forms.main import StaffLoginForm, ClientSearchForm
+from odyssey.models.main import Staff
+from odyssey.models.intake import ClientInfo
 
 bp = Blueprint('main', __name__)
-
-class StaffLoginForm(FlaskForm):
-    email = StringField('Email', render_kw={'type': 'email'})
-    password = PasswordField('Password')
-
-
-class ClientSearchForm(FlaskForm):
-    firstname = StringField('First name')
-    lastname = StringField('Last name')
-    email = StringField('Email address', render_kw={'type': 'email'})
-    phone = StringField('Phone number', render_kw={'type': 'phone'})
-
 
 @bp.route('/')
 def index():
@@ -34,14 +22,12 @@ def index():
 @bp.route('/login', methods=('GET', 'POST'))
 def login():
     if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
-        staff = Staff.query.filter_by(email=email).first()
+        staff = Staff.query.filter_by(email=request.form['email']).one_or_none()
 
-        if staff and check_password_hash(staff.password, password):
+        if staff and check_password_hash(staff.password, request.form['password']):
             session.clear()
             session['staffid'] = staff.staffid
-            session['staffname'] = f'{staff.firstname} {staff.lastname}'
+            session['staffname'] = staff.fullname
             return redirect(url_for('.index'))
 
         flash('Incorrect email or password')
@@ -68,7 +54,7 @@ def clientsearch():
     if request.form['email']:
         clauses.append(ClientInfo.email.ilike(f'%{request.form["email"]}%'))
 
-    clients = db.session.query(ClientInfo).filter(db.and_(*clauses)).all()
+    clients = ClientInfo.query.filter(db.and_(*clauses)).all()
     
     if not clients:
         flash('Client not found, please try again.')
@@ -76,14 +62,12 @@ def clientsearch():
 
     return render_template('main/clientselect.html', clients=clients)
 
-
 @bp.route('/clientload', methods=('POST',))
 def clientload():
     clientid = request.form['clientid']
-    ci = db.session.query(ClientInfo).filter_by(clientid=clientid).one()
-    fullname = f'{ci.firstname} {ci.lastname}'
+    ci = ClientInfo.query.filter_by(clientid=clientid).one()
 
     session['clientid'] = clientid
-    session['clientname'] = fullname
+    session['clientname'] = ci.fullname
 
     return redirect(url_for('.index'))
