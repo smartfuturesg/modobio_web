@@ -63,6 +63,8 @@ def mobility():
         return render_template('pt/mobility.html', form=form)
 
     form = dict(request.form)
+
+    isa = False
     if 'isa_dynamic' in form and form['isa_dynamic']:
         form['isa_dynamic'] = True
     else:

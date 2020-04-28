@@ -48,12 +48,15 @@ def history():
     if request.method == 'GET':
         return render_template('doctor/history.html', form=form)
 
-    if not md:
-        md = MedicalHistory(clientid=clientid)
-        form.populate_obj(md)
-        db.session.add(md)
+    form = dict(request.form)
+
+    if md:
+        md.update(form)
     else:
-        form.populate_obj(md)
+        md = MedicalHistory(clientid=clientid)
+        md.update(form)
+        db.session.add(md)
+
     db.session.commit()
 
     return redirect(url_for('main.index'))

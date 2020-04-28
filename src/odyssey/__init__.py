@@ -11,6 +11,13 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
+# Custom method to easily update db table from a dict
+def _update(self, form: dict):
+    for k, v in form.items():
+        setattr(self, k, v)
+
+db.Model.update = _update
+
 import odyssey.models
 
 db.create_all()
