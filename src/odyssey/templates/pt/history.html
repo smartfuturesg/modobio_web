@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Physical therapy history{% endblock %}
+{% block title %}PT history{% endblock %}
 {% block content %}
 <form id="pthistory" class="input" method="POST" action="{{ url_for('pt.history') }}">
     <div class="row">
@@ -36,8 +36,8 @@
     <div class="row center">
         <span>Draw</span>
         <label class="switch">
-            <input type="checkbox" id="draw">
-            <span class="slider"></span>
+            <input class="switch" type="checkbox" id="draw">
+            <span class="switch"></span>
         </label>
         <span>Erase</span>&emsp;&emsp;&emsp;
         <button id="clear" type="button">Clear</button>

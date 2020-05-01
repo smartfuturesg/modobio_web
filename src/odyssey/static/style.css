@@ -327,6 +327,7 @@ canvas.painarea {
     height: 100%;
     left: 0;
     top: 0;
+    cursor: crosshair;
 }
 
 div.painarealabel {
@@ -344,11 +345,11 @@ label.switch {
   margin: 0 0.5em;
 }
 
-label.switch input {
+input.switch {
     display: none;
 }
 
-span.slider {
+span.switch {
   position: absolute;
   cursor: pointer;
   top: 0;
@@ -360,7 +361,7 @@ span.slider {
   transition: .4s;
 }
 
-span.slider:before {
+span.switch::before {
   position: absolute;
   content: "";
   height: 1em;
@@ -372,23 +373,14 @@ span.slider:before {
   transition: .4s;
 }
 
-input:checked + span.slider {
+input.switch:checked + span.switch {
   background-color: var(--mbwarn);
 }
 
-input:checked + span.slider:before {
+input.switch:checked + span.switch::before {
   -webkit-transform: translateX(1em);
   -ms-transform: translateX(1em);
   transform: translateX(1em);
-}
-
-/* Rounded sliders */
-.slider.round {
-  border-radius: 34px;
-}
-
-.slider.round:before {
-  border-radius: 50%;
 }
 
 /* Document revision */
