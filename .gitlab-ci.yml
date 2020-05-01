@@ -1,0 +1,10 @@
+pages:
+  script:
+    - echo 'Nothing to do...'
+  tags:
+    - gitlab-runner
+  artifacts:
+    paths:
+      - public
+  only:
+    - master
