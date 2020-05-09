@@ -2,7 +2,7 @@
 {% block title %}Release of information{% endblock %}
 {% block content %}
 <div class="docrev">Document revision: 2020-04-16</div>
-<p>Your privacy is important to us. We protect the confidentiality of your health information. Dr. Adam Douglas and Modo Bio may share your health information for purposes of your treatment, payment for that treatment, and health care operations activities. They may also share your health information as authorized by you or as otherwise permitted by law.</p>
+<p>Your privacy is important to us. We protect the confidentiality of your health information. Dr. Adam Douglas and Modo Bio Health Systems LLC ("Modo Bio") may share your health information for purposes of your treatment, payment for that treatment, and health care operations activities. They may also share your health information as authorized by you or as otherwise permitted by law.</p>
 
 <h1>Who can release your health information?</h1>
 <p>I authorize Modo Bio, Dr. Adam Douglas, and the following individuals and organizations to release my health information:</p>
@@ -29,13 +29,16 @@
     {% endif %}
 {% endfor %}
 
+<h1>How long?</h1>
+<p>Please tell us if we should apply date restrictions on the amount of health information we release about you:</p>
+<div class="row">
+    From &ensp; {{ macros.dateinput(form.release_date_from, formid='sigform', pdf=pdf) }}
+    To &ensp; {{ macros.dateinput(form.release_date_to, formid='sigform', pdf=pdf) }}
+</div>
+
 <h1>Purpose of the disclosure</h1>
 <p>I authorize the release of my health information for my treatment, for Modo Bio's health and wellness programs, and for the following additional reason(s):</p>
 <div class="row">{{ macros.textinput(form.release_purpose, formid='sigform', pdf=pdf) }}</div>
-
-<h1>Date restrictions (if any)</h1>
-<p>Please tell us if we should apply date restrictions on the amount of health information we release about you:</p>
-<div class="row">{{ macros.dateinput(form.release_date_limit, formid='sigform', pdf=pdf) }}</div>
 
 <h1>Expiration and revocation</h1>
 <p>I may revoke (take back) or change the above permissions at any time, except to the extent that the individuals or organizations listed on this release have already taken action based on my consent. To revoke this consent, please write to: <a href="mailto:privacy@modobio.com">privacy@modobio.com</a>.</p>

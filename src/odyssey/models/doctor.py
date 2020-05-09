@@ -13,6 +13,7 @@ class MedicalHistory(db.Model):
     goals = db.Column(db.Text)
     concerns = db.Column(db.Text)
     family_history = db.Column(db.Text)
+    social_history = db.Column(db.Text)
     allergies = db.Column(db.Text)
     medication = db.Column(db.Text)
 

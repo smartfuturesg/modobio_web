@@ -182,6 +182,7 @@ class MedicalHistoryForm(FlaskForm):
     goals = TextAreaField('Goals')
     concerns = TextAreaField('Health concerns or conditions')
     family_history = TextAreaField('Family history')
+    social_history = TextAreaField('Social history including smoking, drinking, and drug use')
     allergies = TextAreaField('Allergies and reactions')
     medication = TextAreaField('Current medication and supplements (include dosage)')
 

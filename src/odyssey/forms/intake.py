@@ -14,7 +14,7 @@ class ClientInfoForm(FlaskForm):
     lastname = StringField('Last name')
     s1 = HiddenField(id='spacer')
 
-    guardianname = StringField('Parent or guardian name')
+    guardianname = StringField('Parent or guardian name (if applicable)')
     guardianrole = StringField('Parent or guardian relationship')
 
     s2 = HiddenField(id='spacer')
@@ -47,7 +47,7 @@ class ClientInfoForm(FlaskForm):
 
 class ClientSignForm(FlaskForm):
     fullname = StringField('Full name')
-    guardianname = StringField('Parent or guardian name')
+    guardianname = StringField('Parent or guardian name (if applicable)')
     signdate = DateField('Date', default=today)
     signature = HiddenField()
 
@@ -63,7 +63,8 @@ class ClientReleaseForm(ClientSignForm):
                         coerce=BOOLIFY,
                         default=1)
     release_of_other = StringField()
-    release_date_limit = DateField(default=next_year)
+    release_date_from = DateField()
+    release_date_to = DateField()
     release_purpose = StringField()
 
     emergency_contact = StringField('Emergency contact name')

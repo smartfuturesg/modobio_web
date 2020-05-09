@@ -66,7 +66,8 @@ class ClientRelease(db.Model):
     release_to_other = db.Column(db.String(1024))
     release_of_all = db.Column(db.Boolean)
     release_of_other = db.Column(db.String(1024))
-    release_date_limit = db.Column(db.Date)
+    release_date_from = db.Column(db.Date)
+    release_date_to = db.Column(db.Date)
     release_purpose = db.Column(db.String(1024))
 
     signdate = db.Column(db.Date)
