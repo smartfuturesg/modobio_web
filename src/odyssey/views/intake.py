@@ -4,7 +4,7 @@ from flask_weasyprint import HTML, render_pdf
 from odyssey import db
 from odyssey.forms.intake import ClientInfoForm, ClientConsentForm, ClientReleaseForm, \
                                  ClientSignForm, ClientReceiveForm
-from odyssey.models.intake import ClientInfo, ClientConsent, ClientRelease, ClientFinancial, \
+from odyssey.models.intake import ClientInfo, ClientConsent, ClientRelease, \
                                   ClientConsultContract, ClientSubscriptionContract
 
 bp = Blueprint('intake', __name__)
@@ -94,30 +94,6 @@ def release():
 
     # TODO: store pdf
     # html = render_template('intake/release.html', form=form, pdf=True)
-    # pdf = render_pdf(HTML(string=html))
-    return redirect(url_for('.financial'))
-
-@bp.route('/financial', methods=('GET', 'POST'))
-def financial():
-    clientid = session['clientid']
-    ci = ClientInfo.query.filter_by(clientid=clientid).one()
-    cf = ClientFinancial.query.filter_by(clientid=clientid).one_or_none()
-
-    form = ClientSignForm(obj=cf, fullname=ci.fullname, guardianname=ci.guardianname)
-
-    if request.method == 'GET':
-        return render_template('intake/financial.html', form=form)
-
-    if not cf:
-        cf = ClientFinancial(clientid=clientid)
-        form.populate_obj(cf)
-        db.session.add(cf)
-    else:
-        form.populate_obj(cf)
-    db.session.commit()
-
-    # TODO: store pdf
-    # html = render_template('intake/financial.html', form=form, pdf=True)
     # pdf = render_pdf(HTML(string=html))
     return redirect(url_for('.send'))
 

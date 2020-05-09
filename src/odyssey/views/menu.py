@@ -10,7 +10,6 @@ menu = (
         {'title': 'Forms', 'submenu': (
             {'title': 'Consent form', 'url': 'intake.consent'},
             {'title': 'Release form', 'url': 'intake.release'},
-            {'title': 'Financial form', 'url': 'intake.financial'},
             {'title': 'Send forms', 'url': 'intake.send'})},
         {'title': 'Contracts', 'submenu': (
             {'title': 'Initial consult', 'url': 'intake.consult'},

@@ -74,17 +74,6 @@ class ClientRelease(db.Model):
     signature = db.Column(db.Text)
 
 
-class ClientFinancial(db.Model):
-
-    __tablename__ = 'ClientFinancial'
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid'), nullable=False)
-
-    signdate = db.Column(db.Date)
-    signature = db.Column(db.Text)
-    
-
 class ClientConsultContract(db.Model):
 
     __tablename__ = 'ClientConsultContract'
