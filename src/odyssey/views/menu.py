@@ -10,10 +10,12 @@ menu = (
         {'title': 'Forms', 'submenu': (
             {'title': 'Consent form', 'url': 'intake.consent'},
             {'title': 'Release form', 'url': 'intake.release'},
+            {'title': 'Policies', 'url': 'intake.policies'},
             {'title': 'Send forms', 'url': 'intake.send'})},
         {'title': 'Contracts', 'submenu': (
             {'title': 'Initial consult', 'url': 'intake.consult'},
-            {'title': 'Subscription', 'url': 'intake.subscription'})}
+            {'title': 'Subscription', 'url': 'intake.subscription'},
+            {'title': 'Individual services', 'url': 'intake.individual'})}
     )},
     {'title': 'Doctor', 'submenu': (
         {'title': 'Medical history', 'url': 'doctor.history'},

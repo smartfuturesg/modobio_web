@@ -3,9 +3,11 @@ from flask_weasyprint import HTML, render_pdf
 
 from odyssey import db
 from odyssey.forms.intake import ClientInfoForm, ClientConsentForm, ClientReleaseForm, \
-                                 ClientSignForm, ClientReceiveForm
-from odyssey.models.intake import ClientInfo, ClientConsent, ClientRelease, \
-                                  ClientConsultContract, ClientSubscriptionContract
+                                 ClientSignForm, ClientReceiveForm, \
+                                 ClientIndividualContractForm
+from odyssey.models.intake import ClientInfo, ClientConsent, ClientRelease, ClientPolicies, \
+                                  ClientConsultContract, ClientSubscriptionContract, \
+                                  ClientIndividualContract
 
 bp = Blueprint('intake', __name__)
 
@@ -95,6 +97,30 @@ def release():
     # TODO: store pdf
     # html = render_template('intake/release.html', form=form, pdf=True)
     # pdf = render_pdf(HTML(string=html))
+    return redirect(url_for('.policies'))
+
+@bp.route('/policies', methods=('GET', 'POST'))
+def policies():
+    clientid = session['clientid']
+    ci = ClientInfo.query.filter_by(clientid=clientid).one()
+    cp = ClientPolicies.query.filter_by(clientid=clientid).one_or_none()
+
+    form = ClientSignForm(obj=cp, fullname=ci.fullname, guardianname=ci.guardianname)
+
+    if request.method == 'GET':
+        return render_template('intake/policies.html', form=form)
+
+    if not cp:
+        cp = ClientPolicies(clientid=clientid)
+        form.populate_obj(cp)
+        db.session.add(cp)
+    else:
+        form.populate_obj(cp)
+    db.session.commit()
+
+    # TODO: store pdf
+    # html = render_template('intake/policies.html', form=form, pdf=True)
+    # pdf = render_pdf(HTML(string=html))
     return redirect(url_for('.send'))
 
 @bp.route('/send', methods=('GET', 'POST'))
@@ -163,5 +189,31 @@ def subscription():
 
     # TODO: store pdf
     # html = render_template('intake/subscription.html', form=form, pdf=True)
+    # pdf = render_pdf(HTML(string=html))
+    return redirect(url_for('main.index'))
+
+@bp.route('/individual', methods=('GET', 'POST'))
+def individual():
+    clientid = session['clientid']
+    ci = ClientInfo.query.filter_by(clientid=clientid).one()
+    cs = ClientIndividualContract.query.filter_by(clientid=clientid).one_or_none()
+
+    form = ClientIndividualContractForm(obj=cs,
+                                        fullname=ci.fullname,
+                                        guardianname=ci.guardianname)
+
+    if request.method == 'GET':
+        return render_template('intake/individual.html', form=form)
+
+    if not cs:
+        cs = ClientIndividualContract(clientid=clientid)
+        form.populate_obj(cs)
+        db.session.add(cs)
+    else:
+        form.populate_obj(cs)
+    db.session.commit()
+
+    # TODO: store pdf
+    # html = render_template('intake/individual.html', form=form, pdf=True)
     # pdf = render_pdf(HTML(string=html))
     return redirect(url_for('main.index'))

@@ -74,6 +74,17 @@ class ClientRelease(db.Model):
     signature = db.Column(db.Text)
 
 
+class ClientPolicies(db.Model):
+
+    __tablename__ = 'ClientPolicies'
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid'), nullable=False)
+
+    signdate = db.Column(db.Date)
+    signature = db.Column(db.Text)
+
+
 class ClientConsultContract(db.Model):
 
     __tablename__ = 'ClientConsultContract'
@@ -91,6 +102,22 @@ class ClientSubscriptionContract(db.Model):
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid'), nullable=False)
+
+    signdate = db.Column(db.Date)
+    signature = db.Column(db.Text)
+
+
+class ClientIndividualContract(db.Model):
+
+    __tablename__ = 'ClientIndividualContract'
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid'), nullable=False)
+
+    doctor = db.Column(db.Boolean, default=False)
+    pt = db.Column(db.Boolean, default=False)
+    data = db.Column(db.Boolean, default=False)
+    drinks = db.Column(db.Boolean, default=False)
 
     signdate = db.Column(db.Date)
     signature = db.Column(db.Text)
