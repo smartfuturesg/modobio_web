@@ -1,3 +1,5 @@
+""" Various constants used throughout the Odyssey package. """
+
 COUNTRIES = (
     ('AF', 'Afghanistan'),
     ('AX', 'Åland Islands'),
@@ -249,6 +251,10 @@ COUNTRIES = (
     ('ZM', 'Zambia'),
     ('ZW', 'Zimbabwe')
 )
+"""Names of countries and their 2-letter codes.
+
+A tuple of tuples: (('US', 'United States of America'), ...)
+"""
 
 USSTATES = (
     ('AL', 'Alabama'),
@@ -302,23 +308,51 @@ USSTATES = (
     ('WI', 'Wisconsin'),
     ('WY', 'Wyoming')
 )
+"""Names of US states and their 2-letter codes.
+
+A tuple of tuples: (('AZ', 'Arizona'), ...)
+"""
 
 GENDERS = (
     ('f', 'female'),
     ('m', 'male'),
     ('o', 'other')
 )
+"""Genders and a 1-letter abbreviation.
+
+A tuple of tuples: (('f', 'female'), ...)
+"""
 
 CONTACT_METHODS = (
     (0, 'phone'),
     (1, 'email')
 )
+"""Available methods to contact a client.
 
-# To connect a RadioField with 2 options to a Boolean db column, use:
-# RadioField('label', choices=YESNO, coerce=BOOLIFY)
+A tuple of tuples: ((0, 'phone'), ...)
+"""
+
 YESNO = (
     (0, 'No'),
     (1, 'Yes')
 )
+"""Boolean options of 'Yes' or 'No'.
+
+This can be used to link a :class:`wtforms.fields.RadioField` form field
+to a :class:`sqlalchemy.types.Boolean` database column. Use in conjunction
+with :const:`BOOLIFY`:
+
+`name = RadioField('label', choices=YESNO, coerce=BOOLIFY)`
+"""
 
 BOOLIFY = lambda x: bool(int(x))
+"""Convert a number into a boolean.
+
+A POST request always returns a string. A :class:`sqlalchemy.types.Boolean`
+database column expects a Python :attr:`True` or :attr:`False` value. Use
+:func:`BOOLIFY` to convert the returned string value '0' or '1' into
+:attr:`False` or :attr:`True`, respectively. Use in conjuction with
+:const:`YESNO`:
+
+`name = RadioField('label', choices=YESNO, coerce=BOOLIFY)`
+"""

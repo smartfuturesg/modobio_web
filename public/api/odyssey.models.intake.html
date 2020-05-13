@@ -1,0 +1,811 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>odyssey.models.intake module &mdash; Odyssey 0.0.2 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="odyssey.models.main module" href="odyssey.models.main.html" />
+    <link rel="prev" title="odyssey.models.doctor module" href="odyssey.models.doctor.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Odyssey
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="odyssey.html">odyssey package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="odyssey.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="odyssey.forms.html">odyssey.forms package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="odyssey.models.html">odyssey.models package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="odyssey.models.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="odyssey.views.html">odyssey.views package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Odyssey</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="odyssey.html">odyssey package</a> &raquo;</li>
+        
+          <li><a href="odyssey.models.html">odyssey.models package</a> &raquo;</li>
+        
+      <li>odyssey.models.intake module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api/odyssey.models.intake.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-odyssey.models.intake">
+<span id="odyssey-models-intake-module"></span><h1>odyssey.models.intake module<a class="headerlink" href="#module-odyssey.models.intake" title="Permalink to this headline">¶</a></h1>
+<p>Database tables for the client intake portion of the Modo Bio Staff application.
+All tables in this module are prefixed with ‘Client’.</p>
+<dl class="py class">
+<dt id="odyssey.models.intake.ClientConsent">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.models.intake.</code><code class="sig-name descname">ClientConsent</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.intake.ClientConsent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<p>Client consent form table</p>
+<p>This table stores the signature and related information of the consent form.</p>
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientConsent.clientid">
+<code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.intake.ClientConsent.clientid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client ID number.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="#odyssey.models.intake.ClientInfo.clientid" title="odyssey.models.intake.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientConsent.idx">
+<code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.models.intake.ClientConsent.idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Table index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientConsent.infectious_disease">
+<code class="sig-name descname">infectious_disease</code><a class="headerlink" href="#odyssey.models.intake.ClientConsent.infectious_disease" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates whether or not client ever had an infectious disease.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientConsent.signature">
+<code class="sig-name descname">signature</code><a class="headerlink" href="#odyssey.models.intake.ClientConsent.signature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signature.</p>
+<p>Stored as a base64 encoded png image, prefixed with mime-type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientConsent.signdate">
+<code class="sig-name descname">signdate</code><a class="headerlink" href="#odyssey.models.intake.ClientConsent.signdate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signature date.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.date" title="(in Python v3.8)">datetime.date</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.models.intake.ClientConsultContract">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.models.intake.</code><code class="sig-name descname">ClientConsultContract</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.intake.ClientConsultContract" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<p>Client initial consultation contract table</p>
+<p>This table stores the signature and related information for the
+initial consultation contract.</p>
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientConsultContract.clientid">
+<code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.intake.ClientConsultContract.clientid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client ID number</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="#odyssey.models.intake.ClientInfo.clientid" title="odyssey.models.intake.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientConsultContract.idx">
+<code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.models.intake.ClientConsultContract.idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Table index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientConsultContract.signature">
+<code class="sig-name descname">signature</code><a class="headerlink" href="#odyssey.models.intake.ClientConsultContract.signature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signature.</p>
+<p>Stored as a base64 encoded png image, prefixed with mime-type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientConsultContract.signdate">
+<code class="sig-name descname">signdate</code><a class="headerlink" href="#odyssey.models.intake.ClientConsultContract.signdate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signature date.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.date" title="(in Python v3.8)">datetime.date</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.models.intake.ClientInfo">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.models.intake.</code><code class="sig-name descname">ClientInfo</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.intake.ClientInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<p>Client information table</p>
+<p>This table stores general information of a client. The information is taken
+only once, during the initial consult. The primary index of this table is the
+<a class="reference internal" href="#odyssey.models.intake.ClientInfo.clientid" title="odyssey.models.intake.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">clientid</span></code></a> number. Many other tables in this database refer to the
+<a class="reference internal" href="#odyssey.models.intake.ClientInfo.clientid" title="odyssey.models.intake.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">clientid</span></code></a> number, so a new client <strong>MUST</strong> be added to this table first,
+in order to generate the <a class="reference internal" href="#odyssey.models.intake.ClientInfo.clientid" title="odyssey.models.intake.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">clientid</span></code></a> number.</p>
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientInfo.address">
+<code class="sig-name descname">address</code><a class="headerlink" href="#odyssey.models.intake.ClientInfo.address" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client full address.</p>
+<p>Generate by combining <a class="reference internal" href="#odyssey.models.intake.ClientInfo.street" title="odyssey.models.intake.ClientInfo.street"><code class="xref py py-attr docutils literal notranslate"><span class="pre">street</span></code></a>, <a class="reference internal" href="#odyssey.models.intake.ClientInfo.city" title="odyssey.models.intake.ClientInfo.city"><code class="xref py py-attr docutils literal notranslate"><span class="pre">city</span></code></a>, <a class="reference internal" href="#odyssey.models.intake.ClientInfo.state" title="odyssey.models.intake.ClientInfo.state"><code class="xref py py-attr docutils literal notranslate"><span class="pre">state</span></code></a>,
+<a class="reference internal" href="#odyssey.models.intake.ClientInfo.zipcode" title="odyssey.models.intake.ClientInfo.zipcode"><code class="xref py py-attr docutils literal notranslate"><span class="pre">zipcode</span></code></a>, and <a class="reference internal" href="#odyssey.models.intake.ClientInfo.country" title="odyssey.models.intake.ClientInfo.country"><code class="xref py py-attr docutils literal notranslate"><span class="pre">country</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 120</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientInfo.city">
+<code class="sig-name descname">city</code><a class="headerlink" href="#odyssey.models.intake.ClientInfo.city" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client address city.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 50</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientInfo.clientid">
+<code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.intake.ClientInfo.clientid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client ID number</p>
+<p>The main identifier of a client throughout the Modo Bio system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientInfo.country">
+<code class="sig-name descname">country</code><a class="headerlink" href="#odyssey.models.intake.ClientInfo.country" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client address country.</p>
+<p>Currently defaults to US.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 2</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientInfo.dob">
+<code class="sig-name descname">dob</code><a class="headerlink" href="#odyssey.models.intake.ClientInfo.dob" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client date of birth.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.date" title="(in Python v3.8)">datetime.date</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientInfo.email">
+<code class="sig-name descname">email</code><a class="headerlink" href="#odyssey.models.intake.ClientInfo.email" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client email address.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 50</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientInfo.emergency_contact">
+<code class="sig-name descname">emergency_contact</code><a class="headerlink" href="#odyssey.models.intake.ClientInfo.emergency_contact" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client emergency contact name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 50</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientInfo.emergency_phone">
+<code class="sig-name descname">emergency_phone</code><a class="headerlink" href="#odyssey.models.intake.ClientInfo.emergency_phone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client emergency contact phone number.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 20</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientInfo.firstname">
+<code class="sig-name descname">firstname</code><a class="headerlink" href="#odyssey.models.intake.ClientInfo.firstname" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client first name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 50</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientInfo.fullname">
+<code class="sig-name descname">fullname</code><a class="headerlink" href="#odyssey.models.intake.ClientInfo.fullname" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client full name.</p>
+<p>Create this field by combining <a class="reference internal" href="#odyssey.models.intake.ClientInfo.firstname" title="odyssey.models.intake.ClientInfo.firstname"><code class="xref py py-attr docutils literal notranslate"><span class="pre">firstname</span></code></a> + ‘ ‘ + <a class="reference internal" href="#odyssey.models.intake.ClientInfo.lastname" title="odyssey.models.intake.ClientInfo.lastname"><code class="xref py py-attr docutils literal notranslate"><span class="pre">lastname</span></code></a>.
+The full name is used for displaying and addressing the client.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 100</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientInfo.gender">
+<code class="sig-name descname">gender</code><a class="headerlink" href="#odyssey.models.intake.ClientInfo.gender" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client gender.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 1</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientInfo.guardianname">
+<code class="sig-name descname">guardianname</code><a class="headerlink" href="#odyssey.models.intake.ClientInfo.guardianname" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of client’s parent or guardian, if applicable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 50</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientInfo.guardianrole">
+<code class="sig-name descname">guardianrole</code><a class="headerlink" href="#odyssey.models.intake.ClientInfo.guardianrole" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parent or guardian’s role to the client.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 50</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientInfo.healthcare_contact">
+<code class="sig-name descname">healthcare_contact</code><a class="headerlink" href="#odyssey.models.intake.ClientInfo.healthcare_contact" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client primary healthcare provider name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 50</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientInfo.healthcare_phone">
+<code class="sig-name descname">healthcare_phone</code><a class="headerlink" href="#odyssey.models.intake.ClientInfo.healthcare_phone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client primary health care provider phone number.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 20</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientInfo.lastname">
+<code class="sig-name descname">lastname</code><a class="headerlink" href="#odyssey.models.intake.ClientInfo.lastname" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client last name or family name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 50</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientInfo.middlename">
+<code class="sig-name descname">middlename</code><a class="headerlink" href="#odyssey.models.intake.ClientInfo.middlename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client middle name(s).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 50</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientInfo.phone">
+<code class="sig-name descname">phone</code><a class="headerlink" href="#odyssey.models.intake.ClientInfo.phone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client phone number.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 20</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientInfo.preferred">
+<code class="sig-name descname">preferred</code><a class="headerlink" href="#odyssey.models.intake.ClientInfo.preferred" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client preferred contact method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a>, smallint, signed int16</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientInfo.receive_docs">
+<code class="sig-name descname">receive_docs</code><a class="headerlink" href="#odyssey.models.intake.ClientInfo.receive_docs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates whether or not client wants to receive a copy of the signed documents.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientInfo.ringsize">
+<code class="sig-name descname">ringsize</code><a class="headerlink" href="#odyssey.models.intake.ClientInfo.ringsize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client ring size.</p>
+<p>Used for ordering an Oura Ring.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientInfo.state">
+<code class="sig-name descname">state</code><a class="headerlink" href="#odyssey.models.intake.ClientInfo.state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client address state.</p>
+<p>Currently only US States. Defaults to AZ.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 2</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientInfo.street">
+<code class="sig-name descname">street</code><a class="headerlink" href="#odyssey.models.intake.ClientInfo.street" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client street address.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 50</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientInfo.zipcode">
+<code class="sig-name descname">zipcode</code><a class="headerlink" href="#odyssey.models.intake.ClientInfo.zipcode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client address zip code.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 10</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.models.intake.ClientRelease">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.models.intake.</code><code class="sig-name descname">ClientRelease</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.intake.ClientRelease" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<p>Client release of information table</p>
+<p>This table stores the signature and related information of the
+release of information form.</p>
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientRelease.clientid">
+<code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.intake.ClientRelease.clientid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client ID number</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="#odyssey.models.intake.ClientInfo.clientid" title="odyssey.models.intake.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientRelease.idx">
+<code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.models.intake.ClientRelease.idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Table index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientRelease.release_by_other">
+<code class="sig-name descname">release_by_other</code><a class="headerlink" href="#odyssey.models.intake.ClientRelease.release_by_other" title="Permalink to this definition">¶</a></dt>
+<dd><p>Describes who else can release protected health information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 1024</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientRelease.release_date_from">
+<code class="sig-name descname">release_date_from</code><a class="headerlink" href="#odyssey.models.intake.ClientRelease.release_date_from" title="Permalink to this definition">¶</a></dt>
+<dd><p>Limits the release of protected health information to from this date.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.date" title="(in Python v3.8)">datetime.date</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientRelease.release_date_to">
+<code class="sig-name descname">release_date_to</code><a class="headerlink" href="#odyssey.models.intake.ClientRelease.release_date_to" title="Permalink to this definition">¶</a></dt>
+<dd><p>Limits the release of protected health information to until this date.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.date" title="(in Python v3.8)">datetime.date</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientRelease.release_of_all">
+<code class="sig-name descname">release_of_all</code><a class="headerlink" href="#odyssey.models.intake.ClientRelease.release_of_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates whether or not client want to allow to release all protected health information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientRelease.release_of_other">
+<code class="sig-name descname">release_of_other</code><a class="headerlink" href="#odyssey.models.intake.ClientRelease.release_of_other" title="Permalink to this definition">¶</a></dt>
+<dd><p>Describes what other protected health information can be released.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 1024</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientRelease.release_purpose">
+<code class="sig-name descname">release_purpose</code><a class="headerlink" href="#odyssey.models.intake.ClientRelease.release_purpose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Describes for what purpose protected health information can be released.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 1024</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientRelease.release_to_other">
+<code class="sig-name descname">release_to_other</code><a class="headerlink" href="#odyssey.models.intake.ClientRelease.release_to_other" title="Permalink to this definition">¶</a></dt>
+<dd><p>Describes to whom else protected health information can be released.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 1024</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientRelease.signature">
+<code class="sig-name descname">signature</code><a class="headerlink" href="#odyssey.models.intake.ClientRelease.signature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signature.</p>
+<p>Stored as a base64 encoded png image, prefixed with mime-type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientRelease.signdate">
+<code class="sig-name descname">signdate</code><a class="headerlink" href="#odyssey.models.intake.ClientRelease.signdate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signature date.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.date" title="(in Python v3.8)">datetime.date</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.models.intake.ClientSubscriptionContract">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.models.intake.</code><code class="sig-name descname">ClientSubscriptionContract</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.intake.ClientSubscriptionContract" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<p>Client subscription contract table</p>
+<p>This table stores the signature and related information for the
+subscription contract.</p>
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientSubscriptionContract.clientid">
+<code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.intake.ClientSubscriptionContract.clientid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client ID number</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="#odyssey.models.intake.ClientInfo.clientid" title="odyssey.models.intake.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientSubscriptionContract.idx">
+<code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.models.intake.ClientSubscriptionContract.idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Table index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientSubscriptionContract.signature">
+<code class="sig-name descname">signature</code><a class="headerlink" href="#odyssey.models.intake.ClientSubscriptionContract.signature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signature.</p>
+<p>Stored as a base64 encoded png image, prefixed with mime-type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientSubscriptionContract.signdate">
+<code class="sig-name descname">signdate</code><a class="headerlink" href="#odyssey.models.intake.ClientSubscriptionContract.signdate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signature date.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.date" title="(in Python v3.8)">datetime.date</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="odyssey.models.main.html" class="btn btn-neutral float-right" title="odyssey.models.main module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="odyssey.models.doctor.html" class="btn btn-neutral float-left" title="odyssey.models.doctor module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright Copyright 2019-2020 Atlantic Venture Partners, all rights reserved
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,729 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>odyssey.models.pt module &mdash; Odyssey 0.0.2 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="odyssey.views package" href="odyssey.views.html" />
+    <link rel="prev" title="odyssey.models.main module" href="odyssey.models.main.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Odyssey
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="odyssey.html">odyssey package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="odyssey.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="odyssey.forms.html">odyssey.forms package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="odyssey.models.html">odyssey.models package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="odyssey.models.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="odyssey.views.html">odyssey.views package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Odyssey</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="odyssey.html">odyssey package</a> &raquo;</li>
+        
+          <li><a href="odyssey.models.html">odyssey.models package</a> &raquo;</li>
+        
+      <li>odyssey.models.pt module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api/odyssey.models.pt.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-odyssey.models.pt">
+<span id="odyssey-models-pt-module"></span><h1>odyssey.models.pt module<a class="headerlink" href="#module-odyssey.models.pt" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="odyssey.models.pt.MobilityAssessment">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.models.pt.</code><code class="sig-name descname">MobilityAssessment</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<p>Mobility assessment table</p>
+<p>This table stores the repeated mobility assessment measurements. The measurements
+are indexed by <a class="reference internal" href="#odyssey.models.pt.MobilityAssessment.clientid" title="odyssey.models.pt.MobilityAssessment.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">clientid</span></code></a> and assessment <a class="reference internal" href="#odyssey.models.pt.MobilityAssessment.timestamp" title="odyssey.models.pt.MobilityAssessment.timestamp"><code class="xref py py-attr docutils literal notranslate"><span class="pre">timestamp</span></code></a>. All values in
+this table, with the exception of <a class="reference internal" href="#odyssey.models.pt.MobilityAssessment.isa_dynamic" title="odyssey.models.pt.MobilityAssessment.isa_dynamic"><code class="xref py py-attr docutils literal notranslate"><span class="pre">isa_dynamic</span></code></a>, are angles in degrees.</p>
+<dl class="py attribute">
+<dt id="odyssey.models.pt.MobilityAssessment.clientid">
+<code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.clientid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client ID number</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int, foreign key to <code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.MobilityAssessment.isa_dynamic">
+<code class="sig-name descname">isa_dynamic</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.isa_dynamic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates whether or not the ISA is dynamic.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.MobilityAssessment.isa_left">
+<code class="sig-name descname">isa_left</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.isa_left" title="Permalink to this definition">¶</a></dt>
+<dd><p>ISA? left</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.MobilityAssessment.isa_right">
+<code class="sig-name descname">isa_right</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.isa_right" title="Permalink to this definition">¶</a></dt>
+<dd><p>ISA? left</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.MobilityAssessment.left_hip_abd">
+<code class="sig-name descname">left_hip_abd</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.left_hip_abd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Left hip abduction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.MobilityAssessment.left_hip_add">
+<code class="sig-name descname">left_hip_add</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.left_hip_add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Left hip adduction</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.MobilityAssessment.left_hip_er">
+<code class="sig-name descname">left_hip_er</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.left_hip_er" title="Permalink to this definition">¶</a></dt>
+<dd><p>Left hip external rotation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.MobilityAssessment.left_hip_extension">
+<code class="sig-name descname">left_hip_extension</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.left_hip_extension" title="Permalink to this definition">¶</a></dt>
+<dd><p>Left hip extension.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.MobilityAssessment.left_hip_flexion">
+<code class="sig-name descname">left_hip_flexion</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.left_hip_flexion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Left hip flexion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.MobilityAssessment.left_hip_ir">
+<code class="sig-name descname">left_hip_ir</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.left_hip_ir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Left hip internal rotation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.MobilityAssessment.left_shoulder_abd">
+<code class="sig-name descname">left_shoulder_abd</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.left_shoulder_abd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Left shoulder abduction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.MobilityAssessment.left_shoulder_add">
+<code class="sig-name descname">left_shoulder_add</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.left_shoulder_add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Left shoulder adduction</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.MobilityAssessment.left_shoulder_er">
+<code class="sig-name descname">left_shoulder_er</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.left_shoulder_er" title="Permalink to this definition">¶</a></dt>
+<dd><p>Left shoulder external rotation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.MobilityAssessment.left_shoulder_extension">
+<code class="sig-name descname">left_shoulder_extension</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.left_shoulder_extension" title="Permalink to this definition">¶</a></dt>
+<dd><p>Left shoulder extension.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.MobilityAssessment.left_shoulder_flexion">
+<code class="sig-name descname">left_shoulder_flexion</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.left_shoulder_flexion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Left shoulder flexion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.MobilityAssessment.left_shoulder_ir">
+<code class="sig-name descname">left_shoulder_ir</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.left_shoulder_ir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Left shoulder internal rotation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.MobilityAssessment.right_hip_abd">
+<code class="sig-name descname">right_hip_abd</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.right_hip_abd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Right hip abduction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.MobilityAssessment.right_hip_add">
+<code class="sig-name descname">right_hip_add</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.right_hip_add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Right hip adduction</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.MobilityAssessment.right_hip_er">
+<code class="sig-name descname">right_hip_er</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.right_hip_er" title="Permalink to this definition">¶</a></dt>
+<dd><p>Right hip external rotation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.MobilityAssessment.right_hip_extension">
+<code class="sig-name descname">right_hip_extension</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.right_hip_extension" title="Permalink to this definition">¶</a></dt>
+<dd><p>Right hip extension.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.MobilityAssessment.right_hip_flexion">
+<code class="sig-name descname">right_hip_flexion</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.right_hip_flexion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Right hip flexion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.MobilityAssessment.right_hip_ir">
+<code class="sig-name descname">right_hip_ir</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.right_hip_ir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Right hip internal rotation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.MobilityAssessment.right_shoulder_abd">
+<code class="sig-name descname">right_shoulder_abd</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.right_shoulder_abd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Right shoulder abduction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.MobilityAssessment.right_shoulder_add">
+<code class="sig-name descname">right_shoulder_add</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.right_shoulder_add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Right shoulder adduction</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.MobilityAssessment.right_shoulder_er">
+<code class="sig-name descname">right_shoulder_er</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.right_shoulder_er" title="Permalink to this definition">¶</a></dt>
+<dd><p>Right shoulder external rotation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.MobilityAssessment.right_shoulder_extension">
+<code class="sig-name descname">right_shoulder_extension</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.right_shoulder_extension" title="Permalink to this definition">¶</a></dt>
+<dd><p>Right shoulder extension.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.MobilityAssessment.right_shoulder_flexion">
+<code class="sig-name descname">right_shoulder_flexion</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.right_shoulder_flexion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Right shoulder flexion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.MobilityAssessment.right_shoulder_ir">
+<code class="sig-name descname">right_shoulder_ir</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.right_shoulder_ir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Right shoulder internal rotation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.MobilityAssessment.timestamp">
+<code class="sig-name descname">timestamp</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.timestamp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Timestamp of the assessment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.8)">datetime.datetime</a>, primary key</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.models.pt.PTHistory">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.models.pt.</code><code class="sig-name descname">PTHistory</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.pt.PTHistory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<p>Physical therapy history table</p>
+<p>This table stores the physical therapy history of a client. The information
+is taken only once, during the initial consult.</p>
+<dl class="py attribute">
+<dt id="odyssey.models.pt.PTHistory.best_pain">
+<code class="sig-name descname">best_pain</code><a class="headerlink" href="#odyssey.models.pt.PTHistory.best_pain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Numerical score of client’s best pain level.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.PTHistory.clientid">
+<code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.pt.PTHistory.clientid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client ID number</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int, foreign key to <code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.PTHistory.current_pain">
+<code class="sig-name descname">current_pain</code><a class="headerlink" href="#odyssey.models.pt.PTHistory.current_pain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Numerical score of client’s current pain level.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.PTHistory.exercise">
+<code class="sig-name descname">exercise</code><a class="headerlink" href="#odyssey.models.pt.PTHistory.exercise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description of the client’s current exercise schedule.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.PTHistory.has_acupuncture">
+<code class="sig-name descname">has_acupuncture</code><a class="headerlink" href="#odyssey.models.pt.PTHistory.has_acupuncture" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates whether or not client has had acupuncture in the past.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.PTHistory.has_chiro">
+<code class="sig-name descname">has_chiro</code><a class="headerlink" href="#odyssey.models.pt.PTHistory.has_chiro" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates whether or not client has had chiropractor therapy in the past.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.PTHistory.has_massage">
+<code class="sig-name descname">has_massage</code><a class="headerlink" href="#odyssey.models.pt.PTHistory.has_massage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates whether or not client has had massage therapy in the past.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.PTHistory.has_medication">
+<code class="sig-name descname">has_medication</code><a class="headerlink" href="#odyssey.models.pt.PTHistory.has_medication" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates whether or not client uses any type of medication.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.PTHistory.has_pt">
+<code class="sig-name descname">has_pt</code><a class="headerlink" href="#odyssey.models.pt.PTHistory.has_pt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates whether or not client has had physical therapy in the past.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.PTHistory.has_surgery">
+<code class="sig-name descname">has_surgery</code><a class="headerlink" href="#odyssey.models.pt.PTHistory.has_surgery" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates whether or not client has had surgery in the past.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.PTHistory.idx">
+<code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.models.pt.PTHistory.idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Table index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.PTHistory.makes_better">
+<code class="sig-name descname">makes_better</code><a class="headerlink" href="#odyssey.models.pt.PTHistory.makes_better" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description of factors that make client’s pain better.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 1024</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.PTHistory.makes_worse">
+<code class="sig-name descname">makes_worse</code><a class="headerlink" href="#odyssey.models.pt.PTHistory.makes_worse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description of factors that make client’s pain worse.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 1024</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.PTHistory.pain_areas">
+<code class="sig-name descname">pain_areas</code><a class="headerlink" href="#odyssey.models.pt.PTHistory.pain_areas" title="Permalink to this definition">¶</a></dt>
+<dd><p>Describes pain areas in the client’s body.</p>
+<p>The client or staff member indicates pain areas by drawing on the silhouette
+of a human (front and back) and circling the pain areas. The drawings are
+translated to bezier curves in canvas coordinates, which are stored as a
+JSON dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.PTHistory.worst_pain">
+<code class="sig-name descname">worst_pain</code><a class="headerlink" href="#odyssey.models.pt.PTHistory.worst_pain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Numerical score of client’s worst pain level.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="odyssey.views.html" class="btn btn-neutral float-right" title="odyssey.views package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="odyssey.models.main.html" class="btn btn-neutral float-left" title="odyssey.models.main module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright Copyright 2019-2020 Atlantic Venture Partners, all rights reserved
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

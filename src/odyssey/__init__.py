@@ -1,8 +1,15 @@
+""" Odyssey
+
+*Staff application for the client journey*
+
+This is a `Flask <https://flask.palletsprojects.com>`_ based app that serves webpages to the `ModoBio <https://modobio.com>`_ staff. The pages contain the intake and data gathering forms for the *client journey*. The `Odyssey <https://en.wikipedia.org/wiki/Odyssey>`_ is of course the most famous journey of all time! 🤓
+"""
+
 import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 
 app = Flask(__name__)
 app.secret_key = 'dev'
