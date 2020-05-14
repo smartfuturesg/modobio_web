@@ -105,7 +105,7 @@ class MedicalHistory(db.Model):
     surgery_bladder = db.Column(db.String(1024))
     surgery_csection = db.Column(db.String(1024))
     surgery_hernia = db.Column(db.String(1024))
-    surgery_galbladder = db.Column(db.String(1024))
+    surgery_gallbladder = db.Column(db.String(1024))
     surgery_orthopedic = db.Column(db.String(1024))
     surgery_back = db.Column(db.String(1024))
     surgery_plastic = db.Column(db.String(1024))

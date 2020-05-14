@@ -110,7 +110,7 @@ class MedicalHistorySurgeryForm(FlaskForm):
     bladder = StringField('Bladder surgery')
     csection = StringField('C-section')
     hernia = StringField('Hernia surgery')
-    galbladder = StringField('Gal bladder surgery')
+    gallbladder = StringField('Gallbladder surgery')
     orthopedic = StringField('Orthopedic surgery')
     back = StringField('Back or neck surgery')
     plastic = StringField('Plastic surgery')
