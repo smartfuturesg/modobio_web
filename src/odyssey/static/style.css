@@ -86,9 +86,20 @@ header.main h1 {
     font-size: 150%;
 }
 
+header.main div.client {
+    display: flex;
+    flex-direction: column;
+    padding-right: 1em;
+}
+
 header.main span.client {
     font-weight: bold;
-    padding-right: 1em;
+}
+
+header.main span.clientid {
+    display: flex;
+    justify-content: flex-end;
+    font-size: 70%;
 }
 
 header.main span.noclient {
