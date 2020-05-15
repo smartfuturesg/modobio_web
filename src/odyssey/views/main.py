@@ -22,7 +22,8 @@ def index():
 @bp.route('/login', methods=('GET', 'POST'))
 def login():
     if request.method == 'POST':
-        staff = Staff.query.filter_by(email=request.form['email']).one_or_none()
+        email = request.form['email'].lower()
+        staff = Staff.query.filter_by(email=email).one_or_none()
 
         if staff and check_password_hash(staff.password, request.form['password']):
             session.clear()
