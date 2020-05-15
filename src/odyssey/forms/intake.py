@@ -78,3 +78,10 @@ class ClientReleaseForm(ClientSignForm):
 
 class ClientReceiveForm(FlaskForm):
     receive_docs = BooleanField(default='checked')
+
+
+class ClientIndividualContractForm(ClientSignForm):
+    doctor = BooleanField()
+    pt = BooleanField()
+    data = BooleanField()
+    drinks = BooleanField()

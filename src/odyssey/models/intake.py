@@ -334,6 +334,17 @@ class ClientRelease(db.Model):
     """
 
 
+class ClientPolicies(db.Model):
+
+    __tablename__ = 'ClientPolicies'
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid'), nullable=False)
+
+    signdate = db.Column(db.Date)
+    signature = db.Column(db.Text)
+
+
 class ClientConsultContract(db.Model):
     """ Client initial consultation contract table
 
@@ -395,6 +406,69 @@ class ClientSubscriptionContract(db.Model):
     Client ID number
 
     :type: int, foreign key to :attr:`ClientInfo.clientid`
+    """
+
+    signdate = db.Column(db.Date)
+    """
+    Signature date.
+
+    :type: datetime.date
+    """
+
+    signature = db.Column(db.Text)
+    """
+    Signature.
+
+    Stored as a base64 encoded png image, prefixed with mime-type.
+
+    :type: str
+    """
+
+
+class ClientIndividualContract(db.Model):
+
+    __tablename__ = 'ClientIndividualContract'
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
+
+    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid'), nullable=False)
+    """
+    Client ID number
+
+    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    """
+
+    doctor = db.Column(db.Boolean, default=False)
+    """
+    Indicates whether or not client wants to buy a doctor's appointment.
+
+    :type: bool
+    """
+
+    pt = db.Column(db.Boolean, default=False)
+    """
+    Indicates whether or not client wants to buy a physical therapy session.
+
+    :type: bool
+    """
+
+    data = db.Column(db.Boolean, default=False)
+    """
+    Indicates whether or not client wants to buy a data tracking and analysis package.
+
+    :type: bool
+    """
+
+    drinks = db.Column(db.Boolean, default=False)
+    """
+    Indicates whether or not client wants to buy nutritional supplements.
+
+    :type: bool
     """
 
     signdate = db.Column(db.Date)

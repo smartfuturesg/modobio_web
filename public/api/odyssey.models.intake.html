@@ -289,6 +289,101 @@ initial consultation contract.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt id="odyssey.models.intake.ClientIndividualContract">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.models.intake.</code><code class="sig-name descname">ClientIndividualContract</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.intake.ClientIndividualContract" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientIndividualContract.clientid">
+<code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.intake.ClientIndividualContract.clientid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client ID number</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="#odyssey.models.intake.ClientInfo.clientid" title="odyssey.models.intake.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientIndividualContract.data">
+<code class="sig-name descname">data</code><a class="headerlink" href="#odyssey.models.intake.ClientIndividualContract.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates whether or not client wants to buy a data tracking and analysis package.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientIndividualContract.doctor">
+<code class="sig-name descname">doctor</code><a class="headerlink" href="#odyssey.models.intake.ClientIndividualContract.doctor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates whether or not client wants to buy a doctor’s appointment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientIndividualContract.drinks">
+<code class="sig-name descname">drinks</code><a class="headerlink" href="#odyssey.models.intake.ClientIndividualContract.drinks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates whether or not client wants to buy nutritional supplements.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientIndividualContract.idx">
+<code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.models.intake.ClientIndividualContract.idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Table index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientIndividualContract.pt">
+<code class="sig-name descname">pt</code><a class="headerlink" href="#odyssey.models.intake.ClientIndividualContract.pt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates whether or not client wants to buy a physical therapy session.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientIndividualContract.signature">
+<code class="sig-name descname">signature</code><a class="headerlink" href="#odyssey.models.intake.ClientIndividualContract.signature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signature.</p>
+<p>Stored as a base64 encoded png image, prefixed with mime-type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientIndividualContract.signdate">
+<code class="sig-name descname">signdate</code><a class="headerlink" href="#odyssey.models.intake.ClientIndividualContract.signdate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signature date.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.date" title="(in Python v3.8)">datetime.date</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt id="odyssey.models.intake.ClientInfo">
 <em class="property">class </em><code class="sig-prename descclassname">odyssey.models.intake.</code><code class="sig-name descname">ClientInfo</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.intake.ClientInfo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
@@ -569,6 +664,32 @@ The full name is used for displaying and addressing the client.</p>
 </dd>
 </dl>
 </dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.models.intake.ClientPolicies">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.models.intake.</code><code class="sig-name descname">ClientPolicies</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.intake.ClientPolicies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientPolicies.clientid">
+<code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.intake.ClientPolicies.clientid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientPolicies.idx">
+<code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.models.intake.ClientPolicies.idx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientPolicies.signature">
+<code class="sig-name descname">signature</code><a class="headerlink" href="#odyssey.models.intake.ClientPolicies.signature" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.intake.ClientPolicies.signdate">
+<code class="sig-name descname">signdate</code><a class="headerlink" href="#odyssey.models.intake.ClientPolicies.signdate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
