@@ -43,6 +43,7 @@ class ClientInfoForm(FlaskForm):
     s7 = HiddenField(id='spacer')
     gender = SelectField('Gender', choices=GENDERS)
     dob = DateField('Date of birth')
+    profession = StringField('Profession or occupation')
 
 
 class ClientSignForm(FlaskForm):

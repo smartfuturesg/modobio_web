@@ -191,6 +191,13 @@ class ClientInfo(db.Model):
     :type: datetime.date
     """
 
+    profession = db.Column(db.String(100))
+    """
+    Client profession.
+
+    :type: str, max length 100
+    """
+
     receive_docs = db.Column(db.Boolean)
     """
     Indicates whether or not client wants to receive a copy of the signed documents.
