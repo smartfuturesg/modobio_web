@@ -19,7 +19,7 @@ menu = (
     )},
     {'title': 'Doctor', 'submenu': (
         {'title': 'Medical history', 'url': 'doctor.history'},
-        # {'title': 'Consult', 'url': ''}
+        {'title': 'Physical exam', 'url': 'doctor.physical'}
     )},
     {'title': 'Physical therapist', 'submenu': (
         {'title': 'Therapy history', 'url': 'pt.history'},
