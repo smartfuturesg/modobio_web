@@ -51,8 +51,9 @@
     </div>
 
     <h1>Diagnostic history</h1>
-    {% for element in (form.xray, form.ctscan, form.endoscopy, 
-                        form.mri, form.ultrasound, form.other) %}
+    {% for element in (form.diagnostic_xray, form.diagnostic_ctscan,
+                       form.diagnostic_endoscopy, form.diagnostic_mri,
+                       form.diagnostic_ultrasound, form.diagnostic_other) %}
     {{ macros.expandbox(element) }}
     {% endfor %}
     <div class="row">&nbsp;</div>
