@@ -49,23 +49,11 @@
         <span class="label">{{ form.medication.label }}</span>
         <span class="field">{{ form.medication() }}</span>
     </div>
-    <p>In the sections below, please indicate which medical issues or diagnostic tests you have had in the past, or are currently experiencing.</p>
-    {% for subform in (form.diagnostic, form.general, form.blood, form.digestive, form.skeletal, form.immune, form.surgery, form.uro, form.respiratory, form.neuro, form.trauma, form.nutrition) %}
-        <h1>{{ subform.title }}</h1>
-        <div class="multicol">
-        {% for element in subform %}
-            {% if element.type == 'StringField' %}
-            <div class="expandformrow">
-                <input class="expandform" type="checkbox" id="{{ element.name }}"
-                    {% if element.data %}checked{% endif %}>
-                <label class="expandform" for="{{ element.name }}">{{ element.label }}</label>
-                <div class="expandform">
-                    {{ element() }}
-                </div>
-            </div>
-            {% endif %}
-        {% endfor %}
-        </div>
+
+    <h1>Diagnostic history</h1>
+    {% for element in (form.xray, form.ctscan, form.endoscopy, 
+                        form.mri, form.ultrasound, form.other) %}
+    {{ macros.expandbox(element) }}
     {% endfor %}
     <div class="row">&nbsp;</div>
     <div class="row center"><button type="submit">Next</button></div>

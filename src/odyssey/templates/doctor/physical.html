@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}Medical history{% endblock %}
+{% block content %}
+<form class="input" method="POST" action="{{ url_for('doctor.physical') }}">
+    <h1>Vitals</h1>
+    {% for element in (form.vital_heartrate, form.vital_respiratoryrate, form.vital_systolic,
+                       form.vital_diastolic, form.vital_temperature) %}
+    <div class="row">
+        <span class="label">{{ element.label }}</span>
+        <span class="field">{{ element() }}</span>
+    </div>
+    {% endfor %}
+    <h1>Cardiac</h1>
+    {% for element in (form.cardiac_rrr, form.cardiac_s1s2, form.cardiac_murmurs,
+                       form.cardiac_rubs, form.cardiac_gallops) %}
+    <div class="row">
+        <span class="radiofield">{{ element() }}</span>
+        <span class="radiolabel">{{ element.label }}</span>
+    </div>
+    {% if element == form.cardiac_murmurs %}
+    <div class="row">
+        <span class="radiofield"></span>
+        <span class="radiolabel">{{ form.cardiac_murmurs_info }}</span>
+    </div>
+    {% endif %}
+    {% endfor %}
+    <h1>Pulmonary</h1>
+    {% for element in (form.pulmonary_clear, form.pulmonary_wheezing, 
+                       form.pulmonary_rales, form.pulmonary_rhonchi) %}
+    <div class="row">
+        <span class="radiofield">{{ element() }}</span>
+        <span class="radiolabel">{{ element.label }}</span>
+    </div>
+    {% if element == form.pulmonary_wheezing %}
+    <div class="row">
+        <span class="radiofield"></span>
+        <span class="radiolabel">{{ form.pulmonary_wheezing_info }}</span>
+    </div>
+    {% endif %}
+    {% endfor %}
+    <h1>Abdominal</h1>
+    {% for element in (form.abdominal_soft, form.abdominal_hard,
+                       form.abdominal_bowel, form.abdominal_hsm) %}
+    <div class="row">
+        <span class="radiofield">{{ element() }}</span>
+        <span class="radiolabel">{{ element.label }}</span>
+    </div>
+    {% if element == form.abdominal_hsm %}
+    <div class="row">
+        <span class="radiofield"></span>
+        <span class="radiolabel">{{ form.abdominal_hsm_info }}</span>
+    </div>
+    {% endif %}
+    {% endfor %}
+    <h1>General notes</h1>
+    <div class="row">
+        <span class="radiofield"></span>
+        <span class="radiolabel">{{ form.notes() }}</span>
+    </div>
+    <div class="row">&nbsp;</div>
+    <div class="row center"><button type="submit">Save</button></div>
+</form>
+{% endblock %}

@@ -107,6 +107,26 @@
     {% endif %}
 {% endmacro %}
 
+{# An expanding checkbox
+    Generates a checkbox with a label that, when checked, expands a textbox
+    for further information.
+
+    If the checkbox is checked, but nothing is entered in the textbox, then
+    nothing is stored. The checked state of the checkbox itself is not stored.
+
+    element: StringField
+#}
+{% macro expandbox(element) %}
+    <div class="expandformrow">
+        <input class="expandform" type="checkbox" id="{{ element.name }}"
+            {% if element.data %}checked{% endif %}>
+        <label class="expandform" for="{{ element.name }}">{{ element.label }}</label>
+        <div class="expandform">
+            {{ element() }}
+        </div>
+    </div>
+{% endmacro %}
+
 {# A canvas with a signature pad.
     If pdf=True, returns <img class="sigpad"> with the PNG contents of the signature.
 
