@@ -50,6 +50,11 @@ def history():
 
     form = dict(request.form)
 
+    # Error if date = ""
+    # TODO: this should be fixed with better input validation
+    if not form['last_examination_date']:
+        form['last_examination_date'] = None
+
     if md:
         md.update(form)
     else:
