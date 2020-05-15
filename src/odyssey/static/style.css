@@ -38,6 +38,7 @@
 * {
     box-sizing: border-box;
     font-family: opensans;
+    font-size: 16pt;
 }
 
 html { 
@@ -47,7 +48,7 @@ html {
 
 body {
     background-color: var(--mbbackground);
-    max-width: 960px;
+    max-width: 1200px;
     margin: 0 auto;
 }
 
@@ -82,6 +83,7 @@ header.main h1 {
     flex-grow: 2;
     padding: 1rem 0 1rem 2rem;
     overflow: hidden;
+    font-size: 150%;
 }
 
 header.main span.client {
@@ -97,6 +99,7 @@ header.main span.noclient {
 header.login button,
 header.main button {
     background-color: white;
+    font-size: 70%;
 }
 
 /* Navigation menu */
@@ -187,6 +190,7 @@ h1 {
     color: var(--mbblue);
     margin: 0;
     padding: 1rem 0;
+    font-size: 125%;
 }
 
 a {
@@ -288,7 +292,6 @@ input[type=submit], button {
     border-radius: 2.5px;
     min-width: 8em;
     width: initial;
-    margin-right: 2em;
 }
 
 /* Warnings */
