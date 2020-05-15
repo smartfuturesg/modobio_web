@@ -14,7 +14,7 @@
 {% if session.get('staffid') %}
     <header class="login">
         <span>{{ session.get('staffname') }}</span>
-        <form id="loghout" action="{{ url_for('main.logout') }}"></form>
+        <form id="logout" action="{{ url_for('main.logout') }}"></form>
         <button type="submit" form="logout">Log out</button>
     </header>
 {% endif %}
