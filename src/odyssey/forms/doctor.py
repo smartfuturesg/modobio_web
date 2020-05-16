@@ -33,6 +33,8 @@ class MedicalPhysicalExamForm(FlaskForm):
     vital_systolic = IntegerField('Systolic blood pressure')
     vital_diastolic = IntegerField('Diastolic blood pressure')
     vital_temperature = FloatField('Temperature')
+    vital_weight = FloatField('Weight')
+    vital_height = StringField('Height (type as string)')
 
     cardiac_rrr = BooleanField('RRR')
     cardiac_s1s2 = BooleanField('S1S2')

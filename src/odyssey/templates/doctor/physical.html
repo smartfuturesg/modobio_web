@@ -1,10 +1,11 @@
 {% extends 'base.html' %}
-{% block title %}Medical history{% endblock %}
+{% block title %}Physical exam{% endblock %}
 {% block content %}
 <form class="input" method="POST" action="{{ url_for('doctor.physical') }}">
     <h1>Vitals</h1>
-    {% for element in (form.vital_heartrate, form.vital_respiratoryrate, form.vital_systolic,
-                       form.vital_diastolic, form.vital_temperature) %}
+    {% for element in (form.vital_heartrate, form.vital_respiratoryrate,
+                       form.vital_systolic, form.vital_diastolic, form.vital_temperature,
+                       form.vital_weight, form.vital_height) %}
     <div class="row">
         <span class="label">{{ element.label }}</span>
         <span class="field">{{ element() }}</span>
