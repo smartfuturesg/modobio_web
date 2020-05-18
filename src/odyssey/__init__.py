@@ -6,14 +6,35 @@ This is a `Flask <https://flask.palletsprojects.com>`_ based app that serves web
 """
 
 import os
+import boto3
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
-__version__ = '0.0.2'
+__version__ = '0.0.3'
 
 app = Flask(__name__)
-app.secret_key = 'dev'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://localhost/modobio'
+
+if os.getenv('FLASK_ENV') == 'development':
+    app.secret_key = 'dev'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://localhost/modobio'
+else:
+    ssm = boto3.client('ssm')
+    param = ssm.get_parameter(Name='/modobio/odyssey/db_flav')
+    db_flav = param['Parameter']['Value']
+    param = ssm.get_parameter(Name='/modobio/odyssey/db_user')
+    db_user = param['Parameter']['Value']
+    param = ssm.get_parameter(Name='/modobio/odyssey/db_pass', WithDecryption=True)
+    db_pass = param['Parameter']['Value']
+    param = ssm.get_parameter(Name='/modobio/odyssey/db_host')
+    db_host = param['Parameter']['Value']
+    param = ssm.get_parameter(Name='/modobio/odyssey/db_name')
+    db_name = param['Parameter']['Value']
+
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'{db_flav}://{db_user}:{db_pass}@{db_host}/{db_name}'
+
+    param = ssm.get_parameter(Name='/modobio/odyssey/app_secret')
+    app.secret_key = param['Parameter']['Value']
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
