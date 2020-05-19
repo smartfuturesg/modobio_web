@@ -1,6 +1,7 @@
+boto3
 Flask
-Flask_WTF
-WTForms
-Flask_WeasyPrint
-Werkzeug
 Flask_SQLAlchemy
+Flask_WTF
+Flask_WeasyPrint
+WTForms
+Werkzeug
