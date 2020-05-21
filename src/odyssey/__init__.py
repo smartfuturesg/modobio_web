@@ -32,7 +32,7 @@ else:
 
     app.config['SQLALCHEMY_DATABASE_URI'] = f'{db_flav}://{db_user}:{db_pass}@{db_host}/{db_name}'
 
-    param = ssm.get_parameter(Name='/modobio/odyssey/app_secret')
+    param = ssm.get_parameter(Name='/modobio/odyssey/app_secret', WithDecryption=True)
     app.secret_key = param['Parameter']['Value']
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
