@@ -35,6 +35,8 @@ else:
     if os.getenv('FLASK_ENV') == 'testing':
         param = ssm.get_parameter(Name='/modobio/odyssey/db_name_test')
         db_name = param['Parameter']['Value']
+    elif os.getenv('FLASK_ENV') == 'development':
+        db_name = ssm.get_parameter(Name='/modobio/odyssey/db_name_dev')['Parameter']['Value']
 
     app.config['SQLALCHEMY_DATABASE_URI'] = f'{db_flav}://{db_user}:{db_pass}@{db_host}/{db_name}'
 
