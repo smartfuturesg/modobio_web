@@ -8,15 +8,17 @@ This is a `Flask <https://flask.palletsprojects.com>`_ based app that serves web
 import os
 import boto3
 from flask import Flask
+from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
+
 
 __version__ = '0.0.3'
 
 app = Flask(__name__)
 
-if os.getenv('FLASK_ENV') == 'development':
+if os.getenv('FLASK_ENV') == 'development_local':
     app.secret_key = 'dev'
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://localhost/modobio'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://localhost/modobio_dev'
 else:
     ssm = boto3.client('ssm')
     param = ssm.get_parameter(Name='/modobio/odyssey/db_flav')
@@ -42,6 +44,7 @@ else:
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 # Custom method to easily update db table from a dict
 def _update(self, form: dict):
