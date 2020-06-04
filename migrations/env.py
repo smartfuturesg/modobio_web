@@ -49,6 +49,7 @@ elif os.getenv('FLASK_ENV') == 'production':
 else:
     print("which database are you upgrading?")
     db_name = input()
+
 db_connection_string = f'{db_flav}://{db_user}:{db_pass}@{db_host}/{db_name}'
 
 config.set_main_option(
