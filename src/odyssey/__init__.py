@@ -20,9 +20,7 @@ if os.getenv('FLASK_ENV') == 'development_local':
     app.secret_key = 'dev'
     app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://localhost/modobio_dev'
 elif os.getenv('FLASK_ENV') == 'development': # for connecting to AWS locally. Will be removed once dev server is up and running
-    ssm = boto3.client('ssm', region_name='us-east-2',
-                       aws_access_key_id=os.getenv('AWS_KEY_ID'),
-                       aws_secret_access_key= os.getenv('AWS_SECRET_KEY'))
+    ssm = boto3.client('ssm')
     db_flav = ssm.get_parameter(Name='/modobio/odyssey/db_flav')['Parameter']['Value']
     db_user = ssm.get_parameter(Name='/modobio/odyssey/db_user')['Parameter']['Value']
     db_pass = ssm.get_parameter(Name='/modobio/odyssey/db_pass', WithDecryption=True)['Parameter']['Value']

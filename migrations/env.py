@@ -35,9 +35,7 @@ target_metadata = current_app.extensions['migrate'].db.metadata
 # ... etc.
 
 # change the database user to the master user for the purpose of editing schemas
-ssm = boto3.client('ssm', region_name='us-east-2',
-                   aws_access_key_id=os.getenv('AWS_KEY_ID'),
-                   aws_secret_access_key=os.getenv('AWS_SECRET_KEY'))
+ssm = boto3.client('ssm')
 db_flav = ssm.get_parameter(Name='/modobio/odyssey/db_flav')['Parameter']['Value']
 db_user = ssm.get_parameter(Name='/modobio/odyssey/db_user_master')['Parameter']['Value']
 db_pass = ssm.get_parameter(Name='/modobio/odyssey/db_pass_master', WithDecryption=True)['Parameter']['Value']
