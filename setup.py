@@ -26,6 +26,7 @@ setup(
     python_requires='>=3.6',
     install_requires=[
         'Flask',
+        'Flask-Migrate==2.5.3',
         'Flask_WTF',
         'WTForms',
         'Flask_WeasyPrint',
