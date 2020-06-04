@@ -82,7 +82,7 @@ class ClientReceiveForm(FlaskForm):
 
 
 class ClientIndividualContractForm(ClientSignForm):
-    doctor = BooleanField()
-    pt = BooleanField()
-    data = BooleanField()
+    doctor_consult = BooleanField()
+    pt_consult = BooleanField()
+    data_monitoring = BooleanField()
     drinks = BooleanField()

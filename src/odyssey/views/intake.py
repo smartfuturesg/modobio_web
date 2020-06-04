@@ -1,7 +1,7 @@
 from flask import render_template, Blueprint, session, redirect, request, url_for
-from flask_weasyprint import HTML, render_pdf
 
 from odyssey import db
+from odyssey.pdf import to_pdf
 from odyssey.forms.intake import ClientInfoForm, ClientConsentForm, ClientReleaseForm, \
                                  ClientSignForm, ClientReceiveForm, \
                                  ClientIndividualContractForm
@@ -62,9 +62,7 @@ def consent():
         form.populate_obj(cc)
     db.session.commit()
 
-    # TODO: this needs to be saved somewhere
-    # html = render_template('intake/consent.html', form=form, pdf=True)
-    # pdf = render_pdf(HTML(string=html))
+    to_pdf(clientid, 'intake/consent.html', form)
     return redirect(url_for('.release'))
 
 @bp.route('/release', methods=('GET', 'POST'))
@@ -94,9 +92,7 @@ def release():
         form.populate_obj(cr)
     db.session.commit()
 
-    # TODO: store pdf
-    # html = render_template('intake/release.html', form=form, pdf=True)
-    # pdf = render_pdf(HTML(string=html))
+    to_pdf(clientid, 'intake/release.html', form)
     return redirect(url_for('.policies'))
 
 @bp.route('/policies', methods=('GET', 'POST'))
@@ -118,9 +114,7 @@ def policies():
         form.populate_obj(cp)
     db.session.commit()
 
-    # TODO: store pdf
-    # html = render_template('intake/policies.html', form=form, pdf=True)
-    # pdf = render_pdf(HTML(string=html))
+    to_pdf(clientid, 'intake/policies.html', form)
     return redirect(url_for('.send'))
 
 @bp.route('/send', methods=('GET', 'POST'))
@@ -163,9 +157,7 @@ def consult():
         form.populate_obj(cc)
     db.session.commit()
 
-    # TODO: store pdf
-    # html = render_template('intake/consult.html', form=form, pdf=True)
-    # pdf = render_pdf(HTML(string=html))
+    to_pdf(clientid, 'intake/consult.html', form)
     return redirect(url_for('main.index'))
 
 @bp.route('/subscription', methods=('GET', 'POST'))
@@ -187,9 +179,7 @@ def subscription():
         form.populate_obj(cs)
     db.session.commit()
 
-    # TODO: store pdf
-    # html = render_template('intake/subscription.html', form=form, pdf=True)
-    # pdf = render_pdf(HTML(string=html))
+    to_pdf(clientid, 'intake/subscription.html', form)
     return redirect(url_for('main.index'))
 
 @bp.route('/individual', methods=('GET', 'POST'))
@@ -213,7 +203,5 @@ def individual():
         form.populate_obj(cs)
     db.session.commit()
 
-    # TODO: store pdf
-    # html = render_template('intake/individual.html', form=form, pdf=True)
-    # pdf = render_pdf(HTML(string=html))
+    to_pdf(clientid, 'intake/individual.html', form)
     return redirect(url_for('main.index'))

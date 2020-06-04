@@ -5,8 +5,9 @@
 This is a `Flask <https://flask.palletsprojects.com>`_ based app that serves webpages to the `ModoBio <https://modobio.com>`_ staff. The pages contain the intake and data gathering forms for the *client journey*. The `Odyssey <https://en.wikipedia.org/wiki/Odyssey>`_ is of course the most famous journey of all time! 🤓
 """
 
-import os
+import tempfile
 import boto3
+import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
@@ -17,6 +18,10 @@ app = Flask(__name__)
 if os.getenv('FLASK_ENV') == 'development':
     app.secret_key = 'dev'
     app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://localhost/modobio'
+
+    bucketdir = tempfile.TemporaryDirectory()
+    app.config['DOCS_BUCKET_NAME'] = bucketdir.name
+    print('Docs are stored in:', bucketdir.name)
 else:
     ssm = boto3.client('ssm')
     param = ssm.get_parameter(Name='/modobio/odyssey/db_flav')
@@ -34,6 +39,13 @@ else:
 
     param = ssm.get_parameter(Name='/modobio/odyssey/app_secret')
     app.secret_key = param['Parameter']['Value']
+
+    param = ssm.get_parameter(Name='/modobio/odyssey/docs_bucket')
+    bucket_name = param['Parameter']['Value']
+    if not bucket_name.endswith('/'):
+        bucket_name += '/'
+
+    app.config['DOCS_BUCKET_NAME'] = bucket_name
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 

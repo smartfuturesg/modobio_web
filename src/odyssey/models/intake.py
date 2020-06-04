@@ -450,21 +450,21 @@ class ClientIndividualContract(db.Model):
     :type: int, foreign key to :attr:`ClientInfo.clientid`
     """
 
-    doctor = db.Column(db.Boolean, default=False)
+    doctor_consult = db.Column(db.Boolean, default=False)
     """
     Indicates whether or not client wants to buy a doctor's appointment.
 
     :type: bool
     """
 
-    pt = db.Column(db.Boolean, default=False)
+    pt_consult = db.Column(db.Boolean, default=False)
     """
     Indicates whether or not client wants to buy a physical therapy session.
 
     :type: bool
     """
 
-    data = db.Column(db.Boolean, default=False)
+    data_monitoring = db.Column(db.Boolean, default=False)
     """
     Indicates whether or not client wants to buy a data tracking and analysis package.
 
