@@ -32,8 +32,6 @@ class ClientInfo(db.Model):
     :type: str, max length 50
     """
 
-    dummy_var = db.Column(db.String(50))
-
     middlename = db.Column(db.String(50))
     """
     Client middle name(s).
