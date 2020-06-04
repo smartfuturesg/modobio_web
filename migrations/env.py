@@ -2,7 +2,9 @@ from __future__ import with_statement
 
 import logging
 from logging.config import fileConfig
+import os
 
+import boto3
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
@@ -22,15 +24,36 @@ logger = logging.getLogger('alembic.env')
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 from flask import current_app
-config.set_main_option(
-    'sqlalchemy.url',
-    str(current_app.extensions['migrate'].db.engine.url).replace('%', '%%'))
+# config.set_main_option(
+#     'sqlalchemy.url',
+#     str(current_app.extensions['migrate'].db.engine.url).replace('%', '%%'))
 target_metadata = current_app.extensions['migrate'].db.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
+
+# change the database user to the master user for the purpose of editing schemas
+ssm = boto3.client('ssm', region_name='us-east-2',
+                   aws_access_key_id=os.getenv('AWS_KEY_ID'),
+                   aws_secret_access_key=os.getenv('AWS_SECRET_KEY'))
+db_flav = ssm.get_parameter(Name='/modobio/odyssey/db_flav')['Parameter']['Value']
+db_user = ssm.get_parameter(Name='/modobio/odyssey/db_user_master')['Parameter']['Value']
+db_pass = ssm.get_parameter(Name='/modobio/odyssey/db_pass_master', WithDecryption=True)['Parameter']['Value']
+db_host = ssm.get_parameter(Name='/modobio/odyssey/db_host')['Parameter']['Value']
+if os.getenv('FLASK_ENV') == 'development':
+    db_name = ssm.get_parameter(Name='/modobio/odyssey/db_name_dev')['Parameter']['Value']
+elif os.getenv('FLASK_ENV') == 'production':
+    db_name = ssm.get_parameter(Name='/modobio/odyssey/db_name')['Parameter']['Value']
+else:
+    print("which database are you upgrading?")
+    db_name = input()
+db_connection_string = f'{db_flav}://{db_user}:{db_pass}@{db_host}/{db_name}'
+
+config.set_main_option(
+    'sqlalchemy.url',
+    db_connection_string)
 
 
 def run_migrations_offline():
