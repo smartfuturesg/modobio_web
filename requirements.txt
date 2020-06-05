@@ -1,5 +1,6 @@
 boto3
 Flask
+Flask-Migrate==2.5.3
 Flask_SQLAlchemy
 Flask_WTF
 Flask_WeasyPrint
