@@ -41,11 +41,7 @@ else:
     app.secret_key = param['Parameter']['Value']
 
     param = ssm.get_parameter(Name='/modobio/odyssey/docs_bucket')
-    bucket_name = param['Parameter']['Value']
-    if not bucket_name.endswith('/'):
-        bucket_name += '/'
-
-    app.config['DOCS_BUCKET_NAME'] = bucket_name
+    app.config['DOCS_BUCKET_NAME'] = param['Parameter']['Value']
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
