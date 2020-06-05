@@ -6,11 +6,11 @@
 
 <h1>Who can release your health information?</h1>
 <p>I authorize Modo Bio, The Doctor, and the following individuals and organizations to release my health information:</p>
-<div class="row">{{ macros.textinput(form.release_by_other, formid='sigform', pdf=pdf) }}</div>
+<div class="row">{{ macros.textinput(form.release_by_other, formid='signform', pdf=pdf) }}</div>
 
 <h1>Who can receive your health information?</h1>
 <p>I authorize Modo Bio, The Doctor, and the following individuals and organizations to receive my health information:</p>
-<div class="row">{{ macros.textinput(form.release_to_other, formid='sigform', pdf=pdf) }}</div>
+<div class="row">{{ macros.textinput(form.release_to_other, formid='signform', pdf=pdf) }}</div>
 
 <h1>What kind of health information?</h1>
 <p>I authorize the release of:</p>
@@ -32,13 +32,13 @@
 <h1>How long?</h1>
 <p>Please tell us if we should apply date restrictions on the amount of health information we release about you:</p>
 <div class="row">
-    From &ensp; {{ macros.dateinput(form.release_date_from, formid='sigform', pdf=pdf) }}
-    To &ensp; {{ macros.dateinput(form.release_date_to, formid='sigform', pdf=pdf) }}
+    From &ensp; {{ macros.dateinput(form.release_date_from, formid='signform', pdf=pdf) }}
+    To &ensp; {{ macros.dateinput(form.release_date_to, formid='signform', pdf=pdf) }}
 </div>
 
 <h1>Purpose of the disclosure</h1>
 <p>I authorize the release of my health information for my treatment, for Modo Bio's health and wellness programs, and for the following additional reason(s):</p>
-<div class="row">{{ macros.textinput(form.release_purpose, formid='sigform', pdf=pdf) }}</div>
+<div class="row">{{ macros.textinput(form.release_purpose, formid='signform', pdf=pdf) }}</div>
 
 <h1>Expiration and revocation</h1>
 <p>I may revoke (take back) or change the above permissions at any time, except to the extent that the individuals or organizations listed on this release have already taken action based on my consent. To revoke this consent, please write to: <a href="mailto:privacy@modobio.com">privacy@modobio.com</a>.</p>
@@ -51,11 +51,11 @@
 <p>We will only contact this person if there is an emergency. We will only share information we think is necessary to respond to the emergency, unless you give us permission to share more information.</p>
 <div class="row">
     <span class="label">{{ form.emergency_contact.label }}</span>
-    <span class="field">{{ macros.textinput(form.emergency_contact, formid='sigform', pdf=pdf) }}</span>
+    <span class="field">{{ macros.textinput(form.emergency_contact, formid='signform', pdf=pdf) }}</span>
 </div>
 <div class="row">
     <span class="label">{{ form.emergency_phone.label }}</span>
-    <span class="field">{{ macros.textinput(form.emergency_phone, formid='sigform', pdf=pdf) }}</span>
+    <span class="field">{{ macros.textinput(form.emergency_phone, formid='signform', pdf=pdf) }}</span>
 </div>
 
 <h1>Your contact information</h1>
