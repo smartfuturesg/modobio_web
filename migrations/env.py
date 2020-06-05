@@ -53,8 +53,8 @@ else:
     print("which database are you upgrading?")
     db_name = input()
 
-print(f"updating/querying database using the following connection string: \m {db_connection_string}")
-print("continue?")
+print(f"updating/querying database using the following connection string: \n {db_connection_string}")
+print("continue? [Y,n]")
 answer = input()
 
 if answer not in ['y', 'Y']:
