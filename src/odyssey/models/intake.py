@@ -205,6 +205,36 @@ class ClientInfo(db.Model):
     :type: bool
     """
 
+    def to_dict(self):
+        """returns all client info in dictionary form"""
+        dat = {
+            'client_id': self.clientid,
+            'first_name': self.firstname,
+            'last_name': self.lastname,
+            'full_name': self.fullname,
+            'guardian_name': self.guardianname,
+            'guardian_role': self.guardianrole,
+            'address':self.address,
+            'street': self.street,
+            'city': self.city,
+            'state': self.state,
+            'zipcode': self.zipcode,
+            'country': self.country,
+            'email': self.email,
+            'phone': self.phone,
+            'preffered': self.preferred,
+            'ring_size': self.ringsize,
+            'emergency_contact': self.emergency_contact,
+            'emergency_phone': self.emergency_phone,
+            'healthcare_contact': self.healthcare_contact,
+            'healthcare_phone': self.healthcare_phone,
+            'gender': self.gender,
+            'dob': self.dob,
+            'profession': self.profession,
+            'recieve_docs': self.receive_docs
+        }
+
+
 
 class ClientConsent(db.Model):
     """ Client consent form table
