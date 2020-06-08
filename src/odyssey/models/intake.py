@@ -2,6 +2,8 @@
 Database tables for the client intake portion of the Modo Bio Staff application.
 All tables in this module are prefixed with 'Client'.
 """
+from flask import url_for
+
 from odyssey import db
 
 class ClientInfo(db.Model):
@@ -207,7 +209,7 @@ class ClientInfo(db.Model):
 
     def to_dict(self):
         """returns all client info in dictionary form"""
-        dat = {
+        data = {
             'client_id': self.clientid,
             'first_name': self.firstname,
             'last_name': self.lastname,
@@ -231,8 +233,43 @@ class ClientInfo(db.Model):
             'gender': self.gender,
             'dob': self.dob,
             'profession': self.profession,
-            'recieve_docs': self.receive_docs
+            'receive_docs': self.receive_docs
         }
+        return data
+
+    def client_info_search_dict(self):
+        """returns just the searchable client info (name, email, number)"""
+        data = {
+            'client_id': self.clientid,
+            'first_name': self.firstname,
+            'last_name': self.lastname,
+            'full_name': self.fullname,
+            'phone': self.phone,
+            'email': self.email
+        }
+        return data
+
+    def all_clients_dict(query, page, per_page, endpoint='/clientsearch', **kwargs):
+        resources = query.paginate(page, per_page, False)
+
+        data = {
+            'items': [item.client_info_search_dict() for item in resources.items],
+            '_meta': {
+                'page': page,
+                'per_page': per_page,
+                'total_pages': resources.pages,
+                'total_items': resources.total
+            },
+            '_links': {
+                'self': url_for(endpoint, page=page, per_page=per_page),
+                'next': url_for(endpoint, page=page+1, per_page=per_page)
+                            if resources.has_next else None,
+                'prev': url_for(endpoint, page=page - 1, per_page=per_page)
+                            if resources.has_prev else None,
+
+            }
+        }
+        return data
 
 
 
