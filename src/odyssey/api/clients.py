@@ -1,4 +1,5 @@
 
+from flask import request
 
 from odyssey.models.intake import ClientInfo
 from odyssey.api import bp
@@ -15,5 +16,5 @@ def get_clients():
     per_page = min(request.args.get('per_page', 10, type=int), 100)
     data = ClientInfo.all_clients_dict(ClientInfo.query.order_by(ClientInfo.lastname.asc()),
                                         page=page,per_page=per_page, endpoint='api.get_clients')
-    
+
     return data
