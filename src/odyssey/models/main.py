@@ -2,6 +2,11 @@
 General database tables for the operation of the Modo Bio Staff application.
 There is no specific table name prefix for the tables in this module.
 """
+import base64
+from datetime import datetime, timedelta
+import os
+
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from odyssey import db
 
@@ -12,6 +17,20 @@ class Staff(db.Model):
     staff members.
     """
     __tablename__ = 'Staff'
+
+    token = db.Column(db.String(32), index=True, unique=True)
+    """
+    API authentication token
+    
+    :type: str, max length 32, indexed, unique
+    """
+
+    token_expiration = db.Column(db.DateTime)
+    """
+    token expiration date
+    
+    :type: datetime
+    """
 
     staffid = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -62,3 +81,33 @@ class Staff(db.Model):
 
     :type: str, max length 128
     """
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+    def get_token(self,expires_in=3600):
+        now = datetime.utcnow()
+        #returns current token if it is valid
+        if self.token and self.token_expiration > now + timedelta(seconds=60):
+            return self.token
+        #otherwise generate new token, add to session
+        self.token = base64.b64encode(os.urandom(24)).decode('utf-8')
+        self.token_expiration = now + timedelta(seconds=expires_in)
+        db.session.add(self)
+        return self.token
+
+    def revoke_token(self):
+        """set token to expired, for logging out/generating new token"""
+        self.token_expiration = datetime.utcnow() - timedelta(seconds=1)
+
+    @staticmethod
+    def check_token(token):
+        """check if token is valid. returns user if so"""
+        staff_member = Staff.query.filter_by(token=token).first()
+
+        if staff_member is None or staff_member.token_expiration < datetime.utcnow():
+            return None
+        return staff_member
