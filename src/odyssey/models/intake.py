@@ -224,7 +224,7 @@ class ClientInfo(db.Model):
             'country': self.country,
             'email': self.email,
             'phone': self.phone,
-            'preffered': self.preferred,
+            'preferred': self.preferred,
             'ring_size': self.ringsize,
             'emergency_contact': self.emergency_contact,
             'emergency_phone': self.emergency_phone,
