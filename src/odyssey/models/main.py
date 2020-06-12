@@ -88,7 +88,7 @@ class Staff(db.Model):
     def check_password(self, password):
         return check_password_hash(self.password, password)
 
-    def get_token(self,expires_in=3600):
+    def get_token(self,expires_in=360000):
         now = datetime.utcnow()
         #returns current token if it is valid
         if self.token and self.token_expiration > now + timedelta(seconds=60):
