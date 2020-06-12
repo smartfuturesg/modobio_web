@@ -4,15 +4,15 @@ from odyssey.models.doctor import MedicalPhysicalExam, MedicalHistory
 from odyssey.api import bp
 from odyssey.api.auth import token_auth
 
-@bp.route('/doctor/medicalhistory/<int:client_id>', methods=['GET'])
+@bp.route('/pt/history/<int:client_id>', methods=['GET'])
 #@token_auth.login_required
-def get_medical_history(client_id):
+def get_pt_history(client_id):
     """returns medical history for the specified client id"""
-    return MedicalHistory.query.filter_by(clientid=client_id).first_or_404().to_dict()
+    return {'response': 'nothing here yet'}
 
-@bp.route('/doctor/medicalphysicalexam/<int:client_id>', methods=['GET'])
+@bp.route('/pt/mobility/<int:client_id>', methods=['GET'])
 @token_auth.login_required
-def get_medical_physical(client_id):
+def get_mobility_assessment(client_id):
     """returns medical history for the specified client id"""
-    return MedicalPhysicalExam.query.filter_by(clientid=client_id).first_or_404().to_dict()
+    return {'response': 'nothing here yet'}
 
