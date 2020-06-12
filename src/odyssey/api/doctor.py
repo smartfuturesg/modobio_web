@@ -5,11 +5,14 @@ from odyssey.api import bp
 from odyssey.api.auth import token_auth
 
 @bp.route('/doctor/medicalhistory/<int:client_id>', methods=['GET'])
+#@token_auth.login_required
 def get_medical_history(client_id):
     """returns medical history for the specified client id"""
     return MedicalHistory.query.filter_by(clientid=client_id).first_or_404().to_dict()
 
 @bp.route('/doctor/medicalphysicalexam/<int:client_id>', methods=['GET'])
+@token_auth.login_required
 def get_medical_physical(client_id):
     """returns medical history for the specified client id"""
     return MedicalPhysicalExam.query.filter_by(clientid=client_id).first_or_404().to_dict()
+
