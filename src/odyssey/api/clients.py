@@ -65,3 +65,9 @@ def get_client_subscription_contract(client_id):
 def get_client_individual_contract(client_id):
     """returns client info table as a json for the client_id specified"""
     return  ClientIndividualContract.query.filter_by(clientid=client_id).first_or_404().to_dict()
+
+
+# @bp.route('/client/new', methods=['POST']):
+# def register_new_client():
+#     "register a new client"
+#     client =

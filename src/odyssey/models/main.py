@@ -82,6 +82,28 @@ class Staff(db.Model):
     :type: str, max length 128
     """
 
+    def to_dict(self):
+        """returns all Staff info in dictionary form (except password and token)"""
+        data = {
+            'staff_id': self.staffid,
+            'first_name': self.firstname,
+            'last_name': self.lastname,
+            'full_name': self.fullname,
+            'email': self.email,
+            'is_admin': self.is_admin,
+        }
+
+        return data
+
+    def from_dict(self, data, new_staff=False):
+        for field in ['firstname', 'lastname', 'fullname', 'email']:
+            if field in data:
+                setattr(self, field, data[field])
+
+        if new_staff and 'password' in data:
+            self.set_password(data['password'])
+
+
     def set_password(self, password):
         self.password = generate_password_hash(password)
 
@@ -111,3 +133,5 @@ class Staff(db.Model):
         if staff_member is None or staff_member.token_expiration < datetime.utcnow():
             return None
         return staff_member
+
+
