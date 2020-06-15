@@ -1,11 +1,11 @@
 from flask import Blueprint
-from flask_restplus import Api
+from flask_restx import Api
 
 authorizations = {
-    'apikey': {
+    'Bearer Auth': {
         'type': 'apiKey',
         'in': 'header',
-        'name': 'X-API-KEY'
+        'name': 'Authorization'
     }
 }
 
