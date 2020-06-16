@@ -117,6 +117,7 @@ class Staff(db.Model):
             return self.token
         #otherwise generate new token, add to session
         self.token = base64.b64encode(os.urandom(24)).decode('utf-8')
+        breakpoint()
         self.token_expiration = now + timedelta(seconds=expires_in)
         db.session.add(self)
         return self.token

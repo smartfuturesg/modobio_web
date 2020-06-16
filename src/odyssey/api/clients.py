@@ -2,6 +2,10 @@
 from flask import request, jsonify
 from flask_restx import Resource
 
+from odyssey.api import api
+from odyssey.api.auth import token_auth
+from odyssey.api.serializers import pagination
+from odyssey import db
 from odyssey.models.intake import (
     ClientInfo,
     ClientConsent,
@@ -11,9 +15,7 @@ from odyssey.models.intake import (
     ClientRelease,
     ClientSubscriptionContract
 )
-from odyssey.api import api
-from odyssey.api.auth import token_auth
-from odyssey.api.serializers import pagination
+
 
 
 ns = api.namespace('client', description='Operations related to clients')
@@ -27,6 +29,26 @@ class Client(Resource):
     def get(self, client_id):
         """returns client info table as a json for the client_id specified"""
         return jsonify(ClientInfo.query.get_or_404(client_id).to_dict())
+
+    @token_auth.login_required
+    @ns.doc(security='apikey')
+    def put(self, client_id):
+        """edit client info"""
+        client = ClientInfo.query.filter_by(clientid=client_id).one_or_none()
+        data = request.get_json()
+        client.from_dict(data, new_user=False)
+        db.session.add(client)
+        db.session.commit()
+        return jsonify(client.to_dict())
+
+@ns.route('/')
+class NewClient(Resource):
+    @token_auth.login_required
+    @ns.doc(security='apikey')
+    def post(self):
+        """edit client info"""
+
+
 
 @ns.route('/clientsearch', methods=['GET'])
 class Clients(Resource):

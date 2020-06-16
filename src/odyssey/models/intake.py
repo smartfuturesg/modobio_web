@@ -207,6 +207,10 @@ class ClientInfo(db.Model):
     :type: bool
     """
 
+    def get_attributes(self):
+        """return class attributes as list"""
+        return list(self.__dict__.keys())
+
     def to_dict(self):
         """returns all client info in dictionary form"""
         data = {
@@ -270,6 +274,17 @@ class ClientInfo(db.Model):
             }
         }
         return data
+
+
+    def from_dict(self, data, new_user=False):
+        """to be used when a new user is created or a user id edited"""
+        attributes = self.get_attributes()
+        for field in attributes:
+            if field in data:
+                setattr(self, field, data[field])
+
+        if new_user and 'password' in data:
+            self.set_password(data['password'])
 
 
 
