@@ -4,7 +4,7 @@ from flask_restx import Resource
 
 from odyssey.api import api
 from odyssey.api.auth import token_auth
-from odyssey.api.serializers import pagination
+from odyssey.api.serializers import client_info,pagination
 from odyssey import db
 from odyssey.models.intake import (
     ClientInfo,
@@ -15,8 +15,6 @@ from odyssey.models.intake import (
     ClientRelease,
     ClientSubscriptionContract
 )
-
-
 
 ns = api.namespace('client', description='Operations related to clients')
 
@@ -31,6 +29,7 @@ class Client(Resource):
         return jsonify(ClientInfo.query.get_or_404(client_id).to_dict())
 
     @token_auth.login_required
+    @ns.doc(client_info)
     @ns.doc(security='apikey')
     def put(self, client_id):
         """edit client info"""
