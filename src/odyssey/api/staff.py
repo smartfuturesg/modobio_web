@@ -1,15 +1,20 @@
 from flask import request
-from flask_restx import Resource
+from flask_restx import Resource, fields
 
 from odyssey import db
 from odyssey.models.main import Staff
 from odyssey.api import api
 from odyssey.api.auth import token_auth
 from odyssey.api.errors import bad_request
+from odyssey.api.serializers import new_staff_member
 
-@api.route('/staff')
+ns = api.namespace('staff', description='Operations related to staff members')
+
+
+@ns.route('/')
 class StaffMembers(Resource):
     """staff member class for creating, getting, altering staff"""
+    @ns.expect(new_staff_member, validate=True)
     @token_auth.login_required
     def post(self):
         """register a new staff member"""
