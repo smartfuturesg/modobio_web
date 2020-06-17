@@ -209,7 +209,9 @@ class ClientInfo(db.Model):
 
     def get_attributes(self):
         """return class attributes as list"""
-        return list(self.__dict__.keys())
+        return  ['address', 'city', 'clientid', 'country', 'dob', 'email', 'emergency_contact', 'emergency_phone', 'firstname','fullname', \
+                 'gender','guardianname', 'guardianrole', 'healthcare_contact', 'healthcare_phone', 'lastname',  \
+                'middlename', 'phone', 'preferred', 'profession', 'receive_docs', 'ringsize', 'state', 'street','zipcode']
 
     def to_dict(self):
         """returns all client info in dictionary form"""
@@ -276,15 +278,14 @@ class ClientInfo(db.Model):
         return data
 
 
-    def from_dict(self, data, new_user=False):
+    def from_dict(self, data):
         """to be used when a new user is created or a user id edited"""
         attributes = self.get_attributes()
         for field in attributes:
+            breakpoint()
             if field in data:
                 setattr(self, field, data[field])
 
-        if new_user and 'password' in data:
-            self.set_password(data['password'])
 
 
 

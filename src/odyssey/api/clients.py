@@ -1,6 +1,6 @@
 
 from flask import request, jsonify
-from flask_restx import Resource
+from flask_restx import Resource, Api
 
 from odyssey.api import api
 from odyssey.api.auth import token_auth
@@ -42,11 +42,22 @@ class Client(Resource):
 
 @ns.route('/')
 class NewClient(Resource):
+    """
+        create new clients. This is part of the normal flow where clients register on location
+    """
     @token_auth.login_required
+    @ns.doc(client_info, validate=True)
     @ns.doc(security='apikey')
     def post(self):
-        """edit client info"""
-
+        """create new client"""
+        data = request.get_json()
+        client = ClientInfo()
+        client.from_dict(data)
+        #db.session.add(client)
+        #db.session.commit
+        response = client.to_dict()
+        response['__links'] = api.url_for(Client, client_id = 11)
+        return response, 201
 
 
 @ns.route('/clientsearch', methods=['GET'])
