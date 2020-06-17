@@ -255,9 +255,8 @@ class ClientInfo(db.Model):
         }
         return data
 
-    def all_clients_dict(query, page, per_page, endpoint='/clientsearch', **kwargs):
+    def all_clients_dict(query, page, per_page, **kwargs):
         resources = query.paginate(page, per_page, False)
-
         data = {
             'items': [item.client_info_search_dict() for item in resources.items],
             '_meta': {
@@ -265,18 +264,9 @@ class ClientInfo(db.Model):
                 'per_page': per_page,
                 'total_pages': resources.pages,
                 'total_items': resources.total
-            },
-            '_links': {
-                'self': url_for(endpoint, page=page, per_page=per_page),
-                'next': url_for(endpoint, page=page+1, per_page=per_page)
-                            if resources.has_next else None,
-                'prev': url_for(endpoint, page=page - 1, per_page=per_page)
-                            if resources.has_prev else None,
-
+                }
             }
-        }
-        return data
-
+        return data, resources
 
     def from_dict(self, data):
         """to be used when a new user is created or a user id edited"""

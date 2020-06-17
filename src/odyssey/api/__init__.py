@@ -14,5 +14,5 @@ api = Api(bp, authorizations=authorizations)
 
 from odyssey.api import clients, doctor, pt, staff, errors, tokens
 
-api.add_resource(clients.Client, '/client/<int:client_id>')
+#api.add_resource(clients.Client, '/client/<int:client_id>')
 

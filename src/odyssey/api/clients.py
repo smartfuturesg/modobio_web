@@ -35,7 +35,7 @@ class Client(Resource):
         """edit client info"""
         client = ClientInfo.query.filter_by(clientid=client_id).one_or_none()
         data = request.get_json()
-        client.from_dict(data, new_user=False)
+        client.from_dict(data)
         db.session.add(client)
         db.session.commit()
         return jsonify(client.to_dict())
@@ -61,6 +61,7 @@ class NewClient(Resource):
 
 
 @ns.route('/clientsearch', methods=['GET'])
+@ns.doc(params={'page': 'request page for paginated clients list', 'per_page': 'number of clients per page'})
 class Clients(Resource):
     @ns.doc(security='apikey')
     @ns.expect(pagination)
@@ -69,8 +70,15 @@ class Clients(Resource):
         """returns list of all clients"""
         page = request.args.get('page', 1, type=int)
         per_page = min(request.args.get('per_page', 10, type=int), 100)
-        data = ClientInfo.all_clients_dict(ClientInfo.query.order_by(ClientInfo.lastname.asc()),
-                                            page=page,per_page=per_page, endpoint='api.clients')
+        data, resources = ClientInfo.all_clients_dict(ClientInfo.query.order_by(ClientInfo.lastname.asc()),
+                                            page=page,per_page=per_page)
+        data['_links']= {
+            'self': api.url_for(Clients, page=page, per_page=per_page),
+            'next': api.url_for(Clients, page=page + 1, per_page=per_page)
+            if resources.has_next else None,
+            'prev': api.url_for(Clients, page=page - 1, per_page=per_page)
+            if resources.has_prev else None,
+        }
 
         return jsonify(data)
 
