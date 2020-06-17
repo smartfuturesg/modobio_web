@@ -2,6 +2,8 @@
 Database tables for the client intake portion of the Modo Bio Staff application.
 All tables in this module are prefixed with 'Client'.
 """
+from flask import url_for
+
 from odyssey import db
 
 class ClientInfo(db.Model):
@@ -205,6 +207,87 @@ class ClientInfo(db.Model):
     :type: bool
     """
 
+    def get_attributes(self):
+        """return class attributes as list"""
+        return  ['address', 'city', 'clientid', 'country', 'dob', 'email', 'emergency_contact', 'emergency_phone', 'firstname','fullname', \
+                 'gender','guardianname', 'guardianrole', 'healthcare_contact', 'healthcare_phone', 'lastname',  \
+                'middlename', 'phone', 'preferred', 'profession', 'receive_docs', 'ringsize', 'state', 'street','zipcode']
+
+    def to_dict(self):
+        """returns all client info in dictionary form"""
+        data = {
+            'client_id': self.clientid,
+            'first_name': self.firstname,
+            'last_name': self.lastname,
+            'full_name': self.fullname,
+            'guardian_name': self.guardianname,
+            'guardian_role': self.guardianrole,
+            'address':self.address,
+            'street': self.street,
+            'city': self.city,
+            'state': self.state,
+            'zipcode': self.zipcode,
+            'country': self.country,
+            'email': self.email,
+            'phone': self.phone,
+            'preferred': self.preferred,
+            'ring_size': self.ringsize,
+            'emergency_contact': self.emergency_contact,
+            'emergency_phone': self.emergency_phone,
+            'healthcare_contact': self.healthcare_contact,
+            'healthcare_phone': self.healthcare_phone,
+            'gender': self.gender,
+            'dob': self.dob,
+            'profession': self.profession,
+            'receive_docs': self.receive_docs
+        }
+        return data
+
+    def client_info_search_dict(self):
+        """returns just the searchable client info (name, email, number)"""
+        data = {
+            'client_id': self.clientid,
+            'first_name': self.firstname,
+            'last_name': self.lastname,
+            'full_name': self.fullname,
+            'phone': self.phone,
+            'email': self.email
+        }
+        return data
+
+    def all_clients_dict(query, page, per_page, endpoint='/clientsearch', **kwargs):
+        resources = query.paginate(page, per_page, False)
+
+        data = {
+            'items': [item.client_info_search_dict() for item in resources.items],
+            '_meta': {
+                'page': page,
+                'per_page': per_page,
+                'total_pages': resources.pages,
+                'total_items': resources.total
+            },
+            '_links': {
+                'self': url_for(endpoint, page=page, per_page=per_page),
+                'next': url_for(endpoint, page=page+1, per_page=per_page)
+                            if resources.has_next else None,
+                'prev': url_for(endpoint, page=page - 1, per_page=per_page)
+                            if resources.has_prev else None,
+
+            }
+        }
+        return data
+
+
+    def from_dict(self, data):
+        """to be used when a new user is created or a user id edited"""
+        attributes = self.get_attributes()
+        for field in attributes:
+            breakpoint()
+            if field in data:
+                setattr(self, field, data[field])
+
+
+
 
 class ClientConsent(db.Model):
     """ Client consent form table
@@ -251,6 +334,15 @@ class ClientConsent(db.Model):
     :type: str
     """
 
+    def to_dict(self):
+        """retuns all data in ClientConsent Model as a dictionary"""
+        data = {
+            'client_id': self.clientid,
+            'infectious_disease': self.infectious_disease,
+            'sign_date': self.signdate,
+            'signature': self.signature
+        }
+        return data
 
 class ClientRelease(db.Model):
     """ Client release of information table
@@ -340,6 +432,22 @@ class ClientRelease(db.Model):
     :type: str
     """
 
+    def to_dict(self):
+        """retuns all data in ClientRelease Model as a dictionary"""
+        data = {
+            'client_id': self.clientid,
+            'release_by_other': self.release_by_other,
+            'release_to_other': self.release_to_other,
+            'release_of_all': self.release_of_all,
+            'release_of_other': self.release_of_other,
+            'release_date_from': self.release_date_from,
+            'release_date_to': self.release_date_to,
+            'release_purpose': self.release_purpose,
+            'sign_date': self.signdate,
+            'signature': self.signature
+        }
+        return data
+
 
 class ClientPolicies(db.Model):
 
@@ -350,6 +458,15 @@ class ClientPolicies(db.Model):
 
     signdate = db.Column(db.Date)
     signature = db.Column(db.Text)
+
+    def to_dict(self):
+        """retuns all data in ClientPolicies Model as a dictionary"""
+        data = {
+            'client_id': self.clientid,
+            'sign_date': self.signdate,
+            'signature': self.signature
+        }
+        return data
 
 
 class ClientConsultContract(db.Model):
@@ -391,6 +508,15 @@ class ClientConsultContract(db.Model):
     :type: str
     """
 
+    def to_dict(self):
+        """retuns all data in ClientConsultConstract Model as a dictionary"""
+        data = {
+            'client_id': self.clientid,
+            'sign_date': self.signdate,
+            'signature': self.signature
+        }
+        return data
+
 
 class ClientSubscriptionContract(db.Model):
     """ Client subscription contract table
@@ -430,6 +556,15 @@ class ClientSubscriptionContract(db.Model):
 
     :type: str
     """
+
+    def to_dict(self):
+        """retuns all data in ClientSubscriptionContract Model as a dictionary"""
+        data = {
+            'client_id': self.clientid,
+            'sign_date': self.signdate,
+            'signature': self.signature
+        }
+        return data
 
 
 class ClientIndividualContract(db.Model):
@@ -493,3 +628,15 @@ class ClientIndividualContract(db.Model):
 
     :type: str
     """
+
+    def to_dict(self):
+        """retuns all data in ClientSubscriptionContract Model as a dictionary"""
+        data = {
+            'client_id': self.clientid,
+            'doctor': self.doctor,
+            'pt': self.pt,
+            'drinks': self.drinks,
+            'sign_date': self.signdate,
+            'signature': self.signature
+        }
+        return data

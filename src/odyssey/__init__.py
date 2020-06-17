@@ -94,3 +94,5 @@ app.register_blueprint(bp, url_prefix='/doctor')
 from odyssey.views.pt import bp
 app.register_blueprint(bp, url_prefix='/pt')
 
+from odyssey.api import bp as api_bp
+app.register_blueprint(api_bp, url_prefix='/api')
