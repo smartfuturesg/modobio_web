@@ -30,7 +30,6 @@ setup(
         'Flask-Migrate==2.5.3',
         'Flask_WTF',
         'WTForms',
-        'Flask_WeasyPrint',
         'Werkzeug',
         'Flask_SQLAlchemy'
     ],
