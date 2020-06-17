@@ -22,15 +22,17 @@ ns = api.namespace('client', description='Operations related to clients')
 @ns.route('/<int:client_id>')
 @ns.doc(params={'client_id': 'Client ID number'})
 class Client(Resource):
-    @token_auth.login_required
     @ns.doc(security='apikey')
+    @token_auth.login_required
+    @ns.marshal_with(client_info)
     def get(self, client_id):
         """returns client info table as a json for the client_id specified"""
         return jsonify(ClientInfo.query.get_or_404(client_id).to_dict())
 
-    @token_auth.login_required
-    @ns.doc(client_info)
+    @ns.expect(client_info)
     @ns.doc(security='apikey')
+    @token_auth.login_required
+    @ns.marshal_with(client_info)
     def put(self, client_id):
         """edit client info"""
         client = ClientInfo.query.filter_by(clientid=client_id).one_or_none()
@@ -46,8 +48,9 @@ class NewClient(Resource):
         create new clients. This is part of the normal flow where clients register on location
     """
     @token_auth.login_required
-    @ns.doc(client_info, validate=True)
+    @ns.expect(client_info, validate=True)
     @ns.doc(security='apikey')
+    @ns.marshal_with(client_info)
     def post(self):
         """create new client"""
         data = request.get_json()
