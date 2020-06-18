@@ -29,6 +29,7 @@ from odyssey.models.intake import (
 
 ns = api.namespace('client', description='Operations related to clients')
 
+    
 @ns.route('/<int:clientid>')
 @ns.doc(params={'clientid': 'Client ID number'})
 class Client(Resource):

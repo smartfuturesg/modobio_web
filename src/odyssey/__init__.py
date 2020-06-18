@@ -8,6 +8,7 @@ This is a `Flask <https://flask.palletsprojects.com>`_ based app that serves web
 import os
 import boto3
 from flask import Flask
+from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
@@ -15,6 +16,7 @@ from flask_sqlalchemy import SQLAlchemy
 __version__ = '0.0.3'
 
 app = Flask(__name__)
+CORS(app)
 
 if os.getenv('FLASK_ENV') == 'development_local':
     app.secret_key = 'dev'
