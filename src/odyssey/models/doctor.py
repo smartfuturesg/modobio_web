@@ -128,7 +128,7 @@ class MedicalHistory(db.Model):
     def to_dict(self):
         """retuns all data in ClientSubscriptionContract Model as a dictionary"""
         data = {
-            'client_id': self.clientid,
+            'clientid': self.clientid,
             'last_examination_date': self.last_examination_date,
             'last_examination_reason': self.last_examination_reason,
             'goals': self.goals,
@@ -349,7 +349,7 @@ class MedicalPhysicalExam(db.Model):
     def to_dict(self):
         """retuns all data in ClientSubscriptionContract Model as a dictionary"""
         data = {
-            'client_id': self.clientid,
+            'clientid': self.clientid,
             'vital_heartrate': self.vital_heartrate,
             'vital_respiratoryrate': self.vital_respiratoryrate,
             'vital_systolic': self.vital_systolic,

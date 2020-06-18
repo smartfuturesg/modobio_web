@@ -216,12 +216,13 @@ class ClientInfo(db.Model):
     def to_dict(self):
         """returns all client info in dictionary form"""
         data = {
-            'client_id': self.clientid,
-            'first_name': self.firstname,
-            'last_name': self.lastname,
-            'full_name': self.fullname,
-            'guardian_name': self.guardianname,
-            'guardian_role': self.guardianrole,
+            'clientid': self.clientid,
+            'firstname': self.firstname,
+            'middlename': self.middlename,
+            'lastname': self.lastname,
+            'fullname': self.fullname,
+            'guardianname': self.guardianname,
+            'guardianrole': self.guardianrole,
             'address':self.address,
             'street': self.street,
             'city': self.city,
@@ -231,7 +232,7 @@ class ClientInfo(db.Model):
             'email': self.email,
             'phone': self.phone,
             'preferred': self.preferred,
-            'ring_size': self.ringsize,
+            'ringsize': self.ringsize,
             'emergency_contact': self.emergency_contact,
             'emergency_phone': self.emergency_phone,
             'healthcare_contact': self.healthcare_contact,
@@ -246,15 +247,16 @@ class ClientInfo(db.Model):
     def client_info_search_dict(self):
         """returns just the searchable client info (name, email, number)"""
         data = {
-            'client_id': self.clientid,
-            'first_name': self.firstname,
-            'last_name': self.lastname,
-            'full_name': self.fullname,
+            'clientid': self.clientid,
+            'firstname': self.firstname,
+            'lastname': self.lastname,
+            'fullname': self.fullname,
             'phone': self.phone,
             'email': self.email
         }
         return data
 
+    @staticmethod
     def all_clients_dict(query, page, per_page, **kwargs):
         resources = query.paginate(page, per_page, False)
         data = {
@@ -272,10 +274,8 @@ class ClientInfo(db.Model):
         """to be used when a new user is created or a user id edited"""
         attributes = self.get_attributes()
         for field in attributes:
-            breakpoint()
             if field in data:
                 setattr(self, field, data[field])
-
 
 
 
@@ -324,12 +324,24 @@ class ClientConsent(db.Model):
     :type: str
     """
 
+    def get_attributes(self):
+        """return class attributes as list"""
+        return [ 'infectious_disease', 'signdate', 'signature' ]
+
+    def from_dict(self, clientid, data):
+        """to be used when a new user is created or a user is edited"""
+        setattr(self, 'clientid', clientid) #set clientid of new objects
+        attributes = self.get_attributes()
+        for field in attributes:
+            if field in data:
+                setattr(self, field, data[field])
+
     def to_dict(self):
         """retuns all data in ClientConsent Model as a dictionary"""
         data = {
-            'client_id': self.clientid,
+            'clientid': self.clientid,
             'infectious_disease': self.infectious_disease,
-            'sign_date': self.signdate,
+            'signdate': self.signdate,
             'signature': self.signature
         }
         return data
@@ -425,7 +437,7 @@ class ClientRelease(db.Model):
     def to_dict(self):
         """retuns all data in ClientRelease Model as a dictionary"""
         data = {
-            'client_id': self.clientid,
+            'clientid': self.clientid,
             'release_by_other': self.release_by_other,
             'release_to_other': self.release_to_other,
             'release_of_all': self.release_of_all,
@@ -452,7 +464,7 @@ class ClientPolicies(db.Model):
     def to_dict(self):
         """retuns all data in ClientPolicies Model as a dictionary"""
         data = {
-            'client_id': self.clientid,
+            'clientid': self.clientid,
             'sign_date': self.signdate,
             'signature': self.signature
         }
@@ -501,7 +513,7 @@ class ClientConsultContract(db.Model):
     def to_dict(self):
         """retuns all data in ClientConsultConstract Model as a dictionary"""
         data = {
-            'client_id': self.clientid,
+            'clientid': self.clientid,
             'sign_date': self.signdate,
             'signature': self.signature
         }
@@ -550,7 +562,7 @@ class ClientSubscriptionContract(db.Model):
     def to_dict(self):
         """retuns all data in ClientSubscriptionContract Model as a dictionary"""
         data = {
-            'client_id': self.clientid,
+            'clientid': self.clientid,
             'sign_date': self.signdate,
             'signature': self.signature
         }
@@ -622,7 +634,7 @@ class ClientIndividualContract(db.Model):
     def to_dict(self):
         """retuns all data in ClientSubscriptionContract Model as a dictionary"""
         data = {
-            'client_id': self.clientid,
+            'clientid': self.clientid,
             'doctor': self.doctor,
             'pt': self.pt,
             'drinks': self.drinks,

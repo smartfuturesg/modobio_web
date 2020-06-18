@@ -4,7 +4,7 @@ from flask_restx import Resource, Api
 
 from odyssey.api import api
 from odyssey.api.auth import token_auth
-from odyssey.api.serializers import client_info,pagination
+from odyssey.api.serializers import client_info, client_consent_response, client_consent_new, pagination
 from odyssey import db
 from odyssey.models.intake import (
     ClientInfo,
@@ -18,29 +18,29 @@ from odyssey.models.intake import (
 
 ns = api.namespace('client', description='Operations related to clients')
 
-
-@ns.route('/<int:client_id>')
-@ns.doc(params={'client_id': 'Client ID number'})
+@ns.route('/<int:clientid>')
+@ns.doc(params={'clientid': 'Client ID number'})
 class Client(Resource):
     @ns.doc(security='apikey')
     @token_auth.login_required
     @ns.marshal_with(client_info)
-    def get(self, client_id):
-        """returns client info table as a json for the client_id specified"""
-        return jsonify(ClientInfo.query.get_or_404(client_id).to_dict())
+    def get(self, clientid):
+        """returns client info table as a json for the clientid specified"""
+        return ClientInfo.query.get_or_404(clientid).to_dict()
 
     @ns.expect(client_info)
     @ns.doc(security='apikey')
     @token_auth.login_required
     @ns.marshal_with(client_info)
-    def put(self, client_id):
+    def put(self, clientid):
         """edit client info"""
-        client = ClientInfo.query.filter_by(clientid=client_id).one_or_none()
+        client = ClientInfo.query.filter_by(clientid=clientid).one_or_none()
         data = request.get_json()
         client.from_dict(data)
         db.session.add(client)
+        db.session.flush()
         db.session.commit()
-        return jsonify(client.to_dict())
+        return client.to_dict()
 
 @ns.route('/')
 class NewClient(Resource):
@@ -56,10 +56,11 @@ class NewClient(Resource):
         data = request.get_json()
         client = ClientInfo()
         client.from_dict(data)
-        #db.session.add(client)
-        #db.session.commit
+        db.session.add(client)
+        db.session.flush()
         response = client.to_dict()
-        response['__links'] = api.url_for(Client, client_id = 11)
+        response['__links'] = api.url_for(Client, clientid = client.clientid)
+        db.session.commit()
         return response, 201
 
 
@@ -85,63 +86,96 @@ class Clients(Resource):
 
         return jsonify(data)
 
-@ns.route('/consent/<int:client_id>')
-@ns.doc(params={'client_id': 'Client ID number'})
+@ns.route('/consent/<int:clientid>')
+@ns.doc(params={'clientid': 'Client ID number'})
 class ConsentContract(Resource):
     """client consent forms"""
     @ns.doc(security='apikey')
     @token_auth.login_required
-    def get(self, client_id):
-        """returns client consent table as a json for the client_id specified"""
-        return  jsonify(ClientConsent.query.filter_by(clientid=client_id).first_or_404().to_dict())
+    @ns.marshal_with(client_consent_response)
+    def get(self, clientid):
+        """returns client consent table as a json for the clientid specified"""
+        return  ClientConsent.query.filter_by(clientid=clientid).first_or_404().to_dict()
 
-@ns.route('/release/<int:client_id>')
-@ns.doc(params={'client_id': 'Client ID number'})
+    @ns.expect(client_consent_new)
+    @ns.doc(security='apikey')
+    @token_auth.login_required
+    @ns.marshal_with(client_consent_response)
+    def post(self, clientid):
+        """create client consent object for the specified clientid"""
+        data = request.get_json()
+        client_consent = ClientConsent()
+        client_consent.from_dict(clientid, data)
+        db.session.add(client_consent)
+        db.session.flush()
+        db.session.commit()
+        response = client_consent.to_dict()
+        # response['__links'] = api.url_for(Client, clientid = clientid) # to add links later on
+        return response, 201
+
+    @ns.expect(client_consent_new)
+    @ns.doc(security='apikey')
+    @token_auth.login_required
+    @ns.marshal_with(client_consent_response)
+    def put(self, clientid):
+        """edit client consent object for the specified clientid"""
+        data = request.get_json()
+        client_consent = ClientConsent.query.filter_by(clientid=clientid).first_or_404()
+        client_consent.from_dict(clientid, data)
+        db.session.add(client_consent)
+        db.session.flush()
+        db.session.commit()
+        response = client_consent.to_dict()
+        # response['__links'] = api.url_for(Client, clientid = clientid) # to add links later on
+        return response, 201
+
+@ns.route('/release/<int:clientid>')
+@ns.doc(params={'clientid': 'Client ID number'})
 class ReleaseContract(Resource):
     """Client release forms"""
     @ns.doc(security='apikey')
     @token_auth.login_required
-    def get(self, client_id):
-        """returns client release table as a json for the client_id specified"""
-        return  jsonify(ClientRelease.query.filter_by(clientid=client_id).first_or_404().to_dict())
+    def get(self, clientid):
+        """returns client release table as a json for the clientid specified"""
+        return  jsonify(ClientRelease.query.filter_by(clientid=clientid).first_or_404().to_dict())
 
-@ns.route('/policies/<int:client_id>')
-@ns.doc(params={'client_id': 'Client ID number'})
+@ns.route('/policies/<int:clientid>')
+@ns.doc(params={'clientid': 'Client ID number'})
 class PoliciesContract(Resource):
     """Client policies form"""
     @ns.doc(security='apikey')
     @token_auth.login_required
-    def get(self, client_id):
-        """returns client policies table as a json for the client_id specified"""
-        return  jsonify(ClientPolicies.query.filter_by(clientid=client_id).first_or_404().to_dict())
+    def get(self, clientid):
+        """returns client policies table as a json for the clientid specified"""
+        return  jsonify(ClientPolicies.query.filter_by(clientid=clientid).first_or_404().to_dict())
 
-@ns.route('/consultcontract/<int:client_id>')
-@ns.doc(params={'client_id': 'Client ID number'})
+@ns.route('/consultcontract/<int:clientid>')
+@ns.doc(params={'clientid': 'Client ID number'})
 class ConsultConstract(Resource):
     @ns.doc(security='apikey')
     @token_auth.login_required
-    def get(self, client_id):
-        """returns client consultation table as a json for the client_id specified"""
-        return  jsonify(ClientConsultContract.query.filter_by(clientid=client_id).first_or_404().to_dict())
+    def get(self, clientid):
+        """returns client consultation table as a json for the clientid specified"""
+        return  jsonify(ClientConsultContract.query.filter_by(clientid=clientid).first_or_404().to_dict())
 
 
-@ns.route('/subscriptioncontract/<int:client_id>')
-@ns.doc(params={'client_id': 'Client ID number'})
+@ns.route('/subscriptioncontract/<int:clientid>')
+@ns.doc(params={'clientid': 'Client ID number'})
 class SubscriptionContract(Resource):
     @ns.doc(security='apikey')
     @token_auth.login_required
-    def get(self, client_id):
-        """returns client subscription contract table as a json for the client_id specified"""
-        return  jsonify(ClientSubscriptionContract.query.filter_by(clientid=client_id).first_or_404().to_dict())
+    def get(self, clientid):
+        """returns client subscription contract table as a json for the clientid specified"""
+        return  jsonify(ClientSubscriptionContract.query.filter_by(clientid=clientid).first_or_404().to_dict())
 
-@ns.route('/individualcontract/<int:client_id>')
-@ns.doc(params={'client_id': 'Client ID number'})
+@ns.route('/individualcontract/<int:clientid>')
+@ns.doc(params={'clientid': 'Client ID number'})
 class IndividualContract(Resource):
     @ns.doc(security='apikey')
     @token_auth.login_required
-    def get(self, client_id):
-        """returns client info table as a json for the client_id specified"""
-        return  jsonify(ClientIndividualContract.query.filter_by(clientid=client_id).first_or_404().to_dict())
+    def get(self, clientid):
+        """returns client info table as a json for the clientid specified"""
+        return  jsonify(ClientIndividualContract.query.filter_by(clientid=clientid).first_or_404().to_dict())
 
 
 
