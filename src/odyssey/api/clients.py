@@ -4,7 +4,14 @@ from flask_restx import Resource, Api
 
 from odyssey.api import api
 from odyssey.api.auth import token_auth
-from odyssey.api.serializers import client_info, client_consent_response, client_consent_new, pagination
+from odyssey.api.serializers import (
+    client_info, 
+    client_consent, 
+    client_consent_edit, 
+    client_release, 
+    client_release_edit, 
+    pagination
+)
 from odyssey import db
 from odyssey.models.intake import (
     ClientInfo,
@@ -92,15 +99,15 @@ class ConsentContract(Resource):
     """client consent forms"""
     @ns.doc(security='apikey')
     @token_auth.login_required
-    @ns.marshal_with(client_consent_response)
+    @ns.marshal_with(client_consent)
     def get(self, clientid):
         """returns client consent table as a json for the clientid specified"""
         return  ClientConsent.query.filter_by(clientid=clientid).first_or_404().to_dict()
 
-    @ns.expect(client_consent_new)
+    @ns.expect(client_consent_edit)
     @ns.doc(security='apikey')
     @token_auth.login_required
-    @ns.marshal_with(client_consent_response)
+    @ns.marshal_with(client_consent)
     def post(self, clientid):
         """create client consent object for the specified clientid"""
         data = request.get_json()
@@ -113,10 +120,10 @@ class ConsentContract(Resource):
         # response['__links'] = api.url_for(Client, clientid = clientid) # to add links later on
         return response, 201
 
-    @ns.expect(client_consent_new)
+    @ns.expect(client_consent_edit)
     @ns.doc(security='apikey')
     @token_auth.login_required
-    @ns.marshal_with(client_consent_response)
+    @ns.marshal_with(client_consent)
     def put(self, clientid):
         """edit client consent object for the specified clientid"""
         data = request.get_json()
@@ -135,9 +142,43 @@ class ReleaseContract(Resource):
     """Client release forms"""
     @ns.doc(security='apikey')
     @token_auth.login_required
+    @ns.marshal_with(client_release)
     def get(self, clientid):
         """returns client release table as a json for the clientid specified"""
-        return  jsonify(ClientRelease.query.filter_by(clientid=clientid).first_or_404().to_dict())
+        return  ClientRelease.query.filter_by(clientid=clientid).first_or_404().to_dict()
+
+    @ns.expect(client_release_edit)
+    @ns.doc(security='apikey')
+    @token_auth.login_required
+    @ns.marshal_with(client_release)
+    def post(self, clientid):
+        """create client release contract object for the specified clientid"""
+        data = request.get_json()
+        client_release = ClientRelease()
+        client_release.from_dict(clientid, data)
+        db.session.add(client_release)
+        db.session.flush()
+        db.session.commit()
+        response = client_release.to_dict()
+        # response['__links'] = api.url_for(Client, clientid = clientid) # to add links later on
+        return response, 201
+
+    @ns.expect(client_release_edit)
+    @ns.doc(security='apikey')
+    @token_auth.login_required
+    @ns.marshal_with(client_release)
+    def put(self, clientid):
+        """edit client release object for the specified clientid"""
+        data = request.get_json()
+        client_release = ClientRelease.query.filter_by(clientid=clientid).first_or_404()
+        client_release.from_dict(clientid, data)
+        db.session.add(client_release)
+        db.session.flush()
+        db.session.commit()
+        response = client_release.to_dict()
+        # response['__links'] = api.url_for(Client, clientid = clientid) # to add links later on
+        return response, 201
+
 
 @ns.route('/policies/<int:clientid>')
 @ns.doc(params={'clientid': 'Client ID number'})

@@ -45,15 +45,44 @@ client_info =   api.model('client_info', {
             'receive_docs': fields.Boolean(description=''),
         })
 
-client_consent_response = api.model('client_consent', {
+client_consent = api.model('client_consent', {
     'clientid': fields.Integer(description=''),
     'infectious_disease': fields.Boolean(description='whether or not the client has a known infectious disease'),
     'signdate': fields.Date(description=f'formatted as: {DATE_FORMAT}', date = DATE_FORMAT ),
     'signature': fields.String(description='client signature stored as a base64 encoded png image, prefixed with mime-type.'),
 })
 
-client_consent_new = api.model('client_consent', {
+client_consent_edit = api.model('client_consent_edit', {
     'infectious_disease': fields.Boolean(description='whether or not the client has a known infectious disease'),
     'signdate': fields.Date(description=f'formatted as: {DATE_FORMAT}', date = DATE_FORMAT ),
     'signature': fields.String(description='client signature stored as a base64 encoded png image, prefixed with mime-type.'),
 })
+
+
+client_release = api.model('client_release', {
+            'clientid': fields.Integer(description=''),
+            'release_by_other': fields.String(description = 'Describes who else can release protected health information.'),
+            'release_to_other': fields.String(description = 'Describes to whom else protected health information can be released.'),
+            'release_of_all': fields.Boolean(description='Indicates whether or not client want to allow to release all protected health information.'),
+            'release_of_other': fields.String(description = 'Describes what other protected health information can be released.'),
+            'release_date_from': fields.Date(description=f'formatted as: {DATE_FORMAT}', date = DATE_FORMAT ),
+            'release_date_to': fields.Date(description=f'formatted as: {DATE_FORMAT}', date = DATE_FORMAT ),
+            'release_purpose': fields.String(description = 'Describes for what purpose protected health information can be released.'),
+            'signdate': fields.Date(description=f'formatted as: {DATE_FORMAT}', date = DATE_FORMAT ),
+            'signature': fields.String(description='client signature stored as a base64 encoded png image, prefixed with mime-type.')
+        })
+
+client_release_edit = client_release = api.model('client_release_edit', {
+            'clientid': fields.Integer(description=''),
+            'release_by_other': fields.String(description = 'Describes who else can release protected health information.'),
+            'release_to_other': fields.String(description = 'Describes to whom else protected health information can be released.'),
+            'release_of_all': fields.Boolean(description='Indicates whether or not client want to allow to release all protected health information.'),
+            'release_of_other': fields.String(description = 'Describes what other protected health information can be released.'),
+            'release_date_from': fields.Date(description=f'formatted as: {DATE_FORMAT}', date = DATE_FORMAT ),
+            'release_date_to': fields.Date(description=f'formatted as: {DATE_FORMAT}', date = DATE_FORMAT ),
+            'release_purpose': fields.String(description = 'Describes for what purpose protected health information can be released.'),
+            'signdate': fields.Date(description=f'formatted as: {DATE_FORMAT}', date = DATE_FORMAT ),
+            'signature': fields.String(description='client signature stored as a base64 encoded png image, prefixed with mime-type.')
+        })
+
+    

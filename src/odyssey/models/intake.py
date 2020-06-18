@@ -434,6 +434,19 @@ class ClientRelease(db.Model):
     :type: str
     """
 
+    def get_attributes(self):
+        """return class attributes as list"""
+        return [ 'release_by_other','release_to_other', 'release_of_all', 'release_of_other', 'release_date_to',
+            'release_date_from', 'release_purpose', 'signdate', 'signature' ]
+
+    def from_dict(self, clientid, data):
+        """to be used when a new user is created or a user is edited"""
+        setattr(self, 'clientid', clientid) #set clientid of new objects
+        attributes = self.get_attributes()
+        for field in attributes:
+            if field in data:
+                setattr(self, field, data[field])
+
     def to_dict(self):
         """retuns all data in ClientRelease Model as a dictionary"""
         data = {
@@ -445,7 +458,7 @@ class ClientRelease(db.Model):
             'release_date_from': self.release_date_from,
             'release_date_to': self.release_date_to,
             'release_purpose': self.release_purpose,
-            'sign_date': self.signdate,
+            'signdate': self.signdate,
             'signature': self.signature
         }
         return data
@@ -456,16 +469,30 @@ class ClientPolicies(db.Model):
     __tablename__ = 'ClientPolicies'
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid'), nullable=False)
 
     signdate = db.Column(db.Date)
+
     signature = db.Column(db.Text)
+
+    def get_attributes(self):
+        """return class attributes as list"""
+        return [ 'signdate', 'signature' ]
+
+    def from_dict(self, clientid, data):
+        """to be used when a new user is created or a user is edited"""
+        setattr(self, 'clientid', clientid) #set clientid of new objects
+        attributes = self.get_attributes()
+        for field in attributes:
+            if field in data:
+                setattr(self, field, data[field])
 
     def to_dict(self):
         """retuns all data in ClientPolicies Model as a dictionary"""
         data = {
             'clientid': self.clientid,
-            'sign_date': self.signdate,
+            'signdate': self.signdate,
             'signature': self.signature
         }
         return data
@@ -509,12 +536,24 @@ class ClientConsultContract(db.Model):
 
     :type: str
     """
+    
+    def get_attributes(self):
+        """return class attributes as list"""
+        return [ 'signdate', 'signature' ]
+
+    def from_dict(self, clientid, data):
+        """to be used when a new user is created or a user is edited"""
+        setattr(self, 'clientid', clientid) #set clientid of new objects
+        attributes = self.get_attributes()
+        for field in attributes:
+            if field in data:
+                setattr(self, field, data[field])
 
     def to_dict(self):
         """retuns all data in ClientConsultConstract Model as a dictionary"""
         data = {
             'clientid': self.clientid,
-            'sign_date': self.signdate,
+            'signdate': self.signdate,
             'signature': self.signature
         }
         return data
@@ -559,11 +598,23 @@ class ClientSubscriptionContract(db.Model):
     :type: str
     """
 
+    def get_attributes(self):
+        """return class attributes as list"""
+        return [ 'signdate', 'signature' ]
+
+    def from_dict(self, clientid, data):
+        """to be used when a new user is created or a user is edited"""
+        setattr(self, 'clientid', clientid) #set clientid of new objects
+        attributes = self.get_attributes()
+        for field in attributes:
+            if field in data:
+                setattr(self, field, data[field])
+
     def to_dict(self):
         """retuns all data in ClientSubscriptionContract Model as a dictionary"""
         data = {
             'clientid': self.clientid,
-            'sign_date': self.signdate,
+            'signdate': self.signdate,
             'signature': self.signature
         }
         return data
@@ -630,6 +681,18 @@ class ClientIndividualContract(db.Model):
 
     :type: str
     """
+    
+    def get_attributes(self):
+        """return class attributes as list"""
+        return [ 'signdate', 'signature', 'doctor', 'pt', 'drinks']
+
+    def from_dict(self, clientid, data):
+        """to be used when a new user is created or a user is edited"""
+        setattr(self, 'clientid', clientid) #set clientid of new objects
+        attributes = self.get_attributes()
+        for field in attributes:
+            if field in data:
+                setattr(self, field, data[field])
 
     def to_dict(self):
         """retuns all data in ClientSubscriptionContract Model as a dictionary"""
