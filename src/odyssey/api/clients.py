@@ -10,7 +10,9 @@ from odyssey.api.serializers import (
     client_consent_edit, 
     client_release, 
     client_release_edit, 
-    pagination
+    pagination,
+    sign_and_date,
+    sign_and_date_edit
 )
 from odyssey import db
 from odyssey.models.intake import (
@@ -184,20 +186,89 @@ class ReleaseContract(Resource):
 @ns.doc(params={'clientid': 'Client ID number'})
 class PoliciesContract(Resource):
     """Client policies form"""
+
     @ns.doc(security='apikey')
     @token_auth.login_required
+    @ns.marshal_with(sign_and_date)
     def get(self, clientid):
         """returns client policies table as a json for the clientid specified"""
-        return  jsonify(ClientPolicies.query.filter_by(clientid=clientid).first_or_404().to_dict())
+        return  ClientPolicies.query.filter_by(clientid=clientid).first_or_404().to_dict()
+
+    @ns.expect(sign_and_date_edit)
+    @ns.doc(security='apikey')
+    @token_auth.login_required
+    @ns.marshal_with(sign_and_date)
+    def post(self, clientid):
+        """create client release contract object for the specified clientid"""
+        data = request.get_json()
+        client = ClientPolicies()
+        client.from_dict(clientid, data)
+        db.session.add(client)
+        db.session.flush()
+        db.session.commit()
+        response = client.to_dict()
+        # response['__links'] = api.url_for(Client, clientid = clientid) # to add links later on
+        return response, 201
+
+    @ns.expect(sign_and_date_edit)
+    @ns.doc(security='apikey')
+    @token_auth.login_required
+    @ns.marshal_with(sign_and_date)
+    def put(self, clientid):
+        """edit client release object for the specified clientid"""
+        data = request.get_json()
+        client = ClientPolicies.query.filter_by(clientid=clientid).first_or_404()
+        client.from_dict(clientid, data)
+        db.session.add(client)
+        db.session.flush()
+        db.session.commit()
+        response = client.to_dict()
+        # response['__links'] = api.url_for(Client, clientid = clientid) # to add links later on
+        return response, 201
 
 @ns.route('/consultcontract/<int:clientid>')
 @ns.doc(params={'clientid': 'Client ID number'})
 class ConsultConstract(Resource):
+    """client consult contract"""
+
     @ns.doc(security='apikey')
     @token_auth.login_required
+    @ns.marshal_with(sign_and_date)
     def get(self, clientid):
         """returns client consultation table as a json for the clientid specified"""
-        return  jsonify(ClientConsultContract.query.filter_by(clientid=clientid).first_or_404().to_dict())
+        return  ClientConsultContract.query.filter_by(clientid=clientid).first_or_404().to_dict()
+
+    @ns.expect(sign_and_date_edit)
+    @ns.doc(security='apikey')
+    @token_auth.login_required
+    @ns.marshal_with(sign_and_date)
+    def post(self, clientid):
+        """create client release contract object for the specified clientid"""
+        data = request.get_json()
+        client = ClientConsultContract()
+        client.from_dict(clientid, data)
+        db.session.add(client)
+        db.session.flush()
+        db.session.commit()
+        response = client.to_dict()
+        # response['__links'] = api.url_for(Client, clientid = clientid) # to add links later on
+        return response, 201
+
+    @ns.expect(sign_and_date_edit)
+    @ns.doc(security='apikey')
+    @token_auth.login_required
+    @ns.marshal_with(sign_and_date)
+    def put(self, clientid):
+        """edit client release object for the specified clientid"""
+        data = request.get_json()
+        client = ClientConsultContract.query.filter_by(clientid=clientid).first_or_404()
+        client.from_dict(clientid, data)
+        db.session.add(client)
+        db.session.flush()
+        db.session.commit()
+        response = client.to_dict()
+        # response['__links'] = api.url_for(Client, clientid = clientid) # to add links later on
+        return response, 201
 
 
 @ns.route('/subscriptioncontract/<int:clientid>')

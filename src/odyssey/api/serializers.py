@@ -72,7 +72,7 @@ client_release = api.model('client_release', {
             'signature': fields.String(description='client signature stored as a base64 encoded png image, prefixed with mime-type.')
         })
 
-client_release_edit = client_release = api.model('client_release_edit', {
+client_release_edit = api.model('client_release_edit', {
             'clientid': fields.Integer(description=''),
             'release_by_other': fields.String(description = 'Describes who else can release protected health information.'),
             'release_to_other': fields.String(description = 'Describes to whom else protected health information can be released.'),
@@ -85,4 +85,16 @@ client_release_edit = client_release = api.model('client_release_edit', {
             'signature': fields.String(description='client signature stored as a base64 encoded png image, prefixed with mime-type.')
         })
 
+sign_and_date = api.model('sign_and_date', {
+            'clientid': fields.Integer(description=''),
+            'signdate': fields.Date(description=f'formatted as: {DATE_FORMAT}', date = DATE_FORMAT ),
+            'signature': fields.String(description='client signature stored as a base64 encoded png image, prefixed with mime-type.')
+        })
+
+sign_and_date_edit = api.model('sign_and_date_edit', {
+            'signdate': fields.Date(description=f'formatted as: {DATE_FORMAT}', date = DATE_FORMAT ),
+            'signature': fields.String(description='client signature stored as a base64 encoded png image, prefixed with mime-type.')
+        })
+
+    
     
