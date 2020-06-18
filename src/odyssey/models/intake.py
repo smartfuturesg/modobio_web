@@ -702,7 +702,7 @@ class ClientIndividualContract(db.Model):
             'doctor': self.doctor,
             'pt': self.pt,
             'drinks': self.drinks,
-            'sign_date': self.signdate,
+            'signdate': self.signdate,
             'signature': self.signature
         }
         return data

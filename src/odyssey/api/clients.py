@@ -276,7 +276,7 @@ class ConsultConstract(Resource):
 @ns.route('/subscriptioncontract/<int:clientid>')
 @ns.doc(params={'clientid': 'Client ID number'})
 class SubscriptionContract(Resource):
-
+    """client subscription contract"""
     @ns.doc(security='apikey')
     @token_auth.login_required
     @ns.marshal_with(sign_and_date)
@@ -317,9 +317,10 @@ class SubscriptionContract(Resource):
         return response, 201
 
 
-@ns.route('/individualcontract/<int:clientid>')
+@ns.route('/servicescontract/<int:clientid>')
 @ns.doc(params={'clientid': 'Client ID number'})
 class IndividualContract(Resource):
+    """client individual services contract"""
     @ns.doc(security='apikey')
     @token_auth.login_required
     @ns.marshal_with(client_individual_services_contract)
