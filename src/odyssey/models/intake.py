@@ -684,7 +684,7 @@ class ClientIndividualContract(db.Model):
     
     def get_attributes(self):
         """return class attributes as list"""
-        return [ 'signdate', 'signature', 'doctor', 'pt', 'drinks']
+        return [ 'signdate', 'signature', 'data', 'doctor', 'pt', 'drinks']
 
     def from_dict(self, clientid, data):
         """to be used when a new user is created or a user is edited"""
@@ -698,6 +698,7 @@ class ClientIndividualContract(db.Model):
         """retuns all data in ClientSubscriptionContract Model as a dictionary"""
         data = {
             'clientid': self.clientid,
+            'data': self.data,
             'doctor': self.doctor,
             'pt': self.pt,
             'drinks': self.drinks,
