@@ -4,6 +4,7 @@ from flask_restx import Resource, Api
 
 from odyssey.api import api
 from odyssey.api.auth import token_auth
+from odyssey.api.errors import UserNotFound
 from odyssey.api.serializers import (
     client_info, 
     client_individual_services_contract,
@@ -38,7 +39,10 @@ class Client(Resource):
     @ns.marshal_with(client_info)
     def get(self, clientid):
         """returns client info table as a json for the clientid specified"""
-        return ClientInfo.query.get_or_404(clientid).to_dict()
+        client = ClientInfo.query.get(clientid)
+        if not client:
+            raise UserNotFound(clientid)
+        return client.to_dict()
 
     @ns.expect(client_info)
     @ns.doc(security='apikey')
@@ -47,6 +51,8 @@ class Client(Resource):
     def put(self, clientid):
         """edit client info"""
         client = ClientInfo.query.filter_by(clientid=clientid).one_or_none()
+        if not client:
+            raise UserNotFound(clientid)
         data = request.get_json()
         client.from_dict(data)
         db.session.add(client)
@@ -107,7 +113,10 @@ class ConsentContract(Resource):
     @ns.marshal_with(client_consent)
     def get(self, clientid):
         """returns client consent table as a json for the clientid specified"""
-        return  ClientConsent.query.filter_by(clientid=clientid).first_or_404().to_dict()
+        client = ClientConsent.query.filter_by(clientid=clientid).one_or_none()
+        if not client:
+            raise UserNotFound(clientid)
+        return  client.to_dict()
 
     @ns.expect(client_consent_edit)
     @ns.doc(security='apikey')
@@ -132,12 +141,14 @@ class ConsentContract(Resource):
     def put(self, clientid):
         """edit client consent object for the specified clientid"""
         data = request.get_json()
-        client_consent = ClientConsent.query.filter_by(clientid=clientid).first_or_404()
-        client_consent.from_dict(clientid, data)
-        db.session.add(client_consent)
+        client = ClientConsent.query.filter_by(clientid=clientid).one_or_none()
+        if not client:
+            raise UserNotFound(clientid)
+        client.from_dict(clientid, data)
+        db.session.add(client)
         db.session.flush()
         db.session.commit()
-        response = client_consent.to_dict()
+        response = client.to_dict()
         # response['__links'] = api.url_for(Client, clientid = clientid) # to add links later on
         return response, 201
 
