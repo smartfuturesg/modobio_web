@@ -245,7 +245,7 @@ class ConsultConstract(Resource):
         """returns most recent client consultation table as a json for the clientid specified"""
         client_consult =  ClientConsultContract.query.filter_by(clientid=clientid).order_by(ClientConsultContract.signdate.desc()).first()
 
-        if not client_policies:
+        if not client_consult:
             raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a policy contract in the database")
 
         return  client_consult.to_dict()
