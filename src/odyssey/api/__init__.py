@@ -5,8 +5,13 @@ authorizations = {
     'Bearer Auth': {
         'type': 'apiKey',
         'in': 'header',
-        'name': 'Authorization'
-    }
+        'name': 'Token Authorization'
+    },
+    'Basic Auth': {
+        'type': 'basic',
+        'in': 'header',
+        'name': 'Basic Authorization'
+    },
 }
 
 bp = Blueprint('api', __name__)
