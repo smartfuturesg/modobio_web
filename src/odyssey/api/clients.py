@@ -31,7 +31,7 @@ from odyssey.models.intake import (
 ns = api.namespace('client', description='Operations related to clients')
 
     
-@ns.route('/<int:clientid>')
+@ns.route('/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
 class Client(Resource):
     @ns.doc(security='apikey')
@@ -82,7 +82,7 @@ class NewClient(Resource):
         return response, 201
 
 
-@ns.route('/clientsearch', methods=['GET'])
+@ns.route('/clientsearch/', methods=['GET'])
 @ns.doc(params={'page': 'request page for paginated clients list', 'per_page': 'number of clients per page'})
 class Clients(Resource):
     @ns.doc(security='apikey')
@@ -104,7 +104,7 @@ class Clients(Resource):
 
         return jsonify(data)
 
-@ns.route('/consent/<int:clientid>')
+@ns.route('/consent/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
 class ConsentContract(Resource):
     """client consent forms"""
@@ -152,7 +152,7 @@ class ConsentContract(Resource):
         # response['__links'] = api.url_for(Client, clientid = clientid) # to add links later on
         return response, 201
 
-@ns.route('/release/<int:clientid>')
+@ns.route('/release/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
 class ReleaseContract(Resource):
     """Client release forms"""
@@ -196,7 +196,7 @@ class ReleaseContract(Resource):
         return response, 201
 
 
-@ns.route('/policies/<int:clientid>')
+@ns.route('/policies/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
 class PoliciesContract(Resource):
     """Client policies form"""
@@ -240,7 +240,7 @@ class PoliciesContract(Resource):
         # response['__links'] = api.url_for(Client, clientid = clientid) # to add links later on
         return response, 201
 
-@ns.route('/consultcontract/<int:clientid>')
+@ns.route('/consultcontract/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
 class ConsultConstract(Resource):
     """client consult contract"""
@@ -285,7 +285,7 @@ class ConsultConstract(Resource):
         return response, 201
 
 
-@ns.route('/subscriptioncontract/<int:clientid>')
+@ns.route('/subscriptioncontract/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
 class SubscriptionContract(Resource):
     """client subscription contract"""
@@ -329,7 +329,7 @@ class SubscriptionContract(Resource):
         return response, 201
 
 
-@ns.route('/servicescontract/<int:clientid>')
+@ns.route('/servicescontract/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
 class IndividualContract(Resource):
     """client individual services contract"""
