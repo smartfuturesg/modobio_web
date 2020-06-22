@@ -114,16 +114,22 @@ class Staff(db.Model):
         now = datetime.utcnow()
         #returns current token if it is valid
         if self.token and self.token_expiration > now + timedelta(seconds=60):
+            breakpoint()
             return self.token
         #otherwise generate new token, add to session
         self.token = base64.b64encode(os.urandom(24)).decode('utf-8')
         self.token_expiration = now + timedelta(seconds=expires_in)
         db.session.add(self)
+        db.session.flush()
+        db.session.commit()
         return self.token
 
     def revoke_token(self):
         """set token to expired, for logging out/generating new token"""
         self.token_expiration = datetime.utcnow() - timedelta(seconds=1)
+        db.session.add(self)
+        db.session.flush()
+        db.session.commit()
 
     @staticmethod
     def check_token(token):
