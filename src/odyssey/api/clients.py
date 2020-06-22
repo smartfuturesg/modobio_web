@@ -113,7 +113,6 @@ class ConsentContract(Resource):
     @ns.marshal_with(client_consent)
     def get(self, clientid):
         """returns the most recent consent table as a json for the clientid specified"""
-
         client_consent_form = ClientConsent.query.filter_by(clientid=clientid).order_by(ClientConsent.signdate.desc()).first()
 
         if not client_consent_form:
@@ -163,8 +162,13 @@ class ReleaseContract(Resource):
     @token_auth.login_required
     @ns.marshal_with(client_release)
     def get(self, clientid):
-        """returns client release table as a json for the clientid specified"""
-        return  ClientRelease.query.filter_by(clientid=clientid).first_or_404().to_dict()
+        """returns most recent client release table as a json for the clientid specified"""
+        client_release_form =  ClientRelease.query.filter_by(clientid=clientid).order_by(ClientRelease.signdate.desc()).first()
+
+        if not client_release_form:
+            raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a release contract in the database")
+
+        return  client_release_form.to_dict()
 
     @ns.expect(client_release_edit)
     @ns.doc(security='apikey')
@@ -173,31 +177,13 @@ class ReleaseContract(Resource):
     def post(self, clientid):
         """create client release contract object for the specified clientid"""
         data = request.get_json()
-        client_release = ClientRelease()
-        client_release.from_dict(clientid, data)
-        db.session.add(client_release)
+        client_release_form = ClientRelease()
+        client_release_form.from_dict(clientid, data)
+        db.session.add(client_release_form)
         db.session.flush()
         db.session.commit()
-        response = client_release.to_dict()
-        # response['__links'] = api.url_for(Client, clientid = clientid) # to add links later on
+        response = client_release_form.to_dict()
         return response, 201
-
-    @ns.expect(client_release_edit)
-    @ns.doc(security='apikey')
-    @token_auth.login_required
-    @ns.marshal_with(client_release)
-    def put(self, clientid):
-        """edit client release object for the specified clientid"""
-        data = request.get_json()
-        client_release = ClientRelease.query.filter_by(clientid=clientid).first_or_404()
-        client_release.from_dict(clientid, data)
-        db.session.add(client_release)
-        db.session.flush()
-        db.session.commit()
-        response = client_release.to_dict()
-        # response['__links'] = api.url_for(Client, clientid = clientid) # to add links later on
-        return response, 201
-
 
 @ns.route('/policies/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
