@@ -194,8 +194,13 @@ class PoliciesContract(Resource):
     @token_auth.login_required
     @ns.marshal_with(sign_and_date)
     def get(self, clientid):
-        """returns client policies table as a json for the clientid specified"""
-        return  ClientPolicies.query.filter_by(clientid=clientid).first_or_404().to_dict()
+        """returns most recent client policies table as a json for the clientid specified"""
+        client_policies =  ClientPolicies.query.filter_by(clientid=clientid).order_by(ClientPolicies.signdate.desc()).first()
+
+        if not client_policies:
+            raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a policy contract in the database")
+
+        return  client_policies.to_dict()
 
     @ns.expect(sign_and_date_edit)
     @ns.doc(security='apikey')
@@ -204,30 +209,29 @@ class PoliciesContract(Resource):
     def post(self, clientid):
         """create client policies contract object for the specified clientid"""
         data = request.get_json()
-        client = ClientPolicies()
-        client.from_dict(clientid, data)
-        db.session.add(client)
+        client_policies = ClientPolicies()
+        client_policies.from_dict(clientid, data)
+        db.session.add(client_policies)
         db.session.flush()
         db.session.commit()
-        response = client.to_dict()
-        # response['__links'] = api.url_for(Client, clientid = clientid) # to add links later on
+        response = client_policies.to_dict()
         return response, 201
 
-    @ns.expect(sign_and_date_edit)
-    @ns.doc(security='apikey')
-    @token_auth.login_required
-    @ns.marshal_with(sign_and_date)
-    def put(self, clientid):
-        """edit client policies object for the specified clientid"""
-        data = request.get_json()
-        client = ClientPolicies.query.filter_by(clientid=clientid).first_or_404()
-        client.from_dict(clientid, data)
-        db.session.add(client)
-        db.session.flush()
-        db.session.commit()
-        response = client.to_dict()
-        # response['__links'] = api.url_for(Client, clientid = clientid) # to add links later on
-        return response, 201
+    # @ns.expect(sign_and_date_edit)
+    # @ns.doc(security='apikey')
+    # @token_auth.login_required
+    # @ns.marshal_with(sign_and_date)
+    # def put(self, clientid):
+    #     """edit client policies object for the specified clientid"""
+    #     data = request.get_json()
+    #     client = ClientPolicies.query.filter_by(clientid=clientid).first_or_404()
+    #     client.from_dict(clientid, data)
+    #     db.session.add(client)
+    #     db.session.flush()
+    #     db.session.commit()
+    #     response = client.to_dict()
+    #     # response['__links'] = api.url_for(Client, clientid = clientid) # to add links later on
+    #     return response, 201
 
 @ns.route('/consultcontract/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
@@ -238,8 +242,13 @@ class ConsultConstract(Resource):
     @token_auth.login_required
     @ns.marshal_with(sign_and_date)
     def get(self, clientid):
-        """returns client consultation table as a json for the clientid specified"""
-        return  ClientConsultContract.query.filter_by(clientid=clientid).first_or_404().to_dict()
+        """returns most recent client consultation table as a json for the clientid specified"""
+        client_consult =  ClientConsultContract.query.filter_by(clientid=clientid).order_by(ClientConsultContract.signdate.desc()).first()
+
+        if not client_policies:
+            raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a policy contract in the database")
+
+        return  client_consult.to_dict()
 
     @ns.expect(sign_and_date_edit)
     @ns.doc(security='apikey')
@@ -248,31 +257,13 @@ class ConsultConstract(Resource):
     def post(self, clientid):
         """create client consult contract object for the specified clientid"""
         data = request.get_json()
-        client = ClientConsultContract()
-        client.from_dict(clientid, data)
-        db.session.add(client)
+        client_consult = ClientConsultContract()
+        client_consult.from_dict(clientid, data)
+        db.session.add(client_consult)
         db.session.flush()
         db.session.commit()
-        response = client.to_dict()
-        # response['__links'] = api.url_for(Client, clientid = clientid) # to add links later on
+        response = client_consult.to_dict()
         return response, 201
-
-    @ns.expect(sign_and_date_edit)
-    @ns.doc(security='apikey')
-    @token_auth.login_required
-    @ns.marshal_with(sign_and_date)
-    def put(self, clientid):
-        """edit client consult object for the specified clientid"""
-        data = request.get_json()
-        client = ClientConsultContract.query.filter_by(clientid=clientid).first_or_404()
-        client.from_dict(clientid, data)
-        db.session.add(client)
-        db.session.flush()
-        db.session.commit()
-        response = client.to_dict()
-        # response['__links'] = api.url_for(Client, clientid = clientid) # to add links later on
-        return response, 201
-
 
 @ns.route('/subscriptioncontract/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
