@@ -9,9 +9,13 @@ from odyssey.api import api
 
 class UserNotFound(Exception):
     """in the case a non-existent client is being requested"""
-    def __init__(self, clientid):
+    def __init__(self, clientid, message = None):
         Exception.__init__(self)
-        self.message = f'The client with clientid {clientid}, does not exist. Please try again.'
+        if message:
+            self.message = message
+        else:
+            self.message = f'The client with clientid {clientid}, does not exist. Please try again.'
+            
         self.status_code = 404
 
 def bad_request(message):

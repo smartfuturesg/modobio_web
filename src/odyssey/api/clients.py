@@ -112,45 +112,48 @@ class ConsentContract(Resource):
     @token_auth.login_required
     @ns.marshal_with(client_consent)
     def get(self, clientid):
-        """returns client consent table as a json for the clientid specified"""
-        client = ClientConsent.query.filter_by(clientid=clientid).one_or_none()
-        if not client:
-            raise UserNotFound(clientid)
-        return  client.to_dict()
+        """returns the most recent consent table as a json for the clientid specified"""
+
+        client_consent_form = ClientConsent.query.filter_by(clientid=clientid).order_by(ClientConsent.signdate.desc()).first()
+
+        if not client_consent_form:
+            raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a consultation contract in the database")
+        
+        return  client_consent_form.to_dict()
 
     @ns.expect(client_consent_edit)
     @ns.doc(security='apikey')
     @token_auth.login_required
     @ns.marshal_with(client_consent)
     def post(self, clientid):
-        """create client consent object for the specified clientid"""
+        """create new client consent contract for the specified clientid"""
         data = request.get_json()
-        client_consent = ClientConsent()
-        client_consent.from_dict(clientid, data)
-        db.session.add(client_consent)
+        client_consent_form = ClientConsent()
+        client_consent_form.from_dict(clientid, data)
+        db.session.add(client_consent_form)
         db.session.flush()
         db.session.commit()
-        response = client_consent.to_dict()
+        response = client_consent_form.to_dict()
         # response['__links'] = api.url_for(Client, clientid = clientid) # to add links later on
         return response, 201
 
-    @ns.expect(client_consent_edit)
-    @ns.doc(security='apikey')
-    @token_auth.login_required
-    @ns.marshal_with(client_consent)
-    def put(self, clientid):
-        """edit client consent object for the specified clientid"""
-        data = request.get_json()
-        client = ClientConsent.query.filter_by(clientid=clientid).one_or_none()
-        if not client:
-            raise UserNotFound(clientid)
-        client.from_dict(clientid, data)
-        db.session.add(client)
-        db.session.flush()
-        db.session.commit()
-        response = client.to_dict()
-        # response['__links'] = api.url_for(Client, clientid = clientid) # to add links later on
-        return response, 201
+    # @ns.expect(client_consent_edit)
+    # @ns.doc(security='apikey')
+    # @token_auth.login_required
+    # @ns.marshal_with(client_consent)
+    # def put(self, clientid):
+    #     """edit client consent object for the specified clientid"""
+    #     data = request.get_json()
+    #     client = ClientConsent.query.filter_by(clientid=clientid).one_or_none()
+    #     if not client:
+    #         raise UserNotFound(clientid)
+    #     client.from_dict(clientid, data)
+    #     db.session.add(client)
+    #     db.session.flush()
+    #     db.session.commit()
+    #     response = client.to_dict()
+    #     # response['__links'] = api.url_for(Client, clientid = clientid) # to add links later on
+    #     return response, 201
 
 @ns.route('/release/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
