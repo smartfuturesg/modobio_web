@@ -133,7 +133,6 @@ class Staff(db.Model):
         now = datetime.utcnow()
         #returns current token if it is valid
         if self.token and self.token_expiration > now + timedelta(seconds=60):
-            breakpoint()
             return self.token
         #otherwise generate new token, add to session
         self.token = base64.b64encode(os.urandom(24)).decode('utf-8')
