@@ -19,7 +19,7 @@ class StaffMembers(Resource):
     def post(self):
         """register a new staff member"""
         data = request.get_json() or {}
-  
+        # allow only system admin to add staff admin roles. staff admin can create all other roles except staff/systemadmin
         if data['is_system_admin']:
             raise UnauthorizedUser(message=f"Staff member with email {token_auth.current_user().email} is unauthorized to create a system administrator role.")
 

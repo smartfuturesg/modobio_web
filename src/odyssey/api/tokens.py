@@ -16,7 +16,11 @@ class Token(Resource):
     def post(self):
         """generates a token for the 'current_user' immediately after password authentication"""
         user = basic_auth.current_user()
-        return {'email': user.email, 'firstname': user.firstname, 'lastname': user.lastname, 'token': user.get_token()}, 201
+        return {'email': user.email, 
+                'firstname': user.firstname, 
+                'lastname': user.lastname, 
+                'token': user.get_token(),
+                'access_role': user.access_role}, 201
 
     @ns.doc(security='basic')
     @token_auth.login_required
