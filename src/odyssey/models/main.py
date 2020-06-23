@@ -47,6 +47,22 @@ class Staff(db.Model):
     :type: bool, default = False
     """
 
+    is_system_admin = db.Column(db.Boolean, nullable=False, default=False)
+    """
+    Indicates whether staff member is a system administrator. There should be very few of these
+    roles given out. 
+
+    :type: bool, default = False
+    """
+
+    access_role = db.Column(db.String, nullable=False, default='cs')
+    """
+    Indicates the content access role of the staff member.
+    roles include: client services (cs), pt, doctor, data 
+
+    :type: str, default = cs
+    """
+
     email = db.Column(db.String(50), nullable=False, unique=True)
     """
     Email address of staff member, used as login.
@@ -82,6 +98,8 @@ class Staff(db.Model):
     :type: str, max length 128
     """
 
+
+
     def to_dict(self):
         """returns all Staff info in dictionary form (except password and token)"""
         data = {
@@ -91,18 +109,19 @@ class Staff(db.Model):
             'full_name': self.fullname,
             'email': self.email,
             'is_admin': self.is_admin,
+            'is_system_admin': self.is_system_admin,
+            'access_role': self.access_role
         }
 
         return data
 
     def from_dict(self, data, new_staff=False):
-        for field in ['firstname', 'lastname', 'fullname', 'email']:
+        for field in ['firstname', 'lastname', 'fullname', 'email', 'is_admin', 'is_system_admin', 'access_role']:
             if field in data:
                 setattr(self, field, data[field])
 
         if new_staff and 'password' in data:
             self.set_password(data['password'])
-
 
     def set_password(self, password):
         self.password = generate_password_hash(password)
@@ -140,4 +159,12 @@ class Staff(db.Model):
             return None
         return staff_member
 
+    def get_admin_role(self):
+        """check if this staff member is authorizewd to create new staff members"""
+        if self.is_system_admin:
+            return 'sys_admin'
+        elif self.is_admin:
+            return 'staff_admin'
+        else:
+            return None #not an admin
 

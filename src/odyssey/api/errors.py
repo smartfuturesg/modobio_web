@@ -15,8 +15,19 @@ class UserNotFound(Exception):
             self.message = message
         else:
             self.message = f'The client with clientid {clientid}, does not exist. Please try again.'
-            
+
         self.status_code = 404
+
+class UnauthorizedUser(Exception):
+    """in the case a non-existent client is being requested"""
+    def __init__(self, email=None, message = None):
+        Exception.__init__(self)
+        if message:
+            self.message = message
+        else:
+            self.message = f'The staff member with email {email}, Is not authorized'
+
+        self.status_code = 401
 
 def bad_request(message):
     return error_response(400, message)
@@ -30,6 +41,12 @@ def error_response(status_code, message=None):
 
 
 @api.errorhandler(UserNotFound)
+def error_user_does_not_exist(error):
+    '''Return a custom message and 400 status code'''
+    return error_response(error.status_code, error.message)
+
+
+@api.errorhandler(UnauthorizedUser)
 def error_user_does_not_exist(error):
     '''Return a custom message and 400 status code'''
     return error_response(error.status_code, error.message)
