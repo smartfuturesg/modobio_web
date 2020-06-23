@@ -23,6 +23,7 @@ pagination = api.model('pagination', {
 
 client_info =   api.model('client_info', {
             'clientid': fields.Integer(description=''),
+            'record_locator_id': fields.String(description='medical record locator id'),
             'firstname': fields.String(description=''),
             'middlename': fields.String(description=''),
             'lastname': fields.String(description=''),
@@ -34,7 +35,7 @@ client_info =   api.model('client_info', {
             'city': fields.String(description=''),
             'state': fields.String(description='', max_length=2),
             'zipcode': fields.String(description='', min_length=5, max_length=10),
-            'country': fields.String(description='', max_length=10),
+            'country': fields.String(description='', max_length=2),
             'email': fields.String(description=''),
             'phone': fields.String(description='',min_length=7, max_length=12),
             'preferred': fields.Integer(description=''),

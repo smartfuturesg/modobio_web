@@ -2,6 +2,8 @@
 Database tables for the client intake portion of the Modo Bio Staff application.
 All tables in this module are prefixed with 'Client'.
 """
+from hashlib import md5
+
 from flask import url_for
 
 from odyssey import db
@@ -207,6 +209,13 @@ class ClientInfo(db.Model):
     :type: bool
     """
 
+    def get_medical_record_hash(self):
+        """medical record hash generation"""
+
+        name_hash = md5(bytes((self.firstname+self.lastname), 'utf-8')).hexdigest()
+
+        return (self.firstname[0]+self.lastname[0]+str(self.clientid)+name_hash[0:6]).upper()
+
     def get_attributes(self):
         """return class attributes as list"""
         return  ['address', 'city', 'clientid', 'country', 'dob', 'email', 'emergency_contact', 'emergency_phone', 'firstname','fullname', \
@@ -217,6 +226,7 @@ class ClientInfo(db.Model):
         """returns all client info in dictionary form"""
         data = {
             'clientid': self.clientid,
+            'record_locator_id': self.get_medical_record_hash(),
             'firstname': self.firstname,
             'middlename': self.middlename,
             'lastname': self.lastname,
@@ -248,6 +258,7 @@ class ClientInfo(db.Model):
         """returns just the searchable client info (name, email, number)"""
         data = {
             'clientid': self.clientid,
+            'record_locator_id': self.get_medical_record_hash(),
             'firstname': self.firstname,
             'lastname': self.lastname,
             'fullname': self.fullname,
