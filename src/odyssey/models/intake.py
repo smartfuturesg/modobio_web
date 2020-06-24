@@ -731,13 +731,19 @@ class RemoteRegistration(db.Model):
 
     __tablename__ = 'remote_registration'
 
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """    
+
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid'), nullable=False)
     """
     Client ID number
 
     :type: int, foreign key to :attr:`ClientInfo.clientid`
     """
-
     
     token = db.Column(db.String(32), index=True, unique=True)
     """

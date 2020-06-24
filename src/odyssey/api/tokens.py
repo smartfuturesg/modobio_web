@@ -3,8 +3,9 @@ from flask import jsonify, request
 from flask_restx import Resource
 from odyssey import db
 from odyssey.api import api
-from odyssey.api.auth import basic_auth
+from odyssey.api.auth import basic_auth, basic_auth_client
 from odyssey.api.auth import token_auth
+from odyssey.api.clients import ns as client_ns
 
 ns = api.namespace('tokens', description='Operations related to token authorization')
 
@@ -29,3 +30,14 @@ class Token(Resource):
         token_auth.current_user().revoke_token()
         return '', 204
 
+@ns.route('/remoteregistration/')
+class RemoteRegistrationToken(Resource):
+    @ns.doc(security='basic')
+    @basic_auth_client.login_required
+    def post(self):
+        user = basic_auth_client.current_user()
+        return {'email': user.email, 
+                'firstname': user.firstname, 
+                'lastname': user.lastname, 
+                'token': user.get_token(),
+                'access_role': user.access_role}, 201

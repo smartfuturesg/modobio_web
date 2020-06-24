@@ -29,7 +29,6 @@ from odyssey.models.intake import (
 )
 
 ns = api.namespace('client', description='Operations related to clients')
-
     
 @ns.route('/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
@@ -327,6 +326,19 @@ class IndividualContract(Resource):
         response = client_services.to_dict()
         return response, 201
 
+
+@ns.route('/register/<int:clientid>/')
+@ns.doc(params={'clientid': 'Client ID number'})
+class Client(Resource):
+    @ns.doc(security='apikey')
+    @token_auth.login_required
+    @ns.marshal_with(client_info)
+    def get(self, clientid):
+        """returns client info table as a json for the clientid specified"""
+        client = ClientInfo.query.get(clientid)
+        if not client:
+            raise UserNotFound(clientid)
+        return client.to_dict()
 
 
 
