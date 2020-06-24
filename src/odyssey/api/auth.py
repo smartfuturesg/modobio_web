@@ -7,6 +7,15 @@ from odyssey.api.errors import error_response
 basic_auth = HTTPBasicAuth()
 token_auth = HTTPTokenAuth()
 
+basic_auth_client = HTTPBasicAuth()
+
+@basic_auth.verify_password
+def verify_password(email, password):
+    """check password for at-home client"""
+    staff_member = HomeRegistration.query.filter_by(email=email.lower()).first()
+    if staff_member and staff_member.check_password(password):
+        return staff_member
+
 @basic_auth.verify_password
 def verify_password(email, password):
     """check password for API user"""
