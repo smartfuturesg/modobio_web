@@ -19,7 +19,7 @@ class UserNotFound(Exception):
         self.status_code = 404
 
 class UnauthorizedUser(Exception):
-    """in the case a non-existent client is being requested"""
+    """in the case a staff member is trying to access resources they are not permitted to"""
     def __init__(self, email=None, message = None):
         Exception.__init__(self)
         if message:

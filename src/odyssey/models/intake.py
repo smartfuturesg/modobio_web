@@ -2,9 +2,13 @@
 Database tables for the client intake portion of the Modo Bio Staff application.
 All tables in this module are prefixed with 'Client'.
 """
+import base64
+from datetime import datetime, timedelta
 from hashlib import md5
+import os
 
 from flask import url_for
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from odyssey import db
 
@@ -744,7 +748,14 @@ class RemoteRegistration(db.Model):
 
     :type: int, foreign key to :attr:`ClientInfo.clientid`
     """
-    
+
+    email = db.Column(db.String(50))
+    """
+    Client email address.
+
+    :type: str, max length 50
+    """
+
     token = db.Column(db.String(32), index=True, unique=True)
     """
     API authentication token
@@ -765,6 +776,14 @@ class RemoteRegistration(db.Model):
 
     :type: str, max length 128
     """
+
+    def get_temp_registration_endpoint(self):
+        """creates a temporary endpoint meant for at-home 
+           registration
+        """
+        #TODO MAYBE REMOVE THIS
+        return md5(bytes((self.email), 'utf-8')).hexdigest()
+
 
     def set_password(self, password):
         self.password = generate_password_hash(password)
