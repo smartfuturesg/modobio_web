@@ -6,6 +6,7 @@ import base64
 from datetime import datetime, timedelta
 from hashlib import md5
 import os
+import random
 
 from flask import url_for
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -777,16 +778,41 @@ class RemoteRegistration(db.Model):
     :type: str, max length 128
     """
 
-    def get_temp_registration_endpoint(self):
+    def get_attributes(self):
+        """return class attributes as list"""
+        return  ['clientid', 'email']
+
+    def from_dict(self,  data):
+        """to be used when a new user is created or a user id edited"""
+        attributes = self.get_attributes()
+        for field in attributes:
+            if field in data:
+                setattr(self, field, data[field])
+
+    def to_dict(self):
+        """returns all client info in dictionary form"""
+        data = {
+            'clientid': self.clientid,
+            'email': self.email
+        }
+        return data
+
+
+    @staticmethod
+    def get_temp_registration_endpoint(email):
         """creates a temporary endpoint meant for at-home 
            registration
         """
         #TODO MAYBE REMOVE THIS
-        return md5(bytes((self.email), 'utf-8')).hexdigest()
+        return md5(bytes((email), 'utf-8')).hexdigest()
 
 
-    def set_password(self, password):
+    def set_password(self, firstname, lastname):
+        """create temporary password, hash it"""
+        name_hash = md5(bytes((str(random.randrange(999,99999,1))), 'utf-8')).hexdigest()
+        password = firstname[0:2]+lastname[0:2]+name_hash[0:5]
         self.password = generate_password_hash(password)
+        return password
 
     def check_password(self, password):
         return check_password_hash(self.password, password)

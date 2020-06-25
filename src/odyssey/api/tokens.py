@@ -39,6 +39,7 @@ class Token(Resource):
         return '', 204
 
 @ns.route('/remoteregistration/<string:tmp_registration>/')
+@ns.doc(params={'tmp_registration': 'temporary registration portal hash'})
 class RemoteRegistrationToken(Resource):
     @ns.doc(security='basic')
     @basic_auth_client.login_required

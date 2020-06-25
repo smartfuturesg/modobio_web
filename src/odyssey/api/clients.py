@@ -13,6 +13,7 @@ from odyssey.api.serializers import (
     client_consent_edit, 
     client_release, 
     client_release_edit, 
+    initialize_remote_registration,
     pagination,
     sign_and_date,
     sign_and_date_edit
@@ -25,7 +26,8 @@ from odyssey.models.intake import (
     ClientIndividualContract,
     ClientPolicies,
     ClientRelease,
-    ClientSubscriptionContract
+    ClientSubscriptionContract,
+    RemoteRegistration
 )
 
 ns = api.namespace('client', description='Operations related to clients')
@@ -327,19 +329,47 @@ class IndividualContract(Resource):
         return response, 201
 
 
-@ns.route('/register/<int:clientid>/')
-@ns.doc(params={'clientid': 'Client ID number'})
-class Client(Resource):
-    @ns.doc(security='apikey')
+@ns.route('/remoteregistration/')
+class NewRemoteRegistration(Resource):
+    """
+        initialize a client for remote registration
+    """
     @token_auth.login_required
-    @ns.marshal_with(client_info)
-    def get(self, clientid):
-        """returns client info table as a json for the clientid specified"""
-        client = ClientInfo.query.get(clientid)
-        if not client:
-            raise UserNotFound(clientid)
-        return client.to_dict()
+    @ns.expect(initialize_remote_registration, validate=True)
+    @ns.doc(security='apikey')
+    #@ns.marshal_with(client_info)
+    def post(self):
+        """create new remote registration client
+            this will create a new entry into the client info table first
+            then create an entry into the Remote registration table
+            response includes the hash required to access the temporary portal for 
+            this client
+        """
+        data = request.get_json()
+        client_info = ClientInfo() 
+        remote_client = RemoteRegistration()
 
+        client_info.from_dict(data)
+        db.session.add(client_info)
+        db.session.flush()
+        
+        data['clientid'] = client_info.clientid
+        remote_client.from_dict(data)
+        
+        tmp_password = remote_client.set_password(client_info.firstname, client_info.lastname)
+        
+        tmp_registration_hash = remote_client.get_temp_registration_endpoint(remote_client.email)
+
+        db.session.add(remote_client)
+        db.session.flush()
+
+        response = remote_client.to_dict()
+
+        response['tmp_url_endpoint'] = tmp_registration_hash
+        response['tmp_password'] = tmp_password
+
+        db.session.commit()
+        return response, 201
 
 
 
