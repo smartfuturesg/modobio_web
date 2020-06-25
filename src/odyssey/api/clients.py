@@ -4,7 +4,7 @@ from flask_restx import Resource, Api
 
 from odyssey.api import api
 from odyssey.api.auth import token_auth
-from odyssey.api.errors import UserNotFound
+from odyssey.api.errors import UserNotFound, ClientAlreadyExists, IllegalSetting
 from odyssey.api.serializers import (
     client_info, 
     client_individual_services_contract,
@@ -73,6 +73,13 @@ class NewClient(Resource):
     def post(self):
         """create new client"""
         data = request.get_json()
+        #make sure this user email does not exist
+        if data.get('email', None) and ClientInfo.query.filter_by(email=data.get('email', None)).first():
+            raise ClientAlreadyExists(identification = data['email'])
+        #prevent requests to set clientid and send message back to api user
+        elif data.get('clientid', None):
+            raise IllegalSetting('clientid')
+        
         client = ClientInfo()
         client.from_dict(data)
         db.session.add(client)
@@ -346,6 +353,10 @@ class NewRemoteRegistration(Resource):
             this client
         """
         data = request.get_json()
+        #make sure this user email does not exist
+        if data.get('email', None) and ClientInfo.query.filter_by(email=data.get('email', None)).first():
+            raise ClientAlreadyExists(identification = data['email'])
+        
         client_info = ClientInfo() 
         remote_client = RemoteRegistration()
 

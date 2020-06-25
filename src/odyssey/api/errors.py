@@ -29,6 +29,28 @@ class UnauthorizedUser(Exception):
 
         self.status_code = 401
 
+class ClientAlreadyExists(Exception):
+    """in the case a staff member is trying to create a new client when the client already exists"""
+    def __init__(self, identification=None, message = None):
+        Exception.__init__(self)
+        if message:
+            self.message = message
+        else:
+            self.message = f'The client identified by, {identification} already exists.'
+
+        self.status_code = 409
+
+class IllegalSetting(Exception):
+    """in the case an API request includes a setting or parameter that is not allowed"""
+    def __init__(self, param=None, message = None):
+        Exception.__init__(self)
+        if message:
+            self.message = message
+        else:
+            self.message = f'Illegal Setting of parameter, {param}. You cannot set this value manually'
+
+        self.status_code = 400
+
 def bad_request(message):
     return error_response(400, message)
 
@@ -45,10 +67,19 @@ def error_user_does_not_exist(error):
     '''Return a custom message and 400 status code'''
     return error_response(error.status_code, error.message)
 
+@api.errorhandler(IllegalSetting)
+def error_illegal_setting(error):
+    '''Return a custom message and 400 status code'''
+    return error_response(error.status_code, error.message)
 
 @api.errorhandler(UnauthorizedUser)
-def error_user_does_not_exist(error):
+def error_unauthorized_user(error):
     '''Return a custom message and 400 status code'''
+    return error_response(error.status_code, error.message)
+
+@api.errorhandler(ClientAlreadyExists)
+def error_client_already_exists(error):
+    '''Return a custom message and 409 status code'''
     return error_response(error.status_code, error.message)
 
 @app.errorhandler(400)

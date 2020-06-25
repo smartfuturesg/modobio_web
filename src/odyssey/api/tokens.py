@@ -44,8 +44,10 @@ class RemoteRegistrationToken(Resource):
     @ns.doc(security='basic')
     @basic_auth_client.login_required
     def post(self, tmp_registration):
-        #check if temporary registration endpoint is valid
         user = basic_auth_client.current_user()
+
+        #check if temporary registration endpoint is valid
+        #TODO check database for temporary endpoint also make sure it has not expired
         if tmp_registration != md5(bytes((user.email), 'utf-8')).hexdigest():
             raise UserNotFound(clientid=0, message = f"The client with email: {user.email} does not yet exist") 
         return {'email': user.email, 'token': user.get_token()}, 201
