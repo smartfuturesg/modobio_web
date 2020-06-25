@@ -7,11 +7,14 @@ from datetime import datetime, timedelta
 from hashlib import md5
 import os
 import random
+import pytz
 
 from flask import url_for
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from odyssey import db
+
+phx_tz = pytz.timezone('America/Phoenix')
 
 class ClientInfo(db.Model):
     """ Client information table
@@ -792,22 +795,21 @@ class RemoteRegistration(db.Model):
     :type: datetime
     """
 
-    def get_attributes(self):
-        """return class attributes as list"""
-        return  ['clientid', 'email']
-
     def from_dict(self,  data):
         """to be used when a new user is created or a user id edited"""
-        attributes = self.get_attributes()
-        for field in attributes:
+        for field in ['clientid', 'email']:
             if field in data:
                 setattr(self, field, data[field])
 
     def to_dict(self):
         """returns all client info in dictionary form"""
+        portal_expr_time = phx_tz.localize(self.registration_portal_expiration) + phx_tz.localize(self.registration_portal_expiration).utcoffset()
         data = {
             'clientid': self.clientid,
-            'email': self.email
+            'email': self.email,
+            'registration_portal_id': self.registration_portal_id,
+            'registration_portal_expiration': portal_expr_time.strftime("%m/%d/%Y, %H:%M:%S %Z")
+    
         }
         return data
     

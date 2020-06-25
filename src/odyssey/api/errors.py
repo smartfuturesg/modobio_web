@@ -40,6 +40,17 @@ class ClientAlreadyExists(Exception):
 
         self.status_code = 409
 
+class ClientNotFound(Exception):
+    """in the case a staff member is trying to edit a client that does not exist"""
+    def __init__(self, identification=None, message = None):
+        Exception.__init__(self)
+        if message:
+            self.message = message
+        else:
+            self.message = f'The client identified by, {identification} does not exit. Try another identification or create a new client.'
+
+        self.status_code = 404
+
 class IllegalSetting(Exception):
     """in the case an API request includes a setting or parameter that is not allowed"""
     def __init__(self, param=None, message = None):
@@ -64,6 +75,11 @@ def error_response(status_code, message=None):
 
 @api.errorhandler(UserNotFound)
 def error_user_does_not_exist(error):
+    '''Return a custom message and 400 status code'''
+    return error_response(error.status_code, error.message)
+
+@api.errorhandler(ClientNotFound)
+def error_client_not_found(error):
     '''Return a custom message and 400 status code'''
     return error_response(error.status_code, error.message)
 

@@ -121,10 +121,14 @@ client_individual_services_contract_edit =  api.model('client_individual_service
         })
     
     
-initialize_remote_registration = client_info =   api.model('initial_remote_registration', {
+initialize_remote_registration = api.model('initial_remote_registration', {
             'email': fields.String(description='', required=True),
             'firstname': fields.String(description='', required=True),
             'middlename': fields.String(description='', required=True),
             'lastname': fields.String(description='', required=True),
+        })
+
+refresh_remote_registration = api.model('initial_remote_registration', {
+            'email': fields.String(description='', required=True)
         })
     

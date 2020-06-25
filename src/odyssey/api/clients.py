@@ -4,7 +4,7 @@ from flask_restx import Resource, Api
 
 from odyssey.api import api
 from odyssey.api.auth import token_auth
-from odyssey.api.errors import UserNotFound, ClientAlreadyExists, IllegalSetting
+from odyssey.api.errors import UserNotFound, ClientAlreadyExists, ClientNotFound, IllegalSetting
 from odyssey.api.serializers import (
     client_info, 
     client_individual_services_contract,
@@ -15,6 +15,7 @@ from odyssey.api.serializers import (
     client_release_edit, 
     initialize_remote_registration,
     pagination,
+    refresh_remote_registration,
     sign_and_date,
     sign_and_date_edit
 )
@@ -340,7 +341,7 @@ class IndividualContract(Resource):
         return response, 201
 
 
-@ns.route('/remoteregistration/')
+@ns.route('/remoteregistration/new/')
 class NewRemoteRegistration(Resource):
     """
         initialize a client for remote registration
@@ -349,6 +350,7 @@ class NewRemoteRegistration(Resource):
     @ns.expect(initialize_remote_registration, validate=True)
     @ns.doc(security='apikey')
     #@ns.marshal_with(client_info)
+    #TODO: marshal output of this. Mostly for documentation
     def post(self):
         """create new remote registration client
             this will create a new entry into the client info table first
@@ -359,8 +361,8 @@ class NewRemoteRegistration(Resource):
         data = request.get_json()
         #make sure this user email does not exist
         
-        # if data.get('email', None) and ClientInfo.query.filter_by(email=data.get('email', None)).first():
-        #     raise ClientAlreadyExists(identification = data['email'])
+        if data.get('email', None) and ClientInfo.query.filter_by(email=data.get('email', None)).first():
+            raise ClientAlreadyExists(identification = data['email'])
 
         # enter client into basic info table and remote register table
         client_info = ClientInfo() 
@@ -377,17 +379,50 @@ class NewRemoteRegistration(Resource):
         
         tmp_registration_hash = remote_client.get_temp_registration_endpoint()
 
-        breakpoint()
         db.session.add(remote_client)
         db.session.flush()
 
         response = remote_client.to_dict()
-
-        response['tmp_url_endpoint'] = tmp_registration_hash
-        response['tmp_password'] = tmp_password
-
+        
         db.session.commit()
         return response, 201
 
 
+@ns.route('/remoteregistration/refresh/')
+class ClientRemoteRegistration(Resource):
+    """
+        refresh client portal a client for remote registration
+    """
+    @token_auth.login_required
+    @ns.expect(refresh_remote_registration, validate=True)
+    @ns.doc(security='apikey')
+    #@ns.marshal_with(client_info)
+    #TODO: marshal output of this. Mostly for documentation
+    def post(self):
+        """refresh the portal endpoint and password
+        """
+        data = request.get_json() #should only need the email
 
+        client_info = ClientInfo.query.filter_by(email=data.get('email', None)).first()
+
+        if not client_info:
+            raise ClientNotFound(identification = data['email'])
+
+        #add clientid to the data object from the current client
+        data['clientid'] =  client_info.clientid
+
+        #new remote client session entry
+        remote_client = RemoteRegistration()
+        remote_client.from_dict(data)
+
+        #new passwork and registration hash
+        remote_client.set_password(client_info.firstname, client_info.lastname)
+        remote_client.get_temp_registration_endpoint()
+
+        db.session.add(remote_client)
+        db.session.flush()
+        
+        response = remote_client.to_dict()
+        
+        db.session.commit()
+        return response, 201
