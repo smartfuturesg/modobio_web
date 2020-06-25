@@ -866,3 +866,12 @@ class RemoteRegistration(db.Model):
         if remote_client is None or remote_client.token_expiration < datetime.utcnow():
             return None
         return remote_client
+
+    @staticmethod
+    def check_portal_id(portal_id):
+        """check if token is valid. returns user if so"""
+        remote_client = RemoteRegistration.query.filter_by(registration_portal_id=portal_id).first()
+
+        if remote_client is None or remote_client.registration_portal_expiration < datetime.utcnow():
+            return None
+        return remote_client
