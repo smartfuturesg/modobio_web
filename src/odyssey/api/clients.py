@@ -51,10 +51,14 @@ class Client(Resource):
     @ns.marshal_with(client_info)
     def put(self, clientid):
         """edit client info"""
+        data = request.get_json()
         client = ClientInfo.query.filter_by(clientid=clientid).one_or_none()
         if not client:
             raise UserNotFound(clientid)
-        data = request.get_json()
+        #prevent requests to set clientid and send message back to api user
+        elif data.get('clientid', None):
+            raise IllegalSetting('clientid')
+        
         client.from_dict(data)
         db.session.add(client)
         db.session.flush()
@@ -354,9 +358,11 @@ class NewRemoteRegistration(Resource):
         """
         data = request.get_json()
         #make sure this user email does not exist
-        if data.get('email', None) and ClientInfo.query.filter_by(email=data.get('email', None)).first():
-            raise ClientAlreadyExists(identification = data['email'])
         
+        # if data.get('email', None) and ClientInfo.query.filter_by(email=data.get('email', None)).first():
+        #     raise ClientAlreadyExists(identification = data['email'])
+
+        # enter client into basic info table and remote register table
         client_info = ClientInfo() 
         remote_client = RemoteRegistration()
 
@@ -369,8 +375,9 @@ class NewRemoteRegistration(Resource):
         
         tmp_password = remote_client.set_password(client_info.firstname, client_info.lastname)
         
-        tmp_registration_hash = remote_client.get_temp_registration_endpoint(remote_client.email)
+        tmp_registration_hash = remote_client.get_temp_registration_endpoint()
 
+        breakpoint()
         db.session.add(remote_client)
         db.session.flush()
 

@@ -22,7 +22,7 @@ pagination = api.model('pagination', {
 })
 
 client_info =   api.model('client_info', {
-            'clientid': fields.Integer(description=''),
+            'clientid': fields.Integer(description='auto-generated client id number. Cannot be set manually'),
             'record_locator_id': fields.String(description='medical record locator id'),
             'firstname': fields.String(description=''),
             'middlename': fields.String(description=''),

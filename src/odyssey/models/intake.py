@@ -778,6 +778,20 @@ class RemoteRegistration(db.Model):
     :type: str, max length 128
     """
 
+    registration_portal_id = db.Column(db.String(32), index=True, unique=True)
+    """
+    registration portal endpoint
+    
+    :type: str, max length 32, indexed, unique
+    """
+
+    registration_portal_expiration = db.Column(db.DateTime)
+    """
+    token expiration date
+    
+    :type: datetime
+    """
+
     def get_attributes(self):
         """return class attributes as list"""
         return  ['clientid', 'email']
@@ -796,15 +810,20 @@ class RemoteRegistration(db.Model):
             'email': self.email
         }
         return data
-
-
-    @staticmethod
-    def get_temp_registration_endpoint(email):
+    
+    def get_temp_registration_endpoint(self, expires_in = 86400):
         """creates a temporary endpoint meant for at-home 
            registration
         """
-        #TODO MAYBE REMOVE THIS
-        return md5(bytes((email), 'utf-8')).hexdigest()
+        now = datetime.utcnow()
+        self.registration_portal_id = md5(bytes((self.email+str(random.randrange(999,99999,1))), 'utf-8')).hexdigest()
+        self.registration_portal_expiration = now + timedelta(seconds=expires_in)
+
+        db.session.add(self)
+        db.session.flush()
+        db.session.commit()
+
+        return self.registration_portal_id
 
 
     def set_password(self, firstname, lastname):
@@ -817,7 +836,7 @@ class RemoteRegistration(db.Model):
     def check_password(self, password):
         return check_password_hash(self.password, password)
 
-    def get_token(self,expires_in=360000):
+    def get_token(self,expires_in=86400):
         now = datetime.utcnow()
         #returns current token if it is valid
         if self.token and self.token_expiration > now + timedelta(seconds=60):
