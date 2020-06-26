@@ -40,9 +40,13 @@ class Token(Resource):
 @ns.route('/remoteregistration/<string:tmp_registration>/')
 @ns.doc(params={'tmp_registration': 'temporary registration portal hash'})
 class RemoteRegistrationToken(Resource):
+    """generate and delete portal user API access tokens
+        first validates that the user's basic authentication passes, then checks
+        the url to validate the authenticity of the end point (i.e. in database and not expired)"""
     @ns.doc(security='basic')
     @basic_auth_client.login_required
     def post(self, tmp_registration):
+        """generate api token for portal user"""
         #validate registration portal
         if not RemoteRegistration().check_portal_id(tmp_registration):
             raise ClientNotFound(message="Resource does not exist")
@@ -53,7 +57,7 @@ class RemoteRegistrationToken(Resource):
 
     @ns.doc(security='basic')
     @basic_auth_client.login_required
-    def delete(self,  tmp_registration):
-        """invalidate urrent token. Used to effectively logout a user"""
+    def delete(self, tmp_registration):
+        """invalidate current token. Used to effectively logout a user"""
         token_auth_client.current_user().revoke_token()
         return '', 204

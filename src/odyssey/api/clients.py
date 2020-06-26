@@ -32,7 +32,7 @@ from odyssey.models.intake import (
 )
 
 ns = api.namespace('client', description='Operations related to clients')
-    
+
 @ns.route('/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
 class Client(Resource):
@@ -52,6 +52,7 @@ class Client(Resource):
     @ns.marshal_with(client_info)
     def put(self, clientid):
         """edit client info"""
+        # look into changing to .json
         data = request.get_json()
         client = ClientInfo.query.filter_by(clientid=clientid).one_or_none()
         if not client:
@@ -59,7 +60,7 @@ class Client(Resource):
         #prevent requests to set clientid and send message back to api user
         elif data.get('clientid', None):
             raise IllegalSetting('clientid')
-        
+        # client.update
         client.from_dict(data)
         db.session.add(client)
         db.session.flush()
@@ -389,7 +390,7 @@ class NewRemoteRegistration(Resource):
 
 
 @ns.route('/remoteregistration/refresh/')
-class ClientRemoteRegistration(Resource):
+class RefreshRemoteRegistration(Resource):
     """
         refresh client portal a client for remote registration
     """
@@ -418,7 +419,7 @@ class ClientRemoteRegistration(Resource):
         #new passwork and registration hash
         remote_client.set_password(client_info.firstname, client_info.lastname)
         remote_client.get_temp_registration_endpoint()
-
+        
         db.session.add(remote_client)
         db.session.flush()
         

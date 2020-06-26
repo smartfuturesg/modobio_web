@@ -809,7 +809,6 @@ class RemoteRegistration(db.Model):
             'email': self.email,
             'registration_portal_id': self.registration_portal_id,
             'registration_portal_expiration': portal_expr_time.strftime("%m/%d/%Y, %H:%M:%S %Z")
-    
         }
         return data
     
@@ -818,7 +817,7 @@ class RemoteRegistration(db.Model):
            registration
         """
         now = datetime.utcnow()
-        self.registration_portal_id = md5(bytes((self.email+str(random.randrange(999,99999,1))), 'utf-8')).hexdigest()
+        self.registration_portal_id = md5(bytes(self.email+now.strftime("%m/%d/%Y, %H:%M:%S"), 'utf-8')).hexdigest()
         self.registration_portal_expiration = now + timedelta(seconds=expires_in)
 
         db.session.add(self)
