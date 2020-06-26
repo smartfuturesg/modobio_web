@@ -14,7 +14,10 @@ token_auth_client = HTTPTokenAuth()
 @basic_auth_client.verify_password
 def verify_password_client(email, password):
     """check password for at-home client"""
-    client = RemoteRegistration.query.filter_by(email=email.lower()).first()
+    #take the most recent entry
+    client = RemoteRegistration.query.filter_by(
+                email=email.lower()).order_by(
+                RemoteRegistration.registration_portal_expiration.desc()).first()
     if client and client.check_password(password):
         return client
 

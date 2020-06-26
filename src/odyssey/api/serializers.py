@@ -4,6 +4,7 @@ from flask_restx import fields
 from odyssey.api import api
 
 DATE_FORMAT = '%Y-%m-%d'
+DATE_FORMAT_EXPIRATION = '%Y-%m-%d %H:%M:%S'
 
 new_staff_member = api.model('new_staff', {
     'firstname': fields.String(description='firstname of new staff member', required=True),
@@ -130,5 +131,13 @@ initialize_remote_registration = api.model('initial_remote_registration', {
 
 refresh_remote_registration = api.model('initial_remote_registration', {
             'email': fields.String(description='', required=True)
+        })
+
+remote_registration_reponse = api.model('refresh_remote_registration_response', {
+            'clientid': fields.Integer(description=''),
+            'email': fields.String(description='', required=True),
+            'registration_portal_id': fields.String(description='unique id to be used in the portal URL'),
+            'registration_portal_expiration': fields.DateTime(description=f'formatted as: iso8610', dt_format = 'iso8601', example="2020-06-27T20:42:41.473878" ),
+            'password': fields.String(description='password for temporary portal')
         })
     

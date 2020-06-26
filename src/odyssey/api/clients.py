@@ -3,7 +3,7 @@ from flask import request, jsonify
 from flask_restx import Resource, Api
 
 from odyssey.api import api
-from odyssey.api.auth import token_auth
+from odyssey.api.auth import token_auth, token_auth_client
 from odyssey.api.errors import UserNotFound, ClientAlreadyExists, ClientNotFound, IllegalSetting
 from odyssey.api.serializers import (
     client_info, 
@@ -16,6 +16,7 @@ from odyssey.api.serializers import (
     initialize_remote_registration,
     pagination,
     refresh_remote_registration,
+    remote_registration_reponse,
     sign_and_date,
     sign_and_date_edit
 )
@@ -350,8 +351,7 @@ class NewRemoteRegistration(Resource):
     @token_auth.login_required
     @ns.expect(initialize_remote_registration, validate=True)
     @ns.doc(security='apikey')
-    #@ns.marshal_with(client_info)
-    #TODO: marshal output of this. Mostly for documentation
+    @ns.marshal_with(remote_registration_reponse)
     def post(self):
         """create new remote registration client
             this will create a new entry into the client info table first
@@ -360,8 +360,8 @@ class NewRemoteRegistration(Resource):
             this client
         """
         data = request.get_json()
-        #make sure this user email does not exist
-        
+
+        #make sure this user email does not exist        
         if data.get('email', None) and ClientInfo.query.filter_by(email=data.get('email', None)).first():
             raise ClientAlreadyExists(identification = data['email'])
 
@@ -376,15 +376,15 @@ class NewRemoteRegistration(Resource):
         data['clientid'] = client_info.clientid
         remote_client.from_dict(data)
         
-        tmp_password = remote_client.set_password(client_info.firstname, client_info.lastname)
-        
-        tmp_registration_hash = remote_client.get_temp_registration_endpoint()
+        #create temporary passwork and portal url
+        pwd = remote_client.set_password(client_info.firstname, client_info.lastname)
+        remote_client.get_temp_registration_endpoint()
 
         db.session.add(remote_client)
         db.session.flush()
 
         response = remote_client.to_dict()
-        
+        response['password'] = pwd
         db.session.commit()
         return response, 201
 
@@ -397,8 +397,7 @@ class RefreshRemoteRegistration(Resource):
     @token_auth.login_required
     @ns.expect(refresh_remote_registration, validate=True)
     @ns.doc(security='apikey')
-    #@ns.marshal_with(client_info)
-    #TODO: marshal output of this. Mostly for documentation
+    @ns.marshal_with(remote_registration_reponse)
     def post(self):
         """refresh the portal endpoint and password
         """
@@ -406,6 +405,7 @@ class RefreshRemoteRegistration(Resource):
 
         client_info = ClientInfo.query.filter_by(email=data.get('email', None)).first()
 
+        #if client isnt in the database return error
         if not client_info:
             raise ClientNotFound(identification = data['email'])
 
@@ -416,14 +416,56 @@ class RefreshRemoteRegistration(Resource):
         remote_client = RemoteRegistration()
         remote_client.from_dict(data)
 
-        #new passwork and registration hash
-        remote_client.set_password(client_info.firstname, client_info.lastname)
+        #new password and registration hash
+        pwd = remote_client.set_password(client_info.firstname, client_info.lastname)
         remote_client.get_temp_registration_endpoint()
-        
+
         db.session.add(remote_client)
         db.session.flush()
         
         response = remote_client.to_dict()
-        
+        response['password'] = pwd
         db.session.commit()
         return response, 201
+
+@ns.route('/remoteregistration/clientinfo/<string:tmp_registration>/')
+@ns.doc(params={'tmp_registration': 'temporary registration portal hash'})
+class RemoteClientInfo(Resource):
+    """
+        For getting and altering client info table as a remote client.
+        Requires token authorization in addition to a valid portal id (tmp_registration)
+    """
+    @ns.doc(security='apikey')
+    @token_auth_client.login_required
+    @ns.marshal_with(client_info)
+    def get(self, tmp_registration):
+        """returns client info table as a json for the clientid specified"""
+        #check portal validity
+        if not RemoteRegistration().check_portal_id(tmp_registration):
+            raise ClientNotFound(message="Resource does not exist")
+        client = ClientInfo.query.filter_by(email=token_auth_client.current_user().email).first()
+
+        return client.to_dict()
+
+    @ns.expect(client_info)
+    @ns.doc(security='apikey')
+    @token_auth_client.login_required
+    @ns.marshal_with(client_info)
+    def put(self, tmp_registration):
+        """edit client info"""
+        #check portal validity
+        if not RemoteRegistration().check_portal_id(tmp_registration):
+            raise ClientNotFound(message="Resource does not exist")
+
+        data = request.get_json()
+        #prevent requests to set clientid and send message back to api user
+        if data.get('clientid', None):
+            raise IllegalSetting('clientid')
+        
+        client = ClientInfo.query.filter_by(email=token_auth_client.current_user().email).first()
+       
+        client.from_dict(data)
+        db.session.add(client)
+        db.session.flush()
+        db.session.commit()
+        return client.to_dict()

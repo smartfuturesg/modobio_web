@@ -803,12 +803,13 @@ class RemoteRegistration(db.Model):
 
     def to_dict(self):
         """returns all client info in dictionary form"""
-        portal_expr_time = phx_tz.localize(self.registration_portal_expiration) + phx_tz.localize(self.registration_portal_expiration).utcoffset()
+        #leaving this heer ein case we need to return this with a local timezone
+        # portal_expr_time = phx_tz.localize(self.registration_portal_expiration) + phx_tz.localize(self.registration_portal_expiration).utcoffset()
         data = {
             'clientid': self.clientid,
             'email': self.email,
             'registration_portal_id': self.registration_portal_id,
-            'registration_portal_expiration': portal_expr_time.strftime("%m/%d/%Y, %H:%M:%S %Z")
+            'registration_portal_expiration': self.registration_portal_expiration
         }
         return data
     
@@ -817,7 +818,7 @@ class RemoteRegistration(db.Model):
            registration
         """
         now = datetime.utcnow()
-        self.registration_portal_id = md5(bytes(self.email+now.strftime("%m/%d/%Y, %H:%M:%S"), 'utf-8')).hexdigest()
+        self.registration_portal_id = md5(bytes(self.email+now.strftime("%Y-%m-%d %H:%M:%S"), 'utf-8')).hexdigest()
         self.registration_portal_expiration = now + timedelta(seconds=expires_in)
 
         db.session.add(self)
