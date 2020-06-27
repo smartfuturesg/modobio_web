@@ -5,8 +5,6 @@
 This is a `Flask <https://flask.palletsprojects.com>`_ based app that serves webpages to the `ModoBio <https://modobio.com>`_ staff. The pages contain the intake and data gathering forms for the *client journey*. The `Odyssey <https://en.wikipedia.org/wiki/Odyssey>`_ is of course the most famous journey of all time! 🤓
 """
 
-import os
-import boto3
 from flask import Flask
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
@@ -16,44 +14,9 @@ __version__ = '0.0.3'
 
 app = Flask(__name__)
 
-if os.getenv('FLASK_ENV') == 'development_local':
-    app.secret_key = 'dev'
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://localhost/modobio_dev'
-elif os.getenv('FLASK_ENV') == 'development': # for connecting to AWS locally. Will be removed once dev server is up and running
-    ssm = boto3.client('ssm')
-    db_flav = ssm.get_parameter(Name='/modobio/odyssey/db_flav')['Parameter']['Value']
-    db_user = ssm.get_parameter(Name='/modobio/odyssey/db_user')['Parameter']['Value']
-    db_pass = ssm.get_parameter(Name='/modobio/odyssey/db_pass', WithDecryption=True)['Parameter']['Value']
-    db_host = ssm.get_parameter(Name='/modobio/odyssey/db_host')['Parameter']['Value']
-    db_name = ssm.get_parameter(Name='/modobio/odyssey/db_name_dev')['Parameter']['Value']
-    app.secret_key = 'dev'
-    app.config['SQLALCHEMY_DATABASE_URI'] = f'{db_flav}://{db_user}:{db_pass}@{db_host}/{db_name}'
+app.config.from_pyfile('config.py')
 
-else:
-    ssm = boto3.client('ssm')
-    param = ssm.get_parameter(Name='/modobio/odyssey/db_flav')
-    db_flav = param['Parameter']['Value']
-    param = ssm.get_parameter(Name='/modobio/odyssey/db_user')
-    db_user = param['Parameter']['Value']
-    param = ssm.get_parameter(Name='/modobio/odyssey/db_pass', WithDecryption=True)
-    db_pass = param['Parameter']['Value']
-    param = ssm.get_parameter(Name='/modobio/odyssey/db_host')
-    db_host = param['Parameter']['Value']
-    param = ssm.get_parameter(Name='/modobio/odyssey/db_name')
-    db_name = param['Parameter']['Value']
-
-    if os.getenv('FLASK_ENV') == 'testing':
-        param = ssm.get_parameter(Name='/modobio/odyssey/db_name_test')
-        db_name = param['Parameter']['Value']
-    elif os.getenv('FLASK_ENV') == 'development':
-        db_name = ssm.get_parameter(Name='/modobio/odyssey/db_name_dev')['Parameter']['Value']
-
-    app.config['SQLALCHEMY_DATABASE_URI'] = f'{db_flav}://{db_user}:{db_pass}@{db_host}/{db_name}'
-
-    param = ssm.get_parameter(Name='/modobio/odyssey/app_secret', WithDecryption=True)
-    app.secret_key = param['Parameter']['Value']
-
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+print(app.config)
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
