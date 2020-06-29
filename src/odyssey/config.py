@@ -3,8 +3,8 @@ Flask app configuration
 =======================
 
 Flask makes use of environmental variables to changes its behaviour. Since we have multiple
-development/testing/production environments, we here introduce an extra variable to fine-tune
-the settings.
+development/testing/production environments, here an an extra variable is introduced to
+fine-tune the behaviour of the app.
 
 FLASK_ENV
 ---------
@@ -14,8 +14,8 @@ recognized: ``production`` and ``development``. If ``FLASK_ENV`` is not set, it 
 ``production``. You set ``FLASK_ENV`` in the environment, but it is stored in ``app.config``
 as ``ENV``.
 
-I do not want to repurpose this variable. Flask may add new functionality in the future.
-We will keep it as it is and respect its setting.
+Do not repurpose this variable. Flask may add new functionality in the future that is dependent
+on this variable. Keep this variable as it is and respect its values.
 
 FLASK_DEV
 ---------
