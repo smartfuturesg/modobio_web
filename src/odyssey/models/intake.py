@@ -493,3 +493,37 @@ class ClientIndividualContract(db.Model):
 
     :type: str
     """
+
+
+class ClientDocumentTypes(enum.Enum):
+    consent = 1
+    release = 2
+    policies = 3
+    consult_contract = 4
+    subscription_contract = 5
+    services_contract = 6
+
+
+class ClientSignedDocuments(db.Model):
+
+    __tablename__ = 'ClientSignedDocuments'
+
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
+
+    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid'), nullable=False)
+    """
+    Client ID number
+
+    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    """
+
+    document = db.Column(db.Enum(ClientDocumentTypes))
+    revision = db.Column(db.String(15))
+    signdate = db.Column(db.Date)
+    url = db.Column(db.String(100))
