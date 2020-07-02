@@ -26,10 +26,10 @@ setup(
     python_requires='>=3.6',
     install_requires=[
         'Flask',
+        'Flask-HTTPAuth==4.1.0',
         'Flask-Migrate==2.5.3',
         'Flask_WTF',
         'WTForms',
-        'Flask_WeasyPrint',
         'Werkzeug',
         'Flask_SQLAlchemy'
     ],

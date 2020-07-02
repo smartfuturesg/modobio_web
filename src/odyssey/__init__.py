@@ -6,6 +6,7 @@ This is a `Flask <https://flask.palletsprojects.com>`_ based app that serves web
 """
 
 from flask import Flask
+from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
@@ -13,6 +14,7 @@ from flask_sqlalchemy import SQLAlchemy
 __version__ = '0.0.3'
 
 app = Flask(__name__)
+CORS(app)
 
 app.config.from_pyfile('config.py')
 
@@ -57,3 +59,5 @@ app.register_blueprint(bp, url_prefix='/doctor')
 from odyssey.views.pt import bp
 app.register_blueprint(bp, url_prefix='/pt')
 
+from odyssey.api import bp as api_bp
+app.register_blueprint(api_bp, url_prefix='/api')
