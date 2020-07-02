@@ -11,14 +11,12 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
 
-__version__ = '0.0.3'
+__version__ = '0.1.0'
 
 app = Flask(__name__)
 CORS(app)
 
 app.config.from_pyfile('config.py')
-
-print(app.config)
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
