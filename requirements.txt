@@ -1,8 +1,10 @@
 boto3
 Flask
+Flask-Cors==3.0.8
+Flask-HTTPAuth==4.1.0
 Flask-Migrate==2.5.3
+flask-restx==0.2.0
 Flask_SQLAlchemy
 Flask_WTF
-Flask_WeasyPrint
 WTForms
 Werkzeug

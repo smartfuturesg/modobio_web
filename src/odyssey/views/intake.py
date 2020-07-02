@@ -1,5 +1,5 @@
 from flask import render_template, Blueprint, session, redirect, request, url_for
-from flask_weasyprint import HTML, render_pdf
+#from flask_weasyprint import HTML, render_pdf
 
 from odyssey import db
 from odyssey.forms.intake import ClientInfoForm, ClientConsentForm, ClientReleaseForm, \

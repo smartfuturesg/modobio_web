@@ -3,6 +3,7 @@ from __future__ import with_statement
 import logging
 from logging.config import fileConfig
 import os
+import sys
 
 import boto3
 from sqlalchemy import engine_from_config
@@ -42,13 +43,22 @@ db_pass = ssm.get_parameter(Name='/modobio/odyssey/db_pass_master', WithDecrypti
 db_host = ssm.get_parameter(Name='/modobio/odyssey/db_host')['Parameter']['Value']
 if os.getenv('FLASK_ENV') == 'development':
     db_name = ssm.get_parameter(Name='/modobio/odyssey/db_name_dev')['Parameter']['Value']
+    db_connection_string = f'{db_flav}://{db_user}:{db_pass}@{db_host}/{db_name}'
 elif os.getenv('FLASK_ENV') == 'production':
     db_name = ssm.get_parameter(Name='/modobio/odyssey/db_name')['Parameter']['Value']
+    db_connection_string = f'{db_flav}://{db_user}:{db_pass}@{db_host}/{db_name}'
+elif os.getenv('FLASK_ENV') == 'development_local':
+    db_connection_string = str(current_app.extensions['migrate'].db.engine.url).replace('%', '%%')
 else:
     print("which database are you upgrading?")
     db_name = input()
 
-db_connection_string = f'{db_flav}://{db_user}:{db_pass}@{db_host}/{db_name}'
+print(f"updating/querying database using the following connection string: \n {db_connection_string}")
+print("continue? [Y,n]")
+answer = input()
+
+if answer not in ['y', 'Y']:
+    sys.exit()
 
 config.set_main_option(
     'sqlalchemy.url',
