@@ -32,7 +32,7 @@ def create_app():
     db.Model.update = _update
 
     wtforms.DateTimeField.widget = DateInput()
-    
+
     from odyssey.views.menu import menu
 
     @app.context_processor
@@ -63,7 +63,7 @@ def create_app():
 # Custom method to easily update db table from a dict
 def _update(self, form: dict):
     for k, v in form.items():
-        setattr(self, k, v) 
+        setattr(self, k, v)
 
 # Override wtforms.DateTimeField so that it outputs <input type="date"> by default.
 import wtforms

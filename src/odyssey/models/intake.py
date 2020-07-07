@@ -217,6 +217,11 @@ class ClientInfo(db.Model):
     :type: bool
     """
 
+    signed_docs = db.relationship('ClientSignedDocument',
+                                  order_by='ClientSignedDocument.clientid',
+                                  back_populates='client_info',
+                                  cascade='all, delete-orphan')
+
     def get_medical_record_hash(self):
         """medical record hash generation"""
 
@@ -312,7 +317,7 @@ class ClientConsent(db.Model):
 
     :type: int, primary key, autoincrement
     """
-    
+
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid'), nullable=False)
     """
     Client ID number.
@@ -532,7 +537,7 @@ class ClientConsultContract(db.Model):
 
     :type: int, primary key, autoincrement
     """
-    
+
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid'), nullable=False)
     """
     Client ID number
@@ -555,7 +560,7 @@ class ClientConsultContract(db.Model):
 
     :type: str
     """
-    
+
     def get_attributes(self):
         """return class attributes as list"""
         return [ 'signdate', 'signature' ]
@@ -593,7 +598,7 @@ class ClientSubscriptionContract(db.Model):
 
     :type: int, primary key, autoincrement
     """
-    
+
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid'), nullable=False)
     """
     Client ID number
@@ -700,7 +705,7 @@ class ClientIndividualContract(db.Model):
 
     :type: str
     """
-    
+
     def get_attributes(self):
         """return class attributes as list"""
         return [ 'signdate', 'signature', 'data', 'doctor', 'pt', 'drinks']
@@ -729,12 +734,12 @@ class ClientIndividualContract(db.Model):
 class RemoteRegistration(db.Model):
     """ At-home client registration parameter
 
-    Stores details to enable clients to register at home securely. This inclues the 
-    temporary registration url, client login details, and current api token. Each at-home 
+    Stores details to enable clients to register at home securely. This inclues the
+    temporary registration url, client login details, and current api token. Each at-home
     client will have one entry in this table. Expired urls will remain for record keeping.
 
     The primary index of this table is the
-    :attr:`clientid` number. 
+    :attr:`clientid` number.
     """
 
     __tablename__ = 'remote_registration'
@@ -763,14 +768,14 @@ class RemoteRegistration(db.Model):
     token = db.Column(db.String(32), index=True, unique=True)
     """
     API authentication token
-    
+
     :type: str, max length 32, indexed, unique
     """
 
     token_expiration = db.Column(db.DateTime)
     """
     token expiration date
-    
+
     :type: datetime
     """
 
@@ -784,14 +789,14 @@ class RemoteRegistration(db.Model):
     registration_portal_id = db.Column(db.String(32), index=True, unique=True)
     """
     registration portal endpoint
-    
+
     :type: str, max length 32, indexed, unique
     """
 
     registration_portal_expiration = db.Column(db.DateTime)
     """
     token expiration date
-    
+
     :type: datetime
     """
 
@@ -812,9 +817,9 @@ class RemoteRegistration(db.Model):
             'registration_portal_expiration': self.registration_portal_expiration
         }
         return data
-    
+
     def get_temp_registration_endpoint(self, expires_in = 86400):
-        """creates a temporary endpoint meant for at-home 
+        """creates a temporary endpoint meant for at-home
            registration
         """
         now = datetime.utcnow()
@@ -886,12 +891,55 @@ class ClientDocumentTypes(enum.Enum):
     services_contract = 6
 
 
-class ClientSignedDocuments(db.Model):
+class ClientSignedDocument(db.Model):
 
-    __tablename__ = 'ClientSignedDocuments'
+    __tablename__ = 'ClientSignedDocument'
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
+
+    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid'), nullable=False)
+    """
+    Client ID number.
+
+    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    """
 
     document = db.Column(db.Enum(ClientDocumentTypes))
-    revision = db.Column(db.String(15))
-    signdate = db.Column(db.Date)
-    url = db.Column(db.String(100))
+    """
+    What kind of document is this?
 
+    :type: enum.Enum, ClientDocumentTypes
+    """
+
+    revision = db.Column(db.String(15))
+    """
+    Revision code of the document, usually the date when the document was last changed.
+
+    :type: str, max length 15
+    """
+
+    signdate = db.Column(db.Date)
+    """
+    Date when the document was signed.
+
+    :type: datetime.datetime
+    """
+
+    url = db.Column(db.String(100))
+    """
+    URL where the document is stored.
+
+    :type: str, max length 100
+    """
+
+    client_info = db.relationship('ClientInfo', back_populates='signed_docs')
+    """
+    Instance of :class:`ClientInfo` this table belongs to.
+
+    :type: :class:`ClientInfo` instance
+    """
