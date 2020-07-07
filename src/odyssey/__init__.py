@@ -4,6 +4,7 @@
 
 This is a `Flask <https://flask.palletsprojects.com>`_ based app that serves webpages to the `ModoBio <https://modobio.com>`_ staff. The pages contain the intake and data gathering forms for the *client journey*. The `Odyssey <https://en.wikipedia.org/wiki/Odyssey>`_ is of course the most famous journey of all time! 🤓
 """
+import os
 
 from flask import Flask
 from flask_cors import CORS
@@ -17,11 +18,20 @@ db = SQLAlchemy()
 migrate = Migrate()
 cors = CORS()
 
-def create_app():
+def create_app(flask_env=None):
     """initializes an instance of the flask app"""
     app = Flask(__name__)
 
-    app.config.from_pyfile('config.py')
+    if flask_env == 'testing':
+        BASEDIR = os.path.abspath(os.path.dirname(__file__))
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(BASEDIR, 'app.db')
+        app.config['SECRET_KEY'] = 'very-secretive-key'
+        app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+        app.config['TESTING'] = True
+        app.config['WTF_CSRF_ENABLED'] = False
+        app.config['BCRYPT_LOG_ROUNDS'] = 4
+    else:
+        app.config.from_pyfile('config.py')
 
     print(app.config)
 
