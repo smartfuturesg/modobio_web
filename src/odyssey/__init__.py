@@ -13,49 +13,61 @@ from flask_sqlalchemy import SQLAlchemy
 
 __version__ = '0.1.0'
 
-app = Flask(__name__)
-CORS(app)
+db = SQLAlchemy()
+migrate = Migrate()
+cors = CORS()
 
-app.config.from_pyfile('config.py')
+def create_app():
+    """initializes an instance of the flask app"""
+    app = Flask(__name__)
 
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
+    app.config.from_pyfile('config.py')
+
+    print(app.config)
+
+    db.init_app(app)
+    migrate.init_app(app, db)
+    cors.init_app(app)
+
+    db.Model.update = _update
+
+    wtforms.DateTimeField.widget = DateInput()
+    
+    from odyssey.views.menu import menu
+
+    @app.context_processor
+    def render_menu():
+        return {'menu': menu}
+
+    from odyssey.views.main import bp
+    app.register_blueprint(bp)
+
+    from odyssey.views.intake import bp
+    app.register_blueprint(bp, url_prefix='/intake')
+
+    from odyssey.views.doctor import bp
+    app.register_blueprint(bp, url_prefix='/doctor')
+
+    from odyssey.views.pt import bp
+    app.register_blueprint(bp, url_prefix='/pt')
+
+    from odyssey.api import bp as api_bp
+    app.register_blueprint(api_bp, url_prefix='/api')
+
+    from odyssey.api.errors import register_handlers
+    register_handlers(app)
+
+    return app
+
 
 # Custom method to easily update db table from a dict
 def _update(self, form: dict):
     for k, v in form.items():
-        setattr(self, k, v)
-
-db.Model.update = _update
-
-import odyssey.models
-
-db.create_all()
+        setattr(self, k, v) 
 
 # Override wtforms.DateTimeField so that it outputs <input type="date"> by default.
 import wtforms
 class DateInput(wtforms.widgets.Input):
     input_type = 'date'
 
-wtforms.DateTimeField.widget = DateInput()
-
-from odyssey.views.menu import menu
-
-@app.context_processor
-def render_menu():
-    return {'menu': menu}
-
-from odyssey.views.main import bp
-app.register_blueprint(bp)
-
-from odyssey.views.intake import bp
-app.register_blueprint(bp, url_prefix='/intake')
-
-from odyssey.views.doctor import bp
-app.register_blueprint(bp, url_prefix='/doctor')
-
-from odyssey.views.pt import bp
-app.register_blueprint(bp, url_prefix='/pt')
-
-from odyssey.api import bp as api_bp
-app.register_blueprint(api_bp, url_prefix='/api')
+import odyssey.models
