@@ -27,4 +27,5 @@ sdist/
 
 # from pytests
 *.db
+.coverage
 
