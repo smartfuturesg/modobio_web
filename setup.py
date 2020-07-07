@@ -6,7 +6,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(here, 'README.md')) as fh:
     long_description = fh.read()
 
-with open(os.path.join(here, 'src', '__init__.py')) as fh:
+with open(os.path.join(here, 'src','odyssey', '__init__.py')) as fh:
     for line in fh:
         if line.startswith('__version__'):
             __version__ = line.split('=')[-1].strip().strip("'")
