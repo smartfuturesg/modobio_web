@@ -18,3 +18,13 @@ sdist/
 # macOS
 .DS_Store
 
+
+#vs-code & pyenv specific
+*code-workspace
+.python-version
+.idea
+.vscode
+
+# from pytests
+*.db
+
