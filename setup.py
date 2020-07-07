@@ -6,7 +6,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(here, 'README.md')) as fh:
     long_description = fh.read()
 
-with open(os.path.join(here, 'src', 'odyssey', '__init__.py')) as fh:
+with open(os.path.join(here, 'src', '__init__.py')) as fh:
     for line in fh:
         if line.startswith('__version__'):
             __version__ = line.split('=')[-1].strip().strip("'")
@@ -28,6 +28,8 @@ setup(
         'Flask',
         'Flask-HTTPAuth==4.1.0',
         'Flask-Migrate==2.5.3',
+        'Flask-Cors==3.0.8',
+        'flask-restx==0.2.0',
         'Flask_WTF',
         'WTForms',
         'Werkzeug',
