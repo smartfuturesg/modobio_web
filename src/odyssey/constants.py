@@ -1,4 +1,14 @@
 """ Various constants used throughout the Odyssey package. """
+import enum
+
+from odyssey.models.intake import (
+    ClientPolicies,
+    ClientRelease,
+    ClientConsent,
+    ClientConsultContract,
+    ClientIndividualContract,
+    ClientSubscriptionContract
+)
 
 COUNTRIES = (
     ('AF', 'Afghanistan'),
@@ -355,4 +365,55 @@ database column expects a Python :attr:`True` or :attr:`False` value. Use
 :const:`YESNO`:
 
 `name = RadioField('label', choices=YESNO, coerce=BOOLIFY)`
+"""
+
+class DOCTYPE(enum.Enum):
+    policies = enum.auto()
+    release = enum.auto()
+    consent = enum.auto()
+    consult = enum.auto()
+    subscription = enum.auto()
+    individual = enum.auto()
+""" Enum defining the different signable documents.
+
+:type: enum.Enum
+"""
+
+DOCTYPE_TABLE_MAP = {
+    DOCTYPE.policies: ClientPolicies,
+    DOCTYPE.release: ClientRelease,
+    DOCTYPE.consent: ClientConsent,
+    DOCTYPE.consult: ClientConsultContract,
+    DOCTYPE.individual: ClientIndividualContract,
+    DOCTYPE.subscription: ClientSubscriptionContract
+}
+""" Maps signable documents to the database tables.
+
+The keys of this dict are the members of :class:`DocTypes`. The values are
+the SQLAlchemy models defines in :mod:`odyssey.models.intake`.
+
+:type: dict
+"""
+
+DOCTYPE_DOCREV_MAP = {
+    DOCTYPE.policies: '20200513',
+    DOCTYPE.release: '20200416',
+    DOCTYPE.consent: '20200317',
+    DOCTYPE.consult: '20200428',
+    DOCTYPE.individual: '20200513',
+    DOCTYPE.subscription: '20200428'
+}
+""" Maps signable documents to the latest document revision.
+
+The keys of this dict are the members of :class:`DocTypes`.
+
+The revision string is updated whenever the contents of the document change. The
+revision string can be anything, but it typically consists of the ISO formatted
+date (e.g. 20200519).
+
+This map is the "ground truth" for revision numbers. If one needs to be updated,
+do it here. The revision numbers stored in the database are the revision numbers
+of the *signed* documents.
+
+:type: dict
 """
