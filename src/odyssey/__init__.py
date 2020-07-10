@@ -33,7 +33,8 @@ def create_app(flask_env=None):
     else:
         app.config.from_pyfile('config.py')
 
-    print(app.config)
+    if app.config['DEBUG']:
+        print(app.config)
 
     db.init_app(app)
     migrate.init_app(app, db)
