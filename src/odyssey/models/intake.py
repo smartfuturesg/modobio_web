@@ -3,12 +3,12 @@ Database tables for the client intake portion of the Modo Bio Staff application.
 All tables in this module are prefixed with 'Client'.
 """
 import base64
+import os
+import pytz
+import random
+
 from datetime import datetime, timedelta
 from hashlib import md5
-import os
-import random
-import pytz
-
 from flask import url_for
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -217,11 +217,6 @@ class ClientInfo(db.Model):
     :type: bool
     """
 
-    signed_docs = db.relationship('ClientSignedDocument',
-                                  order_by='ClientSignedDocument.clientid',
-                                  back_populates='client_info',
-                                  cascade='all, delete-orphan')
-
     def get_medical_record_hash(self):
         """medical record hash generation"""
 
@@ -348,6 +343,27 @@ class ClientConsent(db.Model):
     :type: str
     """
 
+    revision = db.Column(db.String(10))
+    """
+    Revision string of the latest signed document.
+
+    The revision string is updated whenever the contents of the document change.
+    The revision stored here is the revision of the newest signed document.
+
+    :type: str, max length 10
+
+    See Also
+    --------
+    :const:`odyssey.constants.DOCTYPE_DOCREV_MAP`
+    """
+
+    url = db.Column(db.String(200))
+    """
+    URL where signed document is stored as a PDF file.
+
+    :type: str, max length 100
+    """
+
     def get_attributes(self):
         """return class attributes as list"""
         return [ 'infectious_disease', 'signdate', 'signature' ]
@@ -458,6 +474,27 @@ class ClientRelease(db.Model):
     :type: str
     """
 
+    revision = db.Column(db.String(10))
+    """
+    Revision string of the latest signed document.
+
+    The revision string is updated whenever the contents of the document change.
+    The revision stored here is the revision of the newest signed document.
+
+    :type: str, max length 10
+
+    See Also
+    --------
+    :const:`odyssey.constants.DOCTYPE_DOCREV_MAP`
+    """
+
+    url = db.Column(db.String(200))
+    """
+    URL where signed document is stored as a PDF file.
+
+    :type: str, max length 100
+    """
+
     def get_attributes(self):
         """return class attributes as list"""
         return [ 'release_by_other','release_to_other', 'release_of_all', 'release_of_other', 'release_date_to',
@@ -489,16 +526,64 @@ class ClientRelease(db.Model):
 
 
 class ClientPolicies(db.Model):
+    """ Client policies table
+
+    This table stores the signature and related information of the
+    Modo Bio policies form.
+    """
 
     __tablename__ = 'ClientPolicies'
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid'), nullable=False)
+    """
+    Client ID number
+
+    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    """
 
     signdate = db.Column(db.Date)
+    """
+    Signature date.
+
+    :type: datetime.date
+    """
 
     signature = db.Column(db.Text)
+    """
+    Signature.
+
+    Stored as a base64 encoded png image, prefixed with mime-type.
+
+    :type: str
+    """
+
+    revision = db.Column(db.String(10))
+    """
+    Revision string of the latest signed document.
+
+    The revision string is updated whenever the contents of the document change.
+    The revision stored here is the revision of the newest signed document.
+
+    :type: str, max length 10
+
+    See Also
+    --------
+    :const:`odyssey.constants.DOCTYPE_DOCREV_MAP`
+    """
+
+    url = db.Column(db.String(200))
+    """
+    URL where signed document is stored as a PDF file.
+
+    :type: str, max length 100
+    """
 
     def get_attributes(self):
         """return class attributes as list"""
@@ -559,6 +644,27 @@ class ClientConsultContract(db.Model):
     Stored as a base64 encoded png image, prefixed with mime-type.
 
     :type: str
+    """
+
+    revision = db.Column(db.String(10))
+    """
+    Revision string of the latest signed document.
+
+    The revision string is updated whenever the contents of the document change.
+    The revision stored here is the revision of the newest signed document.
+
+    :type: str, max length 10
+
+    See Also
+    --------
+    :const:`odyssey.constants.DOCTYPE_DOCREV_MAP`
+    """
+
+    url = db.Column(db.String(200))
+    """
+    URL where signed document is stored as a PDF file.
+
+    :type: str, max length 100
     """
 
     def get_attributes(self):
@@ -622,6 +728,27 @@ class ClientSubscriptionContract(db.Model):
     :type: str
     """
 
+    revision = db.Column(db.String(10))
+    """
+    Revision string of the latest signed document.
+
+    The revision string is updated whenever the contents of the document change.
+    The revision stored here is the revision of the newest signed document.
+
+    :type: str, max length 10
+
+    See Also
+    --------
+    :const:`odyssey.constants.DOCTYPE_DOCREV_MAP`
+    """
+
+    url = db.Column(db.String(200))
+    """
+    URL where signed document is stored as a PDF file.
+
+    :type: str, max length 100
+    """
+
     def get_attributes(self):
         """return class attributes as list"""
         return [ 'signdate', 'signature' ]
@@ -662,21 +789,21 @@ class ClientIndividualContract(db.Model):
     :type: int, foreign key to :attr:`ClientInfo.clientid`
     """
 
-    doctor_consult = db.Column(db.Boolean, default=False)
+    doctor = db.Column(db.Boolean, default=False)
     """
     Indicates whether or not client wants to buy a doctor's appointment.
 
     :type: bool
     """
 
-    pt_consult = db.Column(db.Boolean, default=False)
+    pt = db.Column(db.Boolean, default=False)
     """
     Indicates whether or not client wants to buy a physical therapy session.
 
     :type: bool
     """
 
-    data_monitoring = db.Column(db.Boolean, default=False)
+    data = db.Column(db.Boolean, default=False)
     """
     Indicates whether or not client wants to buy a data tracking and analysis package.
 
@@ -704,6 +831,27 @@ class ClientIndividualContract(db.Model):
     Stored as a base64 encoded png image, prefixed with mime-type.
 
     :type: str
+    """
+
+    revision = db.Column(db.String(10))
+    """
+    Revision string of the latest signed document.
+
+    The revision string is updated whenever the contents of the document change.
+    The revision stored here is the revision of the newest signed document.
+
+    :type: str, max length 10
+
+    See Also
+    --------
+    :const:`odyssey.constants.DOCTYPE_DOCREV_MAP`
+    """
+
+    url = db.Column(db.String(200))
+    """
+    URL where signed document is stored as a PDF file.
+
+    :type: str, max length 100
     """
 
     def get_attributes(self):
@@ -880,66 +1028,3 @@ class RemoteRegistration(db.Model):
         if remote_client is None or remote_client.registration_portal_expiration < datetime.utcnow():
             return None
         return remote_client
-
-
-class ClientDocumentTypes(enum.Enum):
-    consent = 1
-    release = 2
-    policies = 3
-    consult_contract = 4
-    subscription_contract = 5
-    services_contract = 6
-
-
-class ClientSignedDocument(db.Model):
-
-    __tablename__ = 'ClientSignedDocument'
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid'), nullable=False)
-    """
-    Client ID number.
-
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
-    """
-
-    document = db.Column(db.Enum(ClientDocumentTypes))
-    """
-    What kind of document is this?
-
-    :type: enum.Enum, ClientDocumentTypes
-    """
-
-    revision = db.Column(db.String(15))
-    """
-    Revision code of the document, usually the date when the document was last changed.
-
-    :type: str, max length 15
-    """
-
-    signdate = db.Column(db.Date)
-    """
-    Date when the document was signed.
-
-    :type: datetime.datetime
-    """
-
-    url = db.Column(db.String(100))
-    """
-    URL where the document is stored.
-
-    :type: str, max length 100
-    """
-
-    client_info = db.relationship('ClientInfo', back_populates='signed_docs')
-    """
-    Instance of :class:`ClientInfo` this table belongs to.
-
-    :type: :class:`ClientInfo` instance
-    """
