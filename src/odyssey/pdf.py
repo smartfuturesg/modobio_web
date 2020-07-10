@@ -14,7 +14,6 @@ from flask_weasyprint import HTML, CSS
 
 from odyssey import db, create_app
 from odyssey.constants import DOCTYPE, DOCTYPE_TABLE_MAP, DOCTYPE_DOCREV_MAP
-from odyssey.api.errors import UserNotFound
 from odyssey.models.intake import *
 
 
@@ -47,13 +46,8 @@ def to_pdf(clientid: int,
 
     Raises
     ------
-    UserNotFound
-        Raised when :attr:`clientid` does not exist in the database,
-        or when :attr:`clientid` does not exist in the database table
-        corresponding to the given :attr:`doctype`.
-
     ValueError
-        Raised when incorrect :const:`DOCTYPE` is passed.
+        Raised when :attr:`clientid` does not exist in a database table.
     """
     thread = threading.Thread(target=_to_pdf,
                               args=(clientid, doctype),
@@ -62,21 +56,22 @@ def to_pdf(clientid: int,
 
 
 def _to_pdf(clientid: int, doctype: DOCTYPE, template: str=None, form: FlaskForm=None):
-    """PDF generation for the API/React based app"""
+    """ Generate and store a PDF file from a signed document.
+
+        Don't use this function directly, use :func:`to_pdf` for non-blocking,
+        multi-threaded operation.
+    """
     app = create_app()
     with app.test_request_context():
         client = ClientInfo.query.filter_by(clientid=clientid).one_or_none()
         if not client:
-            raise UserNotFound(clientid)
-
-        if not (isinstance(doctype, DOCTYPE) and doctype in DOCTYPE):
-            raise ValueError('Doctype {doctype} is not valid. See constants.DOCTYPES.')
+            raise ValueError('Clientid {clientid} not found in table {ClientInfo.__tablename__}.')
 
         doctable = DOCTYPE_TABLE_MAP[doctype]
 
         doc = doctable.query.filter_by(clientid=clientid).order_by(doctable.revision.desc()).first()
         if not doc:
-            raise UserNotFound(clientid, 'Clientid {clientid} not found in table {doctable.__tablename__}.')
+            raise ValueError('Clientid {clientid} not found in table {doctable.__tablename__}.')
 
         if doc.url:
             # URL already exists, won't save again
