@@ -31,7 +31,7 @@ from odyssey.models.intake import (
     ClientSubscriptionContract,
     RemoteRegistration
 )
-from odyssey.constants import DOCTYPES, DOCTYPE_DOCREV_MAP
+from odyssey.constants import DOCTYPE, DOCTYPE_DOCREV_MAP
 from odyssey.pdf import to_pdf
 
 ns = api.namespace('client', description='Operations related to clients')
@@ -126,7 +126,7 @@ class Clients(Resource):
 class ConsentContract(Resource):
     """client consent forms"""
 
-    doctype = DOCTYPES.consent
+    doctype = DOCTYPE.consent
     docrev = DOCTYPE_DOCREV_MAP[doctype]
 
     @ns.doc(security='apikey')
@@ -181,7 +181,7 @@ class ConsentContract(Resource):
 class ReleaseContract(Resource):
     """Client release forms"""
 
-    doctype = DOCTYPES.release
+    doctype = DOCTYPE.release
     docrev = DOCTYPE_DOCREV_MAP[doctype]
 
     @ns.doc(security='apikey')
@@ -217,7 +217,7 @@ class ReleaseContract(Resource):
 class PoliciesContract(Resource):
     """Client policies form"""
 
-    doctype = DOCTYPES.policies
+    doctype = DOCTYPE.policies
     docrev = DOCTYPE_DOCREV_MAP[doctype]
 
     @ns.doc(security='apikey')
@@ -269,7 +269,7 @@ class PoliciesContract(Resource):
 class ConsultConstract(Resource):
     """client consult contract"""
 
-    doctype = DOCTYPES.consult
+    doctype = DOCTYPE.consult
     docrev = DOCTYPE_DOCREV_MAP[doctype]
 
     @ns.doc(security='apikey')
@@ -305,7 +305,7 @@ class ConsultConstract(Resource):
 class SubscriptionContract(Resource):
     """client subscription contract"""
 
-    doctype = DOCTYPES.subscription
+    doctype = DOCTYPE.subscription
     docrev = DOCTYPE_DOCREV_MAP[doctype]
 
     @ns.doc(security='apikey')
@@ -341,7 +341,7 @@ class SubscriptionContract(Resource):
 class IndividualContract(Resource):
     """client individual services contract"""
 
-    doctype = DOCTYPES.individual
+    doctype = DOCTYPE.individual
     docrev = DOCTYPE_DOCREV_MAP[doctype]
 
     @ns.doc(security='apikey')

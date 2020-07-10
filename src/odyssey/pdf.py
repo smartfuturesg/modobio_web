@@ -33,7 +33,7 @@ def to_pdf(clientid: int,
 
     doctype : :class:`odyssey.constants.DOCTYPE`
         The type of document that is being processed. Must be a member of
-        :class:`odyssey.constants.DOCTYPES`, e.g. `DOCTYPE.consent`
+        :class:`odyssey.constants.DOCTYPE`, e.g. `DOCTYPE.consent`
 
     template : str
         Filename of the Flask template for which a PDF file is requested.
