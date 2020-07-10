@@ -1,4 +1,3 @@
-
 from flask import request, jsonify
 from flask_restx import Resource, Api
 
@@ -6,13 +5,14 @@ from odyssey.api import api
 from odyssey.api.auth import token_auth, token_auth_client
 from odyssey.api.errors import UserNotFound, ClientAlreadyExists, ClientNotFound, IllegalSetting
 from odyssey.api.serializers import (
-    client_info, 
+    client_info,
     client_individual_services_contract,
     client_individual_services_contract_edit,
-    client_consent, 
-    client_consent_edit, 
-    client_release, 
-    client_release_edit, 
+    client_consent,
+    client_consent_edit,
+    client_release,
+    client_release_edit,
+    client_signed_documents,
     initialize_remote_registration,
     pagination,
     refresh_remote_registration,
@@ -86,7 +86,7 @@ class NewClient(Resource):
         #prevent requests to set clientid and send message back to api user
         elif data.get('clientid', None):
             raise IllegalSetting('clientid')
-        
+
         client = ClientInfo()
         client.from_dict(data)
         db.session.add(client)
@@ -132,7 +132,7 @@ class ConsentContract(Resource):
 
         if not client_consent_form:
             raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a consultation contract in the database")
-        
+
         return  client_consent_form.to_dict()
 
     @ns.expect(client_consent_edit)
@@ -342,6 +342,41 @@ class IndividualContract(Resource):
         response = client_services.to_dict()
         return response, 201
 
+@ns.route('/signeddocuments/<int:clientid>/', methods=('GET',))
+@ns.doc(params={'clientid': 'Client ID number'})
+class SignedDocuments(Resource):
+    """
+    API endpoint that provides access to documents signed
+    by the client and stored as PDF files.
+
+    Returns
+    -------
+
+    Returns a list of URLs where the PDF documents are stored.
+    """
+    # @ns.doc(security='apikey')
+    # @token_auth.login_required
+    @ns.marshal_with(client_signed_documents)
+    def get(self, clientid):
+        """Given a clientid, returns a list of URLs for all signed documents."""
+        client = ClientInfo.query.filter_by(clientid=clientid).one_or_none()
+
+        if not client:
+            raise UserNotFound(clientid)
+
+        urls = []
+
+        for table in (ClientPolicies,
+                      ClientRelease,
+                      ClientConsent,
+                      ClientConsultContract,
+                      ClientSubscriptionContract,
+                      ClientIndividualContract):
+            result = table.query.filter_by(clientid=clientid).order_by(table.revision.desc()).first()
+            if result and result.url:
+                urls.append(result.url)
+
+        return {'urls': urls}
 
 @ns.route('/remoteregistration/new/')
 class NewRemoteRegistration(Resource):
@@ -356,26 +391,26 @@ class NewRemoteRegistration(Resource):
         """create new remote registration client
             this will create a new entry into the client info table first
             then create an entry into the Remote registration table
-            response includes the hash required to access the temporary portal for 
+            response includes the hash required to access the temporary portal for
             this client
         """
         data = request.get_json()
 
-        #make sure this user email does not exist        
+        #make sure this user email does not exist
         if data.get('email', None) and ClientInfo.query.filter_by(email=data.get('email', None)).first():
             raise ClientAlreadyExists(identification = data['email'])
 
         # enter client into basic info table and remote register table
-        client_info = ClientInfo() 
+        client_info = ClientInfo()
         remote_client = RemoteRegistration()
 
         client_info.from_dict(data)
         db.session.add(client_info)
         db.session.flush()
-        
+
         data['clientid'] = client_info.clientid
         remote_client.from_dict(data)
-        
+
         #create temporary passwork and portal url
         pwd = remote_client.set_password(client_info.firstname, client_info.lastname)
         remote_client.get_temp_registration_endpoint()
@@ -422,7 +457,7 @@ class RefreshRemoteRegistration(Resource):
 
         db.session.add(remote_client)
         db.session.flush()
-        
+
         response = remote_client.to_dict()
         response['password'] = pwd
         db.session.commit()
@@ -461,9 +496,9 @@ class RemoteClientInfo(Resource):
         #prevent requests to set clientid and send message back to api user
         if data.get('clientid', None):
             raise IllegalSetting('clientid')
-        
+
         client = ClientInfo.query.filter_by(email=token_auth_client.current_user().email).first()
-       
+
         client.from_dict(data)
         db.session.add(client)
         db.session.flush()

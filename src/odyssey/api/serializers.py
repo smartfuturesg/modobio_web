@@ -48,7 +48,7 @@ client_info =   api.model('client_info', {
             'gender': fields.String(description="options: ['m', 'f', 'o' (other), 'n' (non-binary)]",enum = ['m', 'f', 'o', 'n'], max_length=1),
             'dob': fields.Date(description=f'formatted as: {DATE_FORMAT}', date = DATE_FORMAT ),
             'profession': fields.String(description=''),
-            'receive_docs': fields.Boolean(description=''),
+            'receive_docs': fields.Boolean(description='')
         })
 
 client_consent = api.model('client_consent', {
@@ -56,6 +56,7 @@ client_consent = api.model('client_consent', {
     'infectious_disease': fields.Boolean(description='whether or not the client has a known infectious disease'),
     'signdate': fields.Date(description=f'formatted as: {DATE_FORMAT}', date = DATE_FORMAT ),
     'signature': fields.String(description='client signature stored as a base64 encoded png image, prefixed with mime-type.'),
+    'revision': fields.String(description='Revision code of the document, usually the date when the document was last changed.')
 })
 
 client_consent_edit = api.model('client_consent_edit', {
@@ -63,7 +64,6 @@ client_consent_edit = api.model('client_consent_edit', {
     'signdate': fields.Date(description=f'formatted as: {DATE_FORMAT}', date = DATE_FORMAT ),
     'signature': fields.String(description='client signature stored as a base64 encoded png image, prefixed with mime-type.'),
 })
-
 
 client_release = api.model('client_release', {
             'clientid': fields.Integer(description=''),
@@ -75,7 +75,8 @@ client_release = api.model('client_release', {
             'release_date_to': fields.Date(description=f'formatted as: {DATE_FORMAT}', date = DATE_FORMAT ),
             'release_purpose': fields.String(description = 'Describes for what purpose protected health information can be released.'),
             'signdate': fields.Date(description=f'formatted as: {DATE_FORMAT}', date = DATE_FORMAT ),
-            'signature': fields.String(description='client signature stored as a base64 encoded png image, prefixed with mime-type.')
+            'signature': fields.String(description='client signature stored as a base64 encoded png image, prefixed with mime-type.'),
+            'revision': fields.String(description='Revision code of the document, usually the date when the document was last changed.')
         })
 
 client_release_edit = api.model('client_release_edit', {
@@ -109,7 +110,8 @@ client_individual_services_contract =  api.model('client_individual_services_con
             'drinks': fields.Boolean(description='Indicates whether or not client wants super special healthy fountain of youth drinks.'),
             'data': fields.Boolean(description='Indicates whether or not client wants modobio to collect their fitness data.'),
             'signdate': fields.Date(description=f'formatted as: {DATE_FORMAT}', date = DATE_FORMAT ),
-            'signature': fields.String(description='client signature stored as a base64 encoded png image, prefixed with mime-type.')
+            'signature': fields.String(description='client signature stored as a base64 encoded png image, prefixed with mime-type.'),
+            'revision': fields.String(description='Revision code of the document, usually the date when the document was last changed.')
         })
 
 client_individual_services_contract_edit =  api.model('client_individual_services_contract_edit',{
@@ -120,8 +122,11 @@ client_individual_services_contract_edit =  api.model('client_individual_service
             'signdate': fields.Date(description=f'formatted as: {DATE_FORMAT}', date = DATE_FORMAT ),
             'signature': fields.String(description='client signature stored as a base64 encoded png image, prefixed with mime-type.')
         })
-    
-    
+
+client_signed_documents = api.model('client_signed_documents', {
+    'urls': fields.List(fields.String, description='List of URLs pointing to PDF files of signed documents.')
+})
+
 initialize_remote_registration = api.model('initial_remote_registration', {
             'email': fields.String(description='', required=True),
             'firstname': fields.String(description='', required=True),
@@ -140,4 +145,3 @@ remote_registration_reponse = api.model('refresh_remote_registration_response', 
             'registration_portal_expiration': fields.DateTime(description=f'formatted as: iso8610', dt_format = 'iso8601', example="2020-06-27T20:42:41.473878" ),
             'password': fields.String(description='password for temporary portal')
         })
-    
