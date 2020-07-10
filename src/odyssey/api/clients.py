@@ -31,6 +31,8 @@ from odyssey.models.intake import (
     ClientSubscriptionContract,
     RemoteRegistration
 )
+from odyssey.constants import DOCTYPES, DOCTYPE_DOCREV_MAP
+from odyssey.pdf import to_pdf
 
 ns = api.namespace('client', description='Operations related to clients')
 
@@ -123,6 +125,10 @@ class Clients(Resource):
 @ns.doc(params={'clientid': 'Client ID number'})
 class ConsentContract(Resource):
     """client consent forms"""
+
+    doctype = DOCTYPES.consent
+    docrev = DOCTYPE_DOCREV_MAP[doctype]
+
     @ns.doc(security='apikey')
     @token_auth.login_required
     @ns.marshal_with(client_consent)
@@ -142,11 +148,12 @@ class ConsentContract(Resource):
     def post(self, clientid):
         """create new client consent contract for the specified clientid"""
         data = request.get_json()
-        client_consent_form = ClientConsent()
+        client_consent_form = ClientConsent(revision=docrev)
         client_consent_form.from_dict(clientid, data)
         db.session.add(client_consent_form)
         db.session.flush()
         db.session.commit()
+        to_pdf(clientid, doctype)
         response = client_consent_form.to_dict()
         # response['__links'] = api.url_for(Client, clientid = clientid) # to add links later on
         return response, 201
@@ -173,6 +180,10 @@ class ConsentContract(Resource):
 @ns.doc(params={'clientid': 'Client ID number'})
 class ReleaseContract(Resource):
     """Client release forms"""
+
+    doctype = DOCTYPES.release
+    docrev = DOCTYPE_DOCREV_MAP[doctype]
+
     @ns.doc(security='apikey')
     @token_auth.login_required
     @ns.marshal_with(client_release)
@@ -192,11 +203,12 @@ class ReleaseContract(Resource):
     def post(self, clientid):
         """create client release contract object for the specified clientid"""
         data = request.get_json()
-        client_release_form = ClientRelease()
+        client_release_form = ClientRelease(revision=docrev)
         client_release_form.from_dict(clientid, data)
         db.session.add(client_release_form)
         db.session.flush()
         db.session.commit()
+        to_pdf(clientid, doctype)
         response = client_release_form.to_dict()
         return response, 201
 
@@ -204,6 +216,9 @@ class ReleaseContract(Resource):
 @ns.doc(params={'clientid': 'Client ID number'})
 class PoliciesContract(Resource):
     """Client policies form"""
+
+    doctype = DOCTYPES.policies
+    docrev = DOCTYPE_DOCREV_MAP[doctype]
 
     @ns.doc(security='apikey')
     @token_auth.login_required
@@ -224,11 +239,12 @@ class PoliciesContract(Resource):
     def post(self, clientid):
         """create client policies contract object for the specified clientid"""
         data = request.get_json()
-        client_policies = ClientPolicies()
+        client_policies = ClientPolicies(revision=docrev)
         client_policies.from_dict(clientid, data)
         db.session.add(client_policies)
         db.session.flush()
         db.session.commit()
+        to_pdf(clientid, doctype)
         response = client_policies.to_dict()
         return response, 201
 
@@ -253,6 +269,9 @@ class PoliciesContract(Resource):
 class ConsultConstract(Resource):
     """client consult contract"""
 
+    doctype = DOCTYPES.consult
+    docrev = DOCTYPE_DOCREV_MAP[doctype]
+
     @ns.doc(security='apikey')
     @token_auth.login_required
     @ns.marshal_with(sign_and_date)
@@ -272,11 +291,12 @@ class ConsultConstract(Resource):
     def post(self, clientid):
         """create client consult contract object for the specified clientid"""
         data = request.get_json()
-        client_consult = ClientConsultContract()
+        client_consult = ClientConsultContract(revision=docrev)
         client_consult.from_dict(clientid, data)
         db.session.add(client_consult)
         db.session.flush()
         db.session.commit()
+        to_pdf(clientid, doctype)
         response = client_consult.to_dict()
         return response, 201
 
@@ -284,6 +304,10 @@ class ConsultConstract(Resource):
 @ns.doc(params={'clientid': 'Client ID number'})
 class SubscriptionContract(Resource):
     """client subscription contract"""
+
+    doctype = DOCTYPES.subscription
+    docrev = DOCTYPE_DOCREV_MAP[doctype]
+
     @ns.doc(security='apikey')
     @token_auth.login_required
     @ns.marshal_with(sign_and_date)
@@ -303,11 +327,12 @@ class SubscriptionContract(Resource):
     def post(self, clientid):
         """create client subscription contract object for the specified clientid"""
         data = request.get_json()
-        client_subscription = ClientSubscriptionContract()
+        client_subscription = ClientSubscriptionContract(revision=docrev)
         client_subscription.from_dict(clientid, data)
         db.session.add(client_subscription)
         db.session.flush()
         db.session.commit()
+        to_pdf(clientid, doctype)
         response = client_subscription.to_dict()
         return response, 201
 
@@ -315,6 +340,10 @@ class SubscriptionContract(Resource):
 @ns.doc(params={'clientid': 'Client ID number'})
 class IndividualContract(Resource):
     """client individual services contract"""
+
+    doctype = DOCTYPES.individual
+    docrev = DOCTYPE_DOCREV_MAP[doctype]
+
     @ns.doc(security='apikey')
     @token_auth.login_required
     @ns.marshal_with(client_individual_services_contract)
@@ -334,11 +363,12 @@ class IndividualContract(Resource):
     def post(self, clientid):
         """create client individual services contract object for the specified clientid"""
         data = request.get_json()
-        client_services = ClientIndividualContract()
+        client_services = ClientIndividualContract(revision=docrev)
         client_services.from_dict(clientid, data)
         db.session.add(client_services)
         db.session.flush()
         db.session.commit()
+        to_pdf(clientid, doctype)
         response = client_services.to_dict()
         return response, 201
 
@@ -354,8 +384,8 @@ class SignedDocuments(Resource):
 
     Returns a list of URLs where the PDF documents are stored.
     """
-    # @ns.doc(security='apikey')
-    # @token_auth.login_required
+    @ns.doc(security='apikey')
+    @token_auth.login_required
     @ns.marshal_with(client_signed_documents)
     def get(self, clientid):
         """Given a clientid, returns a list of URLs for all signed documents."""
