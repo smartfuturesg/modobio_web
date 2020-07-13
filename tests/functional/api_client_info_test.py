@@ -1,11 +1,27 @@
+import datetime
+import os
+import time
 
-import json
+from flask.json import dumps, loads
 from requests.auth import _basic_auth_str
 
-from tests.data import test_new_client_info, test_new_remote_registration
 from odyssey.models.main import Staff
-from odyssey.models.intake import ClientInfo
+from odyssey.models.intake import (
+    ClientInfo,
+    ClientConsent
+)
 
+from tests.data import (
+    test_new_client_info,
+    test_new_remote_registration,
+    signature,
+    test_client_consent_form,
+    test_client_release_form,
+    test_client_policies_form,
+    test_client_consult_contract,
+    test_client_subscription_contract,
+    test_client_individual_contract,
+)
 
 def test_get_client_info(test_client, init_database):
     """
@@ -41,7 +57,7 @@ def test_put_client_info(test_client, init_database):
     # test attempting to change the clientid
     data = {'clientid': 10}
     # send get request for client info on clientid = 1 
-    response = test_client.put('/api/client/1/', headers=headers, data=json.dumps(data),  content_type='application/json')
+    response = test_client.put('/api/client/1/', headers=headers, data=dumps(data),  content_type='application/json')
 
     assert response.status_code == 400
     assert response.json['message'] == 'Illegal Setting of parameter, clientid. You cannot set this value manually'
@@ -51,7 +67,7 @@ def test_put_client_info(test_client, init_database):
 
     response = test_client.put('/api/client/1/', 
                                 headers=headers, 
-                                data=json.dumps(data),  
+                                data=dumps(data),  
                                 content_type='application/json')
     
     #load the client from the database
@@ -76,7 +92,7 @@ def test_creating_new_client(test_client, init_database):
     # send get request for client info on clientid = 1 
     response = test_client.post('/api/client/',
                                 headers=headers, 
-                                data=json.dumps(test_new_client_info), 
+                                data=dumps(test_new_client_info), 
                                 content_type='application/json')
     
     client = ClientInfo.query.filter_by(email=test_new_client_info['email']).first()
@@ -105,7 +121,7 @@ def test_home_registration(test_client, init_database):
 
     response = test_client.post('/api/client/remoteregistration/new/',
                                 headers=headers, 
-                                data=json.dumps(test_new_remote_registration), 
+                                data=dumps(test_new_remote_registration), 
                                 content_type='application/json')
 
     password = response.json.get('password')
@@ -130,3 +146,75 @@ def test_home_registration(test_client, init_database):
     # client_token = response.json['token']
 
     assert response.status_code == 201
+
+def test_get_client_consent(test_client, init_database):
+    """
+    GIVEN an api endpoint for retrieving client consent form
+    WHEN the '/client/consent/<client id>' resource is requested (GET)
+    THEN check the response is valid
+    """
+    # get staff authorization to view client data
+    staff = Staff().query.first()
+    token = staff.get_token()
+    headers = {'Authorization': f'Bearer {token}'}
+
+    # send get request for client info on clientid = 1
+    response = test_client.get('/api/client/consent/1/', headers=headers)
+
+    # some simple checks for validity
+    assert response.status_code == 200
+
+    response_data = dict(response.json)
+    response_data.pop('clientid')
+
+    expected_data = test_client_consent_form.copy()
+    expected_data['signdate'] = expected_data['signdate'].isoformat()
+    assert response_data == expected_data
+
+def test_post_client_consent(test_client, init_database):
+    """
+    GIVEN an api endpoint for sending client consent form data
+    WHEN the '/client/consent/<client id>' resource is sent data (POST)
+    THEN check the response is valid and data is propagated
+    """
+    # get staff authorization to view client data
+    staff = Staff().query.first()
+    token = staff.get_token()
+    headers = {'Authorization': f'Bearer {token}'}
+
+    # API POST request has not run yet, no PDF should exist
+    consent = ClientConsent.query.filter_by(clientid=1).first()
+    assert not consent.url
+
+    # FIXME: Work-around to get unittest to pass; complete fix to follow later.
+    data = test_client_consent_form.copy()
+    data['signdate'] = data['signdate'].isoformat()
+
+    # Run put request
+    response = test_client.post('/api/client/consent/1/',
+                                headers=headers,
+                                data=dumps(data),
+                                content_type='application/json')
+
+    # Give the PDF thread time to finish.
+    time.sleep(3)
+
+    # The database is not commited at the end of the PDF thread in
+    # a testing environment. Give it an extra commit here.
+    # This works fine in the Flask app and the API calls.
+    init_database.session.commit()
+
+    # Test response OK
+    # Test that data was set correctly in the database
+    # Test that PDF URL exists after post request was run
+    # Test that URL points to existing file (skipping 'file://')
+    assert response.status_code == 201
+    assert consent.signdate == test_client_consent_form['signdate']
+    assert consent.url is not None
+    assert os.path.exists(consent.url[7:])
+
+    # After this call, the URL to the PDF file should be accessible
+    # through the API
+    response = test_client.get('/api/client/signeddocuments/1/', headers=headers)
+    assert response.status_code == 200
+    assert consent.url in response.json['urls']

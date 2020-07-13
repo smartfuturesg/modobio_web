@@ -5,6 +5,7 @@
 This is a `Flask <https://flask.palletsprojects.com>`_ based app that serves webpages to the `ModoBio <https://modobio.com>`_ staff. The pages contain the intake and data gathering forms for the *client journey*. The `Odyssey <https://en.wikipedia.org/wiki/Odyssey>`_ is of course the most famous journey of all time! 🤓
 """
 import os
+import tempfile
 
 from flask import Flask
 from flask_cors import CORS
@@ -30,10 +31,13 @@ def create_app(flask_env=None):
         app.config['TESTING'] = True
         app.config['WTF_CSRF_ENABLED'] = False
         app.config['BCRYPT_LOG_ROUNDS'] = 4
+        app.config['DOCS_BUCKET_NAME'] = tempfile.TemporaryDirectory().name
+        app.config['DOCS_STORE_LOCAL'] = True
     else:
         app.config.from_pyfile('config.py')
 
-    print(app.config)
+    if app.config['DEBUG']:
+        print(app.config)
 
     db.init_app(app)
     migrate.init_app(app, db)
@@ -42,7 +46,7 @@ def create_app(flask_env=None):
     db.Model.update = _update
 
     wtforms.DateTimeField.widget = DateInput()
-    
+
     from odyssey.views.menu import menu
 
     @app.context_processor
@@ -73,7 +77,7 @@ def create_app(flask_env=None):
 # Custom method to easily update db table from a dict
 def _update(self, form: dict):
     for k, v in form.items():
-        setattr(self, k, v) 
+        setattr(self, k, v)
 
 # Override wtforms.DateTimeField so that it outputs <input type="date"> by default.
 import wtforms

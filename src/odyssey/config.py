@@ -71,6 +71,8 @@ This file is loaded by the main Flask app using ``app.config.from_pyfile()``.
 Any uppercase variable in this file will be added to app.config
 
 Currently, the config variables set in this file are:
+``DOCS_BUCKET_NAME``
+``DOCS_STORE_LOCAL``
 ``SECRET_KEY``
 ``SQLALCHEMY_DATABASE_URI``
 ``SQLALCHEMY_TRACK_MODIFICATIONS``
@@ -78,6 +80,7 @@ Currently, the config variables set in this file are:
 
 import os
 import boto3
+import tempfile
 
 # Possible values
 flask_env_options = ('development', 'production')
@@ -111,6 +114,9 @@ if flask_dev == 'local':
     db_host = os.getenv('FLASK_DB_HOST', default='localhost')
     db_name = os.getenv('FLASK_DB_NAME', default='modobio')
 
+    bucket = tempfile.TemporaryDirectory().name
+    docs_local = True
+
     secret = 'dev'
 
 elif flask_dev == 'development':
@@ -121,6 +127,9 @@ elif flask_dev == 'development':
     db_pass = ssm.get_parameter(Name='/modobio/odyssey/db_pass', WithDecryption=True)['Parameter']['Value']
     db_host = ssm.get_parameter(Name='/modobio/odyssey/db_host')['Parameter']['Value']
     db_name = ssm.get_parameter(Name='/modobio/odyssey/db_name_dev')['Parameter']['Value']
+
+    bucket = ssm.get_parameter(Name='/modobio/odyssey/docs_bucket_test')['Parameter']['Value']
+    docs_local = False
 
     secret = 'dev'
 
@@ -133,6 +142,9 @@ elif flask_dev == 'mock':
     db_host = ssm.get_parameter(Name='/modobio/odyssey/db_host')['Parameter']['Value']
     db_name = ssm.get_parameter(Name='/modobio/odyssey/db_name_test')['Parameter']['Value']
 
+    bucket = ssm.get_parameter(Name='/modobio/odyssey/docs_bucket_test')['Parameter']['Value']
+    docs_local = False
+
     secret = ssm.get_parameter(Name='/modobio/odyssey/app_secret', WithDecryption=True)['Parameter']['Value']
 
 else:
@@ -143,6 +155,9 @@ else:
     db_pass = ssm.get_parameter(Name='/modobio/odyssey/db_pass', WithDecryption=True)['Parameter']['Value']
     db_host = ssm.get_parameter(Name='/modobio/odyssey/db_host')['Parameter']['Value']
     db_name = ssm.get_parameter(Name='/modobio/odyssey/db_name')['Parameter']['Value']
+
+    bucket = ssm.get_parameter(Name='/modobio/odyssey/docs_bucket')['Parameter']['Value']
+    docs_local = False
 
     secret = ssm.get_parameter(Name='/modobio/odyssey/app_secret', WithDecryption=True)['Parameter']['Value']
 
@@ -155,6 +170,9 @@ if db_user:
 else:
     uri = f'{db_flav}://{db_host}/{db_name}'
 
+
+DOCS_BUCKET_NAME = bucket
+DOCS_STORE_LOCAL = docs_local
 SECRET_KEY = secret
 SQLALCHEMY_DATABASE_URI = uri
 SQLALCHEMY_TRACK_MODIFICATIONS = False

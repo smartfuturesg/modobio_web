@@ -417,6 +417,10 @@ input.switch:checked + span.switch::before {
         }
     }
 
+    * {
+        font-size: 11pt;
+    }
+
     header.main {
         position: fixed;
         top: -2cm;
@@ -424,7 +428,7 @@ input.switch:checked + span.switch::before {
         width: 100%;
     }
 
-    /* Why is the original image not included? */
+    /* url_for in PDF generation does not work correctly */
     header.main:before {
         width: 20%;
         content: url('/static/logo.svg');

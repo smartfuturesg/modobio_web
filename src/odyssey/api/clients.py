@@ -1,18 +1,19 @@
-
 from flask import request, jsonify
+from flask.json import loads
 from flask_restx import Resource, Api
 
 from odyssey.api import api
 from odyssey.api.auth import token_auth, token_auth_client
 from odyssey.api.errors import UserNotFound, ClientAlreadyExists, ClientNotFound, IllegalSetting
 from odyssey.api.serializers import (
-    client_info, 
+    client_info,
     client_individual_services_contract,
     client_individual_services_contract_edit,
-    client_consent, 
-    client_consent_edit, 
-    client_release, 
-    client_release_edit, 
+    client_consent,
+    client_consent_edit,
+    client_release,
+    client_release_edit,
+    client_signed_documents,
     initialize_remote_registration,
     pagination,
     refresh_remote_registration,
@@ -31,6 +32,8 @@ from odyssey.models.intake import (
     ClientSubscriptionContract,
     RemoteRegistration
 )
+from odyssey.constants import DOCTYPE, DOCTYPE_DOCREV_MAP
+from odyssey.pdf import to_pdf
 
 ns = api.namespace('client', description='Operations related to clients')
 
@@ -86,7 +89,7 @@ class NewClient(Resource):
         #prevent requests to set clientid and send message back to api user
         elif data.get('clientid', None):
             raise IllegalSetting('clientid')
-        
+
         client = ClientInfo()
         client.from_dict(data)
         db.session.add(client)
@@ -123,6 +126,10 @@ class Clients(Resource):
 @ns.doc(params={'clientid': 'Client ID number'})
 class ConsentContract(Resource):
     """client consent forms"""
+
+    doctype = DOCTYPE.consent
+    docrev = DOCTYPE_DOCREV_MAP[doctype]
+
     @ns.doc(security='apikey')
     @token_auth.login_required
     @ns.marshal_with(client_consent)
@@ -132,7 +139,7 @@ class ConsentContract(Resource):
 
         if not client_consent_form:
             raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a consultation contract in the database")
-        
+
         return  client_consent_form.to_dict()
 
     @ns.expect(client_consent_edit)
@@ -140,13 +147,23 @@ class ConsentContract(Resource):
     @token_auth.login_required
     @ns.marshal_with(client_consent)
     def post(self, clientid):
-        """create new client consent contract for the specified clientid"""
-        data = request.get_json()
-        client_consent_form = ClientConsent()
-        client_consent_form.from_dict(clientid, data)
-        db.session.add(client_consent_form)
-        db.session.flush()
+        """ Create or update client consent contract for the specified clientid. """
+        # FIXME: Work-around to get unittest to pass; complete fix to follow later.
+        import datetime
+        request.json['signdate'] = datetime.date.fromisoformat(request.json['signdate'])
+
+        query = ClientConsent.query.filter_by(clientid=clientid, revision=self.docrev)
+        client_consent_form = query.one_or_none()
+
+        if not client_consent_form:
+            client_consent_form = ClientConsent(clientid=clientid, **request.json)
+            db.session.add(client_consent_form)
+        else:
+            query.update(request.json)
+
         db.session.commit()
+
+        to_pdf(clientid, self.doctype)
         response = client_consent_form.to_dict()
         # response['__links'] = api.url_for(Client, clientid = clientid) # to add links later on
         return response, 201
@@ -173,6 +190,10 @@ class ConsentContract(Resource):
 @ns.doc(params={'clientid': 'Client ID number'})
 class ReleaseContract(Resource):
     """Client release forms"""
+
+    doctype = DOCTYPE.release
+    docrev = DOCTYPE_DOCREV_MAP[doctype]
+
     @ns.doc(security='apikey')
     @token_auth.login_required
     @ns.marshal_with(client_release)
@@ -192,11 +213,12 @@ class ReleaseContract(Resource):
     def post(self, clientid):
         """create client release contract object for the specified clientid"""
         data = request.get_json()
-        client_release_form = ClientRelease()
+        client_release_form = ClientRelease(revision=self.docrev)
         client_release_form.from_dict(clientid, data)
         db.session.add(client_release_form)
         db.session.flush()
         db.session.commit()
+        to_pdf(clientid, self.doctype)
         response = client_release_form.to_dict()
         return response, 201
 
@@ -204,6 +226,9 @@ class ReleaseContract(Resource):
 @ns.doc(params={'clientid': 'Client ID number'})
 class PoliciesContract(Resource):
     """Client policies form"""
+
+    doctype = DOCTYPE.policies
+    docrev = DOCTYPE_DOCREV_MAP[doctype]
 
     @ns.doc(security='apikey')
     @token_auth.login_required
@@ -224,11 +249,12 @@ class PoliciesContract(Resource):
     def post(self, clientid):
         """create client policies contract object for the specified clientid"""
         data = request.get_json()
-        client_policies = ClientPolicies()
+        client_policies = ClientPolicies(revision=self.docrev)
         client_policies.from_dict(clientid, data)
         db.session.add(client_policies)
         db.session.flush()
         db.session.commit()
+        to_pdf(clientid, self.doctype)
         response = client_policies.to_dict()
         return response, 201
 
@@ -253,6 +279,9 @@ class PoliciesContract(Resource):
 class ConsultConstract(Resource):
     """client consult contract"""
 
+    doctype = DOCTYPE.consult
+    docrev = DOCTYPE_DOCREV_MAP[doctype]
+
     @ns.doc(security='apikey')
     @token_auth.login_required
     @ns.marshal_with(sign_and_date)
@@ -272,11 +301,12 @@ class ConsultConstract(Resource):
     def post(self, clientid):
         """create client consult contract object for the specified clientid"""
         data = request.get_json()
-        client_consult = ClientConsultContract()
+        client_consult = ClientConsultContract(revision=self.docrev)
         client_consult.from_dict(clientid, data)
         db.session.add(client_consult)
         db.session.flush()
         db.session.commit()
+        to_pdf(clientid, self.doctype)
         response = client_consult.to_dict()
         return response, 201
 
@@ -284,6 +314,10 @@ class ConsultConstract(Resource):
 @ns.doc(params={'clientid': 'Client ID number'})
 class SubscriptionContract(Resource):
     """client subscription contract"""
+
+    doctype = DOCTYPE.subscription
+    docrev = DOCTYPE_DOCREV_MAP[doctype]
+
     @ns.doc(security='apikey')
     @token_auth.login_required
     @ns.marshal_with(sign_and_date)
@@ -303,11 +337,12 @@ class SubscriptionContract(Resource):
     def post(self, clientid):
         """create client subscription contract object for the specified clientid"""
         data = request.get_json()
-        client_subscription = ClientSubscriptionContract()
+        client_subscription = ClientSubscriptionContract(revision=self.docrev)
         client_subscription.from_dict(clientid, data)
         db.session.add(client_subscription)
         db.session.flush()
         db.session.commit()
+        to_pdf(clientid, self.doctype)
         response = client_subscription.to_dict()
         return response, 201
 
@@ -315,6 +350,10 @@ class SubscriptionContract(Resource):
 @ns.doc(params={'clientid': 'Client ID number'})
 class IndividualContract(Resource):
     """client individual services contract"""
+
+    doctype = DOCTYPE.individual
+    docrev = DOCTYPE_DOCREV_MAP[doctype]
+
     @ns.doc(security='apikey')
     @token_auth.login_required
     @ns.marshal_with(client_individual_services_contract)
@@ -334,14 +373,50 @@ class IndividualContract(Resource):
     def post(self, clientid):
         """create client individual services contract object for the specified clientid"""
         data = request.get_json()
-        client_services = ClientIndividualContract()
+        client_services = ClientIndividualContract(revision=self.docrev)
         client_services.from_dict(clientid, data)
         db.session.add(client_services)
         db.session.flush()
         db.session.commit()
+        to_pdf(clientid, self.doctype)
         response = client_services.to_dict()
         return response, 201
 
+@ns.route('/signeddocuments/<int:clientid>/', methods=('GET',))
+@ns.doc(params={'clientid': 'Client ID number'})
+class SignedDocuments(Resource):
+    """
+    API endpoint that provides access to documents signed
+    by the client and stored as PDF files.
+
+    Returns
+    -------
+
+    Returns a list of URLs where the PDF documents are stored.
+    """
+    @ns.doc(security='apikey')
+    @token_auth.login_required
+    @ns.marshal_with(client_signed_documents)
+    def get(self, clientid):
+        """Given a clientid, returns a list of URLs for all signed documents."""
+        client = ClientInfo.query.filter_by(clientid=clientid).one_or_none()
+
+        if not client:
+            raise UserNotFound(clientid)
+
+        urls = []
+
+        for table in (ClientPolicies,
+                      ClientRelease,
+                      ClientConsent,
+                      ClientConsultContract,
+                      ClientSubscriptionContract,
+                      ClientIndividualContract):
+            result = table.query.filter_by(clientid=clientid).order_by(table.revision.desc()).first()
+            if result and result.url:
+                urls.append(result.url)
+
+        return {'urls': urls}
 
 @ns.route('/remoteregistration/new/')
 class NewRemoteRegistration(Resource):
@@ -356,26 +431,26 @@ class NewRemoteRegistration(Resource):
         """create new remote registration client
             this will create a new entry into the client info table first
             then create an entry into the Remote registration table
-            response includes the hash required to access the temporary portal for 
+            response includes the hash required to access the temporary portal for
             this client
         """
         data = request.get_json()
 
-        #make sure this user email does not exist        
+        #make sure this user email does not exist
         if data.get('email', None) and ClientInfo.query.filter_by(email=data.get('email', None)).first():
             raise ClientAlreadyExists(identification = data['email'])
 
         # enter client into basic info table and remote register table
-        client_info = ClientInfo() 
+        client_info = ClientInfo()
         remote_client = RemoteRegistration()
 
         client_info.from_dict(data)
         db.session.add(client_info)
         db.session.flush()
-        
+
         data['clientid'] = client_info.clientid
         remote_client.from_dict(data)
-        
+
         #create temporary passwork and portal url
         pwd = remote_client.set_password(client_info.firstname, client_info.lastname)
         remote_client.get_temp_registration_endpoint()
@@ -422,7 +497,7 @@ class RefreshRemoteRegistration(Resource):
 
         db.session.add(remote_client)
         db.session.flush()
-        
+
         response = remote_client.to_dict()
         response['password'] = pwd
         db.session.commit()
@@ -461,9 +536,9 @@ class RemoteClientInfo(Resource):
         #prevent requests to set clientid and send message back to api user
         if data.get('clientid', None):
             raise IllegalSetting('clientid')
-        
+
         client = ClientInfo.query.filter_by(email=token_auth_client.current_user().email).first()
-       
+
         client.from_dict(data)
         db.session.add(client)
         db.session.flush()

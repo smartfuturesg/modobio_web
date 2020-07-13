@@ -25,15 +25,19 @@ setup(
     packages=find_packages(where='src'),
     python_requires='>=3.6',
     install_requires=[
+        'boto3',
         'Flask',
-        'Flask-HTTPAuth==4.1.0',
-        'Flask-Migrate==2.5.3',
-        'Flask-Cors==3.0.8',
-        'flask-restx==0.2.0',
+        'Flask-Cors',
+        'Flask-HTTPAuth',
+        'Flask-Migrate',
+        'flask-restx',
+        'Flask_SQLAlchemy',
         'Flask_WTF',
+        'pytest',
+        'pytest-cov',
+        'pytz',
+        'WeasyPrint',
         'WTForms',
-        'Werkzeug',
-        'Flask_SQLAlchemy'
     ],
     include_package_data=True
 )

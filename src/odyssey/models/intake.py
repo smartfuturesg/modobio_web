@@ -3,12 +3,12 @@ Database tables for the client intake portion of the Modo Bio Staff application.
 All tables in this module are prefixed with 'Client'.
 """
 import base64
+import os
+import pytz
+import random
+
 from datetime import datetime, timedelta
 from hashlib import md5
-import os
-import random
-import pytz
-
 from flask import url_for
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -312,7 +312,7 @@ class ClientConsent(db.Model):
 
     :type: int, primary key, autoincrement
     """
-    
+
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid'), nullable=False)
     """
     Client ID number.
@@ -343,6 +343,27 @@ class ClientConsent(db.Model):
     :type: str
     """
 
+    revision = db.Column(db.String(10))
+    """
+    Revision string of the latest signed document.
+
+    The revision string is updated whenever the contents of the document change.
+    The revision stored here is the revision of the newest signed document.
+
+    :type: str, max length 10
+
+    See Also
+    --------
+    :const:`odyssey.constants.DOCTYPE_DOCREV_MAP`
+    """
+
+    url = db.Column(db.String(200))
+    """
+    URL where signed document is stored as a PDF file.
+
+    :type: str, max length 100
+    """
+
     def get_attributes(self):
         """return class attributes as list"""
         return [ 'infectious_disease', 'signdate', 'signature' ]
@@ -361,7 +382,9 @@ class ClientConsent(db.Model):
             'clientid': self.clientid,
             'infectious_disease': self.infectious_disease,
             'signdate': self.signdate,
-            'signature': self.signature
+            'signature': self.signature,
+            'revision': self.revision,
+            'url': self.url
         }
         return data
 
@@ -453,6 +476,27 @@ class ClientRelease(db.Model):
     :type: str
     """
 
+    revision = db.Column(db.String(10))
+    """
+    Revision string of the latest signed document.
+
+    The revision string is updated whenever the contents of the document change.
+    The revision stored here is the revision of the newest signed document.
+
+    :type: str, max length 10
+
+    See Also
+    --------
+    :const:`odyssey.constants.DOCTYPE_DOCREV_MAP`
+    """
+
+    url = db.Column(db.String(200))
+    """
+    URL where signed document is stored as a PDF file.
+
+    :type: str, max length 100
+    """
+
     def get_attributes(self):
         """return class attributes as list"""
         return [ 'release_by_other','release_to_other', 'release_of_all', 'release_of_other', 'release_date_to',
@@ -478,22 +522,72 @@ class ClientRelease(db.Model):
             'release_date_to': self.release_date_to,
             'release_purpose': self.release_purpose,
             'signdate': self.signdate,
-            'signature': self.signature
+            'signature': self.signature,
+            'revision': self.revision,
+            'url': self.url
         }
         return data
 
 
 class ClientPolicies(db.Model):
+    """ Client policies table
+
+    This table stores the signature and related information of the
+    Modo Bio policies form.
+    """
 
     __tablename__ = 'ClientPolicies'
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid'), nullable=False)
+    """
+    Client ID number
+
+    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    """
 
     signdate = db.Column(db.Date)
+    """
+    Signature date.
+
+    :type: datetime.date
+    """
 
     signature = db.Column(db.Text)
+    """
+    Signature.
+
+    Stored as a base64 encoded png image, prefixed with mime-type.
+
+    :type: str
+    """
+
+    revision = db.Column(db.String(10))
+    """
+    Revision string of the latest signed document.
+
+    The revision string is updated whenever the contents of the document change.
+    The revision stored here is the revision of the newest signed document.
+
+    :type: str, max length 10
+
+    See Also
+    --------
+    :const:`odyssey.constants.DOCTYPE_DOCREV_MAP`
+    """
+
+    url = db.Column(db.String(200))
+    """
+    URL where signed document is stored as a PDF file.
+
+    :type: str, max length 100
+    """
 
     def get_attributes(self):
         """return class attributes as list"""
@@ -512,7 +606,9 @@ class ClientPolicies(db.Model):
         data = {
             'clientid': self.clientid,
             'signdate': self.signdate,
-            'signature': self.signature
+            'signature': self.signature,
+            'revision': self.revision,
+            'url': self.url
         }
         return data
 
@@ -532,7 +628,7 @@ class ClientConsultContract(db.Model):
 
     :type: int, primary key, autoincrement
     """
-    
+
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid'), nullable=False)
     """
     Client ID number
@@ -555,7 +651,28 @@ class ClientConsultContract(db.Model):
 
     :type: str
     """
-    
+
+    revision = db.Column(db.String(10))
+    """
+    Revision string of the latest signed document.
+
+    The revision string is updated whenever the contents of the document change.
+    The revision stored here is the revision of the newest signed document.
+
+    :type: str, max length 10
+
+    See Also
+    --------
+    :const:`odyssey.constants.DOCTYPE_DOCREV_MAP`
+    """
+
+    url = db.Column(db.String(200))
+    """
+    URL where signed document is stored as a PDF file.
+
+    :type: str, max length 100
+    """
+
     def get_attributes(self):
         """return class attributes as list"""
         return [ 'signdate', 'signature' ]
@@ -573,7 +690,9 @@ class ClientConsultContract(db.Model):
         data = {
             'clientid': self.clientid,
             'signdate': self.signdate,
-            'signature': self.signature
+            'signature': self.signature,
+            'revision': self.revision,
+            'url': self.url
         }
         return data
 
@@ -593,7 +712,7 @@ class ClientSubscriptionContract(db.Model):
 
     :type: int, primary key, autoincrement
     """
-    
+
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid'), nullable=False)
     """
     Client ID number
@@ -617,6 +736,27 @@ class ClientSubscriptionContract(db.Model):
     :type: str
     """
 
+    revision = db.Column(db.String(10))
+    """
+    Revision string of the latest signed document.
+
+    The revision string is updated whenever the contents of the document change.
+    The revision stored here is the revision of the newest signed document.
+
+    :type: str, max length 10
+
+    See Also
+    --------
+    :const:`odyssey.constants.DOCTYPE_DOCREV_MAP`
+    """
+
+    url = db.Column(db.String(200))
+    """
+    URL where signed document is stored as a PDF file.
+
+    :type: str, max length 100
+    """
+
     def get_attributes(self):
         """return class attributes as list"""
         return [ 'signdate', 'signature' ]
@@ -634,7 +774,9 @@ class ClientSubscriptionContract(db.Model):
         data = {
             'clientid': self.clientid,
             'signdate': self.signdate,
-            'signature': self.signature
+            'signature': self.signature,
+            'revision': self.revision,
+            'url': self.url
         }
         return data
 
@@ -700,7 +842,28 @@ class ClientIndividualContract(db.Model):
 
     :type: str
     """
-    
+
+    revision = db.Column(db.String(10))
+    """
+    Revision string of the latest signed document.
+
+    The revision string is updated whenever the contents of the document change.
+    The revision stored here is the revision of the newest signed document.
+
+    :type: str, max length 10
+
+    See Also
+    --------
+    :const:`odyssey.constants.DOCTYPE_DOCREV_MAP`
+    """
+
+    url = db.Column(db.String(200))
+    """
+    URL where signed document is stored as a PDF file.
+
+    :type: str, max length 100
+    """
+
     def get_attributes(self):
         """return class attributes as list"""
         return [ 'signdate', 'signature', 'data', 'doctor', 'pt', 'drinks']
@@ -722,19 +885,21 @@ class ClientIndividualContract(db.Model):
             'pt': self.pt,
             'drinks': self.drinks,
             'signdate': self.signdate,
-            'signature': self.signature
+            'signature': self.signature,
+            'revision': self.revision,
+            'url': self.url
         }
         return data
 
 class RemoteRegistration(db.Model):
     """ At-home client registration parameter
 
-    Stores details to enable clients to register at home securely. This inclues the 
-    temporary registration url, client login details, and current api token. Each at-home 
+    Stores details to enable clients to register at home securely. This inclues the
+    temporary registration url, client login details, and current api token. Each at-home
     client will have one entry in this table. Expired urls will remain for record keeping.
 
     The primary index of this table is the
-    :attr:`clientid` number. 
+    :attr:`clientid` number.
     """
 
     __tablename__ = 'remote_registration'
@@ -744,7 +909,7 @@ class RemoteRegistration(db.Model):
     Table index.
 
     :type: int, primary key, autoincrement
-    """    
+    """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid'), nullable=False)
     """
@@ -763,14 +928,14 @@ class RemoteRegistration(db.Model):
     token = db.Column(db.String(32), index=True, unique=True)
     """
     API authentication token
-    
+
     :type: str, max length 32, indexed, unique
     """
 
     token_expiration = db.Column(db.DateTime)
     """
     token expiration date
-    
+
     :type: datetime
     """
 
@@ -784,14 +949,14 @@ class RemoteRegistration(db.Model):
     registration_portal_id = db.Column(db.String(32), index=True, unique=True)
     """
     registration portal endpoint
-    
+
     :type: str, max length 32, indexed, unique
     """
 
     registration_portal_expiration = db.Column(db.DateTime)
     """
     token expiration date
-    
+
     :type: datetime
     """
 
@@ -812,9 +977,9 @@ class RemoteRegistration(db.Model):
             'registration_portal_expiration': self.registration_portal_expiration
         }
         return data
-    
+
     def get_temp_registration_endpoint(self, expires_in = 86400):
-        """creates a temporary endpoint meant for at-home 
+        """creates a temporary endpoint meant for at-home
            registration
         """
         now = datetime.utcnow()

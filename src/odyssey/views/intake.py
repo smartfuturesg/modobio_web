@@ -1,7 +1,8 @@
 from flask import render_template, Blueprint, session, redirect, request, url_for
-#from flask_weasyprint import HTML, render_pdf
 
 from odyssey import db
+from odyssey.constants import DOCTYPE, DOCTYPE_DOCREV_MAP
+from odyssey.pdf import to_pdf
 from odyssey.forms.intake import ClientInfoForm, ClientConsentForm, ClientReleaseForm, \
                                  ClientSignForm, ClientReceiveForm, \
                                  ClientIndividualContractForm
@@ -47,31 +48,32 @@ def clientinfo():
 def consent():
     clientid = session.get('clientid')
     ci = ClientInfo.query.filter_by(clientid=clientid).one()
-    cc = ClientConsent.query.filter_by(clientid=clientid).one_or_none()
+    cc = ClientConsent.query.filter_by(clientid=clientid).order_by(ClientConsent.revision.desc()).first()
 
     form = ClientConsentForm(obj=cc, fullname=ci.fullname, guardianname=ci.guardianname)
 
     if request.method == 'GET':
         return render_template('intake/consent.html', form=form)
 
+    docrev = DOCTYPE_DOCREV_MAP[DOCTYPE.consent]
+
     if not cc:
-        cc = ClientConsent(clientid=clientid)
+        cc = ClientConsent(clientid=clientid, revision=docrev)
         form.populate_obj(cc)
         db.session.add(cc)
     else:
         form.populate_obj(cc)
+        cc.revision = docrev
     db.session.commit()
 
-    # TODO: this needs to be saved somewhere
-    # html = render_template('intake/consent.html', form=form, pdf=True)
-    # pdf = render_pdf(HTML(string=html))
+    to_pdf(clientid, DOCTYPE.consent, template='intake/consent.html', form=form)
     return redirect(url_for('.release'))
 
 @bp.route('/release', methods=('GET', 'POST'))
 def release():
     clientid = session['clientid']
     ci = ClientInfo.query.filter_by(clientid=clientid).one()
-    cr = ClientRelease.query.filter_by(clientid=clientid).one_or_none()
+    cr = ClientRelease.query.filter_by(clientid=clientid).order_by(ClientRelease.revision.desc()).first()
 
     form = ClientReleaseForm(obj=cr,
                              fullname=ci.fullname,
@@ -86,41 +88,43 @@ def release():
     if request.method == 'GET':
         return render_template('intake/release.html', form=form)
 
+    docrev = DOCTYPE_DOCREV_MAP[DOCTYPE.release]
+
     if not cr:
-        cr = ClientRelease(clientid=clientid)
+        cr = ClientRelease(clientid=clientid, revision=docrev)
         form.populate_obj(cr)
         db.session.add(cr)
     else:
         form.populate_obj(cr)
+        cr.revision = docrev
     db.session.commit()
 
-    # TODO: store pdf
-    # html = render_template('intake/release.html', form=form, pdf=True)
-    # pdf = render_pdf(HTML(string=html))
+    to_pdf(clientid, DOCTYPE.release, template='intake/release.html', form=form)
     return redirect(url_for('.policies'))
 
 @bp.route('/policies', methods=('GET', 'POST'))
 def policies():
     clientid = session['clientid']
     ci = ClientInfo.query.filter_by(clientid=clientid).one()
-    cp = ClientPolicies.query.filter_by(clientid=clientid).one_or_none()
+    cp = ClientPolicies.query.filter_by(clientid=clientid).order_by(ClientPolicies.revision.desc()).first()
 
     form = ClientSignForm(obj=cp, fullname=ci.fullname, guardianname=ci.guardianname)
 
     if request.method == 'GET':
         return render_template('intake/policies.html', form=form)
 
+    docrev = DOCTYPE_DOCREV_MAP[DOCTYPE.policies]
+
     if not cp:
-        cp = ClientPolicies(clientid=clientid)
+        cp = ClientPolicies(clientid=clientid, revision=docrev)
         form.populate_obj(cp)
         db.session.add(cp)
     else:
         form.populate_obj(cp)
+        cp.revision = docrev
     db.session.commit()
 
-    # TODO: store pdf
-    # html = render_template('intake/policies.html', form=form, pdf=True)
-    # pdf = render_pdf(HTML(string=html))
+    to_pdf(clientid, DOCTYPE.policies, template='intake/policies.html', form=form)
     return redirect(url_for('.send'))
 
 @bp.route('/send', methods=('GET', 'POST'))
@@ -148,55 +152,57 @@ def send():
 def consult():
     clientid = session['clientid']
     ci = ClientInfo.query.filter_by(clientid=clientid).one()
-    cc = ClientConsultContract.query.filter_by(clientid=clientid).one_or_none()
+    cc = ClientConsultContract.query.filter_by(clientid=clientid).order_by(ClientConsultContract.revision.desc()).first()
 
     form = ClientSignForm(obj=cc, fullname=ci.fullname, guardianname=ci.guardianname)
 
     if request.method == 'GET':
         return render_template('intake/consult.html', form=form)
 
+    docrev = DOCTYPE_DOCREV_MAP[DOCTYPE.consult]
+
     if not cc:
-        cc = ClientConsultContract(clientid=clientid)
+        cc = ClientConsultContract(clientid=clientid, revision=docrev)
         form.populate_obj(cc)
         db.session.add(cc)
     else:
         form.populate_obj(cc)
+        cc.revision = docrev
     db.session.commit()
 
-    # TODO: store pdf
-    # html = render_template('intake/consult.html', form=form, pdf=True)
-    # pdf = render_pdf(HTML(string=html))
+    to_pdf(clientid, DOCTYPE.consult, template='intake/consult.html', form=form)
     return redirect(url_for('main.index'))
 
 @bp.route('/subscription', methods=('GET', 'POST'))
 def subscription():
     clientid = session['clientid']
     ci = ClientInfo.query.filter_by(clientid=clientid).one()
-    cs = ClientSubscriptionContract.query.filter_by(clientid=clientid).one_or_none()
+    cs = ClientSubscriptionContract.query.filter_by(clientid=clientid).order_by(ClientSubscriptionContract.revision.desc()).first()
 
     form = ClientSignForm(obj=cs, fullname=ci.fullname, guardianname=ci.guardianname)
 
     if request.method == 'GET':
         return render_template('intake/subscription.html', form=form)
 
+    docrev = DOCTYPE_DOCREV_MAP[DOCTYPE.subscription]
+
     if not cs:
-        cs = ClientSubscriptionContract(clientid=clientid)
+        cs = ClientSubscriptionContract(clientid=clientid, revision=docrev)
         form.populate_obj(cs)
         db.session.add(cs)
     else:
         form.populate_obj(cs)
+        cs.revision = docrev
     db.session.commit()
 
-    # TODO: store pdf
-    # html = render_template('intake/subscription.html', form=form, pdf=True)
-    # pdf = render_pdf(HTML(string=html))
+    to_pdf(clientid, DOCTYPE.subscription, template='intake/subscription.html', form=form)
     return redirect(url_for('main.index'))
 
 @bp.route('/individual', methods=('GET', 'POST'))
 def individual():
     clientid = session['clientid']
     ci = ClientInfo.query.filter_by(clientid=clientid).one()
-    cs = ClientIndividualContract.query.filter_by(clientid=clientid).one_or_none()
+    cs = ClientIndividualContract.query.filter_by(clientid=clientid).order_by(ClientIndividualContract.revision.desc()).first()
 
     form = ClientIndividualContractForm(obj=cs,
                                         fullname=ci.fullname,
@@ -205,15 +211,16 @@ def individual():
     if request.method == 'GET':
         return render_template('intake/individual.html', form=form)
 
+    docrev = DOCTYPE_DOCREV_MAP[DOCTYPE.individual]
+
     if not cs:
-        cs = ClientIndividualContract(clientid=clientid)
+        cs = ClientIndividualContract(clientid=clientid, revision=docrev)
         form.populate_obj(cs)
         db.session.add(cs)
     else:
         form.populate_obj(cs)
+        cs.revision = docrev
     db.session.commit()
 
-    # TODO: store pdf
-    # html = render_template('intake/individual.html', form=form, pdf=True)
-    # pdf = render_pdf(HTML(string=html))
+    to_pdf(clientid, DOCTYPE.individual, template='intake/individual.html', form=form)
     return redirect(url_for('main.index'))
