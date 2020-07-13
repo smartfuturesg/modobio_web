@@ -12,6 +12,7 @@ from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
+from odyssey.utils import JSONEncoder, JSONDecoder
 
 __version__ = '0.1.0'
 
@@ -22,6 +23,9 @@ cors = CORS()
 def create_app(flask_env=None):
     """initializes an instance of the flask app"""
     app = Flask(__name__)
+
+    app.json_encoder = JSONEncoder
+    app.json_decoder = JSONDecoder
 
     if flask_env == 'testing':
         BASEDIR = os.path.abspath(os.path.dirname(__file__))

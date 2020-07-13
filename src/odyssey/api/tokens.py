@@ -1,7 +1,5 @@
-
 from hashlib import md5
 
-from flask import jsonify, request
 from flask_restx import Resource
 
 from odyssey import db

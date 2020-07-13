@@ -16,12 +16,12 @@ from odyssey.models.main import Staff
 from .data import (
     test_client_info,
     test_staff_member,
-    test_client_consent_form,
-    test_client_release_form,
-    test_client_policies_form,
-    test_client_consult_contract,
-    test_client_subscription_contract,
-    test_client_individual_contract
+    test_client_consent_data,
+    test_client_release_data,
+    test_client_policies_data,
+    test_client_consult_data,
+    test_client_subscription_data,
+    test_client_individual_data
 )
 
 @pytest.fixture(scope='module')
@@ -66,22 +66,22 @@ def init_database():
     db.session.add(staff_1)
 
     # Populate document tables
-    consent_1 = ClientConsent(clientid=clientid, **test_client_consent_form)
+    consent_1 = ClientConsent(clientid=clientid, **test_client_consent_data)
     db.session.add(consent_1)
 
-    release_1 = ClientRelease(clientid=clientid, **test_client_release_form)
+    release_1 = ClientRelease(clientid=clientid, **test_client_release_data)
     db.session.add(consent_1)
 
-    policies_1 = ClientPolicies(clientid=clientid, **test_client_policies_form)
+    policies_1 = ClientPolicies(clientid=clientid, **test_client_policies_data)
     db.session.add(policies_1)
 
-    consult_1 = ClientConsultContract(clientid=clientid, **test_client_consult_contract)
+    consult_1 = ClientConsultContract(clientid=clientid, **test_client_consult_data)
     db.session.add(consult_1)
 
-    subscription_1 = ClientSubscriptionContract(clientid=clientid, **test_client_subscription_contract)
+    subscription_1 = ClientSubscriptionContract(clientid=clientid, **test_client_subscription_data)
     db.session.add(subscription_1)
 
-    individual_1 = ClientIndividualContract(clientid=clientid, **test_client_individual_contract)
+    individual_1 = ClientIndividualContract(clientid=clientid, **test_client_individual_data)
     db.session.add(individual_1)
 
     # Commit the changes for the users

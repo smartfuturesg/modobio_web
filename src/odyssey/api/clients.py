@@ -1,5 +1,4 @@
 from flask import request, jsonify
-from flask.json import loads
 from flask_restx import Resource, Api
 
 from odyssey.api import api
@@ -148,10 +147,6 @@ class ConsentContract(Resource):
     @ns.marshal_with(client_consent)
     def post(self, clientid):
         """ Create or update client consent contract for the specified clientid. """
-        # FIXME: Work-around to get unittest to pass; complete fix to follow later.
-        import datetime
-        request.json['signdate'] = datetime.date.fromisoformat(request.json['signdate'])
-
         query = ClientConsent.query.filter_by(clientid=clientid, revision=self.docrev)
         client_consent_form = query.one_or_none()
 
