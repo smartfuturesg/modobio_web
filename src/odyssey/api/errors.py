@@ -1,9 +1,6 @@
-
-from flask import jsonify
 from werkzeug.http import HTTP_STATUS_CODES
 
 from odyssey.api import api
-
 
 
 class UserNotFound(Exception):
@@ -17,6 +14,7 @@ class UserNotFound(Exception):
 
         self.status_code = 404
 
+
 class UnauthorizedUser(Exception):
     """in the case a staff member is trying to access resources they are not permitted to"""
     def __init__(self, email=None, message = None):
@@ -27,6 +25,7 @@ class UnauthorizedUser(Exception):
             self.message = f'The staff member with email {email}, Is not authorized'
 
         self.status_code = 401
+
 
 class ClientAlreadyExists(Exception):
     """in the case a staff member is trying to create a new client when the client already exists"""
@@ -39,6 +38,7 @@ class ClientAlreadyExists(Exception):
 
         self.status_code = 409
 
+
 class ClientNotFound(Exception):
     """in the case a staff member is trying to edit a client that does not exist"""
     def __init__(self, identification=None, message = None):
@@ -49,6 +49,7 @@ class ClientNotFound(Exception):
             self.message = f'The client identified by, {identification} does not exit. Try another identification or create a new client.'
 
         self.status_code = 404
+
 
 class IllegalSetting(Exception):
     """in the case an API request includes a setting or parameter that is not allowed"""
@@ -61,6 +62,7 @@ class IllegalSetting(Exception):
 
         self.status_code = 400
 
+
 def bad_request(message):
     return error_response(400, message)
 
@@ -70,7 +72,6 @@ def error_response(status_code, message=None):
         response['message'] = message
     response['status_code'] = status_code
     return response, status_code
-
 
 @api.errorhandler(UserNotFound)
 def error_user_does_not_exist(error):
@@ -108,5 +109,3 @@ def register_handlers(app):
     def api_default_error_handler(error):
         '''Default error handler for api'''
         return  error_response(getattr(error, 'code', 500), str(error)) 
-
-
