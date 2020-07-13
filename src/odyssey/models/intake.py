@@ -382,7 +382,9 @@ class ClientConsent(db.Model):
             'clientid': self.clientid,
             'infectious_disease': self.infectious_disease,
             'signdate': self.signdate,
-            'signature': self.signature
+            'signature': self.signature,
+            'revision': self.revision,
+            'url': self.url
         }
         return data
 
@@ -520,7 +522,9 @@ class ClientRelease(db.Model):
             'release_date_to': self.release_date_to,
             'release_purpose': self.release_purpose,
             'signdate': self.signdate,
-            'signature': self.signature
+            'signature': self.signature,
+            'revision': self.revision,
+            'url': self.url
         }
         return data
 
@@ -602,7 +606,9 @@ class ClientPolicies(db.Model):
         data = {
             'clientid': self.clientid,
             'signdate': self.signdate,
-            'signature': self.signature
+            'signature': self.signature,
+            'revision': self.revision,
+            'url': self.url
         }
         return data
 
@@ -684,7 +690,9 @@ class ClientConsultContract(db.Model):
         data = {
             'clientid': self.clientid,
             'signdate': self.signdate,
-            'signature': self.signature
+            'signature': self.signature,
+            'revision': self.revision,
+            'url': self.url
         }
         return data
 
@@ -766,7 +774,9 @@ class ClientSubscriptionContract(db.Model):
         data = {
             'clientid': self.clientid,
             'signdate': self.signdate,
-            'signature': self.signature
+            'signature': self.signature,
+            'revision': self.revision,
+            'url': self.url
         }
         return data
 
@@ -875,7 +885,9 @@ class ClientIndividualContract(db.Model):
             'pt': self.pt,
             'drinks': self.drinks,
             'signdate': self.signdate,
-            'signature': self.signature
+            'signature': self.signature,
+            'revision': self.revision,
+            'url': self.url
         }
         return data
 
