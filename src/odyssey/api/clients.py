@@ -1,4 +1,5 @@
 from flask import request, jsonify
+from flask.json import loads
 from flask_restx import Resource, Api
 
 from odyssey.api import api
@@ -146,14 +147,23 @@ class ConsentContract(Resource):
     @token_auth.login_required
     @ns.marshal_with(client_consent)
     def post(self, clientid):
-        """create new client consent contract for the specified clientid"""
-        data = request.get_json()
-        client_consent_form = ClientConsent(revision=docrev)
-        client_consent_form.from_dict(clientid, data)
-        db.session.add(client_consent_form)
-        db.session.flush()
+        """ Create or update client consent contract for the specified clientid. """
+        # FIXME: Work-around to get unittest to pass; complete fix to follow later.
+        import datetime
+        request.json['signdate'] = datetime.date.fromisoformat(request.json['signdate'])
+
+        query = ClientConsent.query.filter_by(clientid=clientid, revision=self.docrev)
+        client_consent_form = query.one_or_none()
+
+        if not client_consent_form:
+            client_consent_form = ClientConsent(clientid=clientid, **request.json)
+            db.session.add(client_consent_form)
+        else:
+            query.update(request.json)
+
         db.session.commit()
-        to_pdf(clientid, doctype)
+
+        to_pdf(clientid, self.doctype)
         response = client_consent_form.to_dict()
         # response['__links'] = api.url_for(Client, clientid = clientid) # to add links later on
         return response, 201
@@ -203,12 +213,12 @@ class ReleaseContract(Resource):
     def post(self, clientid):
         """create client release contract object for the specified clientid"""
         data = request.get_json()
-        client_release_form = ClientRelease(revision=docrev)
+        client_release_form = ClientRelease(revision=self.docrev)
         client_release_form.from_dict(clientid, data)
         db.session.add(client_release_form)
         db.session.flush()
         db.session.commit()
-        to_pdf(clientid, doctype)
+        to_pdf(clientid, self.doctype)
         response = client_release_form.to_dict()
         return response, 201
 
@@ -239,12 +249,12 @@ class PoliciesContract(Resource):
     def post(self, clientid):
         """create client policies contract object for the specified clientid"""
         data = request.get_json()
-        client_policies = ClientPolicies(revision=docrev)
+        client_policies = ClientPolicies(revision=self.docrev)
         client_policies.from_dict(clientid, data)
         db.session.add(client_policies)
         db.session.flush()
         db.session.commit()
-        to_pdf(clientid, doctype)
+        to_pdf(clientid, self.doctype)
         response = client_policies.to_dict()
         return response, 201
 
@@ -291,12 +301,12 @@ class ConsultConstract(Resource):
     def post(self, clientid):
         """create client consult contract object for the specified clientid"""
         data = request.get_json()
-        client_consult = ClientConsultContract(revision=docrev)
+        client_consult = ClientConsultContract(revision=self.docrev)
         client_consult.from_dict(clientid, data)
         db.session.add(client_consult)
         db.session.flush()
         db.session.commit()
-        to_pdf(clientid, doctype)
+        to_pdf(clientid, self.doctype)
         response = client_consult.to_dict()
         return response, 201
 
@@ -327,12 +337,12 @@ class SubscriptionContract(Resource):
     def post(self, clientid):
         """create client subscription contract object for the specified clientid"""
         data = request.get_json()
-        client_subscription = ClientSubscriptionContract(revision=docrev)
+        client_subscription = ClientSubscriptionContract(revision=self.docrev)
         client_subscription.from_dict(clientid, data)
         db.session.add(client_subscription)
         db.session.flush()
         db.session.commit()
-        to_pdf(clientid, doctype)
+        to_pdf(clientid, self.doctype)
         response = client_subscription.to_dict()
         return response, 201
 
@@ -363,12 +373,12 @@ class IndividualContract(Resource):
     def post(self, clientid):
         """create client individual services contract object for the specified clientid"""
         data = request.get_json()
-        client_services = ClientIndividualContract(revision=docrev)
+        client_services = ClientIndividualContract(revision=self.docrev)
         client_services.from_dict(clientid, data)
         db.session.add(client_services)
         db.session.flush()
         db.session.commit()
-        to_pdf(clientid, doctype)
+        to_pdf(clientid, self.doctype)
         response = client_services.to_dict()
         return response, 201
 
