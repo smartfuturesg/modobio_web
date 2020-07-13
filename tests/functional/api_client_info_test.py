@@ -186,9 +186,11 @@ def test_post_client_consent(test_client, init_database):
     consent = ClientConsent.query.filter_by(clientid=1).first()
     assert not consent.url
 
-    # Run put request
+    # FIXME: Work-around to get unittest to pass; complete fix to follow later.
     data = test_client_consent_form.copy()
     data['signdate'] = data['signdate'].isoformat()
+
+    # Run put request
     response = test_client.post('/api/client/consent/1/',
                                 headers=headers,
                                 data=dumps(data),
@@ -210,3 +212,9 @@ def test_post_client_consent(test_client, init_database):
     assert consent.signdate == test_client_consent_form['signdate']
     assert consent.url is not None
     assert os.path.exists(consent.url[7:])
+
+    # After this call, the URL to the PDF file should be accessible
+    # through the API
+    response = test_client.get('/api/client/signeddocuments/1/', headers=headers)
+    assert response.status_code == 200
+    assert consent.url in response.json['urls']
