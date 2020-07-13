@@ -1,8 +1,8 @@
 import datetime
-import os
+import pathlib
 import time
 
-from flask.json import dumps, loads
+from flask.json import dumps
 from requests.auth import _basic_auth_str
 
 from odyssey.models.main import Staff
@@ -15,12 +15,12 @@ from tests.data import (
     test_new_client_info,
     test_new_remote_registration,
     signature,
-    test_client_consent_form,
-    test_client_release_form,
-    test_client_policies_form,
-    test_client_consult_contract,
-    test_client_subscription_contract,
-    test_client_individual_contract,
+    test_client_consent_data,
+    test_client_release_data,
+    test_client_policies_data,
+    test_client_consult_data,
+    test_client_subscription_data,
+    test_client_individual_data,
 )
 
 def test_get_client_info(test_client, init_database):
@@ -118,17 +118,18 @@ def test_home_registration(test_client, init_database):
     token = staff.token
     headers = {'Authorization': f'Bearer {token}'}
 
-
     response = test_client.post('/api/client/remoteregistration/new/',
                                 headers=headers, 
                                 data=dumps(test_new_remote_registration), 
                                 content_type='application/json')
 
+    assert response.status_code == 201
+
     password = response.json.get('password')
     tmp_registration_code = response.json.get('registration_portal_id')
+
     client = ClientInfo.query.filter_by(email=test_new_remote_registration['email']).first()
 
-    assert response.status_code == 201
     assert client.email == test_new_remote_registration['email']
 
     ##
@@ -139,7 +140,7 @@ def test_home_registration(test_client, init_database):
     credentials =_basic_auth_str(client.email, password)
     headers = {'Authorization': credentials}
 
-    response = test_client.post(f'api/tokens/remoteregistration/{tmp_registration_code}/',
+    response = test_client.post(f'/api/tokens/remoteregistration/{tmp_registration_code}/',
                                 headers=headers, 
                                 content_type='application/json')
 
@@ -164,12 +165,8 @@ def test_get_client_consent(test_client, init_database):
     # some simple checks for validity
     assert response.status_code == 200
 
-    response_data = dict(response.json)
-    response_data.pop('clientid')
-
-    expected_data = test_client_consent_form.copy()
-    expected_data['signdate'] = expected_data['signdate'].isoformat()
-    assert response_data == expected_data
+    response.json.pop('clientid')
+    assert response.json == test_client_consent_data
 
 def test_post_client_consent(test_client, init_database):
     """
@@ -186,14 +183,10 @@ def test_post_client_consent(test_client, init_database):
     consent = ClientConsent.query.filter_by(clientid=1).first()
     assert not consent.url
 
-    # FIXME: Work-around to get unittest to pass; complete fix to follow later.
-    data = test_client_consent_form.copy()
-    data['signdate'] = data['signdate'].isoformat()
-
     # Run put request
     response = test_client.post('/api/client/consent/1/',
                                 headers=headers,
-                                data=dumps(data),
+                                data=dumps(test_client_consent_data),
                                 content_type='application/json')
 
     # Give the PDF thread time to finish.
@@ -205,13 +198,13 @@ def test_post_client_consent(test_client, init_database):
     init_database.session.commit()
 
     # Test response OK
-    # Test that data was set correctly in the database
-    # Test that PDF URL exists after post request was run
+    # Test that date was set correctly in the database
+    # Test that PDF URL exists after POST request
     # Test that URL points to existing file (skipping 'file://')
     assert response.status_code == 201
-    assert consent.signdate == test_client_consent_form['signdate']
+    assert consent.signdate == test_client_consent_data['signdate']
     assert consent.url is not None
-    assert os.path.exists(consent.url[7:])
+    assert pathlib.Path(consent.url[7:]).exists()
 
     # After this call, the URL to the PDF file should be accessible
     # through the API
