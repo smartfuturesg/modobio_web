@@ -32,11 +32,11 @@ setup(
         'Flask-Migrate',
         'flask-restx',
         'Flask_SQLAlchemy',
-        'Flask_WeasyPrint',
         'Flask_WTF',
         'pytest',
         'pytest-cov',
         'pytz',
+        'WeasyPrint',
         'WTForms',
     ],
     include_package_data=True
