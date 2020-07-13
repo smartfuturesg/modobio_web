@@ -5,6 +5,7 @@
 This is a `Flask <https://flask.palletsprojects.com>`_ based app that serves webpages to the `ModoBio <https://modobio.com>`_ staff. The pages contain the intake and data gathering forms for the *client journey*. The `Odyssey <https://en.wikipedia.org/wiki/Odyssey>`_ is of course the most famous journey of all time! 🤓
 """
 import os
+import tempfile
 
 from flask import Flask
 from flask_cors import CORS
@@ -30,6 +31,8 @@ def create_app(flask_env=None):
         app.config['TESTING'] = True
         app.config['WTF_CSRF_ENABLED'] = False
         app.config['BCRYPT_LOG_ROUNDS'] = 4
+        app.config['DOCS_BUCKET_NAME'] = tempfile.TemporaryDirectory().name
+        app.config['DOCS_STORE_LOCAL'] = True
     else:
         app.config.from_pyfile('config.py')
 

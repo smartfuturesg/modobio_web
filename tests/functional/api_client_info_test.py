@@ -1,5 +1,6 @@
 import datetime
 import os
+import time
 
 from flask.json import dumps, loads
 from requests.auth import _basic_auth_str
@@ -193,12 +194,19 @@ def test_post_client_consent(test_client, init_database):
                                 data=dumps(data),
                                 content_type='application/json')
 
+    # Give the PDF thread time to finish.
+    time.sleep(3)
+
+    # The database is not commited at the end of the PDF thread in
+    # a testing environment. Give it an extra commit here.
+    # This works fine in the Flask app and the API calls.
+    init_database.session.commit()
+
     # Test response OK
     # Test that data was set correctly in the database
     # Test that PDF URL exists after post request was run
-    # Test that URL points to existing file
-    print(response.json['message'])
-    assert response.status_code == 200
+    # Test that URL points to existing file (skipping 'file://')
+    assert response.status_code == 201
     assert consent.signdate == test_client_consent_form['signdate']
-    assert consent.url
-    assert os.path.exists(consent.url)
+    assert consent.url is not None
+    assert os.path.exists(consent.url[7:])

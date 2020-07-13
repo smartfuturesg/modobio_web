@@ -114,11 +114,8 @@ if flask_dev == 'local':
     db_host = os.getenv('FLASK_DB_HOST', default='localhost')
     db_name = os.getenv('FLASK_DB_NAME', default='modobio')
 
-    # bucket = tempfile.TemporaryDirectory().name
-    # docs_local = True
-    ssm = boto3.client('ssm')
-    bucket = ssm.get_parameter(Name='/modobio/odyssey/docs_bucket_test')['Parameter']['Value']
-    docs_local = False
+    bucket = tempfile.TemporaryDirectory().name
+    docs_local = True
 
     secret = 'dev'
 
