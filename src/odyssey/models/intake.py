@@ -364,6 +364,13 @@ class ClientConsent(db.Model):
     :type: str, max length 100
     """
 
+    pdf_hash = db.Column(db.String(40))
+    """
+    SHA-1 hash (as a hexadecimal string) of the stored PDF file.
+
+    :type: str, max length 40
+    """
+
     def get_attributes(self):
         """return class attributes as list"""
         return [ 'infectious_disease', 'signdate', 'signature' ]
@@ -497,6 +504,13 @@ class ClientRelease(db.Model):
     :type: str, max length 100
     """
 
+    pdf_hash = db.Column(db.String(40))
+    """
+    SHA-1 hash (as a hexadecimal string) of the stored PDF file.
+
+    :type: str, max length 40
+    """
+
     def get_attributes(self):
         """return class attributes as list"""
         return [ 'release_by_other','release_to_other', 'release_of_all', 'release_of_other', 'release_date_to',
@@ -589,6 +603,13 @@ class ClientPolicies(db.Model):
     :type: str, max length 100
     """
 
+    pdf_hash = db.Column(db.String(40))
+    """
+    SHA-1 hash (as a hexadecimal string) of the stored PDF file.
+
+    :type: str, max length 40
+    """
+
     def get_attributes(self):
         """return class attributes as list"""
         return [ 'signdate', 'signature' ]
@@ -673,6 +694,13 @@ class ClientConsultContract(db.Model):
     :type: str, max length 100
     """
 
+    pdf_hash = db.Column(db.String(40))
+    """
+    SHA-1 hash (as a hexadecimal string) of the stored PDF file.
+
+    :type: str, max length 40
+    """
+
     def get_attributes(self):
         """return class attributes as list"""
         return [ 'signdate', 'signature' ]
@@ -755,6 +783,13 @@ class ClientSubscriptionContract(db.Model):
     URL where signed document is stored as a PDF file.
 
     :type: str, max length 100
+    """
+
+    pdf_hash = db.Column(db.String(40))
+    """
+    SHA-1 hash (as a hexadecimal string) of the stored PDF file.
+
+    :type: str, max length 40
     """
 
     def get_attributes(self):
@@ -862,6 +897,13 @@ class ClientIndividualContract(db.Model):
     URL where signed document is stored as a PDF file.
 
     :type: str, max length 100
+    """
+
+    pdf_hash = db.Column(db.String(40))
+    """
+    SHA-1 hash (as a hexadecimal string) of the stored PDF file.
+
+    :type: str, max length 40
     """
 
     def get_attributes(self):

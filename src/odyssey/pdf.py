@@ -3,6 +3,7 @@ This module handles the generation and storage of PDF files for signed documents
 """
 
 import boto3
+import hashlib
 import io
 import pathlib
 import threading
@@ -100,6 +101,7 @@ def _to_pdf(req_ctx, clientid: int, doctype: DOCTYPE, template: str=None, form: 
             html = '<html><head></head><body>Nothing here yet</body></html>'
 
         pdf = HTML(string=html).write_pdf(stylesheets=[css])
+        pdf_hash = hashlib.sha1(pdf).hexdigest()
 
         clientid = int(clientid)
 
@@ -126,7 +128,7 @@ def _to_pdf(req_ctx, clientid: int, doctype: DOCTYPE, template: str=None, form: 
             region = s3.get_bucket_location(Bucket=bucket_name)['LocationConstraint']
             url = f'https://{bucket_name}.s3.{region}.amazonaws.com/{path}'
 
-        query.update({'url': url})
+        query.update({'url': url, 'pdf_hash': pdf_hash})
         db.session.commit()
 
         if current_app.config['DEBUG']:
