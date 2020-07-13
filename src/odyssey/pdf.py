@@ -4,18 +4,16 @@ This module handles the generation and storage of PDF files for signed documents
 
 import boto3
 import io
-import os
 import pathlib
 import threading
 
-from flask import render_template, session
+from flask import render_template, session, current_app, _request_ctx_stack
 from flask_wtf import FlaskForm
-from flask_weasyprint import HTML, CSS
+from weasyprint import HTML, CSS
 
-from odyssey import db, create_app
+from odyssey import db
 from odyssey.constants import DOCTYPE, DOCTYPE_TABLE_MAP, DOCTYPE_DOCREV_MAP
 from odyssey.models.intake import *
-
 
 def to_pdf(clientid: int,
            doctype: DOCTYPE,
@@ -49,27 +47,38 @@ def to_pdf(clientid: int,
     ValueError
         Raised when :attr:`clientid` does not exist in a database table.
     """
+    # The first argument is key: we need to copy the current RequestContext and
+    # pass it to the thread to ensure that the other thread has the same information
+    # as the calling thread. Calling the RequestContext in a 'with' statement,
+    # also sets the AppContext, which in turn sets current_app to the right value.
+    #
+    # However, we cannot just pass the RequestContext, it must be a copy. The
+    # main thread keeps working and tries to delete the RequestContext when it
+    # is finished, while the pdf thread is still running. This leads to
+    # AssertionError: popped wrong app context <x> in stead of <y>.
     thread = threading.Thread(target=_to_pdf,
-                              args=(clientid, doctype),
+                              args=(_request_ctx_stack.top.copy(),
+                                    clientid, doctype),
                               kwargs={'template': template, 'form': form})
     thread.start()
 
-
-def _to_pdf(clientid: int, doctype: DOCTYPE, template: str=None, form: FlaskForm=None):
+def _to_pdf(req_ctx, clientid: int, doctype: DOCTYPE, template: str=None, form: FlaskForm=None):
     """ Generate and store a PDF file from a signed document.
 
-        Don't use this function directly, use :func:`to_pdf` for non-blocking,
-        multi-threaded operation.
+    Don't call this function directly, use :func:`to_pdf` for non-blocking,
+    multi-threaded operation.
     """
-    app = create_app()
-    with app.test_request_context():
+    with req_ctx:
         client = ClientInfo.query.filter_by(clientid=clientid).one_or_none()
         if not client:
             raise ValueError('Clientid {clientid} not found in table {ClientInfo.__tablename__}.')
 
         doctable = DOCTYPE_TABLE_MAP[doctype]
+        docrev = DOCTYPE_DOCREV_MAP[doctype]
 
-        doc = doctable.query.filter_by(clientid=clientid).order_by(doctable.revision.desc()).first()
+        query = doctable.query.filter_by(clientid=clientid, revision=docrev)
+        doc = query.one_or_none()
+
         if not doc:
             raise ValueError('Clientid {clientid} not found in table {doctable.__tablename__}.')
 
@@ -95,9 +104,9 @@ def _to_pdf(clientid: int, doctype: DOCTYPE, template: str=None, form: FlaskForm
         clientid = int(clientid)
 
         filename = f'ModoBio_{doctype.name}_v{doc.revision}_client{clientid:05d}_{doc.signdate}.pdf'
-        bucket_name = app.config['DOCS_BUCKET_NAME']
+        bucket_name = current_app.config['DOCS_BUCKET_NAME']
 
-        if app.config['DOCS_STORE_LOCAL']:
+        if current_app.config['DOCS_STORE_LOCAL']:
             path = pathlib.Path(bucket_name)
             path.mkdir(parents=True, exist_ok=True)
 
@@ -117,8 +126,8 @@ def _to_pdf(clientid: int, doctype: DOCTYPE, template: str=None, form: FlaskForm
             region = s3.get_bucket_location(Bucket=bucket_name)['LocationConstraint']
             url = f'https://{bucket_name}.s3.{region}.amazonaws.com/{path}'
 
-        doc.url = url
+        query.update({'url': url})
         db.session.commit()
 
-        if app.config['DEBUG']:
+        if current_app.config['DEBUG']:
             print('PDF stored at:', url)
