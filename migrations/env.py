@@ -40,7 +40,25 @@ target_metadata = current_app.extensions['migrate'].db.metadata
 # NOTE: from_pyfile() looks in odyssey root dir
 current_app.config.from_pyfile('config.py')
 
-db_connection_string = current_app.config['SQLALCHEMY_DATABASE_URI']
+# change the database user to the master user for the purpose of editing schemas
+ssm = boto3.client('ssm')
+db_flav = ssm.get_parameter(Name='/modobio/odyssey/db_flav')['Parameter']['Value']
+db_user = ssm.get_parameter(Name='/modobio/odyssey/db_user_master')['Parameter']['Value']
+db_pass = ssm.get_parameter(Name='/modobio/odyssey/db_pass_master', WithDecryption=True)['Parameter']['Value']
+db_host = ssm.get_parameter(Name='/modobio/odyssey/db_host')['Parameter']['Value']
+if os.getenv('FLASK_ENV') == 'development':
+    if os.getenv('FLASK_DEV') == 'local':
+        db_connection_string = str(current_app.extensions['migrate'].db.engine.url).replace('%', '%%')
+    else:
+        db_name = ssm.get_parameter(Name='/modobio/odyssey/db_name_dev')['Parameter']['Value']
+        db_connection_string = f'{db_flav}://{db_user}:{db_pass}@{db_host}/{db_name}'
+elif os.getenv('FLASK_ENV') == 'production':
+    db_name = ssm.get_parameter(Name='/modobio/odyssey/db_name')['Parameter']['Value']
+    db_connection_string = f'{db_flav}://{db_user}:{db_pass}@{db_host}/{db_name}'
+else:
+    print("which database are you upgrading?")
+    db_name = input()
+
 
 print(f"updating/querying database using the following connection string: \n {db_connection_string}")
 print("continue? [Y,n]")

@@ -219,7 +219,6 @@ class ClientInfo(db.Model):
 
     def get_medical_record_hash(self):
         """medical record hash generation"""
-
         name_hash = md5(bytes((self.firstname+self.lastname), 'utf-8')).hexdigest()
 
         return (self.firstname[0]+self.lastname[0]+str(self.clientid)+name_hash[0:6]).upper()
