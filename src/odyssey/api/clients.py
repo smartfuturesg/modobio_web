@@ -34,6 +34,8 @@ from odyssey.models.intake import (
 from odyssey.constants import DOCTYPE, DOCTYPE_DOCREV_MAP
 from odyssey.pdf import to_pdf
 
+from odyssey.api.schemas import ClientInfoSchema
+
 ns = api.namespace('client', description='Operations related to clients')
 
 @ns.route('/<int:clientid>/')
@@ -76,12 +78,15 @@ class NewClient(Resource):
         create new clients. This is part of the normal flow where clients register on location
     """
     @token_auth.login_required
-    @ns.expect(client_info, validate=True)
+    #@ns.expect(client_info, validate=True)
     @ns.doc(security='apikey')
     @ns.marshal_with(client_info)
     def post(self):
         """create new client"""
         data = request.get_json()
+        data['dob'] = str(data['dob'])
+
+ 
         #make sure this user email does not exist
         if data.get('email', None) and ClientInfo.query.filter_by(email=data.get('email', None)).first():
             raise ClientAlreadyExists(identification = data['email'])
@@ -89,10 +94,11 @@ class NewClient(Resource):
         elif data.get('clientid', None):
             raise IllegalSetting('clientid')
 
-        client = ClientInfo()
-        client.from_dict(data)
         db.session.add(client)
         db.session.flush()
+        
+        ci_schema = ClientInfoSchema()
+        client = ci_schema.load(data)
         response = client.to_dict()
         response['__links'] = api.url_for(Client, clientid = client.clientid)
         db.session.commit()

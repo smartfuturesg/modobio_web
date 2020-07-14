@@ -11,6 +11,7 @@ from flask import Flask
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
+from flask_marshmallow import Marshmallow
 
 from odyssey.utils import JSONEncoder, JSONDecoder
 
@@ -19,6 +20,7 @@ __version__ = '0.1.0'
 db = SQLAlchemy()
 migrate = Migrate()
 cors = CORS()
+ma = Marshmallow()
 
 def create_app(flask_env=None):
     """initializes an instance of the flask app"""
@@ -46,6 +48,7 @@ def create_app(flask_env=None):
     db.init_app(app)
     migrate.init_app(app, db)
     cors.init_app(app)
+    ma.init_app(app)
 
     db.Model.update = _update
 
