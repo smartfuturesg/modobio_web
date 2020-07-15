@@ -7,8 +7,8 @@ development/testing/production environments, an extra variable is introduced to 
 the behaviour of the app.
 
 
-FLASK_ENV and :attr:`flask_env`
--------------------------------
+FLASK_ENV
+---------
 
 ``FLASK_ENV`` is a Flask-native variable and has special meaning to Flask. Only two values are
 recognized: ``production`` and ``development``. If ``FLASK_ENV`` is not set, it defaults to
@@ -17,11 +17,6 @@ as ``ENV``.
 
 Do not repurpose this variable. Flask may add new functionality in the future that is dependent
 on this variable. Keep this variable as it is and respect its values.
-
-In stead of setting environmental variable `FLASK_ENV`, it is also possible to pass the
-parameter :attr:`flask_env` to app factory :func:`odyssey.create_app`. It has the same meaning
-and same possible values as `FLASK_ENV`. If both are set, :attr:`flask_env` takes precedence
-over `FLASK_ENV`.
 
 
 FLASK_DEV and :attr:`flask_dev`
@@ -108,7 +103,31 @@ flask_dev_options = ('local', 'development', 'test', 'mock', 'production')
 
 
 class Config():
-    """ Main configuration class. """
+    """ Main configuration class.
+
+    This class needs to be instantiated before it can be loaded by Flask.
+    Load this class from the :func:`odyssey.create_app` app factory:
+
+        def create_app(flask_dev=None):
+            app = Flask(__name)
+            app.config.from_object(Config(flask_dev=flask_dev))
+
+    Then create an app instance by either setting the environmental variables,
+    or passing in the parameter. On the command line
+
+    .. code-block:: shell
+        export FLASK_ENV=development
+        export FLASK_APP=odyssey:create_app("local")
+        flask run
+
+    is equivalent to
+
+    .. code-block:: shell
+        export FLASK_ENV=development
+        export FLASK_DEV=local
+        export FLASK_APP=odyssey:create_app
+        flask run
+    """
 
     # Defaults
     DOCS_BUCKET_NAME = tempfile.TemporaryDirectory().name
@@ -116,10 +135,26 @@ class Config():
     SECRET_KEY = 'dev'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    def __init__(self, flask_env=None, flask_dev=None):
-        # Parameters have precedence over environmental variables
-        flask_env = flask_env if flask_env else os.getenv('FLASK_ENV')
+    def __init__(self, flask_dev=None):
+        """ Instantiate the Config class.
+
+        Parameters
+        ----------
+        flask_dev : str
+            Set the configuration options for this specific development environment.
+            See module documentation for further explanation.
+
+        Raises
+        ------
+        ValueError
+            Raised when `FLASK_ENV`, `FLASK_DEV`, or :attr:`flask_dev` are set to
+            unsupported values.
+        """
+        # Parameter has precedence over environmental variable
         flask_dev = flask_dev if flask_dev else os.getenv('FLASK_DEV')
+
+        # Flask default is production
+        flask_env = os.getenv('FLASK_ENV', 'production')
 
         # Check that options are valid
         if flask_env and flask_env not in flask_env_options:
@@ -130,23 +165,12 @@ class Config():
             raise ValueError(f'FLASK_DEV must be one of {flask_dev_options} or unset. '
                              f'Detected FLASK_DEV={flask_dev} which is not supported.')
 
-        # Set default values if either is unset
-        if not flask_env:
-            # Flask default
-            flask_env = 'production'
-
+        # Set default based on flask_env
         if not flask_dev:
             if flask_env == 'development':
                 flask_dev = 'local'
             else:
                 flask_dev = 'production'
-
-        # If flask_env came from parameters, set environmental
-        # variables that are normally set by Flask
-        if not os.getenv('FLASK_ENV'):
-            self.ENV = flask_env
-            if flask_env == 'development':
-                self.DEBUG = True
 
         # Load the config parameters
         if flask_dev == 'local':

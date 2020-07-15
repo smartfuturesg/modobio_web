@@ -21,14 +21,14 @@ db = SQLAlchemy()
 migrate = Migrate()
 cors = CORS()
 
-def create_app(flask_env=None, flask_dev=None):
+def create_app(flask_dev=None):
     """initializes an instance of the flask app"""
     app = Flask(__name__)
 
     app.json_encoder = JSONEncoder
     app.json_decoder = JSONDecoder
 
-    app.config.from_object(Config(flask_env=flask_env, flask_dev=flask_dev))
+    app.config.from_object(Config(flask_dev=flask_dev))
     if app.config['DEBUG']:
         print(app.config)
 
