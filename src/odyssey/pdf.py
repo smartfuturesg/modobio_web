@@ -32,16 +32,16 @@ def to_pdf(clientid: int,
 
     doctype : :class:`odyssey.constants.DOCTYPE`
         The type of document that is being processed. Must be a member of
-        :class:`odyssey.constants.DOCTYPE`, e.g. `DOCTYPE.consent`
+        :class:`odyssey.constants.DOCTYPE`, e.g. ``DOCTYPE.consent``.
 
     template : str
         Filename of the Flask template for which a PDF file is requested.
         If template=None, it is assumed that the HTML comes from the React frontend.
         This is not yet supported.
 
-    form : :class:`flask.FlaskForm`
-        :class:`flask.Request.form` data needed to fill out the template.
-        If :attr:`template` is not None, form *must* also be given and can not be None.
+    form : :attr:`flask.Request.form`
+        Form data needed to fill out the forms in the given template.
+        If template is not None, form **must** also be given and can not be None.
 
     Raises
     ------

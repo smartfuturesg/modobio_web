@@ -1,0 +1,739 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>odyssey.models.doctor &mdash; Odyssey 0.1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="odyssey.models.pt" href="odyssey.models.pt.html" />
+    <link rel="prev" title="odyssey.models.intake" href="odyssey.models.intake.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Odyssey
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../toc_flask.html">Flask app</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="odyssey.models.html">Models</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="odyssey.models.main.html">Main</a></li>
+<li class="toctree-l3"><a class="reference internal" href="odyssey.models.intake.html">Intake forms</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Doctor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="odyssey.models.pt.html">Physical therapist</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.views.html">Views</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.forms.html">Forms</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../toc_api.html">API server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../toc_rest.html">Support</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Odyssey</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../toc_flask.html">Flask app</a> &raquo;</li>
+        
+          <li><a href="odyssey.models.html">Models</a> &raquo;</li>
+        
+      <li>odyssey.models.doctor</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/odyssey/odyssey.models.doctor.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-odyssey.models.doctor">
+<span id="odyssey-models-doctor"></span><h1>odyssey.models.doctor<a class="headerlink" href="#module-odyssey.models.doctor" title="Permalink to this headline">¶</a></h1>
+<p>Database tables for the doctor’s portion of the Modo Bio Staff application.
+All tables in this module are prefixed with ‘Medical’.</p>
+<dl class="py class">
+<dt id="odyssey.models.doctor.MedicalHistory">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.models.doctor.</code><code class="sig-name descname">MedicalHistory</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.doctor.MedicalHistory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<p>Medical history table</p>
+<p>This table stores the medical history of a client. The information is taken
+only once, during the initial consult.</p>
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalHistory.idx">
+<code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.models.doctor.MedicalHistory.idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Index</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalHistory.clientid">
+<code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.doctor.MedicalHistory.clientid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client ID number</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int, foreign key to <code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalHistory.last_examination_date">
+<code class="sig-name descname">last_examination_date</code><a class="headerlink" href="#odyssey.models.doctor.MedicalHistory.last_examination_date" title="Permalink to this definition">¶</a></dt>
+<dd><p>Last time client visited a doctor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.date" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.date</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalHistory.last_examination_reason">
+<code class="sig-name descname">last_examination_reason</code><a class="headerlink" href="#odyssey.models.doctor.MedicalHistory.last_examination_reason" title="Permalink to this definition">¶</a></dt>
+<dd><p>Explanation of reason for last visit to a doctor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 1024</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalHistory.goals">
+<code class="sig-name descname">goals</code><a class="headerlink" href="#odyssey.models.doctor.MedicalHistory.goals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client’s goals for visiting Modo Bio.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalHistory.concerns">
+<code class="sig-name descname">concerns</code><a class="headerlink" href="#odyssey.models.doctor.MedicalHistory.concerns" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client’s concerns while visiting Modo Bio.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalHistory.family_history">
+<code class="sig-name descname">family_history</code><a class="headerlink" href="#odyssey.models.doctor.MedicalHistory.family_history" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client’s medical family history.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalHistory.social_history">
+<code class="sig-name descname">social_history</code><a class="headerlink" href="#odyssey.models.doctor.MedicalHistory.social_history" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client’s health related social history.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalHistory.allergies">
+<code class="sig-name descname">allergies</code><a class="headerlink" href="#odyssey.models.doctor.MedicalHistory.allergies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client’s allergies.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalHistory.medication">
+<code class="sig-name descname">medication</code><a class="headerlink" href="#odyssey.models.doctor.MedicalHistory.medication" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client’s medication.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalHistory.diagnostic_xray">
+<code class="sig-name descname">diagnostic_xray</code><a class="headerlink" href="#odyssey.models.doctor.MedicalHistory.diagnostic_xray" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client recently had an X-ray, with reason and outcome.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 1024</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalHistory.diagnostic_ctscan">
+<code class="sig-name descname">diagnostic_ctscan</code><a class="headerlink" href="#odyssey.models.doctor.MedicalHistory.diagnostic_ctscan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client recently had a CT scan, with reason and outcome.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 1024</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalHistory.diagnostic_endoscopy">
+<code class="sig-name descname">diagnostic_endoscopy</code><a class="headerlink" href="#odyssey.models.doctor.MedicalHistory.diagnostic_endoscopy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client recently had an endoscopy, with reason and outcome.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 1024</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalHistory.diagnostic_mri">
+<code class="sig-name descname">diagnostic_mri</code><a class="headerlink" href="#odyssey.models.doctor.MedicalHistory.diagnostic_mri" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client recently had a MRI, with reason and outcome.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 1024</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalHistory.diagnostic_ultrasound">
+<code class="sig-name descname">diagnostic_ultrasound</code><a class="headerlink" href="#odyssey.models.doctor.MedicalHistory.diagnostic_ultrasound" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client recently had an ultrasound, with reason and outcome.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 1024</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalHistory.diagnostic_other">
+<code class="sig-name descname">diagnostic_other</code><a class="headerlink" href="#odyssey.models.doctor.MedicalHistory.diagnostic_other" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client recently had an other diagnostic procedure, with reason and outcome.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 1024</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.models.doctor.MedicalHistory.to_dict">
+<code class="sig-name descname">to_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.doctor.MedicalHistory.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>retuns all data in ClientSubscriptionContract Model as a dictionary</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.models.doctor.MedicalPhysicalExam">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.models.doctor.</code><code class="sig-name descname">MedicalPhysicalExam</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<p>Medical physical exam table</p>
+<p>This table stores the results of the physical exam of a client. The
+information is taken only once, during the initial consult.</p>
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalPhysicalExam.idx">
+<code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Index</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalPhysicalExam.clientid">
+<code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.clientid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client ID number</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int, foreign key to <code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalPhysicalExam.vital_heartrate">
+<code class="sig-name descname">vital_heartrate</code><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.vital_heartrate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Heart rate</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>bpm</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalPhysicalExam.vital_respiratoryrate">
+<code class="sig-name descname">vital_respiratoryrate</code><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.vital_respiratoryrate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Respiratory rate</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>breaths per minute</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalPhysicalExam.vital_systolic">
+<code class="sig-name descname">vital_systolic</code><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.vital_systolic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Systolic blood pressure</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>mm Hg</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalPhysicalExam.vital_diastolic">
+<code class="sig-name descname">vital_diastolic</code><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.vital_diastolic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Diastolic blood pressure</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>mm Hg</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalPhysicalExam.vital_temperature">
+<code class="sig-name descname">vital_temperature</code><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.vital_temperature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Body temperature</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>Fahrenheit</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalPhysicalExam.vital_weight">
+<code class="sig-name descname">vital_weight</code><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.vital_weight" title="Permalink to this definition">¶</a></dt>
+<dd><p>Body weight</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>lbs</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalPhysicalExam.vital_height">
+<code class="sig-name descname">vital_height</code><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.vital_height" title="Permalink to this definition">¶</a></dt>
+<dd><p>Body height</p>
+<p>Stored as a string until we figure out how to convert ft+in to a single number.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 20</p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>TBD</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalPhysicalExam.cardiac_rrr">
+<code class="sig-name descname">cardiac_rrr</code><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.cardiac_rrr" title="Permalink to this definition">¶</a></dt>
+<dd><p>“Regular rate and rythm” heart sound</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalPhysicalExam.cardiac_s1s2">
+<code class="sig-name descname">cardiac_s1s2</code><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.cardiac_s1s2" title="Permalink to this definition">¶</a></dt>
+<dd><p>S1 or S2 type heart sounds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalPhysicalExam.cardiac_murmurs">
+<code class="sig-name descname">cardiac_murmurs</code><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.cardiac_murmurs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Murmurs in heart sounds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalPhysicalExam.cardiac_murmurs_info">
+<code class="sig-name descname">cardiac_murmurs_info</code><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.cardiac_murmurs_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specific details regarding heart murmurs</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 1024</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalPhysicalExam.cardiac_rubs">
+<code class="sig-name descname">cardiac_rubs</code><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.cardiac_rubs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rubs in heart sounds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalPhysicalExam.cardiac_gallops">
+<code class="sig-name descname">cardiac_gallops</code><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.cardiac_gallops" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gallops in heart sounds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalPhysicalExam.pulmonary_clear">
+<code class="sig-name descname">pulmonary_clear</code><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.pulmonary_clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear lung sounds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalPhysicalExam.pulmonary_wheezing">
+<code class="sig-name descname">pulmonary_wheezing</code><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.pulmonary_wheezing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wheezing in lung sounds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalPhysicalExam.pulmonary_wheezing_info">
+<code class="sig-name descname">pulmonary_wheezing_info</code><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.pulmonary_wheezing_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specific details regarding wheezing in lung sounds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 1024</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalPhysicalExam.pulmonary_rales">
+<code class="sig-name descname">pulmonary_rales</code><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.pulmonary_rales" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rales in lung sounds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalPhysicalExam.pulmonary_rhonchi">
+<code class="sig-name descname">pulmonary_rhonchi</code><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.pulmonary_rhonchi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rhonchi in lung sounds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalPhysicalExam.abdominal_soft">
+<code class="sig-name descname">abdominal_soft</code><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.abdominal_soft" title="Permalink to this definition">¶</a></dt>
+<dd><p>Soft abdomen</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalPhysicalExam.abdominal_hard">
+<code class="sig-name descname">abdominal_hard</code><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.abdominal_hard" title="Permalink to this definition">¶</a></dt>
+<dd><p>Non tender abdomen</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalPhysicalExam.abdominal_bowel">
+<code class="sig-name descname">abdominal_bowel</code><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.abdominal_bowel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Positive bowel sounds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalPhysicalExam.abdominal_hsm">
+<code class="sig-name descname">abdominal_hsm</code><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.abdominal_hsm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hepatosplenomegaly, enlarged liver and/or spleen</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalPhysicalExam.abdominal_hsm_info">
+<code class="sig-name descname">abdominal_hsm_info</code><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.abdominal_hsm_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specific details regarding hepatosplenomegaly, enlarged liver and/or spleen</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalPhysicalExam.notes">
+<code class="sig-name descname">notes</code><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.notes" title="Permalink to this definition">¶</a></dt>
+<dd><p>General notes during physical examination.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.models.doctor.MedicalPhysicalExam.to_dict">
+<code class="sig-name descname">to_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>retuns all data in ClientSubscriptionContract Model as a dictionary</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="odyssey.models.pt.html" class="btn btn-neutral float-right" title="odyssey.models.pt" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="odyssey.models.intake.html" class="btn btn-neutral float-left" title="odyssey.models.intake" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright Copyright 2019-2020 Atlantic Venture Partners, all rights reserved
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -6,7 +6,7 @@
 # 
 # DO NOT ADD -f, it will overwrite existing files, which may
 # contain custom options.
-sphinx-apidoc -Me -o api ../src
+sphinx-apidoc -Me -o odyssey ../src/odyssey/
 
 # Run the doc builder.
-sphinx-build -b html . ../public
+sphinx-build -j auto -b html . ../public

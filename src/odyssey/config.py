@@ -1,14 +1,12 @@
 """
-Flask app configuration
-=======================
+.. rubric:: Flask app configuration
 
 Flask makes use of environmental variables to changes its behaviour. Since we have multiple
 development/testing/production environments, an extra variable is introduced to fine-tune
 the behaviour of the app.
 
 
-FLASK_ENV
----------
+.. rubric:: FLASK_ENV
 
 ``FLASK_ENV`` is a Flask-native variable and has special meaning to Flask. Only two values are
 recognized: ``production`` and ``development``. If ``FLASK_ENV`` is not set, it defaults to
@@ -19,8 +17,7 @@ Do not repurpose this variable. Flask may add new functionality in the future th
 on this variable. Keep this variable as it is and respect its values.
 
 
-FLASK_DEV and :attr:`flask_dev`
--------------------------------
+.. rubric:: FLASK_DEV and flask_dev
 
 This is a new variable to indicate which development environment is being used. At the moment,
 there are 5 possible options: ``local`` for local development, ``development`` for development
@@ -30,66 +27,64 @@ with mock data is used.
 
 The main difference between ``local`` and ``test`` and the other settings is that development
 on the local computer does not use any AWS parameters or S3 storage. Everything is kept locally.
-For the other settings development, mock data, and production, all takes place on AWS servers
-and therefore options such as AWS parameter store and S3 storage are available.
+For the other settings (``development``, ``mock``, and ``production``) everything takes place
+on AWS servers and therefore options such as AWS parameter store and S3 storage are available.
 
-In stead of setting environmental variable `FLASK_DEV`, it is also possible to pass the
-parameter :attr:`flask_dev` to app factory :func:`odyssey.create_app`. It has the same meaning
-and same possible values as `FLASK_DEV`. If both are set, :attr:`flask_dev` takes precedence
-over `FLASK_DEV`.
+In stead of setting environmental variable ``FLASK_DEV``, it is also possible to pass the
+parameter ``flask_dev`` to app factory :func:`odyssey.create_app`. It has the same meaning
+and accepts the same values as ``FLASK_DEV``. If both are set, ``flask_dev`` takes precedence
+over ``FLASK_DEV``.
 
-
-FLASK_DEV = local
------------------
+.. rubric:: FLASK_DEV = local
 
 This is the default if ``FLASK_ENV`` is ``development``. Its intended use is local developement.
 The database used is also on localhost. The following environmental variables can be used to
 further fine-tune the database connection.
 
-``FLASK_DB_FLAV``: database type, default: postgres
-``FLASK_DB_USER``: database username, default: empty
-``FLASK_DB_PASS``: database password, default: empty
-``FLASK_DB_HOST``: database hostname, default: localhost
-``FLASK_DB_NAME``: database name, default: modobio
+| ``FLASK_DB_FLAV``: database type, default: postgres
+| ``FLASK_DB_USER``: database username, default: empty
+| ``FLASK_DB_PASS``: database password, default: empty
+| ``FLASK_DB_HOST``: database hostname, default: localhost
+| ``FLASK_DB_NAME``: database name, default: modobio
 
 The above variables default to the following connection string: postgres://localhost/modobio
 
-
-FLASK_DEV = development
------------------------
+.. rubric:: FLASK_DEV = development
 
 This setting is to be used on the development servers. It uses the AWS parameter store to
 discover database and other settings.
 
+.. rubric:: FLASK_DEV = test
 
-FLASK_DEV = test
-----------------
+This setting is to be used on local machines for unit testing with pytest. It sets ``TESTING = True``
+and enables a few testing specific settings. Similar to the ``local`` setting, the following
+environmental variables can be used to change database settings.
 
-This setting is to be used on local machines for unit testing with pytest. It sets ``TESTING=True``
-and enables a few testing specific settings. For database settings, see ``FLASK_DEV = local``, above.
+| ``FLASK_DB_FLAV``: database type, default: sqlite
+| ``FLASK_DB_USER``: database username, default: empty
+| ``FLASK_DB_PASS``: database password, default: empty
+| ``FLASK_DB_HOST``: database hostname, default: /
+| ``FLASK_DB_NAME``: database name, default: <path-to-installation>/app.db
 
-The default database string: sqlite://<path_to_odyssey_installation>/app.db
+The above variables default to the following connection string: sqlite:///<path>/app.db.
+Set ``FLASK_DB_NAME`` to ":memory:" to have an in-memory database without need for cleanup.
 
-
-FLASK_DEV = mock
-----------------
+.. rubric:: FLASK_DEV = mock
 
 This setting is to be used on production server, but serving mock data. It uses the AWS
 parameter store to discover database and other settings.
 
 
-FLASK_DEV = production
-----------------------
+.. rubric:: FLASK_DEV = production
 
 This is the default if ``FLASK_ENV`` is ``production`` or unset. It is to be used on the
 live production server. It uses the AWS parameter store to discover database and other settings.
 
-
 Notes
 -----
 
-This file is loaded by the main Flask app using ``app.config.from_object(Config())``.
-Only uppercase attributes in the Config class will be added to app.config.
+- This file is loaded by the main Flask app using ``app.config.from_object(Config())``.
+- Only uppercase attributes defined on the Config instance will be added to app.config.
 """
 
 import boto3
@@ -108,6 +103,8 @@ class Config():
     This class needs to be instantiated before it can be loaded by Flask.
     Load this class from the :func:`odyssey.create_app` app factory:
 
+    .. code-block::
+
         def create_app(flask_dev=None):
             app = Flask(__name)
             app.config.from_object(Config(flask_dev=flask_dev))
@@ -116,17 +113,30 @@ class Config():
     or passing in the parameter. On the command line
 
     .. code-block:: shell
-        export FLASK_ENV=development
-        export FLASK_APP=odyssey:create_app("local")
-        flask run
+
+        $ export FLASK_ENV=development
+        $ export FLASK_APP=odyssey:create_app("local")
+        $ flask run
 
     is equivalent to
 
     .. code-block:: shell
-        export FLASK_ENV=development
-        export FLASK_DEV=local
-        export FLASK_APP=odyssey:create_app
-        flask run
+
+        $ export FLASK_ENV=development
+        $ export FLASK_DEV=local
+        $ export FLASK_APP=odyssey:create_app
+        $ flask run
+
+    Parameters
+    ----------
+    flask_dev : str
+        The development environment for which the configuration will be loaded.
+
+    Raises
+    ------
+    ValueError
+        Raised when ``FLASK_ENV``, ``FLASK_DEV``, or ``flask_dev`` are set to
+        unsupported values.
     """
 
     # Defaults
@@ -136,20 +146,6 @@ class Config():
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     def __init__(self, flask_dev=None):
-        """ Instantiate the Config class.
-
-        Parameters
-        ----------
-        flask_dev : str
-            Set the configuration options for this specific development environment.
-            See module documentation for further explanation.
-
-        Raises
-        ------
-        ValueError
-            Raised when `FLASK_ENV`, `FLASK_DEV`, or :attr:`flask_dev` are set to
-            unsupported values.
-        """
         # Parameter has precedence over environmental variable
         flask_dev = flask_dev if flask_dev else os.getenv('FLASK_DEV')
 
@@ -196,7 +192,7 @@ class Config():
         return uri
 
     def local_config(self):
-        """ Config for local development. """
+        """ Set the configuration for local development. """
         self.db_flav = os.getenv('FLASK_DB_FLAV', default='postgres')
         self.db_user = os.getenv('FLASK_DB_USER', default=None)
         self.db_pass = os.getenv('FLASK_DB_PASS', default=None)
@@ -204,7 +200,7 @@ class Config():
         self.db_name = os.getenv('FLASK_DB_NAME', default='modobio')
 
     def development_config(self):
-        """ Config for the development server. """
+        """ Set the configuration for the development server. """
         self.ssm = boto3.client('ssm')
         self.db_flav = self.ssm.get_parameter(Name='/modobio/odyssey/db_flav')['Parameter']['Value']
         self.db_user = self.ssm.get_parameter(Name='/modobio/odyssey/db_user')['Parameter']['Value']
@@ -218,7 +214,7 @@ class Config():
         self.DOCS_STORE_LOCAL = False
 
     def test_config(self):
-        """ Config for running unit tests. """
+        """ Set the configuration for running local unittests. """
         db_file = pathlib.Path(__file__).absolute().parent / 'app.db'
         self.db_flav = os.getenv('FLASK_DB_FLAV', default='sqlite')
         self.db_user = os.getenv('FLASK_DB_USER', default=None)
@@ -235,7 +231,7 @@ class Config():
         self.BCRYPT_LOG_ROUNDS = 4
 
     def production_config(self):
-        """ Config for production environment. """
+        """ Set the configuration for the production environment. """
         self.ssm = boto3.client('ssm')
         self.db_flav = self.ssm.get_parameter(Name='/modobio/odyssey/db_flav')['Parameter']['Value']
         self.db_user = self.ssm.get_parameter(Name='/modobio/odyssey/db_user')['Parameter']['Value']
@@ -251,6 +247,6 @@ class Config():
                                                  WithDecryption=True)['Parameter']['Value']
 
     def mock_config(self):
-        """ Config like production environment but with mock data. """
+        """ Set the configuration for the production environment, but with mock data. """
         self.production_config()
         self.db_name = self.ssm.get_parameter(Name='/modobio/odyssey/db_name_test')['Parameter']['Value']
