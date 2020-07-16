@@ -36,7 +36,7 @@ def new_client():
 @pytest.fixture(scope='module')
 def test_client():
     """flask application instance (client)"""
-    app = create_app(flask_env='testing')
+    app = create_app(flask_env='development', flask_dev='test')
     testing_client = app.test_client()
     
     # Establish an application context before running the tests.

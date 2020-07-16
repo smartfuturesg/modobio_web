@@ -13,6 +13,7 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 
+from odyssey.config import Config
 from odyssey.utils import JSONEncoder, JSONDecoder
 
 __version__ = '0.1.0'
@@ -22,26 +23,14 @@ migrate = Migrate()
 cors = CORS()
 ma = Marshmallow()
 
-def create_app(flask_env=None):
+def create_app(flask_dev=None):
     """initializes an instance of the flask app"""
     app = Flask(__name__)
 
     app.json_encoder = JSONEncoder
     app.json_decoder = JSONDecoder
 
-    if flask_env == 'testing':
-        BASEDIR = os.path.abspath(os.path.dirname(__file__))
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(BASEDIR, 'app.db')
-        app.config['SECRET_KEY'] = 'very-secretive-key'
-        app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-        app.config['TESTING'] = True
-        app.config['WTF_CSRF_ENABLED'] = False
-        app.config['BCRYPT_LOG_ROUNDS'] = 4
-        app.config['DOCS_BUCKET_NAME'] = tempfile.TemporaryDirectory().name
-        app.config['DOCS_STORE_LOCAL'] = True
-    else:
-        app.config.from_pyfile('config.py')
-
+    app.config.from_object(Config(flask_dev=flask_dev))
     if app.config['DEBUG']:
         print(app.config)
 
