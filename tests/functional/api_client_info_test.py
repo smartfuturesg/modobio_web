@@ -86,7 +86,7 @@ def test_creating_new_client(test_client, init_database):
 
     # get staff authorization to view client data
     staff = Staff().query.first()
-    token = staff.token
+    token = staff.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
     # send get request for client info on clientid = 1 

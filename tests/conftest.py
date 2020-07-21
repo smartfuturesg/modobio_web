@@ -57,7 +57,8 @@ def init_database():
     # Insert test client data
     client_1 = ci_schema.load(test_client_info)
     db.session.add(client_1)
-    db.session.commit()
+    db.session.flush()
+
     clientid = client_1.clientid
 
     # initialize a test staff member

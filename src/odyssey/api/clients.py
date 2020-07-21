@@ -425,7 +425,7 @@ class NewRemoteRegistration(Resource):
 
         #return non-hashed representation of password
         remote_client.password = pwd
-        
+        db.session.expire(remote_client)
         return remote_client
 
 
