@@ -39,6 +39,8 @@ class ClientRemoteRegistrationSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = RemoteRegistration
 
+
+
     
 """
 
