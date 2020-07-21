@@ -25,7 +25,7 @@ test_client_info = {
     "healthcare_contact": "United",
     "healthcare_phone": "1800676blue",
     "gender": "m",
-    "dob": datetime.date(1991, 10, 14),
+    "dob": "1991-10-14",
     "profession": "Chef",
     "receive_docs": True
 }
@@ -57,7 +57,7 @@ test_new_client_info = {
     "healthcare_contact": "United",
     "healthcare_phone": "1800676blue",
     "gender": "m",
-    #"dob": "1991-10-14",
+    "dob": "1991-10-14",
     "profession": "Chef",
     "receive_docs": True
 }
@@ -81,7 +81,7 @@ signature = 'data:image/png;base64,' + base64.b64encode(signature).decode('utf-8
 
 test_client_consent_data = {
     'infectious_disease': False,
-    'signdate': datetime.date(2020, 4, 5),
+    'signdate': "2020-04-05",
     'signature': signature,
     'revision': DOCTYPE_DOCREV_MAP[DOCTYPE.consent]
 }
@@ -90,28 +90,28 @@ test_client_release_data = {
     'release_by_other': 'My wife can also release my data.',
     'release_of_all': False,
     'release_of_other': 'Only release my prescription drugs, not anything else.',
-    'release_date_from': datetime.date(2020, 7, 7),
-    'release_date_to': datetime.date(2021, 7, 7),
+    'release_date_from': "2020-07-07",
+    'release_date_to': "2021-07-07",
     'release_purpose': 'Release my data for the purpose of doctors having my required drugs.',
-    'signdate': datetime.date(2020, 4, 5),
+    'signdate': "2020-05-05",
     'signature': signature,
     'revision': DOCTYPE_DOCREV_MAP[DOCTYPE.release]
 }
 
 test_client_policies_data = {
-    'signdate': datetime.date(2020, 4, 5),
+    'signdate': "2020-04-05",
     'signature': signature,
     'revision': DOCTYPE_DOCREV_MAP[DOCTYPE.policies]
 }
 
 test_client_consult_data = {
-    'signdate': datetime.date(2020, 4, 5),
+    'signdate': "2020-04-05",
     'signature': signature,
     'revision': DOCTYPE_DOCREV_MAP[DOCTYPE.consult]
 }
 
 test_client_subscription_data = {
-    'signdate': datetime.date(2020, 4, 5),
+    'signdate': "2020-04-05",
     'signature': signature,
     'revision': DOCTYPE_DOCREV_MAP[DOCTYPE.subscription]
 }
@@ -121,7 +121,7 @@ test_client_individual_data = {
     'pt': True,
     'data': False,
     'drinks': True,
-    'signdate': datetime.date(2020, 4, 5),
+    'signdate': "2020-04-05",
     'signature': signature,
     'revision': DOCTYPE_DOCREV_MAP[DOCTYPE.individual]
 }
@@ -136,7 +136,7 @@ test_json_data = {
         'bb': 'bigger string'
     },
     'f': [1, 2, 3, 4, 5],
-    'g': datetime.date(1977, 4, 5),
+    'g': "1977-04-05",
     'h': datetime.time(14, 21, 39, 123456),
     'i': datetime.datetime(2020, 6, 7, 12, 39, 46, 123456),
     'j': {

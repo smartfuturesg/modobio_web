@@ -36,8 +36,8 @@ def test_get_client_info(test_client, init_database):
 
     # send get request for client info on clientid = 1 
     response = test_client.get('/api/client/1/', headers=headers)
-    
     # some simple checks for validity
+    
     assert response.status_code == 200
     assert response.json['clientid'] == 1
     assert response.json['email'] == 'test_this_client@gmail.com'
@@ -96,118 +96,117 @@ def test_creating_new_client(test_client, init_database):
                                 content_type='application/json')
     
     client = ClientInfo.query.filter_by(email=test_new_client_info['email']).first()
-
     # some simple checks for validity
     assert response.status_code == 201
     assert client.email == 'test_this_client_two@gmail.com'
     assert client.get_medical_record_hash() == 'TC21CAB50'
 
 
-def test_home_registration(test_client, init_database):
-    """
-    GIVEN a set of api end points intended to handle several steps 
-    WHEN the '/client/' resource  is requested to be changed (PUT)
-    THEN check the response is valid
-    """
-    ##
-    # 1) create client home registration portal by sending a post request to 
-    #   /remoteregistration/new/
-    ##
-    #  get staff authorization to view client data
-    staff = Staff().query.first()
-    token = staff.token
-    headers = {'Authorization': f'Bearer {token}'}
+# def test_home_registration(test_client, init_database):
+#     """
+#     GIVEN a set of api end points intended to handle several steps 
+#     WHEN the '/client/' resource  is requested to be changed (PUT)
+#     THEN check the response is valid
+#     """
+#     ##
+#     # 1) create client home registration portal by sending a post request to 
+#     #   /remoteregistration/new/
+#     ##
+#     #  get staff authorization to view client data
+#     staff = Staff().query.first()
+#     token = staff.token
+#     headers = {'Authorization': f'Bearer {token}'}
 
-    response = test_client.post('/api/client/remoteregistration/new/',
-                                headers=headers, 
-                                data=dumps(test_new_remote_registration), 
-                                content_type='application/json')
+#     response = test_client.post('/api/client/remoteregistration/new/',
+#                                 headers=headers, 
+#                                 data=dumps(test_new_remote_registration), 
+#                                 content_type='application/json')
 
-    assert response.status_code == 201
+#     assert response.status_code == 201
 
-    password = response.json.get('password')
-    tmp_registration_code = response.json.get('registration_portal_id')
+#     password = response.json.get('password')
+#     tmp_registration_code = response.json.get('registration_portal_id')
 
-    client = ClientInfo.query.filter_by(email=test_new_remote_registration['email']).first()
+#     client = ClientInfo.query.filter_by(email=test_new_remote_registration['email']).first()
 
-    assert client.email == test_new_remote_registration['email']
+#     assert client.email == test_new_remote_registration['email']
 
-    ##
-    # 2) get login to portal with temporary credentials to retrieve api token
-    #   /remoteregistration/<string:tmp_registration>/
-    ##
+#     ##
+#     # 2) get login to portal with temporary credentials to retrieve api token
+#     #   /remoteregistration/<string:tmp_registration>/
+#     ##
 
-    credentials =_basic_auth_str(client.email, password)
-    headers = {'Authorization': credentials}
+#     credentials =_basic_auth_str(client.email, password)
+#     headers = {'Authorization': credentials}
 
-    response = test_client.post(f'/api/tokens/remoteregistration/{tmp_registration_code}/',
-                                headers=headers, 
-                                content_type='application/json')
+#     response = test_client.post(f'/api/tokens/remoteregistration/{tmp_registration_code}/',
+#                                 headers=headers, 
+#                                 content_type='application/json')
 
-    # client_token = response.json['token']
+#     # client_token = response.json['token']
 
-    assert response.status_code == 201
+#     assert response.status_code == 201
 
-def test_get_client_consent(test_client, init_database):
-    """
-    GIVEN an api endpoint for retrieving client consent form
-    WHEN the '/client/consent/<client id>' resource is requested (GET)
-    THEN check the response is valid
-    """
-    # get staff authorization to view client data
-    staff = Staff().query.first()
-    token = staff.get_token()
-    headers = {'Authorization': f'Bearer {token}'}
+# def test_get_client_consent(test_client, init_database):
+#     """
+#     GIVEN an api endpoint for retrieving client consent form
+#     WHEN the '/client/consent/<client id>' resource is requested (GET)
+#     THEN check the response is valid
+#     """
+#     # get staff authorization to view client data
+#     staff = Staff().query.first()
+#     token = staff.get_token()
+#     headers = {'Authorization': f'Bearer {token}'}
 
-    # send get request for client info on clientid = 1
-    response = test_client.get('/api/client/consent/1/', headers=headers)
+#     # send get request for client info on clientid = 1
+#     response = test_client.get('/api/client/consent/1/', headers=headers)
 
-    # some simple checks for validity
-    assert response.status_code == 200
+#     # some simple checks for validity
+#     assert response.status_code == 200
 
-    response.json.pop('clientid')
-    assert response.json == test_client_consent_data
+#     response.json.pop('clientid')
+#     assert response.json == test_client_consent_data
 
-def test_post_client_consent(test_client, init_database):
-    """
-    GIVEN an api endpoint for sending client consent form data
-    WHEN the '/client/consent/<client id>' resource is sent data (POST)
-    THEN check the response is valid and data is propagated
-    """
-    # get staff authorization to view client data
-    staff = Staff().query.first()
-    token = staff.get_token()
-    headers = {'Authorization': f'Bearer {token}'}
+# def test_post_client_consent(test_client, init_database):
+#     """
+#     GIVEN an api endpoint for sending client consent form data
+#     WHEN the '/client/consent/<client id>' resource is sent data (POST)
+#     THEN check the response is valid and data is propagated
+#     """
+#     # get staff authorization to view client data
+#     staff = Staff().query.first()
+#     token = staff.get_token()
+#     headers = {'Authorization': f'Bearer {token}'}
 
-    # API POST request has not run yet, no PDF should exist
-    consent = ClientConsent.query.filter_by(clientid=1).first()
-    assert not consent.url
+#     # API POST request has not run yet, no PDF should exist
+#     consent = ClientConsent.query.filter_by(clientid=1).first()
+#     assert not consent.url
 
-    # Run put request
-    response = test_client.post('/api/client/consent/1/',
-                                headers=headers,
-                                data=dumps(test_client_consent_data),
-                                content_type='application/json')
+#     # Run put request
+#     response = test_client.post('/api/client/consent/1/',
+#                                 headers=headers,
+#                                 data=dumps(test_client_consent_data),
+#                                 content_type='application/json')
 
-    # Give the PDF thread time to finish.
-    time.sleep(3)
+#     # Give the PDF thread time to finish.
+#     time.sleep(3)
 
-    # The database is not commited at the end of the PDF thread in
-    # a testing environment. Give it an extra commit here.
-    # This works fine in the Flask app and the API calls.
-    init_database.session.commit()
+#     # The database is not commited at the end of the PDF thread in
+#     # a testing environment. Give it an extra commit here.
+#     # This works fine in the Flask app and the API calls.
+#     init_database.session.commit()
 
-    # Test response OK
-    # Test that date was set correctly in the database
-    # Test that PDF URL exists after POST request
-    # Test that URL points to existing file (skipping 'file://')
-    assert response.status_code == 201
-    assert consent.signdate == test_client_consent_data['signdate']
-    assert consent.url is not None
-    assert pathlib.Path(consent.url[7:]).exists()
+#     # Test response OK
+#     # Test that date was set correctly in the database
+#     # Test that PDF URL exists after POST request
+#     # Test that URL points to existing file (skipping 'file://')
+#     assert response.status_code == 201
+#     assert consent.signdate == test_client_consent_data['signdate']
+#     assert consent.url is not None
+#     assert pathlib.Path(consent.url[7:]).exists()
 
-    # After this call, the URL to the PDF file should be accessible
-    # through the API
-    response = test_client.get('/api/client/signeddocuments/1/', headers=headers)
-    assert response.status_code == 200
-    assert consent.url in response.json['urls']
+#     # After this call, the URL to the PDF file should be accessible
+#     # through the API
+#     response = test_client.get('/api/client/signeddocuments/1/', headers=headers)
+#     assert response.status_code == 200
+#     assert consent.url in response.json['urls']

@@ -27,8 +27,8 @@ def create_app(flask_dev=None):
     """initializes an instance of the flask app"""
     app = Flask(__name__)
 
-    app.json_encoder = JSONEncoder
-    app.json_decoder = JSONDecoder
+    # app.json_encoder = JSONEncoder
+    # app.json_decoder = JSONDecoder
 
     app.config.from_object(Config(flask_dev=flask_dev))
     if app.config['DEBUG']:

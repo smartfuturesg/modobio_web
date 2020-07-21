@@ -34,7 +34,8 @@ from odyssey.models.intake import (
 from odyssey.constants import DOCTYPE, DOCTYPE_DOCREV_MAP
 from odyssey.pdf import to_pdf
 
-from odyssey.api.schemas import ClientInfoSchema
+from odyssey.api.schemas import ClientInfoSchema, ClientRemoteRegistrationSchema, NewRemoteRegistrationSchema
+from flask_accepts import accepts, responds
 
 ns = api.namespace('client', description='Operations related to clients')
 
@@ -43,21 +44,20 @@ ns = api.namespace('client', description='Operations related to clients')
 class Client(Resource):
     @ns.doc(security='apikey')
     @token_auth.login_required
-    @ns.marshal_with(client_info)
+    @responds(schema=ClientInfoSchema, api=ns)
     def get(self, clientid):
         """returns client info table as a json for the clientid specified"""
         client = ClientInfo.query.get(clientid)
         if not client:
             raise UserNotFound(clientid)
-        return client.to_dict()
+        return client
 
-    @ns.expect(client_info)
-    @ns.doc(security='apikey')
     @token_auth.login_required
-    @ns.marshal_with(client_info)
+    @accepts(schema=ClientInfoSchema, api=ns)
+    @ns.doc(security='apikey')
+    @responds(schema=ClientInfoSchema, api=ns)
     def put(self, clientid):
         """edit client info"""
-        # look into changing to .json
         data = request.get_json()
         client = ClientInfo.query.filter_by(clientid=clientid).one_or_none()
         if not client:
@@ -68,9 +68,8 @@ class Client(Resource):
         # client.update
         client.from_dict(data)
         db.session.add(client)
-        db.session.flush()
         db.session.commit()
-        return client.to_dict()
+        return client
 
 @ns.route('/')
 class NewClient(Resource):
@@ -78,14 +77,12 @@ class NewClient(Resource):
         create new clients. This is part of the normal flow where clients register on location
     """
     @token_auth.login_required
-    #@ns.expect(client_info, validate=True)
+    @accepts(schema=ClientInfoSchema, api=ns)
     @ns.doc(security='apikey')
-    @ns.marshal_with(client_info)
+    @responds(schema=ClientInfoSchema, api=ns, status_code=201)
     def post(self):
         """create new client"""
         data = request.get_json()
-        data['dob'] = str(data['dob'])
-
  
         #make sure this user email does not exist
         if data.get('email', None) and ClientInfo.query.filter_by(email=data.get('email', None)).first():
@@ -93,16 +90,12 @@ class NewClient(Resource):
         #prevent requests to set clientid and send message back to api user
         elif data.get('clientid', None):
             raise IllegalSetting('clientid')
-
-        db.session.add(client)
-        db.session.flush()
-        
+   
         ci_schema = ClientInfoSchema()
         client = ci_schema.load(data)
-        response = client.to_dict()
-        response['__links'] = api.url_for(Client, clientid = client.clientid)
+        db.session.add(client)
         db.session.commit()
-        return response, 201
+        return client
 
 
 @ns.route('/clientsearch/', methods=['GET'])
@@ -168,24 +161,6 @@ class ConsentContract(Resource):
         response = client_consent_form.to_dict()
         # response['__links'] = api.url_for(Client, clientid = clientid) # to add links later on
         return response, 201
-
-    # @ns.expect(client_consent_edit)
-    # @ns.doc(security='apikey')
-    # @token_auth.login_required
-    # @ns.marshal_with(client_consent)
-    # def put(self, clientid):
-    #     """edit client consent object for the specified clientid"""
-    #     data = request.get_json()
-    #     client = ClientConsent.query.filter_by(clientid=clientid).one_or_none()
-    #     if not client:
-    #         raise UserNotFound(clientid)
-    #     client.from_dict(clientid, data)
-    #     db.session.add(client)
-    #     db.session.flush()
-    #     db.session.commit()
-    #     response = client.to_dict()
-    #     # response['__links'] = api.url_for(Client, clientid = clientid) # to add links later on
-    #     return response, 201
 
 @ns.route('/release/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
@@ -258,22 +233,6 @@ class PoliciesContract(Resource):
         to_pdf(clientid, self.doctype)
         response = client_policies.to_dict()
         return response, 201
-
-    # @ns.expect(sign_and_date_edit)
-    # @ns.doc(security='apikey')
-    # @token_auth.login_required
-    # @ns.marshal_with(sign_and_date)
-    # def put(self, clientid):
-    #     """edit client policies object for the specified clientid"""
-    #     data = request.get_json()
-    #     client = ClientPolicies.query.filter_by(clientid=clientid).first_or_404()
-    #     client.from_dict(clientid, data)
-    #     db.session.add(client)
-    #     db.session.flush()
-    #     db.session.commit()
-    #     response = client.to_dict()
-    #     # response['__links'] = api.url_for(Client, clientid = clientid) # to add links later on
-    #     return response, 201
 
 @ns.route('/consultcontract/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
@@ -425,9 +384,9 @@ class NewRemoteRegistration(Resource):
         initialize a client for remote registration
     """
     @token_auth.login_required
-    @ns.expect(initialize_remote_registration, validate=True)
+    @accepts(schema=NewRemoteRegistrationSchema, api=ns)
     @ns.doc(security='apikey')
-    @ns.marshal_with(remote_registration_reponse)
+    @responds(schema=ClientRemoteRegistrationSchema, api=ns, status_code=201)
     def post(self):
         """create new remote registration client
             this will create a new entry into the client info table first
@@ -438,31 +397,36 @@ class NewRemoteRegistration(Resource):
         data = request.get_json()
 
         #make sure this user email does not exist
-        if data.get('email', None) and ClientInfo.query.filter_by(email=data.get('email', None)).first():
+        if ClientInfo.query.filter_by(email=data.get('email', None)).first():
             raise ClientAlreadyExists(identification = data['email'])
 
-        # enter client into basic info table and remote register table
-        client_info = ClientInfo()
-        remote_client = RemoteRegistration()
+        # initialize schema objects
+        rr_schema = NewRemoteRegistrationSchema()
+        client_rr_schema = ClientRemoteRegistrationSchema()
 
-        client_info.from_dict(data)
-        db.session.add(client_info)
+        # enter client into basic info table and remote register table
+        client = rr_schema.load(data)
+        
+        # add client to database (creates clientid)
+        db.session.add(client)
         db.session.flush()
 
-        data['clientid'] = client_info.clientid
+        # create a new remote client registration entry
+        remote_client = RemoteRegistration()
+        data['clientid'] = client.clientid
         remote_client.from_dict(data)
 
-        #create temporary passwork and portal url
-        pwd = remote_client.set_password(client_info.firstname, client_info.lastname)
+        # create temporary password and portal url
+        pwd = remote_client.set_password(client.firstname, client.lastname)
         remote_client.get_temp_registration_endpoint()
 
         db.session.add(remote_client)
-        db.session.flush()
-
-        response = remote_client.to_dict()
-        response['password'] = pwd
         db.session.commit()
-        return response, 201
+
+        #return non-hashed representation of password
+        remote_client.password = pwd
+        
+        return remote_client
 
 
 @ns.route('/remoteregistration/refresh/')

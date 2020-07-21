@@ -294,7 +294,8 @@ class ClientInfo(db.Model):
         for field in attributes:
             if field in data:
                 setattr(self, field, data[field])
-
+        if isinstance(self.dob ,str):
+            self.dob = datetime.strptime(self.dob, '%Y-%m-%d')
 
 
 class ClientConsent(db.Model):
