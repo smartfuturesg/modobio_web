@@ -137,14 +137,14 @@ test_json_data = {
     },
     'f': [1, 2, 3, 4, 5],
     'g': "1977-04-05",
-    'h': datetime.time(14, 21, 39, 123456),
-    'i': datetime.datetime(2020, 6, 7, 12, 39, 46, 123456),
+    'h': datetime.time(14, 21, 39, 123456).isoformat(),
+    'i': datetime.datetime(2020, 6, 7, 12, 39, 46, 123456).isoformat(),
     'j': {
         'ja': {
-            'jja': [datetime.time(13, 0, 0), datetime.time(14, 0, 0), datetime.time(15, 0, 0)],
+            'jja': [datetime.time(13, 0, 0).isoformat(), datetime.time(14, 0, 0).isoformat(), datetime.time(15, 0, 0).isoformat()],
         }
     },
-    'k': uuid.UUID(hex='17a3bee0-42db-4416-8b84-3990b1c6397e'),
+    'k': '17a3bee0-42db-4416-8b84-3990b1c6397e',
 }
 
 test_json_json = '{"a": 1, "b": 1.1, "c": true, "d": "string", "e": {"aa": 11, "bb": "bigger string"}, "f": [1, 2, 3, 4, 5], "g": "1977-04-05", "h": "14:21:39.123456", "i": "2020-06-07T12:39:46.123456", "j": {"ja": {"jja": ["13:00:00", "14:00:00", "15:00:00"]}}, "k": "17a3bee0-42db-4416-8b84-3990b1c6397e"}'

@@ -22,7 +22,7 @@ class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
         model = ClientInfo
 
     record_locator_id = fields.String(dump_only=True)
-    
+
     @post_load
     def make_object(self, data, **kwargs):
         return ClientInfo(**data)
@@ -43,6 +43,33 @@ class NewRemoteRegistrationSchema(Schema):
     @post_load
     def make_object(self, data, **kwargs):
         return ClientInfo(**data)
+        
+class ClientSummarySchema(Schema):
+
+    clientid = fields.Integer(required=True)
+    record_locator_id = fields.String(dump_only=True)
+    email = fields.Email()
+    firstname = fields.String(required=True, validate=validate.Length(min=1, max= 50))
+    lastname = fields.String(required=True, validate=validate.Length(min=1,max=50))
+    middlename = fields.String(required=False, validate=validate.Length(min=1,max=50))
+    phone = fields.String()
+
+    _links = fields.Dict()
+
+    @post_dump
+    def add_record_locator_id(self,data, **kwargs ):
+        name_hash = md5(bytes((data['firstname']+data['lastname']), 'utf-8')).hexdigest()
+        data['record_locator_id'] = (data['firstname'][0]+data['lastname'][0]+str(data['clientid'])+name_hash[0:6]).upper()
+
+        # data['_links']= {
+        #     'self': api.url_for(Clients, page=page, per_page=per_page),
+        #     'next': api.url_for(Clients, page=page + 1, per_page=per_page)
+        #     if resources.has_next else None,
+        #     'prev': api.url_for(Clients, page=page - 1, per_page=per_page)
+        #     if resources.has_prev else None,
+        # }
+        return data
+
 
 class ClientConsentSchema(ma.SQLAlchemyAutoSchema):
     doctype = DOCTYPE.consent

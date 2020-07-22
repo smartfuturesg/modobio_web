@@ -1,4 +1,4 @@
-from flask.json import dumps, loads, jsonify
+from flask.json import dumps, loads, jsonify, load
 from tests.data import test_json_data, test_json_json, test_json_jsonify
 
 
@@ -24,6 +24,6 @@ def test_json_deserialization(test_client, init_database):
 
     js = loads(test_json_json)
     jsf = loads(test_json_jsonify)
-
+    
     assert js == test_json_data
     assert jsf == test_json_data
