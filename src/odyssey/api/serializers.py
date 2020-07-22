@@ -92,37 +92,6 @@ client_release_edit = api.model('client_release_edit', {
             'signature': fields.String(description='client signature stored as a base64 encoded png image, prefixed with mime-type.')
         })
 
-sign_and_date = api.model('sign_and_date', {
-            'clientid': fields.Integer(description=''),
-            'signdate': fields.Date(description=f'formatted as: {DATE_FORMAT}', date = DATE_FORMAT ),
-            'signature': fields.String(description='client signature stored as a base64 encoded png image, prefixed with mime-type.')
-        })
-
-sign_and_date_edit = api.model('sign_and_date_edit', {
-            'signdate': fields.Date(description=f'formatted as: {DATE_FORMAT}', date = DATE_FORMAT ),
-            'signature': fields.String(description='client signature stored as a base64 encoded png image, prefixed with mime-type.')
-        })
-
-client_individual_services_contract =  api.model('client_individual_services_contract',{
-            'clientid': fields.Integer(description=''),
-            'doctor': fields.Boolean(description='Indicates whether or not client wants doctor service.'),
-            'pt': fields.Boolean(description='Indicates whether or not client wants pt service.'),
-            'drinks': fields.Boolean(description='Indicates whether or not client wants super special healthy fountain of youth drinks.'),
-            'data': fields.Boolean(description='Indicates whether or not client wants modobio to collect their fitness data.'),
-            'signdate': fields.Date(description=f'formatted as: {DATE_FORMAT}', date = DATE_FORMAT ),
-            'signature': fields.String(description='client signature stored as a base64 encoded png image, prefixed with mime-type.'),
-            'revision': fields.String(description='Revision code of the document, usually the date when the document was last changed.')
-        })
-
-client_individual_services_contract_edit =  api.model('client_individual_services_contract_edit',{
-            'doctor': fields.Boolean(description='Indicates whether or not client wants doctor service.'),
-            'pt': fields.Boolean(description='Indicates whether or not client wants pt service.'),
-            'drinks': fields.Boolean(description='Indicates whether or not client wants super special healthy fountain of youth drinks.'),
-            'data': fields.Boolean(description='Indicates whether or not client wants modobio to collect their fitness data.'),
-            'signdate': fields.Date(description=f'formatted as: {DATE_FORMAT}', date = DATE_FORMAT ),
-            'signature': fields.String(description='client signature stored as a base64 encoded png image, prefixed with mime-type.')
-        })
-
 client_signed_documents = api.model('client_signed_documents', {
     'urls': fields.List(fields.String, description='List of URLs pointing to PDF files of signed documents.')
 })

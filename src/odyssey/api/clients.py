@@ -6,16 +6,12 @@ from odyssey.api.auth import token_auth, token_auth_client
 from odyssey.api.errors import UserNotFound, ClientAlreadyExists, ClientNotFound, IllegalSetting
 from odyssey.api.serializers import (
     client_info,
-    client_individual_services_contract,
-    client_individual_services_contract_edit,
     client_consent,
     client_consent_edit,
     client_release,
     client_release_edit,
     client_signed_documents,
     pagination,
-    sign_and_date,
-    sign_and_date_edit
 )
 from odyssey import db
 from odyssey.models.intake import (
@@ -32,9 +28,11 @@ from odyssey.constants import DOCTYPE, DOCTYPE_DOCREV_MAP
 from odyssey.pdf import to_pdf
 
 from odyssey.api.schemas import (
+    ClientConsultContractSchema,
     ClientIndividualContractSchema,
     ClientInfoSchema, 
     ClientRemoteRegistrationSchema, 
+    ClientSubscriptionContractSchema,
     NewRemoteRegistrationSchema, 
     RefreshRemoteRegistrationSchema,
     SignAndDateSchema
@@ -212,7 +210,7 @@ class PoliciesContract(Resource):
 
     @ns.doc(security='apikey')
     @token_auth.login_required
-    @ns.marshal_with(sign_and_date)
+    @responds(schema=SignAndDateSchema, api=ns)
     def get(self, clientid):
         """returns most recent client policies table as a json for the clientid specified"""
         client_policies =  ClientPolicies.query.filter_by(clientid=clientid).order_by(ClientPolicies.signdate.desc()).first()
@@ -220,23 +218,21 @@ class PoliciesContract(Resource):
         if not client_policies:
             raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a policy contract in the database")
 
-        return  client_policies.to_dict()
+        return  client_policies
 
-    @ns.expect(sign_and_date_edit)
     @ns.doc(security='apikey')
+    @accepts(schema=SignAndDateSchema, api=ns)
     @token_auth.login_required
-    @ns.marshal_with(sign_and_date)
+    @responds(schema=SignAndDateSchema, status_code= 201, api=ns)
     def post(self, clientid):
         """create client policies contract object for the specified clientid"""
         data = request.get_json()
         client_policies = ClientPolicies(revision=self.docrev)
         client_policies.from_dict(clientid, data)
         db.session.add(client_policies)
-        db.session.flush()
         db.session.commit()
         to_pdf(clientid, self.doctype)
-        response = client_policies.to_dict()
-        return response, 201
+        return client_policies
 
 @ns.route('/consultcontract/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
@@ -248,7 +244,7 @@ class ConsultConstract(Resource):
 
     @ns.doc(security='apikey')
     @token_auth.login_required
-    @ns.marshal_with(sign_and_date)
+    @responds(schema=ClientConsultContractSchema, api=ns)
     def get(self, clientid):
         """returns most recent client consultation table as a json for the clientid specified"""
         client_consult =  ClientConsultContract.query.filter_by(clientid=clientid).order_by(ClientConsultContract.signdate.desc()).first()
@@ -256,23 +252,23 @@ class ConsultConstract(Resource):
         if not client_consult:
             raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a consultation contract in the database")
 
-        return  client_consult.to_dict()
+        return client_consult
 
-    @ns.expect(sign_and_date_edit)
+    @accepts(schema=SignAndDateSchema, api=ns)
     @ns.doc(security='apikey')
     @token_auth.login_required
-    @ns.marshal_with(sign_and_date)
+    @responds(schema=ClientConsultContractSchema, status_code= 201, api=ns)
     def post(self, clientid):
         """create client consult contract object for the specified clientid"""
         data = request.get_json()
-        client_consult = ClientConsultContract(revision=self.docrev)
-        client_consult.from_dict(clientid, data)
+        data["clientid"] = clientid
+        consult_contract_schema = ClientConsultContractSchema()
+        client_consult = consult_contract_schema.load(data)
+        
         db.session.add(client_consult)
-        db.session.flush()
         db.session.commit()
         to_pdf(clientid, self.doctype)
-        response = client_consult.to_dict()
-        return response, 201
+        return client_consult
 
 @ns.route('/subscriptioncontract/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
@@ -284,25 +280,26 @@ class SubscriptionContract(Resource):
 
     @ns.doc(security='apikey')
     @token_auth.login_required
-    @responds(schema=SignAndDateSchema, api=ns)
+    @responds(schema=ClientSubscriptionContractSchema, api=ns)
     def get(self, clientid):
         """returns most recent client subscription contract table as a json for the clientid specified"""
         client_subscription =  ClientSubscriptionContract.query.filter_by(clientid=clientid).order_by(ClientSubscriptionContract.signdate.desc()).first()
-
         if not client_subscription:
             raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a subscription contract in the database")
 
-        return  client_subscription
+        return client_subscription
 
     @ns.doc(security='apikey')
     @accepts(schema=SignAndDateSchema, api=ns)
     @token_auth.login_required
-    @responds(schema=SignAndDateSchema, status_code= 201, api=ns)
+    @responds(schema=ClientSubscriptionContractSchema, status_code= 201, api=ns)
     def post(self, clientid):
         """create client subscription contract object for the specified clientid"""
         data = request.get_json()
-        client_subscription = ClientSubscriptionContract(revision=self.docrev)
-        client_subscription.from_dict(clientid, data)
+        data["clientid"] = clientid
+        subscription_contract_schema = ClientSubscriptionContractSchema()
+        client_subscription = subscription_contract_schema.load(data)
+
         db.session.add(client_subscription)
         db.session.commit()
         to_pdf(clientid, self.doctype)

@@ -5,7 +5,14 @@ from marshmallow import Schema, fields, post_load, ValidationError, validates, v
 from marshmallow import post_load, post_dump
 
 from odyssey import ma
-from odyssey.models.intake import ClientInfo, RemoteRegistration, ClientIndividualContract
+from odyssey.models.intake import (
+    ClientInfo,
+    ClientConsultContract,
+    RemoteRegistration, 
+    ClientIndividualContract, 
+    ClientSubscriptionContract
+)
+from odyssey.constants import DOCTYPE, DOCTYPE_DOCREV_MAP
 
 class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -39,6 +46,39 @@ class SignAndDateSchema(Schema):
     signdate = fields.Date(format="iso", required=True)
     signature = fields.String(required=True)
 
+class ClientSubscriptionContractSchema(ma.SQLAlchemyAutoSchema):
+    doctype = DOCTYPE.subscription
+    docrev = DOCTYPE_DOCREV_MAP[doctype]
+    class Meta:
+        model = ClientSubscriptionContract
+    
+    clientid = fields.Integer(required=True)
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return ClientSubscriptionContract(
+                    clientid = data["clientid"],
+                    signature=data["signature"],
+                    signdate=data["signdate"],
+                    revision=self.docrev
+                    )
+class ClientConsultContractSchema(ma.SQLAlchemyAutoSchema):
+    doctype = DOCTYPE.consult
+    docrev = DOCTYPE_DOCREV_MAP[doctype]
+    class Meta:
+        model = ClientConsultContract
+    
+    clientid = fields.Integer(required=True)
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return ClientConsultContract(
+                    clientid = data["clientid"],
+                    signature=data["signature"],
+                    signdate=data["signdate"],
+                    revision=self.docrev
+                    )
+    
 
 class ClientRemoteRegistrationSchema(ma.SQLAlchemyAutoSchema):
     """
@@ -46,6 +86,7 @@ class ClientRemoteRegistrationSchema(ma.SQLAlchemyAutoSchema):
     """
     class Meta:
         model = RemoteRegistration
+    
 
 class RefreshRemoteRegistrationSchema(Schema):
     """

@@ -94,7 +94,6 @@ def test_creating_new_client(test_client, init_database):
                                 headers=headers, 
                                 data=dumps(test_new_client_info), 
                                 content_type='application/json')
-    
     client = ClientInfo.query.filter_by(email=test_new_client_info['email']).first()
     # some simple checks for validity
     assert response.status_code == 201
