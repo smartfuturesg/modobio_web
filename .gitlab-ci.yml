@@ -6,7 +6,7 @@ stages:
 wheel:
   stage: build
   script:
-    - python3 -v
+    - python3 -V
     - python3 -m pip install setuptools
     - python3 setup.py bdist_wheel sdist
   tags:
