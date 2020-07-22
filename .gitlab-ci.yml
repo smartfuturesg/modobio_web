@@ -3,10 +3,13 @@ stages:
 
 wheel:
   stage: build
-  script: python setup.py bdist_wheel sdist
+  script:
+    - python setup.py bdist_wheel sdist
+  tags:
+    - gitlab-runner
   artifacts:
     paths:
-    - dist/
+    - dist
     expire_in: 1 day
 
 pages:
