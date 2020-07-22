@@ -1,8 +1,9 @@
-# Recursive navigation menu generation
-# 
-# A menu is a tuple () of dicts {}.
-# Each menu item dict has the keywords 'title' and either 'url' or 'submenu'.
-# The value for 'submenu' is another menu with the same structure.
+""" Recursive navigation menu generation.
+
+A menu is a tuple () of dicts {}.
+Each menu item dict has the keywords 'title' and either 'url' or 'submenu'.
+The value for 'submenu' is another menu with the same structure.
+"""
 
 menu = (
     {'title': 'Intake', 'submenu': (
@@ -28,3 +29,9 @@ menu = (
     )},
     {'title': 'Trainer', 'submenu': ()}
 )
+""" A simple, nested description of a menu.
+
+The menu will be converted to HTML on start of the app.
+
+:type: tuple(dict)
+"""

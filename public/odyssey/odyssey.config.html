@@ -1,0 +1,347 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>odyssey.config &mdash; Odyssey 0.1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="odyssey.constants module" href="odyssey.constants.html" />
+    <link rel="prev" title="Support" href="../toc_rest.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Odyssey
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../toc_flask.html">Flask app</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../toc_api.html">API server</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../toc_rest.html">Support</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.constants.html">Constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.pdf.html">PDF generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.utils.html">Utility functions</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Odyssey</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../toc_rest.html">Support</a> &raquo;</li>
+        
+      <li>odyssey.config</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/odyssey/odyssey.config.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-odyssey.config">
+<span id="odyssey-config"></span><h1>odyssey.config<a class="headerlink" href="#module-odyssey.config" title="Permalink to this headline">¶</a></h1>
+<p class="rubric">Flask app configuration</p>
+<p>Flask makes use of environmental variables to changes its behaviour. Since we have multiple
+development/testing/production environments, an extra variable is introduced to fine-tune
+the behaviour of the app.</p>
+<p class="rubric">FLASK_ENV</p>
+<p><code class="docutils literal notranslate"><span class="pre">FLASK_ENV</span></code> is a Flask-native variable and has special meaning to Flask. Only two values are
+recognized: <code class="docutils literal notranslate"><span class="pre">production</span></code> and <code class="docutils literal notranslate"><span class="pre">development</span></code>. If <code class="docutils literal notranslate"><span class="pre">FLASK_ENV</span></code> is not set, it defaults to
+<code class="docutils literal notranslate"><span class="pre">production</span></code>. You set <code class="docutils literal notranslate"><span class="pre">FLASK_ENV</span></code> in the environment, but it is stored in <code class="docutils literal notranslate"><span class="pre">app.config</span></code>
+as <code class="docutils literal notranslate"><span class="pre">ENV</span></code>.</p>
+<p>Do not repurpose this variable. Flask may add new functionality in the future that is dependent
+on this variable. Keep this variable as it is and respect its values.</p>
+<p class="rubric">FLASK_DEV and flask_dev</p>
+<p>This is a new variable to indicate which development environment is being used. At the moment,
+there are 5 possible options: <code class="docutils literal notranslate"><span class="pre">local</span></code> for local development, <code class="docutils literal notranslate"><span class="pre">development</span></code> for development
+on the AWS development server, <code class="docutils literal notranslate"><span class="pre">test</span></code> for running unit tests, <code class="docutils literal notranslate"><span class="pre">production</span></code> for the live
+production environment, and <code class="docutils literal notranslate"><span class="pre">mock</span></code> which is identical to production, except that a database
+with mock data is used.</p>
+<p>The main difference between <code class="docutils literal notranslate"><span class="pre">local</span></code> and <code class="docutils literal notranslate"><span class="pre">test</span></code> and the other settings is that development
+on the local computer does not use any AWS parameters or S3 storage. Everything is kept locally.
+For the other settings (<code class="docutils literal notranslate"><span class="pre">development</span></code>, <code class="docutils literal notranslate"><span class="pre">mock</span></code>, and <code class="docutils literal notranslate"><span class="pre">production</span></code>) everything takes place
+on AWS servers and therefore options such as AWS parameter store and S3 storage are available.</p>
+<p>In stead of setting environmental variable <code class="docutils literal notranslate"><span class="pre">FLASK_DEV</span></code>, it is also possible to pass the
+parameter <code class="docutils literal notranslate"><span class="pre">flask_dev</span></code> to app factory <a class="reference internal" href="../index.html#odyssey.create_app" title="odyssey.create_app"><code class="xref py py-func docutils literal notranslate"><span class="pre">odyssey.create_app()</span></code></a>. It has the same meaning
+and accepts the same values as <code class="docutils literal notranslate"><span class="pre">FLASK_DEV</span></code>. If both are set, <code class="docutils literal notranslate"><span class="pre">flask_dev</span></code> takes precedence
+over <code class="docutils literal notranslate"><span class="pre">FLASK_DEV</span></code>.</p>
+<p class="rubric">FLASK_DEV = local</p>
+<p>This is the default if <code class="docutils literal notranslate"><span class="pre">FLASK_ENV</span></code> is <code class="docutils literal notranslate"><span class="pre">development</span></code>. Its intended use is local developement.
+The database used is also on localhost. The following environmental variables can be used to
+further fine-tune the database connection.</p>
+<div class="line-block">
+<div class="line"><code class="docutils literal notranslate"><span class="pre">FLASK_DB_FLAV</span></code>: database type, default: postgres</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">FLASK_DB_USER</span></code>: database username, default: empty</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">FLASK_DB_PASS</span></code>: database password, default: empty</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">FLASK_DB_HOST</span></code>: database hostname, default: localhost</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">FLASK_DB_NAME</span></code>: database name, default: modobio</div>
+</div>
+<p>The above variables default to the following connection string: postgres://localhost/modobio</p>
+<p class="rubric">FLASK_DEV = development</p>
+<p>This setting is to be used on the development servers. It uses the AWS parameter store to
+discover database and other settings.</p>
+<p class="rubric">FLASK_DEV = test</p>
+<p>This setting is to be used on local machines for unit testing with pytest. It sets <code class="docutils literal notranslate"><span class="pre">TESTING</span> <span class="pre">=</span> <span class="pre">True</span></code>
+and enables a few testing specific settings. Similar to the <code class="docutils literal notranslate"><span class="pre">local</span></code> setting, the following
+environmental variables can be used to change database settings.</p>
+<div class="line-block">
+<div class="line"><code class="docutils literal notranslate"><span class="pre">FLASK_DB_FLAV</span></code>: database type, default: sqlite</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">FLASK_DB_USER</span></code>: database username, default: empty</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">FLASK_DB_PASS</span></code>: database password, default: empty</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">FLASK_DB_HOST</span></code>: database hostname, default: /</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">FLASK_DB_NAME</span></code>: database name, default: &lt;path-to-installation&gt;/app.db</div>
+</div>
+<p>The above variables default to the following connection string: sqlite:///&lt;path&gt;/app.db.
+Set <code class="docutils literal notranslate"><span class="pre">FLASK_DB_NAME</span></code> to “:memory:” to have an in-memory database without need for cleanup.</p>
+<p class="rubric">FLASK_DEV = mock</p>
+<p>This setting is to be used on production server, but serving mock data. It uses the AWS
+parameter store to discover database and other settings.</p>
+<p class="rubric">FLASK_DEV = production</p>
+<p>This is the default if <code class="docutils literal notranslate"><span class="pre">FLASK_ENV</span></code> is <code class="docutils literal notranslate"><span class="pre">production</span></code> or unset. It is to be used on the
+live production server. It uses the AWS parameter store to discover database and other settings.</p>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>This file is loaded by the main Flask app using <code class="docutils literal notranslate"><span class="pre">app.config.from_object(Config())</span></code>.</p></li>
+<li><p>Only uppercase attributes defined on the Config instance will be added to app.config.</p></li>
+</ul>
+<dl class="py class">
+<dt id="odyssey.config.Config">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.config.</code><code class="sig-name descname">Config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">flask_dev</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.config.Config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Main configuration class.</p>
+<p>This class needs to be instantiated before it can be loaded by Flask.
+Load this class from the <a class="reference internal" href="../index.html#odyssey.create_app" title="odyssey.create_app"><code class="xref py py-func docutils literal notranslate"><span class="pre">odyssey.create_app()</span></code></a> app factory:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">create_app</span><span class="p">(</span><span class="n">flask_dev</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="n">__name</span><span class="p">)</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">from_object</span><span class="p">(</span><span class="n">Config</span><span class="p">(</span><span class="n">flask_dev</span><span class="o">=</span><span class="n">flask_dev</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Then create an app instance by either setting the environmental variables,
+or passing in the parameter. On the command line</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ <span class="nb">export</span> <span class="nv">FLASK_ENV</span><span class="o">=</span>development
+$ <span class="nb">export</span> <span class="nv">FLASK_APP</span><span class="o">=</span>odyssey:create_app<span class="o">(</span><span class="s2">&quot;local&quot;</span><span class="o">)</span>
+$ flask run
+</pre></div>
+</div>
+<p>is equivalent to</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ <span class="nb">export</span> <span class="nv">FLASK_ENV</span><span class="o">=</span>development
+$ <span class="nb">export</span> <span class="nv">FLASK_DEV</span><span class="o">=</span><span class="nb">local</span>
+$ <span class="nb">export</span> <span class="nv">FLASK_APP</span><span class="o">=</span>odyssey:create_app
+$ flask run
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>flask_dev</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The development environment for which the configuration will be loaded.</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.8)"><strong>ValueError</strong></a> – Raised when <code class="docutils literal notranslate"><span class="pre">FLASK_ENV</span></code>, <code class="docutils literal notranslate"><span class="pre">FLASK_DEV</span></code>, or <code class="docutils literal notranslate"><span class="pre">flask_dev</span></code> are set to
+    unsupported values.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="odyssey.config.Config.local_config">
+<code class="sig-name descname">local_config</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.config.Config.local_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the configuration for local development.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.config.Config.development_config">
+<code class="sig-name descname">development_config</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.config.Config.development_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the configuration for the development server.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.config.Config.test_config">
+<code class="sig-name descname">test_config</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.config.Config.test_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the configuration for running local unittests.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.config.Config.production_config">
+<code class="sig-name descname">production_config</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.config.Config.production_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the configuration for the production environment.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.config.Config.mock_config">
+<code class="sig-name descname">mock_config</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.config.Config.mock_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the configuration for the production environment, but with mock data.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="odyssey.constants.html" class="btn btn-neutral float-right" title="odyssey.constants module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../toc_rest.html" class="btn btn-neutral float-left" title="Support" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright Copyright 2019-2020 Atlantic Venture Partners, all rights reserved
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

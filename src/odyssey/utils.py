@@ -1,3 +1,5 @@
+""" Utility functions for the odyssey package. """
+
 import datetime
 import re
 import uuid
@@ -30,12 +32,13 @@ class JSONDecoder(flask.json.JSONDecoder):
     
     To add more functionality, simply create a new parser method below, with
     the following properties:
+
     1. The method must have 1 argument, a string.
     2. The method must return 1 object, the converted string.
     3. The method should not raise an error if the conversion fails.
     4. If the conversion was unsuccessful, the method must return the
        original string unaltered.
-    5. The method name must start with 'parse_' to be picked up by the
+    5. The method name must start with 'parse\_' to be picked up by the
        automatic registration system.
     
     Of course, there should be a corresponding serializer in :class:`JSONEncoder`.
@@ -64,8 +67,7 @@ class JSONDecoder(flask.json.JSONDecoder):
 
         Returns
         -------
-        :class:`datetime.datetime`, :class:`datetime.date`, or :class:`datetime.time`
-        object, or the original string if string could not be converted.
+        :class:`datetime.datetime`, :class:`datetime.date`, or :class:`datetime.time` object, or the original string if string could not be converted.
         """
         dt = None
         try:
@@ -89,7 +91,7 @@ class JSONDecoder(flask.json.JSONDecoder):
         return string
 
     def parse_uuid(self, string):
-        """ Convert a string into ':class:`uuid.UUID` object.
+        """ Convert a string into a :class:`uuid.UUID` object.
 
         Serializing :class:`uuid.UUID` is supported by :class:`flask.json.JSONEncoder`,
         but the reverse process is not natively supported by flask. This parser adds

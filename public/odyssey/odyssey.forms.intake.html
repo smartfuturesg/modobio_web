@@ -1,0 +1,514 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>odyssey.forms.intake &mdash; Odyssey 0.1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="odyssey.forms.doctor" href="odyssey.forms.doctor.html" />
+    <link rel="prev" title="odyssey.forms.main" href="odyssey.forms.main.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Odyssey
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../toc_flask.html">Flask app</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="odyssey.models.html">Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.views.html">Views</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="odyssey.forms.html">Forms</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="odyssey.forms.main.html">Main</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Intake forms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="odyssey.forms.doctor.html">Doctor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="odyssey.forms.pt.html">Physical therapist</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../toc_api.html">API server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../toc_rest.html">Support</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Odyssey</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../toc_flask.html">Flask app</a> &raquo;</li>
+        
+          <li><a href="odyssey.forms.html">Forms</a> &raquo;</li>
+        
+      <li>odyssey.forms.intake</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/odyssey/odyssey.forms.intake.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-odyssey.forms.intake">
+<span id="odyssey-forms-intake"></span><h1>odyssey.forms.intake<a class="headerlink" href="#module-odyssey.forms.intake" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="odyssey.forms.intake.ClientInfoForm">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.forms.intake.</code><code class="sig-name descname">ClientInfoForm</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.forms.intake.ClientInfoForm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_wtf.form.FlaskForm</span></code></p>
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientInfoForm.firstname">
+<code class="sig-name descname">firstname</code><em class="property"> = &lt;UnboundField(StringField, ('First name',), {})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientInfoForm.firstname" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientInfoForm.middlename">
+<code class="sig-name descname">middlename</code><em class="property"> = &lt;UnboundField(StringField, ('Middle name(s)',), {})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientInfoForm.middlename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientInfoForm.lastname">
+<code class="sig-name descname">lastname</code><em class="property"> = &lt;UnboundField(StringField, ('Last name',), {})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientInfoForm.lastname" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientInfoForm.s1">
+<code class="sig-name descname">s1</code><em class="property"> = &lt;UnboundField(HiddenField, (), {'id': 'spacer'})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientInfoForm.s1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientInfoForm.guardianname">
+<code class="sig-name descname">guardianname</code><em class="property"> = &lt;UnboundField(StringField, ('Parent or guardian name (if applicable)',), {})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientInfoForm.guardianname" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientInfoForm.guardianrole">
+<code class="sig-name descname">guardianrole</code><em class="property"> = &lt;UnboundField(StringField, ('Parent or guardian relationship',), {})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientInfoForm.guardianrole" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientInfoForm.s2">
+<code class="sig-name descname">s2</code><em class="property"> = &lt;UnboundField(HiddenField, (), {'id': 'spacer'})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientInfoForm.s2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientInfoForm.street">
+<code class="sig-name descname">street</code><em class="property"> = &lt;UnboundField(StringField, ('Address',), {})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientInfoForm.street" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientInfoForm.city">
+<code class="sig-name descname">city</code><em class="property"> = &lt;UnboundField(StringField, ('City',), {})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientInfoForm.city" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientInfoForm.state">
+<code class="sig-name descname">state</code><em class="property"> = &lt;UnboundField(SelectField, ('State',), {'choices': (('AL', 'Alabama'), ('AK', 'Alaska'), ('AZ', 'Arizona'), ('AR', 'Arkansas'), ('CA', 'California'), ('CO', 'Colorado'), ('CT', 'Connecticut'), ('DE', 'Delaware'), ('FL', 'Florida'), ('GA', 'Georgia'), ('HI', 'Hawaii'), ('ID', 'Idaho'), ('IL', 'Illinois'), ('IN', 'Indiana'), ('IA', 'Iowa'), ('KS', 'Kansas'), ('KY', 'Kentucky'), ('LA', 'Louisiana'), ('ME', 'Maine'), ('MD', 'Maryland'), ('MA', 'Massachusetts'), ('MI', 'Michigan'), ('MN', 'Minnesota'), ('MS', 'Mississippi'), ('MO', 'Missouri'), ('MT', 'Montana'), ('NE', 'Nebraska'), ('NV', 'Nevada'), ('NH', 'New Hampshire'), ('NJ', 'New Jersey'), ('NM', 'New Mexico'), ('NY', 'New York'), ('NC', 'North Carolina'), ('ND', 'North Dakota'), ('OH', 'Ohio'), ('OK', 'Oklahoma'), ('OR', 'Oregon'), ('PY', 'Pennsylvania'), ('RI', 'Rhode Island'), ('SC', 'South Carolina'), ('SD', 'South Dakota'), ('TN', 'Tennessee'), ('TX', 'Texas'), ('UT', 'Utah'), ('VT', 'Vermont'), ('VA', 'Virginia'), ('WA', 'Washington'), ('WV', 'West Virginia'), ('WI', 'Wisconsin'), ('WY', 'Wyoming')), 'default': 'AZ'})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientInfoForm.state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientInfoForm.zipcode">
+<code class="sig-name descname">zipcode</code><em class="property"> = &lt;UnboundField(StringField, ('Zip',), {})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientInfoForm.zipcode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientInfoForm.country">
+<code class="sig-name descname">country</code><em class="property"> = &lt;UnboundField(SelectField, ('Country',), {'choices': (('AF', 'Afghanistan'), ('AX', 'Åland Islands'), ('AL', 'Albania'), ('DZ', 'Algeria'), ('AS', 'American Samoa'), ('AD', 'Andorra'), ('AO', 'Angola'), ('AI', 'Anguilla'), ('AQ', 'Antarctica'), ('AG', 'Antigua and Barbuda'), ('AR', 'Argentina'), ('AM', 'Armenia'), ('AW', 'Aruba'), ('AU', 'Australia'), ('AT', 'Austria'), ('AZ', 'Azerbaijan'), ('BS', 'Bahamas'), ('BH', 'Bahrain'), ('BD', 'Bangladesh'), ('BB', 'Barbados'), ('BY', 'Belarus'), ('BE', 'Belgium'), ('BZ', 'Belize'), ('BJ', 'Benin'), ('BM', 'Bermuda'), ('BT', 'Bhutan'), ('BO', 'Bolivia, Plurinational State of'), ('BQ', 'Bonaire, Sint Eustatius and Saba'), ('BA', 'Bosnia and Herzegovina'), ('BW', 'Botswana'), ('BV', 'Bouvet Island'), ('BR', 'Brazil'), ('IO', 'British Indian Ocean Territory'), ('BN', 'Brunei Darussalam'), ('BG', 'Bulgaria'), ('BF', 'Burkina Faso'), ('BI', 'Burundi'), ('KH', 'Cambodia'), ('CM', 'Cameroon'), ('CA', 'Canada'), ('CV', 'Cape Verde'), ('KY', 'Cayman Islands'), ('CF', 'Central African Republic'), ('TD', 'Chad'), ('CL', 'Chile'), ('CN', 'China'), ('CX', 'Christmas Island'), ('CC', 'Cocos (Keeling) Islands'), ('CO', 'Colombia'), ('KM', 'Comoros'), ('CG', 'Congo'), ('CD', 'Congo, the Democratic Republic of the'), ('CK', 'Cook Islands'), ('CR', 'Costa Rica'), ('CI', &quot;Côte d'Ivoire&quot;), ('HR', 'Croatia'), ('CU', 'Cuba'), ('CW', 'Curaçao'), ('CY', 'Cyprus'), ('CZ', 'Czech Republic'), ('DK', 'Denmark'), ('DJ', 'Djibouti'), ('DM', 'Dominica'), ('DO', 'Dominican Republic'), ('EC', 'Ecuador'), ('EG', 'Egypt'), ('SV', 'El Salvador'), ('GQ', 'Equatorial Guinea'), ('ER', 'Eritrea'), ('EE', 'Estonia'), ('ET', 'Ethiopia'), ('FK', 'Falkland Islands (Malvinas)'), ('FO', 'Faroe Islands'), ('FJ', 'Fiji'), ('FI', 'Finland'), ('FR', 'France'), ('GF', 'French Guiana'), ('PF', 'French Polynesia'), ('TF', 'French Southern Territories'), ('GA', 'Gabon'), ('GM', 'Gambia'), ('GE', 'Georgia'), ('DE', 'Germany'), ('GH', 'Ghana'), ('GI', 'Gibraltar'), ('GR', 'Greece'), ('GL', 'Greenland'), ('GD', 'Grenada'), ('GP', 'Guadeloupe'), ('GU', 'Guam'), ('GT', 'Guatemala'), ('GG', 'Guernsey'), ('GN', 'Guinea'), ('GW', 'Guinea-Bissau'), ('GY', 'Guyana'), ('HT', 'Haiti'), ('HM', 'Heard Island and McDonald Islands'), ('VA', 'Holy See (Vatican City State)'), ('HN', 'Honduras'), ('HK', 'Hong Kong'), ('HU', 'Hungary'), ('IS', 'Iceland'), ('IN', 'India'), ('ID', 'Indonesia'), ('IR', 'Iran, Islamic Republic of'), ('IQ', 'Iraq'), ('IE', 'Ireland'), ('IM', 'Isle of Man'), ('IL', 'Israel'), ('IT', 'Italy'), ('JM', 'Jamaica'), ('JP', 'Japan'), ('JE', 'Jersey'), ('JO', 'Jordan'), ('KZ', 'Kazakhstan'), ('KE', 'Kenya'), ('KI', 'Kiribati'), ('KP', &quot;Korea, Democratic People's Republic of&quot;), ('KR', 'Korea, Republic of'), ('KW', 'Kuwait'), ('KG', 'Kyrgyzstan'), ('LA', &quot;Lao People's Democratic Republic&quot;), ('LV', 'Latvia'), ('LB', 'Lebanon'), ('LS', 'Lesotho'), ('LR', 'Liberia'), ('LY', 'Libya'), ('LI', 'Liechtenstein'), ('LT', 'Lithuania'), ('LU', 'Luxembourg'), ('MO', 'Macao'), ('MK', 'North-Macedonia'), ('MG', 'Madagascar'), ('MW', 'Malawi'), ('MY', 'Malaysia'), ('MV', 'Maldives'), ('ML', 'Mali'), ('MT', 'Malta'), ('MH', 'Marshall Islands'), ('MQ', 'Martinique'), ('MR', 'Mauritania'), ('MU', 'Mauritius'), ('YT', 'Mayotte'), ('MX', 'Mexico'), ('FM', 'Micronesia, Federated States of'), ('MD', 'Moldova, Republic of'), ('MC', 'Monaco'), ('MN', 'Mongolia'), ('ME', 'Montenegro'), ('MS', 'Montserrat'), ('MA', 'Morocco'), ('MZ', 'Mozambique'), ('MM', 'Myanmar'), ('NA', 'Namibia'), ('NR', 'Nauru'), ('NP', 'Nepal'), ('NL', 'Netherlands'), ('NC', 'New Caledonia'), ('NZ', 'New Zealand'), ('NI', 'Nicaragua'), ('NE', 'Niger'), ('NG', 'Nigeria'), ('NU', 'Niue'), ('NF', 'Norfolk Island'), ('MP', 'Northern Mariana Islands'), ('NO', 'Norway'), ('OM', 'Oman'), ('PK', 'Pakistan'), ('PW', 'Palau'), ('PS', 'Palestinian Territory, Occupied'), ('PA', 'Panama'), ('PG', 'Papua New Guinea'), ('PY', 'Paraguay'), ('PE', 'Peru'), ('PH', 'Philippines'), ('PN', 'Pitcairn'), ('PL', 'Poland'), ('PT', 'Portugal'), ('PR', 'Puerto Rico'), ('QA', 'Qatar'), ('RE', 'Réunion'), ('RO', 'Romania'), ('RU', 'Russian Federation'), ('RW', 'Rwanda'), ('BL', 'Saint Barthélemy'), ('SH', 'Saint Helena, Ascension and Tristan da Cunha'), ('KN', 'Saint Kitts and Nevis'), ('LC', 'Saint Lucia'), ('MF', 'Saint Martin (French part)'), ('PM', 'Saint Pierre and Miquelon'), ('VC', 'Saint Vincent and the Grenadines'), ('WS', 'Samoa'), ('SM', 'San Marino'), ('ST', 'Sao Tome and Principe'), ('SA', 'Saudi Arabia'), ('SN', 'Senegal'), ('RS', 'Serbia'), ('SC', 'Seychelles'), ('SL', 'Sierra Leone'), ('SG', 'Singapore'), ('SX', 'Sint Maarten (Dutch part)'), ('SK', 'Slovakia'), ('SI', 'Slovenia'), ('SB', 'Solomon Islands'), ('SO', 'Somalia'), ('ZA', 'South Africa'), ('GS', 'South Georgia and the South Sandwich Islands'), ('SS', 'South Sudan'), ('ES', 'Spain'), ('LK', 'Sri Lanka'), ('SD', 'Sudan'), ('SR', 'Suriname'), ('SJ', 'Svalbard and Jan Mayen'), ('SZ', 'Swaziland'), ('SE', 'Sweden'), ('CH', 'Switzerland'), ('SY', 'Syrian Arab Republic'), ('TW', 'Taiwan, Republic of China'), ('TJ', 'Tajikistan'), ('TZ', 'Tanzania, United Republic of'), ('TH', 'Thailand'), ('TL', 'Timor-Leste'), ('TG', 'Togo'), ('TK', 'Tokelau'), ('TO', 'Tonga'), ('TT', 'Trinidad and Tobago'), ('TN', 'Tunisia'), ('TR', 'Turkey'), ('TM', 'Turkmenistan'), ('TC', 'Turks and Caicos Islands'), ('TV', 'Tuvalu'), ('UG', 'Uganda'), ('UA', 'Ukraine'), ('AE', 'United Arab Emirates'), ('GB', 'United Kingdom'), ('US', 'United States'), ('UM', 'United States Minor Outlying Islands'), ('UY', 'Uruguay'), ('UZ', 'Uzbekistan'), ('VU', 'Vanuatu'), ('VE', 'Venezuela, Bolivarian Republic of'), ('VN', 'Viet Nam'), ('VG', 'Virgin Islands, British'), ('VI', 'Virgin Islands, U.S.'), ('WF', 'Wallis and Futuna'), ('EH', 'Western Sahara'), ('YE', 'Yemen'), ('ZM', 'Zambia'), ('ZW', 'Zimbabwe')), 'default': 'US'})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientInfoForm.country" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientInfoForm.s3">
+<code class="sig-name descname">s3</code><em class="property"> = &lt;UnboundField(HiddenField, (), {'id': 'spacer'})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientInfoForm.s3" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientInfoForm.email">
+<code class="sig-name descname">email</code><em class="property"> = &lt;UnboundField(StringField, ('Email address',), {})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientInfoForm.email" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientInfoForm.phone">
+<code class="sig-name descname">phone</code><em class="property"> = &lt;UnboundField(StringField, ('Phone',), {})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientInfoForm.phone" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientInfoForm.preferred">
+<code class="sig-name descname">preferred</code><em class="property"> = &lt;UnboundField(SelectField, ('Preferred method of contact',), {'choices': ((0, 'phone'), (1, 'email'))})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientInfoForm.preferred" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientInfoForm.s4">
+<code class="sig-name descname">s4</code><em class="property"> = &lt;UnboundField(HiddenField, (), {'id': 'spacer'})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientInfoForm.s4" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientInfoForm.ringsize">
+<code class="sig-name descname">ringsize</code><em class="property"> = &lt;UnboundField(FloatField, ('Ringsize for Oura Ring',), {})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientInfoForm.ringsize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientInfoForm.s5">
+<code class="sig-name descname">s5</code><em class="property"> = &lt;UnboundField(HiddenField, (), {'id': 'spacer'})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientInfoForm.s5" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientInfoForm.emergency_contact">
+<code class="sig-name descname">emergency_contact</code><em class="property"> = &lt;UnboundField(StringField, ('Emergency contact name',), {})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientInfoForm.emergency_contact" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientInfoForm.emergency_phone">
+<code class="sig-name descname">emergency_phone</code><em class="property"> = &lt;UnboundField(StringField, ('Emergency contact phone',), {})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientInfoForm.emergency_phone" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientInfoForm.s6">
+<code class="sig-name descname">s6</code><em class="property"> = &lt;UnboundField(HiddenField, (), {'id': 'spacer'})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientInfoForm.s6" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientInfoForm.healthcare_contact">
+<code class="sig-name descname">healthcare_contact</code><em class="property"> = &lt;UnboundField(StringField, ('Primary healthcare provider name',), {})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientInfoForm.healthcare_contact" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientInfoForm.healthcare_phone">
+<code class="sig-name descname">healthcare_phone</code><em class="property"> = &lt;UnboundField(StringField, ('Primary healthcare provider phone',), {})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientInfoForm.healthcare_phone" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientInfoForm.s7">
+<code class="sig-name descname">s7</code><em class="property"> = &lt;UnboundField(HiddenField, (), {'id': 'spacer'})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientInfoForm.s7" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientInfoForm.gender">
+<code class="sig-name descname">gender</code><em class="property"> = &lt;UnboundField(SelectField, ('Gender',), {'choices': (('f', 'female'), ('m', 'male'), ('o', 'other'))})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientInfoForm.gender" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientInfoForm.dob">
+<code class="sig-name descname">dob</code><em class="property"> = &lt;UnboundField(DateField, ('Date of birth',), {})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientInfoForm.dob" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientInfoForm.profession">
+<code class="sig-name descname">profession</code><em class="property"> = &lt;UnboundField(StringField, ('Profession or occupation',), {})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientInfoForm.profession" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.forms.intake.ClientSignForm">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.forms.intake.</code><code class="sig-name descname">ClientSignForm</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.forms.intake.ClientSignForm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_wtf.form.FlaskForm</span></code></p>
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientSignForm.fullname">
+<code class="sig-name descname">fullname</code><em class="property"> = &lt;UnboundField(StringField, ('Full name',), {})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientSignForm.fullname" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientSignForm.guardianname">
+<code class="sig-name descname">guardianname</code><em class="property"> = &lt;UnboundField(StringField, ('Parent or guardian name (if applicable)',), {})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientSignForm.guardianname" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientSignForm.signdate">
+<code class="sig-name descname">signdate</code><em class="property"> = &lt;UnboundField(DateField, ('Date',), {'default': datetime.date(2020, 7, 15)})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientSignForm.signdate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientSignForm.signature">
+<code class="sig-name descname">signature</code><em class="property"> = &lt;UnboundField(HiddenField, (), {})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientSignForm.signature" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.forms.intake.ClientConsentForm">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.forms.intake.</code><code class="sig-name descname">ClientConsentForm</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.forms.intake.ClientConsentForm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#odyssey.forms.intake.ClientSignForm" title="odyssey.forms.intake.ClientSignForm"><code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.forms.intake.ClientSignForm</span></code></a></p>
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientConsentForm.infectious_disease">
+<code class="sig-name descname">infectious_disease</code><em class="property"> = &lt;UnboundField(RadioField, (), {'choices': ((0, 'No'), (1, 'Yes')), 'coerce': &lt;function &lt;lambda&gt;&gt;})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientConsentForm.infectious_disease" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.forms.intake.ClientReleaseForm">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.forms.intake.</code><code class="sig-name descname">ClientReleaseForm</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.forms.intake.ClientReleaseForm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#odyssey.forms.intake.ClientSignForm" title="odyssey.forms.intake.ClientSignForm"><code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.forms.intake.ClientSignForm</span></code></a></p>
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientReleaseForm.release_by_other">
+<code class="sig-name descname">release_by_other</code><em class="property"> = &lt;UnboundField(StringField, (), {})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientReleaseForm.release_by_other" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientReleaseForm.release_to_other">
+<code class="sig-name descname">release_to_other</code><em class="property"> = &lt;UnboundField(StringField, (), {})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientReleaseForm.release_to_other" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientReleaseForm.release_of_all">
+<code class="sig-name descname">release_of_all</code><em class="property"> = &lt;UnboundField(RadioField, (), {'choices': ((1, 'all'), (0, 'other')), 'coerce': &lt;function &lt;lambda&gt;&gt;, 'default': 1})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientReleaseForm.release_of_all" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientReleaseForm.release_of_other">
+<code class="sig-name descname">release_of_other</code><em class="property"> = &lt;UnboundField(StringField, (), {})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientReleaseForm.release_of_other" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientReleaseForm.release_date_from">
+<code class="sig-name descname">release_date_from</code><em class="property"> = &lt;UnboundField(DateField, (), {})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientReleaseForm.release_date_from" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientReleaseForm.release_date_to">
+<code class="sig-name descname">release_date_to</code><em class="property"> = &lt;UnboundField(DateField, (), {})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientReleaseForm.release_date_to" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientReleaseForm.release_purpose">
+<code class="sig-name descname">release_purpose</code><em class="property"> = &lt;UnboundField(StringField, (), {})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientReleaseForm.release_purpose" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientReleaseForm.emergency_contact">
+<code class="sig-name descname">emergency_contact</code><em class="property"> = &lt;UnboundField(StringField, ('Emergency contact name',), {})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientReleaseForm.emergency_contact" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientReleaseForm.emergency_phone">
+<code class="sig-name descname">emergency_phone</code><em class="property"> = &lt;UnboundField(StringField, ('Emergency contact phone',), {})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientReleaseForm.emergency_phone" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientReleaseForm.dob">
+<code class="sig-name descname">dob</code><em class="property"> = &lt;UnboundField(DateField, ('Date of birth',), {})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientReleaseForm.dob" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientReleaseForm.address">
+<code class="sig-name descname">address</code><em class="property"> = &lt;UnboundField(StringField, ('Address',), {})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientReleaseForm.address" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientReleaseForm.phone">
+<code class="sig-name descname">phone</code><em class="property"> = &lt;UnboundField(StringField, ('Phone',), {'render_kw': {'type': 'phone'}})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientReleaseForm.phone" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientReleaseForm.email">
+<code class="sig-name descname">email</code><em class="property"> = &lt;UnboundField(StringField, ('Email',), {'render_kw': {'type': 'email'}})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientReleaseForm.email" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.forms.intake.ClientReceiveForm">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.forms.intake.</code><code class="sig-name descname">ClientReceiveForm</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.forms.intake.ClientReceiveForm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_wtf.form.FlaskForm</span></code></p>
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientReceiveForm.receive_docs">
+<code class="sig-name descname">receive_docs</code><em class="property"> = &lt;UnboundField(BooleanField, (), {'default': 'checked'})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientReceiveForm.receive_docs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.forms.intake.ClientIndividualContractForm">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.forms.intake.</code><code class="sig-name descname">ClientIndividualContractForm</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.forms.intake.ClientIndividualContractForm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#odyssey.forms.intake.ClientSignForm" title="odyssey.forms.intake.ClientSignForm"><code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.forms.intake.ClientSignForm</span></code></a></p>
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientIndividualContractForm.doctor_consult">
+<code class="sig-name descname">doctor_consult</code><em class="property"> = &lt;UnboundField(BooleanField, (), {})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientIndividualContractForm.doctor_consult" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientIndividualContractForm.pt_consult">
+<code class="sig-name descname">pt_consult</code><em class="property"> = &lt;UnboundField(BooleanField, (), {})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientIndividualContractForm.pt_consult" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientIndividualContractForm.data_monitoring">
+<code class="sig-name descname">data_monitoring</code><em class="property"> = &lt;UnboundField(BooleanField, (), {})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientIndividualContractForm.data_monitoring" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.forms.intake.ClientIndividualContractForm.drinks">
+<code class="sig-name descname">drinks</code><em class="property"> = &lt;UnboundField(BooleanField, (), {})&gt;</em><a class="headerlink" href="#odyssey.forms.intake.ClientIndividualContractForm.drinks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="odyssey.forms.doctor.html" class="btn btn-neutral float-right" title="odyssey.forms.doctor" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="odyssey.forms.main.html" class="btn btn-neutral float-left" title="odyssey.forms.main" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright Copyright 2019-2020 Atlantic Venture Partners, all rights reserved
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

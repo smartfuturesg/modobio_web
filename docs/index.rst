@@ -3,16 +3,19 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Odyssey documentation
-=====================
+Odyssey
+=======
 
-Contents
---------
+.. automodule:: odyssey
+   :members: create_app
+   :show-inheritance:
 
 .. toctree::
-   :maxdepth: 2
 
-   api/odyssey
+   toc_flask
+   toc_api
+   toc_rest
+
 
 Indices and tables
 ------------------

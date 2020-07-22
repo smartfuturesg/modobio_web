@@ -1,4 +1,23 @@
+# image: python:3.6
+
+stages:
+  - build
+
+#wheel:
+#  stage: build
+#  script:
+#    - python3 -V
+#    - python3 -m pip install setuptools
+#    - python3 setup.py bdist_wheel sdist
+#  tags:
+#    - gitlab-runner
+#  artifacts:
+#    paths:
+#    - dist
+#    expire_in: 1 day
+
 pages:
+  stage: build
   script:
     - echo 'Nothing to do...'
   tags:

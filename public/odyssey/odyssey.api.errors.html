@@ -1,0 +1,306 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>odyssey.api.errors &mdash; Odyssey 0.1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="odyssey.api.serializers" href="odyssey.api.serializers.html" />
+    <link rel="prev" title="odyssey.api.pt" href="odyssey.api.pt.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Odyssey
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../toc_flask.html">Flask app</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../toc_api.html">API server</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="odyssey.api.html">API</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="odyssey.api.auth.html">Authorization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="odyssey.api.tokens.html">Authorization tokens</a></li>
+<li class="toctree-l3"><a class="reference internal" href="odyssey.api.staff.html">Staff</a></li>
+<li class="toctree-l3"><a class="reference internal" href="odyssey.api.clients.html">Client</a></li>
+<li class="toctree-l3"><a class="reference internal" href="odyssey.api.doctor.html">Doctor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="odyssey.api.pt.html">Physical therapist</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Error messages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="odyssey.api.serializers.html">Serializers</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../toc_rest.html">Support</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Odyssey</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../toc_api.html">API server</a> &raquo;</li>
+        
+          <li><a href="odyssey.api.html">API</a> &raquo;</li>
+        
+      <li>odyssey.api.errors</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/odyssey/odyssey.api.errors.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-odyssey.api.errors">
+<span id="odyssey-api-errors"></span><h1>odyssey.api.errors<a class="headerlink" href="#module-odyssey.api.errors" title="Permalink to this headline">¶</a></h1>
+<dl class="py exception">
+<dt id="odyssey.api.errors.UserNotFound">
+<em class="property">exception </em><code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">UserNotFound</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em>, <em class="sig-param"><span class="n">message</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.UserNotFound" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>in the case a non-existent client is being requested</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="odyssey.api.errors.UnauthorizedUser">
+<em class="property">exception </em><code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">UnauthorizedUser</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">email</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">message</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.UnauthorizedUser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>in the case a staff member is trying to access resources they are not permitted to</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="odyssey.api.errors.ClientAlreadyExists">
+<em class="property">exception </em><code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">ClientAlreadyExists</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">identification</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">message</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.ClientAlreadyExists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>in the case a staff member is trying to create a new client when the client already exists</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="odyssey.api.errors.ClientNotFound">
+<em class="property">exception </em><code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">ClientNotFound</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">identification</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">message</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.ClientNotFound" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>in the case a staff member is trying to edit a client that does not exist</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="odyssey.api.errors.IllegalSetting">
+<em class="property">exception </em><code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">IllegalSetting</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">param</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">message</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.IllegalSetting" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>in the case an API request includes a setting or parameter that is not allowed</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="odyssey.api.errors.bad_request">
+<code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">bad_request</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">message</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.bad_request" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="odyssey.api.errors.error_response">
+<code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">error_response</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">status_code</span></em>, <em class="sig-param"><span class="n">message</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.error_response" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="odyssey.api.errors.error_user_does_not_exist">
+<code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">error_user_does_not_exist</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">error</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.error_user_does_not_exist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a custom message and 400 status code</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="odyssey.api.errors.error_client_not_found">
+<code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">error_client_not_found</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">error</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.error_client_not_found" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a custom message and 400 status code</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="odyssey.api.errors.error_illegal_setting">
+<code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">error_illegal_setting</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">error</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.error_illegal_setting" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a custom message and 400 status code</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="odyssey.api.errors.error_unauthorized_user">
+<code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">error_unauthorized_user</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">error</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.error_unauthorized_user" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a custom message and 400 status code</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="odyssey.api.errors.error_client_already_exists">
+<code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">error_client_already_exists</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">error</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.error_client_already_exists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a custom message and 409 status code</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="odyssey.api.errors.register_handlers">
+<code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">register_handlers</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">app</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.register_handlers" title="Permalink to this definition">¶</a></dt>
+<dd><p>register application-wide error handling</p>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="odyssey.api.serializers.html" class="btn btn-neutral float-right" title="odyssey.api.serializers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="odyssey.api.pt.html" class="btn btn-neutral float-left" title="odyssey.api.pt" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright Copyright 2019-2020 Atlantic Venture Partners, all rights reserved
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

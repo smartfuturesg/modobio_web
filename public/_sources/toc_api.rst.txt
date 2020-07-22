@@ -1,0 +1,8 @@
+API server
+==========
+
+The new (as of version 0.1.0) API based Modo Bio staff application. The frontend is written in React. This API serves database information to and from the React frontend.
+
+.. toctree::
+
+   odyssey/odyssey.api

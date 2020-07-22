@@ -261,9 +261,9 @@ COUNTRIES = (
     ('ZM', 'Zambia'),
     ('ZW', 'Zimbabwe')
 )
-"""Names of countries and their 2-letter codes.
+""" Names of countries and their 2-letter codes.
 
-A tuple of tuples: (('US', 'United States of America'), ...)
+:type: tuple(tuple)
 """
 
 USSTATES = (
@@ -318,9 +318,9 @@ USSTATES = (
     ('WI', 'Wisconsin'),
     ('WY', 'Wyoming')
 )
-"""Names of US states and their 2-letter codes.
+""" Names of US states and their 2-letter codes.
 
-A tuple of tuples: (('AZ', 'Arizona'), ...)
+:type: tuple(tuple)
 """
 
 GENDERS = (
@@ -328,56 +328,57 @@ GENDERS = (
     ('m', 'male'),
     ('o', 'other')
 )
-"""Genders and a 1-letter abbreviation.
+""" Genders and a 1-letter abbreviation.
 
-A tuple of tuples: (('f', 'female'), ...)
+:type: tuple(tuple)
 """
 
 CONTACT_METHODS = (
     (0, 'phone'),
     (1, 'email')
 )
-"""Available methods to contact a client.
+""" Available methods to contact a client.
 
-A tuple of tuples: ((0, 'phone'), ...)
+:type: tuple(tuple)
 """
 
 YESNO = (
     (0, 'No'),
     (1, 'Yes')
 )
-"""Boolean options of 'Yes' or 'No'.
+""" Boolean options of 'Yes' or 'No'.
 
 This can be used to link a :class:`wtforms.fields.RadioField` form field
 to a :class:`sqlalchemy.types.Boolean` database column. Use in conjunction
-with :const:`BOOLIFY`:
+with :const:`BOOLIFY`.::
 
-`name = RadioField('label', choices=YESNO, coerce=BOOLIFY)`
+    name = RadioField('label', choices=YESNO, coerce=BOOLIFY)
+
+:type: tuple(tuple)
 """
 
 BOOLIFY = lambda x: bool(int(x))
-"""Convert a number into a boolean.
+""" Convert a number into a boolean.
 
 A POST request always returns a string. A :class:`sqlalchemy.types.Boolean`
 database column expects a Python :attr:`True` or :attr:`False` value. Use
 :func:`BOOLIFY` to convert the returned string value '0' or '1' into
 :attr:`False` or :attr:`True`, respectively. Use in conjuction with
-:const:`YESNO`:
+:const:`YESNO`.::
 
-`name = RadioField('label', choices=YESNO, coerce=BOOLIFY)`
+    name = RadioField('label', choices=YESNO, coerce=BOOLIFY)
+
+:type: function
 """
 
 class DOCTYPE(enum.Enum):
+    """ Enumeration defining the different types of signable documents. """
     policies = enum.auto()
     release = enum.auto()
     consent = enum.auto()
     consult = enum.auto()
     subscription = enum.auto()
     individual = enum.auto()
-""" Enum defining the different signable documents.
-
-:type: enum.Enum
-"""
 
 DOCTYPE_TABLE_MAP = {
     DOCTYPE.policies: ClientPolicies,
@@ -389,8 +390,8 @@ DOCTYPE_TABLE_MAP = {
 }
 """ Maps signable documents to the database tables.
 
-The keys of this dict are the members of :class:`DocTypes`. The values are
-the SQLAlchemy models defines in :mod:`odyssey.models.intake`.
+The keys of this dict are the members of :class:`DOCTYPE`. The values are
+the SQLAlchemy models defined in :mod:`odyssey.models.intake`.
 
 :type: dict
 """
@@ -405,7 +406,7 @@ DOCTYPE_DOCREV_MAP = {
 }
 """ Maps signable documents to the latest document revision.
 
-The keys of this dict are the members of :class:`DocTypes`.
+The keys of this dict are the members of :class:`DOCTYPE`.
 
 The revision string is updated whenever the contents of the document change. The
 revision string can be anything, but it typically consists of the ISO formatted
@@ -413,7 +414,7 @@ date (e.g. 20200519).
 
 This map is the "ground truth" for revision numbers. If one needs to be updated,
 do it here. The revision numbers stored in the database are the revision numbers
-of the *signed* documents.
+of the latest *signed* documents.
 
 :type: dict
 """
