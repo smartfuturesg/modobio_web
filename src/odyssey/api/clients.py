@@ -466,7 +466,7 @@ class RemoteClientInfo(Resource):
     """
     @ns.doc(security='apikey')
     @token_auth_client.login_required
-    @ns.marshal_with(client_info)
+    @responds(schema=ClientInfoSchema, api=ns)
     def get(self, tmp_registration):
         """returns client info table as a json for the clientid specified"""
         #check portal validity
@@ -474,12 +474,12 @@ class RemoteClientInfo(Resource):
             raise ClientNotFound(message="Resource does not exist")
         client = ClientInfo.query.filter_by(email=token_auth_client.current_user().email).first()
 
-        return client.to_dict()
+        return client
 
-    @ns.expect(client_info)
+    @accepts(schema=ClientInfoSchema, api=ns)
     @ns.doc(security='apikey')
     @token_auth_client.login_required
-    @ns.marshal_with(client_info)
+    @responds(schema=ClientInfoSchema, api=ns)
     def put(self, tmp_registration):
         """edit client info"""
         #check portal validity
@@ -495,6 +495,5 @@ class RemoteClientInfo(Resource):
 
         client.from_dict(data)
         db.session.add(client)
-        db.session.flush()
         db.session.commit()
-        return client.to_dict()
+        return client

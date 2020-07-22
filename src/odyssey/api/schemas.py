@@ -21,6 +21,8 @@ class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientInfo
 
+    record_locator_id = fields.String(dump_only=True)
+    
     @post_load
     def make_object(self, data, **kwargs):
         return ClientInfo(**data)
