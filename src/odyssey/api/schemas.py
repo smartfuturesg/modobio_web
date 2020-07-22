@@ -32,6 +32,14 @@ class NewRemoteRegistrationSchema(Schema):
     def make_object(self, data, **kwargs):
         return ClientInfo(**data)
 
+class SignAndDateSchema(Schema):
+    """for marshaling signatures and sign dates into objects (contracts) requiring only a signature"""
+
+    clientid = fields.Integer(dump_only=True)
+    signdate = fields.Date(format="iso", required=True)
+    signature = fields.String(required=True)
+
+
 class ClientRemoteRegistrationSchema(ma.SQLAlchemyAutoSchema):
     """
         holds client's access information for remote registration

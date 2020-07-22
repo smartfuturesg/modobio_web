@@ -36,7 +36,8 @@ from odyssey.api.schemas import (
     ClientInfoSchema, 
     ClientRemoteRegistrationSchema, 
     NewRemoteRegistrationSchema, 
-    RefreshRemoteRegistrationSchema
+    RefreshRemoteRegistrationSchema,
+    SignAndDateSchema
 )
 from flask_accepts import accepts, responds
 
@@ -283,7 +284,7 @@ class SubscriptionContract(Resource):
 
     @ns.doc(security='apikey')
     @token_auth.login_required
-    @ns.marshal_with(sign_and_date)
+    @responds(schema=SignAndDateSchema, api=ns)
     def get(self, clientid):
         """returns most recent client subscription contract table as a json for the clientid specified"""
         client_subscription =  ClientSubscriptionContract.query.filter_by(clientid=clientid).order_by(ClientSubscriptionContract.signdate.desc()).first()
@@ -291,23 +292,21 @@ class SubscriptionContract(Resource):
         if not client_subscription:
             raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a subscription contract in the database")
 
-        return  client_subscription.to_dict()
+        return  client_subscription
 
-    @ns.expect(sign_and_date_edit)
     @ns.doc(security='apikey')
+    @accepts(schema=SignAndDateSchema, api=ns)
     @token_auth.login_required
-    @ns.marshal_with(sign_and_date)
+    @responds(schema=SignAndDateSchema, status_code= 201, api=ns)
     def post(self, clientid):
         """create client subscription contract object for the specified clientid"""
         data = request.get_json()
         client_subscription = ClientSubscriptionContract(revision=self.docrev)
         client_subscription.from_dict(clientid, data)
         db.session.add(client_subscription)
-        db.session.flush()
         db.session.commit()
         to_pdf(clientid, self.doctype)
-        response = client_subscription.to_dict()
-        return response, 201
+        return client_subscription
 
 @ns.route('/servicescontract/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
