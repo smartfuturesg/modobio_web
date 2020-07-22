@@ -14,8 +14,6 @@ from flask_marshmallow import Marshmallow
 from odyssey.config import Config
 from odyssey.utils import JSONEncoder, JSONDecoder
 
-__version__ = '0.1.0'
-
 db = SQLAlchemy()
 migrate = Migrate()
 cors = CORS()
