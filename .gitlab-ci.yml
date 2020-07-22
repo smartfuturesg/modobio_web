@@ -4,6 +4,8 @@ stages:
 wheel:
   stage: build
   script:
+    - python -v
+    - python -m pip install setuptools
     - python setup.py bdist_wheel sdist
   tags:
     - gitlab-runner
