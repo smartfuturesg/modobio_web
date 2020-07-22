@@ -6,10 +6,13 @@ from marshmallow import post_load, post_dump
 
 from odyssey import ma
 from odyssey.models.intake import (
+    ClientConsent,
     ClientInfo,
     ClientConsultContract,
     RemoteRegistration, 
     ClientIndividualContract, 
+    ClientPolicies,
+    ClientRelease,
     ClientSubscriptionContract
 )
 from odyssey.constants import DOCTYPE, DOCTYPE_DOCREV_MAP
@@ -39,6 +42,34 @@ class NewRemoteRegistrationSchema(Schema):
     def make_object(self, data, **kwargs):
         return ClientInfo(**data)
 
+class ClientConsentSchema(ma.SQLAlchemyAutoSchema):
+    doctype = DOCTYPE.consent
+    docrev = DOCTYPE_DOCREV_MAP[doctype]
+    class Meta:
+        model = ClientConsent
+    
+    # workaround for foreign fields as they are not picked up in autoschema
+    clientid = fields.Integer(required=False)
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        data["revision"] = self.docrev
+        return ClientConsent(**data)
+
+class ClientReleaseSchema(ma.SQLAlchemyAutoSchema):
+    doctype = DOCTYPE.release
+    docrev = DOCTYPE_DOCREV_MAP[doctype]
+    class Meta:
+        model = ClientRelease
+    
+    # workaround for foreign fields as they are not picked up in autoschema
+    clientid = fields.Integer(required=False)
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        data["revision"] = self.docrev
+        return ClientRelease(**data)
+
 class SignAndDateSchema(Schema):
     """for marshaling signatures and sign dates into objects (contracts) requiring only a signature"""
 
@@ -62,6 +93,7 @@ class ClientSubscriptionContractSchema(ma.SQLAlchemyAutoSchema):
                     signdate=data["signdate"],
                     revision=self.docrev
                     )
+
 class ClientConsultContractSchema(ma.SQLAlchemyAutoSchema):
     doctype = DOCTYPE.consult
     docrev = DOCTYPE_DOCREV_MAP[doctype]
@@ -73,6 +105,23 @@ class ClientConsultContractSchema(ma.SQLAlchemyAutoSchema):
     @post_load
     def make_object(self, data, **kwargs):
         return ClientConsultContract(
+                    clientid = data["clientid"],
+                    signature=data["signature"],
+                    signdate=data["signdate"],
+                    revision=self.docrev
+                    )
+    
+class ClientPoliciesContractSchema(ma.SQLAlchemyAutoSchema):
+    doctype = DOCTYPE.policies
+    docrev = DOCTYPE_DOCREV_MAP[doctype]
+    class Meta:
+        model = ClientPolicies
+    
+    clientid = fields.Integer(required=True)
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return ClientPolicies(
                     clientid = data["clientid"],
                     signature=data["signature"],
                     signdate=data["signdate"],

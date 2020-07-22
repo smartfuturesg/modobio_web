@@ -4,7 +4,7 @@ import time
 from flask.json import dumps
 
 from odyssey.models.main import Staff
-from odyssey.models.intake import ClientConsultContract, ClientSubscriptionContract
+from odyssey.models.intake import ClientConsultContract, ClientPolicies ,ClientSubscriptionContract
 from tests.data import (
     test_new_client_info,
     test_new_remote_registration,
@@ -104,3 +104,46 @@ def test_get_consult_contract(test_client, init_database):
                                 
     assert response.status_code == 200
     assert response.json["signdate"] == test_client_consult_data["signdate"]
+
+
+def test_post_policies_contract(test_client, init_database):
+    """
+    GIVEN a api end point for signing a contract
+    WHEN the '/client/policies/<client id>' resource  is requested (POST)
+    THEN check the response is valid
+    """
+    # get staff authorization to view client data
+    staff = Staff().query.first()
+    token = staff.get_token()
+    headers = {'Authorization': f'Bearer {token}'}
+
+    payload = {"signdate" : test_client_policies_data["signdate"], "signature": test_client_policies_data["signature"]}
+    # send get request for client info on clientid = 1 
+    response = test_client.post('/api/client/policies/1/',
+                                headers=headers, 
+                                data=dumps(payload), 
+                                content_type='application/json')
+    #wait for pdf generation
+    time.sleep(3)
+    client_policies = ClientPolicies.query.filter_by(clientid=1).order_by(ClientPolicies.signdate.desc()).first()
+    assert response.status_code == 201
+    assert client_policies.signdate.strftime("%Y-%m-%d") == test_client_policies_data["signdate"]
+
+def test_get_policies_contract(test_client, init_database):
+    """
+    GIVEN a api end point for retrieving the most recent contract
+    WHEN the '/client/policies/<client id>' resource  is requested (GET)
+    THEN check the response is valid
+    """
+    # get staff authorization to view client data
+    staff = Staff().query.first()
+    token = staff.get_token()
+    headers = {'Authorization': f'Bearer {token}'}
+
+    # send get request for client info on clientid = 1 
+    response = test_client.get('/api/client/policies/1/',
+                                headers=headers, 
+                                content_type='application/json')
+                                
+    assert response.status_code == 200
+    assert response.json["signdate"] == test_client_policies_data["signdate"]

@@ -6,10 +6,6 @@ from odyssey.api.auth import token_auth, token_auth_client
 from odyssey.api.errors import UserNotFound, ClientAlreadyExists, ClientNotFound, IllegalSetting
 from odyssey.api.serializers import (
     client_info,
-    client_consent,
-    client_consent_edit,
-    client_release,
-    client_release_edit,
     client_signed_documents,
     pagination,
 )
@@ -28,9 +24,12 @@ from odyssey.constants import DOCTYPE, DOCTYPE_DOCREV_MAP
 from odyssey.pdf import to_pdf
 
 from odyssey.api.schemas import (
+    ClientConsentSchema,
     ClientConsultContractSchema,
     ClientIndividualContractSchema,
-    ClientInfoSchema, 
+    ClientInfoSchema,
+    ClientPoliciesContractSchema, 
+    ClientReleaseSchema,
     ClientRemoteRegistrationSchema, 
     ClientSubscriptionContractSchema,
     NewRemoteRegistrationSchema, 
@@ -132,7 +131,7 @@ class ConsentContract(Resource):
 
     @ns.doc(security='apikey')
     @token_auth.login_required
-    @ns.marshal_with(client_consent)
+    @responds(schema=ClientConsentSchema, api=ns)
     def get(self, clientid):
         """returns the most recent consent table as a json for the clientid specified"""
         client_consent_form = ClientConsent.query.filter_by(clientid=clientid).order_by(ClientConsent.signdate.desc()).first()
@@ -140,29 +139,25 @@ class ConsentContract(Resource):
         if not client_consent_form:
             raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a consultation contract in the database")
 
-        return  client_consent_form.to_dict()
+        return client_consent_form
 
-    @ns.expect(client_consent_edit)
+    @accepts(schema=ClientConsentSchema, api=ns)
     @ns.doc(security='apikey')
     @token_auth.login_required
-    @ns.marshal_with(client_consent)
+    @responds(schema=ClientConsentSchema, status_code=201, api=ns)
     def post(self, clientid):
-        """ Create or update client consent contract for the specified clientid. """
-        query = ClientConsent.query.filter_by(clientid=clientid, revision=self.docrev)
-        client_consent_form = query.one_or_none()
+        """ Create client consent contract for the specified clientid """
+        data = request.get_json()
+        data["clientid"] = clientid
 
-        if not client_consent_form:
-            client_consent_form = ClientConsent(clientid=clientid, **request.json)
-            db.session.add(client_consent_form)
-        else:
-            query.update(request.json)
-
+        client_consent_schema = ClientConsentSchema()
+        client_consent_form = client_consent_schema.load(data)
+        
+        db.session.add(client_consent_form)
         db.session.commit()
 
         to_pdf(clientid, self.doctype)
-        response = client_consent_form.to_dict()
-        # response['__links'] = api.url_for(Client, clientid = clientid) # to add links later on
-        return response, 201
+        return client_consent_form
 
 @ns.route('/release/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
@@ -174,7 +169,7 @@ class ReleaseContract(Resource):
 
     @ns.doc(security='apikey')
     @token_auth.login_required
-    @ns.marshal_with(client_release)
+    @responds(schema=ClientReleaseSchema, api=ns)
     def get(self, clientid):
         """returns most recent client release table as a json for the clientid specified"""
         client_release_form =  ClientRelease.query.filter_by(clientid=clientid).order_by(ClientRelease.signdate.desc()).first()
@@ -182,23 +177,23 @@ class ReleaseContract(Resource):
         if not client_release_form:
             raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a release contract in the database")
 
-        return  client_release_form.to_dict()
+        return client_release_form
 
-    @ns.expect(client_release_edit)
+    @accepts(schema=ClientReleaseSchema)
     @ns.doc(security='apikey')
     @token_auth.login_required
-    @ns.marshal_with(client_release)
+    @responds(schema=ClientReleaseSchema, status_code=201, api=ns)
     def post(self, clientid):
         """create client release contract object for the specified clientid"""
         data = request.get_json()
-        client_release_form = ClientRelease(revision=self.docrev)
-        client_release_form.from_dict(clientid, data)
+        data["clientid"] = clientid
+        client_release_schema = ClientReleaseSchema()
+        client_release_form = client_release_schema.load(data)
+
         db.session.add(client_release_form)
-        db.session.flush()
         db.session.commit()
         to_pdf(clientid, self.doctype)
-        response = client_release_form.to_dict()
-        return response, 201
+        return client_release_form
 
 @ns.route('/policies/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
@@ -210,7 +205,7 @@ class PoliciesContract(Resource):
 
     @ns.doc(security='apikey')
     @token_auth.login_required
-    @responds(schema=SignAndDateSchema, api=ns)
+    @responds(schema=ClientPoliciesContractSchema, api=ns)
     def get(self, clientid):
         """returns most recent client policies table as a json for the clientid specified"""
         client_policies =  ClientPolicies.query.filter_by(clientid=clientid).order_by(ClientPolicies.signdate.desc()).first()
@@ -223,12 +218,14 @@ class PoliciesContract(Resource):
     @ns.doc(security='apikey')
     @accepts(schema=SignAndDateSchema, api=ns)
     @token_auth.login_required
-    @responds(schema=SignAndDateSchema, status_code= 201, api=ns)
+    @responds(schema=ClientPoliciesContractSchema, status_code= 201, api=ns)
     def post(self, clientid):
         """create client policies contract object for the specified clientid"""
         data = request.get_json()
-        client_policies = ClientPolicies(revision=self.docrev)
-        client_policies.from_dict(clientid, data)
+        data["clientid"] = clientid
+        client_policies_schema = ClientPoliciesContractSchema()
+        client_policies = client_policies_schema.load(data)
+
         db.session.add(client_policies)
         db.session.commit()
         to_pdf(clientid, self.doctype)
