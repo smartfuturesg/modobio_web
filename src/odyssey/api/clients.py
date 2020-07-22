@@ -32,6 +32,7 @@ from odyssey.constants import DOCTYPE, DOCTYPE_DOCREV_MAP
 from odyssey.pdf import to_pdf
 
 from odyssey.api.schemas import (
+    ClientIndividualContractSchema,
     ClientInfoSchema, 
     ClientRemoteRegistrationSchema, 
     NewRemoteRegistrationSchema, 
@@ -318,7 +319,7 @@ class IndividualContract(Resource):
 
     @ns.doc(security='apikey')
     @token_auth.login_required
-    @ns.marshal_with(client_individual_services_contract)
+    @responds(schema=ClientIndividualContractSchema, api=ns)
     def get(self, clientid):
         """returns most recent client individual servies table as a json for the clientid specified"""
         client_services =  ClientIndividualContract.query.filter_by(clientid=clientid).order_by(ClientIndividualContract.signdate.desc()).first()
@@ -326,23 +327,21 @@ class IndividualContract(Resource):
         if not client_services:
             raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have an individual services contract in the database")
 
-        return  client_services.to_dict()
+        return  client_services
 
-    @ns.expect(client_individual_services_contract_edit)
-    @ns.doc(security='apikey')
     @token_auth.login_required
-    @ns.marshal_with(client_individual_services_contract)
+    @accepts(schema=ClientIndividualContractSchema, api=ns)
+    @ns.doc(security='apikey')
+    @responds(schema=ClientIndividualContractSchema,status_code=201, api=ns)
     def post(self, clientid):
         """create client individual services contract object for the specified clientid"""
         data = request.get_json()
         client_services = ClientIndividualContract(revision=self.docrev)
         client_services.from_dict(clientid, data)
         db.session.add(client_services)
-        db.session.flush()
         db.session.commit()
         to_pdf(clientid, self.doctype)
-        response = client_services.to_dict()
-        return response, 201
+        return client_services
 
 @ns.route('/signeddocuments/<int:clientid>/', methods=('GET',))
 @ns.doc(params={'clientid': 'Client ID number'})

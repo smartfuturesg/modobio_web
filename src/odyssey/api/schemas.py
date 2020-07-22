@@ -5,7 +5,7 @@ from marshmallow import Schema, fields, post_load, ValidationError, validates, v
 from marshmallow import post_load, post_dump
 
 from odyssey import ma
-from odyssey.models.intake import ClientInfo, RemoteRegistration
+from odyssey.models.intake import ClientInfo, RemoteRegistration, ClientIndividualContract
 
 class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -45,3 +45,12 @@ class RefreshRemoteRegistrationSchema(Schema):
         with the provided email
     """
     email = fields.Email(required=True)
+
+class ClientIndividualContractSchema(ma.SQLAlchemyAutoSchema):
+
+    class Meta:
+        model = ClientIndividualContract
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return ClientIndividualContract(**data)
