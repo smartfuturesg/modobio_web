@@ -1,4 +1,5 @@
 from flask import request, jsonify
+from flask_accepts import accepts, responds
 from flask_restx import Resource, Api
 
 from odyssey.api import api
@@ -22,7 +23,6 @@ from odyssey.models.intake import (
 )
 from odyssey.constants import DOCTYPE, DOCTYPE_DOCREV_MAP
 from odyssey.pdf import to_pdf
-
 from odyssey.api.schemas import (
     ClientConsentSchema,
     ClientConsultContractSchema,
@@ -36,7 +36,7 @@ from odyssey.api.schemas import (
     RefreshRemoteRegistrationSchema,
     SignAndDateSchema
 )
-from flask_accepts import accepts, responds
+
 
 ns = api.namespace('client', description='Operations related to clients')
 
