@@ -126,22 +126,3 @@ client_individual_services_contract_edit =  api.model('client_individual_service
 client_signed_documents = api.model('client_signed_documents', {
     'urls': fields.List(fields.String, description='List of URLs pointing to PDF files of signed documents.')
 })
-
-initialize_remote_registration = api.model('initial_remote_registration', {
-            'email': fields.String(description='', required=True),
-            'firstname': fields.String(description='', required=True),
-            'middlename': fields.String(description=''),
-            'lastname': fields.String(description='', required=True),
-        })
-
-refresh_remote_registration = api.model('initial_remote_registration', {
-            'email': fields.String(description='', required=True)
-        })
-
-remote_registration_reponse = api.model('refresh_remote_registration_response', {
-            'clientid': fields.Integer(description=''),
-            'email': fields.String(description='', required=True),
-            'registration_portal_id': fields.String(description='unique id to be used in the portal URL'),
-            'registration_portal_expiration': fields.DateTime(description=f'formatted as: iso8610', dt_format = 'iso8601', example="2020-06-27T20:42:41.473878" ),
-            'password': fields.String(description='password for temporary portal')
-        })

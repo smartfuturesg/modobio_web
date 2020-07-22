@@ -13,10 +13,7 @@ from odyssey.api.serializers import (
     client_release,
     client_release_edit,
     client_signed_documents,
-    initialize_remote_registration,
     pagination,
-    refresh_remote_registration,
-    remote_registration_reponse,
     sign_and_date,
     sign_and_date_edit
 )
@@ -34,7 +31,12 @@ from odyssey.models.intake import (
 from odyssey.constants import DOCTYPE, DOCTYPE_DOCREV_MAP
 from odyssey.pdf import to_pdf
 
-from odyssey.api.schemas import ClientInfoSchema, ClientRemoteRegistrationSchema, NewRemoteRegistrationSchema
+from odyssey.api.schemas import (
+    ClientInfoSchema, 
+    ClientRemoteRegistrationSchema, 
+    NewRemoteRegistrationSchema, 
+    RefreshRemoteRegistrationSchema
+)
 from flask_accepts import accepts, responds
 
 ns = api.namespace('client', description='Operations related to clients')
@@ -417,56 +419,51 @@ class NewRemoteRegistration(Resource):
         remote_client.from_dict(data)
 
         # create temporary password and portal url
-        pwd = remote_client.set_password(client.firstname, client.lastname)
+        remote_client.set_password()
         remote_client.get_temp_registration_endpoint()
 
         db.session.add(remote_client)
         db.session.commit()
 
-        #return non-hashed representation of password
-        remote_client.password = pwd
-        db.session.expire(remote_client)
         return remote_client
 
 
 @ns.route('/remoteregistration/refresh/')
-class RefreshRemoteRegistration(Resource):
+class RefreshRemoteRegistrationSchema(Resource):
     """
         refresh client portal a client for remote registration
     """
     @token_auth.login_required
-    @ns.expect(refresh_remote_registration, validate=True)
+    @accepts(schema=RefreshRemoteRegistrationSchema)
     @ns.doc(security='apikey')
-    @ns.marshal_with(remote_registration_reponse)
+    @responds(schema=ClientRemoteRegistrationSchema, api=ns, status_code=201)
     def post(self):
         """refresh the portal endpoint and password
         """
         data = request.get_json() #should only need the email
 
-        client_info = ClientInfo.query.filter_by(email=data.get('email', None)).first()
+        client = ClientInfo.query.filter_by(email=data.get('email', None)).first()
 
         #if client isnt in the database return error
-        if not client_info:
+        if not client:
             raise ClientNotFound(identification = data['email'])
 
         #add clientid to the data object from the current client
-        data['clientid'] =  client_info.clientid
+        data['clientid'] =  client.clientid
 
-        #new remote client session entry
+        # create a new remote client session registration entry
         remote_client = RemoteRegistration()
+        data['clientid'] = client.clientid
         remote_client.from_dict(data)
 
-        #new password and registration hash
-        pwd = remote_client.set_password(client_info.firstname, client_info.lastname)
+        # create temporary password and portal url
+        remote_client.set_password()
         remote_client.get_temp_registration_endpoint()
 
         db.session.add(remote_client)
-        db.session.flush()
-
-        response = remote_client.to_dict()
-        response['password'] = pwd
         db.session.commit()
-        return response, 201
+
+        return remote_client
 
 @ns.route('/remoteregistration/clientinfo/<string:tmp_registration>/')
 @ns.doc(params={'tmp_registration': 'temporary registration portal hash'})
