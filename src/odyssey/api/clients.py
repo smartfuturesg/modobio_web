@@ -5,11 +5,6 @@ from flask_restx import Resource, Api
 from odyssey.api import api
 from odyssey.api.auth import token_auth, token_auth_client
 from odyssey.api.errors import UserNotFound, ClientAlreadyExists, ClientNotFound, IllegalSetting
-from odyssey.api.serializers import (
-    client_info,
-    client_signed_documents,
-    pagination,
-)
 from odyssey import db
 from odyssey.models.intake import (
     ClientInfo,
@@ -34,7 +29,8 @@ from odyssey.api.schemas import (
     ClientSubscriptionContractSchema,
     NewRemoteRegistrationSchema, 
     RefreshRemoteRegistrationSchema,
-    SignAndDateSchema
+    SignAndDateSchema,
+    SignedDocumentsSchema
 )
 
 
@@ -103,7 +99,6 @@ class NewClient(Resource):
 @ns.doc(params={'page': 'request page for paginated clients list', 'per_page': 'number of clients per page'})
 class Clients(Resource):
     @ns.doc(security='apikey')
-    @ns.expect(pagination)
     @token_auth.login_required
     def get(self):
         """returns list of all clients"""
@@ -350,7 +345,7 @@ class SignedDocuments(Resource):
     """
     @ns.doc(security='apikey')
     @token_auth.login_required
-    @ns.marshal_with(client_signed_documents)
+    @responds(schema=SignedDocumentsSchema, api=ns)
     def get(self, clientid):
         """Given a clientid, returns a list of URLs for all signed documents."""
         client = ClientInfo.query.filter_by(clientid=clientid).one_or_none()

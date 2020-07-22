@@ -181,3 +181,9 @@ class ClientIndividualContractSchema(ma.SQLAlchemyAutoSchema):
     @post_load
     def make_object(self, data, **kwargs):
         return ClientIndividualContract(**data)
+
+class SignedDocumentsSchema(Schema):
+    """
+        list of document urls
+    """
+    urls = fields.List(fields.String())
