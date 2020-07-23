@@ -118,6 +118,6 @@ class ClientChessboard(Resource):
 
         #return the most recent entry (this one)
         most_recent = all_entries = Chessboard.query.filter_by(clientid=clientid).order_by(Chessboard.timestamp.desc()).first()
-        
+
         return most_recent
 

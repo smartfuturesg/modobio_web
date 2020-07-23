@@ -189,27 +189,26 @@ class SignedDocumentsSchema(Schema):
     """
     urls = fields.List(fields.String())
 
-
-class RotationSchema(Schema):
-    ir = fields.Integer(description="internal rotation")
-    er = fields.Integer(description="external rotation")
-    abd = fields.Integer(description="abduction")
-    add = fields.Integer(description="adduction")
-    flexion  = fields.Integer()
-    extension  = fields.Integer()
+class ShoulderRotationSchema(Schema):
+    ir = fields.Integer(description="internal rotation", validate=validate.Range(min=0, max=100))
+    er = fields.Integer(description="external rotation", validate=validate.Range(min=0, max=130))
+    abd = fields.Integer(description="abduction", validate=validate.Range(min=0, max=75))
+    add = fields.Integer(description="adduction", validate=validate.Range(min=0, max=135))
+    flexion  = fields.Integer(validate=validate.Range(min=0, max=190))
+    extension  = fields.Integer(validate=validate.Range(min=0, max=75))
 
 class HipRotationSchema(Schema):
-    ir = fields.Integer(description="internal rotation")
-    er = fields.Integer(description="external rotation")
-    abd = fields.Integer(description="abduction")
-    add = fields.Integer(description="adduction")
-    flexion  = fields.Integer()
-    extension  = fields.Integer()
-    slr  = fields.Integer()
+    ir = fields.Integer(description="internal rotation", validate=validate.Range(min=0, max=60))
+    er = fields.Integer(description="external rotation", validate=validate.Range(min=0, max=90))
+    abd = fields.Integer(description="abduction", validate=validate.Range(min=0, max=75))
+    add = fields.Integer(description="adduction",validate=validate.Range(min=0, max=50))
+    flexion  = fields.Integer(validate=validate.Range(min=0, max=160))
+    extension  = fields.Integer(validate=validate.Range(min=0, max=110))
+    slr  = fields.Integer(validate=validate.Range(min=0, max=120))
 
 class ChessBoardShoulderSchema(Schema):
-    left = fields.Nested(RotationSchema)
-    right = fields.Nested(RotationSchema)
+    left = fields.Nested(ShoulderRotationSchema)
+    right = fields.Nested(ShoulderRotationSchema)
 
 class ChessBoardHipSchema(Schema):
     left = fields.Nested(HipRotationSchema)
@@ -231,9 +230,8 @@ class ChessboardSchema(Schema):
 
     @validates('isa_structure')
     def isa_structure_picklist(self,value):
-        
         if not value in self.isa_structure_list:
-            ValidationError(f'isa_structure entry invalid. Please use one of the following: {self.isa_structure_list}')
+            raise ValidationError(f'isa_structure entry invalid. Please use one of the following: {self.isa_structure_list}')
 
     @post_load
     def unravel(self, data, **kwargs):
