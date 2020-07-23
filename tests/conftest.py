@@ -24,6 +24,8 @@ from .data import (
     test_client_individual_data
 )
 
+from odyssey.api.schemas import ClientInfoSchema
+
 @pytest.fixture(scope='module')
 def new_client():
     """
@@ -36,7 +38,7 @@ def new_client():
 @pytest.fixture(scope='module')
 def test_client():
     """flask application instance (client)"""
-    app = create_app(flask_env='development', flask_dev='test')
+    app = create_app(flask_dev='test')
     testing_client = app.test_client()
     
     # Establish an application context before running the tests.
@@ -51,12 +53,12 @@ def test_client():
 def init_database():
     # Create the database and the database table
     db.create_all()
-
+    ci_schema = ClientInfoSchema()
     # Insert test client data
-    client_1 = ClientInfo()
-    client_1.from_dict(test_client_info)
+    client_1 = ci_schema.load(test_client_info)
     db.session.add(client_1)
     db.session.commit()
+
     clientid = client_1.clientid
 
     # initialize a test staff member
@@ -65,24 +67,24 @@ def init_database():
     staff_1.set_password(test_staff_member['password'])
     db.session.add(staff_1)
 
-    # Populate document tables
-    consent_1 = ClientConsent(clientid=clientid, **test_client_consent_data)
-    db.session.add(consent_1)
+    # # Populate document tables
+    # consent_1 = ClientConsent(clientid=clientid, **test_client_consent_data)
+    # db.session.add(consent_1)
 
-    release_1 = ClientRelease(clientid=clientid, **test_client_release_data)
-    db.session.add(consent_1)
+    # release_1 = ClientRelease(clientid=clientid, **test_client_release_data)
+    # db.session.add(consent_1)
 
-    policies_1 = ClientPolicies(clientid=clientid, **test_client_policies_data)
-    db.session.add(policies_1)
+    # policies_1 = ClientPolicies(clientid=clientid, **test_client_policies_data)
+    # db.session.add(policies_1)
 
-    consult_1 = ClientConsultContract(clientid=clientid, **test_client_consult_data)
-    db.session.add(consult_1)
+    # consult_1 = ClientConsultContract(clientid=clientid, **test_client_consult_data)
+    # db.session.add(consult_1)
 
-    subscription_1 = ClientSubscriptionContract(clientid=clientid, **test_client_subscription_data)
-    db.session.add(subscription_1)
+    # subscription_1 = ClientSubscriptionContract(clientid=clientid, **test_client_subscription_data)
+    # db.session.add(subscription_1)
 
-    individual_1 = ClientIndividualContract(clientid=clientid, **test_client_individual_data)
-    db.session.add(individual_1)
+    # individual_1 = ClientIndividualContract(clientid=clientid, **test_client_individual_data)
+    # db.session.add(individual_1)
 
     # Commit the changes for the users
     db.session.commit()

@@ -9,6 +9,7 @@ from flask import Flask
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
+from flask_marshmallow import Marshmallow
 
 from odyssey.config import Config
 from odyssey.utils import JSONEncoder, JSONDecoder
@@ -18,6 +19,7 @@ __version__ = '0.1.0'
 db = SQLAlchemy()
 migrate = Migrate()
 cors = CORS()
+ma = Marshmallow()
 
 def create_app(flask_dev=None):
     """ Initialize an instance of the Flask app.
@@ -62,8 +64,8 @@ def create_app(flask_dev=None):
     """
     app = Flask(__name__)
 
-    app.json_encoder = JSONEncoder
-    app.json_decoder = JSONDecoder
+    # app.json_encoder = JSONEncoder
+    # app.json_decoder = JSONDecoder
 
     app.config.from_object(Config(flask_dev=flask_dev))
     if app.config['DEBUG']:
@@ -72,6 +74,7 @@ def create_app(flask_dev=None):
     db.init_app(app)
     migrate.init_app(app, db)
     cors.init_app(app)
+    ma.init_app(app)
 
     db.Model.update = _update
 

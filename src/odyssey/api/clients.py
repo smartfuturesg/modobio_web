@@ -1,25 +1,10 @@
 from flask import request, jsonify
+from flask_accepts import accepts, responds
 from flask_restx import Resource, Api
 
 from odyssey.api import api
 from odyssey.api.auth import token_auth, token_auth_client
 from odyssey.api.errors import UserNotFound, ClientAlreadyExists, ClientNotFound, IllegalSetting
-from odyssey.api.serializers import (
-    client_info,
-    client_individual_services_contract,
-    client_individual_services_contract_edit,
-    client_consent,
-    client_consent_edit,
-    client_release,
-    client_release_edit,
-    client_signed_documents,
-    initialize_remote_registration,
-    pagination,
-    refresh_remote_registration,
-    remote_registration_reponse,
-    sign_and_date,
-    sign_and_date_edit
-)
 from odyssey import db
 from odyssey.models.intake import (
     ClientInfo,
@@ -33,6 +18,21 @@ from odyssey.models.intake import (
 )
 from odyssey.constants import DOCTYPE, DOCTYPE_DOCREV_MAP
 from odyssey.pdf import to_pdf
+from odyssey.api.schemas import (
+    ClientConsentSchema,
+    ClientConsultContractSchema,
+    ClientIndividualContractSchema,
+    ClientInfoSchema,
+    ClientPoliciesContractSchema, 
+    ClientReleaseSchema,
+    ClientRemoteRegistrationSchema, 
+    ClientSubscriptionContractSchema,
+    NewRemoteRegistrationSchema, 
+    RefreshRemoteRegistrationSchema,
+    SignAndDateSchema,
+    SignedDocumentsSchema
+)
+
 
 ns = api.namespace('client', description='Operations related to clients')
 
@@ -41,21 +41,20 @@ ns = api.namespace('client', description='Operations related to clients')
 class Client(Resource):
     @ns.doc(security='apikey')
     @token_auth.login_required
-    @ns.marshal_with(client_info)
+    @responds(schema=ClientInfoSchema, api=ns)
     def get(self, clientid):
         """returns client info table as a json for the clientid specified"""
         client = ClientInfo.query.get(clientid)
         if not client:
             raise UserNotFound(clientid)
-        return client.to_dict()
+        return client
 
-    @ns.expect(client_info)
-    @ns.doc(security='apikey')
     @token_auth.login_required
-    @ns.marshal_with(client_info)
+    @accepts(schema=ClientInfoSchema, api=ns)
+    @ns.doc(security='apikey')
+    @responds(schema=ClientInfoSchema, api=ns)
     def put(self, clientid):
         """edit client info"""
-        # look into changing to .json
         data = request.get_json()
         client = ClientInfo.query.filter_by(clientid=clientid).one_or_none()
         if not client:
@@ -66,9 +65,8 @@ class Client(Resource):
         # client.update
         client.from_dict(data)
         db.session.add(client)
-        db.session.flush()
         db.session.commit()
-        return client.to_dict()
+        return client
 
 @ns.route('/')
 class NewClient(Resource):
@@ -76,34 +74,31 @@ class NewClient(Resource):
         create new clients. This is part of the normal flow where clients register on location
     """
     @token_auth.login_required
-    @ns.expect(client_info, validate=True)
+    @accepts(schema=ClientInfoSchema, api=ns)
     @ns.doc(security='apikey')
-    @ns.marshal_with(client_info)
+    @responds(schema=ClientInfoSchema, api=ns, status_code=201)
     def post(self):
         """create new client"""
         data = request.get_json()
+ 
         #make sure this user email does not exist
         if data.get('email', None) and ClientInfo.query.filter_by(email=data.get('email', None)).first():
             raise ClientAlreadyExists(identification = data['email'])
         #prevent requests to set clientid and send message back to api user
         elif data.get('clientid', None):
             raise IllegalSetting('clientid')
-
-        client = ClientInfo()
-        client.from_dict(data)
+   
+        ci_schema = ClientInfoSchema()
+        client = ci_schema.load(data)
         db.session.add(client)
-        db.session.flush()
-        response = client.to_dict()
-        response['__links'] = api.url_for(Client, clientid = client.clientid)
         db.session.commit()
-        return response, 201
+        return client
 
 
 @ns.route('/clientsearch/', methods=['GET'])
 @ns.doc(params={'page': 'request page for paginated clients list', 'per_page': 'number of clients per page'})
 class Clients(Resource):
     @ns.doc(security='apikey')
-    @ns.expect(pagination)
     @token_auth.login_required
     def get(self):
         """returns list of all clients"""
@@ -131,7 +126,7 @@ class ConsentContract(Resource):
 
     @ns.doc(security='apikey')
     @token_auth.login_required
-    @ns.marshal_with(client_consent)
+    @responds(schema=ClientConsentSchema, api=ns)
     def get(self, clientid):
         """returns the most recent consent table as a json for the clientid specified"""
         client_consent_form = ClientConsent.query.filter_by(clientid=clientid).order_by(ClientConsent.signdate.desc()).first()
@@ -139,47 +134,25 @@ class ConsentContract(Resource):
         if not client_consent_form:
             raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a consultation contract in the database")
 
-        return  client_consent_form.to_dict()
+        return client_consent_form
 
-    @ns.expect(client_consent_edit)
+    @accepts(schema=ClientConsentSchema, api=ns)
     @ns.doc(security='apikey')
     @token_auth.login_required
-    @ns.marshal_with(client_consent)
+    @responds(schema=ClientConsentSchema, status_code=201, api=ns)
     def post(self, clientid):
-        """ Create or update client consent contract for the specified clientid. """
-        query = ClientConsent.query.filter_by(clientid=clientid, revision=self.docrev)
-        client_consent_form = query.one_or_none()
+        """ Create client consent contract for the specified clientid """
+        data = request.get_json()
+        data["clientid"] = clientid
 
-        if not client_consent_form:
-            client_consent_form = ClientConsent(clientid=clientid, **request.json)
-            db.session.add(client_consent_form)
-        else:
-            query.update(request.json)
-
+        client_consent_schema = ClientConsentSchema()
+        client_consent_form = client_consent_schema.load(data)
+        
+        db.session.add(client_consent_form)
         db.session.commit()
 
         to_pdf(clientid, self.doctype)
-        response = client_consent_form.to_dict()
-        # response['__links'] = api.url_for(Client, clientid = clientid) # to add links later on
-        return response, 201
-
-    # @ns.expect(client_consent_edit)
-    # @ns.doc(security='apikey')
-    # @token_auth.login_required
-    # @ns.marshal_with(client_consent)
-    # def put(self, clientid):
-    #     """edit client consent object for the specified clientid"""
-    #     data = request.get_json()
-    #     client = ClientConsent.query.filter_by(clientid=clientid).one_or_none()
-    #     if not client:
-    #         raise UserNotFound(clientid)
-    #     client.from_dict(clientid, data)
-    #     db.session.add(client)
-    #     db.session.flush()
-    #     db.session.commit()
-    #     response = client.to_dict()
-    #     # response['__links'] = api.url_for(Client, clientid = clientid) # to add links later on
-    #     return response, 201
+        return client_consent_form
 
 @ns.route('/release/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
@@ -191,7 +164,7 @@ class ReleaseContract(Resource):
 
     @ns.doc(security='apikey')
     @token_auth.login_required
-    @ns.marshal_with(client_release)
+    @responds(schema=ClientReleaseSchema, api=ns)
     def get(self, clientid):
         """returns most recent client release table as a json for the clientid specified"""
         client_release_form =  ClientRelease.query.filter_by(clientid=clientid).order_by(ClientRelease.signdate.desc()).first()
@@ -199,23 +172,23 @@ class ReleaseContract(Resource):
         if not client_release_form:
             raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a release contract in the database")
 
-        return  client_release_form.to_dict()
+        return client_release_form
 
-    @ns.expect(client_release_edit)
+    @accepts(schema=ClientReleaseSchema)
     @ns.doc(security='apikey')
     @token_auth.login_required
-    @ns.marshal_with(client_release)
+    @responds(schema=ClientReleaseSchema, status_code=201, api=ns)
     def post(self, clientid):
         """create client release contract object for the specified clientid"""
         data = request.get_json()
-        client_release_form = ClientRelease(revision=self.docrev)
-        client_release_form.from_dict(clientid, data)
+        data["clientid"] = clientid
+        client_release_schema = ClientReleaseSchema()
+        client_release_form = client_release_schema.load(data)
+
         db.session.add(client_release_form)
-        db.session.flush()
         db.session.commit()
         to_pdf(clientid, self.doctype)
-        response = client_release_form.to_dict()
-        return response, 201
+        return client_release_form
 
 @ns.route('/policies/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
@@ -227,7 +200,7 @@ class PoliciesContract(Resource):
 
     @ns.doc(security='apikey')
     @token_auth.login_required
-    @ns.marshal_with(sign_and_date)
+    @responds(schema=ClientPoliciesContractSchema, api=ns)
     def get(self, clientid):
         """returns most recent client policies table as a json for the clientid specified"""
         client_policies =  ClientPolicies.query.filter_by(clientid=clientid).order_by(ClientPolicies.signdate.desc()).first()
@@ -235,39 +208,23 @@ class PoliciesContract(Resource):
         if not client_policies:
             raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a policy contract in the database")
 
-        return  client_policies.to_dict()
+        return  client_policies
 
-    @ns.expect(sign_and_date_edit)
     @ns.doc(security='apikey')
+    @accepts(schema=SignAndDateSchema, api=ns)
     @token_auth.login_required
-    @ns.marshal_with(sign_and_date)
+    @responds(schema=ClientPoliciesContractSchema, status_code= 201, api=ns)
     def post(self, clientid):
         """create client policies contract object for the specified clientid"""
         data = request.get_json()
-        client_policies = ClientPolicies(revision=self.docrev)
-        client_policies.from_dict(clientid, data)
+        data["clientid"] = clientid
+        client_policies_schema = ClientPoliciesContractSchema()
+        client_policies = client_policies_schema.load(data)
+
         db.session.add(client_policies)
-        db.session.flush()
         db.session.commit()
         to_pdf(clientid, self.doctype)
-        response = client_policies.to_dict()
-        return response, 201
-
-    # @ns.expect(sign_and_date_edit)
-    # @ns.doc(security='apikey')
-    # @token_auth.login_required
-    # @ns.marshal_with(sign_and_date)
-    # def put(self, clientid):
-    #     """edit client policies object for the specified clientid"""
-    #     data = request.get_json()
-    #     client = ClientPolicies.query.filter_by(clientid=clientid).first_or_404()
-    #     client.from_dict(clientid, data)
-    #     db.session.add(client)
-    #     db.session.flush()
-    #     db.session.commit()
-    #     response = client.to_dict()
-    #     # response['__links'] = api.url_for(Client, clientid = clientid) # to add links later on
-    #     return response, 201
+        return client_policies
 
 @ns.route('/consultcontract/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
@@ -279,7 +236,7 @@ class ConsultConstract(Resource):
 
     @ns.doc(security='apikey')
     @token_auth.login_required
-    @ns.marshal_with(sign_and_date)
+    @responds(schema=ClientConsultContractSchema, api=ns)
     def get(self, clientid):
         """returns most recent client consultation table as a json for the clientid specified"""
         client_consult =  ClientConsultContract.query.filter_by(clientid=clientid).order_by(ClientConsultContract.signdate.desc()).first()
@@ -287,23 +244,23 @@ class ConsultConstract(Resource):
         if not client_consult:
             raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a consultation contract in the database")
 
-        return  client_consult.to_dict()
+        return client_consult
 
-    @ns.expect(sign_and_date_edit)
+    @accepts(schema=SignAndDateSchema, api=ns)
     @ns.doc(security='apikey')
     @token_auth.login_required
-    @ns.marshal_with(sign_and_date)
+    @responds(schema=ClientConsultContractSchema, status_code= 201, api=ns)
     def post(self, clientid):
         """create client consult contract object for the specified clientid"""
         data = request.get_json()
-        client_consult = ClientConsultContract(revision=self.docrev)
-        client_consult.from_dict(clientid, data)
+        data["clientid"] = clientid
+        consult_contract_schema = ClientConsultContractSchema()
+        client_consult = consult_contract_schema.load(data)
+        
         db.session.add(client_consult)
-        db.session.flush()
         db.session.commit()
         to_pdf(clientid, self.doctype)
-        response = client_consult.to_dict()
-        return response, 201
+        return client_consult
 
 @ns.route('/subscriptioncontract/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
@@ -315,31 +272,30 @@ class SubscriptionContract(Resource):
 
     @ns.doc(security='apikey')
     @token_auth.login_required
-    @ns.marshal_with(sign_and_date)
+    @responds(schema=ClientSubscriptionContractSchema, api=ns)
     def get(self, clientid):
         """returns most recent client subscription contract table as a json for the clientid specified"""
         client_subscription =  ClientSubscriptionContract.query.filter_by(clientid=clientid).order_by(ClientSubscriptionContract.signdate.desc()).first()
-
         if not client_subscription:
             raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a subscription contract in the database")
 
-        return  client_subscription.to_dict()
+        return client_subscription
 
-    @ns.expect(sign_and_date_edit)
     @ns.doc(security='apikey')
+    @accepts(schema=SignAndDateSchema, api=ns)
     @token_auth.login_required
-    @ns.marshal_with(sign_and_date)
+    @responds(schema=ClientSubscriptionContractSchema, status_code= 201, api=ns)
     def post(self, clientid):
         """create client subscription contract object for the specified clientid"""
         data = request.get_json()
-        client_subscription = ClientSubscriptionContract(revision=self.docrev)
-        client_subscription.from_dict(clientid, data)
+        data["clientid"] = clientid
+        subscription_contract_schema = ClientSubscriptionContractSchema()
+        client_subscription = subscription_contract_schema.load(data)
+
         db.session.add(client_subscription)
-        db.session.flush()
         db.session.commit()
         to_pdf(clientid, self.doctype)
-        response = client_subscription.to_dict()
-        return response, 201
+        return client_subscription
 
 @ns.route('/servicescontract/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
@@ -351,7 +307,7 @@ class IndividualContract(Resource):
 
     @ns.doc(security='apikey')
     @token_auth.login_required
-    @ns.marshal_with(client_individual_services_contract)
+    @responds(schema=ClientIndividualContractSchema, api=ns)
     def get(self, clientid):
         """returns most recent client individual servies table as a json for the clientid specified"""
         client_services =  ClientIndividualContract.query.filter_by(clientid=clientid).order_by(ClientIndividualContract.signdate.desc()).first()
@@ -359,23 +315,21 @@ class IndividualContract(Resource):
         if not client_services:
             raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have an individual services contract in the database")
 
-        return  client_services.to_dict()
+        return  client_services
 
-    @ns.expect(client_individual_services_contract_edit)
-    @ns.doc(security='apikey')
     @token_auth.login_required
-    @ns.marshal_with(client_individual_services_contract)
+    @accepts(schema=ClientIndividualContractSchema, api=ns)
+    @ns.doc(security='apikey')
+    @responds(schema=ClientIndividualContractSchema,status_code=201, api=ns)
     def post(self, clientid):
         """create client individual services contract object for the specified clientid"""
         data = request.get_json()
         client_services = ClientIndividualContract(revision=self.docrev)
         client_services.from_dict(clientid, data)
         db.session.add(client_services)
-        db.session.flush()
         db.session.commit()
         to_pdf(clientid, self.doctype)
-        response = client_services.to_dict()
-        return response, 201
+        return client_services
 
 @ns.route('/signeddocuments/<int:clientid>/', methods=('GET',))
 @ns.doc(params={'clientid': 'Client ID number'})
@@ -391,7 +345,7 @@ class SignedDocuments(Resource):
     """
     @ns.doc(security='apikey')
     @token_auth.login_required
-    @ns.marshal_with(client_signed_documents)
+    @responds(schema=SignedDocumentsSchema, api=ns)
     def get(self, clientid):
         """Given a clientid, returns a list of URLs for all signed documents."""
         client = ClientInfo.query.filter_by(clientid=clientid).one_or_none()
@@ -419,9 +373,9 @@ class NewRemoteRegistration(Resource):
         initialize a client for remote registration
     """
     @token_auth.login_required
-    @ns.expect(initialize_remote_registration, validate=True)
+    @accepts(schema=NewRemoteRegistrationSchema, api=ns)
     @ns.doc(security='apikey')
-    @ns.marshal_with(remote_registration_reponse)
+    @responds(schema=ClientRemoteRegistrationSchema, api=ns, status_code=201)
     def post(self):
         """create new remote registration client
             this will create a new entry into the client info table first
@@ -432,71 +386,71 @@ class NewRemoteRegistration(Resource):
         data = request.get_json()
 
         #make sure this user email does not exist
-        if data.get('email', None) and ClientInfo.query.filter_by(email=data.get('email', None)).first():
+        if ClientInfo.query.filter_by(email=data.get('email', None)).first():
             raise ClientAlreadyExists(identification = data['email'])
 
-        # enter client into basic info table and remote register table
-        client_info = ClientInfo()
-        remote_client = RemoteRegistration()
+        # initialize schema objects
+        rr_schema = NewRemoteRegistrationSchema()
+        client_rr_schema = ClientRemoteRegistrationSchema()
 
-        client_info.from_dict(data)
-        db.session.add(client_info)
+        # enter client into basic info table and remote register table
+        client = rr_schema.load(data)
+        
+        # add client to database (creates clientid)
+        db.session.add(client)
         db.session.flush()
 
-        data['clientid'] = client_info.clientid
+        # create a new remote client registration entry
+        remote_client = RemoteRegistration()
+        data['clientid'] = client.clientid
         remote_client.from_dict(data)
 
-        #create temporary passwork and portal url
-        pwd = remote_client.set_password(client_info.firstname, client_info.lastname)
+        # create temporary password and portal url
+        remote_client.set_password()
         remote_client.get_temp_registration_endpoint()
 
         db.session.add(remote_client)
-        db.session.flush()
-
-        response = remote_client.to_dict()
-        response['password'] = pwd
         db.session.commit()
-        return response, 201
+
+        return remote_client
 
 
 @ns.route('/remoteregistration/refresh/')
-class RefreshRemoteRegistration(Resource):
+class RefreshRemoteRegistrationSchema(Resource):
     """
         refresh client portal a client for remote registration
     """
     @token_auth.login_required
-    @ns.expect(refresh_remote_registration, validate=True)
+    @accepts(schema=RefreshRemoteRegistrationSchema)
     @ns.doc(security='apikey')
-    @ns.marshal_with(remote_registration_reponse)
+    @responds(schema=ClientRemoteRegistrationSchema, api=ns, status_code=201)
     def post(self):
         """refresh the portal endpoint and password
         """
         data = request.get_json() #should only need the email
 
-        client_info = ClientInfo.query.filter_by(email=data.get('email', None)).first()
+        client = ClientInfo.query.filter_by(email=data.get('email', None)).first()
 
         #if client isnt in the database return error
-        if not client_info:
+        if not client:
             raise ClientNotFound(identification = data['email'])
 
         #add clientid to the data object from the current client
-        data['clientid'] =  client_info.clientid
+        data['clientid'] =  client.clientid
 
-        #new remote client session entry
+        # create a new remote client session registration entry
         remote_client = RemoteRegistration()
+        data['clientid'] = client.clientid
         remote_client.from_dict(data)
 
-        #new password and registration hash
-        pwd = remote_client.set_password(client_info.firstname, client_info.lastname)
+        # create temporary password and portal url
+        remote_client.set_password()
         remote_client.get_temp_registration_endpoint()
 
         db.session.add(remote_client)
-        db.session.flush()
-
-        response = remote_client.to_dict()
-        response['password'] = pwd
         db.session.commit()
-        return response, 201
+
+        return remote_client
 
 @ns.route('/remoteregistration/clientinfo/<string:tmp_registration>/')
 @ns.doc(params={'tmp_registration': 'temporary registration portal hash'})
@@ -507,7 +461,7 @@ class RemoteClientInfo(Resource):
     """
     @ns.doc(security='apikey')
     @token_auth_client.login_required
-    @ns.marshal_with(client_info)
+    @responds(schema=ClientInfoSchema, api=ns)
     def get(self, tmp_registration):
         """returns client info table as a json for the clientid specified"""
         #check portal validity
@@ -515,12 +469,12 @@ class RemoteClientInfo(Resource):
             raise ClientNotFound(message="Resource does not exist")
         client = ClientInfo.query.filter_by(email=token_auth_client.current_user().email).first()
 
-        return client.to_dict()
+        return client
 
-    @ns.expect(client_info)
+    @accepts(schema=ClientInfoSchema, api=ns)
     @ns.doc(security='apikey')
     @token_auth_client.login_required
-    @ns.marshal_with(client_info)
+    @responds(schema=ClientInfoSchema, api=ns)
     def put(self, tmp_registration):
         """edit client info"""
         #check portal validity
@@ -536,6 +490,5 @@ class RemoteClientInfo(Resource):
 
         client.from_dict(data)
         db.session.add(client)
-        db.session.flush()
         db.session.commit()
-        return client.to_dict()
+        return client

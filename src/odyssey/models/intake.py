@@ -6,6 +6,7 @@ import base64
 import os
 import pytz
 import random
+import secrets
 
 from datetime import datetime, timedelta
 from hashlib import md5
@@ -219,7 +220,6 @@ class ClientInfo(db.Model):
 
     def get_medical_record_hash(self):
         """medical record hash generation"""
-
         name_hash = md5(bytes((self.firstname+self.lastname), 'utf-8')).hexdigest()
 
         return (self.firstname[0]+self.lastname[0]+str(self.clientid)+name_hash[0:6]).upper()
@@ -295,7 +295,8 @@ class ClientInfo(db.Model):
         for field in attributes:
             if field in data:
                 setattr(self, field, data[field])
-
+        if isinstance(self.dob ,str):
+            self.dob = datetime.strptime(self.dob, '%Y-%m-%d')
 
 
 class ClientConsent(db.Model):
@@ -1025,25 +1026,23 @@ class RemoteRegistration(db.Model):
            registration
         """
         now = datetime.utcnow()
-        self.registration_portal_id = md5(bytes(self.email+now.strftime("%Y-%m-%d %H:%M:%S"), 'utf-8')).hexdigest()
+        self.registration_portal_id = secrets.token_hex(16)
         self.registration_portal_expiration = now + timedelta(seconds=expires_in)
 
         db.session.add(self)
-        db.session.flush()
         db.session.commit()
 
         return self.registration_portal_id
 
 
-    def set_password(self, firstname, lastname):
+    def set_password(self):
         """create temporary password, hash it"""
-        name_hash = md5(bytes((str(random.randrange(999,99999,1))), 'utf-8')).hexdigest()
-        password = firstname[0:2]+lastname[0:2]+name_hash[0:5]
-        self.password = generate_password_hash(password)
+        password = self.email[0:2]+secrets.token_hex(4)
+        self.password = password
         return password
 
     def check_password(self, password):
-        return check_password_hash(self.password, password)
+        return password == self.password
 
     def get_token(self,expires_in=86400):
         now = datetime.utcnow()
