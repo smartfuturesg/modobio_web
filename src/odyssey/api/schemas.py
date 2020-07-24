@@ -17,7 +17,7 @@ from odyssey.models.intake import (
     ClientSubscriptionContract
 )
 from odyssey.models.pt import Chessboard, PTHistory
-from odyssey.models.trainer import PowerAssessment
+from odyssey.models.trainer import PowerAssessment, StrengthAssessment, MoxyRipTest, MoxyAssessment, MovementAssessment
 from odyssey.constants import DOCTYPE, DOCTYPE_DOCREV_MAP
 
 class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
@@ -302,6 +302,10 @@ class ChessboardSchema(Schema):
         return nested
 
 
+"""
+    Schemas for the trainer's API
+"""
+
 class PowerAttemptsPushPull(Schema):
     weight = fields.Integer(description="weight of exercise in PSI", validate=validate.Range(min=0, max=60))
     attempt_1 = fields.Integer(description="", validate=validate.Range(min=0, max=4000))
@@ -418,4 +422,118 @@ class PowerAssessmentSchema(Schema):
                                  }
             
                  }
+        return nested
+
+
+class StrengthAttemptsPushPull(Schema):
+    weight = fields.Integer(description="weight of exercise in PSI", validate=validate.Range(min=0, max=350))
+    attempt_1 = fields.Integer(description="", validate=validate.Range(min=0, max=50))
+    attempt_2 = fields.Integer(description="", validate=validate.Range(min=0, max=50))
+    attempt_3 = fields.Integer(description="",validate=validate.Range(min=0, max=50))
+    estimated_10rm = fields.Float(description="",validate=validate.Range(min=0, max=350))
+
+class StrengthPushPull(Schema):
+    notes = fields.String()
+    left = fields.Nested(StrengthAttemptsPushPull)
+    right = fields.Nested(StrengthAttemptsPushPull)
+    bilateral = fields.Nested(StrengthAttemptsPushPull)
+
+class StrenghtAssessmentSchema(Schema):
+    clientid = fields.Integer()
+    timestamp = fields.DateTime()
+    upper_push = fields.Nested(StrengthPushPull)
+    upper_pull = fields.Nested(StrengthPushPull)
+
+    @post_load
+    def unravel(self, data, **kwargs):
+        flat_data = {'clientid': data['clientid'],
+                    'timestamp': datetime.utcnow(),
+                    'upper_push_notes': data['upper_push']['notes'],
+                    'upper_pull_notes': data['upper_pull']['notes'],
+                    'upper_push_r_weight':    data['upper_push']['right']['weight'],
+                    'upper_push_r_attempt_1': data['upper_push']['right']['attempt_1'],
+                    'upper_push_r_attempt_2': data['upper_push']['right']['attempt_2'],
+                    'upper_push_r_attempt_3': data['upper_push']['right']['attempt_3'],
+                    'upper_push_r_estimated_10rm': data['upper_push']['right']['estimated_10rm'], 
+                    'upper_push_l_weight':    data['upper_push']['left']['weight'],
+                    'upper_push_l_attempt_1': data['upper_push']['left']['attempt_1'],
+                    'upper_push_l_attempt_2': data['upper_push']['left']['attempt_2'],
+                    'upper_push_l_attempt_3': data['upper_push']['left']['attempt_3'],
+                    'upper_push_l_estimated_10rm': data['upper_push']['left']['estimated_10rm'], 
+                    'upper_push_bi_weight':    data['upper_push']['bilateral']['weight'],
+                    'upper_push_bi_attempt_1': data['upper_push']['bilateral']['attempt_1'],
+                    'upper_push_bi_attempt_2': data['upper_push']['bilateral']['attempt_2'],
+                    'upper_push_bi_attempt_3': data['upper_push']['bilateral']['attempt_3'],
+                    'upper_push_bi_estimated_10rm': data['upper_push']['bilateral']['estimated_10rm'], 
+                    'upper_pull_r_weight':    data['upper_pull']['right']['weight'],
+                    'upper_pull_r_attempt_1': data['upper_pull']['right']['attempt_1'],
+                    'upper_pull_r_attempt_2': data['upper_pull']['right']['attempt_2'],
+                    'upper_pull_r_attempt_3': data['upper_pull']['right']['attempt_3'],
+                    'upper_pull_r_estimated_10rm': data['upper_pull']['right']['estimated_10rm'], 
+                    'upper_pull_l_weight':    data['upper_pull']['left']['weight'],
+                    'upper_pull_l_attempt_1': data['upper_pull']['left']['attempt_1'],
+                    'upper_pull_l_attempt_2': data['upper_pull']['left']['attempt_2'],
+                    'upper_pull_l_attempt_3': data['upper_pull']['left']['attempt_3'],
+                    'upper_pull_l_estimated_10rm': data['upper_pull']['left']['estimated_10rm'],  
+                    'upper_pull_bi_weight':    data['upper_pull']['bilateral']['weight'],
+                    'upper_pull_bi_attempt_1': data['upper_pull']['bilateral']['attempt_1'],
+                    'upper_pull_bi_attempt_2': data['upper_pull']['bilateral']['attempt_2'],
+                    'upper_pull_bi_attempt_3': data['upper_pull']['bilateral']['attempt_3']  ,
+                    'upper_pull_bi_estimated_10rm': data['upper_pull']['bilateral']['estimated_10rm']                  
+                }
+        return StrengthAssessment(**flat_data)
+
+    @pre_dump
+    def ravel(self, data, **kwargs):
+        nested = {"clientid": data.clientid,
+                "timestamp": data.timestamp,
+                "upper_push": {
+                                "bilateral": {
+                                                "attempt_3": data.upper_push_bi_attempt_3,
+                                                "weight": data.upper_push_bi_weight,
+                                                "attempt_2": data.upper_push_bi_attempt_2,
+                                                "estimated_10rm": data.upper_push_bi_estimated_10rm,
+                                                "attempt_1": data.upper_push_bi_attempt_1
+                                },
+                                "right": {
+                                            "attempt_3": data.upper_push_r_attempt_3,
+                                            "weight": data.upper_push_r_weight,
+                                            "attempt_2": data.upper_push_r_attempt_2,
+                                            "estimated_10rm": data.upper_push_r_estimated_10rm,
+                                            "attempt_1": data.upper_push_r_attempt_1
+                                },
+                                "notes": data.upper_push_notes,
+                                "left": {
+                                            "attempt_3": data.upper_push_l_attempt_3,
+                                            "weight": data.upper_push_l_weight,
+                                            "attempt_2": data.upper_push_l_attempt_2,
+                                            "estimated_10rm": data.upper_push_l_estimated_10rm,
+                                            "attempt_1": data.upper_push_l_attempt_1
+                                    }
+                    },
+                "upper_pull": {
+                                "bilateral": {
+                                                "attempt_3": data.upper_pull_bi_attempt_3,
+                                                "weight": data.upper_pull_bi_weight,
+                                                "attempt_2": data.upper_pull_bi_attempt_2,
+                                                "estimated_10rm": data.upper_pull_bi_estimated_10rm,
+                                                "attempt_1": data.upper_pull_bi_attempt_1
+                                },
+                                "right": {
+                                            "attempt_3": data.upper_pull_r_attempt_3,
+                                            "weight": data.upper_pull_r_weight,
+                                            "attempt_2": data.upper_pull_r_attempt_2,
+                                            "estimated_10rm": data.upper_pull_r_estimated_10rm,
+                                            "attempt_1": data.upper_pull_r_attempt_1
+                                },
+                                "notes": data.upper_pull_notes,
+                                "left": {
+                                            "attempt_3": data.upper_pull_l_attempt_3,
+                                            "weight": data.upper_pull_l_weight,
+                                            "attempt_2": data.upper_pull_l_attempt_2,
+                                            "estimated_10rm": data.upper_pull_l_estimated_10rm,
+                                            "attempt_1": data.upper_pull_l_attempt_1
+                                }
+                            }
+                    }
         return nested

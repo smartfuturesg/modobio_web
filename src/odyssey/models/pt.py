@@ -367,15 +367,21 @@ class Chessboard(db.Model):
 
     __tablename__ = 'chessboard'
 
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid'),
-                        nullable=False, primary_key=True)
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
+
+    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid'), nullable=False)
     """
     Client ID number
 
     :type: int, foreign key to :attr:`ClientInfo.clientid`
     """
 
-    timestamp = db.Column(db.DateTime, primary_key=True)
+    timestamp = db.Column(db.DateTime)
     """
     Timestamp of the assessment.
 

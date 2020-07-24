@@ -214,6 +214,232 @@ class StrengthAssessment(db.Model):
     :type: int, foreign key to :attr:`ClientInfo.clientid`
     """
 
+    upper_push_notes = db.Column(db.Text)
+    """
+    notes on the push exercise
+
+    :type: str
+    """
+
+    upper_pull_notes = db.Column(db.Text)
+    """
+    notes on the pull exercise
+
+    :type: str
+    """
+
+    upper_push_l_weight = db.Column(db.Integer)
+    """
+    push weight (left)
+
+    :type: int
+    """
+
+    upper_push_l_attempt_1 = db.Column(db.Integer)
+    """
+    push weight (left) attempt 1 of 3
+
+    :type: int
+    """
+    
+    upper_push_l_attempt_2 = db.Column(db.Integer)
+    """
+    push weight (left) attempt 2 of 3
+
+    :type: int
+    """
+
+    upper_push_l_attempt_3 = db.Column(db.Integer)
+    """
+    push weight (left) attempt 3 of 3
+
+    :type: int
+    """
+
+    upper_push_l_estimated_10rm = db.Column(db.Float)
+    """
+    estimate of 10RM
+    
+    :type: float
+    """
+
+    upper_push_r_weight = db.Column(db.Integer)
+    """
+    push weight (right)
+
+    :type: int
+    """
+
+    upper_push_r_attempt_1 = db.Column(db.Integer)
+    """
+    push weight (right) attempt 1 of 3
+
+    :type: int
+    """
+    
+    upper_push_r_attempt_2 = db.Column(db.Integer)
+    """
+    push weight (right) attempt 2 of 3
+
+    :type: int
+    """
+
+    upper_push_r_attempt_3 = db.Column(db.Integer)
+    """
+    push weight (right) attempt 3 of 3
+
+    :type: int
+    """
+
+    upper_push_r_estimated_10rm = db.Column(db.Float)
+    """
+    estimate of 10RM
+    
+    :type: float
+    """
+
+    upper_push_bi_weight = db.Column(db.Integer)
+    """
+    push weight (bilateral)
+
+    :type: int
+    """
+
+    upper_push_bi_attempt_1 = db.Column(db.Integer)
+    """
+    push weight (bilateral) attempt 1 of 3
+
+    :type: int
+    """
+    
+    upper_push_bi_attempt_2 = db.Column(db.Integer)
+    """
+    push weight (bilateral) attempt 2 of 3
+
+    :type: int
+    """
+
+    upper_push_bi_attempt_3 = db.Column(db.Integer)
+    """
+    push weight (bilateral) attempt 3 of 3
+
+    :type: int
+    """
+
+    upper_push_bi_estimated_10rm = db.Column(db.Float)
+    """
+    estimate of 10RM
+    
+    :type: float
+    """
+
+    upper_pull_l_weight = db.Column(db.Integer)
+    """
+    pull weight (left)
+
+    :type: int
+    """
+
+    upper_pull_l_attempt_1 = db.Column(db.Integer)
+    """
+    pull weight (left) attempt 1 of 3
+
+    :type: int
+    """
+    
+    upper_pull_l_attempt_2 = db.Column(db.Integer)
+    """
+    pull weight (left) attempt 2 of 3
+
+    :type: int
+    """
+
+    upper_pull_l_attempt_3 = db.Column(db.Integer)
+    """
+    pull weight (left) attempt 3 of 3
+
+    :type: int
+    """
+
+    upper_pull_l_estimated_10rm = db.Column(db.Float)
+    """
+    estimate of 10RM
+    
+    :type: float
+    """
+
+    upper_pull_r_weight = db.Column(db.Integer)
+    """
+    pull weight (right)
+
+    :type: int
+    """
+
+    upper_pull_r_attempt_1 = db.Column(db.Integer)
+    """
+    pull weight (right) attempt 1 of 3
+
+    :type: int
+    """
+    
+    upper_pull_r_attempt_2 = db.Column(db.Integer)
+    """
+    pull weight (right) attempt 2 of 3
+
+    :type: int
+    """
+
+    upper_pull_r_attempt_3 = db.Column(db.Integer)
+    """
+    pull weight (right) attempt 3 of 3
+
+    :type: int
+    """
+
+    upper_pull_r_estimated_10rm = db.Column(db.Float)
+    """
+    estimate of 10RM
+    
+    :type: float
+    """
+
+    upper_pull_bi_weight = db.Column(db.Integer)
+    """
+    pull weight (bilateral)
+
+    :type: int
+    """
+
+    upper_pull_bi_attempt_1 = db.Column(db.Integer)
+    """
+    pull weight (bilateral) attempt 1 of 3
+
+    :type: int
+    """
+    
+    upper_pull_bi_attempt_2 = db.Column(db.Integer)
+    """
+    pull weight (bilateral) attempt 2 of 3
+
+    :type: int
+    """
+
+    upper_pull_bi_attempt_3 = db.Column(db.Integer)
+    """
+    pull weight (bilateral) attempt 3 of 3
+
+    :type: int
+    """
+
+    upper_pull_bi_estimated_10rm = db.Column(db.Float)
+    """
+    estimate of 10RM
+    
+    :type: float
+    """
+
+
+
 
 class MovementAssessment(db.Model):
     """ Movement Assessment table
