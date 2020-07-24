@@ -2,6 +2,7 @@ from flask import request, jsonify
 from flask_restx import Resource, Api
 from flask_accepts import accepts , responds
 
+from odyssey.api.utils import check_client_existence
 from odyssey.models.pt import Chessboard, PTHistory
 from odyssey import db
 from odyssey.api import api
@@ -91,7 +92,8 @@ class ClientChessboard(Resource):
     @responds(schema=ChessboardSchema(many=True), api=ns)
     def get(self, clientid):
         """returns all chessboard entries for the specified client"""
-        
+        check_client_existence(clientid)
+
         all_entries = Chessboard.query.filter_by(clientid=clientid).order_by(Chessboard.timestamp.asc()).all()
 
         if len(all_entries) == 0:
@@ -107,6 +109,8 @@ class ClientChessboard(Resource):
     @responds(schema=ChessboardSchema, status_code=201, api=ns)
     def post(self, clientid):
         """create new chessboard entry"""
+        check_client_existence(clientid)
+
         data = request.get_json()
         data['clientid'] = clientid
 
@@ -117,7 +121,7 @@ class ClientChessboard(Resource):
         db.session.commit()
 
         #return the most recent entry (this one)
-        most_recent = all_entries = Chessboard.query.filter_by(clientid=clientid).order_by(Chessboard.timestamp.desc()).first()
+        most_recent =  Chessboard.query.filter_by(clientid=clientid).order_by(Chessboard.timestamp.desc()).first()
 
         return most_recent
 

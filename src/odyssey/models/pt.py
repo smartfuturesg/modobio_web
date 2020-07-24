@@ -603,6 +603,13 @@ class Chessboard(db.Model):
     :type: int
     """
 
+    notes = db.Column(db.Text)
+    """
+    notes on the assessment
+
+    :type: str
+    """
+
     def get_attributes(self):
         """attributes for setting values from dictionaries. 
            Timestamp and clientid are purposefully left out. They are set individually

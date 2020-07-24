@@ -2,6 +2,7 @@ from flask import request, jsonify
 from flask_accepts import accepts, responds
 from flask_restx import Resource, Api
 
+from odyssey.api.utils import check_client_existence
 from odyssey.api import api
 from odyssey.api.auth import token_auth, token_auth_client
 from odyssey.api.errors import UserNotFound, ClientAlreadyExists, ClientNotFound, IllegalSetting
@@ -129,6 +130,8 @@ class ConsentContract(Resource):
     @responds(schema=ClientConsentSchema, api=ns)
     def get(self, clientid):
         """returns the most recent consent table as a json for the clientid specified"""
+        check_client_existence(clientid)
+
         client_consent_form = ClientConsent.query.filter_by(clientid=clientid).order_by(ClientConsent.signdate.desc()).first()
 
         if not client_consent_form:
@@ -142,6 +145,8 @@ class ConsentContract(Resource):
     @responds(schema=ClientConsentSchema, status_code=201, api=ns)
     def post(self, clientid):
         """ Create client consent contract for the specified clientid """
+        check_client_existence(clientid)
+
         data = request.get_json()
         data["clientid"] = clientid
 
@@ -167,6 +172,8 @@ class ReleaseContract(Resource):
     @responds(schema=ClientReleaseSchema, api=ns)
     def get(self, clientid):
         """returns most recent client release table as a json for the clientid specified"""
+        check_client_existence(clientid)
+
         client_release_form =  ClientRelease.query.filter_by(clientid=clientid).order_by(ClientRelease.signdate.desc()).first()
 
         if not client_release_form:
@@ -180,6 +187,8 @@ class ReleaseContract(Resource):
     @responds(schema=ClientReleaseSchema, status_code=201, api=ns)
     def post(self, clientid):
         """create client release contract object for the specified clientid"""
+        check_client_existence(clientid)
+
         data = request.get_json()
         data["clientid"] = clientid
         client_release_schema = ClientReleaseSchema()
@@ -203,6 +212,8 @@ class PoliciesContract(Resource):
     @responds(schema=ClientPoliciesContractSchema, api=ns)
     def get(self, clientid):
         """returns most recent client policies table as a json for the clientid specified"""
+        check_client_existence(clientid)
+
         client_policies =  ClientPolicies.query.filter_by(clientid=clientid).order_by(ClientPolicies.signdate.desc()).first()
 
         if not client_policies:
@@ -216,6 +227,8 @@ class PoliciesContract(Resource):
     @responds(schema=ClientPoliciesContractSchema, status_code= 201, api=ns)
     def post(self, clientid):
         """create client policies contract object for the specified clientid"""
+        check_client_existence(clientid)
+
         data = request.get_json()
         data["clientid"] = clientid
         client_policies_schema = ClientPoliciesContractSchema()
@@ -239,6 +252,8 @@ class ConsultConstract(Resource):
     @responds(schema=ClientConsultContractSchema, api=ns)
     def get(self, clientid):
         """returns most recent client consultation table as a json for the clientid specified"""
+        check_client_existence(clientid)
+
         client_consult =  ClientConsultContract.query.filter_by(clientid=clientid).order_by(ClientConsultContract.signdate.desc()).first()
 
         if not client_consult:
@@ -252,6 +267,8 @@ class ConsultConstract(Resource):
     @responds(schema=ClientConsultContractSchema, status_code= 201, api=ns)
     def post(self, clientid):
         """create client consult contract object for the specified clientid"""
+        check_client_existence(clientid)
+
         data = request.get_json()
         data["clientid"] = clientid
         consult_contract_schema = ClientConsultContractSchema()
@@ -275,6 +292,8 @@ class SubscriptionContract(Resource):
     @responds(schema=ClientSubscriptionContractSchema, api=ns)
     def get(self, clientid):
         """returns most recent client subscription contract table as a json for the clientid specified"""
+        check_client_existence(clientid)
+
         client_subscription =  ClientSubscriptionContract.query.filter_by(clientid=clientid).order_by(ClientSubscriptionContract.signdate.desc()).first()
         if not client_subscription:
             raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a subscription contract in the database")
@@ -287,6 +306,8 @@ class SubscriptionContract(Resource):
     @responds(schema=ClientSubscriptionContractSchema, status_code= 201, api=ns)
     def post(self, clientid):
         """create client subscription contract object for the specified clientid"""
+        check_client_existence(clientid)
+
         data = request.get_json()
         data["clientid"] = clientid
         subscription_contract_schema = ClientSubscriptionContractSchema()
@@ -310,6 +331,8 @@ class IndividualContract(Resource):
     @responds(schema=ClientIndividualContractSchema, api=ns)
     def get(self, clientid):
         """returns most recent client individual servies table as a json for the clientid specified"""
+        check_client_existence(clientid)
+        
         client_services =  ClientIndividualContract.query.filter_by(clientid=clientid).order_by(ClientIndividualContract.signdate.desc()).first()
 
         if not client_services:
@@ -348,10 +371,7 @@ class SignedDocuments(Resource):
     @responds(schema=SignedDocumentsSchema, api=ns)
     def get(self, clientid):
         """Given a clientid, returns a list of URLs for all signed documents."""
-        client = ClientInfo.query.filter_by(clientid=clientid).one_or_none()
-
-        if not client:
-            raise UserNotFound(clientid)
+        check_client_existence(clientid)
 
         urls = []
 

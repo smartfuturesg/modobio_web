@@ -5,6 +5,8 @@ import re
 import uuid
 import flask.json
 
+
+
 _uuid_rx = re.compile('[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}', flags=re.IGNORECASE)
 
 class JSONEncoder(flask.json.JSONEncoder):

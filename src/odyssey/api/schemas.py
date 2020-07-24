@@ -1,5 +1,6 @@
 from datetime import datetime
 from hashlib import md5
+import statistics
 
 from marshmallow import Schema, fields, post_load, ValidationError, validates, validate
 from marshmallow import post_load, post_dump, pre_dump
@@ -16,6 +17,7 @@ from odyssey.models.intake import (
     ClientSubscriptionContract
 )
 from odyssey.models.pt import Chessboard, PTHistory
+from odyssey.models.trainer import PowerAssessment
 from odyssey.constants import DOCTYPE, DOCTYPE_DOCREV_MAP
 
 class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
@@ -217,7 +219,6 @@ class ChessBoardHipSchema(Schema):
 class ChessboardSchema(Schema):
     isa_structure_list  = ['Inhaled','Exhaled', 'Asymettrical Normal','Asymettrical Atypical']
 
-    # clientid = fields.Integer
     clientid = fields.Integer(required=False)
     timestamp = fields.DateTime()
     isa_right = fields.Boolean()
@@ -226,6 +227,7 @@ class ChessboardSchema(Schema):
     isa_dynamic = fields.Boolean()
     shoulder = fields.Nested(ChessBoardShoulderSchema)
     hip = fields.Nested(ChessBoardHipSchema)
+    notes = fields.String(description="some notes regarding this assessment")
 
 
     @validates('isa_structure')
@@ -235,8 +237,12 @@ class ChessboardSchema(Schema):
 
     @post_load
     def unravel(self, data, **kwargs):
+        """takes anested dictionary (json input) and flattens it out 
+            in order to shape into the Chessboard table
+        """
         flat_data = {'clientid': data['clientid'],
                     'timestamp': datetime.utcnow(),
+                    'notes': data['notes'],
                     'left_shoulder_er': data['shoulder']['left']['er'],
                     'left_shoulder_ir': data['shoulder']['left']['ir'],
                     'left_shoulder_abd': data['shoulder']['left']['abd'],
@@ -272,12 +278,16 @@ class ChessboardSchema(Schema):
 
     @pre_dump
     def ravel(self, data, **kwargs):
-        shoulder_l = {k.split('_')[-1]:v for k,v in data.__dict__.items() if 'left_shoulder' in k}
+        """converts the flat Chessboard table into a nested dictionary for easier
+            procesing on the fron end
+        """
+        shoulder_l = {k.split('_')[-1]:v for k,v in data.__dict__.items() if 'left_shoulder' in k} 
         shoulder_r = {k.split('_')[-1]:v for k,v in data.__dict__.items() if 'right_shoulder' in k}
         hip_l = {k.split('_')[-1]:v for k,v in data.__dict__.items() if 'left_hip' in k}
         hip_r = {k.split('_')[-1]:v for k,v in data.__dict__.items() if 'right_hip' in k}
         nested = {'clientid': data.clientid,
                   'timestamp': data.timestamp,
+                  'notes': data.notes,
                   'isa_left' :data.isa_left,
                   'isa_right': data.isa_right,
                   'shoulder': {
@@ -289,4 +299,123 @@ class ChessboardSchema(Schema):
                            'left': hip_l
                         }
                   }
+        return nested
+
+
+class PowerAttemptsPushPull(Schema):
+    weight = fields.Integer(description="weight of exercise in PSI", validate=validate.Range(min=0, max=60))
+    attempt_1 = fields.Integer(description="", validate=validate.Range(min=0, max=4000))
+    attempt_2 = fields.Integer(description="", validate=validate.Range(min=0, max=4000))
+    attempt_3 = fields.Integer(description="",validate=validate.Range(min=0, max=4000))
+    average = fields.Float(description="",validate=validate.Range(min=0, max=4000))
+
+class PowerAttemptsLegPress(Schema):
+    weight = fields.Integer(description="weight of exercise in PSI", validate=validate.Range(min=0, max=1500))
+    attempt_1 = fields.Integer(description="", validate=validate.Range(min=0, max=9999))
+    attempt_2 = fields.Integer(description="", validate=validate.Range(min=0, max=9999))
+    attempt_3 = fields.Integer(description="",validate=validate.Range(min=0, max=9999))
+    average = fields.Float(description="",validate=validate.Range(min=0, max=9999))
+
+class PowerPushPull(Schema):
+    left = fields.Nested(PowerAttemptsPushPull)
+    right = fields.Nested(PowerAttemptsPushPull)
+
+class PowerLegPress(Schema):
+    left = fields.Nested(PowerAttemptsLegPress)
+    right = fields.Nested(PowerAttemptsLegPress)
+    bilateral = fields.Nested(PowerAttemptsLegPress)
+
+class PowerAssessmentSchema(Schema):
+    clientid = fields.Integer()
+    timestamp = fields.DateTime()
+    push_pull = fields.Nested(PowerPushPull)
+    leg_press = fields.Nested(PowerLegPress)
+    upper_watts_per_kg = fields.Float(description = "watts per kg upper body", validate=validate.Range(min=0, max=100))
+    lower_watts_per_kg = fields.Float(description = "watts per kg upper body", validate=validate.Range(min=0, max=250))
+
+    @post_load
+    def unravel(self, data, **kwargs):
+        flat_data = {'clientid': data['clientid'],
+                    'timestamp': datetime.utcnow(),
+                    'keiser_upper_r_weight': data['push_pull']['right']['weight'],
+                    'keiser_upper_r_attempt_1': data['push_pull']['right']['attempt_1'],
+                    'keiser_upper_r_attempt_2': data['push_pull']['right']['attempt_2'],
+                    'keiser_upper_r_attempt_3': data['push_pull']['right']['attempt_3'],
+                    'keiser_upper_l_weight':    data['push_pull']['left']['weight'],
+                    'keiser_upper_l_attempt_1': data['push_pull']['left']['attempt_1'],
+                    'keiser_upper_l_attempt_2': data['push_pull']['left']['attempt_2'],
+                    'keiser_upper_l_attempt_3': data['push_pull']['left']['attempt_3'],
+                    'keiser_lower_bi_weight': data['leg_press']['bilateral']['weight'],
+                    'keiser_lower_bi_attempt_1': data['leg_press']['bilateral']['attempt_1'],
+                    'keiser_lower_bi_attempt_2': data['leg_press']['bilateral']['attempt_2'],
+                    'keiser_lower_bi_attempt_3': data['leg_press']['bilateral']['attempt_3'],
+                    'keiser_lower_r_weight':    data['leg_press']['right']['weight'],
+                    'keiser_lower_r_attempt_1': data['leg_press']['right']['attempt_1'],
+                    'keiser_lower_r_attempt_2': data['leg_press']['right']['attempt_2'],
+                    'keiser_lower_r_attempt_3': data['leg_press']['right']['attempt_3'],
+                    'keiser_lower_l_weight':     data['leg_press']['left']['weight'],
+                    'keiser_lower_l_attempt_1': data['leg_press']['left']['attempt_1'],
+                    'keiser_lower_l_attempt_2': data['leg_press']['left']['attempt_2'],
+                    'keiser_lower_l_attempt_3': data['leg_press']['left']['attempt_3'],
+                    'upper_watts_per_kg': data['upper_watts_per_kg'],
+                    'lower_watts_per_kg': data['lower_watts_per_kg']
+                }
+        return PowerAssessment(**flat_data)
+
+    @pre_dump
+    def ravel(self, data, **kwargs):
+        nested = {'clientid': data.clientid,
+                  'timestamp': data.timestamp,
+                  'upper_watts_per_kg' :data.upper_watts_per_kg,
+                  'lower_watts_per_kg': data.lower_watts_per_kg,
+                  'push_pull': {
+                                'left': {'weight': data.keiser_upper_l_weight,
+                                         'attempt_1': data.keiser_upper_l_attempt_1,
+                                         'attempt_2': data.keiser_upper_l_attempt_2,
+                                         'attempt_3': data.keiser_upper_l_attempt_3,
+                                         'average':   statistics.mean([data.keiser_upper_l_attempt_1,
+                                                                       data.keiser_upper_l_attempt_2,
+                                                                       data.keiser_upper_l_attempt_3
+                                                                    ])
+                                        },
+                                'right': {'weight':   data.keiser_upper_r_weight,
+                                         'attempt_1': data.keiser_upper_r_attempt_1,
+                                         'attempt_2': data.keiser_upper_r_attempt_2,
+                                         'attempt_3': data.keiser_upper_r_attempt_3,
+                                         'average':   statistics.mean([data.keiser_upper_r_attempt_1,
+                                                                       data.keiser_upper_r_attempt_2,
+                                                                       data.keiser_upper_r_attempt_3
+                                                                    ])
+                                        },
+                                },
+                    'leg_press': {'right' : {'weight':   data.keiser_lower_r_weight,
+                                             'attempt_1': data.keiser_lower_r_attempt_1,
+                                             'attempt_2': data.keiser_lower_r_attempt_2,
+                                             'attempt_3': data.keiser_lower_r_attempt_3,
+                                             'average':   statistics.mean([data.keiser_lower_r_attempt_1,
+                                                                           data.keiser_lower_r_attempt_2,
+                                                                           data.keiser_lower_r_attempt_3
+                                                                        ])
+                                            },
+                                  'left': {'weight':   data.keiser_lower_l_weight,
+                                             'attempt_1': data.keiser_lower_l_attempt_1,
+                                             'attempt_2': data.keiser_lower_l_attempt_2,
+                                             'attempt_3': data.keiser_lower_l_attempt_3,
+                                             'average':   statistics.mean([data.keiser_lower_l_attempt_1,
+                                                                           data.keiser_lower_l_attempt_2,
+                                                                           data.keiser_lower_l_attempt_3
+                                                                        ])
+                                            },
+                                  'bilateral': {'weight':   data.keiser_lower_bi_weight,
+                                             'attempt_1': data.keiser_lower_bi_attempt_1,
+                                             'attempt_2': data.keiser_lower_bi_attempt_2,
+                                             'attempt_3': data.keiser_lower_bi_attempt_3,
+                                             'average':   statistics.mean([data.keiser_lower_bi_attempt_1,
+                                                                           data.keiser_lower_bi_attempt_2,
+                                                                           data.keiser_lower_bi_attempt_3
+                                                                        ])
+                                                }
+                                 }
+            
+                 }
         return nested
