@@ -468,6 +468,109 @@ class MovementAssessment(db.Model):
     :type: int, foreign key to :attr:`ClientInfo.clientid`
     """
 
+    squat_dept = db.Column(db.String)
+    """
+    Regarding squat depth, the client  ust be one of the following
+    'Above Parallel',
+    'Parallel',
+    'Below Parallel',
+    'Full Depth'
+
+    :type: str
+    """
+
+    squat_ramp = db.Column(db.String)
+    """
+    If client requires a ramp to squat, must be one of the following:
+    '30 Degree Ramp',
+    '15 Degree Ramp',
+    'No Ramp'
+
+    :type: str
+    """
+
+    squat_eye_test = db.Column(db.Boolean)
+    """
+    pass-True fail-False of wheather client passes test
+
+    :type: Boolean
+    """
+
+    squat_can_breathe = db.Column(db.Boolean)
+    """
+    while squatting client:
+    can breathe-True 
+    cannot breathe-False 
+
+    :type: Boolean
+    """
+
+    squat_can_look_up = db.Column(db.Boolean)
+    """
+    while squatting client:
+    can look up-True 
+    cannot look up-False 
+
+    :type: Boolean
+    """
+
+    toe_touch_depth = db.Column(db.String)
+    """
+    Depth of toe touch test
+    'Knee Height',
+    'Mid Shin',
+    'Low Shin',
+    'Toes',
+    'Floor'
+
+    :type: str
+    """
+
+    toe_touch_pelvis_movement =db.Column(db.String)
+    """
+    Pelvis movement during toe touch test
+    'Right Hip High',
+    'Right Hip Back',
+    'Left Hip High',
+    'Left Hip Back',
+    'Even Bilaterally'
+
+    :type: str
+    """
+
+    toe_touch_ribcage_movement = db.Column(db.String)
+    """
+    Ribcage movement during toe touch test
+    'Right Posterior Ribcage High',
+    'Right Posterior Ribcage Back',
+    'Left Posterior Ribcage High',
+    'Left Posterior Ribcage Back',
+    'Even Bilaterally'
+
+    :type: str
+    """
+
+    toe_touch_notes = db.Column(db.String)
+    """
+    Notes regarding toe touch test
+
+    :type: str
+    """ 
+
+    standing_rotation_r_notes = db.Column(db.String)
+    """
+    Notes regarding standing rotation right
+
+    :type: str
+    """ 
+
+    standing_rotation_l_notes = db.Column(db.String)
+    """
+    Notes regarding standing rotation right
+
+    :type: str
+    """ 
+
 
 class HeartAssessment(db.Model):
     """ Heart assessment table
