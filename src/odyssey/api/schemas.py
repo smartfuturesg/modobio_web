@@ -537,3 +537,79 @@ class StrenghtAssessmentSchema(Schema):
                             }
                     }
         return nested
+
+
+class SquatTestSchema(Schema):
+    depth = fields.String()
+    ramp = fields.String()
+    eye_test = fields.Boolean()
+    can_breathe = fields.Boolean()
+    can_look_up = fields.Boolean()
+
+class ToeTouchTestSchema(Schema):
+    depth = fields.String()
+    pelvis_movement = fields.String()
+    ribcage_movement = fields.String()
+    notes = fields.String()
+
+class StandingRotationNotesSchema(Schema):
+    notes = fields.String()
+
+class StandingRotationSchema(Schema):
+    right = fields.Nested(StandingRotationNotesSchema)
+    left = fields.Nested(StandingRotationNotesSchema)
+
+class MovementAssessmentSchema(Schema):
+    clientid = fields.Integer()
+    timestamp = fields.DateTime()
+    squat = fields.Nested(SquatTestSchema)
+    toe_touch = fields.Nested(ToeTouchTestSchema)
+    standing_roation = fields.Nested(StandingRotationSchema)
+
+    @post_load
+    def unravel(self, data, **kwargs):
+        flat_data = {'clientid': data['clientid'],
+                    'timestamp': datetime.utcnow(),
+                    'squat_depth': data['squat']['depth'],
+                    'squat_ramp': data['squat']['ramp'],
+                    'squat_eye_test': data['squat']['eye_test'],
+                    'squat_can_breathe': data['squat']['can_breathe'],
+                    'squat_can_look_up': data['squat']['can_look_up'],
+                    'toe_touch_depth': data['toe_touch']['depth'],
+                    'toe_touch_pelvis_movement': data['toe_touch']['pelvis_movement'],
+                    'toe_touch_ribcage_movement': data['toe_touch']['ribcage_movement'],
+                    'toe_touch_notes': data['toe_touch']['notes'],
+                    'standing_rotation_r_notes': data['standing_rotation']['right']['notes'],
+                    'standing_rotation_l_notes': data['standing_rotation']['left']['notes']
+        }
+
+        return MovementAssessment(**flat_data)
+
+    @pre_dump
+    def ravel(self, data, **kwargs):
+        nested = {"clientid": data.clientid,
+                  "timestamp": data.timestamp,
+                  "squat": {
+                      "depth": data.squat_depth ,
+                      "ramp": data.squat_ramp,
+                      "eye_test": data.squat_eye_test,
+                      "can_breathe": data.squat_can_breathe,
+                      "can_look_up": data.squat_can_look_up
+                  },
+                  "toe_touch" : {
+                      "depth": data.toe_touch_depth,
+                      "pelvis_movement": data.toe_touch_pelvis_movement,
+                      "ribcage_movement": data.toe_touch_ribcage_movement,
+                      "notes": data.toe_touch_notes
+                  },
+                  "standing_rotation": {
+                      "right": {
+                          "notes": data.standing_rotation_r_notes
+                      },
+                      "left":{
+                          "notes": data.standing_rotation_l_notes
+                      } 
+                  }
+        }
+
+        return nested
