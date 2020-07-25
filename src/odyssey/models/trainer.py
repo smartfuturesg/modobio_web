@@ -599,6 +599,55 @@ class HeartAssessment(db.Model):
     :type: int, foreign key to :attr:`ClientInfo.clientid`
     """
 
+    resting_hr = db.Column(db.Integer)
+    """
+    resting heartrate
+
+    :type: int
+    """
+
+    max_hr = db.Column(db.Integer)
+    """
+    maximum measured heartrate
+
+    :type: int
+    """
+   
+    theoretical_max_hr = db.Column(db.Integer)
+    """
+    theoretical maximum heartrate
+
+    :type: int
+    """ 
+
+    avg_eval_hr = db.Column(db.Integer)
+    """
+    average heartrate during evaluation
+
+    :type: int
+    """
+
+    avg_training_hr = db.Column(db.Integer)
+    """
+    avergage heatrate during training
+
+    :type: int
+    """
+
+    estimated_vo2_max = db.Column(db.Integer)
+    """
+    estimation of VO2 Max
+
+    :type: int
+    """
+
+    notes = db.Column(db.String)
+    """
+    Notes on the client's heatrate tests
+
+    :type: str
+    """
+
 
 class MoxyAssessment(db.Model):
     """ Moxy assessment table

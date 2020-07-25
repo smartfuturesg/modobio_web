@@ -1,3 +1,6 @@
+
+from datetime import datetime
+
 from flask import request, jsonify
 from flask_restx import Resource, Api
 from flask_accepts import accepts, responds
@@ -8,12 +11,14 @@ from odyssey.api.auth import token_auth, token_auth_client
 from odyssey.api.errors import UserNotFound, ClientAlreadyExists, ClientNotFound, IllegalSetting
 from odyssey.api.schemas import (
     ClientInfoSchema,
+    HeartAssessmentSchema,
     PowerAssessmentSchema,
     StrenghtAssessmentSchema,
     MovementAssessmentSchema
 )
 from odyssey import db
 from odyssey.models.trainer import (
+    HeartAssessment,
     PowerAssessment,
     StrengthAssessment,
     MovementAssessment
@@ -107,6 +112,7 @@ class Strength(Resource):
 @ns.route('/assessment/movement/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
 class Movement(Resource):
+
     """GET and POST movement assessments for the client"""
 
     @ns.doc(security='apikey')
@@ -144,3 +150,44 @@ class Movement(Resource):
         
         most_recent = MovementAssessment.query.filter_by(clientid=clientid).order_by(MovementAssessment.timestamp.desc()).first()
         return most_recent
+
+@ns.route('/assessment/heart/<int:clientid>/')
+@ns.doc(params={'clientid': 'Client ID number'})
+class Heart(Resource):
+    
+    """GET and POST movement assessments for the client"""
+
+    @ns.doc(security='apikey')
+    @token_auth.login_required
+    @responds(schema=HeartAssessmentSchema(many=True), api=ns)
+    def get(self, clientid):
+        """returns all power assessment entries for the specified client"""
+        check_client_existence(clientid)
+
+        all_entries = HeartAssessment.query.filter_by(clientid=clientid).order_by(HeartAssessment.timestamp.asc()).all()
+
+        if len(all_entries) == 0:
+            raise UserNotFound(
+                clientid=clientid, 
+                message = "this client does not yet have a power assessment")
+        
+        return all_entries
+
+    @ns.doc(security='apikey')
+    @token_auth.login_required
+    @accepts(schema=HeartAssessmentSchema, api=ns)
+    @responds(schema=HeartAssessmentSchema, status_code=201, api=ns)
+    def post(self, clientid):
+        """create a power assessment entry for clientid"""
+        check_client_existence(clientid)
+
+        data=request.get_json()
+        data['clientid'] = clientid
+        data['timestamp'] = datetime.utcnow().isoformat()
+
+        hr_schema = HeartAssessmentSchema()
+        client_hr = hr_schema.load(data)
+        db.session.add(client_hr)
+        db.session.commit()
+        
+        return client_hr

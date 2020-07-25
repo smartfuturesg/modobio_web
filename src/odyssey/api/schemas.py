@@ -17,7 +17,7 @@ from odyssey.models.intake import (
     ClientSubscriptionContract
 )
 from odyssey.models.pt import Chessboard, PTHistory
-from odyssey.models.trainer import PowerAssessment, StrengthAssessment, MoxyRipTest, MoxyAssessment, MovementAssessment
+from odyssey.models.trainer import HeartAssessment, PowerAssessment, StrengthAssessment, MoxyRipTest, MoxyAssessment, MovementAssessment
 from odyssey.constants import DOCTYPE, DOCTYPE_DOCREV_MAP
 
 class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
@@ -613,3 +613,13 @@ class MovementAssessmentSchema(Schema):
         }
 
         return nested
+
+class HeartAssessmentSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = HeartAssessment
+
+    clientid = fields.Integer(required=False)
+    
+    @post_load
+    def make_object(self, data, **kwargs):
+        return HeartAssessment(**data)
