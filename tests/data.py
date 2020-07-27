@@ -321,3 +321,13 @@ test_chessboard_assessment = {
     }
   }
 }
+
+test_lung_assessment = {
+  "notes": "these lungs are not so great. Client exhibits asthma.",
+  "clientid": 0,
+  "liters_min_kg": 55,
+  "max_minute_volume": 400,
+  "breaths_per_minute": 25,
+  "bag_size": 5,
+  "duration": 200
+}

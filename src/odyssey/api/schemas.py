@@ -23,7 +23,8 @@ from odyssey.models.trainer import (
     StrengthAssessment, 
     MoxyRipTest, 
     MoxyAssessment, 
-    MovementAssessment
+    MovementAssessment,
+    LungAssessment
 )
 from odyssey.constants import DOCTYPE, DOCTYPE_DOCREV_MAP
 
@@ -672,3 +673,21 @@ class MoxyAssessmentSchema(ma.SQLAlchemySchema):
     @post_load
     def make_object(self, data, **kwargs):
         return MoxyAssessment(**data)
+
+class LungAssessmentSchema(ma.SQLAlchemySchema):
+    class Meta:
+        model = LungAssessment
+        
+    clientid = ma.auto_field()
+    timestamp = ma.auto_field()
+    notes = ma.auto_field()
+    bag_size = fields.Float(description="in liters", validate=validate.Range(min=0, max=10))
+    duration = fields.Integer(description="in seconds", validate=validate.Range(min=0, max=300))
+    breaths_per_minute = fields.Integer(description="", validate=validate.Range(min=0, max=100))
+    max_minute_volume = fields.Float(description="", validate=validate.Range(min=0, max=500))
+    liters_min_kg = fields.Float(description="liters per minute per kg", validate=validate.Range(min=0, max=100))
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return LungAssessment(**data)
+    

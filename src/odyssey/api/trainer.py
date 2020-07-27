@@ -12,18 +12,20 @@ from odyssey.api.errors import UserNotFound, ClientAlreadyExists, ClientNotFound
 from odyssey.api.schemas import (
     ClientInfoSchema,
     HeartAssessmentSchema,
-    PowerAssessmentSchema,
-    StrenghtAssessmentSchema,
+    LungAssessmentSchema,
     MovementAssessmentSchema,
-    MoxyAssessmentSchema
+    MoxyAssessmentSchema,
+    PowerAssessmentSchema, 
+    StrenghtAssessmentSchema
 )
 from odyssey import db
 from odyssey.models.trainer import (
     HeartAssessment,
-    PowerAssessment,
-    StrengthAssessment,
+    LungAssessment,
     MovementAssessment,
-    MoxyAssessment
+    MoxyAssessment,
+    PowerAssessment,
+    StrengthAssessment 
 )
 
 ns = api.namespace('trainer', description='Operations related to the trainer')
@@ -235,3 +237,42 @@ class Moxy(Resource):
         
         return client_moxy
 
+@ns.route('/assessment/lungcapacity/<int:clientid>/')
+@ns.doc(params={'clientid': 'Client ID number'})
+class LungCapacity(Resource):    
+    """GET and POST moxy assessments for the client"""
+
+    @ns.doc(security='apikey')
+    @token_auth.login_required
+    @responds(schema=LungAssessmentSchema(many=True), api=ns)
+    def get(self, clientid):
+        """returns all lung capacity assessment entries for the specified client"""
+        check_client_existence(clientid)
+
+        all_entries = LungAssessment.query.filter_by(clientid=clientid).order_by(LungAssessment.timestamp.asc()).all()
+
+        if len(all_entries) == 0:
+            raise UserNotFound(
+                clientid=clientid, 
+                message = "this client does not yet have a lung capacity assessment")
+        
+        return all_entries
+
+    @ns.doc(security='apikey')
+    @token_auth.login_required
+    @accepts(schema=LungAssessmentSchema, api=ns)
+    @responds(schema=LungAssessmentSchema, status_code=201, api=ns)
+    def post(self, clientid):
+        """create a lung capacity assessment entry for clientid"""
+        check_client_existence(clientid)
+
+        data=request.get_json()
+        data['clientid'] = clientid
+        data['timestamp'] = datetime.utcnow().isoformat()
+
+        lung_schema = LungAssessmentSchema()
+        client_lung_capacity = lung_schema.load(data)
+        db.session.add(client_lung_capacity)
+        db.session.commit()
+        
+        return client_lung_capacity

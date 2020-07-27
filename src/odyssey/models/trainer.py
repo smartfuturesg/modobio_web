@@ -765,11 +765,6 @@ class MoxyAssessment(db.Model):
     :type: int
     """
 
-
-
-
-
-
 class MoxyRipTest(db.Model):
     """ Moxy rop test table
     """
@@ -824,3 +819,48 @@ class LungAssessment(db.Model):
 
     :type: int, foreign key to :attr:`ClientInfo.clientid`
     """
+
+    notes = db.Column(db.String)
+    """
+    Notes on the client's lung tests
+
+    :type: str
+    """
+
+    bag_size = db.Column(db.Float)
+    """
+    Lung capcity in liters
+
+    :type: float
+    """
+
+    duration = db.Column(db.Integer)
+    """
+    seconds (0-300)
+
+    :type: int
+    """
+
+    breaths_per_minute = db.Column(db.Integer)
+    """
+    breathing rate
+
+    :type: int
+    """
+
+    max_minute_volume = db.Column(db.Float)
+    """
+    MMV 0-500
+
+    :type: float
+    """
+
+    liters_min_kg = db.Column(db.Float)
+    """
+    liters per minute per kg (0-100)
+
+    :type: float
+    """
+
+
+
