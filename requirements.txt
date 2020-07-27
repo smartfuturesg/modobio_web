@@ -1,11 +1,15 @@
 boto3
 Flask
+flask-accepts==0.17.3
 Flask-Cors
 Flask-HTTPAuth
 Flask-Migrate
 flask-restx
 Flask_SQLAlchemy
+flask-marshmallow==0.13.0   
 Flask_WTF
+marshmallow==3.7.0
+marshmallow-sqlalchemy==0.23.1
 pytest
 pytest-cov
 pytz

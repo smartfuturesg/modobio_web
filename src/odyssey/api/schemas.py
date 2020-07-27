@@ -17,7 +17,14 @@ from odyssey.models.intake import (
     ClientSubscriptionContract
 )
 from odyssey.models.pt import Chessboard, PTHistory
-from odyssey.models.trainer import HeartAssessment, PowerAssessment, StrengthAssessment, MoxyRipTest, MoxyAssessment, MovementAssessment
+from odyssey.models.trainer import (
+    HeartAssessment, 
+    PowerAssessment, 
+    StrengthAssessment, 
+    MoxyRipTest, 
+    MoxyAssessment, 
+    MovementAssessment
+)
 from odyssey.constants import DOCTYPE, DOCTYPE_DOCREV_MAP
 
 class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
@@ -623,3 +630,45 @@ class HeartAssessmentSchema(ma.SQLAlchemyAutoSchema):
     @post_load
     def make_object(self, data, **kwargs):
         return HeartAssessment(**data)
+
+
+class MoxyAssessmentSchema(ma.SQLAlchemySchema):
+    class Meta:
+        model = MoxyAssessment
+    
+    limiter_list = ['Demand','Supply','Respiratory']
+    performance_metric_list = ['Watts','Lbs','Feet/Min']
+
+    clientid = ma.auto_field()
+    timestamp = ma.auto_field()
+    notes = ma.auto_field()
+    performance_baseline = fields.Integer(description="", validate=validate.Range(min=0, max=100))
+    recovery_baseline = fields.Integer(description="", validate=validate.Range(min=0, max=100))
+    gas_tank_size = fields.Integer(description="", validate=validate.Range(min=0, max=100))
+    starting_sm_o2 = fields.Integer(description="", validate=validate.Range(min=0, max=100))
+    starting_thb = fields.Integer(description="", validate=validate.Range(min=9, max=18))
+    limiter = fields.String(description=f"must be one of: {limiter_list}")
+    intervention = ma.auto_field()
+    performance_metric_1 = fields.String(description=f"must be one of: {performance_metric_list}")
+    performance_metric_2 = fields.String(description=f"must be one of: {performance_metric_list}")
+    performance_metric_1_value = fields.Integer(description="value in regards to chosen performance metric", validate=validate.Range(min=0, max=1500))
+    performance_metric_2_value = fields.Integer(description="value in regards to chosen performance metric", validate=validate.Range(min=0, max=1500))
+
+    @validates('limiter')
+    def limiter_picklist(self,value):
+        if not value in self.limiter_list:
+            raise ValidationError(f'limiter entry invalid. Please use one of the following: {self.limiter_list}')
+
+    @validates('performance_metric_1')
+    def performance_metric_1_picklist(self,value):
+        if not value in self.performance_metric_list:
+            raise ValidationError(f'performance_metric_1 entry invalid. Please use one of the following: {self.performance_metric_list}')
+
+    @validates('performance_metric_2')
+    def performance_metric_2_picklist(self,value):
+        if not value in self.performance_metric_list:
+            raise ValidationError(f'performance_metric_2 entry invalid. Please use one of the following: {self.performance_metric_list}')
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return MoxyAssessment(**data)

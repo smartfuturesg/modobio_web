@@ -676,6 +676,99 @@ class MoxyAssessment(db.Model):
 
     :type: int, foreign key to :attr:`ClientInfo.clientid`
     """
+    
+    notes = db.Column(db.String)
+    """
+    Notes on the client's moxy tests
+
+    :type: str
+    """
+
+    recovery_baseline = db.Column(db.Integer)
+    """
+
+    :type: int
+    """
+
+    performance_baseline = db.Column(db.Integer)
+    """
+
+    :type: int
+    """    
+
+    gas_tank_size = db.Column(db.Integer)
+    """
+
+    :type: int
+    """
+    
+    starting_sm_o2 = db.Column(db.Integer)
+    """
+
+    :type: int
+    """
+
+    starting_thb = db.Column(db.Integer)
+    """
+
+    :type: int
+    """
+
+    limiter = db.Column(db.String)
+    """
+    Must be one of:
+    'Demand',
+    'Supply',
+    'Respiratory'
+
+    :type: str
+    """    
+
+    intervention = db.Column(db.String)
+    """
+    text box of letters and numbers
+
+    :type: str
+    """
+
+    performance_metric_1 = db.Column(db.String)
+    """
+    Must be one of:
+    'Watts',
+    'Lbs',
+    'Feet/Min'
+
+    :type: str
+    """   
+
+    performance_metric_1_value = db.Column(db.Integer)
+    """
+    The number behind the performance metric 
+
+    :type: int
+    """
+
+    performance_metric_2 = db.Column(db.String)
+    """
+    Must be one of:
+    'Watts',
+    'Lbs',
+    'Feet/Min'
+
+    :type: str
+    """   
+
+    performance_metric_2_value = db.Column(db.Integer)
+    """
+    The number behind the performance metric 
+    
+    :type: int
+    """
+
+
+
+
+
 
 class MoxyRipTest(db.Model):
     """ Moxy rop test table

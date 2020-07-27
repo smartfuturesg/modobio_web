@@ -14,14 +14,16 @@ from odyssey.api.schemas import (
     HeartAssessmentSchema,
     PowerAssessmentSchema,
     StrenghtAssessmentSchema,
-    MovementAssessmentSchema
+    MovementAssessmentSchema,
+    MoxyAssessmentSchema
 )
 from odyssey import db
 from odyssey.models.trainer import (
     HeartAssessment,
     PowerAssessment,
     StrengthAssessment,
-    MovementAssessment
+    MovementAssessment,
+    MoxyAssessment
 )
 
 ns = api.namespace('trainer', description='Operations related to the trainer')
@@ -191,3 +193,45 @@ class Heart(Resource):
         db.session.commit()
         
         return client_hr
+
+    
+@ns.route('/assessment/moxy/<int:clientid>/')
+@ns.doc(params={'clientid': 'Client ID number'})
+class Moxy(Resource):    
+    """GET and POST moxy assessments for the client"""
+
+    @ns.doc(security='apikey')
+    @token_auth.login_required
+    @responds(schema=MoxyAssessmentSchema(many=True), api=ns)
+    def get(self, clientid):
+        """returns all power assessment entries for the specified client"""
+        check_client_existence(clientid)
+
+        all_entries = MoxyAssessment.query.filter_by(clientid=clientid).order_by(MoxyAssessment.timestamp.asc()).all()
+
+        if len(all_entries) == 0:
+            raise UserNotFound(
+                clientid=clientid, 
+                message = "this client does not yet have a moxy assessment")
+        
+        return all_entries
+
+    @ns.doc(security='apikey')
+    @token_auth.login_required
+    @accepts(schema=MoxyAssessmentSchema, api=ns)
+    @responds(schema=MoxyAssessmentSchema, status_code=201, api=ns)
+    def post(self, clientid):
+        """create a power assessment entry for clientid"""
+        check_client_existence(clientid)
+
+        data=request.get_json()
+        data['clientid'] = clientid
+        data['timestamp'] = datetime.utcnow().isoformat()
+
+        moxy_schema = MoxyAssessmentSchema()
+        client_moxy = moxy_schema.load(data)
+        db.session.add(client_moxy)
+        db.session.commit()
+        
+        return client_moxy
+
