@@ -52,7 +52,7 @@ class Power(Resource):
     @ns.doc(security='apikey')
     @token_auth.login_required
     @accepts(schema=PowerAssessmentSchema, api=ns)
-    @responds(schema=PowerAssessmentSchema, api=ns)
+    @responds(schema=PowerAssessmentSchema, status_code=201, api=ns)
     def post(self, clientid):
         """create a power assessment entry for clientid"""
         check_client_existence(clientid)
@@ -93,7 +93,7 @@ class Strength(Resource):
     @ns.doc(security='apikey')
     @token_auth.login_required
     @accepts(schema=StrenghtAssessmentSchema, api=ns)
-    @responds(schema=StrenghtAssessmentSchema, api=ns)
+    @responds(schema=StrenghtAssessmentSchema, status_code=201, api=ns)
     def post(self, clientid):
         """create a power assessment entry for clientid"""
         check_client_existence(clientid)
@@ -136,7 +136,7 @@ class Movement(Resource):
     @ns.doc(security='apikey')
     @token_auth.login_required
     @accepts(schema=MovementAssessmentSchema, api=ns)
-    @responds(schema=MovementAssessmentSchema, api=ns)
+    @responds(schema=MovementAssessmentSchema, status_code=201, api=ns)
     def post(self, clientid):
         """create a power assessment entry for clientid"""
         check_client_existence(clientid)

@@ -168,3 +168,156 @@ test_moxy_assessment = {
                 "performance_baseline": 89,
                 "notes": "just some notes"
 }
+
+test_heart_assessment = {
+  "resting_hr": 55,
+  "estimated_vo2_max": 84,
+  "notes": "some noty notes",
+  "max_hr": 200,
+  "theoretical_max_hr": 209,
+  "avg_training_hr": 145,
+  "avg_eval_hr": 110
+}
+
+test_strength_assessment = {
+    "clientid": 0,
+    "upper_push": {
+    "right": {
+      "estimated_10rm": 250,
+      "attempt_1": 12,
+      "attempt_2": 10,
+      "attempt_3": 5,
+      "weight": 200
+    },
+    "notes": "more notes",
+    "left": {
+      "estimated_10rm": 260,
+      "attempt_1": 15,
+      "attempt_2": 15,
+      "attempt_3": 10,
+      "weight": 200
+    },
+    "bilateral": {
+      "estimated_10rm": 260,
+      "attempt_1": 15,
+      "attempt_2": 15,
+      "attempt_3": 0,
+      "weight": 200
+    }
+  },
+  "upper_pull": {
+    "right": {
+      "estimated_10rm": 250,
+      "attempt_1": 12,
+      "attempt_2": 10,
+      "attempt_3": 5,
+      "weight": 200
+    },
+    "notes": "string",
+    "left": {
+      "estimated_10rm": 250,
+      "attempt_1": 12,
+      "attempt_2": 10,
+      "attempt_3": 5,
+      "weight": 200
+    },
+    "bilateral": {
+      "estimated_10rm": 260,
+      "attempt_1": 15,
+      "attempt_2": 15,
+      "attempt_3": 0,
+      "weight": 200
+    }
+  }
+}
+
+test_power_assessment = { "clientid": 0,
+  "leg_press": {
+    "bilateral": {
+      "attempt_1": 21,
+      "attempt_2": 12,
+      "attempt_3": 10,
+      "weight": 550,
+      "average": 0
+    },
+    "right": {
+      "attempt_1": 22,
+      "attempt_2": 16,
+      "attempt_3": 5,
+      "weight": 220,
+      "average": 0
+    },
+    "left": {
+      "attempt_1": 22,
+      "attempt_2": 16,
+      "attempt_3": 5,
+      "weight": 220,
+      "average": 0
+    }
+  },
+  "lower_watts_per_kg": 100,
+  "upper_watts_per_kg": 60,
+  "push_pull": {
+    "right": {
+      "attempt_1": 16,
+      "attempt_2": 10,
+      "attempt_3": 0,
+      "weight": 50,
+      "average": 0
+    },
+    "left": {
+      "attempt_1": 16,
+      "attempt_2": 10,
+      "attempt_3": 0,
+      "weight": 50,
+      "average": 0
+    }
+  }
+}
+
+test_chessboard_assessment = {
+  "clientid": 0,
+  "notes": "notes",
+  "isa_right": True,
+  "isa_structure": "Asymettrical Atypical",
+  "isa_dynamic": False,
+  "isa_left": True,
+  "hip": {
+    "left": {
+      "er": 0,
+      "add": 0,
+      "slr": 0,
+      "flexion": 0,
+      "ir": 0,
+      "extension": 0,
+      "abd": 0
+    },
+    "right": {
+      "er": 0,
+      "add": 0,
+      "slr": 0,
+      "flexion": 0,
+      "ir": 0,
+      "extension": 0,
+      "abd": 0
+    }
+  },
+  "shoulder": {
+    "left": {
+      "er": 0,
+      "add": 0,
+      "flexion": 0,
+      "ir": 0,
+      "extension": 0,
+      "abd": 0
+    },
+    "right": {
+      "er": 0,
+      "add": 0,
+      "flexion": 0,
+      "ir": 0,
+      "extension": 0,
+      "abd": 0
+    }
+  }
+}
