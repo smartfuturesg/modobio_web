@@ -167,3 +167,33 @@ class Staff(db.Model):
         else:
             return None #not an admin
 
+class ClientRemovalRequests(db.Model):
+    """ Client removal request table.
+
+    Stores the history if client removal request by staff members
+    """
+    __tablename__ = 'client_removal_requests'
+    
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
+    
+    staffid = db.Column(db.Integer, 
+                         db.ForeignKey('Staff.staffid',
+                            name='ClientRemovalRequests_staffid_fkey'), 
+                        nullable=False)
+    """
+    Staff member ID number
+
+    :type: int, primary key, autoincrement
+    """
+
+    timestamp = db.Column(db.DateTime, primary_key=True)
+    """
+    Timestamp of the removal request
+
+    :type: datetime.datetime, primary key
+    """
