@@ -396,3 +396,20 @@ test_moxy_rip = {
         "clientid": 0,
         "smo2_tank_size": 60
 }
+
+test_pt_history = {
+    "clientid": 0,
+    "exercise": "olympic weigthlifting",
+    "has_pt": False,
+    "has_chiro": True,
+    "has_massage": False,
+    "has_surgery": True,
+    "has_medication": False,
+    "has_acupuncture": True,
+    "pain_areas": "here",
+    "best_pain": 7,
+    "worst_pain": 1,
+    "current_pain": 4,
+    "makes_worse": "exercise",
+    "makes_better": "also exercise"
+}
