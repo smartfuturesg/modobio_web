@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask import request, jsonify
 from flask_accepts import accepts, responds
 from flask_restx import Resource, Api
@@ -17,6 +19,7 @@ from odyssey.models.intake import (
     ClientSubscriptionContract,
     RemoteRegistration
 )
+from odyssey.models.main import ClientRemovalRequests
 from odyssey.constants import DOCTYPE, DOCTYPE_DOCREV_MAP
 from odyssey.pdf import to_pdf
 from odyssey.api.schemas import (
@@ -68,6 +71,31 @@ class Client(Resource):
         db.session.add(client)
         db.session.commit()
         return client
+
+@ns.route('/remove/<int:clientid>/')
+@ns.doc(params={'clientid': 'Client ID number'})
+class RemoveClient(Resource):
+    @ns.doc(security='apikey')
+    @token_auth.login_required
+    def delete(self, clientid):
+        """deletes client from database entirely"""
+        client = ClientInfo.query.get(clientid)
+
+        if not client:
+            raise UserNotFound(clientid)
+        
+        # find the staff member requesting client delete
+        staff = token_auth.current_user()
+        new_removal_request = ClientRemovalRequests(staffid=staff.staffid, timestamp=datetime.utcnow())
+        
+        db.session.add(new_removal_request)
+        db.session.flush()
+
+        #TODO: some logic on who gets to delete clients+ email to staff admin
+        db.session.delete(client)
+        db.session.commit()
+        
+        return {'message': f'client with id {clientid} has been removed'}
 
 @ns.route('/')
 class NewClient(Resource):

@@ -16,7 +16,7 @@ class PTHistory(db.Model):
     :type: int, primary key, autoincrement
     """
 
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid'), nullable=False)
+    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='PTHistory_clientid_fkey',ondelete="CASCADE"), nullable=False)
     """
     Client ID number
 
