@@ -63,7 +63,7 @@ class Power(Resource):
 
         data=request.get_json()
         data['clientid'] = clientid
-
+        
         pa_schema = PowerAssessmentSchema()
         client_pa = pa_schema.load(data)
 

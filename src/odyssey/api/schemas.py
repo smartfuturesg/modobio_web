@@ -3,7 +3,7 @@ from hashlib import md5
 import statistics
 
 from marshmallow import Schema, fields, post_load, ValidationError, validates, validate
-from marshmallow import post_load, post_dump, pre_dump
+from marshmallow import post_load, post_dump, pre_dump, pre_load
 
 from odyssey import ma
 from odyssey.models.intake import (
@@ -57,7 +57,7 @@ class NewRemoteRegistrationSchema(Schema):
         
 class ClientSummarySchema(Schema):
 
-    clientid = fields.Integer(required=True)
+    clientid = fields.Integer(missing=0)
     record_locator_id = fields.String(dump_only=True)
     email = fields.Email()
     firstname = fields.String(required=True, validate=validate.Length(min=1, max= 50))
@@ -88,8 +88,7 @@ class ClientConsentSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientConsent
     
-    # workaround for foreign fields as they are not picked up in autoschema
-    clientid = fields.Integer(required=False)
+    clientid = fields.Integer(missing=0)
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -102,8 +101,7 @@ class ClientReleaseSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientRelease
     
-    # workaround for foreign fields as they are not picked up in autoschema
-    clientid = fields.Integer(required=False)
+    clientid = fields.Integer(missing=0)
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -113,7 +111,7 @@ class ClientReleaseSchema(ma.SQLAlchemyAutoSchema):
 class SignAndDateSchema(Schema):
     """for marshaling signatures and sign dates into objects (contracts) requiring only a signature"""
 
-    clientid = fields.Integer(dump_only=True)
+    clientid = fields.Integer(missing=0, dump_only=True)
     signdate = fields.Date(format="iso", required=True)
     signature = fields.String(required=True)
 
@@ -157,7 +155,7 @@ class ClientPoliciesContractSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientPolicies
     
-    clientid = fields.Integer(required=True)
+    clientid = fields.Integer(missing=0)
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -206,7 +204,8 @@ class SignedDocumentsSchema(Schema):
 class PTHistorySchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = PTHistory
-        include_fk=True
+        
+    clientid = fields.Integer(missing=0)
     
     @post_load
     def make_object(self, data, **kwargs):
@@ -353,7 +352,7 @@ class PowerLegPress(Schema):
     bilateral = fields.Nested(PowerAttemptsLegPress)
 
 class PowerAssessmentSchema(Schema):
-    clientid = fields.Integer()
+    clientid = fields.Integer(missing=0)
     timestamp = fields.DateTime()
     push_pull = fields.Nested(PowerPushPull)
     leg_press = fields.Nested(PowerLegPress)
@@ -462,7 +461,7 @@ class StrengthPushPull(Schema):
     bilateral = fields.Nested(StrengthAttemptsPushPull)
 
 class StrenghtAssessmentSchema(Schema):
-    clientid = fields.Integer()
+    clientid = fields.Integer(missing=0)
     timestamp = fields.DateTime()
     upper_push = fields.Nested(StrengthPushPull)
     upper_pull = fields.Nested(StrengthPushPull)
@@ -583,7 +582,7 @@ class StandingRotationSchema(Schema):
     left = fields.Nested(StandingRotationNotesSchema)
 
 class MovementAssessmentSchema(Schema):
-    clientid = fields.Integer()
+    clientid = fields.Integer(missing=0)
     timestamp = fields.DateTime()
     squat = fields.Nested(SquatTestSchema)
     toe_touch = fields.Nested(ToeTouchTestSchema)
@@ -641,7 +640,7 @@ class HeartAssessmentSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = HeartAssessment
 
-    clientid = fields.Integer(required=False)
+    clientid = fields.Integer(missing=0)
     
     @post_load
     def make_object(self, data, **kwargs):
@@ -655,7 +654,7 @@ class MoxyAssessmentSchema(ma.SQLAlchemySchema):
     limiter_list = ['Demand','Supply','Respiratory']
     performance_metric_list = ['Watts','Lbs','Feet/Min']
 
-    clientid = ma.auto_field()
+    clientid = fields.Integer(missing=0)
     timestamp = ma.auto_field()
     notes = ma.auto_field()
     performance_baseline = fields.Integer(description="", validate=validate.Range(min=0, max=100))
@@ -693,7 +692,7 @@ class LungAssessmentSchema(ma.SQLAlchemySchema):
     class Meta:
         model = LungAssessment
         
-    clientid = ma.auto_field()
+    clientid = fields.Integer(missing=0)
     timestamp = ma.auto_field()
     notes = ma.auto_field()
     bag_size = fields.Float(description="in liters", validate=validate.Range(min=0, max=10))
@@ -721,7 +720,7 @@ class MoxyTries(Schema):
     four = fields.Nested(MoxyRipExaminationSchema)
 
 class MoxyRipSchema(Schema):
-    clientid = fields.Integer()
+    clientid = fields.Integer(missing=0)
     timestamp = fields.DateTime()
     performance = fields.Nested(MoxyTries)
     recovery = fields.Nested(MoxyTries)

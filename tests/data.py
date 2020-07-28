@@ -231,7 +231,7 @@ test_strength_assessment = {
   }
 }
 
-test_power_assessment = { "clientid": 0,
+test_power_assessment = {
   "leg_press": {
     "bilateral": {
       "attempt_1": 21,
