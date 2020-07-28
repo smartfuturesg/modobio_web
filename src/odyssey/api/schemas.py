@@ -691,3 +691,149 @@ class LungAssessmentSchema(ma.SQLAlchemySchema):
     def make_object(self, data, **kwargs):
         return LungAssessment(**data)
     
+
+class MoxyRipExaminationSchema(Schema):
+
+    smo2 = fields.Integer(description="", validate=validate.Range(min=0, max=100))
+    thb = fields.Integer(description="", validate=validate.Range(min=9, max=18))
+    avg_power = fields.Integer(description="", validate=validate.Range(min=0, max=1500))
+    hr_max_min = fields.Integer(description="", validate=validate.Range(min=0, max=220))
+
+class MoxyTries(Schema):
+    one = fields.Nested(MoxyRipExaminationSchema)
+    two = fields.Nested(MoxyRipExaminationSchema)
+    three = fields.Nested(MoxyRipExaminationSchema)
+    four = fields.Nested(MoxyRipExaminationSchema)
+
+class MoxyRipSchema(Schema):
+    clientid = fields.Integer()
+    timestamp = fields.DateTime()
+    performance = fields.Nested(MoxyTries)
+    recovery = fields.Nested(MoxyTries)
+    smo2_tank_size = fields.Integer(description="", validate=validate.Range(min=0, max=100))
+    thb_tank_size = fields.Integer(description="", validate=validate.Range(min=9, max=18))
+    performance_baseline_smo2 = fields.Integer(description="", validate=validate.Range(min=0, max=100))
+    performance_baseline_thb = fields.Integer(description="", validate=validate.Range(min=9, max=18))
+    recovery_baseline_smo2 = fields.Integer(description="", validate=validate.Range(min=0, max=100))
+    recovery_baseline_thb = fields.Integer(description="", validate=validate.Range(min=9, max=18))
+    avg_watt_kg = fields.Float(description="", validate=validate.Range(min=0, max=20))
+    avg_interval_time = fields.Integer(description="seconds", validate=validate.Range(min=0, max=360))
+    avg_recovery_time = fields.Integer(description="seconds", validate=validate.Range(min=0, max=360))
+
+    @post_load
+    def unravel(self, data, **kwargs):
+        flat_data = {'clientid': data['clientid'],
+                    'timestamp': datetime.utcnow(),
+                    'performance_smo2_1':          data['performance']['one']['smo2'],
+                    'performance_thb_1':           data['performance']['one']['thb'],
+                    'performance_average_power_1': data['performance']['one']['avg_power'],
+                    'performance_hr_max_1':        data['performance']['one']['hr_max_min'],
+                    'performance_smo2_2':          data['performance']['two']['smo2'],
+                    'performance_thb_2':           data['performance']['two']['thb'],
+                    'performance_average_power_2': data['performance']['two']['avg_power'],
+                    'performance_hr_max_2':        data['performance']['two']['hr_max_min'],
+                    'performance_smo2_3':          data['performance']['three']['smo2'],
+                    'performance_thb_3':           data['performance']['three']['thb'],
+                    'performance_average_power_3': data['performance']['three']['avg_power'],
+                    'performance_hr_max_3':        data['performance']['three']['hr_max_min'],
+                    'performance_smo2_4':          data['performance']['four']['smo2'],
+                    'performance_thb_4':           data['performance']['four']['thb'],
+                    'performance_average_power_4': data['performance']['four']['avg_power'],
+                    'performance_hr_max_4':        data['performance']['four']['hr_max_min'],
+                    'recovery_smo2_1':          data['recovery']['one']['smo2'],
+                    'recovery_thb_1':           data['recovery']['one']['thb'],
+                    'recovery_average_power_1': data['recovery']['one']['avg_power'],
+                    'recovery_hr_min_1':        data['recovery']['one']['hr_max_min'],
+                    'recovery_smo2_2':          data['recovery']['two']['smo2'],
+                    'recovery_thb_2':           data['recovery']['two']['thb'],
+                    'recovery_average_power_2': data['recovery']['two']['avg_power'],
+                    'recovery_hr_min_2':        data['recovery']['two']['hr_max_min'],
+                    'recovery_smo2_3':          data['recovery']['three']['smo2'],
+                    'recovery_thb_3':           data['recovery']['three']['thb'],
+                    'recovery_average_power_3': data['recovery']['three']['avg_power'],
+                    'recovery_hr_min_3':        data['recovery']['three']['hr_max_min'],
+                    'recovery_smo2_4':          data['recovery']['four']['smo2'],
+                    'recovery_thb_4':           data['recovery']['four']['thb'],
+                    'recovery_average_power_4': data['recovery']['four']['avg_power'],
+                    'recovery_hr_min_4':        data['recovery']['four']['hr_max_min'],
+                    'smo2_tank_size': data['smo2_tank_size'],
+                    'thb_tank_size': data['thb_tank_size'],
+                    'performance_baseline_smo2': data['performance_baseline_smo2'],     
+                    'performance_baseline_thb': data['performance_baseline_thb'],
+                    'recovery_baseline_smo2': data['recovery_baseline_smo2'],
+                    'recovery_baseline_thb': data['recovery_baseline_thb'],
+                    'avg_watt_kg': data['avg_watt_kg'],
+                    'avg_interval_time':data['avg_watt_kg'],
+                    'avg_recovery_time': data['avg_recovery_time']
+        }
+        return MoxyRipTest(**flat_data)
+
+    @pre_dump
+    def ravel(self, data, **kwargs):
+        nested = {
+            "recovery_baseline_smo2": data.recovery_baseline_smo2,
+            "performance": {
+                "two": {
+                    "smo2": data.performance_smo2_2,
+                    "avg_power": data.performance_average_power_2,
+                    "thb": data.performance_thb_2,
+                    "hr_max_min": data.performance_hr_max_2
+                },
+                "one": {
+                    "smo2": data.performance_smo2_1,
+                    "avg_power": data.performance_average_power_1,
+                    "thb": data.performance_thb_1,
+                    "hr_max_min": data.performance_hr_max_1
+                },
+                "three": {
+                    "smo2": data.performance_smo2_3,
+                    "avg_power": data.performance_average_power_3,
+                    "thb": data.performance_thb_3,
+                    "hr_max_min": data.performance_hr_max_3
+                },
+                "four": {
+                    "smo2": data.performance_smo2_4,
+                    "avg_power": data.performance_average_power_4,
+                    "thb": data.performance_thb_4,
+                    "hr_max_min": data.performance_hr_max_4
+                }
+            },
+            "recovery": {
+                "two": {
+                    "smo2": data.recovery_smo2_2,
+                    "avg_power": data.recovery_average_power_2,
+                    "thb": data.recovery_thb_2,
+                    "hr_max_min": data.recovery_hr_min_2
+                },
+                "one": {
+                    "smo2": data.recovery_smo2_1,
+                    "avg_power": data.recovery_average_power_1,
+                    "thb": data.recovery_thb_1,
+                    "hr_max_min": data.recovery_hr_min_1
+                },
+                "three": {
+                    "smo2": data.recovery_smo2_3,
+                    "avg_power": data.recovery_average_power_3,
+                    "thb": data.recovery_thb_3,
+                    "hr_max_min": data.recovery_hr_min_3
+                },
+                "four": {
+                    "smo2": data.recovery_smo2_4,
+                    "avg_power": data.recovery_average_power_4,
+                    "thb": data.recovery_thb_4,
+                    "hr_max_min": data.recovery_hr_min_4
+                }
+            },
+            "timestamp": data.timestamp,
+            "performance_baseline_smo2": data.performance_baseline_smo2,
+            "performance_baseline_thb": data.performance_baseline_thb,
+            "thb_tank_size": data.thb_tank_size,
+            "avg_watt_kg": data.avg_watt_kg,
+            "recovery_baseline_thb": data.recovery_baseline_thb,
+            "avg_interval_time": data.avg_interval_time,
+            "avg_recovery_time": data.avg_recovery_time,
+            "clientid": data.clientid,
+            "smo2_tank_size": data.smo2_tank_size
+        }
+
+        return nested

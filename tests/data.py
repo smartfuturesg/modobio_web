@@ -331,3 +331,68 @@ test_lung_assessment = {
   "bag_size": 5,
   "duration": 200
 }
+
+test_moxy_rip = {
+        "recovery_baseline_smo2": 0,
+        "performance": {
+            "two": {
+            "smo2": 0,
+            "avg_power": 0,
+            "thb": 10,
+            "hr_max_min": 180
+            },
+            "one": {
+            "smo2": 0,
+            "avg_power": 0,
+            "thb": 10,
+            "hr_max_min": 140
+            },
+            "three": {
+            "smo2": 0,
+            "avg_power": 0,
+            "thb": 10,
+            "hr_max_min": 150
+            },
+            "four": {
+            "smo2": 0,
+            "avg_power": 0,
+            "thb": 10,
+            "hr_max_min": 120
+            }
+        },
+        "recovery": {
+            "two": {
+            "smo2": 60,
+            "avg_power": 60,
+            "thb": 10,
+            "hr_max_min": 60
+            },
+            "one": {
+            "smo2": 20,
+            "avg_power": 100,
+            "thb": 10,
+            "hr_max_min": 70
+            },
+            "three": {
+            "smo2":50,
+            "avg_power": 90,
+            "thb": 10,
+            "hr_max_min": 70
+            },
+            "four": {
+            "smo2": 50,
+            "avg_power": 80,
+            "thb": 10,
+            "hr_max_min": 70
+            }
+        },
+        "performance_baseline_smo2": 50,
+        "performance_baseline_thb": 10,
+        "thb_tank_size": 10,
+        "avg_watt_kg": 10,
+        "recovery_baseline_thb": 10,
+        "avg_interval_time": 50,
+        "avg_recovery_time": 56,
+        "clientid": 0,
+        "smo2_tank_size": 60
+}

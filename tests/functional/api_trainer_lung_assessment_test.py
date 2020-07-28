@@ -30,7 +30,7 @@ def test_post_lung_assessment(test_client, init_database):
 
 def test_get_lung_assessment(test_client, init_database):
     """
-    GIVEN a api end point for retrieving all heart assessments
+    GIVEN a api end point for retrieving all lung assessments
     WHEN the  '/trainer/assessment/lungcapacity/<client id>' resource  is requested (GET)
     THEN check the response is valid
     """

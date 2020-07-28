@@ -791,6 +791,310 @@ class MoxyRipTest(db.Model):
 
     :type: int, foreign key to :attr:`ClientInfo.clientid`
     """
+    
+    performance_smo2_1 = db.Column(db.Integer)
+    """
+    performance assessment 1 smo2
+
+    :type: int
+    """
+
+    performance_thb_1 = db.Column(db.Integer)
+    """
+    performance assessment 1 thb
+
+    :type: int
+    """
+
+    performance_average_power_1 = db.Column(db.Integer)
+    """
+    performance assessment 1 average power
+
+    :type: int
+    """
+
+    performance_hr_max_1 = db.Column(db.Integer)
+    """
+    performance assessment 1 max hr
+
+    :type: int
+    """
+
+    performance_smo2_2 = db.Column(db.Integer)
+    """
+    performance assessment 2 smo2
+
+    :type: int
+    """
+
+    performance_thb_2 = db.Column(db.Integer)
+    """
+    performance assessment 2 thb
+
+    :type: int
+    """
+
+    performance_average_power_2 = db.Column(db.Integer)
+    """
+    performance assessment 2 average power
+
+    :type: int
+    """
+
+    performance_hr_max_2 = db.Column(db.Integer)
+    """
+    performance assessment 2 max hr
+
+    :type: int
+    """
+
+    performance_smo2_3 = db.Column(db.Integer)
+    """
+    performance assessment 3 smo2
+
+    :type: int
+    """
+
+    performance_thb_3 = db.Column(db.Integer)
+    """
+    performance assessment 3 thb
+
+    :type: int
+    """
+
+    performance_average_power_3 = db.Column(db.Integer)
+    """
+    performance assessment 3 average power
+
+    :type: int
+    """
+
+    performance_hr_max_3 = db.Column(db.Integer)
+    """
+    performance assessment 3 max hr
+
+    :type: int
+    """
+    
+    performance_smo2_4 = db.Column(db.Integer)
+    """
+    performance assessment 4 smo2
+
+    :type: int
+    """
+
+    performance_thb_4 = db.Column(db.Integer)
+    """
+    performance assessment 4 thb
+
+    :type: int
+    """
+
+    performance_average_power_4 = db.Column(db.Integer)
+    """
+    performance assessment 4 average power
+
+    :type: int
+    """
+
+    performance_hr_max_4 = db.Column(db.Integer)
+    """
+    performance assessment 4 max hr
+
+    :type: int
+    """
+
+    recovery_smo2_1 = db.Column(db.Integer)
+    """
+    recovery assessment 1 smo2
+
+    :type: int
+    """
+
+    recovery_thb_1 = db.Column(db.Integer)
+    """
+    recovery assessment 1 thb
+
+    :type: int
+    """
+
+    recovery_average_power_1 = db.Column(db.Integer)
+    """
+    recovery assessment 1 average power
+
+    :type: int
+    """
+
+    recovery_hr_min_1 = db.Column(db.Integer)
+    """
+    recovery assessment 1 min hr
+
+    :type: int
+    """
+
+    recovery_smo2_2 = db.Column(db.Integer)
+    """
+    recovery assessment 2 smo2
+
+    :type: int
+    """
+
+    recovery_thb_2 = db.Column(db.Integer)
+    """
+    recovery assessment 2 thb
+
+    :type: int
+    """
+
+    recovery_average_power_2 = db.Column(db.Integer)
+    """
+    recovery assessment 2 average power
+
+    :type: int
+    """
+
+    recovery_hr_min_2 = db.Column(db.Integer)
+    """
+    recovery assessment 2 min hr
+
+    :type: int
+    """
+
+    recovery_smo2_3 = db.Column(db.Integer)
+    """
+    recovery assessment 3 smo2
+
+    :type: int
+    """
+
+    recovery_thb_3 = db.Column(db.Integer)
+    """
+    recovery assessment 3 thb
+
+    :type: int
+    """
+
+    recovery_average_power_3 = db.Column(db.Integer)
+    """
+    recovery assessment 3 average power
+
+    :type: int
+    """
+
+    recovery_hr_min_3 = db.Column(db.Integer)
+    """
+    recovery assessment 3 min hr
+
+    :type: int
+    """
+    
+    recovery_smo2_4 = db.Column(db.Integer)
+    """
+    recovery assessment 4 smo2
+
+    :type: int
+    """
+
+    recovery_thb_4 = db.Column(db.Integer)
+    """
+    recovery assessment 4 thb
+
+    :type: int
+    """
+
+    recovery_average_power_4 = db.Column(db.Integer)
+    """
+    recovery assessment 4 average power
+
+    :type: int
+    """
+
+    recovery_hr_min_4 = db.Column(db.Integer)
+    """
+    recovery assessment 4 min hr
+
+    :type: int
+    """
+
+    smo2_tank_size = db.Column(db.Integer)
+    """
+    SmO2 tank size
+
+    :type: int
+    """
+
+    thb_tank_size = db.Column(db.Integer)
+    """
+    tHB tank size
+
+    :type: int
+    """
+
+    performance_baseline_smo2 = db.Column(db.Integer)
+    """
+    performance baseline SmO2 
+
+    :type: int
+    """
+
+    performance_baseline_thb = db.Column(db.Integer)
+    """
+    performance baseline tHB
+
+    :type: int
+    """
+
+    recovery_baseline_smo2 = db.Column(db.Integer)
+    """
+    recovery baseline SmO2 
+
+    :type: int
+    """
+
+    recovery_baseline_thb = db.Column(db.Integer)
+    """
+    recovery baseline tHB
+
+    :type: int
+    """
+
+    avg_watt_kg = db.Column(db.Float)
+    """
+    Average watts per kg
+
+    :type: float
+    """
+
+    avg_interval_time = db.Column(db.Integer)
+    """
+    Average interval time in seconds 
+
+    :type: int
+    """
+
+    avg_recovery_time = db.Column(db.Integer)
+    """
+    Average recovery time in seconds 
+
+    :type: int
+    """
+    
+    limiter = db.Column(db.String)
+    """
+    Must be one of:
+    'Demand',
+    'Supply',
+    'Respiratory'
+
+    :type: str
+    """    
+
+    intervention = db.Column(db.String)
+    """
+    note. Letters & numbers
+
+    :type: str
+    """    
 
 
 class LungAssessment(db.Model):
