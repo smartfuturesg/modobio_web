@@ -9,7 +9,7 @@ from odyssey.api import api
 from odyssey.api.auth import token_auth
 from odyssey.api.errors import UserNotFound, IllegalSetting
 
-from odyssey.api.schemas import ChessboardSchema
+from odyssey.api.schemas import ChessboardSchema, PTHistorySchema
 
 ns = api.namespace('pt', description='Operations related to physical therapy services')
 
@@ -18,7 +18,7 @@ class ClientPTHistory(Resource):
     """GET, POST, PUT for pt history data"""
     @ns.doc(security='apikey')
     @token_auth.login_required
-    # @ns.marshal_with(pt_history_response)
+    @responds(schema=PTHistorySchema)
     def get(self, clientid):
         """returns most recent mobility assessment data"""
         client_pt = PTHistory.query.filter_by(
@@ -31,10 +31,10 @@ class ClientPTHistory(Resource):
         
         return client_pt.to_dict()
 
-    # @ns.expect(pt_history_new, validate=True)
     @ns.doc(security='apikey')
     @token_auth.login_required
-    # @ns.marshal_with(pt_history_response)
+    @accepts(schema=PTHistorySchema, api=ns)
+    @responds(schema=PTHistorySchema, status_code=201, api=ns)
     def post(self, clientid):
         """returns most recent mobility assessment data"""
         data = request.get_json()
@@ -42,23 +42,27 @@ class ClientPTHistory(Resource):
         #check to see if there is already an entry for pt history
         current_pt_history = PTHistory.query.filter_by(
                         clientid=clientid).first()
-        # if current_pt_history:
-        #     raise ResourceAlreadyExists(identification=f"clientid {clientid}")
-        
-        #create a new entry into the pt history table
-        client_pt = PTHistory(clientid=clientid)
 
-        client_pt.from_dict(data)
+        if current_pt_history:
+            raise IllegalSetting(message=f"PT History for clientid {clientid} already exists. Please use PUT method")
+
+        data['clientid'] = clientid
+        
+        pth_schema = PTHistorySchema()
+
+        #create a new entry into the pt history table
+        client_pt = pth_schema.load(data)
 
         db.session.add(client_pt)
         db.session.commit()
 
-        return client_pt.to_dict()
+        return client_pt
 
-    # @ns.expect(pt_history_new, validate=True)
+    
     @ns.doc(security='apikey')
     @token_auth.login_required
-    # @ns.marshal_with(pt_history_response)
+    @accepts(schema=PTHistorySchema, api=ns)
+    @responds(schema=PTHistorySchema, status_code=201, api=ns)
     def put(self, clientid):
         """edit user's pt history"""
         data = request.get_json()

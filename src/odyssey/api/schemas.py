@@ -199,6 +199,21 @@ class SignedDocumentsSchema(Schema):
     """
     urls = fields.List(fields.String())
 
+"""
+    Schemas for the pt API
+"""
+
+class PTHistorySchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = PTHistory
+        include_fk=True
+    
+    @post_load
+    def make_object(self, data, **kwargs):
+        return PTHistory(**data)
+
+
+
 class ShoulderRotationSchema(Schema):
     ir = fields.Integer(description="internal rotation", validate=validate.Range(min=0, max=100))
     er = fields.Integer(description="external rotation", validate=validate.Range(min=0, max=130))

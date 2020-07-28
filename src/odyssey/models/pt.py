@@ -119,29 +119,6 @@ class PTHistory(db.Model):
     :type: str, max length 1024
     """
 
-
-    def to_dict(self):
-        """retuns all data in ClientSubscriptionContract Model as a dictionary"""
-        data = {
-            'clientid': self.clientid,
-            'last_examination_date': self.last_examination_date,
-            'last_examination_reason': self.last_examination_reason,
-            'goals': self.goals,
-            'concerns': self.concerns,
-            'family_history': self.family_history,
-            'social_history': self.social_history,
-            'allergies': self.allergies,
-            'medication': self.medication,
-            'diagnostic_xray': self.diagnostic_xray,
-            'diagnostic_ctscan': self.diagnostic_ctscan,
-            'diagnostic_endoscopy': self.diagnostic_endoscopy,
-            'diagnostic_mri': self.diagnostic_mri,
-            'diagnostic_ultrasound': self.diagnostic_ultrasound,
-            'diagnostic_other': self.diagnostic_other
-        }
-        return data
-
-
 class MobilityAssessment(db.Model):
 
     """ Mobility assessment table
