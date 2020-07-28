@@ -29,7 +29,7 @@ class ClientPTHistory(Resource):
                 clientid=clientid, 
                 message = "this client does not yet have a pt history logged")
         
-        return client_pt.to_dict()
+        return client_pt
 
     @ns.doc(security='apikey')
     @token_auth.login_required
