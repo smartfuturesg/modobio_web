@@ -23,7 +23,7 @@ def upgrade():
     sa.Column('staffid', sa.Integer(), nullable=False),
     sa.Column('timestamp', sa.DateTime(), nullable=False),
     sa.ForeignKeyConstraint(['staffid'], ['Staff.staffid'], name='ClientRemovalRequests_staffid_fkey'),
-    sa.PrimaryKeyConstraint('idx', 'timestamp')
+    sa.PrimaryKeyConstraint('idx')
     )
     # ### end Alembic commands ###
 

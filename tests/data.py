@@ -152,3 +152,264 @@ test_json_json = '{"a": 1, "b": 1.1, "c": true, "d": "string", "e": {"aa": 11, "
 # This will be run in test, so JSONIFY_PRETTYPRINT_REGULAR is True by default.
 # It affects spaces and indentation in jsonify output.
 test_json_jsonify = b'{\n  "a": 1, \n  "b": 1.1, \n  "c": true, \n  "d": "string", \n  "e": {\n    "aa": 11, \n    "bb": "bigger string"\n  }, \n  "f": [\n    1, \n    2, \n    3, \n    4, \n    5\n  ], \n  "g": "1977-04-05", \n  "h": "14:21:39.123456", \n  "i": "2020-06-07T12:39:46.123456", \n  "j": {\n    "ja": {\n      "jja": [\n        "13:00:00", \n        "14:00:00", \n        "15:00:00"\n      ]\n    }\n  }, \n  "k": "17a3bee0-42db-4416-8b84-3990b1c6397e"\n}\n'
+
+test_moxy_assessment = {
+                "clientid" : 0,
+                "performance_metric_2_value": 100,
+                "starting_thb": 11,
+                "limiter": "Demand",
+                "recovery_baseline": 50,
+                "gas_tank_size": 75,
+                "starting_sm_o2": 99,
+                "intervention": "notes on notes",
+                "performance_metric_1": "Feet/Min",
+                "performance_metric_2": "Lbs",
+                "performance_metric_1_value": 1000,
+                "performance_baseline": 89,
+                "notes": "just some notes"
+}
+
+test_heart_assessment = {
+  "resting_hr": 55,
+  "estimated_vo2_max": 84,
+  "notes": "some noty notes",
+  "max_hr": 200,
+  "theoretical_max_hr": 209,
+  "avg_training_hr": 145,
+  "avg_eval_hr": 110
+}
+
+test_strength_assessment = {
+    "clientid": 0,
+    "upper_push": {
+    "right": {
+      "estimated_10rm": 250,
+      "attempt_1": 12,
+      "attempt_2": 10,
+      "attempt_3": 5,
+      "weight": 200
+    },
+    "notes": "more notes",
+    "left": {
+      "estimated_10rm": 260,
+      "attempt_1": 15,
+      "attempt_2": 15,
+      "attempt_3": 10,
+      "weight": 200
+    },
+    "bilateral": {
+      "estimated_10rm": 260,
+      "attempt_1": 15,
+      "attempt_2": 15,
+      "attempt_3": 0,
+      "weight": 200
+    }
+  },
+  "upper_pull": {
+    "right": {
+      "estimated_10rm": 250,
+      "attempt_1": 12,
+      "attempt_2": 10,
+      "attempt_3": 5,
+      "weight": 200
+    },
+    "notes": "string",
+    "left": {
+      "estimated_10rm": 250,
+      "attempt_1": 12,
+      "attempt_2": 10,
+      "attempt_3": 5,
+      "weight": 200
+    },
+    "bilateral": {
+      "estimated_10rm": 260,
+      "attempt_1": 15,
+      "attempt_2": 15,
+      "attempt_3": 0,
+      "weight": 200
+    }
+  }
+}
+
+test_power_assessment = {
+  "leg_press": {
+    "bilateral": {
+      "attempt_1": 21,
+      "attempt_2": 12,
+      "attempt_3": 10,
+      "weight": 550,
+      "average": 0
+    },
+    "right": {
+      "attempt_1": 22,
+      "attempt_2": 16,
+      "attempt_3": 5,
+      "weight": 220,
+      "average": 0
+    },
+    "left": {
+      "attempt_1": 22,
+      "attempt_2": 16,
+      "attempt_3": 5,
+      "weight": 220,
+      "average": 0
+    }
+  },
+  "lower_watts_per_kg": 100,
+  "upper_watts_per_kg": 60,
+  "push_pull": {
+    "right": {
+      "attempt_1": 16,
+      "attempt_2": 10,
+      "attempt_3": 0,
+      "weight": 50,
+      "average": 0
+    },
+    "left": {
+      "attempt_1": 16,
+      "attempt_2": 10,
+      "attempt_3": 0,
+      "weight": 50,
+      "average": 0
+    }
+  }
+}
+
+test_chessboard_assessment = {
+  "clientid": 0,
+  "notes": "notes",
+  "isa_right": True,
+  "isa_structure": "Asymettrical Atypical",
+  "isa_dynamic": False,
+  "isa_left": True,
+  "hip": {
+    "left": {
+      "er": 0,
+      "add": 0,
+      "slr": 0,
+      "flexion": 0,
+      "ir": 0,
+      "extension": 0,
+      "abd": 0
+    },
+    "right": {
+      "er": 0,
+      "add": 0,
+      "slr": 0,
+      "flexion": 0,
+      "ir": 0,
+      "extension": 0,
+      "abd": 0
+    }
+  },
+  "shoulder": {
+    "left": {
+      "er": 0,
+      "add": 0,
+      "flexion": 0,
+      "ir": 0,
+      "extension": 0,
+      "abd": 0
+    },
+    "right": {
+      "er": 0,
+      "add": 0,
+      "flexion": 0,
+      "ir": 0,
+      "extension": 0,
+      "abd": 0
+    }
+  }
+}
+
+test_lung_assessment = {
+  "notes": "these lungs are not so great. Client exhibits asthma.",
+  "clientid": 0,
+  "liters_min_kg": 55,
+  "max_minute_volume": 400,
+  "breaths_per_minute": 25,
+  "bag_size": 5,
+  "duration": 200
+}
+
+test_moxy_rip = {
+        "recovery_baseline_smo2": 0,
+        "performance": {
+            "two": {
+            "smo2": 0,
+            "avg_power": 0,
+            "thb": 10,
+            "hr_max_min": 180
+            },
+            "one": {
+            "smo2": 0,
+            "avg_power": 0,
+            "thb": 10,
+            "hr_max_min": 140
+            },
+            "three": {
+            "smo2": 0,
+            "avg_power": 0,
+            "thb": 10,
+            "hr_max_min": 150
+            },
+            "four": {
+            "smo2": 0,
+            "avg_power": 0,
+            "thb": 10,
+            "hr_max_min": 120
+            }
+        },
+        "recovery": {
+            "two": {
+            "smo2": 60,
+            "avg_power": 60,
+            "thb": 10,
+            "hr_max_min": 60
+            },
+            "one": {
+            "smo2": 20,
+            "avg_power": 100,
+            "thb": 10,
+            "hr_max_min": 70
+            },
+            "three": {
+            "smo2":50,
+            "avg_power": 90,
+            "thb": 10,
+            "hr_max_min": 70
+            },
+            "four": {
+            "smo2": 50,
+            "avg_power": 80,
+            "thb": 10,
+            "hr_max_min": 70
+            }
+        },
+        "performance_baseline_smo2": 50,
+        "performance_baseline_thb": 10,
+        "thb_tank_size": 10,
+        "avg_watt_kg": 10,
+        "recovery_baseline_thb": 10,
+        "avg_interval_time": 50,
+        "avg_recovery_time": 56,
+        "clientid": 0,
+        "smo2_tank_size": 60
+}
+
+test_pt_history = {
+    "clientid": 0,
+    "exercise": "olympic weigthlifting",
+    "has_pt": False,
+    "has_chiro": True,
+    "has_massage": False,
+    "has_surgery": True,
+    "has_medication": False,
+    "has_acupuncture": True,
+    "pain_areas": "here",
+    "best_pain": 7,
+    "worst_pain": 1,
+    "current_pain": 4,
+    "makes_worse": "exercise",
+    "makes_better": "also exercise"
+}
