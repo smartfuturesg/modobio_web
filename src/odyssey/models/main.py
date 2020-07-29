@@ -191,7 +191,7 @@ class ClientRemovalRequests(db.Model):
     :type: int, primary key, autoincrement
     """
 
-    timestamp = db.Column(db.DateTime, primary_key=True)
+    timestamp = db.Column(db.DateTime)
     """
     Timestamp of the removal request
 

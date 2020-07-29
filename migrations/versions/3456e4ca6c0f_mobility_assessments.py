@@ -1,8 +1,8 @@
 """mobility assessments
 
-Revision ID: b4bd6e2599d0
-Revises: 6388fde942e3
-Create Date: 2020-07-27 18:15:58.269180
+Revision ID: 3456e4ca6c0f
+Revises: 2300d2b3ad4c
+Create Date: 2020-07-28 16:54:59.283785
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'b4bd6e2599d0'
-down_revision = '6388fde942e3'
+revision = '3456e4ca6c0f'
+down_revision = '2300d2b3ad4c'
 branch_labels = None
 depends_on = None
 
@@ -53,7 +53,7 @@ def upgrade():
     sa.Column('right_hip_extension', sa.Integer(), nullable=True),
     sa.Column('right_hip_slr', sa.Integer(), nullable=True),
     sa.Column('notes', sa.Text(), nullable=True),
-    sa.ForeignKeyConstraint(['clientid'], ['ClientInfo.clientid'], ),
+    sa.ForeignKeyConstraint(['clientid'], ['ClientInfo.clientid'], name='chessboard_clientid_fkey', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('idx')
     )
     op.create_table('heart_assessment',
@@ -67,7 +67,7 @@ def upgrade():
     sa.Column('avg_training_hr', sa.Integer(), nullable=True),
     sa.Column('estimated_vo2_max', sa.Integer(), nullable=True),
     sa.Column('notes', sa.String(), nullable=True),
-    sa.ForeignKeyConstraint(['clientid'], ['ClientInfo.clientid'], ),
+    sa.ForeignKeyConstraint(['clientid'], ['ClientInfo.clientid'], name='heart_assessment_clientid_fkey', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('idx')
     )
     op.create_table('lung_assessment',
@@ -80,7 +80,7 @@ def upgrade():
     sa.Column('breaths_per_minute', sa.Integer(), nullable=True),
     sa.Column('max_minute_volume', sa.Float(), nullable=True),
     sa.Column('liters_min_kg', sa.Float(), nullable=True),
-    sa.ForeignKeyConstraint(['clientid'], ['ClientInfo.clientid'], ),
+    sa.ForeignKeyConstraint(['clientid'], ['ClientInfo.clientid'], name='lung_assessment_clientid_fkey', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('idx')
     )
     op.create_table('movement_assessment',
@@ -98,7 +98,7 @@ def upgrade():
     sa.Column('toe_touch_notes', sa.String(), nullable=True),
     sa.Column('standing_rotation_r_notes', sa.String(), nullable=True),
     sa.Column('standing_rotation_l_notes', sa.String(), nullable=True),
-    sa.ForeignKeyConstraint(['clientid'], ['ClientInfo.clientid'], ),
+    sa.ForeignKeyConstraint(['clientid'], ['ClientInfo.clientid'], name='movement_assessment_clientid_fkey', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('idx')
     )
     op.create_table('moxy_assessment',
@@ -117,7 +117,7 @@ def upgrade():
     sa.Column('performance_metric_1_value', sa.Integer(), nullable=True),
     sa.Column('performance_metric_2', sa.String(), nullable=True),
     sa.Column('performance_metric_2_value', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['clientid'], ['ClientInfo.clientid'], ),
+    sa.ForeignKeyConstraint(['clientid'], ['ClientInfo.clientid'], name='moxy_assessment_clientid_fkey', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('idx')
     )
     op.create_table('moxy_rip_test',
@@ -167,7 +167,7 @@ def upgrade():
     sa.Column('avg_recovery_time', sa.Integer(), nullable=True),
     sa.Column('limiter', sa.String(), nullable=True),
     sa.Column('intervention', sa.String(), nullable=True),
-    sa.ForeignKeyConstraint(['clientid'], ['ClientInfo.clientid'], ),
+    sa.ForeignKeyConstraint(['clientid'], ['ClientInfo.clientid'], name='moxy_rip_assessment_clientid_fkey', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('idx')
     )
     op.create_table('power_assessment',
@@ -196,7 +196,7 @@ def upgrade():
     sa.Column('keiser_lower_l_attempt_3', sa.Integer(), nullable=True),
     sa.Column('upper_watts_per_kg', sa.Float(), nullable=True),
     sa.Column('lower_watts_per_kg', sa.Float(), nullable=True),
-    sa.ForeignKeyConstraint(['clientid'], ['ClientInfo.clientid'], ),
+    sa.ForeignKeyConstraint(['clientid'], ['ClientInfo.clientid'], name='power_assessment_clientid_fkey', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('idx')
     )
     op.create_table('strength_assessment',
@@ -235,7 +235,7 @@ def upgrade():
     sa.Column('upper_pull_bi_attempt_2', sa.Integer(), nullable=True),
     sa.Column('upper_pull_bi_attempt_3', sa.Integer(), nullable=True),
     sa.Column('upper_pull_bi_estimated_10rm', sa.Float(), nullable=True),
-    sa.ForeignKeyConstraint(['clientid'], ['ClientInfo.clientid'], ),
+    sa.ForeignKeyConstraint(['clientid'], ['ClientInfo.clientid'], name='strength_assessment_clientid_fkey', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('idx')
     )
     # ### end Alembic commands ###

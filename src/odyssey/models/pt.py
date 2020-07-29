@@ -119,220 +119,6 @@ class PTHistory(db.Model):
     :type: str, max length 1024
     """
 
-class MobilityAssessment(db.Model):
-
-    """ Mobility assessment table
-
-    This table stores the repeated mobility assessment measurements. The measurements
-    are indexed by :attr:`clientid` and assessment :attr:`timestamp`. All values in
-    this table, with the exception of :attr:`isa_dynamic`, are angles in degrees.
-    """
-
-    __tablename__ = 'MobilityAssessment'
-
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid'),
-                        nullable=False, primary_key=True)
-    """
-    Client ID number
-
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
-    """
-
-    timestamp = db.Column(db.DateTime, primary_key=True)
-    """
-    Timestamp of the assessment.
-
-    :type: datetime.datetime, primary key
-    """
-
-    isa_left = db.Column(db.Integer)
-    """
-    ISA? left
-
-    :type: int
-    """
-
-    isa_right = db.Column(db.Integer)
-    """
-    ISA? left
-
-    :type: int
-    """
-
-    isa_dynamic = db.Column(db.Boolean)
-    """
-    Indicates whether or not the ISA is dynamic.
-
-    :type: bool
-    """
-
-    left_shoulder_er = db.Column(db.Integer)
-    """
-    Left shoulder external rotation
-
-    :type: int
-    """
-
-    left_shoulder_ir = db.Column(db.Integer)
-    """
-    Left shoulder internal rotation
-
-    :type: int
-    """
-
-    left_shoulder_abd = db.Column(db.Integer)
-    """
-    Left shoulder abduction.
-
-    :type: int
-    """
-
-    left_shoulder_add = db.Column(db.Integer)
-    """
-    Left shoulder adduction
-
-    :type: int
-    """
-
-    left_shoulder_flexion = db.Column(db.Integer)
-    """
-    Left shoulder flexion.
-
-    :type: int
-    """
-
-    left_shoulder_extension = db.Column(db.Integer)
-    """
-    Left shoulder extension.
-
-    :type: int
-    """
-
-    right_shoulder_er = db.Column(db.Integer)
-    """
-    Right shoulder external rotation
-
-    :type: int
-    """
-
-    right_shoulder_ir = db.Column(db.Integer)
-    """
-    Right shoulder internal rotation
-
-    :type: int
-    """
-
-    right_shoulder_abd = db.Column(db.Integer)
-    """
-    Right shoulder abduction.
-
-    :type: int
-    """
-
-    right_shoulder_add = db.Column(db.Integer)
-    """
-    Right shoulder adduction
-
-    :type: int
-    """
-
-    right_shoulder_flexion = db.Column(db.Integer)
-    """
-    Right shoulder flexion.
-
-    :type: int
-    """
-
-    right_shoulder_extension = db.Column(db.Integer)
-    """
-    Right shoulder extension.
-
-    :type: int
-    """
-
-    left_hip_er = db.Column(db.Integer)
-    """
-    Left hip external rotation
-
-    :type: int
-    """
-
-    left_hip_ir = db.Column(db.Integer)
-    """
-    Left hip internal rotation
-
-    :type: int
-    """
-
-    left_hip_abd = db.Column(db.Integer)
-    """
-    Left hip abduction.
-
-    :type: int
-    """
-
-    left_hip_add = db.Column(db.Integer)
-    """
-    Left hip adduction
-
-    :type: int
-    """
-
-    left_hip_flexion = db.Column(db.Integer)
-    """
-    Left hip flexion.
-
-    :type: int
-    """
-
-    left_hip_extension = db.Column(db.Integer)
-    """
-    Left hip extension.
-
-    :type: int
-    """
-
-    right_hip_er = db.Column(db.Integer)
-    """
-    Right hip external rotation
-
-    :type: int
-    """
-
-    right_hip_ir = db.Column(db.Integer)
-    """
-    Right hip internal rotation
-
-    :type: int
-    """
-
-    right_hip_abd = db.Column(db.Integer)
-    """
-    Right hip abduction.
-
-    :type: int
-    """
-
-    right_hip_add = db.Column(db.Integer)
-    """
-    Right hip adduction
-
-    :type: int
-    """
-
-    right_hip_flexion = db.Column(db.Integer)
-    """
-    Right hip flexion.
-
-    :type: int
-    """
-
-    right_hip_extension = db.Column(db.Integer)
-    """
-    Right hip extension.
-
-    :type: int
-    """
 
 class Chessboard(db.Model):
     """ Mobility assessment table a.k.a Chessboard
@@ -351,7 +137,7 @@ class Chessboard(db.Model):
     :type: int, primary key, autoincrement
     """
 
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid'), nullable=False)
+    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='chessboard_clientid_fkey',ondelete="CASCADE"), nullable=False)
     """
     Client ID number
 
@@ -661,3 +447,216 @@ class Chessboard(db.Model):
             }
         return data, resources
 
+class MobilityAssessment(db.Model):
+    """ Mobility assessment table
+
+    This table stores the repeated mobility assessment measurements. The measurements
+    are indexed by :attr:`clientid` and assessment :attr:`timestamp`. All values in
+    this table, with the exception of :attr:`isa_dynamic`, are angles in degrees.
+    """
+
+    __tablename__ = 'MobilityAssessment'
+
+    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid'),
+                        nullable=False, primary_key=True)
+    """
+    Client ID number
+
+    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    """
+
+    timestamp = db.Column(db.DateTime, primary_key=True)
+    """
+    Timestamp of the assessment.
+
+    :type: datetime.datetime, primary key
+    """
+
+    isa_left = db.Column(db.Integer)
+    """
+    ISA? left
+
+    :type: int
+    """
+
+    isa_right = db.Column(db.Integer)
+    """
+    ISA? left
+
+    :type: int
+    """
+
+    isa_dynamic = db.Column(db.Boolean)
+    """
+    Indicates whether or not the ISA is dynamic.
+
+    :type: bool
+    """
+
+    left_shoulder_er = db.Column(db.Integer)
+    """
+    Left shoulder external rotation
+
+    :type: int
+    """
+
+    left_shoulder_ir = db.Column(db.Integer)
+    """
+    Left shoulder internal rotation
+
+    :type: int
+    """
+
+    left_shoulder_abd = db.Column(db.Integer)
+    """
+    Left shoulder abduction.
+
+    :type: int
+    """
+
+    left_shoulder_add = db.Column(db.Integer)
+    """
+    Left shoulder adduction
+
+    :type: int
+    """
+
+    left_shoulder_flexion = db.Column(db.Integer)
+    """
+    Left shoulder flexion.
+
+    :type: int
+    """
+
+    left_shoulder_extension = db.Column(db.Integer)
+    """
+    Left shoulder extension.
+
+    :type: int
+    """
+
+    right_shoulder_er = db.Column(db.Integer)
+    """
+    Right shoulder external rotation
+
+    :type: int
+    """
+
+    right_shoulder_ir = db.Column(db.Integer)
+    """
+    Right shoulder internal rotation
+
+    :type: int
+    """
+
+    right_shoulder_abd = db.Column(db.Integer)
+    """
+    Right shoulder abduction.
+
+    :type: int
+    """
+
+    right_shoulder_add = db.Column(db.Integer)
+    """
+    Right shoulder adduction
+
+    :type: int
+    """
+
+    right_shoulder_flexion = db.Column(db.Integer)
+    """
+    Right shoulder flexion.
+
+    :type: int
+    """
+
+    right_shoulder_extension = db.Column(db.Integer)
+    """
+    Right shoulder extension.
+
+    :type: int
+    """
+
+    left_hip_er = db.Column(db.Integer)
+    """
+    Left hip external rotation
+
+    :type: int
+    """
+
+    left_hip_ir = db.Column(db.Integer)
+    """
+    Left hip internal rotation
+
+    :type: int
+    """
+
+    left_hip_abd = db.Column(db.Integer)
+    """
+    Left hip abduction.
+
+    :type: int
+    """
+
+    left_hip_add = db.Column(db.Integer)
+    """
+    Left hip adduction
+
+    :type: int
+    """
+
+    left_hip_flexion = db.Column(db.Integer)
+    """
+    Left hip flexion.
+
+    :type: int
+    """
+
+    left_hip_extension = db.Column(db.Integer)
+    """
+    Left hip extension.
+
+    :type: int
+    """
+
+    right_hip_er = db.Column(db.Integer)
+    """
+    Right hip external rotation
+
+    :type: int
+    """
+
+    right_hip_ir = db.Column(db.Integer)
+    """
+    Right hip internal rotation
+
+    :type: int
+    """
+
+    right_hip_abd = db.Column(db.Integer)
+    """
+    Right hip abduction.
+
+    :type: int
+    """
+
+    right_hip_add = db.Column(db.Integer)
+    """
+    Right hip adduction
+
+    :type: int
+    """
+
+    right_hip_flexion = db.Column(db.Integer)
+    """
+    Right hip flexion.
+
+    :type: int
+    """
+
+    right_hip_extension = db.Column(db.Integer)
+    """
+    Right hip extension.
+
+    :type: int
+    """

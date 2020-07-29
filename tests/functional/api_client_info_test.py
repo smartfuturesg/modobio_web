@@ -100,6 +100,33 @@ def test_creating_new_client(test_client, init_database):
     assert client.email == 'test_this_client_two@gmail.com'
     assert client.get_medical_record_hash() == 'TC21CAB50'
 
+def test_removing_client(test_client, init_database):
+    """
+    GIVEN a api end point for retrieving client info
+    WHEN the '/client/remove/<client id>' resource  is requested to be changed (DELETE)
+    THEN check the response is valid
+    """
+
+    # get staff authorization to view client data
+    staff = Staff().query.first()
+    token = staff.get_token()
+    headers = {'Authorization': f'Bearer {token}'}
+
+    # send post request to create client
+    test_client.post('/api/client/',
+                                headers=headers, 
+                                data=dumps(test_new_client_info), 
+                                content_type='application/json')
+    client = ClientInfo.query.filter_by(email=test_new_client_info['email']).first()
+    
+    #take this new clientid
+    remove_clientid = client.clientid
+
+    response = test_client.delete(f'/api/client/remove/{remove_clientid}/',
+                                headers=headers, 
+                                content_type='application/json')
+    # some simple checks for validity
+    assert response.status_code == 200
 
 # def test_home_registration(test_client, init_database):
 #     """
