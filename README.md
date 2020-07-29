@@ -2,19 +2,42 @@
 
 --- **_A staff application for the client journey_**
 
-This is a Flask based app that serves webpages to the ModoBio staff. The pages contain the intake and data gathering forms for the _client journey_. The [Odyssey](https://en.wikipedia.org/wiki/Odyssey) is the most famous journey of all time! 🤓
+This is a Flask based app that serves webpages and an API to the ModoBio staff. The pages contain the intake and data gathering forms for the _client journey_. The [Odyssey](https://en.wikipedia.org/wiki/Odyssey) is the most famous journey of all time! 🤓
+
+## Documentation
+
+Documentation for this package can be found [on GitLab Pages](http://zan.atventures.tech/odyssey/)
 
 ## Requirements
 
 For testing on your local computer, you will need the following installed.
 
-- Postgres server on localhost with a database named "modobio" (tested with PostgreSQL 12.2)
+- Postgres server running on localhost (tested with PostgreSQL 12.2)
 - Python (tested with 3.7)
 - pip (should come with Python version 3.4+, if not more info [here](https://pip.pypa.io/en/stable/installing/))
 
-## Installation
+## Pre-installation
 
-Open a terminal and (assuming bash shell) run the following commands:
+### Postgres
+
+With postgres installed, create a new database named modobio. For convenience, add a role (user) with the same name as your login name. Because it is a local connection, you should not need a password.
+
+```shell
+$ sudo -u postgres createdb modobio
+$ sudo -u postgres createuser -l $USER
+$ psql modobio
+modobio=> \q
+```
+
+### External libraries
+
+Pip should normally take care of installing all python dependencies, but some dependencies in turn depend on non-python libraries. To install these on Ubuntu Linux:
+
+```shell
+$ sudo apt install pkg-config libcairo2-dev libgirepository1.0-dev libpangocairo1.0-0 postgresql-client
+```  
+
+## Installation
 
 ```shell
 git clone git@gitlab.atventurepartners.tech:zan/odyssey.git
@@ -24,13 +47,23 @@ pip -e install .
 
 Pip should take care of installing all Python dependencies. The `-e` option means you installed it in _editable_ mode. It imports and runs like it's installed in the normal `PYTHONPATH` directory, but you can edit it in the git repo and see the updates immediately.
 
-## Running
+## Updating the database
 
-In a terminal (assuming bash) type:
+If the database schemas have changed between updates, and before the first run, use Alembic (through flask-migrate) to push the changes to your local database.
 
 ```shell
-export FLASK_APP=odyssey
+export FLASK_APP=odyssey:create_app
 export FLASK_ENV=development
+export FLASK_DEV=local
+flask db migrate
+```
+
+## Running
+
+```shell
+export FLASK_APP=odyssey:create_app
+export FLASK_ENV=development
+export FLASK_DEV=local
 flask run
 ```
 
@@ -38,9 +71,7 @@ The app will keep running in the terminal and give extensive debug output. If al
 
 More info on running Flask apps [here](https://flask.palletsprojects.com/en/1.1.x/quickstart/)
 
-The flask app will create all necessary tables in the database upon first start. It will **not** update existing tables (Alembic is a separate program to do that). After the tables are created, you will need to add a staff member to the `Staff` table in the database. At the moment, no easy admin page exists yet, so you will need to do this directly in psql (the PostgeSQL command line interface).
-
-Before you can add a staff member, you will need to generate the password hash. The Flask app uses the `check_password_hash()` function from the `werkzeug.security` module to check the passwords. To generate a compatible password hash, open Python and type the following.
+Before you can log in, you will need to add a staff member to the `Staff` table in the database. At the moment there is no easy admin page to do this. First, generate a password hash. The Flask app uses the `check_password_hash()` function from the `werkzeug.security` module to check the passwords. To generate a compatible password hash, open Python and type the following.
 
 ```python
 >>> from werkzeug.security import generate_password_hash

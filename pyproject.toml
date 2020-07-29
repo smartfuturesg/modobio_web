@@ -1,5 +1,7 @@
-# This file defines the build system. The requirements are required
+# This file defines the build system. These packages are required
 # BEFORE the setup.py or requirements.txt files are even read.
+# https://www.python.org/dev/peps/pep-0517/
+# https://www.python.org/dev/peps/pep-0518/
 
 [build-system]
 requires = ["setuptools>=42", "wheel", "setuptools_scm[toml]>=3.4"]
