@@ -945,7 +945,7 @@ class RemoteRegistration(db.Model):
     :attr:`clientid` number.
     """
 
-    __tablename__ = 'remote_registration'
+    __tablename__ = 'ClientRemoteRegistration'
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """

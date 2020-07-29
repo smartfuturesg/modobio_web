@@ -172,7 +172,7 @@ class ClientRemovalRequests(db.Model):
 
     Stores the history if client removal request by staff members
     """
-    __tablename__ = 'client_removal_requests'
+    __tablename__ = 'ClientRemovalRequests'
     
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """

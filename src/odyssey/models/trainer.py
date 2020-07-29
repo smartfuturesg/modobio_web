@@ -7,7 +7,7 @@ class PowerAssessment(db.Model):
     """ Power assessment table
     """
 
-    __tablename__ = 'power_assessment'
+    __tablename__ = 'TrainerPowerAssessment'
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -191,7 +191,7 @@ class StrengthAssessment(db.Model):
     """ Strength assessment table
     """
 
-    __tablename__ = 'strength_assessment'
+    __tablename__ = 'TrainerStrengthAssessment'
     
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -439,13 +439,11 @@ class StrengthAssessment(db.Model):
     """
 
 
-
-
 class MovementAssessment(db.Model):
     """ Movement Assessment table
     """
 
-    __tablename__ = 'movement_assessment'
+    __tablename__ = 'TrainerMovementAssessment'
     
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -576,7 +574,7 @@ class HeartAssessment(db.Model):
     """ Heart assessment table
     """
 
-    __tablename__ = 'heart_assessment'
+    __tablename__ = 'TrainerHeartAssessment'
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -654,7 +652,7 @@ class MoxyAssessment(db.Model):
 
     """
 
-    __tablename__ = 'moxy_assessment'
+    __tablename__ = 'TrainerMoxyAssessment'
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -769,7 +767,7 @@ class MoxyRipTest(db.Model):
     """ Moxy rop test table
     """
 
-    __tablename__ = 'moxy_rip_test'
+    __tablename__ = 'TrainerMoxyRipTest'
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -1101,7 +1099,7 @@ class LungAssessment(db.Model):
     """ Lung assessment
     """
 
-    __tablename__ = 'lung_assessment'
+    __tablename__ = 'TrainerLungAssessment'
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """

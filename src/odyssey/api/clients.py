@@ -160,8 +160,8 @@ class ConsentContract(Resource):
         """returns the most recent consent table as a json for the clientid specified"""
         check_client_existence(clientid)
 
-        client_consent_form = ClientConsent.query.filter_by(clientid=clientid).order_by(ClientConsent.signdate.desc()).first()
-
+        client_consent_form = ClientConsent.query.filter_by(clientid=clientid).order_by(ClientConsent.idx.desc()).first()
+        
         if not client_consent_form:
             raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a consultation contract in the database")
 
@@ -202,7 +202,7 @@ class ReleaseContract(Resource):
         """returns most recent client release table as a json for the clientid specified"""
         check_client_existence(clientid)
 
-        client_release_form =  ClientRelease.query.filter_by(clientid=clientid).order_by(ClientRelease.signdate.desc()).first()
+        client_release_form =  ClientRelease.query.filter_by(clientid=clientid).order_by(ClientRelease.idx.desc()).first()
 
         if not client_release_form:
             raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a release contract in the database")
@@ -242,7 +242,7 @@ class PoliciesContract(Resource):
         """returns most recent client policies table as a json for the clientid specified"""
         check_client_existence(clientid)
 
-        client_policies =  ClientPolicies.query.filter_by(clientid=clientid).order_by(ClientPolicies.signdate.desc()).first()
+        client_policies =  ClientPolicies.query.filter_by(clientid=clientid).order_by(ClientPolicies.idx.desc()).first()
 
         if not client_policies:
             raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a policy contract in the database")
@@ -282,7 +282,7 @@ class ConsultConstract(Resource):
         """returns most recent client consultation table as a json for the clientid specified"""
         check_client_existence(clientid)
 
-        client_consult =  ClientConsultContract.query.filter_by(clientid=clientid).order_by(ClientConsultContract.signdate.desc()).first()
+        client_consult =  ClientConsultContract.query.filter_by(clientid=clientid).order_by(ClientConsultContract.idx.desc()).first()
 
         if not client_consult:
             raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a consultation contract in the database")
@@ -322,7 +322,7 @@ class SubscriptionContract(Resource):
         """returns most recent client subscription contract table as a json for the clientid specified"""
         check_client_existence(clientid)
 
-        client_subscription =  ClientSubscriptionContract.query.filter_by(clientid=clientid).order_by(ClientSubscriptionContract.signdate.desc()).first()
+        client_subscription =  ClientSubscriptionContract.query.filter_by(clientid=clientid).order_by(ClientSubscriptionContract.idx.desc()).first()
         if not client_subscription:
             raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a subscription contract in the database")
 
@@ -361,7 +361,7 @@ class IndividualContract(Resource):
         """returns most recent client individual servies table as a json for the clientid specified"""
         check_client_existence(clientid)
         
-        client_services =  ClientIndividualContract.query.filter_by(clientid=clientid).order_by(ClientIndividualContract.signdate.desc()).first()
+        client_services =  ClientIndividualContract.query.filter_by(clientid=clientid).order_by(ClientIndividualContract.idx.desc()).first()
 
         if not client_services:
             raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have an individual services contract in the database")
@@ -409,7 +409,7 @@ class SignedDocuments(Resource):
                       ClientConsultContract,
                       ClientSubscriptionContract,
                       ClientIndividualContract):
-            result = table.query.filter_by(clientid=clientid).order_by(table.revision.desc()).first()
+            result = table.query.filter_by(clientid=clientid).order_by(table.idx.desc()).first()
             if result and result.url:
                 urls.append(result.url)
 
@@ -464,7 +464,7 @@ class NewRemoteRegistration(Resource):
 
 
 @ns.route('/remoteregistration/refresh/')
-class RefreshRemoteRegistrationSchema(Resource):
+class RefreshRemoteRegistration(Resource):
     """
         refresh client portal a client for remote registration
     """

@@ -128,8 +128,7 @@ class Chessboard(db.Model):
     this table, with the exception of :attr:`isa_dynamic`, are angles in degrees.
     """
 
-    __tablename__ = 'chessboard'
-
+    __tablename__ = 'PTChessboard'
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     Table index.
