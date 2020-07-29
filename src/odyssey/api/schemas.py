@@ -38,7 +38,7 @@ class NewRemoteRegistrationSchema(Schema):
     email = fields.Email()
     firstname = fields.String(required=True, validate=validate.Length(min=1, max= 50))
     lastname = fields.String(required=True, validate=validate.Length(min=1,max=50))
-    middlename = fields.String(required=False, validate=validate.Length(min=1,max=50))
+    middlename = fields.String(required=False, validate=validate.Length(min=0,max=50))
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -51,7 +51,7 @@ class ClientSummarySchema(Schema):
     email = fields.Email()
     firstname = fields.String(required=True, validate=validate.Length(min=1, max= 50))
     lastname = fields.String(required=True, validate=validate.Length(min=1,max=50))
-    middlename = fields.String(required=False, validate=validate.Length(min=1,max=50))
+    middlename = fields.String(required=False, validate=validate.Length(min=0,max=50))
     phone = fields.String()
 
     _links = fields.Dict()
