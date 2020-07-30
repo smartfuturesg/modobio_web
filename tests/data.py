@@ -398,7 +398,6 @@ test_moxy_rip = {
 }
 
 test_pt_history = {
-    "clientid": 0,
     "exercise": "olympic weigthlifting",
     "has_pt": False,
     "has_chiro": True,
