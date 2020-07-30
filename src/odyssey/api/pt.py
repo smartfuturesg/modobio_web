@@ -71,7 +71,8 @@ class ClientPTHistory(Resource):
         client_pt = PTHistory.query.filter_by(clientid=clientid).first()
 
         if not client_pt:
-            raise ContentNotFound()
+            raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a pt history in the database")
+
         
         # get payload and update the current instance followd by db commit
         data = request.get_json()

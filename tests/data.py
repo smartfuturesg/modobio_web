@@ -413,3 +413,20 @@ test_pt_history = {
     "makes_worse": "exercise",
     "makes_better": "also exercise"
 }
+
+test_medical_history = {
+  "allergies": "new allergy",
+  "concerns": "no real concerns",
+  "diagnostic_other": "string",
+  "diagnostic_ultrasound": "string",
+  "diagnostic_endoscopy": "string",
+  "family_history": "string",
+  "social_history": "string",
+  "diagnostic_mri": "string",
+  "diagnostic_xray": "string",
+  "last_examination_date": "2020-07-30",
+  "diagnostic_ctscan": "string",
+  "goals": "string",
+  "last_examination_reason": "string",
+  "medication": "string"
+}

@@ -1,4 +1,6 @@
 
+from datetime import datetime
+
 from flask import request
 from flask_accepts import accepts, responds
 from flask_restx import Resource, Api
@@ -28,6 +30,7 @@ class MedHistory(Resource):
 
         if not client:
             raise ContentNotFound()
+
         return client
     
     @ns.doc(security='apikey')
@@ -39,7 +42,7 @@ class MedHistory(Resource):
         check_client_existence(clientid)
 
         current_med_history = MedicalHistory.query.filter_by(clientid=clientid).first()
-
+        
         if current_med_history:
             raise IllegalSetting(message=f"Medical History for clientid {clientid} already exists. Please use PUT method")
 
@@ -50,7 +53,6 @@ class MedHistory(Resource):
         mh_schema = MedicalHistorySchema()
 
         client_mh = mh_schema.load(data)
-
         db.session.add(client_mh)
         db.session.commit()
 
@@ -71,7 +73,9 @@ class MedHistory(Resource):
         
         # get payload and update the current instance followd by db commit
         data = request.get_json()
-
+       
+        data['last_examination_date'] = datetime.strptime(data['last_examination_date'], "%Y-%m-%d")
+        
         client_mh.update(data)
         db.session.commit()
 
@@ -79,11 +83,6 @@ class MedHistory(Resource):
 
 
 
-# @bp.route('/doctor/medicalhistory/<int:clientid>/', methods=['GET'])
-# #@token_auth.login_required
-# def get_medical_history(clientid):
-#     """returns medical history for the specified client id"""
-#     return MedicalHistory.query.filter_by(clientid=clientid).first_or_404().to_dict()
 
 # @bp.route('/doctor/medicalphysicalexam/<int:clientid>/', methods=['GET'])
 # @token_auth.login_required
