@@ -14,6 +14,14 @@ class UserNotFound(Exception):
 
         self.status_code = 404
 
+class ContentNotFound(Exception):
+    """in the case a non-existent resource is requested"""
+    def __init__(self):
+        Exception.__init__(self)
+        
+        self.message = ""
+        
+        self.status_code = 204
 
 class UnauthorizedUser(Exception):
     """in the case a staff member is trying to access resources they are not permitted to"""
@@ -81,6 +89,11 @@ def error_user_does_not_exist(error):
 @api.errorhandler(ClientNotFound)
 def error_client_not_found(error):
     '''Return a custom message and 400 status code'''
+    return error_response(error.status_code, error.message)
+
+@api.errorhandler(ContentNotFound)
+def error_content_not_found(error):
+    '''Return a custom message and 204 status code'''
     return error_response(error.status_code, error.message)
 
 @api.errorhandler(IllegalSetting)

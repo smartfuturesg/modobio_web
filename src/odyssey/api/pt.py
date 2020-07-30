@@ -7,7 +7,7 @@ from odyssey.models.pt import Chessboard, PTHistory
 from odyssey import db
 from odyssey.api import api
 from odyssey.api.auth import token_auth
-from odyssey.api.errors import UserNotFound, IllegalSetting
+from odyssey.api.errors import UserNotFound, IllegalSetting, ContentNotFound
 
 from odyssey.api.schemas import ChessboardSchema, PTHistorySchema
 
@@ -21,14 +21,13 @@ class ClientPTHistory(Resource):
     @responds(schema=PTHistorySchema)
     def get(self, clientid):
         """returns most recent mobility assessment data"""
+        check_client_existence(clientid)
         client_pt = PTHistory.query.filter_by(
                         clientid=clientid).first()
         
         if not client_pt:
-            raise UserNotFound(
-                clientid=clientid, 
-                message = "this client does not yet have a pt history logged")
-        
+            raise ContentNotFound() 
+                
         return client_pt
 
     @ns.doc(security='apikey')
@@ -37,6 +36,8 @@ class ClientPTHistory(Resource):
     @responds(schema=PTHistorySchema, status_code=201, api=ns)
     def post(self, clientid):
         """returns most recent mobility assessment data"""
+        check_client_existence(clientid)
+
         data = request.get_json()
 
         #check to see if there is already an entry for pt history
@@ -70,7 +71,7 @@ class ClientPTHistory(Resource):
         client_pt = PTHistory.query.filter_by(clientid=clientid).first()
 
         if not client_pt:
-            raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a pt history in the database")
+            raise ContentNotFound()
         
         # get payload and update the current instance followd by db commit
         data = request.get_json()

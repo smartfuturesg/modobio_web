@@ -27,8 +27,7 @@ class MedHistory(Resource):
         client = MedicalHistory.query.filter_by(clientid=clientid).first()
 
         if not client:
-            raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a medical history in the database")
-
+            raise ContentNotFound()
         return client
     
     @ns.doc(security='apikey')
