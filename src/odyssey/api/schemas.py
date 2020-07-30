@@ -6,6 +6,7 @@ from marshmallow import Schema, fields, post_load, ValidationError, validates, v
 from marshmallow import post_load, post_dump, pre_dump, pre_load
 
 from odyssey import ma
+from odyssey.models.doctor import MedicalHistory, MedicalPhysicalExam
 from odyssey.models.intake import (
     ClientConsent,
     ClientInfo,
@@ -851,3 +852,19 @@ class MoxyRipSchema(Schema):
         }
 
         return nested
+
+
+"""
+    Schemas for the doctor's API
+"""
+
+class MedicalHistorySchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = MedicalHistory
+        
+    clientid = fields.Integer(missing=0)
+    
+    @post_load
+    def make_object(self, data, **kwargs):
+        return MedicalHistory(**data)
+    

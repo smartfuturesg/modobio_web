@@ -62,28 +62,23 @@ class ClientPTHistory(Resource):
     @ns.doc(security='apikey')
     @token_auth.login_required
     @accepts(schema=PTHistorySchema, api=ns)
-    @responds(schema=PTHistorySchema, status_code=201, api=ns)
+    @responds(schema=PTHistorySchema, api=ns)
     def put(self, clientid):
         """edit user's pt history"""
+        check_client_existence(clientid)
+
+        client_pt = PTHistory.query.filter_by(clientid=clientid).first()
+
+        if not client_pt:
+            raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a pt history in the database")
+        
+        # get payload and update the current instance followd by db commit
         data = request.get_json()
 
-        #pull up the current pt history for the client
-        client_pt = PTHistory.query.filter_by(
-                        clientid=clientid).first()
-        if not client_pt:
-            raise UserNotFound(
-                clientid=clientid, 
-                message = "this client does not yet have a pt history logged")
-        #prevent requests to set clientid and send message back to api user
-        elif data.get('clientid', None):
-            raise IllegalSetting('clientid')
-
-        client_pt.from_dict(data)
-
-        db.session.add(client_pt)
+        client_pt.update(data)
         db.session.commit()
 
-        return client_pt.to_dict()
+        return client_pt
 
 @ns.route('/chessboard/<int:clientid>/')
 class ClientChessboard(Resource):
