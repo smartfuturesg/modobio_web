@@ -63,6 +63,14 @@ class Staff(db.Model):
     :type: str, default = cs
     """
 
+    access_roles = db.Column(db.ARRAY(db.String), nullable=False, server_default="{}")
+    """
+    Indicates the content access role of the staff member.
+    roles include: client services (cs), pt, doctor, data 
+
+    :type: str, default = cs
+    """
+
     email = db.Column(db.String(50), nullable=False, unique=True)
     """
     Email address of staff member, used as login.

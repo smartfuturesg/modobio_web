@@ -18,6 +18,7 @@ from odyssey.models.intake import (
     ClientSubscriptionContract
 )
 from odyssey.models.pt import Chessboard, PTHistory
+from odyssey.models.main import Staff
 from odyssey.models.trainer import (
     HeartAssessment, 
     PowerAssessment, 
@@ -878,3 +879,27 @@ class MedicalPhysicalExamSchema(ma.SQLAlchemyAutoSchema):
     @post_load
     def make_object(self, data, **kwargs):
         return MedicalPhysicalExam(**data)
+
+
+"""
+    Schemas for the staff API
+"""
+class StaffSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Staff
+
+    token = fields.String(dump_only=True)
+    token_expiration = fields.DateTime(dump_only=True)
+    password = fields.String(required=True, load_only=True)
+    email = fields.Email(required=True)
+    access_roles = fields.List(fields.String,required=True)
+    is_system_admin = fields.Boolean(dump_only=True, missing=False)
+    is_admin = fields.Boolean(dump_only=True, missing=False)
+    staffid = fields.Integer(dump_only=True)
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        new_staff = Staff(**data)
+        new_staff.set_password(data['password'])
+        return new_staff
+
