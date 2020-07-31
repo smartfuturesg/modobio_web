@@ -87,12 +87,12 @@ class MedHistory(Resource):
 class MedPhysical(Resource):
     @ns.doc(security='apikey')
     @token_auth.login_required
-    @responds(schema=MedicalPhysicalExamSchema, api=ns)
+    @responds(schema=MedicalPhysicalExamSchema(many=True), api=ns)
     def get(self, clientid):
         """returns client's medical physical exam as a json for the clientid specified"""
         check_client_existence(clientid)
 
-        client = MedicalPhysicalExam.query.filter_by(clientid=clientid).first()
+        client = MedicalPhysicalExam.query.filter_by(clientid=clientid).order_by(MedicalPhysicalExam.timestamp.asc()).all()
 
         if not client:
             raise ContentNotFound()
@@ -104,17 +104,12 @@ class MedPhysical(Resource):
     @accepts(schema=MedicalPhysicalExamSchema, api=ns)
     @responds(schema=MedicalPhysicalExamSchema, status_code=201, api=ns)
     def post(self, clientid):
-        """creates db entry of client's medical physical exam as a json for the clientid specified"""
+        """creates new db entry of client's medical physical exam as a json for the clientid specified"""
         check_client_existence(clientid)
-
-        current_med_physical = MedicalPhysicalExam.query.filter_by(clientid=clientid).first()
-        
-        if current_med_physical:
-            raise IllegalSetting(message=f"Medical physical exam for clientid {clientid} already exists. Please use PUT method")
-
 
         data = request.get_json()
         data["clientid"] = clientid
+        data["timestamp"] = datetime.utcnow().isoformat()
 
         mh_schema = MedicalPhysicalExamSchema()
 
@@ -125,27 +120,27 @@ class MedPhysical(Resource):
 
         return client_mp
 
-    @ns.doc(security='apikey')
-    @token_auth.login_required
-    @accepts(schema=MedicalPhysicalExamSchema, api=ns)
-    @responds(schema=MedicalPhysicalExamSchema, api=ns)
-    def put(self, clientid):
-        """updates client's medical physical exam as a json for the clientid specified"""
-        check_client_existence(clientid)
+    # @ns.doc(security='apikey')
+    # @token_auth.login_required
+    # @accepts(schema=MedicalPhysicalExamSchema, api=ns)
+    # @responds(schema=MedicalPhysicalExamSchema, api=ns)
+    # def put(self, clientid):
+    #     """updates client's medical physical exam as a json for the clientid specified"""
+    #     check_client_existence(clientid)
 
-        client_mp = MedicalPhysicalExam.query.filter_by(clientid=clientid).first()
+    #     client_mp = MedicalPhysicalExam.query.filter_by(clientid=clientid).first()
 
-        if not client_mp:
-            raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a medical physical exam in the database")
+    #     if not client_mp:
+    #         raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a medical physical exam in the database")
         
-        # get payload and update the current instance followd by db commit
-        data = request.get_json()
+    #     # get payload and update the current instance followd by db commit
+    #     data = request.get_json()
        
         
-        client_mp.update(data)
-        db.session.commit()
+    #     client_mp.update(data)
+    #     db.session.commit()
 
-        return client_mh
+    #     return client_mp
 
 
 

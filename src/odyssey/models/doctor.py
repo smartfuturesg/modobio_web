@@ -169,6 +169,13 @@ class MedicalPhysicalExam(db.Model):
     :type: int, foreign key to :attr:`ClientInfo.clientid`
     """
 
+    timestamp = db.Column(db.DateTime)
+    """
+    Timestamp of the assessment.
+
+    :type: datetime.datetime, primary key
+    """
+    
     vital_heartrate = db.Column(db.Integer)
     """
     Heart rate
