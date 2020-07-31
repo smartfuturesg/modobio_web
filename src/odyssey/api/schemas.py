@@ -868,3 +868,13 @@ class MedicalHistorySchema(ma.SQLAlchemyAutoSchema):
     def make_object(self, data, **kwargs):
         return MedicalHistory(**data)
     
+class MedicalPhysicalExamSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = MedicalPhysicalExam
+        
+    clientid = fields.Integer(missing=0)
+    vital_height = fields.String(description="Deprecated, use vital_height_inches instead", missing="")
+    
+    @post_load
+    def make_object(self, data, **kwargs):
+        return MedicalPhysicalExam(**data)

@@ -9,9 +9,9 @@ from odyssey import db
 from odyssey.models.doctor import MedicalPhysicalExam, MedicalHistory
 from odyssey.api import api
 from odyssey.api.auth import token_auth
-from odyssey.api.schemas import MedicalHistorySchema
+from odyssey.api.schemas import MedicalHistorySchema, MedicalPhysicalExamSchema
 from odyssey.api.utils import check_client_existence
-from odyssey.api.errors import UserNotFound, IllegalSetting
+from odyssey.api.errors import UserNotFound, IllegalSetting, ContentNotFound
 
 ns = api.namespace('doctor', description='Operations related to doctor')
 
@@ -82,11 +82,72 @@ class MedHistory(Resource):
         return client_mh
 
 
+@ns.route('/physical/<int:clientid>/')
+@ns.doc(params={'clientid': 'Client ID number'})
+class MedPhysical(Resource):
+    @ns.doc(security='apikey')
+    @token_auth.login_required
+    @responds(schema=MedicalPhysicalExamSchema, api=ns)
+    def get(self, clientid):
+        """returns client's medical physical exam as a json for the clientid specified"""
+        check_client_existence(clientid)
+
+        client = MedicalPhysicalExam.query.filter_by(clientid=clientid).first()
+
+        if not client:
+            raise ContentNotFound()
+
+        return client
+    
+    @ns.doc(security='apikey')
+    @token_auth.login_required
+    @accepts(schema=MedicalPhysicalExamSchema, api=ns)
+    @responds(schema=MedicalPhysicalExamSchema, status_code=201, api=ns)
+    def post(self, clientid):
+        """creates db entry of client's medical physical exam as a json for the clientid specified"""
+        check_client_existence(clientid)
+
+        current_med_physical = MedicalPhysicalExam.query.filter_by(clientid=clientid).first()
+        
+        if current_med_physical:
+            raise IllegalSetting(message=f"Medical physical exam for clientid {clientid} already exists. Please use PUT method")
 
 
-# @bp.route('/doctor/medicalphysicalexam/<int:clientid>/', methods=['GET'])
-# @token_auth.login_required
-# def get_medical_physical(clientid):
-#     """returns medical history for the specified client id"""
-#     return MedicalPhysicalExam.query.filter_by(clientid=clientid).first_or_404().to_dict()
+        data = request.get_json()
+        data["clientid"] = clientid
+
+        mh_schema = MedicalPhysicalExamSchema()
+
+        client_mp = mh_schema.load(data)
+
+        db.session.add(client_mp)
+        db.session.commit()
+
+        return client_mp
+
+    @ns.doc(security='apikey')
+    @token_auth.login_required
+    @accepts(schema=MedicalPhysicalExamSchema, api=ns)
+    @responds(schema=MedicalPhysicalExamSchema, api=ns)
+    def put(self, clientid):
+        """updates client's medical physical exam as a json for the clientid specified"""
+        check_client_existence(clientid)
+
+        client_mp = MedicalPhysicalExam.query.filter_by(clientid=clientid).first()
+
+        if not client_mp:
+            raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a medical physical exam in the database")
+        
+        # get payload and update the current instance followd by db commit
+        data = request.get_json()
+       
+        
+        client_mp.update(data)
+        db.session.commit()
+
+        return client_mh
+
+
+
+
 

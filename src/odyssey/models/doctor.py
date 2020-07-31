@@ -227,6 +227,17 @@ class MedicalPhysicalExam(db.Model):
     :unit: TBD
     """
 
+
+    vital_height_inches = db.Column(db.Float)
+    """
+    Body height
+
+    Height in inches
+
+    :type: float
+    :unit: inches
+    """
+
     cardiac_rrr = db.Column(db.Boolean)
     """
     "Regular rate and rythm" heart sound
@@ -346,33 +357,3 @@ class MedicalPhysicalExam(db.Model):
     :type: str
     """
 
-    def to_dict(self):
-        """retuns all data in ClientSubscriptionContract Model as a dictionary"""
-        data = {
-            'clientid': self.clientid,
-            'vital_heartrate': self.vital_heartrate,
-            'vital_respiratoryrate': self.vital_respiratoryrate,
-            'vital_systolic': self.vital_systolic,
-            'vital_diastolic': self.vital_diastolic,
-            'vital_temperature': self.vital_temperature,
-            'vital_weight': self.vital_weight,
-            'vital_height': self.vital_height,
-            'cardiac_rrr': self.cardiac_rrr,
-            'cardiac_s1s2': self.cardiac_s1s2,
-            'cardiac_murmurs': self.cardiac_murmurs,
-            'cardiac_murmurs_info': self.cardiac_murmurs_info,
-            'cardiac_rubs': self.cardiac_rubs,
-            'cardiac_gallops': self.cardiac_gallops,
-            'pulmonary_clear': self.pulmonary_clear,
-            'pulmonary_wheezing': self.pulmonary_wheezing,
-            'pulmonary_wheezing_info': self.pulmonary_wheezing_info,
-            'pulmonary_rales': self.pulmonary_rales,
-            'pulmonary_rhonchi': self.pulmonary_rhonchi,
-            'abdominal_soft': self.abdominal_soft,
-            'abdominal_hard': self.abdominal_hard,
-            'abdominal_bowel': self.abdominal_bowel,
-            'abdominal_hsm': self.abdominal_hsm,
-            'abdominal_hsm_info': self.abdominal_hsm_info,
-            'notes': self.notes
-        }
-        return data
