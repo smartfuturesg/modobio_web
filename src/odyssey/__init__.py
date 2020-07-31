@@ -62,10 +62,9 @@ def create_app(flask_dev=None):
     """
     app = Flask(__name__)
 
-    # app.json_encoder = JSONEncoder
-    # app.json_decoder = JSONDecoder
-
     app.config.from_object(Config(flask_dev=flask_dev))
+    app.config['APPLICATION_ROOT'] = '/api'
+
     if app.config['DEBUG']:
         print(app.config)
 
@@ -76,28 +75,8 @@ def create_app(flask_dev=None):
 
     db.Model.update = _update
 
-    wtforms.DateTimeField.widget = DateInput()
-
-    from odyssey.views.menu import menu
-
-    @app.context_processor
-    def render_menu():
-        return {'menu': menu}
-
-    from odyssey.views.main import bp
+    from odyssey.api import bp
     app.register_blueprint(bp)
-
-    from odyssey.views.intake import bp
-    app.register_blueprint(bp, url_prefix='/intake')
-
-    from odyssey.views.doctor import bp
-    app.register_blueprint(bp, url_prefix='/doctor')
-
-    from odyssey.views.pt import bp
-    app.register_blueprint(bp, url_prefix='/pt')
-
-    from odyssey.api import bp as api_bp
-    app.register_blueprint(api_bp, url_prefix='/api')
 
     from odyssey.api.errors import register_handlers
     register_handlers(app)
