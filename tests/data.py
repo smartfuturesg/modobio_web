@@ -398,7 +398,6 @@ test_moxy_rip = {
 }
 
 test_pt_history = {
-    "clientid": 0,
     "exercise": "olympic weigthlifting",
     "has_pt": False,
     "has_chiro": True,
@@ -412,4 +411,48 @@ test_pt_history = {
     "current_pain": 4,
     "makes_worse": "exercise",
     "makes_better": "also exercise"
+}
+
+test_medical_history = {
+  "allergies": "new allergy",
+  "concerns": "no real concerns",
+  "diagnostic_other": "string",
+  "diagnostic_ultrasound": "string",
+  "diagnostic_endoscopy": "string",
+  "family_history": "string",
+  "social_history": "string",
+  "diagnostic_mri": "string",
+  "diagnostic_xray": "string",
+  "last_examination_date": "2020-07-30",
+  "diagnostic_ctscan": "string",
+  "goals": "string",
+  "last_examination_reason": "string",
+  "medication": "string"
+}
+
+test_medical_physical = {
+  "cardiac_rrr": True,
+  "cardiac_murmurs_info": "string",
+  "abdominal_bowel": True,
+  "abdominal_hsm": True,
+  "cardiac_murmurs": True,
+  "abdominal_hard": True,
+  "vital_respiratoryrate": 5,
+  "vital_temperature": 98,
+  "vital_heartrate": 70,
+  "pulmonary_wheezing_info": "string",
+  "cardiac_gallops": True,
+  "vital_height_inches": 100,
+  "cardiac_rubs": True,
+  "abdominal_hsm_info": "string",
+  "cardiac_s1s2": False,
+  "abdominal_soft": False,
+  "vital_diastolic": 120,
+  "pulmonary_rhonchi": False,
+  "vital_weight": 110,
+  "pulmonary_wheezing": False,
+  "pulmonary_clear": False,
+  "vital_systolic": 70,
+  "notes": "string",
+  "pulmonary_rales": False
 }

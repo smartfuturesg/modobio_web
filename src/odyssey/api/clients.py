@@ -7,7 +7,7 @@ from flask_restx import Resource, Api
 from odyssey.api.utils import check_client_existence
 from odyssey.api import api
 from odyssey.api.auth import token_auth, token_auth_client
-from odyssey.api.errors import UserNotFound, ClientAlreadyExists, ClientNotFound, IllegalSetting
+from odyssey.api.errors import UserNotFound, ClientAlreadyExists, ClientNotFound, IllegalSetting, ContentNotFound
 from odyssey import db
 from odyssey.models.intake import (
     ClientInfo,
@@ -163,7 +163,7 @@ class ConsentContract(Resource):
         client_consent_form = ClientConsent.query.filter_by(clientid=clientid).order_by(ClientConsent.idx.desc()).first()
         
         if not client_consent_form:
-            raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a consultation contract in the database")
+            raise ContentNotFound()
 
         return client_consent_form
 
@@ -205,7 +205,7 @@ class ReleaseContract(Resource):
         client_release_form =  ClientRelease.query.filter_by(clientid=clientid).order_by(ClientRelease.idx.desc()).first()
 
         if not client_release_form:
-            raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a release contract in the database")
+            raise ContentNotFound()
 
         return client_release_form
 
@@ -285,8 +285,7 @@ class ConsultConstract(Resource):
         client_consult =  ClientConsultContract.query.filter_by(clientid=clientid).order_by(ClientConsultContract.idx.desc()).first()
 
         if not client_consult:
-            raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a consultation contract in the database")
-
+            raise ContentNotFound()
         return client_consult
 
     @accepts(schema=SignAndDateSchema, api=ns)
@@ -324,8 +323,7 @@ class SubscriptionContract(Resource):
 
         client_subscription =  ClientSubscriptionContract.query.filter_by(clientid=clientid).order_by(ClientSubscriptionContract.idx.desc()).first()
         if not client_subscription:
-            raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a subscription contract in the database")
-
+            raise ContentNotFound()
         return client_subscription
 
     @ns.doc(security='apikey')
@@ -364,8 +362,7 @@ class IndividualContract(Resource):
         client_services =  ClientIndividualContract.query.filter_by(clientid=clientid).order_by(ClientIndividualContract.idx.desc()).first()
 
         if not client_services:
-            raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have an individual services contract in the database")
-
+            raise ContentNotFound()
         return  client_services
 
     @token_auth.login_required
