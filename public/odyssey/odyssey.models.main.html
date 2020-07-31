@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>odyssey.models.main &mdash; Odyssey 0.1.0 documentation</title>
+  <title>odyssey.models.main &mdash; Odyssey 0.1.1.dev122+g33a3efc.d20200731 documentation</title>
   
 
   
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                0.1.0
+                0.1.1.dev122+g33a3efc.d20200731
               </div>
             
           
@@ -91,6 +91,7 @@
 <li class="toctree-l3"><a class="reference internal" href="odyssey.models.intake.html">Intake forms</a></li>
 <li class="toctree-l3"><a class="reference internal" href="odyssey.models.doctor.html">Doctor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="odyssey.models.pt.html">Physical therapist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="odyssey.models.trainer.html">Trainer</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.views.html">Views</a></li>
@@ -344,6 +345,47 @@ roles include: client services (cs), pt, doctor, data</p>
 <dt id="odyssey.models.main.Staff.get_admin_role">
 <code class="sig-name descname">get_admin_role</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.main.Staff.get_admin_role" title="Permalink to this definition">¶</a></dt>
 <dd><p>check if this staff member is authorizewd to create new staff members</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.models.main.ClientRemovalRequests">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.models.main.</code><code class="sig-name descname">ClientRemovalRequests</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.main.ClientRemovalRequests" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<p>Client removal request table.</p>
+<p>Stores the history if client removal request by staff members</p>
+<dl class="py attribute">
+<dt id="odyssey.models.main.ClientRemovalRequests.idx">
+<code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.models.main.ClientRemovalRequests.idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Table index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.main.ClientRemovalRequests.staffid">
+<code class="sig-name descname">staffid</code><a class="headerlink" href="#odyssey.models.main.ClientRemovalRequests.staffid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Staff member ID number</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.main.ClientRemovalRequests.timestamp">
+<code class="sig-name descname">timestamp</code><a class="headerlink" href="#odyssey.models.main.ClientRemovalRequests.timestamp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Timestamp of the removal request</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.8)">datetime.datetime</a>, primary key</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

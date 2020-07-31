@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>odyssey.models.pt &mdash; Odyssey 0.1.0 documentation</title>
+  <title>odyssey.models.pt &mdash; Odyssey 0.1.1.dev122+g33a3efc.d20200731 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Views" href="odyssey.views.html" />
+    <link rel="next" title="odyssey.models.trainer" href="odyssey.models.trainer.html" />
     <link rel="prev" title="odyssey.models.doctor" href="odyssey.models.doctor.html" /> 
 </head>
 
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                0.1.0
+                0.1.1.dev122+g33a3efc.d20200731
               </div>
             
           
@@ -91,6 +91,7 @@
 <li class="toctree-l3"><a class="reference internal" href="odyssey.models.intake.html">Intake forms</a></li>
 <li class="toctree-l3"><a class="reference internal" href="odyssey.models.doctor.html">Doctor</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Physical therapist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="odyssey.models.trainer.html">Trainer</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.views.html">Views</a></li>
@@ -345,11 +346,417 @@ JSON dictionary.</p>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="odyssey.models.pt.PTHistory.to_dict">
-<code class="sig-name descname">to_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.pt.PTHistory.to_dict" title="Permalink to this definition">¶</a></dt>
-<dd><p>retuns all data in ClientSubscriptionContract Model as a dictionary</p>
 </dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.models.pt.Chessboard">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.models.pt.</code><code class="sig-name descname">Chessboard</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.pt.Chessboard" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<p>Mobility assessment table a.k.a Chessboard</p>
+<p>This table stores the repeated mobility assessment measurements. The measurements
+are indexed by <a class="reference internal" href="#odyssey.models.pt.Chessboard.clientid" title="odyssey.models.pt.Chessboard.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">clientid</span></code></a> and assessment <a class="reference internal" href="#odyssey.models.pt.Chessboard.timestamp" title="odyssey.models.pt.Chessboard.timestamp"><code class="xref py py-attr docutils literal notranslate"><span class="pre">timestamp</span></code></a>. All values in
+this table, with the exception of <a class="reference internal" href="#odyssey.models.pt.Chessboard.isa_dynamic" title="odyssey.models.pt.Chessboard.isa_dynamic"><code class="xref py py-attr docutils literal notranslate"><span class="pre">isa_dynamic</span></code></a>, are angles in degrees.</p>
+<dl class="py attribute">
+<dt id="odyssey.models.pt.Chessboard.idx">
+<code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Table index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.Chessboard.clientid">
+<code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.clientid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client ID number</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int, foreign key to <code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.Chessboard.timestamp">
+<code class="sig-name descname">timestamp</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.timestamp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Timestamp of the assessment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.8)">datetime.datetime</a>, primary key</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.Chessboard.isa_right">
+<code class="sig-name descname">isa_right</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.isa_right" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates whether or not the ISA is right.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.Chessboard.isa_left">
+<code class="sig-name descname">isa_left</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.isa_left" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates whether or not the ISA is left.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.Chessboard.isa_structure">
+<code class="sig-name descname">isa_structure</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.isa_structure" title="Permalink to this definition">¶</a></dt>
+<dd><p>must be one of the following
+‘Inhaled’,
+‘Exhaled’,
+‘Asymmetrical Normal’,
+‘Asymmetrical Atypical’</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 24</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.Chessboard.isa_dynamic">
+<code class="sig-name descname">isa_dynamic</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.isa_dynamic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates whether or not the ISA is dynamic.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.Chessboard.left_shoulder_er">
+<code class="sig-name descname">left_shoulder_er</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.left_shoulder_er" title="Permalink to this definition">¶</a></dt>
+<dd><p>Left shoulder external rotation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.Chessboard.left_shoulder_ir">
+<code class="sig-name descname">left_shoulder_ir</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.left_shoulder_ir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Left shoulder internal rotation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.Chessboard.left_shoulder_abd">
+<code class="sig-name descname">left_shoulder_abd</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.left_shoulder_abd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Left shoulder abduction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.Chessboard.left_shoulder_add">
+<code class="sig-name descname">left_shoulder_add</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.left_shoulder_add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Left shoulder adduction</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.Chessboard.left_shoulder_flexion">
+<code class="sig-name descname">left_shoulder_flexion</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.left_shoulder_flexion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Left shoulder flexion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.Chessboard.left_shoulder_extension">
+<code class="sig-name descname">left_shoulder_extension</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.left_shoulder_extension" title="Permalink to this definition">¶</a></dt>
+<dd><p>Left shoulder extension.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.Chessboard.right_shoulder_er">
+<code class="sig-name descname">right_shoulder_er</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.right_shoulder_er" title="Permalink to this definition">¶</a></dt>
+<dd><p>Right shoulder external rotation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.Chessboard.right_shoulder_ir">
+<code class="sig-name descname">right_shoulder_ir</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.right_shoulder_ir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Right shoulder internal rotation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.Chessboard.right_shoulder_abd">
+<code class="sig-name descname">right_shoulder_abd</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.right_shoulder_abd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Right shoulder abduction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.Chessboard.right_shoulder_add">
+<code class="sig-name descname">right_shoulder_add</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.right_shoulder_add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Right shoulder adduction</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.Chessboard.right_shoulder_flexion">
+<code class="sig-name descname">right_shoulder_flexion</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.right_shoulder_flexion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Right shoulder flexion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.Chessboard.right_shoulder_extension">
+<code class="sig-name descname">right_shoulder_extension</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.right_shoulder_extension" title="Permalink to this definition">¶</a></dt>
+<dd><p>Right shoulder extension.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.Chessboard.left_hip_slr">
+<code class="sig-name descname">left_hip_slr</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.left_hip_slr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Left hip SLR</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.Chessboard.left_hip_er">
+<code class="sig-name descname">left_hip_er</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.left_hip_er" title="Permalink to this definition">¶</a></dt>
+<dd><p>Left hip external rotation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.Chessboard.left_hip_ir">
+<code class="sig-name descname">left_hip_ir</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.left_hip_ir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Left hip internal rotation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.Chessboard.left_hip_abd">
+<code class="sig-name descname">left_hip_abd</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.left_hip_abd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Left hip abduction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.Chessboard.left_hip_add">
+<code class="sig-name descname">left_hip_add</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.left_hip_add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Left hip adduction</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.Chessboard.left_hip_flexion">
+<code class="sig-name descname">left_hip_flexion</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.left_hip_flexion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Left hip flexion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.Chessboard.left_hip_extension">
+<code class="sig-name descname">left_hip_extension</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.left_hip_extension" title="Permalink to this definition">¶</a></dt>
+<dd><p>Left hip extension.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.Chessboard.right_hip_er">
+<code class="sig-name descname">right_hip_er</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.right_hip_er" title="Permalink to this definition">¶</a></dt>
+<dd><p>Right hip external rotation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.Chessboard.right_hip_ir">
+<code class="sig-name descname">right_hip_ir</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.right_hip_ir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Right hip internal rotation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.Chessboard.right_hip_abd">
+<code class="sig-name descname">right_hip_abd</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.right_hip_abd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Right hip abduction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.Chessboard.right_hip_add">
+<code class="sig-name descname">right_hip_add</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.right_hip_add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Right hip adduction</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.Chessboard.right_hip_flexion">
+<code class="sig-name descname">right_hip_flexion</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.right_hip_flexion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Right hip flexion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.Chessboard.right_hip_extension">
+<code class="sig-name descname">right_hip_extension</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.right_hip_extension" title="Permalink to this definition">¶</a></dt>
+<dd><p>Right hip extension.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.Chessboard.right_hip_slr">
+<code class="sig-name descname">right_hip_slr</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.right_hip_slr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Right hip SLR</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.Chessboard.notes">
+<code class="sig-name descname">notes</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.notes" title="Permalink to this definition">¶</a></dt>
+<dd><p>notes on the assessment</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.models.pt.Chessboard.get_attributes">
+<code class="sig-name descname">get_attributes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.pt.Chessboard.get_attributes" title="Permalink to this definition">¶</a></dt>
+<dd><p>attributes for setting values from dictionaries.
+Timestamp and clientid are purposefully left out. They are set individually</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.models.pt.Chessboard.to_dict">
+<code class="sig-name descname">to_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.pt.Chessboard.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns all mobility assessment in dictionary form</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.models.pt.Chessboard.from_dict">
+<code class="sig-name descname">from_dict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.pt.Chessboard.from_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>to be used when a new user is created or a user id edited</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.models.pt.Chessboard.all_chessboard_entries">
+<em class="property">static </em><code class="sig-name descname">all_chessboard_entries</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">query</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.pt.Chessboard.all_chessboard_entries" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -692,7 +1099,7 @@ this table, with the exception of <a class="reference internal" href="#odyssey.m
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="odyssey.views.html" class="btn btn-neutral float-right" title="Views" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="odyssey.models.trainer.html" class="btn btn-neutral float-right" title="odyssey.models.trainer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="odyssey.models.doctor.html" class="btn btn-neutral float-left" title="odyssey.models.doctor" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

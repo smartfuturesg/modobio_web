@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>odyssey.api.pt &mdash; Odyssey 0.1.0 documentation</title>
+  <title>odyssey.api.pt &mdash; Odyssey 0.1.1.dev122+g33a3efc.d20200731 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="odyssey.api.errors" href="odyssey.api.errors.html" />
+    <link rel="next" title="odyssey.api.trainer" href="odyssey.api.trainer.html" />
     <link rel="prev" title="odyssey.api.doctor" href="odyssey.api.doctor.html" /> 
 </head>
 
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                0.1.0
+                0.1.1.dev122+g33a3efc.d20200731
               </div>
             
           
@@ -94,8 +94,11 @@
 <li class="toctree-l3"><a class="reference internal" href="odyssey.api.clients.html">Client</a></li>
 <li class="toctree-l3"><a class="reference internal" href="odyssey.api.doctor.html">Doctor</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Physical therapist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="odyssey.api.trainer.html">Trainer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="odyssey.api.schemas.html">Schemas</a></li>
 <li class="toctree-l3"><a class="reference internal" href="odyssey.api.errors.html">Error messages</a></li>
 <li class="toctree-l3"><a class="reference internal" href="odyssey.api.serializers.html">Serializers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="odyssey.api.utils.html">Utilities</a></li>
 </ul>
 </li>
 </ul>
@@ -171,16 +174,81 @@
             
   <div class="section" id="module-odyssey.api.pt">
 <span id="odyssey-api-pt"></span><h1>odyssey.api.pt<a class="headerlink" href="#module-odyssey.api.pt" title="Permalink to this headline">¶</a></h1>
-<dl class="py function">
-<dt id="odyssey.api.pt.get_pt_history">
-<code class="sig-prename descclassname">odyssey.api.pt.</code><code class="sig-name descname">get_pt_history</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.pt.get_pt_history" title="Permalink to this definition">¶</a></dt>
-<dd><p>returns medical history for the specified client id</p>
+<dl class="py class">
+<dt id="odyssey.api.pt.ClientPTHistory">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.pt.</code><code class="sig-name descname">ClientPTHistory</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.pt.ClientPTHistory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<p>GET, POST, PUT for pt history data</p>
+<dl class="py method">
+<dt id="odyssey.api.pt.ClientPTHistory.get">
+<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.pt.ClientPTHistory.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns most recent mobility assessment data</p>
 </dd></dl>
 
-<dl class="py function">
-<dt id="odyssey.api.pt.get_mobility_assessment">
-<code class="sig-prename descclassname">odyssey.api.pt.</code><code class="sig-name descname">get_mobility_assessment</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.pt.get_mobility_assessment" title="Permalink to this definition">¶</a></dt>
-<dd><p>returns medical history for the specified client id</p>
+<dl class="py method">
+<dt id="odyssey.api.pt.ClientPTHistory.post">
+<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.pt.ClientPTHistory.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns most recent mobility assessment data</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.api.pt.ClientPTHistory.put">
+<code class="sig-name descname">put</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.pt.ClientPTHistory.put" title="Permalink to this definition">¶</a></dt>
+<dd><p>edit user’s pt history</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.pt.ClientPTHistory.endpoint">
+<code class="sig-name descname">endpoint</code><em class="property"> = 'pt_client_pt_history'</em><a class="headerlink" href="#odyssey.api.pt.ClientPTHistory.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.api.pt.ClientPTHistory.mediatypes">
+<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.pt.ClientPTHistory.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.pt.ClientPTHistory.methods">
+<code class="sig-name descname">methods</code><em class="property"> = {'GET', 'POST', 'PUT'}</em><a class="headerlink" href="#odyssey.api.pt.ClientPTHistory.methods" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.api.pt.ClientChessboard">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.pt.</code><code class="sig-name descname">ClientChessboard</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.pt.ClientChessboard" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<p>GET, POST for mobility assesssment data
+note that clients will have multiple entries as they progress through the program
+Trainers may update some or all fields. The backend will store every update as a new row
+fields left blank will be left as null</p>
+<dl class="py method">
+<dt id="odyssey.api.pt.ClientChessboard.get">
+<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.pt.ClientChessboard.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns all chessboard entries for the specified client</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.api.pt.ClientChessboard.post">
+<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.pt.ClientChessboard.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>create new chessboard entry</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.pt.ClientChessboard.endpoint">
+<code class="sig-name descname">endpoint</code><em class="property"> = 'pt_client_chessboard'</em><a class="headerlink" href="#odyssey.api.pt.ClientChessboard.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.api.pt.ClientChessboard.mediatypes">
+<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.pt.ClientChessboard.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.pt.ClientChessboard.methods">
+<code class="sig-name descname">methods</code><em class="property"> = {'GET', 'POST'}</em><a class="headerlink" href="#odyssey.api.pt.ClientChessboard.methods" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 </div>
@@ -193,7 +261,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="odyssey.api.errors.html" class="btn btn-neutral float-right" title="odyssey.api.errors" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="odyssey.api.trainer.html" class="btn btn-neutral float-right" title="odyssey.api.trainer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="odyssey.api.doctor.html" class="btn btn-neutral float-left" title="odyssey.api.doctor" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

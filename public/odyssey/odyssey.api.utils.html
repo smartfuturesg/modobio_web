@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>odyssey.api.auth &mdash; Odyssey 0.1.1.dev122+g33a3efc.d20200731 documentation</title>
+  <title>odyssey.api.utils &mdash; Odyssey 0.1.1.dev122+g33a3efc.d20200731 documentation</title>
   
 
   
@@ -35,8 +35,8 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="odyssey.api.tokens" href="odyssey.api.tokens.html" />
-    <link rel="prev" title="API" href="odyssey.api.html" /> 
+    <link rel="next" title="Support" href="../toc_rest.html" />
+    <link rel="prev" title="odyssey.api.serializers" href="odyssey.api.serializers.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -88,7 +88,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../toc_flask.html">Flask app</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../toc_api.html">API server</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="odyssey.api.html">API</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Authorization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="odyssey.api.auth.html">Authorization</a></li>
 <li class="toctree-l3"><a class="reference internal" href="odyssey.api.tokens.html">Authorization tokens</a></li>
 <li class="toctree-l3"><a class="reference internal" href="odyssey.api.staff.html">Staff</a></li>
 <li class="toctree-l3"><a class="reference internal" href="odyssey.api.clients.html">Client</a></li>
@@ -98,7 +98,7 @@
 <li class="toctree-l3"><a class="reference internal" href="odyssey.api.schemas.html">Schemas</a></li>
 <li class="toctree-l3"><a class="reference internal" href="odyssey.api.errors.html">Error messages</a></li>
 <li class="toctree-l3"><a class="reference internal" href="odyssey.api.serializers.html">Serializers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.utils.html">Utilities</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Utilities</a></li>
 </ul>
 </li>
 </ul>
@@ -153,13 +153,13 @@
         
           <li><a href="odyssey.api.html">API</a> &raquo;</li>
         
-      <li>odyssey.api.auth</li>
+      <li>odyssey.api.utils</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/odyssey/odyssey.api.auth.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/odyssey/odyssey.api.utils.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -172,43 +172,11 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-odyssey.api.auth">
-<span id="odyssey-api-auth"></span><h1>odyssey.api.auth<a class="headerlink" href="#module-odyssey.api.auth" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-odyssey.api.utils">
+<span id="odyssey-api-utils"></span><h1>odyssey.api.utils<a class="headerlink" href="#module-odyssey.api.utils" title="Permalink to this headline">¶</a></h1>
 <dl class="py function">
-<dt id="odyssey.api.auth.verify_password_client">
-<code class="sig-prename descclassname">odyssey.api.auth.</code><code class="sig-name descname">verify_password_client</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">email</span></em>, <em class="sig-param"><span class="n">password</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.auth.verify_password_client" title="Permalink to this definition">¶</a></dt>
-<dd><p>check password for at-home client</p>
-</dd></dl>
-
-<dl class="py function">
-<dt id="odyssey.api.auth.verify_token_client">
-<code class="sig-prename descclassname">odyssey.api.auth.</code><code class="sig-name descname">verify_token_client</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">token</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.auth.verify_token_client" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt id="odyssey.api.auth.verify_password">
-<code class="sig-prename descclassname">odyssey.api.auth.</code><code class="sig-name descname">verify_password</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">email</span></em>, <em class="sig-param"><span class="n">password</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.auth.verify_password" title="Permalink to this definition">¶</a></dt>
-<dd><p>check password for API user</p>
-</dd></dl>
-
-<dl class="py function">
-<dt id="odyssey.api.auth.basic_auth_error">
-<code class="sig-prename descclassname">odyssey.api.auth.</code><code class="sig-name descname">basic_auth_error</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">status</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.auth.basic_auth_error" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt id="odyssey.api.auth.verify_token">
-<code class="sig-prename descclassname">odyssey.api.auth.</code><code class="sig-name descname">verify_token</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">token</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.auth.verify_token" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt id="odyssey.api.auth.token_auth_error">
-<code class="sig-prename descclassname">odyssey.api.auth.</code><code class="sig-name descname">token_auth_error</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">status</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.auth.token_auth_error" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt id="odyssey.api.auth.get_user_roles">
-<code class="sig-prename descclassname">odyssey.api.auth.</code><code class="sig-name descname">get_user_roles</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.auth.get_user_roles" title="Permalink to this definition">¶</a></dt>
+<dt id="odyssey.api.utils.check_client_existence">
+<code class="sig-prename descclassname">odyssey.api.utils.</code><code class="sig-name descname">check_client_existence</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.utils.check_client_existence" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -221,10 +189,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="odyssey.api.tokens.html" class="btn btn-neutral float-right" title="odyssey.api.tokens" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="../toc_rest.html" class="btn btn-neutral float-right" title="Support" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="odyssey.api.html" class="btn btn-neutral float-left" title="API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="odyssey.api.serializers.html" class="btn btn-neutral float-left" title="odyssey.api.serializers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

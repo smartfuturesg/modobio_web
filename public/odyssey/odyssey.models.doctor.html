@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>odyssey.models.doctor &mdash; Odyssey 0.1.0 documentation</title>
+  <title>odyssey.models.doctor &mdash; Odyssey 0.1.1.dev122+g33a3efc.d20200731 documentation</title>
   
 
   
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                0.1.0
+                0.1.1.dev122+g33a3efc.d20200731
               </div>
             
           
@@ -91,6 +91,7 @@
 <li class="toctree-l3"><a class="reference internal" href="odyssey.models.intake.html">Intake forms</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Doctor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="odyssey.models.pt.html">Physical therapist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="odyssey.models.trainer.html">Trainer</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.views.html">Views</a></li>
@@ -392,6 +393,17 @@ information is taken only once, during the initial consult.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalPhysicalExam.timestamp">
+<code class="sig-name descname">timestamp</code><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.timestamp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Timestamp of the assessment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.8)">datetime.datetime</a>, primary key</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
 <dt id="odyssey.models.doctor.MedicalPhysicalExam.vital_heartrate">
 <code class="sig-name descname">vital_heartrate</code><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.vital_heartrate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Heart rate</p>
@@ -486,6 +498,21 @@ information is taken only once, during the initial consult.</p>
 </dd>
 <dt class="field-even">Unit</dt>
 <dd class="field-even"><p>TBD</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalPhysicalExam.vital_height_inches">
+<code class="sig-name descname">vital_height_inches</code><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.vital_height_inches" title="Permalink to this definition">¶</a></dt>
+<dd><p>Body height</p>
+<p>Height in inches</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>inches</p>
 </dd>
 </dl>
 </dd></dl>
@@ -675,12 +702,6 @@ information is taken only once, during the initial consult.</p>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="odyssey.models.doctor.MedicalPhysicalExam.to_dict">
-<code class="sig-name descname">to_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.to_dict" title="Permalink to this definition">¶</a></dt>
-<dd><p>retuns all data in ClientSubscriptionContract Model as a dictionary</p>
 </dd></dl>
 
 </dd></dl>
