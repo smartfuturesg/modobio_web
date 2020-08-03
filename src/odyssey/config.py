@@ -215,12 +215,18 @@ class Config():
 
     def test_config(self):
         """ Set the configuration for running local unittests. """
-        db_file = pathlib.Path(__file__).absolute().parent / 'app.db'
-        self.db_flav = os.getenv('FLASK_DB_FLAV', default='sqlite')
+        # db_file = pathlib.Path(__file__).absolute().parent / 'app.db'
+        # self.db_flav = os.getenv('FLASK_DB_FLAV', default='sqlite')
+        # self.db_user = os.getenv('FLASK_DB_USER', default=None)
+        # self.db_pass = os.getenv('FLASK_DB_PASS', default=None)
+        # self.db_host = os.getenv('FLASK_DB_HOST', default='')
+        # self.db_name = os.getenv('FLASK_DB_NAME', default=db_file)
+
+        self.db_flav = os.getenv('FLASK_DB_FLAV', default='postgresql')
         self.db_user = os.getenv('FLASK_DB_USER', default=None)
         self.db_pass = os.getenv('FLASK_DB_PASS', default=None)
-        self.db_host = os.getenv('FLASK_DB_HOST', default='')
-        self.db_name = os.getenv('FLASK_DB_NAME', default=db_file)
+        self.db_host = os.getenv('FLASK_DB_HOST', default='localhost')
+        self.db_name = os.getenv('FLASK_DB_TEST_NAME', default='modobio_test')
 
         self.DOCS_BUCKET_NAME = tempfile.TemporaryDirectory().name
         self.DOCS_STORE_LOCAL = True

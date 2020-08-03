@@ -26,6 +26,12 @@ from .data import (
 
 from odyssey.api.schemas import ClientInfoSchema
 
+def clean_db(db):
+    for table in reversed(db.metadata.sorted_tables):
+        db.session.execute(table.delete())
+    db.session.commit()
+    db.drop_all()
+
 @pytest.fixture(scope='module')
 def new_client():
     """
@@ -51,6 +57,7 @@ def test_client():
 
 @pytest.fixture(scope='module')
 def init_database():
+    clean_db(db)
     # Create the database and the database table
     db.create_all()
     ci_schema = ClientInfoSchema()
@@ -91,4 +98,4 @@ def init_database():
 
     yield db  # this is where the testing happens!
 
-    db.drop_all()
+    # db.drop_all()

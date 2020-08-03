@@ -32,12 +32,14 @@ class StaffMembers(Resource):
     def post(self):
         """register a new staff member"""
         data = request.get_json() or {}
-        #check if this email is already being used
+        #check if this email is already being used. If so raise 409 conflict error 
         staff = Staff.query.filter_by(email=data.get('email')).first()
         if staff:
             raise StaffEmailInUse(email=data.get('email'))
 
-        # allow only system admin to add staff admin roles. staff admin can create all other roles except staff/systemadmin
+        ## Role suppression
+        # system_admin: permisison to create staff admin.
+        # staff_admin:  can create all other roles except staff/systemadmin
         if data.get('is_system_admin'):
             raise UnauthorizedUser(message=f"Staff member with email {token_auth.current_user().email} is unauthorized to create a system administrator role.")
 
@@ -45,6 +47,7 @@ class StaffMembers(Resource):
             raise UnauthorizedUser(message=f"Staff member with email {token_auth.current_user().email} is unauthorized to create a staff administrator role. \
                                  Please contact system admin")
    
+        # Staff schema instance load from payload
         staff_schema = StaffSchema()
 
         new_staff = staff_schema.load(data)
