@@ -2,16 +2,15 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('../src'))
 
-from odyssey.__init__ import __version__
+from setuptools_scm import get_version
+version = get_version(root='..', relative_to=__file__)
+release = version
 
 project = 'Odyssey'
 author = 'Zan'
 
 with open('../LICENSE.md') as fh:
     copyright = fh.read().strip()
-
-version = __version__
-release = version
 
 extensions = [
     # numpydoc syntax
@@ -25,6 +24,7 @@ extensions = [
 exclude_patterns = [
     'odyssey/odyssey.rst',
     'odyssey/modules.rst',
+    'odyssey/odyssey.version.rst',
     '_build',
     'Thumbs.db',
     '.DS_Store'

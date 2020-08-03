@@ -15,5 +15,8 @@ API
    Client <odyssey.api.clients>
    Doctor <odyssey.api.doctor>
    Physical therapist <odyssey.api.pt>
+   Trainer <odyssey.api.trainer>
+   Schemas <odyssey.api.schemas>
    Error messages <odyssey.api.errors>
    Serializers <odyssey.api.serializers>
+   Utilities <odyssey.api.utils>

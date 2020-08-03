@@ -13,3 +13,4 @@ Models
    Intake forms <odyssey.models.intake>
    Doctor <odyssey.models.doctor>
    Physical therapist <odyssey.models.pt>
+   Trainer <odyssey.models.trainer>

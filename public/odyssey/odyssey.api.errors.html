@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>odyssey.api.errors &mdash; Odyssey 0.1.0 documentation</title>
+  <title>odyssey.api.errors &mdash; Odyssey 0.1.1.dev122+g33a3efc.d20200731 documentation</title>
   
 
   
@@ -36,7 +36,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="odyssey.api.serializers" href="odyssey.api.serializers.html" />
-    <link rel="prev" title="odyssey.api.pt" href="odyssey.api.pt.html" /> 
+    <link rel="prev" title="odyssey.api.schemas" href="odyssey.api.schemas.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                0.1.0
+                0.1.1.dev122+g33a3efc.d20200731
               </div>
             
           
@@ -94,8 +94,11 @@
 <li class="toctree-l3"><a class="reference internal" href="odyssey.api.clients.html">Client</a></li>
 <li class="toctree-l3"><a class="reference internal" href="odyssey.api.doctor.html">Doctor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="odyssey.api.pt.html">Physical therapist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="odyssey.api.trainer.html">Trainer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="odyssey.api.schemas.html">Schemas</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Error messages</a></li>
 <li class="toctree-l3"><a class="reference internal" href="odyssey.api.serializers.html">Serializers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="odyssey.api.utils.html">Utilities</a></li>
 </ul>
 </li>
 </ul>
@@ -179,6 +182,13 @@
 </dd></dl>
 
 <dl class="py exception">
+<dt id="odyssey.api.errors.ContentNotFound">
+<em class="property">exception </em><code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">ContentNotFound</code><a class="headerlink" href="#odyssey.api.errors.ContentNotFound" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>in the case a non-existent resource is requested</p>
+</dd></dl>
+
+<dl class="py exception">
 <dt id="odyssey.api.errors.UnauthorizedUser">
 <em class="property">exception </em><code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">UnauthorizedUser</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">email</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">message</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.UnauthorizedUser" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
@@ -229,6 +239,12 @@
 </dd></dl>
 
 <dl class="py function">
+<dt id="odyssey.api.errors.error_content_not_found">
+<code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">error_content_not_found</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">error</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.error_content_not_found" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a custom message and 204 status code</p>
+</dd></dl>
+
+<dl class="py function">
 <dt id="odyssey.api.errors.error_illegal_setting">
 <code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">error_illegal_setting</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">error</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.error_illegal_setting" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a custom message and 400 status code</p>
@@ -265,7 +281,7 @@
         <a href="odyssey.api.serializers.html" class="btn btn-neutral float-right" title="odyssey.api.serializers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="odyssey.api.pt.html" class="btn btn-neutral float-left" title="odyssey.api.pt" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="odyssey.api.schemas.html" class="btn btn-neutral float-left" title="odyssey.api.schemas" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
