@@ -77,9 +77,10 @@ def _to_pdf(req_ctx, clientid: int, doctype: DOCTYPE, template: str=None, form: 
         doctable = DOCTYPE_TABLE_MAP[doctype]
         docrev = DOCTYPE_DOCREV_MAP[doctype]
 
-        query = doctable.query.filter_by(clientid=clientid, revision=docrev)
-        doc = query.one_or_none()
-
+        query = doctable.query.filter_by(
+            clientid=clientid, revision=docrev).order_by(doctable.idx.desc())
+        doc = query.first()
+        
         if not doc:
             raise ValueError('Clientid {clientid} not found in table {doctable.__tablename__}.')
 
@@ -128,7 +129,7 @@ def _to_pdf(req_ctx, clientid: int, doctype: DOCTYPE, template: str=None, form: 
             region = s3.get_bucket_location(Bucket=bucket_name)['LocationConstraint']
             url = f'https://{bucket_name}.s3.{region}.amazonaws.com/{path}'
 
-        query.update({'url': url, 'pdf_hash': pdf_hash})
+        doc.update({'url': url, 'pdf_hash': pdf_hash})
         db.session.commit()
 
         if current_app.config['DEBUG']:
