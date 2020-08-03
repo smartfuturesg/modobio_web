@@ -64,7 +64,7 @@ else:
     db_name = input()
 
 
-print(f"updating/querying database using the following connection string: \n {db_connection_string}")
+print(f"\n***\nUpdating/querying database using the following connection string: \n {db_connection_string}")
 print("continue? [Y,n]")
 answer = input()
 
