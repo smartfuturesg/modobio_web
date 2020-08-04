@@ -284,12 +284,10 @@ test_power_assessment = {
 }
 
 test_chessboard_assessment = {
-  "clientid": 0,
   "notes": "notes",
-  "isa_right": True,
   "isa_structure": "Asymettrical Atypical",
-  "isa_dynamic": False,
-  "isa_left": True,
+  "isa_movement": "Dynamic",
+  "co2_tolerance": 60,
   "hip": {
     "left": {
       "er": 0,
