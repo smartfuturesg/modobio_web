@@ -242,13 +242,13 @@ class ChessBoardHipSchema(Schema):
 
 class ChessboardSchema(Schema):
     isa_structure_list  = ['Inhaled','Exhaled', 'Asymettrical Normal','Asymettrical Atypical']
+    isa_movement_list  = ['Dynamic', 'Static', 'R Static/Left Dyanamic', 'L Static/Right Dyanamic']
 
-    clientid = fields.Integer(required=False)
+    clientid = fields.Integer(missing=0)
     timestamp = fields.DateTime()
-    isa_right = fields.Boolean()
-    isa_left = fields.Boolean()
     isa_structure = fields.String(description=f"must be one of {isa_structure_list}")
-    isa_dynamic = fields.Boolean()
+    isa_movement = fields.String(description=f"must be one of {isa_movement_list}")
+    co2_tolerance = fields.Integer(validate=validate.Range(min=0, max=120))
     shoulder = fields.Nested(ChessBoardShoulderSchema)
     hip = fields.Nested(ChessBoardHipSchema)
     notes = fields.String(description="some notes regarding this assessment")
@@ -258,6 +258,11 @@ class ChessboardSchema(Schema):
     def isa_structure_picklist(self,value):
         if not value in self.isa_structure_list:
             raise ValidationError(f'isa_structure entry invalid. Please use one of the following: {self.isa_structure_list}')
+
+    @validates('isa_movement')
+    def isa_movement_picklist(self,value):
+        if not value in self.isa_movement_list:
+            raise ValidationError(f'isa_movement entry invalid. Please use one of the following: {self.isa_movement_list}')
 
     @post_load
     def unravel(self, data, **kwargs):
@@ -293,10 +298,9 @@ class ChessboardSchema(Schema):
                     'right_hip_add': data['hip']['right']['add'],
                     'right_hip_flexion':   data['hip']['right']['flexion'],
                     'right_hip_extension': data['hip']['right']['extension'],
-                    'isa_right': data['isa_right'],
-                    'isa_left':  data['isa_left'],
                     'isa_structure': data['isa_structure'],
-                    'isa_dynamic': data['isa_dynamic'],
+                    'isa_movement': data['isa_movement'],
+                    'co2_tolerance': data['co2_tolerance']
                     }        
         return Chessboard(**flat_data)
 
@@ -312,8 +316,9 @@ class ChessboardSchema(Schema):
         nested = {'clientid': data.clientid,
                   'timestamp': data.timestamp,
                   'notes': data.notes,
-                  'isa_left' :data.isa_left,
-                  'isa_right': data.isa_right,
+                  'isa_structure': data.isa_structure,
+                  'isa_movement': data.isa_movement,
+                  'co2_tolerance': data.co2_tolerance,                  
                   'shoulder': {
                                 'right': shoulder_r,
                                'left': shoulder_l
