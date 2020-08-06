@@ -9,6 +9,8 @@ import boto3
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
+from odyssey.config import Config
+
 from alembic import context
 
 # this is the Alembic Config object, which provides
@@ -37,32 +39,9 @@ target_metadata = current_app.extensions['migrate'].db.metadata
 
 # change the database user to the master user for the purpose of editing schemas
 # Use config.py from main Flask app to get the database URI
-# NOTE: from_pyfile() looks in odyssey root dir
-current_app.config.from_pyfile('config.py')
+current_app.config.from_object(Config(migrate=True))
 
-
-# change the database user to the master user for the purpose of editing schemas
-# this only needs to happen if we are editing a remote db
-if os.getenv('FLASK_ENV') in ('development','production') and os.getenv('FLASK_DEV') != 'local':
-    ssm = boto3.client('ssm')
-    db_flav = ssm.get_parameter(Name='/modobio/odyssey/db_flav')['Parameter']['Value']
-    db_user = ssm.get_parameter(Name='/modobio/odyssey/db_user_master')['Parameter']['Value']
-    db_pass = ssm.get_parameter(Name='/modobio/odyssey/db_pass_master', WithDecryption=True)['Parameter']['Value']
-    db_host = ssm.get_parameter(Name='/modobio/odyssey/db_host')['Parameter']['Value']
-
-if os.getenv('FLASK_ENV') == 'development':
-    if os.getenv('FLASK_DEV') == 'local':
-        db_connection_string = str(current_app.extensions['migrate'].db.engine.url).replace('%', '%%')
-    else:
-        db_name = ssm.get_parameter(Name='/modobio/odyssey/db_name_dev')['Parameter']['Value']
-        db_connection_string = f'{db_flav}://{db_user}:{db_pass}@{db_host}/{db_name}'
-elif os.getenv('FLASK_ENV') == 'production':
-    db_name = ssm.get_parameter(Name='/modobio/odyssey/db_name')['Parameter']['Value']
-    db_connection_string = f'{db_flav}://{db_user}:{db_pass}@{db_host}/{db_name}'
-else:
-    print("which database are you upgrading?")
-    db_name = input()
-
+db_connection_string = current_app.config['SQLALCHEMY_DATABASE_URI']
 
 print(f"\n***\nUpdating/querying database using the following connection string: \n {db_connection_string}")
 print("continue? [Y,n]")

@@ -132,6 +132,9 @@ class Config():
     flask_dev : str
         The development environment for which the configuration will be loaded.
 
+    migrate : bool
+        Indicates whether we are running `flask db ...` from :mod:`flask_migrate`.
+
     Raises
     ------
     ValueError
@@ -145,7 +148,10 @@ class Config():
     SECRET_KEY = 'dev'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    def __init__(self, flask_dev=None):
+    def __init__(self, flask_dev=None, migrate=False):
+        # Whether or not we are running 'flask db ...'
+        self.migrate = migrate
+        
         # Parameter has precedence over environmental variable
         flask_dev = flask_dev if flask_dev else os.getenv('FLASK_DEV')
 
@@ -203,11 +209,17 @@ class Config():
         """ Set the configuration for the development server. """
         self.ssm = boto3.client('ssm')
         self.db_flav = self.ssm.get_parameter(Name='/modobio/odyssey/db_flav')['Parameter']['Value']
-        self.db_user = self.ssm.get_parameter(Name='/modobio/odyssey/db_user')['Parameter']['Value']
-        self.db_pass = self.ssm.get_parameter(Name='/modobio/odyssey/db_pass',
-                                              WithDecryption=True)['Parameter']['Value']
         self.db_host = self.ssm.get_parameter(Name='/modobio/odyssey/db_host')['Parameter']['Value']
         self.db_name = self.ssm.get_parameter(Name='/modobio/odyssey/db_name_dev')['Parameter']['Value']
+
+        if self.migrate:
+            self.db_user = self.ssm.get_parameter(Name='/modobio/odyssey/db_user_master')['Parameter']['Value']
+            self.db_pass = self.ssm.get_parameter(Name='/modobio/odyssey/db_pass_master',
+                                                  WithDecryption=True)['Parameter']['Value']
+        else:
+            self.db_user = self.ssm.get_parameter(Name='/modobio/odyssey/db_user')['Parameter']['Value']
+            self.db_pass = self.ssm.get_parameter(Name='/modobio/odyssey/db_pass',
+                                                  WithDecryption=True)['Parameter']['Value']
 
         param = self.ssm.get_parameter(Name='/modobio/odyssey/docs_bucket_test')
         self.DOCS_BUCKET_NAME = param['Parameter']['Value']
@@ -215,13 +227,6 @@ class Config():
 
     def test_config(self):
         """ Set the configuration for running local unittests. """
-        # db_file = pathlib.Path(__file__).absolute().parent / 'app.db'
-        # self.db_flav = os.getenv('FLASK_DB_FLAV', default='sqlite')
-        # self.db_user = os.getenv('FLASK_DB_USER', default=None)
-        # self.db_pass = os.getenv('FLASK_DB_PASS', default=None)
-        # self.db_host = os.getenv('FLASK_DB_HOST', default='')
-        # self.db_name = os.getenv('FLASK_DB_NAME', default=db_file)
-
         self.db_flav = os.getenv('FLASK_DB_FLAV', default='postgresql')
         self.db_user = os.getenv('FLASK_DB_USER', default=None)
         self.db_pass = os.getenv('FLASK_DB_PASS', default=None)
@@ -240,11 +245,17 @@ class Config():
         """ Set the configuration for the production environment. """
         self.ssm = boto3.client('ssm')
         self.db_flav = self.ssm.get_parameter(Name='/modobio/odyssey/db_flav')['Parameter']['Value']
-        self.db_user = self.ssm.get_parameter(Name='/modobio/odyssey/db_user')['Parameter']['Value']
-        self.db_pass = self.ssm.get_parameter(Name='/modobio/odyssey/db_pass',
-                                              WithDecryption=True)['Parameter']['Value']
         self.db_host = self.ssm.get_parameter(Name='/modobio/odyssey/db_host')['Parameter']['Value']
         self.db_name = self.ssm.get_parameter(Name='/modobio/odyssey/db_name')['Parameter']['Value']
+
+        if self.migrate:
+            self.db_user = self.ssm.get_parameter(Name='/modobio/odyssey/db_user_master')['Parameter']['Value']
+            self.db_pass = self.ssm.get_parameter(Name='/modobio/odyssey/db_pass_master',
+                                                  WithDecryption=True)['Parameter']['Value']
+        else:
+            self.db_user = self.ssm.get_parameter(Name='/modobio/odyssey/db_user')['Parameter']['Value']
+            self.db_pass = self.ssm.get_parameter(Name='/modobio/odyssey/db_pass',
+                                                  WithDecryption=True)['Parameter']['Value']
 
         param = self.ssm.get_parameter(Name='/modobio/odyssey/docs_bucket')
         self.DOCS_BUCKET_NAME = param['Parameter']['Value']
