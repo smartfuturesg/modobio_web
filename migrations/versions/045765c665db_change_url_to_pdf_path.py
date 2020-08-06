@@ -1,8 +1,8 @@
 """Change url to pdf_path
 
-Revision ID: be13289c2fce
-Revises: 5216c031bfd8
-Create Date: 2020-08-05 12:19:55.157590
+Revision ID: 045765c665db
+Revises: fbedc9d658e6
+Create Date: 2020-08-05 18:26:11.127307
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'be13289c2fce'
-down_revision = '5216c031bfd8'
+revision = '045765c665db'
+down_revision = 'fbedc9d658e6'
 branch_labels = None
 depends_on = None
 
