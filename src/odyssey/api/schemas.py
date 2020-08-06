@@ -241,8 +241,8 @@ class ChessBoardHipSchema(Schema):
     right = fields.Nested(HipRotationSchema)
 
 class ChessboardSchema(Schema):
-    isa_structure_list  = ['Inhaled','Exhaled', 'Asymettrical Normal','Asymettrical Atypical']
-    isa_movement_list  = ['Dynamic', 'Static', 'R Static/Left Dyanamic', 'L Static/Right Dyanamic']
+    isa_structure_list  = ['Inhaled','Exhaled', 'Asymmetrical Normal','Asymmetrical Atypical']
+    isa_movement_list  = ['Dynamic', 'Static', 'R Static/Left Dynamic', 'L Static/Right Dynamic']
 
     clientid = fields.Integer(missing=0)
     timestamp = fields.DateTime()
