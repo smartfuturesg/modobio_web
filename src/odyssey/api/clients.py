@@ -7,6 +7,7 @@ from flask_restx import Resource, Api
 from odyssey.api.utils import check_client_existence
 from odyssey.api import api
 from odyssey.api.auth import token_auth, token_auth_client
+from odyssey.api.email import send_email_remote_registration_portal
 from odyssey.api.errors import UserNotFound, ClientAlreadyExists, ClientNotFound, IllegalSetting, ContentNotFound
 from odyssey import db
 from odyssey.models.intake import (
@@ -536,3 +537,20 @@ class RemoteClientInfo(Resource):
         db.session.add(client)
         db.session.commit()
         return client
+
+
+@ns.route('/testemail/')
+# @ns.doc(params={'tmp_registration': 'temporary registration portal hash'})
+class RemoteClientInfo(Resource):
+    """
+        For getting and altering client info table as a remote client.
+        Requires token authorization in addition to a valid portal id (tmp_registration)
+    """
+    # @ns.doc(security='apikey')
+    # @token_auth_client.login_required
+    # @responds(schema=ClientInfoSchema, api=ns)
+    def get(self):
+        """send a testing email"""
+        # send_email_no_reply()
+        send_email_remote_registration_portal()
+        return {}, 200  
