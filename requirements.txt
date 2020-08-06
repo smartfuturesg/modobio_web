@@ -9,7 +9,7 @@ flask-restx
 Flask_SQLAlchemy
 flask-marshmallow
 Flask_WTF
-mashmallow
+marshmallow
 marshmallow-sqlalchemy
 psycopg2
 pytest
