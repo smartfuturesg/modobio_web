@@ -1,3 +1,4 @@
+import boto3
 from datetime import datetime
 
 from flask import request, jsonify
@@ -388,7 +389,8 @@ class SignedDocuments(Resource):
     Returns
     -------
 
-    Returns a list of URLs where the PDF documents are stored.
+    Returns a list of URLs to the stored the PDF documents.
+    The URLs expire after 10 min.
     """
     @ns.doc(security='apikey')
     @token_auth.login_required
@@ -399,15 +401,34 @@ class SignedDocuments(Resource):
 
         urls = []
 
-        for table in (ClientPolicies,
-                      ClientRelease,
-                      ClientConsent,
-                      ClientConsultContract,
-                      ClientSubscriptionContract,
-                      ClientIndividualContract):
-            result = table.query.filter_by(clientid=clientid).order_by(table.idx.desc()).first()
-            if result and result.url:
-                urls.append(result.url)
+        if current_app.config['DOCS_STORE_LOCAL']:
+            for table in (ClientPolicies,
+                          ClientRelease,
+                          ClientConsent,
+                          ClientConsultContract,
+                          ClientSubscriptionContract,
+                          ClientIndividualContract):
+                result = table.query.filter_by(clientid=clientid).order_by(table.idx.desc()).first()
+                if result and result.pdf_path:
+                    urls.append(result.pdf_path)
+        else:
+            s3 = boto3.client('s3')
+            params = {
+                'Bucket': current_app.config['DOCS_BUCKET_NAME'],
+                'Key': None
+            }
+
+            for table in (ClientPolicies,
+                          ClientRelease,
+                          ClientConsent,
+                          ClientConsultContract,
+                          ClientSubscriptionContract,
+                          ClientIndividualContract):
+                result = table.query.filter_by(clientid=clientid).order_by(table.idx.desc()).first()
+                if result and result.pdf_path:
+                    params['Key'] = result.pdf_path
+                    url = s3.generate_presigned_url('get_object', Params=params, ExpiresIn=600)
+                    urls.append(url)
 
         return {'urls': urls}
 

@@ -5,13 +5,10 @@ All tables in this module are prefixed with 'Client'.
 import base64
 import os
 import pytz
-import random
 import secrets
 
 from datetime import datetime, timedelta
 from hashlib import md5
-from flask import url_for
-from werkzeug.security import generate_password_hash, check_password_hash
 
 from odyssey import db
 
@@ -358,11 +355,11 @@ class ClientConsent(db.Model):
     :const:`odyssey.constants.DOCTYPE_DOCREV_MAP`
     """
 
-    url = db.Column(db.String(200))
+    pdf_path = db.Column(db.String(200))
     """
-    URL where signed document is stored as a PDF file.
+    Path where signed document is stored as a PDF file.
 
-    :type: str, max length 100
+    :type: str, max length 200
     """
 
     pdf_hash = db.Column(db.String(40))
@@ -391,8 +388,7 @@ class ClientConsent(db.Model):
             'infectious_disease': self.infectious_disease,
             'signdate': self.signdate,
             'signature': self.signature,
-            'revision': self.revision,
-            'url': self.url
+            'revision': self.revision
         }
         return data
 
@@ -498,11 +494,11 @@ class ClientRelease(db.Model):
     :const:`odyssey.constants.DOCTYPE_DOCREV_MAP`
     """
 
-    url = db.Column(db.String(200))
+    pdf_path = db.Column(db.String(200))
     """
-    URL where signed document is stored as a PDF file.
+    Path where signed document is stored as a PDF file.
 
-    :type: str, max length 100
+    :type: str, max length 200
     """
 
     pdf_hash = db.Column(db.String(40))
@@ -538,8 +534,7 @@ class ClientRelease(db.Model):
             'release_purpose': self.release_purpose,
             'signdate': self.signdate,
             'signature': self.signature,
-            'revision': self.revision,
-            'url': self.url
+            'revision': self.revision
         }
         return data
 
@@ -597,11 +592,11 @@ class ClientPolicies(db.Model):
     :const:`odyssey.constants.DOCTYPE_DOCREV_MAP`
     """
 
-    url = db.Column(db.String(200))
+    pdf_path = db.Column(db.String(200))
     """
-    URL where signed document is stored as a PDF file.
+    Path where signed document is stored as a PDF file.
 
-    :type: str, max length 100
+    :type: str, max length 200
     """
 
     pdf_hash = db.Column(db.String(40))
@@ -629,8 +624,7 @@ class ClientPolicies(db.Model):
             'clientid': self.clientid,
             'signdate': self.signdate,
             'signature': self.signature,
-            'revision': self.revision,
-            'url': self.url
+            'revision': self.revision
         }
         return data
 
@@ -688,11 +682,11 @@ class ClientConsultContract(db.Model):
     :const:`odyssey.constants.DOCTYPE_DOCREV_MAP`
     """
 
-    url = db.Column(db.String(200))
+    pdf_path = db.Column(db.String(200))
     """
-    URL where signed document is stored as a PDF file.
+    Path where signed document is stored as a PDF file.
 
-    :type: str, max length 100
+    :type: str, max length 200
     """
 
     pdf_hash = db.Column(db.String(40))
@@ -720,8 +714,7 @@ class ClientConsultContract(db.Model):
             'clientid': self.clientid,
             'signdate': self.signdate,
             'signature': self.signature,
-            'revision': self.revision,
-            'url': self.url
+            'revision': self.revision
         }
         return data
 
@@ -779,11 +772,11 @@ class ClientSubscriptionContract(db.Model):
     :const:`odyssey.constants.DOCTYPE_DOCREV_MAP`
     """
 
-    url = db.Column(db.String(200))
+    pdf_path = db.Column(db.String(200))
     """
-    URL where signed document is stored as a PDF file.
+    Path where signed document is stored as a PDF file.
 
-    :type: str, max length 100
+    :type: str, max length 200
     """
 
     pdf_hash = db.Column(db.String(40))
@@ -811,8 +804,7 @@ class ClientSubscriptionContract(db.Model):
             'clientid': self.clientid,
             'signdate': self.signdate,
             'signature': self.signature,
-            'revision': self.revision,
-            'url': self.url
+            'revision': self.revision
         }
         return data
 
@@ -893,11 +885,11 @@ class ClientIndividualContract(db.Model):
     :const:`odyssey.constants.DOCTYPE_DOCREV_MAP`
     """
 
-    url = db.Column(db.String(200))
+    pdf_path = db.Column(db.String(200))
     """
-    URL where signed document is stored as a PDF file.
+    Path where signed document is stored as a PDF file.
 
-    :type: str, max length 100
+    :type: str, max length 200
     """
 
     pdf_hash = db.Column(db.String(40))
@@ -929,8 +921,7 @@ class ClientIndividualContract(db.Model):
             'drinks': self.drinks,
             'signdate': self.signdate,
             'signature': self.signature,
-            'revision': self.revision,
-            'url': self.url
+            'revision': self.revision
         }
         return data
 
