@@ -150,20 +150,6 @@ class Chessboard(db.Model):
     :type: datetime.datetime, primary key
     """
 
-    isa_right = db.Column(db.Boolean)
-    """
-    Indicates whether or not the ISA is right.
-
-    :type: bool
-    """
-
-    isa_left = db.Column(db.Boolean)
-    """
-    Indicates whether or not the ISA is left.
-
-    :type: bool
-    """
-
     isa_structure = db.Column(db.String(24))
     """
     must be one of the following
@@ -175,11 +161,22 @@ class Chessboard(db.Model):
     :type: str, max length 24
     """
 
-    isa_dynamic = db.Column(db.Boolean)
+    isa_movement = db.Column(db.String(24))
     """
-    Indicates whether or not the ISA is dynamic.
+    must be one of the following
+    'Dynamic',
+    'Static',
+    'R Static/Left Dyanamic',
+    'L Static/Right Dyanamic'
 
-    :type: bool
+    :type: str, max length 24
+    """
+
+    co2_tolerance = db.Column(db.Integer)
+    """
+    CO2 tolerance 0-120
+    
+    :type: int
     """
 
     left_shoulder_er = db.Column(db.Integer)

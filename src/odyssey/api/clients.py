@@ -245,9 +245,8 @@ class PoliciesContract(Resource):
 
         client_policies =  ClientPolicies.query.filter_by(clientid=clientid).order_by(ClientPolicies.idx.desc()).first()
 
-        if not client_policies:
-            raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a policy contract in the database")
-
+        if not client_services:
+            raise ContentNotFound()
         return  client_policies
 
     @ns.doc(security='apikey')
