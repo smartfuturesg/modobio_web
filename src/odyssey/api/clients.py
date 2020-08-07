@@ -245,7 +245,7 @@ class PoliciesContract(Resource):
 
         client_policies =  ClientPolicies.query.filter_by(clientid=clientid).order_by(ClientPolicies.idx.desc()).first()
 
-        if not client_services:
+        if not client_policies:
             raise ContentNotFound()
         return  client_policies
 
