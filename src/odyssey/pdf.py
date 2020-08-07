@@ -71,6 +71,7 @@ def _to_pdf(req_ctx, clientid: int, doctype: DOCTYPE, template: str=None, form: 
     """
     with req_ctx:
         client = ClientInfo.query.filter_by(clientid=clientid).one_or_none()
+
         if not client:
             raise ValueError('Clientid {clientid} not found in table {ClientInfo.__tablename__}.')
 
@@ -84,8 +85,8 @@ def _to_pdf(req_ctx, clientid: int, doctype: DOCTYPE, template: str=None, form: 
         if not doc:
             raise ValueError('Clientid {clientid} not found in table {doctable.__tablename__}.')
 
-        if doc.url:
-            # URL already exists, won't save again
+        if doc.pdf_path:
+            # PDF already exists, won't save again
             return
 
         cssfile = pathlib.Path(__file__).parent / 'static' / 'style.css'
@@ -118,19 +119,17 @@ def _to_pdf(req_ctx, clientid: int, doctype: DOCTYPE, template: str=None, form: 
             with open(fullname, mode='wb') as fh:
                 fh.write(pdf)
 
-            url = fullname.as_uri()
+            pdf_path = fullname.as_posix()
         else:
             pdf_obj = io.BytesIO(pdf)
-            path = f'id{clientid:05d}/{filename}'
+            pdf_path = f'id{clientid:05d}/{filename}'
 
             s3 = boto3.client('s3')
-            s3.upload_fileobj(pdf_obj, bucket_name, path)
+            s3.upload_fileobj(pdf_obj, bucket_name, pdf_path)
 
-            region = s3.get_bucket_location(Bucket=bucket_name)['LocationConstraint']
-            url = f'https://{bucket_name}.s3.{region}.amazonaws.com/{path}'
-
-        doc.update({'url': url, 'pdf_hash': pdf_hash})
+        doc.pdf_path = pdf_path
+        doc.pdf_hash = pdf_hash
         db.session.commit()
 
         if current_app.config['DEBUG']:
-            print('PDF stored at:', url)
+            print('PDF stored at:', pdf_path)

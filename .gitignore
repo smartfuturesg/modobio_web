@@ -25,7 +25,9 @@ sdist/
 *code-workspace
 .python-version
 .idea
+.vs
 .vscode
+venv/
 
 # from pytests
 *.db

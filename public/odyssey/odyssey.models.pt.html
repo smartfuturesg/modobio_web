@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>odyssey.models.pt &mdash; Odyssey 0.1.1.dev132+g1a99585 documentation</title>
+  <title>odyssey.models.pt &mdash; Odyssey 0.1.1.dev151+gc03d6f9 documentation</title>
   
 
   
@@ -61,7 +61,7 @@
             
             
               <div class="version">
-                0.1.1.dev132+g1a99585
+                0.1.1.dev151+gc03d6f9
               </div>
             
           
@@ -358,7 +358,7 @@ JSON dictionary.</p>
 <p>Mobility assessment table a.k.a Chessboard</p>
 <p>This table stores the repeated mobility assessment measurements. The measurements
 are indexed by <a class="reference internal" href="#odyssey.models.pt.Chessboard.clientid" title="odyssey.models.pt.Chessboard.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">clientid</span></code></a> and assessment <a class="reference internal" href="#odyssey.models.pt.Chessboard.timestamp" title="odyssey.models.pt.Chessboard.timestamp"><code class="xref py py-attr docutils literal notranslate"><span class="pre">timestamp</span></code></a>. All values in
-this table, with the exception of <a class="reference internal" href="#odyssey.models.pt.Chessboard.isa_dynamic" title="odyssey.models.pt.Chessboard.isa_dynamic"><code class="xref py py-attr docutils literal notranslate"><span class="pre">isa_dynamic</span></code></a>, are angles in degrees.</p>
+this table, with the exception of <code class="xref py py-attr docutils literal notranslate"><span class="pre">isa_dynamic</span></code>, are angles in degrees.</p>
 <dl class="py attribute">
 <dt id="odyssey.models.pt.Chessboard.idx">
 <code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.idx" title="Permalink to this definition">¶</a></dt>
@@ -393,28 +393,6 @@ this table, with the exception of <a class="reference internal" href="#odyssey.m
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.models.pt.Chessboard.isa_right">
-<code class="sig-name descname">isa_right</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.isa_right" title="Permalink to this definition">¶</a></dt>
-<dd><p>Indicates whether or not the ISA is right.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.models.pt.Chessboard.isa_left">
-<code class="sig-name descname">isa_left</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.isa_left" title="Permalink to this definition">¶</a></dt>
-<dd><p>Indicates whether or not the ISA is left.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
 <dt id="odyssey.models.pt.Chessboard.isa_structure">
 <code class="sig-name descname">isa_structure</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.isa_structure" title="Permalink to this definition">¶</a></dt>
 <dd><p>must be one of the following
@@ -430,12 +408,27 @@ this table, with the exception of <a class="reference internal" href="#odyssey.m
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.models.pt.Chessboard.isa_dynamic">
-<code class="sig-name descname">isa_dynamic</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.isa_dynamic" title="Permalink to this definition">¶</a></dt>
-<dd><p>Indicates whether or not the ISA is dynamic.</p>
+<dt id="odyssey.models.pt.Chessboard.isa_movement">
+<code class="sig-name descname">isa_movement</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.isa_movement" title="Permalink to this definition">¶</a></dt>
+<dd><p>must be one of the following
+‘Dynamic’,
+‘Static’,
+‘R Static/Left Dyanamic’,
+‘L Static/Right Dyanamic’</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 24</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.Chessboard.co2_tolerance">
+<code class="sig-name descname">co2_tolerance</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.co2_tolerance" title="Permalink to this definition">¶</a></dt>
+<dd><p>CO2 tolerance 0-120</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
 </dd>
 </dl>
 </dd></dl>

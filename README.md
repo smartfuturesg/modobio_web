@@ -89,3 +89,13 @@ modobio => exit
 ```
 
 Use the string from the Python output above in place of `<password>`. You should now be able to log in as 'name@modobio.com' with password '123' (or whatever you used above).
+
+### Docker
+
+If you have Docker installed, you can bring up a local, ready to go instance of this application by running the docker_local.sh script. (Note: If you're using WSL and this script fails on Windows, you may need to dos2unix the script to fix line endings that may be causing errors.)
+
+```
+bash docker_local.sh
+```
+
+This will build the application, stand up a containerized instance of Postgres, update the database, and run the application for use.
