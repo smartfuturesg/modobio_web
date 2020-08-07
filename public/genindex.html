@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Index &mdash; Odyssey 0.1.1.dev132+g1a99585 documentation</title>
+  <title>Index &mdash; Odyssey 0.1.1.dev151+gc03d6f9 documentation</title>
   
 
   
@@ -59,7 +59,7 @@
             
             
               <div class="version">
-                0.1.1.dev132+g1a99585
+                0.1.1.dev151+gc03d6f9
               </div>
             
           
@@ -479,6 +479,8 @@
       <li><a href="odyssey/odyssey.api.schemas.html#odyssey.api.schemas.ClientSubscriptionContractSchema.Meta">ClientSubscriptionContractSchema.Meta (class in odyssey.api.schemas)</a>
 </li>
       <li><a href="odyssey/odyssey.api.schemas.html#odyssey.api.schemas.ClientSummarySchema">ClientSummarySchema (class in odyssey.api.schemas)</a>
+</li>
+      <li><a href="odyssey/odyssey.models.pt.html#odyssey.models.pt.Chessboard.co2_tolerance">co2_tolerance (odyssey.models.pt.Chessboard attribute)</a>
 </li>
       <li><a href="odyssey/odyssey.forms.doctor.html#odyssey.forms.doctor.MedicalHistoryForm.concerns">concerns (odyssey.forms.doctor.MedicalHistoryForm attribute)</a>
 
@@ -1109,24 +1111,24 @@
       <li><a href="odyssey/odyssey.forms.pt.html#odyssey.forms.pt.MobilityAssessmentForm.isa_dynamic">isa_dynamic (odyssey.forms.pt.MobilityAssessmentForm attribute)</a>
 
       <ul>
-        <li><a href="odyssey/odyssey.models.pt.html#odyssey.models.pt.Chessboard.isa_dynamic">(odyssey.models.pt.Chessboard attribute)</a>
-</li>
         <li><a href="odyssey/odyssey.models.pt.html#odyssey.models.pt.MobilityAssessment.isa_dynamic">(odyssey.models.pt.MobilityAssessment attribute)</a>
 </li>
       </ul></li>
       <li><a href="odyssey/odyssey.forms.pt.html#odyssey.forms.pt.MobilityAssessmentForm.isa_left">isa_left (odyssey.forms.pt.MobilityAssessmentForm attribute)</a>
 
       <ul>
-        <li><a href="odyssey/odyssey.models.pt.html#odyssey.models.pt.Chessboard.isa_left">(odyssey.models.pt.Chessboard attribute)</a>
-</li>
         <li><a href="odyssey/odyssey.models.pt.html#odyssey.models.pt.MobilityAssessment.isa_left">(odyssey.models.pt.MobilityAssessment attribute)</a>
 </li>
       </ul></li>
+      <li><a href="odyssey/odyssey.models.pt.html#odyssey.models.pt.Chessboard.isa_movement">isa_movement (odyssey.models.pt.Chessboard attribute)</a>
+</li>
+      <li><a href="odyssey/odyssey.api.schemas.html#odyssey.api.schemas.ChessboardSchema.isa_movement_list">isa_movement_list (odyssey.api.schemas.ChessboardSchema attribute)</a>
+</li>
+      <li><a href="odyssey/odyssey.api.schemas.html#odyssey.api.schemas.ChessboardSchema.isa_movement_picklist">isa_movement_picklist() (odyssey.api.schemas.ChessboardSchema method)</a>
+</li>
       <li><a href="odyssey/odyssey.forms.pt.html#odyssey.forms.pt.MobilityAssessmentForm.isa_right">isa_right (odyssey.forms.pt.MobilityAssessmentForm attribute)</a>
 
       <ul>
-        <li><a href="odyssey/odyssey.models.pt.html#odyssey.models.pt.Chessboard.isa_right">(odyssey.models.pt.Chessboard attribute)</a>
-</li>
         <li><a href="odyssey/odyssey.models.pt.html#odyssey.models.pt.MobilityAssessment.isa_right">(odyssey.models.pt.MobilityAssessment attribute)</a>
 </li>
       </ul></li>
@@ -2083,6 +2085,20 @@
         <li><a href="odyssey/odyssey.models.intake.html#odyssey.models.intake.ClientSubscriptionContract.pdf_hash">(odyssey.models.intake.ClientSubscriptionContract attribute)</a>
 </li>
       </ul></li>
+      <li><a href="odyssey/odyssey.models.intake.html#odyssey.models.intake.ClientConsent.pdf_path">pdf_path (odyssey.models.intake.ClientConsent attribute)</a>
+
+      <ul>
+        <li><a href="odyssey/odyssey.models.intake.html#odyssey.models.intake.ClientConsultContract.pdf_path">(odyssey.models.intake.ClientConsultContract attribute)</a>
+</li>
+        <li><a href="odyssey/odyssey.models.intake.html#odyssey.models.intake.ClientIndividualContract.pdf_path">(odyssey.models.intake.ClientIndividualContract attribute)</a>
+</li>
+        <li><a href="odyssey/odyssey.models.intake.html#odyssey.models.intake.ClientPolicies.pdf_path">(odyssey.models.intake.ClientPolicies attribute)</a>
+</li>
+        <li><a href="odyssey/odyssey.models.intake.html#odyssey.models.intake.ClientRelease.pdf_path">(odyssey.models.intake.ClientRelease attribute)</a>
+</li>
+        <li><a href="odyssey/odyssey.models.intake.html#odyssey.models.intake.ClientSubscriptionContract.pdf_path">(odyssey.models.intake.ClientSubscriptionContract attribute)</a>
+</li>
+      </ul></li>
       <li><a href="odyssey/odyssey.models.trainer.html#odyssey.models.trainer.MoxyRipTest.performance_average_power_1">performance_average_power_1 (odyssey.models.trainer.MoxyRipTest attribute)</a>
 </li>
       <li><a href="odyssey/odyssey.models.trainer.html#odyssey.models.trainer.MoxyRipTest.performance_average_power_2">performance_average_power_2 (odyssey.models.trainer.MoxyRipTest attribute)</a>
@@ -2155,6 +2171,8 @@
 </li>
       <li><a href="odyssey/odyssey.api.schemas.html#odyssey.api.schemas.StaffSchema.possible_roles">possible_roles (odyssey.api.schemas.StaffSchema attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="odyssey/odyssey.api.clients.html#odyssey.api.clients.ConsentContract.post">post() (odyssey.api.clients.ConsentContract method)</a>
 
       <ul>
@@ -2203,8 +2221,6 @@
         <li><a href="odyssey/odyssey.api.trainer.html#odyssey.api.trainer.Strength.post">(odyssey.api.trainer.Strength method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="odyssey/odyssey.api.trainer.html#odyssey.api.trainer.Power">Power (class in odyssey.api.trainer)</a>
 </li>
       <li><a href="odyssey/odyssey.models.trainer.html#odyssey.models.trainer.PowerAssessment">PowerAssessment (class in odyssey.models.trainer)</a>
@@ -2851,14 +2867,14 @@
 </li>
       <li><a href="odyssey/odyssey.models.trainer.html#odyssey.models.trainer.StrengthAssessment.upper_pull_r_attempt_3">upper_pull_r_attempt_3 (odyssey.models.trainer.StrengthAssessment attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="odyssey/odyssey.models.trainer.html#odyssey.models.trainer.StrengthAssessment.upper_pull_r_estimated_10rm">upper_pull_r_estimated_10rm (odyssey.models.trainer.StrengthAssessment attribute)</a>
 </li>
       <li><a href="odyssey/odyssey.models.trainer.html#odyssey.models.trainer.StrengthAssessment.upper_pull_r_weight">upper_pull_r_weight (odyssey.models.trainer.StrengthAssessment attribute)</a>
 </li>
       <li><a href="odyssey/odyssey.models.trainer.html#odyssey.models.trainer.StrengthAssessment.upper_push_bi_attempt_1">upper_push_bi_attempt_1 (odyssey.models.trainer.StrengthAssessment attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="odyssey/odyssey.models.trainer.html#odyssey.models.trainer.StrengthAssessment.upper_push_bi_attempt_2">upper_push_bi_attempt_2 (odyssey.models.trainer.StrengthAssessment attribute)</a>
 </li>
       <li><a href="odyssey/odyssey.models.trainer.html#odyssey.models.trainer.StrengthAssessment.upper_push_bi_attempt_3">upper_push_bi_attempt_3 (odyssey.models.trainer.StrengthAssessment attribute)</a>
@@ -2891,20 +2907,6 @@
 </li>
       <li><a href="odyssey/odyssey.models.trainer.html#odyssey.models.trainer.PowerAssessment.upper_watts_per_kg">upper_watts_per_kg (odyssey.models.trainer.PowerAssessment attribute)</a>
 </li>
-      <li><a href="odyssey/odyssey.models.intake.html#odyssey.models.intake.ClientConsent.url">url (odyssey.models.intake.ClientConsent attribute)</a>
-
-      <ul>
-        <li><a href="odyssey/odyssey.models.intake.html#odyssey.models.intake.ClientConsultContract.url">(odyssey.models.intake.ClientConsultContract attribute)</a>
-</li>
-        <li><a href="odyssey/odyssey.models.intake.html#odyssey.models.intake.ClientIndividualContract.url">(odyssey.models.intake.ClientIndividualContract attribute)</a>
-</li>
-        <li><a href="odyssey/odyssey.models.intake.html#odyssey.models.intake.ClientPolicies.url">(odyssey.models.intake.ClientPolicies attribute)</a>
-</li>
-        <li><a href="odyssey/odyssey.models.intake.html#odyssey.models.intake.ClientRelease.url">(odyssey.models.intake.ClientRelease attribute)</a>
-</li>
-        <li><a href="odyssey/odyssey.models.intake.html#odyssey.models.intake.ClientSubscriptionContract.url">(odyssey.models.intake.ClientSubscriptionContract attribute)</a>
-</li>
-      </ul></li>
       <li><a href="odyssey/odyssey.api.errors.html#odyssey.api.errors.UserNotFound">UserNotFound</a>
 </li>
       <li><a href="odyssey/odyssey.constants.html#odyssey.constants.USSTATES">USSTATES (in module odyssey.constants)</a>

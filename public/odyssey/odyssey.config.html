@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>odyssey.config &mdash; Odyssey 0.1.1.dev132+g1a99585 documentation</title>
+  <title>odyssey.config &mdash; Odyssey 0.1.1.dev151+gc03d6f9 documentation</title>
   
 
   
@@ -61,7 +61,7 @@
             
             
               <div class="version">
-                0.1.1.dev132+g1a99585
+                0.1.1.dev151+gc03d6f9
               </div>
             
           
@@ -231,7 +231,7 @@ live production server. It uses the AWS parameter store to discover database and
 </ul>
 <dl class="py class">
 <dt id="odyssey.config.Config">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.config.</code><code class="sig-name descname">Config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">flask_dev</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.config.Config" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.config.</code><code class="sig-name descname">Config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">flask_dev</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">migrate</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.config.Config" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Main configuration class.</p>
 <p>This class needs to be instantiated before it can be loaded by Flask.
@@ -257,7 +257,10 @@ $ flask run
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>flask_dev</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The development environment for which the configuration will be loaded.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>flask_dev</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The development environment for which the configuration will be loaded.</p></li>
+<li><p><strong>migrate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Indicates whether we are running <cite>flask db …</cite> from <code class="xref py py-mod docutils literal notranslate"><span class="pre">flask_migrate</span></code>.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.8)"><strong>ValueError</strong></a> – Raised when <code class="docutils literal notranslate"><span class="pre">FLASK_ENV</span></code>, <code class="docutils literal notranslate"><span class="pre">FLASK_DEV</span></code>, or <code class="docutils literal notranslate"><span class="pre">flask_dev</span></code> are set to

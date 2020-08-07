@@ -25,6 +25,7 @@ exclude_patterns = [
     'odyssey/odyssey.rst',
     'odyssey/modules.rst',
     'odyssey/odyssey.version.rst',
+    'odyssey/odyssey.run.rst',
     '_build',
     'Thumbs.db',
     '.DS_Store'
@@ -42,6 +43,7 @@ autodoc_default_options = {
 
 intersphinx_mapping = {
     'flask': ('https://flask.palletsprojects.com/', None),
+    'flask_migrate': ('https://flask-migrate.readthedocs.io/en/latest/', None),
     'flask_wtf': ('https://flask-wtf.readthedocs.io/en/stable/', None),
     'python': ('https://docs.python.org/3/', None),
     'sqlalchemy': ('https://docs.sqlalchemy.org/', None),
