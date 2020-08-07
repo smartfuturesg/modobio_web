@@ -26,4 +26,6 @@ Submodules
    odyssey.config
    odyssey.constants
    odyssey.pdf
+   odyssey.run
    odyssey.utils
+   odyssey.version
