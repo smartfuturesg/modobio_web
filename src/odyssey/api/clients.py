@@ -1,8 +1,8 @@
 import boto3
 from datetime import datetime
 
-from flask import request, jsonify
-from flask_accepts import accepts, responds, current_app
+from flask import request, jsonify, current_app
+from flask_accepts import accepts, responds
 from flask_restx import Resource, Api
 
 from odyssey.api.utils import check_client_existence
