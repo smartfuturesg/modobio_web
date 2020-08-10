@@ -28,7 +28,7 @@ def test_creating_new_remote_client(test_client, init_database):
     token = staff.get_token()
     headers = {'Authorization': f'Bearer {token}'}
     
-    response = test_client.post('/api/client/remoteregistration/new/',
+    response = test_client.post('/client/remoteregistration/new/',
                                 headers=headers, 
                                 data=dumps(test_new_remote_registration), 
                                 content_type='application/json')
@@ -57,7 +57,7 @@ def test_refresh_new_remote_client_session(test_client, init_database):
     headers = {'Authorization': f'Bearer {token}'}
     
     payload = {'email': test_new_remote_registration['email']}
-    response = test_client.post('/api/client/remoteregistration/refresh/',
+    response = test_client.post('/client/remoteregistration/refresh/',
                                 headers=headers, 
                                 data=dumps(payload), 
                                 content_type='application/json')

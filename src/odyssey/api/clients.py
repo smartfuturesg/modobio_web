@@ -5,10 +5,9 @@ from flask import request, jsonify, current_app
 from flask_accepts import accepts, responds
 from flask_restx import Resource, Api
 
-from odyssey.api.utils import check_client_existence
 from odyssey.api import api
 from odyssey.api.auth import token_auth, token_auth_client
-from odyssey.api.email import send_email_remote_registration_portal
+from odyssey.utils.email import send_email_remote_registration_portal
 from odyssey.api.errors import UserNotFound, ClientAlreadyExists, ClientNotFound, IllegalSetting, ContentNotFound
 from odyssey import db
 from odyssey.models.intake import (
@@ -24,7 +23,8 @@ from odyssey.models.intake import (
 from odyssey.models.main import ClientRemovalRequests
 from odyssey.constants import DOCTYPE, DOCTYPE_DOCREV_MAP
 from odyssey.pdf import to_pdf
-from odyssey.api.schemas import (
+from odyssey.utils.misc import check_client_existence
+from odyssey.utils.schemas import (
     ClientConsentSchema,
     ClientConsultContractSchema,
     ClientIndividualContractSchema,

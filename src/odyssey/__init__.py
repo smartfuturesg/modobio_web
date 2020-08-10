@@ -12,7 +12,6 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 
 from odyssey.config import Config
-from odyssey.utils import JSONEncoder, JSONDecoder
 
 db = SQLAlchemy()
 migrate = Migrate()

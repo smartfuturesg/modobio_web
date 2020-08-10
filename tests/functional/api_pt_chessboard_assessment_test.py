@@ -21,11 +21,10 @@ def test_post_chessboard_assessment(test_client, init_database):
 
     payload = test_chessboard_assessment
     # send get request for client info on clientid = 1 
-    response = test_client.post('/api/pt/chessboard/1/',
+    response = test_client.post('/pt/chessboard/1/',
                                 headers=headers, 
                                 data=dumps(payload), 
                                 content_type='application/json')
-
     assert response.status_code == 201
 
 def test_get_chessboard_assessment(test_client, init_database):
@@ -40,7 +39,7 @@ def test_get_chessboard_assessment(test_client, init_database):
     headers = {'Authorization': f'Bearer {token}'}
 
     # send get request for client info on clientid = 1 
-    response = test_client.get('/api/pt/chessboard/1/',
+    response = test_client.get('/pt/chessboard/1/',
                                 headers=headers, 
                                 content_type='application/json')
                                 
