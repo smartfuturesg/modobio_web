@@ -7,7 +7,6 @@ from flask_restx import Resource, Api
 
 from odyssey.api import api
 from odyssey.api.auth import token_auth, token_auth_client
-from odyssey.utils.email import send_email_remote_registration_portal
 from odyssey.api.errors import UserNotFound, ClientAlreadyExists, ClientNotFound, IllegalSetting, ContentNotFound
 from odyssey import db
 from odyssey.models.intake import (
@@ -23,6 +22,7 @@ from odyssey.models.intake import (
 from odyssey.models.main import ClientRemovalRequests
 from odyssey.constants import DOCTYPE, DOCTYPE_DOCREV_MAP
 from odyssey.pdf import to_pdf
+from odyssey.utils.email import send_email_remote_registration_portal, send_email_no_reply
 from odyssey.utils.misc import check_client_existence
 from odyssey.utils.schemas import (
     ClientConsentSchema,
@@ -478,6 +478,11 @@ class NewRemoteRegistration(Resource):
         db.session.add(remote_client)
         db.session.commit()
 
+        # send email to client containing registration details
+        send_email_remote_registration_portal(recipient=remote_client.email, 
+                                              password=remote_client.password, 
+                                              remote_registration_portal=remote_client.registration_portal_id)
+
         return remote_client
 
 
@@ -515,6 +520,11 @@ class RefreshRemoteRegistration(Resource):
 
         db.session.add(remote_client)
         db.session.commit()
+
+        # send email to client containing registration details
+        send_email_remote_registration_portal(recipient=remote_client.email, 
+                                        password=remote_client.password, 
+                                        remote_registration_portal=remote_client.registration_portal_id)
 
         return remote_client
 
@@ -561,17 +571,13 @@ class RemoteClientInfo(Resource):
 
 
 @ns.route('/testemail/')
-# @ns.doc(params={'tmp_registration': 'temporary registration portal hash'})
-class RemoteClientInfo(Resource):
+class TestEmail(Resource):
     """
-        For getting and altering client info table as a remote client.
-        Requires token authorization in addition to a valid portal id (tmp_registration)
+       Send a test email
     """
-    # @ns.doc(security='apikey')
-    # @token_auth_client.login_required
-    # @responds(schema=ClientInfoSchema, api=ns)
+    @ns.doc(security='apikey')
+    @token_auth_client.login_required
     def get(self):
         """send a testing email"""
-        # send_email_no_reply()
-        send_email_remote_registration_portal()
+        send_email_no_reply()
         return {}, 200  

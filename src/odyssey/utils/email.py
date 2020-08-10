@@ -9,6 +9,9 @@ SUBJECTS = {"remote_registration_portal": "Modo Bio Client Registration Portal",
             }
 
 def send_email_remote_registration_portal(recipient, password, remote_registration_portal):
+    """
+    Email for sending clients their remote registration link and login details
+    """
     
     SUBJECT = SUBJECTS["remote_registration_portal"]
     
