@@ -24,11 +24,14 @@ from .data import (
     test_client_individual_data
 )
 
-from odyssey.api.schemas import ClientInfoSchema
+from odyssey.utils.schemas import ClientInfoSchema
 
 def clean_db(db):
     for table in reversed(db.metadata.sorted_tables):
-        db.session.execute(table.delete())
+        try:
+            db.session.execute(table.delete())
+        except:
+            pass
     db.session.commit()
     db.drop_all()
 

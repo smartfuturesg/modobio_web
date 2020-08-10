@@ -7,8 +7,7 @@ from odyssey.models.main import Staff
 from odyssey.api import api
 from odyssey.api.auth import token_auth
 from odyssey.api.errors import UnauthorizedUser, StaffEmailInUse
-from odyssey.api.serializers import new_staff_member
-from odyssey.api.schemas import StaffSchema
+from odyssey.utils.schemas import StaffSchema
 
 ns = api.namespace('staff', description='Operations related to staff members')
 

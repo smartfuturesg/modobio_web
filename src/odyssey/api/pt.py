@@ -2,14 +2,13 @@ from flask import request, jsonify
 from flask_restx import Resource, Api
 from flask_accepts import accepts , responds
 
-from odyssey.api.utils import check_client_existence
 from odyssey.models.pt import Chessboard, PTHistory
 from odyssey import db
 from odyssey.api import api
 from odyssey.api.auth import token_auth
 from odyssey.api.errors import UserNotFound, IllegalSetting, ContentNotFound
-
-from odyssey.api.schemas import ChessboardSchema, PTHistorySchema
+from odyssey.utils.misc import check_client_existence
+from odyssey.utils.schemas import ChessboardSchema, PTHistorySchema
 
 ns = api.namespace('pt', description='Operations related to physical therapy services')
 
@@ -84,7 +83,7 @@ class ClientPTHistory(Resource):
 
 @ns.route('/chessboard/<int:clientid>/')
 class ClientChessboard(Resource):
-    """GET, POST for mobility assesssment data
+    """GET, POST for chessboard assesssment data
     note that clients will have multiple entries as they progress through the program
     Trainers may update some or all fields. The backend will store every update as a new row
     fields left blank will be left as null"""
@@ -111,7 +110,7 @@ class ClientChessboard(Resource):
     def post(self, clientid):
         """create new chessboard entry"""
         check_client_existence(clientid)
-
+        
         data = request.get_json()
         data['clientid'] = clientid
 

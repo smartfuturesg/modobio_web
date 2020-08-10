@@ -285,7 +285,7 @@ test_power_assessment = {
 
 test_chessboard_assessment = {
   "notes": "notes",
-  "isa_structure": "Asymettrical Atypical",
+  "isa_structure": "Asymmetrical Atypical",
   "isa_movement": "Dynamic",
   "co2_tolerance": 60,
   "hip": {

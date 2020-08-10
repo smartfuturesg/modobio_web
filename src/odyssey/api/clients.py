@@ -5,7 +5,6 @@ from flask import request, jsonify, current_app
 from flask_accepts import accepts, responds
 from flask_restx import Resource, Api
 
-from odyssey.api.utils import check_client_existence
 from odyssey.api import api
 from odyssey.api.auth import token_auth, token_auth_client
 from odyssey.api.errors import UserNotFound, ClientAlreadyExists, ClientNotFound, IllegalSetting, ContentNotFound
@@ -23,7 +22,9 @@ from odyssey.models.intake import (
 from odyssey.models.main import ClientRemovalRequests
 from odyssey.constants import DOCTYPE, DOCTYPE_DOCREV_MAP
 from odyssey.pdf import to_pdf
-from odyssey.api.schemas import (
+from odyssey.utils.email import send_email_remote_registration_portal, send_email_no_reply
+from odyssey.utils.misc import check_client_existence
+from odyssey.utils.schemas import (
     ClientConsentSchema,
     ClientConsultContractSchema,
     ClientIndividualContractSchema,
@@ -477,6 +478,11 @@ class NewRemoteRegistration(Resource):
         db.session.add(remote_client)
         db.session.commit()
 
+        # send email to client containing registration details
+        send_email_remote_registration_portal(recipient=remote_client.email, 
+                                              password=remote_client.password, 
+                                              remote_registration_portal=remote_client.registration_portal_id)
+
         return remote_client
 
 
@@ -514,6 +520,11 @@ class RefreshRemoteRegistration(Resource):
 
         db.session.add(remote_client)
         db.session.commit()
+
+        # send email to client containing registration details
+        send_email_remote_registration_portal(recipient=remote_client.email, 
+                                        password=remote_client.password, 
+                                        remote_registration_portal=remote_client.registration_portal_id)
 
         return remote_client
 
@@ -557,3 +568,16 @@ class RemoteClientInfo(Resource):
         db.session.add(client)
         db.session.commit()
         return client
+
+
+@ns.route('/testemail/')
+class TestEmail(Resource):
+    """
+       Send a test email
+    """
+    @ns.doc(security='apikey')
+    @token_auth_client.login_required
+    def get(self):
+        """send a testing email"""
+        send_email_no_reply()
+        return {}, 200  
