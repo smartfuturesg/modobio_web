@@ -126,7 +126,7 @@ class NewClient(Resource):
         return client
 
 
-@ns.route('/clientsearch/', methods=['GET'])
+@ns.route('/clientsearch/')
 @ns.doc(params={'page': 'request page for paginated clients list', 'per_page': 'number of clients per page'})
 class Clients(Resource):
     @ns.doc(security='apikey')
