@@ -22,7 +22,7 @@ def test_post_pt_history(test_client, init_database):
     payload = test_pt_history
     
     # send get request for client info on clientid = 1 
-    response = test_client.post('/api/pt/history/1/',
+    response = test_client.post('/pt/history/1/',
                                 headers=headers, 
                                 data=dumps(payload), 
                                 content_type='application/json')
@@ -45,7 +45,7 @@ def test_put_pt_history(test_client, init_database):
     payload = test_pt_history
     
     # send get request for client info on clientid = 1 
-    response = test_client.put('/api/pt/history/1/',
+    response = test_client.put('/pt/history/1/',
                                 headers=headers, 
                                 data=dumps(payload), 
                                 content_type='application/json')
@@ -67,7 +67,7 @@ def test_get_pt_history(test_client, init_database):
     headers = {'Authorization': f'Bearer {token}'}
 
     # send get request for client info on clientid = 1 
-    response = test_client.get('/api/pt/history/1/',
+    response = test_client.get('/pt/history/1/',
                                 headers=headers, 
                                 content_type='application/json')
                                 

@@ -22,7 +22,7 @@ def test_post_medical_physical(test_client, init_database):
     payload = test_medical_physical
     
     # send get request for client info on clientid = 1 
-    response = test_client.post('/api/doctor/physical/1/',
+    response = test_client.post('/doctor/physical/1/',
                                 headers=headers, 
                                 data=dumps(payload), 
                                 content_type='application/json')
@@ -44,7 +44,7 @@ def test_post_medical_physical(test_client, init_database):
 #     payload = test_medical_history
     
 #     # send get request for client info on clientid = 1 
-#     response = test_client.put('/api/doctor/medicalhistory/1/',
+#     response = test_client.put('/doctor/medicalhistory/1/',
 #                                 headers=headers, 
 #                                 data=dumps(payload), 
 #                                 content_type='application/json')
@@ -67,7 +67,7 @@ def test_get_medical_physical(test_client, init_database):
     headers = {'Authorization': f'Bearer {token}'}
 
     # send get request for client info on clientid = 1 
-    response = test_client.get('/api/doctor/physical/1/',
+    response = test_client.get('/doctor/physical/1/',
                                 headers=headers, 
                                 content_type='application/json')
                                 

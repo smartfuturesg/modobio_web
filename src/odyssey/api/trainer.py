@@ -5,20 +5,9 @@ from flask import request, jsonify
 from flask_restx import Resource, Api
 from flask_accepts import accepts, responds
 
-from odyssey.api.utils import check_client_existence
 from odyssey.api import api
 from odyssey.api.auth import token_auth, token_auth_client
 from odyssey.api.errors import UserNotFound, ClientAlreadyExists, ClientNotFound, IllegalSetting
-from odyssey.api.schemas import (
-    ClientInfoSchema,
-    HeartAssessmentSchema,
-    LungAssessmentSchema,
-    MovementAssessmentSchema,
-    MoxyAssessmentSchema,
-    MoxyRipSchema,
-    PowerAssessmentSchema, 
-    StrenghtAssessmentSchema
-)
 from odyssey import db
 from odyssey.models.trainer import (
     HeartAssessment,
@@ -29,7 +18,17 @@ from odyssey.models.trainer import (
     PowerAssessment,
     StrengthAssessment 
 )
-
+from odyssey.utils.misc import check_client_existence
+from odyssey.utils.schemas import (
+    ClientInfoSchema,
+    HeartAssessmentSchema,
+    LungAssessmentSchema,
+    MovementAssessmentSchema,
+    MoxyAssessmentSchema,
+    MoxyRipSchema,
+    PowerAssessmentSchema, 
+    StrenghtAssessmentSchema
+)
 ns = api.namespace('trainer', description='Operations related to the trainer')
 
 @ns.route('/assessment/power/<int:clientid>/')

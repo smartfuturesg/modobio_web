@@ -21,7 +21,7 @@ def test_post_strength_assessment(test_client, init_database):
 
     payload = test_strength_assessment
     # send get request for client info on clientid = 1 
-    response = test_client.post('/api/trainer/assessment/strength/1/',
+    response = test_client.post('/trainer/assessment/strength/1/',
                                 headers=headers, 
                                 data=dumps(payload), 
                                 content_type='application/json')
@@ -40,7 +40,7 @@ def test_get_strength_assessment(test_client, init_database):
     headers = {'Authorization': f'Bearer {token}'}
 
     # send get request for client info on clientid = 1 
-    response = test_client.get('/api/trainer/assessment/strength/1/',
+    response = test_client.get('/trainer/assessment/strength/1/',
                                 headers=headers, 
                                 content_type='application/json')
                                 

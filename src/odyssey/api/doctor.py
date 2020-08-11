@@ -9,9 +9,9 @@ from odyssey import db
 from odyssey.models.doctor import MedicalPhysicalExam, MedicalHistory
 from odyssey.api import api
 from odyssey.api.auth import token_auth
-from odyssey.api.schemas import MedicalHistorySchema, MedicalPhysicalExamSchema
-from odyssey.api.utils import check_client_existence
 from odyssey.api.errors import UserNotFound, IllegalSetting, ContentNotFound
+from odyssey.utils.misc import check_client_existence
+from odyssey.utils.schemas import MedicalHistorySchema, MedicalPhysicalExamSchema
 
 ns = api.namespace('doctor', description='Operations related to doctor')
 

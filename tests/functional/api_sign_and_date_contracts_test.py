@@ -33,7 +33,7 @@ def test_post_subscription_contract(test_client, init_database):
 
     payload = {"signdate" : test_client_subscription_data["signdate"], "signature": test_client_subscription_data["signature"]}
     # send get request for client info on clientid = 1 
-    response = test_client.post('/api/client/subscriptioncontract/1/',
+    response = test_client.post('/client/subscriptioncontract/1/',
                                 headers=headers, 
                                 data=dumps(payload), 
                                 content_type='application/json')
@@ -55,7 +55,7 @@ def test_get_subscription_contract(test_client, init_database):
     headers = {'Authorization': f'Bearer {token}'}
 
     # send get request for client info on clientid = 1 
-    response = test_client.get('/api/client/subscriptioncontract/1/',
+    response = test_client.get('/client/subscriptioncontract/1/',
                                 headers=headers, 
                                 content_type='application/json')
                                 
@@ -76,7 +76,7 @@ def test_post_consult_contract(test_client, init_database):
 
     payload = {"signdate" : test_client_consult_data["signdate"], "signature": test_client_consult_data["signature"]}
     # send get request for client info on clientid = 1 
-    response = test_client.post('/api/client/consultcontract/1/',
+    response = test_client.post('/client/consultcontract/1/',
                                 headers=headers, 
                                 data=dumps(payload), 
                                 content_type='application/json')
@@ -98,7 +98,7 @@ def test_get_consult_contract(test_client, init_database):
     headers = {'Authorization': f'Bearer {token}'}
 
     # send get request for client info on clientid = 1 
-    response = test_client.get('/api/client/consultcontract/1/',
+    response = test_client.get('/client/consultcontract/1/',
                                 headers=headers, 
                                 content_type='application/json')
                                 
@@ -119,7 +119,7 @@ def test_post_policies_contract(test_client, init_database):
 
     payload = {"signdate" : test_client_policies_data["signdate"], "signature": test_client_policies_data["signature"]}
     # send get request for client info on clientid = 1 
-    response = test_client.post('/api/client/policies/1/',
+    response = test_client.post('/client/policies/1/',
                                 headers=headers, 
                                 data=dumps(payload), 
                                 content_type='application/json')
@@ -141,7 +141,7 @@ def test_get_policies_contract(test_client, init_database):
     headers = {'Authorization': f'Bearer {token}'}
 
     # send get request for client info on clientid = 1 
-    response = test_client.get('/api/client/policies/1/',
+    response = test_client.get('/client/policies/1/',
                                 headers=headers, 
                                 content_type='application/json')
                                 

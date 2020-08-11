@@ -35,7 +35,7 @@ def test_get_client_info(test_client, init_database):
     headers = {'Authorization': f'Bearer {token}'}
 
     # send get request for client info on clientid = 1 
-    response = test_client.get('/api/client/1/', headers=headers)
+    response = test_client.get('/client/1/', headers=headers)
     # some simple checks for validity
     
     assert response.status_code == 200
@@ -57,7 +57,7 @@ def test_put_client_info(test_client, init_database):
     # test attempting to change the clientid
     data = {'clientid': 10}
     # send get request for client info on clientid = 1 
-    response = test_client.put('/api/client/1/', headers=headers, data=dumps(data),  content_type='application/json')
+    response = test_client.put('/client/1/', headers=headers, data=dumps(data),  content_type='application/json')
 
     assert response.status_code == 400
     assert response.json['message'] == 'Illegal Setting of parameter, clientid. You cannot set this value manually'
@@ -65,7 +65,7 @@ def test_put_client_info(test_client, init_database):
     # test attempting to change the phone number
     data = {'phone': '9123456789'}
 
-    response = test_client.put('/api/client/1/', 
+    response = test_client.put('/client/1/', 
                                 headers=headers, 
                                 data=dumps(data),  
                                 content_type='application/json')
@@ -90,7 +90,7 @@ def test_creating_new_client(test_client, init_database):
     headers = {'Authorization': f'Bearer {token}'}
 
     # send get request for client info on clientid = 1 
-    response = test_client.post('/api/client/',
+    response = test_client.post('/client/',
                                 headers=headers, 
                                 data=dumps(test_new_client_info), 
                                 content_type='application/json')
@@ -113,7 +113,7 @@ def test_removing_client(test_client, init_database):
     headers = {'Authorization': f'Bearer {token}'}
 
     # send post request to create client
-    test_client.post('/api/client/',
+    test_client.post('/client/',
                                 headers=headers, 
                                 data=dumps(test_new_client_info), 
                                 content_type='application/json')
@@ -122,7 +122,7 @@ def test_removing_client(test_client, init_database):
     #take this new clientid
     remove_clientid = client.clientid
 
-    response = test_client.delete(f'/api/client/remove/{remove_clientid}/',
+    response = test_client.delete(f'/client/remove/{remove_clientid}/',
                                 headers=headers, 
                                 content_type='application/json')
     # some simple checks for validity
@@ -143,7 +143,7 @@ def test_removing_client(test_client, init_database):
 #     token = staff.token
 #     headers = {'Authorization': f'Bearer {token}'}
 
-#     response = test_client.post('/api/client/remoteregistration/new/',
+#     response = test_client.post('/client/remoteregistration/new/',
 #                                 headers=headers, 
 #                                 data=dumps(test_new_remote_registration), 
 #                                 content_type='application/json')
@@ -165,7 +165,7 @@ def test_removing_client(test_client, init_database):
 #     credentials =_basic_auth_str(client.email, password)
 #     headers = {'Authorization': credentials}
 
-#     response = test_client.post(f'/api/tokens/remoteregistration/{tmp_registration_code}/',
+#     response = test_client.post(f'/tokens/remoteregistration/{tmp_registration_code}/',
 #                                 headers=headers, 
 #                                 content_type='application/json')
 
@@ -185,7 +185,7 @@ def test_removing_client(test_client, init_database):
 #     headers = {'Authorization': f'Bearer {token}'}
 
 #     # send get request for client info on clientid = 1
-#     response = test_client.get('/api/client/consent/1/', headers=headers)
+#     response = test_client.get('/client/consent/1/', headers=headers)
 
 #     # some simple checks for validity
 #     assert response.status_code == 200
@@ -209,7 +209,7 @@ def test_removing_client(test_client, init_database):
 #     assert not consent.url
 
 #     # Run put request
-#     response = test_client.post('/api/client/consent/1/',
+#     response = test_client.post('/client/consent/1/',
 #                                 headers=headers,
 #                                 data=dumps(test_client_consent_data),
 #                                 content_type='application/json')
@@ -233,6 +233,6 @@ def test_removing_client(test_client, init_database):
 
 #     # After this call, the URL to the PDF file should be accessible
 #     # through the API
-#     response = test_client.get('/api/client/signeddocuments/1/', headers=headers)
+#     response = test_client.get('/client/signeddocuments/1/', headers=headers)
 #     assert response.status_code == 200
 #     assert consent.url in response.json['urls']
