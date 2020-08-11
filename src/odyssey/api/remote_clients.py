@@ -4,7 +4,6 @@ from flask import request, jsonify, current_app
 from flask_accepts import accepts, responds
 from flask_restx import Resource, Api
 
-# from odyssey.api.utils import check_client_existence
 from odyssey.api import api
 from odyssey.api.auth import token_auth, token_auth_client
 from odyssey.api.errors import ClientNotFound, ContentNotFound, IllegalSetting

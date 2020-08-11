@@ -1067,7 +1067,11 @@ class RemoteRegistration(db.Model):
     @staticmethod
     def check_portal_id(portal_id):
         """check if token is valid. returns user if so"""
-        remote_client = RemoteRegistration.query.filter_by(registration_portal_id=portal_id).first()
+        # get most recent instance of the remote client based on registration
+        # portal id and index
+        remote_client = RemoteRegistration.query.filter_by(
+            registration_portal_id=portal_id).order_by(
+            RemoteRegistration.idx.desc()).first()
 
         if remote_client is None or remote_client.registration_portal_expiration < datetime.utcnow():
             return None
