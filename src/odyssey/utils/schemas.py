@@ -893,7 +893,7 @@ class StaffSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Staff
 
-    possible_roles = ['cs', 'data', 'doc', 'pt', 'ext_doc', 'trainer', 'nutrition']
+    possible_roles = ['stfappadmin', 'clntsvc', 'physthera', 'phystrain', 'datasci', 'doctor', 'docext', 'nutrition']
 
     token = fields.String(dump_only=True)
     token_expiration = fields.DateTime(dump_only=True)
@@ -901,7 +901,7 @@ class StaffSchema(ma.SQLAlchemyAutoSchema):
     email = fields.Email(required=True)
     access_roles = fields.List(fields.String,
                 description=" The access role for this staff member options: \
-                ['cs' (client services), 'pt' (Physiotherapist), 'data' (data scientist), 'doc' (doctor), ext_doc (external doctor), 'trainer' (physical trainer),\
+                ['stfappadmin' (staff application admin), 'clntsvc' (client services), 'physthera' (physiotherapist), 'datasci' (data scientist), 'doctor' (doctor), 'docext' (external doctor), 'phystrain' (physical trainer),\
                  'nutrition' (nutritionist)]",
                 required=True)
     is_system_admin = fields.Boolean(dump_only=True, missing=False)

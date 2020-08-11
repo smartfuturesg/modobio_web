@@ -55,20 +55,20 @@ class Staff(db.Model):
     :type: bool, default = False
     """
 
-    access_role = db.Column(db.String, nullable=False, default='cs')
+    access_role = db.Column(db.String, nullable=False, default='clntsvc')
     """
     Indicates the content access role of the staff member.
-    roles include: client services (cs), pt, doctor, data 
+    roles include: stfappadmin, clntsvc, physthera, phystrain, datasci, doctor, docext, nutrition
 
-    :type: str, default = cs
+    :type: str, default = clntsvc
     """
 
     access_roles = db.Column(db.ARRAY(db.String), nullable=False, server_default="{}")
     """
     Indicates the content access role of the staff member.
-    roles include: client services (cs), pt, doctor, data 
+    roles include: stfappadmin, clntsvc, physthera, phystrain, datasci, doctor, docext, nutrition
 
-    :type: str, default = cs
+    :type: str, default = clntsvc
     """
 
     email = db.Column(db.String(50), nullable=False, unique=True)
