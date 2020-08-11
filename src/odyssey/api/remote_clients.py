@@ -41,8 +41,10 @@ class RemoteClientInfo(Resource):
     @ns.doc(security='apikey')
     @token_auth_client.login_required
     @responds(schema=ClientInfoSchema, api=ns)
-    def get(self, tmp_registration):
+    def get(self):
         """returns client info table as a json for the clientid specified"""
+        tmp_registration = request.args.get('tmp_registration')
+
         # bring up the valid remote client. Returns None is portal is expired 
         remote_client = RemoteRegistration().check_portal_id(tmp_registration)
 
@@ -58,8 +60,9 @@ class RemoteClientInfo(Resource):
     @ns.doc(security='apikey')
     @token_auth_client.login_required
     @responds(schema=ClientInfoSchema, api=ns)
-    def put(self, tmp_registration):
+    def put(self):
         """edit client info"""
+        tmp_registration = request.args.get('tmp_registration')
         #check portal validity
         if not RemoteRegistration().check_portal_id(tmp_registration):
             raise ClientNotFound(message="Resource does not exist")
@@ -77,21 +80,19 @@ class RemoteClientInfo(Resource):
 @ns.doc(params={'tmp_registration': 'temporary registration portal hash'})
 class MedHistory(Resource):
    
-    def __init__(self,tmp_registration):
-        # bring up the valid remote client. Returns None is portal is expired 
-        remote_client = RemoteRegistration().check_portal_id(tmp_registration)
-       
     @ns.doc(security='apikey')
     @token_auth_client.login_required
     @responds(schema=MedicalHistorySchema, api=ns)
-    def get(self, tmp_registration):
+    def get(self):
         """returns client's medical history as a json for the clientid specified"""
-
+        tmp_registration = request.args.get('tmp_registration')
+        
+        remote_client = RemoteRegistration().check_portal_id(tmp_registration)
         # check portal validity
-        if not self.remote_client:
+        if not remote_client:
             raise ClientNotFound(message="Resource does not exist")
         
-        client_mh = MedicalHistory.query.filter_by(clientid=self.remote_client.clientid).first()
+        client_mh = MedicalHistory.query.filter_by(clientid=remote_client.clientid).first()
 
         if not client_mh:
             raise ContentNotFound()
@@ -102,8 +103,9 @@ class MedHistory(Resource):
     @token_auth_client.login_required
     @accepts(schema=MedicalHistorySchema, api=ns)
     @responds(schema=MedicalHistorySchema, status_code=201, api=ns)
-    def post(self, tmp_registration):
+    def post(self):
         """creates client's medical history and returns it as a json for the clientid specified"""
+        tmp_registration = request.args.get('tmp_registration')
         # bring up the valid remote client. Returns None is portal is expired 
         remote_client = RemoteRegistration().check_portal_id(tmp_registration)
        
@@ -132,8 +134,10 @@ class MedHistory(Resource):
     @token_auth_client.login_required
     @accepts(schema=MedicalHistorySchema, api=ns)
     @responds(schema=MedicalHistorySchema, api=ns)
-    def put(self, tmp_registration):
+    def put(self):
         """updates client's medical history as a json for the clientid specified"""
+        tmp_registration = request.args.get('tmp_registration')
+
         remote_client = RemoteRegistration().check_portal_id(tmp_registration)
        
         # check portal validity
