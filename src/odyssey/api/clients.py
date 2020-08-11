@@ -31,9 +31,9 @@ from odyssey.utils.schemas import (
     ClientInfoSchema,
     ClientPoliciesContractSchema, 
     ClientReleaseSchema,
-    ClientRemoteRegistrationSchema, 
+    ClientRemoteRegistrationPortalSchema, 
     ClientSubscriptionContractSchema,
-    NewRemoteRegistrationSchema, 
+    NewRemoteClientSchema, 
     RefreshRemoteRegistrationSchema,
     SignAndDateSchema,
     SignedDocumentsSchema
@@ -439,9 +439,9 @@ class NewRemoteRegistration(Resource):
         initialize a client for remote registration
     """
     @token_auth.login_required
-    @accepts(schema=NewRemoteRegistrationSchema, api=ns)
+    @accepts(schema=NewRemoteClientSchema, api=ns)
     @ns.doc(security='apikey')
-    @responds(schema=ClientRemoteRegistrationSchema, api=ns, status_code=201)
+    @responds(schema=ClientRemoteRegistrationPortalSchema, api=ns, status_code=201)
     def post(self):
         """create new remote registration client
             this will create a new entry into the client info table first
@@ -456,8 +456,8 @@ class NewRemoteRegistration(Resource):
             raise ClientAlreadyExists(identification = data['email'])
 
         # initialize schema objects
-        rr_schema = NewRemoteRegistrationSchema()
-        client_rr_schema = ClientRemoteRegistrationSchema()
+        rr_schema = NewRemoteClientSchema() #creates entry into clientinfo table
+        client_rr_schema = ClientRemoteRegistrationPortalSchema() #remote registration table entry
 
         # enter client into basic info table and remote register table
         client = rr_schema.load(data)
@@ -467,23 +467,17 @@ class NewRemoteRegistration(Resource):
         db.session.flush()
 
         # create a new remote client registration entry
-        remote_client = RemoteRegistration()
-        data['clientid'] = client.clientid
-        remote_client.from_dict(data)
+        portal_data = {'clientid' : client.clientid, 'email': client.email}
+        remote_client_portal = client_rr_schema.load(portal_data)
 
-        # create temporary password and portal url
-        remote_client.set_password()
-        remote_client.get_temp_registration_endpoint()
-
-        db.session.add(remote_client)
+        db.session.add(remote_client_portal)
         db.session.commit()
 
         # send email to client containing registration details
-        send_email_remote_registration_portal(recipient=remote_client.email, 
-                                              password=remote_client.password, 
-                                              remote_registration_portal=remote_client.registration_portal_id)
-
-        return remote_client
+        send_email_remote_registration_portal(recipient=remote_client_portal.email, 
+                                              password=remote_client_portal.password, 
+                                              remote_registration_portal=remote_client_portal.registration_portal_id)
+        return remote_client_portal
 
 
 @ns.route('/remoteregistration/refresh/')
@@ -494,7 +488,7 @@ class RefreshRemoteRegistration(Resource):
     @token_auth.login_required
     @accepts(schema=RefreshRemoteRegistrationSchema)
     @ns.doc(security='apikey')
-    @responds(schema=ClientRemoteRegistrationSchema, api=ns, status_code=201)
+    @responds(schema=ClientRemoteRegistrationPortalSchema, api=ns, status_code=201)
     def post(self):
         """refresh the portal endpoint and password
         """
@@ -506,54 +500,24 @@ class RefreshRemoteRegistration(Resource):
         if not client:
             raise ClientNotFound(identification = data['email'])
 
+        client_rr_schema = ClientRemoteRegistrationPortalSchema() #remote registration table entry
         #add clientid to the data object from the current client
         data['clientid'] =  client.clientid
 
         # create a new remote client session registration entry
-        remote_client = RemoteRegistration()
-        data['clientid'] = client.clientid
-        remote_client.from_dict(data)
+        remote_client_portal = client_rr_schema.load(data)
 
         # create temporary password and portal url
-        remote_client.set_password()
-        remote_client.get_temp_registration_endpoint()
 
-        db.session.add(remote_client)
+        db.session.add(remote_client_portal)
         db.session.commit()
 
         # send email to client containing registration details
-        send_email_remote_registration_portal(recipient=remote_client.email, 
-                                        password=remote_client.password, 
-                                        remote_registration_portal=remote_client.registration_portal_id)
+        send_email_remote_registration_portal(recipient=remote_client_portal.email, 
+                                              password=remote_client_portal.password, 
+                                              remote_registration_portal=remote_client_portal.registration_portal_id)
 
-        return remote_client
-
-
-<<<<<<< HEAD
-=======
-        return client
-
-    @accepts(schema=ClientInfoSchema, api=ns)
-    @ns.doc(security='apikey')
-    @token_auth_client.login_required
-    @responds(schema=ClientInfoSchema, api=ns)
-    def put(self, tmp_registration):
-        """edit client info"""
-        #check portal validity
-        if not RemoteRegistration().check_portal_id(tmp_registration):
-            raise ClientNotFound(message="Resource does not exist")
-
-        data = request.get_json()
-        #prevent requests to set clientid and send message back to api user
-        if data.get('clientid', None):
-            raise IllegalSetting('clientid')
-
-        client = ClientInfo.query.filter_by(email=token_auth_client.current_user().email).first()
-
-        client.from_dict(data)
-        db.session.add(client)
-        db.session.commit()
-        return client
+        return remote_client_portal
 
 
 @ns.route('/testemail/')
@@ -562,9 +526,8 @@ class TestEmail(Resource):
        Send a test email
     """
     @ns.doc(security='apikey')
-    @token_auth_client.login_required
+    @token_auth.login_required
     def get(self):
         """send a testing email"""
         send_email_no_reply()
         return {}, 200  
->>>>>>> cd2e0de783444db3d61259701637e180aab5dd70

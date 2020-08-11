@@ -42,7 +42,6 @@ def test_creating_new_remote_client(test_client, init_database):
     assert response.status_code == 201
     assert client.email == 'rest_remote_registration@gmail.com'
     assert remote_client.email == 'rest_remote_registration@gmail.com'
-    
 
 def test_refresh_new_remote_client_session(test_client, init_database):
     """

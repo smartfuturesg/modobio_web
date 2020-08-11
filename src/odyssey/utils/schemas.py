@@ -46,7 +46,7 @@ class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
         data['record_locator_id'] = (data['firstname'][0]+data['lastname'][0]+str(data['clientid'])+name_hash[0:6]).upper()
         return data
 
-class NewRemoteRegistrationSchema(Schema):
+class NewRemoteClientSchema(Schema):
 
     email = fields.Email()
     firstname = fields.String(required=True, validate=validate.Length(min=1, max= 50))
@@ -57,6 +57,31 @@ class NewRemoteRegistrationSchema(Schema):
     def make_object(self, data, **kwargs):
         return ClientInfo(**data)
         
+class ClientRemoteRegistrationPortalSchema(Schema):
+    """
+        holds client's access information for remote registration
+    """
+    email = fields.Email()
+    clientid = fields.Integer()
+    password = fields.String(dump_only=True)
+    registration_portal_expiration = fields.DateTime(dump_only=True)
+    registration_portal_id = fields.String(dump_only=True)
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        remote_client_portal = RemoteRegistration(clientid=data["clientid"], email=data["email"])
+        remote_client_portal.set_password()
+        remote_client_portal.get_temp_registration_endpoint()
+        return remote_client_portal
+
+
+class RefreshRemoteRegistrationSchema(Schema):
+    """
+        refresh the remote registration password and link for the client
+        with the provided email
+    """
+    email = fields.Email(required=True)
+
 class ClientSummarySchema(Schema):
 
     clientid = fields.Integer(missing=0)
@@ -168,21 +193,6 @@ class ClientPoliciesContractSchema(ma.SQLAlchemyAutoSchema):
                     revision=self.docrev
                     )
     
-
-class ClientRemoteRegistrationSchema(ma.SQLAlchemyAutoSchema):
-    """
-        holds client's access information for remote registration
-    """
-    class Meta:
-        model = RemoteRegistration
-    
-
-class RefreshRemoteRegistrationSchema(Schema):
-    """
-        refresh the remote registration password and link for the client
-        with the provided email
-    """
-    email = fields.Email(required=True)
 
 class ClientIndividualContractSchema(ma.SQLAlchemyAutoSchema):
 

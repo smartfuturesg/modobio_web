@@ -994,24 +994,6 @@ class RemoteRegistration(db.Model):
     :type: datetime
     """
 
-    def from_dict(self,  data):
-        """to be used when a new user is created or a user id edited"""
-        for field in ['clientid', 'email']:
-            if field in data:
-                setattr(self, field, data[field])
-
-    def to_dict(self):
-        """returns all client info in dictionary form"""
-        #leaving this heer ein case we need to return this with a local timezone
-        # portal_expr_time = phx_tz.localize(self.registration_portal_expiration) + phx_tz.localize(self.registration_portal_expiration).utcoffset()
-        data = {
-            'clientid': self.clientid,
-            'email': self.email,
-            'registration_portal_id': self.registration_portal_id,
-            'registration_portal_expiration': self.registration_portal_expiration
-        }
-        return data
-
     def get_temp_registration_endpoint(self, expires_in = 86400):
         """creates a temporary endpoint meant for at-home
            registration
