@@ -517,43 +517,4 @@ class RefreshRemoteRegistration(Resource):
 
         return remote_client
 
-@ns.route('/remoteregistration/clientinfo/<string:tmp_registration>/')
-@ns.doc(params={'tmp_registration': 'temporary registration portal hash'})
-class RemoteClientInfo(Resource):
-    """
-        For getting and altering client info table as a remote client.
-        Requires token authorization in addition to a valid portal id (tmp_registration)
-    """
-    @ns.doc(security='apikey')
-    @token_auth_client.login_required
-    @responds(schema=ClientInfoSchema, api=ns)
-    def get(self, tmp_registration):
-        """returns client info table as a json for the clientid specified"""
-        #check portal validity
-        if not RemoteRegistration().check_portal_id(tmp_registration):
-            raise ClientNotFound(message="Resource does not exist")
-        client = ClientInfo.query.filter_by(email=token_auth_client.current_user().email).first()
 
-        return client
-
-    @accepts(schema=ClientInfoSchema, api=ns)
-    @ns.doc(security='apikey')
-    @token_auth_client.login_required
-    @responds(schema=ClientInfoSchema, api=ns)
-    def put(self, tmp_registration):
-        """edit client info"""
-        #check portal validity
-        if not RemoteRegistration().check_portal_id(tmp_registration):
-            raise ClientNotFound(message="Resource does not exist")
-
-        data = request.get_json()
-        #prevent requests to set clientid and send message back to api user
-        if data.get('clientid', None):
-            raise IllegalSetting('clientid')
-
-        client = ClientInfo.query.filter_by(email=token_auth_client.current_user().email).first()
-
-        client.from_dict(data)
-        db.session.add(client)
-        db.session.commit()
-        return client
