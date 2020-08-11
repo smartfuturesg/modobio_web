@@ -69,7 +69,7 @@ test_staff_member = {
     "password": "password",
     "is_admin": True,
     "is_system_admin": False,
-    "access_roles": ["data"]
+    "access_roles": ["datasci"]
 }
 
 test_new_staff_member = {
@@ -77,7 +77,7 @@ test_new_staff_member = {
     "lastname": "testerson",
     "email": "staff_member_2@modobio.com",
     "password": "password",
-    "access_roles": ["data"]
+    "access_roles": ["datasci"]
 }
 
 signature = None
