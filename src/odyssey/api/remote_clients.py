@@ -86,7 +86,7 @@ class MedHistory(Resource):
     def get(self):
         """returns client's medical history as a json for the clientid specified"""
         tmp_registration = request.args.get('tmp_registration')
-        
+
         remote_client = RemoteRegistration().check_portal_id(tmp_registration)
         # check portal validity
         if not remote_client:
@@ -160,72 +160,75 @@ class MedHistory(Resource):
         return client_mh
 
 
-# @ns.route('/pthistory/')
-# @ns.doc(params={'tmp_registration': 'temporary registration portal hash'})
-# class ClientPTHistory(Resource):
-#     """GET, POST, PUT for pt history data"""
-#     @ns.doc(security='apikey')
-#     @token_auth.login_required
-#     @responds(schema=PTHistorySchema)
-#     def get(self, tmp_registration):
-#         """returns most recent mobility assessment data"""
-#         check_client_existence(clientid)
-#         client_pt = PTHistory.query.filter_by(
-#                         clientid=clientid).first()
-        
-#         if not client_pt:
-#             raise ContentNotFound() 
+@ns.route('/pthistory/')
+@ns.doc(params={'tmp_registration': 'temporary registration portal hash'})
+class ClientPTHistory(Resource):
+    """GET, POST, PUT for pt history data"""
+    @ns.doc(security='apikey')
+    @token_auth_client.login_required
+    @responds(schema=PTHistorySchema)
+    def get(self):
+        """returns most recent mobility assessment data"""
+        tmp_registration = request.args.get('tmp_registration')
+        remote_client = RemoteRegistration().check_portal_id(tmp_registration)
+
+        client_pt = PTHistory.query.filter_by(clientid=remote_client.clientid).first()
+
+        if not client_pt:
+            raise ContentNotFound() 
                 
-#         return client_pt
+        return client_pt
 
-#     @ns.doc(security='apikey')
-#     @token_auth.login_required
-#     @accepts(schema=PTHistorySchema, api=ns)
-#     @responds(schema=PTHistorySchema, status_code=201, api=ns)
-#     def post(self, tmp_registration):
-#         """returns most recent mobility assessment data"""
-#         check_client_existence(clientid)
+    @ns.doc(security='apikey')
+    @token_auth_client.login_required
+    @accepts(schema=PTHistorySchema, api=ns)
+    @responds(schema=PTHistorySchema, status_code=201, api=ns)
+    def post(self):
+        """returns most recent mobility assessment data"""
+        tmp_registration = request.args.get('tmp_registration')
+        remote_client = RemoteRegistration().check_portal_id(tmp_registration)
 
-#         data = request.get_json()
 
-#         #check to see if there is already an entry for pt history
-#         current_pt_history = PTHistory.query.filter_by(
-#                         clientid=clientid).first()
+        #check to see if there is already an entry for pt history
+        current_pt_history = PTHistory.query.filter_by(clientid=remote_client.clientid).first()
+        if current_pt_history:
+            raise IllegalSetting(message=f"PT History for clientid {remote_client.clientid} already exists. Please use PUT method")
 
-#         if current_pt_history:
-#             raise IllegalSetting(message=f"PT History for clientid {clientid} already exists. Please use PUT method")
-
-#         data['clientid'] = clientid
+        data = request.get_json()
+        data['clientid'] = remote_client.clientid
         
-#         pth_schema = PTHistorySchema()
+        pth_schema = PTHistorySchema()
 
-#         #create a new entry into the pt history table
-#         client_pt = pth_schema.load(data)
+        #create a new entry into the pt history table
+        client_pt = pth_schema.load(data)
 
-#         db.session.add(client_pt)
-#         db.session.commit()
+        db.session.add(client_pt)
+        db.session.commit()
 
-#         return client_pt
+        return client_pt
 
-    
-#     @ns.doc(security='apikey')
-#     @token_auth.login_required
-#     @accepts(schema=PTHistorySchema, api=ns)
-#     @responds(schema=PTHistorySchema, api=ns)
-#     def put(self, tmp_registration):
-#         """edit user's pt history"""
-#         check_client_existence(clientid)
+    @ns.doc(security='apikey')
+    @token_auth_client.login_required
+    @accepts(schema=PTHistorySchema, api=ns)
+    @responds(schema=PTHistorySchema, api=ns)
+    def put(self):
+        """edit user's pt history"""
+        tmp_registration = request.args.get('tmp_registration')
+        remote_client = RemoteRegistration().check_portal_id(tmp_registration)
 
-#         client_pt = PTHistory.query.filter_by(clientid=clientid).first()
 
-#         if not client_pt:
-#             raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a pt history in the database")
+        #check to see if there is already an entry for pt history
+        current_pt_history = PTHistory.query.filter_by(
+                        clientid=remote_client.clientid).first()
+
+        if not current_pt_history:
+            raise UserNotFound(clientid, message = f"The client with id: {remote_client.clientid} does not yet have a pt history in the database")
 
         
-#         # get payload and update the current instance followd by db commit
-#         data = request.get_json()
+        # get payload and update the current instance followd by db commit
+        data = request.get_json()
 
-#         client_pt.update(data)
-#         db.session.commit()
+        current_pt_history.update(data)
+        db.session.commit()
 
-#         return client_pt
+        return client_pt
