@@ -57,11 +57,14 @@ def to_pdf(clientid: int,
     # main thread keeps working and tries to delete the RequestContext when it
     # is finished, while the pdf thread is still running. This leads to
     # AssertionError: popped wrong app context <x> in stead of <y>.
-    thread = threading.Thread(target=_to_pdf,
-                              args=(_request_ctx_stack.top.copy(),
-                                    clientid, doctype),
-                              kwargs={'template': template, 'form': form})
-    thread.start()
+    if current_app.testing:
+        pass
+    else:
+        thread = threading.Thread(target=_to_pdf,
+                                args=(_request_ctx_stack.top.copy(),
+                                        clientid, doctype),
+                                kwargs={'template': template, 'form': form})
+        thread.start()
 
 def _to_pdf(req_ctx, clientid: int, doctype: DOCTYPE, template: str=None, form: FlaskForm=None):
     """ Generate and store a PDF file from a signed document.

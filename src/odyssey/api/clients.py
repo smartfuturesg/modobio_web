@@ -31,9 +31,9 @@ from odyssey.utils.schemas import (
     ClientInfoSchema,
     ClientPoliciesContractSchema, 
     ClientReleaseSchema,
-    ClientRemoteRegistrationSchema, 
+    ClientRemoteRegistrationPortalSchema, 
     ClientSubscriptionContractSchema,
-    NewRemoteRegistrationSchema, 
+    NewRemoteClientSchema, 
     RefreshRemoteRegistrationSchema,
     SignAndDateSchema,
     SignedDocumentsSchema
@@ -126,7 +126,7 @@ class NewClient(Resource):
         return client
 
 
-@ns.route('/clientsearch/', methods=['GET'])
+@ns.route('/clientsearch/')
 @ns.doc(params={'page': 'request page for paginated clients list', 'per_page': 'number of clients per page'})
 class Clients(Resource):
     @ns.doc(security='apikey')
@@ -251,7 +251,7 @@ class PoliciesContract(Resource):
         return  client_policies
 
     @ns.doc(security='apikey')
-    @accepts(schema=SignAndDateSchema, api=ns)
+    @accepts(schema=ClientPoliciesContractSchema, api=ns)
     @token_auth.login_required
     @responds(schema=ClientPoliciesContractSchema, status_code= 201, api=ns)
     def post(self, clientid):
@@ -289,7 +289,7 @@ class ConsultConstract(Resource):
             raise ContentNotFound()
         return client_consult
 
-    @accepts(schema=SignAndDateSchema, api=ns)
+    @accepts(schema=ClientConsultContractSchema, api=ns)
     @ns.doc(security='apikey')
     @token_auth.login_required
     @responds(schema=ClientConsultContractSchema, status_code= 201, api=ns)
@@ -409,9 +409,10 @@ class SignedDocuments(Resource):
                           ClientConsultContract,
                           ClientSubscriptionContract,
                           ClientIndividualContract):
+                contract_name = table.tableref
                 result = table.query.filter_by(clientid=clientid).order_by(table.idx.desc()).first()
                 if result and result.pdf_path:
-                    urls.append(result.pdf_path)
+                    urls.append((contract_name, result.pdf_path))
         else:
             s3 = boto3.client('s3')
             params = {
@@ -425,13 +426,14 @@ class SignedDocuments(Resource):
                           ClientConsultContract,
                           ClientSubscriptionContract,
                           ClientIndividualContract):
+                contract_name = table.tableref
                 result = table.query.filter_by(clientid=clientid).order_by(table.idx.desc()).first()
                 if result and result.pdf_path:
                     params['Key'] = result.pdf_path
                     url = s3.generate_presigned_url('get_object', Params=params, ExpiresIn=600)
-                    urls.append(url)
+                    urls.append((contract_name, result.pdf_path))
 
-        return {'urls': urls}
+        return {'urls':dict(urls)}
 
 @ns.route('/remoteregistration/new/')
 class NewRemoteRegistration(Resource):
@@ -439,9 +441,9 @@ class NewRemoteRegistration(Resource):
         initialize a client for remote registration
     """
     @token_auth.login_required
-    @accepts(schema=NewRemoteRegistrationSchema, api=ns)
+    @accepts(schema=NewRemoteClientSchema, api=ns)
     @ns.doc(security='apikey')
-    @responds(schema=ClientRemoteRegistrationSchema, api=ns, status_code=201)
+    @responds(schema=ClientRemoteRegistrationPortalSchema, api=ns, status_code=201)
     def post(self):
         """create new remote registration client
             this will create a new entry into the client info table first
@@ -456,8 +458,8 @@ class NewRemoteRegistration(Resource):
             raise ClientAlreadyExists(identification = data['email'])
 
         # initialize schema objects
-        rr_schema = NewRemoteRegistrationSchema()
-        client_rr_schema = ClientRemoteRegistrationSchema()
+        rr_schema = NewRemoteClientSchema() #creates entry into clientinfo table
+        client_rr_schema = ClientRemoteRegistrationPortalSchema() #remote registration table entry
 
         # enter client into basic info table and remote register table
         client = rr_schema.load(data)
@@ -467,23 +469,17 @@ class NewRemoteRegistration(Resource):
         db.session.flush()
 
         # create a new remote client registration entry
-        remote_client = RemoteRegistration()
-        data['clientid'] = client.clientid
-        remote_client.from_dict(data)
+        portal_data = {'clientid' : client.clientid, 'email': client.email}
+        remote_client_portal = client_rr_schema.load(portal_data)
 
-        # create temporary password and portal url
-        remote_client.set_password()
-        remote_client.get_temp_registration_endpoint()
-
-        db.session.add(remote_client)
+        db.session.add(remote_client_portal)
         db.session.commit()
 
         # send email to client containing registration details
-        send_email_remote_registration_portal(recipient=remote_client.email, 
-                                              password=remote_client.password, 
-                                              remote_registration_portal=remote_client.registration_portal_id)
-
-        return remote_client
+        send_email_remote_registration_portal(recipient=remote_client_portal.email, 
+                                              password=remote_client_portal.password, 
+                                              remote_registration_portal=remote_client_portal.registration_portal_id)
+        return remote_client_portal
 
 
 @ns.route('/remoteregistration/refresh/')
@@ -494,7 +490,7 @@ class RefreshRemoteRegistration(Resource):
     @token_auth.login_required
     @accepts(schema=RefreshRemoteRegistrationSchema)
     @ns.doc(security='apikey')
-    @responds(schema=ClientRemoteRegistrationSchema, api=ns, status_code=201)
+    @responds(schema=ClientRemoteRegistrationPortalSchema, api=ns, status_code=201)
     def post(self):
         """refresh the portal endpoint and password
         """
@@ -506,68 +502,24 @@ class RefreshRemoteRegistration(Resource):
         if not client:
             raise ClientNotFound(identification = data['email'])
 
+        client_rr_schema = ClientRemoteRegistrationPortalSchema() #remote registration table entry
         #add clientid to the data object from the current client
         data['clientid'] =  client.clientid
 
         # create a new remote client session registration entry
-        remote_client = RemoteRegistration()
-        data['clientid'] = client.clientid
-        remote_client.from_dict(data)
+        remote_client_portal = client_rr_schema.load(data)
 
         # create temporary password and portal url
-        remote_client.set_password()
-        remote_client.get_temp_registration_endpoint()
 
-        db.session.add(remote_client)
+        db.session.add(remote_client_portal)
         db.session.commit()
 
         # send email to client containing registration details
-        send_email_remote_registration_portal(recipient=remote_client.email, 
-                                        password=remote_client.password, 
-                                        remote_registration_portal=remote_client.registration_portal_id)
+        send_email_remote_registration_portal(recipient=remote_client_portal.email, 
+                                              password=remote_client_portal.password, 
+                                              remote_registration_portal=remote_client_portal.registration_portal_id)
 
-        return remote_client
-
-@ns.route('/remoteregistration/clientinfo/<string:tmp_registration>/')
-@ns.doc(params={'tmp_registration': 'temporary registration portal hash'})
-class RemoteClientInfo(Resource):
-    """
-        For getting and altering client info table as a remote client.
-        Requires token authorization in addition to a valid portal id (tmp_registration)
-    """
-    @ns.doc(security='apikey')
-    @token_auth_client.login_required
-    @responds(schema=ClientInfoSchema, api=ns)
-    def get(self, tmp_registration):
-        """returns client info table as a json for the clientid specified"""
-        #check portal validity
-        if not RemoteRegistration().check_portal_id(tmp_registration):
-            raise ClientNotFound(message="Resource does not exist")
-        client = ClientInfo.query.filter_by(email=token_auth_client.current_user().email).first()
-
-        return client
-
-    @accepts(schema=ClientInfoSchema, api=ns)
-    @ns.doc(security='apikey')
-    @token_auth_client.login_required
-    @responds(schema=ClientInfoSchema, api=ns)
-    def put(self, tmp_registration):
-        """edit client info"""
-        #check portal validity
-        if not RemoteRegistration().check_portal_id(tmp_registration):
-            raise ClientNotFound(message="Resource does not exist")
-
-        data = request.get_json()
-        #prevent requests to set clientid and send message back to api user
-        if data.get('clientid', None):
-            raise IllegalSetting('clientid')
-
-        client = ClientInfo.query.filter_by(email=token_auth_client.current_user().email).first()
-
-        client.from_dict(data)
-        db.session.add(client)
-        db.session.commit()
-        return client
+        return remote_client_portal
 
 
 @ns.route('/testemail/')
@@ -576,7 +528,7 @@ class TestEmail(Resource):
        Send a test email
     """
     @ns.doc(security='apikey')
-    @token_auth_client.login_required
+    @token_auth.login_required
     def get(self):
         """send a testing email"""
         send_email_no_reply()
