@@ -251,7 +251,7 @@ class PoliciesContract(Resource):
         return  client_policies
 
     @ns.doc(security='apikey')
-    @accepts(schema=SignAndDateSchema, api=ns)
+    @accepts(schema=ClientPoliciesContractSchema, api=ns)
     @token_auth.login_required
     @responds(schema=ClientPoliciesContractSchema, status_code= 201, api=ns)
     def post(self, clientid):
@@ -289,7 +289,7 @@ class ConsultConstract(Resource):
             raise ContentNotFound()
         return client_consult
 
-    @accepts(schema=SignAndDateSchema, api=ns)
+    @accepts(schema=ClientConsultContractSchema, api=ns)
     @ns.doc(security='apikey')
     @token_auth.login_required
     @responds(schema=ClientConsultContractSchema, status_code= 201, api=ns)

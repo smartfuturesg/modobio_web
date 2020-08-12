@@ -148,7 +148,7 @@ class ClientSubscriptionContractSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientSubscriptionContract
     
-    clientid = fields.Integer(required=True)
+    clientid = fields.Integer(missing=0)
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -165,7 +165,7 @@ class ClientConsultContractSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientConsultContract
     
-    clientid = fields.Integer(required=True)
+    clientid = fields.Integer(missing=0)
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -195,10 +195,13 @@ class ClientPoliciesContractSchema(ma.SQLAlchemyAutoSchema):
     
 
 class ClientIndividualContractSchema(ma.SQLAlchemyAutoSchema):
+    doctype = DOCTYPE.policies
+    docrev = DOCTYPE_DOCREV_MAP[doctype]
 
     class Meta:
         model = ClientIndividualContract
-
+        
+    clientid = fields.Integer(missing=0)
     @post_load
     def make_object(self, data, **kwargs):
         return ClientIndividualContract(**data)

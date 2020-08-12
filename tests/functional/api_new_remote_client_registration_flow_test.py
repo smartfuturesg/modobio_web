@@ -16,7 +16,13 @@ from tests.data import (
     test_new_remote_registration,
     test_new_client_info,
     test_medical_history,
-    test_pt_history
+    test_pt_history,
+    test_client_consent_data,
+    test_client_release_data,
+    test_client_policies_data,
+    test_client_subscription_data,
+    test_client_individual_data,
+    test_client_consult_data
 )
 
 
@@ -280,3 +286,309 @@ def test_put_pt_history_remote_client_session(test_client, init_database):
     assert response.status_code == 200
     assert response.json['exercise'] == "none, I give up"
 
+
+
+def test_post_consent_client_session(test_client, init_database):
+    """
+    GIVEN a api end point for creating a signed doc
+    WHEN the '/remoteclient/consent/' resource  is requested to be created (POST)
+    THEN check the response is valid
+    """
+
+    remote_client = RemoteRegistration.query.filter_by(
+                        email=test_new_remote_registration['email']).order_by(
+                        RemoteRegistration.idx.desc()).first()
+
+    tmp_registration = remote_client.registration_portal_id
+    api_token = remote_client.token
+
+    # get client authorization to view  data
+    headers = {'Authorization': f'Bearer {api_token}'}
+    
+    response = test_client.post(f"/remoteclient/consent/?tmp_registration={tmp_registration}",
+                                headers=headers, 
+                                data=dumps(test_client_consent_data), 
+                                content_type='application/json')
+    
+    # some simple checks for validity
+    assert response.status_code == 201
+
+
+def test_get_consent_client_session(test_client, init_database):
+    """
+    GIVEN a api end point getting a signed doc
+    WHEN the '/remoteclient/consent/' resource  is requested to be created (GET)
+    THEN check the response is valid
+    """
+
+    remote_client = RemoteRegistration.query.filter_by(
+                        email=test_new_remote_registration['email']).order_by(
+                        RemoteRegistration.idx.desc()).first()
+
+    tmp_registration = remote_client.registration_portal_id
+    api_token = remote_client.token
+
+    # get client authorization to view  data
+    headers = {'Authorization': f'Bearer {api_token}'}
+    
+    response = test_client.get(f"/remoteclient/consent/?tmp_registration={tmp_registration}",
+                                headers=headers, 
+                                content_type='application/json')
+    
+    # some simple checks for validity
+    assert response.status_code == 200
+
+
+def test_post_release_client_session(test_client, init_database):
+    """
+    GIVEN a api end point for creating a signed doc
+    WHEN the '/remoteclient/release/' resource  is requested to be created (POST)
+    THEN check the response is valid
+    """
+
+    remote_client = RemoteRegistration.query.filter_by(
+                        email=test_new_remote_registration['email']).order_by(
+                        RemoteRegistration.idx.desc()).first()
+
+    tmp_registration = remote_client.registration_portal_id
+    api_token = remote_client.token
+
+    # get client authorization to view  data
+    headers = {'Authorization': f'Bearer {api_token}'}
+    
+    response = test_client.post(f"/remoteclient/release/?tmp_registration={tmp_registration}",
+                                headers=headers, 
+                                data=dumps(test_client_release_data), 
+                                content_type='application/json')
+    
+    # some simple checks for validity
+    assert response.status_code == 201
+
+
+def test_get_release_client_session(test_client, init_database):
+    """
+    GIVEN a api end point getting a signed doc
+    WHEN the '/remoteclient/release/' resource  is requested to be created (GET)
+    THEN check the response is valid
+    """
+
+    remote_client = RemoteRegistration.query.filter_by(
+                        email=test_new_remote_registration['email']).order_by(
+                        RemoteRegistration.idx.desc()).first()
+
+    tmp_registration = remote_client.registration_portal_id
+    api_token = remote_client.token
+
+    # get client authorization to view  data
+    headers = {'Authorization': f'Bearer {api_token}'}
+    
+    response = test_client.get(f"/remoteclient/release/?tmp_registration={tmp_registration}",
+                                headers=headers, 
+                                content_type='application/json')
+    
+    # some simple checks for validity
+    assert response.status_code == 200
+
+
+def test_post_policies_client_session(test_client, init_database):
+    """
+    GIVEN a api end point for creating a signed doc
+    WHEN the '/remoteclient/policies/' resource  is requested to be created (POST)
+    THEN check the response is valid
+    """
+
+    remote_client = RemoteRegistration.query.filter_by(
+                        email=test_new_remote_registration['email']).order_by(
+                        RemoteRegistration.idx.desc()).first()
+
+    tmp_registration = remote_client.registration_portal_id
+    api_token = remote_client.token
+
+    # get client authorization to view  data
+    headers = {'Authorization': f'Bearer {api_token}'}
+    
+    response = test_client.post(f"/remoteclient/policies/?tmp_registration={tmp_registration}",
+                                headers=headers, 
+                                data=dumps(test_client_policies_data), 
+                                content_type='application/json')
+                                
+    # some simple checks for validity
+    assert response.status_code == 201
+
+
+def test_get_policies_client_session(test_client, init_database):
+    """
+    GIVEN a api end point getting a signed doc
+    WHEN the '/remoteclient/policies/' resource  is requested  (GET)
+    THEN check the response is valid
+    """
+
+    remote_client = RemoteRegistration.query.filter_by(
+                        email=test_new_remote_registration['email']).order_by(
+                        RemoteRegistration.idx.desc()).first()
+
+    tmp_registration = remote_client.registration_portal_id
+    api_token = remote_client.token
+
+    # get client authorization to view  data
+    headers = {'Authorization': f'Bearer {api_token}'}
+    
+    response = test_client.get(f"/remoteclient/policies/?tmp_registration={tmp_registration}",
+                                headers=headers, 
+                                content_type='application/json')
+    
+    # some simple checks for validity
+    assert response.status_code == 200
+
+
+def test_post_consult_client_session(test_client, init_database):
+    """
+    GIVEN a api end point for creating a signed doc
+    WHEN the '/remoteclient/consultcontract/' resource  is requested to be created (POST)
+    THEN check the response is valid
+    """
+
+    remote_client = RemoteRegistration.query.filter_by(
+                        email=test_new_remote_registration['email']).order_by(
+                        RemoteRegistration.idx.desc()).first()
+
+    tmp_registration = remote_client.registration_portal_id
+    api_token = remote_client.token
+
+    # get client authorization to view  data
+    headers = {'Authorization': f'Bearer {api_token}'}
+    
+    response = test_client.post(f"/remoteclient/consultcontract/?tmp_registration={tmp_registration}",
+                                headers=headers, 
+                                data=dumps(test_client_policies_data), 
+                                content_type='application/json')
+    
+    # some simple checks for validity
+    assert response.status_code == 201
+
+
+def test_get_consult_client_session(test_client, init_database):
+    """
+    GIVEN a api end point getting a signed doc
+    WHEN the '/remoteclient/consultcontract/' resource  is requested  (GET)
+    THEN check the response is valid
+    """
+
+    remote_client = RemoteRegistration.query.filter_by(
+                        email=test_new_remote_registration['email']).order_by(
+                        RemoteRegistration.idx.desc()).first()
+
+    tmp_registration = remote_client.registration_portal_id
+    api_token = remote_client.token
+
+    # get client authorization to view  data
+    headers = {'Authorization': f'Bearer {api_token}'}
+    
+    response = test_client.get(f"/remoteclient/consultcontract/?tmp_registration={tmp_registration}",
+                                headers=headers, 
+                                content_type='application/json')
+    
+    # some simple checks for validity
+    assert response.status_code == 200
+
+
+def test_post_subscription_client_session(test_client, init_database):
+    """
+    GIVEN a api end point for creating a signed doc
+    WHEN the '/remoteclient/subscriptioncontract/' resource  is requested to be created (POST)
+    THEN check the response is valid
+    """
+
+    remote_client = RemoteRegistration.query.filter_by(
+                        email=test_new_remote_registration['email']).order_by(
+                        RemoteRegistration.idx.desc()).first()
+
+    tmp_registration = remote_client.registration_portal_id
+    api_token = remote_client.token
+
+    # get client authorization to view  data
+    headers = {'Authorization': f'Bearer {api_token}'}
+    
+    response = test_client.post(f"/remoteclient/subscriptioncontract/?tmp_registration={tmp_registration}",
+                                headers=headers, 
+                                data=dumps(test_client_subscription_data), 
+                                content_type='application/json')
+                                
+    # some simple checks for validity
+    assert response.status_code == 201
+
+
+def test_get_subscription_client_session(test_client, init_database):
+    """
+    GIVEN a api end point getting a signed doc
+    WHEN the '/remoteclient/subscriptioncontract/' resource  is requested  (GET)
+    THEN check the response is valid
+    """
+
+    remote_client = RemoteRegistration.query.filter_by(
+                        email=test_new_remote_registration['email']).order_by(
+                        RemoteRegistration.idx.desc()).first()
+
+    tmp_registration = remote_client.registration_portal_id
+    api_token = remote_client.token
+
+    # get client authorization to view  data
+    headers = {'Authorization': f'Bearer {api_token}'}
+    
+    response = test_client.get(f"/remoteclient/subscriptioncontract/?tmp_registration={tmp_registration}",
+                                headers=headers, 
+                                content_type='application/json')
+    
+    # some simple checks for validity
+    assert response.status_code == 200
+
+
+def test_post_services_client_session(test_client, init_database):
+    """
+    GIVEN a api end point for creating a signed doc
+    WHEN the '/remoteclient/servicescontract/' resource  is requested to be created (POST)
+    THEN check the response is valid
+    """
+
+    remote_client = RemoteRegistration.query.filter_by(
+                        email=test_new_remote_registration['email']).order_by(
+                        RemoteRegistration.idx.desc()).first()
+
+    tmp_registration = remote_client.registration_portal_id
+    api_token = remote_client.token
+
+    # get client authorization to view  data
+    headers = {'Authorization': f'Bearer {api_token}'}
+    
+    response = test_client.post(f"/remoteclient/servicescontract/?tmp_registration={tmp_registration}",
+                                headers=headers, 
+                                data=dumps(test_client_individual_data), 
+                                content_type='application/json')
+    
+    # some simple checks for validity
+    assert response.status_code == 201
+
+
+def test_get_services_client_session(test_client, init_database):
+    """
+    GIVEN a api end point getting a signed doc
+    WHEN the '/remoteclient/servicescontract/' resource  is requested  (GET)
+    THEN check the response is valid
+    """
+
+    remote_client = RemoteRegistration.query.filter_by(
+                        email=test_new_remote_registration['email']).order_by(
+                        RemoteRegistration.idx.desc()).first()
+
+    tmp_registration = remote_client.registration_portal_id
+    api_token = remote_client.token
+
+    # get client authorization to view  data
+    headers = {'Authorization': f'Bearer {api_token}'}
+    
+    response = test_client.get(f"/remoteclient/servicescontract/?tmp_registration={tmp_registration}",
+                                headers=headers, 
+                                content_type='application/json')
+                                
+    # some simple checks for validity
+    assert response.status_code == 200

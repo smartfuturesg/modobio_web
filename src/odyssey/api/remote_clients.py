@@ -5,9 +5,11 @@ from flask_accepts import accepts, responds
 from flask_restx import Resource, Api
 
 from odyssey.api import api
+from odyssey.constants import DOCTYPE, DOCTYPE_DOCREV_MAP
 from odyssey.api.auth import token_auth, token_auth_client
 from odyssey.api.errors import ClientNotFound, ContentNotFound, IllegalSetting, UserNotFound
 from odyssey import db
+from odyssey.pdf import to_pdf
 from odyssey.models.intake import (
     ClientInfo,
     ClientConsent,
@@ -22,6 +24,12 @@ from odyssey.models.doctor import MedicalHistory
 from odyssey.models.pt import PTHistory
 from odyssey.utils.schemas import (
     ClientInfoSchema,
+    ClientConsentSchema,
+    ClientConsultContractSchema,
+    ClientPoliciesContractSchema,
+    ClientIndividualContractSchema,
+    ClientSubscriptionContractSchema,
+    ClientReleaseSchema,
     MedicalHistorySchema,
     PTHistorySchema
 ) 
@@ -215,7 +223,6 @@ class ClientPTHistory(Resource):
         tmp_registration = request.args.get('tmp_registration')
         remote_client = RemoteRegistration().check_portal_id(tmp_registration)
 
-
         #check to see if there is already an entry for pt history
         current_pt_history = PTHistory.query.filter_by(
                         clientid=remote_client.clientid).first()
@@ -231,3 +238,286 @@ class ClientPTHistory(Resource):
         db.session.commit()
 
         return current_pt_history
+
+    
+@ns.route('/consent/')
+@ns.doc(params={'tmp_registration': 'temporary registration portal hash'})
+class ConsentContract(Resource):
+    """client consent forms"""
+
+    doctype = DOCTYPE.consent
+    docrev = DOCTYPE_DOCREV_MAP[doctype]
+
+    @ns.doc(security='apikey')
+    @token_auth_client.login_required
+    @responds(schema=ClientConsentSchema, api=ns)
+    def get(self):
+        """returns the most recent consent table as a json for the clientid specified"""
+        tmp_registration = request.args.get('tmp_registration')
+        remote_client = RemoteRegistration().check_portal_id(tmp_registration)
+
+        client_consent_form = ClientConsent.query.filter_by(clientid=remote_client.clientid).order_by(ClientConsent.idx.desc()).first()
+        
+        if not client_consent_form:
+            raise ContentNotFound()
+
+        return client_consent_form
+
+    @accepts(schema=ClientConsentSchema, api=ns)
+    @ns.doc(security='apikey')
+    @token_auth_client.login_required
+    @responds(schema=ClientConsentSchema, status_code=201, api=ns)
+    def post(self):
+        """ Create client consent contract for the specified clientid """
+        tmp_registration = request.args.get('tmp_registration')
+        remote_client = RemoteRegistration().check_portal_id(tmp_registration)
+
+        if not remote_client:
+            raise ClientNotFound(message="this client does not exist")
+
+        data = request.get_json()
+        data["clientid"] = remote_client.clientid
+
+        client_consent_schema = ClientConsentSchema()
+        client_consent_form = client_consent_schema.load(data)
+        
+        db.session.add(client_consent_form)
+        db.session.commit()
+
+        to_pdf(remote_client.clientid, self.doctype)
+        return client_consent_form
+
+
+@ns.route('/release/')
+@ns.doc(params={'tmp_registration': 'temporary registration portal hash'})
+class ReleaseContract(Resource):
+    """Client release forms"""
+
+    doctype = DOCTYPE.release
+    docrev = DOCTYPE_DOCREV_MAP[doctype]
+
+    @ns.doc(security='apikey')
+    @token_auth_client.login_required
+    @responds(schema=ClientReleaseSchema, api=ns)
+    def get(self):
+        """returns most recent client release table as a json for the clientid specified"""
+        tmp_registration = request.args.get('tmp_registration')
+        remote_client = RemoteRegistration().check_portal_id(tmp_registration)
+
+        client_release_form =  ClientRelease.query.filter_by(clientid=remote_client.clientid).order_by(ClientRelease.idx.desc()).first()
+
+        if not client_release_form:
+            raise ContentNotFound()
+
+        return client_release_form
+
+    @accepts(schema=ClientReleaseSchema)
+    @ns.doc(security='apikey')
+    @token_auth_client.login_required
+    @responds(schema=ClientReleaseSchema, status_code=201, api=ns)
+    def post(self):
+        """create client release contract object for the specified clientid"""
+        tmp_registration = request.args.get('tmp_registration')
+        remote_client = RemoteRegistration().check_portal_id(tmp_registration)
+
+        if not remote_client:
+            raise ClientNotFound(message="this client does not exist")
+
+        data = request.get_json()
+        data["clientid"] = remote_client.clientid
+        client_release_schema = ClientReleaseSchema()
+        client_release_form = client_release_schema.load(data)
+
+        db.session.add(client_release_form)
+        db.session.commit()
+        to_pdf(remote_client.clientid, self.doctype)
+
+        return client_release_form
+
+@ns.route('/policies/')
+@ns.doc(params={'tmp_registration': 'temporary registration portal hash'})
+class PoliciesContract(Resource):
+    """Client policies form"""
+
+    doctype = DOCTYPE.policies
+    docrev = DOCTYPE_DOCREV_MAP[doctype]
+
+    @ns.doc(security='apikey')
+    @token_auth_client.login_required
+    @responds(schema=ClientPoliciesContractSchema, api=ns)
+    def get(self):
+        """returns most recent client policies table as a json for the clientid specified"""
+        tmp_registration = request.args.get('tmp_registration')
+        remote_client = RemoteRegistration().check_portal_id(tmp_registration)
+
+        client_policies =  ClientPolicies.query.filter_by(clientid=remote_client.clientid).order_by(ClientPolicies.idx.desc()).first()
+
+        if not client_policies:
+            raise ContentNotFound()
+
+        return client_policies
+
+    @ns.doc(security='apikey')
+    @accepts(schema=ClientPoliciesContractSchema, api=ns)
+    @token_auth_client.login_required
+    @responds(schema=ClientPoliciesContractSchema, status_code= 201, api=ns)
+    def post(self):
+        """create client policies contract object for the specified clientid"""
+        tmp_registration = request.args.get('tmp_registration')
+        remote_client = RemoteRegistration().check_portal_id(tmp_registration)
+
+        if not remote_client:
+            raise ClientNotFound(message="this client does not exist")
+
+        data = request.get_json()
+        data["clientid"] = remote_client.clientid
+        client_policies_schema = ClientPoliciesContractSchema()
+        client_policies = client_policies_schema.load(data)
+
+        db.session.add(client_policies)
+        db.session.commit()
+        to_pdf(remote_client.clientid, self.doctype)
+
+        return client_policies
+
+
+@ns.route('/consultcontract/')
+@ns.doc(params={'tmp_registration': 'temporary registration portal hash'})
+class ConsultConstract(Resource):
+    """client consult contract"""
+
+    doctype = DOCTYPE.consult
+    docrev = DOCTYPE_DOCREV_MAP[doctype]
+
+    @ns.doc(security='apikey')
+    @token_auth_client.login_required
+    @responds(schema=ClientConsultContractSchema, api=ns)
+    def get(self):
+        """returns most recent client consultation table as a json for the clientid specified"""
+        tmp_registration = request.args.get('tmp_registration')
+        remote_client = RemoteRegistration().check_portal_id(tmp_registration)
+
+        client_consult =  ClientConsultContract.query.filter_by(clientid=remote_client.clientid).order_by(ClientConsultContract.idx.desc()).first()
+
+        if not client_consult:
+            raise ContentNotFound()
+        return client_consult
+
+    @accepts(schema=ClientConsultContractSchema, api=ns)
+    @ns.doc(security='apikey')
+    @token_auth_client.login_required
+    @responds(schema=ClientConsultContractSchema, status_code= 201, api=ns)
+    def post(self):
+        """create client consult contract object for the specified clientid"""
+        tmp_registration = request.args.get('tmp_registration')
+        remote_client = RemoteRegistration().check_portal_id(tmp_registration)
+
+        if not remote_client:
+            raise ClientNotFound(message="this client does not exist")
+
+        data = request.get_json()
+        data["clientid"] = remote_client.clientid
+        consult_contract_schema = ClientConsultContractSchema()
+        client_consult = consult_contract_schema.load(data)
+        
+        db.session.add(client_consult)
+        db.session.commit()
+        to_pdf(remote_client.clientid, self.doctype)
+        return client_consult
+
+
+@ns.route('/subscriptioncontract/')
+@ns.doc(params={'tmp_registration': 'temporary registration portal hash'})
+class SubscriptionContract(Resource):
+    """client subscription contract"""
+
+    doctype = DOCTYPE.subscription
+    docrev = DOCTYPE_DOCREV_MAP[doctype]
+
+    @ns.doc(security='apikey')
+    @token_auth_client.login_required
+    @responds(schema=ClientSubscriptionContractSchema, api=ns)
+    def get(self):
+        """returns most recent client subscription contract table as a json for the clientid specified"""
+        tmp_registration = request.args.get('tmp_registration')
+        remote_client = RemoteRegistration().check_portal_id(tmp_registration)
+
+        client_subscription = ClientSubscriptionContract.query.filter_by(clientid=remote_client.clientid).order_by(ClientSubscriptionContract.idx.desc()).first()
+
+        if not client_subscription:
+            raise ContentNotFound()
+
+        return client_subscription
+
+    @ns.doc(security='apikey')
+    @accepts(schema=ClientSubscriptionContractSchema, api=ns)
+    @token_auth_client.login_required
+    @responds(schema=ClientSubscriptionContractSchema, status_code= 201, api=ns)
+    def post(self):
+        """create client subscription contract object for the specified clientid"""
+        tmp_registration = request.args.get('tmp_registration')
+        remote_client = RemoteRegistration().check_portal_id(tmp_registration)
+
+        if not remote_client:
+            raise ClientNotFound(message="this client does not exist")
+
+        data = request.get_json()
+        data["clientid"] = remote_client.clientid
+        subscription_contract_schema = ClientSubscriptionContractSchema()
+        client_subscription = subscription_contract_schema.load(data)
+
+        db.session.add(client_subscription)
+        db.session.commit()
+
+        to_pdf(remote_client.clientid, self.doctype)
+
+        return client_subscription
+
+@ns.route('/servicescontract/')
+@ns.doc(params={'tmp_registration': 'temporary registration portal hash'})
+class IndividualContract(Resource):
+    """client individual services contract"""
+
+    doctype = DOCTYPE.individual
+    docrev = DOCTYPE_DOCREV_MAP[doctype]
+
+    @ns.doc(security='apikey')
+    @token_auth_client.login_required
+    @responds(schema=ClientIndividualContractSchema, api=ns)
+    def get(self):
+        """returns most recent client individual servies table as a json for the clientid specified"""
+        tmp_registration = request.args.get('tmp_registration')
+        remote_client = RemoteRegistration().check_portal_id(tmp_registration)
+        
+        client_services =  ClientIndividualContract.query.filter_by(clientid=remote_client.clientid).order_by(ClientIndividualContract.idx.desc()).first()
+
+        if not client_services:
+            raise ContentNotFound()
+
+        return  client_services
+
+    @token_auth_client.login_required
+    @accepts(schema=ClientIndividualContractSchema, api=ns)
+    @ns.doc(security='apikey')
+    @responds(schema=ClientIndividualContractSchema,status_code=201, api=ns)
+    def post(self):
+        """create client individual services contract object for the specified clientid"""
+        tmp_registration = request.args.get('tmp_registration')
+        remote_client = RemoteRegistration().check_portal_id(tmp_registration)
+
+        if not remote_client:
+            raise ClientNotFound(message="this client does not exist")
+
+        data = request.get_json()
+        data["clientid"] = remote_client.clientid
+
+        client_services_schema = ClientIndividualContractSchema()
+
+        client_services = client_services_schema.load(data)
+
+        db.session.add(client_services)
+        db.session.commit()
+
+        to_pdf(remote_client.clientid, self.doctype)
+
+        return client_services
