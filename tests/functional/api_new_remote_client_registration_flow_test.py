@@ -309,7 +309,6 @@ def test_post_consent_client_session(test_client, init_database):
                                 headers=headers, 
                                 data=dumps(test_client_consent_data), 
                                 content_type='application/json')
-    
     # some simple checks for validity
     assert response.status_code == 201
 
@@ -334,7 +333,6 @@ def test_get_consent_client_session(test_client, init_database):
     response = test_client.get(f"/remoteclient/consent/?tmp_registration={tmp_registration}",
                                 headers=headers, 
                                 content_type='application/json')
-    
     # some simple checks for validity
     assert response.status_code == 200
 
@@ -615,6 +613,5 @@ def test_get_signeddocs_client_session(test_client, init_database):
                                 headers=headers, 
                                 content_type='application/json')
 
-   
     # some simple checks for validity
     assert response.status_code == 200
