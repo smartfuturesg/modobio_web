@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import boto3
 from flask import request, jsonify, current_app
 from flask_accepts import accepts, responds
 from flask_restx import Resource, Api
@@ -524,59 +525,61 @@ class IndividualContract(Resource):
         return client_services
 
 
-# @ns.route('/signeddocuments/', methods=('GET',))
-# @ns.doc(params={'clientid': 'Client ID number'})
-# class SignedDocuments(Resource):
-#     """
-#     API endpoint that provides access to documents signed
-#     by the client and stored as PDF files.
+@ns.route('/signeddocuments/', methods=('GET',))
+@ns.doc(params={'tmp_registration': 'temporary registration portal hash'})
+class SignedDocuments(Resource):
+    """
+    API endpoint that provides access to documents signed
+    by the client and stored as PDF files.
 
-#     Returns
-#     -------
+    Returns
+    -------
 
-#     Returns a list of URLs to the stored the PDF documents.
-#     The URLs expire after 10 min.
-#     """
-#     @ns.doc(security='apikey')
-#     @token_auth.login_required
-#     @responds(schema=SignedDocumentsSchema, api=ns)
-#     def get(self):
-#         """Given a clientid, returns a list of URLs for all signed documents."""
-#         tmp_registration = request.args.get('tmp_registration')
-#         remote_client = RemoteRegistration().check_portal_id(tmp_registration)
+    Returns a list of URLs to the stored the PDF documents.
+    The URLs expire after 10 min.
+    """
+    @ns.doc(security='apikey')
+    @token_auth_client.login_required
+    @responds(schema=SignedDocumentsSchema, api=ns)
+    def get(self):
+        """Given a clientid, returns a list of URLs for all signed documents."""
+        tmp_registration = request.args.get('tmp_registration')
+        remote_client = RemoteRegistration().check_portal_id(tmp_registration)
 
-#         if not remote_client:
-#             raise ClientNotFound(message="this client does not exist")
+        if not remote_client:
+            raise ClientNotFound(message="this client does not exist")
 
-#         urls = []
+        urls = []
 
-#         if current_app.config['DOCS_STORE_LOCAL']:
-#             for table in (ClientPolicies,
-#                           ClientRelease,
-#                           ClientConsent,
-#                           ClientConsultContract,
-#                           ClientSubscriptionContract,
-#                           ClientIndividualContract):
-#                 result = table.query.filter_by(clientid=clientid).order_by(table.idx.desc()).first()
-#                 if result and result.pdf_path:
-#                     urls.append(result.pdf_path)
-#         else:
-#             s3 = boto3.client('s3')
-#             params = {
-#                 'Bucket': current_app.config['DOCS_BUCKET_NAME'],
-#                 'Key': None
-#             }
+        if current_app.config['DOCS_STORE_LOCAL']:
+            for table in (ClientPolicies,
+                          ClientRelease,
+                          ClientConsent,
+                          ClientConsultContract,
+                          ClientSubscriptionContract,
+                          ClientIndividualContract):
+                contract_name = table.__tableref__
+                result = table.query.filter_by(clientid=remote_client.clientid).order_by(table.idx.desc()).first()
+                if result and result.pdf_path:
+                    urls.append((contract_name, result.pdf_path))
+        else:
+            s3 = boto3.client('s3')
+            params = {
+                'Bucket': current_app.config['DOCS_BUCKET_NAME'],
+                'Key': None
+            }
 
-#             for table in (ClientPolicies,
-#                           ClientRelease,
-#                           ClientConsent,
-#                           ClientConsultContract,
-#                           ClientSubscriptionContract,
-#                           ClientIndividualContract):
-#                 result = table.query.filter_by(clientid=clientid).order_by(table.idx.desc()).first()
-#                 if result and result.pdf_path:
-#                     params['Key'] = result.pdf_path
-#                     url = s3.generate_presigned_url('get_object', Params=params, ExpiresIn=600)
-#                     urls.append(url)
+            for table in (ClientPolicies,
+                          ClientRelease,
+                          ClientConsent,
+                          ClientConsultContract,
+                          ClientSubscriptionContract,
+                          ClientIndividualContract):
+                contract_name = table.__tableref__
+                result = table.query.filter_by(clientid=remote_client.clientid).order_by(table.idx.desc()).first()
+                if result and result.pdf_path:
+                    params['Key'] = result.pdf_path
+                    url = s3.generate_presigned_url('get_object', Params=params, ExpiresIn=600)
+                    urls.append((contract_name, result.pdf_path))
 
-#         return {'urls': urls}
+        return {'urls':dict(urls)}

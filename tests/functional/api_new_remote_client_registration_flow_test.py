@@ -592,3 +592,29 @@ def test_get_services_client_session(test_client, init_database):
                                 
     # some simple checks for validity
     assert response.status_code == 200
+
+
+def test_get_signeddocs_client_session(test_client, init_database):
+    """
+    GIVEN a api end point getting a signed doc
+    WHEN the '/remoteclient/signeddocuments/' resource  is requested  (GET)
+    THEN check the response is valid
+    """
+
+    remote_client = RemoteRegistration.query.filter_by(
+                        email=test_new_remote_registration['email']).order_by(
+                        RemoteRegistration.idx.desc()).first()
+
+    tmp_registration = remote_client.registration_portal_id
+    api_token = remote_client.token
+
+    # get client authorization to view  data
+    headers = {'Authorization': f'Bearer {api_token}'}
+    
+    response = test_client.get(f"/remoteclient/signeddocuments/?tmp_registration={tmp_registration}",
+                                headers=headers, 
+                                content_type='application/json')
+
+   
+    # some simple checks for validity
+    assert response.status_code == 200

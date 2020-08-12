@@ -432,6 +432,7 @@ class SignedDocuments(Resource):
                     params['Key'] = result.pdf_path
                     url = s3.generate_presigned_url('get_object', Params=params, ExpiresIn=600)
                     urls.append((contract_name, result.pdf_path))
+                    
         return {'urls':dict(urls)}
 
 @ns.route('/remoteregistration/new/')
