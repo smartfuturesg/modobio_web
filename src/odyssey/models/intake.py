@@ -304,6 +304,8 @@ class ClientConsent(db.Model):
 
     __tablename__ = 'ClientConsent'
 
+    __tableref__ = 'consent_contract'
+
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     Table index.
@@ -400,6 +402,8 @@ class ClientRelease(db.Model):
     """
 
     __tablename__ = 'ClientRelease'
+
+    __tableref__ = 'release_contract'
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -548,6 +552,8 @@ class ClientPolicies(db.Model):
 
     __tablename__ = 'ClientPolicies'
 
+    __tableref__ = 'policy_contract'
+
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     Table index.
@@ -637,6 +643,8 @@ class ClientConsultContract(db.Model):
     """
 
     __tablename__ = 'ClientConsultContract'
+
+    __tableref__ = 'consultation_contract'
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -728,6 +736,8 @@ class ClientSubscriptionContract(db.Model):
 
     __tablename__ = 'ClientSubscriptionContract'
 
+    __tableref__ = 'subscription_contract'
+
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     Table index.
@@ -812,6 +822,8 @@ class ClientSubscriptionContract(db.Model):
 class ClientIndividualContract(db.Model):
 
     __tablename__ = 'ClientIndividualContract'
+
+    __tableref__ = 'individual_services_contract'
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -937,6 +949,7 @@ class RemoteRegistration(db.Model):
     """
 
     __tablename__ = 'ClientRemoteRegistration'
+
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """

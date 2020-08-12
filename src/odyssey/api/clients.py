@@ -409,9 +409,10 @@ class SignedDocuments(Resource):
                           ClientConsultContract,
                           ClientSubscriptionContract,
                           ClientIndividualContract):
+                contract_name = table.__tableref__
                 result = table.query.filter_by(clientid=clientid).order_by(table.idx.desc()).first()
                 if result and result.pdf_path:
-                    urls.append(result.pdf_path)
+                    urls.append((contract_name, result.pdf_path))
         else:
             s3 = boto3.client('s3')
             params = {
@@ -425,13 +426,13 @@ class SignedDocuments(Resource):
                           ClientConsultContract,
                           ClientSubscriptionContract,
                           ClientIndividualContract):
+                contract_name = table.__tableref__
                 result = table.query.filter_by(clientid=clientid).order_by(table.idx.desc()).first()
                 if result and result.pdf_path:
                     params['Key'] = result.pdf_path
                     url = s3.generate_presigned_url('get_object', Params=params, ExpiresIn=600)
-                    urls.append(url)
-
-        return {'urls': urls}
+                    urls.append((contract_name, result.pdf_path))
+        return {'urls':dict(urls)}
 
 @ns.route('/remoteregistration/new/')
 class NewRemoteRegistration(Resource):

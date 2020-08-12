@@ -210,7 +210,8 @@ class SignedDocumentsSchema(Schema):
     """
         list of document urls
     """
-    urls = fields.List(fields.String())
+    urls = fields.Dict()
+
 
 """
     Schemas for the pt API
