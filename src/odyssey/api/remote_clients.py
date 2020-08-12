@@ -188,7 +188,6 @@ class ClientPTHistory(Resource):
         tmp_registration = request.args.get('tmp_registration')
         remote_client = RemoteRegistration().check_portal_id(tmp_registration)
 
-
         #check to see if there is already an entry for pt history
         current_pt_history = PTHistory.query.filter_by(clientid=remote_client.clientid).first()
         if current_pt_history:
@@ -222,7 +221,7 @@ class ClientPTHistory(Resource):
                         clientid=remote_client.clientid).first()
 
         if not current_pt_history:
-            raise UserNotFound(clientid, message = f"The client with id: {remote_client.clientid} does not yet have a pt history in the database")
+            raise UserNotFound(remote_client.clientid, message = f"The client with id: {remote_client.clientid} does not yet have a pt history in the database")
 
         
         # get payload and update the current instance followd by db commit
@@ -231,4 +230,4 @@ class ClientPTHistory(Resource):
         current_pt_history.update(data)
         db.session.commit()
 
-        return client_pt
+        return current_pt_history
