@@ -304,7 +304,7 @@ class ClientConsent(db.Model):
 
     __tablename__ = 'ClientConsent'
 
-    __tableref__ = 'consent_contract'
+    tableref = 'consent_contract'
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -403,7 +403,7 @@ class ClientRelease(db.Model):
 
     __tablename__ = 'ClientRelease'
 
-    __tableref__ = 'release_contract'
+    tableref = 'release_contract'
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -552,7 +552,7 @@ class ClientPolicies(db.Model):
 
     __tablename__ = 'ClientPolicies'
 
-    __tableref__ = 'policy_contract'
+    tableref = 'policy_contract'
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -644,7 +644,7 @@ class ClientConsultContract(db.Model):
 
     __tablename__ = 'ClientConsultContract'
 
-    __tableref__ = 'consultation_contract'
+    tableref = 'consultation_contract'
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -736,7 +736,7 @@ class ClientSubscriptionContract(db.Model):
 
     __tablename__ = 'ClientSubscriptionContract'
 
-    __tableref__ = 'subscription_contract'
+    tableref = 'subscription_contract'
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -823,7 +823,7 @@ class ClientIndividualContract(db.Model):
 
     __tablename__ = 'ClientIndividualContract'
 
-    __tableref__ = 'individual_services_contract'
+    tableref = 'individual_services_contract'
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """

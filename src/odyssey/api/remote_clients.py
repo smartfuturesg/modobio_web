@@ -558,7 +558,7 @@ class SignedDocuments(Resource):
                           ClientConsultContract,
                           ClientSubscriptionContract,
                           ClientIndividualContract):
-                contract_name = table.__tableref__
+                contract_name = table.tableref
                 result = table.query.filter_by(clientid=remote_client.clientid).order_by(table.idx.desc()).first()
                 if result and result.pdf_path:
                     urls.append((contract_name, result.pdf_path))
@@ -575,7 +575,7 @@ class SignedDocuments(Resource):
                           ClientConsultContract,
                           ClientSubscriptionContract,
                           ClientIndividualContract):
-                contract_name = table.__tableref__
+                contract_name = table.tableref
                 result = table.query.filter_by(clientid=remote_client.clientid).order_by(table.idx.desc()).first()
                 if result and result.pdf_path:
                     params['Key'] = result.pdf_path
