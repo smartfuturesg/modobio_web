@@ -14,7 +14,7 @@ from odyssey.models.intake import RemoteRegistration
 
 ns = api.namespace('tokens', description='Operations related to token authorization')
 
-@ns.route('/')
+@ns.route('/staff/')
 class Token(Resource):
     """create and revoke tokens"""
     @ns.doc(security='basic')
@@ -26,7 +26,7 @@ class Token(Resource):
                 'firstname': user.firstname, 
                 'lastname': user.lastname, 
                 'token': user.get_token(),
-                'access_role': user.access_role}, 201
+                'access_roles': user.access_roles}, 201
 
     @ns.doc(security='basic')
     @token_auth.login_required
