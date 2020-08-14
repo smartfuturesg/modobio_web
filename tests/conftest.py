@@ -48,6 +48,7 @@ def new_client():
 def test_client():
     """flask application instance (client)"""
     app = create_app(flask_dev='test')
+    db.init_app(app)
     testing_client = app.test_client()
     
     # Establish an application context before running the tests.
@@ -102,3 +103,6 @@ def init_database():
     yield db  # this is where the testing happens!
 
     # db.drop_all()
+
+    # https://stackoverflow.com/questions/26350911/what-to-do-when-a-py-test-hangs-silently
+    db.session.close()
