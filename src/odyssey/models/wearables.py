@@ -90,7 +90,7 @@ class WearablesOura(_Base):
 
     :type: int, foreign key to :attr:`ClientInfo.clientid`
     """
-    
+
     access_token = Column(String(50))
     """
     OAuth2 access token to authorize Oura Cloud access.
