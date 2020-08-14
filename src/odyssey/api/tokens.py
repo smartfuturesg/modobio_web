@@ -1,5 +1,6 @@
 from hashlib import md5
 
+from flask import request, jsonify, current_app
 from flask_restx import Resource
 
 from odyssey import db
@@ -13,7 +14,7 @@ from odyssey.models.intake import RemoteRegistration
 
 ns = api.namespace('tokens', description='Operations related to token authorization')
 
-@ns.route('/')
+@ns.route('/staff/')
 class Token(Resource):
     """create and revoke tokens"""
     @ns.doc(security='basic')
@@ -25,7 +26,7 @@ class Token(Resource):
                 'firstname': user.firstname, 
                 'lastname': user.lastname, 
                 'token': user.get_token(),
-                'access_role': user.access_role}, 201
+                'access_roles': user.access_roles}, 201
 
     @ns.doc(security='basic')
     @token_auth.login_required
@@ -34,7 +35,7 @@ class Token(Resource):
         token_auth.current_user().revoke_token()
         return '', 204
 
-@ns.route('/remoteregistration/<string:tmp_registration>/')
+@ns.route('/remoteregistration/')
 @ns.doc(params={'tmp_registration': 'temporary registration portal hash'})
 class RemoteRegistrationToken(Resource):
     """generate and delete portal user API access tokens
@@ -42,8 +43,9 @@ class RemoteRegistrationToken(Resource):
         the url to validate the authenticity of the end point (i.e. in database and not expired)"""
     @ns.doc(security='basic')
     @basic_auth_client.login_required
-    def post(self, tmp_registration):
+    def post(self):
         """generate api token for portal user"""
+        tmp_registration = request.args.get('tmp_registration')
         #validate registration portal
         if not RemoteRegistration().check_portal_id(tmp_registration):
             raise ClientNotFound(message="Resource does not exist")
@@ -54,7 +56,7 @@ class RemoteRegistrationToken(Resource):
 
     @ns.doc(security='basic')
     @basic_auth_client.login_required
-    def delete(self, tmp_registration):
+    def delete(self):
         """invalidate current token. Used to effectively logout a user"""
         token_auth_client.current_user().revoke_token()
         return '', 204

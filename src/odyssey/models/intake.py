@@ -304,6 +304,8 @@ class ClientConsent(db.Model):
 
     __tablename__ = 'ClientConsent'
 
+    tableref = 'consent_contract'
+
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     Table index.
@@ -400,6 +402,8 @@ class ClientRelease(db.Model):
     """
 
     __tablename__ = 'ClientRelease'
+
+    tableref = 'release_contract'
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -548,6 +552,8 @@ class ClientPolicies(db.Model):
 
     __tablename__ = 'ClientPolicies'
 
+    tableref = 'policy_contract'
+
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     Table index.
@@ -637,6 +643,8 @@ class ClientConsultContract(db.Model):
     """
 
     __tablename__ = 'ClientConsultContract'
+
+    tableref = 'consultation_contract'
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -728,6 +736,8 @@ class ClientSubscriptionContract(db.Model):
 
     __tablename__ = 'ClientSubscriptionContract'
 
+    tableref = 'subscription_contract'
+
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     Table index.
@@ -812,6 +822,8 @@ class ClientSubscriptionContract(db.Model):
 class ClientIndividualContract(db.Model):
 
     __tablename__ = 'ClientIndividualContract'
+
+    tableref = 'individual_services_contract'
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -938,6 +950,7 @@ class RemoteRegistration(db.Model):
 
     __tablename__ = 'ClientRemoteRegistration'
 
+
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     Table index.
@@ -994,24 +1007,6 @@ class RemoteRegistration(db.Model):
     :type: datetime
     """
 
-    def from_dict(self,  data):
-        """to be used when a new user is created or a user id edited"""
-        for field in ['clientid', 'email']:
-            if field in data:
-                setattr(self, field, data[field])
-
-    def to_dict(self):
-        """returns all client info in dictionary form"""
-        #leaving this heer ein case we need to return this with a local timezone
-        # portal_expr_time = phx_tz.localize(self.registration_portal_expiration) + phx_tz.localize(self.registration_portal_expiration).utcoffset()
-        data = {
-            'clientid': self.clientid,
-            'email': self.email,
-            'registration_portal_id': self.registration_portal_id,
-            'registration_portal_expiration': self.registration_portal_expiration
-        }
-        return data
-
     def get_temp_registration_endpoint(self, expires_in = 86400):
         """creates a temporary endpoint meant for at-home
            registration
@@ -1067,7 +1062,11 @@ class RemoteRegistration(db.Model):
     @staticmethod
     def check_portal_id(portal_id):
         """check if token is valid. returns user if so"""
-        remote_client = RemoteRegistration.query.filter_by(registration_portal_id=portal_id).first()
+        # get most recent instance of the remote client based on registration
+        # portal id and index
+        remote_client = RemoteRegistration.query.filter_by(
+            registration_portal_id=portal_id).order_by(
+            RemoteRegistration.idx.desc()).first()
 
         if remote_client is None or remote_client.registration_portal_expiration < datetime.utcnow():
             return None

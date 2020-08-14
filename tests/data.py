@@ -90,8 +90,7 @@ signature = 'data:image/png;base64,' + base64.b64encode(signature).decode('utf-8
 test_client_consent_data = {
     'infectious_disease': False,
     'signdate': "2020-04-05",
-    'signature': signature,
-    'revision': DOCTYPE_DOCREV_MAP[DOCTYPE.consent]
+    'signature': signature
 }
 
 test_client_release_data = {
@@ -102,26 +101,22 @@ test_client_release_data = {
     'release_date_to': "2021-07-07",
     'release_purpose': 'Release my data for the purpose of doctors having my required drugs.',
     'signdate': "2020-05-05",
-    'signature': signature,
-    'revision': DOCTYPE_DOCREV_MAP[DOCTYPE.release]
+    'signature': signature
 }
 
 test_client_policies_data = {
     'signdate': "2020-04-05",
-    'signature': signature,
-    'revision': DOCTYPE_DOCREV_MAP[DOCTYPE.policies]
+    'signature': signature
 }
 
 test_client_consult_data = {
     'signdate': "2020-04-05",
-    'signature': signature,
-    'revision': DOCTYPE_DOCREV_MAP[DOCTYPE.consult]
+    'signature': signature
 }
 
 test_client_subscription_data = {
     'signdate': "2020-04-05",
-    'signature': signature,
-    'revision': DOCTYPE_DOCREV_MAP[DOCTYPE.subscription]
+    'signature': signature
 }
 
 test_client_individual_data = {
@@ -130,8 +125,7 @@ test_client_individual_data = {
     'data': False,
     'drinks': True,
     'signdate': "2020-04-05",
-    'signature': signature,
-    'revision': DOCTYPE_DOCREV_MAP[DOCTYPE.individual]
+    'signature': signature
 }
 
 test_json_data = {

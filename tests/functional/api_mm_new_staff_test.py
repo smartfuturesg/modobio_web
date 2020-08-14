@@ -18,9 +18,8 @@ def test_creating_new_staff(test_client, init_database):
     WHEN the '/staff' resource  is requested to be created
     THEN check the response is valid
     """
-
     # get staff authorization to view client data
-    staff = Staff().query.first()
+    staff = Staff.query.first()
     token = staff.get_token()
     headers = {'Authorization': f'Bearer {token}'}
     # breakpoint()
@@ -45,7 +44,7 @@ def test_creating_new_staff_same_email(test_client, init_database):
     """
 
     # get staff authorization to view client data
-    staff = Staff().query.first()
+    staff = Staff.query.first()
     token = staff.get_token()
     headers = {'Authorization': f'Bearer {token}'}
     
