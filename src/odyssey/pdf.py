@@ -3,10 +3,10 @@ This module handles the generation and storage of PDF files for signed documents
 """
 
 import boto3
+import concurrent.futures
 import hashlib
 import io
 import pathlib
-import threading
 
 from flask import render_template, session, current_app, _request_ctx_stack
 from flask_wtf import FlaskForm
@@ -15,6 +15,8 @@ from weasyprint import HTML, CSS
 from odyssey import db
 from odyssey.constants import DOCTYPE, DOCTYPE_TABLE_MAP, DOCTYPE_DOCREV_MAP
 from odyssey.models.intake import *
+
+_executor = concurrent.futures.ThreadPoolExecutor(thread_name_prefix='PDF_')
 
 def to_pdf(clientid: int,
            doctype: DOCTYPE,
@@ -48,23 +50,25 @@ def to_pdf(clientid: int,
     ValueError
         Raised when :attr:`clientid` does not exist in a database table.
     """
-    # The first argument is key: we need to copy the current RequestContext and
-    # pass it to the thread to ensure that the other thread has the same information
-    # as the calling thread. Calling the RequestContext in a 'with' statement,
-    # also sets the AppContext, which in turn sets current_app to the right value.
+    # The second argument (first argument to _to_pdf) is key: we need to copy
+    # the current RequestContext and pass it to the thread to ensure that the
+    # other thread has the same information as the calling thread. Calling the
+    # RequestContext in a 'with' statement, also sets the AppContext, which in
+    # turn sets current_app to the right value.
     #
     # However, we cannot just pass the RequestContext, it must be a copy. The
     # main thread keeps working and tries to delete the RequestContext when it
     # is finished, while the pdf thread is still running. This leads to
     # AssertionError: popped wrong app context <x> in stead of <y>.
-    if current_app.testing:
-        pass
-    else:
-        thread = threading.Thread(target=_to_pdf,
-                                args=(_request_ctx_stack.top.copy(),
-                                        clientid, doctype),
-                                kwargs={'template': template, 'form': form})
-        thread.start()
+    # if current_app.testing:
+    _executor.submit(
+        _to_pdf,
+        _request_ctx_stack.top.copy(),
+        clientid,
+        doctype,
+        template=template,
+        form=form
+    )
 
 def _to_pdf(req_ctx, clientid: int, doctype: DOCTYPE, template: str=None, form: FlaskForm=None):
     """ Generate and store a PDF file from a signed document.
@@ -72,21 +76,30 @@ def _to_pdf(req_ctx, clientid: int, doctype: DOCTYPE, template: str=None, form: 
     Don't call this function directly, use :func:`to_pdf` for non-blocking,
     multi-threaded operation.
     """
+    # Even though the db.session instance created by Flask-SQLAlchemy is
+    # a 'scoped_session', it is still thread_local. Create a new session,
+    # local to this thread, with the same configuration.
+    local_session = db.create_scoped_session()
     with req_ctx:
-        client = ClientInfo.query.filter_by(clientid=clientid).one_or_none()
+        client = local_session.query(ClientInfo).filter_by(clientid=clientid).one_or_none()
 
         if not client:
-            raise ValueError('Clientid {clientid} not found in table {ClientInfo.__tablename__}.')
+            # Calling thread has already finished, so raising errors here
+            # has no effect. Print to stdout instead and hope somebody reads it.
+            # TODO: logging
+            print(f'Clientid {clientid} not found in table {ClientInfo.__tablename__}.')
+            return
 
         doctable = DOCTYPE_TABLE_MAP[doctype]
         docrev = DOCTYPE_DOCREV_MAP[doctype]
 
-        query = doctable.query.filter_by(
-            clientid=clientid, revision=docrev).order_by(doctable.idx.desc())
+        query = local_session.query(doctable).filter_by(clientid=clientid, revision=docrev)
+        query = query.order_by(doctable.idx.desc())
         doc = query.first()
-        
+
         if not doc:
-            raise ValueError('Clientid {clientid} not found in table {doctable.__tablename__}.')
+            print(f'Clientid {clientid} not found in table {doctable.__tablename__}.')
+            return
 
         if doc.pdf_path:
             # PDF already exists, won't save again
@@ -132,7 +145,8 @@ def _to_pdf(req_ctx, clientid: int, doctype: DOCTYPE, template: str=None, form: 
 
         doc.pdf_path = pdf_path
         doc.pdf_hash = pdf_hash
-        db.session.commit()
+        local_session.commit()
+        local_session.remove()
 
         if current_app.config['DEBUG']:
             print('PDF stored at:', pdf_path)
