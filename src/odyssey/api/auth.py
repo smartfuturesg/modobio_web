@@ -1,6 +1,6 @@
 from flask_httpauth import HTTPBasicAuth, HTTPTokenAuth
 from odyssey.models.main import Staff
-from odyssey.models.intake import RemoteRegistration
+from odyssey.models.client import RemoteRegistration
 from odyssey.api.errors import error_response
 
 # simple authentication handler allows password authentication and

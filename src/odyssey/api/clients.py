@@ -9,7 +9,7 @@ from odyssey.api import api
 from odyssey.api.auth import token_auth, token_auth_client
 from odyssey.api.errors import UserNotFound, ClientAlreadyExists, ClientNotFound, IllegalSetting, ContentNotFound
 from odyssey import db
-from odyssey.models.intake import (
+from odyssey.models.client import (
     ClientInfo,
     ClientConsent,
     ClientConsultContract,

@@ -6,7 +6,7 @@ from odyssey.pdf import to_pdf
 from odyssey.forms.intake import ClientInfoForm, ClientConsentForm, ClientReleaseForm, \
                                  ClientSignForm, ClientReceiveForm, \
                                  ClientIndividualContractForm
-from odyssey.models.intake import ClientInfo, ClientConsent, ClientRelease, ClientPolicies, \
+from odyssey.models.client import ClientInfo, ClientConsent, ClientRelease, ClientPolicies, \
                                   ClientConsultContract, ClientSubscriptionContract, \
                                   ClientIndividualContract
 

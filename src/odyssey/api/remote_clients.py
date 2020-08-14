@@ -11,7 +11,7 @@ from odyssey.api.auth import token_auth, token_auth_client
 from odyssey.api.errors import ClientNotFound, ContentNotFound, IllegalSetting, UserNotFound
 from odyssey import db
 from odyssey.pdf import to_pdf
-from odyssey.models.intake import (
+from odyssey.models.client import (
     ClientInfo,
     ClientConsent,
     ClientConsultContract,

@@ -7,7 +7,7 @@ from flask.json import dumps
 from requests.auth import _basic_auth_str
 
 from odyssey.models.main import Staff
-from odyssey.models.intake import (
+from odyssey.models.client import (
     ClientInfo,
     RemoteRegistration
 )

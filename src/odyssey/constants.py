@@ -1,7 +1,7 @@
 """ Various constants used throughout the Odyssey package. """
 import enum
 
-from odyssey.models.intake import (
+from odyssey.models.client import (
     ClientPolicies,
     ClientRelease,
     ClientConsent,
@@ -391,7 +391,7 @@ DOCTYPE_TABLE_MAP = {
 """ Maps signable documents to the database tables.
 
 The keys of this dict are the members of :class:`DOCTYPE`. The values are
-the SQLAlchemy models defined in :mod:`odyssey.models.intake`.
+the SQLAlchemy models defined in :mod:`odyssey.models.client`.
 
 :type: dict
 """

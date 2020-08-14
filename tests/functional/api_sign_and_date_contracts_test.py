@@ -4,7 +4,7 @@ import time
 from flask.json import dumps
 
 from odyssey.models.main import Staff
-from odyssey.models.intake import ClientConsultContract, ClientPolicies ,ClientSubscriptionContract
+from odyssey.models.client import ClientConsultContract, ClientPolicies ,ClientSubscriptionContract
 from tests.data import (
     test_new_client_info,
     test_new_remote_registration,
