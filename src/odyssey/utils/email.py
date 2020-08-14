@@ -54,7 +54,7 @@ def send_email_remote_registration_portal(recipient, password, remote_registrati
 
     send_email_no_reply(subject=SUBJECT, recipient=recipient, body_text=BODY_TEXT, body_html=BODY_HTML)
 
-def send_test_email(subject, recipient="success@simulator.amazonses.com", message=None):
+def send_test_email(subject="testing-success", recipient="success@simulator.amazonses.com"):
     """
         Use the AWS mailbox simulator to test different scenarios: success, bounce, complaint
     """
@@ -62,7 +62,9 @@ def send_test_email(subject, recipient="success@simulator.amazonses.com", messag
     SENDER = "Modo Bio no-reply <no-reply@modobio.com>"
 
     # testing scenarios
-    if subject == "testing-success":
+    if "simulator.amazonses.com" not in recipient:
+        pass
+    elif subject == "testing-success":
         recipient="success@simulator.amazonses.com"
     elif subject == "testing-bounce":
         recipient = "bounce@simulator.amazonses.com" 
@@ -92,7 +94,6 @@ def send_test_email(subject, recipient="success@simulator.amazonses.com", messag
     </body>
     </html>
     """          
-
     send_email_no_reply(subject=SUBJECT,recipient=RECIPIENT, body_text=BODY_TEXT, body_html=BODY_HTML)
 
 
@@ -104,7 +105,7 @@ def send_email_no_reply(subject=None, recipient="success@simulator.amazonses.com
     # Create a new SES resource and specify a region.
     AWS_REGION = "us-east-2"
     client = boto3.client('ses',region_name=AWS_REGION)
-
+    
     # Try to send the email.
     try:
         #Provide the contents of the email.
