@@ -1,5 +1,5 @@
 
-from odyssey.models.main import Staff
+from odyssey.models.staff import Staff
 from tests.data import test_staff_member
 
 def test_regular_staff_member(test_client, init_database):

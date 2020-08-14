@@ -6,7 +6,7 @@ import time
 from flask.json import dumps
 from requests.auth import _basic_auth_str
 
-from odyssey.models.main import Staff
+from odyssey.models.staff import Staff
 from odyssey.models.client import (
     ClientInfo,
     RemoteRegistration

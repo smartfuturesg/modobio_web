@@ -11,7 +11,7 @@ from odyssey.models.client import (
     ClientIndividualContract
 )
 
-from odyssey.models.main import Staff
+from odyssey.models.staff import Staff
 
 from .data import (
     test_client_info,

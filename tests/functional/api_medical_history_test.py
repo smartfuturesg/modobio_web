@@ -3,7 +3,7 @@ import time
 
 from flask.json import dumps
 
-from odyssey.models.main import Staff
+from odyssey.models.staff import Staff
 from odyssey.models.doctor import MedicalHistory 
 from tests.data import test_medical_history
 

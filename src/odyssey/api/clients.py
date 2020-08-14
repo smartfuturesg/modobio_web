@@ -19,7 +19,7 @@ from odyssey.models.client import (
     ClientSubscriptionContract,
     RemoteRegistration
 )
-from odyssey.models.main import ClientRemovalRequests
+from odyssey.models.staff import ClientRemovalRequests
 from odyssey.constants import DOCTYPE, DOCTYPE_DOCREV_MAP
 from odyssey.pdf import to_pdf
 from odyssey.utils.email import send_email_remote_registration_portal, send_email_no_reply

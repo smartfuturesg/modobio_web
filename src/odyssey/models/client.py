@@ -1072,39 +1072,39 @@ class RemoteRegistration(db.Model):
             return None
         return remote_client
 
-# class ClientExternalMR(db.Model):
-#     """ Client external medical record table
+class ClientExternalMR(db.Model):
+    """ Client external medical record table
 
-#     This table stored medical record ids from external medical institutes. 
-#     """
+    This table stored medical record ids from external medical institutes. 
+    """
 
-#     __tablename__ = 'ClientExternalMR'
+    __tablename__ = 'ClientExternalMR'
 
-#     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-#     """
-#     Table index.
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
 
-#     :type: int, primary key, autoincrement
-#     """
+    :type: int, primary key, autoincrement
+    """
 
-#     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientExternalMR_clientid_fkey',ondelete="CASCADE"), nullable=False)
-#     """
-#     Client ID number
+    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientExternalMR_clientid_fkey',ondelete="CASCADE"), nullable=False)
+    """
+    Client ID number
 
-#     :type: int, foreign key to :attr:`ClientInfo.clientid`
-#     """
+    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    """
 
-#     med_record_id = db.Column(db.String, nullable=False)
-#     """
-#     medical record id 
-#     :type: str
-#     """
+    med_record_id = db.Column(db.String, nullable=False)
+    """
+    medical record id 
+    :type: str
+    """
 
-#     institute_id = db.Column(db.Integer, db.ForeignKey('MedicalInstitutions.institute_id',name='ClientExternalMR_institute_id_fkey', ondelete="CASCADE"), nullable=False)
-#     """
-#     medical institute id 
+    institute_id = db.Column(db.Integer, db.ForeignKey('MedicalInstitutions.institute_id',name='ClientExternalMR_institute_id_fkey', ondelete="CASCADE"), nullable=False)
+    """
+    medical institute id 
 
-#     :type: int, foreign key to :attr:`MedicalInstitutions.institute_id`
-#     """
+    :type: int, foreign key to :attr:`MedicalInstitutions.institute_id`
+    """
 
 

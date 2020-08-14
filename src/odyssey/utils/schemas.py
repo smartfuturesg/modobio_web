@@ -18,7 +18,7 @@ from odyssey.models.client import (
     ClientSubscriptionContract
 )
 from odyssey.models.pt import Chessboard, PTHistory
-from odyssey.models.main import Staff
+from odyssey.models.staff import Staff
 from odyssey.models.trainer import (
     HeartAssessment, 
     PowerAssessment, 
