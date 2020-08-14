@@ -1,4 +1,4 @@
-
+import pathlib
 import time 
 
 from flask.json import dumps
@@ -16,9 +16,6 @@ from tests.data import (
     test_client_subscription_data,
     test_client_individual_data,
 )
-
-
-
 
 def test_post_subscription_contract(test_client, init_database):
     """
@@ -42,6 +39,8 @@ def test_post_subscription_contract(test_client, init_database):
     client_subscription = ClientSubscriptionContract.query.filter_by(clientid=1).order_by(ClientSubscriptionContract.signdate.desc()).first()
     assert response.status_code == 201
     assert client_subscription.signdate.strftime("%Y-%m-%d") == test_client_subscription_data["signdate"]
+    assert client_subscription.pdf_path
+    assert pathlib.Path(client_subscription.pdf_path).exists()
 
 def test_get_subscription_contract(test_client, init_database):
     """
@@ -85,6 +84,8 @@ def test_post_consult_contract(test_client, init_database):
     client_consult = ClientConsultContract.query.filter_by(clientid=1).order_by(ClientConsultContract.signdate.desc()).first()
     assert response.status_code == 201
     assert client_consult.signdate.strftime("%Y-%m-%d") == test_client_consult_data["signdate"]
+    assert client_consult.pdf_path
+    assert pathlib.Path(client_consult.pdf_path).exists()
 
 def test_get_consult_contract(test_client, init_database):
     """
@@ -128,6 +129,8 @@ def test_post_policies_contract(test_client, init_database):
     client_policies = ClientPolicies.query.filter_by(clientid=1).order_by(ClientPolicies.signdate.desc()).first()
     assert response.status_code == 201
     assert client_policies.signdate.strftime("%Y-%m-%d") == test_client_policies_data["signdate"]
+    assert client_policies.pdf_path
+    assert pathlib.Path(client_policies.pdf_path).exists()
 
 def test_get_policies_contract(test_client, init_database):
     """
