@@ -7,11 +7,12 @@ from flask_restx import Resource, Api
 
 from odyssey import db
 from odyssey.models.doctor import MedicalPhysicalExam, MedicalHistory
+from odyssey.models.misc import MedicalInstitutions
 from odyssey.api import api
 from odyssey.api.auth import token_auth
 from odyssey.api.errors import UserNotFound, IllegalSetting, ContentNotFound
 from odyssey.utils.misc import check_client_existence
-from odyssey.utils.schemas import MedicalHistorySchema, MedicalPhysicalExamSchema
+from odyssey.utils.schemas import MedicalHistorySchema, MedicalPhysicalExamSchema, MedicalInstitutionsSchema
 
 ns = api.namespace('doctor', description='Operations related to doctor')
 
@@ -120,29 +121,16 @@ class MedPhysical(Resource):
 
         return client_mp
 
-    # @ns.doc(security='apikey')
-    # @token_auth.login_required
-    # @accepts(schema=MedicalPhysicalExamSchema, api=ns)
-    # @responds(schema=MedicalPhysicalExamSchema, api=ns)
-    # def put(self, clientid):
-    #     """updates client's medical physical exam as a json for the clientid specified"""
-    #     check_client_existence(clientid)
+@ns.route('/medicalinstitutions/')
+class AllMedInstitutes(Resource):
+    @ns.doc(security='apikey')
+    @token_auth.login_required
+    @responds(schema=MedicalInstitutionsSchema(many=True), api=ns)
+    def get(self):
+        """returns all medical institutes currently in the database"""
 
-    #     client_mp = MedicalPhysicalExam.query.filter_by(clientid=clientid).first()
-
-    #     if not client_mp:
-    #         raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a medical physical exam in the database")
+        institutes = MedicalInstitutions.query.all()
         
-    #     # get payload and update the current instance followd by db commit
-    #     data = request.get_json()
-       
-        
-    #     client_mp.update(data)
-    #     db.session.commit()
-
-    #     return client_mp
-
-
-
-
+        return institutes
+    
 

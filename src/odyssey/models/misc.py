@@ -1,5 +1,5 @@
 """
-Database tables sor supporting miscellaneous funcitonality. 
+Database tables for supporting miscellaneous funcitonality. 
 """
 
 from odyssey import db

@@ -17,6 +17,7 @@ from odyssey.models.client import (
     ClientRelease,
     ClientSubscriptionContract
 )
+from odyssey.models.misc import MedicalInstitutions
 from odyssey.models.pt import Chessboard, PTHistory
 from odyssey.models.staff import Staff
 from odyssey.models.trainer import (
@@ -900,6 +901,20 @@ class MedicalPhysicalExamSchema(ma.SQLAlchemyAutoSchema):
         return MedicalPhysicalExam(**data)
 
 
+class MedicalInstitutionsSchema(ma.SQLAlchemyAutoSchema):
+    """
+    For returning medical institutions in GET request and also accepting new institute names
+    """
+    class Meta:
+        model = MedicalInstitutions
+        exclude = ["institute_id"]
+
+    @post_load
+    def make_object(self, data):
+        return MedicalInstitutions(**data)
+
+
+
 """
     Schemas for the staff API
 """
@@ -933,4 +948,6 @@ class StaffSchema(ma.SQLAlchemyAutoSchema):
         new_staff = Staff(**data)
         new_staff.set_password(data['password'])
         return new_staff
+
+
 
