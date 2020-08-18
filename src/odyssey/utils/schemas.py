@@ -9,13 +9,14 @@ from odyssey import ma
 from odyssey.models.doctor import MedicalHistory, MedicalPhysicalExam
 from odyssey.models.client import (
     ClientConsent,
-    ClientInfo,
     ClientConsultContract,
-    RemoteRegistration, 
+    ClientExternalMR,
+    ClientInfo,
     ClientIndividualContract, 
     ClientPolicies,
     ClientRelease,
-    ClientSubscriptionContract
+    ClientSubscriptionContract,
+    RemoteRegistration
 )
 from odyssey.models.misc import MedicalInstitutions
 from odyssey.models.pt import Chessboard, PTHistory
@@ -907,11 +908,44 @@ class MedicalInstitutionsSchema(ma.SQLAlchemyAutoSchema):
     """
     class Meta:
         model = MedicalInstitutions
-        exclude = ["institute_id"]
+        # exclude = ["institute_id"]
 
     @post_load
     def make_object(self, data):
         return MedicalInstitutions(**data)
+
+class ClientExternalMRSchema(Schema):
+    """
+    For returning medical institutions in GET request and also accepting new institute names
+    """
+
+    clientid = fields.Integer(missing=0)
+    institute_id = fields.Integer(missing=999)
+    med_record_id = fields.String()
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return ClientExternalMR(**data)
+
+    # @pre_load
+    # def make_object_1(self, data, **kwargs):
+    #     breakpoint()
+    #     return ClientExternalMR(**data)
+
+class ClientExternalMREntrySchema(Schema):
+    """
+    For returning medical institutions in GET request and also accepting new institute names
+    """
+
+
+    # record_locators = fields.List(fields.Nested(ClientExternalMRSchema, many=True))
+    record_locators = fields.Nested(ClientExternalMRSchema, many=True)
+
+    @pre_dump
+    def ravel(self, data, **kwargs):
+        """upon dump, add back the schema structure"""
+        response = {"record_locators": data}
+        return response
 
 
 
