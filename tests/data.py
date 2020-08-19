@@ -44,7 +44,7 @@ test_client_external_medical_records = {
     },
     {
         "med_record_id": "sad65",
-        "institute_id": 3,
+        "institute_id": 1,
         "institute_name": ""
     }
   ]
