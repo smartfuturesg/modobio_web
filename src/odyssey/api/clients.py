@@ -9,7 +9,7 @@ from odyssey.api import api
 from odyssey.api.auth import token_auth, token_auth_client
 from odyssey.api.errors import UserNotFound, ClientAlreadyExists, ClientNotFound, IllegalSetting, ContentNotFound
 from odyssey import db
-from odyssey.models.intake import (
+from odyssey.models.client import (
     ClientInfo,
     ClientConsent,
     ClientConsultContract,
@@ -19,10 +19,10 @@ from odyssey.models.intake import (
     ClientSubscriptionContract,
     RemoteRegistration
 )
-from odyssey.models.main import ClientRemovalRequests
+from odyssey.models.staff import ClientRemovalRequests
 from odyssey.constants import DOCTYPE, DOCTYPE_DOCREV_MAP
 from odyssey.pdf import to_pdf
-from odyssey.utils.email import send_email_remote_registration_portal, send_email_no_reply
+from odyssey.utils.email import send_email_remote_registration_portal, send_test_email
 from odyssey.utils.misc import check_client_existence
 from odyssey.utils.schemas import (
     ClientConsentSchema,
@@ -529,7 +529,11 @@ class TestEmail(Resource):
     """
     @ns.doc(security='apikey')
     @token_auth.login_required
+    @ns.doc(params={'recipient': 'test email recipient'})
     def get(self):
         """send a testing email"""
-        send_email_no_reply()
+        recipient = request.args.get('recipient')
+
+        send_test_email(recipient=recipient)
+        
         return {}, 200  

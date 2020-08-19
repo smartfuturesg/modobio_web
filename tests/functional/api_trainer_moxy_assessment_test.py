@@ -3,7 +3,7 @@ import time
 
 from flask.json import dumps
 
-from odyssey.models.main import Staff
+from odyssey.models.staff import Staff
 from odyssey.models.trainer import MoxyAssessment 
 from tests.data import test_moxy_assessment
 

@@ -4,7 +4,7 @@ import datetime
 import re
 import uuid
 import flask.json
-from odyssey.models.intake import ClientInfo
+from odyssey.models.client import ClientInfo
 from odyssey.api.errors import UserNotFound
 
 

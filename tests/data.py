@@ -30,6 +30,26 @@ test_client_info = {
     "receive_docs": True
 }
 
+test_client_external_medical_records = {
+  "record_locators": [
+    {
+        "med_record_id": "sadfgg65",
+        "institute_id": 9999,
+        "institute_name": "Regular Doc Two"
+    },
+    {
+        "med_record_id": "sadfgdrg65",
+        "institute_id": 2,
+        "institute_name": ""
+    },
+    {
+        "med_record_id": "sad65",
+        "institute_id": 1,
+        "institute_name": ""
+    }
+  ]
+}
+
 test_new_remote_registration = {
     "firstname": "Remote",
     "middlename": "Client",

@@ -32,4 +32,4 @@ venv/
 # from pytests
 *.db
 .coverage
-
+pytestdebug.log

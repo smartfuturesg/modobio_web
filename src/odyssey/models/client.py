@@ -1071,3 +1071,43 @@ class RemoteRegistration(db.Model):
         if remote_client is None or remote_client.registration_portal_expiration < datetime.utcnow():
             return None
         return remote_client
+
+class ClientExternalMR(db.Model):
+    """ Client external medical record table
+
+    This table stored medical record ids from external medical institutes. 
+    """
+
+    __tablename__ = 'ClientExternalMR'
+
+    __table_args__ = (
+        db.UniqueConstraint('clientid', 'med_record_id', 'institute_id'),)
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
+
+    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientExternalMR_clientid_fkey',ondelete="CASCADE"), nullable=False)
+    """
+    Client ID number
+
+    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    """
+
+    med_record_id = db.Column(db.String, nullable=False)
+    """
+    medical record id 
+    :type: str
+    """
+
+    institute_id = db.Column(db.Integer, db.ForeignKey('MedicalInstitutions.institute_id',name='ClientExternalMR_institute_id_fkey', ondelete="CASCADE"), nullable=False)
+    """
+    medical institute id 
+
+    :type: int, foreign key to :attr:`MedicalInstitutions.institute_id`
+    """
+
+

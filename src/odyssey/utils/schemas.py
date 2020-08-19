@@ -7,18 +7,20 @@ from marshmallow import post_load, post_dump, pre_dump, pre_load
 
 from odyssey import ma
 from odyssey.models.doctor import MedicalHistory, MedicalPhysicalExam
-from odyssey.models.intake import (
+from odyssey.models.client import (
     ClientConsent,
-    ClientInfo,
     ClientConsultContract,
-    RemoteRegistration, 
+    ClientExternalMR,
+    ClientInfo,
     ClientIndividualContract, 
     ClientPolicies,
     ClientRelease,
-    ClientSubscriptionContract
+    ClientSubscriptionContract,
+    RemoteRegistration
 )
+from odyssey.models.misc import MedicalInstitutions
 from odyssey.models.pt import Chessboard, PTHistory
-from odyssey.models.main import Staff
+from odyssey.models.staff import Staff
 from odyssey.models.trainer import (
     HeartAssessment, 
     PowerAssessment, 
@@ -900,6 +902,47 @@ class MedicalPhysicalExamSchema(ma.SQLAlchemyAutoSchema):
         return MedicalPhysicalExam(**data)
 
 
+class MedicalInstitutionsSchema(ma.SQLAlchemyAutoSchema):
+    """
+    For returning medical institutions in GET request and also accepting new institute names
+    """
+    class Meta:
+        model = MedicalInstitutions
+        # exclude = ["institute_id"]
+
+    @post_load
+    def make_object(self, data):
+        return MedicalInstitutions(**data)
+
+class ClientExternalMRSchema(Schema):
+    """
+    For returning medical institutions in GET request and also accepting new institute names
+    """
+
+    clientid = fields.Integer(missing=0)
+    institute_id = fields.Integer(missing=9999)
+    med_record_id = fields.String()
+    institute_name = fields.String(load_only=True, required=False, missing="")
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        data.pop("institute_name")
+        return ClientExternalMR(**data)
+
+class ClientExternalMREntrySchema(Schema):
+    """
+    For returning medical institutions in GET request and also accepting new institute names
+    """
+
+
+    record_locators = fields.Nested(ClientExternalMRSchema, many=True)
+    
+    @pre_dump
+    def ravel(self, data, **kwargs):
+        """upon dump, add back the schema structure"""
+        response = {"record_locators": data}
+        return response
+
 """
     Schemas for the staff API
 """
@@ -933,4 +976,6 @@ class StaffSchema(ma.SQLAlchemyAutoSchema):
         new_staff = Staff(**data)
         new_staff.set_password(data['password'])
         return new_staff
+
+
 

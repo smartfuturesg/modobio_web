@@ -14,7 +14,7 @@ from weasyprint import HTML, CSS
 
 from odyssey import db
 from odyssey.constants import DOCTYPE, DOCTYPE_TABLE_MAP, DOCTYPE_DOCREV_MAP
-from odyssey.models.intake import *
+from odyssey.models.client import *
 
 _executor = concurrent.futures.ThreadPoolExecutor(thread_name_prefix='PDF_')
 

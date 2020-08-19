@@ -6,12 +6,14 @@ from flask_accepts import accepts, responds
 from flask_restx import Resource, Api
 
 from odyssey import db
+from odyssey.models.client import ClientExternalMR
 from odyssey.models.doctor import MedicalPhysicalExam, MedicalHistory
+from odyssey.models.misc import MedicalInstitutions
 from odyssey.api import api
 from odyssey.api.auth import token_auth
 from odyssey.api.errors import UserNotFound, IllegalSetting, ContentNotFound
 from odyssey.utils.misc import check_client_existence
-from odyssey.utils.schemas import MedicalHistorySchema, MedicalPhysicalExamSchema
+from odyssey.utils.schemas import ClientExternalMREntrySchema, ClientExternalMRSchema, MedicalHistorySchema, MedicalPhysicalExamSchema, MedicalInstitutionsSchema
 
 ns = api.namespace('doctor', description='Operations related to doctor')
 
@@ -120,29 +122,59 @@ class MedPhysical(Resource):
 
         return client_mp
 
-    # @ns.doc(security='apikey')
-    # @token_auth.login_required
-    # @accepts(schema=MedicalPhysicalExamSchema, api=ns)
-    # @responds(schema=MedicalPhysicalExamSchema, api=ns)
-    # def put(self, clientid):
-    #     """updates client's medical physical exam as a json for the clientid specified"""
-    #     check_client_existence(clientid)
+@ns.route('/medicalinstitutions/')
+class AllMedInstitutes(Resource):
+    @ns.doc(security='apikey')
+    @token_auth.login_required
+    @responds(schema=MedicalInstitutionsSchema(many=True), api=ns)
+    def get(self):
+        """returns all medical institutes currently in the database"""
 
-    #     client_mp = MedicalPhysicalExam.query.filter_by(clientid=clientid).first()
-
-    #     if not client_mp:
-    #         raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a medical physical exam in the database")
+        institutes = MedicalInstitutions.query.all()
         
-    #     # get payload and update the current instance followd by db commit
-    #     data = request.get_json()
-       
+        return institutes
+
+@ns.route('/medicalinstitutions/recordid/<int:clientid>/')
+@ns.doc(params={'clientid': 'Client ID number'})
+class ExternalMedicalRecordIDs(Resource):
+    @ns.doc(security='apikey')
+    @token_auth.login_required
+    @accepts(schema=ClientExternalMREntrySchema,  api=ns)
+    @responds(schema=ClientExternalMREntrySchema,status_code=201, api=ns)
+    def post(self, clientid):
+        """for submitting client medical record ids from external medical institutions"""
+
+        data = request.get_json()
+        # check for new institute names. If the institute_id is 9999, then enter 
+        # the new institute into the dabase before proceeding
+        data_cleaned = []
+        for record in data['record_locators']:
+            record["clientid"] = clientid # add in the clientid
+            if record["institute_id"] == 9999 and len(record["institute_name"]) > 0:
+                # enter new insitute name into database
+                new_institute = MedicalInstitutions(institute_name = record["institute_name"])
+                db.session.add(new_institute)
+                db.session.commit()
+                record["institute_id"] = new_institute.institute_id
+
+            data_cleaned.append(record)
+            
+        client_med_record_ids = ClientExternalMRSchema(many=True).load(data_cleaned)
         
-    #     client_mp.update(data)
-    #     db.session.commit()
+        db.session.add_all(client_med_record_ids)
+        db.session.commit()
+        
+        return client_med_record_ids
 
-    #     return client_mp
+    @ns.doc(security='apikey')
+    @token_auth.login_required
+    @responds(schema=ClientExternalMREntrySchema, api=ns)
+    def get(self, clientid):
+        """returns all medical record ids for clientid"""
 
+        client_med_record_ids = ClientExternalMR.query.filter_by(clientid=clientid).all()
 
-
-
+        return client_med_record_ids
+    
+    
 

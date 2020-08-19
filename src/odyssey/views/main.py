@@ -3,8 +3,8 @@ from werkzeug.security import check_password_hash
 
 from odyssey import db
 from odyssey.forms.main import StaffLoginForm, ClientSearchForm
-from odyssey.models.main import Staff
-from odyssey.models.intake import ClientInfo
+from odyssey.models.staff import Staff
+from odyssey.models.client import ClientInfo
 
 bp = Blueprint('main', __name__)
 
