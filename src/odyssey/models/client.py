@@ -1080,6 +1080,9 @@ class ClientExternalMR(db.Model):
 
     __tablename__ = 'ClientExternalMR'
 
+    __table_args__ = (
+        db.UniqueConstraint('clientid', 'med_record_id', 'institute_id'),)
+
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     Table index.

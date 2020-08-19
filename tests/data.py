@@ -31,23 +31,23 @@ test_client_info = {
 }
 
 test_client_external_medical_records = {
-    "record_locators": [
-        {
-            "clientid": 1,
-            "institute_id": 1,
-            "med_record_id": "sadfgdrg65"
-        },
-        {
-            "clientid": 1,
-            "institute_id": 2,
-            "med_record_id": "sadfgdrg65"
-        },
-        {
-            "clientid": 1,
-            "institute_id": 3,
-            "med_record_id": "sad65"
-        }
-    ]
+  "record_locators": [
+    {
+        "med_record_id": "sadfgg65",
+        "institute_id": 9999,
+        "institute_name": "Regular Doc Two"
+    },
+    {
+        "med_record_id": "sadfgdrg65",
+        "institute_id": 2,
+        "institute_name": ""
+    },
+    {
+        "med_record_id": "sad65",
+        "institute_id": 3,
+        "institute_name": ""
+    }
+  ]
 }
 
 test_new_remote_registration = {

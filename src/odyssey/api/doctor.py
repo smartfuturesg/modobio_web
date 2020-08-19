@@ -145,8 +145,21 @@ class ExternalMedicalRecordIDs(Resource):
         """for submitting client medical record ids from external medical institutions"""
 
         data = request.get_json()
+        # check for new institute names. If the institute_id is 9999, then enter 
+        # the new institute into the dabase before proceeding
+        data_cleaned = []
+        for record in data['record_locators']:
+            record["clientid"] = clientid # add in the clientid
+            if record["institute_id"] == 9999 and len(record["institute_name"]) > 0:
+                # enter new insitute name into database
+                new_institute = MedicalInstitutions(institute_name = record["institute_name"])
+                db.session.add(new_institute)
+                db.session.commit()
+                record["institute_id"] = new_institute.institute_id
 
-        client_med_record_ids = ClientExternalMRSchema(many=True).load(data["record_locators"])
+            data_cleaned.append(record)
+            
+        client_med_record_ids = ClientExternalMRSchema(many=True).load(data_cleaned)
         
         db.session.add_all(client_med_record_ids)
         db.session.commit()

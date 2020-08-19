@@ -920,11 +920,13 @@ class ClientExternalMRSchema(Schema):
     """
 
     clientid = fields.Integer(missing=0)
-    institute_id = fields.Integer(missing=999)
+    institute_id = fields.Integer(missing=9999)
     med_record_id = fields.String()
+    institute_name = fields.String(load_only=True, required=False, missing="")
 
     @post_load
     def make_object(self, data, **kwargs):
+        data.pop("institute_name")
         return ClientExternalMR(**data)
 
     # @pre_load
@@ -938,9 +940,8 @@ class ClientExternalMREntrySchema(Schema):
     """
 
 
-    # record_locators = fields.List(fields.Nested(ClientExternalMRSchema, many=True))
     record_locators = fields.Nested(ClientExternalMRSchema, many=True)
-
+    
     @pre_dump
     def ravel(self, data, **kwargs):
         """upon dump, add back the schema structure"""

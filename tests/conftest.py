@@ -10,6 +10,7 @@ from odyssey.models.client import (
     ClientSubscriptionContract,
     ClientIndividualContract
 )
+from odyssey.models.misc import MedicalInstitutions
 
 from odyssey.models.staff import Staff
 
@@ -78,6 +79,12 @@ def init_database():
     staff_1.set_password(test_staff_member['password'])
     db.session.add(staff_1)
 
+    #initialize Medical institutes table
+    med_institute1 = MedicalInstitutions(institute_name='Mercy Gilbert Medical Center')
+    med_institute2 = MedicalInstitutions(institute_name='Mercy Tempe Medical Center')
+
+    db.session.add_all([med_institute1, med_institute2])
+    
     # # Populate document tables
     # consent_1 = ClientConsent(clientid=clientid, **test_client_consent_data)
     # db.session.add(consent_1)
