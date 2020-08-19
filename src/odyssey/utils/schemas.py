@@ -929,11 +929,6 @@ class ClientExternalMRSchema(Schema):
         data.pop("institute_name")
         return ClientExternalMR(**data)
 
-    # @pre_load
-    # def make_object_1(self, data, **kwargs):
-    #     breakpoint()
-    #     return ClientExternalMR(**data)
-
 class ClientExternalMREntrySchema(Schema):
     """
     For returning medical institutions in GET request and also accepting new institute names
@@ -947,8 +942,6 @@ class ClientExternalMREntrySchema(Schema):
         """upon dump, add back the schema structure"""
         response = {"record_locators": data}
         return response
-
-
 
 """
     Schemas for the staff API
