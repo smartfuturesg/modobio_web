@@ -3,8 +3,7 @@ Database tables for the wearable devices section of the Modo Bio Staff applicati
 All tables in this module are prefixed with 'Wearables'.
 
 The models in this file are shared between the Odyssey and the Wearables programs.
-The file lives in the Odyssey repo and describes schemas for the modobio database.
-It is included in the Wearables repo as a git submodule.
+They describe tables in the ``modobio`` database.
 """
 
 import sys

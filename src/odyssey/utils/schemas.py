@@ -28,6 +28,7 @@ from odyssey.models.trainer import (
     MovementAssessment,
     LungAssessment
 )
+from odyssey.models.wearables import Wearables, WearablesOura
 from odyssey.constants import DOCTYPE, DOCTYPE_DOCREV_MAP
 
 class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
@@ -934,3 +935,27 @@ class StaffSchema(ma.SQLAlchemyAutoSchema):
         new_staff.set_password(data['password'])
         return new_staff
 
+
+#
+#   Schemas for the wearables API
+#
+class WearablesSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Wearables
+
+    clientid = fields.Integer(missing=0)
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return Wearables(**data)
+
+
+class WearablesOuraSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = WearablesOura
+
+    clientid = fields.Integer(missing=0)
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return WearablesOura(**data)
