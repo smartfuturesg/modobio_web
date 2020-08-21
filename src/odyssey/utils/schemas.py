@@ -132,10 +132,17 @@ class ClientReleaseContactsSchema(ma.SQLAlchemyAutoSchema):
 
     clientid = fields.Integer(missing=0)
     release_contract_id = fields.Integer()
+    release_direction = fields.String(description="Direction must be either 'TO' (release to) or 'FROM' (release from)")
 
     @post_load
     def make_object(self, data, **kwargs):
         return ClientReleaseContacts(**data)
+
+    @validates('release_direction')
+    def release_direction_picklist(self,value):
+        direction_values=['TO', 'FROM']
+        if not value in direction_values:
+            raise ValidationError(f'release_direction entry invalid. Please use one of the following: {direction_values}')
 
 class ClientReleaseSchema(ma.SQLAlchemyAutoSchema):
     doctype = DOCTYPE.release
