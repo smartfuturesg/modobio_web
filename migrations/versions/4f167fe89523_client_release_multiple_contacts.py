@@ -1,5 +1,5 @@
-"""testing, client release
-
+"""Add table for storing client release contacts
+remove release_to/from  from clientrelease table. 
 Revision ID: 4f167fe89523
 Revises: 21aad6fa547d
 Create Date: 2020-08-20 17:55:56.654385

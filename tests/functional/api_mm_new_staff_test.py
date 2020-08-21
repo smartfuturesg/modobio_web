@@ -22,7 +22,7 @@ def test_creating_new_staff(test_client, init_database):
     staff = Staff.query.first()
     token = staff.get_token()
     headers = {'Authorization': f'Bearer {token}'}
-    # breakpoint()
+    
     response = test_client.post('/staff/',
                                 headers=headers, 
                                 data=dumps(test_new_staff_member), 
