@@ -28,8 +28,8 @@ from tests.data import (
 
 def test_creating_new_remote_client(test_client, init_database):
     """
-    GIVEN a api end point for creating a new client at home registration 
-    WHEN the '/client/remoteregistration/new' resource  is requested to be changed (PUT)
+    GIVEN a api endpoint for creating a new client at home registration 
+    WHEN the '/client/remoteregistration/new' resource  is requested to be creates (POST)
     THEN check the response is valid
     """
 

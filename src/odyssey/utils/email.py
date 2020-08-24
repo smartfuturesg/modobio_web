@@ -104,7 +104,7 @@ def send_email_no_reply(subject=None, recipient="success@simulator.amazonses.com
     CHARSET = "UTF-8"
     # Create a new SES resource and specify a region.
     AWS_REGION = "us-east-2"
-    client = boto3.client('ses',region_name=AWS_REGION)
+    client = boto3.client('ses', region_name=AWS_REGION)
     
     # Try to send the email.
     try:

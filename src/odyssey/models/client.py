@@ -1124,7 +1124,7 @@ class ClientReleaseContacts(db.Model):
 
     relationship = db.Column(db.String, nullable=True)
     """
-    Realtionship the client has with the contact 
+    Relationship the client has with the contact 
 
     :type: str
     """
