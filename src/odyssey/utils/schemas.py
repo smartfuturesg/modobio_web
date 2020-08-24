@@ -15,6 +15,7 @@ from odyssey.models.client import (
     ClientIndividualContract, 
     ClientPolicies,
     ClientRelease,
+    ClientReleaseContacts,
     ClientSubscriptionContract,
     RemoteRegistration
 )
@@ -124,18 +125,59 @@ class ClientConsentSchema(ma.SQLAlchemyAutoSchema):
         data["revision"] = self.docrev
         return ClientConsent(**data)
 
+class ClientReleaseContactsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = ClientReleaseContacts
+        exclude = ('idx',)
+
+    clientid = fields.Integer(missing=0)
+    release_contract_id = fields.Integer()
+    release_direction = fields.String(description="Direction must be either 'TO' (release to) or 'FROM' (release from)")
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return ClientReleaseContacts(**data)
+
+    @validates('release_direction')
+    def release_direction_picklist(self,value):
+        direction_values=['TO', 'FROM']
+        if not value in direction_values:
+            raise ValidationError(f'release_direction entry invalid. Please use one of the following: {direction_values}')
+
 class ClientReleaseSchema(ma.SQLAlchemyAutoSchema):
     doctype = DOCTYPE.release
     docrev = DOCTYPE_DOCREV_MAP[doctype]
     class Meta:
         model = ClientRelease
+
+    release_to = fields.Nested(ClientReleaseContactsSchema, many=True)
+    release_from = fields.Nested(ClientReleaseContactsSchema, many=True)
     
     clientid = fields.Integer(missing=0)
 
     @post_load
     def make_object(self, data, **kwargs):
         data["revision"] = self.docrev
+        data.pop("release_to")
+        data.pop("release_from")
         return ClientRelease(**data)
+
+    @pre_dump
+    def ravel(self, data, **kwargs):
+        """
+        nest release contacts objects into release contract
+        """
+        data_ravel = data.__dict__
+
+        release_to  = ClientReleaseContacts.query.filter_by(release_contract_id = data.idx, release_direction = 'TO').all()
+        release_from  = ClientReleaseContacts.query.filter_by(release_contract_id = data.idx, release_direction = 'FROM').all()
+
+        release_to_list = [obj.__dict__ for obj in release_to]
+        release_from_list = [obj.__dict__ for obj in release_from]
+
+        data_ravel["release_to"] = release_to_list
+        data_ravel["release_from"] = release_from_list
+        return data
 
 class SignAndDateSchema(Schema):
     """for marshaling signatures and sign dates into objects (contracts) requiring only a signature"""
@@ -908,7 +950,6 @@ class MedicalInstitutionsSchema(ma.SQLAlchemyAutoSchema):
     """
     class Meta:
         model = MedicalInstitutions
-        # exclude = ["institute_id"]
 
     @post_load
     def make_object(self, data):
@@ -933,7 +974,6 @@ class ClientExternalMREntrySchema(Schema):
     """
     For returning medical institutions in GET request and also accepting new institute names
     """
-
 
     record_locators = fields.Nested(ClientExternalMRSchema, many=True)
     

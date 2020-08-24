@@ -31,6 +31,7 @@ from odyssey.utils.schemas import (
     ClientInfoSchema,
     ClientPoliciesContractSchema, 
     ClientReleaseSchema,
+    ClientReleaseContactsSchema,
     ClientRemoteRegistrationPortalSchema, 
     ClientSubscriptionContractSchema,
     NewRemoteClientSchema, 
@@ -204,12 +205,12 @@ class ReleaseContract(Resource):
         """returns most recent client release table as a json for the clientid specified"""
         check_client_existence(clientid)
 
-        client_release_form =  ClientRelease.query.filter_by(clientid=clientid).order_by(ClientRelease.idx.desc()).first()
+        client_release_contract =  ClientRelease.query.filter_by(clientid=clientid).order_by(ClientRelease.idx.desc()).first()
 
-        if not client_release_form:
+        if not client_release_contract:
             raise ContentNotFound()
 
-        return client_release_form
+        return client_release_contract
 
     @accepts(schema=ClientReleaseSchema)
     @ns.doc(security='apikey')
@@ -220,14 +221,35 @@ class ReleaseContract(Resource):
         check_client_existence(clientid)
 
         data = request.get_json()
+        
+        # add client id to release contract 
         data["clientid"] = clientid
-        client_release_schema = ClientReleaseSchema()
-        client_release_form = client_release_schema.load(data)
 
-        db.session.add(client_release_form)
+        # load the client release contract into the db and flush
+        client_release_contract = ClientReleaseSchema().load(data)
+        
+        # add release contract to session and flush to get index (foreign key to the release contacts)
+        db.session.add(client_release_contract)
+        db.session.flush()
+        
+        release_to_data = data["release_to"]
+        release_from_data = data["release_from"]
+
+        # add clientid to each release contact
+        release_contacts = []
+        for item in release_to_data + release_from_data:
+            item["clientid"] = clientid
+            item["release_contract_id"] = client_release_contract.idx
+            release_contacts.append(item)
+        
+        # load contacts and rest of release form into objects seperately
+        release_contact_objects = ClientReleaseContactsSchema(many=True).load(release_contacts)
+
+        db.session.add_all(release_contact_objects)
+
         db.session.commit()
         to_pdf(clientid, self.doctype)
-        return client_release_form
+        return client_release_contract
 
 @ns.route('/policies/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
