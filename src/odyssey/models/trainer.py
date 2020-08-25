@@ -466,7 +466,7 @@ class MovementAssessment(db.Model):
     :type: int, foreign key to :attr:`ClientInfo.clientid`
     """
 
-    squat_dept = db.Column(db.String)
+    squat_depth = db.Column(db.String)
     """
     Regarding squat depth, the client  ust be one of the following
     'Above Parallel',
@@ -524,7 +524,7 @@ class MovementAssessment(db.Model):
     :type: str
     """
 
-    toe_touch_pelvis_movement =db.Column(db.String)
+    toe_touch_pelvis_movement = db.Column(db.ARRAY(db.String), nullable=False, server_default="{'Even Bilaterally'}")
     """
     Pelvis movement during toe touch test
     'Right Hip High',
@@ -536,7 +536,7 @@ class MovementAssessment(db.Model):
     :type: str
     """
 
-    toe_touch_ribcage_movement = db.Column(db.String)
+    toe_touch_ribcage_movement = db.Column(db.ARRAY(db.String), nullable=False, server_default="{'Even Bilaterally'}")
     """
     Ribcage movement during toe touch test
     'Right Posterior Ribcage High',
