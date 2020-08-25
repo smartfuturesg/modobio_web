@@ -808,6 +808,8 @@ class MoxyTries(Schema):
     four = fields.Nested(MoxyRipExaminationSchema)
 
 class MoxyRipSchema(Schema):
+    limiter_options = ['Demand','Supply','Respiratory']
+
     clientid = fields.Integer(missing=0)
     timestamp = fields.DateTime()
     performance = fields.Nested(MoxyTries)
@@ -821,6 +823,16 @@ class MoxyRipSchema(Schema):
     avg_watt_kg = fields.Float(description="", validate=validate.Range(min=0, max=20))
     avg_interval_time = fields.Integer(description="seconds", validate=validate.Range(min=0, max=360))
     avg_recovery_time = fields.Integer(description="seconds", validate=validate.Range(min=0, max=360))
+
+    limiter = fields.String(description=f"must be one of the following choices: {limiter_options}")
+
+    intervention = fields.String()
+
+    @validates('limiter')
+    def valid_limiter(self,value):
+        if value not in self.limiter_options:
+            raise ValidationError(f'{value} is not a valid limiter option. Use one of the following {self.limiter_options}')
+            
 
     @post_load
     def unravel(self, data, **kwargs):
@@ -866,7 +878,9 @@ class MoxyRipSchema(Schema):
                     'recovery_baseline_thb': data['recovery_baseline_thb'],
                     'avg_watt_kg': data['avg_watt_kg'],
                     'avg_interval_time':data['avg_watt_kg'],
-                    'avg_recovery_time': data['avg_recovery_time']
+                    'avg_recovery_time': data['avg_recovery_time'],
+                    'limiter': data['limiter'],
+                    'intervention': data['intervention']
         }
         return MoxyRipTest(**flat_data)
 
@@ -935,7 +949,9 @@ class MoxyRipSchema(Schema):
             "avg_interval_time": data.avg_interval_time,
             "avg_recovery_time": data.avg_recovery_time,
             "clientid": data.clientid,
-            "smo2_tank_size": data.smo2_tank_size
+            "smo2_tank_size": data.smo2_tank_size,
+            "limiter": data.limiter,
+            "intervention": data.intervention
         }
 
         return nested
