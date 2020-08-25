@@ -634,10 +634,33 @@ class SquatTestSchema(Schema):
     can_look_up = fields.Boolean()
 
 class ToeTouchTestSchema(Schema):
+    pelvis_movement_test_options = ['Right Hip High','Right Hip Back','Left Hip High',
+                                'Left Hip Back','Right Hip High', 'Even Bilaterally']
+
+    ribcage_movement_test_options = ['Right Posterior Ribcage High','Right Posterior Ribcage Back',	
+                                'Left Posterior Ribcage High', 'Left Posterior Ribcage Back', 'Even Bilaterally']
     depth = fields.String()
-    pelvis_movement = fields.String()
-    ribcage_movement = fields.String()
+    pelvis_movement = fields.List(fields.String,
+                description=f"Descriptors for this assessment must be in the following picklist: {pelvis_movement_test_options}",
+                required=True) 
+    ribcage_movement = fields.List(fields.String,
+                description=f"Descriptors for this assessment must be in the following picklist: {ribcage_movement_test_options}",
+                required=True)
+
     notes = fields.String()
+    
+    @validates('ribcage_movement')
+    def valid_ribcage_movement(self,value):
+        for option in value:
+            if option not in self.ribcage_movement_test_options:
+                raise ValidationError(f'{option} is not a valid movement descriptor. Use one of the following {self.ribcage_movement_test_options}')
+            
+    @validates('pelvis_movement')
+    def valid_pelvis_movement(self,value):
+        for option in value:
+            if option not in self.pelvis_movement_test_options:
+                raise ValidationError(f'{option} is not a valid movement descriptor. Use one of the following {self.pelvis_movement_test_options}')
+            
 
 class StandingRotationNotesSchema(Schema):
     notes = fields.String()
@@ -651,7 +674,7 @@ class MovementAssessmentSchema(Schema):
     timestamp = fields.DateTime()
     squat = fields.Nested(SquatTestSchema)
     toe_touch = fields.Nested(ToeTouchTestSchema)
-    standing_roation = fields.Nested(StandingRotationSchema)
+    standing_rotation = fields.Nested(StandingRotationSchema)
 
     @post_load
     def unravel(self, data, **kwargs):

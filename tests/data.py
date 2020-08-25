@@ -326,6 +326,35 @@ test_power_assessment = {
   }
 }
 
+test_movement_assessment = {
+  "toe_touch": {
+    "ribcage_movement": [
+      "Even Bilaterally"
+    ],
+    "notes": "string",
+    "pelvis_movement": [
+      "Right Hip High",
+      "Left Hip High"
+    ],
+    "depth": "string"
+  },
+  "squat": {
+    "eye_test": True,
+    "depth": "string",
+    "can_breathe": True,
+    "can_look_up": True,
+    "ramp": "string"
+  },
+  "standing_rotation": {
+    "left": {
+      "notes": "string"
+    },
+    "right": {
+      "notes": "string"
+    }
+  }
+}
+
 test_chessboard_assessment = {
   "notes": "notes",
   "isa_structure": "Asymmetrical Atypical",
