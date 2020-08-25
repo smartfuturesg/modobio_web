@@ -471,8 +471,9 @@ test_moxy_rip = {
         "recovery_baseline_thb": 10,
         "avg_interval_time": 50,
         "avg_recovery_time": 56,
-        "clientid": 0,
-        "smo2_tank_size": 60
+        "smo2_tank_size": 60,
+          "limiter": "Demand",
+        "intervention": "just fine for now"
 }
 
 test_pt_history = {
