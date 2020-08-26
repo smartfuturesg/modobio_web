@@ -205,7 +205,7 @@ test_json_json = '{"a": 1, "b": 1.1, "c": true, "d": "string", "e": {"aa": 11, "
 test_json_jsonify = b'{\n  "a": 1, \n  "b": 1.1, \n  "c": true, \n  "d": "string", \n  "e": {\n    "aa": 11, \n    "bb": "bigger string"\n  }, \n  "f": [\n    1, \n    2, \n    3, \n    4, \n    5\n  ], \n  "g": "1977-04-05", \n  "h": "14:21:39.123456", \n  "i": "2020-06-07T12:39:46.123456", \n  "j": {\n    "ja": {\n      "jja": [\n        "13:00:00", \n        "14:00:00", \n        "15:00:00"\n      ]\n    }\n  }, \n  "k": "17a3bee0-42db-4416-8b84-3990b1c6397e"\n}\n'
 
 test_moxy_assessment = {
-                "clientid" : 0,
+                "vl_side" : "right",
                 "performance_metric_2_value": 100,
                 "starting_thb": 11,
                 "limiter": "Demand",
@@ -411,6 +411,7 @@ test_lung_assessment = {
 }
 
 test_moxy_rip = {
+        "vl_side": "left",
         "recovery_baseline_smo2": 0,
         "performance": {
             "two": {

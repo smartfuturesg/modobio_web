@@ -745,7 +745,7 @@ class MoxyAssessmentSchema(ma.SQLAlchemySchema):
     clientid = fields.Integer(missing=0)
     timestamp = ma.auto_field()
     notes = ma.auto_field()
-    vl_side = fields.String(description="vl_side must be either right or left")
+    vl_side = fields.String(description="vl_side must be either 'right' or 'left'")
     performance_baseline = fields.Integer(description="", validate=validate.Range(min=0, max=100))
     recovery_baseline = fields.Integer(description="", validate=validate.Range(min=0, max=100))
     gas_tank_size = fields.Integer(description="", validate=validate.Range(min=0, max=100))
@@ -760,7 +760,7 @@ class MoxyAssessmentSchema(ma.SQLAlchemySchema):
 
     @validates('vl_side')
     def validate_vl_side(self,value):
-        if values not in ["right", "left"]:
+        if value not in ["right", "left"]:
             raise ValidationError(f"{value} not a valid option. must be 'right' or 'left'")
     
     @validates('limiter')
@@ -818,7 +818,7 @@ class MoxyRipSchema(Schema):
 
     clientid = fields.Integer(missing=0)
     timestamp = fields.DateTime()
-    vl_side = fields.String(description="vl_side must be either right or left")
+    vl_side = fields.String(description="vl_side must be either 'right' or 'left'")
     performance = fields.Nested(MoxyTries)
     recovery = fields.Nested(MoxyTries)
     smo2_tank_size = fields.Integer(description="", validate=validate.Range(min=0, max=100))
@@ -837,7 +837,7 @@ class MoxyRipSchema(Schema):
 
     @validates('vl_side')
     def validate_vl_side(self,value):
-        if values not in ["right", "left"]:
+        if value not in ["right", "left"]:
             raise ValidationError(f"{value} not a valid option. must be 'right' or 'left'")
 
     @validates('limiter')
@@ -850,7 +850,7 @@ class MoxyRipSchema(Schema):
     def unravel(self, data, **kwargs):
         flat_data = {'clientid': data['clientid'],
                     'timestamp': datetime.utcnow(),
-                    'vl_side': data['vl_side']
+                    'vl_side': data['vl_side'],
                     'performance_smo2_1':          data['performance']['one']['smo2'],
                     'performance_thb_1':           data['performance']['one']['thb'],
                     'performance_average_power_1': data['performance']['one']['avg_power'],
@@ -900,7 +900,7 @@ class MoxyRipSchema(Schema):
     @pre_dump
     def ravel(self, data, **kwargs):
         nested = {
-            "vl_side": data.vl_side
+            "vl_side": data.vl_side,
             "recovery_baseline_smo2": data.recovery_baseline_smo2,
             "performance": {
                 "two": {
