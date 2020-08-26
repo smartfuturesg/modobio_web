@@ -172,13 +172,6 @@ class Chessboard(db.Model):
     :type: str, max length 24
     """
 
-    co2_tolerance = db.Column(db.Integer)
-    """
-    CO2 tolerance 0-120
-    
-    :type: int
-    """
-
     left_shoulder_er = db.Column(db.Integer)
     """
     Left shoulder external rotation

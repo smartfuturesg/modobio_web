@@ -639,6 +639,13 @@ class HeartAssessment(db.Model):
     :type: int
     """
 
+    co2_tolerance = db.Column(db.Integer)
+    """
+    CO2 tolerance 0-120
+    
+    :type: int
+    """
+
     notes = db.Column(db.String)
     """
     Notes on the client's heatrate tests
@@ -673,6 +680,13 @@ class MoxyAssessment(db.Model):
     Client ID number
 
     :type: int, foreign key to :attr:`ClientInfo.clientid`
+    """
+
+    vl_side = db.Column(db.String)
+    """
+    VL side, right or left leg
+
+    :type: str
     """
     
     notes = db.Column(db.String)
@@ -788,6 +802,13 @@ class MoxyRipTest(db.Model):
     Client ID number
 
     :type: int, foreign key to :attr:`ClientInfo.clientid`
+    """
+       
+    vl_side = db.Column(db.String)
+    """
+    VL side, right or left leg
+
+    :type: str
     """
     
     performance_smo2_1 = db.Column(db.Integer)
@@ -1163,6 +1184,7 @@ class LungAssessment(db.Model):
 
     :type: float
     """
+
 
 
 
