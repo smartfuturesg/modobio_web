@@ -205,7 +205,7 @@ test_json_json = '{"a": 1, "b": 1.1, "c": true, "d": "string", "e": {"aa": 11, "
 test_json_jsonify = b'{\n  "a": 1, \n  "b": 1.1, \n  "c": true, \n  "d": "string", \n  "e": {\n    "aa": 11, \n    "bb": "bigger string"\n  }, \n  "f": [\n    1, \n    2, \n    3, \n    4, \n    5\n  ], \n  "g": "1977-04-05", \n  "h": "14:21:39.123456", \n  "i": "2020-06-07T12:39:46.123456", \n  "j": {\n    "ja": {\n      "jja": [\n        "13:00:00", \n        "14:00:00", \n        "15:00:00"\n      ]\n    }\n  }, \n  "k": "17a3bee0-42db-4416-8b84-3990b1c6397e"\n}\n'
 
 test_moxy_assessment = {
-                "clientid" : 0,
+                "vl_side" : "right",
                 "performance_metric_2_value": 100,
                 "starting_thb": 11,
                 "limiter": "Demand",
@@ -221,6 +221,7 @@ test_moxy_assessment = {
 }
 
 test_heart_assessment = {
+  "co2_tolerance": 60,
   "resting_hr": 55,
   "estimated_vo2_max": 84,
   "notes": "some noty notes",
@@ -359,7 +360,6 @@ test_chessboard_assessment = {
   "notes": "notes",
   "isa_structure": "Asymmetrical Atypical",
   "isa_movement": "Dynamic",
-  "co2_tolerance": 60,
   "hip": {
     "left": {
       "er": 0,
@@ -401,16 +401,16 @@ test_chessboard_assessment = {
 }
 
 test_lung_assessment = {
-  "notes": "these lungs are not so great. Client exhibits asthma.",
-  "clientid": 0,
-  "liters_min_kg": 55,
-  "max_minute_volume": 400,
-  "breaths_per_minute": 25,
-  "bag_size": 5,
-  "duration": 200
+  "breaths_per_minute": 67,
+  "max_minute_volume": 409,
+  "notes": "little struggle but overall fine",
+  "liters_min_kg": 74,
+  "bag_size": 6,
+  "duration": 150
 }
 
 test_moxy_rip = {
+        "vl_side": "left",
         "recovery_baseline_smo2": 0,
         "performance": {
             "two": {

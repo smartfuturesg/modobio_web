@@ -17,7 +17,6 @@ from odyssey.utils.schemas import ClientExternalMREntrySchema, ClientExternalMRS
 
 ns = api.namespace('doctor', description='Operations related to doctor')
 
-
 @ns.route('/medicalhistory/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
 class MedHistory(Resource):
@@ -55,6 +54,7 @@ class MedHistory(Resource):
         mh_schema = MedicalHistorySchema()
 
         client_mh = mh_schema.load(data)
+
         db.session.add(client_mh)
         db.session.commit()
 
@@ -75,10 +75,12 @@ class MedHistory(Resource):
         
         # get payload and update the current instance followd by db commit
         data = request.get_json()
-       
+        
         data['last_examination_date'] = datetime.strptime(data['last_examination_date'], "%Y-%m-%d")
         
+        # update resource 
         client_mh.update(data)
+
         db.session.commit()
 
         return client_mh
