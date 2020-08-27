@@ -221,6 +221,7 @@ test_moxy_assessment = {
 }
 
 test_heart_assessment = {
+  "co2_tolerance": 60,
   "resting_hr": 55,
   "estimated_vo2_max": 84,
   "notes": "some noty notes",
@@ -359,7 +360,6 @@ test_chessboard_assessment = {
   "notes": "notes",
   "isa_structure": "Asymmetrical Atypical",
   "isa_movement": "Dynamic",
-  "co2_tolerance": 60,
   "hip": {
     "left": {
       "er": 0,
@@ -401,13 +401,12 @@ test_chessboard_assessment = {
 }
 
 test_lung_assessment = {
-  "notes": "these lungs are not so great. Client exhibits asthma.",
-  "clientid": 0,
-  "liters_min_kg": 55,
-  "max_minute_volume": 400,
-  "breaths_per_minute": 25,
-  "bag_size": 5,
-  "duration": 200
+  "breaths_per_minute": 67,
+  "max_minute_volume": 409,
+  "notes": "little struggle but overall fine",
+  "liters_min_kg": 74,
+  "bag_size": 6,
+  "duration": 150
 }
 
 test_moxy_rip = {

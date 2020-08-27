@@ -789,6 +789,7 @@ class LungAssessmentSchema(ma.SQLAlchemySchema):
     clientid = fields.Integer(missing=0)
     timestamp = ma.auto_field()
     notes = ma.auto_field()
+    vital_weight = fields.Float(description="weight pulled from doctor physical data", dump_only=True)
     bag_size = fields.Float(description="in liters", validate=validate.Range(min=0, max=10))
     duration = fields.Integer(description="in seconds", validate=validate.Range(min=0, max=300))
     breaths_per_minute = fields.Integer(description="", validate=validate.Range(min=0, max=100))
@@ -798,6 +799,14 @@ class LungAssessmentSchema(ma.SQLAlchemySchema):
     @post_load
     def make_object(self, data, **kwargs):
         return LungAssessment(**data)
+
+    @pre_dump
+    def add_weight(self, data, **kwargs):
+        "add vital weight to the dump"
+        data_dict = data.__dict__
+        recent_physical = MedicalPhysicalExam.query.filter_by(clientid=data.clientid).order_by(MedicalPhysicalExam.idx.desc()).first()
+        data_dict["vital_weight"] = recent_physical.vital_weight
+        return data_dict
     
 
 class MoxyRipExaminationSchema(Schema):
@@ -844,7 +853,6 @@ class MoxyRipSchema(Schema):
     def valid_limiter(self,value):
         if value not in self.limiter_options:
             raise ValidationError(f'{value} is not a valid limiter option. Use one of the following {self.limiter_options}')
-            
 
     @post_load
     def unravel(self, data, **kwargs):

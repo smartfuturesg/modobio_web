@@ -5,7 +5,7 @@ from flask.json import dumps
 
 from odyssey.models.staff import Staff
 from odyssey.models.trainer import LungAssessment 
-from tests.data import test_lung_assessment
+from tests.data import test_lung_assessment, test_medical_physical
 
 
 def test_post_lung_assessment(test_client, init_database):
@@ -18,6 +18,17 @@ def test_post_lung_assessment(test_client, init_database):
     staff = Staff().query.first()
     token = staff.get_token()
     headers = {'Authorization': f'Bearer {token}'}
+
+    ## the lung assessment requires the client's vital weight in order to work
+    # this is pulled from the medical physical data
+    # so we submit a medical physical exam first
+    payload = test_medical_physical
+    
+    # send get request for client info on clientid = 1 
+    response = test_client.post('/doctor/physical/1/',
+                                headers=headers, 
+                                data=dumps(payload), 
+                                content_type='application/json')
 
     payload = test_lung_assessment
     # send get request for client info on clientid = 1 
