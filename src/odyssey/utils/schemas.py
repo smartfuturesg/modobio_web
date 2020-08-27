@@ -357,8 +357,7 @@ class ChessboardSchema(Schema):
                     'right_hip_flexion':   data['hip']['right']['flexion'],
                     'right_hip_extension': data['hip']['right']['extension'],
                     'isa_structure': data['isa_structure'],
-                    'isa_movement': data['isa_movement'],
-                    'co2_tolerance': data['co2_tolerance']
+                    'isa_movement': data['isa_movement']
                     }        
         return Chessboard(**flat_data)
 
@@ -376,7 +375,6 @@ class ChessboardSchema(Schema):
                   'notes': data.notes,
                   'isa_structure': data.isa_structure,
                   'isa_movement': data.isa_movement,
-                  'co2_tolerance': data.co2_tolerance,                  
                   'shoulder': {
                                 'right': shoulder_r,
                                'left': shoulder_l
