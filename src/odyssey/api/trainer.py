@@ -306,7 +306,7 @@ class MoxyRipAssessment(Resource):
         
         return client_moxy_rip
 
-@ns.route('/questionnaire/<int:clientid>/')
+@ns.route('/initialquestionnaire/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
 class InitialQuestionnaire(Resource):    
     """GET and POST moxy rip assessments for the client"""
@@ -318,12 +318,12 @@ class InitialQuestionnaire(Resource):
         """returns client's fitness questionnaire"""
         check_client_existence(clientid)
 
-        client_fq = FitnessQuestionnaireSchema.query.filter_by(clientid=clientid).order_by(FitnessQuestionnaireSchema.timestamp.asc()).all()
+        client_fq = FitnessQuestionnaireSchema.query.filter_by(clientid=clientid).order_by(FitnessQuestionnaireSchema.timestamp.asc()).first()
 
-        if len(all_entries) == 0:
+        if not client_fq:
             raise ContentNotFound()
         
-        return all_entries
+        return client_fq
 
     @ns.doc(security='apikey')
     @token_auth.login_required
@@ -337,9 +337,12 @@ class InitialQuestionnaire(Resource):
         data['clientid'] = clientid
         data['timestamp'] = datetime.utcnow().isoformat()
 
-        moxy_rip_schema = MoxyRipSchema()
-        client_moxy_rip = moxy_rip_schema.load(data)
-        db.session.add(client_moxy_rip)
+        
+        client_fq = FitnessQuestionnaireSchema.load(data)
+        
+        breakpoint()
+        
+        db.session.add(client_fq)
         db.session.commit()
         
-        return client_moxy_rip
+        return client_fq

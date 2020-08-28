@@ -981,13 +981,59 @@ class MoxyRipSchema(Schema):
 class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = FitnessQuestionnaire
-        
-    clientid = fields.Integer(missing=0, dump_only=True)
+        exclude = ('idx',)
     
+    stressors_list = ['Family',	'Work', 'Finances', 'Social Obligations', 'Health', 'Relationships', 'School', 'Body Image',			
+                        'Sports Performance', 'General Environment', 'Other']
+    physical_goals_list = ['Weight Loss','Increase Strength','Increase Aerobic Capacity','Body Composition','Sport Specific Performance',			
+                            'Improve Mobility', 'Injury Rehabilitation', 'Injury Prevention', 'Increase Longevity', 'General Health', 'Other']
+    lifestyle_goals_list = ['Increased Energy', 'Increased Mental Clarity', 'Improved Relationships', 'Increased Libido',			
+                                'Overall Happiness', 'Decreased Stress', 'Improved Sleep', 'Healthier Eating', 'Other']
+
+    trainer_goals_list = ['Expertise', 'Motivation', 'Accountability', 'Time Efficiency', 'Other']
+        
+    clientid = fields.Integer(missing=0)
+
+    stress_sources = fields.List(fields.String,
+            description=f"List of sources of stress. Options: {stressors_list}",
+            required=True) 
+    lifestyle_goals = fields.List(fields.String,
+            description=f"List of lifestyle change goals. Limit of three from these options: {lifestyle_goals_list}. If other, must specify",
+            required=True) 
+    physical_goals = fields.List(fields.String,
+            description=f"List of sources of stress. Limit of three from these options: {physical_goals_list}. If other, must specify",
+            required=True) 
+
+    timestamp = fields.DateTime(dump_only=True)
+
+    trainer_expectation = fields.String(description=f"Client's expectation for their trainer. Must be one of: {trainer_goals_list}")
+
     @post_load
     def make_object(self, data, **kwargs):
         return FitnessQuestionnaire(**data)
 
+    @validates('stress_sources')
+    def validate_stress_sources(self,value):
+        for item in value:
+            if item not in self.stressors_list:
+                raise ValidationError(f"{item} not a valid option. must be in {self.stressors_list}")
+
+    @validates('lifestyle_goals')
+    def validate_lifestyle_goals(self,value):
+        for item in value:
+            if item not in self.lifestyle_goals_list:
+                raise ValidationError(f"{item} not a valid option. must be in {self.lifestyle_goals_list}")
+
+    @validates('physical_goals')
+    def validate_physical_goals(self,value):
+        for item in value:
+            if item not in self.physical_goals_list:
+                raise ValidationError(f"{item} not a valid option. must be in {self.physical_goals_list}")
+    
+    @validates('trainer_expectation')
+    def validate_trainer_expectations(self, value):
+        if value not in self.trainer_goals_list:
+            raise ValidationError(f"{value} not a valid option. Must be one of {self.trainer_goals_list}")
 
 
 """
