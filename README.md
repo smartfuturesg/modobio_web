@@ -92,10 +92,13 @@ Use the string from the Python output above in place of `<password>`. You should
 
 ### Docker
 
-If you have Docker installed, you can bring up a local, ready to go instance of this application by running the docker_local.sh script. (Note: If you're using WSL and this script fails on Windows, you may need to dos2unix the script to fix line endings that may be causing errors.)
+If you have Docker installed, you can bring up a local, ready to go instance of this application by running the following commands.
 
 ```
-bash docker_local.sh
+docker network create modobio
+docker run --name postgres_local --network modobio -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=password -e POSTGRES_DB=modobio -p 5432:5432 -d postgres
+docker build -t odyssey .
+docker run --name odyssey --network modobio -e FLASK_APP=odyssey:create_app -e FLASK_ENV=development -e FLASK_DEV=local -e FLASK_DB_USER=postgres -e FLASK_DB_PASS=password -e FLASK_DB_HOST=postgres_local -e PYTHONPATH=/usr/src/app/src -p 5000:5000 -d odyssey
 ```
 
 This will build the application, stand up a containerized instance of Postgres, update the database, and run the application for use.
