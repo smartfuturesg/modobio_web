@@ -4,6 +4,18 @@ stages:
   - version
   - deploy
 
+pages:
+  stage: build
+  script:
+    - echo 'Nothing to do...'
+  tags:
+    - gitlab-runner
+  artifacts:
+    paths:
+      - public
+  only:
+    - master
+
 test:
   stage: test
   script:
@@ -33,15 +45,3 @@ deploy:
     - master
   tags:
     - shared
-
-pages:
-  stage: build
-  script:
-    - echo 'Nothing to do...'
-  tags:
-    - gitlab-runner
-  artifacts:
-    paths:
-      - public
-  only:
-    - master
