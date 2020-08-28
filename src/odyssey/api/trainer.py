@@ -317,3 +317,43 @@ class MoxyRipAssessment(Resource):
         db.session.commit()
         
         return client_moxy_rip
+
+@ns.route('/questionnaire/<int:clientid>/')
+@ns.doc(params={'clientid': 'Client ID number'})
+class InitialQuestionnaire(Resource):    
+    """GET and POST moxy rip assessments for the client"""
+
+    @ns.doc(security='apikey')
+    @token_auth.login_required
+    @responds(schema=FitnessQuestionnnaireSchema, api=ns)
+    def get(self, clientid):
+        """returns all moxy rip assessment entries for the specified client"""
+        check_client_existence(clientid)
+
+        all_entries = MoxyRipTest.query.filter_by(clientid=clientid).order_by(MoxyRipTest.timestamp.asc()).all()
+
+        if len(all_entries) == 0:
+            raise UserNotFound(
+                clientid=clientid, 
+                message = "this client does not yet have a moxy rip assessment")
+        
+        return all_entries
+
+    @ns.doc(security='apikey')
+    @token_auth.login_required
+    @accepts(schema=MoxyRipSchema, api=ns)
+    @responds(schema=MoxyRipSchema, status_code=201, api=ns)
+    def post(self, clientid):
+        """create a moxy rip assessment entry for clientid"""
+        check_client_existence(clientid)
+
+        data=request.get_json()
+        data['clientid'] = clientid
+        data['timestamp'] = datetime.utcnow().isoformat()
+
+        moxy_rip_schema = MoxyRipSchema()
+        client_moxy_rip = moxy_rip_schema.load(data)
+        db.session.add(client_moxy_rip)
+        db.session.commit()
+        
+        return client_moxy_rip
