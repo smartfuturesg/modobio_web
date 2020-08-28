@@ -8,9 +8,10 @@ test:
   script:
     - echo "Running tests."
     - bash ~/test_odyssey.sh
+  only:
+    - merge_requests
   tags:
     - shared
-    - merge_requests
 
 version:
   stage: version
