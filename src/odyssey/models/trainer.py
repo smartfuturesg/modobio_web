@@ -1261,7 +1261,7 @@ class FitnessQuestionnaire(db.Model):
     :type: str
     """
 
-    obstacles_likely = db.Column(db.Boolean, nullable=False, server_default=False)
+    obstacles_likely = db.Column(db.Boolean, nullable=False)
     """
     Indicates wheather or not the client expects obstacles to their modobio fitness journey
 

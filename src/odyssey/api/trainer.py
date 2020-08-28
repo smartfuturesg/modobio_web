@@ -7,9 +7,10 @@ from flask_accepts import accepts, responds
 
 from odyssey.api import api
 from odyssey.api.auth import token_auth, token_auth_client
-from odyssey.api.errors import UserNotFound, ClientAlreadyExists, ClientNotFound, IllegalSetting
+from odyssey.api.errors import UserNotFound, ClientAlreadyExists, ClientNotFound, ContentNotFound, IllegalSetting
 from odyssey import db
 from odyssey.models.trainer import (
+    FitnessQuestionnaire,
     HeartAssessment,
     LungAssessment,
     MovementAssessment,
@@ -21,6 +22,7 @@ from odyssey.models.trainer import (
 from odyssey.utils.misc import check_client_existence
 from odyssey.utils.schemas import (
     ClientInfoSchema,
+    FitnessQuestionnaireSchema,
     HeartAssessmentSchema,
     LungAssessmentSchema,
     MovementAssessmentSchema,
@@ -46,9 +48,7 @@ class Power(Resource):
         all_entries = PowerAssessment.query.filter_by(clientid=clientid).order_by(PowerAssessment.timestamp.asc()).all()
 
         if len(all_entries) == 0:
-            raise UserNotFound(
-                clientid=clientid, 
-                message = "this client does not yet have a power assessment")
+            raise ContentNotFound()
         
         return all_entries
 
@@ -87,9 +87,7 @@ class Strength(Resource):
         all_entries = StrengthAssessment.query.filter_by(clientid=clientid).order_by(StrengthAssessment.timestamp.asc()).all()
 
         if len(all_entries) == 0:
-            raise UserNotFound(
-                clientid=clientid, 
-                message = "this client does not yet have a power assessment")
+            raise ContentNotFound()
         
         return all_entries
 
@@ -130,9 +128,7 @@ class Movement(Resource):
         all_entries = MovementAssessment.query.filter_by(clientid=clientid).order_by(MovementAssessment.timestamp.asc()).all()
 
         if len(all_entries) == 0:
-            raise UserNotFound(
-                clientid=clientid, 
-                message = "this client does not yet have a power assessment")
+            raise ContentNotFound()
         
         return all_entries
 
@@ -172,10 +168,8 @@ class Heart(Resource):
         all_entries = HeartAssessment.query.filter_by(clientid=clientid).order_by(HeartAssessment.timestamp.asc()).all()
 
         if len(all_entries) == 0:
-            raise UserNotFound(
-                clientid=clientid, 
-                message = "this client does not yet have a power assessment")
-        
+            raise ContentNotFound()
+
         return all_entries
 
     @ns.doc(security='apikey')
@@ -213,9 +207,7 @@ class Moxy(Resource):
         all_entries = MoxyAssessment.query.filter_by(clientid=clientid).order_by(MoxyAssessment.timestamp.asc()).all()
 
         if len(all_entries) == 0:
-            raise UserNotFound(
-                clientid=clientid, 
-                message = "this client does not yet have a moxy assessment")
+            raise ContentNotFound()
         
         return all_entries
 
@@ -253,9 +245,7 @@ class LungCapacity(Resource):
         all_entries = LungAssessment.query.filter_by(clientid=clientid).order_by(LungAssessment.timestamp.asc()).all()
 
         if len(all_entries) == 0:
-            raise UserNotFound(
-                clientid=clientid, 
-                message = "this client does not yet have a lung capacity assessment")
+            raise ContentNotFound()
         
         return all_entries
 
@@ -293,9 +283,7 @@ class MoxyRipAssessment(Resource):
         all_entries = MoxyRipTest.query.filter_by(clientid=clientid).order_by(MoxyRipTest.timestamp.asc()).all()
 
         if len(all_entries) == 0:
-            raise UserNotFound(
-                clientid=clientid, 
-                message = "this client does not yet have a moxy rip assessment")
+            raise ContentNotFound()
         
         return all_entries
 
@@ -325,24 +313,22 @@ class InitialQuestionnaire(Resource):
 
     @ns.doc(security='apikey')
     @token_auth.login_required
-    @responds(schema=FitnessQuestionnnaireSchema, api=ns)
+    @responds(schema=FitnessQuestionnaireSchema, api=ns)
     def get(self, clientid):
-        """returns all moxy rip assessment entries for the specified client"""
+        """returns client's fitness questionnaire"""
         check_client_existence(clientid)
 
-        all_entries = MoxyRipTest.query.filter_by(clientid=clientid).order_by(MoxyRipTest.timestamp.asc()).all()
+        client_fq = FitnessQuestionnaireSchema.query.filter_by(clientid=clientid).order_by(FitnessQuestionnaireSchema.timestamp.asc()).all()
 
         if len(all_entries) == 0:
-            raise UserNotFound(
-                clientid=clientid, 
-                message = "this client does not yet have a moxy rip assessment")
+            raise ContentNotFound()
         
         return all_entries
 
     @ns.doc(security='apikey')
     @token_auth.login_required
-    @accepts(schema=MoxyRipSchema, api=ns)
-    @responds(schema=MoxyRipSchema, status_code=201, api=ns)
+    @accepts(schema=FitnessQuestionnaireSchema, api=ns)
+    @responds(schema=FitnessQuestionnaireSchema, status_code=201, api=ns)
     def post(self, clientid):
         """create a moxy rip assessment entry for clientid"""
         check_client_existence(clientid)

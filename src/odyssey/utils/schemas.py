@@ -23,6 +23,7 @@ from odyssey.models.misc import MedicalInstitutions
 from odyssey.models.pt import Chessboard, PTHistory
 from odyssey.models.staff import Staff
 from odyssey.models.trainer import (
+    FitnessQuestionnaire,
     HeartAssessment, 
     PowerAssessment, 
     StrengthAssessment, 
@@ -975,6 +976,18 @@ class MoxyRipSchema(Schema):
         }
 
         return nested
+
+
+class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = FitnessQuestionnaire
+        
+    clientid = fields.Integer(missing=0, dump_only=True)
+    
+    @post_load
+    def make_object(self, data, **kwargs):
+        return FitnessQuestionnaire(**data)
+
 
 
 """
