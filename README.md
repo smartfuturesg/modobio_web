@@ -34,7 +34,7 @@ modobio=> \q
 Pip should normally take care of installing all python dependencies, but some dependencies in turn depend on non-python libraries. To install these on Ubuntu Linux:
 
 ```shell
-$ sudo apt install pkg-config libcairo2-dev libgirepository1.0-dev libpangocairo1.0-0 postgresql-client
+$ sudo apt install pkg-config libcairo2-dev libgirepository1.0-dev libpangocairo-1.0-0 postgresql-client
 ```  
 
 ## Installation
@@ -42,7 +42,7 @@ $ sudo apt install pkg-config libcairo2-dev libgirepository1.0-dev libpangocairo
 ```shell
 git clone git@gitlab.atventurepartners.tech:zan/odyssey.git
 cd odyssey
-pip -e install .
+pip install -e .
 ```
 
 Pip should take care of installing all Python dependencies. The `-e` option means you installed it in _editable_ mode. It imports and runs like it's installed in the normal `PYTHONPATH` directory, but you can edit it in the git repo and see the updates immediately.
