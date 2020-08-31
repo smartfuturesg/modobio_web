@@ -306,10 +306,10 @@ class MoxyRipAssessment(Resource):
         
         return client_moxy_rip
 
-@ns.route('/initialquestionnaire/<int:clientid>/')
+@ns.route('/questionnaire/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
 class InitialQuestionnaire(Resource):    
-    """GET and POST moxy rip assessments for the client"""
+    """GET and POST initial fitness questionnaire"""
 
     @ns.doc(security='apikey')
     @token_auth.login_required
@@ -330,7 +330,7 @@ class InitialQuestionnaire(Resource):
     @accepts(schema=FitnessQuestionnaireSchema, api=ns)
     @responds(schema=FitnessQuestionnaireSchema, status_code=201, api=ns)
     def post(self, clientid):
-        """create a moxy rip assessment entry for clientid"""
+        """create a fitness questionnaire entry for clientid"""
         check_client_existence(clientid)
 
         data=request.get_json()
