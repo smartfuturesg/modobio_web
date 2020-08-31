@@ -1,20 +1,21 @@
-# image: python:3.6
+variables:
+  GIT_DEPTH: 0
 
 stages:
+  - test
   - build
+  - version
+  - deploy
 
-#wheel:
-#  stage: build
-#  script:
-#    - python3 -V
-#    - python3 -m pip install setuptools
-#    - python3 setup.py bdist_wheel sdist
-#  tags:
-#    - gitlab-runner
-#  artifacts:
-#    paths:
-#    - dist
-#    expire_in: 1 day
+test:
+  stage: test
+  script:
+    - echo "Running tests."
+    - bash ~/test_odyssey.sh
+  only:
+    - merge_requests
+  tags:
+    - shared
 
 pages:
   stage: build
@@ -27,3 +28,23 @@ pages:
       - public
   only:
     - master
+
+version:
+  stage: version
+  script:
+    - echo "Checking version"
+    - bash ~/check_version.sh
+  only:
+    - master
+  tags:
+    - shared
+
+deploy:
+  stage: deploy
+  script:
+    - echo "Deploying update."
+    - bash ~/dev_odyssey.sh
+  only:
+    - master
+  tags:
+    - shared
