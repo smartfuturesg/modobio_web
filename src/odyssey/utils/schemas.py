@@ -23,6 +23,7 @@ from odyssey.models.misc import MedicalInstitutions
 from odyssey.models.pt import Chessboard, PTHistory
 from odyssey.models.staff import Staff
 from odyssey.models.trainer import (
+    FitnessQuestionnaire,
     HeartAssessment, 
     PowerAssessment, 
     StrengthAssessment, 
@@ -975,6 +976,84 @@ class MoxyRipSchema(Schema):
         }
 
         return nested
+
+
+class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = FitnessQuestionnaire
+        exclude = ('idx',)
+    
+    stressors_list = ['Family',	'Work', 'Finances', 'Social Obligations', 'Health', 'Relationships', 'School', 'Body Image',			
+                        'Sports Performance', 'General Environment', 'Other']
+    physical_goals_list = ['Weight Loss','Increase Strength','Increase Aerobic Capacity','Body Composition','Sport Specific Performance',			
+                            'Improve Mobility', 'Injury Rehabilitation', 'Injury Prevention', 'Increase Longevity', 'General Health', 'Other']
+    lifestyle_goals_list = ['Increased Energy', 'Increased Mental Clarity', 'Improved Relationships', 'Increased Libido',			
+                                'Overall Happiness', 'Decreased Stress', 'Improved Sleep', 'Healthier Eating', 'Other']
+
+    trainer_goals_list = ['Expertise', 'Motivation', 'Accountability', 'Time Efficiency', 'Other']
+    sleep_hours_options_list = ['< 4', '4-6','6-8','> 8']
+        
+    clientid = fields.Integer(missing=0)
+    timestamp = fields.DateTime(description="timestamp of questionnaire. Filled by backend")
+
+    stress_sources = fields.List(fields.String,
+            description=f"List of sources of stress. Options: {stressors_list}",
+            required=True) 
+    lifestyle_goals = fields.List(fields.String,
+            description=f"List of lifestyle change goals. Limit of three from these options: {lifestyle_goals_list}. If other, must specify",
+            required=True) 
+    physical_goals = fields.List(fields.String,
+            description=f"List of sources of stress. Limit of three from these options: {physical_goals_list}. If other, must specify",
+            required=True) 
+    trainer_expectation = fields.String(description=f"Client's expectation for their trainer. Must be one of: {trainer_goals_list}")
+    sleep_hours = fields.String(description=f"nightly hours of sleep bucketized by the following options: {sleep_hours_options_list}")
+
+    sleep_quality_level = fields.Integer(description="current sleep quality rating 1-5", validate=validate.Range(min=1, max=5))
+    stress_level = fields.Integer(description="current stress rating 1-5", validate=validate.Range(min=1, max=5))
+    energy_level = fields.Integer(description="current energy rating 1-5", validate=validate.Range(min=1, max=5))
+    libido_level = fields.Integer(description="current libido rating 1-5", validate=validate.Range(min=1, max=5))
+    confidence_level = fields.Integer(description="current confidence rating 1-5", validate=validate.Range(min=1, max=5))
+
+    current_fitness_level = fields.Integer(description="current fitness level 1-10", validate=validate.Range(min=1, max=10))
+    goal_fitness_level = fields.Integer(description="foal fitness level 1-10", validate=validate.Range(min=1, max=10))
+    
+    
+    @post_load
+    def make_object(self, data, **kwargs):
+        return FitnessQuestionnaire(**data)
+
+    @validates('stress_sources')
+    def validate_stress_sources(self,value):
+        for item in value:
+            if item not in self.stressors_list:
+                raise ValidationError(f"{item} not a valid option. must be in {self.stressors_list}")
+
+    @validates('lifestyle_goals')
+    def validate_lifestyle_goals(self,value):
+        for item in value:
+            if item not in self.lifestyle_goals_list:
+                raise ValidationError(f"{item} not a valid option. must be in {self.lifestyle_goals_list}")
+        if len(value) > 3:
+            ValidatioinError("limit list length to 3 choices")
+
+
+    @validates('physical_goals')
+    def validate_physical_goals(self,value):
+        for item in value:
+            if item not in self.physical_goals_list:
+                raise ValidationError(f"{item} not a valid option. must be in {self.physical_goals_list}")
+        if len(value) > 3:
+            ValidatioinError("limit list length to 3 choices")
+    
+    @validates('trainer_expectation')
+    def validate_trainer_expectations(self, value):
+        if value not in self.trainer_goals_list:
+            raise ValidationError(f"{value} not a valid option. Must be one of {self.trainer_goals_list}")
+
+    @validates('sleep_hours')
+    def validate_sleep_hours(self, value):
+        if value not in self.sleep_hours_options_list:
+            raise ValidationError(f"{value} not a valid option. Must be one of {self.sleep_hours_options_list}")
 
 
 """
