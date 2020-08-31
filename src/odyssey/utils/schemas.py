@@ -991,10 +991,10 @@ class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
                                 'Overall Happiness', 'Decreased Stress', 'Improved Sleep', 'Healthier Eating', 'Other']
 
     trainer_goals_list = ['Expertise', 'Motivation', 'Accountability', 'Time Efficiency', 'Other']
-    sleep_hours_opitons_list = ['< 4', '4-6','6-8','> 8']
+    sleep_hours_options_list = ['< 4', '4-6','6-8','> 8']
         
     clientid = fields.Integer(missing=0)
-    timestamp = fields.DateTime(dump_only=True)
+    timestamp = fields.DateTime(description="timestamp of questionnaire. Filled by backend")
 
     stress_sources = fields.List(fields.String,
             description=f"List of sources of stress. Options: {stressors_list}",

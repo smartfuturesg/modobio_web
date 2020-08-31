@@ -318,7 +318,7 @@ class InitialQuestionnaire(Resource):
         """returns client's fitness questionnaire"""
         check_client_existence(clientid)
 
-        client_fq = FitnessQuestionnaireSchema.query.filter_by(clientid=clientid).order_by(FitnessQuestionnaireSchema.timestamp.asc()).first()
+        client_fq = FitnessQuestionnaire.query.filter_by(clientid=clientid).order_by(FitnessQuestionnaire.idx.desc()).first()
 
         if not client_fq:
             raise ContentNotFound()
@@ -338,9 +338,7 @@ class InitialQuestionnaire(Resource):
         data['timestamp'] = datetime.utcnow().isoformat()
 
         
-        client_fq = FitnessQuestionnaireSchema.load(data)
-        
-        breakpoint()
+        client_fq = FitnessQuestionnaireSchema().load(data)
         
         db.session.add(client_fq)
         db.session.commit()
