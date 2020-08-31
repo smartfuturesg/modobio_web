@@ -1,8 +1,21 @@
+variables:
+  GIT_DEPTH: 0
+
 stages:
-  - build
   - test
+  - build
   - version
   - deploy
+
+test:
+  stage: test
+  script:
+    - echo "Running tests."
+    - bash ~/test_odyssey.sh
+  only:
+    - merge_requests
+  tags:
+    - shared
 
 pages:
   stage: build
@@ -15,16 +28,6 @@ pages:
       - public
   only:
     - master
-
-test:
-  stage: test
-  script:
-    - echo "Running tests."
-    - bash ~/test_odyssey.sh
-  only:
-    - merge_requests
-  tags:
-    - shared
 
 version:
   stage: version
