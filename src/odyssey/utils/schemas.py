@@ -991,8 +991,10 @@ class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
                                 'Overall Happiness', 'Decreased Stress', 'Improved Sleep', 'Healthier Eating', 'Other']
 
     trainer_goals_list = ['Expertise', 'Motivation', 'Accountability', 'Time Efficiency', 'Other']
+    sleep_hours_opitons_list = ['< 4', '4-6','6-8','> 8']
         
     clientid = fields.Integer(missing=0)
+    timestamp = fields.DateTime(dump_only=True)
 
     stress_sources = fields.List(fields.String,
             description=f"List of sources of stress. Options: {stressors_list}",
@@ -1003,11 +1005,19 @@ class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
     physical_goals = fields.List(fields.String,
             description=f"List of sources of stress. Limit of three from these options: {physical_goals_list}. If other, must specify",
             required=True) 
-
-    timestamp = fields.DateTime(dump_only=True)
-
     trainer_expectation = fields.String(description=f"Client's expectation for their trainer. Must be one of: {trainer_goals_list}")
+    sleep_hours = fields.String(description=f"nightly hours of sleep bucketized by the following options: {sleep_hours_options_list}")
 
+    sleep_quality_level = fields.Integer(description="current sleep quality rating 1-5", validate=validate.Range(min=1, max=5))
+    stress_level = fields.Integer(description="current stress rating 1-5", validate=validate.Range(min=1, max=5))
+    energy_level = fields.Integer(description="current energy rating 1-5", validate=validate.Range(min=1, max=5))
+    libido_level = fields.Integer(description="current libido rating 1-5", validate=validate.Range(min=1, max=5))
+    confidence_level = fields.Integer(description="current confidence rating 1-5", validate=validate.Range(min=1, max=5))
+
+    current_fitness_level = fields.Integer(description="current fitness level 1-10", validate=validate.Range(min=1, max=10))
+    goal_fitness_level = fields.Integer(description="foal fitness level 1-10", validate=validate.Range(min=1, max=10))
+    
+    
     @post_load
     def make_object(self, data, **kwargs):
         return FitnessQuestionnaire(**data)
@@ -1023,17 +1033,27 @@ class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
         for item in value:
             if item not in self.lifestyle_goals_list:
                 raise ValidationError(f"{item} not a valid option. must be in {self.lifestyle_goals_list}")
+        if len(value) > 3:
+            ValidatioinError("limit list length to 3 choices")
+
 
     @validates('physical_goals')
     def validate_physical_goals(self,value):
         for item in value:
             if item not in self.physical_goals_list:
                 raise ValidationError(f"{item} not a valid option. must be in {self.physical_goals_list}")
+        if len(value) > 3:
+            ValidatioinError("limit list length to 3 choices")
     
     @validates('trainer_expectation')
     def validate_trainer_expectations(self, value):
         if value not in self.trainer_goals_list:
             raise ValidationError(f"{value} not a valid option. Must be one of {self.trainer_goals_list}")
+
+    @validates('sleep_hours')
+    def validate_sleep_hours(self, value):
+        if value not in self.sleep_hours_options_list:
+            raise ValidationError(f"{value} not a valid option. Must be one of {self.sleep_hours_options_list}")
 
 
 """
