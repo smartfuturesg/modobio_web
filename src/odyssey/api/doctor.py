@@ -7,7 +7,7 @@ from flask_restx import Resource, Api
 
 from odyssey import db
 from odyssey.models.client import ClientExternalMR
-from odyssey.models.doctor import MedicalPhysicalExam, MedicalHistory
+from odyssey.models.doctor import MedicalPhysicalExam, MedicalHistory, BloodThyroid
 from odyssey.models.misc import MedicalInstitutions
 from odyssey.api import api
 from odyssey.api.auth import token_auth
@@ -180,3 +180,26 @@ class ExternalMedicalRecordIDs(Resource):
     
     
 
+@ns.route('/bloodthyroid/<int:clientid>/')
+@ns.doc(params={'bloodExamId': 'Blood Exam ID number'})
+class BloodThyroid(Resource):
+    @ns.doc(security='apikey')
+    @token_auth.login_required
+    @responds(schema=BloodThyroidSchema, api=ns)
+    def get(self, clientid):
+        """returns blood thyroid results as a json for the blood exam ID specified"""
+
+    
+    @ns.doc(security='apikey')
+    @token_auth.login_required
+    @accepts(schema=BloodThyroidSchema, api=ns)
+    @responds(schema=BloodThyroidSchema, status_code=201, api=ns)
+    def post(self, clientid):
+        """returns blood test results as a json for the blood exam ID specified"""
+
+    @ns.doc(security='apikey')
+    @token_auth.login_required
+    @accepts(schema=BloodThyroidSchema, api=ns)
+    @responds(schema=BloodThyroidSchema, api=ns)
+    def put(self, clientid):
+        """updates a blood exam's results as a json for the blood exam ID specified"""

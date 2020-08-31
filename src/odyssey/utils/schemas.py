@@ -6,7 +6,7 @@ from marshmallow import Schema, fields, post_load, ValidationError, validates, v
 from marshmallow import post_load, post_dump, pre_dump, pre_load
 
 from odyssey import ma
-from odyssey.models.doctor import MedicalHistory, MedicalPhysicalExam
+from odyssey.models.doctor import MedicalHistory, MedicalPhysicalExam, BloodThyroid
 from odyssey.models.client import (
     ClientConsent,
     ClientConsultContract,
@@ -1076,5 +1076,13 @@ class StaffSchema(ma.SQLAlchemyAutoSchema):
         new_staff.set_password(data['password'])
         return new_staff
 
-
+class BloodThyroidSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = BloodThroid
+        
+    examid = fields.Integer(missing=0)
+    
+    @post_load
+    def make_object(self, data, **kwargs):
+        return BloodThyroid(**data)
 
