@@ -18,7 +18,7 @@ def test_post_chessboard_assessment(test_client, init_database):
     staff = Staff().query.first()
     token = staff.get_token()
     headers = {'Authorization': f'Bearer {token}'}
-
+    
     payload = test_chessboard_assessment
     # send get request for client info on clientid = 1 
     response = test_client.post('/pt/chessboard/1/',
