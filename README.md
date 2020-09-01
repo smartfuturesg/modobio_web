@@ -74,6 +74,13 @@ Change the METHOD column to "trust" for lines 89, 94 and 96 and reload postgres.
 sudo service postgresql reload
 ```
 
+## Flask
+
+Install Flask
+```shell
+pip install flask
+```
+
 If the database schemas have changed between updates, and before the first run, use Alembic (through flask-migrate) to push the changes to your local database.
 
 ```shell
