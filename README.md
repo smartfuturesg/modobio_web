@@ -55,11 +55,8 @@ $ sudo apt install pkg-config libcairo2-dev libgirepository1.0-dev libpangocairo
 ```shell
 git clone https://gitlab.atventurepartners.tech/zan/odyssey.git
 cd odyssey
-<<<<<<< HEAD
 pip install -r requirements.txt
 pip install requests 
-=======
->>>>>>> 07ca0b5194073321e0388a8a6038dc5f463ed63b
 pip install -e .
 ```
 
