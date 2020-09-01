@@ -18,11 +18,24 @@ For testing on your local computer, you will need the following installed.
 
 ## Pre-installation
 
+### Virtual Environment
+
+It is recommended to have a virtual environment with all dependencies installed for each project to avoid conflicts between packages and versions of dependencies.
+
+```shell
+sudo apt-get install python3-venv
+python3 -m venv <virtual_env_name>
+source <virtual_env_name>/bin/activate
+```
+
 ### Postgres
 
 With postgres installed, create a new database named modobio. For convenience, add a role (user) with the same name as your login name. Because it is a local connection, you should not need a password.
 
+[Here](https://phoenixnap.com/kb/how-to-install-postgresql-on-ubuntu) is a helpful link for installing PostgreSQL
+
 ```shell
+$ sudo service postgresql start
 $ sudo -u postgres createdb modobio
 $ sudo -u postgres createuser -l $USER
 $ psql modobio
@@ -34,20 +47,39 @@ modobio=> \q
 Pip should normally take care of installing all python dependencies, but some dependencies in turn depend on non-python libraries. To install these on Ubuntu Linux:
 
 ```shell
-$ sudo apt install pkg-config libcairo2-dev libgirepository1.0-dev libpangocairo1.0-0 postgresql-client
+$ sudo apt install pkg-config libcairo2-dev libgirepository1.0-dev libpangocairo-1.0-0 postgresql-client
 ```  
 
 ## Installation
 
 ```shell
-git clone git@gitlab.atventurepartners.tech:zan/odyssey.git
+git clone https://gitlab.atventurepartners.tech/zan/odyssey.git
 cd odyssey
-pip -e install .
+pip install -r requirements.txt
+pip install requests 
+pip install -e .
 ```
 
 Pip should take care of installing all Python dependencies. The `-e` option means you installed it in _editable_ mode. It imports and runs like it's installed in the normal `PYTHONPATH` directory, but you can edit it in the git repo and see the updates immediately.
 
 ## Updating the database
+
+Configure postgresql pg_hba.conf file to allow any user on the local system to connect to any database.
+
+```shell
+sudo nano -c /etc/postgresql/12/main/pg_hba.conf
+```
+Change the METHOD column to "trust" for lines 89, 94 and 96 and reload postgres.
+```shell
+sudo service postgresql reload
+```
+
+## Flask
+
+Install Flask
+```shell
+pip install flask
+```
 
 If the database schemas have changed between updates, and before the first run, use Alembic (through flask-migrate) to push the changes to your local database.
 
@@ -56,6 +88,7 @@ export FLASK_APP=odyssey:create_app
 export FLASK_ENV=development
 export FLASK_DEV=local
 flask db migrate
+flask db upgrade
 ```
 
 ## Running
@@ -79,16 +112,16 @@ Before you can log in, you will need to add a staff member to the `Staff` table 
 'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1'
 ```
 
-This is the password has for password '123'. Copy the string that starts with 'pbkdf2:...'. Then, in a terminal, run the following commands:
+This is the password hash for password '123'. Copy the string that starts with 'pbkdf2:...'. Then, in a terminal, run the following commands:
 
 ```shell
 $ psql modobio
-modobio => INSERT INTO "Staff" (email, firstname, lastname, fullname, password)
-           VALUES ('name@modobio.com', 'Name', 'Lastname', 'Name Lastname', '<password>');
+modobio => INSERT INTO "Staff" (email, firstname, lastname, fullname, password, is_admin)
+           VALUES ('name@modobio.com', 'Name', 'Lastname', 'Name Lastname', '<password>', true);
 modobio => exit
 ```
 
-Use the string from the Python output above in place of `<password>`. You should now be able to log in as 'name@modobio.com' with password '123' (or whatever you used above).
+Use the sha string from the Python output above in place of `<password>`. You should now be able to log in as 'name@modobio.com' with password '123' (or whatever you used above).
 
 ### Docker
 
