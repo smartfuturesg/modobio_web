@@ -846,6 +846,8 @@ class MoxyRipSchema(Schema):
     limiter = fields.String(description=f"must be one of the following choices: {limiter_options}")
 
     intervention = fields.String()
+    vital_weight = fields.Float(description="weight pulled from doctor physical data", dump_only=True)
+
 
     @validates('vl_side')
     def validate_vl_side(self,value):
@@ -978,7 +980,9 @@ class MoxyRipSchema(Schema):
             "limiter": data.limiter,
             "intervention": data.intervention
         }
-
+        # add vital_weight from client's most recent physical examination
+        recent_physical = MedicalPhysicalExam.query.filter_by(clientid=data.clientid).order_by(MedicalPhysicalExam.idx.desc()).first()
+        nested["vital_weight"] = recent_physical.vital_weight
         return nested
 
 
