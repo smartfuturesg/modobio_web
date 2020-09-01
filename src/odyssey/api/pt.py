@@ -15,7 +15,6 @@ ns = api.namespace('pt', description='Operations related to physical therapy ser
 @ns.route('/history/<int:clientid>/')
 class ClientPTHistory(Resource):
     """GET, POST, PUT for pt history data"""
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @responds(schema=PTHistorySchema)
     def get(self, clientid):
@@ -29,7 +28,6 @@ class ClientPTHistory(Resource):
                 
         return client_pt
 
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @accepts(schema=PTHistorySchema, api=ns)
     @responds(schema=PTHistorySchema, status_code=201, api=ns)
@@ -58,8 +56,6 @@ class ClientPTHistory(Resource):
 
         return client_pt
 
-    
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @accepts(schema=PTHistorySchema, api=ns)
     @responds(schema=PTHistorySchema, api=ns)
@@ -87,7 +83,6 @@ class ClientChessboard(Resource):
     note that clients will have multiple entries as they progress through the program
     Trainers may update some or all fields. The backend will store every update as a new row
     fields left blank will be left as null"""
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @responds(schema=ChessboardSchema(many=True), api=ns)
     def get(self, clientid):
@@ -104,7 +99,6 @@ class ClientChessboard(Resource):
         return all_entries
 
     @accepts(schema=ChessboardSchema, api=ns)
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @responds(schema=ChessboardSchema, status_code=201, api=ns)
     def post(self, clientid):
