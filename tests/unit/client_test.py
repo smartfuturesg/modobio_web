@@ -1,5 +1,5 @@
 
-from odyssey.models.intake import ClientInfo
+from odyssey.models.client import ClientInfo
 
 def test_new_client(test_client, init_database):
     """

@@ -7,19 +7,23 @@ from marshmallow import post_load, post_dump, pre_dump, pre_load
 
 from odyssey import ma
 from odyssey.models.doctor import MedicalHistory, MedicalPhysicalExam
-from odyssey.models.intake import (
+from odyssey.models.client import (
     ClientConsent,
-    ClientInfo,
     ClientConsultContract,
-    RemoteRegistration, 
+    ClientExternalMR,
+    ClientInfo,
     ClientIndividualContract, 
     ClientPolicies,
     ClientRelease,
-    ClientSubscriptionContract
+    ClientReleaseContacts,
+    ClientSubscriptionContract,
+    RemoteRegistration
 )
+from odyssey.models.misc import MedicalInstitutions
 from odyssey.models.pt import Chessboard, PTHistory
-from odyssey.models.main import Staff
+from odyssey.models.staff import Staff
 from odyssey.models.trainer import (
+    FitnessQuestionnaire,
     HeartAssessment, 
     PowerAssessment, 
     StrengthAssessment, 
@@ -123,18 +127,59 @@ class ClientConsentSchema(ma.SQLAlchemyAutoSchema):
         data["revision"] = self.docrev
         return ClientConsent(**data)
 
+class ClientReleaseContactsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = ClientReleaseContacts
+        exclude = ('idx',)
+
+    clientid = fields.Integer(missing=0)
+    release_contract_id = fields.Integer()
+    release_direction = fields.String(description="Direction must be either 'TO' (release to) or 'FROM' (release from)")
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return ClientReleaseContacts(**data)
+
+    @validates('release_direction')
+    def release_direction_picklist(self,value):
+        direction_values=['TO', 'FROM']
+        if not value in direction_values:
+            raise ValidationError(f'release_direction entry invalid. Please use one of the following: {direction_values}')
+
 class ClientReleaseSchema(ma.SQLAlchemyAutoSchema):
     doctype = DOCTYPE.release
     docrev = DOCTYPE_DOCREV_MAP[doctype]
     class Meta:
         model = ClientRelease
+
+    release_to = fields.Nested(ClientReleaseContactsSchema, many=True)
+    release_from = fields.Nested(ClientReleaseContactsSchema, many=True)
     
     clientid = fields.Integer(missing=0)
 
     @post_load
     def make_object(self, data, **kwargs):
         data["revision"] = self.docrev
+        data.pop("release_to")
+        data.pop("release_from")
         return ClientRelease(**data)
+
+    @pre_dump
+    def ravel(self, data, **kwargs):
+        """
+        nest release contacts objects into release contract
+        """
+        data_ravel = data.__dict__
+
+        release_to  = ClientReleaseContacts.query.filter_by(release_contract_id = data.idx, release_direction = 'TO').all()
+        release_from  = ClientReleaseContacts.query.filter_by(release_contract_id = data.idx, release_direction = 'FROM').all()
+
+        release_to_list = [obj.__dict__ for obj in release_to]
+        release_from_list = [obj.__dict__ for obj in release_from]
+
+        data_ravel["release_to"] = release_to_list
+        data_ravel["release_from"] = release_from_list
+        return data
 
 class SignAndDateSchema(Schema):
     """for marshaling signatures and sign dates into objects (contracts) requiring only a signature"""
@@ -314,8 +359,7 @@ class ChessboardSchema(Schema):
                     'right_hip_flexion':   data['hip']['right']['flexion'],
                     'right_hip_extension': data['hip']['right']['extension'],
                     'isa_structure': data['isa_structure'],
-                    'isa_movement': data['isa_movement'],
-                    'co2_tolerance': data['co2_tolerance']
+                    'isa_movement': data['isa_movement']
                     }        
         return Chessboard(**flat_data)
 
@@ -333,7 +377,6 @@ class ChessboardSchema(Schema):
                   'notes': data.notes,
                   'isa_structure': data.isa_structure,
                   'isa_movement': data.isa_movement,
-                  'co2_tolerance': data.co2_tolerance,                  
                   'shoulder': {
                                 'right': shoulder_r,
                                'left': shoulder_l
@@ -591,10 +634,33 @@ class SquatTestSchema(Schema):
     can_look_up = fields.Boolean()
 
 class ToeTouchTestSchema(Schema):
+    pelvis_movement_test_options = ['Right Hip High','Right Hip Back','Left Hip High',
+                                'Left Hip Back','Right Hip High', 'Even Bilaterally']
+
+    ribcage_movement_test_options = ['Right Posterior Ribcage High','Right Posterior Ribcage Back',	
+                                'Left Posterior Ribcage High', 'Left Posterior Ribcage Back', 'Even Bilaterally']
     depth = fields.String()
-    pelvis_movement = fields.String()
-    ribcage_movement = fields.String()
+    pelvis_movement = fields.List(fields.String,
+                description=f"Descriptors for this assessment must be in the following picklist: {pelvis_movement_test_options}",
+                required=True) 
+    ribcage_movement = fields.List(fields.String,
+                description=f"Descriptors for this assessment must be in the following picklist: {ribcage_movement_test_options}",
+                required=True)
+
     notes = fields.String()
+    
+    @validates('ribcage_movement')
+    def valid_ribcage_movement(self,value):
+        for option in value:
+            if option not in self.ribcage_movement_test_options:
+                raise ValidationError(f'{option} is not a valid movement descriptor. Use one of the following {self.ribcage_movement_test_options}')
+            
+    @validates('pelvis_movement')
+    def valid_pelvis_movement(self,value):
+        for option in value:
+            if option not in self.pelvis_movement_test_options:
+                raise ValidationError(f'{option} is not a valid movement descriptor. Use one of the following {self.pelvis_movement_test_options}')
+            
 
 class StandingRotationNotesSchema(Schema):
     notes = fields.String()
@@ -608,7 +674,7 @@ class MovementAssessmentSchema(Schema):
     timestamp = fields.DateTime()
     squat = fields.Nested(SquatTestSchema)
     toe_touch = fields.Nested(ToeTouchTestSchema)
-    standing_roation = fields.Nested(StandingRotationSchema)
+    standing_rotation = fields.Nested(StandingRotationSchema)
 
     @post_load
     def unravel(self, data, **kwargs):
@@ -679,6 +745,7 @@ class MoxyAssessmentSchema(ma.SQLAlchemySchema):
     clientid = fields.Integer(missing=0)
     timestamp = ma.auto_field()
     notes = ma.auto_field()
+    vl_side = fields.String(description="vl_side must be either 'right' or 'left'")
     performance_baseline = fields.Integer(description="", validate=validate.Range(min=0, max=100))
     recovery_baseline = fields.Integer(description="", validate=validate.Range(min=0, max=100))
     gas_tank_size = fields.Integer(description="", validate=validate.Range(min=0, max=100))
@@ -691,6 +758,11 @@ class MoxyAssessmentSchema(ma.SQLAlchemySchema):
     performance_metric_1_value = fields.Integer(description="value in regards to chosen performance metric", validate=validate.Range(min=0, max=1500))
     performance_metric_2_value = fields.Integer(description="value in regards to chosen performance metric", validate=validate.Range(min=0, max=1500))
 
+    @validates('vl_side')
+    def validate_vl_side(self,value):
+        if value not in ["right", "left"]:
+            raise ValidationError(f"{value} not a valid option. must be 'right' or 'left'")
+    
     @validates('limiter')
     def limiter_picklist(self,value):
         if not value in self.limiter_list:
@@ -717,6 +789,7 @@ class LungAssessmentSchema(ma.SQLAlchemySchema):
     clientid = fields.Integer(missing=0)
     timestamp = ma.auto_field()
     notes = ma.auto_field()
+    vital_weight = fields.Float(description="weight pulled from doctor physical data", dump_only=True)
     bag_size = fields.Float(description="in liters", validate=validate.Range(min=0, max=10))
     duration = fields.Integer(description="in seconds", validate=validate.Range(min=0, max=300))
     breaths_per_minute = fields.Integer(description="", validate=validate.Range(min=0, max=100))
@@ -726,6 +799,14 @@ class LungAssessmentSchema(ma.SQLAlchemySchema):
     @post_load
     def make_object(self, data, **kwargs):
         return LungAssessment(**data)
+
+    @pre_dump
+    def add_weight(self, data, **kwargs):
+        "add vital weight to the dump"
+        data_dict = data.__dict__
+        recent_physical = MedicalPhysicalExam.query.filter_by(clientid=data.clientid).order_by(MedicalPhysicalExam.idx.desc()).first()
+        data_dict["vital_weight"] = recent_physical.vital_weight
+        return data_dict
     
 
 class MoxyRipExaminationSchema(Schema):
@@ -742,8 +823,11 @@ class MoxyTries(Schema):
     four = fields.Nested(MoxyRipExaminationSchema)
 
 class MoxyRipSchema(Schema):
+    limiter_options = ['Demand','Supply','Respiratory']
+
     clientid = fields.Integer(missing=0)
     timestamp = fields.DateTime()
+    vl_side = fields.String(description="vl_side must be either 'right' or 'left'")
     performance = fields.Nested(MoxyTries)
     recovery = fields.Nested(MoxyTries)
     smo2_tank_size = fields.Integer(description="", validate=validate.Range(min=0, max=100))
@@ -756,10 +840,25 @@ class MoxyRipSchema(Schema):
     avg_interval_time = fields.Integer(description="seconds", validate=validate.Range(min=0, max=360))
     avg_recovery_time = fields.Integer(description="seconds", validate=validate.Range(min=0, max=360))
 
+    limiter = fields.String(description=f"must be one of the following choices: {limiter_options}")
+
+    intervention = fields.String()
+
+    @validates('vl_side')
+    def validate_vl_side(self,value):
+        if value not in ["right", "left"]:
+            raise ValidationError(f"{value} not a valid option. must be 'right' or 'left'")
+
+    @validates('limiter')
+    def valid_limiter(self,value):
+        if value not in self.limiter_options:
+            raise ValidationError(f'{value} is not a valid limiter option. Use one of the following {self.limiter_options}')
+
     @post_load
     def unravel(self, data, **kwargs):
         flat_data = {'clientid': data['clientid'],
                     'timestamp': datetime.utcnow(),
+                    'vl_side': data['vl_side'],
                     'performance_smo2_1':          data['performance']['one']['smo2'],
                     'performance_thb_1':           data['performance']['one']['thb'],
                     'performance_average_power_1': data['performance']['one']['avg_power'],
@@ -800,13 +899,16 @@ class MoxyRipSchema(Schema):
                     'recovery_baseline_thb': data['recovery_baseline_thb'],
                     'avg_watt_kg': data['avg_watt_kg'],
                     'avg_interval_time':data['avg_watt_kg'],
-                    'avg_recovery_time': data['avg_recovery_time']
+                    'avg_recovery_time': data['avg_recovery_time'],
+                    'limiter': data['limiter'],
+                    'intervention': data['intervention']
         }
         return MoxyRipTest(**flat_data)
 
     @pre_dump
     def ravel(self, data, **kwargs):
         nested = {
+            "vl_side": data.vl_side,
             "recovery_baseline_smo2": data.recovery_baseline_smo2,
             "performance": {
                 "two": {
@@ -869,10 +971,90 @@ class MoxyRipSchema(Schema):
             "avg_interval_time": data.avg_interval_time,
             "avg_recovery_time": data.avg_recovery_time,
             "clientid": data.clientid,
-            "smo2_tank_size": data.smo2_tank_size
+            "smo2_tank_size": data.smo2_tank_size,
+            "limiter": data.limiter,
+            "intervention": data.intervention
         }
 
         return nested
+
+
+class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = FitnessQuestionnaire
+        exclude = ('idx',)
+    
+    stressors_list = ['Family',	'Work', 'Finances', 'Social Obligations', 'Health', 'Relationships', 'School', 'Body Image',			
+                        'Sports Performance', 'General Environment', 'Other']
+    physical_goals_list = ['Weight Loss','Increase Strength','Increase Aerobic Capacity','Body Composition','Sport Specific Performance',			
+                            'Improve Mobility', 'Injury Rehabilitation', 'Injury Prevention', 'Increase Longevity', 'General Health', 'Other']
+    lifestyle_goals_list = ['Increased Energy', 'Increased Mental Clarity', 'Improved Relationships', 'Increased Libido',			
+                                'Overall Happiness', 'Decreased Stress', 'Improved Sleep', 'Healthier Eating', 'Other']
+
+    trainer_goals_list = ['Expertise', 'Motivation', 'Accountability', 'Time Efficiency', 'Other']
+    sleep_hours_options_list = ['< 4', '4-6','6-8','> 8']
+        
+    clientid = fields.Integer(missing=0)
+    timestamp = fields.DateTime(description="timestamp of questionnaire. Filled by backend")
+
+    stress_sources = fields.List(fields.String,
+            description=f"List of sources of stress. Options: {stressors_list}",
+            required=True) 
+    lifestyle_goals = fields.List(fields.String,
+            description=f"List of lifestyle change goals. Limit of three from these options: {lifestyle_goals_list}. If other, must specify",
+            required=True) 
+    physical_goals = fields.List(fields.String,
+            description=f"List of sources of stress. Limit of three from these options: {physical_goals_list}. If other, must specify",
+            required=True) 
+    trainer_expectation = fields.String(description=f"Client's expectation for their trainer. Must be one of: {trainer_goals_list}")
+    sleep_hours = fields.String(description=f"nightly hours of sleep bucketized by the following options: {sleep_hours_options_list}")
+
+    sleep_quality_level = fields.Integer(description="current sleep quality rating 1-5", validate=validate.Range(min=1, max=5))
+    stress_level = fields.Integer(description="current stress rating 1-5", validate=validate.Range(min=1, max=5))
+    energy_level = fields.Integer(description="current energy rating 1-5", validate=validate.Range(min=1, max=5))
+    libido_level = fields.Integer(description="current libido rating 1-5", validate=validate.Range(min=1, max=5))
+    confidence_level = fields.Integer(description="current confidence rating 1-5", validate=validate.Range(min=1, max=5))
+
+    current_fitness_level = fields.Integer(description="current fitness level 1-10", validate=validate.Range(min=1, max=10))
+    goal_fitness_level = fields.Integer(description="foal fitness level 1-10", validate=validate.Range(min=1, max=10))
+    
+    
+    @post_load
+    def make_object(self, data, **kwargs):
+        return FitnessQuestionnaire(**data)
+
+    @validates('stress_sources')
+    def validate_stress_sources(self,value):
+        for item in value:
+            if item not in self.stressors_list:
+                raise ValidationError(f"{item} not a valid option. must be in {self.stressors_list}")
+
+    @validates('lifestyle_goals')
+    def validate_lifestyle_goals(self,value):
+        for item in value:
+            if item not in self.lifestyle_goals_list:
+                raise ValidationError(f"{item} not a valid option. must be in {self.lifestyle_goals_list}")
+        if len(value) > 3:
+            ValidatioinError("limit list length to 3 choices")
+
+
+    @validates('physical_goals')
+    def validate_physical_goals(self,value):
+        for item in value:
+            if item not in self.physical_goals_list:
+                raise ValidationError(f"{item} not a valid option. must be in {self.physical_goals_list}")
+        if len(value) > 3:
+            ValidatioinError("limit list length to 3 choices")
+    
+    @validates('trainer_expectation')
+    def validate_trainer_expectations(self, value):
+        if value not in self.trainer_goals_list:
+            raise ValidationError(f"{value} not a valid option. Must be one of {self.trainer_goals_list}")
+
+    @validates('sleep_hours')
+    def validate_sleep_hours(self, value):
+        if value not in self.sleep_hours_options_list:
+            raise ValidationError(f"{value} not a valid option. Must be one of {self.sleep_hours_options_list}")
 
 
 """
@@ -900,6 +1082,45 @@ class MedicalPhysicalExamSchema(ma.SQLAlchemyAutoSchema):
     def make_object(self, data, **kwargs):
         return MedicalPhysicalExam(**data)
 
+
+class MedicalInstitutionsSchema(ma.SQLAlchemyAutoSchema):
+    """
+    For returning medical institutions in GET request and also accepting new institute names
+    """
+    class Meta:
+        model = MedicalInstitutions
+
+    @post_load
+    def make_object(self, data):
+        return MedicalInstitutions(**data)
+
+class ClientExternalMRSchema(Schema):
+    """
+    For returning medical institutions in GET request and also accepting new institute names
+    """
+
+    clientid = fields.Integer(missing=0)
+    institute_id = fields.Integer(missing=9999)
+    med_record_id = fields.String()
+    institute_name = fields.String(load_only=True, required=False, missing="")
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        data.pop("institute_name")
+        return ClientExternalMR(**data)
+
+class ClientExternalMREntrySchema(Schema):
+    """
+    For returning medical institutions in GET request and also accepting new institute names
+    """
+
+    record_locators = fields.Nested(ClientExternalMRSchema, many=True)
+    
+    @pre_dump
+    def ravel(self, data, **kwargs):
+        """upon dump, add back the schema structure"""
+        response = {"record_locators": data}
+        return response
 
 """
     Schemas for the staff API
@@ -934,7 +1155,6 @@ class StaffSchema(ma.SQLAlchemyAutoSchema):
         new_staff = Staff(**data)
         new_staff.set_password(data['password'])
         return new_staff
-
 
 #
 #   Schemas for the wearables API

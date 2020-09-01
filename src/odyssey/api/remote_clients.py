@@ -11,7 +11,7 @@ from odyssey.api.auth import token_auth, token_auth_client
 from odyssey.api.errors import ClientNotFound, ContentNotFound, IllegalSetting, UserNotFound
 from odyssey import db
 from odyssey.pdf import to_pdf
-from odyssey.models.intake import (
+from odyssey.models.client import (
     ClientInfo,
     ClientConsent,
     ClientConsultContract,
@@ -23,6 +23,7 @@ from odyssey.models.intake import (
 )
 from odyssey.models.doctor import MedicalHistory
 from odyssey.models.pt import PTHistory
+from odyssey.models.trainer import FitnessQuestionnaire
 from odyssey.utils.schemas import (
     ClientInfoSchema,
     ClientConsentSchema,
@@ -31,6 +32,7 @@ from odyssey.utils.schemas import (
     ClientIndividualContractSchema,
     ClientSubscriptionContractSchema,
     ClientReleaseSchema,
+    FitnessQuestionnaireSchema,
     MedicalHistorySchema,
     PTHistorySchema,
     SignedDocumentsSchema
@@ -583,3 +585,51 @@ class SignedDocuments(Resource):
                     urls.append((contract_name, result.pdf_path))
 
         return {'urls':dict(urls)}
+
+
+@ns.route('/questionnaire/')
+@ns.doc(params={'tmp_registration': 'temporary registration portal hash'})
+class InitialQuestionnaire(Resource):    
+    """GET and POST initial fitness questionnaire"""
+
+    @ns.doc(security='apikey')
+    @token_auth_client.login_required
+    @responds(schema=FitnessQuestionnaireSchema, api=ns)
+    def get(self):
+        """returns client's most recent fitness questionnaire"""
+        tmp_registration = request.args.get('tmp_registration')
+        remote_client = RemoteRegistration().check_portal_id(tmp_registration)
+
+        if not remote_client:
+            raise ClientNotFound(message="this client does not exist")
+
+        client_fq = FitnessQuestionnaire.query.filter_by(clientid=remote_client.clientid).order_by(FitnessQuestionnaire.idx.desc()).first()
+
+        if not client_fq:
+            raise ContentNotFound()
+        
+        return client_fq
+
+    @ns.doc(security='apikey')
+    @token_auth_client.login_required
+    @accepts(schema=FitnessQuestionnaireSchema, api=ns)
+    @responds(schema=FitnessQuestionnaireSchema, status_code=201, api=ns)
+    def post(self):
+        """create a fitness questionnaire entry for clientid"""
+        tmp_registration = request.args.get('tmp_registration')
+        remote_client = RemoteRegistration().check_portal_id(tmp_registration)
+
+        if not remote_client:
+            raise ClientNotFound(message="this client does not exist")
+
+        data=request.get_json()
+        data['clientid'] = remote_client.clientid
+        data['timestamp'] = datetime.utcnow().isoformat()
+
+        
+        client_fq = FitnessQuestionnaireSchema().load(data)
+        
+        db.session.add(client_fq)
+        db.session.commit()
+        
+        return client_fq

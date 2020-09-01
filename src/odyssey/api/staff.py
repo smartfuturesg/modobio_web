@@ -3,7 +3,7 @@ from flask_restx import Resource, fields
 from flask_accepts import accepts , responds
 
 from odyssey import db
-from odyssey.models.main import Staff
+from odyssey.models.staff import Staff
 from odyssey.api import api
 from odyssey.api.auth import token_auth
 from odyssey.api.errors import UnauthorizedUser, StaffEmailInUse

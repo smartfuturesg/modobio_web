@@ -419,20 +419,6 @@ class ClientRelease(db.Model):
     :type: int, foreign key to :attr:`ClientInfo.clientid`
     """
 
-    release_by_other = db.Column(db.String(1024))
-    """
-    Describes who else can release protected health information.
-
-    :type: str, max length 1024
-    """
-
-    release_to_other = db.Column(db.String(1024))
-    """
-    Describes to whom else protected health information can be released.
-
-    :type: str, max length 1024
-    """
-
     release_of_all = db.Column(db.Boolean)
     """
     Indicates whether or not client want to allow to release all protected health information.
@@ -511,37 +497,6 @@ class ClientRelease(db.Model):
 
     :type: str, max length 40
     """
-
-    def get_attributes(self):
-        """return class attributes as list"""
-        return [ 'release_by_other','release_to_other', 'release_of_all', 'release_of_other', 'release_date_to',
-            'release_date_from', 'release_purpose', 'signdate', 'signature' ]
-
-    def from_dict(self, clientid, data):
-        """to be used when a new user is created or a user is edited"""
-        setattr(self, 'clientid', clientid) #set clientid of new objects
-        attributes = self.get_attributes()
-        for field in attributes:
-            if field in data:
-                setattr(self, field, data[field])
-
-    def to_dict(self):
-        """retuns all data in ClientRelease Model as a dictionary"""
-        data = {
-            'clientid': self.clientid,
-            'release_by_other': self.release_by_other,
-            'release_to_other': self.release_to_other,
-            'release_of_all': self.release_of_all,
-            'release_of_other': self.release_of_other,
-            'release_date_from': self.release_date_from,
-            'release_date_to': self.release_date_to,
-            'release_purpose': self.release_purpose,
-            'signdate': self.signdate,
-            'signature': self.signature,
-            'revision': self.revision
-        }
-        return data
-
 
 class ClientPolicies(db.Model):
     """ Client policies table
@@ -1071,3 +1026,106 @@ class RemoteRegistration(db.Model):
         if remote_client is None or remote_client.registration_portal_expiration < datetime.utcnow():
             return None
         return remote_client
+
+class ClientExternalMR(db.Model):
+    """ Client external medical record table
+
+    This table stored medical record ids from external medical institutes. 
+    """
+
+    __tablename__ = 'ClientExternalMR'
+
+    __table_args__ = (
+        db.UniqueConstraint('clientid', 'med_record_id', 'institute_id'),)
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
+
+    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientExternalMR_clientid_fkey',ondelete="CASCADE"), nullable=False)
+    """
+    Client ID number
+
+    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    """
+
+    med_record_id = db.Column(db.String, nullable=False)
+    """
+    medical record id 
+    :type: str
+    """
+
+    institute_id = db.Column(db.Integer, db.ForeignKey('MedicalInstitutions.institute_id',name='ClientExternalMR_institute_id_fkey', ondelete="CASCADE"), nullable=False)
+    """
+    medical institute id 
+
+    :type: int, foreign key to :attr:`MedicalInstitutions.institute_id`
+    """
+
+class ClientReleaseContacts(db.Model):
+    """ Client external medical record table
+
+    This table stored medical record ids from external medical institutes. 
+    """
+
+    __tablename__ = 'ClientReleaseContacts'
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
+
+    release_contract_id = db.Column(db.Integer, db.ForeignKey('ClientRelease.idx',name='ClientReleaseContacts_idx_fkey',ondelete="CASCADE"), nullable=False)
+    """
+    ID refering back to the signed contract in the ClientRelease table
+
+    :type: int, foreign key to :attr:`ClientRelease.idx`
+    """
+
+    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientReleaseContacts_clientid_fkey',ondelete="CASCADE"), nullable=False)
+    """
+    Client ID number
+
+    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    """
+
+    release_direction = db.Column(db.String, nullable=False)
+    """
+    Direction of client medical dta release. Must be either 'TO' or 'FROM'
+
+    :type: str
+    """
+
+    name = db.Column(db.String, nullable=False)
+    """
+    Full name of the contact
+
+    :type: str
+    """
+
+    email = db.Column(db.String, nullable=True)
+    """
+    Email of the contact 
+
+    :type: str
+    """
+
+    phone = db.Column(db.String, nullable=True)
+    """
+    Email of the contact 
+
+    :type: str
+    """
+
+    relationship = db.Column(db.String, nullable=True)
+    """
+    Relationship the client has with the contact 
+
+    :type: str
+    """
+

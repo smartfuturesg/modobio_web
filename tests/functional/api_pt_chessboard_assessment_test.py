@@ -3,7 +3,7 @@ import time
 
 from flask.json import dumps
 
-from odyssey.models.main import Staff
+from odyssey.models.staff import Staff
 from odyssey.models.pt import Chessboard 
 from tests.data import test_chessboard_assessment
 
@@ -25,6 +25,7 @@ def test_post_chessboard_assessment(test_client, init_database):
                                 headers=headers, 
                                 data=dumps(payload), 
                                 content_type='application/json')
+    
     assert response.status_code == 201
 
 def test_get_chessboard_assessment(test_client, init_database):

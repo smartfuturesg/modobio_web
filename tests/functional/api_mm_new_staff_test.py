@@ -5,7 +5,7 @@ import time
 from flask.json import dumps
 from requests.auth import _basic_auth_str
 
-from odyssey.models.main import Staff
+from odyssey.models.staff import Staff
 
 from tests.data import (
     test_new_staff_member,
@@ -22,7 +22,7 @@ def test_creating_new_staff(test_client, init_database):
     staff = Staff.query.first()
     token = staff.get_token()
     headers = {'Authorization': f'Bearer {token}'}
-    # breakpoint()
+    
     response = test_client.post('/staff/',
                                 headers=headers, 
                                 data=dumps(test_new_staff_member), 

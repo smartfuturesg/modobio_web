@@ -466,7 +466,7 @@ class MovementAssessment(db.Model):
     :type: int, foreign key to :attr:`ClientInfo.clientid`
     """
 
-    squat_dept = db.Column(db.String)
+    squat_depth = db.Column(db.String)
     """
     Regarding squat depth, the client  ust be one of the following
     'Above Parallel',
@@ -524,7 +524,7 @@ class MovementAssessment(db.Model):
     :type: str
     """
 
-    toe_touch_pelvis_movement =db.Column(db.String)
+    toe_touch_pelvis_movement = db.Column(db.ARRAY(db.String), nullable=False, server_default="{'Even Bilaterally'}")
     """
     Pelvis movement during toe touch test
     'Right Hip High',
@@ -536,7 +536,7 @@ class MovementAssessment(db.Model):
     :type: str
     """
 
-    toe_touch_ribcage_movement = db.Column(db.String)
+    toe_touch_ribcage_movement = db.Column(db.ARRAY(db.String), nullable=False, server_default="{'Even Bilaterally'}")
     """
     Ribcage movement during toe touch test
     'Right Posterior Ribcage High',
@@ -639,6 +639,13 @@ class HeartAssessment(db.Model):
     :type: int
     """
 
+    co2_tolerance = db.Column(db.Integer)
+    """
+    CO2 tolerance 0-120
+    
+    :type: int
+    """
+
     notes = db.Column(db.String)
     """
     Notes on the client's heatrate tests
@@ -673,6 +680,13 @@ class MoxyAssessment(db.Model):
     Client ID number
 
     :type: int, foreign key to :attr:`ClientInfo.clientid`
+    """
+
+    vl_side = db.Column(db.String)
+    """
+    VL side, right or left leg
+
+    :type: str
     """
     
     notes = db.Column(db.String)
@@ -788,6 +802,13 @@ class MoxyRipTest(db.Model):
     Client ID number
 
     :type: int, foreign key to :attr:`ClientInfo.clientid`
+    """
+       
+    vl_side = db.Column(db.String)
+    """
+    VL side, right or left leg
+
+    :type: str
     """
     
     performance_smo2_1 = db.Column(db.Integer)
@@ -1163,6 +1184,181 @@ class LungAssessment(db.Model):
 
     :type: float
     """
+
+class FitnessQuestionnaire(db.Model):
+    """ Initial fitness questionnaire
+    """
+
+    __tablename__ = 'TrainerFitnessQuestionnaire'
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
+
+    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='fitness_questionnaire_clientid_fkey',ondelete="CASCADE"), nullable=False)
+    """
+    Client ID number
+
+    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    """
+    
+    timestamp = db.Column(db.DateTime)
+    """
+    Timestamp of the questionnaire.
+
+    :type: datetime.datetime
+    """
+
+    physical_goals = db.Column(db.ARRAY(db.String), nullable=False, server_default="{'other'}")
+    """
+    Indicates the goals the client has for their fitness journey. There may be only three choices. One of the choices is 'other'.
+
+    :type: str, default = other
+    """
+
+    physical_goals_other = db.Column(db.String, nullable=True)
+    """
+    To elaborate on 'other' choice of physical fitness goal
+    
+    :type: str
+    """
+
+    physical_goals_notes = db.Column(db.String, nullable=True)
+    """
+    Free text field for adding any more detail on the client's physical fitness goals
+
+    :type: str
+    """
+
+    current_fitness_level = db.Column(db.Integer, nullable=True)
+    """
+    Client's current fitness level [1-10]
+
+    :type: int
+    """
+
+    goal_fitness_level = db.Column(db.Integer, nullable=True)
+    """
+    Client's current fitness level [1-10]
+    
+    :type: int
+    """
+
+    trainer_expectation = db.Column(db.String, nullable=False, server_default="other")
+    """
+    Indicates the expectations the client has for their fitness trainer. There may be only one choice. One of the choices is 'other'.
+
+    :type: str, default = other
+    """
+
+    trainer_expectation_other = db.Column(db.String, nullable=True)
+    """
+    For the client to ellaborate on their choice of 'other' for their trainer expectation
+
+    :type: str
+    """
+
+    obstacles_likely = db.Column(db.Boolean, nullable=False)
+    """
+    Indicates wheather or not the client expects obstacles to their modobio fitness journey
+
+    :type: boolean, default=False
+    """
+
+    obstacles_expected = db.Column(db.String, nullable=True)
+    """
+    For the client to ellaborate on their expected obstacles on their modobio journey
+
+    :type: str
+    """
+
+    lifestyle_goals = db.Column(db.ARRAY(db.String), nullable=False, server_default="{'other'}")
+    """
+    Indicates the lifestyle goals the client has for their fitness journey. There may be only three choices. One of the choices is 'other'.
+
+    :type: str, default = other
+    """
+
+    lifestyle_goals_other = db.Column(db.String, nullable=True)
+    """
+    To elaborate on 'other' choice of lifestyle goal
+    
+    :type: str
+    """
+
+    lifestyle_goals_notes = db.Column(db.String, nullable=True)
+    """
+    Free text field for adding any more detail on the client's lifestyle goals
+
+    :type: str
+    """
+
+    sleep_hours = db.Column(db.String, nullable=True)
+    """
+    How many hours the client sleeps per night on average. 
+    
+    :type: str
+    """
+
+    sleep_quality_level = db.Column(db.Integer, nullable=True)
+    """
+    Client's current sleep quality level [1-5]
+    
+    :type: int
+    """
+
+    stress_level = db.Column(db.Integer, nullable=True)
+    """
+    Client's current average stress level [1-5]
+    
+    :type: int
+    """
+
+    stress_sources = db.Column(db.ARRAY(db.String), nullable=False, server_default="{'other'}")
+    """
+    Indicates the client's most prominent life stressors. Choices come from a set picklist where 'other' is one of the choices.
+    
+    :type: str, default = other
+    """
+
+    stress_sources_other = db.Column(db.String, nullable=True)
+    """
+    To elaborate on 'other' choice of client's stress sources. 
+
+    :type: str
+    """
+
+    stress_sources_notes = db.Column(db.String, nullable=True)
+    """
+    Free text field for adding any more detail on the client's sources of stress. 
+
+    :type: str
+    """
+
+    energy_level = db.Column(db.Integer, nullable=True)
+    """
+    Client's current average energy level [1-5]
+    
+    :type: int
+    """
+
+    libido_level = db.Column(db.Integer, nullable=True)
+    """
+    Client's current average libido level [1-5]
+    
+    :type: int
+    """
+
+    confidence_level = db.Column(db.Integer, nullable=True)
+    """
+    Client's current confidence level in regards to their ability to achieve their modobio goals [1-5]
+    
+    :type: int
+    """
+
 
 
 

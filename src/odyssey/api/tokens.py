@@ -9,7 +9,7 @@ from odyssey.api.auth import basic_auth, basic_auth_client
 from odyssey.api.auth import token_auth, token_auth_client
 from odyssey.api.clients import ns as client_ns
 from odyssey.api.errors import UserNotFound, ClientNotFound
-from odyssey.models.intake import RemoteRegistration
+from odyssey.models.client import RemoteRegistration
 
 
 ns = api.namespace('tokens', description='Operations related to token authorization')

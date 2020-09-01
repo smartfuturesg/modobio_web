@@ -30,6 +30,26 @@ test_client_info = {
     "receive_docs": True
 }
 
+test_client_external_medical_records = {
+  "record_locators": [
+    {
+        "med_record_id": "sadfgg65",
+        "institute_id": 9999,
+        "institute_name": "Regular Doc Two"
+    },
+    {
+        "med_record_id": "sadfgdrg65",
+        "institute_id": 2,
+        "institute_name": ""
+    },
+    {
+        "med_record_id": "sad65",
+        "institute_id": 1,
+        "institute_name": ""
+    }
+  ]
+}
+
 test_new_remote_registration = {
     "firstname": "Remote",
     "middlename": "Client",
@@ -94,14 +114,43 @@ test_client_consent_data = {
 }
 
 test_client_release_data = {
-    'release_by_other': 'My wife can also release my data.',
-    'release_of_all': False,
     'release_of_other': 'Only release my prescription drugs, not anything else.',
     'release_date_from': "2020-07-07",
     'release_date_to': "2021-07-07",
     'release_purpose': 'Release my data for the purpose of doctors having my required drugs.',
     'signdate': "2020-05-05",
-    'signature': signature
+    'signature': signature,
+    "release_from": [{
+            "email": "string@gmail.com",
+            "release_direction": "FROM",
+            "name": "string",
+            "phone": "string",
+            "relationship": "string"
+            },
+            {
+            "email": "string@gmail.com",
+            "release_direction": "FROM",
+            "name": "string",
+            "phone": "string",
+            "relationship": "string"
+            }
+    ],
+  "release_to": [{
+            "email": "string@gmail.com",
+            "release_direction": "TO",
+            "name": "string",
+            "phone": "string",
+            "relationship": "string"
+            },
+            {
+            "email": "string@gmail.com",
+            "release_direction": "TO",
+            "name": "string",
+            "phone": "string",
+            "relationship": "string"
+            }
+  ],
+    "release_of_all": False,
 }
 
 test_client_policies_data = {
@@ -156,7 +205,7 @@ test_json_json = '{"a": 1, "b": 1.1, "c": true, "d": "string", "e": {"aa": 11, "
 test_json_jsonify = b'{\n  "a": 1, \n  "b": 1.1, \n  "c": true, \n  "d": "string", \n  "e": {\n    "aa": 11, \n    "bb": "bigger string"\n  }, \n  "f": [\n    1, \n    2, \n    3, \n    4, \n    5\n  ], \n  "g": "1977-04-05", \n  "h": "14:21:39.123456", \n  "i": "2020-06-07T12:39:46.123456", \n  "j": {\n    "ja": {\n      "jja": [\n        "13:00:00", \n        "14:00:00", \n        "15:00:00"\n      ]\n    }\n  }, \n  "k": "17a3bee0-42db-4416-8b84-3990b1c6397e"\n}\n'
 
 test_moxy_assessment = {
-                "clientid" : 0,
+                "vl_side" : "right",
                 "performance_metric_2_value": 100,
                 "starting_thb": 11,
                 "limiter": "Demand",
@@ -172,6 +221,7 @@ test_moxy_assessment = {
 }
 
 test_heart_assessment = {
+  "co2_tolerance": 60,
   "resting_hr": 55,
   "estimated_vo2_max": 84,
   "notes": "some noty notes",
@@ -277,11 +327,39 @@ test_power_assessment = {
   }
 }
 
+test_movement_assessment = {
+  "toe_touch": {
+    "ribcage_movement": [
+      "Even Bilaterally"
+    ],
+    "notes": "string",
+    "pelvis_movement": [
+      "Right Hip High",
+      "Left Hip High"
+    ],
+    "depth": "string"
+  },
+  "squat": {
+    "eye_test": True,
+    "depth": "string",
+    "can_breathe": True,
+    "can_look_up": True,
+    "ramp": "string"
+  },
+  "standing_rotation": {
+    "left": {
+      "notes": "string"
+    },
+    "right": {
+      "notes": "string"
+    }
+  }
+}
+
 test_chessboard_assessment = {
   "notes": "notes",
   "isa_structure": "Asymmetrical Atypical",
   "isa_movement": "Dynamic",
-  "co2_tolerance": 60,
   "hip": {
     "left": {
       "er": 0,
@@ -323,16 +401,16 @@ test_chessboard_assessment = {
 }
 
 test_lung_assessment = {
-  "notes": "these lungs are not so great. Client exhibits asthma.",
-  "clientid": 0,
-  "liters_min_kg": 55,
-  "max_minute_volume": 400,
-  "breaths_per_minute": 25,
-  "bag_size": 5,
-  "duration": 200
+  "breaths_per_minute": 67,
+  "max_minute_volume": 409,
+  "notes": "little struggle but overall fine",
+  "liters_min_kg": 74,
+  "bag_size": 6,
+  "duration": 150
 }
 
 test_moxy_rip = {
+        "vl_side": "left",
         "recovery_baseline_smo2": 0,
         "performance": {
             "two": {
@@ -393,8 +471,9 @@ test_moxy_rip = {
         "recovery_baseline_thb": 10,
         "avg_interval_time": 50,
         "avg_recovery_time": 56,
-        "clientid": 0,
-        "smo2_tank_size": 60
+        "smo2_tank_size": 60,
+          "limiter": "Demand",
+        "intervention": "just fine for now"
 }
 
 test_pt_history = {
@@ -455,4 +534,39 @@ test_medical_physical = {
   "vital_systolic": 70,
   "notes": "string",
   "pulmonary_rales": False
+}
+
+test_fitness_questionnaire = {
+  "stress_sources_notes": "many things stress me out",
+  "sleep_hours": "6-8",
+  "energy_level": 5,
+  "libido_level": 2,
+  "stress_level": 4,
+  "obstacles_expected": "mostly motivating myself consistently",
+  "confidence_level": 4,
+  "clientid": 0,
+  "physical_goals_other": "",
+  "stress_sources": [
+    "Family",
+    "Finances",
+    "Social Obligations"
+  ],
+  "trainer_expectation_other": "",
+  "lifestyle_goals_other": "just want to get into a routine",
+  "trainer_expectation": "Expertise",
+  "physical_goals_notes": "I want to be fit",
+  "lifestyle_goals_notes": "doing fine for now",
+  "current_fitness_level": 6,
+  "lifestyle_goals": [
+    "Increased Energy",
+    "Other"
+  ],
+  "physical_goals": [
+    "Weight Loss",
+    "Increase Strength"
+  ],
+  "sleep_quality_level": 2,
+  "obstacles_likely": True,
+  "stress_sources_other": "",
+  "goal_fitness_level": 9
 }

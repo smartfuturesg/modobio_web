@@ -5,7 +5,7 @@ from flask import render_template, Blueprint, session, redirect, request, url_fo
 from odyssey import db
 from odyssey.forms.doctor import MedicalHistoryForm, MedicalPhysicalExamForm
 from odyssey.models.doctor import MedicalHistory, MedicalPhysicalExam
-from odyssey.models.intake import ClientInfo
+from odyssey.models.client import ClientInfo
 
 bp = Blueprint('doctor', __name__)
 
