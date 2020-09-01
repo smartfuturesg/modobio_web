@@ -21,6 +21,9 @@ from flask_restx import Api
 # with flask-restx only understands version 2. By using the steps above, we trick
 # swagger into sending the "Authorization" header. You just have to add the word
 # "Bearer" yourself when pasting the token.
+#
+# https://swagger.io/docs/specification/authentication/bearer-authentication/
+# https://swagger.io/docs/specification/2-0/authentication/api-keys/
 authorizations = {
     'apikey': {
         'type': 'apiKey',
