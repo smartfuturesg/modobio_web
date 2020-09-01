@@ -639,7 +639,7 @@ def test_post_strength_assessment(test_client, init_database):
                                 headers=headers, 
                                 data=dumps(payload), 
                                 content_type='application/json')
-
+    time.sleep(5)  # wait for process on the backed to finish
     assert response.status_code == 201
 
 def test_get_strength_assessment(test_client, init_database):
@@ -661,6 +661,6 @@ def test_get_strength_assessment(test_client, init_database):
     response = test_client.get(f'/remoteclient/questionnaire/?tmp_registration={tmp_registration}',
                                 headers=headers, 
                                 content_type='application/json')
-                                
+                          
     assert response.status_code == 200
     
