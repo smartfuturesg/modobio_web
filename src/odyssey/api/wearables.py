@@ -10,6 +10,8 @@ from odyssey.api.auth import token_auth
 from odyssey.api.errors import ClientAlreadyExists, IllegalSetting, UserNotFound
 from odyssey.models.wearables import Wearables, WearablesOura
 from odyssey.utils.schemas import WearablesSchema, WearablesOuraSchema
+from odyssey.utils.misc import check_client_existence
+
 from odyssey import db
 
 ns = api.namespace('wearables', description='Endpoints for registering wearable devices.')
@@ -17,7 +19,6 @@ ns = api.namespace('wearables', description='Endpoints for registering wearable 
 @ns.route('/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
 class WearablesEndpoint(Resource):
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @responds(schema=WearablesSchema, api=ns)
     def get(self, clientid):
@@ -43,7 +44,6 @@ class WearablesEndpoint(Resource):
 
     @token_auth.login_required
     @accepts(schema=WearablesSchema, api=ns)
-    @ns.doc(security='apikey')
     @responds(schema=WearablesSchema, api=ns)
     def post(self, clientid):
         """ Create new wearables information for client ``clientid`` in reponse to a POST request.
@@ -79,7 +79,6 @@ class WearablesEndpoint(Resource):
 
     @token_auth.login_required
     @accepts(schema=WearablesSchema, api=ns)
-    @ns.doc(security='apikey')
     @responds(schema=WearablesSchema, api=ns)
     def put(self, clientid):
         """ Update wearables information for client ``clientid`` in reponse to a PUT request.
@@ -112,7 +111,6 @@ class WearablesEndpoint(Resource):
 @ns.route('/oura/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
 class WearablesOuraEndpoint(Resource):
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @responds(schema=WearablesOuraSchema, api=ns)
     def get(self, clientid):
@@ -141,7 +139,7 @@ class WearablesOuraEndpoint(Resource):
 
         oauth_session = OAuth2Session(client_id, redirect_uri=redirect_url)
         auth_url, state = oauth_session.authorization_url(base_url)
-        
+
         session['clientid'] = clientid
         session['oura_oauth_state'] = state
 
@@ -151,7 +149,7 @@ class WearablesOuraEndpoint(Resource):
 @ns.route('/oura/callback/')
 # @ns.doc(params={'clientid': 'Client ID number'})
 class WearablesOuraCallbackEndpoint(Resource):
-    # @ns.doc(security='apikey')
+    @ns.doc(security=None)
     # @token_auth.login_required
     # @responds(schema=WearablesOuraSchema, api=ns)
     def get(self):
