@@ -46,7 +46,6 @@ ns = api.namespace('client', description='Operations related to clients')
 @ns.route('/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
 class Client(Resource):
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @responds(schema=ClientInfoSchema, api=ns)
     def get(self, clientid):
@@ -58,7 +57,6 @@ class Client(Resource):
 
     @token_auth.login_required
     @accepts(schema=ClientInfoSchema, api=ns)
-    @ns.doc(security='apikey')
     @responds(schema=ClientInfoSchema, api=ns)
     def put(self, clientid):
         """edit client info"""
@@ -78,7 +76,6 @@ class Client(Resource):
 @ns.route('/remove/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
 class RemoveClient(Resource):
-    @ns.doc(security='apikey')
     @token_auth.login_required
     def delete(self, clientid):
         """deletes client from database entirely"""
@@ -107,7 +104,6 @@ class NewClient(Resource):
     """
     @token_auth.login_required
     @accepts(schema=ClientInfoSchema, api=ns)
-    @ns.doc(security='apikey')
     @responds(schema=ClientInfoSchema, api=ns, status_code=201)
     def post(self):
         """create new client"""
@@ -130,7 +126,6 @@ class NewClient(Resource):
 @ns.route('/clientsearch/')
 @ns.doc(params={'page': 'request page for paginated clients list', 'per_page': 'number of clients per page'})
 class Clients(Resource):
-    @ns.doc(security='apikey')
     @token_auth.login_required
     def get(self):
         """returns list of all clients"""
@@ -156,7 +151,6 @@ class ConsentContract(Resource):
     doctype = DOCTYPE.consent
     docrev = DOCTYPE_DOCREV_MAP[doctype]
 
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @responds(schema=ClientConsentSchema, api=ns)
     def get(self, clientid):
@@ -171,7 +165,6 @@ class ConsentContract(Resource):
         return client_consent_form
 
     @accepts(schema=ClientConsentSchema, api=ns)
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @responds(schema=ClientConsentSchema, status_code=201, api=ns)
     def post(self, clientid):
@@ -198,7 +191,6 @@ class ReleaseContract(Resource):
     doctype = DOCTYPE.release
     docrev = DOCTYPE_DOCREV_MAP[doctype]
 
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @responds(schema=ClientReleaseSchema, api=ns)
     def get(self, clientid):
@@ -213,7 +205,6 @@ class ReleaseContract(Resource):
         return client_release_contract
 
     @accepts(schema=ClientReleaseSchema)
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @responds(schema=ClientReleaseSchema, status_code=201, api=ns)
     def post(self, clientid):
@@ -259,7 +250,6 @@ class PoliciesContract(Resource):
     doctype = DOCTYPE.policies
     docrev = DOCTYPE_DOCREV_MAP[doctype]
 
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @responds(schema=ClientPoliciesContractSchema, api=ns)
     def get(self, clientid):
@@ -272,7 +262,6 @@ class PoliciesContract(Resource):
             raise ContentNotFound()
         return  client_policies
 
-    @ns.doc(security='apikey')
     @accepts(schema=ClientPoliciesContractSchema, api=ns)
     @token_auth.login_required
     @responds(schema=ClientPoliciesContractSchema, status_code= 201, api=ns)
@@ -298,7 +287,6 @@ class ConsultConstract(Resource):
     doctype = DOCTYPE.consult
     docrev = DOCTYPE_DOCREV_MAP[doctype]
 
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @responds(schema=ClientConsultContractSchema, api=ns)
     def get(self, clientid):
@@ -312,7 +300,6 @@ class ConsultConstract(Resource):
         return client_consult
 
     @accepts(schema=ClientConsultContractSchema, api=ns)
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @responds(schema=ClientConsultContractSchema, status_code= 201, api=ns)
     def post(self, clientid):
@@ -337,7 +324,6 @@ class SubscriptionContract(Resource):
     doctype = DOCTYPE.subscription
     docrev = DOCTYPE_DOCREV_MAP[doctype]
 
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @responds(schema=ClientSubscriptionContractSchema, api=ns)
     def get(self, clientid):
@@ -349,7 +335,6 @@ class SubscriptionContract(Resource):
             raise ContentNotFound()
         return client_subscription
 
-    @ns.doc(security='apikey')
     @accepts(schema=SignAndDateSchema, api=ns)
     @token_auth.login_required
     @responds(schema=ClientSubscriptionContractSchema, status_code= 201, api=ns)
@@ -375,7 +360,6 @@ class IndividualContract(Resource):
     doctype = DOCTYPE.individual
     docrev = DOCTYPE_DOCREV_MAP[doctype]
 
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @responds(schema=ClientIndividualContractSchema, api=ns)
     def get(self, clientid):
@@ -390,7 +374,6 @@ class IndividualContract(Resource):
 
     @token_auth.login_required
     @accepts(schema=ClientIndividualContractSchema, api=ns)
-    @ns.doc(security='apikey')
     @responds(schema=ClientIndividualContractSchema,status_code=201, api=ns)
     def post(self, clientid):
         """create client individual services contract object for the specified clientid"""
@@ -415,7 +398,6 @@ class SignedDocuments(Resource):
     Returns a list of URLs to the stored the PDF documents.
     The URLs expire after 10 min.
     """
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @responds(schema=SignedDocumentsSchema, api=ns)
     def get(self, clientid):
@@ -464,7 +446,6 @@ class NewRemoteRegistration(Resource):
     """
     @token_auth.login_required
     @accepts(schema=NewRemoteClientSchema, api=ns)
-    @ns.doc(security='apikey')
     @responds(schema=ClientRemoteRegistrationPortalSchema, api=ns, status_code=201)
     def post(self):
         """create new remote registration client
@@ -511,7 +492,6 @@ class RefreshRemoteRegistration(Resource):
     """
     @token_auth.login_required
     @accepts(schema=RefreshRemoteRegistrationSchema)
-    @ns.doc(security='apikey')
     @responds(schema=ClientRemoteRegistrationPortalSchema, api=ns, status_code=201)
     def post(self):
         """refresh the portal endpoint and password
@@ -549,7 +529,6 @@ class TestEmail(Resource):
     """
        Send a test email
     """
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @ns.doc(params={'recipient': 'test email recipient'})
     def get(self):

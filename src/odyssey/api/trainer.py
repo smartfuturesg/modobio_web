@@ -37,8 +37,6 @@ ns = api.namespace('trainer', description='Operations related to the trainer')
 @ns.doc(params={'clientid': 'Client ID number'})
 class Power(Resource):
     """GET and POST power assessments for the client"""
-
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @responds(schema=PowerAssessmentSchema(many=True), api=ns)
     def get(self, clientid):
@@ -52,7 +50,6 @@ class Power(Resource):
         
         return all_entries
 
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @accepts(schema=PowerAssessmentSchema, api=ns)
     @responds(schema=PowerAssessmentSchema, status_code=201, api=ns)
@@ -76,8 +73,6 @@ class Power(Resource):
 @ns.doc(params={'clientid': 'Client ID number'})
 class Strength(Resource):
     """GET and POST strength assessments for the client"""
-
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @responds(schema=StrenghtAssessmentSchema(many=True), api=ns)
     def get(self, clientid):
@@ -91,7 +86,6 @@ class Strength(Resource):
         
         return all_entries
 
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @accepts(schema=StrenghtAssessmentSchema, api=ns)
     @responds(schema=StrenghtAssessmentSchema, status_code=201, api=ns)
@@ -115,10 +109,7 @@ class Strength(Resource):
 @ns.route('/assessment/movement/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
 class Movement(Resource):
-
     """GET and POST movement assessments for the client"""
-
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @responds(schema=MovementAssessmentSchema(many=True), api=ns)
     def get(self, clientid):
@@ -132,7 +123,6 @@ class Movement(Resource):
         
         return all_entries
 
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @accepts(schema=MovementAssessmentSchema, api=ns)
     @responds(schema=MovementAssessmentSchema, status_code=201, api=ns)
@@ -155,10 +145,8 @@ class Movement(Resource):
 @ns.route('/assessment/heart/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
 class Heart(Resource):
-    
     """GET and POST movement assessments for the client"""
 
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @responds(schema=HeartAssessmentSchema(many=True), api=ns)
     def get(self, clientid):
@@ -172,7 +160,6 @@ class Heart(Resource):
 
         return all_entries
 
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @accepts(schema=HeartAssessmentSchema, api=ns)
     @responds(schema=HeartAssessmentSchema, status_code=201, api=ns)
@@ -197,7 +184,6 @@ class Heart(Resource):
 class Moxy(Resource):    
     """GET and POST moxy assessments for the client"""
 
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @responds(schema=MoxyAssessmentSchema(many=True), api=ns)
     def get(self, clientid):
@@ -211,7 +197,6 @@ class Moxy(Resource):
         
         return all_entries
 
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @accepts(schema=MoxyAssessmentSchema, api=ns)
     @responds(schema=MoxyAssessmentSchema, status_code=201, api=ns)
@@ -235,7 +220,6 @@ class Moxy(Resource):
 class LungCapacity(Resource):    
     """GET and POST moxy assessments for the client"""
 
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @responds(schema=LungAssessmentSchema(many=True), api=ns)
     def get(self, clientid):
@@ -249,7 +233,6 @@ class LungCapacity(Resource):
         
         return all_entries
 
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @accepts(schema=LungAssessmentSchema, api=ns)
     @responds(schema=LungAssessmentSchema, status_code=201, api=ns)
@@ -273,7 +256,6 @@ class LungCapacity(Resource):
 class MoxyRipAssessment(Resource):    
     """GET and POST moxy rip assessments for the client"""
 
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @responds(schema=MoxyRipSchema(many=True), api=ns)
     def get(self, clientid):
@@ -287,7 +269,6 @@ class MoxyRipAssessment(Resource):
         
         return all_entries
 
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @accepts(schema=MoxyRipSchema, api=ns)
     @responds(schema=MoxyRipSchema, status_code=201, api=ns)
@@ -311,7 +292,6 @@ class MoxyRipAssessment(Resource):
 class InitialQuestionnaire(Resource):    
     """GET and POST initial fitness questionnaire"""
 
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @responds(schema=FitnessQuestionnaireSchema, api=ns)
     def get(self, clientid):
@@ -325,7 +305,6 @@ class InitialQuestionnaire(Resource):
         
         return client_fq
 
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @accepts(schema=FitnessQuestionnaireSchema, api=ns)
     @responds(schema=FitnessQuestionnaireSchema, status_code=201, api=ns)

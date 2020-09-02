@@ -20,7 +20,6 @@ ns = api.namespace('doctor', description='Operations related to doctor')
 @ns.route('/medicalhistory/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
 class MedHistory(Resource):
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @responds(schema=MedicalHistorySchema, api=ns)
     def get(self, clientid):
@@ -33,8 +32,7 @@ class MedHistory(Resource):
             raise ContentNotFound()
 
         return client
-    
-    @ns.doc(security='apikey')
+
     @token_auth.login_required
     @accepts(schema=MedicalHistorySchema, api=ns)
     @responds(schema=MedicalHistorySchema, status_code=201, api=ns)
@@ -60,7 +58,6 @@ class MedHistory(Resource):
 
         return client_mh
 
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @accepts(schema=MedicalHistorySchema, api=ns)
     @responds(schema=MedicalHistorySchema, api=ns)
@@ -89,7 +86,6 @@ class MedHistory(Resource):
 @ns.route('/physical/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
 class MedPhysical(Resource):
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @responds(schema=MedicalPhysicalExamSchema(many=True), api=ns)
     def get(self, clientid):
@@ -102,8 +98,7 @@ class MedPhysical(Resource):
             raise ContentNotFound()
 
         return client
-    
-    @ns.doc(security='apikey')
+
     @token_auth.login_required
     @accepts(schema=MedicalPhysicalExamSchema, api=ns)
     @responds(schema=MedicalPhysicalExamSchema, status_code=201, api=ns)
@@ -126,7 +121,6 @@ class MedPhysical(Resource):
 
 @ns.route('/medicalinstitutions/')
 class AllMedInstitutes(Resource):
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @responds(schema=MedicalInstitutionsSchema(many=True), api=ns)
     def get(self):
@@ -139,7 +133,6 @@ class AllMedInstitutes(Resource):
 @ns.route('/medicalinstitutions/recordid/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
 class ExternalMedicalRecordIDs(Resource):
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @accepts(schema=ClientExternalMREntrySchema,  api=ns)
     @responds(schema=ClientExternalMREntrySchema,status_code=201, api=ns)
@@ -168,7 +161,6 @@ class ExternalMedicalRecordIDs(Resource):
         
         return client_med_record_ids
 
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @responds(schema=ClientExternalMREntrySchema, api=ns)
     def get(self, clientid):
