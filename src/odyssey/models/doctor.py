@@ -2,7 +2,7 @@
 Database tables for the doctor's portion of the Modo Bio Staff application.
 All tables in this module are prefixed with 'Medical'.
 """
-
+from datetime import datetime
 from odyssey import db
 
 class MedicalHistory(db.Model):
@@ -344,10 +344,9 @@ class MedicalPhysicalExam(db.Model):
     """
 
 class BloodThyroid(db.Model):
-    """ Medical history table
+    """ Blood Test - Thyroid results
 
-    This table stores the medical history of a client. The information is taken
-    only once, during the initial consult.
+    This table stores the blood test - thyroid results of clients.
     """
     __tablename__ = 'BloodThyroid'
 
@@ -467,3 +466,17 @@ class BloodThyroid(db.Model):
     :type: integer
     :units: pg/mL
     """
+
+    def get_attributes(self):
+        return ['t3_serum_total','tsi','examination_date','thyroglobulin','t3_resin_uptake','thyroxine_binding_globulin',
+            't3_serum_free','t3_serum_reverse','thyroidial_iodine_uptake','t4_serum_free','idx','tsh','thyroxine_index',
+            'clientid','t4_serum_total']
+
+    def from_dict(self, data):
+        """to be used when a new user is created or a user id edited"""
+        attributes = self.get_attributes()
+        for field in attributes:
+            if field in data:
+                setattr(self, field, data[field])
+        if isinstance(self.examination_date ,str):
+            self.examination_date = datetime.strptime(self.examination_date, '%Y-%m-%d')

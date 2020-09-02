@@ -1078,9 +1078,9 @@ class StaffSchema(ma.SQLAlchemyAutoSchema):
 
 class BloodThyroidSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        model = BloodThroid
+        model = BloodThyroid
         
-    examid = fields.Integer(missing=0)
+    clientid = fields.Integer(missing=0)
     
     @post_load
     def make_object(self, data, **kwargs):

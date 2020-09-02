@@ -11,9 +11,9 @@ from odyssey.models.doctor import MedicalPhysicalExam, MedicalHistory, BloodThyr
 from odyssey.models.misc import MedicalInstitutions
 from odyssey.api import api
 from odyssey.api.auth import token_auth
-from odyssey.api.errors import UserNotFound, IllegalSetting, ContentNotFound
+from odyssey.api.errors import UserNotFound, IllegalSetting, ContentNotFound, ExamNotFound
 from odyssey.utils.misc import check_client_existence
-from odyssey.utils.schemas import ClientExternalMREntrySchema, ClientExternalMRSchema, MedicalHistorySchema, MedicalPhysicalExamSchema, MedicalInstitutionsSchema
+from odyssey.utils.schemas import ClientExternalMREntrySchema, ClientExternalMRSchema, MedicalHistorySchema, MedicalPhysicalExamSchema, MedicalInstitutionsSchema, BloodThyroidSchema
 
 ns = api.namespace('doctor', description='Operations related to doctor')
 
@@ -181,25 +181,57 @@ class ExternalMedicalRecordIDs(Resource):
     
 
 @ns.route('/bloodthyroid/<int:clientid>/')
-@ns.doc(params={'bloodExamId': 'Blood Exam ID number'})
-class BloodThyroid(Resource):
+@ns.doc(params={'clientId': 'Client ID number'})
+class MedBloodThyroid(Resource):
     @ns.doc(security='apikey')
     @token_auth.login_required
-    @responds(schema=BloodThyroidSchema, api=ns)
+    @responds(schema=BloodThyroidSchema(many=True), api=ns)
     def get(self, clientid):
-        """returns blood thyroid results as a json for the blood exam ID specified"""
+        """returns all blood thyroid results as a json for the client ID specified"""
+        check_client_existence(clientid)
 
+        exams = BloodThyroid.query.filter_by(clientid=clientid).all()
+
+        if not exams:
+            raise ContentNotFound()
+
+        return exams
     
     @ns.doc(security='apikey')
     @token_auth.login_required
     @accepts(schema=BloodThyroidSchema, api=ns)
     @responds(schema=BloodThyroidSchema, status_code=201, api=ns)
     def post(self, clientid):
-        """returns blood test results as a json for the blood exam ID specified"""
+        """creates new db entry for blood test results as a json for the blood exam ID specified"""
+        check_client_existence(clientid)
+
+        data = request.get_json()
+        data["clientid"] = clientid
+
+        bt_schema = BloodThyroidSchema()
+
+        client_bt = bt_schema.load(data)
+
+        db.session.add(client_bt)
+        db.session.commit()
+
+        return client_bt
 
     @ns.doc(security='apikey')
     @token_auth.login_required
     @accepts(schema=BloodThyroidSchema, api=ns)
     @responds(schema=BloodThyroidSchema, api=ns)
     def put(self, clientid):
-        """updates a blood exam's results as a json for the blood exam ID specified"""
+        """edit exam info"""
+        data = request.get_json()
+        exam = BloodThyroid.query.filter_by(idx=data["idx"]).one_or_none()
+        if not exam:
+            raise ExamNotFound(examid)
+        #prevent requests to set examid and send message back to api user
+        """elif data.get('idx', None):
+            raise IllegalSetting('examid')"""
+        # exam.update
+        exam.from_dict(data)
+        db.session.add(exam)
+        db.session.commit()
+        return exam
