@@ -50,7 +50,6 @@ class RemoteClientInfo(Resource):
         For getting and altering client info table as a remote client.
         Requires token authorization in addition to a valid portal id (tmp_registration)
     """
-    @ns.doc(security='apikey')
     @token_auth_client.login_required
     @responds(schema=ClientInfoSchema, api=ns)
     def get(self):
@@ -69,7 +68,6 @@ class RemoteClientInfo(Resource):
         return client
 
     @accepts(schema=ClientInfoSchema, api=ns)
-    @ns.doc(security='apikey')
     @token_auth_client.login_required
     @responds(schema=ClientInfoSchema, api=ns)
     def put(self):
@@ -91,8 +89,6 @@ class RemoteClientInfo(Resource):
 @ns.route('/medicalhistory/')
 @ns.doc(params={'tmp_registration': 'temporary registration portal hash'})
 class MedHistory(Resource):
-   
-    @ns.doc(security='apikey')
     @token_auth_client.login_required
     @responds(schema=MedicalHistorySchema, api=ns)
     def get(self):
@@ -110,8 +106,7 @@ class MedHistory(Resource):
             raise ContentNotFound()
 
         return client_mh
-    
-    @ns.doc(security='apikey')
+
     @token_auth_client.login_required
     @accepts(schema=MedicalHistorySchema, api=ns)
     @responds(schema=MedicalHistorySchema, status_code=201, api=ns)
@@ -142,7 +137,6 @@ class MedHistory(Resource):
 
         return client_mh
 
-    @ns.doc(security='apikey')
     @token_auth_client.login_required
     @accepts(schema=MedicalHistorySchema, api=ns)
     @responds(schema=MedicalHistorySchema, api=ns)
@@ -176,7 +170,6 @@ class MedHistory(Resource):
 @ns.doc(params={'tmp_registration': 'temporary registration portal hash'})
 class ClientPTHistory(Resource):
     """GET, POST, PUT for pt history data"""
-    @ns.doc(security='apikey')
     @token_auth_client.login_required
     @responds(schema=PTHistorySchema)
     def get(self):
@@ -191,7 +184,6 @@ class ClientPTHistory(Resource):
                 
         return client_pt
 
-    @ns.doc(security='apikey')
     @token_auth_client.login_required
     @accepts(schema=PTHistorySchema, api=ns)
     @responds(schema=PTHistorySchema, status_code=201, api=ns)
@@ -218,7 +210,6 @@ class ClientPTHistory(Resource):
 
         return client_pt
 
-    @ns.doc(security='apikey')
     @token_auth_client.login_required
     @accepts(schema=PTHistorySchema, api=ns)
     @responds(schema=PTHistorySchema, api=ns)
@@ -252,7 +243,6 @@ class ConsentContract(Resource):
     doctype = DOCTYPE.consent
     docrev = DOCTYPE_DOCREV_MAP[doctype]
 
-    @ns.doc(security='apikey')
     @token_auth_client.login_required
     @responds(schema=ClientConsentSchema, api=ns)
     def get(self):
@@ -268,7 +258,6 @@ class ConsentContract(Resource):
         return client_consent_form
 
     @accepts(schema=ClientConsentSchema, api=ns)
-    @ns.doc(security='apikey')
     @token_auth_client.login_required
     @responds(schema=ClientConsentSchema, status_code=201, api=ns)
     def post(self):
@@ -300,7 +289,6 @@ class ReleaseContract(Resource):
     doctype = DOCTYPE.release
     docrev = DOCTYPE_DOCREV_MAP[doctype]
 
-    @ns.doc(security='apikey')
     @token_auth_client.login_required
     @responds(schema=ClientReleaseSchema, api=ns)
     def get(self):
@@ -316,7 +304,6 @@ class ReleaseContract(Resource):
         return client_release_form
 
     @accepts(schema=ClientReleaseSchema)
-    @ns.doc(security='apikey')
     @token_auth_client.login_required
     @responds(schema=ClientReleaseSchema, status_code=201, api=ns)
     def post(self):
@@ -346,7 +333,6 @@ class PoliciesContract(Resource):
     doctype = DOCTYPE.policies
     docrev = DOCTYPE_DOCREV_MAP[doctype]
 
-    @ns.doc(security='apikey')
     @token_auth_client.login_required
     @responds(schema=ClientPoliciesContractSchema, api=ns)
     def get(self):
@@ -361,7 +347,6 @@ class PoliciesContract(Resource):
 
         return client_policies
 
-    @ns.doc(security='apikey')
     @accepts(schema=ClientPoliciesContractSchema, api=ns)
     @token_auth_client.login_required
     @responds(schema=ClientPoliciesContractSchema, status_code= 201, api=ns)
@@ -393,7 +378,6 @@ class ConsultConstract(Resource):
     doctype = DOCTYPE.consult
     docrev = DOCTYPE_DOCREV_MAP[doctype]
 
-    @ns.doc(security='apikey')
     @token_auth_client.login_required
     @responds(schema=ClientConsultContractSchema, api=ns)
     def get(self):
@@ -408,7 +392,6 @@ class ConsultConstract(Resource):
         return client_consult
 
     @accepts(schema=ClientConsultContractSchema, api=ns)
-    @ns.doc(security='apikey')
     @token_auth_client.login_required
     @responds(schema=ClientConsultContractSchema, status_code= 201, api=ns)
     def post(self):
@@ -438,7 +421,6 @@ class SubscriptionContract(Resource):
     doctype = DOCTYPE.subscription
     docrev = DOCTYPE_DOCREV_MAP[doctype]
 
-    @ns.doc(security='apikey')
     @token_auth_client.login_required
     @responds(schema=ClientSubscriptionContractSchema, api=ns)
     def get(self):
@@ -453,7 +435,6 @@ class SubscriptionContract(Resource):
 
         return client_subscription
 
-    @ns.doc(security='apikey')
     @accepts(schema=ClientSubscriptionContractSchema, api=ns)
     @token_auth_client.login_required
     @responds(schema=ClientSubscriptionContractSchema, status_code= 201, api=ns)
@@ -485,7 +466,6 @@ class IndividualContract(Resource):
     doctype = DOCTYPE.individual
     docrev = DOCTYPE_DOCREV_MAP[doctype]
 
-    @ns.doc(security='apikey')
     @token_auth_client.login_required
     @responds(schema=ClientIndividualContractSchema, api=ns)
     def get(self):
@@ -502,7 +482,6 @@ class IndividualContract(Resource):
 
     @token_auth_client.login_required
     @accepts(schema=ClientIndividualContractSchema, api=ns)
-    @ns.doc(security='apikey')
     @responds(schema=ClientIndividualContractSchema,status_code=201, api=ns)
     def post(self):
         """create client individual services contract object for the specified clientid"""
@@ -540,7 +519,6 @@ class SignedDocuments(Resource):
     Returns a list of URLs to the stored the PDF documents.
     The URLs expire after 10 min.
     """
-    @ns.doc(security='apikey')
     @token_auth_client.login_required
     @responds(schema=SignedDocumentsSchema, api=ns)
     def get(self):
@@ -591,8 +569,6 @@ class SignedDocuments(Resource):
 @ns.doc(params={'tmp_registration': 'temporary registration portal hash'})
 class InitialQuestionnaire(Resource):    
     """GET and POST initial fitness questionnaire"""
-
-    @ns.doc(security='apikey')
     @token_auth_client.login_required
     @responds(schema=FitnessQuestionnaireSchema, api=ns)
     def get(self):
@@ -610,7 +586,6 @@ class InitialQuestionnaire(Resource):
         
         return client_fq
 
-    @ns.doc(security='apikey')
     @token_auth_client.login_required
     @accepts(schema=FitnessQuestionnaireSchema, api=ns)
     @responds(schema=FitnessQuestionnaireSchema, status_code=201, api=ns)

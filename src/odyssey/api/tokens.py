@@ -17,7 +17,7 @@ ns = api.namespace('tokens', description='Operations related to token authorizat
 @ns.route('/staff/')
 class Token(Resource):
     """create and revoke tokens"""
-    @ns.doc(security='basic')
+    @ns.doc(security='password')
     @basic_auth.login_required
     def post(self):
         """generates a token for the 'current_user' immediately after password authentication"""
@@ -28,7 +28,7 @@ class Token(Resource):
                 'token': user.get_token(),
                 'access_roles': user.access_roles}, 201
 
-    @ns.doc(security='basic')
+    @ns.doc(security='password')
     @token_auth.login_required
     def delete(self):
         """invalidate urrent token. Used to effectively logout a user"""
@@ -41,7 +41,7 @@ class RemoteRegistrationToken(Resource):
     """generate and delete portal user API access tokens
         first validates that the user's basic authentication passes, then checks
         the url to validate the authenticity of the end point (i.e. in database and not expired)"""
-    @ns.doc(security='basic')
+    @ns.doc(security='password')
     @basic_auth_client.login_required
     def post(self):
         """generate api token for portal user"""
@@ -54,7 +54,7 @@ class RemoteRegistrationToken(Resource):
 
         return {'email': user.email, 'token': user.get_token()}, 201
 
-    @ns.doc(security='basic')
+    @ns.doc(security='password')
     @basic_auth_client.login_required
     def delete(self):
         """invalidate current token. Used to effectively logout a user"""
