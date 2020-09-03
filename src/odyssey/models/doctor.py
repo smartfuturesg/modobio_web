@@ -343,12 +343,12 @@ class MedicalPhysicalExam(db.Model):
     :type: str
     """
 
-class BloodThyroid(db.Model):
+class MedicalBloodChemistryThyroid(db.Model):
     """ Blood Test - Thyroid results
 
     This table stores the blood test - thyroid results of clients.
     """
-    __tablename__ = 'BloodThyroid'
+    __tablename__ = 'BloodChemistryThyroid'
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -364,7 +364,7 @@ class BloodThyroid(db.Model):
     :type: int, foreign key to :attr:`ClientInfo.clientid`
     """
 
-    examination_date = db.Column(db.Date)
+    exam_date = db.Column(db.Date)
     """
     Date blood test was administered.
 
@@ -478,5 +478,5 @@ class BloodThyroid(db.Model):
         for field in attributes:
             if field in data:
                 setattr(self, field, data[field])
-        if isinstance(self.examination_date ,str):
-            self.examination_date = datetime.strptime(self.examination_date, '%Y-%m-%d')
+        if isinstance(self.exam_date ,str):
+            self.exam_date = datetime.strptime(self.exam_date, '%Y-%m-%d')

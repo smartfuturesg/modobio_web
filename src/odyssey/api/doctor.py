@@ -7,13 +7,13 @@ from flask_restx import Resource, Api
 
 from odyssey import db
 from odyssey.models.client import ClientExternalMR
-from odyssey.models.doctor import MedicalPhysicalExam, MedicalHistory, BloodThyroid
+from odyssey.models.doctor import MedicalPhysicalExam, MedicalHistory, MedicalBloodChemistryThyroid
 from odyssey.models.misc import MedicalInstitutions
 from odyssey.api import api
 from odyssey.api.auth import token_auth
 from odyssey.api.errors import UserNotFound, IllegalSetting, ContentNotFound, ExamNotFound
 from odyssey.utils.misc import check_client_existence
-from odyssey.utils.schemas import ClientExternalMREntrySchema, ClientExternalMRSchema, MedicalHistorySchema, MedicalPhysicalExamSchema, MedicalInstitutionsSchema, BloodThyroidSchema
+from odyssey.utils.schemas import ClientExternalMREntrySchema, ClientExternalMRSchema, MedicalHistorySchema, MedicalPhysicalExamSchema, MedicalInstitutionsSchema, BloodChemistryThyroidSchema
 
 ns = api.namespace('doctor', description='Operations related to doctor')
 
@@ -180,17 +180,17 @@ class ExternalMedicalRecordIDs(Resource):
     
     
 
-@ns.route('/bloodthyroid/<int:clientid>/')
+@ns.route('/bloodchemistry/thyroid/<int:clientid>/')
 @ns.doc(params={'clientId': 'Client ID number'})
-class MedBloodThyroid(Resource):
+class MedBloodChemistryThyroid(Resource):
     @ns.doc(security='apikey')
     @token_auth.login_required
-    @responds(schema=BloodThyroidSchema(many=True), api=ns)
+    @responds(schema=BloodChemistryThyroidSchema(many=True), api=ns)
     def get(self, clientid):
         """returns all blood thyroid results as a json for the client ID specified"""
         check_client_existence(clientid)
 
-        exams = BloodThyroid.query.filter_by(clientid=clientid).all()
+        exams = MedicalBloodChemistryThyroid.query.filter_by(clientid=clientid).all()
 
         if not exams:
             raise ContentNotFound()
@@ -199,8 +199,8 @@ class MedBloodThyroid(Resource):
     
     @ns.doc(security='apikey')
     @token_auth.login_required
-    @accepts(schema=BloodThyroidSchema, api=ns)
-    @responds(schema=BloodThyroidSchema, status_code=201, api=ns)
+    @accepts(schema=BloodChemistryThyroidSchema, api=ns)
+    @responds(schema=BloodChemistryThyroidSchema, status_code=201, api=ns)
     def post(self, clientid):
         """creates new db entry for blood test results as a json for the blood exam ID specified"""
         check_client_existence(clientid)
@@ -208,7 +208,7 @@ class MedBloodThyroid(Resource):
         data = request.get_json()
         data["clientid"] = clientid
 
-        bt_schema = BloodThyroidSchema()
+        bt_schema = BloodChemistryThyroidSchema()
 
         client_bt = bt_schema.load(data)
 
@@ -219,17 +219,15 @@ class MedBloodThyroid(Resource):
 
     @ns.doc(security='apikey')
     @token_auth.login_required
-    @accepts(schema=BloodThyroidSchema, api=ns)
-    @responds(schema=BloodThyroidSchema, api=ns)
+    @accepts(schema=BloodChemistryThyroidSchema, api=ns)
+    @responds(schema=BloodChemistryThyroidSchema, api=ns)
     def put(self, clientid):
         """edit exam info"""
         data = request.get_json()
-        exam = BloodThyroid.query.filter_by(idx=data["idx"]).one_or_none()
+        exam = MedicalBloodChemistryThyroid.query.filter_by(idx=data["idx"]).one_or_none()
         if not exam:
             raise ExamNotFound(examid)
-        #prevent requests to set examid and send message back to api user
-        """elif data.get('idx', None):
-            raise IllegalSetting('examid')"""
+
         # exam.update
         exam.from_dict(data)
         db.session.add(exam)
