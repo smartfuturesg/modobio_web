@@ -147,6 +147,10 @@ class Config():
     DOCS_STORE_LOCAL = True
     SECRET_KEY = 'dev'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    OURA_CLIENT_ID = 'dev'
+    OURA_CLIENT_SECRET = 'dev'
+    OURA_AUTH_URL = 'https://cloud.ouraring.com/oauth/authorize'
+    OURA_TOKEN_URL = 'https://api.ouraring.com/oauth/token'
 
     def __init__(self, flask_dev=None, migrate=False):
         # Whether or not we are running 'flask db ...'
@@ -262,6 +266,10 @@ class Config():
         self.DOCS_STORE_LOCAL = False
         self.SECRET_KEY = self.ssm.get_parameter(Name='/modobio/odyssey/app_secret',
                                                  WithDecryption=True)['Parameter']['Value']
+        self.OURA_CLIENT_ID = self.ssm.get_parameter(Name='/modobio/wearables/plugins/oura/client_id')['Parameter']['Value']
+        self.OURA_CLIENT_SECRET = self.ssm.get_parameter(Name='/modobio/wearables/plugins/oura/client_secret',
+                                                 WithDecryption=True)['Parameter']['Value']
+
 
     def mock_config(self):
         """ Set the configuration for the production environment, but with mock data. """
