@@ -1,7 +1,7 @@
 """add wearables tables
 
 Revision ID: d306fec9e8f2
-Revises: 90b2d6c84344
+Revises: c9c14471cbd4
 Create Date: 2020-08-11 17:09:58.148479
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'd306fec9e8f2'
-down_revision = '90b2d6c84344'
+down_revision = 'c9c14471cbd4'
 branch_labels = None
 depends_on = None
 
