@@ -151,8 +151,6 @@ class WearablesOuraAuthorizationEndpoint(Resource):
 @ns.route('/oura/callback/')
 class WearablesOuraCallbackEndpoint(Resource):
     @ns.doc(security=None)
-    @accepts(schema=WearablesOuraOAuthSchema, api=ns)
-    # @responds(schema=WearablesOuraSchema, api=ns)
     def get(self):
         """ Oura Ring callback URL """
         oauth_state = request.args.get('state')
