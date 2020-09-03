@@ -90,6 +90,19 @@ class WearablesOura(_Base):
     :type: int, foreign key to :attr:`ClientInfo.clientid`
     """
 
+    grant_token = Column(String(50))
+    """
+    OAuth2 access grant token to authorize Oura Cloud access.
+
+    This token is a one-time access grant token, issued immediately after the client
+    clicks 'Accept' on the Oura Ring website. It is exchanged for :attr:`access_token`,
+    but since that exchange can fail, the grant token is temporarily stored. If a token
+    exists in this column, it is a sign that the grant-to-access token exchange did
+    not complete successfully.
+
+    :type: str, max length 50
+    """
+
     access_token = Column(String(50))
     """
     OAuth2 access token to authorize Oura Cloud access.
