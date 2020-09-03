@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from flask import current_app, request, session
+from flask import current_app, request, session, url_for
 from flask_accepts import accepts, responds
 from flask_restx import Resource
 from requests_oauthlib import OAuth2Session
@@ -22,17 +22,23 @@ class WearablesEndpoint(Resource):
     @token_auth.login_required
     @responds(schema=WearablesSchema, api=ns)
     def get(self, clientid):
-        """ Wearables information for client ``clientid`` in reponse to a GET request.
+        """ Wearable device information for client ``clientid`` in reponse to a GET request.
 
-            Parameters
-            ----------
-            clientid : int
-                Client ID number.
+        This endpoint returns information on which wearables a client has. For
+        each supported wearable device, two keys exist in the returned dictionary:
+        ``has_<device_name>`` to indicate whether or not the client has this device,
+        and ``registered_<device_name>`` to indicate whether or not the registration
+        of the wearable device with Modo Bio was completed successfully.
 
-            Returns
-            -------
-            dict
-                JSON encoded dict.
+        Parameters
+        ----------
+        clientid : int
+            Client ID number.
+
+        Returns
+        -------
+        dict
+            JSON encoded dict.
         """
         check_client_existence(clientid)
 
@@ -44,19 +50,18 @@ class WearablesEndpoint(Resource):
 
     @token_auth.login_required
     @accepts(schema=WearablesSchema, api=ns)
-    @responds(schema=WearablesSchema, api=ns)
     def post(self, clientid):
         """ Create new wearables information for client ``clientid`` in reponse to a POST request.
 
-            Parameters
-            ----------
-            clientid : int
-                Client ID number.
+        Parameters
+        ----------
+        clientid : int
+            Client ID number.
 
-            Returns
-            -------
-            dict
-                JSON encoded dict.
+        Returns
+        -------
+        dict
+            JSON encoded dict.
         """
         query = Wearables.query.filter_by(clientid=clientid)
         wearables = query.one_or_none()
@@ -75,23 +80,20 @@ class WearablesEndpoint(Resource):
         db.session.add(wearables)
         db.session.commit()
 
-        return wearables
-
     @token_auth.login_required
     @accepts(schema=WearablesSchema, api=ns)
-    @responds(schema=WearablesSchema, api=ns)
     def put(self, clientid):
         """ Update wearables information for client ``clientid`` in reponse to a PUT request.
 
-            Parameters
-            ----------
-            clientid : int
-                Client ID number.
+        Parameters
+        ----------
+        clientid : int
+            Client ID number.
 
-            Returns
-            -------
-            dict
-                JSON encoded dict.
+        Returns
+        -------
+        dict
+            JSON encoded dict.
         """
         query = Wearables.query.filter_by(clientid=clientid)
         wearables = query.one_or_none()
@@ -105,26 +107,25 @@ class WearablesEndpoint(Resource):
 
         query.update(request.json)
         db.session.commit()
-        return wearables
 
 
 @ns.route('/oura/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
-class WearablesOuraEndpoint(Resource):
+class WearablesOuraAuthorizationEndpoint(Resource):
     @token_auth.login_required
-    @responds(schema=WearablesOuraSchema, api=ns)
+    @responds({'name': 'url', 'type': str}, api=ns)
     def get(self, clientid):
         """ Oura Ring access grant URL for client ``clientid`` in reponse to a GET request.
 
-            Parameters
-            ----------
-            clientid : int
-                Client ID number.
+        Parameters
+        ----------
+        clientid : int
+            Client ID number.
 
-            Returns
-            -------
-            str
-                The URL where the client needs to go to grant access to Modo Bio.
+        Returns
+        -------
+        str
+            The URL where the client needs to go to grant access to Modo Bio.
         """
         check_client_existence(clientid)
 
@@ -135,7 +136,8 @@ class WearablesOuraEndpoint(Resource):
         client_id = current_app.config['OURA_CLIENT_ID']
         base_url = current_app.config['OURA_AUTH_URL']
 
-        redirect_url = url_for('/oura/callback', _external=True)
+        # flask_restx mangles endpoint name for '/oura/callback'
+        redirect_url = url_for('api.wearables_wearables_oura_callback_endpoint', _external=True)
 
         oauth_session = OAuth2Session(client_id, redirect_uri=redirect_url)
         auth_url, state = oauth_session.authorization_url(base_url)
@@ -143,14 +145,13 @@ class WearablesOuraEndpoint(Resource):
         session['clientid'] = clientid
         session['oura_oauth_state'] = state
 
-        return auth_url
+        return {'url': auth_url}
 
 
 @ns.route('/oura/callback/')
-# @ns.doc(params={'clientid': 'Client ID number'})
 class WearablesOuraCallbackEndpoint(Resource):
     @ns.doc(security=None)
-    # @token_auth.login_required
+    @accepts(schema=WearablesOuraOAuthSchema, api=ns)
     # @responds(schema=WearablesOuraSchema, api=ns)
     def get(self):
         """ Oura Ring callback URL """
@@ -158,7 +159,11 @@ class WearablesOuraCallbackEndpoint(Resource):
         error_code = request.args.get('error')
         oauth_grant_code = request.args.get('code')
 
-        if oauth_state != session['oauth_state']:
+        oauth_state_from_session = session.get('oura_oauth_state')
+
+        # Oura does not send any extra parameters, so the only parameter we can
+        # use to identify client is state.
+        if not oauth_state_from_session or oauth_state_from_session != oauth_state:
             raise IllegalSetting(message='OAuth state changed between requests.')
         elif error_code:
             if error_code == 'access_denied':
@@ -179,7 +184,7 @@ class WearablesOuraCallbackEndpoint(Resource):
         oura_id = current_app.config['OURA_CLIENT_ID']
         oura_secret = current_app.config['OURA_CLIENT_SECRET']
         token_url = current_app.config['OURA_TOKEN_URL']
-        redirect_url = url_for('/oura/callback', _external=True)
+        redirect_url = url_for('api.wearables_wearables_oura_callback_endpoint', _external=True)
 
         oauth_session = OAuth2Session(
             oura_id,
@@ -210,4 +215,3 @@ class WearablesOuraCallbackEndpoint(Resource):
 
         return oura
         # session.clear() ?????
-
