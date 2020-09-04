@@ -69,7 +69,7 @@ class ClientPTHistory(Resource):
             raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a pt history in the database")
 
         
-        # get payload and update the current instance followd by db commit
+        # get payload and update the current instance followed by db commit
         data = request.get_json()
 
         client_pt.update(data)
@@ -92,9 +92,7 @@ class ClientChessboard(Resource):
         all_entries = Chessboard.query.filter_by(clientid=clientid).order_by(Chessboard.timestamp.asc()).all()
 
         if len(all_entries) == 0:
-            raise UserNotFound(
-                clientid=clientid, 
-                message = "this client does not yet have a chessboard assessment")
+            raise ContentNotFound()
         
         return all_entries
 

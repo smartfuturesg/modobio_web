@@ -4,7 +4,7 @@ import datetime
 import re
 import uuid
 import flask.json
-from odyssey.models.client import ClientInfo
+from odyssey.models.client import ClientInfo, RemoteRegistration
 from odyssey.api.errors import UserNotFound
 
 
@@ -14,6 +14,17 @@ def check_client_existence(clientid):
     client = ClientInfo.query.filter_by(clientid=clientid).one_or_none()
     if not client:
         raise UserNotFound(clientid)
+
+def check_remote_client_portal_validity(portal_id):
+    """
+    Ensure portal is valid. If not raise 404 error
+    """
+    remote_client = RemoteRegistration().check_portal_id(portal_id)
+
+    if not remote_client:
+        raise UserNotFound(message="Unauthorized. Portal is either expired or never existed")
+
+    return remote_client
 
 class JSONEncoder(flask.json.JSONEncoder):
     """ Converts :class:`datetime.datetime`, :class:`datetime.date`,
