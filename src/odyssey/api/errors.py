@@ -23,6 +23,16 @@ class ContentNotFound(Exception):
         
         self.status_code = 204
 
+class ContentNotFoundReturnData(Exception):
+    """Special case for when a resource has not yet been created but the client must see other data to proceed"""
+    def __init__(self, data=None, clientid = None):
+        Exception.__init__(self)
+        data.update({"clientid": clientid})
+        self.status_code = 201
+        self.message = "no instance of resource exists yet"
+
+        self.data = data
+
 class UnauthorizedUser(Exception):
     """in the case a staff member is trying to access resources they are not permitted to"""
     def __init__(self, email=None, message = None):
@@ -85,8 +95,10 @@ class IllegalSetting(Exception):
 def bad_request(message):
     return error_response(400, message)
 
-def error_response(status_code, message=None):
+def error_response(status_code, message=None, data = None):
     response = {'error': HTTP_STATUS_CODES.get(status_code, 'Unknown error')}
+    if data:
+        response.update(data)
     if message:
         response['message'] = message
     response['status_code'] = status_code
@@ -106,6 +118,11 @@ def error_client_not_found(error):
 def error_content_not_found(error):
     '''Return a custom message and 204 status code'''
     return error_response(error.status_code, error.message)
+
+@api.errorhandler(ContentNotFoundReturnData)
+def error_content_not_found(error):
+    '''Return a custom message with extra data in payload and 201 status code'''
+    return error_response(error.status_code, error.message, error.data)
 
 @api.errorhandler(IllegalSetting)
 def error_illegal_setting(error):

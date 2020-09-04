@@ -69,7 +69,7 @@ class ClientPTHistory(Resource):
             raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a pt history in the database")
 
         
-        # get payload and update the current instance followd by db commit
+        # get payload and update the current instance followed by db commit
         data = request.get_json()
 
         client_pt.update(data)
