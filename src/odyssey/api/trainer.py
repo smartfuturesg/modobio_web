@@ -163,7 +163,13 @@ class Heart(Resource):
         all_entries = HeartAssessment.query.filter_by(clientid=clientid).order_by(HeartAssessment.timestamp.asc()).all()
 
         if len(all_entries) == 0:
-            raise ContentNotFound()
+            recent_physical = MedicalPhysicalExam.query.filter_by(clientid=clientid).order_by(MedicalPhysicalExam.idx.desc()).first()
+            if not recent_physical:
+                vital_heartrate = None
+            else:
+                vital_heartrate = recent_physical.vital_heartrate
+            data_dict = {"vital_heartrate": vital_heartrate}
+            raise ContentNotFoundReturnData(clientid=clientid, data=data_dict)
 
         return all_entries
 

@@ -732,10 +732,22 @@ class HeartAssessmentSchema(ma.SQLAlchemyAutoSchema):
         model = HeartAssessment
 
     clientid = fields.Integer(missing=0)
+    vital_heartrate = fields.Float(description="vital_heartrate pulled from doctor physical data", dump_only=True)
     
     @post_load
     def make_object(self, data, **kwargs):
         return HeartAssessment(**data)
+
+    @pre_dump
+    def add_vital_heartrate(self, data, **kwargs):
+        """Add vital_heartrate from most recent medial physical"""
+        data_dict = data.__dict__
+        recent_physical = MedicalPhysicalExam.query.filter_by(clientid=data.clientid).order_by(MedicalPhysicalExam.idx.desc()).first()
+        data_dict["vital_heartrate"] = recent_physical.vital_heartrate
+        return data_dict
+
+        
+
 
 
 class MoxyAssessmentSchema(ma.SQLAlchemySchema):
