@@ -209,6 +209,10 @@ class Config():
         self.db_host = os.getenv('FLASK_DB_HOST', default='localhost')
         self.db_name = os.getenv('FLASK_DB_NAME', default='modobio')
 
+        self.OURA_CLIENT_ID = self.ssm.get_parameter(Name='/modobio/wearables/plugins/oura/client_id')['Parameter']['Value']
+        self.OURA_CLIENT_SECRET = self.ssm.get_parameter(Name='/modobio/wearables/plugins/oura/client_secret',
+                                                 WithDecryption=True)['Parameter']['Value']
+
     def development_config(self):
         """ Set the configuration for the development server. """
         self.ssm = boto3.client('ssm')
@@ -269,7 +273,6 @@ class Config():
         self.OURA_CLIENT_ID = self.ssm.get_parameter(Name='/modobio/wearables/plugins/oura/client_id')['Parameter']['Value']
         self.OURA_CLIENT_SECRET = self.ssm.get_parameter(Name='/modobio/wearables/plugins/oura/client_secret',
                                                  WithDecryption=True)['Parameter']['Value']
-
 
     def mock_config(self):
         """ Set the configuration for the production environment, but with mock data. """
