@@ -157,7 +157,7 @@ class MedicalPhysicalExam(db.Model):
     
     vital_heartrate = db.Column(db.Integer)
     """
-    Heart rate
+    Resting heart rate
     
     :type: int
     :unit: bpm
@@ -226,7 +226,7 @@ class MedicalPhysicalExam(db.Model):
 
     cardiac_rrr = db.Column(db.Boolean)
     """
-    "Regular rate and rythm" heart sound
+    "Regular rate and rhythm" heart sound
 
     :type: bool
     """
