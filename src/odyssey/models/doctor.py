@@ -5,6 +5,187 @@ All tables in this module are prefixed with 'Medical'.
 
 from odyssey import db
 
+class MedicalBloodChemistryCMP(db.Model):
+    """ Client Blood Chemistry Comprehensive Metabolic Panel (CMP) table
+
+    This table stores client's blood test CMP results
+    """
+
+    __tablename__ = 'MedicalBloodChemistryCMP'
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
+
+    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='MedicalBloodChemistryCMP_clientid_fkey',ondelete="CASCADE"), nullable=False)
+    """
+    Client ID number
+
+    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    """
+    
+    exam_date = db.Column(db.Date)
+    """
+    Exam date.
+
+    :type: datetime.date
+    """
+    
+    glucose = db.Column(db.Float)
+    """
+    Glucose level
+    
+    units: mg/dL
+    :type: float
+    """
+
+    sodium = db.Column(db.Float)
+    """
+    Sodium level
+    
+    units: mmol/L
+    :type: float
+    """
+
+    potassium = db.Column(db.Float)
+    """
+    Potassium level
+    
+    units: mmol/L
+    :type: float
+    """
+
+    carbon_dioxide = db.Column(db.Float)
+    """
+    Carbon Dioxide level
+    
+    units: mmol/L
+    :type: float
+    """
+
+    chloride = db.Column(db.Float)
+    """
+    Chloride level
+    
+    units: mmol/L
+    :type: float
+    """
+
+    magnesium = db.Column(db.Float)
+    """
+    Magnesium level
+    
+    units: mg/dL
+    :type: float
+    """
+
+    calcium = db.Column(db.Float)
+    """
+    Calcium level
+    
+    units: mg/dL
+    :type: float
+    """
+
+    phosphorus = db.Column(db.Float)
+    """
+    Phosphorus level
+    
+    units: mg/dL
+    :type: float
+    """
+
+    uric_acid = db.Column(db.Float)
+    """
+    Utic Acid level
+    
+    units: mg/dL
+    :type: float
+    """
+
+    bun = db.Column(db.Float)
+    """
+    bun level
+    
+    units: mg/dL
+    :type: float
+    """
+
+    creatinine = db.Column(db.Float)
+    """
+    creatinine level
+    
+    units: mg/dL
+    :type: float
+    """
+
+    ast = db.Column(db.Float)
+    """
+    AST level
+    
+    units: U/L
+    :type: float
+    """
+
+    alt = db.Column(db.Float)
+    """
+    ALT level
+    
+    units: U/L
+    :type: float
+    """
+
+    alk_phophatase = db.Column(db.Float)
+    """
+    Alkaline Phosphatase level
+    
+    units: U/L
+    :type: float
+    """
+
+    bilirubin = db.Column(db.Float)
+    """
+    Total bilirubin level
+    
+    units: mg/dL
+    :type: float
+    """
+
+    protein = db.Column(db.Float)
+    """
+    Protein level
+    
+    units: g/dL
+    :type: float
+    """
+
+    albumin = db.Column(db.Float)
+    """
+    Albumin level
+    
+    units: g/dL
+    :type: float
+    """
+
+    globulin = db.Column(db.Float)
+    """
+    Globulin level
+    
+    units: g/dL
+    :type: float
+    """
+
+    bunByAlbumin = db.Column(db.Float)
+    """
+    BUN/Albumnin Ratio
+    
+    units: N/A
+    :type: float
+    """    
+
 class MedicalHistory(db.Model):
     """ Medical history table
 
