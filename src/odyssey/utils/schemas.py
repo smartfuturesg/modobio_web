@@ -6,7 +6,7 @@ from marshmallow import Schema, fields, post_load, ValidationError, validates, v
 from marshmallow import post_load, post_dump, pre_dump, pre_load
 
 from odyssey import ma
-from odyssey.models.doctor import MedicalHistory, MedicalPhysicalExam
+from odyssey.models.doctor import MedicalHistory, MedicalPhysicalExam, MedicalBloodChemistryLipids
 from odyssey.models.client import (
     ClientConsent,
     ClientConsultContract,
@@ -1165,3 +1165,20 @@ class StaffSchema(ma.SQLAlchemyAutoSchema):
 
 
 
+class MedicalBloodChemistryLipidsSchema(Schema):
+        
+    idx = fields.Integer()
+    clientid = fields.Integer(missing=0)
+    exam_date = fields.Date()
+    cholesterol_total = fields.Integer(validate=validate.Range(min=0, max=500))
+    cholesterol_ldl = fields.Integer(validate=validate.Range(min=0, max=50))
+    cholesterol_hdl = fields.Integer(validate=validate.Range(min=0, max=500))
+    triglycerides = fields.Integer(validate=validate.Range(min=0, max=1000))
+    cholesterol_over_hdl = fields.Float()
+    triglycerides_over_hdl = fields.Float()
+    ldl_over_hdl = fields.Float()
+
+    
+    @post_load
+    def make_object(self, data, **kwargs):
+        return MedicalBloodChemistryLipids(**data)

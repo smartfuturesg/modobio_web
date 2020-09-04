@@ -343,3 +343,87 @@ class MedicalPhysicalExam(db.Model):
     :type: str
     """
 
+class MedicalBloodChemistryLipids(db.Model):
+    """ Blood Test - Lipid results
+
+    This table stores the blood test - thyroid results of clients.
+    """
+    __tablename__ = 'MedicalBloodChemistryLipids'
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Index
+
+    :type: int, primary key, autoincrement
+    """
+
+    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='BloodThyroid_clientid_fkey', ondelete="CASCADE"), nullable=False)
+    """
+    Client ID number
+
+    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    """
+
+    exam_date = db.Column(db.Date)
+    """
+    Date blood test was administered.
+
+    :type: :class:`datetime.date`
+    """
+
+    cholesterol_total = db.Column(db.Integer)
+    """
+    Cholesterol total
+
+    :type: Integer
+    :unit: mg/dL
+    """
+
+    cholesterol_ldl = db.Column(db.Integer)
+    """
+    Cholesterol ldl
+
+    :type: Integer
+    :unit: mg/dL
+    """
+
+    cholesterol_hdl = db.Column(db.Integer)
+    """
+    Cholesterol hdl
+
+    :type: Integer
+    :unit: mg/dL
+    """
+
+    triglycerides = db.Column(db.Integer)
+    """
+    Triglycerides
+
+    :type: Integer
+    :unit: mg/dL
+    """
+
+    #calculated values
+    cholesterol_over_hdl = db.Column(db.Float)
+    """
+    cholesterol total / cholesterol hdl
+
+    :type: float
+    :unit: #
+    """
+
+    triglycerides_over_hdl = db.Column(db.Float)
+    """
+    triglycerides / hdl
+
+    :type: float
+    :unit: #
+    """
+
+    ldl_over_hdl = db.Column(db.Float)
+    """
+    cholesterol ldl / cholesterol hdl
+
+    :type: float
+    :unit: #
+    """
