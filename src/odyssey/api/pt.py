@@ -92,9 +92,7 @@ class ClientChessboard(Resource):
         all_entries = Chessboard.query.filter_by(clientid=clientid).order_by(Chessboard.timestamp.asc()).all()
 
         if len(all_entries) == 0:
-            raise UserNotFound(
-                clientid=clientid, 
-                message = "this client does not yet have a chessboard assessment")
+            raise ContentNotFound()
         
         return all_entries
 

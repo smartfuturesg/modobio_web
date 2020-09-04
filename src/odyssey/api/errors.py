@@ -5,7 +5,7 @@ from odyssey.api import api
 
 class UserNotFound(Exception):
     """in the case a non-existent client is being requested"""
-    def __init__(self, clientid, message = None):
+    def __init__(self, clientid=None, message = None):
         Exception.__init__(self)
         if message:
             self.message = message
