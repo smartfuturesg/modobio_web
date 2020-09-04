@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from flask import current_app, request, session, url_for
 from flask_accepts import accepts, responds
@@ -178,6 +178,18 @@ class WearablesOuraCallbackEndpoint(Resource):
         if not wearables or not wearables.has_oura:
             raise UserNotFound(clientid, 'Client does not have an Oura Ring.')
 
+        # At this point we can be sure that client exists, has an oura ring,
+        # and is the client we're interested in by matching state.
+        # Make sure grant token is stored so client does not have to repeat
+        # this process in case the next part fails for some reason.
+        oura = WearablesOura.query.filter_by(clientid=clientid).one_or_none()
+        if not oura:
+            oura = WearablesOura(clientid=clientid, grant_token=oauth_grant_code)
+            db.session.add(oura)
+        else:
+            oura.grant_token = oauth_grant_code
+        db.session.commit()
+
         # Exchange access grant code for access token
         oura_id = current_app.config['OURA_CLIENT_ID']
         oura_secret = current_app.config['OURA_CLIENT_SECRET']
@@ -191,25 +203,23 @@ class WearablesOuraCallbackEndpoint(Resource):
         )
         oauth_reply = oauth_session.fetch_token(
             token_url,
-            code=oauth_code,
+            code=oauth_grant_code,
             include_client_id=True,
             client_secret=oura_secret
         )
 
-        access_token = oauth_reply['access_token']
-        expires_in = oauth_reply['expires_in']
-        refresh_token = oauth_reply['refresh_token']
+        if not oauth_session.authorized:
+            raise IllegalSetting('Shit just went deeply wrong. Redirect client to start process over.')
 
-        oura = WearablesOura(
-            clientid=clientid,
-            access_token=access_token,
-            refresh_token=refresh_token,
-            expires=datetime.datetime.utcnow() + datetime.timedelta(seconds=expires_in)
-        )
-
-        db.session.add(oura)
-        wearables.registered_oura = True
+        oura.access_token = oauth_reply['access_token']
+        oura.refresh_token = oauth_reply['refresh_token']
+        oura.token_expires = datetime.utcnow() + timedelta(seconds=oauth_reply['expires_in'])
         db.session.commit()
 
-        return oura
+        # Everything was successful
+        wearables.registered_oura = True
+        oura.grant_token = None
+        db.session.commit()
+
         # session.clear() ?????
+        # return oura
