@@ -570,3 +570,11 @@ test_fitness_questionnaire = {
   "stress_sources_other": "",
   "goal_fitness_level": 9
 }
+
+test_blood_chemistry_lipids = {
+    "exam_date" = "2020-09-08",
+    "cholesterol_total" = 200,
+    "cholesterol_ldl" = 50,
+    "cholesterol_hdl" = 100,
+    "triglycerides" = 200,
+}
