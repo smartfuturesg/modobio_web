@@ -1076,7 +1076,7 @@ class StaffSchema(ma.SQLAlchemyAutoSchema):
         new_staff.set_password(data['password'])
         return new_staff
 
-class BloodChemistryThyroidSchema(Schema):
+class MedicalBloodChemistryThyroidSchema(Schema):
         
     idx = fields.Integer()
     clientid = fields.Integer(missing=0)
@@ -1097,4 +1097,3 @@ class BloodChemistryThyroidSchema(Schema):
     @post_load
     def make_object(self, data, **kwargs):
         return MedicalBloodChemistryThyroid(**data)
-
