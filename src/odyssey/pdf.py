@@ -9,19 +9,20 @@ import io
 import pathlib
 
 from datetime import date
+from typing import Type
+
 from flask import render_template, session, current_app, _request_ctx_stack
 from flask_wtf import FlaskForm
 from PyPDF2 import PdfFileMerger
 from weasyprint import HTML, CSS
 
 from odyssey import db
-from odyssey.constants import DOCTYPE, DOCTYPE_TABLE_MAP, DOCTYPE_DOCREV_MAP
 from odyssey.models.client import *
 
 _executor = concurrent.futures.ThreadPoolExecutor(thread_name_prefix='PDF_')
 
 def to_pdf(clientid: int,
-           doctype: DOCTYPE,
+           table: Type[db.Model],
            template: str=None,
            form: FlaskForm=None):
     """ Generate and store a PDF file from a signed document.
@@ -34,9 +35,9 @@ def to_pdf(clientid: int,
     clientid : int
         Client ID number.
 
-    doctype : :class:`odyssey.constants.DOCTYPE`
-        The type of document that is being processed. Must be a member of
-        :class:`odyssey.constants.DOCTYPE`, e.g. ``DOCTYPE.consent``.
+    table : :class:`flask_sqlalchemy.SQLAlchemy.Model`
+        Table that stores information for the document about to be PDFed. Must be
+        one of the models in :mod:`odyssey.models.client`.
 
     template : str
         Filename of the Flask template for which a PDF file is requested.
@@ -67,12 +68,12 @@ def to_pdf(clientid: int,
         _to_pdf,
         _request_ctx_stack.top.copy(),
         clientid,
-        doctype,
+        table,
         template=template,
         form=form
     )
 
-def _to_pdf(req_ctx, clientid: int, doctype: DOCTYPE, template: str=None, form: FlaskForm=None):
+def _to_pdf(req_ctx, clientid, table, template=None, form=None):
     """ Generate and store a PDF file from a signed document.
 
     Don't call this function directly, use :func:`to_pdf` for non-blocking,
@@ -93,15 +94,16 @@ def _to_pdf(req_ctx, clientid: int, doctype: DOCTYPE, template: str=None, form: 
             print(f'Clientid {clientid} not found in table {ClientInfo.__tablename__}.')
             return
 
-        doctable = DOCTYPE_TABLE_MAP[doctype]
-        docrev = DOCTYPE_DOCREV_MAP[doctype]
-
-        query = local_session.query(doctable).filter_by(clientid=clientid, revision=docrev)
-        query = query.order_by(doctable.idx.desc())
+        query = (
+            local_session
+            .query(table)
+            .filter_by(clientid=clientid)
+            .order_by(table.idx.desc())
+        )
         doc = query.first()
 
         if not doc:
-            print(f'Clientid {clientid} not found in table {doctable.__tablename__}.')
+            print(f'Clientid {clientid} not found in table {table.__tablename__}.')
             return
 
         if doc.pdf_path:
@@ -127,8 +129,9 @@ def _to_pdf(req_ctx, clientid: int, doctype: DOCTYPE, template: str=None, form: 
         pdf_hash = hashlib.sha1(pdf).hexdigest()
 
         clientid = int(clientid)
+        docname = table.displayname.split()[0].lower()
 
-        filename = f'ModoBio_{doctype.name}_v{doc.revision}_client{clientid:05d}_{doc.signdate}.pdf'
+        filename = f'ModoBio_{docname}_v{doc.revision}_client{clientid:05d}_{doc.signdate}.pdf'
         bucket_name = current_app.config['DOCS_BUCKET_NAME']
 
         if current_app.config['DOCS_STORE_LOCAL']:

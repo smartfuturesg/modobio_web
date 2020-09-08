@@ -1,7 +1,6 @@
 from flask import render_template, Blueprint, session, redirect, request, url_for
 
 from odyssey import db
-from odyssey.constants import DOCTYPE, DOCTYPE_DOCREV_MAP
 from odyssey.pdf import to_pdf
 from odyssey.forms.intake import ClientInfoForm, ClientConsentForm, ClientReleaseForm, \
                                  ClientSignForm, ClientReceiveForm, \
@@ -55,10 +54,8 @@ def consent():
     if request.method == 'GET':
         return render_template('intake/consent.html', form=form)
 
-    docrev = DOCTYPE_DOCREV_MAP[DOCTYPE.consent]
-
     if not cc:
-        cc = ClientConsent(clientid=clientid, revision=docrev)
+        cc = ClientConsent(clientid=clientid, revision=ClientConsent.current_revision)
         form.populate_obj(cc)
         db.session.add(cc)
     else:
@@ -66,7 +63,7 @@ def consent():
         cc.revision = docrev
     db.session.commit()
 
-    to_pdf(clientid, DOCTYPE.consent, template='intake/consent.html', form=form)
+    to_pdf(clientid, ClientConsent, template='intake/consent.html', form=form)
     return redirect(url_for('.release'))
 
 @bp.route('/release', methods=('GET', 'POST'))
@@ -88,10 +85,8 @@ def release():
     if request.method == 'GET':
         return render_template('intake/release.html', form=form)
 
-    docrev = DOCTYPE_DOCREV_MAP[DOCTYPE.release]
-
     if not cr:
-        cr = ClientRelease(clientid=clientid, revision=docrev)
+        cr = ClientRelease(clientid=clientid, revision=ClientRelease.current_revision)
         form.populate_obj(cr)
         db.session.add(cr)
     else:
@@ -99,7 +94,7 @@ def release():
         cr.revision = docrev
     db.session.commit()
 
-    to_pdf(clientid, DOCTYPE.release, template='intake/release.html', form=form)
+    to_pdf(clientid, ClientRelease, template='intake/release.html', form=form)
     return redirect(url_for('.policies'))
 
 @bp.route('/policies', methods=('GET', 'POST'))
@@ -113,10 +108,8 @@ def policies():
     if request.method == 'GET':
         return render_template('intake/policies.html', form=form)
 
-    docrev = DOCTYPE_DOCREV_MAP[DOCTYPE.policies]
-
     if not cp:
-        cp = ClientPolicies(clientid=clientid, revision=docrev)
+        cp = ClientPolicies(clientid=clientid, revision=ClientPolicies.current_revision)
         form.populate_obj(cp)
         db.session.add(cp)
     else:
@@ -124,7 +117,7 @@ def policies():
         cp.revision = docrev
     db.session.commit()
 
-    to_pdf(clientid, DOCTYPE.policies, template='intake/policies.html', form=form)
+    to_pdf(clientid, ClientPolicies, template='intake/policies.html', form=form)
     return redirect(url_for('.send'))
 
 @bp.route('/send', methods=('GET', 'POST'))
@@ -159,10 +152,8 @@ def consult():
     if request.method == 'GET':
         return render_template('intake/consult.html', form=form)
 
-    docrev = DOCTYPE_DOCREV_MAP[DOCTYPE.consult]
-
     if not cc:
-        cc = ClientConsultContract(clientid=clientid, revision=docrev)
+        cc = ClientConsultContract(clientid=clientid, revision=ClientConsultContract.current_revision)
         form.populate_obj(cc)
         db.session.add(cc)
     else:
@@ -170,7 +161,7 @@ def consult():
         cc.revision = docrev
     db.session.commit()
 
-    to_pdf(clientid, DOCTYPE.consult, template='intake/consult.html', form=form)
+    to_pdf(clientid, ClientConsultContract, template='intake/consult.html', form=form)
     return redirect(url_for('main.index'))
 
 @bp.route('/subscription', methods=('GET', 'POST'))
@@ -184,10 +175,9 @@ def subscription():
     if request.method == 'GET':
         return render_template('intake/subscription.html', form=form)
 
-    docrev = DOCTYPE_DOCREV_MAP[DOCTYPE.subscription]
-
     if not cs:
-        cs = ClientSubscriptionContract(clientid=clientid, revision=docrev)
+        cs = ClientSubscriptionContract(clientid=clientid,
+                                        revision=ClientSubscriptionContract.current_revision)
         form.populate_obj(cs)
         db.session.add(cs)
     else:
@@ -195,7 +185,7 @@ def subscription():
         cs.revision = docrev
     db.session.commit()
 
-    to_pdf(clientid, DOCTYPE.subscription, template='intake/subscription.html', form=form)
+    to_pdf(clientid, ClientSubscriptionContract, template='intake/subscription.html', form=form)
     return redirect(url_for('main.index'))
 
 @bp.route('/individual', methods=('GET', 'POST'))
@@ -211,10 +201,9 @@ def individual():
     if request.method == 'GET':
         return render_template('intake/individual.html', form=form)
 
-    docrev = DOCTYPE_DOCREV_MAP[DOCTYPE.individual]
-
     if not cs:
-        cs = ClientIndividualContract(clientid=clientid, revision=docrev)
+        cs = ClientIndividualContract(clientid=clientid,
+                                      revision=ClientIndividualContract.current_revision)
         form.populate_obj(cs)
         db.session.add(cs)
     else:
@@ -222,5 +211,5 @@ def individual():
         cs.revision = docrev
     db.session.commit()
 
-    to_pdf(clientid, DOCTYPE.individual, template='intake/individual.html', form=form)
+    to_pdf(clientid, ClientIndividualContract, template='intake/individual.html', form=form)
     return redirect(url_for('main.index'))

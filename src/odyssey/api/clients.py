@@ -20,7 +20,6 @@ from odyssey.models.client import (
     RemoteRegistration
 )
 from odyssey.models.staff import ClientRemovalRequests
-from odyssey.constants import DOCTYPE, DOCTYPE_DOCREV_MAP, DOCTYPE_TABLE_MAP
 from odyssey.pdf import to_pdf, merge_pdfs
 from odyssey.utils.email import send_email_remote_registration_portal, send_test_email
 from odyssey.utils.misc import check_client_existence
@@ -148,9 +147,6 @@ class Clients(Resource):
 class ConsentContract(Resource):
     """client consent forms"""
 
-    doctype = DOCTYPE.consent
-    docrev = DOCTYPE_DOCREV_MAP[doctype]
-
     @token_auth.login_required
     @responds(schema=ClientConsentSchema, api=ns)
     def get(self, clientid):
@@ -176,20 +172,18 @@ class ConsentContract(Resource):
 
         client_consent_schema = ClientConsentSchema()
         client_consent_form = client_consent_schema.load(data)
+        client_consent_form.revision = ClientConsent.current_revision
         
         db.session.add(client_consent_form)
         db.session.commit()
 
-        to_pdf(clientid, self.doctype)
+        to_pdf(clientid, ClientConsent)
         return client_consent_form
 
 @ns.route('/release/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
 class ReleaseContract(Resource):
     """Client release forms"""
-
-    doctype = DOCTYPE.release
-    docrev = DOCTYPE_DOCREV_MAP[doctype]
 
     @token_auth.login_required
     @responds(schema=ClientReleaseSchema, api=ns)
@@ -218,7 +212,8 @@ class ReleaseContract(Resource):
 
         # load the client release contract into the db and flush
         client_release_contract = ClientReleaseSchema().load(data)
-        
+        client_release_contract.revision = ClientRelease.current_revision
+
         # add release contract to session and flush to get index (foreign key to the release contacts)
         db.session.add(client_release_contract)
         db.session.flush()
@@ -239,16 +234,13 @@ class ReleaseContract(Resource):
         db.session.add_all(release_contact_objects)
 
         db.session.commit()
-        to_pdf(clientid, self.doctype)
+        to_pdf(clientid, ClientRelease)
         return client_release_contract
 
 @ns.route('/policies/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
 class PoliciesContract(Resource):
     """Client policies form"""
-
-    doctype = DOCTYPE.policies
-    docrev = DOCTYPE_DOCREV_MAP[doctype]
 
     @token_auth.login_required
     @responds(schema=ClientPoliciesContractSchema, api=ns)
@@ -273,19 +265,17 @@ class PoliciesContract(Resource):
         data["clientid"] = clientid
         client_policies_schema = ClientPoliciesContractSchema()
         client_policies = client_policies_schema.load(data)
+        client_policies.revision = ClientPolicies.current_revision
 
         db.session.add(client_policies)
         db.session.commit()
-        to_pdf(clientid, self.doctype)
+        to_pdf(clientid, ClientPolicies)
         return client_policies
 
 @ns.route('/consultcontract/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
 class ConsultConstract(Resource):
     """client consult contract"""
-
-    doctype = DOCTYPE.consult
-    docrev = DOCTYPE_DOCREV_MAP[doctype]
 
     @token_auth.login_required
     @responds(schema=ClientConsultContractSchema, api=ns)
@@ -310,19 +300,17 @@ class ConsultConstract(Resource):
         data["clientid"] = clientid
         consult_contract_schema = ClientConsultContractSchema()
         client_consult = consult_contract_schema.load(data)
+        client_consult.revision = ClientConsultContract.current_revision
         
         db.session.add(client_consult)
         db.session.commit()
-        to_pdf(clientid, self.doctype)
+        to_pdf(clientid, ClientConsultContract)
         return client_consult
 
 @ns.route('/subscriptioncontract/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
 class SubscriptionContract(Resource):
     """client subscription contract"""
-
-    doctype = DOCTYPE.subscription
-    docrev = DOCTYPE_DOCREV_MAP[doctype]
 
     @token_auth.login_required
     @responds(schema=ClientSubscriptionContractSchema, api=ns)
@@ -346,19 +334,17 @@ class SubscriptionContract(Resource):
         data["clientid"] = clientid
         subscription_contract_schema = ClientSubscriptionContractSchema()
         client_subscription = subscription_contract_schema.load(data)
+        client_subscription.revision = ClientSubscriptionContract.current_revision
 
         db.session.add(client_subscription)
         db.session.commit()
-        to_pdf(clientid, self.doctype)
+        to_pdf(clientid, ClientSubscriptionContract)
         return client_subscription
 
 @ns.route('/servicescontract/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
 class IndividualContract(Resource):
     """client individual services contract"""
-
-    doctype = DOCTYPE.individual
-    docrev = DOCTYPE_DOCREV_MAP[doctype]
 
     @token_auth.login_required
     @responds(schema=ClientIndividualContractSchema, api=ns)
@@ -378,11 +364,11 @@ class IndividualContract(Resource):
     def post(self, clientid):
         """create client individual services contract object for the specified clientid"""
         data = request.get_json()
-        client_services = ClientIndividualContract(revision=self.docrev)
+        client_services = ClientIndividualContract(revision=ClientIndividualContract.current_revision)
         client_services.from_dict(clientid, data)
         db.session.add(client_services)
         db.session.commit()
-        to_pdf(clientid, self.doctype)
+        to_pdf(clientid, ClientIndividualContract)
         return client_services
 
 @ns.route('/signeddocuments/<int:clientid>/', methods=('GET',))
@@ -426,22 +412,28 @@ class SignedDocuments(Resource):
                 'Key': None
             }
 
-        for doctype, table in DOCTYPE_TABLE_MAP.items():
-            docrev = DOCTYPE_DOCREV_MAP[doctype]
+        for table in (
+            ClientPolicies,
+            ClientConsent,
+            ClientRelease,
+            ClientConsultContract,
+            ClientSubscriptionContract,
+            ClientIndividualContract
+        ):
             result = (
                 table.query
-                .filter_by(clientid=clientid, revision=docrev)
+                .filter_by(clientid=clientid)
                 .order_by(table.idx.desc())
                 .first()
             )
             if result and result.pdf_path:
+                paths.append(result.pdf_path)
                 if not current_app.config['DOCS_STORE_LOCAL']:
                     params['Key'] = result.pdf_path
-                    paths.append(result.pdf_path)
                     url = s3.generate_presigned_url('get_object', Params=params, ExpiresIn=600)
-                    urls[table.tableref] = url
+                    urls[table.displayname] = url
                 else:
-                    urls[table.tableref] = result.pdf_path
+                    urls[table.displayname] = result.pdf_path
 
         concat = merge_pdfs(paths, clientid)
         urls['All documents'] = concat

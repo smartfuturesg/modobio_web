@@ -6,7 +6,6 @@ from flask_accepts import accepts, responds
 from flask_restx import Resource, Api
 
 from odyssey.api import api
-from odyssey.constants import DOCTYPE, DOCTYPE_DOCREV_MAP
 from odyssey.api.auth import token_auth, token_auth_client
 from odyssey.api.errors import ClientNotFound, ContentNotFound, IllegalSetting, UserNotFound
 from odyssey import db
@@ -218,9 +217,6 @@ class ClientPTHistory(Resource):
 class ConsentContract(Resource):
     """client consent forms"""
 
-    doctype = DOCTYPE.consent
-    docrev = DOCTYPE_DOCREV_MAP[doctype]
-
     @token_auth_client.login_required
     @responds(schema=ClientConsentSchema, api=ns)
     def get(self):
@@ -247,11 +243,12 @@ class ConsentContract(Resource):
         data["clientid"] = remote_client.clientid
 
         client_consent_form = ClientConsentSchema().load(data)
+        client_consent_form.revision = ClientConsent.current_revision
         
         db.session.add(client_consent_form)
         db.session.commit()
 
-        to_pdf(remote_client.clientid, self.doctype)
+        to_pdf(remote_client.clientid, ClientConsent)
 
         return client_consent_form
 
@@ -260,9 +257,6 @@ class ConsentContract(Resource):
 @ns.doc(params={'tmp_registration': 'temporary registration portal hash'})
 class ReleaseContract(Resource):
     """Client release forms"""
-
-    doctype = DOCTYPE.release
-    docrev = DOCTYPE_DOCREV_MAP[doctype]
 
     @token_auth_client.login_required
     @responds(schema=ClientReleaseSchema, api=ns)
@@ -292,10 +286,11 @@ class ReleaseContract(Resource):
         data = request.get_json()
         data["clientid"] = remote_client.clientid
         client_release_form = ClientReleaseSchema().load(data)
+        client_release_form.revision = ClientRelease.current_revision
 
         db.session.add(client_release_form)
         db.session.commit()
-        to_pdf(remote_client.clientid, self.doctype)
+        to_pdf(remote_client.clientid, ClientRelease)
 
         return client_release_form
 
@@ -303,9 +298,6 @@ class ReleaseContract(Resource):
 @ns.doc(params={'tmp_registration': 'temporary registration portal hash'})
 class PoliciesContract(Resource):
     """Client policies form"""
-
-    doctype = DOCTYPE.policies
-    docrev = DOCTYPE_DOCREV_MAP[doctype]
 
     @token_auth_client.login_required
     @responds(schema=ClientPoliciesContractSchema, api=ns)
@@ -335,10 +327,11 @@ class PoliciesContract(Resource):
         data = request.get_json()
         data["clientid"] = remote_client.clientid
         client_policies = ClientPoliciesContractSchema().load(data)
+        client_policies.revision = ClientPolicies.current_revision
 
         db.session.add(client_policies)
         db.session.commit()
-        to_pdf(remote_client.clientid, self.doctype)
+        to_pdf(remote_client.clientid, ClientPolicies)
 
         return client_policies
 
@@ -347,9 +340,6 @@ class PoliciesContract(Resource):
 @ns.doc(params={'tmp_registration': 'temporary registration portal hash'})
 class ConsultConstract(Resource):
     """client consult contract"""
-
-    doctype = DOCTYPE.consult
-    docrev = DOCTYPE_DOCREV_MAP[doctype]
 
     @token_auth_client.login_required
     @responds(schema=ClientConsultContractSchema, api=ns)
@@ -376,10 +366,11 @@ class ConsultConstract(Resource):
         data = request.get_json()
         data["clientid"] = remote_client.clientid
         client_consult = ClientConsultContractSchema().load(data)
+        client_consult.revision = ClientConsultContract.current_revision
         
         db.session.add(client_consult)
         db.session.commit()
-        to_pdf(remote_client.clientid, self.doctype)
+        to_pdf(remote_client.clientid, ClientConsultContract)
 
         return client_consult
 
@@ -388,9 +379,6 @@ class ConsultConstract(Resource):
 @ns.doc(params={'tmp_registration': 'temporary registration portal hash'})
 class SubscriptionContract(Resource):
     """client subscription contract"""
-
-    doctype = DOCTYPE.subscription
-    docrev = DOCTYPE_DOCREV_MAP[doctype]
 
     @token_auth_client.login_required
     @responds(schema=ClientSubscriptionContractSchema, api=ns)
@@ -418,11 +406,12 @@ class SubscriptionContract(Resource):
         data["clientid"] = remote_client.clientid
         subscription_contract_schema = ClientSubscriptionContractSchema()
         client_subscription = subscription_contract_schema.load(data)
+        client_subscription.revision = ClientSubscriptionContract.current_revision
 
         db.session.add(client_subscription)
         db.session.commit()
 
-        to_pdf(remote_client.clientid, self.doctype)
+        to_pdf(remote_client.clientid, ClientSubscriptionContract)
 
         return client_subscription
 
@@ -430,9 +419,6 @@ class SubscriptionContract(Resource):
 @ns.doc(params={'tmp_registration': 'temporary registration portal hash'})
 class IndividualContract(Resource):
     """client individual services contract"""
-
-    doctype = DOCTYPE.individual
-    docrev = DOCTYPE_DOCREV_MAP[doctype]
 
     @token_auth_client.login_required
     @responds(schema=ClientIndividualContractSchema, api=ns)
@@ -460,11 +446,12 @@ class IndividualContract(Resource):
         data["clientid"] = remote_client.clientid
 
         client_services = ClientIndividualContractSchema().load(data)
+        client_services.revision = ClientIndividualContract.current_revision
 
         db.session.add(client_services)
         db.session.commit()
 
-        to_pdf(remote_client.clientid, self.doctype)
+        to_pdf(remote_client.clientid, ClientIndividualContract)
 
         return client_services
 
@@ -485,44 +472,58 @@ class SignedDocuments(Resource):
     @token_auth_client.login_required
     @responds(schema=SignedDocumentsSchema, api=ns)
     def get(self):
-        """Given a clientid, returns a list of URLs for all signed documents."""
+        """ Given a clientid, returns a dict of URLs for all signed documents.
+
+        Parameters
+        ----------
+        clientid : int
+            Client ID number
+
+        Returns
+        -------
+        dict
+            Keys are the display names of the documents,
+            values are URLs to the generated PDF documents.
+        """
         tmp_registration = request.args.get('tmp_registration')
         remote_client = check_remote_client_portal_validity(tmp_registration)
 
         urls = []
+        paths = []
 
-        if current_app.config['DOCS_STORE_LOCAL']:
-            for table in (ClientPolicies,
-                          ClientRelease,
-                          ClientConsent,
-                          ClientConsultContract,
-                          ClientSubscriptionContract,
-                          ClientIndividualContract):
-                contract_name = table.tableref
-                result = table.query.filter_by(clientid=remote_client.clientid).order_by(table.idx.desc()).first()
-                if result and result.pdf_path:
-                    urls.append((contract_name, result.pdf_path))
-        else:
+        if not current_app.config['DOCS_STORE_LOCAL']:
             s3 = boto3.client('s3')
             params = {
                 'Bucket': current_app.config['DOCS_BUCKET_NAME'],
                 'Key': None
             }
-
-            for table in (ClientPolicies,
-                          ClientRelease,
-                          ClientConsent,
-                          ClientConsultContract,
-                          ClientSubscriptionContract,
-                          ClientIndividualContract):
-                contract_name = table.tableref
-                result = table.query.filter_by(clientid=remote_client.clientid).order_by(table.idx.desc()).first()
-                if result and result.pdf_path:
+        for table in (
+            ClientPolicies,
+            ClientConsent,
+            ClientRelease,
+            ClientConsultContract,
+            ClientSubscriptionContract,
+            ClientIndividualContract
+        ):
+            result = (
+                table.query
+                .filter_by(clientid=remote_clientid)
+                .order_by(table.idx.desc())
+                .first()
+            )
+            if result and result.pdf_path:
+                paths.append(result.pdf_path)
+                if not current_app.config['DOCS_STORE_LOCAL']:
                     params['Key'] = result.pdf_path
                     url = s3.generate_presigned_url('get_object', Params=params, ExpiresIn=600)
-                    urls.append((contract_name, result.pdf_path))
+                    urls[table.displayname] = url
+                else:
+                    urls[table.displayname] = result.pdf_path
 
-        return {'urls':dict(urls)}
+        concat = merge_pdfs(paths, clientid)
+        urls['All documents'] = concat
+
+        return {'urls': urls}
 
 
 @ns.route('/questionnaire/')

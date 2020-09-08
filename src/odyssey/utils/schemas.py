@@ -32,7 +32,6 @@ from odyssey.models.trainer import (
     MovementAssessment,
     LungAssessment
 )
-from odyssey.constants import DOCTYPE, DOCTYPE_DOCREV_MAP
 
 class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -114,8 +113,6 @@ class ClientSummarySchema(Schema):
 
 
 class ClientConsentSchema(ma.SQLAlchemyAutoSchema):
-    doctype = DOCTYPE.consent
-    docrev = DOCTYPE_DOCREV_MAP[doctype]
     class Meta:
         model = ClientConsent
     
@@ -123,7 +120,6 @@ class ClientConsentSchema(ma.SQLAlchemyAutoSchema):
 
     @post_load
     def make_object(self, data, **kwargs):
-        data["revision"] = self.docrev
         return ClientConsent(**data)
 
 class ClientReleaseContactsSchema(ma.SQLAlchemyAutoSchema):
@@ -146,8 +142,6 @@ class ClientReleaseContactsSchema(ma.SQLAlchemyAutoSchema):
             raise ValidationError(f'release_direction entry invalid. Please use one of the following: {direction_values}')
 
 class ClientReleaseSchema(ma.SQLAlchemyAutoSchema):
-    doctype = DOCTYPE.release
-    docrev = DOCTYPE_DOCREV_MAP[doctype]
     class Meta:
         model = ClientRelease
 
@@ -158,7 +152,6 @@ class ClientReleaseSchema(ma.SQLAlchemyAutoSchema):
 
     @post_load
     def make_object(self, data, **kwargs):
-        data["revision"] = self.docrev
         data.pop("release_to")
         data.pop("release_from")
         return ClientRelease(**data)
@@ -188,8 +181,6 @@ class SignAndDateSchema(Schema):
     signature = fields.String(required=True)
 
 class ClientSubscriptionContractSchema(ma.SQLAlchemyAutoSchema):
-    doctype = DOCTYPE.subscription
-    docrev = DOCTYPE_DOCREV_MAP[doctype]
     class Meta:
         model = ClientSubscriptionContract
     
@@ -200,13 +191,10 @@ class ClientSubscriptionContractSchema(ma.SQLAlchemyAutoSchema):
         return ClientSubscriptionContract(
                     clientid = data["clientid"],
                     signature=data["signature"],
-                    signdate=data["signdate"],
-                    revision=self.docrev
+                    signdate=data["signdate"]
                     )
 
 class ClientConsultContractSchema(ma.SQLAlchemyAutoSchema):
-    doctype = DOCTYPE.consult
-    docrev = DOCTYPE_DOCREV_MAP[doctype]
     class Meta:
         model = ClientConsultContract
     
@@ -217,13 +205,10 @@ class ClientConsultContractSchema(ma.SQLAlchemyAutoSchema):
         return ClientConsultContract(
                     clientid = data["clientid"],
                     signature=data["signature"],
-                    signdate=data["signdate"],
-                    revision=self.docrev
+                    signdate=data["signdate"]
                     )
     
 class ClientPoliciesContractSchema(ma.SQLAlchemyAutoSchema):
-    doctype = DOCTYPE.policies
-    docrev = DOCTYPE_DOCREV_MAP[doctype]
     class Meta:
         model = ClientPolicies
     
@@ -234,15 +219,11 @@ class ClientPoliciesContractSchema(ma.SQLAlchemyAutoSchema):
         return ClientPolicies(
                     clientid = data["clientid"],
                     signature=data["signature"],
-                    signdate=data["signdate"],
-                    revision=self.docrev
+                    signdate=data["signdate"]
                     )
     
 
 class ClientIndividualContractSchema(ma.SQLAlchemyAutoSchema):
-    doctype = DOCTYPE.policies
-    docrev = DOCTYPE_DOCREV_MAP[doctype]
-
     class Meta:
         model = ClientIndividualContract
         
