@@ -6,7 +6,7 @@ from marshmallow import Schema, fields, post_load, ValidationError, validates, v
 from marshmallow import post_load, post_dump, pre_dump, pre_load
 
 from odyssey import ma
-from odyssey.models.doctor import MedicalHistory, MedicalPhysicalExam, MedicalBloodChemistryThyroid
+from odyssey.models.doctor import MedicalHistory, MedicalPhysicalExam, MedicalBloodChemistryThyroid, MedicalBloodChemistryA1C
 from odyssey.models.client import (
     ClientConsent,
     ClientConsultContract,
@@ -1196,3 +1196,14 @@ class MedicalBloodChemistryThyroidSchema(Schema):
     @post_load
     def make_object(self, data, **kwargs):
         return MedicalBloodChemistryThyroid(**data)
+
+class MedicalBloodChemistryA1CSchema(Schema):
+
+    idx = fields.Integer()
+    clientid = fields.Integer(missing=0)
+    exam_date = fields.Date()
+    a1c = fields.Float(validate=validate.Range(min=4.0,max=5.6))
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return MedicalBloodChemistryA1C(**data)

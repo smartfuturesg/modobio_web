@@ -7,13 +7,13 @@ from flask_restx import Resource, Api
 
 from odyssey import db
 from odyssey.models.client import ClientExternalMR
-from odyssey.models.doctor import MedicalPhysicalExam, MedicalHistory, MedicalBloodChemistryThyroid
+from odyssey.models.doctor import MedicalPhysicalExam, MedicalHistory, MedicalBloodChemistryThyroid, MedicalBloodChemistryA1C
 from odyssey.models.misc import MedicalInstitutions
 from odyssey.api import api
 from odyssey.api.auth import token_auth
 from odyssey.api.errors import UserNotFound, IllegalSetting, ContentNotFound, ExamNotFound
 from odyssey.utils.misc import check_client_existence
-from odyssey.utils.schemas import ClientExternalMREntrySchema, ClientExternalMRSchema, MedicalHistorySchema, MedicalPhysicalExamSchema, MedicalInstitutionsSchema, MedicalBloodChemistryThyroidSchema
+from odyssey.utils.schemas import ClientExternalMREntrySchema, ClientExternalMRSchema, MedicalHistorySchema, MedicalPhysicalExamSchema, MedicalInstitutionsSchema, MedicalBloodChemistryThyroidSchema, MedicalBloodChemistryA1CSchema
 ns = api.namespace('doctor', description='Operations related to doctor')
 
 @ns.route('/medicalhistory/<int:clientid>/')
@@ -197,7 +197,7 @@ class MedBloodChemistryThyroid(Resource):
         data = request.get_json()
         data["clientid"] = clientid
 
-        bt_schema = BloodChemistryThyroidSchema()
+        bt_schema = MedicalBloodChemistryThyroidSchema()
 
         client_bt = bt_schema.load(data)
 
@@ -219,7 +219,64 @@ class MedBloodChemistryThyroid(Resource):
         if not exam:
             raise ExamNotFound(data['idx'])
         
-        data['last_examination_date'] = datetime.strptime(data['last_examination_date'], "%Y-%m-%d")
+        data['exam_date'] = datetime.strptime(data['exam_date'], "%Y-%m-%d")
+
+        # update resource 
+        exam.update(data)
+
+        db.session.commit()
+
+        return exam
+
+@ns.route('/bloodchemistry/a1c/<int:clientid>/')
+@ns.doc(params={'clientId': 'Client ID number'})
+class MedBloodChemistryA1C(Resource):
+    @token_auth.login_required
+    @responds(schema=MedicalBloodChemistryA1CSchema(many=True), api=ns)
+    def get(self, clientid):
+        """returns all blood thyroid results as a json for the client ID specified"""
+        check_client_existence(clientid)
+
+        exams = MedicalBloodChemistryA1C.query.filter_by(clientid=clientid).all()
+
+        if not exams:
+            raise ContentNotFound()
+
+        return exams
+    
+    @token_auth.login_required
+    @accepts(schema=MedicalBloodChemistryA1CSchema, api=ns)
+    @responds(schema=MedicalBloodChemistryA1CSchema, status_code=201, api=ns)
+    def post(self, clientid):
+        """creates new db entry for blood test results as a json for the blood exam ID specified"""
+        check_client_existence(clientid)
+
+        data = request.get_json()
+        data["clientid"] = clientid
+
+        bt_schema = MedicalBloodChemistryA1CSchema()
+
+        client_bt = bt_schema.load(data)
+
+        db.session.add(client_bt)
+        db.session.commit()
+
+        return client_bt
+
+    @token_auth.login_required
+    @accepts(schema=MedicalBloodChemistryA1CSchema, api=ns)
+    @responds(schema=MedicalBloodChemistryA1CSchema, api=ns)
+    def put(self, clientid):
+        """edit exam info"""
+        # get payload
+        data = request.get_json()
+
+        exam = MedicalBloodChemistryA1C.query.filter_by(idx=data['idx']).first()
+
+        if not exam:
+            raise ExamNotFound(data['idx'])
+        
+        data['exam_date'] = datetime.strptime(data['exam_date'], "%Y-%m-%d")
 
         # update resource 
         exam.update(data)
