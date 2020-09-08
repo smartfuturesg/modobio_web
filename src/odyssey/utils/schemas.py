@@ -9,7 +9,8 @@ from odyssey import ma
 from odyssey.models.doctor import (
     MedicalHistory, 
     MedicalPhysicalExam,
-    MedicalBloodChemistryCBC
+    MedicalBloodChemistryCBC,
+    MedicalBloodChemistryThyroid
 )
 from odyssey.models.client import (
     ClientConsent,
@@ -1213,5 +1214,24 @@ class StaffSchema(ma.SQLAlchemyAutoSchema):
         new_staff.set_password(data['password'])
         return new_staff
 
-
-
+class MedicalBloodChemistryThyroidSchema(Schema):
+        
+    idx = fields.Integer()
+    clientid = fields.Integer(missing=0)
+    exam_date = fields.Date()
+    t3_resin_uptake = fields.Integer(validate=validate.Range(min=25,max=35))
+    thyroglobulin = fields.Integer(validate=validate.Range(min=0,max=20))
+    thyroidial_iodine_uptake = fields.Integer(validate=validate.Range(min=5,max=30))
+    tsh = fields.Float(validate=validate.Range(min=0.5,max=4.0))
+    tsi = fields.Integer(validate=validate.Range(min=0,max=130))
+    thyroxine_binding_globulin = fields.Integer(validate=validate.Range(min=12,max=27))
+    thyroxine_index = fields.Integer(validate=validate.Range(min=5,max=12))
+    t4_serum_total = fields.Integer(validate=validate.Range(min=5,max=12))
+    t4_serum_free = fields.Float(validate=validate.Range(min=0.8,max=1.8))
+    t3_serum_total = fields.Integer(validate=validate.Range(min=80,max=180))
+    t3_serum_reverse = fields.Integer(validate=validate.Range(min=20,max=40))
+    t3_serum_free = fields.Float(validate=validate.Range(min=2.3,max=4.2))
+    
+    @post_load
+    def make_object(self, data, **kwargs):
+        return MedicalBloodChemistryThyroid(**data)
