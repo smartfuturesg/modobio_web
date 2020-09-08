@@ -2,7 +2,7 @@
 Database tables for the doctor's portion of the Modo Bio Staff application.
 All tables in this module are prefixed with 'Medical'.
 """
-
+from datetime import datetime
 from odyssey import db
 
 class MedicalHistory(db.Model):
@@ -426,4 +426,185 @@ class MedicalBloodChemistryLipids(db.Model):
 
     :type: float
     :unit: #
+    """
+
+class MedicalBloodChemistryThyroid(db.Model):
+    """ Blood Test - Thyroid results
+
+    This table stores the blood test - thyroid results of clients.
+    """
+    __tablename__ = 'MedicalBloodChemistryThyroid'
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Index
+
+    :type: int, primary key, autoincrement
+    """
+
+    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='BloodThyroid_clientid_fkey', ondelete="CASCADE"), nullable=False)
+    """
+    Client ID number
+
+    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    """
+
+    exam_date = db.Column(db.Date)
+    """
+    Date blood test was administered.
+
+    :type: :class:`datetime.date`
+    """
+
+    cholesterol_total = db.Column(db.Integer)
+    """
+    Cholesterol total
+
+    :type: Integer
+    :unit: mg/dL
+    """
+
+    cholesterol_ldl = db.Column(db.Integer)
+    """
+    Cholesterol ldl
+
+    :type: Integer
+    :unit: mg/dL
+    """
+
+    cholesterol_hdl = db.Column(db.Integer)
+    """
+    Cholesterol hdl
+
+    :type: Integer
+    :unit: mg/dL
+    """
+
+    triglycerides = db.Column(db.Integer)
+    """
+    Triglycerides
+
+    :type: Integer
+    :unit: mg/dL
+    """
+
+    #calculated values
+    cholesterol_over_hdl = db.Column(db.Float)
+    """
+    cholesterol total / cholesterol hdl
+
+    :type: float
+    :unit: #
+    """
+
+    triglycerides_over_hdl = db.Column(db.Float)
+    """
+    triglycerides / hdl
+
+    :type: float
+    :unit: #
+    """
+
+    ldl_over_hdl = db.Column(db.Float)
+    """
+    cholesterol ldl / cholesterol hdl
+
+    :type: float
+    :unit: #
+    """
+
+    t3_resin_uptake = db.Column(db.Integer)
+    """
+    T3 Resin Uptake(%)
+
+    :type: integer
+    :units: %
+    """
+
+    thyroglobulin = db.Column(db.Integer)
+    """
+    Thyroglobulin, serum
+
+    :type: integer
+    :units: ng/mL
+    """
+
+    thyroidial_iodine_uptake = db.Column(db.Integer)
+    """
+    Thyroidal Iodine Uptake (I-123)
+
+    :type: integer
+    :units: %
+    """
+
+    tsh = db.Column(db.Float)
+    """
+    Thyroid-stimulating hormone(TSH), serum
+
+    :type: float
+    :units: μU/mL
+    """
+
+    tsi = db.Column(db.Integer)
+    """
+    Thyroid-stimulating immunoglobulin(TSI)
+
+    :type: integer
+    :units: %
+    """
+
+    thyroxine_binding_globulin = db.Column(db.Integer)
+    """
+    Thyroxine-binding globulin, serum
+
+    :type: integer
+    :units: μg/mL
+    """
+
+    thyroxine_index = db.Column(db.Integer)
+    """
+    Thyroxine index, free (estimate)
+
+    :type: integer
+    :units: #
+    """
+
+    t4_serum_total = db.Column(db.Integer)
+    """
+    Thyroxine (T4), serum total
+
+    :type: integer
+    :units: μg/dL
+    """
+
+    t4_serum_free = db.Column(db.Float)
+    """
+    Thyroxine (T4), serum free
+
+    :type: float
+    :units: ng/dL
+    """
+
+    t3_serum_total = db.Column(db.Integer)
+    """
+    Triiodothyronine (T3), serum total
+
+    :type: integer
+    :units: ng/dL
+    """
+
+    t3_serum_reverse = db.Column(db.Integer)
+    """
+    Triiodothyronine (T3), serum reverse
+
+    :type: integer
+    :units: ng/dL
+    """
+
+    t3_serum_free = db.Column(db.Float)
+    """
+    Triiodothyronine (T3), serum free
+
+    :type: integer
+    :units: pg/mL
     """
