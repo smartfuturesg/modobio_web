@@ -13,6 +13,7 @@ lib/
 dist/
 sdist/
 *.egg-info/
+.eggs
 
 # Sphinx
 .buildinfo
