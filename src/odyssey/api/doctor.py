@@ -194,7 +194,12 @@ class MedBloodChemistryThyroid(Resource):
         check_client_existence(clientid)
 
         data = request.get_json()
-        data["clientid"] = clientid
+        data['clientid'] = clientid
+
+        #calculated values
+        data['cholesterol_over_hdl'] = data['cholesterol'] // data['cholesterol_hdl']
+        data['triglycerides_over_ldl'] = data['triglycerides'] // data['cholesterol_ldl']
+        data['ldl_over_hdl'] = data['cholesterol_ldl'] // data['cholesterol_hdl']
 
         bt_schema = BloodChemistryLipidsSchema()
 
@@ -223,6 +228,11 @@ class MedBloodChemistryThyroid(Resource):
         
         data['last_examination_date'] = datetime.strptime(data['last_examination_date'], "%Y-%m-%d")
         
+        #calculated values
+        data['cholesterol_over_hdl'] = data['cholesterol'] // data['cholesterol_hdl']
+        data['triglycerides_over_ldl'] = data['triglycerides'] // data['cholesterol_ldl']
+        data['ldl_over_hdl'] = data['cholesterol_ldl'] // data['cholesterol_hdl']
+
         # update resource 
         exam.update(data)
 
