@@ -220,11 +220,9 @@ class MedBloodChemistryThyroid(Resource):
 
         exam = MedicalBloodChemistryLipids.query.filter_by(idx=data['idx']).first()
 
-        """
-        uncomment after merging errors.py from master
         if not exam:
             raise ExamNotFound(data['idx'])
-        """
+        
         
         data['last_examination_date'] = datetime.strptime(data['last_examination_date'], "%Y-%m-%d")
         
