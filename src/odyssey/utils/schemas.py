@@ -252,10 +252,11 @@ class ClientIndividualContractSchema(ma.SQLAlchemyAutoSchema):
         return ClientIndividualContract(**data)
 
 class SignedDocumentsSchema(Schema):
-    """
-        list of document urls
-    """
-    urls = fields.Dict()
+    """ Dictionary of all signed documents and the URL to the PDF file. """
+    urls = fields.Dict(
+        keys=fields.String(description='Document display name'),
+        values=fields.String(description='URL to PDF file of document.')
+    )
 
 
 """

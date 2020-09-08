@@ -8,8 +8,10 @@ import hashlib
 import io
 import pathlib
 
+from datetime import date
 from flask import render_template, session, current_app, _request_ctx_stack
 from flask_wtf import FlaskForm
+from PyPDF2 import PdfFileMerger
 from weasyprint import HTML, CSS
 
 from odyssey import db
@@ -81,6 +83,7 @@ def _to_pdf(req_ctx, clientid: int, doctype: DOCTYPE, template: str=None, form: 
     # local to this thread, with the same configuration.
     local_session = db.create_scoped_session()
     with req_ctx:
+        ### Load data and perform checks
         client = local_session.query(ClientInfo).filter_by(clientid=clientid).one_or_none()
 
         if not client:
@@ -105,6 +108,7 @@ def _to_pdf(req_ctx, clientid: int, doctype: DOCTYPE, template: str=None, form: 
             # PDF already exists, won't save again
             return
 
+        ### Read HTML page
         cssfile = pathlib.Path(__file__).parent / 'static' / 'style.css'
         css = CSS(filename=cssfile)
 
@@ -118,6 +122,7 @@ def _to_pdf(req_ctx, clientid: int, doctype: DOCTYPE, template: str=None, form: 
             # TODO: get html of page from React frontend
             html = '<html><head></head><body>Nothing here yet</body></html>'
 
+        ### Generate PDF document
         pdf = HTML(string=html).write_pdf(stylesheets=[css])
         pdf_hash = hashlib.sha1(pdf).hexdigest()
 
@@ -150,3 +155,75 @@ def _to_pdf(req_ctx, clientid: int, doctype: DOCTYPE, template: str=None, form: 
 
         if current_app.config['DEBUG']:
             print('PDF stored at:', pdf_path)
+
+def merge_pdfs(documents: list, clientid: int) -> str:
+    """ Merge multiple pdf files into a single pdf.
+
+    Generated document is stored in an S3 bucket with a temp prefix. It expires
+    after 1 day. The link to the generated document expires after 10 minutes.
+
+    Parameters
+    ----------
+    documents : list(str)
+        List of links where PDF documents are stored.
+
+    Returns
+    -------
+    str
+        Link to merged PDF file.
+    """
+    bucket_name = current_app.config['DOCS_BUCKET_NAME']
+
+    merger = PdfFileMerger()
+    bufs = []
+    if current_app.config['DOCS_STORE_LOCAL']:
+        for doc in documents:
+            try:
+                merger.append(doc)
+            except FileNotFoundError:
+                # Temporary file may have changed or disappeared if flask was restarted
+                pass
+    else:
+        s3 = boto3.client('s3')
+        for doc in documents:
+            doc_buf = io.BytesIO()
+            s3.download_fileobj(bucket_name, doc, doc_buf)
+            doc_buf.seek(0)
+            bufs.append(doc_buf)
+            merger.append(doc_buf)
+
+    pdf_buf = io.BytesIO()
+    merger.write(pdf_buf)
+    merger.close()
+    for buf in bufs:
+        buf.close()
+    pdf_buf.seek(0)
+
+    clientid = int(clientid)
+    signdate = date.today().isoformat()
+    filename = f'ModoBio_client{clientid:05d}_{signdate}.pdf'
+
+    if current_app.config['DOCS_STORE_LOCAL']:
+        path = pathlib.Path(bucket_name)
+        path.mkdir(parents=True, exist_ok=True)
+
+        fullname = path / filename
+
+        with open(fullname, mode='wb') as fh:
+            fh.write(pdf_buf.read())
+
+        pdf_path = fullname.as_posix()
+    else:
+        # Anything with a 'temp/' prefix in this bucket is set to be deleted after 1 day.
+        fullname = f'temp/{filename}'
+
+        s3 = boto3.client('s3')
+        s3.upload_fileobj(pdf_buf, bucket_name, fullname)
+
+        params = {
+            'Bucket': bucket_name,
+            'Key': fullname
+        }
+        pdf_path = s3.generate_presigned_url('get_object', Params=params, ExpiresIn=600)
+
+    return pdf_path

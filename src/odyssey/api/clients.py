@@ -20,8 +20,8 @@ from odyssey.models.client import (
     RemoteRegistration
 )
 from odyssey.models.staff import ClientRemovalRequests
-from odyssey.constants import DOCTYPE, DOCTYPE_DOCREV_MAP
-from odyssey.pdf import to_pdf
+from odyssey.constants import DOCTYPE, DOCTYPE_DOCREV_MAP, DOCTYPE_TABLE_MAP
+from odyssey.pdf import to_pdf, merge_pdfs
 from odyssey.utils.email import send_email_remote_registration_portal, send_test_email
 from odyssey.utils.misc import check_client_existence
 from odyssey.utils.schemas import (
@@ -401,43 +401,53 @@ class SignedDocuments(Resource):
     @token_auth.login_required
     @responds(schema=SignedDocumentsSchema, api=ns)
     def get(self, clientid):
-        """Given a clientid, returns a list of URLs for all signed documents."""
+        """ Given a clientid, returns a dict of URLs for all signed documents.
+
+        Parameters
+        ----------
+        clientid : int
+            Client ID number
+
+        Returns
+        -------
+        dict
+            Keys are the display names of the documents,
+            values are URLs to the generated PDF documents.
+        """
         check_client_existence(clientid)
 
-        urls = []
+        urls = {}
+        paths = []
 
-        if current_app.config['DOCS_STORE_LOCAL']:
-            for table in (ClientPolicies,
-                          ClientRelease,
-                          ClientConsent,
-                          ClientConsultContract,
-                          ClientSubscriptionContract,
-                          ClientIndividualContract):
-                contract_name = table.tableref
-                result = table.query.filter_by(clientid=clientid).order_by(table.idx.desc()).first()
-                if result and result.pdf_path:
-                    urls.append((contract_name, result.pdf_path))
-        else:
+        if not current_app.config['DOCS_STORE_LOCAL']:
             s3 = boto3.client('s3')
             params = {
                 'Bucket': current_app.config['DOCS_BUCKET_NAME'],
                 'Key': None
             }
 
-            for table in (ClientPolicies,
-                          ClientRelease,
-                          ClientConsent,
-                          ClientConsultContract,
-                          ClientSubscriptionContract,
-                          ClientIndividualContract):
-                contract_name = table.tableref
-                result = table.query.filter_by(clientid=clientid).order_by(table.idx.desc()).first()
-                if result and result.pdf_path:
+        for doctype, table in DOCTYPE_TABLE_MAP.items():
+            docrev = DOCTYPE_DOCREV_MAP[doctype]
+            result = (
+                table.query
+                .filter_by(clientid=clientid, revision=docrev)
+                .order_by(table.idx.desc())
+                .first()
+            )
+            if result and result.pdf_path:
+                if not current_app.config['DOCS_STORE_LOCAL']:
                     params['Key'] = result.pdf_path
+                    paths.append(result.pdf_path)
                     url = s3.generate_presigned_url('get_object', Params=params, ExpiresIn=600)
-                    urls.append((contract_name, result.pdf_path))
+                    urls[table.tableref] = url
+                else:
+                    urls[table.tableref] = result.pdf_path
 
-        return {'urls':dict(urls)}
+        concat = merge_pdfs(paths, clientid)
+        urls['All documents'] = concat
+
+        return {'urls': urls}
+
 
 @ns.route('/remoteregistration/new/')
 class NewRemoteRegistration(Resource):
