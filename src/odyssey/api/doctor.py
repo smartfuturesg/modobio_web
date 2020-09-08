@@ -7,14 +7,90 @@ from flask_restx import Resource, Api
 
 from odyssey import db
 from odyssey.models.client import ClientExternalMR
-from odyssey.models.doctor import MedicalPhysicalExam, MedicalHistory, MedicalBloodChemistryThyroid
+from odyssey.models.doctor import MedicalPhysicalExam, MedicalHistory, MedicalBloodChemistryCBC, MedicalBloodChemistryThyroid
 from odyssey.models.misc import MedicalInstitutions
 from odyssey.api import api
 from odyssey.api.auth import token_auth
 from odyssey.api.errors import UserNotFound, IllegalSetting, ContentNotFound, ExamNotFound
 from odyssey.utils.misc import check_client_existence
-from odyssey.utils.schemas import ClientExternalMREntrySchema, ClientExternalMRSchema, MedicalHistorySchema, MedicalPhysicalExamSchema, MedicalInstitutionsSchema, MedicalBloodChemistryThyroidSchema
+from odyssey.utils.schemas import (
+    ClientExternalMREntrySchema, 
+    ClientExternalMRSchema, 
+    MedicalHistorySchema, 
+    MedicalPhysicalExamSchema,
+    MedicalInstitutionsSchema,
+    BloodChemistryCBCSchema,
+    MedicalBloodChemistryThyroidSchema
+)
+
 ns = api.namespace('doctor', description='Operations related to doctor')
+
+@ns.route('/bloodtest/cbc/<int:clientid>/')
+@ns.doc(params={'clientid': 'Client ID number'})
+class MedBloodChemistryCBC(Resource):
+    """
+       Records client's Complete Blood Count Blood Test Results
+    """
+
+    @ns.doc(security='apikey')
+    @token_auth.login_required
+    @responds(schema=BloodChemistryCBCSchema(many=True), api=ns)
+    def get(self,clientid):
+        """ Returns client's historical CBC results """
+        
+        check_client_existence(clientid)
+
+        data = MedicalBloodChemistryCBC.query.filter_by(clientid=clientid).all()
+        if not data:
+            raise ContentNotFound()
+        return data
+
+    @token_auth.login_required
+    @accepts(schema=BloodChemistryCBCSchema, api=ns)
+    @ns.doc(security='apikey')
+    @responds(schema=BloodChemistryCBCSchema, api=ns, status_code=201)
+    def post(self,clientid):
+        check_client_existence(clientid)
+        """create new db entry for CBC"""
+        data = request.get_json()
+        data["clientid"] = clientid
+        
+        """ Additional ratio calculations from payload """
+        data['plateletsByMch'] = data['platelets']/data['mch']
+        data['plateletsByLymphocyte'] = data['platelets']/data['abs_lymphocytes']
+        data['neutrophilByLymphocyte'] = data['abs_neutrophils']/data['abs_lymphocytes']
+        data['lymphocyteByMonocyte'] = data['abs_lymphocytes']/data['abs_monocytes']
+
+        cbc_schema = BloodChemistryCBCSchema()
+        cbc_data = cbc_schema.load(data)
+        db.session.add(cbc_data)
+        db.session.commit()
+        return cbc_data
+
+    @token_auth.login_required
+    @accepts(schema=BloodChemistryCBCSchema, api=ns)
+    @responds(schema=BloodChemistryCBCSchema, api=ns)
+    def put(self, clientid):
+        """ updates client's CMP test input based on index """
+        check_client_existence(clientid)
+        # get payload and update the current instance followd by db commit
+        data = request.get_json()
+        cbc_data = MedicalBloodChemistryCBC.query.filter_by(idx=data['idx']).one_or_none()
+
+        if not cbc_data:
+            raise ExamNotFound(data['idx'])
+        
+        # update resource
+        """ Additional ratio calculations from payload """
+        data['plateletsByMch'] = data['platelets']/data['mch']
+        data['plateletsByLymphocyte'] = data['platelets']/data['abs_lymphocytes']
+        data['neutrophilByLymphocyte'] = data['abs_neutrophils']/data['abs_lymphocytes']
+        data['lymphocyteByMonocyte'] = data['abs_lymphocytes']/data['abs_monocytes']
+        cbc_data.update(data)
+        db.session.commit()
+
+        return cbc_data
+
 
 @ns.route('/medicalhistory/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})

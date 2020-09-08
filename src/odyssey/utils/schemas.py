@@ -6,7 +6,12 @@ from marshmallow import Schema, fields, post_load, ValidationError, validates, v
 from marshmallow import post_load, post_dump, pre_dump, pre_load
 
 from odyssey import ma
-from odyssey.models.doctor import MedicalHistory, MedicalPhysicalExam, MedicalBloodChemistryThyroid
+from odyssey.models.doctor import (
+    MedicalHistory, 
+    MedicalPhysicalExam,
+    MedicalBloodChemistryCBC,
+    MedicalBloodChemistryThyroid
+)
 from odyssey.models.client import (
     ClientConsent,
     ClientConsultContract,
@@ -1079,6 +1084,40 @@ class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
 """
     Schemas for the doctor's API
 """
+class BloodChemistryCBCSchema(Schema):
+
+    # Validate each payload entry
+    idx = fields.Integer()
+    clientid = fields.Integer(missing=0)
+    exam_date = fields.DateTime(format='%Y-%m-%d')
+    rbc = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    hemoglobin = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    hematocrit = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    mcv = fields.Float(description="",validate=validate.Range(min=0, max=200),required=True)
+    mch = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    mchc = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    rdw = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    wbc = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    rel_neutrophils = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    abs_neutrophils = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    rel_lymphocytes = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    abs_lymphocytes = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    rel_monocytes = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    abs_monocytes = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    rel_eosinophils = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    abs_eosinophils = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    basophils = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    platelets = fields.Float(description="",validate=validate.Range(min=0, max=500),required=True)
+
+    plateletsByMch = fields.Float()
+    plateletsByLymphocyte = fields.Float()
+    neutrophilByLymphocyte = fields.Float()
+    lymphocyteByMonocyte = fields.Float()
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return MedicalBloodChemistryCBC(**data)
+
 
 class MedicalHistorySchema(ma.SQLAlchemyAutoSchema):
     class Meta:
