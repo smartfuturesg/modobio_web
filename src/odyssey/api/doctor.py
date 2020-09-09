@@ -1,4 +1,3 @@
-
 from datetime import datetime
 
 from flask import request
@@ -278,7 +277,7 @@ class MedBloodChemistryThyroid(Resource):
             data['ldl_over_hdl'] = data['cholesterol_ldl'] / data['cholesterol_hdl']
 
         if data['cholesterol_ldl'] != 0:
-            data['triglycerides_over_hdl'] = data['triglycerides'] / data['cholesterol_ldl']
+            data['triglycerides_over_hdl'] = data['triglycerides'] / data['cholesterol_hdl']
         
 
         bt_schema = MedicalBloodChemistryLipidsSchema()
@@ -312,7 +311,7 @@ class MedBloodChemistryThyroid(Resource):
             data['ldl_over_hdl'] = data['cholesterol_ldl'] / data['cholesterol_hdl']
 
         if data['cholesterol_ldl'] != 0:
-            data['triglycerides_over_hdl'] = data['triglycerides'] / data['cholesterol_ldl']
+            data['triglycerides_over_hdl'] = data['triglycerides'] / data['cholesterol_hdl']
 
         # update resource 
         exam.update(data)
