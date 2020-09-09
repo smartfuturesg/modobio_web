@@ -6,9 +6,10 @@ from marshmallow import Schema, fields, post_load, ValidationError, validates, v
 from marshmallow import post_load, post_dump, pre_dump, pre_load
 
 from odyssey import ma
-from odyssey.models.doctor import (
-    MedicalHistory, 
+from odyssey.models.doctor import ( 
+    MedicalHistory,
     MedicalPhysicalExam,
+    MedicalBloodChemistryCMP,
     MedicalBloodChemistryCBC,
     MedicalBloodChemistryThyroid,
     MedicalImaging
@@ -1060,7 +1061,7 @@ class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
             if item not in self.lifestyle_goals_list:
                 raise ValidationError(f"{item} not a valid option. must be in {self.lifestyle_goals_list}")
         if len(value) > 3:
-            ValidatioinError("limit list length to 3 choices")
+            ValidationError("limit list length to 3 choices")
 
 
     @validates('physical_goals')
@@ -1069,7 +1070,7 @@ class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
             if item not in self.physical_goals_list:
                 raise ValidationError(f"{item} not a valid option. must be in {self.physical_goals_list}")
         if len(value) > 3:
-            ValidatioinError("limit list length to 3 choices")
+            ValidationError("limit list length to 3 choices")
     
     @validates('trainer_expectation')
     def validate_trainer_expectations(self, value):
@@ -1142,6 +1143,37 @@ class BloodChemistryCBCSchema(Schema):
     @post_load
     def make_object(self, data, **kwargs):
         return MedicalBloodChemistryCBC(**data)
+
+class BloodChemistryCMPSchema(Schema):
+
+    # Validate each payload entry
+    idx = fields.Integer()
+    clientid = fields.Integer(missing=0)
+    exam_date = fields.DateTime(format='%Y-%m-%d')
+    glucose = fields.Float(description="",validate=validate.Range(min=0, max=200),required=True)
+    sodium = fields.Float(description="",validate=validate.Range(min=0, max=500),required=True)
+    potassium = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    carbon_dioxide = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    chloride = fields.Float(description="",validate=validate.Range(min=0, max=500),required=True)
+    magnesium = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    calcium = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    phosphorus = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    uric_acid = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    bun = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    creatinine = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    ast = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    alt = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    alk_phophatase = fields.Float(description="",validate=validate.Range(min=0, max=200),required=True)
+    bilirubin = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    protein = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    albumin = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    globulin = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+
+    bunByAlbumin = fields.Float()
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return MedicalBloodChemistryCMP(**data)
 
 
 class MedicalHistorySchema(ma.SQLAlchemyAutoSchema):
