@@ -9,7 +9,9 @@ from odyssey import ma
 from odyssey.models.doctor import ( 
     MedicalHistory,
     MedicalPhysicalExam,
-    MedicalBloodChemistryCMP
+    MedicalBloodChemistryCMP,
+    MedicalBloodChemistryCBC,
+    MedicalBloodChemistryThyroid
 )
 from odyssey.models.client import (
     ClientConsent,
@@ -736,10 +738,22 @@ class HeartAssessmentSchema(ma.SQLAlchemyAutoSchema):
         model = HeartAssessment
 
     clientid = fields.Integer(missing=0)
+    vital_heartrate = fields.Float(description="vital_heartrate pulled from doctor physical data", dump_only=True)
     
     @post_load
     def make_object(self, data, **kwargs):
         return HeartAssessment(**data)
+
+    @pre_dump
+    def add_vital_heartrate(self, data, **kwargs):
+        """Add vital_heartrate from most recent medial physical"""
+        data_dict = data.__dict__
+        recent_physical = MedicalPhysicalExam.query.filter_by(clientid=data.clientid).order_by(MedicalPhysicalExam.idx.desc()).first()
+        data_dict["vital_heartrate"] = recent_physical.vital_heartrate
+        return data_dict
+
+        
+
 
 
 class MoxyAssessmentSchema(ma.SQLAlchemySchema):
@@ -1046,7 +1060,7 @@ class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
             if item not in self.lifestyle_goals_list:
                 raise ValidationError(f"{item} not a valid option. must be in {self.lifestyle_goals_list}")
         if len(value) > 3:
-            ValidatioinError("limit list length to 3 choices")
+            ValidationError("limit list length to 3 choices")
 
 
     @validates('physical_goals')
@@ -1055,7 +1069,7 @@ class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
             if item not in self.physical_goals_list:
                 raise ValidationError(f"{item} not a valid option. must be in {self.physical_goals_list}")
         if len(value) > 3:
-            ValidatioinError("limit list length to 3 choices")
+            ValidationError("limit list length to 3 choices")
     
     @validates('trainer_expectation')
     def validate_trainer_expectations(self, value):
@@ -1071,6 +1085,40 @@ class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
 """
     Schemas for the doctor's API
 """
+class BloodChemistryCBCSchema(Schema):
+
+    # Validate each payload entry
+    idx = fields.Integer()
+    clientid = fields.Integer(missing=0)
+    exam_date = fields.DateTime(format='%Y-%m-%d')
+    rbc = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    hemoglobin = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    hematocrit = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    mcv = fields.Float(description="",validate=validate.Range(min=0, max=200),required=True)
+    mch = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    mchc = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    rdw = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    wbc = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    rel_neutrophils = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    abs_neutrophils = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    rel_lymphocytes = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    abs_lymphocytes = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    rel_monocytes = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    abs_monocytes = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    rel_eosinophils = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    abs_eosinophils = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    basophils = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    platelets = fields.Float(description="",validate=validate.Range(min=0, max=500),required=True)
+
+    plateletsByMch = fields.Float()
+    plateletsByLymphocyte = fields.Float()
+    neutrophilByLymphocyte = fields.Float()
+    lymphocyteByMonocyte = fields.Float()
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return MedicalBloodChemistryCBC(**data)
+
 class BloodChemistryCMPSchema(Schema):
 
     # Validate each payload entry
@@ -1198,5 +1246,24 @@ class StaffSchema(ma.SQLAlchemyAutoSchema):
         new_staff.set_password(data['password'])
         return new_staff
 
-
-
+class MedicalBloodChemistryThyroidSchema(Schema):
+        
+    idx = fields.Integer()
+    clientid = fields.Integer(missing=0)
+    exam_date = fields.Date()
+    t3_resin_uptake = fields.Integer(validate=validate.Range(min=25,max=35))
+    thyroglobulin = fields.Integer(validate=validate.Range(min=0,max=20))
+    thyroidial_iodine_uptake = fields.Integer(validate=validate.Range(min=5,max=30))
+    tsh = fields.Float(validate=validate.Range(min=0.5,max=4.0))
+    tsi = fields.Integer(validate=validate.Range(min=0,max=130))
+    thyroxine_binding_globulin = fields.Integer(validate=validate.Range(min=12,max=27))
+    thyroxine_index = fields.Integer(validate=validate.Range(min=5,max=12))
+    t4_serum_total = fields.Integer(validate=validate.Range(min=5,max=12))
+    t4_serum_free = fields.Float(validate=validate.Range(min=0.8,max=1.8))
+    t3_serum_total = fields.Integer(validate=validate.Range(min=80,max=180))
+    t3_serum_reverse = fields.Integer(validate=validate.Range(min=20,max=40))
+    t3_serum_free = fields.Float(validate=validate.Range(min=2.3,max=4.2))
+    
+    @post_load
+    def make_object(self, data, **kwargs):
+        return MedicalBloodChemistryThyroid(**data)
