@@ -1,4 +1,3 @@
-
 import time 
 
 from flask.json import dumps
@@ -10,8 +9,8 @@ from tests.data import test_get_blood_chemistry_lipids
 
 def test_post_blood_chemistry_lipids(test_client, init_database):
     """
-    GIVEN a api end point for medical history assessment
-    WHEN the '/doctor/medicalhistory/<client id>' resource  is requested (POST)
+    GIVEN a api end point for blood test - lipids
+    WHEN the '/doctor/bloodchemistry/lipids/<client id>' resource  is requested (POST)
     THEN check the response is valid
     """
     # get staff authorization to view client data
@@ -22,7 +21,7 @@ def test_post_blood_chemistry_lipids(test_client, init_database):
     payload = test_get_blood_chemistry_lipids
     
     # send get request for client info on clientid = 1 
-    response = test_client.post('/doctor/medicalhistory/1/',
+    response = test_client.post('/doctor/bloodchemistry/lipids/1/',
                                 headers=headers, 
                                 data=dumps(payload), 
                                 content_type='application/json')
@@ -31,8 +30,8 @@ def test_post_blood_chemistry_lipids(test_client, init_database):
 
 def test_put_blood_chemistry_lipids(test_client, init_database):
     """
-    GIVEN a api end point for medical history assessment
-    WHEN the '/doctor/medicalhistory/<client id>/' resource  is requested (PUT)
+    GIVEN a api end point for blood test - lipids
+    WHEN the '/doctor/bloodchemistry/lipids/<client id>/' resource  is requested (PUT)
     THEN check the response is valid
     """
     # get staff authorization to view client data
@@ -44,7 +43,7 @@ def test_put_blood_chemistry_lipids(test_client, init_database):
     payload = test_get_blood_chemistry_lipids
     
     # send get request for client info on clientid = 1 
-    response = test_client.put('/doctor/medicalhistory/1/',
+    response = test_client.put('/doctor/bloodchemistry/lipids/1/',
                                 headers=headers, 
                                 data=dumps(payload), 
                                 content_type='application/json')
@@ -57,8 +56,8 @@ def test_put_blood_chemistry_lipids(test_client, init_database):
 
 def test_get_blood_chemistry_lipids(test_client, init_database):
     """
-    GIVEN a api end point for retrieving medical history
-    WHEN the  '/doctor/medicalhistory/<client id>' resource  is requested (GET)
+    GIVEN a api end point for blood chemistry - lipids
+    WHEN the  '/doctor/bloodchemistry/lipids/<client id>' resource  is requested (GET)
     THEN check the response is valid
     """
     # get staff authorization to view client data
@@ -67,7 +66,7 @@ def test_get_blood_chemistry_lipids(test_client, init_database):
     headers = {'Authorization': f'Bearer {token}'}
 
     # send get request for client info on clientid = 1 
-    response = test_client.get('/doctor/medicalhistory/1/',
+    response = test_client.get('/doctor/bloodchemistry/lipids/1/',
                                 headers=headers, 
                                 content_type='application/json')
                                 
