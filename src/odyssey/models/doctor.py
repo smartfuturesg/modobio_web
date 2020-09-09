@@ -2,8 +2,213 @@
 Database tables for the doctor's portion of the Modo Bio Staff application.
 All tables in this module are prefixed with 'Medical'.
 """
-
+from datetime import datetime
 from odyssey import db
+
+class MedicalBloodChemistryCBC(db.Model):
+    """ Client Blood Chemistry Complete Blood Count (CBC) table
+
+    This table stores client's blood test CBC results
+    """
+
+    __tablename__ = 'MedicalBloodChemistryCBC'
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
+
+    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='MedicalBloodChemistryCBC_clientid_fkey',ondelete="CASCADE"), nullable=False)
+    """
+    Client ID number
+
+    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    """
+    
+    exam_date = db.Column(db.Date)
+    """
+    Exam date.
+
+    :type: datetime.date
+    """
+    
+    rbc = db.Column(db.Float)
+    """
+    RBC/RCC level
+    
+    units: N/A
+    :type: float
+    """
+
+    hemoglobin = db.Column(db.Float)
+    """
+    Hemoglobin level
+    
+    units: N/A
+    :type: float
+    """
+
+    hematocrit = db.Column(db.Float)
+    """
+    Hematocrit level
+    
+    units: percent
+    :type: float
+    """
+
+    mcv = db.Column(db.Float)
+    """
+    MCV level
+    
+    units: fL
+    :type: float
+    """
+
+    mch = db.Column(db.Float)
+    """
+    MCH level
+    
+    units: pg
+    :type: float
+    """
+
+    mchc = db.Column(db.Float)
+    """
+    MCHC level
+    
+    units: g/dL
+    :type: float
+    """
+
+    rdw = db.Column(db.Float)
+    """
+    RDW level
+    
+    units: percent
+    :type: float
+    """
+
+    wbc = db.Column(db.Float)
+    """
+    WBC/WCC level
+    
+    units: x10E3/uL
+    :type: float
+    """
+
+    rel_neutrophils = db.Column(db.Float)
+    """
+    Relative Neutrophils
+    
+    units: percent
+    :type: float
+    """
+
+    abs_neutrophils = db.Column(db.Float)
+    """
+    Absolute Neutrophils level
+    
+    units: x10E3/uL
+    :type: float
+    """
+
+    rel_lymphocytes = db.Column(db.Float)
+    """
+    Relative Lymphocytes
+    
+    units: percent
+    :type: float
+    """
+
+    abs_lymphocytes = db.Column(db.Float)
+    """
+    Absolute Lymphocytes
+    
+    units: x10E3/uL
+    :type: float
+    """
+
+    rel_monocytes = db.Column(db.Float)
+    """
+    Relative Monocytes
+    
+    units: U/L
+    :type: float
+    """
+
+    abs_monocytes = db.Column(db.Float)
+    """
+    Absolute Monocytes
+    
+    units: x10E3/uL
+    :type: float
+    """
+
+    rel_eosinophils = db.Column(db.Float)
+    """
+    Relative Eosinophils
+    
+    units: percent
+    :type: float
+    """
+
+    abs_eosinophils = db.Column(db.Float)
+    """
+    Absolute Eosinophils
+    
+    units: x10E3/uL
+    :type: float
+    """
+
+    basophils = db.Column(db.Float)
+    """
+    Basophils level
+    
+    units: percent
+    :type: float
+    """
+
+    platelets = db.Column(db.Float)
+    """
+    Platelets
+    
+    units: x10E3/mm^3
+    :type: float
+    """
+
+    plateletsByMch = db.Column(db.Float)
+    """
+    Platelets/MCH
+    
+    units: N/A
+    :type: float
+    """   
+    
+    plateletsByLymphocyte = db.Column(db.Float)
+    """
+    Platelets/Lymphocyte
+    
+    units: N/A
+    :type: float
+    """   
+
+    neutrophilByLymphocyte = db.Column(db.Float)
+    """
+    Neutrophil/Lymphocyte
+    
+    units: N/A
+    :type: float
+    """   
+
+    lymphocyteByMonocyte = db.Column(db.Float)
+    """
+    Lymphocyte/Monocyte
+    
+    units: N/A
+    :type: float
+    """   
 
 class MedicalHistory(db.Model):
     """ Medical history table
@@ -157,7 +362,7 @@ class MedicalPhysicalExam(db.Model):
     
     vital_heartrate = db.Column(db.Integer)
     """
-    Heart rate
+    Resting heart rate
     
     :type: int
     :unit: bpm
@@ -226,7 +431,7 @@ class MedicalPhysicalExam(db.Model):
 
     cardiac_rrr = db.Column(db.Boolean)
     """
-    "Regular rate and rythm" heart sound
+    "Regular rate and rhythm" heart sound
 
     :type: bool
     """
@@ -343,3 +548,126 @@ class MedicalPhysicalExam(db.Model):
     :type: str
     """
 
+class MedicalBloodChemistryThyroid(db.Model):
+    """ Blood Test - Thyroid results
+
+    This table stores the blood test - thyroid results of clients.
+    """
+    __tablename__ = 'MedicalBloodChemistryThyroid'
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Index
+
+    :type: int, primary key, autoincrement
+    """
+
+    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='BloodThyroid_clientid_fkey', ondelete="CASCADE"), nullable=False)
+    """
+    Client ID number
+
+    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    """
+
+    exam_date = db.Column(db.Date)
+    """
+    Date blood test was administered.
+
+    :type: :class:`datetime.date`
+    """
+
+    t3_resin_uptake = db.Column(db.Integer)
+    """
+    T3 Resin Uptake(%)
+
+    :type: integer
+    :units: %
+    """
+
+    thyroglobulin = db.Column(db.Integer)
+    """
+    Thyroglobulin, serum
+
+    :type: integer
+    :units: ng/mL
+    """
+
+    thyroidial_iodine_uptake = db.Column(db.Integer)
+    """
+    Thyroidal Iodine Uptake (I-123)
+
+    :type: integer
+    :units: %
+    """
+
+    tsh = db.Column(db.Float)
+    """
+    Thyroid-stimulating hormone(TSH), serum
+
+    :type: float
+    :units: μU/mL
+    """
+
+    tsi = db.Column(db.Integer)
+    """
+    Thyroid-stimulating immunoglobulin(TSI)
+
+    :type: integer
+    :units: %
+    """
+
+    thyroxine_binding_globulin = db.Column(db.Integer)
+    """
+    Thyroxine-binding globulin, serum
+
+    :type: integer
+    :units: μg/mL
+    """
+
+    thyroxine_index = db.Column(db.Integer)
+    """
+    Thyroxine index, free (estimate)
+
+    :type: integer
+    :units: #
+    """
+
+    t4_serum_total = db.Column(db.Integer)
+    """
+    Thyroxine (T4), serum total
+
+    :type: integer
+    :units: μg/dL
+    """
+
+    t4_serum_free = db.Column(db.Float)
+    """
+    Thyroxine (T4), serum free
+
+    :type: float
+    :units: ng/dL
+    """
+
+    t3_serum_total = db.Column(db.Integer)
+    """
+    Triiodothyronine (T3), serum total
+
+    :type: integer
+    :units: ng/dL
+    """
+
+    t3_serum_reverse = db.Column(db.Integer)
+    """
+    Triiodothyronine (T3), serum reverse
+
+    :type: integer
+    :units: ng/dL
+    """
+
+    t3_serum_free = db.Column(db.Float)
+    """
+    Triiodothyronine (T3), serum free
+
+    :type: integer
+    :units: pg/mL
+    """
