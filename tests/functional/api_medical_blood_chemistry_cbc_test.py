@@ -40,7 +40,7 @@ def test_put_medical_blood_chemistry_cbc(test_client, init_database):
     token = staff.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    test_blood_chemistry_cbc["diagnostic_other"] = "testing put"
+    test_blood_chemistry_cbc["rbc"] = 30
     payload = test_blood_chemistry_cbc
     
     # send get request for client info on clientid = 1 
@@ -52,7 +52,7 @@ def test_put_medical_blood_chemistry_cbc(test_client, init_database):
     client = MedicalBloodChemistryCBC.query.filter_by(clientid=1).first()
 
     assert response.status_code == 200
-    assert client.diagnostic_other == "testing put"
+    assert client.rbc == 30
 
 
 def test_get_medical_blood_chemistry_cbc(test_client, init_database):
