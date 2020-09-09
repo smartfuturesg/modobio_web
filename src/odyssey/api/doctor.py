@@ -7,7 +7,7 @@ from flask_restx import Resource, Api
 
 from odyssey import db
 from odyssey.models.client import ClientExternalMR
-from odyssey.models.doctor import MedicalPhysicalExam, MedicalHistory, MedicalBloodChemistryCBC, MedicalBloodChemistryThyroid
+from odyssey.models.doctor import MedicalPhysicalExam, MedicalHistory, MedicalBloodChemistryCBC, MedicalBloodChemistryThyroid, MedicalBloodChemistryCMP
 from odyssey.models.misc import MedicalInstitutions
 from odyssey.api import api
 from odyssey.api.auth import token_auth
@@ -17,13 +17,69 @@ from odyssey.utils.schemas import (
     ClientExternalMREntrySchema, 
     ClientExternalMRSchema, 
     MedicalHistorySchema, 
-    MedicalPhysicalExamSchema,
+    MedicalPhysicalExamSchema, 
     MedicalInstitutionsSchema,
+    BloodChemistryCMPSchema,
     BloodChemistryCBCSchema,
     MedicalBloodChemistryThyroidSchema
 )
 
 ns = api.namespace('doctor', description='Operations related to doctor')
+
+@ns.route('/bloodtest/cmp/<int:clientid>/')
+@ns.doc(params={'clientid': 'Client ID number'})
+class MedBloodChemistryCMP(Resource):
+    """
+       Records client's Comprehensive Metabolic Panel Blood Test Results
+    """
+    @ns.doc(security='apikey')
+    @token_auth.login_required
+    @responds(schema=BloodChemistryCMPSchema(many=True), api=ns)
+    def get(self,clientid):
+        """ Returns client's historical CMP results """
+        
+        check_client_existence(clientid)
+        data = MedicalBloodChemistryCMP.query.filter_by(clientid=clientid).all()
+        if not data:
+            raise ContentNotFound()
+        return data
+
+    @token_auth.login_required
+    @accepts(schema=BloodChemistryCMPSchema, api=ns)
+    @ns.doc(security='apikey')
+    @responds(schema=BloodChemistryCMPSchema, api=ns, status_code=201)
+    def post(self,clientid):
+        """create new db entItry for CMP"""
+        check_client_existence(clientid)
+        data = request.get_json()
+        data["clientid"] = clientid
+        data["bunByAlbumin"] = data['bun']/data['albumin']
+        cmp_schema = BloodChemistryCMPSchema()
+        cmp_data = cmp_schema.load(data)
+        db.session.add(cmp_data)
+        db.session.commit()
+        return cmp_data
+
+    @token_auth.login_required
+    @accepts(schema=BloodChemistryCMPSchema, api=ns)
+    @responds(schema=BloodChemistryCMPSchema, api=ns)
+    def put(self, clientid):
+        """ updates client's CMP test input based on index """
+        check_client_existence(clientid)
+        # get payload and update the current instance followd by db commit
+        data = request.get_json()
+        cmp_data = MedicalBloodChemistryCMP.query.filter_by(idx=data['idx']).one_or_none()
+
+        if not cmp_data:
+            raise ExamNotFound(data['idx'])
+        
+        # update resource
+        data["bunByAlbumin"] = data['bun']/data['albumin']
+        cmp_data.update(data)
+        db.session.commit()
+
+        return cmp_data
+
 
 @ns.route('/bloodtest/cbc/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
