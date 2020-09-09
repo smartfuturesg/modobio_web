@@ -570,3 +570,24 @@ test_fitness_questionnaire = {
   "stress_sources_other": "",
   "goal_fitness_level": 9
 }
+
+  test_get_blood_chemistry_a1c = {
+    "exam_date" = "2020-09-08",
+    "a1c" = 4.2
+  }
+
+  test_get_blood_chemistry_thyroid = {
+    "exam_date": "2020-09-08",
+    "t3_resin_uptake": 25,
+    "thyroglobulin": 10,
+    "thyroidial_iodine_uptake": 10,
+    "tsh": 1.0,
+    "tsi": 10,
+    "thyroxine_binding_globulin": 20,
+    "thyroxine_index": 10,
+    "t4_serum_total": 6,
+    "t4_serum_free": 1.0,
+    "t3_serum_total": 100,
+    "t3_serum_reverse": 20,
+    "t3_serum_free": 3.0
+  }
