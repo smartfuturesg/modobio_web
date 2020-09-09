@@ -90,6 +90,18 @@ class WearablesOura(_Base):
     :type: int, foreign key to :attr:`ClientInfo.clientid`
     """
 
+    oauth_state = Column(String(50))
+    """
+    State token for OAuth2 exchange with Oura Cloud.
+
+    This token is a state parameter, it must not change in between the various phases
+    of OAuth2 authorization. It is stored temporarily in the database, but has no meaning
+    after the OAuth2 process is completed. If a token exists in this column, it is a sign
+    that the grant-to-access token exchange did not complete successfully.
+
+    :type: str, max length 50
+    """
+
     grant_token = Column(String(50))
     """
     OAuth2 access grant token to authorize Oura Cloud access.

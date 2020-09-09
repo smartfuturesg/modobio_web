@@ -142,8 +142,14 @@ class WearablesOuraAuthorizationEndpoint(Resource):
         oauth_session = OAuth2Session(client_id, redirect_uri=redirect_url)
         auth_url, state = oauth_session.authorization_url(base_url)
 
-        session['clientid'] = clientid
-        session['oura_oauth_state'] = state
+        # Store state in database
+        oura = WearablesOura.query.filter_by(clientid=clientid).one_or_none()
+        if not oura:
+            oura = WearablesOura(clientid=clientid, oauth_state=state)
+            db.session.add(oura)
+        else:
+            oura.oauth_state = state
+        db.session.commit()
 
         return {'url': auth_url}
 
@@ -157,13 +163,7 @@ class WearablesOuraCallbackEndpoint(Resource):
         error_code = request.args.get('error')
         oauth_grant_code = request.args.get('code')
 
-        oauth_state_from_session = session.get('oura_oauth_state')
-
-        # Oura does not send any extra parameters, so the only parameter we can
-        # use to identify client is state.
-        if not oauth_state_from_session or oauth_state_from_session != oauth_state:
-            raise IllegalSetting(message='OAuth state changed between requests.')
-        elif error_code:
+        if error_code:
             if error_code == 'access_denied':
                 raise IllegalSetting(message='Client denied access.')
             else:
@@ -171,23 +171,21 @@ class WearablesOuraCallbackEndpoint(Resource):
         elif not oauth_grant_code:
             raise IllegalSetting(message='OAuth token empty, but no error message.')
 
-        clientid = session.get('clientid')
-        check_client_existence(clientid)
+        if not oauth_grant_code:
+            raise UnknownError(message='OAuth token empty, but no error message.')
 
-        wearables = Wearables.query.filter_by(clientid=clientid).one_or_none()
-        if not wearables or not wearables.has_oura:
-            raise UserNotFound(clientid, 'Client does not have an Oura Ring.')
+        if not oauth_state:
+            raise IllegalSetting(message='OAuth state changed between requests.')
 
-        # At this point we can be sure that client exists, has an oura ring,
-        # and is the client we're interested in by matching state.
-        # Make sure grant token is stored so client does not have to repeat
-        # this process in case the next part fails for some reason.
-        oura = WearablesOura.query.filter_by(clientid=clientid).one_or_none()
+        # Oura does not send any extra parameters, so the only parameter we can
+        # use to identify client is state.
+        oura = WearablesOura.query.filter_by(oauth_state=oauth_state).one_or_none()
         if not oura:
-            oura = WearablesOura(clientid=clientid, grant_token=oauth_grant_code)
-            db.session.add(oura)
-        else:
-            oura.grant_token = oauth_grant_code
+            raise IllegalSetting(message='OAuth state changed between requests.')
+
+        # Store grant code so client does not have to repeat the
+        # process in case the next part fails.
+        oura.grant_token = oauth_grant_code
         db.session.commit()
 
         # Exchange access grant code for access token
@@ -217,9 +215,10 @@ class WearablesOuraCallbackEndpoint(Resource):
         db.session.commit()
 
         # Everything was successful
+        wearables = Wearables.query.filter_by(clientid=oura.clientid).first()
         wearables.registered_oura = True
         oura.grant_token = None
+        oura.oauth_state = None
         db.session.commit()
 
-        # session.clear() ?????
-        # return oura
+        return 'OK'
