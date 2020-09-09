@@ -7,7 +7,13 @@ from requests_oauthlib import OAuth2Session
 
 from odyssey.api import api
 from odyssey.api.auth import token_auth
-from odyssey.api.errors import ClientAlreadyExists, IllegalSetting, UserNotFound
+from odyssey.api.errors import (
+    ClientDeniedAccess,
+    ContentNotFound,
+    IllegalSetting,
+    MethodNotAllowed,
+    UnknownError
+)
 from odyssey.models.wearables import Wearables, WearablesOura
 from odyssey.utils.schemas import WearablesSchema, WearablesOuraSchema
 from odyssey.utils.misc import check_client_existence
@@ -20,7 +26,7 @@ ns = api.namespace('wearables', description='Endpoints for registering wearable 
 @ns.doc(params={'clientid': 'Client ID number'})
 class WearablesEndpoint(Resource):
     @token_auth.login_required
-    @responds(schema=WearablesSchema, api=ns)
+    @responds(schema=WearablesSchema, status_code=200, api=ns)
     def get(self, clientid):
         """ Wearable device information for client ``clientid`` in reponse to a GET request.
 
@@ -44,12 +50,13 @@ class WearablesEndpoint(Resource):
 
         wearables = Wearables.query.filter_by(clientid=clientid).one_or_none()
         if not wearables:
-            raise UserNotFound(clientid)
+            raise ContentNotFound
 
         return wearables
 
     @token_auth.login_required
     @accepts(schema=WearablesSchema, api=ns)
+    @responds(status_code=201, api=ns)
     def post(self, clientid):
         """ Create new wearables information for client ``clientid`` in reponse to a POST request.
 
@@ -67,14 +74,11 @@ class WearablesEndpoint(Resource):
         wearables = query.one_or_none()
 
         if wearables:
-            raise ClientAlreadyExists(
-                identification=clientid,
-                message=f'Resource already exists for client {clientid}, please use PUT request.'
-            )
+            raise MethodNotAllowed
 
         # Prevent user from changing ID
         if request.json.get('clientid'):
-            raise IllegalSetting('clientid')
+            raise IllegalSetting(param='clientid')
 
         wearables = Wearables(clientid=clientid, **request.json)
         db.session.add(wearables)
@@ -82,6 +86,7 @@ class WearablesEndpoint(Resource):
 
     @token_auth.login_required
     @accepts(schema=WearablesSchema, api=ns)
+    @responds(status_code=204, api=ns)
     def put(self, clientid):
         """ Update wearables information for client ``clientid`` in reponse to a PUT request.
 
@@ -99,11 +104,11 @@ class WearablesEndpoint(Resource):
         wearables = query.one_or_none()
 
         if not wearables:
-            raise UserNotFound(clientid)
+            raise ContentNotFound
 
         # Prevent user from changing ID
         if request.json.get('clientid'):
-            raise IllegalSetting('clientid')
+            raise IllegalSetting(param='clientid')
 
         query.update(request.json)
         db.session.commit()
@@ -113,7 +118,7 @@ class WearablesEndpoint(Resource):
 @ns.doc(params={'clientid': 'Client ID number'})
 class WearablesOuraAuthorizationEndpoint(Resource):
     @token_auth.login_required
-    @responds({'name': 'url', 'type': str}, api=ns)
+    @responds({'name': 'url', 'type': str}, status_code=200, api=ns)
     def get(self, clientid):
         """ Oura Ring access grant URL for client ``clientid`` in reponse to a GET request.
 
@@ -131,7 +136,7 @@ class WearablesOuraAuthorizationEndpoint(Resource):
 
         wearables = Wearables.query.filter_by(clientid=clientid).one_or_none()
         if not wearables or not wearables.has_oura:
-            raise UserNotFound(clientid, 'Client does not have an Oura Ring.')
+            raise ContentNotFound
 
         client_id = current_app.config['OURA_CLIENT_ID']
         base_url = current_app.config['OURA_AUTH_URL']
@@ -156,7 +161,7 @@ class WearablesOuraAuthorizationEndpoint(Resource):
 
 @ns.route('/oura/callback/')
 class WearablesOuraCallbackEndpoint(Resource):
-    @ns.doc(security=None)
+    @responds(status_code=200, api=ns)
     def get(self):
         """ Oura Ring callback URL """
         oauth_state = request.args.get('state')
@@ -165,11 +170,9 @@ class WearablesOuraCallbackEndpoint(Resource):
 
         if error_code:
             if error_code == 'access_denied':
-                raise IllegalSetting(message='Client denied access.')
+                raise ClientDeniedAccess
             else:
-                raise IllegalSetting(message='Unknown error: {error_code}')
-        elif not oauth_grant_code:
-            raise IllegalSetting(message='OAuth token empty, but no error message.')
+                raise UnknownError(message='Unknown error: {error_code}')
 
         if not oauth_grant_code:
             raise UnknownError(message='OAuth token empty, but no error message.')
@@ -207,7 +210,7 @@ class WearablesOuraCallbackEndpoint(Resource):
         )
 
         if not oauth_session.authorized:
-            raise IllegalSetting('Shit just went deeply wrong. Redirect client to start process over.')
+            raise UnknownError('Exchange of grant code into access token failed.')
 
         oura.access_token = oauth_reply['access_token']
         oura.refresh_token = oauth_reply['refresh_token']
