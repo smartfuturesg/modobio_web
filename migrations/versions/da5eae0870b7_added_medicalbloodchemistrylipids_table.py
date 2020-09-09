@@ -1,8 +1,8 @@
-"""added MedicalBloodChemistryLipids table
+"""Added MedicalBloodChemistryLipids table
 
-Revision ID: 644674db8df8
-Revises: c9c14471cbd4
-Create Date: 2020-09-04 16:01:03.899726
+Revision ID: da5eae0870b7
+Revises: c8334dc2c01f
+Create Date: 2020-09-09 10:12:32.256737
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '644674db8df8'
-down_revision = 'c9c14471cbd4'
+revision = 'da5eae0870b7'
+down_revision = 'c8334dc2c01f'
 branch_labels = None
 depends_on = None
 
@@ -22,14 +22,14 @@ def upgrade():
     sa.Column('idx', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('clientid', sa.Integer(), nullable=False),
     sa.Column('exam_date', sa.Date(), nullable=True),
-    sa.Column('cholesterol_total', sa.Integer(), nullable=True),
-    sa.Column('cholesterol_ldl', sa.Integer(), nullable=True),
-    sa.Column('cholesterol_hdl', sa.Integer(), nullable=True),
-    sa.Column('triglycerides', sa.Integer(), nullable=True),
+    sa.Column('cholesterol_total', sa.Float(), nullable=True),
+    sa.Column('cholesterol_ldl', sa.Float(), nullable=True),
+    sa.Column('cholesterol_hdl', sa.Float(), nullable=True),
+    sa.Column('triglycerides', sa.Float(), nullable=True),
     sa.Column('cholesterol_over_hdl', sa.Float(), nullable=True),
     sa.Column('triglycerides_over_hdl', sa.Float(), nullable=True),
     sa.Column('ldl_over_hdl', sa.Float(), nullable=True),
-    sa.ForeignKeyConstraint(['clientid'], ['ClientInfo.clientid'], name='BloodThyroid_clientid_fkey', ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['clientid'], ['ClientInfo.clientid'], name='BloodLipids_clientid_fkey', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('idx')
     )
     # ### end Alembic commands ###

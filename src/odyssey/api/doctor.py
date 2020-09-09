@@ -197,11 +197,15 @@ class MedBloodChemistryThyroid(Resource):
         data['clientid'] = clientid
 
         #calculated values
-        data['cholesterol_over_hdl'] = data['cholesterol'] // data['cholesterol_hdl']
-        data['triglycerides_over_ldl'] = data['triglycerides'] // data['cholesterol_ldl']
-        data['ldl_over_hdl'] = data['cholesterol_ldl'] // data['cholesterol_hdl']
+        if data['cholesterol_hdl'] != 0:
+            data['cholesterol_over_hdl'] = data['cholesterol_total'] / data['cholesterol_hdl']
+            data['ldl_over_hdl'] = data['cholesterol_ldl'] / data['cholesterol_hdl']
 
-        bt_schema = BloodChemistryLipidsSchema()
+        if data['cholesterol_ldl'] != 0:
+            data['triglycerides_over_hdl'] = data['triglycerides'] / data['cholesterol_ldl']
+        
+
+        bt_schema = MedicalBloodChemistryLipidsSchema()
 
         client_bt = bt_schema.load(data)
 
@@ -224,12 +228,15 @@ class MedBloodChemistryThyroid(Resource):
             raise ExamNotFound(data['idx'])
         
         
-        data['last_examination_date'] = datetime.strptime(data['last_examination_date'], "%Y-%m-%d")
+        data['exam_date'] = datetime.strptime(data['exam_date'], "%Y-%m-%d")
         
         #calculated values
-        data['cholesterol_over_hdl'] = data['cholesterol'] // data['cholesterol_hdl']
-        data['triglycerides_over_ldl'] = data['triglycerides'] // data['cholesterol_ldl']
-        data['ldl_over_hdl'] = data['cholesterol_ldl'] // data['cholesterol_hdl']
+        if data['cholesterol_hdl'] != 0:
+            data['cholesterol_over_hdl'] = data['cholesterol_total'] / data['cholesterol_hdl']
+            data['ldl_over_hdl'] = data['cholesterol_ldl'] / data['cholesterol_hdl']
+
+        if data['cholesterol_ldl'] != 0:
+            data['triglycerides_over_hdl'] = data['triglycerides'] / data['cholesterol_ldl']
 
         # update resource 
         exam.update(data)

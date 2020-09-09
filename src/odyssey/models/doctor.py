@@ -357,7 +357,7 @@ class MedicalBloodChemistryLipids(db.Model):
     :type: int, primary key, autoincrement
     """
 
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='BloodThyroid_clientid_fkey', ondelete="CASCADE"), nullable=False)
+    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='BloodLipids_clientid_fkey', ondelete="CASCADE"), nullable=False)
     """
     Client ID number
 
@@ -371,7 +371,7 @@ class MedicalBloodChemistryLipids(db.Model):
     :type: :class:`datetime.date`
     """
 
-    cholesterol_total = db.Column(db.Integer)
+    cholesterol_total = db.Column(db.Float)
     """
     Cholesterol total
 
@@ -379,7 +379,7 @@ class MedicalBloodChemistryLipids(db.Model):
     :unit: mg/dL
     """
 
-    cholesterol_ldl = db.Column(db.Integer)
+    cholesterol_ldl = db.Column(db.Float)
     """
     Cholesterol ldl
 
@@ -387,7 +387,7 @@ class MedicalBloodChemistryLipids(db.Model):
     :unit: mg/dL
     """
 
-    cholesterol_hdl = db.Column(db.Integer)
+    cholesterol_hdl = db.Column(db.Float)
     """
     Cholesterol hdl
 
@@ -395,7 +395,7 @@ class MedicalBloodChemistryLipids(db.Model):
     :unit: mg/dL
     """
 
-    triglycerides = db.Column(db.Integer)
+    triglycerides = db.Column(db.Float)
     """
     Triglycerides
 
@@ -454,63 +454,6 @@ class MedicalBloodChemistryThyroid(db.Model):
     Date blood test was administered.
 
     :type: :class:`datetime.date`
-    """
-
-    cholesterol_total = db.Column(db.Integer)
-    """
-    Cholesterol total
-
-    :type: Integer
-    :unit: mg/dL
-    """
-
-    cholesterol_ldl = db.Column(db.Integer)
-    """
-    Cholesterol ldl
-
-    :type: Integer
-    :unit: mg/dL
-    """
-
-    cholesterol_hdl = db.Column(db.Integer)
-    """
-    Cholesterol hdl
-
-    :type: Integer
-    :unit: mg/dL
-    """
-
-    triglycerides = db.Column(db.Integer)
-    """
-    Triglycerides
-
-    :type: Integer
-    :unit: mg/dL
-    """
-
-    #calculated values
-    cholesterol_over_hdl = db.Column(db.Float)
-    """
-    cholesterol total / cholesterol hdl
-
-    :type: float
-    :unit: #
-    """
-
-    triglycerides_over_hdl = db.Column(db.Float)
-    """
-    triglycerides / hdl
-
-    :type: float
-    :unit: #
-    """
-
-    ldl_over_hdl = db.Column(db.Float)
-    """
-    cholesterol ldl / cholesterol hdl
-
-    :type: float
-    :unit: #
     """
 
     t3_resin_uptake = db.Column(db.Integer)

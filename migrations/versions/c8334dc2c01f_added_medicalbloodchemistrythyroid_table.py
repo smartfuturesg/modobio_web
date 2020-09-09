@@ -1,7 +1,7 @@
 """Added MedicalBloodChemistryThyroid table
 
 Revision ID: c8334dc2c01f
-Revises: 2c861c33474f
+Revises: c9c14471cbd4
 Create Date: 2020-09-08 09:12:15.701780
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'c8334dc2c01f'
-down_revision = '2c861c33474f'
+down_revision = 'c9c14471cbd4'
 branch_labels = None
 depends_on = None
 
