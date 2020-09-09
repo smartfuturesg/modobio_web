@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'd306fec9e8f2'
-down_revision = 'c9c14471cbd4'
+down_revision = 'd6c482ee1b12'
 branch_labels = None
 depends_on = None
 
@@ -29,7 +29,7 @@ def upgrade():
     op.create_table('WearablesOura',
     sa.Column('idx', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('clientid', sa.Integer(), nullable=False),
-    sa.Column('oauth_state', sa.String(length=50), nullable=True)
+    sa.Column('oauth_state', sa.String(length=50), nullable=True),
     sa.Column('grant_token', sa.String(length=50), nullable=True),
     sa.Column('access_token', sa.String(length=50), nullable=True),
     sa.Column('refresh_token', sa.String(length=50), nullable=True),
