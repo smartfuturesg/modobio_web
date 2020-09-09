@@ -5,6 +5,81 @@ All tables in this module are prefixed with 'Medical'.
 from datetime import datetime
 from odyssey import db
 
+class MedicalImaging(db.Model):
+    """ Medical history table
+
+    This table stores the medical imaging history of a client. 
+    As long as the clientID exists, we can add images to this table and search by clientID
+    """
+    __tablename__ = 'MedicalImaging'
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Index
+
+    :type: int, primary key, autoincrement
+    """
+    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='MedicalHistory_clientid_fkey', ondelete="CASCADE"), nullable=False)
+    """
+    Client ID number
+
+    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    """
+    
+    image_name = db.Column(db.String(1024))
+    """
+    image name includes date and type of image.
+
+    :type: str, max length 1024
+    """
+
+    image_date = db.Column(db.Date)
+    """
+    Date image was taken
+    To be filled in by the doctor
+
+    :type: :class:`datetime.date`
+    """
+
+    image_type = db.Column(db.String(1024))
+    """
+    Type of image, to be filled in by the doctor via a drop down menu
+    Possible options are: Ultrasound, CT scan, X-Ray, MRI, PET scan.
+
+    :type: str, max length 1024
+    """
+    
+    image_read = db.Column(db.Text)
+    """
+    Text representing the doctors diagnosis or notes of the image
+
+    :type: str
+    """
+
+    medical_imaging_clinic_info = db.Column(db.Text)
+    """
+    Name of and information about clinic where image was gathered.
+    eg. SimonMed imaging, Banner imaging, etc.
+    May include name, address and contact information of clinic.
+
+    :type: str
+    """
+
+    image_cpt_code = db.Column(db.String(1024))
+    """
+    CPT code of image, used to specify the type of image, part of the body
+    and what it is looking for.
+
+    :type: str, max length 1024
+    """
+
+    image = db.Column(db.Text)
+    """
+    Bynary Stream data of the image.
+
+    :type: bytea
+    """
+
 class MedicalBloodChemistryCBC(db.Model):
     """ Client Blood Chemistry Complete Blood Count (CBC) table
 

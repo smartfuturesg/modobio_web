@@ -10,7 +10,8 @@ from odyssey.models.doctor import (
     MedicalHistory, 
     MedicalPhysicalExam,
     MedicalBloodChemistryCBC,
-    MedicalBloodChemistryThyroid
+    MedicalBloodChemistryThyroid,
+    MedicalImaging
 )
 from odyssey.models.client import (
     ClientConsent,
@@ -1084,6 +1085,30 @@ class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
 """
     Schemas for the doctor's API
 """
+class MedicalImagingSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = MedicalImaging
+
+    clientid = fields.Integer(missing=0)
+    
+    possible_image_types = ['CT scan', 'MRI', 'PET scan', 'Ultrasound', 'X-Ray']
+    image_type = fields.List(fields.String,
+                description=" Type of image options: \
+                ['CT scan' (Computed Tomography), 'MRI' (Magnetic Resonance imaging),\
+                 'PET scan' (Positron Emissions Tomography), 'Ultrasound' (Ultrasound scan), 'X-Ray' (X-Rays)]",
+                required=True)
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return MedicalImaging(**data)   
+
+    @validates('image_type')
+    def valid_image_type(self,value):
+        for imgType in value:
+            if imgType not in self.possible_image_types:
+                raise ValidationError(f'{imgType} is not a valid image type. Use one of the following {self.possible_image_types}') 
+
+
 class BloodChemistryCBCSchema(Schema):
 
     # Validate each payload entry
