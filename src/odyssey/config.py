@@ -209,6 +209,7 @@ class Config():
         self.db_host = os.getenv('FLASK_DB_HOST', default='localhost')
         self.db_name = os.getenv('FLASK_DB_NAME', default='modobio')
 
+        self.ssm = boto3.client('ssm')
         self.OURA_CLIENT_ID = self.ssm.get_parameter(Name='/modobio/wearables/plugins/oura/client_id')['Parameter']['Value']
         self.OURA_CLIENT_SECRET = self.ssm.get_parameter(Name='/modobio/wearables/plugins/oura/client_secret',
                                                  WithDecryption=True)['Parameter']['Value']
