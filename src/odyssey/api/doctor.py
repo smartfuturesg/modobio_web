@@ -275,8 +275,6 @@ class MedBloodChemistryThyroid(Resource):
         if data['cholesterol_hdl'] != 0:
             data['cholesterol_over_hdl'] = data['cholesterol_total'] / data['cholesterol_hdl']
             data['ldl_over_hdl'] = data['cholesterol_ldl'] / data['cholesterol_hdl']
-
-        if data['cholesterol_ldl'] != 0:
             data['triglycerides_over_hdl'] = data['triglycerides'] / data['cholesterol_hdl']
         
 
@@ -309,8 +307,6 @@ class MedBloodChemistryThyroid(Resource):
         if data['cholesterol_hdl'] != 0:
             data['cholesterol_over_hdl'] = data['cholesterol_total'] / data['cholesterol_hdl']
             data['ldl_over_hdl'] = data['cholesterol_ldl'] / data['cholesterol_hdl']
-
-        if data['cholesterol_ldl'] != 0:
             data['triglycerides_over_hdl'] = data['triglycerides'] / data['cholesterol_hdl']
 
         # update resource 
