@@ -571,9 +571,29 @@ test_fitness_questionnaire = {
   "goal_fitness_level": 9
 }
 
+test_blood_chemistry_cbc = {
+    "exam_date": "2020-09-01",
+    "rbc": 3,
+    "hemoglobin": 4,
+    "hematocrit": 5,
+    "mcv": 60,
+    "mch": 7,
+    "mchc": 8,
+    "rdw": 9,
+    "wbc": 10,
+    "rel_neutrophils": 11,
+    "abs_neutrophils": 12,
+    "rel_lymphocytes": 13,
+    "abs_lymphocytes": 16,
+    "rel_monocytes": 15,
+    "abs_monocytes": 16,
+    "rel_eosinophils": 17,
+    "abs_eosinophils": 18,
+    "basophils": 19,
+    "platelets": 20
+}
+
 test_blood_chemistry_cmp = {
-    "idx": 1,
-    "clientid": 1,
     "exam_date": "2020-09-01",
     "glucose": 3,
     "sodium": 4,
