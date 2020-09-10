@@ -34,6 +34,39 @@ class ContentNotFound(Exception):
         
         self.status_code = 204
 
+
+class MethodNotAllowed(Exception):
+    """ Exception for the case a resource already exists in response to a POST request. """
+    def __init__(self, *args, message=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if message:
+            self.message = message
+        else:
+            self.message = 'The resource already exists. Use PUT to edit existing resources.'
+        self.status_code = 405
+
+
+class ClientDeniedAccess(Exception):
+    """ Exception for the case a client denied access
+        to a 3rd party resource in an OAuth request.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.message = 'Client denied access.'
+        self.status_code = 409
+
+
+class UnknownError(Exception):
+    """ Exception for an unknown error. """
+    def __init__(self, *args, message=None, **kwargs):
+        super().__init__()
+        if message:
+            self.message = message
+        else:
+            self.message = 'Unknown error occured'
+        self.status_code = 400
+
+
 class ContentNotFoundReturnData(Exception):
     """Special case for when a resource has not yet been created but the client must see other data to proceed"""
     def __init__(self, data=None, clientid = None):
@@ -134,6 +167,21 @@ def error_content_not_found(error):
 def error_content_not_found(error):
     '''Return a custom message with extra data in payload and 201 status code'''
     return error_response(error.status_code, error.message, error.data)
+
+@api.errorhandler(MethodNotAllowed)
+def error_method_not_allowed(error):
+    """Return a custom message and 405 status code"""
+    return error_response(error.status_code, error.message)
+
+@api.errorhandler(ClientDeniedAccess)
+def error_client_denied_access(error):
+    """Return a custom message and 409 status code"""
+    return error_response(error.status_code, error.message)
+
+@api.errorhandler(UnknownError)
+def error_unknown(error):
+    """Return a custom message and 400 status code"""
+    return error_response(error.status_code, error.message)
 
 @api.errorhandler(IllegalSetting)
 def error_illegal_setting(error):
