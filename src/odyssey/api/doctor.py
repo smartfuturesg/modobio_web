@@ -351,7 +351,7 @@ class MedBloodChemistryThyroid(Resource):
         if not exam:
             raise ExamNotFound(data['idx'])
         
-        data['last_examination_date'] = datetime.strptime(data['last_examination_date'], "%Y-%m-%d")
+        data['exami_date'] = datetime.strptime(data['exam_date'], "%Y-%m-%d")
 
         # update resource 
         exam.update(data)
