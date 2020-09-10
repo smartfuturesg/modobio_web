@@ -39,7 +39,8 @@ def test_put_blood_chemistry_lipids(test_client, init_database):
     token = staff.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    test_medical_history["exam_date"] = "1900-01-01"
+    test_blood_chemistry_lipids["idx"] = 1
+    test_blood_chemistry_lipids["exam_date"] = "1900-01-01"
     payload = test_blood_chemistry_lipids
     
     # send get request for client info on clientid = 1 
