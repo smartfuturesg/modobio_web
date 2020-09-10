@@ -9,3 +9,4 @@ import odyssey.models.pt
 import odyssey.models.staff 
 import odyssey.models.misc 
 import odyssey.models.trainer
+import odyssey.models.wearables

@@ -147,6 +147,10 @@ class Config():
     DOCS_STORE_LOCAL = True
     SECRET_KEY = 'dev'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    OURA_CLIENT_ID = None
+    OURA_CLIENT_SECRET = None
+    OURA_AUTH_URL = 'https://cloud.ouraring.com/oauth/authorize'
+    OURA_TOKEN_URL = 'https://api.ouraring.com/oauth/token'
 
     def __init__(self, flask_dev=None, migrate=False):
         # Whether or not we are running 'flask db ...'
@@ -221,9 +225,14 @@ class Config():
             self.db_pass = self.ssm.get_parameter(Name='/modobio/odyssey/db_pass',
                                                   WithDecryption=True)['Parameter']['Value']
 
-        param = self.ssm.get_parameter(Name='/modobio/odyssey/docs_bucket_test')
-        self.DOCS_BUCKET_NAME = param['Parameter']['Value']
+        self.DOCS_BUCKET_NAME = self.ssm.get_parameter(
+            Name='/modobio/odyssey/docs_bucket_test')['Parameter']['Value']
         self.DOCS_STORE_LOCAL = False
+        self.OURA_CLIENT_ID = self.ssm.get_parameter(
+            Name='/modobio/wearables/plugins/oura/client_id')['Parameter']['Value']
+        self.OURA_CLIENT_SECRET = self.ssm.get_parameter(
+            Name='/modobio/wearables/plugins/oura/client_secret',
+            WithDecryption=True)['Parameter']['Value']
 
     def test_config(self):
         """ Set the configuration for running local unittests. """
@@ -261,6 +270,9 @@ class Config():
         self.DOCS_BUCKET_NAME = param['Parameter']['Value']
         self.DOCS_STORE_LOCAL = False
         self.SECRET_KEY = self.ssm.get_parameter(Name='/modobio/odyssey/app_secret',
+                                                 WithDecryption=True)['Parameter']['Value']
+        self.OURA_CLIENT_ID = self.ssm.get_parameter(Name='/modobio/wearables/plugins/oura/client_id')['Parameter']['Value']
+        self.OURA_CLIENT_SECRET = self.ssm.get_parameter(Name='/modobio/wearables/plugins/oura/client_secret',
                                                  WithDecryption=True)['Parameter']['Value']
 
     def mock_config(self):

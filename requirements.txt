@@ -7,7 +7,6 @@ flask-marshmallow
 Flask-Migrate
 flask-restx
 Flask_SQLAlchemy
-flask-marshmallow
 Flask_WTF
 marshmallow
 marshmallow-sqlalchemy
@@ -15,5 +14,6 @@ psycopg2
 pytest
 pytest-cov
 pytz
+requests-oauthlib
 WeasyPrint
 WTForms
