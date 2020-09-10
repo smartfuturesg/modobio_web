@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from flask import current_app, request, session, url_for
+from flask import current_app, request, url_for
 from flask_accepts import accepts, responds
 from flask_restx import Resource
 from requests_oauthlib import OAuth2Session
