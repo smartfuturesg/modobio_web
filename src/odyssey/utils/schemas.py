@@ -25,7 +25,7 @@ from odyssey.models.client import (
     ClientSubscriptionContract,
     RemoteRegistration
 )
-from odyssey.models.misc import MedicalInstitutions
+from odyssey.models.misc import MedicalInstitutions, RegisteredFacilities
 from odyssey.models.pt import Chessboard, PTHistory
 from odyssey.models.staff import Staff
 from odyssey.models.trainer import (
@@ -1267,3 +1267,13 @@ class MedicalBloodChemistryThyroidSchema(Schema):
     @post_load
     def make_object(self, data, **kwargs):
         return MedicalBloodChemistryThyroid(**data)
+
+class RegisteredFacilitiesSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = RegisteredFacilities
+
+    facilityid = fields.Integer(missing=0)
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return RegisteredFacilities(**data)
