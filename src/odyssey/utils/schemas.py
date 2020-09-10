@@ -1072,7 +1072,7 @@ class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
 class BloodChemistryCBCSchema(Schema):
 
     # Validate each payload entry
-    idx = fields.Integer()
+    idx = fields.Integer(required=False)
     clientid = fields.Integer(missing=0)
     exam_date = fields.DateTime(format='%Y-%m-%d')
     rbc = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
@@ -1106,7 +1106,7 @@ class BloodChemistryCBCSchema(Schema):
 class BloodChemistryCMPSchema(Schema):
 
     # Validate each payload entry
-    idx = fields.Integer()
+    idx = fields.Integer(required=False)
     clientid = fields.Integer(missing=0)
     exam_date = fields.DateTime(format='%Y-%m-%d')
     glucose = fields.Float(description="",validate=validate.Range(min=0, max=200),required=True)

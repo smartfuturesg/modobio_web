@@ -68,7 +68,7 @@ class MedBloodChemistryCMP(Resource):
         check_client_existence(clientid)
         # get payload and update the current instance followd by db commit
         data = request.get_json()
-        cmp_data = MedicalBloodChemistryCMP.query.filter_by(idx=data['idx']).one_or_none()
+        cmp_data = MedicalBloodChemistryCMP.query.filter_by(idx=data['idx'], clientid=clientid).one_or_none()
 
         if not cmp_data:
             raise ExamNotFound(data['idx'])
@@ -131,7 +131,7 @@ class MedBloodChemistryCBC(Resource):
         check_client_existence(clientid)
         # get payload and update the current instance followd by db commit
         data = request.get_json()
-        cbc_data = MedicalBloodChemistryCBC.query.filter_by(idx=data['idx']).one_or_none()
+        cbc_data = MedicalBloodChemistryCBC.query.filter_by(idx=data['idx'], clientid=clientid).one_or_none()
 
         if not cbc_data:
             raise ExamNotFound(data['idx'])

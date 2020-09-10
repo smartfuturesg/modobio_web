@@ -39,6 +39,7 @@ def test_put_medical_blood_chemistry_cmp(test_client, init_database):
     token = staff.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
+    test_blood_chemistry_cmp["idx"] = 1
     test_blood_chemistry_cmp["glucose"] = 30.0
     payload = test_blood_chemistry_cmp
     

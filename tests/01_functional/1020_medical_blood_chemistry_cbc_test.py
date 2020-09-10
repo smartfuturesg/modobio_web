@@ -39,7 +39,8 @@ def test_put_medical_blood_chemistry_cbc(test_client, init_database):
     staff = Staff().query.first()
     token = staff.get_token()
     headers = {'Authorization': f'Bearer {token}'}
-
+    
+    test_blood_chemistry_cbc["idx"] = 1
     test_blood_chemistry_cbc["rbc"] = 30
     payload = test_blood_chemistry_cbc
     
