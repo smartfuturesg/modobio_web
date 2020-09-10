@@ -147,8 +147,8 @@ class Config():
     DOCS_STORE_LOCAL = True
     SECRET_KEY = 'dev'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    OURA_CLIENT_ID = 'dev'
-    OURA_CLIENT_SECRET = 'dev'
+    OURA_CLIENT_ID = None
+    OURA_CLIENT_SECRET = None
     OURA_AUTH_URL = 'https://cloud.ouraring.com/oauth/authorize'
     OURA_TOKEN_URL = 'https://api.ouraring.com/oauth/token'
 
@@ -209,11 +209,6 @@ class Config():
         self.db_host = os.getenv('FLASK_DB_HOST', default='localhost')
         self.db_name = os.getenv('FLASK_DB_NAME', default='modobio')
 
-        self.ssm = boto3.client('ssm')
-        self.OURA_CLIENT_ID = self.ssm.get_parameter(Name='/modobio/wearables/plugins/oura/client_id')['Parameter']['Value']
-        self.OURA_CLIENT_SECRET = self.ssm.get_parameter(Name='/modobio/wearables/plugins/oura/client_secret',
-                                                 WithDecryption=True)['Parameter']['Value']
-
     def development_config(self):
         """ Set the configuration for the development server. """
         self.ssm = boto3.client('ssm')
@@ -230,9 +225,14 @@ class Config():
             self.db_pass = self.ssm.get_parameter(Name='/modobio/odyssey/db_pass',
                                                   WithDecryption=True)['Parameter']['Value']
 
-        param = self.ssm.get_parameter(Name='/modobio/odyssey/docs_bucket_test')
-        self.DOCS_BUCKET_NAME = param['Parameter']['Value']
+        self.DOCS_BUCKET_NAME = self.ssm.get_parameter(
+            Name='/modobio/odyssey/docs_bucket_test')['Parameter']['Value']
         self.DOCS_STORE_LOCAL = False
+        self.OURA_CLIENT_ID = self.ssm.get_parameter(
+            Name='/modobio/wearables/plugins/oura/client_id')['Parameter']['Value']
+        self.OURA_CLIENT_SECRET = self.ssm.get_parameter(
+            Name='/modobio/wearables/plugins/oura/client_secret',
+            WithDecryption=True)['Parameter']['Value']
 
     def test_config(self):
         """ Set the configuration for running local unittests. """

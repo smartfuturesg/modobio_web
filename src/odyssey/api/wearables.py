@@ -132,6 +132,10 @@ class WearablesOuraAuthorizationEndpoint(Resource):
         str
             The URL where the client needs to go to grant access to Modo Bio.
         """
+        # FLASK_DEV=local has no access to AWS
+        if not current_app.config['OURA_CLIENT_ID']:
+            return {'url': ''}
+
         check_client_existence(clientid)
 
         wearables = Wearables.query.filter_by(clientid=clientid).one_or_none()
@@ -164,6 +168,9 @@ class WearablesOuraCallbackEndpoint(Resource):
     @responds(status_code=200, api=ns)
     def get(self):
         """ Oura Ring callback URL """
+        if not current_app.config['OURA_CLIENT_ID']:
+            return 'Nothing done'
+
         oauth_state = request.args.get('state')
         error_code = request.args.get('error')
         oauth_grant_code = request.args.get('code')
