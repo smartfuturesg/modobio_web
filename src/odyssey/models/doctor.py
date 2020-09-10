@@ -19,7 +19,7 @@ class MedicalImaging(db.Model):
 
     :type: int, primary key, autoincrement
     """
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='MedicalHistory_clientid_fkey', ondelete="CASCADE"), nullable=False)
+    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='MedicalImaging_clientid_fkey', ondelete="CASCADE"), nullable=False)
     """
     Client ID number
 

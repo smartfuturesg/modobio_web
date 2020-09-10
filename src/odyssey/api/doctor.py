@@ -52,8 +52,8 @@ class MedicalImaging(Resource):
         return data
 
     @token_auth.login_required
-    @accepts(schema=MedicalImagingSchema, api=ns)
-    @responds(schema=MedicalImagingSchema, status_code=201, api=ns)
+    @accepts(schema=MedicalImagingSchema(many=True), api=ns)
+    @responds(schema=MedicalImagingSchema(many=True), status_code=201, api=ns)
     def post(self, clientid):
         """for adding a medical image to the database for the specified clientid"""
         check_client_existence(clientid)
@@ -64,7 +64,7 @@ class MedicalImaging(Resource):
         mi_schema = MedicalImagingSchema()
         client_mi = mi_schema.load(data)
 
-        db.session.add(client_mh)
+        db.session.add(client_mi)
         db.session.commit()
 
         return client_mi
