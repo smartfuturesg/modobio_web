@@ -32,6 +32,7 @@ setup(
         'Flask_WTF',
         'marshmallow',
         'marshmallow-sqlalchemy',
+        'PyPDF2',
         'pytest',
         'pytest-cov',
         'pytz',
