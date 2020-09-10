@@ -9,7 +9,7 @@ from odyssey.api import api
 from odyssey.api.auth import token_auth, token_auth_client
 from odyssey.api.errors import ClientNotFound, ContentNotFound, IllegalSetting, UserNotFound
 from odyssey import db
-from odyssey.pdf import to_pdf
+from odyssey.pdf import merge_pdfs, to_pdf
 from odyssey.models.client import (
     ClientInfo,
     ClientConsent,
@@ -488,7 +488,7 @@ class SignedDocuments(Resource):
         tmp_registration = request.args.get('tmp_registration')
         remote_client = check_remote_client_portal_validity(tmp_registration)
 
-        urls = []
+        urls = {}
         paths = []
 
         if not current_app.config['DOCS_STORE_LOCAL']:
@@ -507,7 +507,7 @@ class SignedDocuments(Resource):
         ):
             result = (
                 table.query
-                .filter_by(clientid=remote_clientid)
+                .filter_by(clientid=remote_client.clientid)
                 .order_by(table.idx.desc())
                 .first()
             )
@@ -520,7 +520,7 @@ class SignedDocuments(Resource):
                 else:
                     urls[table.displayname] = result.pdf_path
 
-        concat = merge_pdfs(paths, clientid)
+        concat = merge_pdfs(paths, remote_client.clientid)
         urls['All documents'] = concat
 
         return {'urls': urls}
