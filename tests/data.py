@@ -3,8 +3,6 @@ import datetime
 import pathlib
 import uuid
 
-from odyssey.constants import DOCTYPE, DOCTYPE_DOCREV_MAP
-
 test_client_info = {
     "firstname": "Test",
     "middlename": "This",
