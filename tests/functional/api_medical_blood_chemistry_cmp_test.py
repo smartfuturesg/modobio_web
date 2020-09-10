@@ -26,7 +26,6 @@ def test_post_medical_blood_chemistry_cmp(test_client, init_database):
                                 headers=headers, 
                                 data=dumps(payload), 
                                 content_type='application/json')
-    
     assert response.status_code == 201
 
 def test_put_medical_blood_chemistry_cmp(test_client, init_database):
@@ -49,10 +48,10 @@ def test_put_medical_blood_chemistry_cmp(test_client, init_database):
                                 data=dumps(payload), 
                                 content_type='application/json')
 
-    client = MedicalHistory.query.filter_by(clientid=1).first()
+    client = MedicalBloodChemistryCMP.query.filter_by(clientid=1).first()
 
     assert response.status_code == 200
-    assert client.diagnostic_other == "testing put"
+    assert client.glucose == 30.0
 
 
 def test_get_medical_blood_chemistry_cmp(test_client, init_database):
