@@ -732,7 +732,7 @@ class MedicalPhysicalExam(db.Model):
 class MedicalBloodChemistryLipids(db.Model):
     """ Blood Test - Lipid results
 
-    This table stores the blood test - thyroid results of clients.
+    This table stores the blood test - lipids results of clients.
     """
     __tablename__ = 'MedicalBloodChemistryLipids'
 
