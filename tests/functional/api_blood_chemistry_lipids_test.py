@@ -4,7 +4,7 @@ from flask.json import dumps
 
 from odyssey.models.staff import Staff
 from odyssey.models.doctor import MedicalBloodChemistryLipids
-from tests.data import test_get_blood_chemistry_lipids
+from tests.data import test_blood_chemistry_lipids
 
 
 def test_post_blood_chemistry_lipids(test_client, init_database):
