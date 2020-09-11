@@ -56,7 +56,7 @@ for path in paths:
                 break
 
     if not previous_hash:
-        print('Warning: script {path.name} does not have "down_revision" defined.')
+        print(f'Warning: script {path.name} does not have "down_revision" defined.')
         continue
     elif previous_hash == 'None':
         if nodelist.hash:
@@ -66,6 +66,11 @@ for path in paths:
 
         nodelist.hash = current_hash
         nodelist.file = path.name
+    elif previous_hash in nodes:
+        prev = nodes[previous_hash]
+        print(f'Warning: scripts {path.name} and {prev.file} both '
+              f'claim to upgrade {previous_hash}. Branch point?')
+        continue
     else:
         nodes[previous_hash] = Node(
             next=None,
