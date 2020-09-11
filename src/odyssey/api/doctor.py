@@ -426,9 +426,12 @@ class MedBloodChemistryLipids(Resource):
 
         #calculated values
         if 'cholesterol_hdl' in data.keys() and data['cholesterol_hdl'] != 0:
-            data['cholesterol_over_hdl'] = data['cholesterol_total'] / data['cholesterol_hdl']
-            data['ldl_over_hdl'] = data['cholesterol_ldl'] / data['cholesterol_hdl']
-            data['triglycerides_over_hdl'] = data['triglycerides'] / data['cholesterol_hdl']
+            if 'cholesterol_total' in data.keys():
+                data['cholesterol_over_hdl'] = data['cholesterol_total'] / data['cholesterol_hdl']
+            if 'cholesterol_ldl' in data.keys():
+                data['ldl_over_hdl'] = data['cholesterol_ldl'] / data['cholesterol_hdl']
+            if 'triglycerides' in data.keys():
+                data['triglycerides_over_hdl'] = data['triglycerides'] / data['cholesterol_hdl']
         
 
         bt_schema = MedicalBloodChemistryLipidsSchema()
@@ -472,10 +475,13 @@ class MedBloodChemistryLipids(Resource):
         
         #calculated values
         if 'cholesterol_hdl' in data.keys() and data['cholesterol_hdl'] != 0:
-            data['cholesterol_over_hdl'] = data['cholesterol_total'] / data['cholesterol_hdl']
-            data['ldl_over_hdl'] = data['cholesterol_ldl'] / data['cholesterol_hdl']
-            data['triglycerides_over_hdl'] = data['triglycerides'] / data['cholesterol_hdl']
-
+            if 'cholesterol_total' in data.keys():
+                data['cholesterol_over_hdl'] = data['cholesterol_total'] / data['cholesterol_hdl']
+            if 'cholesterol_ldl' in data.keys():
+                data['ldl_over_hdl'] = data['cholesterol_ldl'] / data['cholesterol_hdl']
+            if 'triglycerides' in data.keys():
+                data['triglycerides_over_hdl'] = data['triglycerides'] / data['cholesterol_hdl']
+        
         # update resource 
         exam.update(data)
 
