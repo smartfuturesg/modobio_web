@@ -38,7 +38,7 @@ ns = api.namespace('doctor', description='Operations related to doctor')
 
 @ns.route('/medicalimaging/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
-class MedicalImaging(Resource):
+class MedImaging(Resource):
     @ns.doc(security='apikey')
     @token_auth.login_required
     @responds(schema=MedicalImagingSchema(many=True), api=ns)
@@ -63,7 +63,7 @@ class MedicalImaging(Resource):
         
         data = request.get_json()
         data["clientid"] = clientid
-
+        
         mi_schema = MedicalImagingSchema()
         mi_data = mi_schema.load(data)
 

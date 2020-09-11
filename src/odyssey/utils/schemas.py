@@ -1077,11 +1077,12 @@ class MedicalImagingSchema(ma.SQLAlchemyAutoSchema):
     clientid = fields.Integer(missing=0)
     
     possible_image_types = ['CT scan', 'MRI', 'PET scan', 'Ultrasound', 'X-Ray']
-
-    @validates('image_type')
-    def valid_image_types(self, value):
-        if img_type not in self.possible_image_types:
-            raise ValidationError(f'{value} is not a valid image type. Use one of the following {self.possible_image_types}')
+    image_date = fields.DateTime(format='%Y-%m-%d', required=True)
+    image_read = fields.String(required=True)
+    image_type = fields.String(validate=validate.OneOf(possible_image_types), required=True)
+    #TODO: change image type
+    image = fields.String(required=True)
+   
     @post_load
     def make_object(self, data, **kwargs):
         return MedicalImaging(**data)   

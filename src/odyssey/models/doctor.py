@@ -72,7 +72,7 @@ class MedicalImaging(db.Model):
 
     :type: str, max length 1024
     """
-
+    #TODO: change image type
     image = db.Column(db.Text)
     """
     Bynary Stream data of the image.
