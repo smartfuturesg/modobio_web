@@ -1,8 +1,8 @@
-"""empty message
+"""Adds Medical Imaging Table
 
-Revision ID: ba27d3dde483
-Revises: 98f59f69d103
-Create Date: 2020-09-09 14:59:04.991532
+Revision ID: f8906e35ca68
+Revises: d6c482ee1b12
+Create Date: 2020-09-10 17:12:08.259200
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'ba27d3dde483'
-down_revision = '98f59f69d103'
+revision = 'f8906e35ca68'
+down_revision = 'd6c482ee1b12'
 branch_labels = None
 depends_on = None
 
@@ -28,7 +28,7 @@ def upgrade():
     sa.Column('medical_imaging_clinic_info', sa.Text(), nullable=True),
     sa.Column('image_cpt_code', sa.String(length=1024), nullable=True),
     sa.Column('image', sa.Text(), nullable=True),
-    sa.ForeignKeyConstraint(['clientid'], ['ClientInfo.clientid'], name='MedicalHistory_clientid_fkey', ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['clientid'], ['ClientInfo.clientid'], name='MedicalImaging_clientid_fkey', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('idx')
     )
     # ### end Alembic commands ###

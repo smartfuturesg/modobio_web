@@ -39,12 +39,13 @@ ns = api.namespace('doctor', description='Operations related to doctor')
 @ns.route('/medicalimaging/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
 class MedicalImaging(Resource):
+    @ns.doc(security='apikey')
     @token_auth.login_required
     @responds(schema=MedicalImagingSchema(many=True), api=ns)
     def get(self, clientid):
         """returns a json file of all the medical images in the database for the specified clientid"""
+        
         check_client_existence(clientid)
-
         data = MedicalImaging.query.filter_by(clientid=clientid).all()
         if not data:
             raise ContentNotFound()
@@ -52,22 +53,24 @@ class MedicalImaging(Resource):
         return data
 
     @token_auth.login_required
-    @accepts(schema=MedicalImagingSchema(many=True), api=ns)
-    @responds(schema=MedicalImagingSchema(many=True), status_code=201, api=ns)
+    @accepts(schema=MedicalImagingSchema, api=ns)
+    @ns.doc(security='apikey')
+    @responds(schema=MedicalImagingSchema, status_code=201, api=ns)
     def post(self, clientid):
         """for adding a medical image to the database for the specified clientid"""
+        
         check_client_existence(clientid)
-
+        
         data = request.get_json()
         data["clientid"] = clientid
 
         mi_schema = MedicalImagingSchema()
-        client_mi = mi_schema.load(data)
+        mi_data = mi_schema.load(data)
 
-        db.session.add(client_mi)
+        db.session.add(mi_data)
         db.session.commit()
 
-        return client_mi
+        return mi_data
 
 @ns.route('/bloodtest/cmp/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})

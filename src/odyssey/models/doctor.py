@@ -6,7 +6,7 @@ from datetime import datetime
 from odyssey import db
 
 class MedicalImaging(db.Model):
-    """ Medical history table
+    """ Medical Imaging table
 
     This table stores the medical imaging history of a client. 
     As long as the clientID exists, we can add images to this table and search by clientID
@@ -19,7 +19,7 @@ class MedicalImaging(db.Model):
 
     :type: int, primary key, autoincrement
     """
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='MedicalImaging_clientid_fkey', ondelete="CASCADE"), nullable=False)
+    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid', name='MedicalImaging_clientid_fkey', ondelete="CASCADE"), nullable=False)
     """
     Client ID number
 
