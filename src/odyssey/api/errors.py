@@ -135,6 +135,16 @@ class IllegalSetting(Exception):
 
         self.status_code = 400
 
+class InsufficientInputs(Exception):
+    """in the case that the input does not have enough data"""
+    def __init__(self, message = None):
+        Exception.__init__(self)
+        if message:
+            self.message = message
+        else:
+            self.message = 'Insufficient inputs supplied. At least 1 value other than date (and idx for PUT) must be given.'
+
+        self.status_code = 405
 
 def bad_request(message):
     return error_response(400, message)
@@ -157,6 +167,12 @@ def error_user_does_not_exist(error):
 def error_client_not_found(error):
     '''Return a custom message and 400 status code'''
     return error_response(error.status_code, error.message)
+
+@api.errorhandler(ExamNotFound)
+def error_exam_not_found(error):
+    '''Return a custom message and 400 status code'''
+    return error_response(error.status_code, error.message)
+
 
 @api.errorhandler(ContentNotFound)
 def error_content_not_found(error):
@@ -202,6 +218,12 @@ def error_client_already_exists(error):
 def error_staff_email_in_use(error):
     '''Return a custom message and 409 status code'''
     return error_response(error.status_code, error.message)
+
+@api.errorhandler(InsufficientInputs)
+def error_insufficient_inputs(error):
+    '''Return a custom message and 405 status code'''
+    return error_response(error.status_code, error.message)
+
 
 def register_handlers(app):
     """register application-wide error handling"""

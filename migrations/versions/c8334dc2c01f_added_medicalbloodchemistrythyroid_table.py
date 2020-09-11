@@ -1,7 +1,7 @@
 """Added MedicalBloodChemistryThyroid table
 
 Revision ID: c8334dc2c01f
-Revises: 2c861c33474f
+Revises: c9c14471cbd4
 Create Date: 2020-09-08 09:12:15.701780
 
 """
