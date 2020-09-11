@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import glob
 import math
 import pathlib
 
@@ -15,29 +14,29 @@ class Node():
     def __repr__(self):
         return f'Node {self.hash}'
 
-    def length(self):
+    def __len__(self):
         """ Length of linked list, starting from current node. """
         n = 0
         node = self
-        while node:
+        while node is not None:
             n += 1
             node = node.next
         return n
 
-    def print(self):
-        """ Print linked list to screen, starting from current node. """
-        length = self.length()
-        if length == 0:
+    def __str__(self):
+        """ Returns linked list as string, starting from current node. """
+        if len(self) == 0:
             pad = 2
         else:
-            pad = math.ceil(math.log10(length)) + 2
+            pad = math.ceil(math.log10(len(self))) + 2
         n = 1
         node = self
+        out = []
         while node:
-            print(f'{n:<{pad}}{node.file}')
+            out.append(f'{n:<{pad}}{node.file}')
             n += 1
             node = node.next
-
+        return '\n'.join(out)
 
 versions_dir = pathlib.Path(__file__).parent / 'versions'
 paths = versions_dir.glob('*.py')
@@ -83,7 +82,7 @@ while node.hash in nodes:
     node.next = nodes.pop(node.hash)
     node = node.next
 
-nodelist.print()
+print(nodelist)
 
 if nodes:
     print()
