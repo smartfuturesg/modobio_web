@@ -3,8 +3,6 @@ import datetime
 import pathlib
 import uuid
 
-from odyssey.constants import DOCTYPE, DOCTYPE_DOCREV_MAP
-
 test_client_info = {
     "firstname": "Test",
     "middlename": "This",
@@ -591,3 +589,54 @@ test_fitness_questionnaire = {
     "t3_serum_reverse": 20,
     "t3_serum_free": 3.0
   }
+test_blood_chemistry_lipids = {
+    "exam_date": "2020-09-08",
+    "cholesterol_total": 200,
+    "cholesterol_ldl": 50,
+    "cholesterol_hdl": 100,
+    "triglycerides": 200
+}
+
+test_blood_chemistry_cbc = {
+    "exam_date": "2020-09-01",
+    "rbc": 3,
+    "hemoglobin": 4,
+    "hematocrit": 5,
+    "mcv": 60,
+    "mch": 7,
+    "mchc": 8,
+    "rdw": 9,
+    "wbc": 10,
+    "rel_neutrophils": 11,
+    "abs_neutrophils": 12,
+    "rel_lymphocytes": 13,
+    "abs_lymphocytes": 16,
+    "rel_monocytes": 15,
+    "abs_monocytes": 16,
+    "rel_eosinophils": 17,
+    "abs_eosinophils": 18,
+    "basophils": 19,
+    "platelets": 20
+}
+
+test_blood_chemistry_cmp = {
+    "exam_date": "2020-09-01",
+    "glucose": 3,
+    "sodium": 4,
+    "potassium": 5,
+    "carbon_dioxide": 6,
+    "chloride": 7,
+    "magnesium": 8,
+    "calcium": 9,
+    "phosphorus": 10,
+    "uric_acid": 11,
+    "bun": 12,
+    "creatinine": 13,
+    "ast": 14,
+    "alt": 15,
+    "alk_phophatase": 16,
+    "bilirubin": 17,
+    "protein": 18,
+    "albumin": 19,
+    "globulin": 20
+}

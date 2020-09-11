@@ -6,7 +6,18 @@ from marshmallow import Schema, fields, post_load, ValidationError, validates, v
 from marshmallow import post_load, post_dump, pre_dump, pre_load
 
 from odyssey import ma
+<<<<<<< HEAD
 from odyssey.models.doctor import MedicalHistory, MedicalPhysicalExam, MedicalBloodChemistryThyroid, MedicalBloodChemistryA1C
+=======
+from odyssey.models.doctor import ( 
+    MedicalHistory,
+    MedicalPhysicalExam,
+    MedicalBloodChemistryCMP,
+    MedicalBloodChemistryCBC,
+    MedicalBloodChemistryThyroid,
+    MedicalBloodChemistryLipids
+)
+>>>>>>> master
 from odyssey.models.client import (
     ClientConsent,
     ClientConsultContract,
@@ -32,7 +43,8 @@ from odyssey.models.trainer import (
     MovementAssessment,
     LungAssessment
 )
-from odyssey.constants import DOCTYPE, DOCTYPE_DOCREV_MAP
+from odyssey.models.wearables import Wearables, WearablesOura
+
 
 class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -114,8 +126,6 @@ class ClientSummarySchema(Schema):
 
 
 class ClientConsentSchema(ma.SQLAlchemyAutoSchema):
-    doctype = DOCTYPE.consent
-    docrev = DOCTYPE_DOCREV_MAP[doctype]
     class Meta:
         model = ClientConsent
     
@@ -123,7 +133,6 @@ class ClientConsentSchema(ma.SQLAlchemyAutoSchema):
 
     @post_load
     def make_object(self, data, **kwargs):
-        data["revision"] = self.docrev
         return ClientConsent(**data)
 
 class ClientReleaseContactsSchema(ma.SQLAlchemyAutoSchema):
@@ -146,8 +155,6 @@ class ClientReleaseContactsSchema(ma.SQLAlchemyAutoSchema):
             raise ValidationError(f'release_direction entry invalid. Please use one of the following: {direction_values}')
 
 class ClientReleaseSchema(ma.SQLAlchemyAutoSchema):
-    doctype = DOCTYPE.release
-    docrev = DOCTYPE_DOCREV_MAP[doctype]
     class Meta:
         model = ClientRelease
 
@@ -158,7 +165,6 @@ class ClientReleaseSchema(ma.SQLAlchemyAutoSchema):
 
     @post_load
     def make_object(self, data, **kwargs):
-        data["revision"] = self.docrev
         data.pop("release_to")
         data.pop("release_from")
         return ClientRelease(**data)
@@ -188,8 +194,6 @@ class SignAndDateSchema(Schema):
     signature = fields.String(required=True)
 
 class ClientSubscriptionContractSchema(ma.SQLAlchemyAutoSchema):
-    doctype = DOCTYPE.subscription
-    docrev = DOCTYPE_DOCREV_MAP[doctype]
     class Meta:
         model = ClientSubscriptionContract
     
@@ -200,13 +204,10 @@ class ClientSubscriptionContractSchema(ma.SQLAlchemyAutoSchema):
         return ClientSubscriptionContract(
                     clientid = data["clientid"],
                     signature=data["signature"],
-                    signdate=data["signdate"],
-                    revision=self.docrev
+                    signdate=data["signdate"]
                     )
 
 class ClientConsultContractSchema(ma.SQLAlchemyAutoSchema):
-    doctype = DOCTYPE.consult
-    docrev = DOCTYPE_DOCREV_MAP[doctype]
     class Meta:
         model = ClientConsultContract
     
@@ -217,13 +218,10 @@ class ClientConsultContractSchema(ma.SQLAlchemyAutoSchema):
         return ClientConsultContract(
                     clientid = data["clientid"],
                     signature=data["signature"],
-                    signdate=data["signdate"],
-                    revision=self.docrev
+                    signdate=data["signdate"]
                     )
     
 class ClientPoliciesContractSchema(ma.SQLAlchemyAutoSchema):
-    doctype = DOCTYPE.policies
-    docrev = DOCTYPE_DOCREV_MAP[doctype]
     class Meta:
         model = ClientPolicies
     
@@ -234,15 +232,11 @@ class ClientPoliciesContractSchema(ma.SQLAlchemyAutoSchema):
         return ClientPolicies(
                     clientid = data["clientid"],
                     signature=data["signature"],
-                    signdate=data["signdate"],
-                    revision=self.docrev
+                    signdate=data["signdate"]
                     )
     
 
 class ClientIndividualContractSchema(ma.SQLAlchemyAutoSchema):
-    doctype = DOCTYPE.policies
-    docrev = DOCTYPE_DOCREV_MAP[doctype]
-
     class Meta:
         model = ClientIndividualContract
         
@@ -252,10 +246,11 @@ class ClientIndividualContractSchema(ma.SQLAlchemyAutoSchema):
         return ClientIndividualContract(**data)
 
 class SignedDocumentsSchema(Schema):
-    """
-        list of document urls
-    """
-    urls = fields.Dict()
+    """ Dictionary of all signed documents and the URL to the PDF file. """
+    urls = fields.Dict(
+        keys=fields.String(description='Document display name'),
+        values=fields.String(description='URL to PDF file of document.')
+    )
 
 
 """
@@ -1054,7 +1049,7 @@ class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
             if item not in self.lifestyle_goals_list:
                 raise ValidationError(f"{item} not a valid option. must be in {self.lifestyle_goals_list}")
         if len(value) > 3:
-            ValidatioinError("limit list length to 3 choices")
+            ValidationError("limit list length to 3 choices")
 
 
     @validates('physical_goals')
@@ -1063,7 +1058,7 @@ class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
             if item not in self.physical_goals_list:
                 raise ValidationError(f"{item} not a valid option. must be in {self.physical_goals_list}")
         if len(value) > 3:
-            ValidatioinError("limit list length to 3 choices")
+            ValidationError("limit list length to 3 choices")
     
     @validates('trainer_expectation')
     def validate_trainer_expectations(self, value):
@@ -1079,6 +1074,71 @@ class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
 """
     Schemas for the doctor's API
 """
+class BloodChemistryCBCSchema(Schema):
+
+    # Validate each payload entry
+    idx = fields.Integer(required=False)
+    clientid = fields.Integer(missing=0)
+    exam_date = fields.DateTime(format='%Y-%m-%d')
+    rbc = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    hemoglobin = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    hematocrit = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    mcv = fields.Float(description="",validate=validate.Range(min=0, max=200),required=True)
+    mch = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    mchc = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    rdw = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    wbc = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    rel_neutrophils = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    abs_neutrophils = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    rel_lymphocytes = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    abs_lymphocytes = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    rel_monocytes = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    abs_monocytes = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    rel_eosinophils = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    abs_eosinophils = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    basophils = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    platelets = fields.Float(description="",validate=validate.Range(min=0, max=500),required=True)
+
+    plateletsByMch = fields.Float()
+    plateletsByLymphocyte = fields.Float()
+    neutrophilByLymphocyte = fields.Float()
+    lymphocyteByMonocyte = fields.Float()
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return MedicalBloodChemistryCBC(**data)
+
+class BloodChemistryCMPSchema(Schema):
+
+    # Validate each payload entry
+    idx = fields.Integer(required=False)
+    clientid = fields.Integer(missing=0)
+    exam_date = fields.DateTime(format='%Y-%m-%d')
+    glucose = fields.Float(description="",validate=validate.Range(min=0, max=200),required=True)
+    sodium = fields.Float(description="",validate=validate.Range(min=0, max=500),required=True)
+    potassium = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    carbon_dioxide = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    chloride = fields.Float(description="",validate=validate.Range(min=0, max=500),required=True)
+    magnesium = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    calcium = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    phosphorus = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    uric_acid = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    bun = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    creatinine = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    ast = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    alt = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    alk_phophatase = fields.Float(description="",validate=validate.Range(min=0, max=200),required=True)
+    bilirubin = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    protein = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    albumin = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+    globulin = fields.Float(description="",validate=validate.Range(min=0, max=100),required=True)
+
+    bunByAlbumin = fields.Float()
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return MedicalBloodChemistryCMP(**data)
+
 
 class MedicalHistorySchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -1175,23 +1235,38 @@ class StaffSchema(ma.SQLAlchemyAutoSchema):
         new_staff.set_password(data['password'])
         return new_staff
 
+class MedicalBloodChemistryLipidsSchema(Schema):
+    idx = fields.Integer(required=False)
+    clientid = fields.Integer(required=False,missing=0)
+    exam_date = fields.Date(required=True)
+    cholesterol_total = fields.Float(required=False,validate=validate.Range(min=0.0, max=500.0))
+    cholesterol_ldl = fields.Float(required=False,validate=validate.Range(min=0.0, max=50.0))
+    cholesterol_hdl = fields.Float(required=False,validate=validate.Range(min=0.0, max=500.0))
+    triglycerides = fields.Float(required=False,validate=validate.Range(min=0.0, max=1000.0))
+    cholesterol_over_hdl = fields.Float(required=False)
+    triglycerides_over_hdl = fields.Float(required=False)
+    ldl_over_hdl = fields.Float(required=False)
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return MedicalBloodChemistryLipids(**data)
+
 class MedicalBloodChemistryThyroidSchema(Schema):
-        
-    idx = fields.Integer()
-    clientid = fields.Integer(missing=0)
-    exam_date = fields.Date()
-    t3_resin_uptake = fields.Integer(validate=validate.Range(min=25,max=35))
-    thyroglobulin = fields.Integer(validate=validate.Range(min=0,max=20))
-    thyroidial_iodine_uptake = fields.Integer(validate=validate.Range(min=5,max=30))
-    tsh = fields.Float(validate=validate.Range(min=0.5,max=4.0))
-    tsi = fields.Integer(validate=validate.Range(min=0,max=130))
-    thyroxine_binding_globulin = fields.Integer(validate=validate.Range(min=12,max=27))
-    thyroxine_index = fields.Integer(validate=validate.Range(min=5,max=12))
-    t4_serum_total = fields.Integer(validate=validate.Range(min=5,max=12))
-    t4_serum_free = fields.Float(validate=validate.Range(min=0.8,max=1.8))
-    t3_serum_total = fields.Integer(validate=validate.Range(min=80,max=180))
-    t3_serum_reverse = fields.Integer(validate=validate.Range(min=20,max=40))
-    t3_serum_free = fields.Float(validate=validate.Range(min=2.3,max=4.2))
+    idx = fields.Integer(required=False)
+    clientid = fields.Integer(required=False,missing=0)
+    exam_date = fields.Date(required=True)
+    t3_resin_uptake = fields.Integer(required=False,validate=validate.Range(min=25,max=35))
+    thyroglobulin = fields.Integer(required=False,validate=validate.Range(min=0,max=20))
+    thyroidial_iodine_uptake = fields.Integer(required=False,validate=validate.Range(min=5,max=30))
+    tsh = fields.Float(required=False,validate=validate.Range(min=0.5,max=4.0))
+    tsi = fields.Integer(required=False,validate=validate.Range(min=0,max=130))
+    thyroxine_binding_globulin = fields.Integer(required=False,validate=validate.Range(min=12,max=27))
+    thyroxine_index = fields.Integer(required=False,validate=validate.Range(min=5,max=12))
+    t4_serum_total = fields.Integer(required=False,validate=validate.Range(min=5,max=12))
+    t4_serum_free = fields.Float(required=False,validate=validate.Range(min=0.8,max=1.8))
+    t3_serum_total = fields.Integer(required=False,validate=validate.Range(min=80,max=180))
+    t3_serum_reverse = fields.Integer(required=False,validate=validate.Range(min=20,max=40))
+    t3_serum_free = fields.Float(required=False,validate=validate.Range(min=2.3,max=4.2))
     
     @post_load
     def make_object(self, data, **kwargs):
@@ -1199,11 +1274,35 @@ class MedicalBloodChemistryThyroidSchema(Schema):
 
 class MedicalBloodChemistryA1CSchema(Schema):
 
-    idx = fields.Integer()
-    clientid = fields.Integer(missing=0)
-    exam_date = fields.Date()
-    a1c = fields.Float(validate=validate.Range(min=4.0,max=5.6))
+    idx = fields.Integer(required=False)
+    clientid = fields.Integer(required=False,missing=0)
+    exam_date = fields.Date(required=True)
+    a1c = fields.Float(required=True,validate=validate.Range(min=4.0,max=5.6))
 
     @post_load
     def make_object(self, data, **kwargs):
         return MedicalBloodChemistryA1C(**data)
+
+#
+#   Schemas for the wearables API
+#
+class WearablesSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Wearables
+
+    clientid = fields.Integer(missing=0)
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return Wearables(**data)
+
+
+class WearablesOuraSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = WearablesOura
+
+    clientid = fields.Integer(missing=0)
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return WearablesOura(**data)
