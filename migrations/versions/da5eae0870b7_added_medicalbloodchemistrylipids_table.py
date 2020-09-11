@@ -1,7 +1,7 @@
 """Added MedicalBloodChemistryLipids table
 
 Revision ID: da5eae0870b7
-Revises: c8334dc2c01f
+Revises: d306fec9e8f2
 Create Date: 2020-09-09 10:12:32.256737
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'da5eae0870b7'
-down_revision = 'c8334dc2c01f'
+down_revision = 'd306fec9e8f2'
 branch_labels = None
 depends_on = None
 

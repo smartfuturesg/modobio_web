@@ -40,7 +40,7 @@ def test_put_blood_chemistry_lipids(test_client, init_database):
     headers = {'Authorization': f'Bearer {token}'}
 
     test_blood_chemistry_lipids["idx"] = 1
-    test_blood_chemistry_lipids["exam_date"] = "1900-01-01"
+    test_blood_chemistry_lipids["cholesterol_total"] = 300
     payload = test_blood_chemistry_lipids
     
     # send get request for client info on clientid = 1 
@@ -52,7 +52,7 @@ def test_put_blood_chemistry_lipids(test_client, init_database):
     client = MedicalBloodChemistryLipids.query.filter_by(clientid=1).first()
 
     assert response.status_code == 200
-    assert client.exam_date == "1900-01-01"
+    assert client.cholesterol_total == 300
 
 
 def test_get_blood_chemistry_lipids(test_client, init_database):

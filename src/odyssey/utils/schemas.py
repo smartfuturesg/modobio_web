@@ -1232,37 +1232,37 @@ class StaffSchema(ma.SQLAlchemyAutoSchema):
         return new_staff
 
 class MedicalBloodChemistryLipidsSchema(Schema):
-    idx = fields.Integer()
-    clientid = fields.Integer(missing=0)
-    exam_date = fields.Date()
-    cholesterol_total = fields.Float(validate=validate.Range(min=0.0, max=500.0))
-    cholesterol_ldl = fields.Float(validate=validate.Range(min=0.0, max=50.0))
-    cholesterol_hdl = fields.Float(validate=validate.Range(min=0.0, max=500.0))
-    triglycerides = fields.Float(validate=validate.Range(min=0.0, max=1000.0))
-    cholesterol_over_hdl = fields.Float()
-    triglycerides_over_hdl = fields.Float()
-    ldl_over_hdl = fields.Float()
+    idx = fields.Integer(required=False)
+    clientid = fields.Integer(required=False,missing=0)
+    exam_date = fields.Date(required=True)
+    cholesterol_total = fields.Float(required=False,validate=validate.Range(min=0.0, max=500.0))
+    cholesterol_ldl = fields.Float(required=False,validate=validate.Range(min=0.0, max=50.0))
+    cholesterol_hdl = fields.Float(required=False,validate=validate.Range(min=0.0, max=500.0))
+    triglycerides = fields.Float(required=False,validate=validate.Range(min=0.0, max=1000.0))
+    cholesterol_over_hdl = fields.Float(required=False)
+    triglycerides_over_hdl = fields.Float(required=False)
+    ldl_over_hdl = fields.Float(required=False)
 
     @post_load
     def make_object(self, data, **kwargs):
         return MedicalBloodChemistryLipids(**data)
 
 class MedicalBloodChemistryThyroidSchema(Schema):
-    idx = fields.Integer()
-    clientid = fields.Integer(missing=0)
-    exam_date = fields.Date()
-    t3_resin_uptake = fields.Integer(validate=validate.Range(min=25,max=35))
-    thyroglobulin = fields.Integer(validate=validate.Range(min=0,max=20))
-    thyroidial_iodine_uptake = fields.Integer(validate=validate.Range(min=5,max=30))
-    tsh = fields.Float(validate=validate.Range(min=0.5,max=4.0))
-    tsi = fields.Integer(validate=validate.Range(min=0,max=130))
-    thyroxine_binding_globulin = fields.Integer(validate=validate.Range(min=12,max=27))
-    thyroxine_index = fields.Integer(validate=validate.Range(min=5,max=12))
-    t4_serum_total = fields.Integer(validate=validate.Range(min=5,max=12))
-    t4_serum_free = fields.Float(validate=validate.Range(min=0.8,max=1.8))
-    t3_serum_total = fields.Integer(validate=validate.Range(min=80,max=180))
-    t3_serum_reverse = fields.Integer(validate=validate.Range(min=20,max=40))
-    t3_serum_free = fields.Float(validate=validate.Range(min=2.3,max=4.2))
+    idx = fields.Integer(required=False)
+    clientid = fields.Integer(required=False,missing=0)
+    exam_date = fields.Date(required=True)
+    t3_resin_uptake = fields.Integer(required=False,validate=validate.Range(min=25,max=35))
+    thyroglobulin = fields.Integer(required=False,validate=validate.Range(min=0,max=20))
+    thyroidial_iodine_uptake = fields.Integer(required=False,validate=validate.Range(min=5,max=30))
+    tsh = fields.Float(required=False,validate=validate.Range(min=0.5,max=4.0))
+    tsi = fields.Integer(required=False,validate=validate.Range(min=0,max=130))
+    thyroxine_binding_globulin = fields.Integer(required=False,validate=validate.Range(min=12,max=27))
+    thyroxine_index = fields.Integer(required=False,validate=validate.Range(min=5,max=12))
+    t4_serum_total = fields.Integer(required=False,validate=validate.Range(min=5,max=12))
+    t4_serum_free = fields.Float(required=False,validate=validate.Range(min=0.8,max=1.8))
+    t3_serum_total = fields.Integer(required=False,validate=validate.Range(min=80,max=180))
+    t3_serum_reverse = fields.Integer(required=False,validate=validate.Range(min=20,max=40))
+    t3_serum_free = fields.Float(required=False,validate=validate.Range(min=2.3,max=4.2))
     
     @post_load
     def make_object(self, data, **kwargs):

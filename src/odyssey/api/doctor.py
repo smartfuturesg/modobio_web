@@ -10,7 +10,7 @@ from odyssey.models.doctor import MedicalPhysicalExam, MedicalHistory, MedicalBl
 from odyssey.models.misc import MedicalInstitutions
 from odyssey.api import api
 from odyssey.api.auth import token_auth
-from odyssey.api.errors import UserNotFound, IllegalSetting, ContentNotFound, ExamNotFound
+from odyssey.api.errors import UserNotFound, IllegalSetting, ContentNotFound, ExamNotFound, InsufficientInputs, MethodNotAllowed
 from odyssey.utils.misc import check_client_existence
 from odyssey.utils.schemas import (
     ClientExternalMREntrySchema, 
@@ -327,9 +327,19 @@ class MedBloodChemistryThyroid(Resource):
         check_client_existence(clientid)
 
         data = request.get_json()
+
+        #temporarily remove exam date to check if at least 1 other field is populated
+        temp_date = data["exam_date"]
+        del data["exam_date"]
+        if not data:
+            #there is not at least 1 other field populated, illegal input
+            raise InsufficientInputs("At least 1 input other than date is required")
+        
+        #at least 1 other field is populated, restore exam date and idx and resume PUT
+        data["exam_date"] = temp_date
         data["clientid"] = clientid
 
-        bt_schema = BloodChemistryThyroidSchema()
+        bt_schema = MedicalBloodChemistryThyroidSchema()
 
         client_bt = bt_schema.load(data)
 
@@ -346,12 +356,29 @@ class MedBloodChemistryThyroid(Resource):
         # get payload
         data = request.get_json()
 
+        if 'idx' not in data.keys():
+            raise ExamNotFound('None')
+
         exam = MedicalBloodChemistryThyroid.query.filter_by(idx=data['idx']).first()
 
+        #check that exam at given idx exists
         if not exam:
             raise ExamNotFound(data['idx'])
-        
-        data['exami_date'] = datetime.strptime(data['exam_date'], "%Y-%m-%d")
+
+        #temporarily remove exam date and idx to check if at least 1 other field is populated
+        temp_date = data["exam_date"]
+        temp_idx = data["idx"]
+        del(data["exam_date"])
+        del(data["idx"])
+        if not data:
+            #there is not at least 1 other field populated, illegal input
+            raise InsufficientInputs("At least 1 input other than date and idx is required")
+
+        #at least 1 other field is populated, restore exam date and idx and resume PUT
+        data["exam_date"] = temp_date
+        data["idx"] = temp_idx
+
+        data['exam_date'] = datetime.strptime(data['exam_date'], "%Y-%m-%d")
 
         # update resource 
         exam.update(data)
@@ -384,10 +411,20 @@ class MedBloodChemistryLipids(Resource):
         check_client_existence(clientid)
 
         data = request.get_json()
+
+        #temporarily remove exam date and idx to check if at least 1 other field is populated
+        temp_date = data["exam_date"]
+        del data["exam_date"]
+        if not data:
+            #there is not at least 1 other field populated, illegal input
+            raise InsufficientInputs("At least 1 input other than date and idx is required")
+
+        #at least 1 other field is populated, restore exam date and resume POST
+        data["exam_date"] = temp_date
         data['clientid'] = clientid
 
         #calculated values
-        if data['cholesterol_hdl'] != 0:
+        if 'cholesterol_hdl' in data.keys() and data['cholesterol_hdl'] != 0:
             data['cholesterol_over_hdl'] = data['cholesterol_total'] / data['cholesterol_hdl']
             data['ldl_over_hdl'] = data['cholesterol_ldl'] / data['cholesterol_hdl']
             data['triglycerides_over_hdl'] = data['triglycerides'] / data['cholesterol_hdl']
@@ -410,16 +447,30 @@ class MedBloodChemistryLipids(Resource):
         # get payload
         data = request.get_json()
 
+        if 'idx' not in data.keys():
+            raise ExamNotFound('None')
+
         exam = MedicalBloodChemistryLipids.query.filter_by(idx=data['idx']).first()
 
         if not exam:
             raise ExamNotFound(data['idx'])
         
-        
+        #temporarily remove exam date and idx to check if at least 1 other field is populated
+        temp_date = data["exam_date"]
+        temp_idx = data["idx"]
+        del(data["exam_date"])
+        del(data["idx"])
+        if not data:
+            #there is not at least 1 other field populated, illegal input
+            raise InsufficientInputs("At least 1 input other than date and idx is required")
+
+        #at least 1 other field is populated, restore exam date and idx and resume PUT
+        data["exam_date"] = temp_date
+        data["idx"] = temp_idx
         data['exam_date'] = datetime.strptime(data['exam_date'], "%Y-%m-%d")
         
         #calculated values
-        if data['cholesterol_hdl'] != 0:
+        if 'cholesterol_hdl' in data.keys() and data['cholesterol_hdl'] != 0:
             data['cholesterol_over_hdl'] = data['cholesterol_total'] / data['cholesterol_hdl']
             data['ldl_over_hdl'] = data['cholesterol_ldl'] / data['cholesterol_hdl']
             data['triglycerides_over_hdl'] = data['triglycerides'] / data['cholesterol_hdl']
