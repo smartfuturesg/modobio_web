@@ -11,6 +11,7 @@ Flask_WTF
 marshmallow
 marshmallow-sqlalchemy
 psycopg2
+PyPDF2
 pytest
 pytest-cov
 pytz

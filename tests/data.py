@@ -3,8 +3,6 @@ import datetime
 import pathlib
 import uuid
 
-from odyssey.constants import DOCTYPE, DOCTYPE_DOCREV_MAP
-
 test_client_info = {
     "firstname": "Test",
     "middlename": "This",
@@ -572,8 +570,6 @@ test_fitness_questionnaire = {
 }
 
 test_blood_chemistry_cbc = {
-    "idx": 1,
-    "clientid": 1,
     "exam_date": "2020-09-01",
     "rbc": 3,
     "hemoglobin": 4,
@@ -593,4 +589,26 @@ test_blood_chemistry_cbc = {
     "abs_eosinophils": 18,
     "basophils": 19,
     "platelets": 20
+}
+
+test_blood_chemistry_cmp = {
+    "exam_date": "2020-09-01",
+    "glucose": 3,
+    "sodium": 4,
+    "potassium": 5,
+    "carbon_dioxide": 6,
+    "chloride": 7,
+    "magnesium": 8,
+    "calcium": 9,
+    "phosphorus": 10,
+    "uric_acid": 11,
+    "bun": 12,
+    "creatinine": 13,
+    "ast": 14,
+    "alt": 15,
+    "alk_phophatase": 16,
+    "bilirubin": 17,
+    "protein": 18,
+    "albumin": 19,
+    "globulin": 20
 }

@@ -22,14 +22,3 @@ odyssey.constants module
    :annotation:
 
 .. autofunction:: odyssey.constants.BOOLIFY
-
-.. autoclass:: odyssey.constants.DOCTYPE
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-.. autodata:: odyssey.constants.DOCTYPE_TABLE_MAP
-   :annotation:
-
-.. autodata:: odyssey.constants.DOCTYPE_DOCREV_MAP
-   :annotation:
