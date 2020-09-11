@@ -9,42 +9,48 @@ stages:
 
 test:
   stage: test
-  script:
-    - echo "Running tests."
-    - bash ~/test_odyssey.sh
-  only:
-    - merge_requests
   tags:
     - shared
+  only:
+    - merge_requests
+  script:
+    - sudo docker network create modobio
+    - echo "Creating test database..."
+    - sudo docker run --name postgres_$CI_BUILD_ID --network modobio -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=password -e POSTGRES_DB=modobio_test -p 5432:5432 -d postgres
+    - echo "Running tests..."
+    - bash ~/test_odyssey.sh
+  after_script:
+    - echo "Destroying test database..."
+    - sudo docker rm -f postgres_$CI_BUILD_ID
 
 pages:
   stage: build
-  script:
-    - echo 'Nothing to do...'
   tags:
     - gitlab-runner
+  only:
+    - master
+  script:
+    - echo 'Nothing to do...'
   artifacts:
     paths:
       - public
-  only:
-    - master
 
 version:
   stage: version
-  script:
-    - echo "Checking version"
-    - bash ~/check_version.sh
-  only:
-    - master
   tags:
     - shared
+  only:
+    - master
+  script:
+    - echo "Checking version"
+    - bash ~/update_version.sh zan/odyssey
 
 deploy:
   stage: deploy
-  script:
-    - echo "Deploying update."
-    - bash ~/dev_odyssey.sh
-  only:
-    - master
   tags:
     - shared
+  only:
+    - master
+  script:
+    - echo "Deploying update."
+    - bash ~/dev_update.sh odyssey
