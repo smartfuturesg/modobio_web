@@ -49,7 +49,7 @@ def test_put_blood_chemistry_lipids(test_client, init_database):
                                 data=dumps(payload), 
                                 content_type='application/json')
 
-    client = MedicalHistory.query.filter_by(clientid=1).first()
+    client = MedicalBloodChemistryLipids.query.filter_by(clientid=1).first()
 
     assert response.status_code == 200
     assert client.exam_date == "1900-01-01"
