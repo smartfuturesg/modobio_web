@@ -72,7 +72,7 @@ class ContentNotFoundReturnData(Exception):
     def __init__(self, data=None, clientid = None):
         Exception.__init__(self)
         data.update({"clientid": clientid})
-        self.status_code = 201
+        self.status_code = 200
         self.message = "no instance of resource exists yet"
 
         self.data = data
