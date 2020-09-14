@@ -109,13 +109,28 @@ class MedBloodChemistryCBC(Resource):
         check_client_existence(clientid)
         """create new db entry for CBC"""
         data = request.get_json()
+        temp_date = data['exam_date']
+        del data['exam_date']
+
+        # Check if data is empty
+        if not data:
+            # Data has nothing in it, raise error.
+            # Blood Chemistry test needs at least one input
+            raise InsufficientInputs()
+
+        data['exam_date'] = temp_date  
         data["clientid"] = clientid
         
         """ Additional ratio calculations from payload """
-        data['plateletsByMch'] = data['platelets']/data['mch']
-        data['plateletsByLymphocyte'] = data['platelets']/data['abs_lymphocytes']
-        data['neutrophilByLymphocyte'] = data['abs_neutrophils']/data['abs_lymphocytes']
-        data['lymphocyteByMonocyte'] = data['abs_lymphocytes']/data['abs_monocytes']
+        if 'abs_lymphocytes' in data:
+            if 'platelets' in data:
+                data['plateletsByLymphocyte'] = data['platelets']/data['abs_lymphocytes']
+            if 'abs_neutrophils' in data:
+                data['neutrophilByLymphocyte'] = data['abs_neutrophils']/data['abs_lymphocytes']
+            if 'abs_monocytes' in data:
+                data['lymphocyteByMonocyte'] = data['abs_lymphocytes']/data['abs_monocytes']
+        if 'platelets' in data and 'mch' in data:
+            data['plateletsByMch'] = data['platelets']/data['mch']
 
         cbc_schema = BloodChemistryCBCSchema()
         cbc_data = cbc_schema.load(data)
@@ -135,13 +150,30 @@ class MedBloodChemistryCBC(Resource):
 
         if not cbc_data:
             raise ExamNotFound(data['idx'])
-        
-        # update resource
+
+        temp_date = data['exam_date']
+        temp_idx = data['idx']
+        del data['exam_date']
+        del data['idx']
+        # Check if data is empty
+        if not data:
+            # Data has nothing in it, raise error.
+            # Blood Chemistry test needs at least one input
+            raise InsufficientInputs()
+
+        data['exam_date'] = temp_date  
+        data["idx"] = temp_idx
+
         """ Additional ratio calculations from payload """
-        data['plateletsByMch'] = data['platelets']/data['mch']
-        data['plateletsByLymphocyte'] = data['platelets']/data['abs_lymphocytes']
-        data['neutrophilByLymphocyte'] = data['abs_neutrophils']/data['abs_lymphocytes']
-        data['lymphocyteByMonocyte'] = data['abs_lymphocytes']/data['abs_monocytes']
+        if 'abs_lymphocytes' in data:
+            if 'platelets' in data:
+                data['plateletsByLymphocyte'] = data['platelets']/data['abs_lymphocytes']
+            if 'abs_neutrophils' in data:
+                data['neutrophilByLymphocyte'] = data['abs_neutrophils']/data['abs_lymphocytes']
+            if 'abs_monocytes' in data:
+                data['lymphocyteByMonocyte'] = data['abs_lymphocytes']/data['abs_monocytes']
+        if 'platelets' in data and 'mch' in data:
+            data['plateletsByMch'] = data['platelets']/data['mch']
         cbc_data.update(data)
         db.session.commit()
 
