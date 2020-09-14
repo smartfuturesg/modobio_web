@@ -48,7 +48,6 @@ def test_creating_new_remote_client(test_client, init_database):
     client = ClientInfo.query.filter_by(email=test_new_remote_registration['email']).first()
     
     remote_client = RemoteRegistration.query.filter_by(email=test_new_remote_registration['email']).first()
-    
     # some simple checks for validity
     assert response.status_code == 201
     assert client.email == 'rest_remote_registration@gmail.com'

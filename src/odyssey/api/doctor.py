@@ -51,9 +51,23 @@ class MedBloodChemistryCMP(Resource):
     def post(self,clientid):
         """create new db entItry for CMP"""
         check_client_existence(clientid)
+        
         data = request.get_json()
+        temp_date = data['exam_date']
+        del data['exam_date']
+        # Check if data is empty
+        if not data:
+            # Data has nothing in it, raise error.
+            # Blood Chemistry test needs at least one input
+            raise InsufficientInputs()
+        
+        data['exam_date'] = temp_date
         data["clientid"] = clientid
-        data["bunByAlbumin"] = data['bun']/data['albumin']
+
+        # If bun or albumin is missing, make bunByAlbumin null
+        if 'bun' in data and 'albumin' in data:
+            data['bunByAlbumin'] = data['bun']/data['albumin']
+
         cmp_schema = BloodChemistryCMPSchema()
         cmp_data = cmp_schema.load(data)
         db.session.add(cmp_data)
@@ -72,9 +86,26 @@ class MedBloodChemistryCMP(Resource):
 
         if not cmp_data:
             raise ExamNotFound(data['idx'])
+
+        data = request.get_json()
+        temp_date = data['exam_date']
+        temp_idx = data['idx']
+        del data['exam_date']
+        del data['idx']
+        # Check if data is empty
+        if not data:
+            # Data has nothing in it, raise error.
+            # Blood Chemistry test needs at least one input
+            raise InsufficientInputs()
         
-        # update resource
-        data["bunByAlbumin"] = data['bun']/data['albumin']
+        data['idx'] = temp_idx
+        data['exam_date'] = temp_date
+        data["clientid"] = clientid
+
+        # If bun or albumin is missing, make bunByAlbumin null
+        if 'bun' in data and 'albumin' in data:
+            data['bunByAlbumin'] = data['bun']/data['albumin']
+
         cmp_data.update(data)
         db.session.commit()
 
