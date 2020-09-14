@@ -1,7 +1,7 @@
 """add wearables tables
 
 Revision ID: d306fec9e8f2
-Revises: c9c14471cbd4
+Revises: d6c482ee1b12
 Create Date: 2020-08-11 17:09:58.148479
 
 """
