@@ -108,7 +108,7 @@ def init_database():
     db.session.commit()
 
     yield db  # this is where the testing happens!
-
+    clean_db(db)
     # db.drop_all()
 
     # https://stackoverflow.com/questions/26350911/what-to-do-when-a-py-test-hangs-silently
