@@ -12,7 +12,8 @@ from odyssey.models.doctor import (
     MedicalBloodChemistryCMP,
     MedicalBloodChemistryCBC,
     MedicalBloodChemistryThyroid,
-    MedicalBloodChemistryLipids
+    MedicalBloodChemistryLipids,
+    MedicalBloodChemistryA1C
 )
 from odyssey.models.client import (
     ClientConsent,
@@ -1268,6 +1269,16 @@ class MedicalBloodChemistryThyroidSchema(Schema):
     def make_object(self, data, **kwargs):
         return MedicalBloodChemistryThyroid(**data)
 
+class MedicalBloodChemistryA1CSchema(Schema):
+
+    idx = fields.Integer(required=False)
+    clientid = fields.Integer(required=False,missing=0)
+    exam_date = fields.Date(required=True)
+    a1c = fields.Float(required=True,validate=validate.Range(min=4.0,max=5.6))
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return MedicalBloodChemistryA1C(**data)
 
 #
 #   Schemas for the wearables API

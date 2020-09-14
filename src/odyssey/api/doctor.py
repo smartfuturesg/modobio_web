@@ -6,7 +6,7 @@ from flask_restx import Resource, Api
 
 from odyssey import db
 from odyssey.models.client import ClientExternalMR
-from odyssey.models.doctor import MedicalPhysicalExam, MedicalHistory, MedicalBloodChemistryCBC, MedicalBloodChemistryThyroid, MedicalBloodChemistryCMP, MedicalBloodChemistryLipids
+from odyssey.models.doctor import MedicalPhysicalExam, MedicalHistory, MedicalBloodChemistryCBC, MedicalBloodChemistryThyroid, MedicalBloodChemistryCMP, MedicalBloodChemistryLipids, MedicalBloodChemistryA1C
 from odyssey.models.misc import MedicalInstitutions
 from odyssey.api import api
 from odyssey.api.auth import token_auth
@@ -21,7 +21,8 @@ from odyssey.utils.schemas import (
     BloodChemistryCMPSchema,
     BloodChemistryCBCSchema,
     MedicalBloodChemistryThyroidSchema,
-    MedicalBloodChemistryLipidsSchema
+    MedicalBloodChemistryLipidsSchema,
+    MedicalBloodChemistryA1CSchema
 )
 
 ns = api.namespace('doctor', description='Operations related to doctor')
@@ -488,9 +489,12 @@ class MedBloodChemistryLipids(Resource):
 
         #calculated values
         if 'cholesterol_hdl' in data.keys() and data['cholesterol_hdl'] != 0:
-            data['cholesterol_over_hdl'] = data['cholesterol_total'] / data['cholesterol_hdl']
-            data['ldl_over_hdl'] = data['cholesterol_ldl'] / data['cholesterol_hdl']
-            data['triglycerides_over_hdl'] = data['triglycerides'] / data['cholesterol_hdl']
+            if 'cholesterol_total' in data.keys():
+                data['cholesterol_over_hdl'] = data['cholesterol_total'] / data['cholesterol_hdl']
+            if 'cholesterol_ldl' in data.keys():
+                data['ldl_over_hdl'] = data['cholesterol_ldl'] / data['cholesterol_hdl']
+            if 'triglycerides' in data.keys():
+                data['triglycerides_over_hdl'] = data['triglycerides'] / data['cholesterol_hdl']
         
 
         bt_schema = MedicalBloodChemistryLipidsSchema()
@@ -534,9 +538,72 @@ class MedBloodChemistryLipids(Resource):
         
         #calculated values
         if 'cholesterol_hdl' in data.keys() and data['cholesterol_hdl'] != 0:
-            data['cholesterol_over_hdl'] = data['cholesterol_total'] / data['cholesterol_hdl']
-            data['ldl_over_hdl'] = data['cholesterol_ldl'] / data['cholesterol_hdl']
-            data['triglycerides_over_hdl'] = data['triglycerides'] / data['cholesterol_hdl']
+            if 'cholesterol_total' in data.keys():
+                data['cholesterol_over_hdl'] = data['cholesterol_total'] / data['cholesterol_hdl']
+            if 'cholesterol_ldl' in data.keys():
+                data['ldl_over_hdl'] = data['cholesterol_ldl'] / data['cholesterol_hdl']
+            if 'triglycerides' in data.keys():
+                data['triglycerides_over_hdl'] = data['triglycerides'] / data['cholesterol_hdl']
+        
+        # update resource 
+        exam.update(data)
+
+        db.session.commit()
+
+        return exam
+
+@ns.route('/bloodchemistry/a1c/<int:clientid>/')
+@ns.doc(params={'clientId': 'Client ID number'})
+class MedBloodChemistryA1C(Resource):
+    @token_auth.login_required
+    @responds(schema=MedicalBloodChemistryA1CSchema(many=True), api=ns)
+    def get(self, clientid):
+        """returns all blood thyroid results as a json for the client ID specified"""
+        check_client_existence(clientid)
+
+        exams = MedicalBloodChemistryA1C.query.filter_by(clientid=clientid).all()
+
+        if not exams:
+            raise ContentNotFound()
+
+        return exams
+    
+    @token_auth.login_required
+    @accepts(schema=MedicalBloodChemistryA1CSchema, api=ns)
+    @responds(schema=MedicalBloodChemistryA1CSchema, status_code=201, api=ns)
+    def post(self, clientid):
+        """creates new db entry for blood test results as a json for the clientid specified"""
+        check_client_existence(clientid)
+
+        data = request.get_json()
+        data["clientid"] = clientid
+
+        bt_schema = MedicalBloodChemistryA1CSchema()
+
+        client_bt = bt_schema.load(data)
+
+        db.session.add(client_bt)
+        db.session.commit()
+
+        return client_bt
+
+    @token_auth.login_required
+    @accepts(schema=MedicalBloodChemistryA1CSchema, api=ns)
+    @responds(schema=MedicalBloodChemistryA1CSchema, api=ns)
+    def put(self, clientid):
+        """edit exam info"""
+        # get payload
+        data = request.get_json()
+
+        if 'idx' not in data.keys():
+            raise ExamNotFound('None')
+
+        exam = MedicalBloodChemistryA1C.query.filter_by(idx=data['idx']).first()
+
+        if not exam:
+            raise ExamNotFound(data['idx'])
+        
+        data['exam_date'] = datetime.strptime(data['exam_date'], "%Y-%m-%d")
 
         # update resource 
         exam.update(data)

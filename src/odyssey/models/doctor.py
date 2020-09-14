@@ -937,3 +937,39 @@ class MedicalBloodChemistryThyroid(db.Model):
     :type: integer
     :units: pg/mL
     """
+
+class MedicalBloodChemistryA1C(db.Model):
+    """ Blood Test - A1C results
+
+    This table stores the blood test - thyroid results of clients.
+    """
+    __tablename__ = 'MedicalBloodChemistryA1C'
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Index
+
+    :type: int, primary key, autoincrement
+    """
+
+    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='BloodA1C_clientid_fkey', ondelete="CASCADE"), nullable=False)
+    """
+    Client ID number
+
+    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    """
+
+    exam_date = db.Column(db.Date)
+    """
+    Date blood test was administered.
+
+    :type: :class:`datetime.date`
+    """
+
+    a1c = db.Column(db.Float)
+    """
+    Hemoglobin A1C
+
+    :type: float
+    :units: %
+    """    
