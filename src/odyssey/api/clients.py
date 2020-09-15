@@ -480,10 +480,14 @@ class NewRemoteRegistration(Resource):
         db.session.add(remote_client_portal)
         db.session.commit()
 
-        # send email to client containing registration details
-        send_email_remote_registration_portal(recipient=remote_client_portal.email, 
-                                              password=remote_client_portal.password, 
-                                              remote_registration_portal=remote_client_portal.registration_portal_id)
+        if not current_app.config['LOCAL_CONFIG']:
+            # send email to client containing registration details
+            send_email_remote_registration_portal(
+                recipient=remote_client_portal.email, 
+                password=remote_client_portal.password, 
+                remote_registration_portal=remote_client_portal.registration_portal_id
+            )
+
         return remote_client_portal
 
 
@@ -518,10 +522,13 @@ class RefreshRemoteRegistration(Resource):
         db.session.add(remote_client_portal)
         db.session.commit()
 
-        # send email to client containing registration details
-        send_email_remote_registration_portal(recipient=remote_client_portal.email, 
-                                              password=remote_client_portal.password, 
-                                              remote_registration_portal=remote_client_portal.registration_portal_id)
+        if not current_app.config['LOCAL_CONFIG']:
+            # send email to client containing registration details
+            send_email_remote_registration_portal(
+                recipient=remote_client_portal.email,
+                password=remote_client_portal.password, 
+                remote_registration_portal=remote_client_portal.registration_portal_id
+            )
 
         return remote_client_portal
 
