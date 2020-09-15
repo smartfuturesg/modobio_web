@@ -48,5 +48,6 @@ from odyssey.api import (
     tokens,
     trainer,
     wearables,
-    version
+    version,
+    registeredfacilities
 )

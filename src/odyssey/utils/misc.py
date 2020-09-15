@@ -5,7 +5,8 @@ import re
 import uuid
 import flask.json
 from odyssey.models.client import ClientInfo, RemoteRegistration
-from odyssey.api.errors import UserNotFound
+from odyssey.models.misc import RegisteredFacilities
+from odyssey.api.errors import UserNotFound, FacilityNotFound
 
 
 _uuid_rx = re.compile('[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}', flags=re.IGNORECASE)
@@ -14,6 +15,11 @@ def check_client_existence(clientid):
     client = ClientInfo.query.filter_by(clientid=clientid).one_or_none()
     if not client:
         raise UserNotFound(clientid)
+
+def check_facility_existence(facility_id):
+    facility = RegisteredFacilities.query.filter_by(facility_id=facility_id).one_or_none()
+    if not facility:
+        raise FacilityNotFound(facility_id)
 
 def check_remote_client_portal_validity(portal_id):
     """

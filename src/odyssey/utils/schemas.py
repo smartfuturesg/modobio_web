@@ -1273,8 +1273,6 @@ class RegisteredFacilitiesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = RegisteredFacilities
 
-    facilityid = fields.Integer(missing=0)
-
     @post_load
     def make_object(self, data, **kwargs):
         return RegisteredFacilities(**data)
