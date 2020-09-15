@@ -64,9 +64,6 @@ def create_app(flask_dev=None):
     app.config.from_object(Config(flask_dev=flask_dev))
     app.config['APPLICATION_ROOT'] = '/api'
 
-    if app.config['DEBUG']:
-        print(app.config)
-
     db.init_app(app)
     migrate.init_app(app, db)
     cors.init_app(app)
@@ -74,8 +71,9 @@ def create_app(flask_dev=None):
 
     db.Model.update = _update
 
-    from odyssey.api import bp
+    from odyssey.api import bp, api
     app.register_blueprint(bp)
+    api.version = app.config['VERSION']
 
     from odyssey.api.errors import register_handlers
     register_handlers(app)

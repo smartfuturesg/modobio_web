@@ -304,7 +304,23 @@ class ClientConsent(db.Model):
 
     __tablename__ = 'ClientConsent'
 
-    tableref = 'consent_contract'
+    displayname = 'Consent form'
+    """
+    Print-friendly name of this document.
+
+    :type: str
+    """
+
+    current_revision = '20200317'
+    """
+    Current revision of this document.
+
+    The revision string is updated whenever the contents of the document change. The
+    revision string can be anything, but it typically consists of the ISO formatted
+    date (e.g. 20200519).
+
+    :type: str
+    """
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -351,10 +367,6 @@ class ClientConsent(db.Model):
     The revision stored here is the revision of the newest signed document.
 
     :type: str, max length 10
-
-    See Also
-    --------
-    :const:`odyssey.constants.DOCTYPE_DOCREV_MAP`
     """
 
     pdf_path = db.Column(db.String(200))
@@ -403,7 +415,23 @@ class ClientRelease(db.Model):
 
     __tablename__ = 'ClientRelease'
 
-    tableref = 'release_contract'
+    displayname = 'Release of information form'
+    """
+    Print-friendly name of this document.
+
+    :type: str
+    """
+
+    current_revision = '20200416'
+    """
+    Current revision of this document.
+
+    The revision string is updated whenever the contents of the document change. The
+    revision string can be anything, but it typically consists of the ISO formatted
+    date (e.g. 20200519).
+
+    :type: str
+    """
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -478,10 +506,6 @@ class ClientRelease(db.Model):
     The revision stored here is the revision of the newest signed document.
 
     :type: str, max length 10
-
-    See Also
-    --------
-    :const:`odyssey.constants.DOCTYPE_DOCREV_MAP`
     """
 
     pdf_path = db.Column(db.String(200))
@@ -507,7 +531,23 @@ class ClientPolicies(db.Model):
 
     __tablename__ = 'ClientPolicies'
 
-    tableref = 'policy_contract'
+    displayname = 'Policies form'
+    """
+    Print-friendly name of this document.
+
+    :type: str
+    """
+
+    current_revision = '20200513'
+    """
+    Current revision of this document.
+
+    The revision string is updated whenever the contents of the document change. The
+    revision string can be anything, but it typically consists of the ISO formatted
+    date (e.g. 20200519).
+
+    :type: str
+    """
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -547,10 +587,6 @@ class ClientPolicies(db.Model):
     The revision stored here is the revision of the newest signed document.
 
     :type: str, max length 10
-
-    See Also
-    --------
-    :const:`odyssey.constants.DOCTYPE_DOCREV_MAP`
     """
 
     pdf_path = db.Column(db.String(200))
@@ -599,7 +635,23 @@ class ClientConsultContract(db.Model):
 
     __tablename__ = 'ClientConsultContract'
 
-    tableref = 'consultation_contract'
+    displayname = 'Consultation contract'
+    """
+    Print-friendly name of this document.
+
+    :type: str
+    """
+
+    current_revision = '20200428'
+    """
+    Current revision of this document.
+
+    The revision string is updated whenever the contents of the document change. The
+    revision string can be anything, but it typically consists of the ISO formatted
+    date (e.g. 20200519).
+
+    :type: str
+    """
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -639,10 +691,6 @@ class ClientConsultContract(db.Model):
     The revision stored here is the revision of the newest signed document.
 
     :type: str, max length 10
-
-    See Also
-    --------
-    :const:`odyssey.constants.DOCTYPE_DOCREV_MAP`
     """
 
     pdf_path = db.Column(db.String(200))
@@ -691,7 +739,23 @@ class ClientSubscriptionContract(db.Model):
 
     __tablename__ = 'ClientSubscriptionContract'
 
-    tableref = 'subscription_contract'
+    displayname = 'Subscription contract'
+    """
+    Print-friendly name of this document.
+
+    :type: str
+    """
+
+    current_revision = '20200428'
+    """
+    Current revision of this document.
+
+    The revision string is updated whenever the contents of the document change. The
+    revision string can be anything, but it typically consists of the ISO formatted
+    date (e.g. 20200519).
+
+    :type: str
+    """
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -731,10 +795,6 @@ class ClientSubscriptionContract(db.Model):
     The revision stored here is the revision of the newest signed document.
 
     :type: str, max length 10
-
-    See Also
-    --------
-    :const:`odyssey.constants.DOCTYPE_DOCREV_MAP`
     """
 
     pdf_path = db.Column(db.String(200))
@@ -778,7 +838,23 @@ class ClientIndividualContract(db.Model):
 
     __tablename__ = 'ClientIndividualContract'
 
-    tableref = 'individual_services_contract'
+    displayname = 'Individual services contract'
+    """
+    Print-friendly name of this document.
+
+    :type: str
+    """
+
+    current_revision = '20200513'
+    """
+    Current revision of this document.
+
+    The revision string is updated whenever the contents of the document change. The
+    revision string can be anything, but it typically consists of the ISO formatted
+    date (e.g. 20200519).
+
+    :type: str
+    """
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -846,10 +922,6 @@ class ClientIndividualContract(db.Model):
     The revision stored here is the revision of the newest signed document.
 
     :type: str, max length 10
-
-    See Also
-    --------
-    :const:`odyssey.constants.DOCTYPE_DOCREV_MAP`
     """
 
     pdf_path = db.Column(db.String(200))

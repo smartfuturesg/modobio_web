@@ -729,6 +729,91 @@ class MedicalPhysicalExam(db.Model):
     :type: str
     """
 
+class MedicalBloodChemistryLipids(db.Model):
+    """ Blood Test - Lipid results
+
+    This table stores the blood test - lipids results of clients.
+    """
+    __tablename__ = 'MedicalBloodChemistryLipids'
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Index
+
+    :type: int, primary key, autoincrement
+    """
+
+    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='BloodLipids_clientid_fkey', ondelete="CASCADE"), nullable=False)
+    """
+    Client ID number
+
+    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    """
+
+    exam_date = db.Column(db.Date)
+    """
+    Date blood test was administered.
+
+    :type: :class:`datetime.date`
+    """
+
+    cholesterol_total = db.Column(db.Float)
+    """
+    Cholesterol total
+
+    :type: Integer
+    :unit: mg/dL
+    """
+
+    cholesterol_ldl = db.Column(db.Float)
+    """
+    Cholesterol ldl
+
+    :type: Integer
+    :unit: mg/dL
+    """
+
+    cholesterol_hdl = db.Column(db.Float)
+    """
+    Cholesterol hdl
+
+    :type: Integer
+    :unit: mg/dL
+    """
+
+    triglycerides = db.Column(db.Float)
+    """
+    Triglycerides
+
+    :type: Integer
+    :unit: mg/dL
+    """
+
+    #calculated values
+    cholesterol_over_hdl = db.Column(db.Float)
+    """
+    cholesterol total / cholesterol hdl
+
+    :type: float
+    :unit: #
+    """
+
+    triglycerides_over_hdl = db.Column(db.Float)
+    """
+    triglycerides / hdl
+
+    :type: float
+    :unit: #
+    """
+
+    ldl_over_hdl = db.Column(db.Float)
+    """
+    cholesterol ldl / cholesterol hdl
+
+    :type: float
+    :unit: #
+    """
+
 class MedicalBloodChemistryThyroid(db.Model):
     """ Blood Test - Thyroid results
 
@@ -852,3 +937,39 @@ class MedicalBloodChemistryThyroid(db.Model):
     :type: integer
     :units: pg/mL
     """
+
+class MedicalBloodChemistryA1C(db.Model):
+    """ Blood Test - A1C results
+
+    This table stores the blood test - thyroid results of clients.
+    """
+    __tablename__ = 'MedicalBloodChemistryA1C'
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Index
+
+    :type: int, primary key, autoincrement
+    """
+
+    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='BloodA1C_clientid_fkey', ondelete="CASCADE"), nullable=False)
+    """
+    Client ID number
+
+    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    """
+
+    exam_date = db.Column(db.Date)
+    """
+    Date blood test was administered.
+
+    :type: :class:`datetime.date`
+    """
+
+    a1c = db.Column(db.Float)
+    """
+    Hemoglobin A1C
+
+    :type: float
+    :units: %
+    """    

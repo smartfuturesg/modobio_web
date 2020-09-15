@@ -91,6 +91,8 @@ flask db migrate
 flask db upgrade
 ```
 
+If there are errors while trying to upgrade the database, you can use the script `migrations/list_versions.py` to help figuring out which is the offending version script. Most likely, someone created a version script, but before it was merged, someone else created one too off of the same endpoint.
+
 ## Running
 
 ```shell
