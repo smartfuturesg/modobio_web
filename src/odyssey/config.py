@@ -17,8 +17,8 @@ and files are stored in AWS S3 buckets.
 
 Configuration parameters can be set in one of four ways (in order of precedense):
 
-1. AWS Parameter Store, if available
-2. Environmental variables
+1. Environmental variables
+2. AWS Parameter Store, if available
 3. Defaults from :mod:`odyssey.defaults`
 4. Hard-coded defaults is all else fails
 
@@ -87,17 +87,23 @@ class Config:
         if flask_dev not in ('local', 'remote'):
             raise ValueError(f'FLASK_DEV must be "local" or "remote", found "{flask_dev}".')
 
-        flask_env = os.getenv('FLASK_ENV', default='production')
-        if flask_env not in ('development', 'production'):
-            raise ValueError(f'FLASK_ENV must be "development" or "production", found "{flask_env}".')
+        # FLASK_ENV is loaded by Flask before the app is created and thus
+        # before this config is loaded. The default is "production" if
+        # FLASK_ENV was not set. We don't want production by default, so raise
+        # an error if it was not set to force the user to set it explicitly.
+        flask_env = os.getenv('FLASK_ENV')
+        if not flask_env:
+            raise ValueError('FLASK_ENV was not set. Set it to '
+                             'either "development" or "production".')
+        elif flask_env not in ('development', 'production'):
+            raise ValueError(f'FLASK_ENV must be "development" or '
+                             f'"production", found "{flask_env}".')
 
         self.LOCAL_CONFIG = flask_dev == 'local'
 
+        # Testing (running pytest) is always local.
         if testing:
             self.LOCAL_CONFIG = True
-
-        if flask_env == 'production':
-            self.LOCAL_CONFIG = False
 
         # Do we have access to AWS Parameter store?
         self.ssm = None
@@ -112,13 +118,13 @@ class Config:
         #############################################################
         
         # Database
-        db_flav = self.getvar('DB_FLAV', '/modobio/odyssey/db_flav')
-        db_host = self.getvar('DB_HOST', '/modobio/odyssey/db_host')
+        db_flav = self.getvar('DB_FLAV', None)
+        db_host = self.getvar('DB_HOST', None)
 
         if testing:
             db_name = 'modobio_test'
         else:
-            db_name = self.getvar('DB_NAME', '/modobio/odyssey/db_name')
+            db_name = self.getvar('DB_NAME', None)
 
         if migrate:
             db_user = self.getvar('DB_USER', '/modobio/odyssey/db_user_master')
@@ -130,10 +136,11 @@ class Config:
         self.SQLALCHEMY_DATABASE_URI = f'{db_flav}://{db_user}:{db_pass}@{db_host}/{db_name}'
 
         # S3 buckets
-        if flask_env == 'production':
-            self.DOCS_BUCKET_NAME = self.getvar('DOCS_BUCKET_NAME', '/modobio/odyssey/docs_bucket')
+        if self.LOCAL_CONFIG:
+            self.DOCS_BUCKET_NAME = defaults.DOCS_BUCKET_NAME
         else:
-            self.DOCS_BUCKET_NAME = self.getvar('DOCS_BUCKET_NAME', '/modobio/odyssey/docs_bucket_test')
+            # Don't use getvar, must fail if not set in environment
+            self.DOCS_BUCKET_NAME = os.getenv('DOCS_BUCKET_NAME', None)
 
         # Wearables
         self.OURA_CLIENT_ID = self.getvar(
@@ -150,7 +157,7 @@ class Config:
 
         # Other config
         self.SECRET_KEY = self.getvar('SECRET_KEY', '/modobio/odyssey/app_secret')
-        self.SQLALCHEMY_TRACK_MODIFICATIONS = self.getvar('SQLALCHEMY_TRACK_MODIFICATIONS', None)
+        self.SQLALCHEMY_TRACK_MODIFICATIONS = self.getvar('SQLALCHEMY_TRACK_MODIFICATIONS', None, default=False)
 
         # Testing config
         if testing:
@@ -174,8 +181,8 @@ class Config:
 
         Order of lookup:
 
-        1. AWS Parameter Store
-        2. Environmental variables
+        1. Environmental variables
+        2. AWS Parameter Store
         3. Defaults from :mod:`odyssey.defaults`
         4. Given ``default`` (defaults to '') if all else fails
 
@@ -194,7 +201,11 @@ class Config:
         str
             Value of the parameter.
         """
+        env = os.getenv(var)
+        if env:
+            return env
+
         if not self.LOCAL_CONFIG and param:
             return self.ssm.get_parameter(Name=param, WithDecryption=decrypt)['Parameter']['Value']
 
-        return os.getenv(var, default=getattr(defaults, var, default))
+        return getattr(defaults, var, default)
