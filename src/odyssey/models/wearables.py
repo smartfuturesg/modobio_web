@@ -20,8 +20,8 @@ else:
     from sqlalchemy.ext.declarative import declarative_base
     _Base = declarative_base()
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
-
+from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Integer, String
+from sqlalchemy.dialects.postgresql import ARRAY
 
 class Wearables(_Base):
     """ Table that lists which supported wearables a client has. """
@@ -59,6 +59,13 @@ class Wearables(_Base):
     registered_oura = Column(Boolean, default=False, nullable=False)
     """
     Client granted Modo Bio access to Oura Cloud.
+
+    :type: bool, default = False
+    """
+
+    has_freestyle = Column(Boolean, default=False, nullable=False)
+    """
+    Client has an FreeStyle Libre continuous glucose monitoring (CGM) wearable.
 
     :type: bool, default = False
     """
@@ -141,4 +148,62 @@ class WearablesOura(_Base):
     Date and time of last access to Oura Cloud.
 
     :type: :class:`datetime.datetime`
+    """
+
+
+class WearablesFreeStyle(_Base):
+    """ FreeStyle Libre continuous glucose monitoring wearable specific information. """
+
+    __tablename__ = 'WearablesFreeStyle'
+
+    idx = Column(Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
+
+    clientid = Column(
+        Integer,
+        ForeignKey(
+             'ClientInfo.clientid',
+             ondelete="CASCADE"
+        ),
+        nullable=False
+    )
+    """
+    Client ID number.
+
+    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    """
+
+    timestamps = Column(ARRAY(DateTime, dimensions=2))
+    """
+    Timestamps for the glucose data.
+
+    A 2-dimensional array with blocks of data. Each block represents the data
+    of one CGM device, which has a lifespan of circa 14 days.
+
+    :type: list(list(datetime.datatime))
+    """
+
+    glucose = Column(ARRAY(Float, dimensions=2))
+    """
+    Glucose data from the GCM.
+
+    A 2-dimensional array with blocks of data. Each block represents the data
+    of one CGM device, which has a lifespan of circa 14 days.
+
+    :type: list(list(float))
+    """
+
+    activation_time = Column(DateTime)
+    """
+    Timestamp when last CGM was activated.
+
+    On the CGM device, the time is stored as minutes since activation. It must
+    be converted to a timestamp before it can be added to the timestamps array.
+    This timestamp can be used to calculate the timestamp for each data point.
+
+    :type: datetime.datetime
     """

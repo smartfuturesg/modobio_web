@@ -40,7 +40,7 @@ from odyssey.models.trainer import (
     MovementAssessment,
     LungAssessment
 )
-from odyssey.models.wearables import Wearables, WearablesOura
+from odyssey.models.wearables import Wearables, WearablesOura, WearablesFreeStyle
 
 
 class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
@@ -1286,8 +1286,8 @@ class MedicalBloodChemistryA1CSchema(Schema):
 class WearablesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Wearables
-
-    clientid = fields.Integer(missing=0)
+        exclude = ['idx', 'clientid']
+    # clientid = fields.Integer(missing=0)
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -1303,3 +1303,18 @@ class WearablesOuraSchema(ma.SQLAlchemyAutoSchema):
     @post_load
     def make_object(self, data, **kwargs):
         return WearablesOura(**data)
+
+
+class WearablesFreeStyleSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = WearablesFreeStyle
+
+    clientid = fields.Integer(missing=0)
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return WearablesFreeStyle(**data)
+
+class WearablesFreeStyleActivateSchema(Schema):
+    clientid = fields.Integer(missing=0)
+    timestamp = fields.DateTime()

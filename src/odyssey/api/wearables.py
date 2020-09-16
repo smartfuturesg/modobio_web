@@ -14,8 +14,17 @@ from odyssey.api.errors import (
     MethodNotAllowed,
     UnknownError
 )
-from odyssey.models.wearables import Wearables, WearablesOura
-from odyssey.utils.schemas import WearablesSchema, WearablesOuraSchema
+from odyssey.models.wearables import (
+    Wearables,
+    WearablesOura,
+    WearablesFreeStyle
+)
+from odyssey.utils.schemas import (
+    WearablesSchema,
+    WearablesOuraSchema,
+    WearablesFreeStyleSchema,
+    WearablesFreeStyleActivateSchema
+)
 from odyssey.utils.misc import check_client_existence
 
 from odyssey import db
@@ -52,7 +61,8 @@ class WearablesEndpoint(Resource):
         if not wearables:
             raise ContentNotFound
 
-        return wearables
+        wearables_schema = WearablesSchema()
+        return wearables_schema.load(wearables)
 
     @token_auth.login_required
     @accepts(schema=WearablesSchema, api=ns)
@@ -76,11 +86,7 @@ class WearablesEndpoint(Resource):
         if wearables:
             raise MethodNotAllowed
 
-        # Prevent user from changing ID
-        if request.json.get('clientid'):
-            raise IllegalSetting(param='clientid')
-
-        wearables = Wearables(clientid=clientid, **request.json)
+        wearables = WearablesSchema().load(request.json)
         db.session.add(wearables)
         db.session.commit()
 
@@ -107,8 +113,8 @@ class WearablesEndpoint(Resource):
             raise ContentNotFound
 
         # Prevent user from changing ID
-        if request.json.get('clientid'):
-            raise IllegalSetting(param='clientid')
+        # if request.json.get('clientid'):
+        #     raise IllegalSetting(param='clientid')
 
         query.update(request.json)
         db.session.commit()
@@ -232,3 +238,143 @@ class WearablesOuraCallbackEndpoint(Resource):
         db.session.commit()
 
         return 'OK'
+
+
+@ns.route('/freestyle/activate/<int:clientid>/')
+@ns.doc(params={'clientid': 'Client ID number'})
+class WearablesFreeStyleActivateEndpoint(Resource):
+    @token_auth.login_required
+    @responds(schema=WearablesFreeStyleActivateSchema, status_code=200, api=ns)
+    def get(self, clientid):
+        """ Returns CGM activation timestamp for client ``clientid`` in reponse to a GET request.
+
+        Time data on the CGM sensor is stored as minutes since activation and as full
+        timestamps in the database. Time data must be converted before it can be
+        uploaded to the database, using the activation timestamp retrieved in this GET
+        request.
+
+        Parameters
+        ----------
+        clientid : int
+            Client ID number.
+
+        Returns
+        -------
+        str
+            JSON encoded, ISO 8601 formatted datetime string.
+        """
+
+        cgm = (WearablesFreeStyle
+            .query
+            .filter_by(clientid=clientid)
+            .one_or_none()
+        )
+
+        if not cgm:
+            raise ContentNotFound
+
+        cgm_schema = WearablesFreeStyleActivateSchema()
+        return cgm_schema.dump(cgm)
+
+    @token_auth.login_required
+    @accepts(schema=WearablesFreeStyleActivateSchema, api=ns)
+    @responds(status_code=201, api=ns)
+    def post(self, clientid):
+        """ Create new data block for client ``clientid`` in reponse to a POST request.
+
+        Data is stored in blocks, where every block represents a new FreeStyle sensor.
+        Each sensor must be activated when applied to a client. Upon activation, this
+        endpoint receives the activation timestamp and creates a new block of data.
+
+        Parameters
+        ----------
+        clientid : int
+            Client ID number.
+
+        timestamp : str
+            ISO 8601 formatted datetime string.
+        """
+
+        cgm = (WearablesFreeStyle
+            .query
+            .filter_by(clientid=clientid)
+            .one_or_none()
+        )
+
+        if not cgm:
+            cgm = WearablesFreeStyle(clientid=clientid)
+            db.session.add(cgm)
+
+        cgm_schema = WearablesFreeStyleActivateSchema()
+        cgm_data = cgm_schema.load(request.json)
+
+        cgm.activation_timestamp = cgm_data['timestamp']
+        cgm.timestamps.append([])
+        cgm.glucose.append([])
+        db.session.commit()
+
+
+@ns.route('/freestyle/<int:clientid>/')
+@ns.doc(params={'clientid': 'Client ID number'})
+class WearablesFreeStyleEndpoint(Resource):
+    @token_auth.login_required
+    @responds(schema=WearablesFreeStyleSchema, status_code=200, api=ns)
+    def get(self, clientid):
+        """ Return FreeStyle CGM data for client ``clientid`` in reponse to a GET request.
+
+        Parameters
+        ----------
+        clientid : int
+            Client ID number.
+
+        Returns
+        -------
+        str
+            JSON encoded dictionary
+        """
+
+        cgm = (WearablesFreeStyle
+            .query
+            .filter_by(clientid=clientid)
+            .one_or_none()
+        )
+
+        if not cgm:
+            raise ContentNotFound
+
+        cgm_schema = WearablesFreeStyleSchema()
+        return cgm_schema.dump(cgm)
+
+    @token_auth.login_required
+    @accepts(schema=WearablesFreeStyleSchema, api=ns)
+    @responds(status_code=201, api=ns)
+    def post(self, clientid):
+        """ Create new data block for client ``clientid`` in reponse to a POST request.
+
+        Data is stored in blocks, where every block represents a new FreeStyle sensor.
+        Each sensor must be activated when applied to a client. Upon activation, this
+        endpoint receives the activation timestamp and creates a new block of data.
+
+        Parameters
+        ----------
+        clientid : int
+            Client ID number.
+
+        timestamp : str
+            ISO 8601 formatted datetime string.
+        """
+
+        cgm = (WearablesFreeStyle
+            .query
+            .filter_by(clientid=clientid)
+            .one_or_none()
+        )
+
+        if not cgm:
+            cgm = WearablesFreeStyle(clientid=clientid)
+            db.session.add(cgm)
+
+        cgm.activation_timestamp = request.json['timestamp']
+        cgm.timestamps.append([])
+        cgm.glucose.append([])
+        db.session.commit()
