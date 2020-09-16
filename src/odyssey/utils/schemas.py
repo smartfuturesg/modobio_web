@@ -43,9 +43,11 @@ from odyssey.models.trainer import (
 )
 from odyssey.models.wearables import Wearables, WearablesOura
 
-class ClientFacilitiesSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = ClientFacilities
+class ClientFacilitiesSchema(Schema):
+
+    idx = fields.Integer()
+    client_id = fields.Integer()
+    facility_id = fields.Integer()
 
     @post_load
     def make_object(self, data, **kwargs):

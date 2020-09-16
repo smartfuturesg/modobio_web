@@ -1,8 +1,8 @@
 """Added ClientFacilities table
 
-Revision ID: 2965aeb972d6
+Revision ID: 9d7bf561a158
 Revises: f2bb918e633c
-Create Date: 2020-09-16 10:45:22.619124
+Create Date: 2020-09-16 13:59:36.061054
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '2965aeb972d6'
+revision = '9d7bf561a158'
 down_revision = 'f2bb918e633c'
 branch_labels = None
 depends_on = None
@@ -22,8 +22,8 @@ def upgrade():
     sa.Column('idx', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('client_id', sa.Integer(), nullable=True),
     sa.Column('facility_id', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['client_id'], ['ClientInfo.clientid'], name='ClientFacilities_clientid_fkey', ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['facility_id'], ['RegisteredFacilities.facility_id'], name='ClientFacilities_facilityid_fkey', ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['client_id'], ['ClientInfo.clientid'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['facility_id'], ['RegisteredFacilities.facility_id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('idx')
     )
     # ### end Alembic commands ###

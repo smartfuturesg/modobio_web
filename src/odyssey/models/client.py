@@ -308,14 +308,14 @@ class ClientFacilities(db.Model):
     :type: int, primary key, autoincrement
     """
 
-    client_id = db.Column(db.ForeignKey('ClientInfo.clientid',name='ClientFacilities_clientid_fkey',ondelete="CASCADE"))
+    client_id = db.Column(db.ForeignKey('ClientInfo.clientid',ondelete="CASCADE"))
     """
     Foreign key from ClientInfo table
 
     :type: int, foreign key
     """
     
-    facility_id = db.Column(db.ForeignKey('RegisteredFacilities.facility_id',name='ClientFacilities_facilityid_fkey',ondelete="CASCADE"))
+    facility_id = db.Column(db.ForeignKey('RegisteredFacilities.facility_id',ondelete="CASCADE"))
     """
     Foreign key from RegisteredFacilities table
 
