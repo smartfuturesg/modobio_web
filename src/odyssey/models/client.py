@@ -295,6 +295,32 @@ class ClientInfo(db.Model):
         if isinstance(self.dob ,str):
             self.dob = datetime.strptime(self.dob, '%Y-%m-%d')
 
+class ClientFacilities(db.Model):
+    """ A mapping of client ids to registered facilitiy ids
+    """
+
+    __tablename__ = 'ClientFacilities'
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
+
+    client_id = db.Column(db.ForeignKey('ClientInfo.clientid',name='ClientFacilities_clientid_fkey',ondelete="CASCADE"))
+    """
+    Foreign key from ClientInfo table
+
+    :type: int, foreign key
+    """
+    
+    facility_id = db.Column(db.ForeignKey('RegisteredFacilities.facility_id',name='ClientFacilities_facilityid_fkey',ondelete="CASCADE"))
+    """
+    Foreign key from RegisteredFacilities table
+
+    :type: int, foreign key
+    """
 
 class ClientConsent(db.Model):
     """ Client consent form table
