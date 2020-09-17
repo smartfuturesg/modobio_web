@@ -503,7 +503,10 @@ class PowerAssessmentSchema(Schema):
                  }
         # add client's vital_weight from most recent physical exam
         recent_physical = MedicalPhysicalExam.query.filter_by(clientid=data.clientid).order_by(MedicalPhysicalExam.idx.desc()).first()
-        nested["vital_weight"] = recent_physical.vital_weight
+        if not recent_physical:
+            nested["vital_weight"] = None
+        else:    
+            nested["vital_weight"] = recent_physical.vital_weight
         return nested
 
 
@@ -735,7 +738,10 @@ class HeartAssessmentSchema(ma.SQLAlchemyAutoSchema):
         """Add vital_heartrate from most recent medial physical"""
         data_dict = data.__dict__
         recent_physical = MedicalPhysicalExam.query.filter_by(clientid=data.clientid).order_by(MedicalPhysicalExam.idx.desc()).first()
-        data_dict["vital_heartrate"] = recent_physical.vital_heartrate
+        if not recent_physical:
+            data_dict["vital_heartrate"] = None
+        else:    
+            data_dict["vital_heartrate"] = recent_physical.vital_heartrate
         return data_dict
 
         
@@ -812,7 +818,10 @@ class LungAssessmentSchema(ma.SQLAlchemySchema):
         "add vital weight to the dump"
         data_dict = data.__dict__
         recent_physical = MedicalPhysicalExam.query.filter_by(clientid=data.clientid).order_by(MedicalPhysicalExam.idx.desc()).first()
-        data_dict["vital_weight"] = recent_physical.vital_weight
+        if not recent_physical:
+            data_dict["vital_weight"] = None
+        else:    
+            data_dict["vital_weight"] = recent_physical.vital_weight
         return data_dict
     
 
@@ -986,7 +995,10 @@ class MoxyRipSchema(Schema):
         }
         # add vital_weight from client's most recent physical examination
         recent_physical = MedicalPhysicalExam.query.filter_by(clientid=data.clientid).order_by(MedicalPhysicalExam.idx.desc()).first()
-        nested["vital_weight"] = recent_physical.vital_weight
+        if not recent_physical:
+            nested["vital_weight"] = None
+        else:    
+            nested["vital_weight"] = recent_physical.vital_weight
         return nested
 
 
