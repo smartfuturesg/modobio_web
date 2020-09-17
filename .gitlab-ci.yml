@@ -11,8 +11,8 @@ test:
   stage: test
   tags:
     - shared
-  #only:
-  #  - merge_requests
+  only:
+    - merge_requests
   script:
     - echo "Creating test database..."
     - sudo docker run --name postgres_$CI_BUILD_ID --network modobio -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=password -e POSTGRES_DB=modobio_test -p 5432:5432 -d postgres
