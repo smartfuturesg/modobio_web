@@ -12,7 +12,7 @@ from odyssey.api.errors import ContentNotFound
 from odyssey.models.client import ClientFacilities
 from odyssey.models.misc import RegisteredFacilities
 from odyssey.utils.schemas import RegisteredFacilitiesSchema, ClientFacilitiesSchema
-from odyssey.utils.misc import check_facility_existence, check_client_existence
+from odyssey.utils.misc import check_facility_existence, check_client_existence, check_client_facility_relation_existence
 
 from odyssey import db
 
@@ -90,12 +90,13 @@ class RegisterClient(Resource):
         if not clientFacilities:
             raise ContentNotFound()
 
-#       facilities = RegisteredFacilities.query.filter_by(clientid=clientid).all()
+        facilityList = [item.facility_id for item in clientFacilities]
 
-#        if not facilities:
-#            raise ContentNotFound()
+        response = []
+        for item in facilityList:
+            response.append(RegisteredFacilities.query.filter_by(facility_id=item).first())
 
-        return clientFacilities
+        return response
 
     @token_auth.login_required
     @accepts(schema=ClientFacilitiesSchema, api=ns)
@@ -109,6 +110,9 @@ class RegisterClient(Resource):
         data['client_id'] = clientid
 
         check_facility_existence(data['facility_id'])
+
+        #check if this client-facility relation already exists
+        check_client_facility_relation_existence(clientid, data['facility_id'])
 
         facility_schema = ClientFacilitiesSchema()
 

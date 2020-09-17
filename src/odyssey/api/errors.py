@@ -100,6 +100,16 @@ class ClientAlreadyExists(Exception):
 
         self.status_code = 409
 
+class RelationAlreadyExists(Exception):
+    """in the case a client is trying to be associated with a facility where this relationship is already defined"""
+    def __init__(self, client_identification=None, facility_identification=None, message=None):
+        Exception.__init__(self)
+        if message:
+            self.message = message
+        else:
+            self.message = f'The client identified by, {client_identification} is already associated with the facility identified by {facility_identification}.'
+        self.status_code = 409
+
 class StaffEmailInUse(Exception):
     """in the case a staff member is creating a staff member with the same email"""
     def __init__(self, email, message = None):
@@ -226,6 +236,11 @@ def error_unauthorized_user(error):
 
 @api.errorhandler(ClientAlreadyExists)
 def error_client_already_exists(error):
+    '''Return a custom message and 409 status code'''
+    return error_response(error.status_code, error.message)
+
+@api.errorhandler(RelationAlreadyExists)
+def error_relation_already_exists(error):
     '''Return a custom message and 409 status code'''
     return error_response(error.status_code, error.message)
 

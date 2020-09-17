@@ -4,9 +4,9 @@ import datetime
 import re
 import uuid
 import flask.json
-from odyssey.models.client import ClientInfo, RemoteRegistration
+from odyssey.models.client import ClientInfo, RemoteRegistration, ClientFacilities
 from odyssey.models.misc import RegisteredFacilities
-from odyssey.api.errors import UserNotFound, FacilityNotFound
+from odyssey.api.errors import UserNotFound, FacilityNotFound, RelationAlreadyExists
 
 
 _uuid_rx = re.compile('[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}', flags=re.IGNORECASE)
@@ -20,6 +20,11 @@ def check_facility_existence(facility_id):
     facility = RegisteredFacilities.query.filter_by(facility_id=facility_id).one_or_none()
     if not facility:
         raise FacilityNotFound(facility_id)
+
+def check_client_facility_relation_existence(clientid, facility_id):
+    relation = ClientFacilities.query.filter_by(client_id=clientid,facility_id=facility_id).one_or_none()
+    if relation:
+        raise RelationAlreadyExists(clientid, facility_id)
 
 def check_remote_client_portal_validity(portal_id):
     """
