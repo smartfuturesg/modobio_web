@@ -48,7 +48,7 @@ def new_client():
 @pytest.fixture(scope='module')
 def test_client():
     """flask application instance (client)"""
-    app = create_app(flask_dev='test')
+    app = create_app()
     db.init_app(app)
     testing_client = app.test_client()
     

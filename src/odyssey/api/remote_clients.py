@@ -491,7 +491,7 @@ class SignedDocuments(Resource):
         urls = {}
         paths = []
 
-        if not current_app.config['DOCS_STORE_LOCAL']:
+        if not current_app.config['LOCAL_CONFIG']:
             s3 = boto3.client('s3')
             params = {
                 'Bucket': current_app.config['DOCS_BUCKET_NAME'],
@@ -513,7 +513,7 @@ class SignedDocuments(Resource):
             )
             if result and result.pdf_path:
                 paths.append(result.pdf_path)
-                if not current_app.config['DOCS_STORE_LOCAL']:
+                if not current_app.config['LOCAL_CONFIG']:
                     params['Key'] = result.pdf_path
                     url = s3.generate_presigned_url('get_object', Params=params, ExpiresIn=600)
                     urls[table.displayname] = url
