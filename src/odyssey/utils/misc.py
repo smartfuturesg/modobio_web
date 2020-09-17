@@ -9,7 +9,7 @@ from odyssey.models.misc import RegisteredFacilities
 from odyssey.api.errors import UserNotFound, FacilityNotFound, RelationAlreadyExists
 
 
-_uuid_rx = re.compile('[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}', flags=re.IGNORECASE)
+_uuid_rx = re.compile(r'[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}', flags=re.IGNORECASE)
 
 def check_client_existence(clientid):
     client = ClientInfo.query.filter_by(clientid=clientid).one_or_none()
@@ -68,7 +68,7 @@ class JSONDecoder(flask.json.JSONDecoder):
     3. The method should not raise an error if the conversion fails.
     4. If the conversion was unsuccessful, the method must return the
        original string unaltered.
-    5. The method name must start with 'parse\_' to be picked up by the
+    5. The method name must start with 'parse\\_' to be picked up by the
        automatic registration system.
     
     Of course, there should be a corresponding serializer in :class:`JSONEncoder`.

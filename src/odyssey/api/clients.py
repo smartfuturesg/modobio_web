@@ -407,7 +407,7 @@ class SignedDocuments(Resource):
         urls = {}
         paths = []
 
-        if not current_app.config['DOCS_STORE_LOCAL']:
+        if not current_app.config['LOCAL_CONFIG']:
             s3 = boto3.client('s3')
             params = {
                 'Bucket': current_app.config['DOCS_BUCKET_NAME'],
@@ -430,7 +430,7 @@ class SignedDocuments(Resource):
             )
             if result and result.pdf_path:
                 paths.append(result.pdf_path)
-                if not current_app.config['DOCS_STORE_LOCAL']:
+                if not current_app.config['LOCAL_CONFIG']:
                     params['Key'] = result.pdf_path
                     url = s3.generate_presigned_url('get_object', Params=params, ExpiresIn=600)
                     urls[table.displayname] = url
@@ -482,10 +482,14 @@ class NewRemoteRegistration(Resource):
         db.session.add(remote_client_portal)
         db.session.commit()
 
-        # send email to client containing registration details
-        send_email_remote_registration_portal(recipient=remote_client_portal.email, 
-                                              password=remote_client_portal.password, 
-                                              remote_registration_portal=remote_client_portal.registration_portal_id)
+        if not current_app.config['LOCAL_CONFIG']:
+            # send email to client containing registration details
+            send_email_remote_registration_portal(
+                recipient=remote_client_portal.email, 
+                password=remote_client_portal.password, 
+                remote_registration_portal=remote_client_portal.registration_portal_id
+            )
+
         return remote_client_portal
 
 
@@ -520,10 +524,13 @@ class RefreshRemoteRegistration(Resource):
         db.session.add(remote_client_portal)
         db.session.commit()
 
-        # send email to client containing registration details
-        send_email_remote_registration_portal(recipient=remote_client_portal.email, 
-                                              password=remote_client_portal.password, 
-                                              remote_registration_portal=remote_client_portal.registration_portal_id)
+        if not current_app.config['LOCAL_CONFIG']:
+            # send email to client containing registration details
+            send_email_remote_registration_portal(
+                recipient=remote_client_portal.email,
+                password=remote_client_portal.password, 
+                remote_registration_portal=remote_client_portal.registration_portal_id
+            )
 
         return remote_client_portal
 

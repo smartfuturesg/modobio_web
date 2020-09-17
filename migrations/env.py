@@ -39,7 +39,7 @@ target_metadata = current_app.extensions['migrate'].db.metadata
 
 # change the database user to the master user for the purpose of editing schemas
 # Use config.py from main Flask app to get the database URI
-current_app.config.from_object(Config(migrate=True))
+current_app.config.from_object(Config())
 
 db_connection_string = current_app.config['SQLALCHEMY_DATABASE_URI']
 
