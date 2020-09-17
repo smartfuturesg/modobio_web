@@ -35,6 +35,15 @@ class ClientInfo(db.Model):
     :type: int, primary key, autoincrement
     """
 
+    membersince = db.Column(db.Date)
+    """
+    Member since date
+
+    The date a member was first added to the system
+
+    :type: date
+    """
+
     firstname = db.Column(db.String(50))
     """
     Client first name.
@@ -223,7 +232,7 @@ class ClientInfo(db.Model):
 
     def get_attributes(self):
         """return class attributes as list"""
-        return  ['address', 'city', 'clientid', 'country', 'dob', 'email', 'emergency_contact', 'emergency_phone', 'firstname','fullname', \
+        return  ['address', 'membersince', 'city', 'clientid', 'country', 'dob', 'email', 'emergency_contact', 'emergency_phone', 'firstname','fullname', \
                  'gender','guardianname', 'guardianrole', 'healthcare_contact', 'healthcare_phone', 'lastname',  \
                 'middlename', 'phone', 'preferred', 'profession', 'receive_docs', 'ringsize', 'state', 'street','zipcode']
 
@@ -232,6 +241,7 @@ class ClientInfo(db.Model):
         data = {
             'clientid': self.clientid,
             'record_locator_id': self.get_medical_record_hash(),
+            'membersince': self.membersince,
             'firstname': self.firstname,
             'middlename': self.middlename,
             'lastname': self.lastname,

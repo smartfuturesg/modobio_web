@@ -66,6 +66,8 @@ class Client(Resource):
         #prevent requests to set clientid and send message back to api user
         elif data.get('clientid', None):
             raise IllegalSetting('clientid')
+        elif data.get('membersince', None):
+            raise IllegalSetting('membersince')
         # client.update
         client.from_dict(data)
         db.session.add(client)
@@ -114,6 +116,8 @@ class NewClient(Resource):
         #prevent requests to set clientid and send message back to api user
         elif data.get('clientid', None):
             raise IllegalSetting('clientid')
+        #set member since date to today
+        data['membersince'] = datetime.today()
    
         ci_schema = ClientInfoSchema()
         client = ci_schema.load(data)
