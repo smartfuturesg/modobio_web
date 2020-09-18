@@ -43,7 +43,6 @@ from odyssey.models.trainer import (
 from odyssey.models.wearables import Wearables, WearablesOura
 from odyssey.utils.misc import list_average
 
-
 class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientInfo
