@@ -1,6 +1,5 @@
 from datetime import datetime
 from hashlib import md5
-import statistics
 
 from marshmallow import Schema, fields, post_load, ValidationError, validates, validate
 from marshmallow import post_load, post_dump, pre_dump, pre_load
