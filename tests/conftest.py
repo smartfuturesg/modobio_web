@@ -74,8 +74,7 @@ def init_database():
     clientid = client_1.clientid
 
     # initialize a test staff member
-    staff_1 = Staff()
-    staff_1.from_dict(test_staff_member)
+    staff_1 = Staff(**test_staff_member)
     staff_1.set_password(test_staff_member['password'])
     db.session.add(staff_1)
 
