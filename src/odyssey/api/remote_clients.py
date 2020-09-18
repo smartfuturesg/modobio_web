@@ -74,10 +74,8 @@ class RemoteClientInfo(Resource):
 
         client = ClientInfo.query.filter_by(clientid=remote_client.clientid).first()
 
-        client.from_dict(data)
-        db.session.add(client)
+        client.update(data)
         db.session.commit()
-        
         return client
 
 @ns.route('/medicalhistory/')
