@@ -377,8 +377,6 @@ class ChessboardSchema(Schema):
     Schemas for the trainer's API
 """
 
-
-
 class PowerAttemptsPushPull(Schema):
     weight = fields.Integer(description="weight of exercise in PSI", validate=validate.Range(min=0, max=60), missing=None)
     attempt_1 = fields.Integer(description="", validate=validate.Range(min=0, max=4000), missing=None)
@@ -752,19 +750,19 @@ class MoxyAssessmentSchema(ma.SQLAlchemySchema):
 
     clientid = fields.Integer(missing=0)
     timestamp = ma.auto_field()
-    notes = ma.auto_field()
-    vl_side = fields.String(description="vl_side must be either 'right' or 'left'")
-    performance_baseline = fields.Integer(description="", validate=validate.Range(min=0, max=100))
-    recovery_baseline = fields.Integer(description="", validate=validate.Range(min=0, max=100))
-    gas_tank_size = fields.Integer(description="", validate=validate.Range(min=0, max=100))
-    starting_sm_o2 = fields.Integer(description="", validate=validate.Range(min=0, max=100))
-    starting_thb = fields.Integer(description="", validate=validate.Range(min=9, max=18))
-    limiter = fields.String(description=f"must be one of: {limiter_list}")
-    intervention = ma.auto_field()
-    performance_metric_1 = fields.String(description=f"must be one of: {performance_metric_list}")
-    performance_metric_2 = fields.String(description=f"must be one of: {performance_metric_list}")
-    performance_metric_1_value = fields.Integer(description="value in regards to chosen performance metric", validate=validate.Range(min=0, max=1500))
-    performance_metric_2_value = fields.Integer(description="value in regards to chosen performance metric", validate=validate.Range(min=0, max=1500))
+    notes = ma.auto_field(missing=None)
+    vl_side = fields.String(description="vl_side must be either 'right' or 'left'", missing=None)
+    performance_baseline = fields.Integer(description="", validate=validate.Range(min=0, max=100), missing=None)
+    recovery_baseline = fields.Integer(description="", validate=validate.Range(min=0, max=100), missing=None)
+    gas_tank_size = fields.Integer(description="", validate=validate.Range(min=0, max=100), missing=None)
+    starting_sm_o2 = fields.Integer(description="", validate=validate.Range(min=0, max=100), missing=None)
+    starting_thb = fields.Integer(description="", validate=validate.Range(min=9, max=18), missing=None)
+    limiter = fields.String(description=f"must be one of: {limiter_list}", missing=None)
+    intervention = ma.auto_field(missing=None)
+    performance_metric_1 = fields.String(description=f"must be one of: {performance_metric_list}", missing=None)
+    performance_metric_2 = fields.String(description=f"must be one of: {performance_metric_list}", missing=None)
+    performance_metric_1_value = fields.Integer(description="value in regards to chosen performance metric", validate=validate.Range(min=0, max=1500), missing=None)
+    performance_metric_2_value = fields.Integer(description="value in regards to chosen performance metric", validate=validate.Range(min=0, max=1500), missing=None)
 
     @validates('vl_side')
     def validate_vl_side(self,value):
@@ -796,13 +794,13 @@ class LungAssessmentSchema(ma.SQLAlchemySchema):
         
     clientid = fields.Integer(missing=0)
     timestamp = ma.auto_field()
-    notes = ma.auto_field()
-    vital_weight = fields.Float(description="weight pulled from doctor physical data", dump_only=True)
-    bag_size = fields.Float(description="in liters", validate=validate.Range(min=0, max=10))
-    duration = fields.Integer(description="in seconds", validate=validate.Range(min=0, max=300))
-    breaths_per_minute = fields.Integer(description="", validate=validate.Range(min=0, max=100))
-    max_minute_volume = fields.Float(description="", validate=validate.Range(min=0, max=500))
-    liters_min_kg = fields.Float(description="liters per minute per kg", validate=validate.Range(min=0, max=100))
+    notes = ma.auto_field(missing=None)
+    vital_weight = fields.Float(description="weight pulled from doctor physical data", dump_only=True, missing=None)
+    bag_size = fields.Float(description="in liters", validate=validate.Range(min=0, max=10), missing=None)
+    duration = fields.Integer(description="in seconds", validate=validate.Range(min=0, max=300), missing=None)
+    breaths_per_minute = fields.Integer(description="", validate=validate.Range(min=0, max=100), missing=None)
+    max_minute_volume = fields.Float(description="", validate=validate.Range(min=0, max=500), missing=None)
+    liters_min_kg = fields.Float(description="liters per minute per kg", validate=validate.Range(min=0, max=100), missing=None)
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -822,49 +820,49 @@ class LungAssessmentSchema(ma.SQLAlchemySchema):
 
 class MoxyRipExaminationSchema(Schema):
 
-    smo2 = fields.Integer(description="", validate=validate.Range(min=0, max=100))
-    thb = fields.Integer(description="", validate=validate.Range(min=9, max=18))
-    avg_power = fields.Integer(description="", validate=validate.Range(min=0, max=1500))
-    hr_max_min = fields.Integer(description="", validate=validate.Range(min=0, max=220))
+    smo2 = fields.Integer(description="", validate=validate.Range(min=0, max=100), missing=None)
+    thb = fields.Integer(description="", validate=validate.Range(min=9, max=18), missing=None)
+    avg_power = fields.Integer(description="", validate=validate.Range(min=0, max=1500), missing=None)
+    hr_max_min = fields.Integer(description="", validate=validate.Range(min=0, max=220), missing=None)
 
 class MoxyTries(Schema):
-    one = fields.Nested(MoxyRipExaminationSchema)
-    two = fields.Nested(MoxyRipExaminationSchema)
-    three = fields.Nested(MoxyRipExaminationSchema)
-    four = fields.Nested(MoxyRipExaminationSchema)
+    one = fields.Nested(MoxyRipExaminationSchema, missing = MoxyRipExaminationSchema().load({}))
+    two = fields.Nested(MoxyRipExaminationSchema, missing = MoxyRipExaminationSchema().load({}))
+    three = fields.Nested(MoxyRipExaminationSchema, missing = MoxyRipExaminationSchema().load({}))
+    four = fields.Nested(MoxyRipExaminationSchema, missing = MoxyRipExaminationSchema().load({}))
 
 class MoxyRipSchema(Schema):
     limiter_options = ['Demand','Supply','Respiratory']
 
     clientid = fields.Integer(missing=0)
     timestamp = fields.DateTime()
-    vl_side = fields.String(description="vl_side must be either 'right' or 'left'")
-    performance = fields.Nested(MoxyTries)
-    recovery = fields.Nested(MoxyTries)
-    smo2_tank_size = fields.Integer(description="", validate=validate.Range(min=0, max=100))
-    thb_tank_size = fields.Integer(description="", validate=validate.Range(min=9, max=18))
-    performance_baseline_smo2 = fields.Integer(description="", validate=validate.Range(min=0, max=100))
-    performance_baseline_thb = fields.Integer(description="", validate=validate.Range(min=9, max=18))
-    recovery_baseline_smo2 = fields.Integer(description="", validate=validate.Range(min=0, max=100))
-    recovery_baseline_thb = fields.Integer(description="", validate=validate.Range(min=9, max=18))
-    avg_watt_kg = fields.Float(description="", validate=validate.Range(min=0, max=20))
-    avg_interval_time = fields.Integer(description="seconds", validate=validate.Range(min=0, max=360))
-    avg_recovery_time = fields.Integer(description="seconds", validate=validate.Range(min=0, max=360))
+    vl_side = fields.String(description="vl_side must be either 'right' or 'left'", missing=None)
+    performance = fields.Nested(MoxyTries, missing=MoxyTries().load({}))
+    recovery = fields.Nested(MoxyTries, missing=MoxyTries().load({}))
+    smo2_tank_size = fields.Integer(description="", validate=validate.Range(min=0, max=100), missing=None)
+    thb_tank_size = fields.Integer(description="", validate=validate.Range(min=9, max=18), missing=None)
+    performance_baseline_smo2 = fields.Integer(description="", validate=validate.Range(min=0, max=100), missing=None)
+    performance_baseline_thb = fields.Integer(description="", validate=validate.Range(min=9, max=18), missing=None)
+    recovery_baseline_smo2 = fields.Integer(description="", validate=validate.Range(min=0, max=100), missing=None)
+    recovery_baseline_thb = fields.Integer(description="", validate=validate.Range(min=9, max=18), missing=None)
+    avg_watt_kg = fields.Float(description="", validate=validate.Range(min=0, max=20), missing=None)
+    avg_interval_time = fields.Integer(description="seconds", validate=validate.Range(min=0, max=360), missing=None)
+    avg_recovery_time = fields.Integer(description="seconds", validate=validate.Range(min=0, max=360), missing=MoxyTries().load({}))
 
-    limiter = fields.String(description=f"must be one of the following choices: {limiter_options}")
+    limiter = fields.String(description=f"must be one of the following choices: {limiter_options}", missing=None)
 
-    intervention = fields.String()
-    vital_weight = fields.Float(description="weight pulled from doctor physical data", dump_only=True)
+    intervention = fields.String(missing=None)
+    vital_weight = fields.Float(description="weight pulled from doctor physical data", dump_only=True, missing=None)
 
 
     @validates('vl_side')
     def validate_vl_side(self,value):
-        if value not in ["right", "left"]:
+        if value not in ["right", "left"] and value!= None:
             raise ValidationError(f"{value} not a valid option. must be 'right' or 'left'")
 
     @validates('limiter')
     def valid_limiter(self,value):
-        if value not in self.limiter_options:
+        if value not in self.limiter_options and value != None:
             raise ValidationError(f'{value} is not a valid limiter option. Use one of the following {self.limiter_options}')
 
     @post_load
@@ -1017,24 +1015,24 @@ class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
 
     stress_sources = fields.List(fields.String,
             description=f"List of sources of stress. Options: {stressors_list}",
-            required=True) 
+            missing=[None]) 
     lifestyle_goals = fields.List(fields.String,
             description=f"List of lifestyle change goals. Limit of three from these options: {lifestyle_goals_list}. If other, must specify",
-            required=True) 
+            missing=[None]) 
     physical_goals = fields.List(fields.String,
             description=f"List of sources of stress. Limit of three from these options: {physical_goals_list}. If other, must specify",
-            required=True) 
-    trainer_expectation = fields.String(description=f"Client's expectation for their trainer. Must be one of: {trainer_goals_list}")
-    sleep_hours = fields.String(description=f"nightly hours of sleep bucketized by the following options: {sleep_hours_options_list}")
+            missing=[None]) 
+    trainer_expectation = fields.String(description=f"Client's expectation for their trainer. Must be one of: {trainer_goals_list}", missing=None)
+    sleep_hours = fields.String(description=f"nightly hours of sleep bucketized by the following options: {sleep_hours_options_list}", missing=None)
 
-    sleep_quality_level = fields.Integer(description="current sleep quality rating 1-5", validate=validate.Range(min=1, max=5))
-    stress_level = fields.Integer(description="current stress rating 1-5", validate=validate.Range(min=1, max=5))
-    energy_level = fields.Integer(description="current energy rating 1-5", validate=validate.Range(min=1, max=5))
-    libido_level = fields.Integer(description="current libido rating 1-5", validate=validate.Range(min=1, max=5))
-    confidence_level = fields.Integer(description="current confidence rating 1-5", validate=validate.Range(min=1, max=5))
+    sleep_quality_level = fields.Integer(description="current sleep quality rating 1-5", validate=validate.Range(min=1, max=5), missing=None)
+    stress_level = fields.Integer(description="current stress rating 1-5", validate=validate.Range(min=1, max=5), missing=None)
+    energy_level = fields.Integer(description="current energy rating 1-5", validate=validate.Range(min=1, max=5), missing=None)
+    libido_level = fields.Integer(description="current libido rating 1-5", validate=validate.Range(min=1, max=5), missing=None)
+    confidence_level = fields.Integer(description="current confidence rating 1-5", validate=validate.Range(min=1, max=5), missing=None)
 
-    current_fitness_level = fields.Integer(description="current fitness level 1-10", validate=validate.Range(min=1, max=10))
-    goal_fitness_level = fields.Integer(description="foal fitness level 1-10", validate=validate.Range(min=1, max=10))
+    current_fitness_level = fields.Integer(description="current fitness level 1-10", validate=validate.Range(min=1, max=10), missing=None)
+    goal_fitness_level = fields.Integer(description="foal fitness level 1-10", validate=validate.Range(min=1, max=10), missing=None)
     
     
     @post_load
@@ -1044,13 +1042,13 @@ class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
     @validates('stress_sources')
     def validate_stress_sources(self,value):
         for item in value:
-            if item not in self.stressors_list:
+            if item not in self.stressors_list and item != None:
                 raise ValidationError(f"{item} not a valid option. must be in {self.stressors_list}")
 
     @validates('lifestyle_goals')
     def validate_lifestyle_goals(self,value):
         for item in value:
-            if item not in self.lifestyle_goals_list:
+            if item not in self.lifestyle_goals_list and item != None:
                 raise ValidationError(f"{item} not a valid option. must be in {self.lifestyle_goals_list}")
         if len(value) > 3:
             ValidationError("limit list length to 3 choices")
@@ -1059,19 +1057,19 @@ class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
     @validates('physical_goals')
     def validate_physical_goals(self,value):
         for item in value:
-            if item not in self.physical_goals_list:
+            if item not in self.physical_goals_list and value != None:
                 raise ValidationError(f"{item} not a valid option. must be in {self.physical_goals_list}")
         if len(value) > 3:
             ValidationError("limit list length to 3 choices")
     
     @validates('trainer_expectation')
     def validate_trainer_expectations(self, value):
-        if value not in self.trainer_goals_list:
+        if value not in self.trainer_goals_list and value != None:
             raise ValidationError(f"{value} not a valid option. Must be one of {self.trainer_goals_list}")
 
     @validates('sleep_hours')
     def validate_sleep_hours(self, value):
-        if value not in self.sleep_hours_options_list:
+        if value not in self.sleep_hours_options_list and value != None:
             raise ValidationError(f"{value} not a valid option. Must be one of {self.sleep_hours_options_list}")
 
 
