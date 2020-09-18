@@ -2,13 +2,30 @@
 
 import datetime
 import re
+import statistics
 import uuid
+
 import flask.json
 from odyssey.models.client import ClientInfo, RemoteRegistration
 from odyssey.api.errors import UserNotFound
 
 
 _uuid_rx = re.compile(r'[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}', flags=re.IGNORECASE)
+
+def schema_to_dict(schema):
+    """Returns a dictionary represenation of the schema with None type for all values"""
+    fields = schema.fields.keys()
+    schema_dict = {f:None for f in fields}
+    return schema_dict
+
+def list_average(values_list):
+    """Helper function to clean list values before attempting to find the average"""
+    # remove empty items
+    values_list_ = [val for val in values_list if val]
+    if len(values_list_)>0:
+        return statistics.mean(values_list_)
+    else:
+        return None
 
 def check_client_existence(clientid):
     client = ClientInfo.query.filter_by(clientid=clientid).one_or_none()

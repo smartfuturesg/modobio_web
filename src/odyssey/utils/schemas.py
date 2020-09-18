@@ -41,6 +41,7 @@ from odyssey.models.trainer import (
     LungAssessment
 )
 from odyssey.models.wearables import Wearables, WearablesOura
+from odyssey.utils.misc import schema_to_dict, list_average
 
 
 class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
@@ -111,14 +112,6 @@ class ClientSummarySchema(Schema):
     def add_record_locator_id(self,data, **kwargs ):
         name_hash = md5(bytes((data['firstname']+data['lastname']), 'utf-8')).hexdigest()
         data['record_locator_id'] = (data['firstname'][0]+data['lastname'][0]+str(data['clientid'])+name_hash[0:6]).upper()
-
-        # data['_links']= {
-        #     'self': api.url_for(Clients, page=page, per_page=per_page),
-        #     'next': api.url_for(Clients, page=page + 1, per_page=per_page)
-        #     if resources.has_next else None,
-        #     'prev': api.url_for(Clients, page=page - 1, per_page=per_page)
-        #     if resources.has_prev else None,
-        # }
         return data
 
 
@@ -384,12 +377,14 @@ class ChessboardSchema(Schema):
     Schemas for the trainer's API
 """
 
+
+
 class PowerAttemptsPushPull(Schema):
-    weight = fields.Integer(description="weight of exercise in PSI", validate=validate.Range(min=0, max=60))
-    attempt_1 = fields.Integer(description="", validate=validate.Range(min=0, max=4000))
-    attempt_2 = fields.Integer(description="", validate=validate.Range(min=0, max=4000))
-    attempt_3 = fields.Integer(description="",validate=validate.Range(min=0, max=4000))
-    average = fields.Float(description="",validate=validate.Range(min=0, max=4000))
+    weight = fields.Integer(description="weight of exercise in PSI", validate=validate.Range(min=0, max=60), missing=None)
+    attempt_1 = fields.Integer(description="", validate=validate.Range(min=0, max=4000), missing=None)
+    attempt_2 = fields.Integer(description="", validate=validate.Range(min=0, max=4000), missing=None)
+    attempt_3 = fields.Integer(description="",validate=validate.Range(min=0, max=4000), missing=None)
+    average = fields.Float(description="",validate=validate.Range(min=0, max=4000), missing=None)
 
 class PowerAttemptsLegPress(Schema):
     weight = fields.Integer(description="weight of exercise in PSI", validate=validate.Range(min=0, max=1500))
@@ -399,21 +394,21 @@ class PowerAttemptsLegPress(Schema):
     average = fields.Float(description="",validate=validate.Range(min=0, max=9999))
 
 class PowerPushPull(Schema):
-    left = fields.Nested(PowerAttemptsPushPull)
-    right = fields.Nested(PowerAttemptsPushPull)
+    left = fields.Nested(PowerAttemptsPushPull, missing=schema_to_dict(PowerAttemptsPushPull()))
+    right = fields.Nested(PowerAttemptsPushPull, missing=schema_to_dict(PowerAttemptsPushPull()))
 
 class PowerLegPress(Schema):
-    left = fields.Nested(PowerAttemptsLegPress)
-    right = fields.Nested(PowerAttemptsLegPress)
-    bilateral = fields.Nested(PowerAttemptsLegPress)
+    left = fields.Nested(PowerAttemptsLegPress, missing=schema_to_dict(PowerAttemptsLegPress()))
+    right = fields.Nested(PowerAttemptsLegPress, missing=schema_to_dict(PowerAttemptsLegPress()))
+    bilateral = fields.Nested(PowerAttemptsLegPress, missing=schema_to_dict(PowerAttemptsLegPress()))
 
 class PowerAssessmentSchema(Schema):
     clientid = fields.Integer(missing=0)
     timestamp = fields.DateTime()
-    push_pull = fields.Nested(PowerPushPull)
-    leg_press = fields.Nested(PowerLegPress)
-    upper_watts_per_kg = fields.Float(description = "watts per kg upper body", validate=validate.Range(min=0, max=100))
-    lower_watts_per_kg = fields.Float(description = "watts per kg upper body", validate=validate.Range(min=0, max=250))
+    push_pull = fields.Nested(PowerPushPull, missing=PowerPushPull().load({}))
+    leg_press = fields.Nested(PowerLegPress, missing=PowerLegPress().load({}))
+    upper_watts_per_kg = fields.Float(description = "watts per kg upper body", validate=validate.Range(min=0, max=100), missing=None)
+    lower_watts_per_kg = fields.Float(description = "watts per kg upper body", validate=validate.Range(min=0, max=250), missing=None)
     vital_weight = fields.Float(description="weight pulled from doctor physical data", dump_only=True)
 
     @post_load
@@ -456,7 +451,7 @@ class PowerAssessmentSchema(Schema):
                                          'attempt_1': data.keiser_upper_l_attempt_1,
                                          'attempt_2': data.keiser_upper_l_attempt_2,
                                          'attempt_3': data.keiser_upper_l_attempt_3,
-                                         'average':   statistics.mean([data.keiser_upper_l_attempt_1,
+                                         'average':   list_average([data.keiser_upper_l_attempt_1,
                                                                        data.keiser_upper_l_attempt_2,
                                                                        data.keiser_upper_l_attempt_3
                                                                     ])
@@ -465,7 +460,7 @@ class PowerAssessmentSchema(Schema):
                                          'attempt_1': data.keiser_upper_r_attempt_1,
                                          'attempt_2': data.keiser_upper_r_attempt_2,
                                          'attempt_3': data.keiser_upper_r_attempt_3,
-                                         'average':   statistics.mean([data.keiser_upper_r_attempt_1,
+                                         'average':   list_average([data.keiser_upper_r_attempt_1,
                                                                        data.keiser_upper_r_attempt_2,
                                                                        data.keiser_upper_r_attempt_3
                                                                     ])
@@ -475,7 +470,7 @@ class PowerAssessmentSchema(Schema):
                                              'attempt_1': data.keiser_lower_r_attempt_1,
                                              'attempt_2': data.keiser_lower_r_attempt_2,
                                              'attempt_3': data.keiser_lower_r_attempt_3,
-                                             'average':   statistics.mean([data.keiser_lower_r_attempt_1,
+                                             'average':   list_average([data.keiser_lower_r_attempt_1,
                                                                            data.keiser_lower_r_attempt_2,
                                                                            data.keiser_lower_r_attempt_3
                                                                         ])
@@ -484,7 +479,7 @@ class PowerAssessmentSchema(Schema):
                                              'attempt_1': data.keiser_lower_l_attempt_1,
                                              'attempt_2': data.keiser_lower_l_attempt_2,
                                              'attempt_3': data.keiser_lower_l_attempt_3,
-                                             'average':   statistics.mean([data.keiser_lower_l_attempt_1,
+                                             'average':   list_average([data.keiser_lower_l_attempt_1,
                                                                            data.keiser_lower_l_attempt_2,
                                                                            data.keiser_lower_l_attempt_3
                                                                         ])
@@ -493,7 +488,7 @@ class PowerAssessmentSchema(Schema):
                                              'attempt_1': data.keiser_lower_bi_attempt_1,
                                              'attempt_2': data.keiser_lower_bi_attempt_2,
                                              'attempt_3': data.keiser_lower_bi_attempt_3,
-                                             'average':   statistics.mean([data.keiser_lower_bi_attempt_1,
+                                             'average':   list_average([data.keiser_lower_bi_attempt_1,
                                                                            data.keiser_lower_bi_attempt_2,
                                                                            data.keiser_lower_bi_attempt_3
                                                                         ])
