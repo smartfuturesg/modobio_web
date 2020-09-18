@@ -75,6 +75,16 @@ class RegisteredFacility(Resource):
 
         return facility
 
+@ns.route('/all/')
+class AllFacilities(Resource):
+    """api to return all registered facilities in the database"""
+
+    @token_auth.login_required
+    @responds(schema=RegisteredFacilitiesSchema(many=True), api=ns)
+    def get(self):
+        """get a list of all registered facilities"""
+        return RegisteredFacilities.query.all()
+
 @ns.route('/client/<int:clientid>/')
 class RegisterClient(Resource):
     """api to handle actions revolving around what facilities a client is registered to"""
@@ -86,9 +96,6 @@ class RegisterClient(Resource):
         check_client_existence(clientid)
 
         clientFacilities = ClientFacilities.query.filter_by(client_id=clientid).all()
-
-        if not clientFacilities:
-            raise ContentNotFound()
 
         facilityList = [item.facility_id for item in clientFacilities]
 
@@ -114,9 +121,7 @@ class RegisterClient(Resource):
         #check if this client-facility relation already exists
         check_client_facility_relation_existence(clientid, data['facility_id'])
 
-        facility_schema = ClientFacilitiesSchema()
-
-        facility_data = facility_schema.load(data)
+        facility_data = ClientFacilitiesSchema().load(data)
 
         db.session.add(facility_data)
         db.session.commit()

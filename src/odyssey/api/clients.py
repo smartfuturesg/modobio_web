@@ -19,7 +19,6 @@ from odyssey.models.client import (
     ClientSubscriptionContract,
     RemoteRegistration
 )
-from odyssey.models.misc import RegisteredFacilities
 from odyssey.models.staff import ClientRemovalRequests
 from odyssey.pdf import to_pdf, merge_pdfs
 from odyssey.utils.email import send_email_remote_registration_portal, send_test_email
@@ -37,8 +36,7 @@ from odyssey.utils.schemas import (
     NewRemoteClientSchema, 
     RefreshRemoteRegistrationSchema,
     SignAndDateSchema,
-    SignedDocumentsSchema,
-    RegisteredFacilitiesSchema
+    SignedDocumentsSchema
 )
 
 
