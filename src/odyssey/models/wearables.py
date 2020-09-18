@@ -197,7 +197,7 @@ class WearablesFreeStyle(_Base):
     :type: list(list(float))
     """
 
-    activation_time = Column(DateTime)
+    activation_timestamp = Column(DateTime)
     """
     Timestamp when last CGM was activated.
 

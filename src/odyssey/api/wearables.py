@@ -21,7 +21,6 @@ from odyssey.models.wearables import (
 )
 from odyssey.utils.schemas import (
     WearablesSchema,
-    WearablesOuraSchema,
     WearablesFreeStyleSchema,
     WearablesFreeStyleActivateSchema
 )
@@ -55,14 +54,16 @@ class WearablesEndpoint(Resource):
         dict
             JSON encoded dict.
         """
-        check_client_existence(clientid)
+        wearables = (
+            Wearables.query
+            .filter_by(clientid=clientid)
+            .one_or_none()
+        )
 
-        wearables = Wearables.query.filter_by(clientid=clientid).one_or_none()
         if not wearables:
             raise ContentNotFound
 
-        wearables_schema = WearablesSchema()
-        return wearables_schema.load(wearables)
+        return wearables
 
     @token_auth.login_required
     @accepts(schema=WearablesSchema, api=ns)
@@ -80,14 +81,17 @@ class WearablesEndpoint(Resource):
         dict
             JSON encoded dict.
         """
-        query = Wearables.query.filter_by(clientid=clientid)
-        wearables = query.one_or_none()
+        wearables = (
+            Wearables.query
+            .filter_by(clientid=clientid)
+            .one_or_none()
+        )
 
         if wearables:
             raise MethodNotAllowed
 
-        wearables = WearablesSchema().load(request.json)
-        db.session.add(wearables)
+        request.parsed_obj.clientid = clientid
+        db.session.add(request.parsed_obj)
         db.session.commit()
 
     @token_auth.login_required
@@ -112,11 +116,8 @@ class WearablesEndpoint(Resource):
         if not wearables:
             raise ContentNotFound
 
-        # Prevent user from changing ID
-        # if request.json.get('clientid'):
-        #     raise IllegalSetting(param='clientid')
-
-        query.update(request.json)
+        data = WearablesSchema().dump(request.parsed_obj)
+        query.update(data)
         db.session.commit()
 
 
@@ -138,13 +139,15 @@ class WearablesOuraAuthorizationEndpoint(Resource):
         str
             The URL where the client needs to go to grant access to Modo Bio.
         """
-        # FLASK_DEV=local has no access to AWS
-        if not current_app.config['OURA_CLIENT_ID']:
+        if current_app.config['LOCAL_CONFIG']:
             return {'url': ''}
 
-        check_client_existence(clientid)
+        wearables = (
+            Wearables.query
+            .filter_by(clientid=clientid)
+            .one_or_none()
+        )
 
-        wearables = Wearables.query.filter_by(clientid=clientid).one_or_none()
         if not wearables or not wearables.has_oura:
             raise ContentNotFound
 
@@ -158,7 +161,12 @@ class WearablesOuraAuthorizationEndpoint(Resource):
         auth_url, state = oauth_session.authorization_url(base_url)
 
         # Store state in database
-        oura = WearablesOura.query.filter_by(clientid=clientid).one_or_none()
+        oura = (
+            WearablesOura.query
+            .filter_by(clientid=clientid)
+            .one_or_none()
+        )
+
         if not oura:
             oura = WearablesOura(clientid=clientid, oauth_state=state)
             db.session.add(oura)
@@ -174,8 +182,8 @@ class WearablesOuraCallbackEndpoint(Resource):
     @responds(status_code=200, api=ns)
     def get(self):
         """ Oura Ring callback URL """
-        if not current_app.config['OURA_CLIENT_ID']:
-            return 'Nothing done'
+        if current_app.config['LOCAL_CONFIG']:
+            return
 
         oauth_state = request.args.get('state')
         error_code = request.args.get('error')
@@ -231,13 +239,16 @@ class WearablesOuraCallbackEndpoint(Resource):
         db.session.commit()
 
         # Everything was successful
-        wearables = Wearables.query.filter_by(clientid=oura.clientid).first()
+        wearables = (
+            Wearables.query
+            .filter_by(clientid=oura.clientid)
+            .first()
+        )
+
         wearables.registered_oura = True
         oura.grant_token = None
         oura.oauth_state = None
         db.session.commit()
-
-        return 'OK'
 
 
 @ns.route('/freestyle/activate/<int:clientid>/')
@@ -263,9 +274,8 @@ class WearablesFreeStyleActivateEndpoint(Resource):
         str
             JSON encoded, ISO 8601 formatted datetime string.
         """
-
-        cgm = (WearablesFreeStyle
-            .query
+        cgm = (
+            WearablesFreeStyle.query
             .filter_by(clientid=clientid)
             .one_or_none()
         )
@@ -273,8 +283,7 @@ class WearablesFreeStyleActivateEndpoint(Resource):
         if not cgm:
             raise ContentNotFound
 
-        cgm_schema = WearablesFreeStyleActivateSchema()
-        return cgm_schema.dump(cgm)
+        return cgm
 
     @token_auth.login_required
     @accepts(schema=WearablesFreeStyleActivateSchema, api=ns)
@@ -294,23 +303,21 @@ class WearablesFreeStyleActivateEndpoint(Resource):
         timestamp : str
             ISO 8601 formatted datetime string.
         """
-
-        cgm = (WearablesFreeStyle
-            .query
+        cgm = (
+            WearablesFreeStyle.query
             .filter_by(clientid=clientid)
             .one_or_none()
         )
 
         if not cgm:
             cgm = WearablesFreeStyle(clientid=clientid)
+            cgm.timestamps = []
+            cgm.glucose = []
             db.session.add(cgm)
 
-        cgm_schema = WearablesFreeStyleActivateSchema()
-        cgm_data = cgm_schema.load(request.json)
-
-        cgm.activation_timestamp = cgm_data['timestamp']
-        cgm.timestamps.append([])
-        cgm.glucose.append([])
+        cgm.activation_timestamp = request.parsed_obj.activation_timestamp
+        cgm.timestamps.append([request.parsed_obj.activation_timestamp])
+        cgm.glucose.append([-1.0])
         db.session.commit()
 
 
@@ -333,8 +340,8 @@ class WearablesFreeStyleEndpoint(Resource):
             JSON encoded dictionary
         """
 
-        cgm = (WearablesFreeStyle
-            .query
+        cgm = (
+            WearablesFreeStyle.query
             .filter_by(clientid=clientid)
             .one_or_none()
         )
@@ -364,8 +371,8 @@ class WearablesFreeStyleEndpoint(Resource):
             ISO 8601 formatted datetime string.
         """
 
-        cgm = (WearablesFreeStyle
-            .query
+        cgm = (
+            WearablesFreeStyle.query
             .filter_by(clientid=clientid)
             .one_or_none()
         )

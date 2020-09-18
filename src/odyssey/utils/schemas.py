@@ -1286,35 +1286,19 @@ class MedicalBloodChemistryA1CSchema(Schema):
 class WearablesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Wearables
+        load_instance = True
         exclude = ['idx', 'clientid']
-    # clientid = fields.Integer(missing=0)
-
-    @post_load
-    def make_object(self, data, **kwargs):
-        return Wearables(**data)
-
-
-class WearablesOuraSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = WearablesOura
-
-    clientid = fields.Integer(missing=0)
-
-    @post_load
-    def make_object(self, data, **kwargs):
-        return WearablesOura(**data)
 
 
 class WearablesFreeStyleSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = WearablesFreeStyle
+        load_instance = True
+        exclude = ['idx', 'clientid']
 
-    clientid = fields.Integer(missing=0)
 
-    @post_load
-    def make_object(self, data, **kwargs):
-        return WearablesFreeStyle(**data)
-
-class WearablesFreeStyleActivateSchema(Schema):
-    clientid = fields.Integer(missing=0)
-    timestamp = fields.DateTime()
+class WearablesFreeStyleActivateSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = WearablesFreeStyle
+        load_instance = True
+        only = ['activation_timestamp']
