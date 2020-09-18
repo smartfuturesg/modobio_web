@@ -524,7 +524,7 @@ class MovementAssessment(db.Model):
     :type: str
     """
 
-    toe_touch_pelvis_movement = db.Column(db.ARRAY(db.String), nullable=False, server_default="{'Even Bilaterally'}")
+    toe_touch_pelvis_movement = db.Column(db.ARRAY(db.String), nullable=True, server_default="{'Even Bilaterally'}")
     """
     Pelvis movement during toe touch test
     'Right Hip High',
@@ -536,7 +536,7 @@ class MovementAssessment(db.Model):
     :type: str
     """
 
-    toe_touch_ribcage_movement = db.Column(db.ARRAY(db.String), nullable=False, server_default="{'Even Bilaterally'}")
+    toe_touch_ribcage_movement = db.Column(db.ARRAY(db.String), nullable=True, server_default="{'Even Bilaterally'}")
     """
     Ribcage movement during toe touch test
     'Right Posterior Ribcage High',
@@ -1212,7 +1212,7 @@ class FitnessQuestionnaire(db.Model):
     :type: datetime.datetime
     """
 
-    physical_goals = db.Column(db.ARRAY(db.String), nullable=False, server_default="{'other'}")
+    physical_goals = db.Column(db.ARRAY(db.String), nullable=True, server_default="{'other'}")
     """
     Indicates the goals the client has for their fitness journey. There may be only three choices. One of the choices is 'other'.
 
@@ -1247,7 +1247,7 @@ class FitnessQuestionnaire(db.Model):
     :type: int
     """
 
-    trainer_expectation = db.Column(db.String, nullable=False, server_default="other")
+    trainer_expectation = db.Column(db.String, nullable=True, server_default="other")
     """
     Indicates the expectations the client has for their fitness trainer. There may be only one choice. One of the choices is 'other'.
 
@@ -1261,7 +1261,7 @@ class FitnessQuestionnaire(db.Model):
     :type: str
     """
 
-    obstacles_likely = db.Column(db.Boolean, nullable=False)
+    obstacles_likely = db.Column(db.Boolean, nullable=True)
     """
     Indicates wheather or not the client expects obstacles to their modobio fitness journey
 
@@ -1275,7 +1275,7 @@ class FitnessQuestionnaire(db.Model):
     :type: str
     """
 
-    lifestyle_goals = db.Column(db.ARRAY(db.String), nullable=False, server_default="{'other'}")
+    lifestyle_goals = db.Column(db.ARRAY(db.String), nullable=True, server_default="{'other'}")
     """
     Indicates the lifestyle goals the client has for their fitness journey. There may be only three choices. One of the choices is 'other'.
 
@@ -1317,7 +1317,7 @@ class FitnessQuestionnaire(db.Model):
     :type: int
     """
 
-    stress_sources = db.Column(db.ARRAY(db.String), nullable=False, server_default="{'other'}")
+    stress_sources = db.Column(db.ARRAY(db.String), nullable=True, server_default="{'other'}")
     """
     Indicates the client's most prominent life stressors. Choices come from a set picklist where 'other' is one of the choices.
     
