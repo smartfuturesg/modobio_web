@@ -23,7 +23,7 @@ def upgrade():
     sa.Column('clientid', sa.Integer(), nullable=False),
     sa.Column('timestamps', postgresql.ARRAY(sa.DateTime(), dimensions=2), nullable=True),
     sa.Column('glucose', postgresql.ARRAY(sa.Float(), dimensions=2), nullable=True),
-    sa.Column('activation_time', sa.DateTime(), nullable=True),
+    sa.Column('activation_timestamp', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['clientid'], ['ClientInfo.clientid'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('idx')
     )
