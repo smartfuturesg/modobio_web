@@ -134,7 +134,7 @@ def _to_pdf(req_ctx, clientid, table, template=None, form=None):
         filename = f'ModoBio_{docname}_v{doc.revision}_client{clientid:05d}_{doc.signdate}.pdf'
         bucket_name = current_app.config['DOCS_BUCKET_NAME']
 
-        if current_app.config['DOCS_STORE_LOCAL']:
+        if current_app.config['LOCAL_CONFIG']:
             path = pathlib.Path(bucket_name)
             path.mkdir(parents=True, exist_ok=True)
 
@@ -179,7 +179,7 @@ def merge_pdfs(documents: list, clientid: int) -> str:
 
     merger = PdfFileMerger()
     bufs = []
-    if current_app.config['DOCS_STORE_LOCAL']:
+    if current_app.config['LOCAL_CONFIG']:
         for doc in documents:
             try:
                 merger.append(doc)
@@ -206,7 +206,7 @@ def merge_pdfs(documents: list, clientid: int) -> str:
     signdate = date.today().isoformat()
     filename = f'ModoBio_client{clientid:05d}_{signdate}.pdf'
 
-    if current_app.config['DOCS_STORE_LOCAL']:
+    if current_app.config['LOCAL_CONFIG']:
         path = pathlib.Path(bucket_name)
         path.mkdir(parents=True, exist_ok=True)
 
