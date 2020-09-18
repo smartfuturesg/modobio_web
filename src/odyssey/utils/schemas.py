@@ -511,7 +511,7 @@ class StrengthAttemptsPushPull(Schema):
 
 class StrengthPushPull(Schema):
     notes = fields.String(missing=None)
-    left = fields.Nested(StrengthAttemptsPushPull, missing=StrengthAttemptsPushPull().load({}) )
+    left = fields.Nested(StrengthAttemptsPushPull, missing=StrengthAttemptsPushPull().load({}))
     right = fields.Nested(StrengthAttemptsPushPull, missing=StrengthAttemptsPushPull().load({}))
     bilateral = fields.Nested(StrengthAttemptsPushPull, missing=StrengthAttemptsPushPull().load({}))
 
@@ -656,8 +656,8 @@ class StandingRotationNotesSchema(Schema):
     notes = fields.String(missing=None)
 
 class StandingRotationSchema(Schema):
-    right = fields.Nested(StandingRotationNotesSchema, missing=StandingRotationNotesSchema().load({}) )
-    left = fields.Nested(StandingRotationNotesSchema, missing=StandingRotationNotesSchema().load({}) )
+    right = fields.Nested(StandingRotationNotesSchema, missing=StandingRotationNotesSchema().load({}))
+    left = fields.Nested(StandingRotationNotesSchema, missing=StandingRotationNotesSchema().load({}))
 
 class MovementAssessmentSchema(Schema):
     clientid = fields.Integer(missing=0)
@@ -736,10 +736,6 @@ class HeartAssessmentSchema(ma.SQLAlchemyAutoSchema):
             data_dict["vital_heartrate"] = recent_physical.vital_heartrate
         return data_dict
 
-        
-
-
-
 class MoxyAssessmentSchema(ma.SQLAlchemySchema):
     class Meta:
         model = MoxyAssessment
@@ -765,22 +761,22 @@ class MoxyAssessmentSchema(ma.SQLAlchemySchema):
 
     @validates('vl_side')
     def validate_vl_side(self,value):
-        if value not in ["right", "left"]:
+        if value not in ["right", "left"] and value != None:
             raise ValidationError(f"{value} not a valid option. must be 'right' or 'left'")
     
     @validates('limiter')
     def limiter_picklist(self,value):
-        if not value in self.limiter_list:
+        if not value in self.limiter_list and value != None:
             raise ValidationError(f'limiter entry invalid. Please use one of the following: {self.limiter_list}')
 
     @validates('performance_metric_1')
     def performance_metric_1_picklist(self,value):
-        if not value in self.performance_metric_list:
+        if not value in self.performance_metric_list and value != None:
             raise ValidationError(f'performance_metric_1 entry invalid. Please use one of the following: {self.performance_metric_list}')
 
     @validates('performance_metric_2')
     def performance_metric_2_picklist(self,value):
-        if not value in self.performance_metric_list:
+        if not value in self.performance_metric_list and value != None:
             raise ValidationError(f'performance_metric_2 entry invalid. Please use one of the following: {self.performance_metric_list}')
 
     @post_load
@@ -846,7 +842,7 @@ class MoxyRipSchema(Schema):
     recovery_baseline_thb = fields.Integer(description="", validate=validate.Range(min=9, max=18), missing=None)
     avg_watt_kg = fields.Float(description="", validate=validate.Range(min=0, max=20), missing=None)
     avg_interval_time = fields.Integer(description="seconds", validate=validate.Range(min=0, max=360), missing=None)
-    avg_recovery_time = fields.Integer(description="seconds", validate=validate.Range(min=0, max=360), missing=MoxyTries().load({}))
+    avg_recovery_time = fields.Integer(description="seconds", validate=validate.Range(min=0, max=360), missing=None)
 
     limiter = fields.String(description=f"must be one of the following choices: {limiter_options}", missing=None)
 
@@ -1056,7 +1052,7 @@ class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
     @validates('physical_goals')
     def validate_physical_goals(self,value):
         for item in value:
-            if item not in self.physical_goals_list and value != None:
+            if item not in self.physical_goals_list and item != None:
                 raise ValidationError(f"{item} not a valid option. must be in {self.physical_goals_list}")
         if len(value) > 3:
             ValidationError("limit list length to 3 choices")
