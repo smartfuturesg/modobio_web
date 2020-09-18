@@ -12,12 +12,6 @@ from odyssey.api.errors import UserNotFound
 
 _uuid_rx = re.compile(r'[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}', flags=re.IGNORECASE)
 
-def schema_to_dict(schema):
-    """Returns a dictionary represenation of the schema with None type for all values"""
-    fields = schema.fields.keys()
-    schema_dict = {f:None for f in fields}
-    return schema_dict
-
 def list_average(values_list):
     """Helper function to clean list values before attempting to find the average"""
     # remove empty items

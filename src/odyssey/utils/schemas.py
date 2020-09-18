@@ -41,7 +41,7 @@ from odyssey.models.trainer import (
     LungAssessment
 )
 from odyssey.models.wearables import Wearables, WearablesOura
-from odyssey.utils.misc import schema_to_dict, list_average
+from odyssey.utils.misc import list_average
 
 
 class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
@@ -387,20 +387,20 @@ class PowerAttemptsPushPull(Schema):
     average = fields.Float(description="",validate=validate.Range(min=0, max=4000), missing=None)
 
 class PowerAttemptsLegPress(Schema):
-    weight = fields.Integer(description="weight of exercise in PSI", validate=validate.Range(min=0, max=1500))
-    attempt_1 = fields.Integer(description="", validate=validate.Range(min=0, max=9999))
-    attempt_2 = fields.Integer(description="", validate=validate.Range(min=0, max=9999))
-    attempt_3 = fields.Integer(description="",validate=validate.Range(min=0, max=9999))
-    average = fields.Float(description="",validate=validate.Range(min=0, max=9999))
+    weight = fields.Integer(description="weight of exercise in PSI", validate=validate.Range(min=0, max=1500),missing=None)
+    attempt_1 = fields.Integer(description="", validate=validate.Range(min=0, max=9999),missing=None)
+    attempt_2 = fields.Integer(description="", validate=validate.Range(min=0, max=9999),missing=None)
+    attempt_3 = fields.Integer(description="",validate=validate.Range(min=0, max=9999),missing=None)
+    average = fields.Float(description="",validate=validate.Range(min=0, max=9999),missing=None)
 
 class PowerPushPull(Schema):
-    left = fields.Nested(PowerAttemptsPushPull, missing=schema_to_dict(PowerAttemptsPushPull()))
-    right = fields.Nested(PowerAttemptsPushPull, missing=schema_to_dict(PowerAttemptsPushPull()))
+    left = fields.Nested(PowerAttemptsPushPull, missing=PowerAttemptsPushPull().load({}))
+    right = fields.Nested(PowerAttemptsPushPull, missing=PowerAttemptsPushPull().load({}))
 
 class PowerLegPress(Schema):
-    left = fields.Nested(PowerAttemptsLegPress, missing=schema_to_dict(PowerAttemptsLegPress()))
-    right = fields.Nested(PowerAttemptsLegPress, missing=schema_to_dict(PowerAttemptsLegPress()))
-    bilateral = fields.Nested(PowerAttemptsLegPress, missing=schema_to_dict(PowerAttemptsLegPress()))
+    left = fields.Nested(PowerAttemptsLegPress, missing=PowerAttemptsLegPress().load({}))
+    right = fields.Nested(PowerAttemptsLegPress, missing=PowerAttemptsLegPress().load({}))
+    bilateral = fields.Nested(PowerAttemptsLegPress, missing=PowerAttemptsLegPress().load({}))
 
 class PowerAssessmentSchema(Schema):
     clientid = fields.Integer(missing=0)
@@ -506,23 +506,23 @@ class PowerAssessmentSchema(Schema):
 
 
 class StrengthAttemptsPushPull(Schema):
-    weight = fields.Integer(description="weight of exercise in PSI", validate=validate.Range(min=0, max=350))
-    attempt_1 = fields.Integer(description="", validate=validate.Range(min=0, max=50))
-    attempt_2 = fields.Integer(description="", validate=validate.Range(min=0, max=50))
-    attempt_3 = fields.Integer(description="",validate=validate.Range(min=0, max=50))
-    estimated_10rm = fields.Float(description="",validate=validate.Range(min=0, max=350))
+    weight = fields.Integer(description="weight of exercise in PSI", validate=validate.Range(min=0, max=350), missing=None)
+    attempt_1 = fields.Integer(description="", validate=validate.Range(min=0, max=50), missing=None)
+    attempt_2 = fields.Integer(description="", validate=validate.Range(min=0, max=50), missing=None)
+    attempt_3 = fields.Integer(description="",validate=validate.Range(min=0, max=50), missing=None)
+    estimated_10rm = fields.Float(description="",validate=validate.Range(min=0, max=350), missing=None)
 
 class StrengthPushPull(Schema):
-    notes = fields.String()
-    left = fields.Nested(StrengthAttemptsPushPull)
-    right = fields.Nested(StrengthAttemptsPushPull)
-    bilateral = fields.Nested(StrengthAttemptsPushPull)
+    notes = fields.String(missing=None)
+    left = fields.Nested(StrengthAttemptsPushPull, missing=StrengthAttemptsPushPull().load({}) )
+    right = fields.Nested(StrengthAttemptsPushPull, missing=StrengthAttemptsPushPull().load({}))
+    bilateral = fields.Nested(StrengthAttemptsPushPull, missing=StrengthAttemptsPushPull().load({}))
 
 class StrenghtAssessmentSchema(Schema):
     clientid = fields.Integer(missing=0)
     timestamp = fields.DateTime()
-    upper_push = fields.Nested(StrengthPushPull)
-    upper_pull = fields.Nested(StrengthPushPull)
+    upper_push = fields.Nested(StrengthPushPull, missing=StrengthPushPull().load({}))
+    upper_pull = fields.Nested(StrengthPushPull, missing=StrengthPushPull().load({}))
 
     @post_load
     def unravel(self, data, **kwargs):
@@ -620,11 +620,11 @@ class StrenghtAssessmentSchema(Schema):
 
 
 class SquatTestSchema(Schema):
-    depth = fields.String()
-    ramp = fields.String()
-    eye_test = fields.Boolean()
-    can_breathe = fields.Boolean()
-    can_look_up = fields.Boolean()
+    depth = fields.String(missing=None)
+    ramp = fields.String(missing=None)
+    eye_test = fields.Boolean(missing=None)
+    can_breathe = fields.Boolean(missing=None)
+    can_look_up = fields.Boolean(missing=None)
 
 class ToeTouchTestSchema(Schema):
     pelvis_movement_test_options = ['Right Hip High','Right Hip Back','Left Hip High',
@@ -632,42 +632,42 @@ class ToeTouchTestSchema(Schema):
 
     ribcage_movement_test_options = ['Right Posterior Ribcage High','Right Posterior Ribcage Back',	
                                 'Left Posterior Ribcage High', 'Left Posterior Ribcage Back', 'Even Bilaterally']
-    depth = fields.String()
+    depth = fields.String(missing=None)
     pelvis_movement = fields.List(fields.String,
                 description=f"Descriptors for this assessment must be in the following picklist: {pelvis_movement_test_options}",
-                required=True) 
+                missing=[None]) 
     ribcage_movement = fields.List(fields.String,
                 description=f"Descriptors for this assessment must be in the following picklist: {ribcage_movement_test_options}",
-                required=True)
+                missing=[None])
 
-    notes = fields.String()
+    notes = fields.String(missing=None)
     
     @validates('ribcage_movement')
     def valid_ribcage_movement(self,value):
         for option in value:
-            if option not in self.ribcage_movement_test_options:
+            if option not in self.ribcage_movement_test_options and option != None:
                 raise ValidationError(f'{option} is not a valid movement descriptor. Use one of the following {self.ribcage_movement_test_options}')
             
     @validates('pelvis_movement')
     def valid_pelvis_movement(self,value):
         for option in value:
-            if option not in self.pelvis_movement_test_options:
+            if option not in self.pelvis_movement_test_options and option != None:
                 raise ValidationError(f'{option} is not a valid movement descriptor. Use one of the following {self.pelvis_movement_test_options}')
             
 
 class StandingRotationNotesSchema(Schema):
-    notes = fields.String()
+    notes = fields.String(missing=None)
 
 class StandingRotationSchema(Schema):
-    right = fields.Nested(StandingRotationNotesSchema)
-    left = fields.Nested(StandingRotationNotesSchema)
+    right = fields.Nested(StandingRotationNotesSchema, missing=StandingRotationNotesSchema().load({}) )
+    left = fields.Nested(StandingRotationNotesSchema, missing=StandingRotationNotesSchema().load({}) )
 
 class MovementAssessmentSchema(Schema):
     clientid = fields.Integer(missing=0)
     timestamp = fields.DateTime()
-    squat = fields.Nested(SquatTestSchema)
-    toe_touch = fields.Nested(ToeTouchTestSchema)
-    standing_rotation = fields.Nested(StandingRotationSchema)
+    squat = fields.Nested(SquatTestSchema,missing=SquatTestSchema().load({}))
+    toe_touch = fields.Nested(ToeTouchTestSchema, missing=ToeTouchTestSchema().load({}))
+    standing_rotation = fields.Nested(StandingRotationSchema, missing=StandingRotationSchema().load({}))
 
     @post_load
     def unravel(self, data, **kwargs):
