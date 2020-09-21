@@ -11,6 +11,7 @@ import pathlib
 from datetime import date
 from typing import Type
 
+from botocore.exceptions import ClientError
 from flask import render_template, session, current_app, _request_ctx_stack
 from flask_wtf import FlaskForm
 from PyPDF2 import PdfFileMerger
@@ -190,7 +191,11 @@ def merge_pdfs(documents: list, clientid: int) -> str:
         s3 = boto3.client('s3')
         for doc in documents:
             doc_buf = io.BytesIO()
-            s3.download_fileobj(bucket_name, doc, doc_buf)
+            try:
+                s3.download_fileobj(bucket_name, doc, doc_buf)
+            except ClientError as e:
+                print(f'Could not download file {doc} from S3 bucket {bucket_name}: {e}')
+                continue
             doc_buf.seek(0)
             bufs.append(doc_buf)
             merger.append(doc_buf)
