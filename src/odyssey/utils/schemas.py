@@ -24,9 +24,10 @@ from odyssey.models.client import (
     ClientRelease,
     ClientReleaseContacts,
     ClientSubscriptionContract,
+    ClientFacilities,
     RemoteRegistration
 )
-from odyssey.models.misc import MedicalInstitutions
+from odyssey.models.misc import MedicalInstitutions, RegisteredFacilities
 from odyssey.models.pt import Chessboard, PTHistory
 from odyssey.models.staff import Staff
 from odyssey.models.trainer import (
@@ -41,6 +42,16 @@ from odyssey.models.trainer import (
 )
 from odyssey.models.wearables import Wearables, WearablesOura
 from odyssey.utils.misc import list_average
+
+class ClientFacilitiesSchema(Schema):
+
+    idx = fields.Integer()
+    client_id = fields.Integer()
+    facility_id = fields.Integer()
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return ClientFacilities(**data)
 
 class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -1236,7 +1247,7 @@ class MedicalBloodChemistryLipidsSchema(Schema):
     clientid = fields.Integer(required=False,missing=0)
     exam_date = fields.Date(required=True)
     cholesterol_total = fields.Float(required=False,validate=validate.Range(min=0.0, max=500.0))
-    cholesterol_ldl = fields.Float(required=False,validate=validate.Range(min=0.0, max=50.0))
+    cholesterol_ldl = fields.Float(required=False,validate=validate.Range(min=0.0, max=500.0))
     cholesterol_hdl = fields.Float(required=False,validate=validate.Range(min=0.0, max=500.0))
     triglycerides = fields.Float(required=False,validate=validate.Range(min=0.0, max=1000.0))
     cholesterol_over_hdl = fields.Float(required=False)
@@ -1267,6 +1278,16 @@ class MedicalBloodChemistryThyroidSchema(Schema):
     @post_load
     def make_object(self, data, **kwargs):
         return MedicalBloodChemistryThyroid(**data)
+
+class RegisteredFacilitiesSchema(Schema):
+    facility_id = fields.Integer(required=False, missing=0)
+    facility_name = fields.String(required=True)
+    facility_address = fields.String(required=True)
+    modobio_facility = fields.Boolean(required=True)
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return RegisteredFacilities(**data)
 
 class MedicalBloodChemistryA1CSchema(Schema):
 
