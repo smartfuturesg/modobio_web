@@ -68,10 +68,10 @@ class Client(Resource):
             raise IllegalSetting('clientid')
         elif data.get('membersince', None):
             raise IllegalSetting('membersince')
-        # client.update
-        client.from_dict(data)
-        db.session.add(client)
+        
+        client.update(data)
         db.session.commit()
+        
         return client
 
 @ns.route('/remove/<int:clientid>/')
@@ -409,10 +409,14 @@ class SignedDocuments(Resource):
         urls = {}
         paths = []
 
+        bucket_name = current_app.config['DOCS_BUCKET_NAME']
+        if not bucket_name:
+            raise IllegalSetting(message='Bucket name not defined.')
+
         if not current_app.config['LOCAL_CONFIG']:
             s3 = boto3.client('s3')
             params = {
-                'Bucket': current_app.config['DOCS_BUCKET_NAME'],
+                'Bucket': bucket_name,
                 'Key': None
             }
 
