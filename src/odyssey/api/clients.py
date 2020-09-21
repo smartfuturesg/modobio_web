@@ -1,5 +1,5 @@
 import boto3
-from datetime import datetime
+from datetime import datetime, date
 
 from flask import request, jsonify, current_app
 from flask_accepts import accepts, responds
@@ -117,7 +117,7 @@ class NewClient(Resource):
         elif data.get('clientid', None):
             raise IllegalSetting('clientid')
         #set member since date to today
-        data['membersince'] = datetime.today()
+        data['membersince'] = date.today().strftime("%Y-%m-%d")
    
         ci_schema = ClientInfoSchema()
         client = ci_schema.load(data)
