@@ -1,5 +1,5 @@
 import boto3
-from datetime import datetime
+from datetime import datetime, date
 
 from flask import request, jsonify, current_app
 from flask_accepts import accepts, responds
@@ -66,10 +66,12 @@ class Client(Resource):
         #prevent requests to set clientid and send message back to api user
         elif data.get('clientid', None):
             raise IllegalSetting('clientid')
-        # client.update
-        client.from_dict(data)
-        db.session.add(client)
+        elif data.get('membersince', None):
+            raise IllegalSetting('membersince')
+        
+        client.update(data)
         db.session.commit()
+        
         return client
 
 @ns.route('/remove/<int:clientid>/')
@@ -114,6 +116,8 @@ class NewClient(Resource):
         #prevent requests to set clientid and send message back to api user
         elif data.get('clientid', None):
             raise IllegalSetting('clientid')
+        #set member since date to today
+        data['membersince'] = date.today().strftime("%Y-%m-%d")
    
         ci_schema = ClientInfoSchema()
         client = ci_schema.load(data)

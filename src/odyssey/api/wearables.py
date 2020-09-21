@@ -28,7 +28,7 @@ class WearablesEndpoint(Resource):
     @token_auth.login_required
     @responds(schema=WearablesSchema, status_code=200, api=ns)
     def get(self, clientid):
-        """ Wearable device information for client ``clientid`` in reponse to a GET request.
+        """ Wearable device information for client ``clientid`` in response to a GET request.
 
         This endpoint returns information on which wearables a client has. For
         each supported wearable device, two keys exist in the returned dictionary:
