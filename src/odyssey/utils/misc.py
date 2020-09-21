@@ -2,7 +2,9 @@
 
 import datetime
 import re
+import statistics
 import uuid
+
 import flask.json
 from odyssey.models.client import ClientInfo, RemoteRegistration, ClientFacilities
 from odyssey.models.misc import RegisteredFacilities
@@ -11,7 +13,18 @@ from odyssey.api.errors import UserNotFound, FacilityNotFound, RelationAlreadyEx
 
 _uuid_rx = re.compile(r'[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}', flags=re.IGNORECASE)
 
+def list_average(values_list):
+    """Helper function to clean list values before attempting to find the average"""
+    # remove empty items
+    values_list_ = [val for val in values_list if val is not None]
+    if len(values_list_)>0:
+        return statistics.mean(values_list_)
+    else:
+        return None
+
 def check_client_existence(clientid):
+    """Check that the client is in the database
+    All clients must be in the CLientInfo table before any other procedure"""
     client = ClientInfo.query.filter_by(clientid=clientid).one_or_none()
     if not client:
         raise UserNotFound(clientid)
