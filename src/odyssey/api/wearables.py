@@ -12,7 +12,8 @@ from odyssey.api.errors import (
     ContentNotFound,
     IllegalSetting,
     MethodNotAllowed,
-    UnknownError
+    UnknownError,
+    UserNotFound
 )
 from odyssey.models.wearables import (
     Wearables,
@@ -289,7 +290,7 @@ class WearablesFreeStyleActivateEndpoint(Resource):
     @accepts(schema=WearablesFreeStyleActivateSchema, api=ns)
     @responds(status_code=201, api=ns)
     def post(self, clientid):
-        """ Create new data block for client ``clientid`` in reponse to a POST request.
+        """ Start new data block for client ``clientid`` in reponse to a POST request.
 
         Data is stored in blocks, where every block represents a new FreeStyle sensor.
         Each sensor must be activated when applied to a client. Upon activation, this
@@ -315,9 +316,10 @@ class WearablesFreeStyleActivateEndpoint(Resource):
             cgm.glucose = []
             db.session.add(cgm)
 
-        cgm.activation_timestamp = request.parsed_obj.activation_timestamp
-        cgm.timestamps.append([request.parsed_obj.activation_timestamp])
-        cgm.glucose.append([-1.0])
+        ts = request.parsed_obj.activation_timestamp
+        cgm.activation_timestamp = ts
+        cgm.timestamps = cgm.timestamps + [[ts]]
+        cgm.glucose = cgm.glucose + [[-1.0]]
         db.session.commit()
 
 
@@ -339,7 +341,6 @@ class WearablesFreeStyleEndpoint(Resource):
         str
             JSON encoded dictionary
         """
-
         cgm = (
             WearablesFreeStyle.query
             .filter_by(clientid=clientid)
@@ -349,28 +350,19 @@ class WearablesFreeStyleEndpoint(Resource):
         if not cgm:
             raise ContentNotFound
 
-        cgm_schema = WearablesFreeStyleSchema()
-        return cgm_schema.dump(cgm)
+        return cgm
 
     @token_auth.login_required
     @accepts(schema=WearablesFreeStyleSchema, api=ns)
     @responds(status_code=201, api=ns)
-    def post(self, clientid):
-        """ Create new data block for client ``clientid`` in reponse to a POST request.
-
-        Data is stored in blocks, where every block represents a new FreeStyle sensor.
-        Each sensor must be activated when applied to a client. Upon activation, this
-        endpoint receives the activation timestamp and creates a new block of data.
+    def put(self, clientid):
+        """ Add data to current block for client ``clientid`` in reponse to a PUT request.
 
         Parameters
         ----------
         clientid : int
             Client ID number.
-
-        timestamp : str
-            ISO 8601 formatted datetime string.
         """
-
         cgm = (
             WearablesFreeStyle.query
             .filter_by(clientid=clientid)
@@ -378,10 +370,29 @@ class WearablesFreeStyleEndpoint(Resource):
         )
 
         if not cgm:
-            cgm = WearablesFreeStyle(clientid=clientid)
-            db.session.add(cgm)
+            msg =  f'FreeStyle Libre for client {clientid} has not yet been activated. '
+            msg += f'Please send a POST request to /wearables/freestyle/activate/ first.'
+            raise UnknownError(message=msg)
 
-        cgm.activation_timestamp = request.json['timestamp']
-        cgm.timestamps.append([])
-        cgm.glucose.append([])
+        ts = request.parsed_obj.activation_timestamp
+        if cgm.activation_timestamp != ts:
+            msg =  f'Activation timestamp "{ts}" does not match '
+            msg += f'current activation timestamp "{cgm.activation_timestamp}". '
+            msg += f'Please send a GET request to /wearables/freestyle/activate/ first.'
+            raise UnknownError(message=msg)
+
+        if cgm.glucose[-1][-1] == -1.0:
+            # First addition to a new block, override the signal values.
+            cgm.timestamps = cgm.timestamps[:-1] + request.parsed_obj.timestamps
+            cgm.glucose = cgm.glucose[:-1] + request.parsed_obj.glucose
+        else:
+            cgm.timestamps = (
+                cgm.timestamps[:-1]
+                + [
+                    cgm.timestamps[-1]
+                    + request.parsed_obj.timestamps[0]
+                ]
+            )
+            cgm.glucose = cgm.glucose[:-1] + [cgm.glucose[-1] + request.parsed_obj.glucose[0]]
+
         db.session.commit()
