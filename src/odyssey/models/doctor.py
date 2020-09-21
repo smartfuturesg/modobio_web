@@ -57,14 +57,6 @@ class MedicalImaging(db.Model):
 
     :type: str
     """
-
-    image_cpt_code = db.Column(db.String(1024))
-    """
-    CPT code of image, used to specify the type of image, part of the body
-    and what it is looking for.
-
-    :type: str, max length 1024
-    """
     
     image_path = db.Column(db.Text)
     """
