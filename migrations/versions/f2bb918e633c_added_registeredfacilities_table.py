@@ -1,7 +1,7 @@
 """Added RegisteredFacilities table
 
 Revision ID: f2bb918e633c
-Revises: cc90212de393
+Revises: 37c8b86974b1
 Create Date: 2020-09-16 09:28:50.928681
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'f2bb918e633c'
-down_revision = 'cc90212de393'
+down_revision = '37c8b86974b1'
 branch_labels = None
 depends_on = None
 
