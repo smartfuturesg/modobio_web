@@ -134,7 +134,7 @@ class Staff(db.Model):
         return staff_member
 
     def get_admin_role(self):
-        """check if this staff member is authorizewd to create new staff members"""
+        """check if this staff member is authorized to create new staff members"""
         if self.is_system_admin:
             return 'sys_admin'
         elif self.is_admin:

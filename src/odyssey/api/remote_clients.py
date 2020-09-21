@@ -1,12 +1,12 @@
 from datetime import datetime
 
 import boto3
-from flask import request, jsonify, current_app
+from flask import request, current_app
 from flask_accepts import accepts, responds
-from flask_restx import Resource, Api
+from flask_restx import Resource
 
 from odyssey.api import api
-from odyssey.api.auth import token_auth, token_auth_client
+from odyssey.api.auth import token_auth_client
 from odyssey.api.errors import ClientNotFound, ContentNotFound, IllegalSetting, UserNotFound
 from odyssey import db
 from odyssey.pdf import merge_pdfs, to_pdf
