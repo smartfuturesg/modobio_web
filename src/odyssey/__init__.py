@@ -10,6 +10,7 @@ from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
+from flask_whooshee import Whooshee
 
 from odyssey.config import Config
 
@@ -17,7 +18,7 @@ db = SQLAlchemy()
 migrate = Migrate()
 cors = CORS()
 ma = Marshmallow()
-
+whooshee = Whooshee()
 def create_app(flask_dev=None):
     """ Initialize an instance of the Flask app.
 
@@ -60,7 +61,7 @@ def create_app(flask_dev=None):
         odyssey.config
     """
     app = Flask(__name__)
-
+    
     app.config.from_object(Config(flask_dev=flask_dev))
     app.config['APPLICATION_ROOT'] = '/api'
 
@@ -68,6 +69,7 @@ def create_app(flask_dev=None):
     migrate.init_app(app, db)
     cors.init_app(app)
     ma.init_app(app)
+    whooshee.init_app(app)
 
     db.Model.update = _update
 

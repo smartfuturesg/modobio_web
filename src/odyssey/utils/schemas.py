@@ -5,7 +5,7 @@ import statistics
 from marshmallow import Schema, fields, post_load, ValidationError, validates, validate
 from marshmallow import post_load, post_dump, pre_dump, pre_load
 
-from odyssey import ma
+from odyssey import ma, whooshee
 from odyssey.models.doctor import ( 
     MedicalHistory,
     MedicalPhysicalExam,
@@ -16,6 +16,7 @@ from odyssey.models.doctor import (
     MedicalBloodChemistryA1C
 )
 from odyssey.models.client import (
+    GarbageClient,
     ClientConsent,
     ClientConsultContract,
     ClientExternalMR,
@@ -42,6 +43,24 @@ from odyssey.models.trainer import (
 )
 from odyssey.models.wearables import Wearables, WearablesOura
 
+@whooshee.register_whoosheer(GarbageClient)
+class GarbageClientSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = GarbageClient
+
+    id = fields.Integer(required=False)
+
+    @classmethod
+    def update_entry(cls, writer, garbageclient):
+        writer.update_document(id=garbageclient.id,
+                               firstname=garbageclient.firstname,
+                               lastname=garbageclient.lastname,
+                               email=garbageclient.email,
+                               phone=garbageclient.phone)
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return GarbageClient(**data)
 
 class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
