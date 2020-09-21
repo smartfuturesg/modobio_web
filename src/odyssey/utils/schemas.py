@@ -1,6 +1,5 @@
 from datetime import datetime
 from hashlib import md5
-import statistics
 
 from marshmallow import Schema, fields, post_load, ValidationError, validates, validate
 from marshmallow import post_load, post_dump, pre_dump, pre_load
@@ -25,9 +24,10 @@ from odyssey.models.client import (
     ClientRelease,
     ClientReleaseContacts,
     ClientSubscriptionContract,
+    ClientFacilities,
     RemoteRegistration
 )
-from odyssey.models.misc import MedicalInstitutions
+from odyssey.models.misc import MedicalInstitutions, RegisteredFacilities
 from odyssey.models.pt import Chessboard, PTHistory
 from odyssey.models.staff import Staff
 from odyssey.models.trainer import (
@@ -41,7 +41,17 @@ from odyssey.models.trainer import (
     LungAssessment
 )
 from odyssey.models.wearables import Wearables, WearablesOura, WearablesFreeStyle
+from odyssey.utils.misc import list_average
 
+class ClientFacilitiesSchema(Schema):
+
+    idx = fields.Integer()
+    client_id = fields.Integer()
+    facility_id = fields.Integer()
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return ClientFacilities(**data)
 
 class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -111,14 +121,6 @@ class ClientSummarySchema(Schema):
     def add_record_locator_id(self,data, **kwargs ):
         name_hash = md5(bytes((data['firstname']+data['lastname']), 'utf-8')).hexdigest()
         data['record_locator_id'] = (data['firstname'][0]+data['lastname'][0]+str(data['clientid'])+name_hash[0:6]).upper()
-
-        # data['_links']= {
-        #     'self': api.url_for(Clients, page=page, per_page=per_page),
-        #     'next': api.url_for(Clients, page=page + 1, per_page=per_page)
-        #     if resources.has_next else None,
-        #     'prev': api.url_for(Clients, page=page - 1, per_page=per_page)
-        #     if resources.has_prev else None,
-        # }
         return data
 
 
@@ -385,35 +387,35 @@ class ChessboardSchema(Schema):
 """
 
 class PowerAttemptsPushPull(Schema):
-    weight = fields.Integer(description="weight of exercise in PSI", validate=validate.Range(min=0, max=60))
-    attempt_1 = fields.Integer(description="", validate=validate.Range(min=0, max=4000))
-    attempt_2 = fields.Integer(description="", validate=validate.Range(min=0, max=4000))
-    attempt_3 = fields.Integer(description="",validate=validate.Range(min=0, max=4000))
-    average = fields.Float(description="",validate=validate.Range(min=0, max=4000))
+    weight = fields.Integer(description="weight of exercise in PSI", validate=validate.Range(min=0, max=60), missing=None)
+    attempt_1 = fields.Integer(description="", validate=validate.Range(min=0, max=4000), missing=None)
+    attempt_2 = fields.Integer(description="", validate=validate.Range(min=0, max=4000), missing=None)
+    attempt_3 = fields.Integer(description="",validate=validate.Range(min=0, max=4000), missing=None)
+    average = fields.Float(description="",validate=validate.Range(min=0, max=4000), missing=None)
 
 class PowerAttemptsLegPress(Schema):
-    weight = fields.Integer(description="weight of exercise in PSI", validate=validate.Range(min=0, max=1500))
-    attempt_1 = fields.Integer(description="", validate=validate.Range(min=0, max=9999))
-    attempt_2 = fields.Integer(description="", validate=validate.Range(min=0, max=9999))
-    attempt_3 = fields.Integer(description="",validate=validate.Range(min=0, max=9999))
-    average = fields.Float(description="",validate=validate.Range(min=0, max=9999))
+    weight = fields.Integer(description="weight of exercise in PSI", validate=validate.Range(min=0, max=1500),missing=None)
+    attempt_1 = fields.Integer(description="", validate=validate.Range(min=0, max=9999),missing=None)
+    attempt_2 = fields.Integer(description="", validate=validate.Range(min=0, max=9999),missing=None)
+    attempt_3 = fields.Integer(description="",validate=validate.Range(min=0, max=9999),missing=None)
+    average = fields.Float(description="",validate=validate.Range(min=0, max=9999),missing=None)
 
 class PowerPushPull(Schema):
-    left = fields.Nested(PowerAttemptsPushPull)
-    right = fields.Nested(PowerAttemptsPushPull)
+    left = fields.Nested(PowerAttemptsPushPull, missing=PowerAttemptsPushPull().load({}))
+    right = fields.Nested(PowerAttemptsPushPull, missing=PowerAttemptsPushPull().load({}))
 
 class PowerLegPress(Schema):
-    left = fields.Nested(PowerAttemptsLegPress)
-    right = fields.Nested(PowerAttemptsLegPress)
-    bilateral = fields.Nested(PowerAttemptsLegPress)
+    left = fields.Nested(PowerAttemptsLegPress, missing=PowerAttemptsLegPress().load({}))
+    right = fields.Nested(PowerAttemptsLegPress, missing=PowerAttemptsLegPress().load({}))
+    bilateral = fields.Nested(PowerAttemptsLegPress, missing=PowerAttemptsLegPress().load({}))
 
 class PowerAssessmentSchema(Schema):
     clientid = fields.Integer(missing=0)
     timestamp = fields.DateTime()
-    push_pull = fields.Nested(PowerPushPull)
-    leg_press = fields.Nested(PowerLegPress)
-    upper_watts_per_kg = fields.Float(description = "watts per kg upper body", validate=validate.Range(min=0, max=100))
-    lower_watts_per_kg = fields.Float(description = "watts per kg upper body", validate=validate.Range(min=0, max=250))
+    push_pull = fields.Nested(PowerPushPull, missing=PowerPushPull().load({}))
+    leg_press = fields.Nested(PowerLegPress, missing=PowerLegPress().load({}))
+    upper_watts_per_kg = fields.Float(description = "watts per kg upper body", validate=validate.Range(min=0, max=100), missing=None)
+    lower_watts_per_kg = fields.Float(description = "watts per kg upper body", validate=validate.Range(min=0, max=250), missing=None)
     vital_weight = fields.Float(description="weight pulled from doctor physical data", dump_only=True)
 
     @post_load
@@ -456,7 +458,7 @@ class PowerAssessmentSchema(Schema):
                                          'attempt_1': data.keiser_upper_l_attempt_1,
                                          'attempt_2': data.keiser_upper_l_attempt_2,
                                          'attempt_3': data.keiser_upper_l_attempt_3,
-                                         'average':   statistics.mean([data.keiser_upper_l_attempt_1,
+                                         'average':   list_average([data.keiser_upper_l_attempt_1,
                                                                        data.keiser_upper_l_attempt_2,
                                                                        data.keiser_upper_l_attempt_3
                                                                     ])
@@ -465,7 +467,7 @@ class PowerAssessmentSchema(Schema):
                                          'attempt_1': data.keiser_upper_r_attempt_1,
                                          'attempt_2': data.keiser_upper_r_attempt_2,
                                          'attempt_3': data.keiser_upper_r_attempt_3,
-                                         'average':   statistics.mean([data.keiser_upper_r_attempt_1,
+                                         'average':   list_average([data.keiser_upper_r_attempt_1,
                                                                        data.keiser_upper_r_attempt_2,
                                                                        data.keiser_upper_r_attempt_3
                                                                     ])
@@ -475,7 +477,7 @@ class PowerAssessmentSchema(Schema):
                                              'attempt_1': data.keiser_lower_r_attempt_1,
                                              'attempt_2': data.keiser_lower_r_attempt_2,
                                              'attempt_3': data.keiser_lower_r_attempt_3,
-                                             'average':   statistics.mean([data.keiser_lower_r_attempt_1,
+                                             'average':   list_average([data.keiser_lower_r_attempt_1,
                                                                            data.keiser_lower_r_attempt_2,
                                                                            data.keiser_lower_r_attempt_3
                                                                         ])
@@ -484,7 +486,7 @@ class PowerAssessmentSchema(Schema):
                                              'attempt_1': data.keiser_lower_l_attempt_1,
                                              'attempt_2': data.keiser_lower_l_attempt_2,
                                              'attempt_3': data.keiser_lower_l_attempt_3,
-                                             'average':   statistics.mean([data.keiser_lower_l_attempt_1,
+                                             'average':   list_average([data.keiser_lower_l_attempt_1,
                                                                            data.keiser_lower_l_attempt_2,
                                                                            data.keiser_lower_l_attempt_3
                                                                         ])
@@ -493,7 +495,7 @@ class PowerAssessmentSchema(Schema):
                                              'attempt_1': data.keiser_lower_bi_attempt_1,
                                              'attempt_2': data.keiser_lower_bi_attempt_2,
                                              'attempt_3': data.keiser_lower_bi_attempt_3,
-                                             'average':   statistics.mean([data.keiser_lower_bi_attempt_1,
+                                             'average':   list_average([data.keiser_lower_bi_attempt_1,
                                                                            data.keiser_lower_bi_attempt_2,
                                                                            data.keiser_lower_bi_attempt_3
                                                                         ])
@@ -503,28 +505,31 @@ class PowerAssessmentSchema(Schema):
                  }
         # add client's vital_weight from most recent physical exam
         recent_physical = MedicalPhysicalExam.query.filter_by(clientid=data.clientid).order_by(MedicalPhysicalExam.idx.desc()).first()
-        nested["vital_weight"] = recent_physical.vital_weight
+        if not recent_physical:
+            nested["vital_weight"] = None
+        else:    
+            nested["vital_weight"] = recent_physical.vital_weight
         return nested
 
 
 class StrengthAttemptsPushPull(Schema):
-    weight = fields.Integer(description="weight of exercise in PSI", validate=validate.Range(min=0, max=350))
-    attempt_1 = fields.Integer(description="", validate=validate.Range(min=0, max=50))
-    attempt_2 = fields.Integer(description="", validate=validate.Range(min=0, max=50))
-    attempt_3 = fields.Integer(description="",validate=validate.Range(min=0, max=50))
-    estimated_10rm = fields.Float(description="",validate=validate.Range(min=0, max=350))
+    weight = fields.Integer(description="weight of exercise in PSI", validate=validate.Range(min=0, max=350), missing=None)
+    attempt_1 = fields.Integer(description="", validate=validate.Range(min=0, max=50), missing=None)
+    attempt_2 = fields.Integer(description="", validate=validate.Range(min=0, max=50), missing=None)
+    attempt_3 = fields.Integer(description="",validate=validate.Range(min=0, max=50), missing=None)
+    estimated_10rm = fields.Float(description="",validate=validate.Range(min=0, max=350), missing=None)
 
 class StrengthPushPull(Schema):
-    notes = fields.String()
-    left = fields.Nested(StrengthAttemptsPushPull)
-    right = fields.Nested(StrengthAttemptsPushPull)
-    bilateral = fields.Nested(StrengthAttemptsPushPull)
+    notes = fields.String(missing=None)
+    left = fields.Nested(StrengthAttemptsPushPull, missing=StrengthAttemptsPushPull().load({}))
+    right = fields.Nested(StrengthAttemptsPushPull, missing=StrengthAttemptsPushPull().load({}))
+    bilateral = fields.Nested(StrengthAttemptsPushPull, missing=StrengthAttemptsPushPull().load({}))
 
 class StrenghtAssessmentSchema(Schema):
     clientid = fields.Integer(missing=0)
     timestamp = fields.DateTime()
-    upper_push = fields.Nested(StrengthPushPull)
-    upper_pull = fields.Nested(StrengthPushPull)
+    upper_push = fields.Nested(StrengthPushPull, missing=StrengthPushPull().load({}))
+    upper_pull = fields.Nested(StrengthPushPull, missing=StrengthPushPull().load({}))
 
     @post_load
     def unravel(self, data, **kwargs):
@@ -622,11 +627,11 @@ class StrenghtAssessmentSchema(Schema):
 
 
 class SquatTestSchema(Schema):
-    depth = fields.String()
-    ramp = fields.String()
-    eye_test = fields.Boolean()
-    can_breathe = fields.Boolean()
-    can_look_up = fields.Boolean()
+    depth = fields.String(missing=None)
+    ramp = fields.String(missing=None)
+    eye_test = fields.Boolean(missing=None)
+    can_breathe = fields.Boolean(missing=None)
+    can_look_up = fields.Boolean(missing=None)
 
 class ToeTouchTestSchema(Schema):
     pelvis_movement_test_options = ['Right Hip High','Right Hip Back','Left Hip High',
@@ -634,42 +639,42 @@ class ToeTouchTestSchema(Schema):
 
     ribcage_movement_test_options = ['Right Posterior Ribcage High','Right Posterior Ribcage Back',	
                                 'Left Posterior Ribcage High', 'Left Posterior Ribcage Back', 'Even Bilaterally']
-    depth = fields.String()
+    depth = fields.String(missing=None)
     pelvis_movement = fields.List(fields.String,
                 description=f"Descriptors for this assessment must be in the following picklist: {pelvis_movement_test_options}",
-                required=True) 
+                missing=[None]) 
     ribcage_movement = fields.List(fields.String,
                 description=f"Descriptors for this assessment must be in the following picklist: {ribcage_movement_test_options}",
-                required=True)
+                missing=[None])
 
-    notes = fields.String()
+    notes = fields.String(missing=None)
     
     @validates('ribcage_movement')
     def valid_ribcage_movement(self,value):
         for option in value:
-            if option not in self.ribcage_movement_test_options:
+            if option not in self.ribcage_movement_test_options and option != None:
                 raise ValidationError(f'{option} is not a valid movement descriptor. Use one of the following {self.ribcage_movement_test_options}')
             
     @validates('pelvis_movement')
     def valid_pelvis_movement(self,value):
         for option in value:
-            if option not in self.pelvis_movement_test_options:
+            if option not in self.pelvis_movement_test_options and option != None:
                 raise ValidationError(f'{option} is not a valid movement descriptor. Use one of the following {self.pelvis_movement_test_options}')
             
 
 class StandingRotationNotesSchema(Schema):
-    notes = fields.String()
+    notes = fields.String(missing=None)
 
 class StandingRotationSchema(Schema):
-    right = fields.Nested(StandingRotationNotesSchema)
-    left = fields.Nested(StandingRotationNotesSchema)
+    right = fields.Nested(StandingRotationNotesSchema, missing=StandingRotationNotesSchema().load({}))
+    left = fields.Nested(StandingRotationNotesSchema, missing=StandingRotationNotesSchema().load({}))
 
 class MovementAssessmentSchema(Schema):
     clientid = fields.Integer(missing=0)
     timestamp = fields.DateTime()
-    squat = fields.Nested(SquatTestSchema)
-    toe_touch = fields.Nested(ToeTouchTestSchema)
-    standing_rotation = fields.Nested(StandingRotationSchema)
+    squat = fields.Nested(SquatTestSchema,missing=SquatTestSchema().load({}))
+    toe_touch = fields.Nested(ToeTouchTestSchema, missing=ToeTouchTestSchema().load({}))
+    standing_rotation = fields.Nested(StandingRotationSchema, missing=StandingRotationSchema().load({}))
 
     @post_load
     def unravel(self, data, **kwargs):
@@ -735,12 +740,11 @@ class HeartAssessmentSchema(ma.SQLAlchemyAutoSchema):
         """Add vital_heartrate from most recent medial physical"""
         data_dict = data.__dict__
         recent_physical = MedicalPhysicalExam.query.filter_by(clientid=data.clientid).order_by(MedicalPhysicalExam.idx.desc()).first()
-        data_dict["vital_heartrate"] = recent_physical.vital_heartrate
+        if not recent_physical:
+            data_dict["vital_heartrate"] = None
+        else:    
+            data_dict["vital_heartrate"] = recent_physical.vital_heartrate
         return data_dict
-
-        
-
-
 
 class MoxyAssessmentSchema(ma.SQLAlchemySchema):
     class Meta:
@@ -751,38 +755,38 @@ class MoxyAssessmentSchema(ma.SQLAlchemySchema):
 
     clientid = fields.Integer(missing=0)
     timestamp = ma.auto_field()
-    notes = ma.auto_field()
-    vl_side = fields.String(description="vl_side must be either 'right' or 'left'")
-    performance_baseline = fields.Integer(description="", validate=validate.Range(min=0, max=100))
-    recovery_baseline = fields.Integer(description="", validate=validate.Range(min=0, max=100))
-    gas_tank_size = fields.Integer(description="", validate=validate.Range(min=0, max=100))
-    starting_sm_o2 = fields.Integer(description="", validate=validate.Range(min=0, max=100))
-    starting_thb = fields.Integer(description="", validate=validate.Range(min=9, max=18))
-    limiter = fields.String(description=f"must be one of: {limiter_list}")
-    intervention = ma.auto_field()
-    performance_metric_1 = fields.String(description=f"must be one of: {performance_metric_list}")
-    performance_metric_2 = fields.String(description=f"must be one of: {performance_metric_list}")
-    performance_metric_1_value = fields.Integer(description="value in regards to chosen performance metric", validate=validate.Range(min=0, max=1500))
-    performance_metric_2_value = fields.Integer(description="value in regards to chosen performance metric", validate=validate.Range(min=0, max=1500))
+    notes = ma.auto_field(missing=None)
+    vl_side = fields.String(description="vl_side must be either 'right' or 'left'", missing=None)
+    performance_baseline = fields.Integer(description="", validate=validate.Range(min=0, max=100), missing=None)
+    recovery_baseline = fields.Integer(description="", validate=validate.Range(min=0, max=100), missing=None)
+    gas_tank_size = fields.Integer(description="", validate=validate.Range(min=0, max=100), missing=None)
+    starting_sm_o2 = fields.Integer(description="", validate=validate.Range(min=0, max=100), missing=None)
+    starting_thb = fields.Integer(description="", validate=validate.Range(min=9, max=18), missing=None)
+    limiter = fields.String(description=f"must be one of: {limiter_list}", missing=None)
+    intervention = ma.auto_field(missing=None)
+    performance_metric_1 = fields.String(description=f"must be one of: {performance_metric_list}", missing=None)
+    performance_metric_2 = fields.String(description=f"must be one of: {performance_metric_list}", missing=None)
+    performance_metric_1_value = fields.Integer(description="value in regards to chosen performance metric", validate=validate.Range(min=0, max=1500), missing=None)
+    performance_metric_2_value = fields.Integer(description="value in regards to chosen performance metric", validate=validate.Range(min=0, max=1500), missing=None)
 
     @validates('vl_side')
     def validate_vl_side(self,value):
-        if value not in ["right", "left"]:
+        if value not in ["right", "left"] and value != None:
             raise ValidationError(f"{value} not a valid option. must be 'right' or 'left'")
     
     @validates('limiter')
     def limiter_picklist(self,value):
-        if not value in self.limiter_list:
+        if not value in self.limiter_list and value != None:
             raise ValidationError(f'limiter entry invalid. Please use one of the following: {self.limiter_list}')
 
     @validates('performance_metric_1')
     def performance_metric_1_picklist(self,value):
-        if not value in self.performance_metric_list:
+        if not value in self.performance_metric_list and value != None:
             raise ValidationError(f'performance_metric_1 entry invalid. Please use one of the following: {self.performance_metric_list}')
 
     @validates('performance_metric_2')
     def performance_metric_2_picklist(self,value):
-        if not value in self.performance_metric_list:
+        if not value in self.performance_metric_list and value != None:
             raise ValidationError(f'performance_metric_2 entry invalid. Please use one of the following: {self.performance_metric_list}')
 
     @post_load
@@ -795,13 +799,13 @@ class LungAssessmentSchema(ma.SQLAlchemySchema):
         
     clientid = fields.Integer(missing=0)
     timestamp = ma.auto_field()
-    notes = ma.auto_field()
-    vital_weight = fields.Float(description="weight pulled from doctor physical data", dump_only=True)
-    bag_size = fields.Float(description="in liters", validate=validate.Range(min=0, max=10))
-    duration = fields.Integer(description="in seconds", validate=validate.Range(min=0, max=300))
-    breaths_per_minute = fields.Integer(description="", validate=validate.Range(min=0, max=100))
-    max_minute_volume = fields.Float(description="", validate=validate.Range(min=0, max=500))
-    liters_min_kg = fields.Float(description="liters per minute per kg", validate=validate.Range(min=0, max=100))
+    notes = ma.auto_field(missing=None)
+    vital_weight = fields.Float(description="weight pulled from doctor physical data", dump_only=True, missing=None)
+    bag_size = fields.Float(description="in liters", validate=validate.Range(min=0, max=10), missing=None)
+    duration = fields.Integer(description="in seconds", validate=validate.Range(min=0, max=300), missing=None)
+    breaths_per_minute = fields.Integer(description="", validate=validate.Range(min=0, max=100), missing=None)
+    max_minute_volume = fields.Float(description="", validate=validate.Range(min=0, max=500), missing=None)
+    liters_min_kg = fields.Float(description="liters per minute per kg", validate=validate.Range(min=0, max=100), missing=None)
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -812,55 +816,58 @@ class LungAssessmentSchema(ma.SQLAlchemySchema):
         "add vital weight to the dump"
         data_dict = data.__dict__
         recent_physical = MedicalPhysicalExam.query.filter_by(clientid=data.clientid).order_by(MedicalPhysicalExam.idx.desc()).first()
-        data_dict["vital_weight"] = recent_physical.vital_weight
+        if not recent_physical:
+            data_dict["vital_weight"] = None
+        else:    
+            data_dict["vital_weight"] = recent_physical.vital_weight
         return data_dict
     
 
 class MoxyRipExaminationSchema(Schema):
 
-    smo2 = fields.Integer(description="", validate=validate.Range(min=0, max=100))
-    thb = fields.Integer(description="", validate=validate.Range(min=9, max=18))
-    avg_power = fields.Integer(description="", validate=validate.Range(min=0, max=1500))
-    hr_max_min = fields.Integer(description="", validate=validate.Range(min=0, max=220))
+    smo2 = fields.Integer(description="", validate=validate.Range(min=0, max=100), missing=None)
+    thb = fields.Integer(description="", validate=validate.Range(min=9, max=18), missing=None)
+    avg_power = fields.Integer(description="", validate=validate.Range(min=0, max=1500), missing=None)
+    hr_max_min = fields.Integer(description="", validate=validate.Range(min=0, max=220), missing=None)
 
 class MoxyTries(Schema):
-    one = fields.Nested(MoxyRipExaminationSchema)
-    two = fields.Nested(MoxyRipExaminationSchema)
-    three = fields.Nested(MoxyRipExaminationSchema)
-    four = fields.Nested(MoxyRipExaminationSchema)
+    one = fields.Nested(MoxyRipExaminationSchema, missing = MoxyRipExaminationSchema().load({}))
+    two = fields.Nested(MoxyRipExaminationSchema, missing = MoxyRipExaminationSchema().load({}))
+    three = fields.Nested(MoxyRipExaminationSchema, missing = MoxyRipExaminationSchema().load({}))
+    four = fields.Nested(MoxyRipExaminationSchema, missing = MoxyRipExaminationSchema().load({}))
 
 class MoxyRipSchema(Schema):
     limiter_options = ['Demand','Supply','Respiratory']
 
     clientid = fields.Integer(missing=0)
     timestamp = fields.DateTime()
-    vl_side = fields.String(description="vl_side must be either 'right' or 'left'")
-    performance = fields.Nested(MoxyTries)
-    recovery = fields.Nested(MoxyTries)
-    smo2_tank_size = fields.Integer(description="", validate=validate.Range(min=0, max=100))
-    thb_tank_size = fields.Integer(description="", validate=validate.Range(min=9, max=18))
-    performance_baseline_smo2 = fields.Integer(description="", validate=validate.Range(min=0, max=100))
-    performance_baseline_thb = fields.Integer(description="", validate=validate.Range(min=9, max=18))
-    recovery_baseline_smo2 = fields.Integer(description="", validate=validate.Range(min=0, max=100))
-    recovery_baseline_thb = fields.Integer(description="", validate=validate.Range(min=9, max=18))
-    avg_watt_kg = fields.Float(description="", validate=validate.Range(min=0, max=20))
-    avg_interval_time = fields.Integer(description="seconds", validate=validate.Range(min=0, max=360))
-    avg_recovery_time = fields.Integer(description="seconds", validate=validate.Range(min=0, max=360))
+    vl_side = fields.String(description="vl_side must be either 'right' or 'left'", missing=None)
+    performance = fields.Nested(MoxyTries, missing=MoxyTries().load({}))
+    recovery = fields.Nested(MoxyTries, missing=MoxyTries().load({}))
+    smo2_tank_size = fields.Integer(description="", validate=validate.Range(min=0, max=100), missing=None)
+    thb_tank_size = fields.Integer(description="", validate=validate.Range(min=9, max=18), missing=None)
+    performance_baseline_smo2 = fields.Integer(description="", validate=validate.Range(min=0, max=100), missing=None)
+    performance_baseline_thb = fields.Integer(description="", validate=validate.Range(min=9, max=18), missing=None)
+    recovery_baseline_smo2 = fields.Integer(description="", validate=validate.Range(min=0, max=100), missing=None)
+    recovery_baseline_thb = fields.Integer(description="", validate=validate.Range(min=9, max=18), missing=None)
+    avg_watt_kg = fields.Float(description="", validate=validate.Range(min=0, max=20), missing=None)
+    avg_interval_time = fields.Integer(description="seconds", validate=validate.Range(min=0, max=360), missing=None)
+    avg_recovery_time = fields.Integer(description="seconds", validate=validate.Range(min=0, max=360), missing=None)
 
-    limiter = fields.String(description=f"must be one of the following choices: {limiter_options}")
+    limiter = fields.String(description=f"must be one of the following choices: {limiter_options}", missing=None)
 
-    intervention = fields.String()
-    vital_weight = fields.Float(description="weight pulled from doctor physical data", dump_only=True)
+    intervention = fields.String(missing=None)
+    vital_weight = fields.Float(description="weight pulled from doctor physical data", dump_only=True, missing=None)
 
 
     @validates('vl_side')
     def validate_vl_side(self,value):
-        if value not in ["right", "left"]:
+        if value not in ["right", "left"] and value!= None:
             raise ValidationError(f"{value} not a valid option. must be 'right' or 'left'")
 
     @validates('limiter')
     def valid_limiter(self,value):
-        if value not in self.limiter_options:
+        if value not in self.limiter_options and value != None:
             raise ValidationError(f'{value} is not a valid limiter option. Use one of the following {self.limiter_options}')
 
     @post_load
@@ -986,7 +993,10 @@ class MoxyRipSchema(Schema):
         }
         # add vital_weight from client's most recent physical examination
         recent_physical = MedicalPhysicalExam.query.filter_by(clientid=data.clientid).order_by(MedicalPhysicalExam.idx.desc()).first()
-        nested["vital_weight"] = recent_physical.vital_weight
+        if not recent_physical:
+            nested["vital_weight"] = None
+        else:    
+            nested["vital_weight"] = recent_physical.vital_weight
         return nested
 
 
@@ -1010,24 +1020,24 @@ class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
 
     stress_sources = fields.List(fields.String,
             description=f"List of sources of stress. Options: {stressors_list}",
-            required=True) 
+            missing=[None]) 
     lifestyle_goals = fields.List(fields.String,
             description=f"List of lifestyle change goals. Limit of three from these options: {lifestyle_goals_list}. If other, must specify",
-            required=True) 
+            missing=[None]) 
     physical_goals = fields.List(fields.String,
             description=f"List of sources of stress. Limit of three from these options: {physical_goals_list}. If other, must specify",
-            required=True) 
-    trainer_expectation = fields.String(description=f"Client's expectation for their trainer. Must be one of: {trainer_goals_list}")
-    sleep_hours = fields.String(description=f"nightly hours of sleep bucketized by the following options: {sleep_hours_options_list}")
+            missing=[None]) 
+    trainer_expectation = fields.String(description=f"Client's expectation for their trainer. Must be one of: {trainer_goals_list}", missing=None)
+    sleep_hours = fields.String(description=f"nightly hours of sleep bucketized by the following options: {sleep_hours_options_list}", missing=None)
 
-    sleep_quality_level = fields.Integer(description="current sleep quality rating 1-5", validate=validate.Range(min=1, max=5))
-    stress_level = fields.Integer(description="current stress rating 1-5", validate=validate.Range(min=1, max=5))
-    energy_level = fields.Integer(description="current energy rating 1-5", validate=validate.Range(min=1, max=5))
-    libido_level = fields.Integer(description="current libido rating 1-5", validate=validate.Range(min=1, max=5))
-    confidence_level = fields.Integer(description="current confidence rating 1-5", validate=validate.Range(min=1, max=5))
+    sleep_quality_level = fields.Integer(description="current sleep quality rating 1-5", validate=validate.Range(min=1, max=5), missing=None)
+    stress_level = fields.Integer(description="current stress rating 1-5", validate=validate.Range(min=1, max=5), missing=None)
+    energy_level = fields.Integer(description="current energy rating 1-5", validate=validate.Range(min=1, max=5), missing=None)
+    libido_level = fields.Integer(description="current libido rating 1-5", validate=validate.Range(min=1, max=5), missing=None)
+    confidence_level = fields.Integer(description="current confidence rating 1-5", validate=validate.Range(min=1, max=5), missing=None)
 
-    current_fitness_level = fields.Integer(description="current fitness level 1-10", validate=validate.Range(min=1, max=10))
-    goal_fitness_level = fields.Integer(description="foal fitness level 1-10", validate=validate.Range(min=1, max=10))
+    current_fitness_level = fields.Integer(description="current fitness level 1-10", validate=validate.Range(min=1, max=10), missing=None)
+    goal_fitness_level = fields.Integer(description="foal fitness level 1-10", validate=validate.Range(min=1, max=10), missing=None)
     
     
     @post_load
@@ -1037,13 +1047,13 @@ class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
     @validates('stress_sources')
     def validate_stress_sources(self,value):
         for item in value:
-            if item not in self.stressors_list:
+            if item not in self.stressors_list and item != None:
                 raise ValidationError(f"{item} not a valid option. must be in {self.stressors_list}")
 
     @validates('lifestyle_goals')
     def validate_lifestyle_goals(self,value):
         for item in value:
-            if item not in self.lifestyle_goals_list:
+            if item not in self.lifestyle_goals_list and item != None:
                 raise ValidationError(f"{item} not a valid option. must be in {self.lifestyle_goals_list}")
         if len(value) > 3:
             ValidationError("limit list length to 3 choices")
@@ -1052,19 +1062,19 @@ class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
     @validates('physical_goals')
     def validate_physical_goals(self,value):
         for item in value:
-            if item not in self.physical_goals_list:
+            if item not in self.physical_goals_list and item != None:
                 raise ValidationError(f"{item} not a valid option. must be in {self.physical_goals_list}")
         if len(value) > 3:
             ValidationError("limit list length to 3 choices")
     
     @validates('trainer_expectation')
     def validate_trainer_expectations(self, value):
-        if value not in self.trainer_goals_list:
+        if value not in self.trainer_goals_list and value != None:
             raise ValidationError(f"{value} not a valid option. Must be one of {self.trainer_goals_list}")
 
     @validates('sleep_hours')
     def validate_sleep_hours(self, value):
-        if value not in self.sleep_hours_options_list:
+        if value not in self.sleep_hours_options_list and value != None:
             raise ValidationError(f"{value} not a valid option. Must be one of {self.sleep_hours_options_list}")
 
 
@@ -1237,7 +1247,7 @@ class MedicalBloodChemistryLipidsSchema(Schema):
     clientid = fields.Integer(required=False,missing=0)
     exam_date = fields.Date(required=True)
     cholesterol_total = fields.Float(required=False,validate=validate.Range(min=0.0, max=500.0))
-    cholesterol_ldl = fields.Float(required=False,validate=validate.Range(min=0.0, max=50.0))
+    cholesterol_ldl = fields.Float(required=False,validate=validate.Range(min=0.0, max=500.0))
     cholesterol_hdl = fields.Float(required=False,validate=validate.Range(min=0.0, max=500.0))
     triglycerides = fields.Float(required=False,validate=validate.Range(min=0.0, max=1000.0))
     cholesterol_over_hdl = fields.Float(required=False)
@@ -1268,6 +1278,16 @@ class MedicalBloodChemistryThyroidSchema(Schema):
     @post_load
     def make_object(self, data, **kwargs):
         return MedicalBloodChemistryThyroid(**data)
+
+class RegisteredFacilitiesSchema(Schema):
+    facility_id = fields.Integer(required=False, missing=0)
+    facility_name = fields.String(required=True)
+    facility_address = fields.String(required=True)
+    modobio_facility = fields.Boolean(required=True)
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return RegisteredFacilities(**data)
 
 class MedicalBloodChemistryA1CSchema(Schema):
 
