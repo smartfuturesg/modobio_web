@@ -641,3 +641,13 @@ test_blood_chemistry_cmp = {
     "albumin": 19,
     "globulin": 20
 }
+
+test_registered_facilities = {
+  "facility_name": "Test Facility",
+  "facility_address": "123 Test Address, Scottsdale, AZ 85255",
+  "modobio_facility": True
+}
+
+test_client_facilities = {
+  "facility_id": 1
+}

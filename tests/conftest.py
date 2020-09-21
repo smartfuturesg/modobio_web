@@ -25,7 +25,7 @@ from .data import (
     test_client_individual_data
 )
 
-from odyssey.utils.schemas import ClientInfoSchema
+# from odyssey.utils.schemas import ClientInfoSchema
 
 def clean_db(db):
     for table in reversed(db.metadata.sorted_tables):
@@ -48,7 +48,7 @@ def new_client():
 @pytest.fixture(scope='module')
 def test_client():
     """flask application instance (client)"""
-    app = create_app(flask_dev='test')
+    app = create_app()
     db.init_app(app)
     testing_client = app.test_client()
     
@@ -65,9 +65,8 @@ def init_database():
     clean_db(db)
     # Create the database and the database table
     db.create_all()
-    ci_schema = ClientInfoSchema()
+    client_1 = ClientInfo(**test_client_info)
     # Insert test client data
-    client_1 = ci_schema.load(test_client_info)
     db.session.add(client_1)
     db.session.commit()
 

@@ -18,18 +18,17 @@ db = SQLAlchemy()
 migrate = Migrate()
 cors = CORS()
 ma = Marshmallow()
+<<<<<<< HEAD
 whooshee = Whooshee()
 def create_app(flask_dev=None):
+=======
+
+def create_app():
+>>>>>>> 7bbe713294afcaa70295f9af3ccf8fb2eb3dd765
     """ Initialize an instance of the Flask app.
 
         This function is an 'app factory'. It creates an instance of :class:`flask.Flask`.
         It is the main function to call to get the program started.
-
-        Parameters
-        ----------
-        flask_dev : str
-            Sets the development environment, which determines a range of configuration
-            options that will be used. See :mod:`odyssey.config` for more information.
 
         Returns
         -------
@@ -42,27 +41,22 @@ def create_app(flask_dev=None):
         .. code-block:: shell
 
             $ export FLASK_ENV=development
-            $ export FLASK_APP=odyssey:create_app("local")
+            $ export FLASK_DEV=local
+            $ export FLASK_APP=odyssey:create_app()
             $ flask run
-
-        Running as a uWSGI program:
-
-        .. code-block:: ini
-
-            [uwsgi]
-            plugins = python
-            pythonpath = <path-to-installation>
-            wsgi-file = <path-to-installation>/odyssey/__init__.py
-            callable = create_app(flask_dev='local')
-            env = FLASK_ENV=development
 
         See Also
         --------
-        odyssey.config
+        odyssey.config and odyssey.defaults
     """
     app = Flask(__name__)
+<<<<<<< HEAD
     
     app.config.from_object(Config(flask_dev=flask_dev))
+=======
+
+    app.config.from_object(Config())
+>>>>>>> 7bbe713294afcaa70295f9af3ccf8fb2eb3dd765
     app.config['APPLICATION_ROOT'] = '/api'
 
     db.init_app(app)
@@ -79,6 +73,11 @@ def create_app(flask_dev=None):
 
     from odyssey.api.errors import register_handlers
     register_handlers(app)
+
+    # Unprotected route, only relevant to developers
+    if app.config['LOCAL_CONFIG']:
+        from odyssey.api.postman import bp
+        app.register_blueprint(bp, url_prefix='/postman')
 
     return app
 
