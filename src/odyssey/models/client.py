@@ -236,7 +236,7 @@ class ClientInfo(db.Model):
         return data, resources
 
 class ClientFacilities(db.Model):
-    """ A mapping of client ids to registered facilitiy ids
+    """ A mapping of client ids to registered facility ids
     """
 
     __tablename__ = 'ClientFacilities'
