@@ -319,7 +319,7 @@ class ChessboardSchema(Schema):
 
     @post_load
     def unravel(self, data, **kwargs):
-        """takes a nested dictionary (json input) and flattens it out 
+        """takes a nested dictionary (json input) and flattens it out
             in order to shape into the Chessboard table
         """
         flat_data = {'clientid': data['clientid'],
