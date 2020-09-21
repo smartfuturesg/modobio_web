@@ -66,6 +66,25 @@ class UnknownError(Exception):
             self.message = 'Unknown error occured'
         self.status_code = 400
 
+class InputError(Exception):
+    """ Exception raised for errors with the input.
+
+        Attributes:
+        expression -- input expression in which the error occurred
+        status_code -- Common status code for specific error
+        message -- explanation of the error
+    """
+    def __init__(self, status_code, message):
+        super().__init__()
+        if message:
+            self.message = message
+        else:
+            self.message = 'Input error'
+        
+        if status_code:
+            self.status_code = status_code
+        else:
+            self.status_code = 400
 
 class ContentNotFoundReturnData(Exception):
     """Special case for when a resource has not yet been created but the client must see other data to proceed"""
@@ -181,6 +200,11 @@ def error_client_denied_access(error):
 @api.errorhandler(UnknownError)
 def error_unknown(error):
     """Return a custom message and 400 status code"""
+    return error_response(error.status_code, error.message)
+
+@api.errorhandler(InputError)
+def error_input(error):
+    """Return a custom message and status code"""
     return error_response(error.status_code, error.message)
 
 @api.errorhandler(IllegalSetting)

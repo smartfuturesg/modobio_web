@@ -1,8 +1,8 @@
-"""Adds medical imaging table
+"""Adding MedicalImaging table
 
-Revision ID: 1b1b8ce62d1f
+Revision ID: 0b45fd08fcfa
 Revises: d306fec9e8f2
-Create Date: 2020-09-11 09:32:52.638980
+Create Date: 2020-09-17 14:47:49.306802
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '1b1b8ce62d1f'
+revision = '0b45fd08fcfa'
 down_revision = 'd306fec9e8f2'
 branch_labels = None
 depends_on = None
@@ -22,13 +22,13 @@ def upgrade():
     sa.Column('idx', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('clientid', sa.Integer(), nullable=False),
     sa.Column('image_name', sa.String(length=1024), nullable=True),
-    sa.Column('image_date', sa.Date(), nullable=True),
+    sa.Column('image_date', sa.DateTime(), nullable=True),
     sa.Column('image_type', sa.String(length=1024), nullable=True),
     sa.Column('image_read', sa.Text(), nullable=True),
-    sa.Column('medical_imaging_clinic_info', sa.Text(), nullable=True),
+    sa.Column('image_origin_location', sa.Text(), nullable=True),
     sa.Column('image_cpt_code', sa.String(length=1024), nullable=True),
-    sa.Column('image', sa.Text(), nullable=True),
-    sa.ForeignKeyConstraint(['clientid'], ['ClientInfo.clientid'], name='MedicalImaging_clientid_fkey', ondelete='CASCADE'),
+    sa.Column('image_path', sa.Text(), nullable=True),
+    sa.ForeignKeyConstraint(['clientid'], ['ClientInfo.clientid'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('idx')
     )
     # ### end Alembic commands ###

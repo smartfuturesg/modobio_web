@@ -19,7 +19,7 @@ class MedicalImaging(db.Model):
 
     :type: int, primary key, autoincrement
     """
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid', name='MedicalImaging_clientid_fkey', ondelete="CASCADE"), nullable=False)
+    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid', ondelete="CASCADE"), nullable=False)
     """
     Client ID number
 
@@ -33,7 +33,7 @@ class MedicalImaging(db.Model):
     :type: str, max length 1024
     """
 
-    image_date = db.Column(db.Date)
+    image_date = db.Column(db.DateTime)
     """
     Date image was taken
     To be filled in by the doctor
@@ -56,7 +56,7 @@ class MedicalImaging(db.Model):
     :type: str
     """
 
-    medical_imaging_clinic_info = db.Column(db.Text)
+    image_origin_location = db.Column(db.Text)
     """
     Name of and information about clinic where image was gathered.
     eg. SimonMed imaging, Banner imaging, etc.
@@ -72,12 +72,11 @@ class MedicalImaging(db.Model):
 
     :type: str, max length 1024
     """
-    #TODO: change image type
-    image = db.Column(db.Text)
+    image_path = db.Column(db.Text)
     """
-    Bynary Stream data of the image.
+    image S3 path
 
-    :type: bytea
+    :type: str
     """
 
 class MedicalBloodChemistryCBC(db.Model):

@@ -40,7 +40,7 @@ from odyssey.models.trainer import (
     LungAssessment
 )
 from odyssey.models.wearables import Wearables, WearablesOura
-
+from requests_toolbelt import MultipartEncoder
 
 class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -1073,19 +1073,27 @@ class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
 class MedicalImagingSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = MedicalImaging
+        load_instance = True
+        exclude = ["clientid", "idx"]
 
-    clientid = fields.Integer(missing=0)
-    
+    possible_image_types = ['CT scan', 'MRI', 'PET scan', 'Ultrasound', 'X-Ray']
+    image_type = fields.String(validate=validate.OneOf(possible_image_types), required=True)
+
+    #
+    """clientid = fields.Integer(missing=0)
     possible_image_types = ['CT scan', 'MRI', 'PET scan', 'Ultrasound', 'X-Ray']
     image_date = fields.DateTime(format='%Y-%m-%d', required=True)
     image_read = fields.String(required=True)
     image_type = fields.String(validate=validate.OneOf(possible_image_types), required=True)
-    #TODO: change image type
-    image = fields.String(required=True)
-   
+    files = fields.Dict()
+    image_name = fields.String()
+    image_origin_location = fields.String()
+    image_cpt_code = fields.String()
+    
+    
     @post_load
     def make_object(self, data, **kwargs):
-        return MedicalImaging(**data)   
+        return MedicalImaging(**data)   """
 
 
 class BloodChemistryCBCSchema(Schema):

@@ -1,9 +1,11 @@
-
+import os, io
 from datetime import datetime
 
-from flask import request
+from flask import Flask, request, flash, redirect, url_for
 from flask_accepts import accepts, responds
 from flask_restx import Resource, Api
+from werkzeug.utils import secure_filename
+from werkzeug.datastructures import MultiDict, FileStorage
 
 from odyssey import db
 from odyssey.models.client import ClientExternalMR
@@ -19,7 +21,13 @@ from odyssey.models.doctor import (
 from odyssey.models.misc import MedicalInstitutions
 from odyssey.api import api
 from odyssey.api.auth import token_auth
-from odyssey.api.errors import UserNotFound, IllegalSetting, ContentNotFound, ExamNotFound
+from odyssey.api.errors import (
+    UserNotFound, 
+    IllegalSetting, 
+    ContentNotFound, 
+    ExamNotFound, 
+    InputError
+)
 from odyssey.utils.misc import check_client_existence
 from odyssey.utils.schemas import (
     ClientExternalMREntrySchema, 
@@ -39,7 +47,6 @@ ns = api.namespace('doctor', description='Operations related to doctor')
 @ns.route('/medicalimaging/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
 class MedImaging(Resource):
-    @ns.doc(security='apikey')
     @token_auth.login_required
     @responds(schema=MedicalImagingSchema(many=True), api=ns)
     def get(self, clientid):
@@ -48,29 +55,55 @@ class MedImaging(Resource):
         check_client_existence(clientid)
         data = MedicalImaging.query.filter_by(clientid=clientid).all()
         if not data:
-            raise ContentNotFound()
+            raise ContentNotFound
 
         return data
 
     @token_auth.login_required
-    @accepts(schema=MedicalImagingSchema, api=ns)
-    @ns.doc(security='apikey')
-    @responds(schema=MedicalImagingSchema, status_code=201, api=ns)
+    #@accepts(schema=MedicalImagingSchema, api=ns)
+    @responds(status_code=201, api=ns)
     def post(self, clientid):
         """for adding a medical image to the database for the specified clientid"""
-        
+      
         check_client_existence(clientid)
-        
-        data = request.get_json()
-        data["clientid"] = clientid
-        
+
+        if 'image' not in request.files:
+            raise InputError(400, 'Empty input file')
+
+        """ All images should be sent with a key name of "image" 
+
+            In a dictionary, if more than one key:value pair has the same key,
+            it will return only the first key of the same name, so we use
+            .getlist(key) to get a list of all the key:value pairs with the same key
+            and that way we can iterate through all of the files sent.
+        """
+        files = request.files
+        MAX_bytes = 500000000 #500 mb
+        for i, img in enumerate(files.getlist('image')):
+            
+            #Verifying image size is within a safe threashold (MAX = 500 mb = 500mil bytes)
+            img.seek(0, os.SEEK_END)
+            img_size = img.tell()
+            if img_size > MAX_bytes:
+                raise InputError(413, 'File too large')
+            
+            #TODO: change file name (dateofupload_clientid)
+            #TODO: Save to S3 Bucket & get path
+
+
+            img.seek(0)
+            img.save(f'/home/rosangelica_magdaleno/odyssey/src/odyssey/api/uploads/newImg{i}.jpg')
+
+        #s3path = 
         mi_schema = MedicalImagingSchema()
-        mi_data = mi_schema.load(data)
+        """ comments """
+        mi_data = mi_schema.load(request.form)
+        mi_data.clientid = clientid
+       # mi_data.image_path = s3path
 
         db.session.add(mi_data)
         db.session.commit()
 
-        return mi_data
 
 @ns.route('/bloodtest/cmp/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
