@@ -25,13 +25,6 @@ class MedicalImaging(db.Model):
 
     :type: int, foreign key to :attr:`ClientInfo.clientid`
     """
-    
-    image_name = db.Column(db.String(1024))
-    """
-    image name includes date and type of image.
-
-    :type: str, max length 1024
-    """
 
     image_date = db.Column(db.DateTime)
     """
@@ -72,6 +65,7 @@ class MedicalImaging(db.Model):
 
     :type: str, max length 1024
     """
+    
     image_path = db.Column(db.Text)
     """
     image S3 path
