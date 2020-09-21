@@ -11,7 +11,7 @@ from odyssey.models.doctor import (
     MedicalBloodChemistryCMP,
     MedicalBloodChemistryCBC,
     MedicalBloodChemistryThyroid,
-    MedicalImaging
+    MedicalImaging,
     MedicalBloodChemistryLipids,
     MedicalBloodChemistryA1C
 )
