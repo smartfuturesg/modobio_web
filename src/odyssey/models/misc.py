@@ -25,3 +25,37 @@ class MedicalInstitutions(db.Model):
     :type: str
     """
 
+class RegisteredFacilities(db.Model):
+    """ Facilities registered in the modobio system. These can be internal(Modobio facilities) 
+        or external(doctor's offices, hospitals, etc.)
+    """
+
+    __tablename__ = 'RegisteredFacilities'
+
+    facility_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    facility id
+
+    :type: int, primary key, autoincrement
+    """
+
+    facility_name = db.Column(db.String, nullable=False)
+    """
+    facility name
+
+    :type: str
+    """
+
+    facility_address = db.Column(db.String, nullable=False, unique=True)
+    """
+    facility full address
+
+    :type: str
+    """
+
+    modobio_facility = db.Column(db.Boolean)
+    """
+    denotes if facility is a modobio(internal) facility
+
+    :type: bool
+    """

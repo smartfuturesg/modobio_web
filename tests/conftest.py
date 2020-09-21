@@ -25,6 +25,11 @@ from .data import (
     test_client_individual_data
 )
 
+<<<<<<< HEAD
+=======
+# from odyssey.utils.schemas import ClientInfoSchema
+
+>>>>>>> 7bbe713294afcaa70295f9af3ccf8fb2eb3dd765
 def clean_db(db):
     for table in reversed(db.metadata.sorted_tables):
         try:
