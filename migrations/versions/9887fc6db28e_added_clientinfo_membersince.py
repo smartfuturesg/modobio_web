@@ -1,8 +1,8 @@
 """Added ClientInfo membersince
 
-Revision ID: a081b9a9c586
+Revision ID: 9887fc6db28e
 Revises: 9d7bf561a158
-Create Date: 2020-09-17 16:00:49.726531
+Create Date: 2020-09-21 09:19:17.470633
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'a081b9a9c586'
+revision = '9887fc6db28e'
 down_revision = '9d7bf561a158'
 branch_labels = None
 depends_on = None
