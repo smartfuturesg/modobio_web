@@ -91,7 +91,7 @@ class ContentNotFoundReturnData(Exception):
     def __init__(self, data=None, clientid = None):
         Exception.__init__(self)
         data.update({"clientid": clientid})
-        self.status_code = 201
+        self.status_code = 200
         self.message = "no instance of resource exists yet"
 
         self.data = data
@@ -119,6 +119,16 @@ class ClientAlreadyExists(Exception):
 
         self.status_code = 409
 
+class RelationAlreadyExists(Exception):
+    """in the case a client is trying to be associated with a facility where this relationship is already defined"""
+    def __init__(self, client_identification=None, facility_identification=None, message=None):
+        Exception.__init__(self)
+        if message:
+            self.message = message
+        else:
+            self.message = f'The client identified by, {client_identification} is already associated with the facility identified by {facility_identification}.'
+        self.status_code = 409
+
 class StaffEmailInUse(Exception):
     """in the case a staff member is creating a staff member with the same email"""
     def __init__(self, email, message = None):
@@ -142,6 +152,16 @@ class ClientNotFound(Exception):
 
         self.status_code = 404
 
+class FacilityNotFound(Exception):
+    """in the case a staff member is trying to edit a client that does not exist"""
+    def __init__(self, identification=None, message = None):
+        Exception.__init__(self)
+        if message:
+            self.message = message
+        else:
+            self.message = f'The facility identified by, {identification} does not exit. Try another identification or create a new registered facility.'
+
+        self.status_code = 404
 
 class IllegalSetting(Exception):
     """in the case an API request includes a setting or parameter that is not allowed"""
@@ -154,6 +174,16 @@ class IllegalSetting(Exception):
 
         self.status_code = 400
 
+class InsufficientInputs(Exception):
+    """in the case that the input does not have enough data"""
+    def __init__(self, message = None):
+        Exception.__init__(self)
+        if message:
+            self.message = message
+        else:
+            self.message = 'Insufficient inputs supplied. At least 1 value other than date (and idx for PUT) must be given.'
+
+        self.status_code = 405
 
 def bad_request(message):
     return error_response(400, message)
@@ -176,6 +206,17 @@ def error_user_does_not_exist(error):
 def error_client_not_found(error):
     '''Return a custom message and 400 status code'''
     return error_response(error.status_code, error.message)
+
+@api.errorhandler(ExamNotFound)
+def error_exam_not_found(error):
+    '''Return a custom message and 400 status code'''
+    return error_response(error.status_code, error.message)
+
+@api.errorhandler(FacilityNotFound)
+def error_exam_not_found(error):
+    '''Return a custom message and 400 status code'''
+    return error_response(error.status_code, error.message)
+
 
 @api.errorhandler(ContentNotFound)
 def error_content_not_found(error):
@@ -222,10 +263,21 @@ def error_client_already_exists(error):
     '''Return a custom message and 409 status code'''
     return error_response(error.status_code, error.message)
 
+@api.errorhandler(RelationAlreadyExists)
+def error_relation_already_exists(error):
+    '''Return a custom message and 409 status code'''
+    return error_response(error.status_code, error.message)
+
 @api.errorhandler(StaffEmailInUse)
 def error_staff_email_in_use(error):
     '''Return a custom message and 409 status code'''
     return error_response(error.status_code, error.message)
+
+@api.errorhandler(InsufficientInputs)
+def error_insufficient_inputs(error):
+    '''Return a custom message and 405 status code'''
+    return error_response(error.status_code, error.message)
+
 
 def register_handlers(app):
     """register application-wide error handling"""

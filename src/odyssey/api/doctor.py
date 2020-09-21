@@ -1,11 +1,9 @@
-import os, io
 from datetime import datetime
 
-from flask import Flask, request, flash, redirect, url_for
+from flask import request
 from flask_accepts import accepts, responds
 from flask_restx import Resource, Api
-from werkzeug.utils import secure_filename
-from werkzeug.datastructures import MultiDict, FileStorage
+from werkzeug.datastructures import FileStorage
 
 from odyssey import db
 from odyssey.models.client import ClientExternalMR
@@ -15,7 +13,9 @@ from odyssey.models.doctor import (
     MedicalBloodChemistryCBC, 
     MedicalBloodChemistryThyroid, 
     MedicalImaging,
-    MedicalBloodChemistryCMP
+    MedicalBloodChemistryCMP,
+    MedicalBloodChemistryLipids, 
+    MedicalBloodChemistryA1C
 )
 
 from odyssey.models.misc import MedicalInstitutions
@@ -26,7 +26,9 @@ from odyssey.api.errors import (
     IllegalSetting, 
     ContentNotFound, 
     ExamNotFound, 
-    InputError
+    InputError,
+    InsufficientInputs,
+    MethodNotAllowed
 )
 from odyssey.utils.misc import check_client_existence
 from odyssey.utils.schemas import (
@@ -38,7 +40,9 @@ from odyssey.utils.schemas import (
     BloodChemistryCMPSchema,
     BloodChemistryCBCSchema,
     MedicalBloodChemistryThyroidSchema,
-    MedicalImagingSchema
+    MedicalImagingSchema,
+    MedicalBloodChemistryLipidsSchema,
+    MedicalBloodChemistryA1CSchema
 )
 
 ns = api.namespace('doctor', description='Operations related to doctor')
@@ -104,7 +108,6 @@ class MedImaging(Resource):
         db.session.add(mi_data)
         db.session.commit()
 
-
 @ns.route('/bloodtest/cmp/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
 class MedBloodChemistryCMP(Resource):
@@ -130,9 +133,23 @@ class MedBloodChemistryCMP(Resource):
     def post(self,clientid):
         """create new db entItry for CMP"""
         check_client_existence(clientid)
+        
         data = request.get_json()
+        temp_date = data['exam_date']
+        del data['exam_date']
+        # Check if data is empty
+        if not data:
+            # Data has nothing in it, raise error.
+            # Blood Chemistry test needs at least one input
+            raise InsufficientInputs()
+        
+        data['exam_date'] = temp_date
         data["clientid"] = clientid
-        data["bunByAlbumin"] = data['bun']/data['albumin']
+
+        # If bun or albumin is missing, make bunByAlbumin null
+        if 'bun' in data and 'albumin' in data:
+            data['bunByAlbumin'] = data['bun']/data['albumin']
+
         cmp_schema = BloodChemistryCMPSchema()
         cmp_data = cmp_schema.load(data)
         db.session.add(cmp_data)
@@ -147,13 +164,30 @@ class MedBloodChemistryCMP(Resource):
         check_client_existence(clientid)
         # get payload and update the current instance followd by db commit
         data = request.get_json()
-        cmp_data = MedicalBloodChemistryCMP.query.filter_by(idx=data['idx'], clientid=clientid).one_or_none()
+        cmp_data = MedicalBloodChemistryCMP.query.filter_by(idx=data['idx']).one_or_none()
 
         if not cmp_data:
             raise ExamNotFound(data['idx'])
+
+        data = request.get_json()
+        temp_date = data['exam_date']
+        temp_idx = data['idx']
+        del data['exam_date']
+        del data['idx']
+        # Check if data is empty
+        if not data:
+            # Data has nothing in it, raise error.
+            # Blood Chemistry test needs at least one input
+            raise InsufficientInputs()
         
-        # update resource
-        data["bunByAlbumin"] = data['bun']/data['albumin']
+        data['idx'] = temp_idx
+        data['exam_date'] = temp_date
+        data["clientid"] = clientid
+
+        # If bun or albumin is missing, make bunByAlbumin null
+        if 'bun' in data and 'albumin' in data:
+            data['bunByAlbumin'] = data['bun']/data['albumin']
+
         cmp_data.update(data)
         db.session.commit()
 
@@ -188,13 +222,28 @@ class MedBloodChemistryCBC(Resource):
         check_client_existence(clientid)
         """create new db entry for CBC"""
         data = request.get_json()
+        temp_date = data['exam_date']
+        del data['exam_date']
+
+        # Check if data is empty
+        if not data:
+            # Data has nothing in it, raise error.
+            # Blood Chemistry test needs at least one input
+            raise InsufficientInputs()
+
+        data['exam_date'] = temp_date  
         data["clientid"] = clientid
         
         """ Additional ratio calculations from payload """
-        data['plateletsByMch'] = data['platelets']/data['mch']
-        data['plateletsByLymphocyte'] = data['platelets']/data['abs_lymphocytes']
-        data['neutrophilByLymphocyte'] = data['abs_neutrophils']/data['abs_lymphocytes']
-        data['lymphocyteByMonocyte'] = data['abs_lymphocytes']/data['abs_monocytes']
+        if 'abs_lymphocytes' in data:
+            if 'platelets' in data:
+                data['plateletsByLymphocyte'] = data['platelets']/data['abs_lymphocytes']
+            if 'abs_neutrophils' in data:
+                data['neutrophilByLymphocyte'] = data['abs_neutrophils']/data['abs_lymphocytes']
+            if 'abs_monocytes' in data:
+                data['lymphocyteByMonocyte'] = data['abs_lymphocytes']/data['abs_monocytes']
+        if 'platelets' in data and 'mch' in data:
+            data['plateletsByMch'] = data['platelets']/data['mch']
 
         cbc_schema = BloodChemistryCBCSchema()
         cbc_data = cbc_schema.load(data)
@@ -210,17 +259,34 @@ class MedBloodChemistryCBC(Resource):
         check_client_existence(clientid)
         # get payload and update the current instance followd by db commit
         data = request.get_json()
-        cbc_data = MedicalBloodChemistryCBC.query.filter_by(idx=data['idx'], clientid=clientid).one_or_none()
+        cbc_data = MedicalBloodChemistryCBC.query.filter_by(idx=data['idx']).one_or_none()
 
         if not cbc_data:
             raise ExamNotFound(data['idx'])
-        
-        # update resource
+
+        temp_date = data['exam_date']
+        temp_idx = data['idx']
+        del data['exam_date']
+        del data['idx']
+        # Check if data is empty
+        if not data:
+            # Data has nothing in it, raise error.
+            # Blood Chemistry test needs at least one input
+            raise InsufficientInputs()
+
+        data['exam_date'] = temp_date  
+        data["idx"] = temp_idx
+
         """ Additional ratio calculations from payload """
-        data['plateletsByMch'] = data['platelets']/data['mch']
-        data['plateletsByLymphocyte'] = data['platelets']/data['abs_lymphocytes']
-        data['neutrophilByLymphocyte'] = data['abs_neutrophils']/data['abs_lymphocytes']
-        data['lymphocyteByMonocyte'] = data['abs_lymphocytes']/data['abs_monocytes']
+        if 'abs_lymphocytes' in data:
+            if 'platelets' in data:
+                data['plateletsByLymphocyte'] = data['platelets']/data['abs_lymphocytes']
+            if 'abs_neutrophils' in data:
+                data['neutrophilByLymphocyte'] = data['abs_neutrophils']/data['abs_lymphocytes']
+            if 'abs_monocytes' in data:
+                data['lymphocyteByMonocyte'] = data['abs_lymphocytes']/data['abs_monocytes']
+        if 'platelets' in data and 'mch' in data:
+            data['plateletsByMch'] = data['platelets']/data['mch']
         cbc_data.update(data)
         db.session.commit()
 
@@ -406,9 +472,19 @@ class MedBloodChemistryThyroid(Resource):
         check_client_existence(clientid)
 
         data = request.get_json()
+
+        #temporarily remove exam date to check if at least 1 other field is populated
+        temp_date = data["exam_date"]
+        del data["exam_date"]
+        if not data:
+            #there is not at least 1 other field populated, illegal input
+            raise InsufficientInputs("At least 1 input other than date is required")
+        
+        #at least 1 other field is populated, restore exam date and idx and resume PUT
+        data["exam_date"] = temp_date
         data["clientid"] = clientid
 
-        bt_schema = BloodChemistryThyroidSchema()
+        bt_schema = MedicalBloodChemistryThyroidSchema()
 
         client_bt = bt_schema.load(data)
 
@@ -425,12 +501,190 @@ class MedBloodChemistryThyroid(Resource):
         # get payload
         data = request.get_json()
 
+        if 'idx' not in data.keys():
+            raise ExamNotFound('None')
+
         exam = MedicalBloodChemistryThyroid.query.filter_by(idx=data['idx']).first()
+
+        #check that exam at given idx exists
+        if not exam:
+            raise ExamNotFound(data['idx'])
+
+        #temporarily remove exam date and idx to check if at least 1 other field is populated
+        temp_date = data["exam_date"]
+        temp_idx = data["idx"]
+        del(data["exam_date"])
+        del(data["idx"])
+        if not data:
+            #there is not at least 1 other field populated, illegal input
+            raise InsufficientInputs("At least 1 input other than date and idx is required")
+
+        #at least 1 other field is populated, restore exam date and idx and resume PUT
+        data["exam_date"] = temp_date
+        data["idx"] = temp_idx
+
+        data['exam_date'] = datetime.strptime(data['exam_date'], "%Y-%m-%d")
+
+        # update resource 
+        exam.update(data)
+
+        db.session.commit()
+
+        return exam
+
+@ns.route('/bloodchemistry/lipids/<int:clientid>/')
+@ns.doc(params={'clientId': 'Client ID number'})
+class MedBloodChemistryLipids(Resource):
+    @token_auth.login_required
+    @responds(schema=MedicalBloodChemistryLipidsSchema(many=True), api=ns)
+    def get(self, clientid):
+        """returns all blood thyroid results as a json for the client ID specified"""
+        check_client_existence(clientid)
+
+        exams = MedicalBloodChemistryLipids.query.filter_by(clientid=clientid).all()
+
+        if not exams:
+            raise ContentNotFound()
+
+        return exams
+    
+    @token_auth.login_required
+    @accepts(schema=MedicalBloodChemistryLipidsSchema, api=ns)
+    @responds(schema=MedicalBloodChemistryLipidsSchema, status_code=201, api=ns)
+    def post(self, clientid):
+        """creates new db entry for blood test results as a json for the blood exam ID specified"""
+        check_client_existence(clientid)
+
+        data = request.get_json()
+
+        #temporarily remove exam date and idx to check if at least 1 other field is populated
+        temp_date = data["exam_date"]
+        del data["exam_date"]
+        if not data:
+            #there is not at least 1 other field populated, illegal input
+            raise InsufficientInputs("At least 1 input other than date and idx is required")
+
+        #at least 1 other field is populated, restore exam date and resume POST
+        data["exam_date"] = temp_date
+        data['clientid'] = clientid
+
+        #calculated values
+        if 'cholesterol_hdl' in data.keys() and data['cholesterol_hdl'] != 0:
+            if 'cholesterol_total' in data.keys():
+                data['cholesterol_over_hdl'] = data['cholesterol_total'] / data['cholesterol_hdl']
+            if 'cholesterol_ldl' in data.keys():
+                data['ldl_over_hdl'] = data['cholesterol_ldl'] / data['cholesterol_hdl']
+            if 'triglycerides' in data.keys():
+                data['triglycerides_over_hdl'] = data['triglycerides'] / data['cholesterol_hdl']
+        
+
+        bt_schema = MedicalBloodChemistryLipidsSchema()
+
+        client_bt = bt_schema.load(data)
+
+        db.session.add(client_bt)
+        db.session.commit()
+
+        return client_bt
+
+    @token_auth.login_required
+    @accepts(schema=MedicalBloodChemistryLipidsSchema, api=ns)
+    @responds(schema=MedicalBloodChemistryLipidsSchema, api=ns)
+    def put(self, clientid):
+        """edit exam info"""
+        # get payload
+        data = request.get_json()
+
+        if 'idx' not in data.keys():
+            raise ExamNotFound('None')
+
+        exam = MedicalBloodChemistryLipids.query.filter_by(idx=data['idx']).first()
 
         if not exam:
             raise ExamNotFound(data['idx'])
         
-        data['last_examination_date'] = datetime.strptime(data['last_examination_date'], "%Y-%m-%d")
+        #temporarily remove exam date and idx to check if at least 1 other field is populated
+        temp_date = data["exam_date"]
+        temp_idx = data["idx"]
+        del(data["exam_date"])
+        del(data["idx"])
+        if not data:
+            #there is not at least 1 other field populated, illegal input
+            raise InsufficientInputs("At least 1 input other than date and idx is required")
+
+        #at least 1 other field is populated, restore exam date and idx and resume PUT
+        data["exam_date"] = temp_date
+        data["idx"] = temp_idx
+        data['exam_date'] = datetime.strptime(data['exam_date'], "%Y-%m-%d")
+        
+        #calculated values
+        if 'cholesterol_hdl' in data.keys() and data['cholesterol_hdl'] != 0:
+            if 'cholesterol_total' in data.keys():
+                data['cholesterol_over_hdl'] = data['cholesterol_total'] / data['cholesterol_hdl']
+            if 'cholesterol_ldl' in data.keys():
+                data['ldl_over_hdl'] = data['cholesterol_ldl'] / data['cholesterol_hdl']
+            if 'triglycerides' in data.keys():
+                data['triglycerides_over_hdl'] = data['triglycerides'] / data['cholesterol_hdl']
+        
+        # update resource 
+        exam.update(data)
+
+        db.session.commit()
+
+        return exam
+
+@ns.route('/bloodchemistry/a1c/<int:clientid>/')
+@ns.doc(params={'clientId': 'Client ID number'})
+class MedBloodChemistryA1C(Resource):
+    @token_auth.login_required
+    @responds(schema=MedicalBloodChemistryA1CSchema(many=True), api=ns)
+    def get(self, clientid):
+        """returns all blood thyroid results as a json for the client ID specified"""
+        check_client_existence(clientid)
+
+        exams = MedicalBloodChemistryA1C.query.filter_by(clientid=clientid).all()
+
+        if not exams:
+            raise ContentNotFound()
+
+        return exams
+    
+    @token_auth.login_required
+    @accepts(schema=MedicalBloodChemistryA1CSchema, api=ns)
+    @responds(schema=MedicalBloodChemistryA1CSchema, status_code=201, api=ns)
+    def post(self, clientid):
+        """creates new db entry for blood test results as a json for the clientid specified"""
+        check_client_existence(clientid)
+
+        data = request.get_json()
+        data["clientid"] = clientid
+
+        bt_schema = MedicalBloodChemistryA1CSchema()
+
+        client_bt = bt_schema.load(data)
+
+        db.session.add(client_bt)
+        db.session.commit()
+
+        return client_bt
+
+    @token_auth.login_required
+    @accepts(schema=MedicalBloodChemistryA1CSchema, api=ns)
+    @responds(schema=MedicalBloodChemistryA1CSchema, api=ns)
+    def put(self, clientid):
+        """edit exam info"""
+        # get payload
+        data = request.get_json()
+
+        if 'idx' not in data.keys():
+            raise ExamNotFound('None')
+
+        exam = MedicalBloodChemistryA1C.query.filter_by(idx=data['idx']).first()
+
+        if not exam:
+            raise ExamNotFound(data['idx'])
+        
+        data['exam_date'] = datetime.strptime(data['exam_date'], "%Y-%m-%d")
 
         # update resource 
         exam.update(data)

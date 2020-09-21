@@ -11,6 +11,7 @@ import pathlib
 from datetime import date
 from typing import Type
 
+from botocore.exceptions import ClientError
 from flask import render_template, session, current_app, _request_ctx_stack
 from flask_wtf import FlaskForm
 from PyPDF2 import PdfFileMerger
@@ -134,7 +135,7 @@ def _to_pdf(req_ctx, clientid, table, template=None, form=None):
         filename = f'ModoBio_{docname}_v{doc.revision}_client{clientid:05d}_{doc.signdate}.pdf'
         bucket_name = current_app.config['DOCS_BUCKET_NAME']
 
-        if current_app.config['DOCS_STORE_LOCAL']:
+        if current_app.config['LOCAL_CONFIG']:
             path = pathlib.Path(bucket_name)
             path.mkdir(parents=True, exist_ok=True)
 
@@ -179,7 +180,7 @@ def merge_pdfs(documents: list, clientid: int) -> str:
 
     merger = PdfFileMerger()
     bufs = []
-    if current_app.config['DOCS_STORE_LOCAL']:
+    if current_app.config['LOCAL_CONFIG']:
         for doc in documents:
             try:
                 merger.append(doc)
@@ -190,7 +191,11 @@ def merge_pdfs(documents: list, clientid: int) -> str:
         s3 = boto3.client('s3')
         for doc in documents:
             doc_buf = io.BytesIO()
-            s3.download_fileobj(bucket_name, doc, doc_buf)
+            try:
+                s3.download_fileobj(bucket_name, doc, doc_buf)
+            except ClientError as e:
+                print(f'Could not download file {doc} from S3 bucket {bucket_name}: {e}')
+                continue
             doc_buf.seek(0)
             bufs.append(doc_buf)
             merger.append(doc_buf)
@@ -206,7 +211,7 @@ def merge_pdfs(documents: list, clientid: int) -> str:
     signdate = date.today().isoformat()
     filename = f'ModoBio_client{clientid:05d}_{signdate}.pdf'
 
-    if current_app.config['DOCS_STORE_LOCAL']:
+    if current_app.config['LOCAL_CONFIG']:
         path = pathlib.Path(bucket_name)
         path.mkdir(parents=True, exist_ok=True)
 
