@@ -66,9 +66,8 @@ class Client(Resource):
         #prevent requests to set clientid and send message back to api user
         elif data.get('clientid', None):
             raise IllegalSetting('clientid')
-        # client.update
-        client.from_dict(data)
-        db.session.add(client)
+            
+        client.update(data)
         db.session.commit()
         return client
 
