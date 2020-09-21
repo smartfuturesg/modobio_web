@@ -35,6 +35,15 @@ class ClientInfo(db.Model):
     :type: int, primary key, autoincrement
     """
 
+    membersince = db.Column(db.Date)
+    """
+    Member since date
+
+    The date a member was first added to the system
+
+    :type: date
+    """
+
     firstname = db.Column(db.String(50))
     """
     Client first name.
