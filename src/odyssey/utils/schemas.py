@@ -1287,18 +1287,21 @@ class WearablesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Wearables
         load_instance = True
-        exclude = ['idx', 'clientid']
+        exclude = ('idx', 'clientid')
 
 
 class WearablesFreeStyleSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = WearablesFreeStyle
         load_instance = True
-        exclude = ['idx', 'clientid']
+        exclude = ('idx', 'clientid')
+
+    timestamps = fields.List(fields.List(fields.DateTime()))
+    glucose = fields.List(fields.List(fields.Float()))
 
 
 class WearablesFreeStyleActivateSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = WearablesFreeStyle
         load_instance = True
-        only = ['activation_timestamp']
+        fields = ('activation_timestamp',)
