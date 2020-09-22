@@ -33,6 +33,7 @@ from odyssey.utils.schemas import (
     ClientIndividualContractSchema,
     ClientInfoSchema,
     ClientPoliciesContractSchema, 
+    ClientRegistrationStatusSchema,
     ClientReleaseSchema,
     ClientReleaseContactsSchema,
     ClientRemoteRegistrationPortalSchema, 
@@ -372,8 +373,11 @@ class IndividualContract(Resource):
     def post(self, clientid):
         """create client individual services contract object for the specified clientid"""
         data = request.get_json()
-        client_services = ClientIndividualContract(revision=ClientIndividualContract.current_revision)
-        client_services.from_dict(clientid, data)
+        data['clientid'] = clientid
+        data['revision'] = ClientIndividualContract.current_revision
+        
+        client_services = ClientIndividualContract(**data)
+
         db.session.add(client_services)
         db.session.commit()
         to_pdf(clientid, ClientIndividualContract)
@@ -458,8 +462,7 @@ class JourneyStatusCheck(Resource):
     """
         Returns the outstanding forms needed to complete the client journey
     """
-    # @accepts(schema=NewRemoteClientSchema, api=ns)
-    # @responds(schema=ClientRemoteRegistrationPortalSchema, api=ns, status_code=201)
+    @responds(schema=ClientRegistrationStatusSchema, api=ns)
     @token_auth.login_required
     def get(self, clientid):
         """
@@ -485,7 +488,7 @@ class JourneyStatusCheck(Resource):
             if result is None:
                 remaining_forms.append({'name': table.displayname, 'URI': TABLE_TO_URI.get(table.__tablename__).format(clientid)})
 
-        return jsonify({'outstanding': remaining_forms})
+        return {'outstanding': remaining_forms}
 
 
 
