@@ -230,6 +230,19 @@ class ClientInfo(db.Model):
 
         return (self.firstname[0]+self.lastname[0]+str(self.clientid)+name_hash[0:6]).upper()
 
+    def client_info_search_dict(self):
+        """returns just the searchable client info (name, email, number)"""
+        data = {
+            'clientid': self.clientid,
+            'record_locator_id': self.get_medical_record_hash(),
+            'firstname': self.firstname,
+            'lastname': self.lastname,
+            'fullname': self.fullname,
+            'phone': self.phone,
+            'email': self.email
+        }
+        return data
+
     @staticmethod
     def all_clients_dict(query, page, per_page, **kwargs):
         resources = query.paginate(page, per_page, False)
