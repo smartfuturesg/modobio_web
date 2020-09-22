@@ -9,6 +9,7 @@ from odyssey.api import api
 from odyssey.api.auth import token_auth, token_auth_client
 from odyssey.api.errors import UserNotFound, ClientAlreadyExists, ClientNotFound, IllegalSetting, ContentNotFound
 from odyssey import db
+from odyssey.constants import TABLE_TO_URI
 from odyssey.models.client import (
     ClientInfo,
     ClientConsent,
@@ -19,7 +20,10 @@ from odyssey.models.client import (
     ClientSubscriptionContract,
     RemoteRegistration
 )
+from odyssey.models.doctor import MedicalHistory, MedicalPhysicalExam
+from odyssey.models.pt import PTHistory 
 from odyssey.models.staff import ClientRemovalRequests
+from odyssey.models.trainer import FitnessQuestionnaire
 from odyssey.pdf import to_pdf, merge_pdfs
 from odyssey.utils.email import send_email_remote_registration_portal, send_test_email
 from odyssey.utils.misc import check_client_existence
@@ -447,6 +451,42 @@ class SignedDocuments(Resource):
         urls['All documents'] = concat
 
         return {'urls': urls}
+
+@ns.route('/registrationstatus/<int:clientid>/')
+@ns.doc(params={'clientid': 'Client ID number'})
+class JourneyStatusCheck(Resource):
+    """
+        Returns the outstanding forms needed to complete the client journey
+    """
+    # @accepts(schema=NewRemoteClientSchema, api=ns)
+    # @responds(schema=ClientRemoteRegistrationPortalSchema, api=ns, status_code=201)
+    @token_auth.login_required
+    def get(self, clientid):
+        """
+        """
+        check_client_existence(clientid)
+
+        remaining_forms = []
+
+        for table in (
+                ClientPolicies,
+                ClientConsent,
+                ClientRelease,
+                ClientConsultContract,
+                ClientSubscriptionContract,
+                ClientIndividualContract,
+                FitnessQuestionnaire,
+                MedicalHistory,
+                MedicalPhysicalExam,
+                PTHistory
+        ):
+            result = table.query.filter_by(clientid=clientid).order_by(table.idx.desc()).first()
+
+            if result is None:
+                remaining_forms.append({'name': table.displayname, 'URI': TABLE_TO_URI.get(table.__tablename__).format(clientid)})
+
+        return jsonify({'outstanding': remaining_forms})
+
 
 
 @ns.route('/remoteregistration/new/')
