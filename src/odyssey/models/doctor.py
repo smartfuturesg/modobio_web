@@ -522,7 +522,7 @@ class MedicalPhysicalExam(db.Model):
     """
     __tablename__ = 'MedicalPhysicalExam'
 
-    displayname = 'Medical Physcal Examination'
+    displayname = 'Medical Physical Examination'
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """

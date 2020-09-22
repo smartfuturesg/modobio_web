@@ -375,7 +375,7 @@ class IndividualContract(Resource):
         data = request.get_json()
         data['clientid'] = clientid
         data['revision'] = ClientIndividualContract.current_revision
-        
+
         client_services = ClientIndividualContract(**data)
 
         db.session.add(client_services)
@@ -466,6 +466,7 @@ class JourneyStatusCheck(Resource):
     @token_auth.login_required
     def get(self, clientid):
         """
+        Returns the client's outstanding registration items and their URIs.
         """
         check_client_existence(clientid)
 
