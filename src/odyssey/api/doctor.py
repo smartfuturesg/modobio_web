@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 
 from flask import request
@@ -67,40 +68,47 @@ class MedImaging(Resource):
     #@accepts(schema=MedicalImagingSchema, api=ns)
     @responds(status_code=201, api=ns)
     def post(self, clientid):
-        """for adding a medical image to the database for the specified clientid"""
-      
-        check_client_existence(clientid)
-
-        if 'image' not in request.files:
-            raise InputError(400, 'Empty input file')
-
-        """ All images should be sent with a key name of "image" 
+        """for adding one or many medical images to the database for the specified clientid
+        
+            All images should be sent with a key name of "image" 
 
             In a dictionary, if more than one key:value pair has the same key,
             it will return only the first key of the same name, so we use
             .getlist(key) to get a list of all the key:value pairs with the same key
-            and that way we can iterate through all of the files sent.
+            so we can iterate through all of the files sent.
         """
+        check_client_existence(clientid)
+
+        #Verify at least 1 file with key-name:image is selected
+        if 'image' not in request.files:
+            raise InputError(400, 'Empty input file')
+
+        possible_input_file_extensions = ['.jpeg', '.jpg', '.png', '.dcm']
         files = request.files
         MAX_bytes = 500000000 #500 mb
+
         for i, img in enumerate(files.getlist('image')):
             
-            #Verifying image size is within a safe threashold (MAX = 500 mb = 500mil bytes)
+            img_name, img_extension = os.path.splitext(img.filename)
+            #Verify image file extension is within acceptable extensions
+            if img_extension.lower() not in possible_input_file_extensions:
+                raise InputError(415, "Unsupported file type")
+            
+            
             img.seek(0, os.SEEK_END)
             img_size = img.tell()
+            #Verifying image size is within a safe threashold (MAX = 500 mb = 500mil bytes)
             if img_size > MAX_bytes:
                 raise InputError(413, 'File too large')
             
             #TODO: change file name (dateofupload_clientid)
             #TODO: Save to S3 Bucket & get path
-
-
             img.seek(0)
-            img.save(f'/home/rosangelica_magdaleno/odyssey/src/odyssey/api/uploads/newImg{i}.jpg')
+            
 
         #s3path = 
         mi_schema = MedicalImagingSchema()
-        """ comments """
+        """ Using request.form ... """
         mi_data = mi_schema.load(request.form)
         mi_data.clientid = clientid
        # mi_data.image_path = s3path
