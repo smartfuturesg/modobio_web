@@ -1,4 +1,4 @@
-import os
+import os, boto3
 from datetime import datetime
 
 from flask import request
@@ -68,18 +68,20 @@ class MedImaging(Resource):
     #@accepts(schema=MedicalImagingSchema, api=ns)
     @responds(status_code=201, api=ns)
     def post(self, clientid):
-        """for adding one or many medical images to the database for the specified clientid
-        
-            All images should be sent with a key name of "image" 
+        """For adding one or many medical images to the database for the specified clientid
 
-            In a dictionary, if more than one key:value pair has the same key,
-            it will return only the first key of the same name, so we use
-            .getlist(key) to get a list of all the key:value pairs with the same key
-            so we can iterate through all of the files sent.
+        Expects form-data
+
+        Fields:
+            image_date : DateTime
+            image_type : one of ['CT scan', 'MRI', 'PET scan', 'Ultrasound', 'X-Ray']
+            image_origin_location : Text Field
+            image_read : Text Field
+            image : file/s to upload
         """
         check_client_existence(clientid)
 
-        #Verify at least 1 file with key-name:image is selected
+        #Verify at least 1 file with key-name:image is selected for upload
         if 'image' not in request.files:
             raise InputError(400, 'Empty input file')
 
@@ -87,34 +89,32 @@ class MedImaging(Resource):
         files = request.files
         MAX_bytes = 500000000 #500 mb
 
-        for i, img in enumerate(files.getlist('image')):
-            
-            img_name, img_extension = os.path.splitext(img.filename)
+        for i, img in enumerate(files.getlist('image')):       
+
             #Verify image file extension is within acceptable extensions
+            img_name, img_extension = os.path.splitext(img.filename)
             if img_extension.lower() not in possible_input_file_extensions:
                 raise InputError(415, "Unsupported file type")
-            
-            
+
+            #Verifying image size is within a safe threashold (MAX = 500 mb)
             img.seek(0, os.SEEK_END)
             img_size = img.tell()
-            #Verifying image size is within a safe threashold (MAX = 500 mb = 500mil bytes)
             if img_size > MAX_bytes:
                 raise InputError(413, 'File too large')
             
-            #TODO: change file name (dateofupload_clientid)
-            #TODO: Save to S3 Bucket & get path
+            mi_schema = MedicalImagingSchema()
+            mi_data = mi_schema.load(request.form)
+            mi_data.clientid = clientid
+
+            #Rename:"imageIndex_datetimeOfUpload_clientid" AND Save=>S3
             img.seek(0)
-            
+            s3key = f'{i}_{mi_data.image_date}_{clientid}{img_extension}'
+            s3 = boto3.resource('s3')
+            s3.Bucket('testingavpapi').put_object(Key= s3key, Body=img.stream)         
+            mi_data.image_path = s3key
 
-        #s3path = 
-        mi_schema = MedicalImagingSchema()
-        """ Using request.form ... """
-        mi_data = mi_schema.load(request.form)
-        mi_data.clientid = clientid
-       # mi_data.image_path = s3path
-
-        db.session.add(mi_data)
-        db.session.commit()
+            db.session.add(mi_data)  
+            db.session.commit()
 
 @ns.route('/bloodtest/cmp/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})

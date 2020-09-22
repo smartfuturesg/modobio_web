@@ -1089,23 +1089,7 @@ class MedicalImagingSchema(ma.SQLAlchemyAutoSchema):
         exclude = ["clientid", "idx"]
 
     possible_image_types = ['CT scan', 'MRI', 'PET scan', 'Ultrasound', 'X-Ray']
-    image_type = fields.String(validate=validate.OneOf(possible_image_types), required=True)
-
-    #
-    """clientid = fields.Integer(missing=0)
-    possible_image_types = ['CT scan', 'MRI', 'PET scan', 'Ultrasound', 'X-Ray']
-    image_date = fields.DateTime(format='%Y-%m-%d', required=True)
-    image_read = fields.String(required=True)
-    image_type = fields.String(validate=validate.OneOf(possible_image_types), required=True)
-    files = fields.Dict()
-    image_name = fields.String()
-    image_origin_location = fields.String()
-    image_cpt_code = fields.String()
-    
-    
-    @post_load
-    def make_object(self, data, **kwargs):
-        return MedicalImaging(**data)   """
+    image_type = fields.String(validate=validate.OneOf(possible_image_types), required=True)   
 
 
 class BloodChemistryCBCSchema(Schema):
