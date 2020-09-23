@@ -1191,6 +1191,8 @@ class FitnessQuestionnaire(db.Model):
 
     __tablename__ = 'TrainerFitnessQuestionnaire'
 
+    displayname = 'Fitness Questionnaire'
+
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     Table index.

@@ -9,6 +9,8 @@ class PTHistory(db.Model):
 
     __tablename__ = 'PTHistory'
 
+    displayname = 'Physical Therapy History'
+
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     Table index.
