@@ -1,5 +1,5 @@
 import boto3
-from datetime import datetime
+from datetime import datetime, date
 
 from flask import request, jsonify, current_app
 from flask_accepts import accepts, responds
@@ -9,6 +9,7 @@ from odyssey.api import api
 from odyssey.api.auth import token_auth, token_auth_client
 from odyssey.api.errors import UserNotFound, ClientAlreadyExists, ClientNotFound, IllegalSetting, ContentNotFound
 from odyssey import db
+from odyssey.constants import TABLE_TO_URI
 from odyssey.models.client import (
     ClientInfo,
     ClientConsent,
@@ -19,7 +20,10 @@ from odyssey.models.client import (
     ClientSubscriptionContract,
     RemoteRegistration
 )
+from odyssey.models.doctor import MedicalHistory, MedicalPhysicalExam
+from odyssey.models.pt import PTHistory 
 from odyssey.models.staff import ClientRemovalRequests
+from odyssey.models.trainer import FitnessQuestionnaire
 from odyssey.pdf import to_pdf, merge_pdfs
 from odyssey.utils.email import send_email_remote_registration_portal, send_test_email
 from odyssey.utils.misc import check_client_existence
@@ -29,6 +33,7 @@ from odyssey.utils.schemas import (
     ClientIndividualContractSchema,
     ClientInfoSchema,
     ClientPoliciesContractSchema, 
+    ClientRegistrationStatusSchema,
     ClientReleaseSchema,
     ClientReleaseContactsSchema,
     ClientRemoteRegistrationPortalSchema, 
@@ -65,10 +70,12 @@ class Client(Resource):
         #prevent requests to set clientid and send message back to api user
         elif data.get('clientid', None):
             raise IllegalSetting('clientid')
-        # client.update
-        client.from_dict(data)
-        db.session.add(client)
+        elif data.get('membersince', None):
+            raise IllegalSetting('membersince')
+        
+        client.update(data)
         db.session.commit()
+        
         return client
 
 @ns.route('/remove/<int:clientid>/')
@@ -113,6 +120,8 @@ class NewClient(Resource):
         #prevent requests to set clientid and send message back to api user
         elif data.get('clientid', None):
             raise IllegalSetting('clientid')
+        #set member since date to today
+        data['membersince'] = date.today().strftime("%Y-%m-%d")
    
         ci_schema = ClientInfoSchema()
         client = ci_schema.load(data)
@@ -390,8 +399,11 @@ class IndividualContract(Resource):
     def post(self, clientid):
         """create client individual services contract object for the specified clientid"""
         data = request.get_json()
-        client_services = ClientIndividualContract(revision=ClientIndividualContract.current_revision)
-        client_services.from_dict(clientid, data)
+        data['clientid'] = clientid
+        data['revision'] = ClientIndividualContract.current_revision
+
+        client_services = ClientIndividualContract(**data)
+
         db.session.add(client_services)
         db.session.commit()
         to_pdf(clientid, ClientIndividualContract)
@@ -431,10 +443,14 @@ class SignedDocuments(Resource):
         urls = {}
         paths = []
 
+        bucket_name = current_app.config['DOCS_BUCKET_NAME']
+        if not bucket_name:
+            raise IllegalSetting(message='Bucket name not defined.')
+
         if not current_app.config['LOCAL_CONFIG']:
             s3 = boto3.client('s3')
             params = {
-                'Bucket': current_app.config['DOCS_BUCKET_NAME'],
+                'Bucket': bucket_name,
                 'Key': None
             }
 
@@ -465,6 +481,42 @@ class SignedDocuments(Resource):
         urls['All documents'] = concat
 
         return {'urls': urls}
+
+@ns.route('/registrationstatus/<int:clientid>/')
+@ns.doc(params={'clientid': 'Client ID number'})
+class JourneyStatusCheck(Resource):
+    """
+        Returns the outstanding forms needed to complete the client journey
+    """
+    @responds(schema=ClientRegistrationStatusSchema, api=ns)
+    @token_auth.login_required
+    def get(self, clientid):
+        """
+        Returns the client's outstanding registration items and their URIs.
+        """
+        check_client_existence(clientid)
+
+        remaining_forms = []
+
+        for table in (
+                ClientPolicies,
+                ClientConsent,
+                ClientRelease,
+                ClientConsultContract,
+                ClientSubscriptionContract,
+                ClientIndividualContract,
+                FitnessQuestionnaire,
+                MedicalHistory,
+                MedicalPhysicalExam,
+                PTHistory
+        ):
+            result = table.query.filter_by(clientid=clientid).order_by(table.idx.desc()).first()
+
+            if result is None:
+                remaining_forms.append({'name': table.displayname, 'URI': TABLE_TO_URI.get(table.__tablename__).format(clientid)})
+
+        return {'outstanding': remaining_forms}
+
 
 
 @ns.route('/remoteregistration/new/')

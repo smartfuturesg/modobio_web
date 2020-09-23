@@ -9,6 +9,8 @@ class PTHistory(db.Model):
 
     __tablename__ = 'PTHistory'
 
+    displayname = 'Physical Therapy History'
+
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     Table index.
@@ -367,74 +369,6 @@ class Chessboard(db.Model):
 
     :type: str
     """
-
-    def get_attributes(self):
-        """attributes for setting values from dictionaries. 
-           Timestamp and clientid are purposefully left out. They are set individually
-        """
-        return ['isa_left', 'isa_right', 'isa_dynamic', 'isa_structure',
-            'left_shoulder_er', 'left_shoulder_ir', 'left_shoulder_abd', 'left_shoulder_add',
-            'left_shoulder_flexion', 'left_shoulder_extension', 'right_shoulder_er', 'right_shoulder_ir',
-            'right_shoulder_abd', 'right_shoulder_add', 'right_shoulder_flexion', 'right_shoulder_extension', 
-            'left_hip_er', 'left_hip_ir', 'left_hip_abd', 'left_hip_add', 'left_hip_flexion', 'left_hip_extension', 
-            'right_hip_er', 'right_hip_ir', 'right_hip_abd', 'right_hip_add', 'right_hip_flexion', 'right_hip_extension']
-    
-    def to_dict(self):
-        """returns all mobility assessment in dictionary form"""
-        data = {
-            'clientid': self.clientid,
-            'timestamp': self.timestamp,
-            'isa_left': self.isa_left,
-            'isa_right': self.isa_right,
-            'isa_dynamic': self.isa_dynamic,
-            'isa_structure': self.isa_structure,
-            'left_shoulder_er': self.left_shoulder_er,
-            'left_shoulder_ir': self.left_shoulder_ir,
-            'left_shoulder_abd': self.left_shoulder_abd,
-            'left_shoulder_add': self.left_shoulder_add,
-            'left_shoulder_flexion': self.left_shoulder_flexion,
-            'left_shoulder_extension': self.left_shoulder_extension,
-            'right_shoulder_er': self.right_shoulder_er,
-            'right_shoulder_ir': self.right_shoulder_ir,
-            'right_shoulder_abd': self.right_shoulder_abd,
-            'right_shoulder_add': self.right_shoulder_add,
-            'right_shoulder_flexion': self.right_shoulder_flexion,
-            'right_shoulder_extension': self.right_shoulder_extension,
-            'left_hip_er': self.left_hip_er,
-            'left_hip_ir': self.left_hip_ir,
-            'left_hip_abd': self.left_hip_abd,
-            'left_hip_add': self.left_hip_add,
-            'left_hip_flexion': self.left_hip_flexion,
-            'left_hip_extension': self.left_hip_extension,
-            'right_hip_er': self.right_hip_er,
-            'right_hip_ir': self.right_hip_ir,
-            'right_hip_abd': self.right_hip_abd,
-            'right_hip_add': self.right_hip_add,
-            'right_hip_flexion': self.right_hip_flexion,
-            'right_hip_extension': self.right_hip_extension,
-        }
-        return data
-
-    def from_dict(self, data):
-        """to be used when a new user is created or a user id edited"""
-        attributes = self.get_attributes()
-
-        setattr(self, 'timestamp', datetime.utcnow())
-        for field in attributes:
-            if field in data:
-                setattr(self, field, data[field])
-
-    @staticmethod
-    def all_chessboard_entries(query, **kwargs):
-        resources = query.all()
-        
-        data = {
-            'items': [item.to_dict() for item in resources],
-            '_meta': {
-                'total_items': len(resources)
-                }
-            }
-        return data, resources
 
 class MobilityAssessment(db.Model):
     """ Mobility assessment table

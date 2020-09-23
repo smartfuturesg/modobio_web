@@ -9,6 +9,21 @@ from odyssey.models.client import (
     ClientIndividualContract,
     ClientSubscriptionContract
 )
+from odyssey.models.pt import PTHistory 
+from odyssey.models.doctor import MedicalHistory, MedicalPhysicalExam
+from odyssey.models.trainer import FitnessQuestionnaire
+
+TABLE_TO_URI = {ClientPolicies.__tablename__ : '/client/policies/{}/',
+                ClientRelease.__tablename__ : '/client/release/{}/',
+                ClientConsent.__tablename__ : '/client/consent/{}/',
+                ClientConsultContract.__tablename__ : '/client/consultcontract/{}/',
+                ClientIndividualContract.__tablename__ : '/client/servicescontract/{}/' ,
+                ClientSubscriptionContract.__tablename__ : '/client/subscriptioncontract/{}/',
+                FitnessQuestionnaire.__tablename__: '/trainer/questionnaire/{}/',
+                MedicalHistory.__tablename__: '/doctor/medicalhistory/{}/',
+                PTHistory.__tablename__: '/pt/history/{}/',
+                MedicalPhysicalExam.__tablename__: '/doctor/physical/{}/'
+                }
 
 COUNTRIES = (
     ('AF', 'Afghanistan'),
@@ -363,7 +378,7 @@ BOOLIFY = lambda x: bool(int(x))
 A POST request always returns a string. A :class:`sqlalchemy.types.Boolean`
 database column expects a Python :attr:`True` or :attr:`False` value. Use
 :func:`BOOLIFY` to convert the returned string value '0' or '1' into
-:attr:`False` or :attr:`True`, respectively. Use in conjuction with
+:attr:`False` or :attr:`True`, respectively. Use in conjunction with
 :const:`YESNO`.::
 
     name = RadioField('label', choices=YESNO, coerce=BOOLIFY)

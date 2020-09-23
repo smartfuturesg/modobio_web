@@ -18,7 +18,7 @@ class ClientPTHistory(Resource):
     @token_auth.login_required
     @responds(schema=PTHistorySchema)
     def get(self, clientid):
-        """returns most recent mobility assessment data"""
+        """returns most recent pt history"""
         check_client_existence(clientid)
         client_pt = PTHistory.query.filter_by(
                         clientid=clientid).first()
@@ -32,7 +32,7 @@ class ClientPTHistory(Resource):
     @accepts(schema=PTHistorySchema, api=ns)
     @responds(schema=PTHistorySchema, status_code=201, api=ns)
     def post(self, clientid):
-        """returns most recent mobility assessment data"""
+        """create client's pt history"""
         check_client_existence(clientid)
 
         data = request.get_json()
@@ -46,10 +46,8 @@ class ClientPTHistory(Resource):
 
         data['clientid'] = clientid
         
-        pth_schema = PTHistorySchema()
-
         #create a new entry into the pt history table
-        client_pt = pth_schema.load(data)
+        client_pt = PTHistorySchema().load(data)
 
         db.session.add(client_pt)
         db.session.commit()
@@ -68,7 +66,6 @@ class ClientPTHistory(Resource):
         if not client_pt:
             raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a pt history in the database")
 
-        
         # get payload and update the current instance followed by db commit
         data = request.get_json()
 
@@ -106,8 +103,7 @@ class ClientChessboard(Resource):
         data = request.get_json()
         data['clientid'] = clientid
 
-        chessboard_schema = ChessboardSchema()
-        client_ma = chessboard_schema.load(data)
+        client_ma = ChessboardSchema().load(data)
         
         db.session.add(client_ma)
         db.session.commit()
