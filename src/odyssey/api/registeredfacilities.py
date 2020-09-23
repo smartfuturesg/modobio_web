@@ -71,22 +71,17 @@ class NewFacility(Resource):
     @token_auth.login_required
     @accepts(schema=RegisteredFacilitiesSchema, api=ns)
     @responds(schema=RegisteredFacilitiesSchema, status_code=201, api=ns)
-    def post(self, facility_id):
+    def post(self):
         """create a new registered facility"""
-        #facility = RegisteredFacilities.query.filter_by(facility_id=facility_id).first()
-        
-
         data = request.get_json()
 
-        data['facility_id'] = facility_id
+        #prevent requests to set clientid and send message back to api user
+        if data.get('facility_id', None):
+            raise IllegalSetting('facility_id')
 
-        facility_schema = RegisteredFacilitiesSchema()
-
-        facility_data = facility_schema.load(data)
-
+        facility_data = RegisteredFacilitiesSchema().load(data)
         db.session.add(facility_data)
         db.session.commit()
-
         return facility_data
 
 @ns.route('/client/<int:clientid>/')

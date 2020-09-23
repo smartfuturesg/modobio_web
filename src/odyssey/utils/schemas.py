@@ -1280,7 +1280,7 @@ class MedicalBloodChemistryThyroidSchema(Schema):
         return MedicalBloodChemistryThyroid(**data)
 
 class RegisteredFacilitiesSchema(Schema):
-    facility_id = fields.Integer(required=False, missing=0)
+    facility_id = fields.Integer(required=False)
     facility_name = fields.String(required=True)
     facility_address = fields.String(required=True)
     modobio_facility = fields.Boolean(required=True)
