@@ -36,27 +36,6 @@ class RegisteredFacility(Resource):
 
     @token_auth.login_required
     @accepts(schema=RegisteredFacilitiesSchema, api=ns)
-    @responds(schema=RegisteredFacilitiesSchema, status_code=201, api=ns)
-    def post(self, facility_id):
-        """create a new registered facility"""
-        #facility = RegisteredFacilities.query.filter_by(facility_id=facility_id).first()
-        
-
-        data = request.get_json()
-
-        data['facility_id'] = facility_id
-
-        facility_schema = RegisteredFacilitiesSchema()
-
-        facility_data = facility_schema.load(data)
-
-        db.session.add(facility_data)
-        db.session.commit()
-
-        return facility_data
-
-    @token_auth.login_required
-    @accepts(schema=RegisteredFacilitiesSchema, api=ns)
     @responds(schema=RegisteredFacilitiesSchema, api=ns)
     def put(self, facility_id):
         """edit registered facility info"""
@@ -84,6 +63,31 @@ class AllFacilities(Resource):
     def get(self):
         """get a list of all registered facilities"""
         return RegisteredFacilities.query.all()
+
+@ns.route('/')
+class NewFacility(Resource):
+    """api to create a new registered facility"""
+
+    @token_auth.login_required
+    @accepts(schema=RegisteredFacilitiesSchema, api=ns)
+    @responds(schema=RegisteredFacilitiesSchema, status_code=201, api=ns)
+    def post(self, facility_id):
+        """create a new registered facility"""
+        #facility = RegisteredFacilities.query.filter_by(facility_id=facility_id).first()
+        
+
+        data = request.get_json()
+
+        data['facility_id'] = facility_id
+
+        facility_schema = RegisteredFacilitiesSchema()
+
+        facility_data = facility_schema.load(data)
+
+        db.session.add(facility_data)
+        db.session.commit()
+
+        return facility_data
 
 @ns.route('/client/<int:clientid>/')
 class RegisterClient(Resource):
