@@ -17,6 +17,7 @@ from odyssey.models.client import (
     ClientPolicies,
     ClientRelease,
     ClientSubscriptionContract,
+    ClientFacilities,
     RemoteRegistration
 )
 from odyssey.models.staff import ClientRemovalRequests
@@ -46,12 +47,12 @@ ns = api.namespace('client', description='Operations related to clients')
 @ns.doc(params={'clientid': 'Client ID number'})
 class Client(Resource):
     @token_auth.login_required
-    @responds(schema=ClientInfoSchema, api=ns)
     def get(self, clientid):
         """returns client info table as a json for the clientid specified"""
         client = ClientInfo.query.get(clientid)
         if not client:
             raise UserNotFound(clientid)
+        client['registeredFacilities'] = ClientFacilities.query.get(clientid)
         return client
 
     @token_auth.login_required
