@@ -98,7 +98,7 @@ def test_creating_new_client(test_client, init_database):
     # some simple checks for validity
     assert response.status_code == 201
     assert client.email == 'test_this_client_two@gmail.com'
-    assert client.get_medical_record_hash() == 'TC21CAB50'
+    assert client.record_locator_id == 'TC21CAB50'
 
 def test_removing_client(test_client, init_database):
     """

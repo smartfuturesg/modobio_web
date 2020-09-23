@@ -28,6 +28,7 @@ from odyssey.pdf import to_pdf, merge_pdfs
 from odyssey.utils.email import send_email_remote_registration_portal, send_test_email
 from odyssey.utils.misc import check_client_existence
 from odyssey.utils.schemas import (
+    ClientSearchSchema,
     ClientConsentSchema,
     ClientConsultContractSchema,
     ClientIndividualContractSchema,
@@ -122,11 +123,16 @@ class NewClient(Resource):
             raise IllegalSetting('clientid')
         #set member since date to today
         data['membersince'] = date.today().strftime("%Y-%m-%d")
-   
-        ci_schema = ClientInfoSchema()
-        client = ci_schema.load(data)
+        
+        client = ClientInfoSchema().load(data)
         db.session.add(client)
+        db.session.flush()
+
+        rli = {'record_locator_id': ClientInfo().get_medical_record_hash(firstname = client.firstname , lastname = client.lastname, clientid =client.clientid)}
+
+        client.update(rli)
         db.session.commit()
+
         return client
 
 
@@ -134,34 +140,34 @@ class NewClient(Resource):
 @ns.doc(params={'page': 'request page for paginated clients list', 'per_page': 'number of clients per page'})
 class Clients(Resource):
     @token_auth.login_required
+    @accepts(schema=ClientSearchSchema, api=ns)
     def get(self):
         """returns list of all clients"""
         page = request.args.get('page', 1, type=int)
         per_page = min(request.args.get('per_page', 10, type=int), 100)                 
-
+        
         payload = request.get_json()
         # These payload keys should be the same as what's indexed in 
         # the model.
-        payload_keys = ['firstname', 'lastname', 'email', 'phone', 'dob']
+        payload_keys = ['firstname', 'lastname', 'email', 'phone', 'dob', 'record_locator_id']
+        
         searchStr = ''
-        rli = None
  
         if not payload:
             data, resources = ClientInfo.all_clients_dict(ClientInfo.query.order_by(ClientInfo.lastname.asc()),
                                                 page=page,per_page=per_page)
         else:
-            if 'record_locator_id' in payload:
-                rli_key = 'record_locator_id'
-                rli = payload[rli_key]
-                del payload[rli_key]
-
+            # DOB is a string that needs to be broken up without the "-"
+            # for whooshee search
+            if payload.get('dob', None):
+                payload['dob'] = payload['dob'].replace("-"," ")
+            # Go through the payload, and enter an empty string for missing keys
             for key in payload_keys:
                 if key not in payload:
                     payload[key]=''
                 searchStr = searchStr + payload[key] + ' '
             data, resources = ClientInfo.all_clients_dict(ClientInfo.query.whooshee_search(searchStr).order_by(ClientInfo.lastname.asc()),
                                                 page=page,per_page=per_page) 
-
         data['_links']= {
             'self': api.url_for(Clients, page=page, per_page=per_page),
             'next': api.url_for(Clients, page=page + 1, per_page=per_page)
@@ -169,13 +175,8 @@ class Clients(Resource):
             'prev': api.url_for(Clients, page=page - 1, per_page=per_page)
             if resources.has_prev else None,
         }
-
-        if rli:
-            for idx,val in enumerate(data['items']):
-                if rli in val.values():
-                    data = data['items'][idx]
         
-        return data
+        return jsonify(data)
 
 @ns.route('/consent/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
