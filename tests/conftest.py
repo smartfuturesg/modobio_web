@@ -1,6 +1,6 @@
 import pytest
 
-from odyssey import create_app, db
+from odyssey import create_app, db, whooshee
 from odyssey.models.client import (
     ClientInfo,
     ClientConsent,

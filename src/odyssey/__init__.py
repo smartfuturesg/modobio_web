@@ -18,13 +18,9 @@ db = SQLAlchemy()
 migrate = Migrate()
 cors = CORS()
 ma = Marshmallow()
-<<<<<<< HEAD
 whooshee = Whooshee()
-def create_app(flask_dev=None):
-=======
 
 def create_app():
->>>>>>> 7bbe713294afcaa70295f9af3ccf8fb2eb3dd765
     """ Initialize an instance of the Flask app.
 
         This function is an 'app factory'. It creates an instance of :class:`flask.Flask`.
@@ -50,13 +46,8 @@ def create_app():
         odyssey.config and odyssey.defaults
     """
     app = Flask(__name__)
-<<<<<<< HEAD
-    
-    app.config.from_object(Config(flask_dev=flask_dev))
-=======
 
     app.config.from_object(Config())
->>>>>>> 7bbe713294afcaa70295f9af3ccf8fb2eb3dd765
     app.config['APPLICATION_ROOT'] = '/api'
 
     db.init_app(app)
@@ -78,6 +69,17 @@ def create_app():
     if app.config['LOCAL_CONFIG']:
         from odyssey.api.postman import bp
         app.register_blueprint(bp, url_prefix='/postman')
+
+    # If you want to add another field to search for in the database by whooshee
+    # Example: @whooshee.register_model('firstname')
+    # Add in lastname
+    # @whooshee.register_model('firstname','lastname')
+    # YOU MUST DELETE THE whooshee folder! Same level as src, tests, migrations, etc
+    with app.app_context():
+        try:
+            whooshee.reindex()
+        except:
+            pass
 
     return app
 

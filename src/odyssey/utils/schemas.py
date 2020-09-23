@@ -15,7 +15,6 @@ from odyssey.models.doctor import (
     MedicalBloodChemistryA1C
 )
 from odyssey.models.client import (
-    GarbageClient,
     ClientConsent,
     ClientConsultContract,
     ClientExternalMR,
@@ -44,26 +43,6 @@ from odyssey.models.trainer import (
 from odyssey.models.wearables import Wearables, WearablesOura
 from odyssey.utils.misc import list_average
 
-<<<<<<< HEAD
-@whooshee.register_whoosheer(GarbageClient)
-class GarbageClientSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = GarbageClient
-
-    id = fields.Integer(required=False)
-
-    @classmethod
-    def update_entry(cls, writer, garbageclient):
-        writer.update_document(id=garbageclient.id,
-                               firstname=garbageclient.firstname,
-                               lastname=garbageclient.lastname,
-                               email=garbageclient.email,
-                               phone=garbageclient.phone)
-
-    @post_load
-    def make_object(self, data, **kwargs):
-        return GarbageClient(**data)
-=======
 class ClientFacilitiesSchema(Schema):
 
     idx = fields.Integer()
@@ -73,7 +52,6 @@ class ClientFacilitiesSchema(Schema):
     @post_load
     def make_object(self, data, **kwargs):
         return ClientFacilities(**data)
->>>>>>> 7bbe713294afcaa70295f9af3ccf8fb2eb3dd765
 
 class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

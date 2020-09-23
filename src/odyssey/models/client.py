@@ -14,18 +14,7 @@ from odyssey import db, whooshee
 
 phx_tz = pytz.timezone('America/Phoenix')
 
-# @whooshee.register_model('firstname','lastname','email','phone')
-class GarbageClient(db.Model):
-    
-    __tablename__ = 'GarbageClient'
-
-    id = db.Column(db.Integer,primary_key=True,autoincrement=True)
-    firstname = db.Column(db.String(50))
-    lastname = db.Column(db.String(50))
-    email = db.Column(db.String(50))
-    phone = db.Column(db.String(20))
-
-@whooshee.register_model('firstname','lastname','email','phone')
+@whooshee.register_model('firstname','lastname','email','phone','dob', 'record_locator_id')
 class ClientInfo(db.Model):
     """ Client information table
 
@@ -37,8 +26,6 @@ class ClientInfo(db.Model):
     """
 
     __tablename__ = 'ClientInfo'
-
-    # __searchable__ = ['firstname','lastname','email','phone']
 
     clientid = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
