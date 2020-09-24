@@ -251,6 +251,18 @@ class SignedDocumentsSchema(Schema):
         values=fields.String(description='URL to PDF file of document.')
     )
 
+class OutstandingForm(Schema):
+    """
+        Forms that have not yet been completed
+        Display name and URI given
+    """
+    name = fields.String(description='name of form')
+    URI = fields.String(description = 'URI for completing form')
+
+class ClientRegistrationStatusSchema(Schema):
+
+    outstanding = fields.Nested(OutstandingForm(many=True))
+
 
 """
     Schemas for the pt API

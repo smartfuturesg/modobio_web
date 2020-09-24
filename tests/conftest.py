@@ -39,8 +39,8 @@ def new_client():
     """
         create a test client using the client info table
     """
-    client = ClientInfo()
-    client.from_dict(test_client_info)
+    client = ClientInfo(**test_client_info)
+    
     return client
 
 @pytest.fixture(scope='module')

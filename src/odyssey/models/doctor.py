@@ -399,6 +399,8 @@ class MedicalHistory(db.Model):
     """
     __tablename__ = 'MedicalHistory'
 
+    displayname = 'Medical History'
+
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     Index
@@ -519,6 +521,8 @@ class MedicalPhysicalExam(db.Model):
     information is taken only once, during the initial consult.
     """
     __tablename__ = 'MedicalPhysicalExam'
+
+    displayname = 'Medical Physical Examination'
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """

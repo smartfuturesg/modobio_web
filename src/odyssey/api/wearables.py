@@ -138,9 +138,11 @@ class WearablesOuraAuthorizationEndpoint(Resource):
 
         check_client_existence(clientid)
 
-        wearables = Wearables.query.filter_by(clientid=clientid).one_or_none()
-        if not wearables or not wearables.has_oura:
-            raise ContentNotFound
+        # TODO: Disable this check until frontend has a way of setting has_oura
+        #
+        # wearables = Wearables.query.filter_by(clientid=clientid).one_or_none()
+        # if not wearables or not wearables.has_oura:
+        #     raise ContentNotFound
 
         client_id = current_app.config['OURA_CLIENT_ID']
         base_url = current_app.config['OURA_AUTH_URL']
