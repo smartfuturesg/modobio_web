@@ -552,6 +552,11 @@ class NewRemoteRegistration(Resource):
         db.session.add(client)
         db.session.flush()
 
+        rli = {'record_locator_id': ClientInfo().get_medical_record_hash(firstname = client.firstname , lastname = client.lastname, clientid =client.clientid)}
+
+        client.update(rli)        
+        db.session.flush()
+
         # create a new remote client registration entry
         portal_data = {'clientid' : client.clientid, 'email': client.email}
         remote_client_portal = client_rr_schema.load(portal_data)

@@ -249,7 +249,7 @@ class ClientInfo(db.Model):
             'record_locator_id': self.record_locator_id,
             'firstname': self.firstname,
             'lastname': self.lastname,
-            'dob': self.dob.strftime("%Y-%m-%d"),
+            'dob': self.dob.strftime("%Y-%m-%d") if self.dob is not None else self.dob,
             'phone': self.phone,
             'email': self.email
         }
