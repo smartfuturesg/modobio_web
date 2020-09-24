@@ -4,7 +4,7 @@ from hashlib import md5
 from marshmallow import Schema, fields, post_load, ValidationError, validates, validate
 from marshmallow import post_load, post_dump, pre_dump, pre_load
 
-from odyssey import ma, whooshee
+from odyssey import ma
 from odyssey.models.doctor import ( 
     MedicalHistory,
     MedicalPhysicalExam,
