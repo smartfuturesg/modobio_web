@@ -1,7 +1,7 @@
 """Add FreeStyle CGM table
 
 Revision ID: dce299726f19
-Revises: cc90212de393
+Revises: 9887fc6db28e
 Create Date: 2020-09-16 12:13:51.482233
 
 """
@@ -11,7 +11,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = 'dce299726f19'
-down_revision = 'cc90212de393'
+down_revision = '9887fc6db28e'
 branch_labels = None
 depends_on = None
 
@@ -27,7 +27,14 @@ def upgrade():
     sa.ForeignKeyConstraint(['clientid'], ['ClientInfo.clientid'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('idx')
     )
-    op.add_column('Wearables', sa.Column('has_freestyle', sa.Boolean(), nullable=False))
+
+    # This is a manual addition. Cannot update existing table with data
+    # and add a boolean column with nullable = False. Throws error:
+    #   sqlalchemy.exc.IntegrityError: (psycopg2.errors.NotNullViolation)
+    #   column "has_freestyle" contains null values
+    op.add_column('Wearables', sa.Column('has_freestyle', sa.Boolean(), default=False, nullable=True))
+    op.execute('UPDATE "Wearables" SET has_freestyle = false')
+    op.alter_column('Wearables', 'has_freestyle', nullable=False)
     # ### end Alembic commands ###
 
 
