@@ -1328,8 +1328,8 @@ class WearablesFreeStyleSchema(ma.SQLAlchemyAutoSchema):
         load_instance = True
         exclude = ('idx', 'clientid')
 
-    timestamps = fields.List(fields.List(fields.DateTime()))
-    glucose = fields.List(fields.List(fields.Float()))
+    timestamps = fields.List(fields.DateTime())
+    glucose = fields.List(fields.Float())
 
 
 class WearablesFreeStyleActivateSchema(ma.SQLAlchemyAutoSchema):
