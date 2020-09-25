@@ -18,12 +18,14 @@ from odyssey.models.client import (
     ClientPolicies,
     ClientRelease,
     ClientSubscriptionContract,
+    ClientFacilities,
     RemoteRegistration
 )
 from odyssey.models.doctor import MedicalHistory, MedicalPhysicalExam
 from odyssey.models.pt import PTHistory 
 from odyssey.models.staff import ClientRemovalRequests
 from odyssey.models.trainer import FitnessQuestionnaire
+from odyssey.models.misc import RegisteredFacilities
 from odyssey.pdf import to_pdf, merge_pdfs
 from odyssey.utils.email import send_email_remote_registration_portal, send_test_email
 from odyssey.utils.misc import check_client_existence
@@ -39,6 +41,7 @@ from odyssey.utils.schemas import (
     ClientReleaseContactsSchema,
     ClientRemoteRegistrationPortalSchema, 
     ClientSubscriptionContractSchema,
+    ClientSummarySchema,
     NewRemoteClientSchema, 
     RefreshRemoteRegistrationSchema,
     SignAndDateSchema,
@@ -135,6 +138,25 @@ class NewClient(Resource):
 
         return client
 
+@ns.route('/summary/<int:clientid>/')
+class ClientSummary(Resource):
+    @token_auth.login_required
+    @responds(schema=ClientSummarySchema, api=ns)
+    def get(self, clientid):
+        client = ClientInfo.query.get(clientid)
+        if not client:
+            raise UserNotFound(clientid)
+        
+        #get list of a client's registered facilities' addresses
+        clientFacilities = ClientFacilities.query.filter_by(client_id=clientid).all()
+        facilityList = [item.facility_id for item in clientFacilities]
+        facilities = []
+        for item in facilityList:
+            facilities.append(RegisteredFacilities.query.filter_by(facility_id=item).first())
+            
+        data = {"firstname": client.firstname, "middlename": client.middlename, "lastname": client.lastname,
+                "clientid": client.clientid, "dob": client.dob, "membersince": client.membersince, "facilities": facilities}
+        return data
 
 @ns.route('/clientsearch/')
 @ns.doc(params={'page': 'request page for paginated clients list', 'per_page': 'number of clients per page'})
