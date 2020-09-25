@@ -109,7 +109,7 @@ def test_get_client_facility(test_client, init_database):
 
     assert response.status_code == 200
 
-def test_get_client_sidebar(test_client, init_database):
+def test_get_client_summary(test_client, init_database):
     """
     GIVEN a api end point for cient sidebar
     WHEN the '/client/sidebar/<client id>' resource is requested (GET)
@@ -121,7 +121,7 @@ def test_get_client_sidebar(test_client, init_database):
     headers = {'Authorization': f'Bearer {token}'}
 
     #send get request for a client with client id = 1
-    response = test_client.get('/client/sidebar/1/',
+    response = test_client.get('/client/summary/1/',
                                 headers=headers,
                                 content_type='application/json')
 
