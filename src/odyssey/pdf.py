@@ -133,10 +133,10 @@ def _to_pdf(req_ctx, clientid, table, template=None, form=None):
         docname = table.displayname.split()[0].lower()
 
         filename = f'ModoBio_{docname}_v{doc.revision}_client{clientid:05d}_{doc.signdate}.pdf'
-        bucket_name = current_app.config['DOCS_BUCKET_NAME']
+        bucket_name = current_app.config['S3_BUCKET_NAME']
 
         if current_app.config['LOCAL_CONFIG']:
-            path = pathlib.Path(bucket_name)
+            path = pathlib.Path(bucket_name) / f'id{clientid:05d}' / 'signed_documents'
             path.mkdir(parents=True, exist_ok=True)
 
             fullname = path / filename
@@ -147,7 +147,7 @@ def _to_pdf(req_ctx, clientid, table, template=None, form=None):
             pdf_path = fullname.as_posix()
         else:
             pdf_obj = io.BytesIO(pdf)
-            pdf_path = f'id{clientid:05d}/{filename}'
+            pdf_path = f'id{clientid:05d}/signed_documents/{filename}'
 
             s3 = boto3.client('s3')
             s3.upload_fileobj(pdf_obj, bucket_name, pdf_path)
@@ -176,7 +176,7 @@ def merge_pdfs(documents: list, clientid: int) -> str:
     str
         Link to merged PDF file.
     """
-    bucket_name = current_app.config['DOCS_BUCKET_NAME']
+    bucket_name = current_app.config['S3_BUCKET_NAME']
 
     merger = PdfFileMerger()
     bufs = []
@@ -212,7 +212,7 @@ def merge_pdfs(documents: list, clientid: int) -> str:
     filename = f'ModoBio_client{clientid:05d}_{signdate}.pdf'
 
     if current_app.config['LOCAL_CONFIG']:
-        path = pathlib.Path(bucket_name)
+        path = pathlib.Path(bucket_name) / f'id{clientid:05d}' / 'signed_documents'
         path.mkdir(parents=True, exist_ok=True)
 
         fullname = path / filename
@@ -232,6 +232,6 @@ def merge_pdfs(documents: list, clientid: int) -> str:
             'Bucket': bucket_name,
             'Key': fullname
         }
-        pdf_path = s3.generate_presigned_url('get_object', Params=params, ExpiresIn=600)
+        pdf_path = s3.generate_presigned_url('get_object', Params=params, ExpiresIn=3600)
 
     return pdf_path
