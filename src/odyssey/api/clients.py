@@ -41,6 +41,7 @@ from odyssey.utils.schemas import (
     ClientReleaseContactsSchema,
     ClientRemoteRegistrationPortalSchema, 
     ClientSubscriptionContractSchema,
+    ClientSummarySchema,
     NewRemoteClientSchema, 
     RefreshRemoteRegistrationSchema,
     SignAndDateSchema,
@@ -137,9 +138,10 @@ class NewClient(Resource):
 
         return client
 
-@ns.route('/sidebar/<int:clientid>/')
-class ClientSidebar(Resource):
+@ns.route('/summary/<int:clientid>/')
+class ClientSummary(Resource):
     @token_auth.login_required
+    @responds(schema=ClientSummarySchema, api=ns)
     def get(self, clientid):
         client = ClientInfo.query.get(clientid)
         if not client:
@@ -150,18 +152,11 @@ class ClientSidebar(Resource):
         facilityList = [item.facility_id for item in clientFacilities]
         facilities = []
         for item in facilityList:
-            facilities.append(RegisteredFacilities.query.filter_by(facility_id=item).first().facility_address)
-
-        #ensure dates are not null
-        membersince, dob = None, None
-        if not client.membersince == None:
-            membersince = client.membersince.strftime("%Y-%m-%d")
-        if not client.dob == None:
-            dob = client.dob.strftime("%Y-%m-%d")
-
-        response = {"firstname": client.firstname, "middlename": client.middlename, "lastname": client.lastname,
-                    "dob": dob, "clientid": client.clientid, "membersince": membersince, "facilities": facilities}
-        return response
+            facilities.append(RegisteredFacilities.query.filter_by(facility_id=item).first())
+            
+        data = {"firstname": client.firstname, "middlename": client.middlename, "lastname": client.lastname,
+                "clientid": client.clientid, "dob": client.dob, "membersince": client.membersince, "facilities": facilities}
+        return data
 
 @ns.route('/clientsearch/')
 @ns.doc(params={'page': 'request page for paginated clients list', 'per_page': 'number of clients per page'})
