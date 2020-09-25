@@ -140,7 +140,6 @@ class NewClient(Resource):
 @ns.route('/sidebar/<int:clientid>/')
 class ClientSidebar(Resource):
     @token_auth.login_required
-    #@responds(schema=ClientSidebarSchema, api=ns, status_code=201)
     def get(self, clientid):
         client = ClientInfo.query.get(clientid)
         if not client:
