@@ -138,9 +138,11 @@ class Config:
         # S3 buckets
         if self.LOCAL_CONFIG:
             self.DOCS_BUCKET_NAME = defaults.DOCS_BUCKET_NAME
+            self.IMAGES_BUCKET_NAME = defaults.IMAGES_BUCKET_NAME
         else:
             # Don't use getvar, must fail if not set in environment
             self.DOCS_BUCKET_NAME = os.getenv('DOCS_BUCKET_NAME', None)
+            self.IMAGES_BUCKET_NAME = os.getenv('IMAGES_BUCKET_NAME', None)
 
         # Wearables
         self.OURA_CLIENT_ID = self.getvar(

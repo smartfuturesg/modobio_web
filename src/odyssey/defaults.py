@@ -8,6 +8,9 @@ FLASK_DEV = 'local'
 # Storage location for PDF documents
 DOCS_BUCKET_NAME = tempfile.TemporaryDirectory().name
 
+# Storage location for Medical Images
+IMAGES_BUCKET_NAME = tempfile.mkdtemp()
+
 # Database
 DB_FLAV = 'postgresql'
 DB_USER = ''

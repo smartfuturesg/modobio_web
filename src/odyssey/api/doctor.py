@@ -1,7 +1,7 @@
-import os, boto3
+import os, boto3, secrets, pathlib
 from datetime import datetime
 
-from flask import request
+from flask import request, current_app
 from flask_accepts import accepts, responds
 from flask_restx import Resource, Api
 from werkzeug.datastructures import FileStorage
@@ -29,7 +29,8 @@ from odyssey.api.errors import (
     ExamNotFound, 
     InputError,
     InsufficientInputs,
-    MethodNotAllowed
+    MethodNotAllowed,
+    UnknownError
 )
 from odyssey.utils.misc import check_client_existence
 from odyssey.utils.schemas import (
@@ -49,35 +50,55 @@ from odyssey.utils.schemas import (
 ns = api.namespace('doctor', description='Operations related to doctor')
 
 
-@ns.route('/medicalimaging/<int:clientid>/')
+@ns.route('/images/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
 class MedImaging(Resource):
     @token_auth.login_required
     @responds(schema=MedicalImagingSchema(many=True), api=ns)
     def get(self, clientid):
-        """returns a json file of all the medical images in the database for the specified clientid"""
-        
+        """returns a json file of all the medical images in the database for the specified clientid
+
+            Helpful notes:
+            image_path is a sharable url for an image saved in S3 Bucket
+        """
         check_client_existence(clientid)
         data = MedicalImaging.query.filter_by(clientid=clientid).all()
         if not data:
             raise ContentNotFound
+        
+        if not current_app.config['LOCAL_CONFIG']:
+            bucket_name = current_app.config['IMAGES_BUCKET_NAME']
+            if not bucket_name:
+                raise UnknownError(message='IMAGES_BUCKET_NAME name not defined')
 
+            s3 = boto3.client('s3')
+            params = {
+                        'Bucket' : bucket_name,
+                        'Key' : None
+                    }
+            for img in data:
+                if img.image_path:
+                    params['Key'] = img.image_path
+                    url = s3.generate_presigned_url('get_object', Params=params, ExpiresIn=3600)
+                    img.image_path = url
+ 
         return data
 
     @token_auth.login_required
-    #@accepts(schema=MedicalImagingSchema, api=ns)
+    #@accepts(schema=MedicalImagingSchema , api=ns)
     @responds(status_code=201, api=ns)
     def post(self, clientid):
         """For adding one or many medical images to the database for the specified clientid
 
         Expects form-data
 
-        Fields:
-            image_date : DateTime
-            image_type : one of ['CT scan', 'MRI', 'PET scan', 'Ultrasound', 'X-Ray']
-            image_origin_location : Text Field
-            image_read : Text Field
-            image : file/s to upload
+        "image": files selected to upload
+        "image_date": "2020-09-25T00:31:29.304Z",
+        "image_origin_location": "string",
+        "image_type": "string",
+        "image_read": "string",
+        "image_path": "string"
+
         """
         check_client_existence(clientid)
 
@@ -85,36 +106,49 @@ class MedImaging(Resource):
         if 'image' not in request.files:
             raise InputError(400, 'Empty input file')
 
-        possible_input_file_extensions = ['.jpeg', '.jpg', '.png', '.dcm']
         files = request.files
-        MAX_bytes = 500000000 #500 mb
+        mi_schema = MedicalImagingSchema()
+        MAX_bytes = 524288000 #500 mb
+        data_list = []
+        hex_token = secrets.token_hex(4)
 
-        for i, img in enumerate(files.getlist('image')):       
-
-            #Verify image file extension is within acceptable extensions
-            img_name, img_extension = os.path.splitext(img.filename)
-            if img_extension.lower() not in possible_input_file_extensions:
-                raise InputError(415, "Unsupported file type")
+        for i, img in enumerate(files.getlist('image')):
+            mi_data = mi_schema.load(request.form)
+            mi_data.clientid = clientid
+            date = mi_data.image_date.strftime("%Y-%m-%d")
 
             #Verifying image size is within a safe threashold (MAX = 500 mb)
             img.seek(0, os.SEEK_END)
             img_size = img.tell()
             if img_size > MAX_bytes:
                 raise InputError(413, 'File too large')
-            
-            mi_schema = MedicalImagingSchema()
-            mi_data = mi_schema.load(request.form)
-            mi_data.clientid = clientid
 
-            #Rename:"imageIndex_datetimeOfUpload_clientid" AND Save=>S3
+            #Rename image (format: imageType_Y-M-d_4digitRandomHex_index.img_extension) AND Save=>S3 
+            img_extension = pathlib.Path(img.filename).suffix
             img.seek(0)
-            s3key = f'{i}_{mi_data.image_date}_{clientid}{img_extension}'
-            s3 = boto3.resource('s3')
-            s3.Bucket('testingavpapi').put_object(Key= s3key, Body=img.stream)         
-            mi_data.image_path = s3key
+            bucket_name = current_app.config['IMAGES_BUCKET_NAME']
 
-            db.session.add(mi_data)  
-            db.session.commit()
+            if not bucket_name:
+                raise UnknownError(message='IMAGES_BUCKET_NAME name not defined')
+
+            if not current_app.config['LOCAL_CONFIG']:
+                s3key = f'id{clientid:05d}/{mi_data.image_type}_{date}_{hex_token}_{i}{img_extension}'
+                s3 = boto3.resource('s3')
+                s3.Bucket(bucket_name).put_object(Key= s3key, Body=img.stream) 
+                mi_data.image_path = s3key  
+
+            else:
+                path = pathlib.Path(bucket_name) / f'id{clientid:05d}'
+                path.mkdir(parents=True, exist_ok=True)
+                s3key = f'{mi_data.image_type}_{date}_{hex_token}_{i}{img_extension}'
+                file_name = path / s3key
+                mi_data.image_path = file_name.as_posix()
+                img.save(file_name.as_posix())
+
+            data_list.append(mi_data)
+
+        db.session.add_all(data_list)  
+        db.session.commit()
 
 @ns.route('/bloodtest/cmp/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})

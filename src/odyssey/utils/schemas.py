@@ -1,6 +1,5 @@
 from datetime import datetime
 from hashlib import md5
-
 from marshmallow import Schema, fields, post_load, ValidationError, validates, validate
 from marshmallow import post_load, post_dump, pre_dump, pre_load
 
@@ -1088,9 +1087,8 @@ class MedicalImagingSchema(ma.SQLAlchemyAutoSchema):
         load_instance = True
         exclude = ["clientid", "idx"]
 
-    possible_image_types = ['CT scan', 'MRI', 'PET scan', 'Ultrasound', 'X-Ray']
-    image_type = fields.String(validate=validate.OneOf(possible_image_types), required=True)   
-
+    possible_image_types = ['CTscan', 'MRI', 'PETscan', 'Ultrasound', 'XRay']
+    image_type = fields.String(validate=validate.OneOf(possible_image_types), required=True)
 
 class BloodChemistryCBCSchema(Schema):
 
