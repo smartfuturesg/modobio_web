@@ -19,8 +19,8 @@ def test_post_registered_facilities(test_client, init_database):
 
     payload = test_registered_facilities
     
-    # send get request for facility info on facility_id = 1 
-    response = test_client.post('/registeredfacility/1/',
+    # send psot request for a new facility 
+    response = test_client.post('/registeredfacility/',
                                 headers=headers, 
                                 data=dumps(payload), 
                                 content_type='application/json')
@@ -106,5 +106,23 @@ def test_get_client_facility(test_client, init_database):
     response = test_client.get('/registeredfacility/client/1/',
                                  headers=headers,
                                  content_type='application/json')
+
+    assert response.status_code == 200
+
+def test_get_client_sidebar(test_client, init_database):
+    """
+    GIVEN a api end point for cient sidebar
+    WHEN the '/client/sidebar/<client id>' resource is requested (GET)
+    THEN check the response is valid
+    """
+    #get staff authorization to view client data
+    staff = Staff().query.first()
+    token = staff.get_token()
+    headers = {'Authorization': f'Bearer {token}'}
+
+    #send get request for a client with client id = 1
+    response = test_client.get('/client/sidebar/1/',
+                                headers=headers,
+                                content_type='application/json')
 
     assert response.status_code == 200
