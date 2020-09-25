@@ -39,8 +39,8 @@ def new_client():
     """
         create a test client using the client info table
     """
-    client = ClientInfo()
-    client.from_dict(test_client_info)
+    client = ClientInfo(**test_client_info)
+    
     return client
 
 @pytest.fixture(scope='module')
@@ -68,8 +68,13 @@ def init_database():
     client_1 = ClientInfo(**test_client_info)
 
     db.session.add(client_1)
-    db.session.commit()
+    db.session.flush()
 
+    rli = {'record_locator_id': ClientInfo().get_medical_record_hash(firstname = client_1.firstname , lastname = client_1.lastname, clientid =client_1.clientid)}
+
+    client_1.update(rli)
+    db.session.commit()
+    
     clientid = client_1.clientid
 
     # initialize a test staff member

@@ -43,6 +43,14 @@ from odyssey.models.trainer import (
 from odyssey.models.wearables import Wearables, WearablesOura
 from odyssey.utils.misc import list_average
 
+class ClientSearchSchema(Schema):
+    firstname = fields.String(required=False, validate=validate.Length(min=1, max= 50), missing=None)
+    lastname = fields.String(required=False, validate=validate.Length(min=1,max=50), missing=None)
+    email = fields.Email(required=False, missing=None)
+    phone = fields.String(required=False, validate=validate.Length(min=0,max=50), missing=None)
+    dob = fields.Date(required=False, missing=None)
+    record_locator_id = fields.String(required=False, validate=validate.Length(min=0,max=10), missing=None)
+    
 class ClientFacilitiesSchema(Schema):
 
     idx = fields.Integer()
@@ -57,17 +65,12 @@ class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientInfo
 
-    record_locator_id = fields.String(dump_only=True)
+    record_locator_id = fields.String(missing=None)
 
     @post_load
     def make_object(self, data, **kwargs):
         return ClientInfo(**data)
 
-    @post_dump
-    def add_record_locator_id(self,data, **kwargs ):
-        name_hash = md5(bytes((data['firstname']+data['lastname']), 'utf-8')).hexdigest()
-        data['record_locator_id'] = (data['firstname'][0]+data['lastname'][0]+str(data['clientid'])+name_hash[0:6]).upper()
-        return data
 
 class NewRemoteClientSchema(Schema):
 
@@ -250,6 +253,18 @@ class SignedDocumentsSchema(Schema):
         keys=fields.String(description='Document display name'),
         values=fields.String(description='URL to PDF file of document.')
     )
+
+class OutstandingForm(Schema):
+    """
+        Forms that have not yet been completed
+        Display name and URI given
+    """
+    name = fields.String(description='name of form')
+    URI = fields.String(description = 'URI for completing form')
+
+class ClientRegistrationStatusSchema(Schema):
+
+    outstanding = fields.Nested(OutstandingForm(many=True))
 
 
 """

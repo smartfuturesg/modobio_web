@@ -9,6 +9,7 @@ from odyssey.api import api
 from odyssey.api.auth import token_auth, token_auth_client
 from odyssey.api.errors import UserNotFound, ClientAlreadyExists, ClientNotFound, IllegalSetting, ContentNotFound
 from odyssey import db
+from odyssey.constants import TABLE_TO_URI
 from odyssey.models.client import (
     ClientInfo,
     ClientConsent,
@@ -19,16 +20,21 @@ from odyssey.models.client import (
     ClientSubscriptionContract,
     RemoteRegistration
 )
+from odyssey.models.doctor import MedicalHistory, MedicalPhysicalExam
+from odyssey.models.pt import PTHistory 
 from odyssey.models.staff import ClientRemovalRequests
+from odyssey.models.trainer import FitnessQuestionnaire
 from odyssey.pdf import to_pdf, merge_pdfs
 from odyssey.utils.email import send_email_remote_registration_portal, send_test_email
 from odyssey.utils.misc import check_client_existence
 from odyssey.utils.schemas import (
+    ClientSearchSchema,
     ClientConsentSchema,
     ClientConsultContractSchema,
     ClientIndividualContractSchema,
     ClientInfoSchema,
     ClientPoliciesContractSchema, 
+    ClientRegistrationStatusSchema,
     ClientReleaseSchema,
     ClientReleaseContactsSchema,
     ClientRemoteRegistrationPortalSchema, 
@@ -38,7 +44,6 @@ from odyssey.utils.schemas import (
     SignAndDateSchema,
     SignedDocumentsSchema
 )
-
 
 ns = api.namespace('client', description='Operations related to clients')
 
@@ -118,11 +123,16 @@ class NewClient(Resource):
             raise IllegalSetting('clientid')
         #set member since date to today
         data['membersince'] = date.today().strftime("%Y-%m-%d")
-   
-        ci_schema = ClientInfoSchema()
-        client = ci_schema.load(data)
+        
+        client = ClientInfoSchema().load(data)
         db.session.add(client)
+        db.session.flush()
+
+        rli = {'record_locator_id': ClientInfo().get_medical_record_hash(firstname = client.firstname , lastname = client.lastname, clientid =client.clientid)}
+
+        client.update(rli)
         db.session.commit()
+
         return client
 
 
@@ -130,12 +140,34 @@ class NewClient(Resource):
 @ns.doc(params={'page': 'request page for paginated clients list', 'per_page': 'number of clients per page'})
 class Clients(Resource):
     @token_auth.login_required
+    @accepts(schema=ClientSearchSchema, api=ns)
     def get(self):
         """returns list of all clients"""
         page = request.args.get('page', 1, type=int)
-        per_page = min(request.args.get('per_page', 10, type=int), 100)
-        data, resources = ClientInfo.all_clients_dict(ClientInfo.query.order_by(ClientInfo.lastname.asc()),
-                                            page=page,per_page=per_page)
+        per_page = min(request.args.get('per_page', 10, type=int), 100)                 
+        
+        payload = request.get_json()
+        # These payload keys should be the same as what's indexed in 
+        # the model.
+        payload_keys = ['firstname', 'lastname', 'email', 'phone', 'dob', 'record_locator_id']
+        
+        searchStr = ''
+ 
+        if not payload:
+            data, resources = ClientInfo.all_clients_dict(ClientInfo.query.order_by(ClientInfo.lastname.asc()),
+                                                page=page,per_page=per_page)
+        else:
+            # DOB is a string that needs to be broken up without the "-"
+            # for whooshee search
+            if payload.get('dob', None):
+                payload['dob'] = payload['dob'].replace("-"," ")
+            # Go through the payload, and enter an empty string for missing keys
+            for key in payload_keys:
+                if key not in payload:
+                    payload[key]=''
+                searchStr = searchStr + payload[key] + ' '
+            data, resources = ClientInfo.all_clients_dict(ClientInfo.query.whooshee_search(searchStr).order_by(ClientInfo.lastname.asc()),
+                                                page=page,per_page=per_page) 
         data['_links']= {
             'self': api.url_for(Clients, page=page, per_page=per_page),
             'next': api.url_for(Clients, page=page + 1, per_page=per_page)
@@ -143,7 +175,7 @@ class Clients(Resource):
             'prev': api.url_for(Clients, page=page - 1, per_page=per_page)
             if resources.has_prev else None,
         }
-
+        
         return jsonify(data)
 
 @ns.route('/consent/<int:clientid>/')
@@ -368,8 +400,11 @@ class IndividualContract(Resource):
     def post(self, clientid):
         """create client individual services contract object for the specified clientid"""
         data = request.get_json()
-        client_services = ClientIndividualContract(revision=ClientIndividualContract.current_revision)
-        client_services.from_dict(clientid, data)
+        data['clientid'] = clientid
+        data['revision'] = ClientIndividualContract.current_revision
+
+        client_services = ClientIndividualContract(**data)
+
         db.session.add(client_services)
         db.session.commit()
         to_pdf(clientid, ClientIndividualContract)
@@ -448,6 +483,42 @@ class SignedDocuments(Resource):
 
         return {'urls': urls}
 
+@ns.route('/registrationstatus/<int:clientid>/')
+@ns.doc(params={'clientid': 'Client ID number'})
+class JourneyStatusCheck(Resource):
+    """
+        Returns the outstanding forms needed to complete the client journey
+    """
+    @responds(schema=ClientRegistrationStatusSchema, api=ns)
+    @token_auth.login_required
+    def get(self, clientid):
+        """
+        Returns the client's outstanding registration items and their URIs.
+        """
+        check_client_existence(clientid)
+
+        remaining_forms = []
+
+        for table in (
+                ClientPolicies,
+                ClientConsent,
+                ClientRelease,
+                ClientConsultContract,
+                ClientSubscriptionContract,
+                ClientIndividualContract,
+                FitnessQuestionnaire,
+                MedicalHistory,
+                MedicalPhysicalExam,
+                PTHistory
+        ):
+            result = table.query.filter_by(clientid=clientid).order_by(table.idx.desc()).first()
+
+            if result is None:
+                remaining_forms.append({'name': table.displayname, 'URI': TABLE_TO_URI.get(table.__tablename__).format(clientid)})
+
+        return {'outstanding': remaining_forms}
+
+
 
 @ns.route('/remoteregistration/new/')
 class NewRemoteRegistration(Resource):
@@ -479,6 +550,11 @@ class NewRemoteRegistration(Resource):
         
         # add client to database (creates clientid)
         db.session.add(client)
+        db.session.flush()
+
+        rli = {'record_locator_id': ClientInfo().get_medical_record_hash(firstname = client.firstname , lastname = client.lastname, clientid =client.clientid)}
+
+        client.update(rli)        
         db.session.flush()
 
         # create a new remote client registration entry
