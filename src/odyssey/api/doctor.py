@@ -67,9 +67,7 @@ class MedImaging(Resource):
             raise ContentNotFound
         
         if not current_app.config['LOCAL_CONFIG']:
-            bucket_name = current_app.config['IMAGES_BUCKET_NAME']
-            if not bucket_name:
-                raise UnknownError(message='IMAGES_BUCKET_NAME name not defined')
+            bucket_name = current_app.config['S3_BUCKET_NAME']
 
             s3 = boto3.client('s3')
             params = {
@@ -126,24 +124,21 @@ class MedImaging(Resource):
             #Rename image (format: imageType_Y-M-d_4digitRandomHex_index.img_extension) AND Save=>S3 
             img_extension = pathlib.Path(img.filename).suffix
             img.seek(0)
-            bucket_name = current_app.config['IMAGES_BUCKET_NAME']
+            bucket_name = current_app.config['S3_BUCKET_NAME']
 
-            if not bucket_name:
-                raise UnknownError(message='IMAGES_BUCKET_NAME name not defined')
-
-            if not current_app.config['LOCAL_CONFIG']:
-                s3key = f'id{clientid:05d}/{mi_data.image_type}_{date}_{hex_token}_{i}{img_extension}'
-                s3 = boto3.resource('s3')
-                s3.Bucket(bucket_name).put_object(Key= s3key, Body=img.stream) 
-                mi_data.image_path = s3key  
-
-            else:
-                path = pathlib.Path(bucket_name) / f'id{clientid:05d}'
+            if current_app.config['LOCAL_CONFIG']:
+                path = pathlib.Path(bucket_name) / f'id{clientid:05d}' / 'medical_images'
                 path.mkdir(parents=True, exist_ok=True)
                 s3key = f'{mi_data.image_type}_{date}_{hex_token}_{i}{img_extension}'
                 file_name = path / s3key
                 mi_data.image_path = file_name.as_posix()
                 img.save(file_name.as_posix())
+
+            else:
+                s3key = f'id{clientid:05d}/medical_images/{mi_data.image_type}_{date}_{hex_token}_{i}{img_extension}'
+                s3 = boto3.resource('s3')
+                s3.Bucket(bucket_name).put_object(Key= s3key, Body=img.stream) 
+                mi_data.image_path = s3key  
 
             data_list.append(mi_data)
 

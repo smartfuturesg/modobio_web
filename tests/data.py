@@ -651,3 +651,13 @@ test_registered_facilities = {
 test_client_facilities = {
   "facility_id": 1
 }
+
+img = pathlib.Path(__file__).parent / 'test_jpg_image.jpg'
+
+test_medical_imaging = {
+  'image': ('test_jpg_image.jpg', open(img, 'rb')),
+  'image_date': (None, '2020-09-25T00:31:29.304Z'),
+  'image_origin_location': (None, 'testing clinic'),
+  'image_type': (None, 'XRay'),
+  'image_read': (None, 'Check Check')
+}
