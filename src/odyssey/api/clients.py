@@ -30,7 +30,6 @@ from odyssey.pdf import to_pdf, merge_pdfs
 from odyssey.utils.email import send_email_remote_registration_portal, send_test_email
 from odyssey.utils.misc import check_client_existence
 from odyssey.utils.schemas import (
-    ClientSearchSchema,
     ClientConsentSchema,
     ClientConsultContractSchema,
     ClientIndividualContractSchema,
@@ -169,7 +168,6 @@ class ClientSummary(Resource):
                 'record_locator_id': 'record locator id to search'})
 class Clients(Resource):
     @token_auth.login_required
-    @accepts(schema=ClientSearchSchema, api=ns)
     def get(self):
         """returns list of clients given query parameters"""
         page = request.args.get('page', 1, type=int)
