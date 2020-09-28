@@ -182,7 +182,9 @@ class Clients(Resource):
             param[key] = request.args.get(key, default=None, type=str)
             # Cleans up search query
             if param[key] is None:
-                param[key] = ''            
+                param[key] = ''          
+            elif key == 'record_locator_id' and param.get(key, None):
+                tempId = param[key]
             elif key == 'email' and param.get(key, None):
                 tempEmail = param[key]
                 param[key] = param[key].replace("@"," ")
@@ -199,17 +201,32 @@ class Clients(Resource):
             data, resources = ClientInfo.all_clients_dict(ClientInfo.query.order_by(ClientInfo.lastname.asc()),
                                                 page=page,per_page=per_page)
         else:
-            data, resources = ClientInfo.all_clients_dict(ClientInfo.query.whooshee_search(searchStr).order_by(ClientInfo.lastname.asc()),
+            data, resources = ClientInfo.all_clients_dict(ClientInfo.query.whooshee_search(searchStr),
                                                 page=page,per_page=per_page)
 
-        # Since email should be unique, if the input email exactly matches 
-        # the a profile, only display that user
+        # Since email and record locator idshould be unique, 
+        # if the input email or rli exactly matches 
+        # the profile, only display that user
+        exactMatch = False
         if param['email']:
             for val in data['items']:
                 if val['email'].lower() == tempEmail.lower():
                     data['items'] = val
+                    exactMatch = True
                     continue
-                
+        # Assuming client will most likely remember their 
+        # email instead of their RLI. If the email is correct
+        # no need to search through RLI. 
+        #
+        # If BOTH are incorrect, return data as normal.
+        if param['record_locator_id'] and not exactMatch:
+            for val in data['items']:
+                if val['record_locator_id'] is None:
+                    pass
+                elif val['record_locator_id'].lower() == tempId.lower():
+                    data['items'] = val
+                    continue
+
         data['_links']= {
             'self': api.url_for(Clients, page=page, per_page=per_page),
             'next': api.url_for(Clients, page=page + 1, per_page=per_page)
