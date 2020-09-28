@@ -1319,12 +1319,6 @@ class WearablesSchema(ma.SQLAlchemyAutoSchema):
         return Wearables(**data)
 
 
-class WearablesOuraSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = WearablesOura
-
-    clientid = fields.Integer(missing=0)
-
-    @post_load
-    def make_object(self, data, **kwargs):
-        return WearablesOura(**data)
+class WearablesOuraAuthSchema(Schema):
+    oura_client_id = fields.String()
+    oauth_state = fields.String()
