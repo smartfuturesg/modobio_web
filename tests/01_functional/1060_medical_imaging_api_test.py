@@ -1,4 +1,5 @@
-import time , pathlib, os, datetime
+import time , pathlib, os
+from datetime import datetime
 
 from flask.json import dumps
 
@@ -29,7 +30,7 @@ def test_post_medical_imaging(test_client, init_database):
     data = MedicalImaging.query.filter_by(clientid=1).first()
     assert data.image_path
     assert pathlib.Path(data.image_path).exists() 
-    assert data.image_date == datetime.datetime.fromisoformat(payload['image_date'])
+    assert data.image_date == datetime.fromisoformat(payload['image_date'])
     assert data.image_origin_location == payload['image_origin_location']
     assert data.image_type == payload['image_type']
     assert data.image_read == payload['image_read']

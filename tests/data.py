@@ -652,9 +652,7 @@ test_client_facilities = {
   "facility_id": 1
 }
 
-imgage = None
 img_file = pathlib.Path(__file__).parent / 'test_jpg_image.jpg'
-  
 test_medical_imaging = {
   'image': (img_file.as_posix() , open(img_file, mode='rb'), 'image/jpg'),
   'image_date': '2020-09-25T00:31:29.304000',

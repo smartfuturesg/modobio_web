@@ -4,7 +4,6 @@ from datetime import datetime
 from flask import request, current_app
 from flask_accepts import accepts, responds
 from flask_restx import Resource, Api
-from werkzeug.datastructures import FileStorage
 
 from odyssey import db
 from odyssey.models.client import ClientExternalMR
@@ -58,8 +57,9 @@ class MedImaging(Resource):
     def get(self, clientid):
         """returns a json file of all the medical images in the database for the specified clientid
 
-            Helpful notes:
-            image_path is a sharable url for an image saved in S3 Bucket
+            Note:
+            image_path is a sharable url for an image saved in S3 Bucket,
+            if running locally, it is the path to a local temp file
         """
         check_client_existence(clientid)
         data = MedicalImaging.query.filter_by(clientid=clientid).all()
@@ -82,16 +82,16 @@ class MedImaging(Resource):
  
         return data
 
+    #Unable to use @accepts because the input files come in a form-data, not json.
     @token_auth.login_required
-    #@accepts(schema=MedicalImagingSchema , api=ns)
     @responds(status_code=201, api=ns)
     def post(self, clientid):
         """For adding one or many medical images to the database for the specified clientid
 
         Expects form-data
 
-        "image": files selected to upload
-        "image_date": "2020-09-25T00:31:29.304Z",
+        "image": (file_path , open(file_path, mode='rb'), 'Mime type')
+        "image_date": "2020-09-25T00:31:29.304000",
         "image_origin_location": "string",
         "image_type": "string",
         "image_read": "string",
@@ -99,6 +99,7 @@ class MedImaging(Resource):
 
         """
         check_client_existence(clientid)
+        bucket_name = current_app.config['S3_BUCKET_NAME']
 
         #Verify at least 1 file with key-name:image is selected for upload
         if 'image' not in request.files:
@@ -124,15 +125,14 @@ class MedImaging(Resource):
             #Rename image (format: imageType_Y-M-d_4digitRandomHex_index.img_extension) AND Save=>S3 
             img_extension = pathlib.Path(img.filename).suffix
             img.seek(0)
-            bucket_name = current_app.config['S3_BUCKET_NAME']
 
             if current_app.config['LOCAL_CONFIG']:
                 path = pathlib.Path(bucket_name) / f'id{clientid:05d}' / 'medical_images'
                 path.mkdir(parents=True, exist_ok=True)
                 s3key = f'{mi_data.image_type}_{date}_{hex_token}_{i}{img_extension}'
-                file_name = path / s3key
-                mi_data.image_path = file_name.as_posix()
-                img.save(file_name.as_posix())
+                file_name = (path / s3key).as_posix()
+                mi_data.image_path = file_name
+                img.save(file_name)
 
             else:
                 s3key = f'id{clientid:05d}/medical_images/{mi_data.image_type}_{date}_{hex_token}_{i}{img_extension}'
