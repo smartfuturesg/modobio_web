@@ -105,14 +105,14 @@ class MedImaging(Resource):
         if 'image' not in request.files:
             raise InputError(400, 'Empty input file')
 
-        files = request.files
+        files = request.files #ImmutableMultiDict of key : FileStorage object
         mi_schema = MedicalImagingSchema()
         MAX_bytes = 524288000 #500 mb
         data_list = []
         hex_token = secrets.token_hex(4)
-
+        mi_data = mi_schema.load(request.form)
+        
         for i, img in enumerate(files.getlist('image')):
-            mi_data = mi_schema.load(request.form)
             mi_data.clientid = clientid
             date = mi_data.image_date.strftime("%Y-%m-%d")
 
