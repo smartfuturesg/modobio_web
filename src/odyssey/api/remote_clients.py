@@ -492,9 +492,10 @@ class SignedDocuments(Resource):
         if not current_app.config['LOCAL_CONFIG']:
             s3 = boto3.client('s3')
             params = {
-                'Bucket': current_app.config['DOCS_BUCKET_NAME'],
+                'Bucket': current_app.config['S3_BUCKET_NAME'],
                 'Key': None
             }
+
         for table in (
             ClientPolicies,
             ClientConsent,

@@ -135,12 +135,15 @@ class Config:
 
         self.SQLALCHEMY_DATABASE_URI = f'{db_flav}://{db_user}:{db_pass}@{db_host}/{db_name}'
 
-        # S3 buckets
+        # S3 bucket
         if self.LOCAL_CONFIG:
-            self.DOCS_BUCKET_NAME = defaults.DOCS_BUCKET_NAME
+            self.S3_BUCKET_NAME = defaults.S3_BUCKET_NAME
         else:
             # Don't use getvar, must fail if not set in environment
-            self.DOCS_BUCKET_NAME = os.getenv('DOCS_BUCKET_NAME', None)
+            self.S3_BUCKET_NAME = os.getenv('S3_BUCKET_NAME')
+
+            if not self.S3_BUCKET_NAME:
+                raise ValueError('S3_BUCKET_NAME not defined')
 
         # Wearables
         self.OURA_CLIENT_ID = self.getvar(
