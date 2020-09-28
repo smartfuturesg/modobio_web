@@ -1,7 +1,7 @@
 """Create MedicalImaging Table
 
 Revision ID: 4830e1250eab
-Revises: 9887fc6db28e
+Revises: 9b92a2be034e
 Create Date: 2020-09-21 15:22:59.531096
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '4830e1250eab'
-down_revision = '3cb25c724f84'
+down_revision = '9b92a2be034e'
 branch_labels = None
 depends_on = None
 
