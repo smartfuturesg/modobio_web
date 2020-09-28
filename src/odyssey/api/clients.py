@@ -137,37 +137,59 @@ class NewClient(Resource):
 
 
 @ns.route('/clientsearch/')
-@ns.doc(params={'page': 'request page for paginated clients list', 'per_page': 'number of clients per page'})
+@ns.doc(params={'page': 'request page for paginated clients list',
+                'per_page': 'number of clients per page',
+                'firstname': 'first name to search',
+                'lastname': 'last name to search',
+                'email': 'email to search',
+                'phone': 'phone number to search',
+                'dob': 'date of birth to search',
+                'record_locator_id': 'record locator id to search'})
 class Clients(Resource):
     @token_auth.login_required
     @accepts(schema=ClientSearchSchema, api=ns)
     def get(self):
-        """returns list of all clients"""
+        """returns list of clients given query parameters"""
         page = request.args.get('page', 1, type=int)
         per_page = min(request.args.get('per_page', 10, type=int), 100)                 
         
-        payload = request.get_json()
         # These payload keys should be the same as what's indexed in 
         # the model.
-        payload_keys = ['firstname', 'lastname', 'email', 'phone', 'dob', 'record_locator_id']
-        
+        param = {}
+        param_keys = ['firstname', 'lastname', 'email', 'phone', 'dob', 'record_locator_id']
         searchStr = ''
- 
-        if not payload:
+        for key in param_keys:
+            param[key] = request.args.get(key, default=None, type=str)
+            # Cleans up search query
+            if param[key] is None:
+                param[key] = ''            
+            elif key == 'email' and param.get(key, None):
+                tempEmail = param[key]
+                param[key] = param[key].replace("@"," ")
+            elif key == 'phone' and param.get(key, None):
+                param[key] = param[key].replace("-"," ")
+                param[key] = param[key].replace("("," ")
+                param[key] = param[key].replace(")"," ")                
+            elif key == 'dob' and param.get(key, None):
+                param[key] = param[key].replace("-"," ")
+
+            searchStr = searchStr + param[key] + ' '        
+        
+        if(searchStr.isspace()):
             data, resources = ClientInfo.all_clients_dict(ClientInfo.query.order_by(ClientInfo.lastname.asc()),
                                                 page=page,per_page=per_page)
         else:
-            # DOB is a string that needs to be broken up without the "-"
-            # for whooshee search
-            if payload.get('dob', None):
-                payload['dob'] = payload['dob'].replace("-"," ")
-            # Go through the payload, and enter an empty string for missing keys
-            for key in payload_keys:
-                if key not in payload:
-                    payload[key]=''
-                searchStr = searchStr + payload[key] + ' '
             data, resources = ClientInfo.all_clients_dict(ClientInfo.query.whooshee_search(searchStr).order_by(ClientInfo.lastname.asc()),
-                                                page=page,per_page=per_page) 
+                                                page=page,per_page=per_page)
+
+        # Since email should be unique, if the input email exactly matches 
+        # the a profile, only display that user
+        if param['email']:
+            for val in data['items']:
+                if val['email'].lower() == tempEmail.lower():
+                    data['items'] = val
+                    continue
+                
         data['_links']= {
             'self': api.url_for(Clients, page=page, per_page=per_page),
             'next': api.url_for(Clients, page=page + 1, per_page=per_page)

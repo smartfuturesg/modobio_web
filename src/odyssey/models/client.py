@@ -265,6 +265,12 @@ class ClientInfo(db.Model):
                 'per_page': per_page,
                 'total_pages': resources.pages,
                 'total_items': resources.total
+                # 'firstname': firstname,
+                # 'lastname': lastname,
+                # 'email': email,
+                # 'phone': phone,
+                # 'dob': dob,
+                # 'record_locator_id': record_locator_id
                 }
             }
         return data, resources
