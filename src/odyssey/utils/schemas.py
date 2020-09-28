@@ -247,6 +247,21 @@ class ClientRegistrationStatusSchema(Schema):
     outstanding = fields.Nested(OutstandingForm(many=True))
 
 
+class ClientDataTierSchema(Schema):
+
+    clientid = fields.Integer(missing=None)
+    stored_bytes = fields.Integer(description="total bytes stored for the client", missing=None)
+    tier = fields.String(description="data storage tier. Either Tier 1/2/3", missing=None)
+
+
+class AllClientsDataTier(Schema):
+
+    items = fields.Nested(ClientDataTierSchema(many=True), missing=ClientDataTierSchema().load({}))
+    total_stored_bytes = fields.Integer(description="Total bytes stored for all clients", missing=0)
+    total_items = fields.Integer(description="number of clients in this payload", missing=0)
+
+
+
 """
     Schemas for the pt API
 """
