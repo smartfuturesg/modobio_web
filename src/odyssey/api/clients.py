@@ -466,14 +466,10 @@ class SignedDocuments(Resource):
         urls = {}
         paths = []
 
-        bucket_name = current_app.config['DOCS_BUCKET_NAME']
-        if not bucket_name:
-            raise IllegalSetting(message='Bucket name not defined.')
-
         if not current_app.config['LOCAL_CONFIG']:
             s3 = boto3.client('s3')
             params = {
-                'Bucket': bucket_name,
+                'Bucket': current_app.config['S3_BUCKET_NAME'],
                 'Key': None
             }
 
