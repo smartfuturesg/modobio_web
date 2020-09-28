@@ -5,8 +5,12 @@ import tempfile
 # Do all local development
 FLASK_DEV = 'local'
 
-# Storage location for PDF documents
-DOCS_BUCKET_NAME = tempfile.TemporaryDirectory().name
+# File storage location
+# This directory is **NOT** deleted by the program.
+# However, using tempfile.TemporaryDirectory() went out of scope
+# and was therefore deleted after defaults was loaded, but while
+# Flask was still running.
+S3_BUCKET_NAME = tempfile.mkdtemp()
 
 # Database
 DB_FLAV = 'postgresql'
