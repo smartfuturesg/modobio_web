@@ -16,13 +16,16 @@ def test_post_medical_imaging(test_client, init_database):
     # get staff authorization to view client data
     staff = Staff().query.first()
     token = staff.get_token()
-    headers = {'Authorization': 'Bearer cpSVFlP9g0bNmSVKHtQ9iR2efEt9Q8HM'}#'Authorization': f'Bearer {token}'}
+    headers = {'Authorization': f'Bearer {token}'} #'Bearer cpSVFlP9g0bNmSVKHtQ9iR2efEt9Q8HM'} # f'Bearer {token}'}
     payload = test_medical_imaging
 
     # send get request for client info on clientid = 1
-    response = requests.post('http://127.0.0.1:5000/doctor/images/1/', headers=headers, files=payload)
+    response = test_client.post('/doctor/images/1/', 
+                            headers=headers, 
+                            data=dumps(payload)
+                            )
+    #breakpoint()
     assert response.status_code == 201
-
 
 def test_get_medical_imaging(test_client, init_database):
     """
@@ -33,10 +36,11 @@ def test_get_medical_imaging(test_client, init_database):
     # get staff authorization to view client data
     staff = Staff().query.first()
     token = staff.get_token()
-    headers = {'Authorization': 'Bearer cpSVFlP9g0bNmSVKHtQ9iR2efEt9Q8HM'}#'Authorization': f'Bearer {token}'}
+    headers = {'Authorization': 'Bearer {token}'}#'Bearer cpSVFlP9g0bNmSVKHtQ9iR2efEt9Q8HM'} # f'Bearer {token}'}
 
     # send get request for client info on clientid = 1 
-    response = requests.get('http://127.0.0.1:5000/doctor/images/1/',
-                                headers=headers)
+    response = test_client.get('/doctor/images/1/',
+                                headers=headers,
+                                content_type='application/json')
                                 
     assert response.status_code == 200

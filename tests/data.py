@@ -652,12 +652,17 @@ test_client_facilities = {
   "facility_id": 1
 }
 
-img = pathlib.Path(__file__).parent / 'test_jpg_image.jpg'
+imgage = None
+img_file = pathlib.Path(__file__).parent / 'test_jpg_image.jpg'
+with open(img_file, mode='rb') as img:
+  image = img.read()
 
-test_medical_imaging = {
-  'image': ('test_jpg_image.jpg', open(img, 'rb')),
-  'image_date': (None, '2020-09-25T00:31:29.304Z'),
-  'image_origin_location': (None, 'testing clinic'),
-  'image_type': (None, 'XRay'),
-  'image_read': (None, 'Check Check')
-}
+  image = 'data:image/jpg;base64,' + base64.b64encode(image).decode('utf-8')
+  
+  test_medical_imaging = {
+    'image': image,
+    'image_date': (None, '2020-09-25T00:31:29.304Z'),
+    'image_origin_location': (None, 'testing clinic'),
+    'image_type': (None, 'XRay'),
+    'image_read': (None, 'Check Check')
+  }
