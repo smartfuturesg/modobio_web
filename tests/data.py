@@ -654,15 +654,11 @@ test_client_facilities = {
 
 imgage = None
 img_file = pathlib.Path(__file__).parent / 'test_jpg_image.jpg'
-with open(img_file, mode='rb') as img:
-  image = img.read()
-
-  image = 'data:image/jpg;base64,' + base64.b64encode(image).decode('utf-8')
   
-  test_medical_imaging = {
-    'image': image,
-    'image_date': (None, '2020-09-25T00:31:29.304Z'),
-    'image_origin_location': (None, 'testing clinic'),
-    'image_type': (None, 'XRay'),
-    'image_read': (None, 'Check Check')
-  }
+test_medical_imaging = {
+  'image': (img_file.as_posix() , open(img_file, mode='rb'), 'image/jpg'),
+  'image_date': '2020-09-25T00:31:29.304000',
+  'image_origin_location': 'testing clinic',
+  'image_type': 'XRay',
+  'image_read': 'Check Check'
+}
