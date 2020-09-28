@@ -669,6 +669,6 @@ class ClientDataStorageTiers(Resource):
             results['items'].append({'clientid': row[0], 'stored_bytes': bytes_as_int, 'tier': row[2]})
             total_bytes += bytes_as_int
 
-        results['total_bytes_stored'] = total_bytes 
+        results['total_stored_bytes'] = total_bytes 
         
         return results
