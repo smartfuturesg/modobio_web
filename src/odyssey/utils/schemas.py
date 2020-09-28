@@ -71,7 +71,6 @@ class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
     def make_object(self, data, **kwargs):
         return ClientInfo(**data)
 
-
 class NewRemoteClientSchema(Schema):
 
     email = fields.Email()
@@ -107,25 +106,6 @@ class RefreshRemoteRegistrationSchema(Schema):
         with the provided email
     """
     email = fields.Email(required=True)
-
-class ClientSummarySchema(Schema):
-
-    clientid = fields.Integer(missing=0)
-    record_locator_id = fields.String(dump_only=True)
-    email = fields.Email()
-    firstname = fields.String(required=True, validate=validate.Length(min=1, max= 50))
-    lastname = fields.String(required=True, validate=validate.Length(min=1,max=50))
-    middlename = fields.String(required=False, validate=validate.Length(min=0,max=50))
-    phone = fields.String()
-
-    _links = fields.Dict()
-
-    @post_dump
-    def add_record_locator_id(self,data, **kwargs ):
-        name_hash = md5(bytes((data['firstname']+data['lastname']), 'utf-8')).hexdigest()
-        data['record_locator_id'] = (data['firstname'][0]+data['lastname'][0]+str(data['clientid'])+name_hash[0:6]).upper()
-        return data
-
 
 class ClientConsentSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -1295,7 +1275,7 @@ class MedicalBloodChemistryThyroidSchema(Schema):
         return MedicalBloodChemistryThyroid(**data)
 
 class RegisteredFacilitiesSchema(Schema):
-    facility_id = fields.Integer(required=False, missing=0)
+    facility_id = fields.Integer(required=False)
     facility_name = fields.String(required=True)
     facility_address = fields.String(required=True)
     modobio_facility = fields.Boolean(required=True)
@@ -1303,6 +1283,16 @@ class RegisteredFacilitiesSchema(Schema):
     @post_load
     def make_object(self, data, **kwargs):
         return RegisteredFacilities(**data)
+
+class ClientSummarySchema(Schema):
+
+    firstname = fields.String()
+    middlename = fields.String()
+    lastname = fields.String()
+    dob = fields.Date()
+    clientid = fields.Integer()
+    membersince = fields.Date()
+    facilities = fields.Nested(RegisteredFacilitiesSchema(many=True))
 
 class MedicalBloodChemistryA1CSchema(Schema):
 
