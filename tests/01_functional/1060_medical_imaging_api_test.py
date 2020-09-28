@@ -25,12 +25,12 @@ def test_post_medical_imaging(test_client, init_database):
     response = test_client.post('/doctor/images/1/', 
                             headers=headers, 
                             data = payload)
-      
-    assert response.status_code == 201
+    
     data = MedicalImaging.query.filter_by(clientid=1).first()
+
+    assert response.status_code == 201
     assert data.image_path
     assert pathlib.Path(data.image_path).exists() 
-    assert data.image_date == datetime.fromisoformat(payload['image_date'])
     assert data.image_origin_location == payload['image_origin_location']
     assert data.image_type == payload['image_type']
     assert data.image_read == payload['image_read']
