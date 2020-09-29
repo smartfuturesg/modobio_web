@@ -30,6 +30,7 @@ from odyssey.pdf import to_pdf, merge_pdfs
 from odyssey.utils.email import send_email_remote_registration_portal, send_test_email
 from odyssey.utils.misc import check_client_existence
 from odyssey.utils.schemas import (
+    AllClientsDataTier,
     ClientSearchSchema,
     ClientConsentSchema,
     ClientConsultContractSchema,
@@ -649,3 +650,25 @@ class TestEmail(Resource):
         send_test_email(recipient=recipient)
         
         return {}, 200  
+
+@ns.route('/datastoragetiers/')
+class ClientDataStorageTiers(Resource):
+    """
+       Amount of data stored on each client and their storage tier
+    """
+    @token_auth.login_required
+    @responds(schema=AllClientsDataTier, api=ns)
+    def get(self):
+        """Returns the total data storage for each client along with their data storage tier"""
+
+        data = db.session.execute("SELECT * FROM public.data_per_client;").fetchall()
+        results = {'total_items': len(data), 'items' : []}
+        total_bytes = 0
+        for row in data:
+            bytes_as_int = row[1].__int__()
+            results['items'].append({'clientid': row[0], 'stored_bytes': bytes_as_int, 'tier': row[2]})
+            total_bytes += bytes_as_int
+
+        results['total_stored_bytes'] = total_bytes 
+        
+        return results
