@@ -38,7 +38,8 @@ from odyssey.utils.schemas import (
     ClientRegistrationStatusSchema,
     ClientReleaseSchema,
     ClientReleaseContactsSchema,
-    ClientRemoteRegistrationPortalSchema, 
+    ClientRemoteRegistrationPortalSchema,
+    ClientSearchOutSchema,
     ClientSubscriptionContractSchema,
     ClientSummarySchema,
     NewRemoteClientSchema, 
@@ -168,6 +169,7 @@ class ClientSummary(Resource):
                 'record_locator_id': 'record locator id to search'})
 class Clients(Resource):
     @token_auth.login_required
+    @responds(schema=ClientSearchOutSchema, api=ns)
     def get(self):
         """returns list of clients given query parameters"""
         page = request.args.get('page', 1, type=int)
@@ -208,12 +210,14 @@ class Clients(Resource):
         # if the input email or rli exactly matches 
         # the profile, only display that user
         exactMatch = False
+        
         if param['email']:
             for val in data['items']:
                 if val['email'].lower() == tempEmail.lower():
-                    data['items'] = val
+                    data['items'] = [val]
                     exactMatch = True
                     continue
+        
         # Assuming client will most likely remember their 
         # email instead of their RLI. If the email is correct
         # no need to search through RLI. 
@@ -224,18 +228,18 @@ class Clients(Resource):
                 if val['record_locator_id'] is None:
                     pass
                 elif val['record_locator_id'].lower() == tempId.lower():
-                    data['items'] = val
+                    data['items'] = [val]
                     continue
 
         data['_links']= {
-            'self': api.url_for(Clients, page=page, per_page=per_page),
-            'next': api.url_for(Clients, page=page + 1, per_page=per_page)
+            '_self': api.url_for(Clients, page=page, per_page=per_page),
+            '_next': api.url_for(Clients, page=page + 1, per_page=per_page)
             if resources.has_next else None,
-            'prev': api.url_for(Clients, page=page - 1, per_page=per_page)
+            '_prev': api.url_for(Clients, page=page - 1, per_page=per_page)
             if resources.has_prev else None,
         }
         
-        return jsonify(data)
+        return data
 
 @ns.route('/consent/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})

@@ -249,7 +249,7 @@ class ClientInfo(db.Model):
             'record_locator_id': self.record_locator_id,
             'firstname': self.firstname,
             'lastname': self.lastname,
-            'dob': self.dob.strftime("%Y-%m-%d") if self.dob is not None else self.dob,
+            'dob': self.dob,
             'phone': self.phone,
             'email': self.email
         }
@@ -265,12 +265,6 @@ class ClientInfo(db.Model):
                 'per_page': per_page,
                 'total_pages': resources.pages,
                 'total_items': resources.total
-                # 'firstname': firstname,
-                # 'lastname': lastname,
-                # 'email': email,
-                # 'phone': phone,
-                # 'dob': dob,
-                # 'record_locator_id': record_locator_id
                 }
             }
         return data, resources
