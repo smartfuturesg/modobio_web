@@ -47,6 +47,28 @@ language plpgsql;;
 ---------------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------------
 
+---------------------------------------------------------------------------------------------------
+-- client_medical_images_total_bytes
+-- total byte size of medical images stored for specified clientid 
+---------------------------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.client_medical_images_total_bytes(client_id integer)
+ RETURNS integer
+ LANGUAGE plpgsql
+AS $function$
+declare
+  result integer;
+  query varchar;
+begin
+  query := 'SELECT SUM(image_size) FROM public."MedicalImaging" ' || 'where clientid =' || client_id || 'GROUP BY clientid';
+  execute query into result;
+  return coalesce(result, 0);
+end;
+$function$
+;
+
+---------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
+
 
 ---------------------------------------------------------------------------------------------------
 -- client_table_sizes
@@ -80,9 +102,11 @@ where t.table_schema = 'public'
 create or replace view public.data_per_client
 as
 select  clientid, 
-		sum(client_entries_per_table(table_schema, '"'||table_name||'"', clientid) * bytes_per_row) as total_bytes,
+		sum(client_entries_per_table(table_schema, '"'||table_name||'"', clientid) * bytes_per_row)
+			+ client_medical_images_total_bytes(clientid) as total_bytes,
 		case
-			when sum(client_entries_per_table(table_schema, '"'||table_name||'"', clientid) * bytes_per_row) < 10000000 
+			when sum(client_entries_per_table(table_schema, '"'||table_name||'"', clientid) * bytes_per_row)
+				+ client_medical_images_total_bytes(clientid) < 10000000 
 				then 'Tier 1'
 			else 'Tier 2'
 		end as data_usage_tier
