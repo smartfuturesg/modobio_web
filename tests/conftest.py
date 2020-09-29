@@ -70,9 +70,12 @@ def init_database():
     db.create_all()
 
     # run .sql file to create db procedures
+    #  read client_data_storage_file, remove comments,
+    #  execute, raw sql on database
     with open ("database/client_data_storage.sql", "r") as f:
         data=f.readlines()
-    dat = [x for x in data if '--'not in x]
+
+    dat = [x for x in data if not x.startswith('--')]
     
     db.session.execute(''.join(dat))
     
