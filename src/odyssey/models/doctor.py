@@ -65,6 +65,13 @@ class MedicalImaging(db.Model):
     :type: str
     """
 
+    image_size = db.Column(db.Integer)
+    """
+    Size of image in bytes
+
+    :type: int
+    """
+
 class MedicalBloodChemistryCBC(db.Model):
     """ Client Blood Chemistry Complete Blood Count (CBC) table
 

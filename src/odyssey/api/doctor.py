@@ -110,15 +110,16 @@ class MedImaging(Resource):
         MAX_bytes = 524288000 #500 mb
         data_list = []
         hex_token = secrets.token_hex(4)
-        mi_data = mi_schema.load(request.form)
         
         for i, img in enumerate(files.getlist('image')):
+            mi_data = mi_schema.load(request.form)
             mi_data.clientid = clientid
             date = mi_data.image_date.strftime("%Y-%m-%d")
 
             #Verifying image size is within a safe threashold (MAX = 500 mb)
             img.seek(0, os.SEEK_END)
             img_size = img.tell()
+            mi_data.image_size = img_size
             if img_size > MAX_bytes:
                 raise InputError(413, 'File too large')
 
