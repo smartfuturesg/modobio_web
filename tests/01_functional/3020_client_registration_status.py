@@ -1,9 +1,8 @@
 
-
 from odyssey.models.staff import Staff
 
 
-def test_get_registration_statis(test_client, init_database):
+def test_get_registration_status(test_client, init_database):
     """
     GIVEN a api end point for strength assessment
     WHEN the '/trainer/assessment/strength/<client id>' resource  is requested (POST)
