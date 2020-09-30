@@ -31,6 +31,11 @@ def clean_db(db):
             db.session.execute(table.delete())
         except:
             pass
+    # specifically cascade drop clientinfo table
+    try:
+        db.session.execute('DROP TABLE "ClientInfo" CASCADE;')
+    except:
+        pass
     db.session.commit()
     db.drop_all()
 
@@ -64,12 +69,27 @@ def init_database():
     # Create the database and the database table
     db.create_all()
 
+    # run .sql file to create db procedures
+    #  read client_data_storage_file, remove comments,
+    #  execute, raw sql on database
+    with open ("database/client_data_storage.sql", "r") as f:
+        data=f.readlines()
+
+    dat = [x for x in data if not x.startswith('--')]
+    
+    db.session.execute(''.join(dat))
+    
     # Insert test client data
     client_1 = ClientInfo(**test_client_info)
 
     db.session.add(client_1)
-    db.session.commit()
+    db.session.flush()
 
+    rli = {'record_locator_id': ClientInfo().get_medical_record_hash(firstname = client_1.firstname , lastname = client_1.lastname, clientid =client_1.clientid)}
+
+    client_1.update(rli)
+    db.session.commit()
+    
     clientid = client_1.clientid
 
     # initialize a test staff member

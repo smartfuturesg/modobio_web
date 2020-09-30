@@ -1,3 +1,5 @@
+import secrets
+
 from datetime import datetime, timedelta
 
 from flask import current_app, request, url_for
@@ -25,6 +27,8 @@ from odyssey.utils.schemas import (
     WearablesFreeStyleSchema,
     WearablesFreeStyleActivateSchema
 )
+from odyssey.models.wearables import Wearables, WearablesOura
+from odyssey.utils.schemas import WearablesSchema, WearablesOuraAuthSchema
 from odyssey.utils.misc import check_client_existence
 
 from odyssey import db
@@ -122,13 +126,13 @@ class WearablesEndpoint(Resource):
         db.session.commit()
 
 
-@ns.route('/oura/<int:clientid>/')
+@ns.route('/oura/auth/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
-class WearablesOuraAuthorizationEndpoint(Resource):
+class WearablesOuraAuthEndpoint(Resource):
     @token_auth.login_required
-    @responds({'name': 'url', 'type': str}, status_code=200, api=ns)
+    @responds(schema=WearablesOuraAuthSchema, status_code=200, api=ns)
     def get(self, clientid):
-        """ Oura Ring access grant URL for client ``clientid`` in reponse to a GET request.
+        """ Oura Ring OAuth2 parameters to initialize the access grant process.
 
         Parameters
         ----------
@@ -137,11 +141,14 @@ class WearablesOuraAuthorizationEndpoint(Resource):
 
         Returns
         -------
-        str
-            The URL where the client needs to go to grant access to Modo Bio.
+        dict
+            JSON encoded dict containing:
+            - oura_client_id
+            - oauth_state
         """
-        if current_app.config['LOCAL_CONFIG']:
-            return {'url': ''}
+        # FLASK_DEV=local has no access to AWS
+        if not current_app.config['OURA_CLIENT_ID']:
+            return
 
         wearables = (
             Wearables.query
@@ -155,14 +162,8 @@ class WearablesOuraAuthorizationEndpoint(Resource):
         # if not wearables or not wearables.has_oura:
         #     raise ContentNotFound
 
-        client_id = current_app.config['OURA_CLIENT_ID']
-        base_url = current_app.config['OURA_AUTH_URL']
-
-        # flask_restx mangles endpoint name for '/oura/callback'
-        redirect_url = url_for('api.wearables_wearables_oura_callback_endpoint', _external=True)
-
-        oauth_session = OAuth2Session(client_id, redirect_uri=redirect_url)
-        auth_url, state = oauth_session.authorization_url(base_url)
+        oura_id = current_app.config['OURA_CLIENT_ID']
+        state = secrets.token_urlsafe(24)
 
         # Store state in database
         oura = (
@@ -178,80 +179,70 @@ class WearablesOuraAuthorizationEndpoint(Resource):
             oura.oauth_state = state
         db.session.commit()
 
-        return {'url': auth_url}
+        return {'oura_client_id': oura_id, 'oauth_state': state}
 
 
-@ns.route('/oura/callback/')
+@ns.route('/oura/callback/<int:clientid>/')
+@ns.doc(params={
+    'clientid': 'Client ID number',
+    'state': 'OAuth2 state token',
+    'code': 'OAuth2 access grant code',
+    'redirect_uri': 'OAuth2 redirect URI'
+})
 class WearablesOuraCallbackEndpoint(Resource):
+    @token_auth.login_required
     @responds(status_code=200, api=ns)
-    def get(self):
-        """ Oura Ring callback URL """
-        if current_app.config['LOCAL_CONFIG']:
-            return
+    def get(self, clientid):
+        """ Oura Ring OAuth2 callback URL """
+        if not current_app.config['OURA_CLIENT_ID']:
+            raise UnknownError(message='This endpoint does not work in local mode.')
+
+        check_client_existence(clientid)
+
+        oura = WearablesOura.query.filter_by(clientid=clientid).one_or_none()
+        if not oura:
+            raise UnknownError(
+                message=f'Clientid {clientid} not found in WearablesOura table. '
+                         'Connect to /wearables/auth first.'
+            )
 
         oauth_state = request.args.get('state')
-        error_code = request.args.get('error')
         oauth_grant_code = request.args.get('code')
+        redirect_uri = request.args.get('redirect_uri')
 
-        if error_code:
-            if error_code == 'access_denied':
-                raise ClientDeniedAccess
-            else:
-                raise UnknownError(message='Unknown error: {error_code}')
-
-        if not oauth_grant_code:
-            raise UnknownError(message='OAuth token empty, but no error message.')
-
-        if not oauth_state:
-            raise IllegalSetting(message='OAuth state changed between requests.')
-
-        # Oura does not send any extra parameters, so the only parameter we can
-        # use to identify client is state.
-        oura = WearablesOura.query.filter_by(oauth_state=oauth_state).one_or_none()
-        if not oura:
-            raise IllegalSetting(message='OAuth state changed between requests.')
-
-        # Store grant code so client does not have to repeat the
-        # process in case the next part fails.
-        oura.grant_token = oauth_grant_code
-        db.session.commit()
+        if oauth_state != oura.oauth_state:
+            raise UnknownError(message='OAuth state changed between requests.')
 
         # Exchange access grant code for access token
         oura_id = current_app.config['OURA_CLIENT_ID']
         oura_secret = current_app.config['OURA_CLIENT_SECRET']
         token_url = current_app.config['OURA_TOKEN_URL']
-        redirect_url = url_for('api.wearables_wearables_oura_callback_endpoint', _external=True)
 
         oauth_session = OAuth2Session(
             oura_id,
             state=oauth_state,
-            redirect_uri=redirect_url
+            redirect_uri=redirect_uri
         )
-        oauth_reply = oauth_session.fetch_token(
-            token_url,
-            code=oauth_grant_code,
-            include_client_id=True,
-            client_secret=oura_secret
-        )
+        try:
+            oauth_reply = oauth_session.fetch_token(
+                token_url,
+                code=oauth_grant_code,
+                include_client_id=True,
+                client_secret=oura_secret
+            )
+        except Exception as e:
+            raise UnknownError(message=f'Error while exchanging grant code for access token: {e}')
 
-        if not oauth_session.authorized:
-            raise UnknownError('Exchange of grant code into access token failed.')
-
+        # Everything was successful
         oura.access_token = oauth_reply['access_token']
         oura.refresh_token = oauth_reply['refresh_token']
         oura.token_expires = datetime.utcnow() + timedelta(seconds=oauth_reply['expires_in'])
-        db.session.commit()
-
-        # Everything was successful
-        wearables = (
-            Wearables.query
-            .filter_by(clientid=oura.clientid)
-            .first()
-        )
-
-        wearables.registered_oura = True
-        oura.grant_token = None
         oura.oauth_state = None
+
+        # TODO: disable this until frontend has a way of setting wearable devices.
+        # wearables = Wearables.query.filter_by(clientid=oura.clientid).first()
+        # wearables.registered_oura = True
+
         db.session.commit()
 
 

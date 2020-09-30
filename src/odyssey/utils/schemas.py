@@ -1,6 +1,5 @@
 from datetime import datetime
 from hashlib import md5
-
 from marshmallow import Schema, fields, post_load, ValidationError, validates, validate
 from marshmallow import post_load, post_dump, pre_dump, pre_load
 
@@ -11,6 +10,7 @@ from odyssey.models.doctor import (
     MedicalBloodChemistryCMP,
     MedicalBloodChemistryCBC,
     MedicalBloodChemistryThyroid,
+    MedicalImaging,
     MedicalBloodChemistryLipids,
     MedicalBloodChemistryA1C
 )
@@ -43,6 +43,34 @@ from odyssey.models.trainer import (
 from odyssey.models.wearables import Wearables, WearablesOura, WearablesFreeStyle
 from odyssey.utils.misc import list_average
 
+class ClientSearchItemsSchema(Schema):
+    clientid = fields.Integer()
+    firstname = fields.String(required=False, validate=validate.Length(min=1, max= 50), missing=None)
+    lastname = fields.String(required=False, validate=validate.Length(min=1,max=50), missing=None)
+    email = fields.Email(required=False, missing=None)
+    phone = fields.String(required=False, validate=validate.Length(min=0,max=50), missing=None)
+    dob = fields.Date(required=False, missing=None)
+    record_locator_id = fields.String(required=False, validate=validate.Length(min=0,max=10), missing=None)
+
+class ClientSearchMetaSchema(Schema):
+    page = fields.Integer(required=False, missing=0)
+    per_page = fields.Integer(required=False, missing=0)
+    total_pages = fields.Integer(required=False, missing=0)
+    total_items = fields.Integer(required=False, missing=0)
+
+class ClientSearchLinksSchema(Schema):
+    _self = fields.String(required=False, validate=validate.Length(min=1, max= 50), missing=None)
+    _next = fields.String(required=False, validate=validate.Length(min=1, max= 50), missing=None)
+    _prev = fields.String(required=False, validate=validate.Length(min=1, max= 50), missing=None)
+
+class ClientSearchOutSchema(Schema):
+    """ ClientSearchOutSchema uses nested ClientSearchItemsSchemas and 
+        ClientSearchMetaSchemas """
+    items = fields.Nested(ClientSearchItemsSchema(many=True),
+                            missing=ClientSearchItemsSchema().load({}))
+    _meta = fields.Nested(ClientSearchMetaSchema, missing=ClientSearchMetaSchema().load({}))
+    _links = fields.Nested(ClientSearchLinksSchema, missing=ClientSearchLinksSchema().load({}))
+    
 class ClientFacilitiesSchema(Schema):
 
     idx = fields.Integer()
@@ -57,17 +85,11 @@ class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientInfo
 
-    record_locator_id = fields.String(dump_only=True)
+    record_locator_id = fields.String(missing=None)
 
     @post_load
     def make_object(self, data, **kwargs):
         return ClientInfo(**data)
-
-    @post_dump
-    def add_record_locator_id(self,data, **kwargs ):
-        name_hash = md5(bytes((data['firstname']+data['lastname']), 'utf-8')).hexdigest()
-        data['record_locator_id'] = (data['firstname'][0]+data['lastname'][0]+str(data['clientid'])+name_hash[0:6]).upper()
-        return data
 
 class NewRemoteClientSchema(Schema):
 
@@ -104,25 +126,6 @@ class RefreshRemoteRegistrationSchema(Schema):
         with the provided email
     """
     email = fields.Email(required=True)
-
-class ClientSummarySchema(Schema):
-
-    clientid = fields.Integer(missing=0)
-    record_locator_id = fields.String(dump_only=True)
-    email = fields.Email()
-    firstname = fields.String(required=True, validate=validate.Length(min=1, max= 50))
-    lastname = fields.String(required=True, validate=validate.Length(min=1,max=50))
-    middlename = fields.String(required=False, validate=validate.Length(min=0,max=50))
-    phone = fields.String()
-
-    _links = fields.Dict()
-
-    @post_dump
-    def add_record_locator_id(self,data, **kwargs ):
-        name_hash = md5(bytes((data['firstname']+data['lastname']), 'utf-8')).hexdigest()
-        data['record_locator_id'] = (data['firstname'][0]+data['lastname'][0]+str(data['clientid'])+name_hash[0:6]).upper()
-        return data
-
 
 class ClientConsentSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -262,6 +265,21 @@ class OutstandingForm(Schema):
 class ClientRegistrationStatusSchema(Schema):
 
     outstanding = fields.Nested(OutstandingForm(many=True))
+
+
+class ClientDataTierSchema(Schema):
+
+    clientid = fields.Integer(missing=None)
+    stored_bytes = fields.Integer(description="total bytes stored for the client", missing=None)
+    tier = fields.String(description="data storage tier. Either Tier 1/2/3", missing=None)
+
+
+class AllClientsDataTier(Schema):
+
+    items = fields.Nested(ClientDataTierSchema(many=True), missing=ClientDataTierSchema().load({}))
+    total_stored_bytes = fields.Integer(description="Total bytes stored for all clients", missing=0)
+    total_items = fields.Integer(description="number of clients in this payload", missing=0)
+
 
 
 """
@@ -1093,6 +1111,15 @@ class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
 """
     Schemas for the doctor's API
 """
+class MedicalImagingSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = MedicalImaging
+        load_instance = True
+        exclude = ["clientid", "idx"]
+
+    possible_image_types = ['CTscan', 'MRI', 'PETscan', 'Ultrasound', 'XRay']
+    image_type = fields.String(validate=validate.OneOf(possible_image_types), required=True)
+
 class BloodChemistryCBCSchema(Schema):
 
     # Validate each payload entry
@@ -1292,7 +1319,7 @@ class MedicalBloodChemistryThyroidSchema(Schema):
         return MedicalBloodChemistryThyroid(**data)
 
 class RegisteredFacilitiesSchema(Schema):
-    facility_id = fields.Integer(required=False, missing=0)
+    facility_id = fields.Integer(required=False)
     facility_name = fields.String(required=True)
     facility_address = fields.String(required=True)
     modobio_facility = fields.Boolean(required=True)
@@ -1300,6 +1327,16 @@ class RegisteredFacilitiesSchema(Schema):
     @post_load
     def make_object(self, data, **kwargs):
         return RegisteredFacilities(**data)
+
+class ClientSummarySchema(Schema):
+
+    firstname = fields.String()
+    middlename = fields.String()
+    lastname = fields.String()
+    dob = fields.Date()
+    clientid = fields.Integer()
+    membersince = fields.Date()
+    facilities = fields.Nested(RegisteredFacilitiesSchema(many=True))
 
 class MedicalBloodChemistryA1CSchema(Schema):
 
@@ -1320,6 +1357,11 @@ class WearablesSchema(ma.SQLAlchemyAutoSchema):
         model = Wearables
         load_instance = True
         exclude = ('idx', 'clientid')
+
+
+class WearablesOuraAuthSchema(Schema):
+    oura_client_id = fields.String()
+    oauth_state = fields.String()
 
 
 class WearablesFreeStyleSchema(ma.SQLAlchemyAutoSchema):

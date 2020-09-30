@@ -34,3 +34,7 @@ venv/
 *.db
 .coverage
 pytestdebug.log
+
+# whooshee files
+whooshee/*
+tests/01_functional/whooshee/*

@@ -10,10 +10,11 @@ import secrets
 from datetime import datetime, timedelta
 from hashlib import md5
 
-from odyssey import db
+from odyssey import db, whooshee
 
 phx_tz = pytz.timezone('America/Phoenix')
 
+@whooshee.register_model('firstname','lastname','email','phone','dob', 'record_locator_id')
 class ClientInfo(db.Model):
     """ Client information table
 
@@ -223,21 +224,32 @@ class ClientInfo(db.Model):
 
     :type: bool
     """
+    
+    record_locator_id = db.Column(db.String(10))
+    """
+    Record Locator ID
 
-    def get_medical_record_hash(self):
+    name_hash = md5(bytes((data['firstname']+data['lastname']), 'utf-8')).hexdigest()
+    data['record_locator_id'] = (data['firstname'][0]+data['lastname'][0]+str(data['clientid'])+name_hash[0:6]).upper()    
+
+    :type: str, max length 10
+    """
+
+    @staticmethod
+    def get_medical_record_hash(firstname, lastname, clientid):
         """medical record hash generation"""
-        name_hash = md5(bytes((self.firstname+self.lastname), 'utf-8')).hexdigest()
+        name_hash = md5(bytes((firstname+lastname), 'utf-8')).hexdigest()
 
-        return (self.firstname[0]+self.lastname[0]+str(self.clientid)+name_hash[0:6]).upper()
+        return (firstname[0]+lastname[0]+str(clientid)+name_hash[0:6]).upper()
 
     def client_info_search_dict(self):
         """returns just the searchable client info (name, email, number)"""
         data = {
             'clientid': self.clientid,
-            'record_locator_id': self.get_medical_record_hash(),
+            'record_locator_id': self.record_locator_id,
             'firstname': self.firstname,
             'lastname': self.lastname,
-            'fullname': self.fullname,
+            'dob': self.dob,
             'phone': self.phone,
             'email': self.email
         }

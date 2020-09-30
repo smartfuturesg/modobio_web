@@ -10,6 +10,7 @@ from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
+from flask_whooshee import Whooshee
 
 from odyssey.config import Config
 
@@ -17,6 +18,7 @@ db = SQLAlchemy()
 migrate = Migrate()
 cors = CORS()
 ma = Marshmallow()
+whooshee = Whooshee()
 
 def create_app():
     """ Initialize an instance of the Flask app.
@@ -52,6 +54,7 @@ def create_app():
     migrate.init_app(app, db)
     cors.init_app(app)
     ma.init_app(app)
+    whooshee.init_app(app)
 
     db.Model.update = _update
 
@@ -66,6 +69,17 @@ def create_app():
     if app.config['LOCAL_CONFIG']:
         from odyssey.api.postman import bp
         app.register_blueprint(bp, url_prefix='/postman')
+
+    # If you want to add another field to search for in the database by whooshee
+    # Example: @whooshee.register_model('firstname')
+    # Add in lastname
+    # @whooshee.register_model('firstname','lastname')
+    # YOU MUST DELETE THE whooshee folder! Same level as src, tests, migrations, etc
+    with app.app_context():
+        try:
+            whooshee.reindex()
+        except:
+            pass
 
     return app
 

@@ -18,16 +18,19 @@ from odyssey.models.client import (
     ClientPolicies,
     ClientRelease,
     ClientSubscriptionContract,
+    ClientFacilities,
     RemoteRegistration
 )
 from odyssey.models.doctor import MedicalHistory, MedicalPhysicalExam
 from odyssey.models.pt import PTHistory 
 from odyssey.models.staff import ClientRemovalRequests
 from odyssey.models.trainer import FitnessQuestionnaire
+from odyssey.models.misc import RegisteredFacilities
 from odyssey.pdf import to_pdf, merge_pdfs
 from odyssey.utils.email import send_email_remote_registration_portal, send_test_email
 from odyssey.utils.misc import check_client_existence
 from odyssey.utils.schemas import (
+    AllClientsDataTier,
     ClientConsentSchema,
     ClientConsultContractSchema,
     ClientIndividualContractSchema,
@@ -36,14 +39,15 @@ from odyssey.utils.schemas import (
     ClientRegistrationStatusSchema,
     ClientReleaseSchema,
     ClientReleaseContactsSchema,
-    ClientRemoteRegistrationPortalSchema, 
+    ClientRemoteRegistrationPortalSchema,
+    ClientSearchOutSchema,
     ClientSubscriptionContractSchema,
+    ClientSummarySchema,
     NewRemoteClientSchema, 
     RefreshRemoteRegistrationSchema,
     SignAndDateSchema,
     SignedDocumentsSchema
 )
-
 
 ns = api.namespace('client', description='Operations related to clients')
 
@@ -123,33 +127,120 @@ class NewClient(Resource):
             raise IllegalSetting('clientid')
         #set member since date to today
         data['membersince'] = date.today().strftime("%Y-%m-%d")
-   
-        ci_schema = ClientInfoSchema()
-        client = ci_schema.load(data)
+        
+        client = ClientInfoSchema().load(data)
         db.session.add(client)
+        db.session.flush()
+
+        rli = {'record_locator_id': ClientInfo().get_medical_record_hash(firstname = client.firstname , lastname = client.lastname, clientid =client.clientid)}
+
+        client.update(rli)
         db.session.commit()
+
         return client
 
+@ns.route('/summary/<int:clientid>/')
+class ClientSummary(Resource):
+    @token_auth.login_required
+    @responds(schema=ClientSummarySchema, api=ns)
+    def get(self, clientid):
+        client = ClientInfo.query.get(clientid)
+        if not client:
+            raise UserNotFound(clientid)
+        
+        #get list of a client's registered facilities' addresses
+        clientFacilities = ClientFacilities.query.filter_by(client_id=clientid).all()
+        facilityList = [item.facility_id for item in clientFacilities]
+        facilities = []
+        for item in facilityList:
+            facilities.append(RegisteredFacilities.query.filter_by(facility_id=item).first())
+            
+        data = {"firstname": client.firstname, "middlename": client.middlename, "lastname": client.lastname,
+                "clientid": client.clientid, "dob": client.dob, "membersince": client.membersince, "facilities": facilities}
+        return data
 
 @ns.route('/clientsearch/')
-@ns.doc(params={'page': 'request page for paginated clients list', 'per_page': 'number of clients per page'})
+@ns.doc(params={'page': 'request page for paginated clients list',
+                'per_page': 'number of clients per page',
+                'firstname': 'first name to search',
+                'lastname': 'last name to search',
+                'email': 'email to search',
+                'phone': 'phone number to search',
+                'dob': 'date of birth to search',
+                'record_locator_id': 'record locator id to search'})
 class Clients(Resource):
     @token_auth.login_required
+    @responds(schema=ClientSearchOutSchema, api=ns)
     def get(self):
-        """returns list of all clients"""
+        """returns list of clients given query parameters"""
         page = request.args.get('page', 1, type=int)
-        per_page = min(request.args.get('per_page', 10, type=int), 100)
-        data, resources = ClientInfo.all_clients_dict(ClientInfo.query.order_by(ClientInfo.lastname.asc()),
-                                            page=page,per_page=per_page)
+        per_page = min(request.args.get('per_page', 10, type=int), 100)                 
+        
+        # These payload keys should be the same as what's indexed in 
+        # the model.
+        param = {}
+        param_keys = ['firstname', 'lastname', 'email', 'phone', 'dob', 'record_locator_id']
+        searchStr = ''
+        for key in param_keys:
+            param[key] = request.args.get(key, default=None, type=str)
+            # Cleans up search query
+            if param[key] is None:
+                param[key] = ''          
+            elif key == 'record_locator_id' and param.get(key, None):
+                tempId = param[key]
+            elif key == 'email' and param.get(key, None):
+                tempEmail = param[key]
+                param[key] = param[key].replace("@"," ")
+            elif key == 'phone' and param.get(key, None):
+                param[key] = param[key].replace("-"," ")
+                param[key] = param[key].replace("("," ")
+                param[key] = param[key].replace(")"," ")                
+            elif key == 'dob' and param.get(key, None):
+                param[key] = param[key].replace("-"," ")
+
+            searchStr = searchStr + param[key] + ' '        
+        
+        if(searchStr.isspace()):
+            data, resources = ClientInfo.all_clients_dict(ClientInfo.query.order_by(ClientInfo.lastname.asc()),
+                                                page=page,per_page=per_page)
+        else:
+            data, resources = ClientInfo.all_clients_dict(ClientInfo.query.whooshee_search(searchStr),
+                                                page=page,per_page=per_page)
+
+        # Since email and record locator idshould be unique, 
+        # if the input email or rli exactly matches 
+        # the profile, only display that user
+        exactMatch = False
+        
+        if param['email']:
+            for val in data['items']:
+                if val['email'].lower() == tempEmail.lower():
+                    data['items'] = [val]
+                    exactMatch = True
+                    continue
+        
+        # Assuming client will most likely remember their 
+        # email instead of their RLI. If the email is correct
+        # no need to search through RLI. 
+        #
+        # If BOTH are incorrect, return data as normal.
+        if param['record_locator_id'] and not exactMatch:
+            for val in data['items']:
+                if val['record_locator_id'] is None:
+                    pass
+                elif val['record_locator_id'].lower() == tempId.lower():
+                    data['items'] = [val]
+                    continue
+
         data['_links']= {
-            'self': api.url_for(Clients, page=page, per_page=per_page),
-            'next': api.url_for(Clients, page=page + 1, per_page=per_page)
+            '_self': api.url_for(Clients, page=page, per_page=per_page),
+            '_next': api.url_for(Clients, page=page + 1, per_page=per_page)
             if resources.has_next else None,
-            'prev': api.url_for(Clients, page=page - 1, per_page=per_page)
+            '_prev': api.url_for(Clients, page=page - 1, per_page=per_page)
             if resources.has_prev else None,
         }
-
-        return jsonify(data)
+        
+        return data
 
 @ns.route('/consent/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
@@ -417,14 +508,10 @@ class SignedDocuments(Resource):
         urls = {}
         paths = []
 
-        bucket_name = current_app.config['DOCS_BUCKET_NAME']
-        if not bucket_name:
-            raise IllegalSetting(message='Bucket name not defined.')
-
         if not current_app.config['LOCAL_CONFIG']:
             s3 = boto3.client('s3')
             params = {
-                'Bucket': bucket_name,
+                'Bucket': current_app.config['S3_BUCKET_NAME'],
                 'Key': None
             }
 
@@ -525,6 +612,11 @@ class NewRemoteRegistration(Resource):
         db.session.add(client)
         db.session.flush()
 
+        rli = {'record_locator_id': ClientInfo().get_medical_record_hash(firstname = client.firstname , lastname = client.lastname, clientid =client.clientid)}
+
+        client.update(rli)        
+        db.session.flush()
+
         # create a new remote client registration entry
         portal_data = {'clientid' : client.clientid, 'email': client.email}
         remote_client_portal = client_rr_schema.load(portal_data)
@@ -599,3 +691,25 @@ class TestEmail(Resource):
         send_test_email(recipient=recipient)
         
         return {}, 200  
+
+@ns.route('/datastoragetiers/')
+class ClientDataStorageTiers(Resource):
+    """
+       Amount of data stored on each client and their storage tier
+    """
+    @token_auth.login_required
+    @responds(schema=AllClientsDataTier, api=ns)
+    def get(self):
+        """Returns the total data storage for each client along with their data storage tier"""
+
+        data = db.session.execute("SELECT * FROM public.data_per_client;").fetchall()
+        results = {'total_items': len(data), 'items' : []}
+        total_bytes = 0
+        for row in data:
+            bytes_as_int = row[1].__int__()
+            results['items'].append({'clientid': row[0], 'stored_bytes': bytes_as_int, 'tier': row[2]})
+            total_bytes += bytes_as_int
+
+        results['total_stored_bytes'] = total_bytes 
+        
+        return results
