@@ -9,6 +9,7 @@ import os
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from odyssey import db
+from odyssey.constants import DB_SERVER_TIME
 
 class Staff(db.Model):
     """ Staff member information table.
@@ -17,6 +18,20 @@ class Staff(db.Model):
     staff members.
     """
     __tablename__ = 'Staff'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
+    """
 
     token = db.Column(db.String(32), index=True, unique=True)
     """
@@ -155,6 +170,20 @@ class ClientRemovalRequests(db.Model):
 
     :type: int, primary key, autoincrement
     """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
+    """
     
     staffid = db.Column(db.Integer, 
                          db.ForeignKey('Staff.staffid',
@@ -166,7 +195,7 @@ class ClientRemovalRequests(db.Model):
     :type: int, primary key, autoincrement
     """
 
-    timestamp = db.Column(db.DateTime)
+    timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     Timestamp of the removal request
 

@@ -5,7 +5,7 @@ from sqlalchemy import text
 
 TABLE_TO_URI = {'ClientPolicies' : '/client/policies/{}/',
                 'ClientRelease': '/client/release/{}/',
-                'ClientConsent'. : '/client/consent/{}/',
+                'ClientConsent' : '/client/consent/{}/',
                 'ClientConsultContract' : '/client/consultcontract/{}/',
                 'ClientIndividualContract' : '/client/servicescontract/{}/' ,
                 'ClientSubscriptionContract' : '/client/subscriptioncontract/{}/',
