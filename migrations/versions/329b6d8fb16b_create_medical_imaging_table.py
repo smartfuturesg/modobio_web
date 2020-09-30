@@ -1,8 +1,8 @@
-"""Create MedicalImaging Table
+"""Create Medical Imaging Table
 
-Revision ID: 4830e1250eab
+Revision ID: 329b6d8fb16b
 Revises: 9b92a2be034e
-Create Date: 2020-09-21 15:22:59.531096
+Create Date: 2020-09-29 18:02:55.530935
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '4830e1250eab'
+revision = '329b6d8fb16b'
 down_revision = '9b92a2be034e'
 branch_labels = None
 depends_on = None
@@ -21,11 +21,12 @@ def upgrade():
     op.create_table('MedicalImaging',
     sa.Column('idx', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('clientid', sa.Integer(), nullable=False),
-    sa.Column('image_date', sa.DateTime(), nullable=True),
+    sa.Column('image_date', sa.Date(), nullable=True),
     sa.Column('image_type', sa.String(length=1024), nullable=True),
     sa.Column('image_read', sa.Text(), nullable=True),
     sa.Column('image_origin_location', sa.Text(), nullable=True),
     sa.Column('image_path', sa.Text(), nullable=True),
+    sa.Column('image_size', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['clientid'], ['ClientInfo.clientid'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('idx')
     )
