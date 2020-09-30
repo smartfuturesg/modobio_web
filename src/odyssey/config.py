@@ -145,6 +145,9 @@ class Config:
             if not self.S3_BUCKET_NAME:
                 raise ValueError('S3_BUCKET_NAME not defined')
 
+        # Whooshee fulltext index
+        self.WHOOSHEE_DIR = self.getvar('WHOOSHEE_DIR', None)
+
         # Wearables
         self.OURA_CLIENT_ID = self.getvar(
             'OURA_CLIENT_ID',

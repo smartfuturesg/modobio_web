@@ -1119,6 +1119,8 @@ class MedicalImagingSchema(ma.SQLAlchemyAutoSchema):
 
     possible_image_types = ['CTscan', 'MRI', 'PETscan', 'Ultrasound', 'XRay']
     image_type = fields.String(validate=validate.OneOf(possible_image_types), required=True)
+    image_date = fields.Date(required=True)
+    image_read = fields.String(required=True)
 
 class BloodChemistryCBCSchema(Schema):
 
