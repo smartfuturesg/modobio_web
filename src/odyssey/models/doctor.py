@@ -3,7 +3,9 @@ Database tables for the doctor's portion of the Modo Bio Staff application.
 All tables in this module are prefixed with 'Medical'.
 """
 from datetime import datetime
+
 from odyssey import db
+from odyssey.constants import DB_SERVER_TIME
 
 class MedicalImaging(db.Model):
     """ Medical Imaging table
@@ -19,6 +21,21 @@ class MedicalImaging(db.Model):
 
     :type: int, primary key, autoincrement
     """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
+    """
+
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid', ondelete="CASCADE"), nullable=False)
     """
     Client ID number
@@ -85,6 +102,20 @@ class MedicalBloodChemistryCBC(db.Model):
     Table index.
 
     :type: int, primary key, autoincrement
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='MedicalBloodChemistryCBC_clientid_fkey',ondelete="CASCADE"), nullable=False)
@@ -292,6 +323,20 @@ class MedicalBloodChemistryCMP(db.Model):
     :type: int, primary key, autoincrement
     """
 
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
+    """
+
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='MedicalBloodChemistryCMP_clientid_fkey',ondelete="CASCADE"), nullable=False)
     """
     Client ID number
@@ -475,6 +520,20 @@ class MedicalHistory(db.Model):
     :type: int, primary key, autoincrement
     """
 
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
+    """
+
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='MedicalHistory_clientid_fkey', ondelete="CASCADE"), nullable=False)
     """
     Client ID number
@@ -605,7 +664,21 @@ class MedicalPhysicalExam(db.Model):
     :type: int, foreign key to :attr:`ClientInfo.clientid`
     """
 
-    timestamp = db.Column(db.DateTime)
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
+    """
+
+    timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     Timestamp of the assessment.
 
@@ -814,6 +887,20 @@ class MedicalBloodChemistryLipids(db.Model):
     :type: int, primary key, autoincrement
     """
 
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
+    """
+
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='BloodLipids_clientid_fkey', ondelete="CASCADE"), nullable=False)
     """
     Client ID number
@@ -897,6 +984,20 @@ class MedicalBloodChemistryThyroid(db.Model):
     Index
 
     :type: int, primary key, autoincrement
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='BloodThyroid_clientid_fkey', ondelete="CASCADE"), nullable=False)
@@ -1021,6 +1122,20 @@ class MedicalBloodChemistryA1C(db.Model):
     Index
 
     :type: int, primary key, autoincrement
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='BloodA1C_clientid_fkey', ondelete="CASCADE"), nullable=False)

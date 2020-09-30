@@ -1,6 +1,8 @@
 """ Various constants used throughout the Odyssey package. """
 import enum
 
+from sqlalchemy import text
+
 from odyssey.models.client import (
     ClientPolicies,
     ClientRelease,
@@ -385,3 +387,7 @@ database column expects a Python :attr:`True` or :attr:`False` value. Use
 
 :type: function
 """
+
+# POSTGRESQL specific function that returns the time the statement is run.
+# It is independent of transaction time
+DB_SERVER_TIME = text("clock_timestamp()")

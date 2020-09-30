@@ -126,7 +126,7 @@ class NewClient(Resource):
         elif data.get('clientid', None):
             raise IllegalSetting('clientid')
         #set member since date to today
-        data['membersince'] = date.today().strftime("%Y-%m-%d")
+        # data['membersince'] = date.today().strftime("%Y-%m-%d")
         
         client = ClientInfoSchema().load(data)
         db.session.add(client)
