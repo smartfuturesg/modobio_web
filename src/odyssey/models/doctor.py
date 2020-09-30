@@ -4,8 +4,8 @@ All tables in this module are prefixed with 'Medical'.
 """
 from datetime import datetime
 
-from odyssey import db
 from odyssey.constants import DB_SERVER_TIME
+from odyssey import db
 
 class MedicalImaging(db.Model):
     """ Medical Imaging table

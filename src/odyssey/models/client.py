@@ -10,8 +10,8 @@ import secrets
 from datetime import datetime, timedelta
 from hashlib import md5
 from sqlalchemy import text
-from odyssey import db, whooshee
 from odyssey.constants import DB_SERVER_TIME
+from odyssey import db, whooshee
 
 phx_tz = pytz.timezone('America/Phoenix')
 
