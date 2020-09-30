@@ -1250,6 +1250,29 @@ class ClientExternalMREntrySchema(Schema):
 """
     Schemas for the staff API
 """
+class StaffSearchItemsSchema(Schema):
+    staffid = fields.Integer()
+    firstname = fields.String(required=False, validate=validate.Length(min=1, max= 50), missing=None)
+    lastname = fields.String(required=False, validate=validate.Length(min=1,max=50), missing=None)
+    email = fields.Email(required=False, missing=None)
+
+# class ClientSearchMetaSchema(Schema):
+#     page = fields.Integer(required=False, missing=0)
+#     per_page = fields.Integer(required=False, missing=0)
+#     total_pages = fields.Integer(required=False, missing=0)
+#     total_items = fields.Integer(required=False, missing=0)
+
+# class ClientSearchLinksSchema(Schema):
+#     _self = fields.String(required=False, validate=validate.Length(min=1, max= 50), missing=None)
+#     _next = fields.String(required=False, validate=validate.Length(min=1, max= 50), missing=None)
+#     _prev = fields.String(required=False, validate=validate.Length(min=1, max= 50), missing=None)
+
+class StaffSearchOutSchema(Schema):
+    """ ClientSearchOutSchema uses nested ClientSearchItemsSchemas and 
+        ClientSearchMetaSchemas """
+    items = fields.Nested(StaffSearchItemsSchema(many=True),
+                            missing=StaffSearchItemsSchema().load({}))
+
 class StaffSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Staff
