@@ -1,0 +1,70 @@
+import datetime
+import pathlib
+import time
+
+from flask.json import dumps
+from requests.auth import _basic_auth_str
+
+from odyssey.models.staff import Staff
+
+def test_get_client_search(test_client, init_database):
+    """
+    GIVEN a api end point for retrieving client info
+    WHEN the '/client/<client id>' resource  is requested (GET)
+    THEN check the response is valid
+    """
+    # get staff authorization to view client data
+    staff = Staff().query.first()
+    token = staff.get_token()
+    headers = {'Authorization': f'Bearer {token}'}
+    
+    # Order of test search:
+    # General empty search
+    # record_locator_id
+    # firstname
+    # lastname
+    # email
+    # firstname and email
+
+    # send get request
+    response = test_client.get('/client/clientsearch/', headers=headers)
+    assert response.status_code == 200
+
+    response = test_client.get('/client/clientsearch/?record_locator_id=TC148FAC4', headers=headers)
+    assert response.status_code == 200
+    assert response.json['items'][0]['firstname'] == 'Test'
+    assert response.json['items'][0]['lastname'] == 'Client'
+    assert response.json['items'][0]['email'] == 'test_this_client@gmail.com'
+    assert response.json['items'][0]['record_locator_id'] == 'TC148FAC4'
+
+    # send get request for first name (note, the actual first name is testY)
+    response = test_client.get('/client/clientsearch/?firstname=test', headers=headers)
+    assert response.status_code == 200
+    assert response.json['items'][0]['firstname'] == 'Test'
+    assert response.json['items'][0]['lastname'] == 'Client'
+    assert response.json['items'][0]['email'] == 'test_this_client@gmail.com'
+    assert response.json['items'][0]['record_locator_id'] == 'TC148FAC4'
+
+    # send get request for last name 
+    response = test_client.get('/client/clientsearch/?lastname=client', headers=headers)
+    assert response.status_code == 200
+    assert response.json['items'][0]['firstname'] == 'Test'
+    assert response.json['items'][0]['lastname'] == 'Client'
+    assert response.json['items'][0]['email'] == 'test_this_client@gmail.com'
+    assert response.json['items'][0]['record_locator_id'] == 'TC148FAC4'
+
+    # send get request for email 
+    response = test_client.get('/client/clientsearch/?email=test_this_client@gmail.com', headers=headers)
+    assert response.status_code == 200
+    assert response.json['items'][0]['firstname'] == 'Test'
+    assert response.json['items'][0]['lastname'] == 'Client'
+    assert response.json['items'][0]['email'] == 'test_this_client@gmail.com'
+    assert response.json['items'][0]['record_locator_id'] == 'TC148FAC4'
+
+    # send get request for first name 
+    response = test_client.get('/client/clientsearch/?firstname=test&email=test_this_client@gmail.com', headers=headers)
+    assert response.status_code == 200
+    assert response.json['items'][0]['firstname'] == 'Test'
+    assert response.json['items'][0]['lastname'] == 'Client'
+    assert response.json['items'][0]['email'] == 'test_this_client@gmail.com'
+    assert response.json['items'][0]['record_locator_id'] == 'TC148FAC4'
