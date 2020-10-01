@@ -353,7 +353,6 @@ class ChessboardSchema(Schema):
             in order to shape into the Chessboard table
         """
         flat_data = {'clientid': data['clientid'],
-                    'timestamp': datetime.utcnow(),
                     'notes': data['notes'],
                     'left_shoulder_er': data['shoulder']['left']['er'],
                     'left_shoulder_ir': data['shoulder']['left']['ir'],
@@ -396,7 +395,6 @@ class ChessboardSchema(Schema):
         hip_l = {k.split('_')[-1]:v for k,v in data.__dict__.items() if 'left_hip' in k}
         hip_r = {k.split('_')[-1]:v for k,v in data.__dict__.items() if 'right_hip' in k}
         nested = {'clientid': data.clientid,
-                  'timestamp': data.timestamp,
                   'notes': data.notes,
                   'isa_structure': data.isa_structure,
                   'isa_movement': data.isa_movement,
@@ -451,7 +449,6 @@ class PowerAssessmentSchema(Schema):
     @post_load
     def unravel(self, data, **kwargs):
         flat_data = {'clientid': data['clientid'],
-                    'timestamp': datetime.utcnow(),
                     'keiser_upper_r_weight': data['push_pull']['right']['weight'],
                     'keiser_upper_r_attempt_1': data['push_pull']['right']['attempt_1'],
                     'keiser_upper_r_attempt_2': data['push_pull']['right']['attempt_2'],
@@ -709,7 +706,6 @@ class MovementAssessmentSchema(Schema):
     @post_load
     def unravel(self, data, **kwargs):
         flat_data = {'clientid': data['clientid'],
-                    'timestamp': datetime.utcnow(),
                     'squat_depth': data['squat']['depth'],
                     'squat_ramp': data['squat']['ramp'],
                     'squat_eye_test': data['squat']['eye_test'],
@@ -903,7 +899,6 @@ class MoxyRipSchema(Schema):
     @post_load
     def unravel(self, data, **kwargs):
         flat_data = {'clientid': data['clientid'],
-                    'timestamp': datetime.utcnow(),
                     'vl_side': data['vl_side'],
                     'performance_smo2_1':          data['performance']['one']['smo2'],
                     'performance_thb_1':           data['performance']['one']['thb'],

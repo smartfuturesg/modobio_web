@@ -96,7 +96,7 @@ class RemoveClient(Resource):
         
         # find the staff member requesting client delete
         staff = token_auth.current_user()
-        new_removal_request = ClientRemovalRequests(staffid=staff.staffid, timestamp=datetime.utcnow())
+        new_removal_request = ClientRemovalRequests(staffid=staff.staffid)
         
         db.session.add(new_removal_request)
         db.session.flush()
