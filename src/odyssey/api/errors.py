@@ -290,7 +290,7 @@ def error_insufficient_inputs(error):
     return error_response(error.status_code, error.message)
 
 @api.errorhandler(StaffNotFound)
-def error_user_does_not_exist(error):
+def error_staff_id_does_not_exist(error):
     '''Return a custom message and 400 status code'''
     return error_response(error.status_code, error.message)
 
