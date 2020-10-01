@@ -28,38 +28,30 @@ class StaffMembers(Resource):
         param = {}
         param_keys = ['firstname', 'lastname', 'email', 'staffid']
         noMoreSearch = False
+        
         if not request.args:
             data = Staff.query.order_by(Staff.lastname.asc()).all()
+            noMoreSearch = True
+        elif len(request.args) == 1 and request.args.get('staffid'):
+            data = [Staff.query.filter_by(staffid=request.args.get('staffid')).first()]
+            if not any(data):
+                raise StaffNotFound(request.args.get('staffid'))
             noMoreSearch = True
         
         if not noMoreSearch:
             searchStr = ''
-            count = 0
-            onlyStaffID = False
             exactMatch = False
             for key in param_keys:
                 param[key] = request.args.get(key, default=None, type=str)
                 # Cleans up search query
                 if param[key] is None:
-                    param[key] = ''
-                    # This checks if staffid is the only searching criteria
-                    if key != 'staffid':
-                        count+=1        
+                    param[key] = ''     
                 elif key == 'email' and param.get(key, None):
                     tempEmail = param[key]
                     param[key] = param[key].replace("@"," ")
                 searchStr = searchStr + param[key] + ' '
             
-            if count == len(param_keys)-1:
-                onlyStaffID = True
-
-            if onlyStaffID:
-                data = [Staff.query.filter_by(staffid=param['staffid']).first()]
-                if not any(data):
-                    raise StaffNotFound(param['staffid'])
-                exactMatch = True
-            else:
-                data = Staff.query.whooshee_search(searchStr).all()
+            data = Staff.query.whooshee_search(searchStr).all()
 
             # Since email and staffid should be unique, 
             # if the input email or staffid exactly matches 
