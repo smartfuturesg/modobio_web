@@ -27,29 +27,32 @@ class StaffMembers(Resource):
         # the model.
         param = {}
         param_keys = ['firstname', 'lastname', 'email', 'staffid']
-        searchStr = ''
-        count = 0
-        onlyStaffID = False
-        exactMatch = False
-        for key in param_keys:
-            param[key] = request.args.get(key, default=None, type=str)
-            # Cleans up search query
-            if param[key] is None:
-                param[key] = ''
-                # This checks if staffid is the only searching criteria
-                if key != 'staffid':
-                    count+=1        
-            elif key == 'email' and param.get(key, None):
-                tempEmail = param[key]
-                param[key] = param[key].replace("@"," ")
-            searchStr = searchStr + param[key] + ' '
-        
-        if count == len(param_keys)-1:
-            onlyStaffID = True
-        
-        if(searchStr.isspace()):
+        noMoreSearch = False
+        if not request.args:
             data = Staff.query.order_by(Staff.lastname.asc()).all()
-        else:
+            noMoreSearch = True
+        
+        if not noMoreSearch:
+            searchStr = ''
+            count = 0
+            onlyStaffID = False
+            exactMatch = False
+            for key in param_keys:
+                param[key] = request.args.get(key, default=None, type=str)
+                # Cleans up search query
+                if param[key] is None:
+                    param[key] = ''
+                    # This checks if staffid is the only searching criteria
+                    if key != 'staffid':
+                        count+=1        
+                elif key == 'email' and param.get(key, None):
+                    tempEmail = param[key]
+                    param[key] = param[key].replace("@"," ")
+                searchStr = searchStr + param[key] + ' '
+            
+            if count == len(param_keys)-1:
+                onlyStaffID = True
+
             if onlyStaffID:
                 data = [Staff.query.filter_by(staffid=param['staffid']).first()]
                 if not any(data):
@@ -58,31 +61,31 @@ class StaffMembers(Resource):
             else:
                 data = Staff.query.whooshee_search(searchStr).all()
 
-        # Since email and staffid should be unique, 
-        # if the input email or staffid exactly matches 
-        # the profile, only display that user
-        if param['email']:
-            for val in data:
-                if val.email.lower() == tempEmail.lower():
-                    data = [val]
-                    exactMatch = True
-                    break
+            # Since email and staffid should be unique, 
+            # if the input email or staffid exactly matches 
+            # the profile, only display that user
+            if param['email']:
+                for val in data:
+                    if val.email.lower() == tempEmail.lower():
+                        data = [val]
+                        exactMatch = True
+                        break
 
-        # Assuming staff will most likely remember their 
-        # email instead of their staff. If the email is correct
-        # no need to search through RLI. 
-        #
-        # This next check depends on if the whooshee search returns 
-        # Relevant staff with the correct ID. It is possible for the
-        # search to return different staff members (and NOT the staffid
-        # that was a search parameter
-        #
-        # If BOTH are incorrect, return data as normal.
-        if param['staffid'] and not exactMatch:
-            for val in data:
-                if val.staffid == param['staffid']:
-                    data = [val]
-                    break
+            # Assuming staff will most likely remember their 
+            # email instead of their staff. If the email is correct
+            # no need to search through RLI. 
+            #
+            # This next check depends on if the whooshee search returns 
+            # Relevant staff with the correct ID. It is possible for the
+            # search to return different staff members (and NOT the staffid
+            # that was a search parameter
+            #
+            # If BOTH are incorrect, return data as normal.
+            if param['staffid'] and not exactMatch:
+                for val in data:
+                    if val.staffid == param['staffid']:
+                        data = [val]
+                        break
         return data 
     
     @token_auth.login_required(role=['sys_admin', 'staff_admin'])

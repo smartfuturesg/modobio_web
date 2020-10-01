@@ -6,6 +6,7 @@ from flask.json import dumps
 from requests.auth import _basic_auth_str
 
 from odyssey.models.staff import Staff
+from odyssey.models.client import ClientInfo
 
 def test_get_client_search(test_client, init_database):
     """
@@ -25,12 +26,15 @@ def test_get_client_search(test_client, init_database):
     # lastname
     # email
     # firstname and email
-
+ 
     # send get request
     response = test_client.get('/client/clientsearch/', headers=headers)
     assert response.status_code == 200
 
-    response = test_client.get('/client/clientsearch/?record_locator_id=TC148FAC4', headers=headers)
+    client = ClientInfo.query.filter_by(clientid=1).first()
+    queryStr = '/client/clientsearch/?record_locator_id=' + client.record_locator_id
+
+    response = test_client.get(queryStr, headers=headers)
     assert response.status_code == 200
     assert response.json['items'][0]['firstname'] == 'Test'
     assert response.json['items'][0]['lastname'] == 'Client'
