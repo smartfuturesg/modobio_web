@@ -43,7 +43,7 @@ class MedicalImaging(db.Model):
     :type: int, foreign key to :attr:`ClientInfo.clientid`
     """
 
-    image_date = db.Column(db.DateTime)
+    image_date = db.Column(db.Date)
     """
     Date image was taken
     To be filled in by the doctor

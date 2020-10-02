@@ -8,9 +8,10 @@ import os
 
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from odyssey import db
+from odyssey import db, whooshee
 from odyssey.constants import DB_SERVER_TIME
 
+@whooshee.register_model('firstname','lastname','email','staffid')
 class Staff(db.Model):
     """ Staff member information table.
 

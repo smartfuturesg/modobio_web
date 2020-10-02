@@ -1114,7 +1114,9 @@ class MedicalImagingSchema(ma.SQLAlchemyAutoSchema):
 
     possible_image_types = ['CTscan', 'MRI', 'PETscan', 'Ultrasound', 'XRay']
     image_type = fields.String(validate=validate.OneOf(possible_image_types), required=True)
-
+    image_date = fields.Date(required=True)
+    image_read = fields.String(required=True)
+    
 class BloodChemistryCBCSchema(Schema):
 
     # Validate each payload entry
@@ -1245,6 +1247,12 @@ class ClientExternalMREntrySchema(Schema):
 """
     Schemas for the staff API
 """
+class StaffSearchItemsSchema(Schema):
+    staffid = fields.Integer()
+    firstname = fields.String(required=False, validate=validate.Length(min=1, max= 50), missing=None)
+    lastname = fields.String(required=False, validate=validate.Length(min=1,max=50), missing=None)
+    email = fields.Email(required=False, missing=None)
+
 class StaffSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Staff
