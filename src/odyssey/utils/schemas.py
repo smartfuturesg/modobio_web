@@ -7,12 +7,10 @@ from odyssey import ma
 from odyssey.models.doctor import ( 
     MedicalHistory,
     MedicalPhysicalExam,
-    MedicalBloodChemistryCMP,
-    MedicalBloodChemistryCBC,
-    MedicalBloodChemistryThyroid,
     MedicalImaging,
-    MedicalBloodChemistryLipids,
-    MedicalBloodChemistryA1C
+    MedicalBloodTests,
+    MedicalBloodTestResults,
+    MedicalBloodTestResultTypes
 )
 from odyssey.models.client import (
     ClientConsent,
@@ -1122,71 +1120,57 @@ class MedicalImagingSchema(ma.SQLAlchemyAutoSchema):
     image_date = fields.Date(required=True)
     image_read = fields.String(required=True)
     
-class BloodChemistryCBCSchema(Schema):
-
-    # Validate each payload entry
-    idx = fields.Integer(required=False)
-    clientid = fields.Integer(missing=0)
-    exam_date = fields.Date()
-    rbc = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    hemoglobin = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    hematocrit = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    mcv = fields.Float(description="",validate=validate.Range(min=0, max=200),required=False)
-    mch = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    mchc = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    rdw = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    wbc = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    rel_neutrophils = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    abs_neutrophils = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    rel_lymphocytes = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    abs_lymphocytes = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    rel_monocytes = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    abs_monocytes = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    rel_eosinophils = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    abs_eosinophils = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    basophils = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    platelets = fields.Float(description="",validate=validate.Range(min=0, max=500),required=False)
-
-    plateletsByMch = fields.Float(allow_blank=True)
-    plateletsByLymphocyte = fields.Float(allow_blank=True)
-    neutrophilByLymphocyte = fields.Float(allow_blank=True)
-    lymphocyteByMonocyte = fields.Float(allow_blank=True)
+class MedicalBloodTestSchema(Schema):
+    testid = fields.Integer()
+    clientid = fields.Integer(required=True)
+    date = fields.Date(required=True)
+    panel_type = fields.String(required=False)
+    notes = fields.String(required=False)
 
     @post_load
     def make_object(self, data, **kwargs):
-        return MedicalBloodChemistryCBC(**data)
+        return MedicalBloodTests(**data)
 
-class BloodChemistryCMPSchema(Schema):
+class MedicalBloodTestInputSchema(Schema):
+    clientid = fields.Integer()
+    date = fields.Date()
+    panel_type = fields.String()
+    notes = fields.String()
+    results = fields.Nested(MedicalBloodTestResultsInputSchema, many=True))
 
-    # Validate each payload entry
-    idx = fields.Integer(required=False)
-    clientid = fields.Integer(missing=0)
-    exam_date = fields.Date()
-    glucose = fields.Float(description="",validate=validate.Range(min=0, max=200),required=False)
-    sodium = fields.Float(description="",validate=validate.Range(min=0, max=500),required=False)
-    potassium = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    carbon_dioxide = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    chloride = fields.Float(description="",validate=validate.Range(min=0, max=500),required=False)
-    magnesium = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    calcium = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    phosphorus = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    uric_acid = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    bun = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    creatinine = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    ast = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    alt = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    alk_phophatase = fields.Float(description="",validate=validate.Range(min=0, max=200),required=False)
-    bilirubin = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    protein = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    albumin = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    globulin = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
+class MedicalBloodTestResultsInputSchema(Schema):
+    result_name = fields.String()
+    result_value = fields.Float()
 
-    bunByAlbumin = fields.Float(allow_blank=True)
+class MedicalBloodTestResultsSchema(Scehma):
+    idx = fields.Integer()
+    testid = fields.Integer()
+    result_type = fields.Integer()
+    result_value = fields.Float()
 
     @post_load
     def make_object(self, data, **kwargs):
-        return MedicalBloodChemistryCMP(**data)
+        return MedicalBloodTestResults(**data)
 
+class MedicalBloodTestResultTypes(Schema):
+    resultid = fields.Integer()
+    resultname = fields.String()
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return MedicalBloodTestResultTypes(**data)
+
+class MedicalBloodTestResultsSchema(Schema):
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return MedicalBloodTests(**data)
+        
+class MedicalBloodTestResultTypesSchema(Schema):
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return MedicalBloodTests(**data)
 
 class MedicalHistorySchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -1289,43 +1273,6 @@ class StaffSchema(ma.SQLAlchemyAutoSchema):
         new_staff.set_password(data['password'])
         return new_staff
 
-class MedicalBloodChemistryLipidsSchema(Schema):
-    idx = fields.Integer(required=False)
-    clientid = fields.Integer(required=False,missing=0)
-    exam_date = fields.Date(required=True)
-    cholesterol_total = fields.Float(required=False,validate=validate.Range(min=0.0, max=500.0))
-    cholesterol_ldl = fields.Float(required=False,validate=validate.Range(min=0.0, max=500.0))
-    cholesterol_hdl = fields.Float(required=False,validate=validate.Range(min=0.0, max=500.0))
-    triglycerides = fields.Float(required=False,validate=validate.Range(min=0.0, max=1000.0))
-    cholesterol_over_hdl = fields.Float(required=False)
-    triglycerides_over_hdl = fields.Float(required=False)
-    ldl_over_hdl = fields.Float(required=False)
-
-    @post_load
-    def make_object(self, data, **kwargs):
-        return MedicalBloodChemistryLipids(**data)
-
-class MedicalBloodChemistryThyroidSchema(Schema):
-    idx = fields.Integer(required=False)
-    clientid = fields.Integer(required=False,missing=0)
-    exam_date = fields.Date(required=True)
-    t3_resin_uptake = fields.Integer(required=False,validate=validate.Range(min=25,max=35))
-    thyroglobulin = fields.Integer(required=False,validate=validate.Range(min=0,max=20))
-    thyroidial_iodine_uptake = fields.Integer(required=False,validate=validate.Range(min=5,max=30))
-    tsh = fields.Float(required=False,validate=validate.Range(min=0.5,max=4.0))
-    tsi = fields.Integer(required=False,validate=validate.Range(min=0,max=130))
-    thyroxine_binding_globulin = fields.Integer(required=False,validate=validate.Range(min=12,max=27))
-    thyroxine_index = fields.Integer(required=False,validate=validate.Range(min=5,max=12))
-    t4_serum_total = fields.Integer(required=False,validate=validate.Range(min=5,max=12))
-    t4_serum_free = fields.Float(required=False,validate=validate.Range(min=0.8,max=1.8))
-    t3_serum_total = fields.Integer(required=False,validate=validate.Range(min=80,max=180))
-    t3_serum_reverse = fields.Integer(required=False,validate=validate.Range(min=20,max=40))
-    t3_serum_free = fields.Float(required=False,validate=validate.Range(min=2.3,max=4.2))
-    
-    @post_load
-    def make_object(self, data, **kwargs):
-        return MedicalBloodChemistryThyroid(**data)
-
 class RegisteredFacilitiesSchema(Schema):
     facility_id = fields.Integer(required=False)
     facility_name = fields.String(required=True)
@@ -1345,17 +1292,6 @@ class ClientSummarySchema(Schema):
     clientid = fields.Integer()
     membersince = fields.Date()
     facilities = fields.Nested(RegisteredFacilitiesSchema(many=True))
-
-class MedicalBloodChemistryA1CSchema(Schema):
-
-    idx = fields.Integer(required=False)
-    clientid = fields.Integer(required=False,missing=0)
-    exam_date = fields.Date(required=True)
-    a1c = fields.Float(required=True,validate=validate.Range(min=4.0,max=5.6))
-
-    @post_load
-    def make_object(self, data, **kwargs):
-        return MedicalBloodChemistryA1C(**data)
 
 #
 #   Schemas for the wearables API
