@@ -217,7 +217,7 @@ class Clients(Resource):
                 if val['email'].lower() == tempEmail.lower():
                     data['items'] = [val]
                     exactMatch = True
-                    continue
+                    break
         
         # Assuming client will most likely remember their 
         # email instead of their RLI. If the email is correct
@@ -230,7 +230,7 @@ class Clients(Resource):
                     pass
                 elif val['record_locator_id'].lower() == tempId.lower():
                     data['items'] = [val]
-                    continue
+                    break
 
         data['_links']= {
             '_self': api.url_for(Clients, page=page, per_page=per_page),

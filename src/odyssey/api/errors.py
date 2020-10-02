@@ -185,6 +185,17 @@ class InsufficientInputs(Exception):
 
         self.status_code = 405
 
+class StaffNotFound(Exception):
+    """in the case a non-existent staff member is being requested"""
+    def __init__(self, staffid=None, message = None):
+        Exception.__init__(self)
+        if message:
+            self.message = message
+        else:
+            self.message = f'The Staff member with staffid {staffid}, does not exist. Please try again.'
+
+        self.status_code = 404
+
 def bad_request(message):
     return error_response(400, message)
 
@@ -278,6 +289,10 @@ def error_insufficient_inputs(error):
     '''Return a custom message and 405 status code'''
     return error_response(error.status_code, error.message)
 
+@api.errorhandler(StaffNotFound)
+def error_staff_id_does_not_exist(error):
+    '''Return a custom message and 400 status code'''
+    return error_response(error.status_code, error.message)
 
 def register_handlers(app):
     """register application-wide error handling"""
