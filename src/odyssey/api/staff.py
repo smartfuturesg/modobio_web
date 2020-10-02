@@ -1,4 +1,4 @@
-from flask import request
+from flask import request, jsonify
 from flask_restx import Resource, fields
 from flask_accepts import accepts , responds
 
@@ -6,24 +6,79 @@ from odyssey import db
 from odyssey.models.staff import Staff
 from odyssey.api import api
 from odyssey.api.auth import token_auth
-from odyssey.api.errors import UnauthorizedUser, StaffEmailInUse
-from odyssey.utils.schemas import StaffSchema
+from odyssey.api.errors import UnauthorizedUser, StaffEmailInUse, StaffNotFound
+from odyssey.utils.schemas import StaffSchema, StaffSearchItemsSchema
 
 ns = api.namespace('staff', description='Operations related to staff members')
 
-
 @ns.route('/')
+@ns.doc(params={'firstname': 'first name to search',
+                'lastname': 'last name to search',
+                'staffid': 'staffid to search',
+                'email': 'email to search'})
 class StaffMembers(Resource):
     """staff member class for creating, getting staff"""
     
     @token_auth.login_required(role=['sys_admin', 'staff_admin'])
-    @responds(schema=StaffSchema(many=True), api=ns)
+    @responds(schema=StaffSearchItemsSchema(many=True), api=ns)
     def get(self):
-        """returns all staff members"""
-        #TODO add search functionality
-        all_staff = Staff.query.all()
+        """returns list of staff members given query parameters"""                
+        # These payload keys should be the same as what's indexed in 
+        # the model.
+        param = {}
+        param_keys = ['firstname', 'lastname', 'email', 'staffid']
+        noMoreSearch = False
+        
+        if not request.args:
+            data = Staff.query.order_by(Staff.lastname.asc()).all()
+            noMoreSearch = True
+        elif len(request.args) == 1 and request.args.get('staffid'):
+            data = [Staff.query.filter_by(staffid=request.args.get('staffid')).first()]
+            if not any(data):
+                raise StaffNotFound(request.args.get('staffid'))
+            noMoreSearch = True
+        
+        if not noMoreSearch:
+            searchStr = ''
+            exactMatch = False
+            for key in param_keys:
+                param[key] = request.args.get(key, default=None, type=str)
+                # Cleans up search query
+                if param[key] is None:
+                    param[key] = ''     
+                elif key == 'email' and param.get(key, None):
+                    tempEmail = param[key]
+                    param[key] = param[key].replace("@"," ")
+                searchStr = searchStr + param[key] + ' '
+            
+            data = Staff.query.whooshee_search(searchStr).all()
 
-        return all_staff    
+            # Since email and staffid should be unique, 
+            # if the input email or staffid exactly matches 
+            # the profile, only display that user
+            if param['email']:
+                for val in data:
+                    if val.email.lower() == tempEmail.lower():
+                        data = [val]
+                        exactMatch = True
+                        break
+
+            # Assuming staff will most likely remember their 
+            # email instead of their staff. If the email is correct
+            # no need to search through RLI. 
+            #
+            # This next check depends on if the whooshee search returns 
+            # Relevant staff with the correct ID. It is possible for the
+            # search to return different staff members (and NOT the staffid
+            # that was a search parameter
+            #
+            # If BOTH are incorrect, return data as normal.
+            if param['staffid'] and not exactMatch:
+                for val in data:
+                    if val.staffid == param['staffid']:
+                        data = [val]
+                        break
+        return data 
     
     @token_auth.login_required(role=['sys_admin', 'staff_admin'])
     @accepts(schema=StaffSchema, api=ns)
