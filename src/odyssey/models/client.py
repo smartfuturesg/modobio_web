@@ -235,7 +235,7 @@ class ClientInfo(db.Model):
     :type: bool
     """
     
-    record_locator_id = db.Column(db.String(12))
+    record_locator_id = db.Column(db.String(10))
     """
     Record Locator ID
 
@@ -248,9 +248,9 @@ class ClientInfo(db.Model):
     @staticmethod
     def get_medical_record_hash(firstname, lastname, clientid):
         """medical record hash generation"""
-        rli_hash = secrets.token_hex(4)
+        rli_hash = secrets.token_hex()
 
-        return (firstname[0]+lastname[0]+str(clientid)+rli_hash[0:4]).upper()
+        return (firstname[0]+lastname[0]+str(clientid)+rli_hash[0:8-len(str(clientid))]).upper()
 
     def client_info_search_dict(self):
         """returns just the searchable client info (name, email, number)"""

@@ -11,7 +11,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = '8dd3ed610f45'
-down_revision = 'fc9cc3b543a4'
+down_revision = 'eca2c67d91fb'
 branch_labels = None
 depends_on = None
 
@@ -32,10 +32,6 @@ def upgrade():
     op.alter_column('ClientInfo', 'membersince',
                existing_type=sa.DATE(),
                type_=sa.DateTime(),
-               existing_nullable=True)
-    op.alter_column('ClientInfo', 'record_locator_id',
-               existing_type=sa.VARCHAR(length=10),
-               type_=sa.String(length=12),
                existing_nullable=True)
     op.add_column('ClientPolicies', sa.Column('created_at', sa.DateTime(), nullable=True))
     op.add_column('ClientPolicies', sa.Column('updated_at', sa.DateTime(), nullable=True))
@@ -69,9 +65,6 @@ def upgrade():
     op.add_column('MedicalPhysicalExam', sa.Column('updated_at', sa.DateTime(), nullable=True))
     op.add_column('MobilityAssessment', sa.Column('created_at', sa.DateTime(), nullable=True))
     op.add_column('MobilityAssessment', sa.Column('updated_at', sa.DateTime(), nullable=True))
-    op.alter_column('MobilityAssessment', 'timestamp',
-               existing_type=postgresql.TIMESTAMP(),
-               nullable=True)
     op.add_column('PTChessboard', sa.Column('created_at', sa.DateTime(), nullable=True))
     op.add_column('PTChessboard', sa.Column('updated_at', sa.DateTime(), nullable=True))
     op.add_column('PTHistory', sa.Column('created_at', sa.DateTime(), nullable=True))
@@ -133,9 +126,6 @@ def downgrade():
     op.drop_column('PTHistory', 'created_at')
     op.drop_column('PTChessboard', 'updated_at')
     op.drop_column('PTChessboard', 'created_at')
-    op.alter_column('MobilityAssessment', 'timestamp',
-               existing_type=postgresql.TIMESTAMP(),
-               nullable=False)
     op.drop_column('MobilityAssessment', 'updated_at')
     op.drop_column('MobilityAssessment', 'created_at')
     op.drop_column('MedicalPhysicalExam', 'updated_at')
@@ -168,10 +158,6 @@ def downgrade():
     op.drop_column('ClientRelease', 'created_at')
     op.drop_column('ClientPolicies', 'updated_at')
     op.drop_column('ClientPolicies', 'created_at')
-    op.alter_column('ClientInfo', 'record_locator_id',
-               existing_type=sa.String(length=12),
-               type_=sa.VARCHAR(length=10),
-               existing_nullable=True)
     op.alter_column('ClientInfo', 'membersince',
                existing_type=sa.DateTime(),
                type_=sa.DATE(),
