@@ -144,23 +144,45 @@ class MedImaging(Resource):
 @ns.doc(params={'clientid': 'Client ID number'})
 class MedBloodTest(Resouce):
     @token_auth.login_required
-    #@responds(schema=MedicalBloodTestSchema)
+    @responds(schema=MedicalBloodTestSchema, many=True)
     def get(self, clientid):
-        return 0
+        check_client_existence(clientid)
+        return MedicalBloodTests().query(clientid=clientid).all()
 
     @token_auth.login_required
-    #@responds(schema=MedicalBloodTestSchema)
-    #@accepts(schema=MedicalBloodTestInputSchema)
-    def post(self, clientid):
-        return 0
+    @responds(schema=MedicalBloodTestSchema)
+    @accepts(schema=MedicalBloodTestInputSchema)
+    def put(self, clientid):
+        check_client_existence(clientid)
+        data = request.get_json()
+
+        #remove results from data, commit test info without results to db
+        results = data['results']
+        data = del data['results']
+        client_bt = MedicalBloodTests().load(data)
+        db.session.add(client_bt)
+        db.session.commit()
+
+        #get newly committed blood test id and commit results to results db
+        test = MedicalBloodTests().query(clientid=clientid, date=data['date']).first()
+        for result in results:
+            result_data = {'testid': test.testid, 'result_name': result['result_name'], 'result_value': result['result_value']}
+            bt_result = MedicalBloodTestResults().load(result_data)
+            db.session.add(bt_result)
+        db.session.commit()
+        return test
 
 @ns.route('/bloodtest/results/<int:testid>/')
 @ns.doc(params={'testid': 'Test ID number'})
 class MedBloodTestResults(Resource):
     @token_auth.login_required
-    #@responds(schema=MedicalBloodTestResultsSchema, many=True)
+    @responds(schema=MedicalBloodTestResultsSchema, many=True)
     def get(self, testid):
-        return 0
+        #query for join of MedicalBloodTestResults and MedicalBloodTestResultTypes tables
+        results = db.session.query(MedicalBloodTestResults, MedicalBloodTestResultTypes).filter(testid).filter().all()
+        if not results:
+            raise ContentNotFound()           
+        return results
 
 @ns.route('/medicalhistory/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
