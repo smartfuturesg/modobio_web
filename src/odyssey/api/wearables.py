@@ -6,6 +6,7 @@ from flask import current_app, request, url_for
 from flask_accepts import accepts, responds
 from flask_restx import Resource
 from requests_oauthlib import OAuth2Session
+from sqlalchemy.sql import text
 
 from odyssey.api import api
 from odyssey.api.auth import token_auth
@@ -284,11 +285,9 @@ class WearablesFreeStyleActivateEndpoint(Resource):
     @accepts(schema=WearablesFreeStyleActivateSchema, api=ns)
     @responds(status_code=201, api=ns)
     def post(self, clientid):
-        """ Start new data block for client ``clientid`` in reponse to a POST request.
+        """ Set new activation timestamp for client ``clientid`` in response to POST request.
 
-        Data is stored in blocks, where every block represents a new FreeStyle sensor.
-        Each sensor must be activated when applied to a client. Upon activation, this
-        endpoint receives the activation timestamp and creates a new block of data.
+        When a new CGM is activated, the activation timestamp must be stored in the database.
 
         Parameters
         ----------
@@ -306,14 +305,9 @@ class WearablesFreeStyleActivateEndpoint(Resource):
 
         if not cgm:
             cgm = WearablesFreeStyle(clientid=clientid)
-            cgm.timestamps = []
-            cgm.glucose = []
             db.session.add(cgm)
 
-        ts = request.parsed_obj.activation_timestamp
-        cgm.activation_timestamp = ts
-        cgm.timestamps = cgm.timestamps + [[ts]]
-        cgm.glucose = cgm.glucose + [[-1.0]]
+        cgm.activation_timestamp = request.parsed_obj.activation_timestamp
         db.session.commit()
 
 
@@ -368,25 +362,24 @@ class WearablesFreeStyleEndpoint(Resource):
             msg += f'Please send a POST request to /wearables/freestyle/activate/ first.'
             raise UnknownError(message=msg)
 
-        ts = request.parsed_obj.activation_timestamp
-        if cgm.activation_timestamp != ts:
-            msg =  f'Activation timestamp "{ts}" does not match '
-            msg += f'current activation timestamp "{cgm.activation_timestamp}". '
+        if cgm.activation_timestamp != request.parsed_obj.activation_timestamp:
+            msg =  f'Activation timestamp {request.parsed_obj.activation_timestamp} does not '
+            msg += f'match current activation timestamp {cgm.activation_timestamp}. '
             msg += f'Please send a GET request to /wearables/freestyle/activate/ first.'
             raise UnknownError(message=msg)
 
-        if cgm.glucose[-1][-1] == -1.0:
-            # First addition to a new block, override the signal values.
-            cgm.timestamps = cgm.timestamps[:-1] + request.parsed_obj.timestamps
-            cgm.glucose = cgm.glucose[:-1] + request.parsed_obj.glucose
-        else:
-            cgm.timestamps = (
-                cgm.timestamps[:-1]
-                + [
-                    cgm.timestamps[-1]
-                    + request.parsed_obj.timestamps[0]
-                ]
-            )
-            cgm.glucose = cgm.glucose[:-1] + [cgm.glucose[-1] + request.parsed_obj.glucose[0]]
-
+        # Use array concatenation here, don't use:
+        #    cgm.glucose = cgm.glucose + request.parsed_obj.glucose
+        # See ... confluence page
+        stmt = text('''
+            UPDATE "WearablesFreeStyle"
+            SET glucose = glucose || cast(:gluc as double precision[]),
+                timestamps = timestamps || cast(:tstamps as timestamp without time zone[])
+            WHERE clientid = :cid;
+        ''').bindparams(
+            gluc=request.parsed_obj.glucose,
+            tstamps=request.parsed_obj.timestamps,
+            cid=clientid
+        )
+        db.session.execute(stmt)
         db.session.commit()

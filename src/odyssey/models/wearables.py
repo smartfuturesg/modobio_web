@@ -164,24 +164,18 @@ class WearablesFreeStyle(_Base):
     :type: int, foreign key to :attr:`ClientInfo.clientid`
     """
 
-    timestamps = Column(ARRAY(DateTime, dimensions=2))
+    timestamps = Column(ARRAY(DateTime, dimensions=1))
     """
     Timestamps for the glucose data.
 
-    A 2-dimensional array with blocks of data. Each block represents the data
-    of one CGM device, which has a lifespan of circa 14 days.
-
-    :type: list(list(datetime.datatime))
+    :type: list(datetime.datatime)
     """
 
-    glucose = Column(ARRAY(Float, dimensions=2))
+    glucose = Column(ARRAY(Float, dimensions=1))
     """
     Glucose data from the GCM.
 
-    A 2-dimensional array with blocks of data. Each block represents the data
-    of one CGM device, which has a lifespan of circa 14 days.
-
-    :type: list(list(float))
+    :type: list(float)
     """
 
     activation_timestamp = Column(DateTime)
