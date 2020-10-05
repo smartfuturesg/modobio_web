@@ -12,6 +12,10 @@ FLASK_DEV = 'local'
 # Flask was still running.
 S3_BUCKET_NAME = tempfile.mkdtemp()
 
+# Whooshee fulltext index, persist location.
+# Defaults to 'whooshee' in local dir
+WHOOSHEE_DIR = None
+
 # Database
 DB_FLAV = 'postgresql'
 DB_USER = ''

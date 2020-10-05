@@ -91,7 +91,7 @@ class MedImaging(Resource):
         Expects form-data
 
         "image": (file_path , open(file_path, mode='rb'), 'Mime type')
-        "image_date": "2020-09-25T00:31:29.304000",
+        "image_date": "2020-09-25",
         "image_origin_location": "string",
         "image_type": "string",
         "image_read": "string",
@@ -114,7 +114,7 @@ class MedImaging(Resource):
         for i, img in enumerate(files.getlist('image')):
             mi_data = mi_schema.load(request.form)
             mi_data.clientid = clientid
-            date = mi_data.image_date.strftime("%Y-%m-%d")
+            date = mi_data.image_date
 
             #Verifying image size is within a safe threashold (MAX = 500 mb)
             img.seek(0, os.SEEK_END)
