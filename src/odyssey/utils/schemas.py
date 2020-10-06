@@ -1122,55 +1122,49 @@ class MedicalImagingSchema(ma.SQLAlchemyAutoSchema):
     
 class MedicalBloodTestSchema(Schema):
     testid = fields.Integer()
-    clientid = fields.Integer(required=True)
+    clientid = fields.Integer()
     date = fields.Date(required=True)
-    panel_type = fields.String(required=False)
+    panelType = fields.String(required=False)
     notes = fields.String(required=False)
 
     @post_load
     def make_object(self, data, **kwargs):
         return MedicalBloodTests(**data)
 
-class MedicalBloodTestInputSchema(Schema):
-    clientid = fields.Integer()
-    date = fields.Date()
-    panel_type = fields.String()
-    notes = fields.String()
-    results = fields.Nested(MedicalBloodTestResultsInputSchema, many=True))
-
 class MedicalBloodTestResultsInputSchema(Schema):
-    result_name = fields.String()
-    result_value = fields.Float()
+    resultName = fields.String()
+    resultValue = fields.Float()
 
-class MedicalBloodTestResultsSchema(Scehma):
+class MedicalBloodTestResultsOutputSchema(Schema):
     idx = fields.Integer()
     testid = fields.Integer()
-    result_type = fields.Integer()
-    result_value = fields.Float()
+    resultType = fields.String()
+    resultValue = fields.Float()
+
+class MedicalBloodTestsInputSchema(Schema):
+    clientid = fields.Integer()
+    date = fields.Date()
+    panelType = fields.String()
+    notes = fields.String()
+    results = fields.Nested(MedicalBloodTestResultsInputSchema, many=True)
+
+class MedicalBloodTestResultsSchema(Schema):
+    idx = fields.Integer()
+    testid = fields.Integer()
+    resultid = fields.Integer()
+    resultValue = fields.Float()
 
     @post_load
     def make_object(self, data, **kwargs):
         return MedicalBloodTestResults(**data)
 
-class MedicalBloodTestResultTypes(Schema):
+class MedicalBloodTestResultTypesSchema(Schema):
     resultid = fields.Integer()
-    resultname = fields.String()
+    resultName = fields.String()
 
     @post_load
     def make_object(self, data, **kwargs):
         return MedicalBloodTestResultTypes(**data)
-
-class MedicalBloodTestResultsSchema(Schema):
-
-    @post_load
-    def make_object(self, data, **kwargs):
-        return MedicalBloodTests(**data)
-        
-class MedicalBloodTestResultTypesSchema(Schema):
-
-    @post_load
-    def make_object(self, data, **kwargs):
-        return MedicalBloodTests(**data)
 
 class MedicalHistorySchema(ma.SQLAlchemyAutoSchema):
     class Meta:

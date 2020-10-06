@@ -419,7 +419,7 @@ class MedicalBloodTests(db.Model):
 
     __tablename__ = "MedicalBloodTests"
 
-    testid = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    testid = db.Column(db.Integer, primary_key=True)
     """
     Unique id identifying the test
 
@@ -440,7 +440,7 @@ class MedicalBloodTests(db.Model):
     :type: date
     """
 
-    panel_type = db.Column(db.String, nullable=True)
+    panelType = db.Column(db.String, nullable=True)
     """
     denotes the panel type of the test, null if not one of the "standard tests"
 
@@ -454,8 +454,29 @@ class MedicalBloodTests(db.Model):
     :type: string
     """
 
+class MedicalBloodTestResultTypes(db.Model):
+    """Holds a list of possible blood test result types(i.e. hemoglobulin, cholesterol, glucose, etc.)"""
+
+    __tablename__ = "MedicalBloodTestResultTypes"
+
+    resultid = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    autoincrementing primary key
+
+    :type: int, primary key, autoincrementing
+    """
+
+    resultName = db.Column(db.String)
+    """
+    name of the result
+
+    :type: string
+    """
+
 class MedicalBloodTestResults(db.Model):
     """Holds the results of a blood test identified by a blood test id"""
+
+    __tablename__ = "MedicalBloodTestResults"
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -478,26 +499,9 @@ class MedicalBloodTestResults(db.Model):
     :type: int, foreign key
     """
 
-    result_value = db.Column(db.Float)
+    resultValue = db.Column(db.Float)
     """
     numerical value of the parameter
 
     :type: int
-    """"
-
-class MedicalBloodTestResultTypes(db.Model):
-    """Holds a list of possible blood test result types(i.e. hemoglobulin, cholesterol, glucose, etc.)"""
-
-    resultid = db.Column(db.Integer, priamry_key=True, autoincrement=True)
-    """
-    autoincrementing primary key
-
-    :type: int, primary key, autoincrementing
-    """
-
-    resultname = db.Column(db.String)
-    """
-    name of the result
-
-    :type: string
     """
