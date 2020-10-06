@@ -194,6 +194,20 @@ class WearablesFreeStyle(_Base):
     :type: int, foreign key to :attr:`ClientInfo.clientid`
     """
 
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
+    """
+
     timestamps = Column(ARRAY(DateTime, dimensions=1))
     """
     Timestamps for the glucose data.
