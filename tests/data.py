@@ -660,3 +660,19 @@ test_medical_imaging = {
   'image_type': 'XRay',
   'image_read': 'Check Check'
 }
+
+wearables_data = {
+    "has_freestyle": True,
+    "has_oura": True,
+    "registered_oura": False
+}
+
+wearables_freestyle_data = {
+    'activation_timestamp': '2020-04-05T12:34:56.000',
+    'glucose': [1.1, 2.2, 3.3],
+    'timestamps': [
+        '2020-04-05T01:00:12.345678',
+        '2020-04-05T02:00:00.000',
+        '2020-04-05T03:00:00.000'
+    ]
+}
