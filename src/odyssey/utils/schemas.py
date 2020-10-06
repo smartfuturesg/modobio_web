@@ -1359,7 +1359,7 @@ class WearablesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Wearables
         load_instance = True
-        exclude = ('idx', 'clientid')
+        exclude = ('idx', 'clientid', 'created_at', 'updated_at')
 
 
 class WearablesOuraAuthSchema(Schema):
@@ -1371,7 +1371,7 @@ class WearablesFreeStyleSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = WearablesFreeStyle
         load_instance = True
-        exclude = ('idx', 'clientid')
+        exclude = ('idx', 'clientid', 'created_at', 'updated_at')
 
 
 class WearablesFreeStyleActivateSchema(ma.SQLAlchemyAutoSchema):
