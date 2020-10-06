@@ -286,7 +286,6 @@ class MedPhysical(Resource):
 
         data = request.get_json()
         data["clientid"] = clientid
-        data["timestamp"] = datetime.utcnow().isoformat()
 
         mh_schema = MedicalPhysicalExamSchema()
 

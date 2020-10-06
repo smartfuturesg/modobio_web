@@ -3,6 +3,8 @@ Database tables for the doctor's portion of the Modo Bio Staff application.
 All tables in this module are prefixed with 'Medical'.
 """
 from datetime import datetime
+
+from odyssey.constants import DB_SERVER_TIME
 from odyssey import db
 
 class MedicalImaging(db.Model):
@@ -19,6 +21,21 @@ class MedicalImaging(db.Model):
 
     :type: int, primary key, autoincrement
     """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
+    """
+
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid', ondelete="CASCADE"), nullable=False)
     """
     Client ID number
@@ -87,6 +104,20 @@ class MedicalHistory(db.Model):
     Index
 
     :type: int, primary key, autoincrement
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='MedicalHistory_clientid_fkey', ondelete="CASCADE"), nullable=False)
@@ -219,7 +250,21 @@ class MedicalPhysicalExam(db.Model):
     :type: int, foreign key to :attr:`ClientInfo.clientid`
     """
 
-    timestamp = db.Column(db.DateTime)
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
+    """
+
+    timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     Timestamp of the assessment.
 
@@ -426,6 +471,20 @@ class MedicalBloodTests(db.Model):
     :type: int, primary key, auto incrementing
     """
 
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
+    """
+
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid', ondelete="CASCADE"), nullable=False)
     """
     Client ID number
@@ -466,6 +525,20 @@ class MedicalBloodTestResultTypes(db.Model):
     :type: int, primary key, autoincrementing
     """
 
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
+    """
+
     resultName = db.Column(db.String)
     """
     name of the result
@@ -483,6 +556,20 @@ class MedicalBloodTestResults(db.Model):
     autoincrementing result idx
 
     :type: int, primary key, autoincrementing
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
     """
 
     testid = db.Column(db.Integer, db.ForeignKey('MedicalBloodTests.testid', ondelete="CASCADE"), nullable=False)

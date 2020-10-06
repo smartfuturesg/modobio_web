@@ -1,4 +1,6 @@
 from odyssey import db
+from odyssey.constants import DB_SERVER_TIME
+
 
 class PTHistory(db.Model):
     """ Physical therapy history table
@@ -16,6 +18,20 @@ class PTHistory(db.Model):
     Table index.
 
     :type: int, primary key, autoincrement
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='PTHistory_clientid_fkey',ondelete="CASCADE"), nullable=False)
@@ -145,11 +161,25 @@ class Chessboard(db.Model):
     :type: int, foreign key to :attr:`ClientInfo.clientid`
     """
 
-    timestamp = db.Column(db.DateTime)
+    timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     Timestamp of the assessment.
 
-    :type: datetime.datetime, primary key
+    :type: datetime.datetime
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
     """
 
     isa_structure = db.Column(db.String(24))
@@ -388,11 +418,25 @@ class MobilityAssessment(db.Model):
     :type: int, foreign key to :attr:`ClientInfo.clientid`
     """
 
-    timestamp = db.Column(db.DateTime, primary_key=True)
+    timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     Timestamp of the assessment.
 
-    :type: datetime.datetime, primary key
+    :type: datetime.datetime
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
     """
 
     isa_left = db.Column(db.Integer)

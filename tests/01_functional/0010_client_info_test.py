@@ -41,7 +41,6 @@ def test_get_client_info(test_client, init_database):
     assert response.status_code == 200
     assert response.json['clientid'] == 1
     assert response.json['email'] == 'test_this_client@gmail.com'
-    assert response.json['record_locator_id'] == 'TC148FAC4'
 
 def test_put_client_info(test_client, init_database):
     """
@@ -98,7 +97,6 @@ def test_creating_new_client(test_client, init_database):
     # some simple checks for validity
     assert response.status_code == 201
     assert client.email == 'test_this_client_two@gmail.com'
-    assert client.record_locator_id == 'TC21CAB50'
 
 def test_removing_client(test_client, init_database):
     """

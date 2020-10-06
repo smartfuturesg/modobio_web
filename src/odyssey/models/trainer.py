@@ -1,6 +1,8 @@
 from datetime import datetime
 
 from odyssey import db
+from odyssey.constants import DB_SERVER_TIME
+
 
 
 class PowerAssessment(db.Model):
@@ -16,11 +18,25 @@ class PowerAssessment(db.Model):
     :type: int, primary key, autoincrement
     """
     
-    timestamp = db.Column(db.DateTime)
+    timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     Timestamp of the assessment.
 
     :type: datetime.datetime
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='power_assessment_clientid_fkey',ondelete="CASCADE"), nullable=False)
@@ -200,11 +216,25 @@ class StrengthAssessment(db.Model):
     :type: int, primary key, autoincrement
     """
     
-    timestamp = db.Column(db.DateTime)
+    timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     Timestamp of the assessment.
 
     :type: datetime.datetime
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='strength_assessment_clientid_fkey',ondelete="CASCADE"), nullable=False)
@@ -452,11 +482,25 @@ class MovementAssessment(db.Model):
     :type: int, primary key, autoincrement
     """
     
-    timestamp = db.Column(db.DateTime)
+    timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     Timestamp of the assessment.
 
     :type: datetime.datetime
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='movement_assessment_clientid_fkey',ondelete="CASCADE"), nullable=False)
@@ -583,11 +627,25 @@ class HeartAssessment(db.Model):
     :type: int, primary key, autoincrement
     """
     
-    timestamp = db.Column(db.DateTime)
+    timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     Timestamp of the assessment.
 
     :type: datetime.datetime
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='heart_assessment_clientid_fkey',ondelete="CASCADE"), nullable=False)
@@ -668,11 +726,25 @@ class MoxyAssessment(db.Model):
     :type: int, primary key, autoincrement
     """
     
-    timestamp = db.Column(db.DateTime)
+    timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     Timestamp of the assessment.
 
     :type: datetime.datetime
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='moxy_assessment_clientid_fkey',ondelete="CASCADE"), nullable=False)
@@ -790,11 +862,25 @@ class MoxyRipTest(db.Model):
     :type: int, primary key, autoincrement
     """
     
-    timestamp = db.Column(db.DateTime)
+    timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     Timestamp of the assessment.
 
     :type: datetime.datetime
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='moxy_rip_assessment_clientid_fkey',ondelete="CASCADE"), nullable=False)
@@ -1129,11 +1215,25 @@ class LungAssessment(db.Model):
     :type: int, primary key, autoincrement
     """
     
-    timestamp = db.Column(db.DateTime)
+    timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     Timestamp of the assessment.
 
     :type: datetime.datetime
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='lung_assessment_clientid_fkey',ondelete="CASCADE"), nullable=False)
@@ -1207,11 +1307,25 @@ class FitnessQuestionnaire(db.Model):
     :type: int, foreign key to :attr:`ClientInfo.clientid`
     """
     
-    timestamp = db.Column(db.DateTime)
+    timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    Timestamp of the questionnaire.
+    Timestamp of the assessment.
 
     :type: datetime.datetime
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
     """
 
     physical_goals = db.Column(db.ARRAY(db.String), nullable=True, server_default="{'other'}")

@@ -3,13 +3,27 @@ Database tables for supporting miscellaneous functionality.
 """
 
 from odyssey import db
-
+from odyssey.constants import DB_SERVER_TIME
 
 class MedicalInstitutions(db.Model):
     """ Medical institutions associated with client external medical records. 
     """
 
     __tablename__ = 'MedicalInstitutions'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
+    """
 
     institute_id = db.Column(db.Integer, primary_key=True, autoincrement=True )
     """
@@ -31,6 +45,20 @@ class RegisteredFacilities(db.Model):
     """
 
     __tablename__ = 'RegisteredFacilities'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
+    """
 
     facility_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """

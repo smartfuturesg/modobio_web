@@ -1,28 +1,18 @@
 """ Various constants used throughout the Odyssey package. """
 import enum
 
-from odyssey.models.client import (
-    ClientPolicies,
-    ClientRelease,
-    ClientConsent,
-    ClientConsultContract,
-    ClientIndividualContract,
-    ClientSubscriptionContract
-)
-from odyssey.models.pt import PTHistory 
-from odyssey.models.doctor import MedicalHistory, MedicalPhysicalExam
-from odyssey.models.trainer import FitnessQuestionnaire
+from sqlalchemy import text
 
-TABLE_TO_URI = {ClientPolicies.__tablename__ : '/client/policies/{}/',
-                ClientRelease.__tablename__ : '/client/release/{}/',
-                ClientConsent.__tablename__ : '/client/consent/{}/',
-                ClientConsultContract.__tablename__ : '/client/consultcontract/{}/',
-                ClientIndividualContract.__tablename__ : '/client/servicescontract/{}/' ,
-                ClientSubscriptionContract.__tablename__ : '/client/subscriptioncontract/{}/',
-                FitnessQuestionnaire.__tablename__: '/trainer/questionnaire/{}/',
-                MedicalHistory.__tablename__: '/doctor/medicalhistory/{}/',
-                PTHistory.__tablename__: '/pt/history/{}/',
-                MedicalPhysicalExam.__tablename__: '/doctor/physical/{}/'
+TABLE_TO_URI = {'ClientPolicies' : '/client/policies/{}/',
+                'ClientRelease': '/client/release/{}/',
+                'ClientConsent' : '/client/consent/{}/',
+                'ClientConsultContract' : '/client/consultcontract/{}/',
+                'ClientIndividualContract' : '/client/servicescontract/{}/' ,
+                'ClientSubscriptionContract' : '/client/subscriptioncontract/{}/',
+                'TrainerFitnessQuestionnaire': '/trainer/questionnaire/{}/',
+                'MedicalHistory': '/doctor/medicalhistory/{}/',
+                'PTHistory': '/pt/history/{}/',
+                'MedicalPhysicalExam': '/doctor/physical/{}/'
                 }
 
 COUNTRIES = (
@@ -385,3 +375,7 @@ database column expects a Python :attr:`True` or :attr:`False` value. Use
 
 :type: function
 """
+
+# POSTGRESQL specific function that returns the time the statement is run.
+# It is independent of transaction time
+DB_SERVER_TIME = text("clock_timestamp()")
