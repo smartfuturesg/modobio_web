@@ -1247,6 +1247,11 @@ class ClientExternalMREntrySchema(Schema):
 """
     Schemas for the staff API
 """
+
+class StaffPasswordRecoverSchema(Schema):
+    #TODO Validate password strength
+    password = fields.String(required=True,  validate=validate.Length(min=3,max=50), description="new password to be used going forward")
+
 class StaffSearchItemsSchema(Schema):
     staffid = fields.Integer()
     firstname = fields.String(required=False, validate=validate.Length(min=1, max= 50), missing=None)

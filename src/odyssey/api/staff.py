@@ -9,10 +9,10 @@ import jwt
 from odyssey import db
 from odyssey.models.staff import Staff
 from odyssey.api import api
-from odyssey.api.auth import token_auth
+from odyssey.api.auth import token_auth, basic_auth
 from odyssey.api.errors import UnauthorizedUser, StaffEmailInUse, StaffNotFound
 from odyssey.utils.email import send_email_password_reset
-from odyssey.utils.schemas import StaffSchema, StaffSearchItemsSchema
+from odyssey.utils.schemas import StaffPasswordRecoverSchema, StaffSchema, StaffSearchItemsSchema
 
 ns = api.namespace('staff', description='Operations related to staff members')
 
@@ -116,8 +116,8 @@ class StaffMembers(Resource):
 
         return new_staff
 
-@ns.route('/resetpassword/')
-@ns.doc(params={'email': 'email to search'})
+@ns.route('/forgot-password/password-recovery-link')
+@ns.doc(params={'email': "email to search"})
 class PasswordResetEmail(Resource):
     """Password reset endpoints."""
     
@@ -141,11 +141,41 @@ class PasswordResetEmail(Resource):
 
         secret = current_app.config['SECRET_KEY']
         encoded_jwt = jwt.encode({'exp': datetime.utcnow()+timedelta(minutes = 15), 
-                                  'sub': staff.staffid}, 
+                                  'sid': staff.staffid}, 
                                   secret, algorithm='HS256').decode("utf-8") 
 
-        send_email_password_reset(staff.email, encoded_jwt)
+
+        # send_email_password_reset(staff.email, encoded_jwt)
         
+        return jsonify({"token": encoded_jwt})
+
+@ns.route('/forgot-password/reset')
+@ns.doc(params={'reset_token': "token from password reset endpoint"})
+class ResetPassword(Resource):
+    """Reset the user's password."""
+    
+    @accepts(schema=StaffPasswordRecoverSchema)
+    def put(self):
+        """
+            Change the current password to the one given
+        response 201 Created
+       """
+        # decode and validate token 
+        secret = current_app.config['SECRET_KEY']
+        reset_token=request.args.get("reset_token")
+        try:
+            decoded_token = jwt.decode(reset_token, secret, algorithms='HS256')
+        except jwt.ExpiredSignatureError:
+            #TODO: proper error response
+            return 400
+
+        # bring up the staff member and reset their password
+        pswd = request.get_json()['password']
+
+        staff = Staff.query.filter_by(staffid=decoded_token['sid']).first()
+        staff.set_password(pswd)
+        
+        db.session.commit()
         return 200
 
 
