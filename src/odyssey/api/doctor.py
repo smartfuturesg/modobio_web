@@ -167,11 +167,11 @@ class MedBloodTest(Resource):
         db.session.add(client_bt)
         db.session.commit()
 
-        #get newly committed blood test id and commit results to results db
-        test = MedicalBloodTests.query.filter_by(clientid=clientid, date=data['date']).first()
+        #insert results into the result table
+        test = MedicalBloodTests.query.filter_by(testid=client_bt.testid).first()
         for result in results:
             resultid = MedicalBloodTestResultTypes.query.filter_by(resultName=result['resultName']).first().resultid
-            result_data = {'testid': test.testid, 'resultid': resultid, 'resultValue': result['resultValue']}
+            result_data = {'testid': client_bt.testid, 'resultid': resultid, 'resultValue': result['resultValue']}
             bt_result = MedicalBloodTestResultsSchema().load(result_data)
             db.session.add(bt_result)
         db.session.commit()
