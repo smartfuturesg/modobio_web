@@ -1,9 +1,10 @@
 """ Utility functions for the odyssey package. """
 
-import datetime
 import re
 import statistics
 import uuid
+
+from datetime import datetime, date, time
 
 import flask.json
 from odyssey.models.client import ClientInfo, RemoteRegistration, ClientFacilities
@@ -61,7 +62,7 @@ class JSONEncoder(flask.json.JSONEncoder):
     """
     def default(self, obj):
         """ Convert a Python object to a JSON string. """
-        if isinstance(obj, (datetime.date, datetime.datetime, datetime.time)):
+        if isinstance(obj, (date, datetime, time)):
             return obj.isoformat()
         return super().default(obj)
 
@@ -115,17 +116,17 @@ class JSONDecoder(flask.json.JSONDecoder):
         dt = None
         try:
             # Will fail on full datetime string
-            dt = datetime.date.fromisoformat(string)
+            dt = date.fromisoformat(string)
         except TypeError:
             # Not a string
             pass
         except ValueError:
             try:
                 # Will fail on full datetime string
-                dt = datetime.time.fromisoformat(string)
+                dt = time.fromisoformat(string)
             except ValueError:
                 try:
-                    dt = datetime.datetime.fromisoformat(string)
+                    dt = datetime.fromisoformat(string)
                 except ValueError:
                     # Not a datetime string
                     pass

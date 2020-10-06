@@ -1,7 +1,8 @@
 import base64
-import datetime
 import pathlib
 import uuid
+
+from datetime import datetime, date, time
 
 test_client_info = {
     "firstname": "Test",
@@ -186,11 +187,11 @@ test_json_data = {
     },
     'f': [1, 2, 3, 4, 5],
     'g': "1977-04-05",
-    'h': datetime.time(14, 21, 39, 123456).isoformat(),
-    'i': datetime.datetime(2020, 6, 7, 12, 39, 46, 123456).isoformat(),
+    'h': time(14, 21, 39, 123456).isoformat(),
+    'i': datetime(2020, 6, 7, 12, 39, 46, 123456).isoformat(),
     'j': {
         'ja': {
-            'jja': [datetime.time(13, 0, 0).isoformat(), datetime.time(14, 0, 0).isoformat(), datetime.time(15, 0, 0).isoformat()],
+            'jja': [time(13, 0, 0).isoformat(), time(14, 0, 0).isoformat(), time(15, 0, 0).isoformat()],
         }
     },
     'k': '17a3bee0-42db-4416-8b84-3990b1c6397e',
