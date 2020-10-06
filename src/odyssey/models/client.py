@@ -9,10 +9,13 @@ import secrets
 
 from datetime import datetime, timedelta
 from hashlib import md5
-
+from sqlalchemy import text
+from odyssey.constants import DB_SERVER_TIME
 from odyssey import db, whooshee
 
 phx_tz = pytz.timezone('America/Phoenix')
+
+
 
 @whooshee.register_model('firstname','lastname','email','phone','dob', 'record_locator_id')
 class ClientInfo(db.Model):
@@ -36,13 +39,20 @@ class ClientInfo(db.Model):
     :type: int, primary key, autoincrement
     """
 
-    membersince = db.Column(db.Date)
+    membersince = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     Member since date
 
     The date a member was first added to the system
 
-    :type: date
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated
+
+    :type: datetime
     """
 
     firstname = db.Column(db.String(50))
@@ -238,9 +248,9 @@ class ClientInfo(db.Model):
     @staticmethod
     def get_medical_record_hash(firstname, lastname, clientid):
         """medical record hash generation"""
-        name_hash = md5(bytes((firstname+lastname), 'utf-8')).hexdigest()
+        rli_hash = secrets.token_hex()
 
-        return (firstname[0]+lastname[0]+str(clientid)+name_hash[0:6]).upper()
+        return (firstname[0]+lastname[0]+str(clientid)+rli_hash[0:8-len(str(clientid))]).upper()
 
     def client_info_search_dict(self):
         """returns just the searchable client info (name, email, number)"""
@@ -280,6 +290,20 @@ class ClientFacilities(db.Model):
     Table index.
 
     :type: int, primary key, autoincrement
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
     """
 
     client_id = db.Column(db.ForeignKey('ClientInfo.clientid',ondelete="CASCADE"))
@@ -329,6 +353,20 @@ class ClientConsent(db.Model):
     :type: int, primary key, autoincrement
     """
 
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
+    """
+
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientConsent_clientid_fkey',ondelete="CASCADE"), nullable=False)
     """
     Client ID number.
@@ -345,7 +383,8 @@ class ClientConsent(db.Model):
 
     signdate = db.Column(db.Date)
     """
-    Signature date.
+    Signature date. This is filled by the client upon signing the document. Therefore, we can assume that 
+    this date is in their local timezone. 
 
     :type: datetime.date
     """
@@ -417,6 +456,20 @@ class ClientRelease(db.Model):
     :type: int, primary key, autoincrement
     """
 
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
+    """
+
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientRelease_clientid_fkey',ondelete="CASCADE"), nullable=False)
     """
     Client ID number
@@ -461,7 +514,8 @@ class ClientRelease(db.Model):
 
     signdate = db.Column(db.Date)
     """
-    Signature date.
+    Signature date. This is filled by the client upon signing the document. Therefore, we can assume that 
+    this date is in their local timezone. 
 
     :type: datetime.date
     """
@@ -533,6 +587,20 @@ class ClientPolicies(db.Model):
     :type: int, primary key, autoincrement
     """
 
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
+    """
+
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientPolicies_clientid_fkey',ondelete="CASCADE"), nullable=False)
     """
     Client ID number
@@ -542,7 +610,8 @@ class ClientPolicies(db.Model):
 
     signdate = db.Column(db.Date)
     """
-    Signature date.
+    Signature date. This is filled by the client upon signing the document. Therefore, we can assume that 
+    this date is in their local timezone. 
 
     :type: datetime.date
     """
@@ -614,6 +683,20 @@ class ClientConsultContract(db.Model):
     :type: int, primary key, autoincrement
     """
 
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
+    """
+
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientColusultContract_clientid_fkey',ondelete="CASCADE"), nullable=False)
     """
     Client ID number
@@ -623,7 +706,8 @@ class ClientConsultContract(db.Model):
 
     signdate = db.Column(db.Date)
     """
-    Signature date.
+    Signature date. This is filled by the client upon signing the document. Therefore, we can assume that 
+    this date is in their local timezone. 
 
     :type: datetime.date
     """
@@ -695,6 +779,20 @@ class ClientSubscriptionContract(db.Model):
     :type: int, primary key, autoincrement
     """
 
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
+    """
+
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientSubscriptionContract_clientid_fkey',ondelete="CASCADE"), nullable=False)
     """
     Client ID number
@@ -704,7 +802,8 @@ class ClientSubscriptionContract(db.Model):
 
     signdate = db.Column(db.Date)
     """
-    Signature date.
+    Signature date. This is filled by the client upon signing the document. Therefore, we can assume that 
+    this date is in their local timezone. 
 
     :type: datetime.date
     """
@@ -771,6 +870,20 @@ class ClientIndividualContract(db.Model):
     :type: int, primary key, autoincrement
     """
 
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
+    """
+
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientIndividualContract_clientid_fkey',ondelete="CASCADE"), nullable=False)
     """
     Client ID number
@@ -808,7 +921,8 @@ class ClientIndividualContract(db.Model):
 
     signdate = db.Column(db.Date)
     """
-    Signature date.
+    Signature date. This is filled by the client upon signing the document. Therefore, we can assume that 
+    this date is in their local timezone. 
 
     :type: datetime.date
     """
@@ -865,6 +979,20 @@ class RemoteRegistration(db.Model):
     Table index.
 
     :type: int, primary key, autoincrement
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='remote_registration_clientid_fkey',ondelete="CASCADE"), nullable=False)
@@ -999,6 +1127,20 @@ class ClientExternalMR(db.Model):
     :type: int, primary key, autoincrement
     """
 
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
+    """
+
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientExternalMR_clientid_fkey',ondelete="CASCADE"), nullable=False)
     """
     Client ID number
@@ -1032,6 +1174,20 @@ class ClientReleaseContacts(db.Model):
     Table index.
 
     :type: int, primary key, autoincrement
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
     """
 
     release_contract_id = db.Column(db.Integer, db.ForeignKey('ClientRelease.idx',name='ClientReleaseContacts_idx_fkey',ondelete="CASCADE"), nullable=False)

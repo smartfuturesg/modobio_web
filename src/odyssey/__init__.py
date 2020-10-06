@@ -28,7 +28,7 @@ def create_app():
 
         Returns
         -------
-        An instance of :class:`flask.Flask`, with approrpiate configuration.
+        An instance of :class:`flask.Flask`, with appropriate configuration.
 
         Examples
         --------

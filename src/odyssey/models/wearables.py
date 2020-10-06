@@ -23,6 +23,8 @@ else:
 from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Integer, String
 from sqlalchemy.dialects.postgresql import ARRAY
 
+from odyssey.constants import DB_SERVER_TIME
+
 class Wearables(_Base):
     """ Table that lists which supported wearables a client has. """
 
@@ -33,6 +35,20 @@ class Wearables(_Base):
     Table index.
 
     :type: int, primary key, autoincrement
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
     """
 
     clientid = Column(
@@ -95,6 +111,20 @@ class WearablesOura(_Base):
     Client ID number.
 
     :type: int, foreign key to :attr:`ClientInfo.clientid`
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
     """
 
     oauth_state = Column(String(50))

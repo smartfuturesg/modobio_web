@@ -553,7 +553,6 @@ class InitialQuestionnaire(Resource):
 
         data=request.get_json()
         data['clientid'] = remote_client.clientid
-        data['timestamp'] = datetime.utcnow().isoformat()
 
         client_fq = FitnessQuestionnaireSchema().load(data)
         
