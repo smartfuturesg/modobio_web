@@ -96,7 +96,7 @@ class RemoveClient(Resource):
         
         # find the staff member requesting client delete
         staff = token_auth.current_user()
-        new_removal_request = ClientRemovalRequests(staffid=staff.staffid, timestamp=datetime.utcnow())
+        new_removal_request = ClientRemovalRequests(staffid=staff.staffid)
         
         db.session.add(new_removal_request)
         db.session.flush()
@@ -125,8 +125,6 @@ class NewClient(Resource):
         #prevent requests to set clientid and send message back to api user
         elif data.get('clientid', None):
             raise IllegalSetting('clientid')
-        #set member since date to today
-        data['membersince'] = date.today().strftime("%Y-%m-%d")
         
         client = ClientInfoSchema().load(data)
         db.session.add(client)

@@ -182,7 +182,6 @@ class Heart(Resource):
 
         data=request.get_json()
         data['clientid'] = clientid
-        data['timestamp'] = datetime.utcnow().isoformat()
 
         hr_schema = HeartAssessmentSchema()
         client_hr = hr_schema.load(data)
@@ -219,7 +218,6 @@ class Moxy(Resource):
 
         data=request.get_json()
         data['clientid'] = clientid
-        data['timestamp'] = datetime.utcnow().isoformat()
 
         moxy_schema = MoxyAssessmentSchema()
         client_moxy = moxy_schema.load(data)
@@ -262,7 +260,6 @@ class LungCapacity(Resource):
 
         data=request.get_json()
         data['clientid'] = clientid
-        data['timestamp'] = datetime.utcnow().isoformat()
 
         lung_schema = LungAssessmentSchema()
         client_lung_capacity = lung_schema.load(data)
@@ -304,7 +301,6 @@ class MoxyRipAssessment(Resource):
 
         data=request.get_json()
         data['clientid'] = clientid
-        data['timestamp'] = datetime.utcnow().isoformat()
 
         moxy_rip_schema = MoxyRipSchema()
         client_moxy_rip = moxy_rip_schema.load(data)
@@ -340,8 +336,6 @@ class InitialQuestionnaire(Resource):
 
         data=request.get_json()
         data['clientid'] = clientid
-        data['timestamp'] = datetime.utcnow().isoformat()
-
         
         client_fq = FitnessQuestionnaireSchema().load(data)
         

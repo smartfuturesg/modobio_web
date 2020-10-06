@@ -39,7 +39,7 @@ def test_get_client_search(test_client, init_database):
     assert response.json['items'][0]['firstname'] == 'Test'
     assert response.json['items'][0]['lastname'] == 'Client'
     assert response.json['items'][0]['email'] == 'test_this_client@gmail.com'
-    assert response.json['items'][0]['record_locator_id'] == 'TC148FAC4'
+    assert response.json['items'][0]['record_locator_id'] == client.record_locator_id
 
     # send get request for first name (note, the actual first name is testY)
     response = test_client.get('/client/clientsearch/?firstname=test', headers=headers)
@@ -47,7 +47,7 @@ def test_get_client_search(test_client, init_database):
     assert response.json['items'][0]['firstname'] == 'Test'
     assert response.json['items'][0]['lastname'] == 'Client'
     assert response.json['items'][0]['email'] == 'test_this_client@gmail.com'
-    assert response.json['items'][0]['record_locator_id'] == 'TC148FAC4'
+    assert response.json['items'][0]['record_locator_id'] == client.record_locator_id
 
     # send get request for last name 
     response = test_client.get('/client/clientsearch/?lastname=client', headers=headers)
@@ -55,7 +55,7 @@ def test_get_client_search(test_client, init_database):
     assert response.json['items'][0]['firstname'] == 'Test'
     assert response.json['items'][0]['lastname'] == 'Client'
     assert response.json['items'][0]['email'] == 'test_this_client@gmail.com'
-    assert response.json['items'][0]['record_locator_id'] == 'TC148FAC4'
+    assert response.json['items'][0]['record_locator_id'] == client.record_locator_id
 
     # send get request for email 
     response = test_client.get('/client/clientsearch/?email=test_this_client@gmail.com', headers=headers)
@@ -63,7 +63,7 @@ def test_get_client_search(test_client, init_database):
     assert response.json['items'][0]['firstname'] == 'Test'
     assert response.json['items'][0]['lastname'] == 'Client'
     assert response.json['items'][0]['email'] == 'test_this_client@gmail.com'
-    assert response.json['items'][0]['record_locator_id'] == 'TC148FAC4'
+    assert response.json['items'][0]['record_locator_id'] == client.record_locator_id
 
     # send get request for first name 
     response = test_client.get('/client/clientsearch/?firstname=test&email=test_this_client@gmail.com', headers=headers)
@@ -71,4 +71,4 @@ def test_get_client_search(test_client, init_database):
     assert response.json['items'][0]['firstname'] == 'Test'
     assert response.json['items'][0]['lastname'] == 'Client'
     assert response.json['items'][0]['email'] == 'test_this_client@gmail.com'
-    assert response.json['items'][0]['record_locator_id'] == 'TC148FAC4'
+    assert response.json['items'][0]['record_locator_id'] == client.record_locator_id
