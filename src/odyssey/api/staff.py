@@ -1,12 +1,17 @@
-from flask import request, jsonify
+from datetime import datetime, timedelta
+import secrets
+
+from flask import current_app, request, jsonify
 from flask_restx import Resource, fields
-from flask_accepts import accepts , responds
+from flask_accepts import accepts, responds
+import jwt
 
 from odyssey import db
 from odyssey.models.staff import Staff
 from odyssey.api import api
 from odyssey.api.auth import token_auth
 from odyssey.api.errors import UnauthorizedUser, StaffEmailInUse, StaffNotFound
+from odyssey.utils.email import send_email_password_reset
 from odyssey.utils.schemas import StaffSchema, StaffSearchItemsSchema
 
 ns = api.namespace('staff', description='Operations related to staff members')
@@ -111,4 +116,37 @@ class StaffMembers(Resource):
 
         return new_staff
 
+@ns.route('/resetpassword/')
+@ns.doc(params={'email': 'email to search'})
+class PasswordResetEmail(Resource):
+    """Password reset endpoints."""
     
+    def post(self):
+        """begin a password reset session. 
+            Staff member unable to log in will request a password reset
+            with only their email. Emails will be checked for exact match in the database
+            to a staff member. 
+    
+            If the email exists, a signed JWT is created; encoding the token's expiration 
+            time and the staffid. The code will be placed into this URL <url for password reset>
+            and sent to a valid email address.  
+            If the email does not exist, no email is sent. 
+            response 200 OK
+        """
+        email = request.args.get('email')
+
+        staff = Staff.query.filter_by(email=email.lower() ).first()
+        if not email or not staff:
+            return 200
+
+        secret = current_app.config['SECRET_KEY']
+        encoded_jwt = jwt.encode({'exp': datetime.utcnow()+timedelta(minutes = 15), 
+                                  'sub': staff.staffid}, 
+                                  secret, algorithm='HS256').decode("utf-8") 
+
+        send_email_password_reset(staff.email, encoded_jwt)
+        
+        return 200
+
+
+
