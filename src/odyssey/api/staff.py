@@ -178,7 +178,7 @@ class ResetPassword(Resource):
         try:
             decoded_token = jwt.decode(reset_token, secret, algorithms='HS256')
         except jwt.ExpiredSignatureError:
-            return UnauthorizedUser(message="Token authorization expired")
+            raise UnauthorizedUser(message="Token authorization expired")
 
         # bring up the staff member and reset their password
         pswd = request.get_json()['password']
@@ -190,12 +190,12 @@ class ResetPassword(Resource):
 
         return 200
 
-@ns.route('password/update')
+@ns.route('/password/update')
 class ChangePassword(Resource):
     """Reset the user's password."""
     @token_auth.login_required()
     @accepts(schema=StaffPasswordUpdateSchema, api=ns)
-    def put(self):
+    def post(self):
         """
             Change the current password to the one given
             in the body of this request
@@ -205,16 +205,14 @@ class ChangePassword(Resource):
         staff_email = token_auth.current_user().email
 
         # bring up the staff member and reset their password
-        pswd = request.get_json()['password']
-
         staff = Staff.query.filter_by(email=staff_email).first()
+
         if staff.check_password(password=data["current_password"]):
-            staff.set_password(data["new_password"]):
+            staff.set_password(data["new_password"])
         else:
-            UnauthorizedUser(message="please enter the correct current password \
+            raise UnauthorizedUser(message="please enter the correct current password \
                                       otherwise, visit the password recovery endpoint \
                                       /staff/password/forgot-password/recovery-link")
-
         db.session.commit()
 
         return 200

@@ -660,3 +660,9 @@ test_medical_imaging = {
   'image_type': 'XRay',
   'image_read': 'Check Check'
 }
+
+test_user_passwords = {
+  "password" : "gogoleplexitykatcity65",
+  "current_password": "password",
+  "new_password": "salt1ampintheruffs98"
+}
