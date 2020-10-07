@@ -464,7 +464,7 @@ class MedicalBloodTests(db.Model):
 
     __tablename__ = "MedicalBloodTests"
 
-    testid = db.Column(db.Integer, primary_key=True)
+    testid = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     Unique id identifying the test
 
@@ -499,7 +499,7 @@ class MedicalBloodTests(db.Model):
     :type: date
     """
 
-    panelType = db.Column(db.String, nullable=True)
+    panel_type = db.Column(db.String, default="Nonroutine")
     """
     denotes the panel type of the test, null if not one of the "standard tests"
 
@@ -539,7 +539,7 @@ class MedicalBloodTestResultTypes(db.Model):
     :type: datetime
     """
 
-    resultName = db.Column(db.String)
+    result_name = db.Column(db.String)
     """
     name of the result
 
@@ -586,7 +586,7 @@ class MedicalBloodTestResults(db.Model):
     :type: int, foreign key
     """
 
-    resultValue = db.Column(db.Float)
+    result_value = db.Column(db.Float)
     """
     numerical value of the parameter
 
