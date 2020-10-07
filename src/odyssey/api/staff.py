@@ -122,7 +122,7 @@ class StaffMembers(Resource):
 
         return new_staff
 
-@ns.route('password/forgot-password/recovery-link')
+@ns.route('/password/forgot-password/recovery-link')
 class PasswordResetEmail(Resource):
     """Password reset endpoints."""
     
@@ -152,12 +152,15 @@ class PasswordResetEmail(Resource):
                                   secret, 
                                   algorithm='HS256').decode("utf-8") 
 
-
-        # send_email_password_reset(staff.email, encoded_jwt)
+        send_email_password_reset(staff.email, encoded_token)
         
-        return jsonify({"token": encoded_token})
+        if current_app.env == "development":
+            return jsonify({"token": encoded_token})
+        else:
+            return 200
+        
 
-@ns.route('password/forgot-password/reset')
+@ns.route('/password/forgot-password/reset')
 @ns.doc(params={'reset_token': "token from password reset endpoint"})
 class ResetPassword(Resource):
     """Reset the user's password."""
