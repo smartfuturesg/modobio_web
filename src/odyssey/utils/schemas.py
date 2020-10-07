@@ -1119,7 +1119,7 @@ class MedicalBloodTestSchema(Schema):
     testid = fields.Integer()
     clientid = fields.Integer()
     date = fields.Date(required=True)
-    panelType = fields.String(required=False)
+    panel_type = fields.String(required=False)
     notes = fields.String(required=False)
 
     @post_load
@@ -1127,19 +1127,19 @@ class MedicalBloodTestSchema(Schema):
         return MedicalBloodTests(**data)
 
 class MedicalBloodTestResultsInputSchema(Schema):
-    resultName = fields.String()
-    resultValue = fields.Float()
+    result_name = fields.String()
+    result_value = fields.Float()
 
 class MedicalBloodTestResultsOutputSchema(Schema):
     idx = fields.Integer()
     testid = fields.Integer()
-    resultType = fields.String()
-    resultValue = fields.Float()
+    result_type = fields.String()
+    result_value = fields.Float()
 
 class MedicalBloodTestsInputSchema(Schema):
     clientid = fields.Integer()
     date = fields.Date()
-    panelType = fields.String()
+    panel_type = fields.String()
     notes = fields.String()
     results = fields.Nested(MedicalBloodTestResultsInputSchema, many=True)
 
@@ -1147,7 +1147,7 @@ class MedicalBloodTestResultsSchema(Schema):
     idx = fields.Integer()
     testid = fields.Integer()
     resultid = fields.Integer()
-    resultValue = fields.Float()
+    result_value = fields.Float()
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -1155,7 +1155,7 @@ class MedicalBloodTestResultsSchema(Schema):
 
 class MedicalBloodTestResultTypesSchema(Schema):
     resultid = fields.Integer()
-    resultName = fields.String()
+    result_name = fields.String()
 
     @post_load
     def make_object(self, data, **kwargs):

@@ -36,9 +36,9 @@ def check_blood_test_existence(testid):
     if not test:
         raise TestNotFound(testid)
 
-def check_blood_test_result_type_existence(resultName):
+def check_blood_test_result_type_existence(result_name):
     """Check that a supplied blood test result type is in the database"""
-    result = MedicalBloodTestResultTypes.query.filter_by(resultName=resultName).one_or_none()
+    result = MedicalBloodTestResultTypes.query.filter_by(result_name=result_name).one_or_none()
     if not result:
         raise ResultTypeNotFound(resultName)
 
