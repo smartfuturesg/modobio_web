@@ -569,7 +569,7 @@ test_fitness_questionnaire = {
   "goal_fitness_level": 9
 }
 
-test_blood_test = {
+test_blood_tests = {
     "date": "2020-09-10",
     "results": [
         {"resultName": "cholesterolTotal","resultValue": 150.0}
