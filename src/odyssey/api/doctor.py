@@ -171,7 +171,7 @@ class MedBloodTest(Resource):
         #insert results into the result table
         test = MedicalBloodTests.query.filter_by(testid=client_bt.testid).first()
         for result in results:
-            check_blood_test_result_type_existence(result['resultName'])
+            check_blood_test_result_type_existence(result['result_name'])
             resultid = MedicalBloodTestResultTypes.query.filter_by(resultName=result['result_name']).first().resultid
             result_data = {'testid': client_bt.testid, 'resultid': resultid, 'result_value': result['result_value']}
             bt_result = MedicalBloodTestResultsSchema().load(result_data)
