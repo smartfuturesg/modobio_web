@@ -89,420 +89,6 @@ class MedicalImaging(db.Model):
     :type: int
     """
 
-class MedicalBloodChemistryCBC(db.Model):
-    """ Client Blood Chemistry Complete Blood Count (CBC) table
-
-    This table stores client's blood test CBC results
-    """
-
-    __tablename__ = 'MedicalBloodChemistryCBC'
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    timestamp for when object was created. DB server time is used. 
-
-    :type: datetime
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    timestamp for when object was updated. DB server time is used. 
-
-    :type: datetime
-    """
-
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='MedicalBloodChemistryCBC_clientid_fkey',ondelete="CASCADE"), nullable=False)
-    """
-    Client ID number
-
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
-    """
-    
-    exam_date = db.Column(db.Date)
-    """
-    Exam date.
-
-    :type: datetime.date
-    """
-    
-    rbc = db.Column(db.Float)
-    """
-    RBC/RCC level
-    
-    units: N/A
-    :type: float
-    """
-
-    hemoglobin = db.Column(db.Float)
-    """
-    Hemoglobin level
-    
-    units: N/A
-    :type: float
-    """
-
-    hematocrit = db.Column(db.Float)
-    """
-    Hematocrit level
-    
-    units: percent
-    :type: float
-    """
-
-    mcv = db.Column(db.Float)
-    """
-    MCV level
-    
-    units: fL
-    :type: float
-    """
-
-    mch = db.Column(db.Float)
-    """
-    MCH level
-    
-    units: pg
-    :type: float
-    """
-
-    mchc = db.Column(db.Float)
-    """
-    MCHC level
-    
-    units: g/dL
-    :type: float
-    """
-
-    rdw = db.Column(db.Float)
-    """
-    RDW level
-    
-    units: percent
-    :type: float
-    """
-
-    wbc = db.Column(db.Float)
-    """
-    WBC/WCC level
-    
-    units: x10E3/uL
-    :type: float
-    """
-
-    rel_neutrophils = db.Column(db.Float)
-    """
-    Relative Neutrophils
-    
-    units: percent
-    :type: float
-    """
-
-    abs_neutrophils = db.Column(db.Float)
-    """
-    Absolute Neutrophils level
-    
-    units: x10E3/uL
-    :type: float
-    """
-
-    rel_lymphocytes = db.Column(db.Float)
-    """
-    Relative Lymphocytes
-    
-    units: percent
-    :type: float
-    """
-
-    abs_lymphocytes = db.Column(db.Float)
-    """
-    Absolute Lymphocytes
-    
-    units: x10E3/uL
-    :type: float
-    """
-
-    rel_monocytes = db.Column(db.Float)
-    """
-    Relative Monocytes
-    
-    units: U/L
-    :type: float
-    """
-
-    abs_monocytes = db.Column(db.Float)
-    """
-    Absolute Monocytes
-    
-    units: x10E3/uL
-    :type: float
-    """
-
-    rel_eosinophils = db.Column(db.Float)
-    """
-    Relative Eosinophils
-    
-    units: percent
-    :type: float
-    """
-
-    abs_eosinophils = db.Column(db.Float)
-    """
-    Absolute Eosinophils
-    
-    units: x10E3/uL
-    :type: float
-    """
-
-    basophils = db.Column(db.Float)
-    """
-    Basophils level
-    
-    units: percent
-    :type: float
-    """
-
-    platelets = db.Column(db.Float)
-    """
-    Platelets
-    
-    units: x10E3/mm^3
-    :type: float
-    """
-
-    plateletsByMch = db.Column(db.Float)
-    """
-    Platelets/MCH
-    
-    units: N/A
-    :type: float
-    """   
-    
-    plateletsByLymphocyte = db.Column(db.Float)
-    """
-    Platelets/Lymphocyte
-    
-    units: N/A
-    :type: float
-    """   
-
-    neutrophilByLymphocyte = db.Column(db.Float)
-    """
-    Neutrophil/Lymphocyte
-    
-    units: N/A
-    :type: float
-    """   
-
-    lymphocyteByMonocyte = db.Column(db.Float)
-    """
-    Lymphocyte/Monocyte
-    
-    units: N/A
-    :type: float
-    """   
-
-class MedicalBloodChemistryCMP(db.Model):
-    """ Client Blood Chemistry Comprehensive Metabolic Panel (CMP) table
-
-    This table stores client's blood test CMP results
-    """
-
-    __tablename__ = 'MedicalBloodChemistryCMP'
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    timestamp for when object was created. DB server time is used. 
-
-    :type: datetime
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    timestamp for when object was updated. DB server time is used. 
-
-    :type: datetime
-    """
-
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='MedicalBloodChemistryCMP_clientid_fkey',ondelete="CASCADE"), nullable=False)
-    """
-    Client ID number
-
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
-    """
-    
-    exam_date = db.Column(db.Date)
-    """
-    Exam date.
-
-    :type: datetime.date
-    """
-    
-    glucose = db.Column(db.Float)
-    """
-    Glucose level
-    
-    units: mg/dL
-    :type: float
-    """
-
-    sodium = db.Column(db.Float)
-    """
-    Sodium level
-    
-    units: mmol/L
-    :type: float
-    """
-
-    potassium = db.Column(db.Float)
-    """
-    Potassium level
-    
-    units: mmol/L
-    :type: float
-    """
-
-    carbon_dioxide = db.Column(db.Float)
-    """
-    Carbon Dioxide level
-    
-    units: mmol/L
-    :type: float
-    """
-
-    chloride = db.Column(db.Float)
-    """
-    Chloride level
-    
-    units: mmol/L
-    :type: float
-    """
-
-    magnesium = db.Column(db.Float)
-    """
-    Magnesium level
-    
-    units: mg/dL
-    :type: float
-    """
-
-    calcium = db.Column(db.Float)
-    """
-    Calcium level
-    
-    units: mg/dL
-    :type: float
-    """
-
-    phosphorus = db.Column(db.Float)
-    """
-    Phosphorus level
-    
-    units: mg/dL
-    :type: float
-    """
-
-    uric_acid = db.Column(db.Float)
-    """
-    Utic Acid level
-    
-    units: mg/dL
-    :type: float
-    """
-
-    bun = db.Column(db.Float)
-    """
-    bun level
-    
-    units: mg/dL
-    :type: float
-    """
-
-    creatinine = db.Column(db.Float)
-    """
-    creatinine level
-    
-    units: mg/dL
-    :type: float
-    """
-
-    ast = db.Column(db.Float)
-    """
-    AST level
-    
-    units: U/L
-    :type: float
-    """
-
-    alt = db.Column(db.Float)
-    """
-    ALT level
-    
-    units: U/L
-    :type: float
-    """
-
-    alk_phophatase = db.Column(db.Float)
-    """
-    Alkaline Phosphatase level
-    
-    units: U/L
-    :type: float
-    """
-
-    bilirubin = db.Column(db.Float)
-    """
-    Total bilirubin level
-    
-    units: mg/dL
-    :type: float
-    """
-
-    protein = db.Column(db.Float)
-    """
-    Protein level
-    
-    units: g/dL
-    :type: float
-    """
-
-    albumin = db.Column(db.Float)
-    """
-    Albumin level
-    
-    units: g/dL
-    :type: float
-    """
-
-    globulin = db.Column(db.Float)
-    """
-    Globulin level
-    
-    units: g/dL
-    :type: float
-    """
-
-    bunByAlbumin = db.Column(db.Float)
-    """
-    BUN/Albumnin Ratio
-    
-    units: N/A
-    :type: float
-    """    
-
 class MedicalHistory(db.Model):
     """ Medical history table
 
@@ -873,18 +459,16 @@ class MedicalPhysicalExam(db.Model):
     :type: str
     """
 
-class MedicalBloodChemistryLipids(db.Model):
-    """ Blood Test - Lipid results
+class MedicalBloodTests(db.Model):
+    """Holds information about client blood tests"""
 
-    This table stores the blood test - lipids results of clients.
+    __tablename__ = "MedicalBloodTests"
+
+    testid = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
-    __tablename__ = 'MedicalBloodChemistryLipids'
+    Unique id identifying the test
 
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Index
-
-    :type: int, primary key, autoincrement
+    :type: int, primary key, auto incrementing
     """
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
@@ -901,89 +485,44 @@ class MedicalBloodChemistryLipids(db.Model):
     :type: datetime
     """
 
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='BloodLipids_clientid_fkey', ondelete="CASCADE"), nullable=False)
+    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid', ondelete="CASCADE"), nullable=False)
     """
     Client ID number
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key
     """
 
-    exam_date = db.Column(db.Date)
+    date = db.Column(db.Date)
     """
-    Date blood test was administered.
+    Date the test was administered
 
-    :type: :class:`datetime.date`
-    """
-
-    cholesterol_total = db.Column(db.Float)
-    """
-    Cholesterol total
-
-    :type: Integer
-    :unit: mg/dL
+    :type: date
     """
 
-    cholesterol_ldl = db.Column(db.Float)
+    panel_type = db.Column(db.String, default="Nonroutine")
     """
-    Cholesterol ldl
+    denotes the panel type of the test, null if not one of the "standard tests"
 
-    :type: Integer
-    :unit: mg/dL
-    """
-
-    cholesterol_hdl = db.Column(db.Float)
-    """
-    Cholesterol hdl
-
-    :type: Integer
-    :unit: mg/dL
+    :type: string
     """
 
-    triglycerides = db.Column(db.Float)
+    notes = db.Column(db.String)
     """
-    Triglycerides
+    doctor's notes about the test
 
-    :type: Integer
-    :unit: mg/dL
-    """
-
-    #calculated values
-    cholesterol_over_hdl = db.Column(db.Float)
-    """
-    cholesterol total / cholesterol hdl
-
-    :type: float
-    :unit: #
+    :type: string
     """
 
-    triglycerides_over_hdl = db.Column(db.Float)
+class MedicalBloodTestResultTypes(db.Model):
+    """Holds a list of possible blood test result types(i.e. hemoglobulin, cholesterol, glucose, etc.)"""
+
+    __tablename__ = "MedicalBloodTestResultTypes"
+
+    resultid = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
-    triglycerides / hdl
+    autoincrementing primary key
 
-    :type: float
-    :unit: #
-    """
-
-    ldl_over_hdl = db.Column(db.Float)
-    """
-    cholesterol ldl / cholesterol hdl
-
-    :type: float
-    :unit: #
-    """
-
-class MedicalBloodChemistryThyroid(db.Model):
-    """ Blood Test - Thyroid results
-
-    This table stores the blood test - thyroid results of clients.
-    """
-    __tablename__ = 'MedicalBloodChemistryThyroid'
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Index
-
-    :type: int, primary key, autoincrement
+    :type: int, primary key, autoincrementing
     """
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
@@ -1000,128 +539,23 @@ class MedicalBloodChemistryThyroid(db.Model):
     :type: datetime
     """
 
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='BloodThyroid_clientid_fkey', ondelete="CASCADE"), nullable=False)
+    result_name = db.Column(db.String)
     """
-    Client ID number
+    name of the result
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
-    """
-
-    exam_date = db.Column(db.Date)
-    """
-    Date blood test was administered.
-
-    :type: :class:`datetime.date`
+    :type: string
     """
 
-    t3_resin_uptake = db.Column(db.Integer)
-    """
-    T3 Resin Uptake(%)
+class MedicalBloodTestResults(db.Model):
+    """Holds the results of a blood test identified by a blood test id"""
 
-    :type: integer
-    :units: %
-    """
-
-    thyroglobulin = db.Column(db.Integer)
-    """
-    Thyroglobulin, serum
-
-    :type: integer
-    :units: ng/mL
-    """
-
-    thyroidial_iodine_uptake = db.Column(db.Integer)
-    """
-    Thyroidal Iodine Uptake (I-123)
-
-    :type: integer
-    :units: %
-    """
-
-    tsh = db.Column(db.Float)
-    """
-    Thyroid-stimulating hormone(TSH), serum
-
-    :type: float
-    :units: μU/mL
-    """
-
-    tsi = db.Column(db.Integer)
-    """
-    Thyroid-stimulating immunoglobulin(TSI)
-
-    :type: integer
-    :units: %
-    """
-
-    thyroxine_binding_globulin = db.Column(db.Integer)
-    """
-    Thyroxine-binding globulin, serum
-
-    :type: integer
-    :units: μg/mL
-    """
-
-    thyroxine_index = db.Column(db.Integer)
-    """
-    Thyroxine index, free (estimate)
-
-    :type: integer
-    :units: #
-    """
-
-    t4_serum_total = db.Column(db.Integer)
-    """
-    Thyroxine (T4), serum total
-
-    :type: integer
-    :units: μg/dL
-    """
-
-    t4_serum_free = db.Column(db.Float)
-    """
-    Thyroxine (T4), serum free
-
-    :type: float
-    :units: ng/dL
-    """
-
-    t3_serum_total = db.Column(db.Integer)
-    """
-    Triiodothyronine (T3), serum total
-
-    :type: integer
-    :units: ng/dL
-    """
-
-    t3_serum_reverse = db.Column(db.Integer)
-    """
-    Triiodothyronine (T3), serum reverse
-
-    :type: integer
-    :units: ng/dL
-    """
-
-    t3_serum_free = db.Column(db.Float)
-    """
-    Triiodothyronine (T3), serum free
-
-    :type: integer
-    :units: pg/mL
-    """
-
-class MedicalBloodChemistryA1C(db.Model):
-    """ Blood Test - A1C results
-
-    This table stores the blood test - thyroid results of clients.
-    """
-    __tablename__ = 'MedicalBloodChemistryA1C'
+    __tablename__ = "MedicalBloodTestResults"
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
-    Index
+    autoincrementing result idx
 
-    :type: int, primary key, autoincrement
+    :type: int, primary key, autoincrementing
     """
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
@@ -1138,24 +572,23 @@ class MedicalBloodChemistryA1C(db.Model):
     :type: datetime
     """
 
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='BloodA1C_clientid_fkey', ondelete="CASCADE"), nullable=False)
+    testid = db.Column(db.Integer, db.ForeignKey('MedicalBloodTests.testid', ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    foreign key to MedicalBloodTests.clientid
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
-    """
-
-    exam_date = db.Column(db.Date)
-    """
-    Date blood test was administered.
-
-    :type: :class:`datetime.date`
+    :type: int, foreign key
     """
 
-    a1c = db.Column(db.Float)
+    resultid = db.Column(db.Integer, db.ForeignKey('MedicalBloodTestResultTypes.resultid', ondelete="CASCADE"), nullable=False)
     """
-    Hemoglobin A1C
+    foreign key to MedicalBloodTestResultTypes.resultid
 
-    :type: float
-    :units: %
-    """    
+    :type: int, foreign key
+    """
+
+    result_value = db.Column(db.Float)
+    """
+    numerical value of the parameter
+
+    :type: int
+    """
