@@ -12,7 +12,13 @@ from odyssey.api import api
 from odyssey.api.auth import token_auth, basic_auth
 from odyssey.api.errors import UnauthorizedUser, StaffEmailInUse, StaffNotFound
 from odyssey.utils.email import send_email_password_reset
-from odyssey.utils.schemas import StaffPasswordRecoverSchema, StaffSchema, StaffSearchItemsSchema
+from odyssey.utils.schemas import (
+    StaffPasswordRecoveryContactSchema, 
+    StaffPasswordResetSchema,
+    StaffPasswordUpdateSchema,
+    StaffSchema, 
+    StaffSearchItemsSchema
+)
 
 ns = api.namespace('staff', description='Operations related to staff members')
 
@@ -116,11 +122,11 @@ class StaffMembers(Resource):
 
         return new_staff
 
-@ns.route('/forgot-password/password-recovery-link')
-@ns.doc(params={'email': "email to search"})
+@ns.route('password/forgot-password/recovery-link')
 class PasswordResetEmail(Resource):
     """Password reset endpoints."""
     
+    @accepts(schema=StaffPasswordRecoveryContactSchema, api=ns)
     def post(self):
         """begin a password reset session. 
             Staff member unable to log in will request a password reset
@@ -133,32 +139,35 @@ class PasswordResetEmail(Resource):
             If the email does not exist, no email is sent. 
             response 200 OK
         """
-        email = request.args.get('email')
+        email = request.get_json()['email']
 
-        staff = Staff.query.filter_by(email=email.lower() ).first()
+        staff = Staff.query.filter_by(email=email.lower()).first()
+        
         if not email or not staff:
             return 200
 
         secret = current_app.config['SECRET_KEY']
-        encoded_jwt = jwt.encode({'exp': datetime.utcnow()+timedelta(minutes = 15), 
+        encoded_token = jwt.encode({'exp': datetime.utcnow()+timedelta(minutes = 1), 
                                   'sid': staff.staffid}, 
-                                  secret, algorithm='HS256').decode("utf-8") 
+                                  secret, 
+                                  algorithm='HS256').decode("utf-8") 
 
 
         # send_email_password_reset(staff.email, encoded_jwt)
         
-        return jsonify({"token": encoded_jwt})
+        return jsonify({"token": encoded_token})
 
-@ns.route('/forgot-password/reset')
+@ns.route('password/forgot-password/reset')
 @ns.doc(params={'reset_token': "token from password reset endpoint"})
 class ResetPassword(Resource):
     """Reset the user's password."""
-    
-    @accepts(schema=StaffPasswordRecoverSchema)
+
+    @accepts(schema=StaffPasswordResetSchema, api=ns)
     def put(self):
         """
             Change the current password to the one given
-        response 201 Created
+            in the body of this request
+            response 200 OK
        """
         # decode and validate token 
         secret = current_app.config['SECRET_KEY']
@@ -166,16 +175,45 @@ class ResetPassword(Resource):
         try:
             decoded_token = jwt.decode(reset_token, secret, algorithms='HS256')
         except jwt.ExpiredSignatureError:
-            #TODO: proper error response
-            return 400
+            return UnauthorizedUser(message="Token authorization expired")
 
         # bring up the staff member and reset their password
         pswd = request.get_json()['password']
 
         staff = Staff.query.filter_by(staffid=decoded_token['sid']).first()
         staff.set_password(pswd)
-        
+
         db.session.commit()
+
+        return 200
+
+@ns.route('password/update')
+class ChangePassword(Resource):
+    """Reset the user's password."""
+    @token_auth.login_required()
+    @accepts(schema=StaffPasswordUpdateSchema, api=ns)
+    def put(self):
+        """
+            Change the current password to the one given
+            in the body of this request
+            response 200 OK
+       """
+        data = request.get_json()
+        staff_email = token_auth.current_user().email
+
+        # bring up the staff member and reset their password
+        pswd = request.get_json()['password']
+
+        staff = Staff.query.filter_by(email=staff_email).first()
+        if staff.check_password(password=data["current_password"]):
+            staff.set_password(data["new_password"]):
+        else:
+            UnauthorizedUser(message="please enter the correct current password \
+                                      otherwise, visit the password recovery endpoint \
+                                      /staff/password/forgot-password/recovery-link")
+
+        db.session.commit()
+
         return 200
 
 
