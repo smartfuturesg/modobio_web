@@ -154,8 +154,8 @@ class MedBloodTest(Resource):
         return MedicalBloodTests.query.filter_by(clientid=clientid).all()
 
     @token_auth.login_required
-    @responds(schema=MedicalBloodTestSchema, api=ns)
-    @accepts(schema=MedicalBloodTestsInputSchema, status_code=201, api=ns)
+    @accepts(schema=MedicalBloodTestsInputSchema, api=ns)
+    @responds(schema=MedicalBloodTestSchema, status_code=201, api=ns)
     def post(self, clientid):
         check_client_existence(clientid)
         data = request.get_json()
