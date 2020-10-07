@@ -148,14 +148,14 @@ class MedImaging(Resource):
 @ns.doc(params={'clientid': 'Client ID number'})
 class MedBloodTest(Resource):
     @token_auth.login_required
-    @responds(schema=MedicalBloodTestSchema(many=True))
+    @responds(schema=MedicalBloodTestSchema(many=True), api=ns)
     def get(self, clientid):
         check_client_existence(clientid)
         return MedicalBloodTests.query.filter_by(clientid=clientid).all()
 
     @token_auth.login_required
-    @responds(schema=MedicalBloodTestSchema)
-    @accepts(schema=MedicalBloodTestsInputSchema)
+    @responds(schema=MedicalBloodTestSchema, api=ns)
+    @accepts(schema=MedicalBloodTestsInputSchema, status_code=201, api=ns)
     def post(self, clientid):
         check_client_existence(clientid)
         data = request.get_json()
@@ -183,7 +183,7 @@ class MedBloodTest(Resource):
 @ns.doc(params={'testid': 'Test ID number'})
 class MedBloodTestResults(Resource):
     @token_auth.login_required
-    @responds(schema=MedicalBloodTestResultsOutputSchema(many=True))
+    @responds(schema=MedicalBloodTestResultsOutputSchema(many=True), api=ns)
     def get(self, testid):
         #query for join of MedicalBloodTestResults and MedicalBloodTestResultTypes tables
         check_blood_test_existence(testid)
@@ -200,7 +200,7 @@ class MedBloodTestResults(Resource):
 @ns.route('/bloodtest/resulttypes/')
 class MedBloodTestResultTypes(Resource):
     @token_auth.login_required
-    @responds(schema=MedicalBloodTestResultTypesSchema(many=True))
+    @responds(schema=MedicalBloodTestResultTypesSchema(many=True), api=ns)
     def get(self):
         return MedicalBloodTestResultTypes.query.all()
 
