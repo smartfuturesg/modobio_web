@@ -78,7 +78,12 @@ def init_database():
     dat = [x for x in data if not x.startswith('--')]
     
     db.session.execute(''.join(dat))
-    
+
+    with open ("database/addResultTypes.sql", "r") as f:
+        data=f.readlines()
+
+    db.session.execute(''.join(data))
+
     # Insert test client data
     client_1 = ClientInfo(**test_client_info)
 

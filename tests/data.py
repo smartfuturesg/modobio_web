@@ -569,77 +569,14 @@ test_fitness_questionnaire = {
   "goal_fitness_level": 9
 }
 
-test_blood_chemistry_a1c = {
-  "exam_date": "2020-09-08",
-  "a1c": 4.2
-}
-
-test_blood_chemistry_thyroid = {
-  "exam_date": "2020-09-08",
-  "t3_resin_uptake": 25,
-  "thyroglobulin": 10,
-  "thyroidial_iodine_uptake": 10,
-  "tsh": 1.0,
-  "tsi": 10,
-  "thyroxine_binding_globulin": 20,
-  "thyroxine_index": 10,
-  "t4_serum_total": 6,
-  "t4_serum_free": 1.0,
-  "t3_serum_total": 100,
-  "t3_serum_reverse": 20,
-  "t3_serum_free": 3.0
-}
-
-test_blood_chemistry_lipids = {
-    "exam_date": "2020-09-08",
-    "cholesterol_total": 200,
-    "cholesterol_ldl": 50,
-    "cholesterol_hdl": 100,
-    "triglycerides": 200
-}
-
-test_blood_chemistry_cbc = {
-    "exam_date": "2020-09-01",
-    "rbc": 3,
-    "hemoglobin": 4,
-    "hematocrit": 5,
-    "mcv": 60,
-    "mch": 7,
-    "mchc": 8,
-    "rdw": 9,
-    "wbc": 10,
-    "rel_neutrophils": 11,
-    "abs_neutrophils": 12,
-    "rel_lymphocytes": 13,
-    "abs_lymphocytes": 16,
-    "rel_monocytes": 15,
-    "abs_monocytes": 16,
-    "rel_eosinophils": 17,
-    "abs_eosinophils": 18,
-    "basophils": 19,
-    "platelets": 20
-}
-
-test_blood_chemistry_cmp = {
-    "exam_date": "2020-09-01",
-    "glucose": 3,
-    "sodium": 4,
-    "potassium": 5,
-    "carbon_dioxide": 6,
-    "chloride": 7,
-    "magnesium": 8,
-    "calcium": 9,
-    "phosphorus": 10,
-    "uric_acid": 11,
-    "bun": 12,
-    "creatinine": 13,
-    "ast": 14,
-    "alt": 15,
-    "alk_phophatase": 16,
-    "bilirubin": 17,
-    "protein": 18,
-    "albumin": 19,
-    "globulin": 20
+test_blood_tests = {
+    "date": "2020-09-10",
+    "results": [
+        {"result_name": "cholesterolTotal","result_value": 150.0},
+        {"result_name": "cholesterolLdl", "result_value": 20.0}
+    ],
+    "panel_type": "Lipids",
+    "notes": "test2"
 }
 
 test_registered_facilities = {
