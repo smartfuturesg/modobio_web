@@ -39,7 +39,7 @@ def test_get_client_blood_tests(test_client, init_database):
     token = staff.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    # send get request for client info on clientid = 1 
+    # send get request for client blood tests on clientid = 1 
     response = test_client.get('/doctor/bloodtest/1/',
                                 headers=headers, 
                                 content_type='application/json')

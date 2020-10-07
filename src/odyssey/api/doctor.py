@@ -29,7 +29,7 @@ from odyssey.api.errors import (
     MethodNotAllowed,
     UnknownError
 )
-from odyssey.utils.misc import check_client_existence, check_blood_test_existence
+from odyssey.utils.misc import check_client_existence, check_blood_test_existence, check_blood_test_result_type_existence
 from odyssey.utils.schemas import (
     ClientExternalMREntrySchema, 
     ClientExternalMRSchema, 
@@ -170,6 +170,7 @@ class MedBloodTest(Resource):
         #insert results into the result table
         test = MedicalBloodTests.query.filter_by(testid=client_bt.testid).first()
         for result in results:
+            check_blood_test_result_type_existence(result['resultName'])
             resultid = MedicalBloodTestResultTypes.query.filter_by(resultName=result['resultName']).first().resultid
             result_data = {'testid': client_bt.testid, 'resultid': resultid, 'resultValue': result['resultValue']}
             bt_result = MedicalBloodTestResultsSchema().load(result_data)
