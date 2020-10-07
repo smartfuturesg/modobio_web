@@ -21,7 +21,7 @@ def test_post_medical_blood_chemistry_cmp(test_client, init_database):
 
     payload = test_blood_tests
     
-    # send get request for client info on clientid = 1 
+    # send post request for client info on clientid = 1 
     response = test_client.post('/doctor/bloodtest/1/',
                                 headers=headers, 
                                 data=dumps(payload), 
