@@ -147,7 +147,7 @@ class PasswordResetEmail(Resource):
             return 200
 
         secret = current_app.config['SECRET_KEY']
-        encoded_token = jwt.encode({'exp': datetime.utcnow()+timedelta(minutes = 1), 
+        encoded_token = jwt.encode({'exp': datetime.utcnow()+timedelta(minutes = 15), 
                                   'sid': staff.staffid}, 
                                   secret, 
                                   algorithm='HS256').decode("utf-8") 
