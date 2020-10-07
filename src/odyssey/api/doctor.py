@@ -40,6 +40,7 @@ from odyssey.utils.schemas import (
     MedicalBloodTestSchema,
     MedicalBloodTestResultsSchema,
     MedicalBloodTestResultsOutputSchema,
+    MedicalBloodTestResultTypesSchema,
     MedicalImagingSchema
 )
 
@@ -195,6 +196,13 @@ class MedBloodTestResults(Resource):
             output['resultType'] = MedicalBloodTestResultTypes.query.filter_by(resultid=result.resultid).first().resultName
             response.append(output) 
         return response
+
+@ns.route('/bloodtest/resulttypes/')
+class MedBloodTestResultTypes(Resource):
+    @token_auth.login_required
+    @responds(schema=MedicalBloodTestResultTypesSchema(many=True))
+    def get(self):
+        return MedicalBloodTestResultTypes.query.all()
 
 @ns.route('/medicalhistory/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
