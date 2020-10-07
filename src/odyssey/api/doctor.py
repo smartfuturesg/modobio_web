@@ -172,8 +172,8 @@ class MedBloodTest(Resource):
         test = MedicalBloodTests.query.filter_by(testid=client_bt.testid).first()
         for result in results:
             check_blood_test_result_type_existence(result['resultName'])
-            resultid = MedicalBloodTestResultTypes.query.filter_by(resultName=result['resultName']).first().resultid
-            result_data = {'testid': client_bt.testid, 'resultid': resultid, 'resultValue': result['resultValue']}
+            resultid = MedicalBloodTestResultTypes.query.filter_by(resultName=result['result_name']).first().resultid
+            result_data = {'testid': client_bt.testid, 'resultid': resultid, 'result_value': result['result_value']}
             bt_result = MedicalBloodTestResultsSchema().load(result_data)
             db.session.add(bt_result)
         db.session.commit()
@@ -192,8 +192,8 @@ class MedBloodTestResults(Resource):
         #replace resultid with result name for readability      
         response = []
         for result in results:
-            output = {'idx': result.idx,'testid': result.testid,'resultValue': result.resultValue}
-            output['resultType'] = MedicalBloodTestResultTypes.query.filter_by(resultid=result.resultid).first().resultName
+            output = {'idx': result.idx,'testid': result.testid,'result_value': result.result_value}
+            output['result_type'] = MedicalBloodTestResultTypes.query.filter_by(resultid=result.resultid).first().result_name
             response.append(output) 
         return response
 
