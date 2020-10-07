@@ -8,7 +8,7 @@ from odyssey.models.doctor import MedicalBloodTests, MedicalBloodTestResults, Me
 from tests.data import test_blood_tests
 
 
-def test_post_medical_blood_chemistry_cmp(test_client, init_database):
+def test_post_medical_blood_test(test_client, init_database):
     """
     GIVEN a api end point for medical blood test
     WHEN the '/doctor/bloodtest/<client id>/' resource  is requested (POST)
