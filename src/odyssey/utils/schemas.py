@@ -443,7 +443,7 @@ class PowerAssessmentSchema(Schema):
     push_pull = fields.Nested(PowerPushPull, missing=PowerPushPull().load({}))
     leg_press = fields.Nested(PowerLegPress, missing=PowerLegPress().load({}))
     upper_watts_per_kg = fields.Float(description = "watts per kg upper body", validate=validate.Range(min=0, max=100), missing=None)
-    lower_watts_per_kg = fields.Float(description = "watts per kg upper body", validate=validate.Range(min=0, max=250), missing=None)
+    lower_watts_per_kg = fields.Float(description = "watts per kg lower body", validate=validate.Range(min=0, max=250), missing=None)
     vital_weight = fields.Float(description="weight pulled from doctor physical data", dump_only=True)
 
     @post_load
@@ -826,6 +826,7 @@ class LungAssessmentSchema(ma.SQLAlchemySchema):
     clientid = fields.Integer(missing=0)
     timestamp = ma.auto_field()
     notes = ma.auto_field(missing=None)
+    # Put in weight validation?
     vital_weight = fields.Float(description="weight pulled from doctor physical data", dump_only=True, missing=None)
     bag_size = fields.Float(description="in liters", validate=validate.Range(min=0, max=10), missing=None)
     duration = fields.Integer(description="in seconds", validate=validate.Range(min=0, max=300), missing=None)
