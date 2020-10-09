@@ -152,6 +152,28 @@ class ClientNotFound(Exception):
 
         self.status_code = 404
 
+class TestNotFound(Exception):
+    """in the case that blood test results are requested for a test id that does not exist"""
+    def __init__(self, identification=None, message = None):
+        Exception.__init__(self)
+        if message:
+            self.message = message
+        else:
+            self.message = f'The blood test identified by, {identification} does not exit.'
+
+        self.status_code = 404
+
+class ResultTypeNotFound(Exception):
+    """in the case that blood test result type is given where that result type does not exist"""
+    def __init__(self, identification=None, message = None):
+        Exception.__init__(self)
+        if message:
+            self.message = message
+        else:
+            self.message = f'The blood test resultType identified by, {identification} does not exit.'
+
+        self.status_code = 404
+
 class FacilityNotFound(Exception):
     """in the case a staff member is trying to edit a client that does not exist"""
     def __init__(self, identification=None, message = None):
@@ -218,6 +240,11 @@ def error_client_not_found(error):
     '''Return a custom message and 400 status code'''
     return error_response(error.status_code, error.message)
 
+@api.errorhandler(TestNotFound)
+def error_test_not_found(error):
+    '''Return a custom message and 400 status code'''
+    return error_response(error.status_code, error.message)
+
 @api.errorhandler(ExamNotFound)
 def error_exam_not_found(error):
     '''Return a custom message and 400 status code'''
@@ -228,6 +255,10 @@ def error_exam_not_found(error):
     '''Return a custom message and 400 status code'''
     return error_response(error.status_code, error.message)
 
+@api.errorhandler(ResultTypeNotFound)
+def error_result_type_not_found(error):
+    '''Return a custom message and 400 status code'''
+    return error_response(error.status_code, error.message)
 
 @api.errorhandler(ContentNotFound)
 def error_content_not_found(error):

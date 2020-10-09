@@ -8,8 +8,9 @@ from datetime import datetime, date, time
 
 import flask.json
 from odyssey.models.client import ClientInfo, RemoteRegistration, ClientFacilities
+from odyssey.models.doctor import MedicalBloodTests, MedicalBloodTestResultTypes
 from odyssey.models.misc import RegisteredFacilities
-from odyssey.api.errors import UserNotFound, FacilityNotFound, RelationAlreadyExists
+from odyssey.api.errors import UserNotFound, FacilityNotFound, RelationAlreadyExists, TestNotFound, ResultTypeNotFound
 
 
 _uuid_rx = re.compile(r'[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}', flags=re.IGNORECASE)
@@ -29,6 +30,18 @@ def check_client_existence(clientid):
     client = ClientInfo.query.filter_by(clientid=clientid).one_or_none()
     if not client:
         raise UserNotFound(clientid)
+
+def check_blood_test_existence(testid):
+    """Check that the blood test is in the database"""
+    test = MedicalBloodTests.query.filter_by(testid=testid).one_or_none()
+    if not test:
+        raise TestNotFound(testid)
+
+def check_blood_test_result_type_existence(result_name):
+    """Check that a supplied blood test result type is in the database"""
+    result = MedicalBloodTestResultTypes.query.filter_by(result_name=result_name).one_or_none()
+    if not result:
+        raise ResultTypeNotFound(resultName)
 
 def check_facility_existence(facility_id):
     facility = RegisteredFacilities.query.filter_by(facility_id=facility_id).one_or_none()
