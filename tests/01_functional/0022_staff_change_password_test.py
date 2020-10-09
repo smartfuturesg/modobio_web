@@ -33,7 +33,7 @@ def test_password_update(test_client, init_database):
                                 content_type='application/json')
     
     # bring up staff member again for updated data
-    staff = Staff.query.first()
+    staff = Staff.query.filter_by(email=staff.email).first()
 
     assert response.status_code == 200
     assert staff.check_password(password=test_user_passwords['new_password'])

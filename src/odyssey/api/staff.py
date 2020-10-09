@@ -152,7 +152,6 @@ class PasswordResetEmail(Resource):
                                   secret, 
                                   algorithm='HS256').decode("utf-8") 
 
-        
         if current_app.env == "development":
             return jsonify({"token": encoded_token})
         else:
@@ -185,7 +184,7 @@ class ResetPassword(Resource):
 
         staff = Staff.query.filter_by(staffid=decoded_token['sid']).first()
         staff.set_password(pswd)
-
+        
         db.session.commit()
 
         return 200
