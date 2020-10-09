@@ -344,7 +344,7 @@ class WearablesFreeStyleEndpoint(Resource):
     @accepts(schema=WearablesFreeStyleSchema, api=ns)
     @responds(status_code=201, api=ns)
     def put(self, clientid):
-        """ Add data to current block for client ``clientid`` in reponse to a PUT request.
+        """ Add CGM data for client ``clientid`` in reponse to a PUT request.
 
         Parameters
         ----------
@@ -359,14 +359,45 @@ class WearablesFreeStyleEndpoint(Resource):
 
         if not cgm:
             msg =  f'FreeStyle Libre for client {clientid} has not yet been activated. '
-            msg += f'Please send a POST request to /wearables/freestyle/activate/ first.'
+            msg += f'Send a POST request to /wearables/freestyle/activate/ first.'
             raise UnknownError(message=msg)
 
         if cgm.activation_timestamp != request.parsed_obj.activation_timestamp:
             msg =  f'Activation timestamp {request.parsed_obj.activation_timestamp} does not '
             msg += f'match current activation timestamp {cgm.activation_timestamp}. '
-            msg += f'Please send a GET request to /wearables/freestyle/activate/ first.'
+            msg += f'Send a GET request to /wearables/freestyle/activate/ first.'
             raise UnknownError(message=msg)
+
+        tstamps = request.parsed_obj.timestamps
+        glucose = request.parsed_obj.glucose
+
+        if len(tstamps) != len(glucose):
+            raise UnknownError(message='Data arrays not equal length.')
+
+        if not tstamps:
+            return
+
+        if len(tstamps) != len(set(tstamps)):
+            raise UnknownError(message='Duplicate timestamps in data.')
+
+        # Sort data
+        if tstamps != sorted(tstamps):
+            temp = sorted(zip(tstamps, glucose))
+            tstamps = []
+            glucose = []
+            for t, g in temp:
+                tstamps.append(t)
+                glucose.append(g)
+
+        # Find index where new data starts
+        n = 0
+        if cgm.timestamps:
+            while n < len(tstamps) and tstamps[n] <= cgm.timestamps[-1]:
+                n += 1
+
+        # No new data
+        if n == len(tstamps):
+            return
 
         # Use array concatenation here, don't use:
         #    cgm.glucose = cgm.glucose + request.parsed_obj.glucose
@@ -377,8 +408,8 @@ class WearablesFreeStyleEndpoint(Resource):
                 timestamps = timestamps || cast(:tstamps as timestamp without time zone[])
             WHERE clientid = :cid;
         ''').bindparams(
-            gluc=request.parsed_obj.glucose,
-            tstamps=request.parsed_obj.timestamps,
+            gluc=glucose[n:],
+            tstamps=tstamps[n:],
             cid=clientid
         )
         db.session.execute(stmt)
