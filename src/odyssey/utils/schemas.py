@@ -1298,6 +1298,14 @@ class ClientSummarySchema(Schema):
     membersince = fields.Date()
     facilities = fields.Nested(RegisteredFacilitiesSchema(many=True))
 
+class UserSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = User
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return User(**data)
+
 #
 #   Schemas for the wearables API
 #
