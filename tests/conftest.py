@@ -78,7 +78,7 @@ def init_database():
     # Insert test client data
     client_1 = ClientInfo(**test_client_info)
     db.session.add(client_1)
-    db.session.commit()
+    db.session.flush()
 
     rli = {'record_locator_id': ClientInfo().generate_record_locator_id(
         firstname = client_1.firstname, 
@@ -86,10 +86,7 @@ def init_database():
         clientid =client_1.clientid)}
 
     client_1.update(rli)
-    db.session.commit()
     
-    clientid = client_1.clientid
-
     # initialize a test staff member
     staff_1 = Staff(**test_staff_member)
     staff_1.set_password(test_staff_member['password'])
