@@ -1,7 +1,8 @@
 import base64
-import datetime
 import pathlib
 import uuid
+
+from datetime import datetime, date, time
 
 test_client_info = {
     "firstname": "Test",
@@ -186,11 +187,11 @@ test_json_data = {
     },
     'f': [1, 2, 3, 4, 5],
     'g': "1977-04-05",
-    'h': datetime.time(14, 21, 39, 123456).isoformat(),
-    'i': datetime.datetime(2020, 6, 7, 12, 39, 46, 123456).isoformat(),
+    'h': time(14, 21, 39, 123456).isoformat(),
+    'i': datetime(2020, 6, 7, 12, 39, 46, 123456).isoformat(),
     'j': {
         'ja': {
-            'jja': [datetime.time(13, 0, 0).isoformat(), datetime.time(14, 0, 0).isoformat(), datetime.time(15, 0, 0).isoformat()],
+            'jja': [time(13, 0, 0).isoformat(), time(14, 0, 0).isoformat(), time(15, 0, 0).isoformat()],
         }
     },
     'k': '17a3bee0-42db-4416-8b84-3990b1c6397e',
@@ -596,6 +597,71 @@ test_medical_imaging = {
   'image_origin_location': 'testing clinic',
   'image_type': 'XRay',
   'image_read': 'Check Check'
+}
+
+wearables_data = {
+    "has_freestyle": True,
+    "has_oura": True,
+    "registered_oura": False
+}
+
+wearables_freestyle_data = {
+    'activation_timestamp': '2020-04-05T12:34:56.000',
+    'glucose': [1.1, 2.2, 3.3],
+    'timestamps': [
+        '2020-04-05T01:00:12.345678',
+        '2020-04-05T02:00:00.000',
+        '2020-04-05T03:00:00.000'
+    ]
+}
+
+wearables_freestyle_data_more = {
+    'activation_timestamp': '2020-04-05T12:34:56.000',
+    'glucose': [2.2, 3.3, 4.4, 5.5],
+    'timestamps': [
+        '2020-04-05T02:00:00.000',
+        '2020-04-05T03:00:00.000',
+        '2020-04-05T04:00:00.000',
+        '2020-04-05T05:00:00.000'
+    ]
+}
+
+# Combine previous two to check against merge
+wearables_freestyle_data_combo = {
+    'activation_timestamp': '2020-04-05T12:34:56.000',
+    'glucose': [1.1, 2.2, 3.3, 4.4, 5.5],
+    'timestamps': [
+        '2020-04-05T01:00:12.345678',
+        '2020-04-05T02:00:00.000',
+        '2020-04-05T03:00:00.000',
+        '2020-04-05T04:00:00.000',
+        '2020-04-05T05:00:00.000'
+    ]
+}
+
+wearables_freestyle_data_empty = {
+    'activation_timestamp': '2020-04-05T12:34:56.000',
+    'glucose': [],
+    'timestamps': []
+}
+
+wearables_freestyle_data_unequal = {
+    'activation_timestamp': '2020-04-05T12:34:56.000',
+    'glucose': [6.6, 7.7, 8.8],
+    'timestamps': [
+        '2020-04-05T06:00:00.000',
+        '2020-04-05T07:00:00.000'
+    ]
+}
+
+wearables_freestyle_data_duplicate = {
+    'activation_timestamp': '2020-04-05T12:34:56.000',
+    'glucose': [6.6, 7.7, 7.7],
+    'timestamps': [
+        '2020-04-05T06:00:00.000',
+        '2020-04-05T07:00:00.000',
+        '2020-04-05T07:00:00.000'
+    ]
 }
 
 test_user_passwords = {
