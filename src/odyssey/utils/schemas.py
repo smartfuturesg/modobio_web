@@ -1225,6 +1225,22 @@ class ClientExternalMREntrySchema(Schema):
 """
     Schemas for the staff API
 """
+
+class StaffPasswordRecoveryContactSchema(Schema):
+    """contact methods for password recovery.
+        currently just email but may be expanded to include sms
+    """
+    email = fields.Email(required=True)
+
+class StaffPasswordResetSchema(Schema):
+    #TODO Validate password strength
+    password = fields.String(required=True,  validate=validate.Length(min=3,max=50), description="new password to be used going forward")
+
+class StaffPasswordUpdateSchema(Schema):
+    #TODO Validate password strength
+    current_password = fields.String(required=True,  validate=validate.Length(min=3,max=50), description="current password")
+    new_password = fields.String(required=True,  validate=validate.Length(min=3,max=50), description="new password to be used going forward")
+
 class StaffSearchItemsSchema(Schema):
     staffid = fields.Integer()
     firstname = fields.String(required=False, validate=validate.Length(min=1, max= 50), missing=None)
