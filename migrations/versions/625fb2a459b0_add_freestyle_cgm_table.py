@@ -1,7 +1,7 @@
 """Add FreeStyle CGM table.
 
 Revision ID: 625fb2a459b0
-Revises: 8dd3ed610f45
+Revises: bbb0027f1deb
 Create Date: 2020-10-06 09:38:46.235765
 
 """
@@ -11,7 +11,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = '625fb2a459b0'
-down_revision = '8dd3ed610f45'
+down_revision = 'bbb0027f1deb'
 branch_labels = None
 depends_on = None
 
