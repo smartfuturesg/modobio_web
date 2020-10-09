@@ -151,7 +151,7 @@ class PasswordResetEmail(Resource):
                                   'sid': staff.staffid}, 
                                   secret, 
                                   algorithm='HS256').decode("utf-8") 
-
+   
         send_email_password_reset(staff.email, encoded_token)
         
         if current_app.env == "development":

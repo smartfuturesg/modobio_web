@@ -1,4 +1,5 @@
-from flask_httpauth import HTTPBasicAuth, HTTPTokenAuth
+# from flask_httpauth import HTTPBasicAuth, HTTPTokenAuth
+from odyssey.utils.auth.auth import HTTPBasicAuth, HTTPTokenAuth
 from odyssey.models.staff import Staff
 from odyssey.models.client import RemoteRegistration
 from odyssey.api.errors import error_response
