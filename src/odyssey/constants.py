@@ -379,3 +379,5 @@ database column expects a Python :attr:`True` or :attr:`False` value. Use
 # POSTGRESQL specific function that returns the time the statement is run.
 # It is independent of transaction time
 DB_SERVER_TIME = text("clock_timestamp()")
+
+ALPHANUMERIC = "BCDFGHJKLMNPQRSTVWXYZ01234567890123456789"

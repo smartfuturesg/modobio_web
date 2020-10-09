@@ -5,12 +5,13 @@ All tables in this module are prefixed with 'Client'.
 import base64
 import os
 import pytz
+import random
 import secrets
 
 from datetime import datetime, timedelta
 from hashlib import md5
 from sqlalchemy import text
-from odyssey.constants import DB_SERVER_TIME
+from odyssey.constants import DB_SERVER_TIME, ALPHANUMERIC
 from odyssey import db, whooshee
 
 phx_tz = pytz.timezone('America/Phoenix')
@@ -235,7 +236,7 @@ class ClientInfo(db.Model):
     :type: bool
     """
     
-    record_locator_id = db.Column(db.String(10))
+    record_locator_id = db.Column(db.String(15))
     """
     Record Locator ID
 
@@ -246,11 +247,11 @@ class ClientInfo(db.Model):
     """
 
     @staticmethod
-    def get_medical_record_hash(firstname, lastname, clientid):
+    def generate_record_locator_id(firstname, lastname, clientid):
         """medical record hash generation"""
-        rli_hash = secrets.token_hex()
-
-        return (firstname[0]+lastname[0]+str(clientid)+rli_hash[0:8-len(str(clientid))]).upper()
+        random.seed(clientid)
+        rli_hash = "".join([random.choice(ALPHANUMERIC) for i in range(10)])
+        return (firstname[0]+lastname[0]+rli_hash).upper()
 
     def client_info_search_dict(self):
         """returns just the searchable client info (name, email, number)"""
