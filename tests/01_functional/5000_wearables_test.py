@@ -5,7 +5,15 @@ from flask.json import dumps
 from odyssey.models.staff import Staff
 from odyssey.models.wearables import Wearables, WearablesFreeStyle
 
-from tests.data import wearables_data, wearables_freestyle_data
+from tests.data import (
+    wearables_data,
+    wearables_freestyle_data,
+    wearables_freestyle_data_more,
+    wearables_freestyle_data_combo,
+    wearables_freestyle_data_empty,
+    wearables_freestyle_data_unequal,
+    wearables_freestyle_data_duplicate
+)
 
 def test_wearables_post(test_client, init_database):
     """
@@ -135,6 +143,7 @@ def test_wearables_freestyle_put(test_client, init_database):
     headers = {'Authorization': f'Bearer {token}'}
     tss = [datetime.fromisoformat(d) for d in wearables_freestyle_data['timestamps']]
 
+    ### Add data
     response = test_client.put(
         '/wearables/freestyle/1/',
         headers=headers,
@@ -150,6 +159,67 @@ def test_wearables_freestyle_put(test_client, init_database):
     assert data.glucose == wearables_freestyle_data['glucose']
     assert data.timestamps == tss
 
+    ### Add data with some overlapping dates (previously added data)
+    # Afterwards, data should look like wearables_freestyle_data_combo
+    cur_len = len(data.timestamps)
+
+    response = test_client.put(
+        '/wearables/freestyle/1/',
+        headers=headers,
+        data=dumps(wearables_freestyle_data_more),
+        content_type='application/json'
+    )
+
+    assert response.status_code == 201
+    
+    init_database.session.commit()
+    assert len(data.timestamps) == len(wearables_freestyle_data_combo['timestamps'])
+    assert data.glucose == wearables_freestyle_data_combo['glucose']
+
+    combo_dt = [datetime.fromisoformat(d) for d in wearables_freestyle_data_combo['timestamps']]
+    assert all([ret == orig for ret, orig in zip(data.timestamps, combo_dt)])
+
+    ### Add empty data set
+    cur_len = len(data.timestamps)
+
+    response = test_client.put(
+        '/wearables/freestyle/1/',
+        headers=headers,
+        data=dumps(wearables_freestyle_data_empty),
+        content_type='application/json'
+    )
+
+    assert response.status_code == 201
+
+    init_database.session.commit()
+    assert len(data.timestamps) == cur_len
+
+    ### Add data with unequal lengths
+    response = test_client.put(
+        '/wearables/freestyle/1/',
+        headers=headers,
+        data=dumps(wearables_freestyle_data_unequal),
+        content_type='application/json'
+    )
+
+    assert response.status_code == 400
+    assert 'not equal length' in response.json['message']
+    init_database.session.commit()
+    assert len(data.timestamps) == cur_len
+
+    ### Add data with duplicate dates
+    response = test_client.put(
+        '/wearables/freestyle/1/',
+        headers=headers,
+        data=dumps(wearables_freestyle_data_duplicate),
+        content_type='application/json'
+    )
+
+    assert response.status_code == 400
+    assert 'Duplicate timestamps' in response.json['message']
+    init_database.session.commit()
+    assert len(data.timestamps) == cur_len    
+
 def test_wearables_freestyle_get(test_client, init_database):
     """
     GIVEN an API end point for the FreeStyle Libre CGM
@@ -159,7 +229,6 @@ def test_wearables_freestyle_get(test_client, init_database):
     staff = Staff.query.first()
     token = staff.get_token()
     headers = {'Authorization': f'Bearer {token}'}
-    tss = [datetime.fromisoformat(d) for d in wearables_freestyle_data['timestamps']]
 
     response = test_client.get(
         '/wearables/freestyle/1/',
@@ -167,8 +236,8 @@ def test_wearables_freestyle_get(test_client, init_database):
     )
 
     assert response.status_code == 200
-    assert response.json['glucose'] == wearables_freestyle_data['glucose']
+    assert response.json['glucose'] == wearables_freestyle_data_combo['glucose']
 
     returned_dt = [datetime.fromisoformat(d) for d in response.json['timestamps']]
-    orig_dt = [datetime.fromisoformat(d) for d in wearables_freestyle_data['timestamps']]
+    orig_dt = [datetime.fromisoformat(d) for d in wearables_freestyle_data_combo['timestamps']]
     assert all([ret == orig for ret, orig in zip(returned_dt, orig_dt)])
