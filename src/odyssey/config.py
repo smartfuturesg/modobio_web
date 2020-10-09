@@ -84,6 +84,13 @@ class Config:
 
         # Do we want to keep everything local?
         flask_dev = os.getenv('FLASK_DEV', default=defaults.FLASK_DEV)
+        flask_env = os.getenv('FLASK_ENV')
+
+        # Testing (running pytest) is always local.
+        if testing:
+            flask_env = 'development'
+            flask_dev = 'local'
+
         if flask_dev not in ('local', 'remote'):
             raise ValueError(f'FLASK_DEV must be "local" or "remote", found "{flask_dev}".')
 
@@ -91,7 +98,6 @@ class Config:
         # before this config is loaded. The default is "production" if
         # FLASK_ENV was not set. We don't want production by default, so raise
         # an error if it was not set to force the user to set it explicitly.
-        flask_env = os.getenv('FLASK_ENV')
         if not flask_env:
             raise ValueError('FLASK_ENV was not set. Set it to '
                              'either "development" or "production".')
@@ -100,10 +106,6 @@ class Config:
                              f'"production", found "{flask_env}".')
 
         self.LOCAL_CONFIG = flask_dev == 'local'
-
-        # Testing (running pytest) is always local.
-        if testing:
-            self.LOCAL_CONFIG = True
 
         # Do we have access to AWS Parameter store?
         self.ssm = None

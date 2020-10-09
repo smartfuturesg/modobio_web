@@ -6,6 +6,7 @@ from flask import current_app, request, url_for
 from flask_accepts import accepts, responds
 from flask_restx import Resource
 from requests_oauthlib import OAuth2Session
+from sqlalchemy.sql import text
 
 from odyssey.api import api
 from odyssey.api.auth import token_auth
@@ -14,7 +15,18 @@ from odyssey.api.errors import (
     ContentNotFound,
     IllegalSetting,
     MethodNotAllowed,
-    UnknownError
+    UnknownError,
+    UserNotFound
+)
+from odyssey.models.wearables import (
+    Wearables,
+    WearablesOura,
+    WearablesFreeStyle
+)
+from odyssey.utils.schemas import (
+    WearablesSchema,
+    WearablesFreeStyleSchema,
+    WearablesFreeStyleActivateSchema
 )
 from odyssey.models.wearables import Wearables, WearablesOura
 from odyssey.utils.schemas import WearablesSchema, WearablesOuraAuthSchema
@@ -48,9 +60,12 @@ class WearablesEndpoint(Resource):
         dict
             JSON encoded dict.
         """
-        check_client_existence(clientid)
+        wearables = (
+            Wearables.query
+            .filter_by(clientid=clientid)
+            .one_or_none()
+        )
 
-        wearables = Wearables.query.filter_by(clientid=clientid).one_or_none()
         if not wearables:
             raise ContentNotFound
 
@@ -72,18 +87,17 @@ class WearablesEndpoint(Resource):
         dict
             JSON encoded dict.
         """
-        query = Wearables.query.filter_by(clientid=clientid)
-        wearables = query.one_or_none()
+        wearables = (
+            Wearables.query
+            .filter_by(clientid=clientid)
+            .one_or_none()
+        )
 
         if wearables:
             raise MethodNotAllowed
 
-        # Prevent user from changing ID
-        if request.json.get('clientid'):
-            raise IllegalSetting(param='clientid')
-
-        wearables = Wearables(clientid=clientid, **request.json)
-        db.session.add(wearables)
+        request.parsed_obj.clientid = clientid
+        db.session.add(request.parsed_obj)
         db.session.commit()
 
     @token_auth.login_required
@@ -108,11 +122,8 @@ class WearablesEndpoint(Resource):
         if not wearables:
             raise ContentNotFound
 
-        # Prevent user from changing ID
-        if request.json.get('clientid'):
-            raise IllegalSetting(param='clientid')
-
-        query.update(request.json)
+        data = WearablesSchema().dump(request.parsed_obj)
+        query.update(data)
         db.session.commit()
 
 
@@ -140,7 +151,11 @@ class WearablesOuraAuthEndpoint(Resource):
         if not current_app.config['OURA_CLIENT_ID']:
             return
 
-        check_client_existence(clientid)
+        wearables = (
+            Wearables.query
+            .filter_by(clientid=clientid)
+            .one_or_none()
+        )
 
         # TODO: Disable this check until frontend has a way of setting has_oura
         #
@@ -152,7 +167,12 @@ class WearablesOuraAuthEndpoint(Resource):
         state = secrets.token_urlsafe(24)
 
         # Store state in database
-        oura = WearablesOura.query.filter_by(clientid=clientid).one_or_none()
+        oura = (
+            WearablesOura.query
+            .filter_by(clientid=clientid)
+            .one_or_none()
+        )
+
         if not oura:
             oura = WearablesOura(clientid=clientid, oauth_state=state)
             db.session.add(oura)
@@ -224,4 +244,173 @@ class WearablesOuraCallbackEndpoint(Resource):
         # wearables = Wearables.query.filter_by(clientid=oura.clientid).first()
         # wearables.registered_oura = True
 
+        db.session.commit()
+
+
+@ns.route('/freestyle/activate/<int:clientid>/')
+@ns.doc(params={'clientid': 'Client ID number'})
+class WearablesFreeStyleActivateEndpoint(Resource):
+    @token_auth.login_required
+    @responds(schema=WearablesFreeStyleActivateSchema, status_code=200, api=ns)
+    def get(self, clientid):
+        """ Returns CGM activation timestamp for client ``clientid`` in reponse to a GET request.
+
+        Time data on the CGM sensor is stored as minutes since activation and as full
+        timestamps in the database. Time data must be converted before it can be
+        uploaded to the database, using the activation timestamp retrieved in this GET
+        request.
+
+        Parameters
+        ----------
+        clientid : int
+            Client ID number.
+
+        Returns
+        -------
+        str
+            JSON encoded, ISO 8601 formatted datetime string.
+        """
+        cgm = (
+            WearablesFreeStyle.query
+            .filter_by(clientid=clientid)
+            .one_or_none()
+        )
+
+        if not cgm:
+            raise ContentNotFound
+
+        return cgm
+
+    @token_auth.login_required
+    @accepts(schema=WearablesFreeStyleActivateSchema, api=ns)
+    @responds(status_code=201, api=ns)
+    def post(self, clientid):
+        """ Set new activation timestamp for client ``clientid`` in response to POST request.
+
+        When a new CGM is activated, the activation timestamp must be stored in the database.
+
+        Parameters
+        ----------
+        clientid : int
+            Client ID number.
+
+        timestamp : str
+            ISO 8601 formatted datetime string.
+        """
+        cgm = (
+            WearablesFreeStyle.query
+            .filter_by(clientid=clientid)
+            .one_or_none()
+        )
+
+        if not cgm:
+            cgm = WearablesFreeStyle(clientid=clientid)
+            db.session.add(cgm)
+
+        cgm.activation_timestamp = request.parsed_obj.activation_timestamp
+        db.session.commit()
+
+
+@ns.route('/freestyle/<int:clientid>/')
+@ns.doc(params={'clientid': 'Client ID number'})
+class WearablesFreeStyleEndpoint(Resource):
+    @token_auth.login_required
+    @responds(schema=WearablesFreeStyleSchema, status_code=200, api=ns)
+    def get(self, clientid):
+        """ Return FreeStyle CGM data for client ``clientid`` in reponse to a GET request.
+
+        Parameters
+        ----------
+        clientid : int
+            Client ID number.
+
+        Returns
+        -------
+        str
+            JSON encoded dictionary
+        """
+        cgm = (
+            WearablesFreeStyle.query
+            .filter_by(clientid=clientid)
+            .one_or_none()
+        )
+
+        if not cgm:
+            raise ContentNotFound
+
+        return cgm
+
+    @token_auth.login_required
+    @accepts(schema=WearablesFreeStyleSchema, api=ns)
+    @responds(status_code=201, api=ns)
+    def put(self, clientid):
+        """ Add CGM data for client ``clientid`` in reponse to a PUT request.
+
+        Parameters
+        ----------
+        clientid : int
+            Client ID number.
+        """
+        cgm = (
+            WearablesFreeStyle.query
+            .filter_by(clientid=clientid)
+            .one_or_none()
+        )
+
+        if not cgm:
+            msg =  f'FreeStyle Libre for client {clientid} has not yet been activated. '
+            msg += f'Send a POST request to /wearables/freestyle/activate/ first.'
+            raise UnknownError(message=msg)
+
+        if cgm.activation_timestamp != request.parsed_obj.activation_timestamp:
+            msg =  f'Activation timestamp {request.parsed_obj.activation_timestamp} does not '
+            msg += f'match current activation timestamp {cgm.activation_timestamp}. '
+            msg += f'Send a GET request to /wearables/freestyle/activate/ first.'
+            raise UnknownError(message=msg)
+
+        tstamps = request.parsed_obj.timestamps
+        glucose = request.parsed_obj.glucose
+
+        if len(tstamps) != len(glucose):
+            raise UnknownError(message='Data arrays not equal length.')
+
+        if not tstamps:
+            return
+
+        if len(tstamps) != len(set(tstamps)):
+            raise UnknownError(message='Duplicate timestamps in data.')
+
+        # Sort data
+        if tstamps != sorted(tstamps):
+            temp = sorted(zip(tstamps, glucose))
+            tstamps = []
+            glucose = []
+            for t, g in temp:
+                tstamps.append(t)
+                glucose.append(g)
+
+        # Find index where new data starts
+        n = 0
+        if cgm.timestamps:
+            while n < len(tstamps) and tstamps[n] <= cgm.timestamps[-1]:
+                n += 1
+
+        # No new data
+        if n == len(tstamps):
+            return
+
+        # Use array concatenation here, don't use:
+        #    cgm.glucose = cgm.glucose + request.parsed_obj.glucose
+        # See ... confluence page
+        stmt = text('''
+            UPDATE "WearablesFreeStyle"
+            SET glucose = glucose || cast(:gluc as double precision[]),
+                timestamps = timestamps || cast(:tstamps as timestamp without time zone[])
+            WHERE clientid = :cid;
+        ''').bindparams(
+            gluc=glucose[n:],
+            tstamps=tstamps[n:],
+            cid=clientid
+        )
+        db.session.execute(stmt)
         db.session.commit()

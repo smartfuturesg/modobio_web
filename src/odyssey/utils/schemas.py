@@ -38,7 +38,7 @@ from odyssey.models.trainer import (
     MovementAssessment,
     LungAssessment
 )
-from odyssey.models.wearables import Wearables, WearablesOura
+from odyssey.models.wearables import Wearables, WearablesOura, WearablesFreeStyle
 from odyssey.utils.misc import list_average
 
 class ClientSearchItemsSchema(Schema):
@@ -1304,14 +1304,24 @@ class ClientSummarySchema(Schema):
 class WearablesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Wearables
-
-    clientid = fields.Integer(missing=0)
-
-    @post_load
-    def make_object(self, data, **kwargs):
-        return Wearables(**data)
+        load_instance = True
+        exclude = ('idx', 'clientid', 'created_at', 'updated_at')
 
 
 class WearablesOuraAuthSchema(Schema):
     oura_client_id = fields.String()
     oauth_state = fields.String()
+
+
+class WearablesFreeStyleSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = WearablesFreeStyle
+        load_instance = True
+        exclude = ('idx', 'clientid', 'created_at', 'updated_at')
+
+
+class WearablesFreeStyleActivateSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = WearablesFreeStyle
+        load_instance = True
+        fields = ('activation_timestamp',)
