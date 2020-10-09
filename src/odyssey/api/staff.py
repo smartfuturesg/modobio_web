@@ -8,6 +8,7 @@ import jwt
 
 from odyssey import db
 from odyssey.models.staff import Staff
+from odyssey.models.user import User
 from odyssey.api import api
 from odyssey.api.auth import token_auth, basic_auth
 from odyssey.api.errors import UnauthorizedUser, StaffEmailInUse, StaffNotFound
@@ -17,7 +18,8 @@ from odyssey.utils.schemas import (
     StaffPasswordResetSchema,
     StaffPasswordUpdateSchema,
     StaffSchema, 
-    StaffSearchItemsSchema
+    StaffSearchItemsSchema,
+    UserSchema
 )
 
 ns = api.namespace('staff', description='Operations related to staff members')
@@ -118,6 +120,13 @@ class StaffMembers(Resource):
         new_staff = staff_schema.load(data)
 
         db.session.add(new_staff)
+        db.session.commit()
+
+        user_data = {'staffid': new_staff.staffid, 'email': data['email']}
+        user = UserSchema().load(user_data)
+        user.set_password(data['password'])
+        
+        db.session.add(user)
         db.session.commit()
 
         return new_staff

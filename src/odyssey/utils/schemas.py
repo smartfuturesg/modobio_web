@@ -1302,9 +1302,16 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
 
+    token = fields.String(dump_only=True)
+    token_expiration = fields.DateTime(dump_only=True)
+    password = fields.String(required=True, load_only=True)
+    email = fields.Email(required=True)
+
     @post_load
     def make_object(self, data, **kwargs):
-        return User(**data)
+        new_user = User(**data)
+        new_user.set_password(data['password'])
+        return user
 
 #
 #   Schemas for the wearables API

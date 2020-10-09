@@ -4,14 +4,12 @@ All tables in this module are prefixed with 'User'.
 """
 import base64
 import os
-import pytz
-import secrets
 
 from datetime import datetime, timedelta
-from hashlib import md5
-from sqlalchemy import text
-from odyssey.constants import DB_SERVER_TIME
+from werkzeug.security import generate_password_hash, check_password_hash
+
 from odyssey import db
+from odyssey.constants import DB_SERVER_TIME
 
 class User(db.Model):
     """ 
@@ -87,9 +85,11 @@ class User(db.Model):
     :type: str, max length 128
     """
 
-    def 
-    check_password(self, password):
-        return password == self.password
+    def set_password(self, password):
+        self.password = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password, password)
 
     def get_token(self,expires_in=86400):
         now = datetime.utcnow()
