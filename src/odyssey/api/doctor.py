@@ -62,7 +62,7 @@ class MedImaging(Resource):
         check_client_existence(clientid)
         data = MedicalImaging.query.filter_by(clientid=clientid).all()
         if not data:
-            raise ContentNotFound
+            raise ContentNotFound()
         
         if not current_app.config['LOCAL_CONFIG']:
             bucket_name = current_app.config['S3_BUCKET_NAME']
@@ -151,7 +151,12 @@ class MedBloodTest(Resource):
     @responds(schema=MedicalBloodTestSchema(many=True), api=ns)
     def get(self, clientid):
         check_client_existence(clientid)
-        return MedicalBloodTests.query.filter_by(clientid=clientid).all()
+        blood_tests = MedicalBloodTests.query.filter_by(clientid=clientid).all()
+
+        if not blood_tests:
+            raise ContentNotFound()
+
+        return blood_tests
 
     @token_auth.login_required
     @accepts(schema=MedicalBloodTestsInputSchema, api=ns)
