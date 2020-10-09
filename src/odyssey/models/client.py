@@ -236,7 +236,7 @@ class ClientInfo(db.Model):
     :type: bool
     """
     
-    record_locator_id = db.Column(db.String(15))
+    record_locator_id = db.Column(db.String(12))
     """
     Record Locator ID
 
