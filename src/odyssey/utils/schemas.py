@@ -12,6 +12,7 @@ from odyssey.models.doctor import (
     MedicalBloodTestResults,
     MedicalBloodTestResultTypes
 )
+from odyssey.models.user import User
 from odyssey.models.client import (
     ClientConsent,
     ClientConsultContract,
