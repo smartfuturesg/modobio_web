@@ -541,9 +541,6 @@ test_fitness_questionnaire = {
   "energy_level": 5,
   "libido_level": 2,
   "stress_level": 4,
-  "obstacles_expected": "mostly motivating myself consistently",
-  "confidence_level": 4,
-  "clientid": 0,
   "physical_goals_other": "",
   "stress_sources": [
     "Family",
@@ -552,7 +549,7 @@ test_fitness_questionnaire = {
   ],
   "trainer_expectation_other": "",
   "lifestyle_goals_other": "just want to get into a routine",
-  "trainer_expectation": "Expertise",
+  "trainer_expectation": ["Expertise"],
   "physical_goals_notes": "I want to be fit",
   "lifestyle_goals_notes": "doing fine for now",
   "current_fitness_level": 6,
@@ -565,7 +562,6 @@ test_fitness_questionnaire = {
     "Increase Strength"
   ],
   "sleep_quality_level": 2,
-  "obstacles_likely": True,
   "stress_sources_other": "",
   "goal_fitness_level": 9
 }

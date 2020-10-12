@@ -24,7 +24,7 @@ def test_post_strength_assessment(test_client, init_database):
                                 headers=headers, 
                                 data=dumps(payload), 
                                 content_type='application/json')
-
+    breakpoint()
     assert response.status_code == 201
 
 def test_get_strength_assessment(test_client, init_database):
