@@ -62,7 +62,7 @@ def test_full_password_recovery_routine(test_client, init_database):
                                 content_type='application/json')
 
     # re-query database for staff member
-    staff = Staff.query.first()
+    staff = Staff.query.filter_by(email=staff.email).first()
 
     assert response.status_code == 200
     assert staff.check_password(password=payload_password_reset['password'])
