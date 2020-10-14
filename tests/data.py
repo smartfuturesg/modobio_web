@@ -595,7 +595,7 @@ test_medical_imaging = {
   'image': (img_file.as_posix() , open(img_file, mode='rb'), 'image/jpg'),
   'image_date': '2020-09-29',
   'image_origin_location': 'testing clinic',
-  'image_type': 'XRay',
+  'image_type': 'X-ray',
   'image_read': 'Check Check'
 }
 
