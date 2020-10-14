@@ -1034,19 +1034,19 @@ class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
                       'School', 'Body Image',			
                       'Sports Performance',
                       'General Environment',
-                      'Other']
+                      ]
     physical_goals_list = ['Weight Loss','Increase Strength',
                            'Increase Aerobic Capacity','Body Composition',
                            'Sport Specific Performance', 'Improve Mobility',
                            'Injury Rehabilitation', 'Injury Prevention',
                            'Increase Longevity', 'General Health',
-                           'Other']
+                           ]
     lifestyle_goals_list = ['Increased Energy', 'Increased Mental Clarity', 
                             'Increased Libido', 'Overall Happiness', 
                             'Decreased Stress', 'Improved Sleep', 
-                            'Healthier Eating', 'Other']
+                            'Healthier Eating', ]
 
-    trainer_goals_list = ['Expertise', 'Motivation', 'Accountability', 'Time Efficiency', 'Other']
+    trainer_goals_list = ['Expertise', 'Motivation', 'Accountability', 'Time Efficiency']
     sleep_hours_options_list = ['< 4', '4-6','6-8','> 8']
         
     clientid = fields.Integer(missing=0)
