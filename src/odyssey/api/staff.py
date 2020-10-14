@@ -100,7 +100,7 @@ class StaffMembers(Resource):
         """register a new staff member"""
         data = request.get_json() or {}
         #check if this email is already being used. If so raise 409 conflict error 
-        staff = Staff.query.filter_by(email=data.get('email')).first()
+        staff = User.query.filter_by(email=data.get('email')).first()
         if staff:
             raise StaffEmailInUse(email=data.get('email'))
 
@@ -114,19 +114,22 @@ class StaffMembers(Resource):
             raise UnauthorizedUser(message=f"Staff member with email {token_auth.current_user().email} is unauthorized to create a staff administrator role. \
                                  Please contact system admin")
    
+        #remove user data from staff data
+        user_data = {'email': data['email'], 'password': data['password']}
+        del data['email']
+        del data['password']
+
         # Staff schema instance load from payload
         staff_schema = StaffSchema()
-
         new_staff = staff_schema.load(data)
 
         db.session.add(new_staff)
         db.session.commit()
 
-        user_data = {'staffid': new_staff.staffid, 'email': data['email']}
-        user = UserSchema().load(user_data)
-        user.set_password(data['password'])
+        user_data['staffid'] = new_staff.staffid
+        new_user = UserSchema().load(user_data)
         
-        db.session.add(user)
+        db.session.add(new_user)
         db.session.commit()
 
         return new_staff

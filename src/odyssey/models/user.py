@@ -10,6 +10,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from odyssey import db
 from odyssey.constants import DB_SERVER_TIME
+from odyssey.models.staff import Staff
 
 class User(db.Model):
     """ 
@@ -119,3 +120,8 @@ class User(db.Model):
         if user is None or user.token_expiration < datetime.utcnow():
             return None
         return user
+
+    def get_admin_role(self):
+        """check if this staff member is authorized to create new staff members"""
+        staff = Staff.query.filter_by(staffid=self.staffid).first()
+        return staff.get_admin_role()

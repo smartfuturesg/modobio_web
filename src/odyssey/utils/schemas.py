@@ -1248,16 +1248,13 @@ class StaffSearchItemsSchema(Schema):
     lastname = fields.String(required=False, validate=validate.Length(min=1,max=50), missing=None)
     email = fields.Email(required=False, missing=None)
 
+class UserSchema
+
 class StaffSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Staff
 
     possible_roles = ['stfappadmin', 'clntsvc', 'physthera', 'phystrain', 'datasci', 'doctor', 'docext', 'nutrition']
-
-    token = fields.String(dump_only=True)
-    token_expiration = fields.DateTime(dump_only=True)
-    password = fields.String(required=True, load_only=True)
-    email = fields.Email(required=True)
     access_roles = fields.List(fields.String,
                 description=" The access role for this staff member options: \
                 ['stfappadmin' (staff application admin), 'clntsvc' (client services), 'physthera' (physiotherapist), 'datasci' (data scientist), 'doctor' (doctor), 'docext' (external doctor), 'phystrain' (physical trainer),\
@@ -1276,7 +1273,6 @@ class StaffSchema(ma.SQLAlchemyAutoSchema):
     @post_load
     def make_object(self, data, **kwargs):
         new_staff = Staff(**data)
-        new_staff.set_password(data['password'])
         return new_staff
 
 class RegisteredFacilitiesSchema(Schema):
@@ -1303,16 +1299,18 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
 
+    clientid = fields.Integer()
+    staffid = fields.Integer()
     token = fields.String(dump_only=True)
     token_expiration = fields.DateTime(dump_only=True)
-    password = fields.String(required=True, load_only=True)
+    password = fields.String(load_only=True)
     email = fields.Email(required=True)
 
     @post_load
     def make_object(self, data, **kwargs):
         new_user = User(**data)
         new_user.set_password(data['password'])
-        return user
+        return new_user
 
 #
 #   Schemas for the wearables API

@@ -1,5 +1,6 @@
 from flask_httpauth import HTTPBasicAuth, HTTPTokenAuth
 from odyssey.models.staff import Staff
+from odyssey.models.user import User
 from odyssey.models.client import RemoteRegistration
 from odyssey.api.errors import error_response
 
@@ -28,9 +29,9 @@ def verify_token_client(token):
 @basic_auth.verify_password
 def verify_password(email, password):
     """check password for API user"""
-    staff_member = Staff.query.filter_by(email=email.lower()).first()
-    if staff_member and staff_member.check_password(password):
-        return staff_member
+    user = User.query.filter_by(email=email.lower()).first()
+    if user and user.check_password(password):
+        return user
 
 @basic_auth.error_handler
 def basic_auth_error(status):
@@ -38,7 +39,7 @@ def basic_auth_error(status):
 
 @token_auth.verify_token
 def verify_token(token):
-    return Staff.check_token(token) if token else None
+    return User.check_token(token) if token else None
 
 @token_auth.error_handler
 def token_auth_error(status):
