@@ -1124,7 +1124,7 @@ class MedicalImagingSchema(ma.SQLAlchemyAutoSchema):
         load_instance = True
         exclude = ["clientid", "idx"]
 
-    possible_image_types = ['CTscan', 'MRI', 'PETscan', 'Ultrasound', 'XRay']
+    possible_image_types = ['CT', 'MRI', 'PET', 'Scopes', 'Special imaging', 'Ultrasound', 'X-ray']
     image_type = fields.String(validate=validate.OneOf(possible_image_types), required=True)
     image_date = fields.Date(required=True)
     image_read = fields.String(required=True)
