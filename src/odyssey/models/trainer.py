@@ -792,10 +792,10 @@ class MoxyAssessment(db.Model):
     :type: int
     """
 
-    starting_thb = db.Column(db.Integer)
+    starting_thb = db.Column(db.Float)
     """
 
-    :type: int
+    :type: float
     """
 
     limiter = db.Column(db.String)
@@ -904,11 +904,11 @@ class MoxyRipTest(db.Model):
     :type: int
     """
 
-    performance_thb_1 = db.Column(db.Integer)
+    performance_thb_1 = db.Column(db.Float)
     """
     performance assessment 1 thb
 
-    :type: int
+    :type: float
     """
 
     performance_average_power_1 = db.Column(db.Integer)
@@ -932,11 +932,11 @@ class MoxyRipTest(db.Model):
     :type: int
     """
 
-    performance_thb_2 = db.Column(db.Integer)
+    performance_thb_2 = db.Column(db.Float)
     """
     performance assessment 2 thb
 
-    :type: int
+    :type: float
     """
 
     performance_average_power_2 = db.Column(db.Integer)
@@ -960,11 +960,11 @@ class MoxyRipTest(db.Model):
     :type: int
     """
 
-    performance_thb_3 = db.Column(db.Integer)
+    performance_thb_3 = db.Column(db.Float)
     """
     performance assessment 3 thb
 
-    :type: int
+    :type: float
     """
 
     performance_average_power_3 = db.Column(db.Integer)
@@ -988,11 +988,11 @@ class MoxyRipTest(db.Model):
     :type: int
     """
 
-    performance_thb_4 = db.Column(db.Integer)
+    performance_thb_4 = db.Column(db.Float)
     """
     performance assessment 4 thb
 
-    :type: int
+    :type: float
     """
 
     performance_average_power_4 = db.Column(db.Integer)
@@ -1016,11 +1016,11 @@ class MoxyRipTest(db.Model):
     :type: int
     """
 
-    recovery_thb_1 = db.Column(db.Integer)
+    recovery_thb_1 = db.Column(db.Float)
     """
     recovery assessment 1 thb
 
-    :type: int
+    :type: float
     """
 
     recovery_average_power_1 = db.Column(db.Integer)
@@ -1044,11 +1044,11 @@ class MoxyRipTest(db.Model):
     :type: int
     """
 
-    recovery_thb_2 = db.Column(db.Integer)
+    recovery_thb_2 = db.Column(db.Float)
     """
     recovery assessment 2 thb
 
-    :type: int
+    :type: float
     """
 
     recovery_average_power_2 = db.Column(db.Integer)
@@ -1072,11 +1072,11 @@ class MoxyRipTest(db.Model):
     :type: int
     """
 
-    recovery_thb_3 = db.Column(db.Integer)
+    recovery_thb_3 = db.Column(db.Float)
     """
     recovery assessment 3 thb
 
-    :type: int
+    :type: float
     """
 
     recovery_average_power_3 = db.Column(db.Integer)
@@ -1100,11 +1100,11 @@ class MoxyRipTest(db.Model):
     :type: int
     """
 
-    recovery_thb_4 = db.Column(db.Integer)
+    recovery_thb_4 = db.Column(db.Float)
     """
     recovery assessment 4 thb
 
-    :type: int
+    :type: float
     """
 
     recovery_average_power_4 = db.Column(db.Integer)
@@ -1128,11 +1128,11 @@ class MoxyRipTest(db.Model):
     :type: int
     """
 
-    thb_tank_size = db.Column(db.Integer)
+    thb_tank_size = db.Column(db.Float)
     """
     tHB tank size
 
-    :type: int
+    :type: float
     """
 
     performance_baseline_smo2 = db.Column(db.Integer)
@@ -1142,9 +1142,9 @@ class MoxyRipTest(db.Model):
     :type: int
     """
 
-    performance_baseline_thb = db.Column(db.Integer)
+    performance_baseline_thb = db.Column(db.Float)
     """
-    performance baseline tHB
+    performance baseline float
 
     :type: int
     """
@@ -1156,11 +1156,11 @@ class MoxyRipTest(db.Model):
     :type: int
     """
 
-    recovery_baseline_thb = db.Column(db.Integer)
+    recovery_baseline_thb = db.Column(db.Float)
     """
     recovery baseline tHB
 
-    :type: int
+    :type: float
     """
 
     avg_watt_kg = db.Column(db.Float)
