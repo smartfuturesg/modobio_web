@@ -51,30 +51,30 @@ from odyssey.utils.schemas import (
 
 ns = api.namespace('client', description='Operations related to clients')
 
-@ns.route('/<int:clientid>/')
-@ns.doc(params={'clientid': 'Client ID number'})
+@ns.route('/<int:userid>/')
+@ns.doc(params={'userid': 'User ID number'})
 class Client(Resource):
     @token_auth.login_required
     @responds(schema=ClientInfoSchema, api=ns)
-    def get(self, clientid):
-        """returns client info table as a json for the clientid specified"""
-        client = ClientInfo.query.get(clientid)
+    def get(self, userid):
+        """returns client info table as a json for the userid specified"""
+        client = ClientInfo.query.filter_by(userid=userid)
         if not client:
-            raise UserNotFound(clientid)
+            raise UserNotFound(userid)
         return client
 
     @token_auth.login_required
     @accepts(schema=ClientInfoSchema, api=ns)
     @responds(schema=ClientInfoSchema, api=ns)
-    def put(self, clientid):
+    def put(self, userid):
         """edit client info"""
         data = request.get_json()
-        client = ClientInfo.query.filter_by(clientid=clientid).one_or_none()
+        client = ClientInfo.query.filter_by(userid=userid).one_or_none()
         if not client:
-            raise UserNotFound(clientid)
-        #prevent requests to set clientid and send message back to api user
-        elif data.get('clientid', None):
-            raise IllegalSetting('clientid')
+            raise UserNotFound(userid)
+        #prevent requests to set userid and send message back to api user
+        elif data.get('userid', None):
+            raise IllegalSetting('userid')
         elif data.get('membersince', None):
             raise IllegalSetting('membersince')
         
@@ -83,20 +83,20 @@ class Client(Resource):
         
         return client
 
-@ns.route('/remove/<int:clientid>/')
-@ns.doc(params={'clientid': 'Client ID number'})
+@ns.route('/remove/<int:userid>/')
+@ns.doc(params={'userid': 'User ID number'})
 class RemoveClient(Resource):
     @token_auth.login_required
-    def delete(self, clientid):
+    def delete(self, userid):
         """deletes client from database entirely"""
-        client = ClientInfo.query.get(clientid)
+        client = ClientInfo.query.filter_by(userid=userid).one_or_none
 
         if not client:
-            raise UserNotFound(clientid)
+            raise UserNotFound(userid)
         
         # find the staff member requesting client delete
         staff = token_auth.current_user()
-        new_removal_request = ClientRemovalRequests(staffid=staff.staffid)
+        new_removal_request = ClientRemovalRequests(userid=staff.userid)
         
         db.session.add(new_removal_request)
         db.session.flush()
@@ -105,8 +105,11 @@ class RemoveClient(Resource):
         db.session.delete(client)
         db.session.commit()
         
-        return {'message': f'client with id {clientid} has been removed'}
+        return {'message': f'client with id {userid} has been removed'}
 
+#No longer relevant, client accounts should be created with the user creation endpoint.
+#Then, clientinfo can be edited using the above endpoint to fill out information
+"""
 @ns.route('/')
 class NewClient(Resource):
     """
@@ -139,25 +142,27 @@ class NewClient(Resource):
         db.session.commit()
 
         return client
+"""
 
-@ns.route('/summary/<int:clientid>/')
+@ns.route('/summary/<int:userid>/')
 class ClientSummary(Resource):
     @token_auth.login_required
     @responds(schema=ClientSummarySchema, api=ns)
-    def get(self, clientid):
-        client = ClientInfo.query.get(clientid)
+    def get(self, userid):
+        user = User.query.filter_by(userid=userid).one_or_none()
+        client = ClientInfo.query.filter_by(userid=userid).one_or_none()
         if not client:
-            raise UserNotFound(clientid)
+            raise UserNotFound(userid)
         
         #get list of a client's registered facilities' addresses
-        clientFacilities = ClientFacilities.query.filter_by(client_id=clientid).all()
+        clientFacilities = ClientFacilities.query.filter_by(userid=userid).all()
         facilityList = [item.facility_id for item in clientFacilities]
         facilities = []
         for item in facilityList:
             facilities.append(RegisteredFacilities.query.filter_by(facility_id=item).first())
             
-        data = {"firstname": client.firstname, "middlename": client.middlename, "lastname": client.lastname,
-                "clientid": client.clientid, "dob": client.dob, "membersince": client.membersince, "facilities": facilities}
+        data = {"firstname": user.firstname, "middlename": user.middlename, "lastname": user.lastname,
+                "userid": user.userid, "dob": client.dob, "membersince": client.membersince, "facilities": facilities}
         return data
 
 @ns.route('/clientsearch/')
@@ -169,6 +174,8 @@ class ClientSummary(Resource):
                 'phone': 'phone number to search',
                 'dob': 'date of birth to search',
                 'record_locator_id': 'record locator id to search'})
+
+#todo - fix to work with new user system
 class Clients(Resource):
     @token_auth.login_required
     @responds(schema=ClientSearchOutSchema, api=ns)
@@ -243,18 +250,18 @@ class Clients(Resource):
         
         return data
 
-@ns.route('/consent/<int:clientid>/')
-@ns.doc(params={'clientid': 'Client ID number'})
+@ns.route('/consent/<int:userid>/')
+@ns.doc(params={'userid': 'User ID number'})
 class ConsentContract(Resource):
     """client consent forms"""
 
     @token_auth.login_required
     @responds(schema=ClientConsentSchema, api=ns)
-    def get(self, clientid):
-        """returns the most recent consent table as a json for the clientid specified"""
-        check_client_existence(clientid)
+    def get(self, userid):
+        """returns the most recent consent table as a json for the userid specified"""
+        check_client_existence(userid)
 
-        client_consent_form = ClientConsent.query.filter_by(clientid=clientid).order_by(ClientConsent.idx.desc()).first()
+        client_consent_form = ClientConsent.query.filter_by(userid=userid).order_by(ClientConsent.idx.desc()).first()
         
         if not client_consent_form:
             raise ContentNotFound()
@@ -264,12 +271,12 @@ class ConsentContract(Resource):
     @accepts(schema=ClientConsentSchema, api=ns)
     @token_auth.login_required
     @responds(schema=ClientConsentSchema, status_code=201, api=ns)
-    def post(self, clientid):
-        """ Create client consent contract for the specified clientid """
-        check_client_existence(clientid)
+    def post(self, userid):
+        """ Create client consent contract for the specified userid """
+        check_client_existence(userid)
 
         data = request.get_json()
-        data["clientid"] = clientid
+        data["userid"] = userid
 
         client_consent_schema = ClientConsentSchema()
         client_consent_form = client_consent_schema.load(data)
@@ -278,21 +285,21 @@ class ConsentContract(Resource):
         db.session.add(client_consent_form)
         db.session.commit()
 
-        to_pdf(clientid, ClientConsent)
+        to_pdf(userid, ClientConsent)
         return client_consent_form
 
-@ns.route('/release/<int:clientid>/')
-@ns.doc(params={'clientid': 'Client ID number'})
+@ns.route('/release/<int:userid>/')
+@ns.doc(params={'userid': 'User ID number'})
 class ReleaseContract(Resource):
     """Client release forms"""
 
     @token_auth.login_required
     @responds(schema=ClientReleaseSchema, api=ns)
-    def get(self, clientid):
-        """returns most recent client release table as a json for the clientid specified"""
-        check_client_existence(clientid)
+    def get(self, userid):
+        """returns most recent client release table as a json for the userid specified"""
+        check_client_existence(userid)
 
-        client_release_contract =  ClientRelease.query.filter_by(clientid=clientid).order_by(ClientRelease.idx.desc()).first()
+        client_release_contract =  ClientRelease.query.filter_by(userid=userid).order_by(ClientRelease.idx.desc()).first()
 
         if not client_release_contract:
             raise ContentNotFound()
@@ -302,14 +309,14 @@ class ReleaseContract(Resource):
     @accepts(schema=ClientReleaseSchema)
     @token_auth.login_required
     @responds(schema=ClientReleaseSchema, status_code=201, api=ns)
-    def post(self, clientid):
-        """create client release contract object for the specified clientid"""
-        check_client_existence(clientid)
+    def post(self, userid):
+        """create client release contract object for the specified userid"""
+        check_client_existence(userid)
 
         data = request.get_json()
         
         # add client id to release contract 
-        data["clientid"] = clientid
+        data["userid"] = userid
 
         # load the client release contract into the db and flush
         client_release_contract = ClientReleaseSchema().load(data)
@@ -322,10 +329,10 @@ class ReleaseContract(Resource):
         release_to_data = data["release_to"]
         release_from_data = data["release_from"]
 
-        # add clientid to each release contact
+        # add userid to each release contact
         release_contacts = []
         for item in release_to_data + release_from_data:
-            item["clientid"] = clientid
+            item["userid"] = userid
             item["release_contract_id"] = client_release_contract.idx
             release_contacts.append(item)
         
@@ -335,21 +342,21 @@ class ReleaseContract(Resource):
         db.session.add_all(release_contact_objects)
 
         db.session.commit()
-        to_pdf(clientid, ClientRelease)
+        to_pdf(userid, ClientRelease)
         return client_release_contract
 
-@ns.route('/policies/<int:clientid>/')
-@ns.doc(params={'clientid': 'Client ID number'})
+@ns.route('/policies/<int:userid>/')
+@ns.doc(params={'userid': 'User ID number'})
 class PoliciesContract(Resource):
     """Client policies form"""
 
     @token_auth.login_required
     @responds(schema=ClientPoliciesContractSchema, api=ns)
-    def get(self, clientid):
-        """returns most recent client policies table as a json for the clientid specified"""
-        check_client_existence(clientid)
+    def get(self, userid):
+        """returns most recent client policies table as a json for the userid specified"""
+        check_client_existence(userid)
 
-        client_policies =  ClientPolicies.query.filter_by(clientid=clientid).order_by(ClientPolicies.idx.desc()).first()
+        client_policies =  ClientPolicies.query.filter_by(userid=userid).order_by(ClientPolicies.idx.desc()).first()
 
         if not client_policies:
             raise ContentNotFound()
@@ -358,33 +365,33 @@ class PoliciesContract(Resource):
     @accepts(schema=ClientPoliciesContractSchema, api=ns)
     @token_auth.login_required
     @responds(schema=ClientPoliciesContractSchema, status_code= 201, api=ns)
-    def post(self, clientid):
-        """create client policies contract object for the specified clientid"""
-        check_client_existence(clientid)
+    def post(self, userid):
+        """create client policies contract object for the specified userid"""
+        check_client_existence(userid)
 
         data = request.get_json()
-        data["clientid"] = clientid
+        data["userid"] = userid
         client_policies_schema = ClientPoliciesContractSchema()
         client_policies = client_policies_schema.load(data)
         client_policies.revision = ClientPolicies.current_revision
 
         db.session.add(client_policies)
         db.session.commit()
-        to_pdf(clientid, ClientPolicies)
+        to_pdf(userid, ClientPolicies)
         return client_policies
 
-@ns.route('/consultcontract/<int:clientid>/')
-@ns.doc(params={'clientid': 'Client ID number'})
+@ns.route('/consultcontract/<int:userid>/')
+@ns.doc(params={'userid': 'User ID number'})
 class ConsultConstract(Resource):
     """client consult contract"""
 
     @token_auth.login_required
     @responds(schema=ClientConsultContractSchema, api=ns)
-    def get(self, clientid):
-        """returns most recent client consultation table as a json for the clientid specified"""
-        check_client_existence(clientid)
+    def get(self, userid):
+        """returns most recent client consultation table as a json for the userid specified"""
+        check_client_existence(userid)
 
-        client_consult =  ClientConsultContract.query.filter_by(clientid=clientid).order_by(ClientConsultContract.idx.desc()).first()
+        client_consult =  ClientConsultContract.query.filter_by(userid=userid).order_by(ClientConsultContract.idx.desc()).first()
 
         if not client_consult:
             raise ContentNotFound()
@@ -393,33 +400,33 @@ class ConsultConstract(Resource):
     @accepts(schema=ClientConsultContractSchema, api=ns)
     @token_auth.login_required
     @responds(schema=ClientConsultContractSchema, status_code= 201, api=ns)
-    def post(self, clientid):
-        """create client consult contract object for the specified clientid"""
-        check_client_existence(clientid)
+    def post(self, userid):
+        """create client consult contract object for the specified userid"""
+        check_client_existence(userid)
 
         data = request.get_json()
-        data["clientid"] = clientid
+        data["userid"] = userid
         consult_contract_schema = ClientConsultContractSchema()
         client_consult = consult_contract_schema.load(data)
         client_consult.revision = ClientConsultContract.current_revision
         
         db.session.add(client_consult)
         db.session.commit()
-        to_pdf(clientid, ClientConsultContract)
+        to_pdf(userid, ClientConsultContract)
         return client_consult
 
-@ns.route('/subscriptioncontract/<int:clientid>/')
-@ns.doc(params={'clientid': 'Client ID number'})
+@ns.route('/subscriptioncontract/<int:userid>/')
+@ns.doc(params={'userid': 'User ID number'})
 class SubscriptionContract(Resource):
     """client subscription contract"""
 
     @token_auth.login_required
     @responds(schema=ClientSubscriptionContractSchema, api=ns)
-    def get(self, clientid):
-        """returns most recent client subscription contract table as a json for the clientid specified"""
-        check_client_existence(clientid)
+    def get(self, userid):
+        """returns most recent client subscription contract table as a json for the userid specified"""
+        check_client_existence(userid)
 
-        client_subscription =  ClientSubscriptionContract.query.filter_by(clientid=clientid).order_by(ClientSubscriptionContract.idx.desc()).first()
+        client_subscription =  ClientSubscriptionContract.query.filter_by(userid=userid).order_by(ClientSubscriptionContract.idx.desc()).first()
         if not client_subscription:
             raise ContentNotFound()
         return client_subscription
@@ -427,33 +434,33 @@ class SubscriptionContract(Resource):
     @accepts(schema=SignAndDateSchema, api=ns)
     @token_auth.login_required
     @responds(schema=ClientSubscriptionContractSchema, status_code= 201, api=ns)
-    def post(self, clientid):
-        """create client subscription contract object for the specified clientid"""
-        check_client_existence(clientid)
+    def post(self, userid):
+        """create client subscription contract object for the specified userid"""
+        check_client_existence(userid)
 
         data = request.get_json()
-        data["clientid"] = clientid
+        data["userid"] = userid
         subscription_contract_schema = ClientSubscriptionContractSchema()
         client_subscription = subscription_contract_schema.load(data)
         client_subscription.revision = ClientSubscriptionContract.current_revision
 
         db.session.add(client_subscription)
         db.session.commit()
-        to_pdf(clientid, ClientSubscriptionContract)
+        to_pdf(userid, ClientSubscriptionContract)
         return client_subscription
 
-@ns.route('/servicescontract/<int:clientid>/')
-@ns.doc(params={'clientid': 'Client ID number'})
+@ns.route('/servicescontract/<int:userid>/')
+@ns.doc(params={'userid': 'User ID number'})
 class IndividualContract(Resource):
     """client individual services contract"""
 
     @token_auth.login_required
     @responds(schema=ClientIndividualContractSchema, api=ns)
-    def get(self, clientid):
-        """returns most recent client individual servies table as a json for the clientid specified"""
-        check_client_existence(clientid)
+    def get(self, userid):
+        """returns most recent client individual servies table as a json for the userid specified"""
+        check_client_existence(userid)
         
-        client_services =  ClientIndividualContract.query.filter_by(clientid=clientid).order_by(ClientIndividualContract.idx.desc()).first()
+        client_services =  ClientIndividualContract.query.filter_by(userid=userid).order_by(ClientIndividualContract.idx.desc()).first()
 
         if not client_services:
             raise ContentNotFound()
@@ -462,21 +469,21 @@ class IndividualContract(Resource):
     @token_auth.login_required
     @accepts(schema=ClientIndividualContractSchema, api=ns)
     @responds(schema=ClientIndividualContractSchema,status_code=201, api=ns)
-    def post(self, clientid):
-        """create client individual services contract object for the specified clientid"""
+    def post(self, userid):
+        """create client individual services contract object for the specified userid"""
         data = request.get_json()
-        data['clientid'] = clientid
+        data['userid'] = userid
         data['revision'] = ClientIndividualContract.current_revision
 
         client_services = ClientIndividualContract(**data)
 
         db.session.add(client_services)
         db.session.commit()
-        to_pdf(clientid, ClientIndividualContract)
+        to_pdf(userid, ClientIndividualContract)
         return client_services
 
-@ns.route('/signeddocuments/<int:clientid>/', methods=('GET',))
-@ns.doc(params={'clientid': 'Client ID number'})
+@ns.route('/signeddocuments/<int:userid>/', methods=('GET',))
+@ns.doc(params={'userid': 'User ID number'})
 class SignedDocuments(Resource):
     """
     API endpoint that provides access to documents signed
@@ -490,13 +497,13 @@ class SignedDocuments(Resource):
     """
     @token_auth.login_required
     @responds(schema=SignedDocumentsSchema, api=ns)
-    def get(self, clientid):
-        """ Given a clientid, returns a dict of URLs for all signed documents.
+    def get(self, userid):
+        """ Given a userid, returns a dict of URLs for all signed documents.
 
         Parameters
         ----------
-        clientid : int
-            Client ID number
+        userid : int
+            User ID number
 
         Returns
         -------
@@ -504,7 +511,7 @@ class SignedDocuments(Resource):
             Keys are the display names of the documents,
             values are URLs to the generated PDF documents.
         """
-        check_client_existence(clientid)
+        check_client_existence(userid)
 
         urls = {}
         paths = []
@@ -526,7 +533,7 @@ class SignedDocuments(Resource):
         ):
             result = (
                 table.query
-                .filter_by(clientid=clientid)
+                .filter_by(userid=userid)
                 .order_by(table.idx.desc())
                 .first()
             )
@@ -539,24 +546,24 @@ class SignedDocuments(Resource):
                 else:
                     urls[table.displayname] = result.pdf_path
 
-        concat = merge_pdfs(paths, clientid)
+        concat = merge_pdfs(paths, userid)
         urls['All documents'] = concat
 
         return {'urls': urls}
 
-@ns.route('/registrationstatus/<int:clientid>/')
-@ns.doc(params={'clientid': 'Client ID number'})
+@ns.route('/registrationstatus/<int:userid>/')
+@ns.doc(params={'userid': 'User ID number'})
 class JourneyStatusCheck(Resource):
     """
         Returns the outstanding forms needed to complete the client journey
     """
     @responds(schema=ClientRegistrationStatusSchema, api=ns)
     @token_auth.login_required
-    def get(self, clientid):
+    def get(self, userid):
         """
         Returns the client's outstanding registration items and their URIs.
         """
-        check_client_existence(clientid)
+        check_client_existence(userid)
 
         remaining_forms = []
 
@@ -572,111 +579,12 @@ class JourneyStatusCheck(Resource):
                 MedicalPhysicalExam,
                 PTHistory
         ):
-            result = table.query.filter_by(clientid=clientid).order_by(table.idx.desc()).first()
+            result = table.query.filter_by(userid=userid).order_by(table.idx.desc()).first()
 
             if result is None:
-                remaining_forms.append({'name': table.displayname, 'URI': TABLE_TO_URI.get(table.__tablename__).format(clientid)})
+                remaining_forms.append({'name': table.displayname, 'URI': TABLE_TO_URI.get(table.__tablename__).format(userid)})
 
         return {'outstanding': remaining_forms}
-
-
-
-@ns.route('/remoteregistration/new/')
-class NewRemoteRegistration(Resource):
-    """
-        initialize a client for remote registration
-    """
-    @token_auth.login_required
-    @accepts(schema=NewRemoteClientSchema, api=ns)
-    @responds(schema=ClientRemoteRegistrationPortalSchema, api=ns, status_code=201)
-    def post(self):
-        """create new remote registration client
-            this will create a new entry into the client info table first
-            then create an entry into the Remote registration table
-            response includes the hash required to access the temporary portal for
-            this client
-        """
-        data = request.get_json()
-
-        #make sure this user email does not exist
-        if ClientInfo.query.filter_by(email=data.get('email', None)).first():
-            raise ClientAlreadyExists(identification = data['email'])
-
-        # initialize schema objects
-        rr_schema = NewRemoteClientSchema() #creates entry into clientinfo table
-        client_rr_schema = ClientRemoteRegistrationPortalSchema() #remote registration table entry
-
-        # enter client into basic info table and remote register table
-        client = rr_schema.load(data)
-        
-        # add client to database (creates clientid)
-        db.session.add(client)
-        db.session.flush()
-
-        rli = {'record_locator_id': ClientInfo().generate_record_locator_id(firstname = client.firstname , lastname = client.lastname, clientid =client.clientid)}
-
-        client.update(rli)        
-        db.session.flush()
-
-        # create a new remote client registration entry
-        portal_data = {'clientid' : client.clientid, 'email': client.email}
-        remote_client_portal = client_rr_schema.load(portal_data)
-
-        db.session.add(remote_client_portal)
-        db.session.commit()
-
-        if not current_app.config['LOCAL_CONFIG']:
-            # send email to client containing registration details
-            send_email_remote_registration_portal(
-                recipient=remote_client_portal.email, 
-                password=remote_client_portal.password, 
-                remote_registration_portal=remote_client_portal.registration_portal_id
-            )
-
-        return remote_client_portal
-
-
-@ns.route('/remoteregistration/refresh/')
-class RefreshRemoteRegistration(Resource):
-    """
-        refresh client portal a client for remote registration
-    """
-    @token_auth.login_required
-    @accepts(schema=RefreshRemoteRegistrationSchema)
-    @responds(schema=ClientRemoteRegistrationPortalSchema, api=ns, status_code=201)
-    def post(self):
-        """refresh the portal endpoint and password
-        """
-        data = request.get_json() #should only need the email
-
-        client = ClientInfo.query.filter_by(email=data.get('email', None)).first()
-
-        #if client isnt in the database return error
-        if not client:
-            raise ClientNotFound(identification = data['email'])
-
-        client_rr_schema = ClientRemoteRegistrationPortalSchema() #remote registration table entry
-        #add clientid to the data object from the current client
-        data['clientid'] =  client.clientid
-
-        # create a new remote client session registration entry
-        remote_client_portal = client_rr_schema.load(data)
-
-        # create temporary password and portal url
-
-        db.session.add(remote_client_portal)
-        db.session.commit()
-
-        if not current_app.config['LOCAL_CONFIG']:
-            # send email to client containing registration details
-            send_email_remote_registration_portal(
-                recipient=remote_client_portal.email,
-                password=remote_client_portal.password, 
-                remote_registration_portal=remote_client_portal.registration_portal_id
-            )
-
-        return remote_client_portal
-
 
 @ns.route('/testemail/')
 class TestEmail(Resource):
@@ -708,7 +616,7 @@ class ClientDataStorageTiers(Resource):
         total_bytes = 0
         for row in data:
             bytes_as_int = row[1].__int__()
-            results['items'].append({'clientid': row[0], 'stored_bytes': bytes_as_int, 'tier': row[2]})
+            results['items'].append({'userid': row[0], 'stored_bytes': bytes_as_int, 'tier': row[2]})
             total_bytes += bytes_as_int
 
         results['total_stored_bytes'] = total_bytes 
