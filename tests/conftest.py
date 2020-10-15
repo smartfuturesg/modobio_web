@@ -39,16 +39,7 @@ def clean_db(db):
     db.session.commit()
     db.drop_all()
 
-@pytest.fixture(scope='module')
-def new_client():
-    """
-        create a test client using the client info table
-    """
-    client = ClientInfo(**test_client_info)
-    
-    return client
-
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def test_client():
     """flask application instance (client)"""
     app = create_app()
@@ -63,7 +54,7 @@ def test_client():
 
     ctx.pop()
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def init_database():
     clean_db(db)
     # Create the database and the database table
@@ -78,20 +69,24 @@ def init_database():
     dat = [x for x in data if not x.startswith('--')]
     
     db.session.execute(''.join(dat))
-    
+
+    with open ("database/addResultTypes.sql", "r") as f:
+        data=f.readlines()
+
+    db.session.execute(''.join(data))
+
     # Insert test client data
     client_1 = ClientInfo(**test_client_info)
-
     db.session.add(client_1)
     db.session.flush()
 
-    rli = {'record_locator_id': ClientInfo().get_medical_record_hash(firstname = client_1.firstname , lastname = client_1.lastname, clientid =client_1.clientid)}
+    rli = {'record_locator_id': ClientInfo().generate_record_locator_id(
+        firstname = client_1.firstname, 
+        lastname = client_1.lastname, 
+        clientid =client_1.clientid)}
 
     client_1.update(rli)
-    db.session.commit()
     
-    clientid = client_1.clientid
-
     # initialize a test staff member
     staff_1 = Staff(**test_staff_member)
     staff_1.set_password(test_staff_member['password'])

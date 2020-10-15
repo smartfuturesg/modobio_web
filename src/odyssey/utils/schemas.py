@@ -7,12 +7,10 @@ from odyssey import ma
 from odyssey.models.doctor import ( 
     MedicalHistory,
     MedicalPhysicalExam,
-    MedicalBloodChemistryCMP,
-    MedicalBloodChemistryCBC,
-    MedicalBloodChemistryThyroid,
     MedicalImaging,
-    MedicalBloodChemistryLipids,
-    MedicalBloodChemistryA1C
+    MedicalBloodTests,
+    MedicalBloodTestResults,
+    MedicalBloodTestResultTypes
 )
 from odyssey.models.client import (
     ClientConsent,
@@ -40,7 +38,7 @@ from odyssey.models.trainer import (
     MovementAssessment,
     LungAssessment
 )
-from odyssey.models.wearables import Wearables, WearablesOura
+from odyssey.models.wearables import Wearables, WearablesOura, WearablesFreeStyle
 from odyssey.utils.misc import list_average
 
 class ClientSearchItemsSchema(Schema):
@@ -1029,42 +1027,55 @@ class MoxyRipSchema(Schema):
 class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = FitnessQuestionnaire
-        exclude = ('idx',)
+        exclude = ('idx','created_at', 'updated_at')
     
-    stressors_list = ['Family',	'Work', 'Finances', 'Social Obligations', 'Health', 'Relationships', 'School', 'Body Image',			
-                        'Sports Performance', 'General Environment', 'Other']
-    physical_goals_list = ['Weight Loss','Increase Strength','Increase Aerobic Capacity','Body Composition','Sport Specific Performance',			
-                            'Improve Mobility', 'Injury Rehabilitation', 'Injury Prevention', 'Increase Longevity', 'General Health', 'Other']
-    lifestyle_goals_list = ['Increased Energy', 'Increased Mental Clarity', 'Improved Relationships', 'Increased Libido',			
-                                'Overall Happiness', 'Decreased Stress', 'Improved Sleep', 'Healthier Eating', 'Other']
+    stressors_list = ['Family',	'Work',
+                      'Finances', 'Social Obligations',
+                      'Health', 'Relationships',
+                      'School', 'Body Image',			
+                      'Sports Performance',
+                      'General Environment',
+                      ]
+    physical_goals_list = ['Weight Loss','Increase Strength',
+                           'Increase Aerobic Capacity','Body Composition',
+                           'Sport Specific Performance', 'Improve Mobility',
+                           'Injury Rehabilitation', 'Injury Prevention',
+                           'Increase Longevity', 'General Health',
+                           ]
+    lifestyle_goals_list = ['Increased Energy', 'Increased Mental Clarity', 
+                            'Increased Libido', 'Overall Happiness', 
+                            'Decreased Stress', 'Improved Sleep', 
+                            'Healthier Eating', ]
 
-    trainer_goals_list = ['Expertise', 'Motivation', 'Accountability', 'Time Efficiency', 'Other']
+    trainer_goals_list = ['Expertise', 'Motivation', 'Accountability', 'Time Efficiency']
     sleep_hours_options_list = ['< 4', '4-6','6-8','> 8']
         
     clientid = fields.Integer(missing=0)
     timestamp = fields.DateTime(description="timestamp of questionnaire. Filled by backend")
-
+    physical_goals = fields.List(fields.String,
+            description=f"List of sources of stress. Limit of three from these options: {physical_goals_list}. If other, must specify",
+            missing=[None]) 
+    current_fitness_level = fields.Integer(description="current fitness level 1-10", validate=validate.Range(min=1, max=10), missing=None)
+    goal_fitness_level = fields.Integer(description="goal fitness level 1-10", validate=validate.Range(min=1, max=10), missing=None)
+    trainer_expectation = fields.List(fields.String,
+        description=f"Client's expectation for their trainer. Choice of: {trainer_goals_list}", 
+        missing=[None])
+    sleep_hours = fields.String(description=f"nightly hours of sleep bucketized by the following options: {sleep_hours_options_list}", missing=None)
+    sleep_quality_level = fields.Integer(description="current sleep quality rating 1-10", validate=validate.Range(min=1, max=10), missing=None)
+    stress_level = fields.Integer(description="current stress rating 1-10", validate=validate.Range(min=1, max=10), missing=None)
     stress_sources = fields.List(fields.String,
             description=f"List of sources of stress. Options: {stressors_list}",
             missing=[None]) 
+
     lifestyle_goals = fields.List(fields.String,
             description=f"List of lifestyle change goals. Limit of three from these options: {lifestyle_goals_list}. If other, must specify",
             missing=[None]) 
     physical_goals = fields.List(fields.String,
             description=f"List of sources of stress. Limit of three from these options: {physical_goals_list}. If other, must specify",
             missing=[None]) 
-    trainer_expectation = fields.String(description=f"Client's expectation for their trainer. Must be one of: {trainer_goals_list}", missing=None)
-    sleep_hours = fields.String(description=f"nightly hours of sleep bucketized by the following options: {sleep_hours_options_list}", missing=None)
 
-    sleep_quality_level = fields.Integer(description="current sleep quality rating 1-5", validate=validate.Range(min=1, max=5), missing=None)
-    stress_level = fields.Integer(description="current stress rating 1-5", validate=validate.Range(min=1, max=5), missing=None)
-    energy_level = fields.Integer(description="current energy rating 1-5", validate=validate.Range(min=1, max=5), missing=None)
-    libido_level = fields.Integer(description="current libido rating 1-5", validate=validate.Range(min=1, max=5), missing=None)
-    confidence_level = fields.Integer(description="current confidence rating 1-5", validate=validate.Range(min=1, max=5), missing=None)
-
-    current_fitness_level = fields.Integer(description="current fitness level 1-10", validate=validate.Range(min=1, max=10), missing=None)
-    goal_fitness_level = fields.Integer(description="foal fitness level 1-10", validate=validate.Range(min=1, max=10), missing=None)
-    
+    energy_level = fields.Integer(description="current energy rating 1-10", validate=validate.Range(min=1, max=10), missing=None)
+    libido_level = fields.Integer(description="current libido rating 1-10", validate=validate.Range(min=1, max=10), missing=None)
     
     @post_load
     def make_object(self, data, **kwargs):
@@ -1095,8 +1106,9 @@ class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
     
     @validates('trainer_expectation')
     def validate_trainer_expectations(self, value):
-        if value not in self.trainer_goals_list and value != None:
-            raise ValidationError(f"{value} not a valid option. Must be one of {self.trainer_goals_list}")
+        for item in value:
+            if item not in self.trainer_goals_list and item != None:
+                raise ValidationError(f"{item} not a valid option. must be in {self.trainer_goals_list}")
 
     @validates('sleep_hours')
     def validate_sleep_hours(self, value):
@@ -1113,76 +1125,56 @@ class MedicalImagingSchema(ma.SQLAlchemyAutoSchema):
         load_instance = True
         exclude = ["clientid", "idx"]
 
-    possible_image_types = ['CTscan', 'MRI', 'PETscan', 'Ultrasound', 'XRay']
+    possible_image_types = ['CT', 'MRI', 'PET', 'Scopes', 'Special imaging', 'Ultrasound', 'X-ray']
     image_type = fields.String(validate=validate.OneOf(possible_image_types), required=True)
     image_date = fields.Date(required=True)
     image_read = fields.String(required=True)
     
-class BloodChemistryCBCSchema(Schema):
-
-    # Validate each payload entry
-    idx = fields.Integer(required=False)
-    clientid = fields.Integer(missing=0)
-    exam_date = fields.Date()
-    rbc = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    hemoglobin = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    hematocrit = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    mcv = fields.Float(description="",validate=validate.Range(min=0, max=200),required=False)
-    mch = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    mchc = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    rdw = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    wbc = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    rel_neutrophils = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    abs_neutrophils = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    rel_lymphocytes = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    abs_lymphocytes = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    rel_monocytes = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    abs_monocytes = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    rel_eosinophils = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    abs_eosinophils = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    basophils = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    platelets = fields.Float(description="",validate=validate.Range(min=0, max=500),required=False)
-
-    plateletsByMch = fields.Float(allow_blank=True)
-    plateletsByLymphocyte = fields.Float(allow_blank=True)
-    neutrophilByLymphocyte = fields.Float(allow_blank=True)
-    lymphocyteByMonocyte = fields.Float(allow_blank=True)
+class MedicalBloodTestSchema(Schema):
+    testid = fields.Integer()
+    clientid = fields.Integer()
+    date = fields.Date(required=True)
+    panel_type = fields.String(required=False)
+    notes = fields.String(required=False)
 
     @post_load
     def make_object(self, data, **kwargs):
-        return MedicalBloodChemistryCBC(**data)
+        return MedicalBloodTests(**data)
 
-class BloodChemistryCMPSchema(Schema):
+class MedicalBloodTestResultsInputSchema(Schema):
+    result_name = fields.String()
+    result_value = fields.Float()
 
-    # Validate each payload entry
-    idx = fields.Integer(required=False)
-    clientid = fields.Integer(missing=0)
-    exam_date = fields.Date()
-    glucose = fields.Float(description="",validate=validate.Range(min=0, max=200),required=False)
-    sodium = fields.Float(description="",validate=validate.Range(min=0, max=500),required=False)
-    potassium = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    carbon_dioxide = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    chloride = fields.Float(description="",validate=validate.Range(min=0, max=500),required=False)
-    magnesium = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    calcium = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    phosphorus = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    uric_acid = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    bun = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    creatinine = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    ast = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    alt = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    alk_phophatase = fields.Float(description="",validate=validate.Range(min=0, max=200),required=False)
-    bilirubin = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    protein = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    albumin = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
-    globulin = fields.Float(description="",validate=validate.Range(min=0, max=100),required=False)
+class MedicalBloodTestResultsOutputSchema(Schema):
+    idx = fields.Integer()
+    testid = fields.Integer()
+    result_type = fields.String()
+    result_value = fields.Float()
 
-    bunByAlbumin = fields.Float(allow_blank=True)
+class MedicalBloodTestsInputSchema(Schema):
+    clientid = fields.Integer()
+    date = fields.Date()
+    panel_type = fields.String()
+    notes = fields.String()
+    results = fields.Nested(MedicalBloodTestResultsInputSchema, many=True)
+
+class MedicalBloodTestResultsSchema(Schema):
+    idx = fields.Integer()
+    testid = fields.Integer()
+    resultid = fields.Integer()
+    result_value = fields.Float()
 
     @post_load
     def make_object(self, data, **kwargs):
-        return MedicalBloodChemistryCMP(**data)
+        return MedicalBloodTestResults(**data)
 
+class MedicalBloodTestResultTypesSchema(Schema):
+    resultid = fields.Integer()
+    result_name = fields.String()
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return MedicalBloodTestResultTypes(**data)
 
 class MedicalHistorySchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -1248,6 +1240,22 @@ class ClientExternalMREntrySchema(Schema):
 """
     Schemas for the staff API
 """
+
+class StaffPasswordRecoveryContactSchema(Schema):
+    """contact methods for password recovery.
+        currently just email but may be expanded to include sms
+    """
+    email = fields.Email(required=True)
+
+class StaffPasswordResetSchema(Schema):
+    #TODO Validate password strength
+    password = fields.String(required=True,  validate=validate.Length(min=3,max=50), description="new password to be used going forward")
+
+class StaffPasswordUpdateSchema(Schema):
+    #TODO Validate password strength
+    current_password = fields.String(required=True,  validate=validate.Length(min=3,max=50), description="current password")
+    new_password = fields.String(required=True,  validate=validate.Length(min=3,max=50), description="new password to be used going forward")
+
 class StaffSearchItemsSchema(Schema):
     staffid = fields.Integer()
     firstname = fields.String(required=False, validate=validate.Length(min=1, max= 50), missing=None)
@@ -1285,43 +1293,6 @@ class StaffSchema(ma.SQLAlchemyAutoSchema):
         new_staff.set_password(data['password'])
         return new_staff
 
-class MedicalBloodChemistryLipidsSchema(Schema):
-    idx = fields.Integer(required=False)
-    clientid = fields.Integer(required=False,missing=0)
-    exam_date = fields.Date(required=True)
-    cholesterol_total = fields.Float(required=False,validate=validate.Range(min=0.0, max=500.0))
-    cholesterol_ldl = fields.Float(required=False,validate=validate.Range(min=0.0, max=500.0))
-    cholesterol_hdl = fields.Float(required=False,validate=validate.Range(min=0.0, max=500.0))
-    triglycerides = fields.Float(required=False,validate=validate.Range(min=0.0, max=1000.0))
-    cholesterol_over_hdl = fields.Float(required=False)
-    triglycerides_over_hdl = fields.Float(required=False)
-    ldl_over_hdl = fields.Float(required=False)
-
-    @post_load
-    def make_object(self, data, **kwargs):
-        return MedicalBloodChemistryLipids(**data)
-
-class MedicalBloodChemistryThyroidSchema(Schema):
-    idx = fields.Integer(required=False)
-    clientid = fields.Integer(required=False,missing=0)
-    exam_date = fields.Date(required=True)
-    t3_resin_uptake = fields.Integer(required=False,validate=validate.Range(min=25,max=35))
-    thyroglobulin = fields.Integer(required=False,validate=validate.Range(min=0,max=20))
-    thyroidial_iodine_uptake = fields.Integer(required=False,validate=validate.Range(min=5,max=30))
-    tsh = fields.Float(required=False,validate=validate.Range(min=0.5,max=4.0))
-    tsi = fields.Integer(required=False,validate=validate.Range(min=0,max=130))
-    thyroxine_binding_globulin = fields.Integer(required=False,validate=validate.Range(min=12,max=27))
-    thyroxine_index = fields.Integer(required=False,validate=validate.Range(min=5,max=12))
-    t4_serum_total = fields.Integer(required=False,validate=validate.Range(min=5,max=12))
-    t4_serum_free = fields.Float(required=False,validate=validate.Range(min=0.8,max=1.8))
-    t3_serum_total = fields.Integer(required=False,validate=validate.Range(min=80,max=180))
-    t3_serum_reverse = fields.Integer(required=False,validate=validate.Range(min=20,max=40))
-    t3_serum_free = fields.Float(required=False,validate=validate.Range(min=2.3,max=4.2))
-    
-    @post_load
-    def make_object(self, data, **kwargs):
-        return MedicalBloodChemistryThyroid(**data)
-
 class RegisteredFacilitiesSchema(Schema):
     facility_id = fields.Integer(required=False)
     facility_name = fields.String(required=True)
@@ -1342,31 +1313,30 @@ class ClientSummarySchema(Schema):
     membersince = fields.Date()
     facilities = fields.Nested(RegisteredFacilitiesSchema(many=True))
 
-class MedicalBloodChemistryA1CSchema(Schema):
-
-    idx = fields.Integer(required=False)
-    clientid = fields.Integer(required=False,missing=0)
-    exam_date = fields.Date(required=True)
-    a1c = fields.Float(required=True,validate=validate.Range(min=4.0,max=5.6))
-
-    @post_load
-    def make_object(self, data, **kwargs):
-        return MedicalBloodChemistryA1C(**data)
-
 #
 #   Schemas for the wearables API
 #
 class WearablesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Wearables
-
-    clientid = fields.Integer(missing=0)
-
-    @post_load
-    def make_object(self, data, **kwargs):
-        return Wearables(**data)
+        load_instance = True
+        exclude = ('idx', 'clientid', 'created_at', 'updated_at')
 
 
 class WearablesOuraAuthSchema(Schema):
     oura_client_id = fields.String()
     oauth_state = fields.String()
+
+
+class WearablesFreeStyleSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = WearablesFreeStyle
+        load_instance = True
+        exclude = ('idx', 'clientid', 'created_at', 'updated_at')
+
+
+class WearablesFreeStyleActivateSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = WearablesFreeStyle
+        load_instance = True
+        fields = ('activation_timestamp',)

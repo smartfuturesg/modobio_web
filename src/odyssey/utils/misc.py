@@ -1,14 +1,16 @@
 """ Utility functions for the odyssey package. """
 
-import datetime
 import re
 import statistics
 import uuid
 
+from datetime import datetime, date, time
+
 import flask.json
 from odyssey.models.client import ClientInfo, RemoteRegistration, ClientFacilities
+from odyssey.models.doctor import MedicalBloodTests, MedicalBloodTestResultTypes
 from odyssey.models.misc import RegisteredFacilities
-from odyssey.api.errors import UserNotFound, FacilityNotFound, RelationAlreadyExists
+from odyssey.api.errors import UserNotFound, FacilityNotFound, RelationAlreadyExists, TestNotFound, ResultTypeNotFound
 
 
 _uuid_rx = re.compile(r'[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}', flags=re.IGNORECASE)
@@ -28,6 +30,18 @@ def check_client_existence(clientid):
     client = ClientInfo.query.filter_by(clientid=clientid).one_or_none()
     if not client:
         raise UserNotFound(clientid)
+
+def check_blood_test_existence(testid):
+    """Check that the blood test is in the database"""
+    test = MedicalBloodTests.query.filter_by(testid=testid).one_or_none()
+    if not test:
+        raise TestNotFound(testid)
+
+def check_blood_test_result_type_existence(result_name):
+    """Check that a supplied blood test result type is in the database"""
+    result = MedicalBloodTestResultTypes.query.filter_by(result_name=result_name).one_or_none()
+    if not result:
+        raise ResultTypeNotFound(resultName)
 
 def check_facility_existence(facility_id):
     facility = RegisteredFacilities.query.filter_by(facility_id=facility_id).one_or_none()
@@ -61,7 +75,7 @@ class JSONEncoder(flask.json.JSONEncoder):
     """
     def default(self, obj):
         """ Convert a Python object to a JSON string. """
-        if isinstance(obj, (datetime.date, datetime.datetime, datetime.time)):
+        if isinstance(obj, (date, datetime, time)):
             return obj.isoformat()
         return super().default(obj)
 
@@ -115,17 +129,17 @@ class JSONDecoder(flask.json.JSONDecoder):
         dt = None
         try:
             # Will fail on full datetime string
-            dt = datetime.date.fromisoformat(string)
+            dt = date.fromisoformat(string)
         except TypeError:
             # Not a string
             pass
         except ValueError:
             try:
                 # Will fail on full datetime string
-                dt = datetime.time.fromisoformat(string)
+                dt = time.fromisoformat(string)
             except ValueError:
                 try:
-                    dt = datetime.datetime.fromisoformat(string)
+                    dt = datetime.fromisoformat(string)
                 except ValueError:
                     # Not a datetime string
                     pass

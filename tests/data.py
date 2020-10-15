@@ -1,7 +1,8 @@
 import base64
-import datetime
 import pathlib
 import uuid
+
+from datetime import datetime, date, time
 
 test_client_info = {
     "firstname": "Test",
@@ -186,11 +187,11 @@ test_json_data = {
     },
     'f': [1, 2, 3, 4, 5],
     'g': "1977-04-05",
-    'h': datetime.time(14, 21, 39, 123456).isoformat(),
-    'i': datetime.datetime(2020, 6, 7, 12, 39, 46, 123456).isoformat(),
+    'h': time(14, 21, 39, 123456).isoformat(),
+    'i': datetime(2020, 6, 7, 12, 39, 46, 123456).isoformat(),
     'j': {
         'ja': {
-            'jja': [datetime.time(13, 0, 0).isoformat(), datetime.time(14, 0, 0).isoformat(), datetime.time(15, 0, 0).isoformat()],
+            'jja': [time(13, 0, 0).isoformat(), time(14, 0, 0).isoformat(), time(15, 0, 0).isoformat()],
         }
     },
     'k': '17a3bee0-42db-4416-8b84-3990b1c6397e',
@@ -535,111 +536,36 @@ test_medical_physical = {
 }
 
 test_fitness_questionnaire = {
-  "stress_sources_notes": "many things stress me out",
   "sleep_hours": "6-8",
   "energy_level": 5,
   "libido_level": 2,
   "stress_level": 4,
-  "obstacles_expected": "mostly motivating myself consistently",
-  "confidence_level": 4,
-  "clientid": 0,
-  "physical_goals_other": "",
   "stress_sources": [
     "Family",
     "Finances",
     "Social Obligations"
   ],
-  "trainer_expectation_other": "",
-  "lifestyle_goals_other": "just want to get into a routine",
-  "trainer_expectation": "Expertise",
-  "physical_goals_notes": "I want to be fit",
-  "lifestyle_goals_notes": "doing fine for now",
+  "trainer_expectation": ["Expertise"],
   "current_fitness_level": 6,
   "lifestyle_goals": [
-    "Increased Energy",
-    "Other"
+    "Increased Energy"
   ],
   "physical_goals": [
     "Weight Loss",
     "Increase Strength"
   ],
   "sleep_quality_level": 2,
-  "obstacles_likely": True,
-  "stress_sources_other": "",
   "goal_fitness_level": 9
 }
 
-test_blood_chemistry_a1c = {
-  "exam_date": "2020-09-08",
-  "a1c": 4.2
-}
-
-test_blood_chemistry_thyroid = {
-  "exam_date": "2020-09-08",
-  "t3_resin_uptake": 25,
-  "thyroglobulin": 10,
-  "thyroidial_iodine_uptake": 10,
-  "tsh": 1.0,
-  "tsi": 10,
-  "thyroxine_binding_globulin": 20,
-  "thyroxine_index": 10,
-  "t4_serum_total": 6,
-  "t4_serum_free": 1.0,
-  "t3_serum_total": 100,
-  "t3_serum_reverse": 20,
-  "t3_serum_free": 3.0
-}
-
-test_blood_chemistry_lipids = {
-    "exam_date": "2020-09-08",
-    "cholesterol_total": 200,
-    "cholesterol_ldl": 50,
-    "cholesterol_hdl": 100,
-    "triglycerides": 200
-}
-
-test_blood_chemistry_cbc = {
-    "exam_date": "2020-09-01",
-    "rbc": 3,
-    "hemoglobin": 4,
-    "hematocrit": 5,
-    "mcv": 60,
-    "mch": 7,
-    "mchc": 8,
-    "rdw": 9,
-    "wbc": 10,
-    "rel_neutrophils": 11,
-    "abs_neutrophils": 12,
-    "rel_lymphocytes": 13,
-    "abs_lymphocytes": 16,
-    "rel_monocytes": 15,
-    "abs_monocytes": 16,
-    "rel_eosinophils": 17,
-    "abs_eosinophils": 18,
-    "basophils": 19,
-    "platelets": 20
-}
-
-test_blood_chemistry_cmp = {
-    "exam_date": "2020-09-01",
-    "glucose": 3,
-    "sodium": 4,
-    "potassium": 5,
-    "carbon_dioxide": 6,
-    "chloride": 7,
-    "magnesium": 8,
-    "calcium": 9,
-    "phosphorus": 10,
-    "uric_acid": 11,
-    "bun": 12,
-    "creatinine": 13,
-    "ast": 14,
-    "alt": 15,
-    "alk_phophatase": 16,
-    "bilirubin": 17,
-    "protein": 18,
-    "albumin": 19,
-    "globulin": 20
+test_blood_tests = {
+    "date": "2020-09-10",
+    "results": [
+        {"result_name": "cholesterolTotal","result_value": 150.0},
+        {"result_name": "cholesterolLdl", "result_value": 20.0}
+    ],
+    "panel_type": "Lipids",
+    "notes": "test2"
 }
 
 test_registered_facilities = {
@@ -657,6 +583,77 @@ test_medical_imaging = {
   'image': (img_file.as_posix() , open(img_file, mode='rb'), 'image/jpg'),
   'image_date': '2020-09-29',
   'image_origin_location': 'testing clinic',
-  'image_type': 'XRay',
+  'image_type': 'X-ray',
   'image_read': 'Check Check'
+}
+
+wearables_data = {
+    "has_freestyle": True,
+    "has_oura": True,
+    "registered_oura": False
+}
+
+wearables_freestyle_data = {
+    'activation_timestamp': '2020-04-05T12:34:56.000',
+    'glucose': [1.1, 2.2, 3.3],
+    'timestamps': [
+        '2020-04-05T01:00:12.345678',
+        '2020-04-05T02:00:00.000',
+        '2020-04-05T03:00:00.000'
+    ]
+}
+
+wearables_freestyle_data_more = {
+    'activation_timestamp': '2020-04-05T12:34:56.000',
+    'glucose': [2.2, 3.3, 4.4, 5.5],
+    'timestamps': [
+        '2020-04-05T02:00:00.000',
+        '2020-04-05T03:00:00.000',
+        '2020-04-05T04:00:00.000',
+        '2020-04-05T05:00:00.000'
+    ]
+}
+
+# Combine previous two to check against merge
+wearables_freestyle_data_combo = {
+    'activation_timestamp': '2020-04-05T12:34:56.000',
+    'glucose': [1.1, 2.2, 3.3, 4.4, 5.5],
+    'timestamps': [
+        '2020-04-05T01:00:12.345678',
+        '2020-04-05T02:00:00.000',
+        '2020-04-05T03:00:00.000',
+        '2020-04-05T04:00:00.000',
+        '2020-04-05T05:00:00.000'
+    ]
+}
+
+wearables_freestyle_data_empty = {
+    'activation_timestamp': '2020-04-05T12:34:56.000',
+    'glucose': [],
+    'timestamps': []
+}
+
+wearables_freestyle_data_unequal = {
+    'activation_timestamp': '2020-04-05T12:34:56.000',
+    'glucose': [6.6, 7.7, 8.8],
+    'timestamps': [
+        '2020-04-05T06:00:00.000',
+        '2020-04-05T07:00:00.000'
+    ]
+}
+
+wearables_freestyle_data_duplicate = {
+    'activation_timestamp': '2020-04-05T12:34:56.000',
+    'glucose': [6.6, 7.7, 7.7],
+    'timestamps': [
+        '2020-04-05T06:00:00.000',
+        '2020-04-05T07:00:00.000',
+        '2020-04-05T07:00:00.000'
+    ]
+}
+
+test_user_passwords = {
+  "password" : "gogoleplexitykatcity65",
+  "current_password": "password",
+  "new_password": "salt1ampintheruffs98"
 }

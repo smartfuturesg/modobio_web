@@ -1,5 +1,3 @@
-import datetime
-
 from flask import render_template, Blueprint, session, redirect, request, url_for
 
 from odyssey import db

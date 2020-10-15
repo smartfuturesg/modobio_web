@@ -1,7 +1,3 @@
-import datetime
-import pathlib
-import time
-
 from flask.json import dumps
 from requests.auth import _basic_auth_str
 
@@ -59,6 +55,6 @@ def test_get_staff_search(test_client, init_database):
     assert response.json[0]['email'] == 'staff_member@modobio.com'
     assert response.json[0]['staffid'] == 1
 
-    # Expect response to fail because there is only one staff
-    response = test_client.get('/staff/?staffid=2', headers=headers)
+    # Expect response to fail because there is only TWO staff in the db
+    response = test_client.get('/staff/?staffid=99', headers=headers)
     assert response.status_code == 404
