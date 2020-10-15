@@ -12,13 +12,13 @@ from odyssey import db, whooshee
 from odyssey.constants import DB_SERVER_TIME
 
 @whooshee.register_model('firstname','lastname','email','staffid')
-class Staff(db.Model):
+class StaffProfile(db.Model):
     """ Staff member information table.
 
-    This table stores basic login information regarding Modo Bio
-    staff members.
+    This table stores information regarding Modo Bio
+    staff member profiles.
     """
-    __tablename__ = 'Staff'
+    __tablename__ = 'StaffProfile'
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
@@ -34,66 +34,28 @@ class Staff(db.Model):
     :type: datetime
     """
 
-    staffid = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    userid = db.Column((db.Integer, db.ForeignKey('User.userid',nullable=False))
     """
-    Staff member ID number
+    User ID number, foreign key to User.userid
 
-    :type: int, primary key, autoincrement
-    """
-
-    is_admin = db.Column(db.Boolean, nullable=False, default=False)
-    """
-    Indicates whether staff member is an administrator, i.e. has the
-    ability to add/delete members to the Staff table.
-
-    :type: bool, default = False
+    :type: int, foreign key
     """
 
-    is_system_admin = db.Column(db.Boolean, nullable=False, default=False)
+    membersince = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    Indicates whether staff member is a system administrator. There should be very few of these
-    roles given out. 
+    Member since date
 
-    :type: bool, default = False
-    """
+    The date a staff member was first added to the system
 
-    access_roles = db.Column(db.ARRAY(db.String), nullable=False, server_default="{'clntsvc'}")
-    """
-    Indicates the content access role of the staff member.
-    roles include: stfappadmin, clntsvc, physthera, phystrain, datasci, doctor, docext, nutrition
-
-    :type: str, default = clntsvc
+    :type: datetime
     """
 
-    firstname = db.Column(db.String(50), nullable=False)
+    bio = db.Column(db.String)
     """
-    First name of staff member.
+    staff member profile biography
 
-    :type: str, max length 50, non-null
+    :type: string
     """
-
-    lastname = db.Column(db.String(50), nullable=False)
-    """
-    Last name of staff member.
-
-    :type: str, max length 50, non-null
-    """
-
-    fullname = db.Column(db.String(100))
-    """
-    Full name  of staff member. Combination of :attr:`firstname` + :attr:`lastname`.
-
-    :type: str, max length 100
-    """
-
-    def get_admin_role(self):
-        """check if this staff member is authorized to create new staff members"""
-        if self.is_system_admin:
-            return 'sys_admin'
-        elif self.is_admin:
-            return 'staff_admin'
-        else:
-            return None #not an admin
 
 class ClientRemovalRequests(db.Model):
     """ Client removal request table.
@@ -123,14 +85,11 @@ class ClientRemovalRequests(db.Model):
     :type: datetime
     """
     
-    staffid = db.Column(db.Integer, 
-                         db.ForeignKey('Staff.staffid',
-                            name='ClientRemovalRequests_staffid_fkey'), 
-                        nullable=False)
+    staffid = db.Column(db.Integer, db.ForeignKey('User.userid',nullable=False)
     """
-    Staff member ID number
+    Staff member userid number, foreign key to User.userid
 
-    :type: int, primary key, autoincrement
+    :type: int, foreign key
     """
 
     timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)
