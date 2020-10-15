@@ -27,7 +27,7 @@ ns = api.namespace('staff', description='Operations related to staff members')
 @ns.route('/')
 @ns.doc(params={'firstname': 'first name to search',
                 'lastname': 'last name to search',
-                'staffid': 'staffid to search',
+                'user_id': 'user_id to search',
                 'email': 'email to search'})
 class StaffMembers(Resource):
     """staff member class for creating, getting staff"""
@@ -39,16 +39,16 @@ class StaffMembers(Resource):
         # These payload keys should be the same as what's indexed in 
         # the model.
         param = {}
-        param_keys = ['firstname', 'lastname', 'email', 'staffid']
+        param_keys = ['firstname', 'lastname', 'email', 'user_id']
         noMoreSearch = False
         
         if not request.args:
             data = Staff.query.order_by(Staff.lastname.asc()).all()
             noMoreSearch = True
-        elif len(request.args) == 1 and request.args.get('staffid'):
-            data = [Staff.query.filter_by(staffid=request.args.get('staffid')).first()]
+        elif len(request.args) == 1 and request.args.get('user_id'):
+            data = [Staff.query.filter_by(user_id=request.args.get('user_id')).first()]
             if not any(data):
-                raise StaffNotFound(request.args.get('staffid'))
+                raise StaffNotFound(request.args.get('user_id'))
             noMoreSearch = True
         
         if not noMoreSearch:
@@ -66,8 +66,8 @@ class StaffMembers(Resource):
             
             data = Staff.query.whooshee_search(searchStr).all()
 
-            # Since email and staffid should be unique, 
-            # if the input email or staffid exactly matches 
+            # Since email and user_id should be unique, 
+            # if the input email or user_id exactly matches 
             # the profile, only display that user
             if param['email']:
                 for val in data:
@@ -82,13 +82,13 @@ class StaffMembers(Resource):
             #
             # This next check depends on if the whooshee search returns 
             # Relevant staff with the correct ID. It is possible for the
-            # search to return different staff members (and NOT the staffid
+            # search to return different staff members (and NOT the user_id
             # that was a search parameter
             #
             # If BOTH are incorrect, return data as normal.
-            if param['staffid'] and not exactMatch:
+            if param['user_id'] and not exactMatch:
                 for val in data:
-                    if val.staffid == param['staffid']:
+                    if val.user_id == param['user_id']:
                         data = [val]
                         break
         return data 
@@ -126,7 +126,7 @@ class StaffMembers(Resource):
         db.session.add(new_staff)
         db.session.commit()
 
-        user_data['staffid'] = new_staff.staffid
+        user_data['user_id'] = new_staff.user_id
         new_user = UserSchema().load(user_data)
         
         db.session.add(new_user)
@@ -146,7 +146,7 @@ class PasswordResetEmail(Resource):
             to a staff member. 
     
             If the email exists, a signed JWT is created; encoding the token's expiration 
-            time and the staffid. The code will be placed into this URL <url for password reset>
+            time and the user_id. The code will be placed into this URL <url for password reset>
             and sent to a valid email address.  
             If the email does not exist, no email is sent. 
             response 200 OK
@@ -160,7 +160,7 @@ class PasswordResetEmail(Resource):
 
         secret = current_app.config['SECRET_KEY']
         encoded_token = jwt.encode({'exp': datetime.utcnow()+timedelta(minutes = 15), 
-                                  'sid': staff.staffid}, 
+                                  'sid': staff.user_id}, 
                                   secret, 
                                   algorithm='HS256').decode("utf-8") 
 
@@ -194,7 +194,7 @@ class ResetPassword(Resource):
         # bring up the staff member and reset their password
         pswd = request.get_json()['password']
 
-        staff = Staff.query.filter_by(staffid=decoded_token['sid']).first()
+        staff = Staff.query.filter_by(user_id=decoded_token['sid']).first()
         staff.set_password(pswd)
         
         db.session.commit()

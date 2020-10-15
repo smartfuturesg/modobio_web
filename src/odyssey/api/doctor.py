@@ -47,20 +47,20 @@ from odyssey.utils.schemas import (
 ns = api.namespace('doctor', description='Operations related to doctor')
 
 
-@ns.route('/images/<int:clientid>/')
-@ns.doc(params={'clientid': 'Client ID number'})
+@ns.route('/images/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
 class MedImaging(Resource):
     @token_auth.login_required
     @responds(schema=MedicalImagingSchema(many=True), api=ns)
-    def get(self, clientid):
-        """returns a json file of all the medical images in the database for the specified clientid
+    def get(self, user_id):
+        """returns a json file of all the medical images in the database for the specified user_id
 
             Note:
             image_path is a sharable url for an image saved in S3 Bucket,
             if running locally, it is the path to a local temp file
         """
-        check_client_existence(clientid)
-        data = MedicalImaging.query.filter_by(clientid=clientid).all()
+        check_client_existence(user_id)
+        data = MedicalImaging.query.filter_by(user_id=user_id).all()
         if not data:
             raise ContentNotFound()
         
@@ -83,8 +83,8 @@ class MedImaging(Resource):
     #Unable to use @accepts because the input files come in a form-data, not json.
     @token_auth.login_required
     @responds(status_code=201, api=ns)
-    def post(self, clientid):
-        """For adding one or many medical images to the database for the specified clientid
+    def post(self, user_id):
+        """For adding one or many medical images to the database for the specified user_id
 
         Expects form-data
 
@@ -96,7 +96,7 @@ class MedImaging(Resource):
         "image_path": "string"
 
         """
-        check_client_existence(clientid)
+        check_client_existence(user_id)
         bucket_name = current_app.config['S3_BUCKET_NAME']
 
         #Verify at least 1 file with key-name:image is selected for upload
@@ -111,7 +111,7 @@ class MedImaging(Resource):
         
         for i, img in enumerate(files.getlist('image')):
             mi_data = mi_schema.load(request.form)
-            mi_data.clientid = clientid
+            mi_data.user_id = user_id
             date = mi_data.image_date
 
             #Verifying image size is within a safe threashold (MAX = 500 mb)
@@ -126,7 +126,7 @@ class MedImaging(Resource):
             img.seek(0)
 
             if current_app.config['LOCAL_CONFIG']:
-                path = pathlib.Path(bucket_name) / f'id{clientid:05d}' / 'medical_images'
+                path = pathlib.Path(bucket_name) / f'id{user_id:05d}' / 'medical_images'
                 path.mkdir(parents=True, exist_ok=True)
                 s3key = f'{mi_data.image_type}_{date}_{hex_token}_{i}{img_extension}'
                 file_name = (path / s3key).as_posix()
@@ -134,7 +134,7 @@ class MedImaging(Resource):
                 img.save(file_name)
 
             else:
-                s3key = f'id{clientid:05d}/medical_images/{mi_data.image_type}_{date}_{hex_token}_{i}{img_extension}'
+                s3key = f'id{user_id:05d}/medical_images/{mi_data.image_type}_{date}_{hex_token}_{i}{img_extension}'
                 s3 = boto3.resource('s3')
                 s3.Bucket(bucket_name).put_object(Key= s3key, Body=img.stream) 
                 mi_data.image_path = s3key  
@@ -144,14 +144,14 @@ class MedImaging(Resource):
         db.session.add_all(data_list)  
         db.session.commit()
 
-@ns.route('/bloodtest/<int:clientid>/')
-@ns.doc(params={'clientid': 'Client ID number'})
+@ns.route('/bloodtest/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
 class MedBloodTest(Resource):
     @token_auth.login_required
     @responds(schema=MedicalBloodTestSchema(many=True), api=ns)
-    def get(self, clientid):
-        check_client_existence(clientid)
-        blood_tests = MedicalBloodTests.query.filter_by(clientid=clientid).all()
+    def get(self, user_id):
+        check_client_existence(user_id)
+        blood_tests = MedicalBloodTests.query.filter_by(user_id=user_id).all()
 
         if not blood_tests:
             raise ContentNotFound()
@@ -161,43 +161,43 @@ class MedBloodTest(Resource):
     @token_auth.login_required
     @accepts(schema=MedicalBloodTestsInputSchema, api=ns)
     @responds(schema=MedicalBloodTestSchema, status_code=201, api=ns)
-    def post(self, clientid):
-        check_client_existence(clientid)
+    def post(self, user_id):
+        check_client_existence(user_id)
         data = request.get_json()
 
         #remove results from data, commit test info without results to db
         results = data['results']
         del data['results']
-        data['clientid'] = clientid
+        data['user_id'] = user_id
         client_bt = MedicalBloodTestSchema().load(data)
         db.session.add(client_bt)
         db.session.commit()
 
         #insert results into the result table
-        test = MedicalBloodTests.query.filter_by(testid=client_bt.testid).first()
+        test = MedicalBloodTests.query.filter_by(test_id=client_bt.test_id).first()
         for result in results:
             check_blood_test_result_type_existence(result['result_name'])
             resultid = MedicalBloodTestResultTypes.query.filter_by(result_name=result['result_name']).first().resultid
-            result_data = {'testid': client_bt.testid, 'resultid': resultid, 'result_value': result['result_value']}
+            result_data = {'test_id': client_bt.test_id, 'resultid': resultid, 'result_value': result['result_value']}
             bt_result = MedicalBloodTestResultsSchema().load(result_data)
             db.session.add(bt_result)
         db.session.commit()
         return test
 
-@ns.route('/bloodtest/results/<int:testid>/')
-@ns.doc(params={'testid': 'Test ID number'})
+@ns.route('/bloodtest/results/<int:test_id>/')
+@ns.doc(params={'test_id': 'Test ID number'})
 class MedBloodTestResults(Resource):
     @token_auth.login_required
     @responds(schema=MedicalBloodTestResultsOutputSchema(many=True), api=ns)
-    def get(self, testid):
+    def get(self, test_id):
         #query for join of MedicalBloodTestResults and MedicalBloodTestResultTypes tables
-        check_blood_test_existence(testid)
-        results = MedicalBloodTestResults.query.filter_by(testid=testid).all()
+        check_blood_test_existence(test_id)
+        results = MedicalBloodTestResults.query.filter_by(test_id=test_id).all()
 
         #replace resultid with result name for readability      
         response = []
         for result in results:
-            output = {'idx': result.idx,'testid': result.testid,'result_value': result.result_value}
+            output = {'idx': result.idx,'test_id': result.test_id,'result_value': result.result_value}
             output['result_type'] = MedicalBloodTestResultTypes.query.filter_by(resultid=result.resultid).first().result_name
             response.append(output) 
         return response
@@ -209,16 +209,16 @@ class MedBloodTestResultTypes(Resource):
     def get(self):
         return MedicalBloodTestResultTypes.query.all()
 
-@ns.route('/medicalhistory/<int:clientid>/')
-@ns.doc(params={'clientid': 'Client ID number'})
+@ns.route('/medicalhistory/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
 class MedHistory(Resource):
     @token_auth.login_required
     @responds(schema=MedicalHistorySchema, api=ns)
-    def get(self, clientid):
-        """returns client's medical history as a json for the clientid specified"""
-        check_client_existence(clientid)
+    def get(self, user_id):
+        """returns client's medical history as a json for the user_id specified"""
+        check_client_existence(user_id)
 
-        client = MedicalHistory.query.filter_by(clientid=clientid).first()
+        client = MedicalHistory.query.filter_by(user_id=user_id).first()
 
         if not client:
             raise ContentNotFound()
@@ -228,18 +228,18 @@ class MedHistory(Resource):
     @token_auth.login_required
     @accepts(schema=MedicalHistorySchema, api=ns)
     @responds(schema=MedicalHistorySchema, status_code=201, api=ns)
-    def post(self, clientid):
-        """returns client's medical history as a json for the clientid specified"""
-        check_client_existence(clientid)
+    def post(self, user_id):
+        """returns client's medical history as a json for the user_id specified"""
+        check_client_existence(user_id)
 
-        current_med_history = MedicalHistory.query.filter_by(clientid=clientid).first()
+        current_med_history = MedicalHistory.query.filter_by(user_id=user_id).first()
         
         if current_med_history:
-            raise IllegalSetting(message=f"Medical History for clientid {clientid} already exists. Please use PUT method")
+            raise IllegalSetting(message=f"Medical History for user_id {user_id} already exists. Please use PUT method")
 
 
         data = request.get_json()
-        data["clientid"] = clientid
+        data["user_id"] = user_id
 
         mh_schema = MedicalHistorySchema()
 
@@ -253,14 +253,14 @@ class MedHistory(Resource):
     @token_auth.login_required
     @accepts(schema=MedicalHistorySchema, api=ns)
     @responds(schema=MedicalHistorySchema, api=ns)
-    def put(self, clientid):
-        """updates client's medical history as a json for the clientid specified"""
-        check_client_existence(clientid)
+    def put(self, user_id):
+        """updates client's medical history as a json for the user_id specified"""
+        check_client_existence(user_id)
 
-        client_mh = MedicalHistory.query.filter_by(clientid=clientid).first()
+        client_mh = MedicalHistory.query.filter_by(user_id=user_id).first()
 
         if not client_mh:
-            raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a medical history in the database")
+            raise UserNotFound(user_id, message = f"The client with id: {user_id} does not yet have a medical history in the database")
         
         # get payload and update the current instance followd by db commit
         data = request.get_json()
@@ -275,16 +275,16 @@ class MedHistory(Resource):
         return client_mh
 
 
-@ns.route('/physical/<int:clientid>/')
-@ns.doc(params={'clientid': 'Client ID number'})
+@ns.route('/physical/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
 class MedPhysical(Resource):
     @token_auth.login_required
     @responds(schema=MedicalPhysicalExamSchema(many=True), api=ns)
-    def get(self, clientid):
-        """returns client's medical physical exam as a json for the clientid specified"""
-        check_client_existence(clientid)
+    def get(self, user_id):
+        """returns client's medical physical exam as a json for the user_id specified"""
+        check_client_existence(user_id)
 
-        client = MedicalPhysicalExam.query.filter_by(clientid=clientid).order_by(MedicalPhysicalExam.timestamp.asc()).all()
+        client = MedicalPhysicalExam.query.filter_by(user_id=user_id).order_by(MedicalPhysicalExam.timestamp.asc()).all()
 
         if not client:
             raise ContentNotFound()
@@ -294,12 +294,12 @@ class MedPhysical(Resource):
     @token_auth.login_required
     @accepts(schema=MedicalPhysicalExamSchema, api=ns)
     @responds(schema=MedicalPhysicalExamSchema, status_code=201, api=ns)
-    def post(self, clientid):
-        """creates new db entry of client's medical physical exam as a json for the clientid specified"""
-        check_client_existence(clientid)
+    def post(self, user_id):
+        """creates new db entry of client's medical physical exam as a json for the clientuser_idid specified"""
+        check_client_existence(user_id)
 
         data = request.get_json()
-        data["clientid"] = clientid
+        data["user_id"] = user_id
 
         mh_schema = MedicalPhysicalExamSchema()
 
@@ -321,13 +321,13 @@ class AllMedInstitutes(Resource):
         
         return institutes
 
-@ns.route('/medicalinstitutions/recordid/<int:clientid>/')
-@ns.doc(params={'clientid': 'Client ID number'})
+@ns.route('/medicalinstitutions/recordid/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
 class ExternalMedicalRecordIDs(Resource):
     @token_auth.login_required
     @accepts(schema=ClientExternalMREntrySchema,  api=ns)
     @responds(schema=ClientExternalMREntrySchema,status_code=201, api=ns)
-    def post(self, clientid):
+    def post(self, user_id):
         """for submitting client medical record ids from external medical institutions"""
 
         data = request.get_json()
@@ -335,7 +335,7 @@ class ExternalMedicalRecordIDs(Resource):
         # the new institute into the dabase before proceeding
         data_cleaned = []
         for record in data['record_locators']:
-            record["clientid"] = clientid # add in the clientid
+            record["user_id"] = user_id # add in the user_id
             if record["institute_id"] == 9999 and len(record["institute_name"]) > 0:
                 # enter new insitute name into database
                 new_institute = MedicalInstitutions(institute_name = record["institute_name"])
@@ -354,9 +354,9 @@ class ExternalMedicalRecordIDs(Resource):
 
     @token_auth.login_required
     @responds(schema=ClientExternalMREntrySchema, api=ns)
-    def get(self, clientid):
-        """returns all medical record ids for clientid"""
+    def get(self, user_id):
+        """returns all medical record ids for user_id"""
 
-        client_med_record_ids = ClientExternalMR.query.filter_by(clientid=clientid).all()
+        client_med_record_ids = ClientExternalMR.query.filter_by(user_id=user_id).all()
 
         return client_med_record_ids

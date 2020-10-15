@@ -5,12 +5,12 @@ from odyssey.api import api
 
 class UserNotFound(Exception):
     """in the case a non-existent client is being requested"""
-    def __init__(self, clientid=None, message = None):
+    def __init__(self, user_id=None, message = None):
         Exception.__init__(self)
         if message:
             self.message = message
         else:
-            self.message = f'The client with clientid {clientid}, does not exist. Please try again.'
+            self.message = f'The client with user_id {user_id}, does not exist. Please try again.'
 
         self.status_code = 404
 
@@ -88,9 +88,9 @@ class InputError(Exception):
 
 class ContentNotFoundReturnData(Exception):
     """Special case for when a resource has not yet been created but the client must see other data to proceed"""
-    def __init__(self, data=None, clientid = None):
+    def __init__(self, data=None, user_id = None):
         Exception.__init__(self)
-        data.update({"clientid": clientid})
+        data.update({"user_id": user_id})
         self.status_code = 200
         self.message = "no instance of resource exists yet"
 
@@ -209,12 +209,12 @@ class InsufficientInputs(Exception):
 
 class StaffNotFound(Exception):
     """in the case a non-existent staff member is being requested"""
-    def __init__(self, staffid=None, message = None):
+    def __init__(self, user_id=None, message = None):
         Exception.__init__(self)
         if message:
             self.message = message
         else:
-            self.message = f'The Staff member with staffid {staffid}, does not exist. Please try again.'
+            self.message = f'The Staff member with user_id {user_id}, does not exist. Please try again.'
 
         self.status_code = 404
 

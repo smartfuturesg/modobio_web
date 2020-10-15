@@ -36,13 +36,13 @@ from odyssey import db
 
 ns = api.namespace('wearables', description='Endpoints for registering wearable devices.')
 
-@ns.route('/<int:clientid>/')
-@ns.doc(params={'clientid': 'Client ID number'})
+@ns.route('/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
 class WearablesEndpoint(Resource):
     @token_auth.login_required
     @responds(schema=WearablesSchema, status_code=200, api=ns)
-    def get(self, clientid):
-        """ Wearable device information for client ``clientid`` in response to a GET request.
+    def get(self, user_id):
+        """ Wearable device information for client ``user_id`` in response to a GET request.
 
         This endpoint returns information on which wearables a client has. For
         each supported wearable device, two keys exist in the returned dictionary:
@@ -52,8 +52,8 @@ class WearablesEndpoint(Resource):
 
         Parameters
         ----------
-        clientid : int
-            Client ID number.
+        user_id : int
+            User ID number.
 
         Returns
         -------
@@ -62,7 +62,7 @@ class WearablesEndpoint(Resource):
         """
         wearables = (
             Wearables.query
-            .filter_by(clientid=clientid)
+            .filter_by(user_id=user_id)
             .one_or_none()
         )
 
@@ -74,13 +74,13 @@ class WearablesEndpoint(Resource):
     @token_auth.login_required
     @accepts(schema=WearablesSchema, api=ns)
     @responds(status_code=201, api=ns)
-    def post(self, clientid):
-        """ Create new wearables information for client ``clientid`` in reponse to a POST request.
+    def post(self, user_id):
+        """ Create new wearables information for client ``user_id`` in reponse to a POST request.
 
         Parameters
         ----------
-        clientid : int
-            Client ID number.
+        user_id : int
+            User ID number.
 
         Returns
         -------
@@ -89,34 +89,34 @@ class WearablesEndpoint(Resource):
         """
         wearables = (
             Wearables.query
-            .filter_by(clientid=clientid)
+            .filter_by(user_id=user_id)
             .one_or_none()
         )
 
         if wearables:
             raise MethodNotAllowed
 
-        request.parsed_obj.clientid = clientid
+        request.parsed_obj.user_id = user_id
         db.session.add(request.parsed_obj)
         db.session.commit()
 
     @token_auth.login_required
     @accepts(schema=WearablesSchema, api=ns)
     @responds(status_code=204, api=ns)
-    def put(self, clientid):
-        """ Update wearables information for client ``clientid`` in reponse to a PUT request.
+    def put(self, user_id):
+        """ Update wearables information for client ``user_id`` in reponse to a PUT request.
 
         Parameters
         ----------
-        clientid : int
-            Client ID number.
+        user_id : int
+            User ID number.
 
         Returns
         -------
         dict
             JSON encoded dict.
         """
-        query = Wearables.query.filter_by(clientid=clientid)
+        query = Wearables.query.filter_by(user_id=user_id)
         wearables = query.one_or_none()
 
         if not wearables:
@@ -127,18 +127,18 @@ class WearablesEndpoint(Resource):
         db.session.commit()
 
 
-@ns.route('/oura/auth/<int:clientid>/')
-@ns.doc(params={'clientid': 'Client ID number'})
+@ns.route('/oura/auth/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
 class WearablesOuraAuthEndpoint(Resource):
     @token_auth.login_required
     @responds(schema=WearablesOuraAuthSchema, status_code=200, api=ns)
-    def get(self, clientid):
+    def get(self, user_id):
         """ Oura Ring OAuth2 parameters to initialize the access grant process.
 
         Parameters
         ----------
-        clientid : int
-            Client ID number.
+        user_id : int
+            User ID number.
 
         Returns
         -------
@@ -153,13 +153,13 @@ class WearablesOuraAuthEndpoint(Resource):
 
         wearables = (
             Wearables.query
-            .filter_by(clientid=clientid)
+            .filter_by(user_id=user_id)
             .one_or_none()
         )
 
         # TODO: Disable this check until frontend has a way of setting has_oura
         #
-        # wearables = Wearables.query.filter_by(clientid=clientid).one_or_none()
+        # wearables = Wearables.query.filter_by(user_id=user_id).one_or_none()
         # if not wearables or not wearables.has_oura:
         #     raise ContentNotFound
 
@@ -169,12 +169,12 @@ class WearablesOuraAuthEndpoint(Resource):
         # Store state in database
         oura = (
             WearablesOura.query
-            .filter_by(clientid=clientid)
+            .filter_by(user_id=user_id)
             .one_or_none()
         )
 
         if not oura:
-            oura = WearablesOura(clientid=clientid, oauth_state=state)
+            oura = WearablesOura(user_id=user_id, oauth_state=state)
             db.session.add(oura)
         else:
             oura.oauth_state = state
@@ -183,9 +183,9 @@ class WearablesOuraAuthEndpoint(Resource):
         return {'oura_client_id': oura_id, 'oauth_state': state}
 
 
-@ns.route('/oura/callback/<int:clientid>/')
+@ns.route('/oura/callback/<int:user_id>/')
 @ns.doc(params={
-    'clientid': 'Client ID number',
+    'user_id': 'User ID number',
     'state': 'OAuth2 state token',
     'code': 'OAuth2 access grant code',
     'redirect_uri': 'OAuth2 redirect URI'
@@ -193,17 +193,17 @@ class WearablesOuraAuthEndpoint(Resource):
 class WearablesOuraCallbackEndpoint(Resource):
     @token_auth.login_required
     @responds(status_code=200, api=ns)
-    def get(self, clientid):
+    def get(self, user_id):
         """ Oura Ring OAuth2 callback URL """
         if not current_app.config['OURA_CLIENT_ID']:
             raise UnknownError(message='This endpoint does not work in local mode.')
 
-        check_client_existence(clientid)
+        check_client_existence(user_id)
 
-        oura = WearablesOura.query.filter_by(clientid=clientid).one_or_none()
+        oura = WearablesOura.query.filter_by(user_id=user_id).one_or_none()
         if not oura:
             raise UnknownError(
-                message=f'Clientid {clientid} not found in WearablesOura table. '
+                message=f'user_id {user_id} not found in WearablesOura table. '
                          'Connect to /wearables/auth first.'
             )
 
@@ -241,19 +241,19 @@ class WearablesOuraCallbackEndpoint(Resource):
         oura.oauth_state = None
 
         # TODO: disable this until frontend has a way of setting wearable devices.
-        # wearables = Wearables.query.filter_by(clientid=oura.clientid).first()
+        # wearables = Wearables.query.filter_by(user_id=oura.user_id).first()
         # wearables.registered_oura = True
 
         db.session.commit()
 
 
-@ns.route('/freestyle/activate/<int:clientid>/')
-@ns.doc(params={'clientid': 'Client ID number'})
+@ns.route('/freestyle/activate/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
 class WearablesFreeStyleActivateEndpoint(Resource):
     @token_auth.login_required
     @responds(schema=WearablesFreeStyleActivateSchema, status_code=200, api=ns)
-    def get(self, clientid):
-        """ Returns CGM activation timestamp for client ``clientid`` in reponse to a GET request.
+    def get(self, user_id):
+        """ Returns CGM activation timestamp for client ``user_id`` in reponse to a GET request.
 
         Time data on the CGM sensor is stored as minutes since activation and as full
         timestamps in the database. Time data must be converted before it can be
@@ -262,8 +262,8 @@ class WearablesFreeStyleActivateEndpoint(Resource):
 
         Parameters
         ----------
-        clientid : int
-            Client ID number.
+        user_id : int
+            User ID number.
 
         Returns
         -------
@@ -272,7 +272,7 @@ class WearablesFreeStyleActivateEndpoint(Resource):
         """
         cgm = (
             WearablesFreeStyle.query
-            .filter_by(clientid=clientid)
+            .filter_by(user_id=user_id)
             .one_or_none()
         )
 
@@ -284,45 +284,45 @@ class WearablesFreeStyleActivateEndpoint(Resource):
     @token_auth.login_required
     @accepts(schema=WearablesFreeStyleActivateSchema, api=ns)
     @responds(status_code=201, api=ns)
-    def post(self, clientid):
-        """ Set new activation timestamp for client ``clientid`` in response to POST request.
+    def post(self, user_id):
+        """ Set new activation timestamp for client ``user_id`` in response to POST request.
 
         When a new CGM is activated, the activation timestamp must be stored in the database.
 
         Parameters
         ----------
-        clientid : int
-            Client ID number.
+        user_id : int
+            User ID number.
 
         timestamp : str
             ISO 8601 formatted datetime string.
         """
         cgm = (
             WearablesFreeStyle.query
-            .filter_by(clientid=clientid)
+            .filter_by(user_id=user_id)
             .one_or_none()
         )
 
         if not cgm:
-            cgm = WearablesFreeStyle(clientid=clientid)
+            cgm = WearablesFreeStyle(user_id=user_id)
             db.session.add(cgm)
 
         cgm.activation_timestamp = request.parsed_obj.activation_timestamp
         db.session.commit()
 
 
-@ns.route('/freestyle/<int:clientid>/')
-@ns.doc(params={'clientid': 'Client ID number'})
+@ns.route('/freestyle/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
 class WearablesFreeStyleEndpoint(Resource):
     @token_auth.login_required
     @responds(schema=WearablesFreeStyleSchema, status_code=200, api=ns)
-    def get(self, clientid):
-        """ Return FreeStyle CGM data for client ``clientid`` in reponse to a GET request.
+    def get(self, user_id):
+        """ Return FreeStyle CGM data for client ``user_id`` in reponse to a GET request.
 
         Parameters
         ----------
-        clientid : int
-            Client ID number.
+        user_id : int
+            User ID number.
 
         Returns
         -------
@@ -331,7 +331,7 @@ class WearablesFreeStyleEndpoint(Resource):
         """
         cgm = (
             WearablesFreeStyle.query
-            .filter_by(clientid=clientid)
+            .filter_by(user_id=user_id)
             .one_or_none()
         )
 
@@ -343,22 +343,22 @@ class WearablesFreeStyleEndpoint(Resource):
     @token_auth.login_required
     @accepts(schema=WearablesFreeStyleSchema, api=ns)
     @responds(status_code=201, api=ns)
-    def put(self, clientid):
-        """ Add CGM data for client ``clientid`` in reponse to a PUT request.
+    def put(self, user_id):
+        """ Add CGM data for client ``user_id`` in reponse to a PUT request.
 
         Parameters
         ----------
-        clientid : int
-            Client ID number.
+        user_id : int
+            User ID number.
         """
         cgm = (
             WearablesFreeStyle.query
-            .filter_by(clientid=clientid)
+            .filter_by(user_id=user_id)
             .one_or_none()
         )
 
         if not cgm:
-            msg =  f'FreeStyle Libre for client {clientid} has not yet been activated. '
+            msg =  f'FreeStyle Libre for client {user_id} has not yet been activated. '
             msg += f'Send a POST request to /wearables/freestyle/activate/ first.'
             raise UnknownError(message=msg)
 
@@ -406,11 +406,11 @@ class WearablesFreeStyleEndpoint(Resource):
             UPDATE "WearablesFreeStyle"
             SET glucose = glucose || cast(:gluc as double precision[]),
                 timestamps = timestamps || cast(:tstamps as timestamp without time zone[])
-            WHERE clientid = :cid;
+            WHERE user_id = :cid;
         ''').bindparams(
             gluc=glucose[n:],
             tstamps=tstamps[n:],
-            cid=clientid
+            cid=user_id
         )
         db.session.execute(stmt)
         db.session.commit()
