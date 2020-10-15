@@ -18,33 +18,18 @@ phx_tz = pytz.timezone('America/Phoenix')
 
 
 
-@whooshee.register_model('firstname','lastname','email','phone','dob', 'record_locator_id')
+@whooshee.register_model('firstname','lastname','dob', 'record_locator_id')
 class ClientInfo(db.Model):
     """ Client information table
 
-    This table stores general information of a client. The information is taken
-    only once, during the initial consult. The primary index of this table is the
-    :attr:`clientid` number. Many other tables in this database refer to the
-    :attr:`clientid` number, so a new client **MUST** be added to this table first,
-    in order to generate the :attr:`clientid` number.
+    This table stores general information of a client.
     """
 
     __tablename__ = 'ClientInfo'
 
-    clientid = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    Client ID number
-
-    The main identifier of a client throughout the Modo Bio system.
-
-    :type: int, primary key, autoincrement
-    """
-
-    membersince = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Member since date
-
-    The date a member was first added to the system
+    timestamp for when object was created. DB server time is used. 
 
     :type: datetime
     """
@@ -56,35 +41,20 @@ class ClientInfo(db.Model):
     :type: datetime
     """
 
-    firstname = db.Column(db.String(50))
+    userid = db.Column(db.Integer, db.ForeignKey('User.userid',nullable=False))
     """
-    Client first name.
+    User ID number, foreign key to User.userid
 
-    :type: str, max length 50
+    :type: int, foreign key
     """
-
-    middlename = db.Column(db.String(50))
+    
+    membersince = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    Client middle name(s).
+    Member since date
 
-    :type: str, max length 50
-    """
+    The date a client was first added to the system
 
-    lastname = db.Column(db.String(50))
-    """
-    Client last name or family name.
-
-    :type: str, max length 50
-    """
-
-    fullname = db.Column(db.String(100))
-    """
-    Client full name.
-
-    Create this field by combining :attr:`firstname` + ' ' + :attr:`lastname`.
-    The full name is used for displaying and addressing the client.
-
-    :type: str, max length 100
+    :type: datetime
     """
 
     guardianname = db.Column(db.String(100))
@@ -138,30 +108,6 @@ class ClientInfo(db.Model):
     Currently defaults to US.
 
     :type: str, max length 2
-    """
-
-    address = db.Column(db.String(120))
-    """
-    Client full address.
-
-    Generate by combining :attr:`street`, :attr:`city`, :attr:`state`,
-    :attr:`zipcode`, and :attr:`country`.
-
-    :type: str, max length 120
-    """
-
-    email = db.Column(db.String(50))
-    """
-    Client email address.
-
-    :type: str, max length 50
-    """
-
-    phone = db.Column(db.String(20))
-    """
-    Client phone number.
-
-    :type: str, max length 20
     """
 
     preferred = db.Column(db.SmallInteger)
@@ -241,13 +187,13 @@ class ClientInfo(db.Model):
     Record Locator ID
 
     name_hash = md5(bytes((data['firstname']+data['lastname']), 'utf-8')).hexdigest()
-    data['record_locator_id'] = (data['firstname'][0]+data['lastname'][0]+str(data['clientid'])+name_hash[0:6]).upper()    
+    data['record_locator_id'] = (data['firstname'][0]+data['lastname'][0]+str(data['userid'])+name_hash[0:6]).upper()    
 
     :type: str, max length 10
     """
 
     @staticmethod
-    def generate_record_locator_id(firstname, lastname, clientid):
+    def generate_record_locator_id(firstname, lastname, userid):
         """medical record hash generation"""
         random.seed(clientid)
         rli_hash = "".join([random.choice(ALPHANUMERIC) for i in range(10)])
@@ -261,8 +207,8 @@ class ClientInfo(db.Model):
             'firstname': self.firstname,
             'lastname': self.lastname,
             'dob': self.dob,
-            'phone': self.phone,
-            'email': self.email
+            #'phone': self.phone,
+            #'email': self.email
         }
         return data
 
@@ -307,9 +253,9 @@ class ClientFacilities(db.Model):
     :type: datetime
     """
 
-    client_id = db.Column(db.ForeignKey('ClientInfo.clientid',ondelete="CASCADE"))
+    userid = db.Column(db.ForeignKey('User.userid',ondelete="CASCADE"))
     """
-    Foreign key from ClientInfo table
+    Foreign key from User table
 
     :type: int, foreign key
     """
@@ -368,11 +314,11 @@ class ClientConsent(db.Model):
     :type: datetime
     """
 
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientConsent_clientid_fkey',ondelete="CASCADE"), nullable=False)
+    userid = db.Column(db.Integer, db.ForeignKey('User.userid',ondelete="CASCADE"), nullable=False)
     """
-    Client ID number.
+    User ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`User.userid`
     """
 
     infectious_disease = db.Column(db.Boolean)
@@ -471,11 +417,11 @@ class ClientRelease(db.Model):
     :type: datetime
     """
 
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientRelease_clientid_fkey',ondelete="CASCADE"), nullable=False)
+    userid = db.Column(db.Integer, db.ForeignKey('User.userid',ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    User ID number
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`User.userid`
     """
 
     release_of_all = db.Column(db.Boolean)
@@ -602,11 +548,11 @@ class ClientPolicies(db.Model):
     :type: datetime
     """
 
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientPolicies_clientid_fkey',ondelete="CASCADE"), nullable=False)
+    userid = db.Column(db.Integer, db.ForeignKey('User.userid',ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    User ID number
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`User.userid`
     """
 
     signdate = db.Column(db.Date)
@@ -698,11 +644,11 @@ class ClientConsultContract(db.Model):
     :type: datetime
     """
 
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientColusultContract_clientid_fkey',ondelete="CASCADE"), nullable=False)
+    userid = db.Column(db.Integer, db.ForeignKey('User.userid',ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    User ID number
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`User.userid`
     """
 
     signdate = db.Column(db.Date)
@@ -794,11 +740,11 @@ class ClientSubscriptionContract(db.Model):
     :type: datetime
     """
 
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientSubscriptionContract_clientid_fkey',ondelete="CASCADE"), nullable=False)
+    userid = db.Column(db.Integer, db.ForeignKey('User.userid',ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    User ID number
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`User.userid`
     """
 
     signdate = db.Column(db.Date)
@@ -885,11 +831,11 @@ class ClientIndividualContract(db.Model):
     :type: datetime
     """
 
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientIndividualContract_clientid_fkey',ondelete="CASCADE"), nullable=False)
+    userid = db.Column(db.Integer, db.ForeignKey('User.userid',ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    User ID number
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`User.userid`
     """
 
     doctor = db.Column(db.Boolean, default=False)
@@ -960,7 +906,7 @@ class ClientIndividualContract(db.Model):
 
     :type: str, max length 40
     """
-
+""" 
 class RemoteRegistration(db.Model):
     """ At-home client registration parameter
 
@@ -1108,7 +1054,7 @@ class RemoteRegistration(db.Model):
 
         if remote_client is None or remote_client.registration_portal_expiration < datetime.utcnow():
             return None
-        return remote_client
+        return remote_client """
 
 class ClientExternalMR(db.Model):
     """ Client external medical record table
@@ -1119,7 +1065,7 @@ class ClientExternalMR(db.Model):
     __tablename__ = 'ClientExternalMR'
 
     __table_args__ = (
-        db.UniqueConstraint('clientid', 'med_record_id', 'institute_id'),)
+        db.UniqueConstraint('userid', 'med_record_id', 'institute_id'),)
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -1142,11 +1088,11 @@ class ClientExternalMR(db.Model):
     :type: datetime
     """
 
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientExternalMR_clientid_fkey',ondelete="CASCADE"), nullable=False)
+    userid = db.Column(db.Integer, db.ForeignKey('User.userid',ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    User ID number
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`User.userid`
     """
 
     med_record_id = db.Column(db.String, nullable=False)
@@ -1198,11 +1144,11 @@ class ClientReleaseContacts(db.Model):
     :type: int, foreign key to :attr:`ClientRelease.idx`
     """
 
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientReleaseContacts_clientid_fkey',ondelete="CASCADE"), nullable=False)
+    userid = db.Column(db.Integer, db.ForeignKey('User.userid',ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    User ID number
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`User.userid`
     """
 
     release_direction = db.Column(db.String, nullable=False)
