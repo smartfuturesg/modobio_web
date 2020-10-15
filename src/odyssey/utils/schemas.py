@@ -43,7 +43,7 @@ from odyssey.models.wearables import Wearables, WearablesOura, WearablesFreeStyl
 from odyssey.utils.misc import list_average
 
 class ClientSearchItemsSchema(Schema):
-    userid = fields.Integer()
+    user_id = fields.Integer()
     firstname = fields.String(required=False, validate=validate.Length(min=1, max= 50), missing=None)
     lastname = fields.String(required=False, validate=validate.Length(min=1,max=50), missing=None)
     email = fields.Email(required=False, missing=None)
@@ -106,14 +106,14 @@ class ClientRemoteRegistrationPortalSchema(Schema):
         holds client's access information for remote registration
     """
     email = fields.Email()
-    userid = fields.Integer()
+    user_id = fields.Integer()
     password = fields.String(dump_only=True)
     registration_portal_expiration = fields.DateTime(dump_only=True)
     registration_portal_id = fields.String(dump_only=True)
 
     @post_load
     def make_object(self, data, **kwargs):
-        remote_client_portal = RemoteRegistration(userid=data["userid"], email=data["email"])
+        remote_client_portal = RemoteRegistration(user_id=data["user_id"], email=data["email"])
         remote_client_portal.set_password()
         remote_client_portal.get_temp_registration_endpoint()
         return remote_client_portal
@@ -130,7 +130,7 @@ class ClientConsentSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientConsent
     
-    userid = fields.Integer(missing=0)
+    user_id = fields.Integer(missing=0)
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -141,7 +141,7 @@ class ClientReleaseContactsSchema(ma.SQLAlchemyAutoSchema):
         model = ClientReleaseContacts
         exclude = ('idx',)
 
-    userid = fields.Integer(missing=0)
+    user_id = fields.Integer(missing=0)
     release_contract_id = fields.Integer()
     release_direction = fields.String(description="Direction must be either 'TO' (release to) or 'FROM' (release from)")
 
@@ -162,7 +162,7 @@ class ClientReleaseSchema(ma.SQLAlchemyAutoSchema):
     release_to = fields.Nested(ClientReleaseContactsSchema, many=True)
     release_from = fields.Nested(ClientReleaseContactsSchema, many=True)
     
-    userid = fields.Integer(missing=0)
+    user_id = fields.Integer(missing=0)
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -190,7 +190,7 @@ class ClientReleaseSchema(ma.SQLAlchemyAutoSchema):
 class SignAndDateSchema(Schema):
     """for marshaling signatures and sign dates into objects (contracts) requiring only a signature"""
 
-    userid = fields.Integer(missing=0, dump_only=True)
+    user_id = fields.Integer(missing=0, dump_only=True)
     signdate = fields.Date(format="iso", required=True)
     signature = fields.String(required=True)
 
@@ -198,12 +198,12 @@ class ClientSubscriptionContractSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientSubscriptionContract
     
-    userid = fields.Integer(missing=0)
+    user_id = fields.Integer(missing=0)
 
     @post_load
     def make_object(self, data, **kwargs):
         return ClientSubscriptionContract(
-                    userid = data["userid"],
+                    user_id = data["user_id"],
                     signature=data["signature"],
                     signdate=data["signdate"]
                     )
@@ -212,12 +212,12 @@ class ClientConsultContractSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientConsultContract
     
-    userid = fields.Integer(missing=0)
+    user_id = fields.Integer(missing=0)
 
     @post_load
     def make_object(self, data, **kwargs):
         return ClientConsultContract(
-                    userid = data["userid"],
+                    user_id = data["user_id"],
                     signature=data["signature"],
                     signdate=data["signdate"]
                     )
@@ -226,12 +226,12 @@ class ClientPoliciesContractSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientPolicies
     
-    userid = fields.Integer(missing=0)
+    user_id = fields.Integer(missing=0)
 
     @post_load
     def make_object(self, data, **kwargs):
         return ClientPolicies(
-                    userid = data["userid"],
+                    user_id = data["user_id"],
                     signature=data["signature"],
                     signdate=data["signdate"]
                     )
@@ -241,7 +241,7 @@ class ClientIndividualContractSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientIndividualContract
         
-    userid = fields.Integer(missing=0)
+    user_id = fields.Integer(missing=0)
     @post_load
     def make_object(self, data, **kwargs):
         return ClientIndividualContract(**data)
@@ -268,7 +268,7 @@ class ClientRegistrationStatusSchema(Schema):
 
 class ClientDataTierSchema(Schema):
 
-    userid = fields.Integer(missing=None)
+    user_id = fields.Integer(missing=None)
     stored_bytes = fields.Integer(description="total bytes stored for the client", missing=None)
     tier = fields.String(description="data storage tier. Either Tier 1/2/3", missing=None)
 
@@ -289,7 +289,7 @@ class PTHistorySchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = PTHistory
         
-    userid = fields.Integer(missing=0)
+    user_id = fields.Integer(missing=0)
     
     @post_load
     def make_object(self, data, **kwargs):
@@ -326,7 +326,7 @@ class ChessboardSchema(Schema):
     isa_structure_list  = ['Inhaled','Exhaled', 'Asymmetrical Normal','Asymmetrical Atypical']
     isa_movement_list  = ['Dynamic', 'Static', 'R Static/Left Dynamic', 'L Static/Right Dynamic']
 
-    userid = fields.Integer(missing=0)
+    user_id = fields.Integer(missing=0)
     timestamp = fields.DateTime()
     isa_structure = fields.String(description=f"must be one of {isa_structure_list}", missing=None)
     isa_movement = fields.String(description=f"must be one of {isa_movement_list}", missing=None)
@@ -351,7 +351,7 @@ class ChessboardSchema(Schema):
         """takes a nested dictionary (json input) and flattens it out
             in order to shape into the Chessboard table
         """
-        flat_data = {'userid': data['userid'],
+        flat_data = {'user_id': data['user_id'],
                     'notes': data['notes'],
                     'left_shoulder_er': data['shoulder']['left']['er'],
                     'left_shoulder_ir': data['shoulder']['left']['ir'],
@@ -393,7 +393,7 @@ class ChessboardSchema(Schema):
         shoulder_r = {k.split('_')[-1]:v for k,v in data.__dict__.items() if 'right_shoulder' in k}
         hip_l = {k.split('_')[-1]:v for k,v in data.__dict__.items() if 'left_hip' in k}
         hip_r = {k.split('_')[-1]:v for k,v in data.__dict__.items() if 'right_hip' in k}
-        nested = {'userid': data.userid,
+        nested = {'user_id': data.user_id,
                   'notes': data.notes,
                   'isa_structure': data.isa_structure,
                   'isa_movement': data.isa_movement,
@@ -437,7 +437,7 @@ class PowerLegPress(Schema):
     bilateral = fields.Nested(PowerAttemptsLegPress, missing=PowerAttemptsLegPress().load({}))
 
 class PowerAssessmentSchema(Schema):
-    userid = fields.Integer(missing=0)
+    user_id = fields.Integer(missing=0)
     timestamp = fields.DateTime()
     push_pull = fields.Nested(PowerPushPull, missing=PowerPushPull().load({}))
     leg_press = fields.Nested(PowerLegPress, missing=PowerLegPress().load({}))
@@ -447,7 +447,7 @@ class PowerAssessmentSchema(Schema):
 
     @post_load
     def unravel(self, data, **kwargs):
-        flat_data = {'userid': data['userid'],
+        flat_data = {'user_id': data['user_id'],
                     'keiser_upper_r_weight': data['push_pull']['right']['weight'],
                     'keiser_upper_r_attempt_1': data['push_pull']['right']['attempt_1'],
                     'keiser_upper_r_attempt_2': data['push_pull']['right']['attempt_2'],
@@ -475,7 +475,7 @@ class PowerAssessmentSchema(Schema):
 
     @pre_dump
     def ravel(self, data, **kwargs):
-        nested = {'userid': data.userid,
+        nested = {'user_id': data.user_id,
                   'timestamp': data.timestamp,
                   'upper_watts_per_kg' :data.upper_watts_per_kg,
                   'lower_watts_per_kg': data.lower_watts_per_kg,
@@ -530,7 +530,7 @@ class PowerAssessmentSchema(Schema):
             
                  }
         # add client's vital_weight from most recent physical exam
-        recent_physical = MedicalPhysicalExam.query.filter_by(userid=data.userid).order_by(MedicalPhysicalExam.idx.desc()).first()
+        recent_physical = MedicalPhysicalExam.query.filter_by(user_id=data.user_id).order_by(MedicalPhysicalExam.idx.desc()).first()
         if not recent_physical:
             nested["vital_weight"] = None
         else:    
@@ -552,14 +552,14 @@ class StrengthPushPull(Schema):
     bilateral = fields.Nested(StrengthAttemptsPushPull, missing=StrengthAttemptsPushPull().load({}))
 
 class StrenghtAssessmentSchema(Schema):
-    userid = fields.Integer(missing=0)
+    user_id = fields.Integer(missing=0)
     timestamp = fields.DateTime()
     upper_push = fields.Nested(StrengthPushPull, missing=StrengthPushPull().load({}))
     upper_pull = fields.Nested(StrengthPushPull, missing=StrengthPushPull().load({}))
 
     @post_load
     def unravel(self, data, **kwargs):
-        flat_data = {'userid': data['userid'],
+        flat_data = {'user_id': data['user_id'],
                     'timestamp': datetime.utcnow(),
                     'upper_push_notes': data['upper_push']['notes'],
                     'upper_pull_notes': data['upper_pull']['notes'],
@@ -598,7 +598,7 @@ class StrenghtAssessmentSchema(Schema):
 
     @pre_dump
     def ravel(self, data, **kwargs):
-        nested = {"userid": data.userid,
+        nested = {"user_id": data.user_id,
                 "timestamp": data.timestamp,
                 "upper_push": {
                                 "bilateral": {
@@ -696,7 +696,7 @@ class StandingRotationSchema(Schema):
     left = fields.Nested(StandingRotationNotesSchema, missing=StandingRotationNotesSchema().load({}))
 
 class MovementAssessmentSchema(Schema):
-    userid = fields.Integer(missing=0)
+    user_id = fields.Integer(missing=0)
     timestamp = fields.DateTime()
     squat = fields.Nested(SquatTestSchema,missing=SquatTestSchema().load({}))
     toe_touch = fields.Nested(ToeTouchTestSchema, missing=ToeTouchTestSchema().load({}))
@@ -704,7 +704,7 @@ class MovementAssessmentSchema(Schema):
 
     @post_load
     def unravel(self, data, **kwargs):
-        flat_data = {'userid': data['userid'],
+        flat_data = {'user_id': data['user_id'],
                     'squat_depth': data['squat']['depth'],
                     'squat_ramp': data['squat']['ramp'],
                     'squat_eye_test': data['squat']['eye_test'],
@@ -722,7 +722,7 @@ class MovementAssessmentSchema(Schema):
 
     @pre_dump
     def ravel(self, data, **kwargs):
-        nested = {"userid": data.userid,
+        nested = {"user_id": data.user_id,
                   "timestamp": data.timestamp,
                   "squat": {
                       "depth": data.squat_depth ,
@@ -753,7 +753,7 @@ class HeartAssessmentSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = HeartAssessment
 
-    userid = fields.Integer(missing=0)
+    user_id = fields.Integer(missing=0)
     vital_heartrate = fields.Float(description="vital_heartrate pulled from doctor physical data", dump_only=True)
     
     @post_load
@@ -764,7 +764,7 @@ class HeartAssessmentSchema(ma.SQLAlchemyAutoSchema):
     def add_vital_heartrate(self, data, **kwargs):
         """Add vital_heartrate from most recent medial physical"""
         data_dict = data.__dict__
-        recent_physical = MedicalPhysicalExam.query.filter_by(userid=data.userid).order_by(MedicalPhysicalExam.idx.desc()).first()
+        recent_physical = MedicalPhysicalExam.query.filter_by(user_id=data.user_id).order_by(MedicalPhysicalExam.idx.desc()).first()
         if not recent_physical:
             data_dict["vital_heartrate"] = None
         else:    
@@ -778,7 +778,7 @@ class MoxyAssessmentSchema(ma.SQLAlchemySchema):
     limiter_list = ['Demand','Supply','Respiratory']
     performance_metric_list = ['Watts','Lbs','Feet/Min']
 
-    userid = fields.Integer(missing=0)
+    user_id = fields.Integer(missing=0)
     timestamp = ma.auto_field()
     notes = ma.auto_field(missing=None)
     vl_side = fields.String(description="vl_side must be either 'right' or 'left'", missing=None)
@@ -822,7 +822,7 @@ class LungAssessmentSchema(ma.SQLAlchemySchema):
     class Meta:
         model = LungAssessment
         
-    userid = fields.Integer(missing=0)
+    user_id = fields.Integer(missing=0)
     timestamp = ma.auto_field()
     notes = ma.auto_field(missing=None)
     vital_weight = fields.Float(description="weight pulled from doctor physical data", dump_only=True, missing=None)
@@ -840,7 +840,7 @@ class LungAssessmentSchema(ma.SQLAlchemySchema):
     def add_weight(self, data, **kwargs):
         "add vital weight to the dump"
         data_dict = data.__dict__
-        recent_physical = MedicalPhysicalExam.query.filter_by(userid=data.userid).order_by(MedicalPhysicalExam.idx.desc()).first()
+        recent_physical = MedicalPhysicalExam.query.filter_by(user_id=data.user_id).order_by(MedicalPhysicalExam.idx.desc()).first()
         if not recent_physical:
             data_dict["vital_weight"] = None
         else:    
@@ -864,7 +864,7 @@ class MoxyTries(Schema):
 class MoxyRipSchema(Schema):
     limiter_options = ['Demand','Supply','Respiratory']
 
-    userid = fields.Integer(missing=0)
+    user_id = fields.Integer(missing=0)
     timestamp = fields.DateTime()
     vl_side = fields.String(description="vl_side must be either 'right' or 'left'", missing=None)
     performance = fields.Nested(MoxyTries, missing=MoxyTries().load({}))
@@ -897,7 +897,7 @@ class MoxyRipSchema(Schema):
 
     @post_load
     def unravel(self, data, **kwargs):
-        flat_data = {'userid': data['userid'],
+        flat_data = {'user_id': data['user_id'],
                     'vl_side': data['vl_side'],
                     'performance_smo2_1':          data['performance']['one']['smo2'],
                     'performance_thb_1':           data['performance']['one']['thb'],
@@ -1010,13 +1010,13 @@ class MoxyRipSchema(Schema):
             "recovery_baseline_thb": data.recovery_baseline_thb,
             "avg_interval_time": data.avg_interval_time,
             "avg_recovery_time": data.avg_recovery_time,
-            "userid": data.userid,
+            "user_id": data.user_id,
             "smo2_tank_size": data.smo2_tank_size,
             "limiter": data.limiter,
             "intervention": data.intervention
         }
         # add vital_weight from client's most recent physical examination
-        recent_physical = MedicalPhysicalExam.query.filter_by(userid=data.userid).order_by(MedicalPhysicalExam.idx.desc()).first()
+        recent_physical = MedicalPhysicalExam.query.filter_by(user_id=data.user_id).order_by(MedicalPhysicalExam.idx.desc()).first()
         if not recent_physical:
             nested["vital_weight"] = None
         else:    
@@ -1039,7 +1039,7 @@ class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
     trainer_goals_list = ['Expertise', 'Motivation', 'Accountability', 'Time Efficiency', 'Other']
     sleep_hours_options_list = ['< 4', '4-6','6-8','> 8']
         
-    userid = fields.Integer(missing=0)
+    user_id = fields.Integer(missing=0)
     timestamp = fields.DateTime(description="timestamp of questionnaire. Filled by backend")
 
     stress_sources = fields.List(fields.String,
@@ -1109,7 +1109,7 @@ class MedicalImagingSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = MedicalImaging
         load_instance = True
-        exclude = ["userid", "idx"]
+        exclude = ["user_id", "idx"]
 
     possible_image_types = ['CTscan', 'MRI', 'PETscan', 'Ultrasound', 'XRay']
     image_type = fields.String(validate=validate.OneOf(possible_image_types), required=True)
@@ -1117,8 +1117,8 @@ class MedicalImagingSchema(ma.SQLAlchemyAutoSchema):
     image_read = fields.String(required=True)
     
 class MedicalBloodTestSchema(Schema):
-    testid = fields.Integer()
-    userid = fields.Integer()
+    test_id = fields.Integer()
+    user_id = fields.Integer()
     date = fields.Date(required=True)
     panel_type = fields.String(required=False)
     notes = fields.String(required=False)
@@ -1133,12 +1133,12 @@ class MedicalBloodTestResultsInputSchema(Schema):
 
 class MedicalBloodTestResultsOutputSchema(Schema):
     idx = fields.Integer()
-    testid = fields.Integer()
+    test_id = fields.Integer()
     result_type = fields.String()
     result_value = fields.Float()
 
 class MedicalBloodTestsInputSchema(Schema):
-    userid = fields.Integer()
+    user_id = fields.Integer()
     date = fields.Date()
     panel_type = fields.String()
     notes = fields.String()
@@ -1146,7 +1146,7 @@ class MedicalBloodTestsInputSchema(Schema):
 
 class MedicalBloodTestResultsSchema(Schema):
     idx = fields.Integer()
-    testid = fields.Integer()
+    test_id = fields.Integer()
     resultid = fields.Integer()
     result_value = fields.Float()
 
@@ -1166,7 +1166,7 @@ class MedicalHistorySchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = MedicalHistory
         
-    userid = fields.Integer(missing=0)
+    user_id = fields.Integer(missing=0)
     
     @post_load
     def make_object(self, data, **kwargs):
@@ -1176,7 +1176,7 @@ class MedicalPhysicalExamSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = MedicalPhysicalExam
         
-    userid = fields.Integer(missing=0)
+    user_id = fields.Integer(missing=0)
     vital_height = fields.String(description="Deprecated, use vital_height_inches instead", missing="")
     
     @post_load
@@ -1200,7 +1200,7 @@ class ClientExternalMRSchema(Schema):
     For returning medical institutions in GET request and also accepting new institute names
     """
 
-    userid = fields.Integer(missing=0)
+    user_id = fields.Integer(missing=0)
     institute_id = fields.Integer(missing=9999)
     med_record_id = fields.String()
     institute_name = fields.String(load_only=True, required=False, missing="")
@@ -1243,7 +1243,7 @@ class StaffPasswordUpdateSchema(Schema):
     new_password = fields.String(required=True,  validate=validate.Length(min=3,max=50), description="new password to be used going forward")
 
 class StaffSearchItemsSchema(Schema):
-    userid = fields.Integer()
+    user_id = fields.Integer()
     firstname = fields.String(required=False, validate=validate.Length(min=1, max= 50), missing=None)
     lastname = fields.String(required=False, validate=validate.Length(min=1,max=50), missing=None)
     email = fields.Email(required=False, missing=None)   
@@ -1260,7 +1260,7 @@ class StaffSchema(ma.SQLAlchemyAutoSchema):
                 required=True)
     is_system_admin = fields.Boolean(dump_only=True, missing=False)
     is_admin = fields.Boolean(dump_only=True, missing=False)
-    userid = fields.Integer(dump_only=True)
+    user_id = fields.Integer(dump_only=True)
 
     @validates('access_roles')
     def valid_access_roles(self,value):
@@ -1289,7 +1289,7 @@ class ClientSummarySchema(Schema):
     middlename = fields.String()
     lastname = fields.String()
     dob = fields.Date()
-    userid = fields.Integer()
+    user_id = fields.Integer()
     membersince = fields.Date()
     facilities = fields.Nested(RegisteredFacilitiesSchema(many=True))
 
@@ -1322,7 +1322,7 @@ class WearablesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Wearables
         load_instance = True
-        exclude = ('idx', 'userid', 'created_at', 'updated_at')
+        exclude = ('idx', 'user_id', 'created_at', 'updated_at')
 
 
 class WearablesOuraAuthSchema(Schema):
@@ -1334,7 +1334,7 @@ class WearablesFreeStyleSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = WearablesFreeStyle
         load_instance = True
-        exclude = ('idx', 'userid', 'created_at', 'updated_at')
+        exclude = ('idx', 'user_id', 'created_at', 'updated_at')
 
 
 class WearablesFreeStyleActivateSchema(ma.SQLAlchemyAutoSchema):

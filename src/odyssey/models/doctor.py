@@ -11,7 +11,7 @@ class MedicalImaging(db.Model):
     """ Medical Imaging table
 
     This table stores the medical imaging history of a client. 
-    As long as the clientID exists, we can add images to this table and search by clientID
+    As long as the user_id exists, we can add images to this table and search by user_id
     """
     __tablename__ = 'MedicalImaging'
 
@@ -36,11 +36,11 @@ class MedicalImaging(db.Model):
     :type: datetime
     """
 
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid', ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id', ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    User ID number
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.user_id`
     """
 
     image_date = db.Column(db.Date)
@@ -120,11 +120,11 @@ class MedicalHistory(db.Model):
     :type: datetime
     """
 
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='MedicalHistory_clientid_fkey', ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id', ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    User ID number
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.user_id`
     """
 
     last_examination_date = db.Column(db.Date)
@@ -243,11 +243,11 @@ class MedicalPhysicalExam(db.Model):
     :type: int, primary key, autoincrement
     """
 
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='MedicalPhysicalExam_clientid_fkey',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id',ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    User ID number
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.user_id`
     """
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
@@ -485,9 +485,9 @@ class MedicalBloodTests(db.Model):
     :type: datetime
     """
 
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid', ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id', ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    User ID number
 
     :type: int, foreign key
     """
@@ -574,7 +574,7 @@ class MedicalBloodTestResults(db.Model):
 
     testid = db.Column(db.Integer, db.ForeignKey('MedicalBloodTests.testid', ondelete="CASCADE"), nullable=False)
     """
-    foreign key to MedicalBloodTests.clientid
+    foreign key to MedicalBloodTests.user_id
 
     :type: int, foreign key
     """

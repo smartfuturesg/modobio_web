@@ -32,7 +32,7 @@ class User(db.Model):
     :type: datetime
     """
 
-    userid = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     User ID number
 
@@ -98,9 +98,9 @@ class UserLogin(db.Model):
     :type: datetime
     """
 
-    userid = db.Column((db.Integer, db.ForeignKey('User.userid',nullable=False)
+    user_id = db.Column((db.Integer, db.ForeignKey('User.user_id',nullable=False)
     """
-    User ID number, foreign key to User.userid
+    User ID number, foreign key to User.user_id
 
     :type: int, foreign key
     """

@@ -11,9 +11,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from odyssey import db, whooshee
 from odyssey.constants import DB_SERVER_TIME
 
-@whooshee.register_model('firstname','lastname','email','staffid')
+@whooshee.register_model('firstname','lastname','email','user_id')
 class StaffProfile(db.Model):
-    """ Staff member information table.
+    """ Staff member profile information table.
 
     This table stores information regarding Modo Bio
     staff member profiles.
@@ -34,9 +34,9 @@ class StaffProfile(db.Model):
     :type: datetime
     """
 
-    userid = db.Column((db.Integer, db.ForeignKey('User.userid',nullable=False))
+    user_id = db.Column((db.Integer, db.ForeignKey('User.user_id',nullable=False))
     """
-    User ID number, foreign key to User.userid
+    User ID number, foreign key to User.user_id
 
     :type: int, foreign key
     """
@@ -85,9 +85,9 @@ class ClientRemovalRequests(db.Model):
     :type: datetime
     """
     
-    staffid = db.Column(db.Integer, db.ForeignKey('User.userid',nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',nullable=False)
     """
-    Staff member userid number, foreign key to User.userid
+    Staff member user_id number, foreign key to User.user_id
 
     :type: int, foreign key
     """

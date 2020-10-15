@@ -41,9 +41,9 @@ class ClientInfo(db.Model):
     :type: datetime
     """
 
-    userid = db.Column(db.Integer, db.ForeignKey('User.userid',nullable=False))
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',nullable=False), unique=True)
     """
-    User ID number, foreign key to User.userid
+    User ID number, foreign key to User.user_id
 
     :type: int, foreign key
     """
@@ -187,22 +187,22 @@ class ClientInfo(db.Model):
     Record Locator ID
 
     name_hash = md5(bytes((data['firstname']+data['lastname']), 'utf-8')).hexdigest()
-    data['record_locator_id'] = (data['firstname'][0]+data['lastname'][0]+str(data['userid'])+name_hash[0:6]).upper()    
+    data['record_locator_id'] = (data['firstname'][0]+data['lastname'][0]+str(data['user_id'])+name_hash[0:6]).upper()    
 
     :type: str, max length 10
     """
 
     @staticmethod
-    def generate_record_locator_id(firstname, lastname, userid):
+    def generate_record_locator_id(firstname, lastname, user_id):
         """medical record hash generation"""
-        random.seed(clientid)
+        random.seed(user_id)
         rli_hash = "".join([random.choice(ALPHANUMERIC) for i in range(10)])
         return (firstname[0]+lastname[0]+rli_hash).upper()
 
     def client_info_search_dict(self):
         """returns just the searchable client info (name, email, number)"""
         data = {
-            'clientid': self.clientid,
+            'user_id': self.user_id,
             'record_locator_id': self.record_locator_id,
             'firstname': self.firstname,
             'lastname': self.lastname,
@@ -253,9 +253,9 @@ class ClientFacilities(db.Model):
     :type: datetime
     """
 
-    userid = db.Column(db.ForeignKey('User.userid',ondelete="CASCADE"))
+    user_id = db.Column(db.ForeignKey('ClientInfo.user_id',ondelete="CASCADE"))
     """
-    Foreign key from User table
+    Foreign key from ClienInfo table
 
     :type: int, foreign key
     """
@@ -314,11 +314,11 @@ class ClientConsent(db.Model):
     :type: datetime
     """
 
-    userid = db.Column(db.Integer, db.ForeignKey('User.userid',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id',ondelete="CASCADE"), nullable=False)
     """
     User ID number.
 
-    :type: int, foreign key to :attr:`User.userid`
+    :type: int, foreign key to :attr:`ClientInfo.user_id`
     """
 
     infectious_disease = db.Column(db.Boolean)
@@ -417,11 +417,11 @@ class ClientRelease(db.Model):
     :type: datetime
     """
 
-    userid = db.Column(db.Integer, db.ForeignKey('User.userid',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id',ondelete="CASCADE"), nullable=False)
     """
     User ID number
 
-    :type: int, foreign key to :attr:`User.userid`
+    :type: int, foreign key to :attr:`ClientInfo.user_id`
     """
 
     release_of_all = db.Column(db.Boolean)
@@ -548,11 +548,11 @@ class ClientPolicies(db.Model):
     :type: datetime
     """
 
-    userid = db.Column(db.Integer, db.ForeignKey('User.userid',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id',ondelete="CASCADE"), nullable=False)
     """
     User ID number
 
-    :type: int, foreign key to :attr:`User.userid`
+    :type: int, foreign key to :attr:`ClientInfo.user_id`
     """
 
     signdate = db.Column(db.Date)
@@ -644,11 +644,11 @@ class ClientConsultContract(db.Model):
     :type: datetime
     """
 
-    userid = db.Column(db.Integer, db.ForeignKey('User.userid',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id',ondelete="CASCADE"), nullable=False)
     """
     User ID number
 
-    :type: int, foreign key to :attr:`User.userid`
+    :type: int, foreign key to :attr:`ClientInfo.user_id`
     """
 
     signdate = db.Column(db.Date)
@@ -740,11 +740,11 @@ class ClientSubscriptionContract(db.Model):
     :type: datetime
     """
 
-    userid = db.Column(db.Integer, db.ForeignKey('User.userid',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id',ondelete="CASCADE"), nullable=False)
     """
     User ID number
 
-    :type: int, foreign key to :attr:`User.userid`
+    :type: int, foreign key to :attr:`ClientInfo.user_id`
     """
 
     signdate = db.Column(db.Date)
@@ -831,11 +831,11 @@ class ClientIndividualContract(db.Model):
     :type: datetime
     """
 
-    userid = db.Column(db.Integer, db.ForeignKey('User.userid',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id',ondelete="CASCADE"), nullable=False)
     """
     User ID number
 
-    :type: int, foreign key to :attr:`User.userid`
+    :type: int, foreign key to :attr:`ClientInfo.user_id`
     """
 
     doctor = db.Column(db.Boolean, default=False)
@@ -906,155 +906,6 @@ class ClientIndividualContract(db.Model):
 
     :type: str, max length 40
     """
-""" 
-class RemoteRegistration(db.Model):
-    """ At-home client registration parameter
-
-    Stores details to enable clients to register at home securely. This inclues the
-    temporary registration url, client login details, and current api token. Each at-home
-    client will have one entry in this table. Expired urls will remain for record keeping.
-
-    The primary index of this table is the
-    :attr:`clientid` number.
-    """
-
-    __tablename__ = 'ClientRemoteRegistration'
-
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    timestamp for when object was created. DB server time is used. 
-
-    :type: datetime
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    timestamp for when object was updated. DB server time is used. 
-
-    :type: datetime
-    """
-
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='remote_registration_clientid_fkey',ondelete="CASCADE"), nullable=False)
-    """
-    Client ID number
-
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
-    """
-
-    email = db.Column(db.String(50))
-    """
-    Client email address.
-
-    :type: str, max length 50
-    """
-
-    token = db.Column(db.String(32), index=True, unique=True)
-    """
-    API authentication token
-
-    :type: str, max length 32, indexed, unique
-    """
-
-    token_expiration = db.Column(db.DateTime)
-    """
-    token expiration date
-
-    :type: datetime
-    """
-
-    password = db.Column(db.String(128))
-    """
-    Hashed password string, as generated by :func:`werkzeug.security.generate_password_hash`.
-
-    :type: str, max length 128
-    """
-
-    registration_portal_id = db.Column(db.String(32), index=True, unique=True)
-    """
-    registration portal endpoint
-
-    :type: str, max length 32, indexed, unique
-    """
-
-    registration_portal_expiration = db.Column(db.DateTime)
-    """
-    token expiration date
-
-    :type: datetime
-    """
-
-    def get_temp_registration_endpoint(self, expires_in = 86400):
-        """creates a temporary endpoint meant for at-home
-           registration
-        """
-        now = datetime.utcnow()
-        self.registration_portal_id = secrets.token_hex(16)
-        self.registration_portal_expiration = now + timedelta(seconds=expires_in)
-
-        db.session.add(self)
-        db.session.commit()
-
-        return self.registration_portal_id
-
-
-    def set_password(self):
-        """create temporary password, hash it"""
-        password = self.email[0:2]+secrets.token_hex(4)
-        self.password = password
-        return password
-
-    def check_password(self, password):
-        return password == self.password
-
-    def get_token(self,expires_in=86400):
-        now = datetime.utcnow()
-        #returns current token if it is valid
-        if self.token and self.token_expiration > now + timedelta(seconds=60):
-            return self.token
-        #otherwise generate new token, add to session
-        self.token = base64.b64encode(os.urandom(24)).decode('utf-8')
-        self.token_expiration = now + timedelta(seconds=expires_in)
-        db.session.add(self)
-        db.session.flush()
-        db.session.commit()
-        return self.token
-
-    def revoke_token(self):
-        """set token to expired, for logging out/generating new token"""
-        self.token_expiration = datetime.utcnow() - timedelta(seconds=1)
-        db.session.add(self)
-        db.session.flush()
-        db.session.commit()
-
-    @staticmethod
-    def check_token(token):
-        """check if token is valid. returns user if so"""
-        remote_client = RemoteRegistration.query.filter_by(token=token).first()
-
-        if remote_client is None or remote_client.token_expiration < datetime.utcnow():
-            return None
-        return remote_client
-
-    @staticmethod
-    def check_portal_id(portal_id):
-        """check if token is valid. returns user if so"""
-        # get most recent instance of the remote client based on registration
-        # portal id and index
-        remote_client = RemoteRegistration.query.filter_by(
-            registration_portal_id=portal_id).order_by(
-            RemoteRegistration.idx.desc()).first()
-
-        if remote_client is None or remote_client.registration_portal_expiration < datetime.utcnow():
-            return None
-        return remote_client """
 
 class ClientExternalMR(db.Model):
     """ Client external medical record table
@@ -1065,7 +916,7 @@ class ClientExternalMR(db.Model):
     __tablename__ = 'ClientExternalMR'
 
     __table_args__ = (
-        db.UniqueConstraint('userid', 'med_record_id', 'institute_id'),)
+        db.UniqueConstraint('user_id', 'med_record_id', 'institute_id'),)
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -1088,11 +939,11 @@ class ClientExternalMR(db.Model):
     :type: datetime
     """
 
-    userid = db.Column(db.Integer, db.ForeignKey('User.userid',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id',ondelete="CASCADE"), nullable=False)
     """
     User ID number
 
-    :type: int, foreign key to :attr:`User.userid`
+    :type: int, foreign key to :attr:`ClientInfo.user_id`
     """
 
     med_record_id = db.Column(db.String, nullable=False)
@@ -1144,11 +995,11 @@ class ClientReleaseContacts(db.Model):
     :type: int, foreign key to :attr:`ClientRelease.idx`
     """
 
-    userid = db.Column(db.Integer, db.ForeignKey('User.userid',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id',ondelete="CASCADE"), nullable=False)
     """
     User ID number
 
-    :type: int, foreign key to :attr:`User.userid`
+    :type: int, foreign key to :attr:`ClientInfo.user_id`
     """
 
     release_direction = db.Column(db.String, nullable=False)

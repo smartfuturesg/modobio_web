@@ -22,7 +22,7 @@ from odyssey.models.client import *
 
 _executor = concurrent.futures.ThreadPoolExecutor(thread_name_prefix='PDF_')
 
-def to_pdf(clientid: int,
+def to_pdf(user_id: int,
            table: Type[db.Model],
            template: str=None,
            form: FlaskForm=None):
@@ -33,8 +33,8 @@ def to_pdf(clientid: int,
 
     Parameters
     ----------
-    clientid : int
-        Client ID number.
+    user_id : int
+        User ID number.
 
     table : :class:`flask_sqlalchemy.SQLAlchemy.Model`
         Table that stores information for the document about to be PDFed. Must be
@@ -52,7 +52,7 @@ def to_pdf(clientid: int,
     Raises
     ------
     ValueError
-        Raised when :attr:`clientid` does not exist in a database table.
+        Raised when :attr:`user_id` does not exist in a database table.
     """
     # The second argument (first argument to _to_pdf) is key: we need to copy
     # the current RequestContext and pass it to the thread to ensure that the
@@ -68,13 +68,13 @@ def to_pdf(clientid: int,
     _executor.submit(
         _to_pdf,
         _request_ctx_stack.top.copy(),
-        clientid,
+        user_id,
         table,
         template=template,
         form=form
     )
 
-def _to_pdf(req_ctx, clientid, table, template=None, form=None):
+def _to_pdf(req_ctx, user_id, table, template=None, form=None):
     """ Generate and store a PDF file from a signed document.
 
     Don't call this function directly, use :func:`to_pdf` for non-blocking,
@@ -86,25 +86,25 @@ def _to_pdf(req_ctx, clientid, table, template=None, form=None):
     local_session = db.create_scoped_session()
     with req_ctx:
         ### Load data and perform checks
-        client = local_session.query(ClientInfo).filter_by(clientid=clientid).one_or_none()
+        client = local_session.query(ClientInfo).filter_by(user_id=user_id).one_or_none()
 
         if not client:
             # Calling thread has already finished, so raising errors here
             # has no effect. Print to stdout instead and hope somebody reads it.
             # TODO: logging
-            print(f'Clientid {clientid} not found in table {ClientInfo.__tablename__}.')
+            print(f'User ID {user_id} not found in table {ClientInfo.__tablename__}.')
             return
 
         query = (
             local_session
             .query(table)
-            .filter_by(clientid=clientid)
+            .filter_by(user_id=user_id)
             .order_by(table.idx.desc())
         )
         doc = query.first()
 
         if not doc:
-            print(f'Clientid {clientid} not found in table {table.__tablename__}.')
+            print(f'User ID {user_id} not found in table {table.__tablename__}.')
             return
 
         if doc.pdf_path:
@@ -116,9 +116,9 @@ def _to_pdf(req_ctx, clientid, table, template=None, form=None):
         css = CSS(filename=cssfile)
 
         if template:
-            session['staffid'] = 1
-            session['clientname'] = client.fullname
-            session['clientid'] = clientid
+            session['staff_id'] = 1
+            #session['clientname'] = client.fullname
+            session['user_id'] = user_id
 
             html = render_template(template, form=form, pdf=True)
         else:
@@ -129,14 +129,14 @@ def _to_pdf(req_ctx, clientid, table, template=None, form=None):
         pdf = HTML(string=html).write_pdf(stylesheets=[css])
         pdf_hash = hashlib.sha1(pdf).hexdigest()
 
-        clientid = int(clientid)
+        user_id = int(user_id)
         docname = table.displayname.split()[0].lower()
 
-        filename = f'ModoBio_{docname}_v{doc.revision}_client{clientid:05d}_{doc.signdate}.pdf'
+        filename = f'ModoBio_{docname}_v{doc.revision}_client{user_id:05d}_{doc.signdate}.pdf'
         bucket_name = current_app.config['S3_BUCKET_NAME']
 
         if current_app.config['LOCAL_CONFIG']:
-            path = pathlib.Path(bucket_name) / f'id{clientid:05d}' / 'signed_documents'
+            path = pathlib.Path(bucket_name) / f'id{user_id:05d}' / 'signed_documents'
             path.mkdir(parents=True, exist_ok=True)
 
             fullname = path / filename
@@ -147,7 +147,7 @@ def _to_pdf(req_ctx, clientid, table, template=None, form=None):
             pdf_path = fullname.as_posix()
         else:
             pdf_obj = io.BytesIO(pdf)
-            pdf_path = f'id{clientid:05d}/signed_documents/{filename}'
+            pdf_path = f'id{user_id:05d}/signed_documents/{filename}'
 
             s3 = boto3.client('s3')
             s3.upload_fileobj(pdf_obj, bucket_name, pdf_path)
@@ -160,7 +160,7 @@ def _to_pdf(req_ctx, clientid, table, template=None, form=None):
         if current_app.config['DEBUG']:
             print('PDF stored at:', pdf_path)
 
-def merge_pdfs(documents: list, clientid: int) -> str:
+def merge_pdfs(documents: list, user_id: int) -> str:
     """ Merge multiple pdf files into a single pdf.
 
     Generated document is stored in an S3 bucket with a temp prefix. It expires
@@ -207,12 +207,12 @@ def merge_pdfs(documents: list, clientid: int) -> str:
         buf.close()
     pdf_buf.seek(0)
 
-    clientid = int(clientid)
+    user_id = int(user_id)
     signdate = date.today().isoformat()
-    filename = f'ModoBio_client{clientid:05d}_{signdate}.pdf'
+    filename = f'ModoBio_client{user_id:05d}_{signdate}.pdf'
 
     if current_app.config['LOCAL_CONFIG']:
-        path = pathlib.Path(bucket_name) / f'id{clientid:05d}' / 'signed_documents'
+        path = pathlib.Path(bucket_name) / f'id{user_id:05d}' / 'signed_documents'
         path.mkdir(parents=True, exist_ok=True)
 
         fullname = path / filename

@@ -34,11 +34,11 @@ class PTHistory(db.Model):
     :type: datetime
     """
 
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='PTHistory_clientid_fkey',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    User ID number
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`User.user_id`
     """
 
     exercise = db.Column(db.Text)
@@ -142,11 +142,12 @@ class Chessboard(db.Model):
     """ Mobility assessment table a.k.a Chessboard
 
     This table stores the repeated mobility assessment measurements. The measurements
-    are indexed by :attr:`clientid` and assessment :attr:`timestamp`. All values in
+    are indexed by :attr:`user_id` and assessment :attr:`timestamp`. All values in
     this table, with the exception of :attr:`isa_dynamic`, are angles in degrees.
     """
 
     __tablename__ = 'PTChessboard'
+    
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     Table index.
@@ -154,11 +155,11 @@ class Chessboard(db.Model):
     :type: int, primary key, autoincrement
     """
 
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='chessboard_clientid_fkey',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
     """
     Client ID number
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`User.user_id`
     """
 
     timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)
@@ -404,18 +405,17 @@ class MobilityAssessment(db.Model):
     """ Mobility assessment table
 
     This table stores the repeated mobility assessment measurements. The measurements
-    are indexed by :attr:`clientid` and assessment :attr:`timestamp`. All values in
+    are indexed by :attr:`user_id` and assessment :attr:`timestamp`. All values in
     this table, with the exception of :attr:`isa_dynamic`, are angles in degrees.
     """
 
     __tablename__ = 'MobilityAssessment'
 
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid'),
-                        nullable=False, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    User ID number
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`User.user_id`
     """
 
     timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)

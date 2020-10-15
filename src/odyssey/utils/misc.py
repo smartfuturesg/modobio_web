@@ -24,34 +24,34 @@ def list_average(values_list):
     else:
         return None
 
-def check_client_existence(clientid):
+def check_client_existence(user_id):
     """Check that the client is in the database
     All clients must be in the CLientInfo table before any other procedure"""
-    client = ClientInfo.query.filter_by(clientid=clientid).one_or_none()
+    client = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
     if not client:
-        raise UserNotFound(clientid)
+        raise UserNotFound(user_id)
 
-def check_blood_test_existence(testid):
+def check_blood_test_existence(test_id):
     """Check that the blood test is in the database"""
-    test = MedicalBloodTests.query.filter_by(testid=testid).one_or_none()
+    test = MedicalBloodTests.query.filter_by(test_id=test_id).one_or_none()
     if not test:
-        raise TestNotFound(testid)
+        raise TestNotFound(test_id)
 
 def check_blood_test_result_type_existence(result_name):
     """Check that a supplied blood test result type is in the database"""
     result = MedicalBloodTestResultTypes.query.filter_by(result_name=result_name).one_or_none()
     if not result:
-        raise ResultTypeNotFound(resultName)
+        raise ResultTypeNotFound(result_name)
 
 def check_facility_existence(facility_id):
     facility = RegisteredFacilities.query.filter_by(facility_id=facility_id).one_or_none()
     if not facility:
         raise FacilityNotFound(facility_id)
 
-def check_client_facility_relation_existence(clientid, facility_id):
-    relation = ClientFacilities.query.filter_by(client_id=clientid,facility_id=facility_id).one_or_none()
+def check_client_facility_relation_existence(user_id, facility_id):
+    relation = ClientFacilities.query.filter_by(userid=userid,facility_id=facility_id).one_or_none()
     if relation:
-        raise RelationAlreadyExists(clientid, facility_id)
+        raise RelationAlreadyExists(user_id, facility_id)
 
 def check_remote_client_portal_validity(portal_id):
     """

@@ -237,11 +237,11 @@ class StrengthAssessment(db.Model):
     :type: datetime
     """
 
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='strength_assessment_clientid_fkey',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id',ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    User ID number
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.user_id`
     """
 
     upper_push_notes = db.Column(db.Text)
@@ -503,11 +503,11 @@ class MovementAssessment(db.Model):
     :type: datetime
     """
 
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='movement_assessment_clientid_fkey',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id', ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    User ID number
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.user_id`
     """
 
     squat_depth = db.Column(db.String)
@@ -648,11 +648,11 @@ class HeartAssessment(db.Model):
     :type: datetime
     """
 
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='heart_assessment_clientid_fkey',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id',ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    User ID number
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.user_id`
     """
 
     resting_hr = db.Column(db.Integer)
@@ -747,11 +747,11 @@ class MoxyAssessment(db.Model):
     :type: datetime
     """
 
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='moxy_assessment_clientid_fkey',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id',ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    User ID number
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.user_id`
     """
 
     vl_side = db.Column(db.String)
@@ -883,7 +883,7 @@ class MoxyRipTest(db.Model):
     :type: datetime
     """
 
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='moxy_rip_assessment_clientid_fkey',ondelete="CASCADE"), nullable=False)
+    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id',ondelete="CASCADE"), nullable=False)
     """
     Client ID number
 
