@@ -1246,9 +1246,7 @@ class StaffSearchItemsSchema(Schema):
     staffid = fields.Integer()
     firstname = fields.String(required=False, validate=validate.Length(min=1, max= 50), missing=None)
     lastname = fields.String(required=False, validate=validate.Length(min=1,max=50), missing=None)
-    email = fields.Email(required=False, missing=None)
-
-class UserSchema
+    email = fields.Email(required=False, missing=None)   
 
 class StaffSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -1295,20 +1293,25 @@ class ClientSummarySchema(Schema):
     membersince = fields.Date()
     facilities = fields.Nested(RegisteredFacilitiesSchema(many=True))
 
+#
+#   Schemas for user accounts
+#
 class UserSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
 
-    clientid = fields.Integer()
-    staffid = fields.Integer()
-    token = fields.String(dump_only=True)
-    token_expiration = fields.DateTime(dump_only=True)
-    password = fields.String(load_only=True)
-    email = fields.Email(required=True)
-
     @post_load
     def make_object(self, data, **kwargs):
         new_user = User(**data)
+        return new_user
+
+class UserLoginSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = UserLogin
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        new_user = UserLogin(**data)
         new_user.set_password(data['password'])
         return new_user
 
