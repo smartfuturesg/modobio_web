@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 
 from flask_wtf import FlaskForm
 from wtforms import BooleanField, FormField, HiddenField, IntegerField, StringField, TextAreaField
@@ -50,7 +50,7 @@ class MobilityAssessmentRHForm(MobilityAssessmentQuadrantForm):
 
 
 class MobilityAssessmentForm(FlaskForm):
-    timestamp = StringField('Assessment date', default=datetime.datetime.now())
+    timestamp = StringField('Assessment date', default=datetime.now())
     isa_left = IntegerField('ISA left')
     isa_right = IntegerField('ISA right')
     isa_dynamic = BooleanField('Dynamic?')

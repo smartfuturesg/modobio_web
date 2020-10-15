@@ -50,7 +50,6 @@ def test_get_medical_imaging(test_client, init_database):
     # send get request for client info on clientid = 1 
     response = test_client.get('/doctor/images/1/', headers=headers)
     
-    #breakpoint()
     assert response.status_code == 200
     assert len(response.json) == 1
     assert response.json[0]['image_type'] ==  test_medical_imaging['image_type']

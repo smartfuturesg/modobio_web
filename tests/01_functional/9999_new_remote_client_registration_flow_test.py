@@ -1,6 +1,4 @@
 import base64
-import datetime
-import pathlib
 import time
 
 from flask.json import dumps
@@ -88,7 +86,6 @@ def test_get_remote_client_api_token(test_client, init_database):
     remote_client = RemoteRegistration.query.filter_by(
                         email=test_new_remote_registration['email']).order_by(
                         RemoteRegistration.idx.desc()).first()
-    
     tmp_registration = remote_client.registration_portal_id
     valid_credentials = base64.b64encode(f"{remote_client.email}:{remote_client.password}".encode("utf-8")).decode("utf-8")
     

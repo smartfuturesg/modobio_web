@@ -1,12 +1,12 @@
-import datetime
+from datetime import date
 
 from flask_wtf import FlaskForm
 from wtforms import BooleanField, DateField, FloatField, HiddenField, RadioField, StringField, SelectField
 
 from odyssey.constants import COUNTRIES, GENDERS, USSTATES, CONTACT_METHODS, YESNO, BOOLIFY
 
-today = datetime.date.today()
-next_year = datetime.date(year=today.year + 1, month=today.month, day=today.day)
+today = date.today()
+next_year = date(year=today.year + 1, month=today.month, day=today.day)
 
 class ClientInfoForm(FlaskForm):
     firstname = StringField('First name')
