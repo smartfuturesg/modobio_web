@@ -1,3 +1,4 @@
+import os
 import pytest
 
 from odyssey import create_app, db
@@ -63,17 +64,18 @@ def init_database():
     # run .sql file to create db procedures
     #  read client_data_storage_file, remove comments,
     #  execute, raw sql on database
-    with open ("database/client_data_storage.sql", "r") as f:
-        data=f.readlines()
 
-    dat = [x for x in data if not x.startswith('--')]
+    breakpoint()
+
+    sql_scripts = [f for f in os.listdir('database/') if f.endswith(".sql")]
+    #TODO RUN ALL SCRIPTS WHAT BEND WITH .SQL
+    for sql_script in sql_files:
+        with open (sql_script, "r") as f:
+            data=f.readlines()
+
+        dat = [x for x in data if not x.startswith('--')]
     
-    db.session.execute(''.join(dat))
-
-    with open ("database/addResultTypes.sql", "r") as f:
-        data=f.readlines()
-
-    db.session.execute(''.join(data))
+        db.session.execute(''.join(dat))
 
     # Insert test client data
     client_1 = ClientInfo(**test_client_info)
