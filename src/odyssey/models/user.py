@@ -53,7 +53,7 @@ class User(db.Model):
     :type: str, max length 50
     """
 
-    phone_number = db.Column(db.String(20))
+    phone_number = db.Column(db.String(50))
     """
     User phone number
 
