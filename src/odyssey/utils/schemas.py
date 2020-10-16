@@ -1132,7 +1132,7 @@ class MedicalImagingSchema(ma.SQLAlchemyAutoSchema):
 class MedicalBloodTestSchema(Schema):
     testid = fields.Integer()
     clientid = fields.Integer()
-    date = fields.Date(required=True)
+    date = fields.Date(required=True, format="iso")
     panel_type = fields.String(required=False)
     notes = fields.String(required=False)
 
@@ -1140,14 +1140,8 @@ class MedicalBloodTestSchema(Schema):
     def make_object(self, data, **kwargs):
         return MedicalBloodTests(**data)
 
-class MedicalBloodTestResultsInputSchema(Schema):
+class MedicalBloodTestResultsSchema(Schema):
     result_name = fields.String()
-    result_value = fields.Float()
-
-class MedicalBloodTestResultsOutputSchema(Schema):
-    idx = fields.Integer()
-    testid = fields.Integer()
-    result_type = fields.String()
     result_value = fields.Float()
     evaluation = fields.String(dump_only=True)
 
@@ -1156,7 +1150,29 @@ class MedicalBloodTestsInputSchema(Schema):
     date = fields.Date()
     panel_type = fields.String()
     notes = fields.String()
-    results = fields.Nested(MedicalBloodTestResultsInputSchema, many=True)
+    results = fields.Nested(MedicalBloodTestResultsSchema, many=True)
+
+class BloodTestsByTestID(Schema):
+    """
+    Organizes blood test results into a nested results field
+    General information about the test entry like testid, date, notes, panel
+    are in the outer most part of this schema.
+    """
+    testid = fields.Integer()
+    results = fields.Nested(MedicalBloodTestResultsSchema(many=True))
+    notes = fields.String()
+    panel = fields.String()
+    date = fields.Date(format="iso")
+
+class MedicalBloodTestResultsOutputSchema(Schema):
+    """
+    Schema for outputting a nested json 
+    of blood test results. 
+    """
+    tests = fields.Integer(description="# of test entry sessions. All each test may have more than one test result")
+    test_results = fields.Integer(description="# of test results")
+    items = fields.Nested(BloodTestsByTestID(many=True), missing = [])
+    clientid = fields.Integer()
 
 class MedicalBloodTestResultsSchema(Schema):
     idx = fields.Integer()
@@ -1168,10 +1184,17 @@ class MedicalBloodTestResultsSchema(Schema):
     def make_object(self, data, **kwargs):
         return MedicalBloodTestResults(**data)
 
-class MedicalBloodTestResultTypesSchema(Schema):
-    resultid = fields.Integer()
-    result_name = fields.String()
 
+class MedicalBloodTestTypes(ma.SQLAlchemyAutoSchema):
+    class Meta():
+        model = MedicalBloodTestResultTypes
+        exclude = ('created_at', 'resultid')
+
+class MedicalBloodTestResultTypesSchema(Schema):
+    
+    items = fields.Nested(MedicalBloodTestTypes(many=True)) 
+    total = fields.Integer()
+    
     @post_load
     def make_object(self, data, **kwargs):
         return MedicalBloodTestResultTypes(**data)

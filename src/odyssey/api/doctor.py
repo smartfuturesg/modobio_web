@@ -1,7 +1,7 @@
 import os, boto3, secrets, pathlib
 from datetime import datetime
 
-from flask import request, current_app
+from flask import request, current_app, jsonify
 from flask_accepts import accepts, responds
 from flask_restx import Resource, Api
 
@@ -197,17 +197,72 @@ class MedBloodTestResults(Resource):
         #replace resultid with result name for readability      
         response = []
         for result in results:
-            output = {'idx': result.idx,'testid': result.testid,'result_value': result.result_value}
+            output = {'idx': result.idx,'testid': result.testid,'result_value': result.result_value, 'evaluation': result.evaluation}
             output['result_type'] = MedicalBloodTestResultTypes.query.filter_by(resultid=result.resultid).first().result_name
             response.append(output) 
         return response
 
-@ns.route('/bloodtest/resulttypes/')
-class MedBloodTestResultTypes(Resource):
+@ns.route('/bloodtest/results/all/<int:clientid>/')
+@ns.doc(params={'clientid': 'Client ID number'})
+class AllMedBloodTestResults(Resource):
+    """
+    Endpoint for returning all blood tests from a client
+    """
     @token_auth.login_required
-    @responds(schema=MedicalBloodTestResultTypesSchema(many=True), api=ns)
+    @responds(schema=MedicalBloodTestResultsOutputSchema, api=ns)
+    def get(self, clientid):
+        # pull up all tests, test results, and the test type names for this client
+        results =  db.session.query(
+                        MedicalBloodTests, MedicalBloodTestResults, MedicalBloodTestResultTypes
+                        ).join(
+                            MedicalBloodTestResultTypes
+                        ).join(MedicalBloodTests
+                        ).filter(
+                            MedicalBloodTests.testid == MedicalBloodTestResults.testid
+                        ).filter(
+                            MedicalBloodTests.clientid==clientid
+                        ).all()
+
+        test_ids = set([x[0].testid for x in results])
+        nested_results = [{'testid': x, 'results': []} for x in test_ids ]
+        
+        # loop through results in order to nest results in their respective test
+        # entry instances (testid)
+        for test_info, test_result, result_type in results:
+            for test in nested_results:
+                # add rest result to appropriate test entry instance (testid)
+                if test_result.testid == test['testid']:
+                    res = {'result_name': result_type.result_name, 
+                           'result_value': test_result.result_value,
+                           'evaluation': test_result.evaluation}
+                    test['results'].append(res)
+                    # add test details if not present
+                    if not test.get('date', False):
+                        test['date'] = test_info.date.strftime("%Y-%m-%d") 
+                        test['notes'] = test_info.notes
+                        test['panel_type'] = test_info.panel_type
+
+        payload = {}
+        payload['items'] = nested_results
+        payload['tests'] = len(test_ids)
+        payload['test_results'] = len(results)
+        payload['clientid'] = clientid
+        # breakpoint()
+        return jsonify(payload)
+
+        
+
+@ns.route('/bloodtest/result-types/')
+class MedBloodTestResultTypes(Resource):
+    """
+    Returns the types of tests currently documented in the DB
+    """
+    @token_auth.login_required
+    @responds(schema=MedicalBloodTestResultTypesSchema, api=ns)
     def get(self):
-        return MedicalBloodTestResultTypes.query.all()
+        bt_types = MedicalBloodTestResultTypes.query.all()
+        payload = {'items' : bt_types, 'total' : len(bt_types)}
+        return payload
 
 @ns.route('/medicalhistory/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
