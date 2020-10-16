@@ -28,7 +28,7 @@ from odyssey.models.client import (
 )
 from odyssey.models.misc import MedicalInstitutions, RegisteredFacilities
 from odyssey.models.pt import Chessboard, PTHistory
-from odyssey.models.staff import Staff
+from odyssey.models.staff import StaffProfile
 from odyssey.models.trainer import (
     FitnessQuestionnaire,
     HeartAssessment, 
@@ -1248,30 +1248,13 @@ class StaffSearchItemsSchema(Schema):
     lastname = fields.String(required=False, validate=validate.Length(min=1,max=50), missing=None)
     email = fields.Email(required=False, missing=None)   
 
-class StaffSchema(ma.SQLAlchemyAutoSchema):
+class StaffProfileSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        model = Staff
+        model = StaffProfile
 
-    possible_roles = ['stfappadmin', 'clntsvc', 'physthera', 'phystrain', 'datasci', 'doctor', 'docext', 'nutrition']
-    access_roles = fields.List(fields.String,
-                description=" The access role for this staff member options: \
-                ['stfappadmin' (staff application admin), 'clntsvc' (client services), 'physthera' (physiotherapist), 'datasci' (data scientist), 'doctor' (doctor), 'docext' (external doctor), 'phystrain' (physical trainer),\
-                 'nutrition' (nutritionist)]",
-                required=True)
-    is_system_admin = fields.Boolean(dump_only=True, missing=False)
-    is_admin = fields.Boolean(dump_only=True, missing=False)
-    user_id = fields.Integer(dump_only=True)
-
-    @validates('access_roles')
-    def valid_access_roles(self,value):
-        for role in value:
-            if role not in self.possible_roles:
-                raise ValidationError(f'{role} is not a valid access role. Use one of the following {self.possible_roles}')
-            
     @post_load
     def make_object(self, data, **kwargs):
-        new_staff = Staff(**data)
-        return new_staff
+        return StaffProfile(**data)
 
 class RegisteredFacilitiesSchema(Schema):
     facility_id = fields.Integer(required=False)
@@ -1314,6 +1297,15 @@ class UserLoginSchema(ma.SQLAlchemyAutoSchema):
         new_user = UserLogin(**data)
         new_user.set_password(data['password'])
         return new_user
+
+class NewUserSchema(Schema):
+
+    firstname = fields.String()
+    middlename = fields.String()
+    lastname = fields.String()
+    email = fields.Email(validate=validate.Length(min=0,max=50))
+    phone_number = fields.String(validate=validate.Length(min=0,max=50))
+    is_staff = fields.Boolean()
 
 #
 #   Schemas for the wearables API
