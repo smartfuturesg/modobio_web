@@ -1131,7 +1131,7 @@ class MedicalImagingSchema(ma.SQLAlchemyAutoSchema):
     
 class MedicalBloodTestSchema(Schema):
     testid = fields.Integer()
-    clientid = fields.Integer()
+    clientid = fields.Integer(load_only=True)
     date = fields.Date(required=True, format="iso")
     panel_type = fields.String(required=False)
     notes = fields.String(required=False)
@@ -1139,6 +1139,16 @@ class MedicalBloodTestSchema(Schema):
     @post_load
     def make_object(self, data, **kwargs):
         return MedicalBloodTests(**data)
+
+class AllMedicalBloodTestSchema(Schema):
+    """
+    For returning several blood test instance details 
+    No actual results are returned, just details on
+    the test entry (notes, date, panel_type)
+    """
+    items = fields.Nested(MedicalBloodTestSchema(many=True))
+    total = fields.Integer()
+    clientid = fields.Integer()
 
 class MedicalBloodTestResultsSchema(Schema):
     result_name = fields.String()

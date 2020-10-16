@@ -61,15 +61,14 @@ def init_database():
     # Create the database and the database table
     db.create_all()
 
-    # run .sql file to create db procedures
-    #  read client_data_storage_file, remove comments,
+    # run .sql files to create db procedures and initialize 
+    # some tables
+    #  read .sql files, remove comments,
     #  execute, raw sql on database
 
-    breakpoint()
-
-    sql_scripts = [f for f in os.listdir('database/') if f.endswith(".sql")]
+    sql_scripts = ['database/'+f for f in os.listdir('database/') if f.endswith(".sql")]
     #TODO RUN ALL SCRIPTS WHAT BEND WITH .SQL
-    for sql_script in sql_files:
+    for sql_script in sql_scripts:
         with open (sql_script, "r") as f:
             data=f.readlines()
 

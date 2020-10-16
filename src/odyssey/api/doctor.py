@@ -31,6 +31,7 @@ from odyssey.api.errors import (
 )
 from odyssey.utils.misc import check_client_existence, check_blood_test_existence, check_blood_test_result_type_existence
 from odyssey.utils.schemas import (
+    AllMedicalBloodTestSchema,
     ClientExternalMREntrySchema, 
     ClientExternalMRSchema, 
     MedicalHistorySchema, 
@@ -174,6 +175,24 @@ class MedBloodTest(Resource):
         db.session.commit()
         return client_bt
 
+@ns.route('/bloodtest/all/<int:clientid>/')
+@ns.doc(params={'clientid': 'Client ID number'})
+class MedBloodTest(Resource):
+    @token_auth.login_required
+    @responds(schema=AllMedicalBloodTestSchema, api=ns)
+    def get(self, clientid):
+        check_client_existence(clientid)
+        blood_tests = MedicalBloodTests.query.filter_by(clientid=clientid).all()
+
+        if not blood_tests:
+            raise ContentNotFound()
+        payload = {}
+        payload['items'] = blood_tests
+        payload['total'] = len(blood_tests)
+        payload['clientid'] = clientid
+        return payload
+
+
 @ns.route('/bloodtest/results/<int:testid>/')
 @ns.doc(params={'testid': 'Test ID number'})
 class MedBloodTestResults(Resource):
@@ -181,7 +200,7 @@ class MedBloodTestResults(Resource):
     Resource for working with a single blood test 
     entry instance, testid.
 
-    Each test intance may have multiple test results. 
+    Each test instance may have multiple test results. 
     """
     @token_auth.login_required
     @responds(schema=MedicalBloodTestResultsOutputSchema, api=ns)
