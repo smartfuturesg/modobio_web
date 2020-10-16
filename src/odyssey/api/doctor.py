@@ -188,19 +188,44 @@ class MedBloodTest(Resource):
 @ns.doc(params={'testid': 'Test ID number'})
 class MedBloodTestResults(Resource):
     @token_auth.login_required
-    @responds(schema=MedicalBloodTestResultsOutputSchema(many=True), api=ns)
+    @responds(schema=MedicalBloodTestResultsOutputSchema, api=ns)
     def get(self, testid):
         #query for join of MedicalBloodTestResults and MedicalBloodTestResultTypes tables
         check_blood_test_existence(testid)
         results = MedicalBloodTestResults.query.filter_by(testid=testid).all()
-
+        results =  db.session.query(
+                MedicalBloodTests, MedicalBloodTestResults, MedicalBloodTestResultTypes
+                ).join(
+                    MedicalBloodTestResultTypes
+                ).join(MedicalBloodTests
+                ).filter(
+                    MedicalBloodTests.testid == MedicalBloodTestResults.testid
+                ).filter(
+                    MedicalBloodTests.testid==testid
+                ).all()
+        if len(results) == 0:
+            raise ContentNotFound()
         #replace resultid with result name for readability      
-        response = []
-        for result in results:
-            output = {'idx': result.idx,'testid': result.testid,'result_value': result.result_value, 'evaluation': result.evaluation}
-            output['result_type'] = MedicalBloodTestResultTypes.query.filter_by(resultid=result.resultid).first().result_name
-            response.append(output) 
-        return response
+        nested_results = {'testid': testid, 
+                          'date' : results[0][0].date,
+                          'notes' : results[0][0].notes,
+                          'panel_type' : results[0][0].panel_type,
+                          'results': []} 
+        
+        # loop through results in order to nest results in their respective test
+        # entry instances (testid)
+        for _, test_result, result_type in results:
+                res = {'result_name': result_type.result_name, 
+                        'result_value': test_result.result_value,
+                        'evaluation': test_result.evaluation}
+                nested_results['results'].append(res)
+
+        payload = {}
+        payload['items'] = [nested_results]
+        payload['tests'] = 1
+        payload['test_results'] = len( nested_results['results'])
+        payload['clientid'] = results[0][0].clientid
+        return payload
 
 @ns.route('/bloodtest/results/all/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
@@ -238,7 +263,7 @@ class AllMedBloodTestResults(Resource):
                     test['results'].append(res)
                     # add test details if not present
                     if not test.get('date', False):
-                        test['date'] = test_info.date.strftime("%Y-%m-%d") 
+                        test['date'] = test_info.date
                         test['notes'] = test_info.notes
                         test['panel_type'] = test_info.panel_type
 
@@ -247,8 +272,7 @@ class AllMedBloodTestResults(Resource):
         payload['tests'] = len(test_ids)
         payload['test_results'] = len(results)
         payload['clientid'] = clientid
-        # breakpoint()
-        return jsonify(payload)
+        return payload
 
         
 
