@@ -5,7 +5,7 @@
 -- Labratory Test Reference Ranges
 -- rev. January 2020
 ---------------------------------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION public.blood_test_assessment(test_type text, test_value float)
+CREATE OR REPLACE FUNCTION public.blood_test_eval(resultid int, test_value float)
  RETURNS varchar
  LANGUAGE plpgsql
 AS $function$
@@ -24,7 +24,7 @@ begin
 					else ''abnormal''
 				end as assessment
 			from "MedicalBloodTestResultTypes" rt
-			where rt.result_name =' || quote_nullable(test_type) || '';
+			where rt.resultid =' || resultid || '';
   execute query into assessment;
   return assessment;
 end;

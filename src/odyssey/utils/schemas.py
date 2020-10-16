@@ -1149,6 +1149,7 @@ class MedicalBloodTestResultsOutputSchema(Schema):
     testid = fields.Integer()
     result_type = fields.String()
     result_value = fields.Float()
+    evaluation = fields.String(dump_only=True)
 
 class MedicalBloodTestsInputSchema(Schema):
     clientid = fields.Integer()
