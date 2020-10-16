@@ -11,8 +11,9 @@ def test_get_client_search(test_client, init_database):
     THEN check the response is valid
     """
     # get staff authorization to view client data
-    staff = Staff().query.first()
-    token = staff.get_token()
+    staff = User.query.filter_by(is_staff=True).first()
+    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
+    token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
     
     # Order of test search:
@@ -27,7 +28,7 @@ def test_get_client_search(test_client, init_database):
     response = test_client.get('/client/clientsearch/', headers=headers)
     assert response.status_code == 200
 
-    client = ClientInfo.query.filter_by(clientid=1).first()
+    client = ClientInfo.query.filter_by(user_id=1).first()
     queryStr = '/client/clientsearch/?record_locator_id=' + client.record_locator_id
 
     response = test_client.get(queryStr, headers=headers)

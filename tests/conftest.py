@@ -83,7 +83,7 @@ def init_database():
     rli = {'record_locator_id': ClientInfo().generate_record_locator_id(
         firstname = client_1.firstname, 
         lastname = client_1.lastname, 
-        clientid =client_1.clientid)}
+        user_id =client_1.user_id)}
 
     client_1.update(rli)
     

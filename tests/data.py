@@ -231,7 +231,7 @@ test_heart_assessment = {
 }
 
 test_strength_assessment = {
-    "clientid": 0,
+    "user_id": 0,
     "upper_push": {
     "right": {
       "estimated_10rm": 250,
@@ -543,7 +543,7 @@ test_fitness_questionnaire = {
   "stress_level": 4,
   "obstacles_expected": "mostly motivating myself consistently",
   "confidence_level": 4,
-  "clientid": 0,
+  "user_id": 0,
   "physical_goals_other": "",
   "stress_sources": [
     "Family",

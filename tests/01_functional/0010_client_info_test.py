@@ -4,7 +4,7 @@ import time
 from flask.json import dumps
 from requests.auth import _basic_auth_str
 
-from odyssey.models.staff import Staff
+from odyssey.models.user import User, UserLogin
 from odyssey.models.client import (
     ClientInfo,
     ClientConsent
@@ -29,16 +29,17 @@ def test_get_client_info(test_client, init_database):
     THEN check the response is valid
     """
     # get staff authorization to view client data
-    staff = Staff().query.first()
-    token = staff.get_token()
+    staff = User.query.filter_by(is_staff=True).first()
+    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
+    token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    # send get request for client info on clientid = 1 
+    # send get request for client info on user_id = 1 
     response = test_client.get('/client/1/', headers=headers)
     # some simple checks for validity
     
     assert response.status_code == 200
-    assert response.json['clientid'] == 1
+    assert response.json['user_id'] == 1
     assert response.json['email'] == 'test_this_client@gmail.com'
 
 def test_put_client_info(test_client, init_database):
@@ -48,17 +49,18 @@ def test_put_client_info(test_client, init_database):
     THEN check the response is valid
     """
     # get staff authorization to view client data
-    staff = Staff().query.first()
-    token = staff.get_token()
+    staff = User.query.filter_by(is_staff=True).first()
+    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
+    token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    # test attempting to change the clientid
-    data = {'clientid': 10}
-    # send get request for client info on clientid = 1 
+    # test attempting to change the user_id
+    data = {'user_id': 10}
+    # send get request for client info on user_id = 1 
     response = test_client.put('/client/1/', headers=headers, data=dumps(data),  content_type='application/json')
 
     assert response.status_code == 400
-    assert response.json['message'] == 'Illegal Setting of parameter, clientid. You cannot set this value manually'
+    assert response.json['message'] == 'Illegal Setting of parameter, user_id. You cannot set this value manually'
 
     # test attempting to change the phone number
     data = {'phone': '9123456789'}
@@ -83,11 +85,12 @@ def test_creating_new_client(test_client, init_database):
     """
 
     # get staff authorization to view client data
-    staff = Staff().query.first()
-    token = staff.get_token()
+    staff = User.query.filter_by(is_staff=True).first()
+    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
+    token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    # send get request for client info on clientid = 1 
+    # send get request for client info on user_id = 1 
     response = test_client.post('/client/',
                                 headers=headers, 
                                 data=dumps(test_new_client_info), 
@@ -100,13 +103,14 @@ def test_creating_new_client(test_client, init_database):
 def test_removing_client(test_client, init_database):
     """
     GIVEN a api end point for retrieving client info
-    WHEN the '/client/remove/<client id>' resource  is requested to be changed (DELETE)
+    WHEN the '/client/remove/<user_id>' resource  is requested to be changed (DELETE)
     THEN check the response is valid
     """
 
     # get staff authorization to view client data
-    staff = Staff().query.first()
-    token = staff.get_token()
+    staff = User.query.filter_by(is_staff=True).first()
+    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
+    token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
     # send post request to create client
@@ -117,12 +121,11 @@ def test_removing_client(test_client, init_database):
                     
     client = ClientInfo.query.filter_by(email=test_new_client_info['email']).first()
     
-    #take this new clientid
-    remove_clientid = client.clientid
+    #take this new user_id
+    remove_user_id = client.user_id
 
-    response = test_client.delete(f'/client/remove/{remove_clientid}/',
+    response = test_client.delete(f'/client/remove/{remove_user_id}/',
                                 headers=headers, 
                                 content_type='application/json')
     # some simple checks for validity
     assert response.status_code == 200
-

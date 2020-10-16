@@ -9,12 +9,13 @@ from tests.data import test_registered_facilities, test_client_facilities
 def test_post_registered_facilities(test_client, init_database):
     """
     GIVEN a api end point for blood test - a1c
-    WHEN the '/doctor/bloodchemistry/a1c/<client id>' resource  is requested (POST)
+    WHEN the '/doctor/bloodchemistry/a1c/<user_id>' resource  is requested (POST)
     THEN check the response is valid
     """
     # get staff authorization to view client data
-    staff = Staff().query.first()
-    token = staff.get_token()
+    staff = User.query.filter_by(is_staff=True).first()
+    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
+    token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
     payload = test_registered_facilities
@@ -34,8 +35,9 @@ def test_put_registered_facility(test_client, init_database):
     THEN check the response is valid
     """
     # get staff authorization to view facility data
-    staff = Staff().query.first()
-    token = staff.get_token()
+    staff = User.query.filter_by(is_staff=True).first()
+    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
+    token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
     test_registered_facilities["facility_address"] = "123 Test Address"
@@ -59,8 +61,9 @@ def test_get_registered_facility(test_client, init_database):
     THEN check the response is valid
     """
     # get staff authorization to view facility data
-    staff = Staff().query.first()
-    token = staff.get_token()
+    staff = User.query.filter_by(is_staff=True).first()
+    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
+    token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
     # send get request for facility info on facility_id = 1 
@@ -73,17 +76,18 @@ def test_get_registered_facility(test_client, init_database):
 def test_post_client_facility(test_client, init_database):
     """
     GIVEN a api end point for client facility
-    WHEN the '/registeredfacility/client/<client id>' resource is requested (POST)
+    WHEN the '/registeredfacility/client/<user_id>' resource is requested (POST)
     THEN check the response is valid
     """
     #get staff authorization to view facility data
-    staff = Staff().query.first()
-    token = staff.get_token()
+    staff = User.query.filter_by(is_staff=True).first()
+    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
+    token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
     payload = test_client_facilities
 
-    #send post request for a client-facility relation with facility_id = 1 and client_id = 1
+    #send post request for a client-facility relation with facility_id = 1 and user_id = 1
     response = test_client.post('/registeredfacility/client/1/',
                                  headers=headers,
                                  data=dumps(payload),
@@ -94,15 +98,16 @@ def test_post_client_facility(test_client, init_database):
 def test_get_client_facility(test_client, init_database):
     """
     GIVEN a api end point for client facility
-    WHEN the '/registeredfacility/client/<client id>' resource is requested (GET)
+    WHEN the '/registeredfacility/client/<user_id>' resource is requested (GET)
     THEN check the response is valid
     """
     #get staff authorization to view facility data
-    staff = Staff().query.first()
-    token = staff.get_token()
+    staff = User.query.filter_by(is_staff=True).first()
+    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
+    token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    #send post request for a client-facility relation with facility_id = 1 and client_id = 1
+    #send post request for a client-facility relation with facility_id = 1 and user_id = 1
     response = test_client.get('/registeredfacility/client/1/',
                                  headers=headers,
                                  content_type='application/json')
@@ -112,15 +117,16 @@ def test_get_client_facility(test_client, init_database):
 def test_get_client_summary(test_client, init_database):
     """
     GIVEN a api end point for cient sidebar
-    WHEN the '/client/sidebar/<client id>' resource is requested (GET)
+    WHEN the '/client/sidebar/<user_id>' resource is requested (GET)
     THEN check the response is valid
     """
     #get staff authorization to view client data
-    staff = Staff().query.first()
-    token = staff.get_token()
+    staff = User.query.filter_by(is_staff=True).first()
+    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
+    token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    #send get request for a client with client id = 1
+    #send get request for a client with user_id = 1
     response = test_client.get('/client/summary/1/',
                                 headers=headers,
                                 content_type='application/json')

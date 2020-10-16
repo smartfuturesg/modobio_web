@@ -4,7 +4,7 @@ import time
 from flask.json import dumps
 from requests.auth import _basic_auth_str
 
-from odyssey.models.staff import Staff
+from odyssey.models.user import User, UserLogin
 from odyssey.models.client import (
     ClientInfo,
     RemoteRegistration
@@ -23,7 +23,6 @@ from tests.data import (
     test_client_consult_data,
     test_fitness_questionnaire
 )
-
 
 def test_creating_new_remote_client(test_client, init_database):
     """
@@ -618,7 +617,7 @@ def test_get_signeddocs_client_session(test_client, init_database):
 def test_post_strength_assessment(test_client, init_database):
     """
     GIVEN a api end point for fitness questionnaire
-    WHEN the '/trainer/questionnaire/<client id>' resource  is requested (POST)
+    WHEN the '/trainer/questionnaire/<user_id>' resource  is requested (POST)
     THEN check the response is valid
     """
     remote_client = RemoteRegistration.query.filter_by(
@@ -631,7 +630,7 @@ def test_post_strength_assessment(test_client, init_database):
     headers = {'Authorization': f'Bearer {api_token}'}
 
     payload = test_fitness_questionnaire
-    # send get request for client info on clientid = 1 
+    # send get request for client info on user_id = 1 
     response = test_client.post(f'/remoteclient/questionnaire/?tmp_registration={tmp_registration}',
                                 headers=headers, 
                                 data=dumps(payload), 
@@ -654,7 +653,7 @@ def test_get_strength_assessment(test_client, init_database):
 
     headers = {'Authorization': f'Bearer {api_token}'}
 
-    # send get request for client info on clientid = 1 
+    # send get request for client info on user_id = 1 
     response = test_client.get(f'/remoteclient/questionnaire/?tmp_registration={tmp_registration}',
                                 headers=headers, 
                                 content_type='application/json')

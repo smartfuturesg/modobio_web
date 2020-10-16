@@ -19,7 +19,9 @@ def test_password_recovery_link(test_client, init_database):
     THEN check the response is valid
     """
     # Get staff member to reset lost password
-    staff = Staff.query.first()
+    staff = User.query.filter_by(is_staff=True).first()
+    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
+    token = staffLogin.get_token()
  
     payload = {"email": staff.email}
 
