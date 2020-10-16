@@ -546,6 +546,38 @@ class MedicalBloodTestResultTypes(db.Model):
     :type: string
     """
 
+    normal_min = db.Column(db.Float)
+    """
+    Minimum of normal range for blood test
+
+    :type: float
+    """
+    normal_max = db.Column(db.Float)
+    """
+    Maximum of normal range for blood test
+
+    :type: float
+    """
+    optimal_min = db.Column(db.Float)
+    """
+    Minimum of optimal range for blood test
+
+    :type: float
+    """
+    optimal_max = db.Column(db.Float)
+    """
+    Maximum of optimal range for blood test
+
+    :type: float
+    """
+
+    unit = db.Column(db.String)
+    """
+    Unit of reported blood test. 
+
+    :type: str
+    """
+
 class MedicalBloodTestResults(db.Model):
     """Holds the results of a blood test identified by a blood test id"""
 
