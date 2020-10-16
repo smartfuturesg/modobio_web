@@ -6,7 +6,7 @@ from flask_accepts import accepts, responds
 from flask_restx import Resource, Api
 
 from odyssey.api import api
-from odyssey.api.auth import token_auth, token_auth_client
+from odyssey.api.auth import token_auth
 from odyssey.api.errors import UserNotFound, ClientAlreadyExists, ClientNotFound, IllegalSetting, ContentNotFound
 from odyssey import db
 from odyssey.constants import TABLE_TO_URI
@@ -18,8 +18,7 @@ from odyssey.models.client import (
     ClientPolicies,
     ClientRelease,
     ClientSubscriptionContract,
-    ClientFacilities,
-    RemoteRegistration
+    ClientFacilities
 )
 from odyssey.models.doctor import MedicalHistory, MedicalPhysicalExam
 from odyssey.models.pt import PTHistory 
@@ -39,12 +38,10 @@ from odyssey.utils.schemas import (
     ClientRegistrationStatusSchema,
     ClientReleaseSchema,
     ClientReleaseContactsSchema,
-    ClientRemoteRegistrationPortalSchema,
     ClientSearchOutSchema,
     ClientSubscriptionContractSchema,
     ClientSummarySchema,
     NewRemoteClientSchema, 
-    RefreshRemoteRegistrationSchema,
     SignAndDateSchema,
     SignedDocumentsSchema
 )

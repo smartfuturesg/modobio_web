@@ -7,7 +7,7 @@ import uuid
 from datetime import datetime, date, time
 
 import flask.json
-from odyssey.models.client import ClientInfo, RemoteRegistration, ClientFacilities
+from odyssey.models.client import ClientInfo, ClientFacilities
 from odyssey.models.doctor import MedicalBloodTests, MedicalBloodTestResultTypes
 from odyssey.models.misc import RegisteredFacilities
 from odyssey.api.errors import UserNotFound, FacilityNotFound, RelationAlreadyExists, TestNotFound, ResultTypeNotFound
@@ -53,16 +53,16 @@ def check_client_facility_relation_existence(user_id, facility_id):
     if relation:
         raise RelationAlreadyExists(user_id, facility_id)
 
-def check_remote_client_portal_validity(portal_id):
-    """
-    Ensure portal is valid. If not raise 404 error
-    """
-    remote_client = RemoteRegistration().check_portal_id(portal_id)
-
-    if not remote_client:
-        raise UserNotFound(message="Unauthorized. Portal is either expired or never existed")
-
-    return remote_client
+#def check_remote_client_portal_validity(portal_id):
+#    """
+#    Ensure portal is valid. If not raise 404 error
+#    """
+#    remote_client = RemoteRegistration().check_portal_id(portal_id)
+#
+#    if not remote_client:
+#        raise UserNotFound(message="Unauthorized. Portal is either expired or never existed")
+#
+#    return remote_client
 
 class JSONEncoder(flask.json.JSONEncoder):
     """ Converts :class:`datetime.datetime`, :class:`datetime.date`,

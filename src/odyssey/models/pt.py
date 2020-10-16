@@ -34,11 +34,11 @@ class PTHistory(db.Model):
     :type: datetime
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id',ondelete="CASCADE"), nullable=False)
     """
     User ID number
 
-    :type: int, foreign key to :attr:`User.user_id`
+    :type: int, foreign key to :attr:`ClientInfo.user_id`
     """
 
     exercise = db.Column(db.Text)
@@ -155,11 +155,11 @@ class Chessboard(db.Model):
     :type: int, primary key, autoincrement
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id',ondelete="CASCADE"), nullable=False)
     """
     Client ID number
 
-    :type: int, foreign key to :attr:`User.user_id`
+    :type: int, foreign key to :attr:`ClientInfo.user_id`
     """
 
     timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)
@@ -411,11 +411,11 @@ class MobilityAssessment(db.Model):
 
     __tablename__ = 'MobilityAssessment'
 
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id', ondelete="CASCADE"), primary_key=True, nullable=False)
     """
     User ID number
 
-    :type: int, foreign key to :attr:`User.user_id`
+    :type: int, foreign key to :attr:`ClientInfo.user_id`
     """
 
     timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)

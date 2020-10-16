@@ -7,7 +7,7 @@ from flask_accepts import accepts, responds
 import jwt
 
 from odyssey import db
-from odyssey.models.staff import Staff
+from odyssey.models.staff import StaffProfile
 from odyssey.models.user import User
 from odyssey.api import api
 from odyssey.api.auth import token_auth, basic_auth
@@ -17,7 +17,7 @@ from odyssey.utils.schemas import (
     StaffPasswordRecoveryContactSchema, 
     StaffPasswordResetSchema,
     StaffPasswordUpdateSchema,
-    StaffSchema, 
+    StaffProfileSchema, 
     StaffSearchItemsSchema,
     UserSchema
 )
@@ -43,10 +43,10 @@ class StaffMembers(Resource):
         noMoreSearch = False
         
         if not request.args:
-            data = Staff.query.order_by(Staff.lastname.asc()).all()
+            data = User.query.filter_by(is_staff=True).order_by(Staff.lastname.asc()).all()
             noMoreSearch = True
         elif len(request.args) == 1 and request.args.get('user_id'):
-            data = [Staff.query.filter_by(user_id=request.args.get('user_id')).first()]
+            data = [User.query.filter_by(user_id=request.args.get('user_id')).first()]
             if not any(data):
                 raise StaffNotFound(request.args.get('user_id'))
             noMoreSearch = True
@@ -94,8 +94,8 @@ class StaffMembers(Resource):
         return data 
     
     @token_auth.login_required(role=['sys_admin', 'staff_admin'])
-    @accepts(schema=StaffSchema, api=ns)
-    @responds(schema=StaffSchema, status_code=201, api=ns)     
+    @accepts(schema=StaffProfileSchema, api=ns)
+    @responds(schema=StaffProfileSchema, status_code=201, api=ns)     
     def post(self):
         """register a new staff member"""
         data = request.get_json() or {}
@@ -120,7 +120,7 @@ class StaffMembers(Resource):
         del data['password']
 
         # Staff schema instance load from payload
-        staff_schema = StaffSchema()
+        staff_schema = StaffProfileSchema()
         new_staff = staff_schema.load(data)
 
         db.session.add(new_staff)

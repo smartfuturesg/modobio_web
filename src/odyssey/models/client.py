@@ -41,7 +41,7 @@ class ClientInfo(db.Model):
     :type: datetime
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',nullable=False), unique=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id'), primary_key=True, nullable=False, unique=True)
     """
     User ID number, foreign key to User.user_id
 
@@ -952,7 +952,7 @@ class ClientExternalMR(db.Model):
     :type: str
     """
 
-    institute_id = db.Column(db.Integer, db.ForeignKey('MedicalInstitutions.institute_id',name='ClientExternalMR_institute_id_fkey', ondelete="CASCADE"), nullable=False)
+    institute_id = db.Column(db.Integer, db.ForeignKey('MedicalInstitutions.institute_id', ondelete="CASCADE"), nullable=False)
     """
     medical institute id 
 
@@ -988,7 +988,7 @@ class ClientReleaseContacts(db.Model):
     :type: datetime
     """
 
-    release_contract_id = db.Column(db.Integer, db.ForeignKey('ClientRelease.idx',name='ClientReleaseContacts_idx_fkey',ondelete="CASCADE"), nullable=False)
+    release_contract_id = db.Column(db.Integer, db.ForeignKey('ClientRelease.idx',ondelete="CASCADE"), nullable=False)
     """
     ID refering back to the signed contract in the ClientRelease table
 

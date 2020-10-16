@@ -75,11 +75,11 @@ class User(db.Model):
     """
 
 class UserLogin(db.Model):
-""" 
+    """ 
     Stores details to relating to user login and verification.
 
     The primary index of this table is the
-    :attr:`staffid` number.
+    :attr:`user_id` number.
     """
 
     __tablename__ = 'UserLogin'
@@ -98,7 +98,7 @@ class UserLogin(db.Model):
     :type: datetime
     """
 
-    user_id = db.Column((db.Integer, db.ForeignKey('User.user_id',nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id'), primary_key=True, nullable=False)
     """
     User ID number, foreign key to User.user_id
 

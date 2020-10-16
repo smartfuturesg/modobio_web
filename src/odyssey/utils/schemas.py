@@ -12,7 +12,7 @@ from odyssey.models.doctor import (
     MedicalBloodTestResults,
     MedicalBloodTestResultTypes
 )
-from odyssey.models.user import User
+from odyssey.models.user import User, UserLogin
 from odyssey.models.client import (
     ClientConsent,
     ClientConsultContract,
@@ -23,8 +23,7 @@ from odyssey.models.client import (
     ClientRelease,
     ClientReleaseContacts,
     ClientSubscriptionContract,
-    ClientFacilities,
-    RemoteRegistration
+    ClientFacilities
 )
 from odyssey.models.misc import MedicalInstitutions, RegisteredFacilities
 from odyssey.models.pt import Chessboard, PTHistory
@@ -101,30 +100,30 @@ class NewRemoteClientSchema(Schema):
     def make_object(self, data, **kwargs):
         return ClientInfo(**data)
         
-class ClientRemoteRegistrationPortalSchema(Schema):
-    """
-        holds client's access information for remote registration
-    """
-    email = fields.Email()
-    user_id = fields.Integer()
-    password = fields.String(dump_only=True)
-    registration_portal_expiration = fields.DateTime(dump_only=True)
-    registration_portal_id = fields.String(dump_only=True)
+#class ClientRemoteRegistrationPortalSchema(Schema):
+#    """
+#        holds client's access information for remote registration
+#    """
+#    email = fields.Email()
+#    user_id = fields.Integer()
+#    password = fields.String(dump_only=True)
+#    registration_portal_expiration = fields.DateTime(dump_only=True)
+#    registration_portal_id = fields.String(dump_only=True)
+#
+#    @post_load
+#    def make_object(self, data, **kwargs):
+#        remote_client_portal = RemoteRegistration(user_id=data["user_id"], email=data["email"])
+#        remote_client_portal.set_password()
+#        remote_client_portal.get_temp_registration_endpoint()
+#        return remote_client_portal
 
-    @post_load
-    def make_object(self, data, **kwargs):
-        remote_client_portal = RemoteRegistration(user_id=data["user_id"], email=data["email"])
-        remote_client_portal.set_password()
-        remote_client_portal.get_temp_registration_endpoint()
-        return remote_client_portal
 
-
-class RefreshRemoteRegistrationSchema(Schema):
-    """
-        refresh the remote registration password and link for the client
-        with the provided email
-    """
-    email = fields.Email(required=True)
+#class RefreshRemoteRegistrationSchema(Schema):
+#    """
+#        refresh the remote registration password and link for the client
+#        with the provided email
+#    """
+#    email = fields.Email(required=True)
 
 class ClientConsentSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
