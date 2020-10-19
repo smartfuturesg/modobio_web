@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}Odyssey{% endblock %}
+{% block content %}
+<div style="padding-left: 30%">
+    <h1>Welcome</h1>
+    <p>Please select where you want to start your journey.</p>
+    <p><a href="{{ url_for('intake.clientinfo') }}">Client intake</a></p>
+    <p><a href="{{ url_for('doctor.history') }}">Doctor section</a></p>
+    <p><a href="{{ url_for('pt.history') }}">Physical therapist section</a></p>
+    <p><a href="">Trainer section</a></p>
+</div>
+{% endblock %}

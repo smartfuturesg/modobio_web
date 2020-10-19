@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}PT history{% endblock %}
+{% block content %}
+<form id="pthistory" class="input" method="POST" action="{{ url_for('pt.history') }}">
+    <div class="row">
+        <span class="label">{{ form.exercise.label }}</span>
+        <span class="field">{{ form.exercise() }}</span>
+    </div>
+    <div class="row">&nbsp;</div>
+    <div class="row">
+        <span class="label">Please indicate if you have received any of the following treatments.</span>
+        <span class="field">
+            <div class="multicol">
+                {% for treatment in ( form.has_pt, form.has_chiro, form.has_massage,
+                                      form.has_surgery, form.has_medication,
+                                      form.has_acupuncture) %}
+                <div class="row">
+                    <span class="radiofield">{{ treatment() }}</span>&ensp;
+                    <span class="radiolabel">{{ treatment.label }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </span>
+    </div>
+    <div class="row">&nbsp;</div>
+    <p>Please indicate any areas of pain you are currently experiencing.</p>
+    {{ form.pain_areas() }}
+    <div class="painarealabel">
+        <span>Front</span>
+        <span>Back</span>
+    </div>
+    <div class="painarea">
+        <img class="painarea" src="{{ url_for('static', filename='human_silhouette.svg') }}">
+        <canvas class="painarea" id="pain"></canvas>
+    </div>
+    <div class="row center">
+        <span>Draw</span>
+        <label class="switch">
+            <input class="switch" type="checkbox" id="draw">
+            <span class="switch"></span>
+        </label>
+        <span>Erase</span>&emsp;&emsp;&emsp;
+        <button id="clear" type="button">Clear</button>
+    </div>
+    <div class="row">&nbsp;</div>
+    <p>Please rate your symptoms on scale of 0 to 10, with 0 = no pain and 10 = the worst pain imaginable, you need to go to the emergency room.</p>
+    <div class="row">
+        <span class="label">{{ form.best_pain.label }}</span>
+        <span class="field">{{ form.best_pain() }}</span>
+    </div>
+    <div class="row">
+        <span class="label">{{ form.worst_pain.label }}</span>
+        <span class="field">{{ form.worst_pain() }}</span>
+    </div>
+    <div class="row">
+        <span class="label">{{ form.current_pain.label }}</span>
+        <span class="field">{{ form.current_pain() }}</span>
+    </div>
+    <div class="row">&nbsp;</div>
+    <div class="row">
+        <span class="label">{{ form.makes_worse.label }}</span>
+        <span class="field">{{ form.makes_worse() }}</span>
+    </div>
+    <div class="row">
+        <span class="label">{{ form.makes_better.label }}</span>
+        <span class="field">{{ form.makes_better() }}</span>
+    </div>
+    <div class="row">&nbsp;</div>
+    <div class="row center"><button type="submit">Next</button></div>
+</form>
+<script>add_pain_area_pad('pain', 'pthistory', 'clear', 'draw', '{{ form.pain_areas.id }}');
+</script>
+{% endblock %}
