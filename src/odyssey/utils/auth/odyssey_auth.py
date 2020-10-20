@@ -5,6 +5,9 @@ from werkzeug.security import safe_str_cmp
 from base64 import b64decode
 
 class OdyBasicAuth(object):
+    ''' OdyBasicAuth class is the main authentication class for 
+        the ModoBio project. It's primary function is to do basic
+        authentications. '''
     def __init__(self, scheme=None, realm=None, header=None):
         self.scheme = scheme
         self.realm = realm or "Authentication Required"
@@ -17,6 +20,7 @@ class OdyBasicAuth(object):
         self.error_handler(default_auth_error)
 
     def error_handler(self, f):
+        ''' Error handler for OdyBasicAuth class. '''
         @wraps(f)
         def decorated(*args, **kwargs):
             res = f(*args, **kwargs)
@@ -31,15 +35,18 @@ class OdyBasicAuth(object):
         return decorated
 
     def authenticate_header(self):
+        ''' authenticate header '''
         return '{0} realm="{1}"'.format(self.scheme, self.realm)
 
     def role_check(self, user, roles):
+        ''' role_check method will be used for future cases to check
+            the user's roles '''
         if any(role in user.access_roles for role in roles):
             return None
         else:
             return 403
 
-    def login_required(self, f=None, role=None, optional=None):
+    def login_required(self, f=None, role=None):
         ''' The login_required method is the main method that we will be using
             for authenticating both tokens and basic authorizations.
             This method decorates each CRUD request and verifies the person
@@ -52,7 +59,7 @@ class OdyBasicAuth(object):
                   authenticate(auth,pass)
              '''
         if f is not None and \
-                (role is not None or optional is not None):  # pragma: no cover
+                (role is not None):  # pragma: no cover
             raise ValueError(
                 'role and optional are the only supported arguments')
         def login_required_internal(f):
@@ -134,6 +141,8 @@ class OdyBasicAuth(object):
             return g.flask_httpauth_user
           
 class OdyTokenAuth(OdyBasicAuth):
+    ''' OdyTokenAuth class extends the OdyBasicAuth class. 
+        It's primary function is to do token authentications. '''    
     def __init__(self, scheme='Bearer', realm=None, header=None):
         super(OdyTokenAuth, self).__init__(scheme, realm, header)
 
