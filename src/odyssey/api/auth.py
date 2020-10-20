@@ -1,15 +1,15 @@
 from odyssey.models.staff import Staff
 from odyssey.models.client import RemoteRegistration
 from odyssey.api.errors import error_response
-from odyssey.utils.auth.odyssey_auth import OdyAuth, TokenAuth
+from odyssey.utils.auth.odyssey_auth import OdyBasicAuth, OdyTokenAuth
 
 # simple authentication handler allows password authentication and
 # stores a current user for view functions to check against
-basic_auth = OdyAuth()
-token_auth = TokenAuth()
+basic_auth = OdyBasicAuth()
+token_auth = OdyTokenAuth()
 
-basic_auth_client = OdyAuth()
-token_auth_client = TokenAuth()
+basic_auth_client = OdyBasicAuth()
+token_auth_client = OdyTokenAuth()
 
 @basic_auth_client.verify_password
 def verify_password_client(email, password):
@@ -29,7 +29,6 @@ def verify_token_client(token):
 def verify_password(email, password):
     """check password for API user"""
     staff_member = Staff.query.filter_by(email=email.lower()).first()
-    
     if staff_member and staff_member.check_password(password):
         return staff_member
 
