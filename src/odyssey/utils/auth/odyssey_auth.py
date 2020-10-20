@@ -4,8 +4,8 @@ from werkzeug.datastructures import Authorization
 from werkzeug.security import safe_str_cmp
 from base64 import b64decode
 
-class OdyBasicAuth(object):
-    ''' OdyBasicAuth class is the main authentication class for 
+class BasicAuth(object):
+    ''' BasicAuth class is the main authentication class for 
         the ModoBio project. It's primary function is to do basic
         authentications. '''
     def __init__(self, scheme=None, realm=None, header=None):
@@ -140,11 +140,11 @@ class OdyBasicAuth(object):
         if hasattr(g, 'flask_httpauth_user'):
             return g.flask_httpauth_user
           
-class OdyTokenAuth(OdyBasicAuth):
-    ''' OdyTokenAuth class extends the OdyBasicAuth class. 
+class TokenAuth(BasicAuth):
+    ''' TokenAuth class extends the OdyBasicAuth class. 
         It's primary function is to do token authentications. '''    
     def __init__(self, scheme='Bearer', realm=None, header=None):
-        super(OdyTokenAuth, self).__init__(scheme, realm, header)
+        super(TokenAuth, self).__init__(scheme, realm, header)
 
         self.verify_token_callback = None
 
