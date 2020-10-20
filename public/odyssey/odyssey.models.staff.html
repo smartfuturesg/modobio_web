@@ -1,0 +1,514 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>odyssey.models.staff module &mdash; Odyssey version: 0.1.55 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="odyssey.models.doctor" href="odyssey.models.doctor.html" />
+    <link rel="prev" title="odyssey.models.client module" href="odyssey.models.client.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> Odyssey
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                version: 0.1.55
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="odyssey.config.html">Configuration</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="odyssey.models.html">Models</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="odyssey.models.client.html">Client</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Staff</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.models.doctor.html">Doctor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.models.pt.html">Physical therapist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.models.trainer.html">Trainer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.models.wearables.html">Wearable devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.models.misc.html">Other</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.api.html">Endpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.utils.html">Utilities</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Odyssey</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="odyssey.models.html">Models</a> &raquo;</li>
+        
+      <li>odyssey.models.staff module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/odyssey/odyssey.models.staff.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-odyssey.models.staff">
+<span id="odyssey-models-staff-module"></span><h1>odyssey.models.staff module<a class="headerlink" href="#module-odyssey.models.staff" title="Permalink to this headline">¶</a></h1>
+<p>General database tables for the operation of the Modo Bio Staff application.
+There is no specific table name prefix for the tables in this module.</p>
+<dl class="py class">
+<dt id="odyssey.models.staff.Staff">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.models.staff.</code><code class="sig-name descname">Staff</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.staff.Staff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<p>Staff member information table.</p>
+<p>This table stores basic login information regarding Modo Bio
+staff members.</p>
+<dl class="py attribute">
+<dt id="odyssey.models.staff.Staff.created_at">
+<code class="sig-name descname">created_at</code><a class="headerlink" href="#odyssey.models.staff.Staff.created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creation timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>datetime</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.staff.Staff.updated_at">
+<code class="sig-name descname">updated_at</code><a class="headerlink" href="#odyssey.models.staff.Staff.updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>timestamp for when object was updated. DB server time is used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>datetime</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.staff.Staff.token">
+<code class="sig-name descname">token</code><a class="headerlink" href="#odyssey.models.staff.Staff.token" title="Permalink to this definition">¶</a></dt>
+<dd><p>API authentication token</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 32, indexed, unique</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.staff.Staff.token_expiration">
+<code class="sig-name descname">token_expiration</code><a class="headerlink" href="#odyssey.models.staff.Staff.token_expiration" title="Permalink to this definition">¶</a></dt>
+<dd><p>token expiration date</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>datetime</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.staff.Staff.staffid">
+<code class="sig-name descname">staffid</code><a class="headerlink" href="#odyssey.models.staff.Staff.staffid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Staff member ID number</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.staff.Staff.is_admin">
+<code class="sig-name descname">is_admin</code><a class="headerlink" href="#odyssey.models.staff.Staff.is_admin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates whether staff member is an administrator, i.e. has the
+ability to add/delete members to the Staff table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a>, default = False</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.staff.Staff.is_system_admin">
+<code class="sig-name descname">is_system_admin</code><a class="headerlink" href="#odyssey.models.staff.Staff.is_system_admin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates whether staff member is a system administrator. There should be very few of these
+roles given out.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a>, default = False</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.staff.Staff.access_roles">
+<code class="sig-name descname">access_roles</code><a class="headerlink" href="#odyssey.models.staff.Staff.access_roles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates the content access role of the staff member.
+roles include: stfappadmin, clntsvc, physthera, phystrain, datasci, doctor, docext, nutrition</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, default = clntsvc</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.staff.Staff.email">
+<code class="sig-name descname">email</code><a class="headerlink" href="#odyssey.models.staff.Staff.email" title="Permalink to this definition">¶</a></dt>
+<dd><p>Email address of staff member, used as login.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 50, non-null, unique</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.staff.Staff.firstname">
+<code class="sig-name descname">firstname</code><a class="headerlink" href="#odyssey.models.staff.Staff.firstname" title="Permalink to this definition">¶</a></dt>
+<dd><p>First name of staff member.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 50, non-null</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.staff.Staff.lastname">
+<code class="sig-name descname">lastname</code><a class="headerlink" href="#odyssey.models.staff.Staff.lastname" title="Permalink to this definition">¶</a></dt>
+<dd><p>Last name of staff member.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 50, non-null</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.staff.Staff.fullname">
+<code class="sig-name descname">fullname</code><a class="headerlink" href="#odyssey.models.staff.Staff.fullname" title="Permalink to this definition">¶</a></dt>
+<dd><p>Full name  of staff member. Combination of <a class="reference internal" href="#odyssey.models.staff.Staff.firstname" title="odyssey.models.staff.Staff.firstname"><code class="xref py py-attr docutils literal notranslate"><span class="pre">firstname</span></code></a> + <a class="reference internal" href="#odyssey.models.staff.Staff.lastname" title="odyssey.models.staff.Staff.lastname"><code class="xref py py-attr docutils literal notranslate"><span class="pre">lastname</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 100</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.staff.Staff.password">
+<code class="sig-name descname">password</code><a class="headerlink" href="#odyssey.models.staff.Staff.password" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hashed password string, as generated by <a class="reference external" href="https://werkzeug.palletsprojects.com/en/1.0.x/utils/#werkzeug.security.generate_password_hash" title="(in Werkzeug v1.0.x)"><code class="xref py py-func docutils literal notranslate"><span class="pre">werkzeug.security.generate_password_hash()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 128</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.staff.Staff.query_class">
+<code class="sig-name descname">query_class</code><a class="headerlink" href="#odyssey.models.staff.Staff.query_class" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_whooshee.WhoosheeQuery</span></code></p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.models.staff.Staff.set_password">
+<code class="sig-name descname">set_password</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">password</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.staff.Staff.set_password" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.models.staff.Staff.whoosh_search">
+<em class="property">classmethod </em><code class="sig-name descname">whoosh_search</code><span class="sig-paren">(</span><em class="sig-param">search_string</em>, <em class="sig-param">values_of=''</em>, <em class="sig-param">group=&lt;class 'whoosh.qparser.syntax.OrGroup'&gt;</em>, <em class="sig-param">match_substrings=True</em>, <em class="sig-param">limit=None</em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.staff.Staff.whoosh_search" title="Permalink to this definition">¶</a></dt>
+<dd><p>Searches the fields for given search_string.
+Returns the found records if ‘values_of’ is left empty,
+else the values of the given columns.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>search_string</strong> – The string to search for.</p></li>
+<li><p><strong>values_of</strong> – If given, the method will not return the whole
+records, but only values of given column.
+Defaults to returning whole records.</p></li>
+<li><p><strong>group</strong> – The whoosh group to use for searching.
+Defaults to <a class="reference external" href="https://whoosh.readthedocs.io/en/latest/api/qparser.html#whoosh.qparser.OrGroup" title="(in Whoosh v2.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">whoosh.qparser.OrGroup</span></code></a> which
+searches for all words in all columns.</p></li>
+<li><p><strong>match_substrings</strong> – <code class="docutils literal notranslate"><span class="pre">True</span></code> if you want to match substrings,
+<code class="docutils literal notranslate"><span class="pre">False</span></code> otherwise.</p></li>
+<li><p><strong>limit</strong> – The number of the top records to be returned.
+Defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code> and returns all records.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.models.staff.Staff.check_password">
+<code class="sig-name descname">check_password</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">password</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.staff.Staff.check_password" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.models.staff.Staff.get_token">
+<code class="sig-name descname">get_token</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">expires_in</span><span class="o">=</span><span class="default_value">360000</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.staff.Staff.get_token" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.models.staff.Staff.revoke_token">
+<code class="sig-name descname">revoke_token</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.staff.Staff.revoke_token" title="Permalink to this definition">¶</a></dt>
+<dd><p>set token to expired, for logging out/generating new token</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.models.staff.Staff.check_token">
+<em class="property">static </em><code class="sig-name descname">check_token</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">token</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.staff.Staff.check_token" title="Permalink to this definition">¶</a></dt>
+<dd><p>check if token is valid. returns user if so</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.models.staff.Staff.get_admin_role">
+<code class="sig-name descname">get_admin_role</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.staff.Staff.get_admin_role" title="Permalink to this definition">¶</a></dt>
+<dd><p>check if this staff member is authorized to create new staff members</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.models.staff.ClientRemovalRequests">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.models.staff.</code><code class="sig-name descname">ClientRemovalRequests</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.staff.ClientRemovalRequests" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<p>Client removal request table.</p>
+<p>Stores the history if client removal request by staff members</p>
+<dl class="py attribute">
+<dt id="odyssey.models.staff.ClientRemovalRequests.idx">
+<code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.models.staff.ClientRemovalRequests.idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Table index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.staff.ClientRemovalRequests.created_at">
+<code class="sig-name descname">created_at</code><a class="headerlink" href="#odyssey.models.staff.ClientRemovalRequests.created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creation timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>datetime</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.staff.ClientRemovalRequests.updated_at">
+<code class="sig-name descname">updated_at</code><a class="headerlink" href="#odyssey.models.staff.ClientRemovalRequests.updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>timestamp for when object was updated. DB server time is used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>datetime</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.staff.ClientRemovalRequests.staffid">
+<code class="sig-name descname">staffid</code><a class="headerlink" href="#odyssey.models.staff.ClientRemovalRequests.staffid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Staff member ID number</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.staff.ClientRemovalRequests.timestamp">
+<code class="sig-name descname">timestamp</code><a class="headerlink" href="#odyssey.models.staff.ClientRemovalRequests.timestamp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Timestamp of the removal request</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)">datetime.datetime</a>, primary key</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="odyssey.models.doctor.html" class="btn btn-neutral float-right" title="odyssey.models.doctor" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="odyssey.models.client.html" class="btn btn-neutral float-left" title="odyssey.models.client module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright Copyright 2019-2020 Atlantic Venture Partners, all rights reserved
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

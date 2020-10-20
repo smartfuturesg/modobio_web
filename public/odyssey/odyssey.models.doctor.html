@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>odyssey.models.doctor &mdash; Odyssey 0.1.1.dev151+gc03d6f9 documentation</title>
+  <title>odyssey.models.doctor &mdash; Odyssey version: 0.1.55 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="odyssey.models.pt" href="odyssey.models.pt.html" />
-    <link rel="prev" title="odyssey.models.intake" href="odyssey.models.intake.html" /> 
+    <link rel="prev" title="odyssey.models.staff module" href="odyssey.models.staff.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -61,7 +61,7 @@
             
             
               <div class="version">
-                0.1.1.dev151+gc03d6f9
+                version: 0.1.55
               </div>
             
           
@@ -87,21 +87,19 @@
             
             
               <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../toc_flask.html">Flask app</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="odyssey.models.html">Models</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="odyssey.models.main.html">Main</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.models.intake.html">Intake forms</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Doctor</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.models.pt.html">Physical therapist</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.models.trainer.html">Trainer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.config.html">Configuration</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="odyssey.models.html">Models</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="odyssey.models.client.html">Client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.models.staff.html">Staff</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Doctor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.models.pt.html">Physical therapist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.models.trainer.html">Trainer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.models.wearables.html">Wearable devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.models.misc.html">Other</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey.views.html">Views</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey.forms.html">Forms</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="../toc_api.html">API server</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../toc_rest.html">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.api.html">Endpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.utils.html">Utilities</a></li>
 </ul>
 
             
@@ -148,8 +146,6 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-          <li><a href="../toc_flask.html">Flask app</a> &raquo;</li>
-        
           <li><a href="odyssey.models.html">Models</a> &raquo;</li>
         
       <li>odyssey.models.doctor</li>
@@ -176,6 +172,129 @@
 <p>Database tables for the doctor’s portion of the Modo Bio Staff application.
 All tables in this module are prefixed with ‘Medical’.</p>
 <dl class="py class">
+<dt id="odyssey.models.doctor.MedicalImaging">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.models.doctor.</code><code class="sig-name descname">MedicalImaging</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.doctor.MedicalImaging" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<p>Medical Imaging table</p>
+<p>This table stores the medical imaging history of a client.
+As long as the clientID exists, we can add images to this table and search by clientID</p>
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalImaging.idx">
+<code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.models.doctor.MedicalImaging.idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Index</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalImaging.created_at">
+<code class="sig-name descname">created_at</code><a class="headerlink" href="#odyssey.models.doctor.MedicalImaging.created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creation timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>datetime</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalImaging.updated_at">
+<code class="sig-name descname">updated_at</code><a class="headerlink" href="#odyssey.models.doctor.MedicalImaging.updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>timestamp for when object was updated. DB server time is used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>datetime</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalImaging.clientid">
+<code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.doctor.MedicalImaging.clientid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client ID number</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int, foreign key to <code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalImaging.image_date">
+<code class="sig-name descname">image_date</code><a class="headerlink" href="#odyssey.models.doctor.MedicalImaging.image_date" title="Permalink to this definition">¶</a></dt>
+<dd><p>Date image was taken
+To be filled in by the doctor</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.date" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.date</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalImaging.image_type">
+<code class="sig-name descname">image_type</code><a class="headerlink" href="#odyssey.models.doctor.MedicalImaging.image_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Type of image, to be filled in by the doctor via a drop down menu
+Possible options are: Ultrasound, CT scan, X-Ray, MRI, PET scan.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 1024</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalImaging.image_read">
+<code class="sig-name descname">image_read</code><a class="headerlink" href="#odyssey.models.doctor.MedicalImaging.image_read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Text representing the doctors diagnosis or notes of the image</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalImaging.image_origin_location">
+<code class="sig-name descname">image_origin_location</code><a class="headerlink" href="#odyssey.models.doctor.MedicalImaging.image_origin_location" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of and information about clinic where image was gathered.
+eg. SimonMed imaging, Banner imaging, etc.
+May include name, address and contact information of clinic.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalImaging.image_path">
+<code class="sig-name descname">image_path</code><a class="headerlink" href="#odyssey.models.doctor.MedicalImaging.image_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>image S3 path</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalImaging.image_size">
+<code class="sig-name descname">image_size</code><a class="headerlink" href="#odyssey.models.doctor.MedicalImaging.image_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Size of image in bytes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt id="odyssey.models.doctor.MedicalHistory">
 <em class="property">class </em><code class="sig-prename descclassname">odyssey.models.doctor.</code><code class="sig-name descname">MedicalHistory</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.doctor.MedicalHistory" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
@@ -183,12 +302,39 @@ All tables in this module are prefixed with ‘Medical’.</p>
 <p>This table stores the medical history of a client. The information is taken
 only once, during the initial consult.</p>
 <dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalHistory.displayname">
+<code class="sig-name descname">displayname</code><em class="property"> = 'Medical History'</em><a class="headerlink" href="#odyssey.models.doctor.MedicalHistory.displayname" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt id="odyssey.models.doctor.MedicalHistory.idx">
 <code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.models.doctor.MedicalHistory.idx" title="Permalink to this definition">¶</a></dt>
 <dd><p>Index</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a>, primary key, autoincrement</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalHistory.created_at">
+<code class="sig-name descname">created_at</code><a class="headerlink" href="#odyssey.models.doctor.MedicalHistory.created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creation timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>datetime</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalHistory.updated_at">
+<code class="sig-name descname">updated_at</code><a class="headerlink" href="#odyssey.models.doctor.MedicalHistory.updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>timestamp for when object was updated. DB server time is used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>datetime</p>
 </dd>
 </dl>
 </dd></dl>
@@ -210,7 +356,7 @@ only once, during the initial consult.</p>
 <dd><p>Last time client visited a doctor.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.date" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.date</span></code></a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.date" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.date</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -221,7 +367,7 @@ only once, during the initial consult.</p>
 <dd><p>Explanation of reason for last visit to a doctor.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 1024</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 1024</p>
 </dd>
 </dl>
 </dd></dl>
@@ -232,7 +378,7 @@ only once, during the initial consult.</p>
 <dd><p>Client’s goals for visiting Modo Bio.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -243,7 +389,7 @@ only once, during the initial consult.</p>
 <dd><p>Client’s concerns while visiting Modo Bio.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -254,7 +400,7 @@ only once, during the initial consult.</p>
 <dd><p>Client’s medical family history.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -265,7 +411,7 @@ only once, during the initial consult.</p>
 <dd><p>Client’s health related social history.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -276,7 +422,7 @@ only once, during the initial consult.</p>
 <dd><p>Client’s allergies.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -287,7 +433,7 @@ only once, during the initial consult.</p>
 <dd><p>Client’s medication.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -298,7 +444,7 @@ only once, during the initial consult.</p>
 <dd><p>Client recently had an X-ray, with reason and outcome.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 1024</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 1024</p>
 </dd>
 </dl>
 </dd></dl>
@@ -309,7 +455,7 @@ only once, during the initial consult.</p>
 <dd><p>Client recently had a CT scan, with reason and outcome.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 1024</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 1024</p>
 </dd>
 </dl>
 </dd></dl>
@@ -320,7 +466,7 @@ only once, during the initial consult.</p>
 <dd><p>Client recently had an endoscopy, with reason and outcome.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 1024</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 1024</p>
 </dd>
 </dl>
 </dd></dl>
@@ -331,7 +477,7 @@ only once, during the initial consult.</p>
 <dd><p>Client recently had a MRI, with reason and outcome.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 1024</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 1024</p>
 </dd>
 </dl>
 </dd></dl>
@@ -342,7 +488,7 @@ only once, during the initial consult.</p>
 <dd><p>Client recently had an ultrasound, with reason and outcome.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 1024</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 1024</p>
 </dd>
 </dl>
 </dd></dl>
@@ -353,15 +499,9 @@ only once, during the initial consult.</p>
 <dd><p>Client recently had an other diagnostic procedure, with reason and outcome.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 1024</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 1024</p>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="odyssey.models.doctor.MedicalHistory.to_dict">
-<code class="sig-name descname">to_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.doctor.MedicalHistory.to_dict" title="Permalink to this definition">¶</a></dt>
-<dd><p>retuns all data in ClientSubscriptionContract Model as a dictionary</p>
 </dd></dl>
 
 </dd></dl>
@@ -374,12 +514,17 @@ only once, during the initial consult.</p>
 <p>This table stores the results of the physical exam of a client. The
 information is taken only once, during the initial consult.</p>
 <dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalPhysicalExam.displayname">
+<code class="sig-name descname">displayname</code><em class="property"> = 'Medical Physical Examination'</em><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.displayname" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt id="odyssey.models.doctor.MedicalPhysicalExam.idx">
 <code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.idx" title="Permalink to this definition">¶</a></dt>
 <dd><p>Index</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a>, primary key, autoincrement</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, autoincrement</p>
 </dd>
 </dl>
 </dd></dl>
@@ -396,12 +541,34 @@ information is taken only once, during the initial consult.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalPhysicalExam.created_at">
+<code class="sig-name descname">created_at</code><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creation timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>datetime</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalPhysicalExam.updated_at">
+<code class="sig-name descname">updated_at</code><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>timestamp for when object was updated. DB server time is used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>datetime</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
 <dt id="odyssey.models.doctor.MedicalPhysicalExam.timestamp">
 <code class="sig-name descname">timestamp</code><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.timestamp" title="Permalink to this definition">¶</a></dt>
 <dd><p>Timestamp of the assessment.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.8)">datetime.datetime</a>, primary key</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)">datetime.datetime</a>, primary key</p>
 </dd>
 </dl>
 </dd></dl>
@@ -409,10 +576,10 @@ information is taken only once, during the initial consult.</p>
 <dl class="py attribute">
 <dt id="odyssey.models.doctor.MedicalPhysicalExam.vital_heartrate">
 <code class="sig-name descname">vital_heartrate</code><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.vital_heartrate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Heart rate</p>
+<dd><p>Resting heart rate</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
 </dd>
 <dt class="field-even">Unit</dt>
 <dd class="field-even"><p>bpm</p>
@@ -426,7 +593,7 @@ information is taken only once, during the initial consult.</p>
 <dd><p>Respiratory rate</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
 </dd>
 <dt class="field-even">Unit</dt>
 <dd class="field-even"><p>breaths per minute</p>
@@ -440,7 +607,7 @@ information is taken only once, during the initial consult.</p>
 <dd><p>Systolic blood pressure</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
 </dd>
 <dt class="field-even">Unit</dt>
 <dd class="field-even"><p>mm Hg</p>
@@ -454,7 +621,7 @@ information is taken only once, during the initial consult.</p>
 <dd><p>Diastolic blood pressure</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
 </dd>
 <dt class="field-even">Unit</dt>
 <dd class="field-even"><p>mm Hg</p>
@@ -468,7 +635,7 @@ information is taken only once, during the initial consult.</p>
 <dd><p>Body temperature</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
 </dd>
 <dt class="field-even">Unit</dt>
 <dd class="field-even"><p>Fahrenheit</p>
@@ -482,7 +649,7 @@ information is taken only once, during the initial consult.</p>
 <dd><p>Body weight</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
 </dd>
 <dt class="field-even">Unit</dt>
 <dd class="field-even"><p>lbs</p>
@@ -497,7 +664,7 @@ information is taken only once, during the initial consult.</p>
 <p>Stored as a string until we figure out how to convert ft+in to a single number.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 20</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 20</p>
 </dd>
 <dt class="field-even">Unit</dt>
 <dd class="field-even"><p>TBD</p>
@@ -512,7 +679,7 @@ information is taken only once, during the initial consult.</p>
 <p>Height in inches</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
 </dd>
 <dt class="field-even">Unit</dt>
 <dd class="field-even"><p>inches</p>
@@ -523,10 +690,10 @@ information is taken only once, during the initial consult.</p>
 <dl class="py attribute">
 <dt id="odyssey.models.doctor.MedicalPhysicalExam.cardiac_rrr">
 <code class="sig-name descname">cardiac_rrr</code><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.cardiac_rrr" title="Permalink to this definition">¶</a></dt>
-<dd><p>“Regular rate and rythm” heart sound</p>
+<dd><p>“Regular rate and rhythm” heart sound</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -537,7 +704,7 @@ information is taken only once, during the initial consult.</p>
 <dd><p>S1 or S2 type heart sounds</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -548,7 +715,7 @@ information is taken only once, during the initial consult.</p>
 <dd><p>Murmurs in heart sounds</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -559,7 +726,7 @@ information is taken only once, during the initial consult.</p>
 <dd><p>Specific details regarding heart murmurs</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 1024</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 1024</p>
 </dd>
 </dl>
 </dd></dl>
@@ -570,7 +737,7 @@ information is taken only once, during the initial consult.</p>
 <dd><p>Rubs in heart sounds</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -581,7 +748,7 @@ information is taken only once, during the initial consult.</p>
 <dd><p>Gallops in heart sounds</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -592,7 +759,7 @@ information is taken only once, during the initial consult.</p>
 <dd><p>Clear lung sounds</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -603,7 +770,7 @@ information is taken only once, during the initial consult.</p>
 <dd><p>Wheezing in lung sounds</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -614,7 +781,7 @@ information is taken only once, during the initial consult.</p>
 <dd><p>Specific details regarding wheezing in lung sounds</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, max length 1024</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 1024</p>
 </dd>
 </dl>
 </dd></dl>
@@ -625,7 +792,7 @@ information is taken only once, during the initial consult.</p>
 <dd><p>Rales in lung sounds</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -636,7 +803,7 @@ information is taken only once, during the initial consult.</p>
 <dd><p>Rhonchi in lung sounds</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -647,7 +814,7 @@ information is taken only once, during the initial consult.</p>
 <dd><p>Soft abdomen</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -658,7 +825,7 @@ information is taken only once, during the initial consult.</p>
 <dd><p>Non tender abdomen</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -669,7 +836,7 @@ information is taken only once, during the initial consult.</p>
 <dd><p>Positive bowel sounds</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -680,7 +847,7 @@ information is taken only once, during the initial consult.</p>
 <dd><p>Hepatosplenomegaly, enlarged liver and/or spleen</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -691,7 +858,7 @@ information is taken only once, during the initial consult.</p>
 <dd><p>Specific details regarding hepatosplenomegaly, enlarged liver and/or spleen</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -702,7 +869,215 @@ information is taken only once, during the initial consult.</p>
 <dd><p>General notes during physical examination.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.models.doctor.MedicalBloodTests">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.models.doctor.</code><code class="sig-name descname">MedicalBloodTests</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.doctor.MedicalBloodTests" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<p>Holds information about client blood tests</p>
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalBloodTests.testid">
+<code class="sig-name descname">testid</code><a class="headerlink" href="#odyssey.models.doctor.MedicalBloodTests.testid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unique id identifying the test</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, auto incrementing</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalBloodTests.created_at">
+<code class="sig-name descname">created_at</code><a class="headerlink" href="#odyssey.models.doctor.MedicalBloodTests.created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creation timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>datetime</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalBloodTests.updated_at">
+<code class="sig-name descname">updated_at</code><a class="headerlink" href="#odyssey.models.doctor.MedicalBloodTests.updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>timestamp for when object was updated. DB server time is used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>datetime</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalBloodTests.clientid">
+<code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.doctor.MedicalBloodTests.clientid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client ID number</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, foreign key</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalBloodTests.date">
+<code class="sig-name descname">date</code><a class="headerlink" href="#odyssey.models.doctor.MedicalBloodTests.date" title="Permalink to this definition">¶</a></dt>
+<dd><p>Date the test was administered</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>date</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalBloodTests.panel_type">
+<code class="sig-name descname">panel_type</code><a class="headerlink" href="#odyssey.models.doctor.MedicalBloodTests.panel_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>denotes the panel type of the test, null if not one of the “standard tests”</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalBloodTests.notes">
+<code class="sig-name descname">notes</code><a class="headerlink" href="#odyssey.models.doctor.MedicalBloodTests.notes" title="Permalink to this definition">¶</a></dt>
+<dd><p>doctor’s notes about the test</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.models.doctor.MedicalBloodTestResultTypes">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.models.doctor.</code><code class="sig-name descname">MedicalBloodTestResultTypes</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.doctor.MedicalBloodTestResultTypes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<p>Holds a list of possible blood test result types(i.e. hemoglobulin, cholesterol, glucose, etc.)</p>
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalBloodTestResultTypes.resultid">
+<code class="sig-name descname">resultid</code><a class="headerlink" href="#odyssey.models.doctor.MedicalBloodTestResultTypes.resultid" title="Permalink to this definition">¶</a></dt>
+<dd><p>autoincrementing primary key</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, autoincrementing</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalBloodTestResultTypes.created_at">
+<code class="sig-name descname">created_at</code><a class="headerlink" href="#odyssey.models.doctor.MedicalBloodTestResultTypes.created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creation timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>datetime</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalBloodTestResultTypes.updated_at">
+<code class="sig-name descname">updated_at</code><a class="headerlink" href="#odyssey.models.doctor.MedicalBloodTestResultTypes.updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>timestamp for when object was updated. DB server time is used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>datetime</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalBloodTestResultTypes.result_name">
+<code class="sig-name descname">result_name</code><a class="headerlink" href="#odyssey.models.doctor.MedicalBloodTestResultTypes.result_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>name of the result</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.models.doctor.MedicalBloodTestResults">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.models.doctor.</code><code class="sig-name descname">MedicalBloodTestResults</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.doctor.MedicalBloodTestResults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<p>Holds the results of a blood test identified by a blood test id</p>
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalBloodTestResults.idx">
+<code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.models.doctor.MedicalBloodTestResults.idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>autoincrementing result idx</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, autoincrementing</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalBloodTestResults.created_at">
+<code class="sig-name descname">created_at</code><a class="headerlink" href="#odyssey.models.doctor.MedicalBloodTestResults.created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creation timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>datetime</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalBloodTestResults.updated_at">
+<code class="sig-name descname">updated_at</code><a class="headerlink" href="#odyssey.models.doctor.MedicalBloodTestResults.updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>timestamp for when object was updated. DB server time is used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>datetime</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalBloodTestResults.testid">
+<code class="sig-name descname">testid</code><a class="headerlink" href="#odyssey.models.doctor.MedicalBloodTestResults.testid" title="Permalink to this definition">¶</a></dt>
+<dd><p>foreign key to MedicalBloodTests.clientid</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, foreign key</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalBloodTestResults.resultid">
+<code class="sig-name descname">resultid</code><a class="headerlink" href="#odyssey.models.doctor.MedicalBloodTestResults.resultid" title="Permalink to this definition">¶</a></dt>
+<dd><p>foreign key to MedicalBloodTestResultTypes.resultid</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, foreign key</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.doctor.MedicalBloodTestResults.result_value">
+<code class="sig-name descname">result_value</code><a class="headerlink" href="#odyssey.models.doctor.MedicalBloodTestResults.result_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>numerical value of the parameter</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -722,7 +1097,7 @@ information is taken only once, during the initial consult.</p>
         <a href="odyssey.models.pt.html" class="btn btn-neutral float-right" title="odyssey.models.pt" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="odyssey.models.intake.html" class="btn btn-neutral float-left" title="odyssey.models.intake" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="odyssey.models.staff.html" class="btn btn-neutral float-left" title="odyssey.models.staff module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

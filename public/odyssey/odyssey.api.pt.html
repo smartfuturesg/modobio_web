@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>odyssey.api.pt &mdash; Odyssey 0.1.1.dev151+gc03d6f9 documentation</title>
+  <title>odyssey.api.pt &mdash; Odyssey version: 0.1.55 documentation</title>
   
 
   
@@ -61,7 +61,7 @@
             
             
               <div class="version">
-                0.1.1.dev151+gc03d6f9
+                version: 0.1.55
               </div>
             
           
@@ -87,25 +87,25 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../toc_flask.html">Flask app</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../toc_api.html">API server</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="odyssey.api.html">API</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.auth.html">Authorization</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.tokens.html">Authorization tokens</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.staff.html">Staff</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.clients.html">Client</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.doctor.html">Doctor</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Physical therapist</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.trainer.html">Trainer</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.schemas.html">Schemas</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.errors.html">Error messages</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.serializers.html">Serializers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.utils.html">Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.config.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.models.html">Models</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="odyssey.api.html">Endpoints</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.clients.html">Client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.staff.html">Staff</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.doctor.html">Doctor</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Physical therapist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.trainer.html">Trainer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.remote_clients.html">Remote registration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.registeredfacilities.html">Registered facilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.wearables.html">Wearable devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.auth.html">Authorization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.tokens.html">Authorization tokens</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.errors.html">Error messages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.postman.html">Postman</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.version.html">Version</a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="../toc_rest.html">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.utils.html">Utilities</a></li>
 </ul>
 
             
@@ -152,8 +152,6 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-          <li><a href="../toc_api.html">API server</a> &raquo;</li>
-        
           <li><a href="odyssey.api.html">API</a> &raquo;</li>
         
       <li>odyssey.api.pt</li>
@@ -185,13 +183,13 @@
 <dl class="py method">
 <dt id="odyssey.api.pt.ClientPTHistory.get">
 <code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.pt.ClientPTHistory.get" title="Permalink to this definition">¶</a></dt>
-<dd><p>returns most recent mobility assessment data</p>
+<dd><p>returns most recent pt history</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="odyssey.api.pt.ClientPTHistory.post">
 <code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.pt.ClientPTHistory.post" title="Permalink to this definition">¶</a></dt>
-<dd><p>returns most recent mobility assessment data</p>
+<dd><p>create client’s pt history</p>
 </dd></dl>
 
 <dl class="py method">
@@ -221,7 +219,7 @@
 <dt id="odyssey.api.pt.ClientChessboard">
 <em class="property">class </em><code class="sig-prename descclassname">odyssey.api.pt.</code><code class="sig-name descname">ClientChessboard</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.pt.ClientChessboard" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
-<p>GET, POST for mobility assesssment data
+<p>GET, POST for chessboard assesssment data
 note that clients will have multiple entries as they progress through the program
 Trainers may update some or all fields. The backend will store every update as a new row
 fields left blank will be left as null</p>

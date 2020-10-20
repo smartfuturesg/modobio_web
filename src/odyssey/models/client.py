@@ -11,22 +11,22 @@ import secrets
 from datetime import datetime, timedelta
 from hashlib import md5
 from sqlalchemy import text
+from sqlalchemy.orm.query import Query
 from odyssey.constants import DB_SERVER_TIME, ALPHANUMERIC
 from odyssey import db, whooshee
 
 phx_tz = pytz.timezone('America/Phoenix')
 
 
-
-@whooshee.register_model('firstname','lastname','email','phone','dob', 'record_locator_id')
+@whooshee.register_model('firstname', 'lastname', 'email', 'phone', 'dob', 'record_locator_id')
 class ClientInfo(db.Model):
     """ Client information table
 
-    This table stores general information of a client. The information is taken
-    only once, during the initial consult. The primary index of this table is the
-    :attr:`clientid` number. Many other tables in this database refer to the
-    :attr:`clientid` number, so a new client **MUST** be added to this table first,
-    in order to generate the :attr:`clientid` number.
+    This table stores general information of a client. The primary index of
+    this table is the :attr:`clientid` number, the main identifier of clients
+    in the system. Many other tables in this database refer to the :attr:`clientid`
+    number, so a new client **must** be added to this table first, in order to
+    generate the :attr:`clientid` number.
     """
 
     __tablename__ = 'ClientInfo'
@@ -44,16 +44,16 @@ class ClientInfo(db.Model):
     """
     Member since date
 
-    The date a member was first added to the system
+    The date a member was first added to the system.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     firstname = db.Column(db.String(50))
@@ -219,7 +219,7 @@ class ClientInfo(db.Model):
     """
     Client date of birth.
 
-    :type: datetime.date
+    :type: :class:`datetime.date`
     """
 
     profession = db.Column(db.String(100))
@@ -238,23 +238,60 @@ class ClientInfo(db.Model):
     
     record_locator_id = db.Column(db.String(12))
     """
-    Record Locator ID
+    Medical decord Locator ID.
 
-    name_hash = md5(bytes((data['firstname']+data['lastname']), 'utf-8')).hexdigest()
-    data['record_locator_id'] = (data['firstname'][0]+data['lastname'][0]+str(data['clientid'])+name_hash[0:6]).upper()    
+    See :meth:`generate_record_locator_id`.
 
-    :type: str, max length 10
+    :type: str, max length 12
     """
 
     @staticmethod
-    def generate_record_locator_id(firstname, lastname, clientid):
-        """medical record hash generation"""
+    def generate_record_locator_id(firstname: str, lastname: str, clientid: int) -> str:
+        """ Generate the medical record identifier.
+
+        The medical record identifier can be exported to other healthcare providers.
+        It is made up of the firstname and lastname initials and 10 random alphanumeric
+        characters.
+
+        Parameters
+        ----------
+        firstname : str
+            Client first name.
+
+        lastname : str
+            Client last name.
+
+        clientid : int
+            Client ID number.
+
+        Returns
+        -------
+        str
+            Medical record ID
+        """
         random.seed(clientid)
         rli_hash = "".join([random.choice(ALPHANUMERIC) for i in range(10)])
-        return (firstname[0]+lastname[0]+rli_hash).upper()
+        return (firstname[0] + lastname[0] + rli_hash).upper()
 
-    def client_info_search_dict(self):
-        """returns just the searchable client info (name, email, number)"""
+    def client_info_search_dict(self) -> dict:
+        """ Searchable client info.
+        
+        Returns a subset of the data in this row object.
+        The returned dict contains the following keys:
+
+        - clientid
+        - record_locator_id
+        - firstname
+        - lastename
+        - dob (date of birth)
+        - phone
+        - email
+
+        Returns
+        -------
+        dict
+            Subset of data in this row object.
+        """
         data = {
             'clientid': self.clientid,
             'record_locator_id': self.record_locator_id,
@@ -267,7 +304,33 @@ class ClientInfo(db.Model):
         return data
 
     @staticmethod
-    def all_clients_dict(query, page, per_page, **kwargs):
+    def all_clients_dict(query: Query, page: int, per_page: int, **kwargs) -> tuple:
+        """ Paginate a search in this table.
+        
+        Given a search query in this table, return the results for page ``page``
+        with ``per_page`` results per page. The returned result itmes are generated
+        by :meth:`client_info_search_dict`.
+
+        Parameters
+        ----------
+        query : :class:`sqlalchemy.orm.query.Query`
+            The SQL query with a (possibly) long list of results to paginate.
+
+        page : int
+            The current page to display results for.
+
+        per_page : int
+            How many results to display per page.
+
+        Returns
+        -------
+        dict
+            A dictionary with ``items``, a list of dicts containing the search results,
+            and ``_meta`` a dict containing pagination information.
+
+        :class:`flask_sqlalchemy.Pagination`
+            An object holding the paginated search results from the SQLAlchemy query.
+        """
         resources = query.paginate(page, per_page, False)
         data = {
             'items': [item.client_info_search_dict() for item in resources.items],
@@ -280,9 +343,9 @@ class ClientInfo(db.Model):
             }
         return data, resources
 
+
 class ClientFacilities(db.Model):
-    """ A mapping of client ids to registered facility ids
-    """
+    """ A mapping of client ID number to registered facility ID numbers. """
 
     __tablename__ = 'ClientFacilities'
 
@@ -295,30 +358,30 @@ class ClientFacilities(db.Model):
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    timestamp for when object was created. DB server time is used. 
+    Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
-    client_id = db.Column(db.ForeignKey('ClientInfo.clientid',ondelete="CASCADE"))
+    client_id = db.Column(db.ForeignKey('ClientInfo.clientid', ondelete="CASCADE"))
     """
-    Foreign key from ClientInfo table
+    Client ID number.
 
-    :type: int, foreign key
+    :type: int, foreign key to :attr:`ClientInfo.clientid`
     """
     
-    facility_id = db.Column(db.ForeignKey('RegisteredFacilities.facility_id',ondelete="CASCADE"))
+    facility_id = db.Column(db.ForeignKey('RegisteredFacilities.facility_id', ondelete="CASCADE"))
     """
-    Foreign key from RegisteredFacilities table
+    RegisteredFacilities ID number.
 
-    :type: int, foreign key
+    :type: int, foreign key to :attr:`RegisteredFacilities.facility_id`
     """
 
 class ClientConsent(db.Model):
@@ -356,16 +419,16 @@ class ClientConsent(db.Model):
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    timestamp for when object was created. DB server time is used. 
+    Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientConsent_clientid_fkey',ondelete="CASCADE"), nullable=False)
@@ -387,7 +450,7 @@ class ClientConsent(db.Model):
     Signature date. This is filled by the client upon signing the document. Therefore, we can assume that 
     this date is in their local timezone. 
 
-    :type: datetime.date
+    :type: :class:`datetime.date`
     """
 
     signature = db.Column(db.Text)
@@ -459,16 +522,16 @@ class ClientRelease(db.Model):
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    timestamp for when object was created. DB server time is used. 
+    Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientRelease_clientid_fkey',ondelete="CASCADE"), nullable=False)
@@ -496,14 +559,14 @@ class ClientRelease(db.Model):
     """
     Limits the release of protected health information to from this date.
 
-    :type: datetime.date
+    :type: :class:`datetime.date`
     """
 
     release_date_to = db.Column(db.Date)
     """
     Limits the release of protected health information to until this date.
 
-    :type: datetime.date
+    :type: :class:`datetime.date`
     """
 
     release_purpose = db.Column(db.String(1024))
@@ -518,7 +581,7 @@ class ClientRelease(db.Model):
     Signature date. This is filled by the client upon signing the document. Therefore, we can assume that 
     this date is in their local timezone. 
 
-    :type: datetime.date
+    :type: :class:`datetime.date`
     """
 
     signature = db.Column(db.Text)
@@ -590,16 +653,16 @@ class ClientPolicies(db.Model):
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    timestamp for when object was created. DB server time is used. 
+    Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientPolicies_clientid_fkey',ondelete="CASCADE"), nullable=False)
@@ -614,7 +677,7 @@ class ClientPolicies(db.Model):
     Signature date. This is filled by the client upon signing the document. Therefore, we can assume that 
     this date is in their local timezone. 
 
-    :type: datetime.date
+    :type: :class:`datetime.date`
     """
 
     signature = db.Column(db.Text)
@@ -686,16 +749,16 @@ class ClientConsultContract(db.Model):
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    timestamp for when object was created. DB server time is used. 
+    Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientColusultContract_clientid_fkey',ondelete="CASCADE"), nullable=False)
@@ -710,7 +773,7 @@ class ClientConsultContract(db.Model):
     Signature date. This is filled by the client upon signing the document. Therefore, we can assume that 
     this date is in their local timezone. 
 
-    :type: datetime.date
+    :type: :class:`datetime.date`
     """
 
     signature = db.Column(db.Text)
@@ -782,16 +845,16 @@ class ClientSubscriptionContract(db.Model):
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    timestamp for when object was created. DB server time is used. 
+    Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientSubscriptionContract_clientid_fkey',ondelete="CASCADE"), nullable=False)
@@ -806,7 +869,7 @@ class ClientSubscriptionContract(db.Model):
     Signature date. This is filled by the client upon signing the document. Therefore, we can assume that 
     this date is in their local timezone. 
 
-    :type: datetime.date
+    :type: :class:`datetime.date`
     """
 
     signature = db.Column(db.Text)
@@ -873,16 +936,16 @@ class ClientIndividualContract(db.Model):
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    timestamp for when object was created. DB server time is used. 
+    Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientIndividualContract_clientid_fkey',ondelete="CASCADE"), nullable=False)
@@ -925,7 +988,7 @@ class ClientIndividualContract(db.Model):
     Signature date. This is filled by the client upon signing the document. Therefore, we can assume that 
     this date is in their local timezone. 
 
-    :type: datetime.date
+    :type: :class:`datetime.date`
     """
 
     signature = db.Column(db.Text)
@@ -984,16 +1047,16 @@ class RemoteRegistration(db.Model):
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    timestamp for when object was created. DB server time is used. 
+    Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='remote_registration_clientid_fkey',ondelete="CASCADE"), nullable=False)
@@ -1021,7 +1084,7 @@ class RemoteRegistration(db.Model):
     """
     token expiration date
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     password = db.Column(db.String(128))
@@ -1042,7 +1105,7 @@ class RemoteRegistration(db.Model):
     """
     token expiration date
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     def get_temp_registration_endpoint(self, expires_in = 86400):
@@ -1130,16 +1193,16 @@ class ClientExternalMR(db.Model):
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    timestamp for when object was created. DB server time is used. 
+    Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientExternalMR_clientid_fkey',ondelete="CASCADE"), nullable=False)
@@ -1179,16 +1242,16 @@ class ClientReleaseContacts(db.Model):
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    timestamp for when object was created. DB server time is used. 
+    Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     release_contract_id = db.Column(db.Integer, db.ForeignKey('ClientRelease.idx',name='ClientReleaseContacts_idx_fkey',ondelete="CASCADE"), nullable=False)

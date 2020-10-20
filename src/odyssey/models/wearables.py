@@ -39,7 +39,7 @@ class Wearables(_Base):
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    timestamp for when object was created. DB server time is used. 
+    Creation timestamp of this row in the database.
 
     :type: datetime
     """
@@ -115,7 +115,7 @@ class WearablesOura(_Base):
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    timestamp for when object was created. DB server time is used. 
+    Creation timestamp of this row in the database.
 
     :type: datetime
     """
@@ -196,7 +196,7 @@ class WearablesFreeStyle(_Base):
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    timestamp for when object was created. DB server time is used. 
+    Creation timestamp of this row in the database.
 
     :type: datetime
     """

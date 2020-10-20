@@ -1,8 +1,12 @@
-""" Flask app configuration
+""" 
+Flask app configuration
+=======================
 
-The configuration of this program is defined by two environmental parameters, ``FLASK_ENV``
-and ``FLASK_DEV``. ``FLASK_ENV`` is native to Flask and can be either ``production`` (the
-default), or ``development``. Setting ``FLASK_ENV`` to ``development`` enables debugging
+The configuration of the Odyssey API is defined by two environmental parameters, ``FLASK_ENV``
+and ``FLASK_DEV``.
+
+``FLASK_ENV`` is native to Flask and can be set to ``production`` (the
+default) or ``development``. Setting ``FLASK_ENV=development`` enables debugging
 and automatic reloading of changed code.
 
 ``FLASK_DEV`` determines the development environment and can be either ``local`` or
@@ -13,7 +17,8 @@ When ``FLASK_DEV`` is set to ``remote``, the default configuration parameters ar
 from the AWS Parameter store where possible. The database is a database on a separate machine,
 and files are stored in AWS S3 buckets.
 
-.. rubric:: Defaults
+Defaults
+========
 
 Configuration parameters can be set in one of four ways (in order of precedense):
 
@@ -23,28 +28,34 @@ Configuration parameters can be set in one of four ways (in order of precedense)
 4. Hard-coded defaults is all else fails
 
 Defaults are set in :mod:`odyssey.defaults`. These defaults can be overriden by setting an
-environmental variable with the same name. If AWS credentials are available and FLASK_ENV
-= "remote", most (but not all) parameters are pulled from the AWS parameter store.
+environmental variable with the same name. If AWS credentials are available and
+``FLASK_ENV=remote``, default parameters are pulled from the AWS parameter store.
 
-.. rubric:: AWS access
+AWS access
+==========
 
 In order for remote development to work, the program must have access to AWS. A client key
-ID and secret key must be provided either in ``.aws/credentials`` or in the environment as
-``AWS_ACCESS_KEY_ID`` and ``AWS_SECRET_ACCESS_KEY``, respectively. Additinally, a default
-region must be set (currently "us-east-2") in ``.aws/config`` or ``AWS_DEFAULT_REGION``.
+ID and secret key must be provided either in ``$HOME/.aws/credentials`` or in the environment as
+``AWS_ACCESS_KEY_ID`` and ``AWS_SECRET_ACCESS_KEY``, respectively. Additionally, a default
+region must be set in ``$HOME/.aws/config`` or ``AWS_DEFAULT_REGION``.
 
-.. rubric:: Special cases
+Special cases
+=============
 
-- *Testing*: when ``pytest`` is running the unit tests, the environment is always local (FLASK_DEV =
-"local", LOCAL_CONFIG = True).
-- *Production*: when ``FLASK_ENV`` is ``development``, the environment is always remote (FLASK_DEV = "remote", LOCAL_CONFIG = False).
+**Testing**: when ``pytest`` is running the unit tests, the environment is always local
+(i.e. ``FLASK_DEV=local`` and ``LOCAL_CONFIG=True``).
+
+**Production**: when ``FLASK_ENV=development``, the environment is always remote
+(i.e. ``FLASK_DEV=remote`` and  ``LOCAL_CONFIG=False``).
 
 Notes
------
+=====
 
 - This file is loaded by the main Flask app using ``app.config.from_object(Config())``.
 - Only uppercase attributes defined on the Config instance will be added to app.config.
 - The development environment is accessible in the Flask program as ``LOCAL_CONFIG`` (bool).
+- **Do NOT** use any other logic to determine what state the app is in. All configuration
+  logic should take place in config.py.
 """
 
 import boto3
@@ -66,9 +77,12 @@ class Config:
     """ Main configuration class.
 
     This class needs to be instantiated before it can be loaded by Flask.
-    Load this class from the :func:`odyssey.create_app` app factory:
+    Load this class in the :func:`odyssey.create_app` app factory using
+    :meth:`flask.Config.from_object`.
 
     .. code-block::
+
+        from odyssey.config import Config
 
         def create_app():
             app = Flask(__name__)

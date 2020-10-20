@@ -1,0 +1,349 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>odyssey.utils.misc module &mdash; Odyssey version: 0.1.55 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="odyssey.pdf" href="odyssey.pdf.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> Odyssey
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                version: 0.1.55
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="odyssey.config.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.api.html">Endpoints</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="odyssey.utils.html">Utilities</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="odyssey.utils.schemas.html">Schemas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.constants.html">Constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.utils.email.html">Email</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.pdf.html">PDF generation</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Other</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Odyssey</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="odyssey.utils.html">Utilities</a> &raquo;</li>
+        
+      <li>odyssey.utils.misc module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/odyssey/odyssey.utils.misc.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-odyssey.utils.misc">
+<span id="odyssey-utils-misc-module"></span><h1>odyssey.utils.misc module<a class="headerlink" href="#module-odyssey.utils.misc" title="Permalink to this headline">¶</a></h1>
+<p>Utility functions for the odyssey package.</p>
+<dl class="py function">
+<dt id="odyssey.utils.misc.list_average">
+<code class="sig-prename descclassname">odyssey.utils.misc.</code><code class="sig-name descname">list_average</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">values_list</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.list_average" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function to clean list values before attempting to find the average</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="odyssey.utils.misc.check_client_existence">
+<code class="sig-prename descclassname">odyssey.utils.misc.</code><code class="sig-name descname">check_client_existence</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.check_client_existence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check that the client is in the database
+All clients must be in the CLientInfo table before any other procedure</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="odyssey.utils.misc.check_blood_test_existence">
+<code class="sig-prename descclassname">odyssey.utils.misc.</code><code class="sig-name descname">check_blood_test_existence</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">testid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.check_blood_test_existence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check that the blood test is in the database</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="odyssey.utils.misc.check_blood_test_result_type_existence">
+<code class="sig-prename descclassname">odyssey.utils.misc.</code><code class="sig-name descname">check_blood_test_result_type_existence</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">result_name</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.check_blood_test_result_type_existence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check that a supplied blood test result type is in the database</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="odyssey.utils.misc.check_facility_existence">
+<code class="sig-prename descclassname">odyssey.utils.misc.</code><code class="sig-name descname">check_facility_existence</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">facility_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.check_facility_existence" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="odyssey.utils.misc.check_client_facility_relation_existence">
+<code class="sig-prename descclassname">odyssey.utils.misc.</code><code class="sig-name descname">check_client_facility_relation_existence</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em>, <em class="sig-param"><span class="n">facility_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.check_client_facility_relation_existence" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="odyssey.utils.misc.check_remote_client_portal_validity">
+<code class="sig-prename descclassname">odyssey.utils.misc.</code><code class="sig-name descname">check_remote_client_portal_validity</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">portal_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.check_remote_client_portal_validity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ensure portal is valid. If not raise 404 error</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.utils.misc.JSONEncoder">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.utils.misc.</code><code class="sig-name descname">JSONEncoder</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span></em>, <em class="sig-param"><span class="n">skipkeys</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">ensure_ascii</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">check_circular</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">allow_nan</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">sort_keys</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">indent</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">separators</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.JSONEncoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://flask.palletsprojects.com/en/1.1.x/api/#flask.json.JSONEncoder" title="(in Flask v1.1.x)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flask.json.JSONEncoder</span></code></a></p>
+<dl class="simple">
+<dt>Converts <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.date" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.date</span></code></a>,</dt><dd><p>or <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.time" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.time</span></code></a> objects to a JSON compatible ISO8601 string.</p>
+</dd>
+</dl>
+<p>This subclass of <a class="reference external" href="https://flask.palletsprojects.com/en/1.1.x/api/#flask.json.JSONEncoder" title="(in Flask v1.1.x)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flask.json.JSONEncoder</span></code></a> overrides the
+<a class="reference internal" href="#odyssey.utils.misc.JSONEncoder.default" title="odyssey.utils.misc.JSONEncoder.default"><code class="xref py py-meth docutils literal notranslate"><span class="pre">default()</span></code></a> method to convert datetime objects to ISO8601 strings,
+instead of the RFC 822 strings. RFC 822 strings are much harder to
+deserialize. Everything else is passed on to the parent class.</p>
+<dl class="py method">
+<dt id="odyssey.utils.misc.JSONEncoder.default">
+<code class="sig-name descname">default</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">obj</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.JSONEncoder.default" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a Python object to a JSON string.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.utils.misc.JSONDecoder">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.utils.misc.</code><code class="sig-name descname">JSONDecoder</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.JSONDecoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://flask.palletsprojects.com/en/1.1.x/api/#flask.json.JSONDecoder" title="(in Flask v1.1.x)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flask.json.JSONDecoder</span></code></a></p>
+<p>Deserialize JSON string into a dictionary of Python objects.</p>
+<p><a class="reference external" href="https://flask.palletsprojects.com/en/1.1.x/api/#flask.json.JSONDecoder" title="(in Flask v1.1.x)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flask.json.JSONDecoder</span></code></a> only supports a small set of types that
+can be deserialized into Python objects. This class adds a set of parsers
+that can convert JSON strings into their respective Python objects.</p>
+<p>To add more functionality, simply create a new parser method below, with
+the following properties:</p>
+<ol class="arabic simple">
+<li><p>The method must have 1 argument, a string.</p></li>
+<li><p>The method must return 1 object, the converted string.</p></li>
+<li><p>The method should not raise an error if the conversion fails.</p></li>
+<li><p>If the conversion was unsuccessful, the method must return the
+original string unaltered.</p></li>
+<li><p>The method name must start with ‘parse_’ to be picked up by the
+automatic registration system.</p></li>
+</ol>
+<p>Of course, there should be a corresponding serializer in <a class="reference internal" href="#odyssey.utils.misc.JSONEncoder" title="odyssey.utils.misc.JSONEncoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">JSONEncoder</span></code></a>.</p>
+<dl class="py method">
+<dt id="odyssey.utils.misc.JSONDecoder.parse_datetime">
+<code class="sig-name descname">parse_datetime</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">string</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.JSONDecoder.parse_datetime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a string to a <code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code> object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>string</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – ISO8601 formatted datetime (yyyy-mm-dd HH:MM:ss.ssssss), date (yyyy-mm-dd),
+or time (HH:MM:ss.ssssss) string. Timezone information (+/-tttt after time)
+is not yet handled.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.date" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.date</span></code></a>, or <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.time" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.time</span></code></a> object, or the original string if string could not be converted.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.utils.misc.JSONDecoder.parse_uuid">
+<code class="sig-name descname">parse_uuid</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">string</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.JSONDecoder.parse_uuid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a string into a <a class="reference external" href="https://docs.python.org/3/library/uuid.html#uuid.UUID" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">uuid.UUID</span></code></a> object.</p>
+<p>Serializing <a class="reference external" href="https://docs.python.org/3/library/uuid.html#uuid.UUID" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">uuid.UUID</span></code></a> is supported by <a class="reference external" href="https://flask.palletsprojects.com/en/1.1.x/api/#flask.json.JSONEncoder" title="(in Flask v1.1.x)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flask.json.JSONEncoder</span></code></a>,
+but the reverse process is not natively supported by flask. This parser adds
+support for the deserialization of UUID strings into <a class="reference external" href="https://docs.python.org/3/library/uuid.html#uuid.UUID" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">uuid.UUID</span></code></a>
+objects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>string</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – UUID compatible string, e.g. ‘56128bcc-da87-3204-892e-177f8df298a8’.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/uuid.html#uuid.UUID" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">uuid.UUID</span></code></a> or the original string if it could not be converted.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.utils.misc.JSONDecoder.parse">
+<code class="sig-name descname">parse</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">jsonobj</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.JSONDecoder.parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply the registered parsers to the Python dict.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="odyssey.pdf.html" class="btn btn-neutral float-left" title="odyssey.pdf" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright Copyright 2019-2020 Atlantic Venture Partners, all rights reserved
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

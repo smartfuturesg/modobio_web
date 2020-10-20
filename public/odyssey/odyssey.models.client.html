@@ -1,0 +1,2003 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>odyssey.models.client module &mdash; Odyssey version: 0.1.55 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="odyssey.models.staff module" href="odyssey.models.staff.html" />
+    <link rel="prev" title="Models" href="odyssey.models.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> Odyssey
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                version: 0.1.55
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="odyssey.config.html">Configuration</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="odyssey.models.html">Models</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.models.staff.html">Staff</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.models.doctor.html">Doctor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.models.pt.html">Physical therapist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.models.trainer.html">Trainer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.models.wearables.html">Wearable devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.models.misc.html">Other</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.api.html">Endpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.utils.html">Utilities</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Odyssey</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="odyssey.models.html">Models</a> &raquo;</li>
+        
+      <li>odyssey.models.client module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/odyssey/odyssey.models.client.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-odyssey.models.client">
+<span id="odyssey-models-client-module"></span><h1>odyssey.models.client module<a class="headerlink" href="#module-odyssey.models.client" title="Permalink to this headline">¶</a></h1>
+<p>Database tables for the client intake portion of the Modo Bio Staff application.
+All tables in this module are prefixed with ‘Client’.</p>
+<dl class="py class">
+<dt id="odyssey.models.client.ClientInfo">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.models.client.</code><code class="sig-name descname">ClientInfo</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.client.ClientInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<p>Client information table</p>
+<p>This table stores general information of a client. The primary index of
+this table is the <a class="reference internal" href="#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">clientid</span></code></a> number, the main identifier of clients
+in the system. Many other tables in this database refer to the <a class="reference internal" href="#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">clientid</span></code></a>
+number, so a new client <strong>must</strong> be added to this table first, in order to
+generate the <a class="reference internal" href="#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">clientid</span></code></a> number.</p>
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientInfo.clientid">
+<code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.clientid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client ID number</p>
+<p>The main identifier of a client throughout the Modo Bio system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientInfo.membersince">
+<code class="sig-name descname">membersince</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.membersince" title="Permalink to this definition">¶</a></dt>
+<dd><p>Member since date</p>
+<p>The date a member was first added to the system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientInfo.updated_at">
+<code class="sig-name descname">updated_at</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Last update timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientInfo.firstname">
+<code class="sig-name descname">firstname</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.firstname" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client first name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 50</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientInfo.middlename">
+<code class="sig-name descname">middlename</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.middlename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client middle name(s).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 50</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientInfo.lastname">
+<code class="sig-name descname">lastname</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.lastname" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client last name or family name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 50</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientInfo.fullname">
+<code class="sig-name descname">fullname</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.fullname" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client full name.</p>
+<p>Create this field by combining <a class="reference internal" href="#odyssey.models.client.ClientInfo.firstname" title="odyssey.models.client.ClientInfo.firstname"><code class="xref py py-attr docutils literal notranslate"><span class="pre">firstname</span></code></a> + ‘ ‘ + <a class="reference internal" href="#odyssey.models.client.ClientInfo.lastname" title="odyssey.models.client.ClientInfo.lastname"><code class="xref py py-attr docutils literal notranslate"><span class="pre">lastname</span></code></a>.
+The full name is used for displaying and addressing the client.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 100</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientInfo.guardianname">
+<code class="sig-name descname">guardianname</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.guardianname" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of client’s parent or guardian, if applicable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 50</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientInfo.guardianrole">
+<code class="sig-name descname">guardianrole</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.guardianrole" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parent or guardian’s role to the client.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 50</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientInfo.street">
+<code class="sig-name descname">street</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.street" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client street address.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 50</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientInfo.city">
+<code class="sig-name descname">city</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.city" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client address city.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 50</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientInfo.state">
+<code class="sig-name descname">state</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client address state.</p>
+<p>Currently only US States. Defaults to AZ.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 2</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientInfo.zipcode">
+<code class="sig-name descname">zipcode</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.zipcode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client address zip code.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 10</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientInfo.country">
+<code class="sig-name descname">country</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.country" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client address country.</p>
+<p>Currently defaults to US.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 2</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientInfo.address">
+<code class="sig-name descname">address</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.address" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client full address.</p>
+<p>Generate by combining <a class="reference internal" href="#odyssey.models.client.ClientInfo.street" title="odyssey.models.client.ClientInfo.street"><code class="xref py py-attr docutils literal notranslate"><span class="pre">street</span></code></a>, <a class="reference internal" href="#odyssey.models.client.ClientInfo.city" title="odyssey.models.client.ClientInfo.city"><code class="xref py py-attr docutils literal notranslate"><span class="pre">city</span></code></a>, <a class="reference internal" href="#odyssey.models.client.ClientInfo.state" title="odyssey.models.client.ClientInfo.state"><code class="xref py py-attr docutils literal notranslate"><span class="pre">state</span></code></a>,
+<a class="reference internal" href="#odyssey.models.client.ClientInfo.zipcode" title="odyssey.models.client.ClientInfo.zipcode"><code class="xref py py-attr docutils literal notranslate"><span class="pre">zipcode</span></code></a>, and <a class="reference internal" href="#odyssey.models.client.ClientInfo.country" title="odyssey.models.client.ClientInfo.country"><code class="xref py py-attr docutils literal notranslate"><span class="pre">country</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 120</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientInfo.email">
+<code class="sig-name descname">email</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.email" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client email address.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 50</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientInfo.phone">
+<code class="sig-name descname">phone</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.phone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client phone number.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 20</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientInfo.preferred">
+<code class="sig-name descname">preferred</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.preferred" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client preferred contact method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, smallint, signed int16</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientInfo.ringsize">
+<code class="sig-name descname">ringsize</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.ringsize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client ring size.</p>
+<p>Used for ordering an Oura Ring.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientInfo.emergency_contact">
+<code class="sig-name descname">emergency_contact</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.emergency_contact" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client emergency contact name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 50</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientInfo.emergency_phone">
+<code class="sig-name descname">emergency_phone</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.emergency_phone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client emergency contact phone number.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 20</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientInfo.healthcare_contact">
+<code class="sig-name descname">healthcare_contact</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.healthcare_contact" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client primary healthcare provider name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 50</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientInfo.healthcare_phone">
+<code class="sig-name descname">healthcare_phone</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.healthcare_phone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client primary health care provider phone number.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 20</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientInfo.gender">
+<code class="sig-name descname">gender</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.gender" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client gender.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 1</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientInfo.dob">
+<code class="sig-name descname">dob</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.dob" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client date of birth.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.date" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.date</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientInfo.profession">
+<code class="sig-name descname">profession</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.profession" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client profession.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 100</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientInfo.receive_docs">
+<code class="sig-name descname">receive_docs</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.receive_docs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates whether or not client wants to receive a copy of the signed documents.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientInfo.record_locator_id">
+<code class="sig-name descname">record_locator_id</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.record_locator_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Medical decord Locator ID.</p>
+<p>See <a class="reference internal" href="#odyssey.models.client.ClientInfo.generate_record_locator_id" title="odyssey.models.client.ClientInfo.generate_record_locator_id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">generate_record_locator_id()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 12</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.models.client.ClientInfo.generate_record_locator_id">
+<em class="property">static </em><code class="sig-name descname">generate_record_locator_id</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">firstname</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span></em>, <em class="sig-param"><span class="n">lastname</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span></em>, <em class="sig-param"><span class="n">clientid</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><a class="headerlink" href="#odyssey.models.client.ClientInfo.generate_record_locator_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate the medical record identifier.</p>
+<p>The medical record identifier can be exported to other healthcare providers.
+It is made up of the firstname and lastname initials and 10 random alphanumeric
+characters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>firstname</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Client first name.</p></li>
+<li><p><strong>lastname</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Client last name.</p></li>
+<li><p><strong>clientid</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Client ID number.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><em>str</em> – Medical record ID</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.models.client.ClientInfo.client_info_search_dict">
+<code class="sig-name descname">client_info_search_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a><a class="headerlink" href="#odyssey.models.client.ClientInfo.client_info_search_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Searchable client info.</p>
+<p>Returns a subset of the data in this row object.
+The returned dict contains the following keys:</p>
+<ul class="simple">
+<li><p>clientid</p></li>
+<li><p>record_locator_id</p></li>
+<li><p>firstname</p></li>
+<li><p>lastename</p></li>
+<li><p>dob (date of birth)</p></li>
+<li><p>phone</p></li>
+<li><p>email</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><em>dict</em> – Subset of data in this row object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.models.client.ClientInfo.all_clients_dict">
+<em class="property">static </em><code class="sig-name descname">all_clients_dict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">query</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.sqlalchemy.org/en/13/orm/query.html#sqlalchemy.orm.query.Query" title="(in SQLAlchemy v1.3)">sqlalchemy.orm.query.Query</a></span></em>, <em class="sig-param"><span class="n">page</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></span></em>, <em class="sig-param"><span class="n">per_page</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.9)">tuple</a><a class="headerlink" href="#odyssey.models.client.ClientInfo.all_clients_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Paginate a search in this table.</p>
+<p>Given a search query in this table, return the results for page <code class="docutils literal notranslate"><span class="pre">page</span></code>
+with <code class="docutils literal notranslate"><span class="pre">per_page</span></code> results per page. The returned result itmes are generated
+by <a class="reference internal" href="#odyssey.models.client.ClientInfo.client_info_search_dict" title="odyssey.models.client.ClientInfo.client_info_search_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">client_info_search_dict()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>query</strong> (<a class="reference external" href="https://docs.sqlalchemy.org/en/13/orm/query.html#sqlalchemy.orm.query.Query" title="(in SQLAlchemy v1.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.query.Query</span></code></a>) – The SQL query with a (possibly) long list of results to paginate.</p></li>
+<li><p><strong>page</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The current page to display results for.</p></li>
+<li><p><strong>per_page</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – How many results to display per page.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>dict</em> – A dictionary with <code class="docutils literal notranslate"><span class="pre">items</span></code>, a list of dicts containing the search results,
+and <code class="docutils literal notranslate"><span class="pre">_meta</span></code> a dict containing pagination information.</p></li>
+<li><p><a class="reference external" href="https://flask-sqlalchemy.palletsprojects.com/en/2.x/api/#flask_sqlalchemy.Pagination" title="(in Flask-SQLAlchemy v2.x)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flask_sqlalchemy.Pagination</span></code></a> – An object holding the paginated search results from the SQLAlchemy query.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientInfo.query_class">
+<code class="sig-name descname">query_class</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.query_class" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_whooshee.WhoosheeQuery</span></code></p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.models.client.ClientInfo.whoosh_search">
+<em class="property">classmethod </em><code class="sig-name descname">whoosh_search</code><span class="sig-paren">(</span><em class="sig-param">search_string</em>, <em class="sig-param">values_of=''</em>, <em class="sig-param">group=&lt;class 'whoosh.qparser.syntax.OrGroup'&gt;</em>, <em class="sig-param">match_substrings=True</em>, <em class="sig-param">limit=None</em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.client.ClientInfo.whoosh_search" title="Permalink to this definition">¶</a></dt>
+<dd><p>Searches the fields for given search_string.
+Returns the found records if ‘values_of’ is left empty,
+else the values of the given columns.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>search_string</strong> – The string to search for.</p></li>
+<li><p><strong>values_of</strong> – If given, the method will not return the whole
+records, but only values of given column.
+Defaults to returning whole records.</p></li>
+<li><p><strong>group</strong> – The whoosh group to use for searching.
+Defaults to <a class="reference external" href="https://whoosh.readthedocs.io/en/latest/api/qparser.html#whoosh.qparser.OrGroup" title="(in Whoosh v2.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">whoosh.qparser.OrGroup</span></code></a> which
+searches for all words in all columns.</p></li>
+<li><p><strong>match_substrings</strong> – <code class="docutils literal notranslate"><span class="pre">True</span></code> if you want to match substrings,
+<code class="docutils literal notranslate"><span class="pre">False</span></code> otherwise.</p></li>
+<li><p><strong>limit</strong> – The number of the top records to be returned.
+Defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code> and returns all records.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.models.client.ClientFacilities">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.models.client.</code><code class="sig-name descname">ClientFacilities</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.client.ClientFacilities" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<p>A mapping of client ID number to registered facility ID numbers</p>
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientFacilities.idx">
+<code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.models.client.ClientFacilities.idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Table index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientFacilities.created_at">
+<code class="sig-name descname">created_at</code><a class="headerlink" href="#odyssey.models.client.ClientFacilities.created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creation timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientFacilities.updated_at">
+<code class="sig-name descname">updated_at</code><a class="headerlink" href="#odyssey.models.client.ClientFacilities.updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Last update timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientFacilities.client_id">
+<code class="sig-name descname">client_id</code><a class="headerlink" href="#odyssey.models.client.ClientFacilities.client_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Foreign key from ClientInfo table</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, foreign key</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientFacilities.facility_id">
+<code class="sig-name descname">facility_id</code><a class="headerlink" href="#odyssey.models.client.ClientFacilities.facility_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Foreign key from RegisteredFacilities table</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, foreign key</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.models.client.ClientConsent">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.models.client.</code><code class="sig-name descname">ClientConsent</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.client.ClientConsent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<p>Client consent form table</p>
+<p>This table stores the signature and related information of the consent form.</p>
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientConsent.displayname">
+<code class="sig-name descname">displayname</code><em class="property"> = 'Consent form'</em><a class="headerlink" href="#odyssey.models.client.ClientConsent.displayname" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print-friendly name of this document.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientConsent.current_revision">
+<code class="sig-name descname">current_revision</code><em class="property"> = '20200317'</em><a class="headerlink" href="#odyssey.models.client.ClientConsent.current_revision" title="Permalink to this definition">¶</a></dt>
+<dd><p>Current revision of this document.</p>
+<p>The revision string is updated whenever the contents of the document change. The
+revision string can be anything, but it typically consists of the ISO formatted
+date (e.g. 20200519).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientConsent.idx">
+<code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.models.client.ClientConsent.idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Table index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientConsent.created_at">
+<code class="sig-name descname">created_at</code><a class="headerlink" href="#odyssey.models.client.ClientConsent.created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creation timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientConsent.updated_at">
+<code class="sig-name descname">updated_at</code><a class="headerlink" href="#odyssey.models.client.ClientConsent.updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Last update timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientConsent.clientid">
+<code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.client.ClientConsent.clientid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client ID number.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientConsent.infectious_disease">
+<code class="sig-name descname">infectious_disease</code><a class="headerlink" href="#odyssey.models.client.ClientConsent.infectious_disease" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates whether or not client ever had an infectious disease.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientConsent.signdate">
+<code class="sig-name descname">signdate</code><a class="headerlink" href="#odyssey.models.client.ClientConsent.signdate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signature date. This is filled by the client upon signing the document. Therefore, we can assume that
+this date is in their local timezone.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.date" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.date</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientConsent.signature">
+<code class="sig-name descname">signature</code><a class="headerlink" href="#odyssey.models.client.ClientConsent.signature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signature.</p>
+<p>Stored as a base64 encoded png image, prefixed with mime-type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientConsent.revision">
+<code class="sig-name descname">revision</code><a class="headerlink" href="#odyssey.models.client.ClientConsent.revision" title="Permalink to this definition">¶</a></dt>
+<dd><p>Revision string of the latest signed document.</p>
+<p>The revision string is updated whenever the contents of the document change.
+The revision stored here is the revision of the newest signed document.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 10</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientConsent.pdf_path">
+<code class="sig-name descname">pdf_path</code><a class="headerlink" href="#odyssey.models.client.ClientConsent.pdf_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path where signed document is stored as a PDF file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 200</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientConsent.pdf_hash">
+<code class="sig-name descname">pdf_hash</code><a class="headerlink" href="#odyssey.models.client.ClientConsent.pdf_hash" title="Permalink to this definition">¶</a></dt>
+<dd><p>SHA-1 hash (as a hexadecimal string) of the stored PDF file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 40</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.models.client.ClientRelease">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.models.client.</code><code class="sig-name descname">ClientRelease</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.client.ClientRelease" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<p>Client release of information table</p>
+<p>This table stores the signature and related information of the
+release of information form.</p>
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientRelease.displayname">
+<code class="sig-name descname">displayname</code><em class="property"> = 'Release of information form'</em><a class="headerlink" href="#odyssey.models.client.ClientRelease.displayname" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print-friendly name of this document.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientRelease.current_revision">
+<code class="sig-name descname">current_revision</code><em class="property"> = '20200416'</em><a class="headerlink" href="#odyssey.models.client.ClientRelease.current_revision" title="Permalink to this definition">¶</a></dt>
+<dd><p>Current revision of this document.</p>
+<p>The revision string is updated whenever the contents of the document change. The
+revision string can be anything, but it typically consists of the ISO formatted
+date (e.g. 20200519).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientRelease.idx">
+<code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.models.client.ClientRelease.idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Table index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientRelease.created_at">
+<code class="sig-name descname">created_at</code><a class="headerlink" href="#odyssey.models.client.ClientRelease.created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creation timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientRelease.updated_at">
+<code class="sig-name descname">updated_at</code><a class="headerlink" href="#odyssey.models.client.ClientRelease.updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Last update timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientRelease.clientid">
+<code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.client.ClientRelease.clientid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client ID number</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientRelease.release_of_all">
+<code class="sig-name descname">release_of_all</code><a class="headerlink" href="#odyssey.models.client.ClientRelease.release_of_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates whether or not client want to allow to release all protected health information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientRelease.release_of_other">
+<code class="sig-name descname">release_of_other</code><a class="headerlink" href="#odyssey.models.client.ClientRelease.release_of_other" title="Permalink to this definition">¶</a></dt>
+<dd><p>Describes what other protected health information can be released.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 1024</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientRelease.release_date_from">
+<code class="sig-name descname">release_date_from</code><a class="headerlink" href="#odyssey.models.client.ClientRelease.release_date_from" title="Permalink to this definition">¶</a></dt>
+<dd><p>Limits the release of protected health information to from this date.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.date" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.date</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientRelease.release_date_to">
+<code class="sig-name descname">release_date_to</code><a class="headerlink" href="#odyssey.models.client.ClientRelease.release_date_to" title="Permalink to this definition">¶</a></dt>
+<dd><p>Limits the release of protected health information to until this date.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.date" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.date</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientRelease.release_purpose">
+<code class="sig-name descname">release_purpose</code><a class="headerlink" href="#odyssey.models.client.ClientRelease.release_purpose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Describes for what purpose protected health information can be released.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 1024</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientRelease.signdate">
+<code class="sig-name descname">signdate</code><a class="headerlink" href="#odyssey.models.client.ClientRelease.signdate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signature date. This is filled by the client upon signing the document. Therefore, we can assume that
+this date is in their local timezone.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.date" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.date</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientRelease.signature">
+<code class="sig-name descname">signature</code><a class="headerlink" href="#odyssey.models.client.ClientRelease.signature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signature.</p>
+<p>Stored as a base64 encoded png image, prefixed with mime-type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientRelease.revision">
+<code class="sig-name descname">revision</code><a class="headerlink" href="#odyssey.models.client.ClientRelease.revision" title="Permalink to this definition">¶</a></dt>
+<dd><p>Revision string of the latest signed document.</p>
+<p>The revision string is updated whenever the contents of the document change.
+The revision stored here is the revision of the newest signed document.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 10</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientRelease.pdf_path">
+<code class="sig-name descname">pdf_path</code><a class="headerlink" href="#odyssey.models.client.ClientRelease.pdf_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path where signed document is stored as a PDF file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 200</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientRelease.pdf_hash">
+<code class="sig-name descname">pdf_hash</code><a class="headerlink" href="#odyssey.models.client.ClientRelease.pdf_hash" title="Permalink to this definition">¶</a></dt>
+<dd><p>SHA-1 hash (as a hexadecimal string) of the stored PDF file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 40</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.models.client.ClientPolicies">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.models.client.</code><code class="sig-name descname">ClientPolicies</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.client.ClientPolicies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<p>Client policies table</p>
+<p>This table stores the signature and related information of the
+Modo Bio policies form.</p>
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientPolicies.displayname">
+<code class="sig-name descname">displayname</code><em class="property"> = 'Policies form'</em><a class="headerlink" href="#odyssey.models.client.ClientPolicies.displayname" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print-friendly name of this document.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientPolicies.current_revision">
+<code class="sig-name descname">current_revision</code><em class="property"> = '20200513'</em><a class="headerlink" href="#odyssey.models.client.ClientPolicies.current_revision" title="Permalink to this definition">¶</a></dt>
+<dd><p>Current revision of this document.</p>
+<p>The revision string is updated whenever the contents of the document change. The
+revision string can be anything, but it typically consists of the ISO formatted
+date (e.g. 20200519).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientPolicies.idx">
+<code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.models.client.ClientPolicies.idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Table index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientPolicies.created_at">
+<code class="sig-name descname">created_at</code><a class="headerlink" href="#odyssey.models.client.ClientPolicies.created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creation timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientPolicies.updated_at">
+<code class="sig-name descname">updated_at</code><a class="headerlink" href="#odyssey.models.client.ClientPolicies.updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Last update timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientPolicies.clientid">
+<code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.client.ClientPolicies.clientid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client ID number</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientPolicies.signdate">
+<code class="sig-name descname">signdate</code><a class="headerlink" href="#odyssey.models.client.ClientPolicies.signdate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signature date. This is filled by the client upon signing the document. Therefore, we can assume that
+this date is in their local timezone.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.date" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.date</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientPolicies.signature">
+<code class="sig-name descname">signature</code><a class="headerlink" href="#odyssey.models.client.ClientPolicies.signature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signature.</p>
+<p>Stored as a base64 encoded png image, prefixed with mime-type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientPolicies.revision">
+<code class="sig-name descname">revision</code><a class="headerlink" href="#odyssey.models.client.ClientPolicies.revision" title="Permalink to this definition">¶</a></dt>
+<dd><p>Revision string of the latest signed document.</p>
+<p>The revision string is updated whenever the contents of the document change.
+The revision stored here is the revision of the newest signed document.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 10</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientPolicies.pdf_path">
+<code class="sig-name descname">pdf_path</code><a class="headerlink" href="#odyssey.models.client.ClientPolicies.pdf_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path where signed document is stored as a PDF file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 200</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientPolicies.pdf_hash">
+<code class="sig-name descname">pdf_hash</code><a class="headerlink" href="#odyssey.models.client.ClientPolicies.pdf_hash" title="Permalink to this definition">¶</a></dt>
+<dd><p>SHA-1 hash (as a hexadecimal string) of the stored PDF file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 40</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.models.client.ClientConsultContract">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.models.client.</code><code class="sig-name descname">ClientConsultContract</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.client.ClientConsultContract" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<p>Client initial consultation contract table</p>
+<p>This table stores the signature and related information for the
+initial consultation contract.</p>
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientConsultContract.displayname">
+<code class="sig-name descname">displayname</code><em class="property"> = 'Consultation contract'</em><a class="headerlink" href="#odyssey.models.client.ClientConsultContract.displayname" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print-friendly name of this document.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientConsultContract.current_revision">
+<code class="sig-name descname">current_revision</code><em class="property"> = '20200428'</em><a class="headerlink" href="#odyssey.models.client.ClientConsultContract.current_revision" title="Permalink to this definition">¶</a></dt>
+<dd><p>Current revision of this document.</p>
+<p>The revision string is updated whenever the contents of the document change. The
+revision string can be anything, but it typically consists of the ISO formatted
+date (e.g. 20200519).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientConsultContract.idx">
+<code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.models.client.ClientConsultContract.idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Table index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientConsultContract.created_at">
+<code class="sig-name descname">created_at</code><a class="headerlink" href="#odyssey.models.client.ClientConsultContract.created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creation timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientConsultContract.updated_at">
+<code class="sig-name descname">updated_at</code><a class="headerlink" href="#odyssey.models.client.ClientConsultContract.updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Last update timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientConsultContract.clientid">
+<code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.client.ClientConsultContract.clientid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client ID number</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientConsultContract.signdate">
+<code class="sig-name descname">signdate</code><a class="headerlink" href="#odyssey.models.client.ClientConsultContract.signdate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signature date. This is filled by the client upon signing the document. Therefore, we can assume that
+this date is in their local timezone.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.date" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.date</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientConsultContract.signature">
+<code class="sig-name descname">signature</code><a class="headerlink" href="#odyssey.models.client.ClientConsultContract.signature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signature.</p>
+<p>Stored as a base64 encoded png image, prefixed with mime-type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientConsultContract.revision">
+<code class="sig-name descname">revision</code><a class="headerlink" href="#odyssey.models.client.ClientConsultContract.revision" title="Permalink to this definition">¶</a></dt>
+<dd><p>Revision string of the latest signed document.</p>
+<p>The revision string is updated whenever the contents of the document change.
+The revision stored here is the revision of the newest signed document.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 10</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientConsultContract.pdf_path">
+<code class="sig-name descname">pdf_path</code><a class="headerlink" href="#odyssey.models.client.ClientConsultContract.pdf_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path where signed document is stored as a PDF file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 200</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientConsultContract.pdf_hash">
+<code class="sig-name descname">pdf_hash</code><a class="headerlink" href="#odyssey.models.client.ClientConsultContract.pdf_hash" title="Permalink to this definition">¶</a></dt>
+<dd><p>SHA-1 hash (as a hexadecimal string) of the stored PDF file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 40</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.models.client.ClientSubscriptionContract">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.models.client.</code><code class="sig-name descname">ClientSubscriptionContract</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.client.ClientSubscriptionContract" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<p>Client subscription contract table</p>
+<p>This table stores the signature and related information for the
+subscription contract.</p>
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientSubscriptionContract.displayname">
+<code class="sig-name descname">displayname</code><em class="property"> = 'Subscription contract'</em><a class="headerlink" href="#odyssey.models.client.ClientSubscriptionContract.displayname" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print-friendly name of this document.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientSubscriptionContract.current_revision">
+<code class="sig-name descname">current_revision</code><em class="property"> = '20200428'</em><a class="headerlink" href="#odyssey.models.client.ClientSubscriptionContract.current_revision" title="Permalink to this definition">¶</a></dt>
+<dd><p>Current revision of this document.</p>
+<p>The revision string is updated whenever the contents of the document change. The
+revision string can be anything, but it typically consists of the ISO formatted
+date (e.g. 20200519).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientSubscriptionContract.idx">
+<code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.models.client.ClientSubscriptionContract.idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Table index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientSubscriptionContract.created_at">
+<code class="sig-name descname">created_at</code><a class="headerlink" href="#odyssey.models.client.ClientSubscriptionContract.created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creation timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientSubscriptionContract.updated_at">
+<code class="sig-name descname">updated_at</code><a class="headerlink" href="#odyssey.models.client.ClientSubscriptionContract.updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Last update timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientSubscriptionContract.clientid">
+<code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.client.ClientSubscriptionContract.clientid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client ID number</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientSubscriptionContract.signdate">
+<code class="sig-name descname">signdate</code><a class="headerlink" href="#odyssey.models.client.ClientSubscriptionContract.signdate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signature date. This is filled by the client upon signing the document. Therefore, we can assume that
+this date is in their local timezone.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.date" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.date</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientSubscriptionContract.signature">
+<code class="sig-name descname">signature</code><a class="headerlink" href="#odyssey.models.client.ClientSubscriptionContract.signature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signature.</p>
+<p>Stored as a base64 encoded png image, prefixed with mime-type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientSubscriptionContract.revision">
+<code class="sig-name descname">revision</code><a class="headerlink" href="#odyssey.models.client.ClientSubscriptionContract.revision" title="Permalink to this definition">¶</a></dt>
+<dd><p>Revision string of the latest signed document.</p>
+<p>The revision string is updated whenever the contents of the document change.
+The revision stored here is the revision of the newest signed document.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 10</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientSubscriptionContract.pdf_path">
+<code class="sig-name descname">pdf_path</code><a class="headerlink" href="#odyssey.models.client.ClientSubscriptionContract.pdf_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path where signed document is stored as a PDF file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 200</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientSubscriptionContract.pdf_hash">
+<code class="sig-name descname">pdf_hash</code><a class="headerlink" href="#odyssey.models.client.ClientSubscriptionContract.pdf_hash" title="Permalink to this definition">¶</a></dt>
+<dd><p>SHA-1 hash (as a hexadecimal string) of the stored PDF file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 40</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.models.client.ClientIndividualContract">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.models.client.</code><code class="sig-name descname">ClientIndividualContract</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.client.ClientIndividualContract" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientIndividualContract.displayname">
+<code class="sig-name descname">displayname</code><em class="property"> = 'Individual services contract'</em><a class="headerlink" href="#odyssey.models.client.ClientIndividualContract.displayname" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print-friendly name of this document.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientIndividualContract.current_revision">
+<code class="sig-name descname">current_revision</code><em class="property"> = '20200513'</em><a class="headerlink" href="#odyssey.models.client.ClientIndividualContract.current_revision" title="Permalink to this definition">¶</a></dt>
+<dd><p>Current revision of this document.</p>
+<p>The revision string is updated whenever the contents of the document change. The
+revision string can be anything, but it typically consists of the ISO formatted
+date (e.g. 20200519).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientIndividualContract.idx">
+<code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.models.client.ClientIndividualContract.idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Table index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientIndividualContract.created_at">
+<code class="sig-name descname">created_at</code><a class="headerlink" href="#odyssey.models.client.ClientIndividualContract.created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creation timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientIndividualContract.updated_at">
+<code class="sig-name descname">updated_at</code><a class="headerlink" href="#odyssey.models.client.ClientIndividualContract.updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Last update timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientIndividualContract.clientid">
+<code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.client.ClientIndividualContract.clientid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client ID number</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientIndividualContract.doctor">
+<code class="sig-name descname">doctor</code><a class="headerlink" href="#odyssey.models.client.ClientIndividualContract.doctor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates whether or not client wants to buy a doctor’s appointment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientIndividualContract.pt">
+<code class="sig-name descname">pt</code><a class="headerlink" href="#odyssey.models.client.ClientIndividualContract.pt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates whether or not client wants to buy a physical therapy session.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientIndividualContract.data">
+<code class="sig-name descname">data</code><a class="headerlink" href="#odyssey.models.client.ClientIndividualContract.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates whether or not client wants to buy a data tracking and analysis package.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientIndividualContract.drinks">
+<code class="sig-name descname">drinks</code><a class="headerlink" href="#odyssey.models.client.ClientIndividualContract.drinks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates whether or not client wants to buy nutritional supplements.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientIndividualContract.signdate">
+<code class="sig-name descname">signdate</code><a class="headerlink" href="#odyssey.models.client.ClientIndividualContract.signdate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signature date. This is filled by the client upon signing the document. Therefore, we can assume that
+this date is in their local timezone.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.date" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.date</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientIndividualContract.signature">
+<code class="sig-name descname">signature</code><a class="headerlink" href="#odyssey.models.client.ClientIndividualContract.signature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signature.</p>
+<p>Stored as a base64 encoded png image, prefixed with mime-type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientIndividualContract.revision">
+<code class="sig-name descname">revision</code><a class="headerlink" href="#odyssey.models.client.ClientIndividualContract.revision" title="Permalink to this definition">¶</a></dt>
+<dd><p>Revision string of the latest signed document.</p>
+<p>The revision string is updated whenever the contents of the document change.
+The revision stored here is the revision of the newest signed document.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 10</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientIndividualContract.pdf_path">
+<code class="sig-name descname">pdf_path</code><a class="headerlink" href="#odyssey.models.client.ClientIndividualContract.pdf_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path where signed document is stored as a PDF file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 200</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientIndividualContract.pdf_hash">
+<code class="sig-name descname">pdf_hash</code><a class="headerlink" href="#odyssey.models.client.ClientIndividualContract.pdf_hash" title="Permalink to this definition">¶</a></dt>
+<dd><p>SHA-1 hash (as a hexadecimal string) of the stored PDF file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 40</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.models.client.RemoteRegistration">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.models.client.</code><code class="sig-name descname">RemoteRegistration</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.client.RemoteRegistration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<p>At-home client registration parameter</p>
+<p>Stores details to enable clients to register at home securely. This inclues the
+temporary registration url, client login details, and current api token. Each at-home
+client will have one entry in this table. Expired urls will remain for record keeping.</p>
+<p>The primary index of this table is the
+<a class="reference internal" href="#odyssey.models.client.RemoteRegistration.clientid" title="odyssey.models.client.RemoteRegistration.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">clientid</span></code></a> number.</p>
+<dl class="py attribute">
+<dt id="odyssey.models.client.RemoteRegistration.idx">
+<code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.models.client.RemoteRegistration.idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Table index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.RemoteRegistration.created_at">
+<code class="sig-name descname">created_at</code><a class="headerlink" href="#odyssey.models.client.RemoteRegistration.created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creation timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.RemoteRegistration.updated_at">
+<code class="sig-name descname">updated_at</code><a class="headerlink" href="#odyssey.models.client.RemoteRegistration.updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Last update timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.RemoteRegistration.clientid">
+<code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.client.RemoteRegistration.clientid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client ID number</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.RemoteRegistration.email">
+<code class="sig-name descname">email</code><a class="headerlink" href="#odyssey.models.client.RemoteRegistration.email" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client email address.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 50</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.RemoteRegistration.token">
+<code class="sig-name descname">token</code><a class="headerlink" href="#odyssey.models.client.RemoteRegistration.token" title="Permalink to this definition">¶</a></dt>
+<dd><p>API authentication token</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 32, indexed, unique</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.RemoteRegistration.token_expiration">
+<code class="sig-name descname">token_expiration</code><a class="headerlink" href="#odyssey.models.client.RemoteRegistration.token_expiration" title="Permalink to this definition">¶</a></dt>
+<dd><p>token expiration date</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.RemoteRegistration.password">
+<code class="sig-name descname">password</code><a class="headerlink" href="#odyssey.models.client.RemoteRegistration.password" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hashed password string, as generated by <a class="reference external" href="https://werkzeug.palletsprojects.com/en/1.0.x/utils/#werkzeug.security.generate_password_hash" title="(in Werkzeug v1.0.x)"><code class="xref py py-func docutils literal notranslate"><span class="pre">werkzeug.security.generate_password_hash()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 128</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.RemoteRegistration.registration_portal_id">
+<code class="sig-name descname">registration_portal_id</code><a class="headerlink" href="#odyssey.models.client.RemoteRegistration.registration_portal_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>registration portal endpoint</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 32, indexed, unique</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.RemoteRegistration.registration_portal_expiration">
+<code class="sig-name descname">registration_portal_expiration</code><a class="headerlink" href="#odyssey.models.client.RemoteRegistration.registration_portal_expiration" title="Permalink to this definition">¶</a></dt>
+<dd><p>token expiration date</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.models.client.RemoteRegistration.get_temp_registration_endpoint">
+<code class="sig-name descname">get_temp_registration_endpoint</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">expires_in</span><span class="o">=</span><span class="default_value">86400</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.client.RemoteRegistration.get_temp_registration_endpoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>creates a temporary endpoint meant for at-home
+registration</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.models.client.RemoteRegistration.set_password">
+<code class="sig-name descname">set_password</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.client.RemoteRegistration.set_password" title="Permalink to this definition">¶</a></dt>
+<dd><p>create temporary password, hash it</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.models.client.RemoteRegistration.check_password">
+<code class="sig-name descname">check_password</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">password</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.client.RemoteRegistration.check_password" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.models.client.RemoteRegistration.get_token">
+<code class="sig-name descname">get_token</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">expires_in</span><span class="o">=</span><span class="default_value">86400</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.client.RemoteRegistration.get_token" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.models.client.RemoteRegistration.revoke_token">
+<code class="sig-name descname">revoke_token</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.client.RemoteRegistration.revoke_token" title="Permalink to this definition">¶</a></dt>
+<dd><p>set token to expired, for logging out/generating new token</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.models.client.RemoteRegistration.check_token">
+<em class="property">static </em><code class="sig-name descname">check_token</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">token</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.client.RemoteRegistration.check_token" title="Permalink to this definition">¶</a></dt>
+<dd><p>check if token is valid. returns user if so</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.models.client.RemoteRegistration.check_portal_id">
+<em class="property">static </em><code class="sig-name descname">check_portal_id</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">portal_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.client.RemoteRegistration.check_portal_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>check if token is valid. returns user if so</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.models.client.ClientExternalMR">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.models.client.</code><code class="sig-name descname">ClientExternalMR</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.client.ClientExternalMR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<p>Client external medical record table</p>
+<p>This table stored medical record ids from external medical institutes.</p>
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientExternalMR.idx">
+<code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.models.client.ClientExternalMR.idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Table index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientExternalMR.created_at">
+<code class="sig-name descname">created_at</code><a class="headerlink" href="#odyssey.models.client.ClientExternalMR.created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creation timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientExternalMR.updated_at">
+<code class="sig-name descname">updated_at</code><a class="headerlink" href="#odyssey.models.client.ClientExternalMR.updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Last update timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientExternalMR.clientid">
+<code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.client.ClientExternalMR.clientid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client ID number</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientExternalMR.med_record_id">
+<code class="sig-name descname">med_record_id</code><a class="headerlink" href="#odyssey.models.client.ClientExternalMR.med_record_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>medical record id
+:type: str</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientExternalMR.institute_id">
+<code class="sig-name descname">institute_id</code><a class="headerlink" href="#odyssey.models.client.ClientExternalMR.institute_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>medical institute id</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int, foreign key to <code class="xref py py-attr docutils literal notranslate"><span class="pre">MedicalInstitutions.institute_id</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.models.client.ClientReleaseContacts">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.models.client.</code><code class="sig-name descname">ClientReleaseContacts</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.client.ClientReleaseContacts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<p>Client external medical record table</p>
+<p>This table stored medical record ids from external medical institutes.</p>
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientReleaseContacts.idx">
+<code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.models.client.ClientReleaseContacts.idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Table index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientReleaseContacts.created_at">
+<code class="sig-name descname">created_at</code><a class="headerlink" href="#odyssey.models.client.ClientReleaseContacts.created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creation timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientReleaseContacts.updated_at">
+<code class="sig-name descname">updated_at</code><a class="headerlink" href="#odyssey.models.client.ClientReleaseContacts.updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Last update timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientReleaseContacts.release_contract_id">
+<code class="sig-name descname">release_contract_id</code><a class="headerlink" href="#odyssey.models.client.ClientReleaseContacts.release_contract_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>ID refering back to the signed contract in the ClientRelease table</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="#odyssey.models.client.ClientRelease.idx" title="odyssey.models.client.ClientRelease.idx"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientRelease.idx</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientReleaseContacts.clientid">
+<code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.client.ClientReleaseContacts.clientid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client ID number</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientReleaseContacts.release_direction">
+<code class="sig-name descname">release_direction</code><a class="headerlink" href="#odyssey.models.client.ClientReleaseContacts.release_direction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Direction of client medical dta release. Must be either ‘TO’ or ‘FROM’</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientReleaseContacts.name">
+<code class="sig-name descname">name</code><a class="headerlink" href="#odyssey.models.client.ClientReleaseContacts.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Full name of the contact</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientReleaseContacts.email">
+<code class="sig-name descname">email</code><a class="headerlink" href="#odyssey.models.client.ClientReleaseContacts.email" title="Permalink to this definition">¶</a></dt>
+<dd><p>Email of the contact</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientReleaseContacts.phone">
+<code class="sig-name descname">phone</code><a class="headerlink" href="#odyssey.models.client.ClientReleaseContacts.phone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Email of the contact</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.client.ClientReleaseContacts.relationship">
+<code class="sig-name descname">relationship</code><a class="headerlink" href="#odyssey.models.client.ClientReleaseContacts.relationship" title="Permalink to this definition">¶</a></dt>
+<dd><p>Relationship the client has with the contact</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="odyssey.models.staff.html" class="btn btn-neutral float-right" title="odyssey.models.staff module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="odyssey.models.html" class="btn btn-neutral float-left" title="Models" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright Copyright 2019-2020 Atlantic Venture Partners, all rights reserved
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

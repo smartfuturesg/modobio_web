@@ -11,11 +11,12 @@ Odyssey
    :show-inheritance:
 
 .. toctree::
+   :titlesonly:
 
-   toc_flask
-   toc_api
-   toc_rest
-
+   Configuration <odyssey/odyssey.config>
+   Models <odyssey/odyssey.models>
+   Endpoints <odyssey/odyssey.api>
+   Utilities <odyssey/odyssey.utils>
 
 Indices and tables
 ------------------

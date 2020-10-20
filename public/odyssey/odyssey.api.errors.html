@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>odyssey.api.errors &mdash; Odyssey 0.1.1.dev151+gc03d6f9 documentation</title>
+  <title>odyssey.api.errors &mdash; Odyssey version: 0.1.55 documentation</title>
   
 
   
@@ -36,8 +36,8 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="odyssey.api.serializers" href="odyssey.api.serializers.html" />
-    <link rel="prev" title="odyssey.api.schemas" href="odyssey.api.schemas.html" /> 
+    <link rel="next" title="odyssey.api.postman module" href="odyssey.api.postman.html" />
+    <link rel="prev" title="odyssey.api.tokens" href="odyssey.api.tokens.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -61,7 +61,7 @@
             
             
               <div class="version">
-                0.1.1.dev151+gc03d6f9
+                version: 0.1.55
               </div>
             
           
@@ -87,25 +87,25 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../toc_flask.html">Flask app</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../toc_api.html">API server</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="odyssey.api.html">API</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.auth.html">Authorization</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.tokens.html">Authorization tokens</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.staff.html">Staff</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.clients.html">Client</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.doctor.html">Doctor</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.pt.html">Physical therapist</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.trainer.html">Trainer</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.schemas.html">Schemas</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Error messages</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.serializers.html">Serializers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.utils.html">Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.config.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.models.html">Models</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="odyssey.api.html">Endpoints</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.clients.html">Client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.staff.html">Staff</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.doctor.html">Doctor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.pt.html">Physical therapist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.trainer.html">Trainer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.remote_clients.html">Remote registration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.registeredfacilities.html">Registered facilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.wearables.html">Wearable devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.auth.html">Authorization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.tokens.html">Authorization tokens</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Error messages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.postman.html">Postman</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.version.html">Version</a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="../toc_rest.html">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.utils.html">Utilities</a></li>
 </ul>
 
             
@@ -152,8 +152,6 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-          <li><a href="../toc_api.html">API server</a> &raquo;</li>
-        
           <li><a href="odyssey.api.html">API</a> &raquo;</li>
         
       <li>odyssey.api.errors</li>
@@ -179,51 +177,140 @@
 <span id="odyssey-api-errors"></span><h1>odyssey.api.errors<a class="headerlink" href="#module-odyssey.api.errors" title="Permalink to this headline">¶</a></h1>
 <dl class="py exception">
 <dt id="odyssey.api.errors.UserNotFound">
-<em class="property">exception </em><code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">UserNotFound</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em>, <em class="sig-param"><span class="n">message</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.UserNotFound" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<em class="property">exception </em><code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">UserNotFound</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">message</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.UserNotFound" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>in the case a non-existent client is being requested</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="odyssey.api.errors.ExamNotFound">
+<em class="property">exception </em><code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">ExamNotFound</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">examid</span></em>, <em class="sig-param"><span class="n">message</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.ExamNotFound" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
 <p>in the case a non-existent client is being requested</p>
 </dd></dl>
 
 <dl class="py exception">
 <dt id="odyssey.api.errors.ContentNotFound">
 <em class="property">exception </em><code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">ContentNotFound</code><a class="headerlink" href="#odyssey.api.errors.ContentNotFound" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
 <p>in the case a non-existent resource is requested</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="odyssey.api.errors.MethodNotAllowed">
+<em class="property">exception </em><code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">MethodNotAllowed</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="n">message</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.MethodNotAllowed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>Exception for the case a resource already exists in response to a POST request.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="odyssey.api.errors.ClientDeniedAccess">
+<em class="property">exception </em><code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">ClientDeniedAccess</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.ClientDeniedAccess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>Exception for the case a client denied access
+to a 3rd party resource in an OAuth request.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="odyssey.api.errors.UnknownError">
+<em class="property">exception </em><code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">UnknownError</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="n">message</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.UnknownError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>Exception for an unknown error.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="odyssey.api.errors.InputError">
+<em class="property">exception </em><code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">InputError</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">status_code</span></em>, <em class="sig-param"><span class="n">message</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.InputError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>Exception raised for errors with the input.</p>
+<p>Attributes:
+expression – input expression in which the error occurred
+status_code – Common status code for specific error
+message – explanation of the error</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="odyssey.api.errors.ContentNotFoundReturnData">
+<em class="property">exception </em><code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">ContentNotFoundReturnData</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">clientid</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.ContentNotFoundReturnData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>Special case for when a resource has not yet been created but the client must see other data to proceed</p>
 </dd></dl>
 
 <dl class="py exception">
 <dt id="odyssey.api.errors.UnauthorizedUser">
 <em class="property">exception </em><code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">UnauthorizedUser</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">email</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">message</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.UnauthorizedUser" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
 <p>in the case a staff member is trying to access resources they are not permitted to</p>
 </dd></dl>
 
 <dl class="py exception">
 <dt id="odyssey.api.errors.ClientAlreadyExists">
 <em class="property">exception </em><code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">ClientAlreadyExists</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">identification</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">message</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.ClientAlreadyExists" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
 <p>in the case a staff member is trying to create a new client when the client already exists</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="odyssey.api.errors.RelationAlreadyExists">
+<em class="property">exception </em><code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">RelationAlreadyExists</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">client_identification</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">facility_identification</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">message</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.RelationAlreadyExists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>in the case a client is trying to be associated with a facility where this relationship is already defined</p>
 </dd></dl>
 
 <dl class="py exception">
 <dt id="odyssey.api.errors.StaffEmailInUse">
 <em class="property">exception </em><code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">StaffEmailInUse</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">email</span></em>, <em class="sig-param"><span class="n">message</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.StaffEmailInUse" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
 <p>in the case a staff member is creating a staff member with the same email</p>
 </dd></dl>
 
 <dl class="py exception">
 <dt id="odyssey.api.errors.ClientNotFound">
 <em class="property">exception </em><code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">ClientNotFound</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">identification</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">message</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.ClientNotFound" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>in the case a staff member is trying to edit a client that does not exist</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="odyssey.api.errors.TestNotFound">
+<em class="property">exception </em><code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">TestNotFound</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">identification</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">message</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.TestNotFound" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>in the case that blood test results are requested for a test id that does not exist</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="odyssey.api.errors.ResultTypeNotFound">
+<em class="property">exception </em><code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">ResultTypeNotFound</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">identification</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">message</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.ResultTypeNotFound" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>in the case that blood test result type is given where that result type does not exist</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="odyssey.api.errors.FacilityNotFound">
+<em class="property">exception </em><code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">FacilityNotFound</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">identification</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">message</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.FacilityNotFound" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
 <p>in the case a staff member is trying to edit a client that does not exist</p>
 </dd></dl>
 
 <dl class="py exception">
 <dt id="odyssey.api.errors.IllegalSetting">
 <em class="property">exception </em><code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">IllegalSetting</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">param</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">message</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.IllegalSetting" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
 <p>in the case an API request includes a setting or parameter that is not allowed</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="odyssey.api.errors.InsufficientInputs">
+<em class="property">exception </em><code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">InsufficientInputs</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">message</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.InsufficientInputs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>in the case that the input does not have enough data</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="odyssey.api.errors.StaffNotFound">
+<em class="property">exception </em><code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">StaffNotFound</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">staffid</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">message</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.StaffNotFound" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>in the case a non-existent staff member is being requested</p>
 </dd></dl>
 
 <dl class="py function">
@@ -233,7 +320,7 @@
 
 <dl class="py function">
 <dt id="odyssey.api.errors.error_response">
-<code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">error_response</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">status_code</span></em>, <em class="sig-param"><span class="n">message</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.error_response" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">error_response</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">status_code</span></em>, <em class="sig-param"><span class="n">message</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">data</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.error_response" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -249,9 +336,51 @@
 </dd></dl>
 
 <dl class="py function">
+<dt id="odyssey.api.errors.error_test_not_found">
+<code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">error_test_not_found</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">error</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.error_test_not_found" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a custom message and 400 status code</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="odyssey.api.errors.error_exam_not_found">
+<code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">error_exam_not_found</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">error</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.error_exam_not_found" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a custom message and 400 status code</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="odyssey.api.errors.error_result_type_not_found">
+<code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">error_result_type_not_found</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">error</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.error_result_type_not_found" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a custom message and 400 status code</p>
+</dd></dl>
+
+<dl class="py function">
 <dt id="odyssey.api.errors.error_content_not_found">
 <code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">error_content_not_found</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">error</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.error_content_not_found" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a custom message and 204 status code</p>
+<dd><p>Return a custom message with extra data in payload and 201 status code</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="odyssey.api.errors.error_method_not_allowed">
+<code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">error_method_not_allowed</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">error</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.error_method_not_allowed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a custom message and 405 status code</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="odyssey.api.errors.error_client_denied_access">
+<code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">error_client_denied_access</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">error</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.error_client_denied_access" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a custom message and 409 status code</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="odyssey.api.errors.error_unknown">
+<code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">error_unknown</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">error</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.error_unknown" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a custom message and 400 status code</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="odyssey.api.errors.error_input">
+<code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">error_input</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">error</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.error_input" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a custom message and status code</p>
 </dd></dl>
 
 <dl class="py function">
@@ -273,9 +402,27 @@
 </dd></dl>
 
 <dl class="py function">
+<dt id="odyssey.api.errors.error_relation_already_exists">
+<code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">error_relation_already_exists</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">error</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.error_relation_already_exists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a custom message and 409 status code</p>
+</dd></dl>
+
+<dl class="py function">
 <dt id="odyssey.api.errors.error_staff_email_in_use">
 <code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">error_staff_email_in_use</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">error</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.error_staff_email_in_use" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a custom message and 409 status code</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="odyssey.api.errors.error_insufficient_inputs">
+<code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">error_insufficient_inputs</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">error</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.error_insufficient_inputs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a custom message and 405 status code</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="odyssey.api.errors.error_staff_id_does_not_exist">
+<code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">error_staff_id_does_not_exist</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">error</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.error_staff_id_does_not_exist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a custom message and 400 status code</p>
 </dd></dl>
 
 <dl class="py function">
@@ -294,10 +441,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="odyssey.api.serializers.html" class="btn btn-neutral float-right" title="odyssey.api.serializers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="odyssey.api.postman.html" class="btn btn-neutral float-right" title="odyssey.api.postman module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="odyssey.api.schemas.html" class="btn btn-neutral float-left" title="odyssey.api.schemas" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="odyssey.api.tokens.html" class="btn btn-neutral float-left" title="odyssey.api.tokens" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

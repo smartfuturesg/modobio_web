@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>odyssey.api.doctor &mdash; Odyssey 0.1.1.dev151+gc03d6f9 documentation</title>
+  <title>odyssey.api.doctor &mdash; Odyssey version: 0.1.55 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="odyssey.api.pt" href="odyssey.api.pt.html" />
-    <link rel="prev" title="odyssey.api.clients" href="odyssey.api.clients.html" /> 
+    <link rel="prev" title="odyssey.api.staff" href="odyssey.api.staff.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -61,7 +61,7 @@
             
             
               <div class="version">
-                0.1.1.dev151+gc03d6f9
+                version: 0.1.55
               </div>
             
           
@@ -87,25 +87,25 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../toc_flask.html">Flask app</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../toc_api.html">API server</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="odyssey.api.html">API</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.auth.html">Authorization</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.tokens.html">Authorization tokens</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.staff.html">Staff</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.clients.html">Client</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Doctor</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.pt.html">Physical therapist</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.trainer.html">Trainer</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.schemas.html">Schemas</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.errors.html">Error messages</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.serializers.html">Serializers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.utils.html">Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.config.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.models.html">Models</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="odyssey.api.html">Endpoints</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.clients.html">Client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.staff.html">Staff</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Doctor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.pt.html">Physical therapist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.trainer.html">Trainer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.remote_clients.html">Remote registration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.registeredfacilities.html">Registered facilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.wearables.html">Wearable devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.auth.html">Authorization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.tokens.html">Authorization tokens</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.errors.html">Error messages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.postman.html">Postman</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.version.html">Version</a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="../toc_rest.html">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.utils.html">Utilities</a></li>
 </ul>
 
             
@@ -152,8 +152,6 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-          <li><a href="../toc_api.html">API server</a> &raquo;</li>
-        
           <li><a href="odyssey.api.html">API</a> &raquo;</li>
         
       <li>odyssey.api.doctor</li>
@@ -177,6 +175,132 @@
             
   <div class="section" id="module-odyssey.api.doctor">
 <span id="odyssey-api-doctor"></span><h1>odyssey.api.doctor<a class="headerlink" href="#module-odyssey.api.doctor" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="odyssey.api.doctor.MedImaging">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.doctor.</code><code class="sig-name descname">MedImaging</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.MedImaging" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<dl class="py method">
+<dt id="odyssey.api.doctor.MedImaging.get">
+<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.MedImaging.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns a json file of all the medical images in the database for the specified clientid</p>
+<p>Note:
+image_path is a sharable url for an image saved in S3 Bucket,
+if running locally, it is the path to a local temp file</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.api.doctor.MedImaging.post">
+<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.MedImaging.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>For adding one or many medical images to the database for the specified clientid</p>
+<p>Expects form-data</p>
+<p>“image”: (file_path , open(file_path, mode=’rb’), ‘Mime type’)
+“image_date”: “2020-09-25”,
+“image_origin_location”: “string”,
+“image_type”: “string”,
+“image_read”: “string”,
+“image_path”: “string”</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.doctor.MedImaging.endpoint">
+<code class="sig-name descname">endpoint</code><em class="property"> = 'doctor_med_imaging'</em><a class="headerlink" href="#odyssey.api.doctor.MedImaging.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.api.doctor.MedImaging.mediatypes">
+<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.MedImaging.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.doctor.MedImaging.methods">
+<code class="sig-name descname">methods</code><em class="property"> = {'GET', 'POST'}</em><a class="headerlink" href="#odyssey.api.doctor.MedImaging.methods" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.api.doctor.MedBloodTest">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.doctor.</code><code class="sig-name descname">MedBloodTest</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.MedBloodTest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<dl class="py method">
+<dt id="odyssey.api.doctor.MedBloodTest.get">
+<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.MedBloodTest.get" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.api.doctor.MedBloodTest.post">
+<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.MedBloodTest.post" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.doctor.MedBloodTest.endpoint">
+<code class="sig-name descname">endpoint</code><em class="property"> = 'doctor_med_blood_test'</em><a class="headerlink" href="#odyssey.api.doctor.MedBloodTest.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.api.doctor.MedBloodTest.mediatypes">
+<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.MedBloodTest.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.doctor.MedBloodTest.methods">
+<code class="sig-name descname">methods</code><em class="property"> = {'GET', 'POST'}</em><a class="headerlink" href="#odyssey.api.doctor.MedBloodTest.methods" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.api.doctor.MedBloodTestResults">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.doctor.</code><code class="sig-name descname">MedBloodTestResults</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.MedBloodTestResults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<dl class="py method">
+<dt id="odyssey.api.doctor.MedBloodTestResults.get">
+<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">testid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.MedBloodTestResults.get" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.doctor.MedBloodTestResults.endpoint">
+<code class="sig-name descname">endpoint</code><em class="property"> = 'doctor_med_blood_test_results'</em><a class="headerlink" href="#odyssey.api.doctor.MedBloodTestResults.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.api.doctor.MedBloodTestResults.mediatypes">
+<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.MedBloodTestResults.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.doctor.MedBloodTestResults.methods">
+<code class="sig-name descname">methods</code><em class="property"> = {'GET'}</em><a class="headerlink" href="#odyssey.api.doctor.MedBloodTestResults.methods" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.api.doctor.MedBloodTestResultTypes">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.doctor.</code><code class="sig-name descname">MedBloodTestResultTypes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.MedBloodTestResultTypes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<dl class="py method">
+<dt id="odyssey.api.doctor.MedBloodTestResultTypes.get">
+<code class="sig-name descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.MedBloodTestResultTypes.get" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.doctor.MedBloodTestResultTypes.endpoint">
+<code class="sig-name descname">endpoint</code><em class="property"> = 'doctor_med_blood_test_result_types'</em><a class="headerlink" href="#odyssey.api.doctor.MedBloodTestResultTypes.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.api.doctor.MedBloodTestResultTypes.mediatypes">
+<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.MedBloodTestResultTypes.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.doctor.MedBloodTestResultTypes.methods">
+<code class="sig-name descname">methods</code><em class="property"> = {'GET'}</em><a class="headerlink" href="#odyssey.api.doctor.MedBloodTestResultTypes.methods" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 <dl class="py class">
 <dt id="odyssey.api.doctor.MedHistory">
 <em class="property">class </em><code class="sig-prename descclassname">odyssey.api.doctor.</code><code class="sig-name descname">MedHistory</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.MedHistory" title="Permalink to this definition">¶</a></dt>
@@ -249,6 +373,66 @@
 
 </dd></dl>
 
+<dl class="py class">
+<dt id="odyssey.api.doctor.AllMedInstitutes">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.doctor.</code><code class="sig-name descname">AllMedInstitutes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.AllMedInstitutes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<dl class="py method">
+<dt id="odyssey.api.doctor.AllMedInstitutes.get">
+<code class="sig-name descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.AllMedInstitutes.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns all medical institutes currently in the database</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.doctor.AllMedInstitutes.endpoint">
+<code class="sig-name descname">endpoint</code><em class="property"> = 'doctor_all_med_institutes'</em><a class="headerlink" href="#odyssey.api.doctor.AllMedInstitutes.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.api.doctor.AllMedInstitutes.mediatypes">
+<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.AllMedInstitutes.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.doctor.AllMedInstitutes.methods">
+<code class="sig-name descname">methods</code><em class="property"> = {'GET'}</em><a class="headerlink" href="#odyssey.api.doctor.AllMedInstitutes.methods" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.api.doctor.ExternalMedicalRecordIDs">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.doctor.</code><code class="sig-name descname">ExternalMedicalRecordIDs</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.ExternalMedicalRecordIDs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<dl class="py method">
+<dt id="odyssey.api.doctor.ExternalMedicalRecordIDs.post">
+<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.ExternalMedicalRecordIDs.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>for submitting client medical record ids from external medical institutions</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.api.doctor.ExternalMedicalRecordIDs.get">
+<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.ExternalMedicalRecordIDs.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns all medical record ids for clientid</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.doctor.ExternalMedicalRecordIDs.endpoint">
+<code class="sig-name descname">endpoint</code><em class="property"> = 'doctor_external_medical_record_i_ds'</em><a class="headerlink" href="#odyssey.api.doctor.ExternalMedicalRecordIDs.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.api.doctor.ExternalMedicalRecordIDs.mediatypes">
+<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.ExternalMedicalRecordIDs.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.doctor.ExternalMedicalRecordIDs.methods">
+<code class="sig-name descname">methods</code><em class="property"> = {'GET', 'POST'}</em><a class="headerlink" href="#odyssey.api.doctor.ExternalMedicalRecordIDs.methods" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </div>
 
 
@@ -262,7 +446,7 @@
         <a href="odyssey.api.pt.html" class="btn btn-neutral float-right" title="odyssey.api.pt" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="odyssey.api.clients.html" class="btn btn-neutral float-left" title="odyssey.api.clients" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="odyssey.api.staff.html" class="btn btn-neutral float-left" title="odyssey.api.staff" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
