@@ -1026,42 +1026,55 @@ class MoxyRipSchema(Schema):
 class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = FitnessQuestionnaire
-        exclude = ('idx',)
+        exclude = ('idx','created_at', 'updated_at')
     
-    stressors_list = ['Family',	'Work', 'Finances', 'Social Obligations', 'Health', 'Relationships', 'School', 'Body Image',			
-                        'Sports Performance', 'General Environment', 'Other']
-    physical_goals_list = ['Weight Loss','Increase Strength','Increase Aerobic Capacity','Body Composition','Sport Specific Performance',			
-                            'Improve Mobility', 'Injury Rehabilitation', 'Injury Prevention', 'Increase Longevity', 'General Health', 'Other']
-    lifestyle_goals_list = ['Increased Energy', 'Increased Mental Clarity', 'Improved Relationships', 'Increased Libido',			
-                                'Overall Happiness', 'Decreased Stress', 'Improved Sleep', 'Healthier Eating', 'Other']
+    stressors_list = ['Family',	'Work',
+                      'Finances', 'Social Obligations',
+                      'Health', 'Relationships',
+                      'School', 'Body Image',			
+                      'Sports Performance',
+                      'General Environment',
+                      ]
+    physical_goals_list = ['Weight Loss','Increase Strength',
+                           'Increase Aerobic Capacity','Body Composition',
+                           'Sport Specific Performance', 'Improve Mobility',
+                           'Injury Rehabilitation', 'Injury Prevention',
+                           'Increase Longevity', 'General Health',
+                           ]
+    lifestyle_goals_list = ['Increased Energy', 'Increased Mental Clarity', 
+                            'Increased Libido', 'Overall Happiness', 
+                            'Decreased Stress', 'Improved Sleep', 
+                            'Healthier Eating', ]
 
-    trainer_goals_list = ['Expertise', 'Motivation', 'Accountability', 'Time Efficiency', 'Other']
+    trainer_goals_list = ['Expertise', 'Motivation', 'Accountability', 'Time Efficiency']
     sleep_hours_options_list = ['< 4', '4-6','6-8','> 8']
         
     user_id = fields.Integer(missing=0)
     timestamp = fields.DateTime(description="timestamp of questionnaire. Filled by backend")
-
+    physical_goals = fields.List(fields.String,
+            description=f"List of sources of stress. Limit of three from these options: {physical_goals_list}. If other, must specify",
+            missing=[None]) 
+    current_fitness_level = fields.Integer(description="current fitness level 1-10", validate=validate.Range(min=1, max=10), missing=None)
+    goal_fitness_level = fields.Integer(description="goal fitness level 1-10", validate=validate.Range(min=1, max=10), missing=None)
+    trainer_expectation = fields.List(fields.String,
+        description=f"Client's expectation for their trainer. Choice of: {trainer_goals_list}", 
+        missing=[None])
+    sleep_hours = fields.String(description=f"nightly hours of sleep bucketized by the following options: {sleep_hours_options_list}", missing=None)
+    sleep_quality_level = fields.Integer(description="current sleep quality rating 1-10", validate=validate.Range(min=1, max=10), missing=None)
+    stress_level = fields.Integer(description="current stress rating 1-10", validate=validate.Range(min=1, max=10), missing=None)
     stress_sources = fields.List(fields.String,
             description=f"List of sources of stress. Options: {stressors_list}",
             missing=[None]) 
+
     lifestyle_goals = fields.List(fields.String,
             description=f"List of lifestyle change goals. Limit of three from these options: {lifestyle_goals_list}. If other, must specify",
             missing=[None]) 
     physical_goals = fields.List(fields.String,
             description=f"List of sources of stress. Limit of three from these options: {physical_goals_list}. If other, must specify",
             missing=[None]) 
-    trainer_expectation = fields.String(description=f"Client's expectation for their trainer. Must be one of: {trainer_goals_list}", missing=None)
-    sleep_hours = fields.String(description=f"nightly hours of sleep bucketized by the following options: {sleep_hours_options_list}", missing=None)
 
-    sleep_quality_level = fields.Integer(description="current sleep quality rating 1-5", validate=validate.Range(min=1, max=5), missing=None)
-    stress_level = fields.Integer(description="current stress rating 1-5", validate=validate.Range(min=1, max=5), missing=None)
-    energy_level = fields.Integer(description="current energy rating 1-5", validate=validate.Range(min=1, max=5), missing=None)
-    libido_level = fields.Integer(description="current libido rating 1-5", validate=validate.Range(min=1, max=5), missing=None)
-    confidence_level = fields.Integer(description="current confidence rating 1-5", validate=validate.Range(min=1, max=5), missing=None)
-
-    current_fitness_level = fields.Integer(description="current fitness level 1-10", validate=validate.Range(min=1, max=10), missing=None)
-    goal_fitness_level = fields.Integer(description="foal fitness level 1-10", validate=validate.Range(min=1, max=10), missing=None)
-    
+    energy_level = fields.Integer(description="current energy rating 1-10", validate=validate.Range(min=1, max=10), missing=None)
+    libido_level = fields.Integer(description="current libido rating 1-10", validate=validate.Range(min=1, max=10), missing=None)
     
     @post_load
     def make_object(self, data, **kwargs):
@@ -1092,8 +1105,9 @@ class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
     
     @validates('trainer_expectation')
     def validate_trainer_expectations(self, value):
-        if value not in self.trainer_goals_list and value != None:
-            raise ValidationError(f"{value} not a valid option. Must be one of {self.trainer_goals_list}")
+        for item in value:
+            if item not in self.trainer_goals_list and item != None:
+                raise ValidationError(f"{item} not a valid option. must be in {self.trainer_goals_list}")
 
     @validates('sleep_hours')
     def validate_sleep_hours(self, value):
@@ -1110,7 +1124,7 @@ class MedicalImagingSchema(ma.SQLAlchemyAutoSchema):
         load_instance = True
         exclude = ["user_id", "idx"]
 
-    possible_image_types = ['CTscan', 'MRI', 'PETscan', 'Ultrasound', 'XRay']
+    possible_image_types = ['CT', 'MRI', 'PET', 'Scopes', 'Special imaging', 'Ultrasound', 'X-ray']
     image_type = fields.String(validate=validate.OneOf(possible_image_types), required=True)
     image_date = fields.Date(required=True)
     image_read = fields.String(required=True)
