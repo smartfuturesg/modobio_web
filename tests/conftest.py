@@ -1,4 +1,5 @@
 import pytest
+from datetime import datetime
 
 from odyssey import create_app, db
 from odyssey.models.client import (
@@ -11,11 +12,12 @@ from odyssey.models.client import (
     ClientIndividualContract
 )
 from odyssey.models.misc import MedicalInstitutions
-
-from odyssey.models.staff import Staff
+from odyssey.models.user import User, UserLogin
 
 from .data import (
-    test_client_info,
+    test_new_client_creation,
+    test_new_client_info,
+    test_new_client_login,
     test_staff_member,
     test_client_consent_data,
     test_client_release_data,
@@ -76,8 +78,13 @@ def init_database():
     db.session.execute(''.join(data))
 
     # Insert test client data
-    client_1 = ClientInfo(**test_client_info)
+    client_1 = User(**test_new_client_creation)
+    client_1_login = UserLogin(**{'user_id': client_1.user_id})
+    test_new_client_info['user_id'] = client_1.user_id
+    client_1_info = ClientInfo(**test_new_client_info)
     db.session.add(client_1)
+    db.session.add(client_1_login)
+    db.session.add(client_1_info)
     db.session.flush()
 
     rli = {'record_locator_id': ClientInfo().generate_record_locator_id(
@@ -85,12 +92,15 @@ def init_database():
         lastname = client_1.lastname, 
         user_id =client_1.user_id)}
 
+    client_1_info = ClientInfo.query.filter_by(user_id=client_1.user_id)
     client_1.update(rli)
     
     # initialize a test staff member
-    staff_1 = Staff(**test_staff_member)
-    staff_1.set_password(test_staff_member['password'])
+    staff_1 = User(**test_staff_member)
+    staff_1_login = UserLogin(**{"user_id": staff_1.user_id})
+    staff_1_login.set_password('password')
     db.session.add(staff_1)
+    db.session.add(staff_1_login)
 
     #initialize Medical institutes table
     med_institute1 = MedicalInstitutions(institute_name='Mercy Gilbert Medical Center')

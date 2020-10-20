@@ -36,11 +36,11 @@ class MedicalImaging(db.Model):
     :type: datetime
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id', ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
     """
     User ID number
 
-    :type: int, foreign key to :attr:`ClientInfo.user_id`
+    :type: int, foreign key to :attr:`User.user_id`
     """
 
     image_date = db.Column(db.Date)
@@ -120,11 +120,11 @@ class MedicalHistory(db.Model):
     :type: datetime
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id', ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
     """
     User ID number
 
-    :type: int, foreign key to :attr:`ClientInfo.user_id`
+    :type: int, foreign key to :attr:`User.user_id`
     """
 
     last_examination_date = db.Column(db.Date)
@@ -243,7 +243,7 @@ class MedicalPhysicalExam(db.Model):
     :type: int, primary key, autoincrement
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
     """
     User ID number
 
@@ -464,7 +464,7 @@ class MedicalBloodTests(db.Model):
 
     __tablename__ = "MedicalBloodTests"
 
-    testid = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    test_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     Unique id identifying the test
 
@@ -485,7 +485,7 @@ class MedicalBloodTests(db.Model):
     :type: datetime
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id', ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
     """
     User ID number
 
@@ -518,7 +518,7 @@ class MedicalBloodTestResultTypes(db.Model):
 
     __tablename__ = "MedicalBloodTestResultTypes"
 
-    resultid = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    result_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     autoincrementing primary key
 
@@ -572,14 +572,14 @@ class MedicalBloodTestResults(db.Model):
     :type: datetime
     """
 
-    testid = db.Column(db.Integer, db.ForeignKey('MedicalBloodTests.testid', ondelete="CASCADE"), nullable=False)
+    test_id = db.Column(db.Integer, db.ForeignKey('MedicalBloodTests.test_id', ondelete="CASCADE"), nullable=False)
     """
-    foreign key to MedicalBloodTests.user_id
+    foreign key to MedicalBloodTests.test_id
 
     :type: int, foreign key
     """
 
-    resultid = db.Column(db.Integer, db.ForeignKey('MedicalBloodTestResultTypes.resultid', ondelete="CASCADE"), nullable=False)
+    result_id = db.Column(db.Integer, db.ForeignKey('MedicalBloodTestResultTypes.result_id', ondelete="CASCADE"), nullable=False)
     """
     foreign key to MedicalBloodTestResultTypes.resultid
 

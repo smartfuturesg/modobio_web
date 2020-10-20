@@ -1,6 +1,6 @@
 from flask.json import dumps
 
-from odyssey.models.staff import Staff
+from odyssey.models.user import User, UserLogin
 from odyssey.models.client import ClientFacilities
 from odyssey.models.misc import RegisteredFacilities
 from tests.data import test_registered_facilities, test_client_facilities

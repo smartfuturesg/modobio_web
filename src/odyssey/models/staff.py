@@ -34,7 +34,14 @@ class StaffProfile(db.Model):
     :type: datetime
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id'), primary_key=True, nullable=False, unique=True)
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
     """
     User ID number, foreign key to User.user_id
 
@@ -85,7 +92,7 @@ class ClientRemovalRequests(db.Model):
     :type: datetime
     """
     
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id'), nullable=False, unique=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
     """
     Staff member user_id number, foreign key to User.user_id
 

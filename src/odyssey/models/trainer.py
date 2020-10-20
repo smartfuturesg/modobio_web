@@ -39,11 +39,11 @@ class PowerAssessment(db.Model):
     :type: datetime
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
     """
     Client ID number
 
-    :type: int, foreign key to :attr:`ClientInfo.user_id`
+    :type: int, foreign key to :attr:`User.user_id`
     """
 
     keiser_upper_r_weight = db.Column(db.Integer)
@@ -237,11 +237,11 @@ class StrengthAssessment(db.Model):
     :type: datetime
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
     """
     User ID number
 
-    :type: int, foreign key to :attr:`ClientInfo.user_id`
+    :type: int, foreign key to :attr:`User.user_id`
     """
 
     upper_push_notes = db.Column(db.Text)
@@ -503,11 +503,11 @@ class MovementAssessment(db.Model):
     :type: datetime
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id', ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
     """
     User ID number
 
-    :type: int, foreign key to :attr:`ClientInfo.user_id`
+    :type: int, foreign key to :attr:`User.user_id`
     """
 
     squat_depth = db.Column(db.String)
@@ -648,11 +648,11 @@ class HeartAssessment(db.Model):
     :type: datetime
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
     """
     User ID number
 
-    :type: int, foreign key to :attr:`ClientInfo.user_id`
+    :type: int, foreign key to :attr:`User.user_id`
     """
 
     resting_hr = db.Column(db.Integer)
@@ -747,11 +747,11 @@ class MoxyAssessment(db.Model):
     :type: datetime
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
     """
     User ID number
 
-    :type: int, foreign key to :attr:`ClientInfo.user_id`
+    :type: int, foreign key to :attr:`User.user_id`
     """
 
     vl_side = db.Column(db.String)
@@ -883,11 +883,11 @@ class MoxyRipTest(db.Model):
     :type: datetime
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
     """
     Client ID number
 
-    :type: int, foreign key to :attr:`ClientInfo.user_id`
+    :type: int, foreign key to :attr:`User.user_id`
     """
        
     vl_side = db.Column(db.String)
@@ -1236,11 +1236,11 @@ class LungAssessment(db.Model):
     :type: datetime
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
     """
     User ID number
 
-    :type: int, foreign key to :attr:`ClientInfo.user_id`
+    :type: int, foreign key to :attr:`User.user_id`
     """
 
     notes = db.Column(db.String)
@@ -1300,11 +1300,11 @@ class FitnessQuestionnaire(db.Model):
     :type: int, primary key, autoincrement
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
     """
     Client ID number
 
-    :type: int, foreign key to :attr:`ClientInfo.user_id`
+    :type: int, foreign key to :attr:`User.user_id`
     """
     
     timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)

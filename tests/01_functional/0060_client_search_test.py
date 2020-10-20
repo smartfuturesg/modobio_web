@@ -1,7 +1,7 @@
 from flask.json import dumps
 from requests.auth import _basic_auth_str
 
-from odyssey.models.staff import Staff
+from odyssey.models.user import User, UserLogin
 from odyssey.models.client import ClientInfo
 
 def test_get_client_search(test_client, init_database):

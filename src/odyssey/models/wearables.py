@@ -54,7 +54,7 @@ class Wearables(_Base):
     user_id = Column(
         Integer,
         ForeignKey(
-             'ClientInfo.user_id',
+             'User.user_id',
              ondelete="CASCADE"
         ),
         nullable=False
@@ -62,7 +62,7 @@ class Wearables(_Base):
     """
     User ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.user_id`
+    :type: int, foreign key to :attr:`User.user_id`
     """
 
     has_oura = Column(Boolean, default=False, nullable=False)
@@ -102,7 +102,7 @@ class WearablesOura(_Base):
     user_id = Column(
         Integer,
         ForeignKey(
-             'ClientInfo.user_id',
+             'User.user_id',
              ondelete="CASCADE"
         ),
         nullable=False
@@ -110,7 +110,7 @@ class WearablesOura(_Base):
     """
     Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.user_id`
+    :type: int, foreign key to :attr:`User.user_id`
     """
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
@@ -183,7 +183,7 @@ class WearablesFreeStyle(_Base):
     user_id = Column(
         Integer,
         ForeignKey(
-             'ClientInfo.user_id',
+             'User.user_id',
              ondelete="CASCADE"
         ),
         nullable=False
@@ -191,7 +191,7 @@ class WearablesFreeStyle(_Base):
     """
     Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.user_id`
+    :type: int, foreign key to :attr:`User.user_id`
     """
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)

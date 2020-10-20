@@ -49,17 +49,18 @@ test_client_external_medical_records = {
   ]
 }
 
-test_new_remote_registration = {
+test_new_client_creation = {
     "firstname": "Remote",
     "middlename": "Client",
     "lastname": "Test",
-    "email": "rest_remote_registration@gmail.com"
+    "email": "rest_remote_registration@gmail.com",
+    "phone_number": "1111111111",
+    "is_staff": False,
+    "is_client": True
     }
 
 test_new_client_info = {
-    "firstname": "Test",
-    "middlename": "This",
-    "lastname": "Client Two",
+    "user_id": 0,
     "guardianname": "guardian 1",
     "guardianrole": "guardian role",
     "street": "3325 S Malibu Dr.",
@@ -67,8 +68,6 @@ test_new_client_info = {
     "state": "AZ",
     "zipcode": "85282",
     "country": "US",
-    "email": "test_this_client_two@gmail.com",
-    "phone": "4805555555",
     "preferred": 0,
     "ringsize": 11,
     "emergency_contact": "Emergency",
@@ -81,22 +80,26 @@ test_new_client_info = {
     "receive_docs": True
 }
 
+test_new_client_login = {
+  "password": "password"
+}
+
 test_staff_member = {
     "firstname": "testy",
     "lastname": "testerson",
     "email": "staff_member@modobio.com",
-    "password": "password",
-    "is_admin": True,
-    "is_system_admin": False,
-    "access_roles": ["datasci"]
+    "phone_number": "1111111111",
+    "is_staff": True,
+    "is_client": False
 }
 
 test_new_staff_member = {
     "firstname": "testy",
-    "lastname": "testerson",
-    "email": "staff_member_2@modobio.com",
-    "password": "password",
-    "access_roles": ["datasci"]
+    "lastname": "mctesterson",
+    "email": "staff_member2@modobio.com",
+    "phone_number": "1111111112",
+    "is_staff": True,
+    "is_client": False
 }
 
 signature = None

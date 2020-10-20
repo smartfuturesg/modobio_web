@@ -41,7 +41,14 @@ class ClientInfo(db.Model):
     :type: datetime
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id'), primary_key=True, nullable=False, unique=True)
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    autoincrementing primary key
+
+    :type: int, primary key, autoincrement
+    """
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
     """
     User ID number, foreign key to User.user_id
 
@@ -253,14 +260,14 @@ class ClientFacilities(db.Model):
     :type: datetime
     """
 
-    user_id = db.Column(db.ForeignKey('ClientInfo.user_id',ondelete="CASCADE"))
+    user_id = db.Column(db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable = False)
     """
     Foreign key from ClienInfo table
 
     :type: int, foreign key
     """
     
-    facility_id = db.Column(db.ForeignKey('RegisteredFacilities.facility_id',ondelete="CASCADE"))
+    facility_id = db.Column(db.ForeignKey('RegisteredFacilities.facility_id',ondelete="CASCADE"), nullable=False)
     """
     Foreign key from RegisteredFacilities table
 
@@ -314,11 +321,11 @@ class ClientConsent(db.Model):
     :type: datetime
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
     """
     User ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.user_id`
+    :type: int, foreign key to :attr:`User.user_id`
     """
 
     infectious_disease = db.Column(db.Boolean)
@@ -417,11 +424,11 @@ class ClientRelease(db.Model):
     :type: datetime
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
     """
     User ID number
 
-    :type: int, foreign key to :attr:`ClientInfo.user_id`
+    :type: int, foreign key to :attr:`User.user_id`
     """
 
     release_of_all = db.Column(db.Boolean)
@@ -548,11 +555,11 @@ class ClientPolicies(db.Model):
     :type: datetime
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
     """
     User ID number
 
-    :type: int, foreign key to :attr:`ClientInfo.user_id`
+    :type: int, foreign key to :attr:`User.user_id`
     """
 
     signdate = db.Column(db.Date)
@@ -644,11 +651,11 @@ class ClientConsultContract(db.Model):
     :type: datetime
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
     """
     User ID number
 
-    :type: int, foreign key to :attr:`ClientInfo.user_id`
+    :type: int, foreign key to :attr:`User.user_id`
     """
 
     signdate = db.Column(db.Date)
@@ -740,11 +747,11 @@ class ClientSubscriptionContract(db.Model):
     :type: datetime
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
     """
     User ID number
 
-    :type: int, foreign key to :attr:`ClientInfo.user_id`
+    :type: int, foreign key to :attr:`User.user_id`
     """
 
     signdate = db.Column(db.Date)
@@ -831,11 +838,11 @@ class ClientIndividualContract(db.Model):
     :type: datetime
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
     """
     User ID number
 
-    :type: int, foreign key to :attr:`ClientInfo.user_id`
+    :type: int, foreign key to :attr:`User.user_id`
     """
 
     doctor = db.Column(db.Boolean, default=False)
@@ -939,11 +946,11 @@ class ClientExternalMR(db.Model):
     :type: datetime
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
     """
     User ID number
 
-    :type: int, foreign key to :attr:`ClientInfo.user_id`
+    :type: int, foreign key to :attr:`User.user_id`
     """
 
     med_record_id = db.Column(db.String, nullable=False)
@@ -995,11 +1002,11 @@ class ClientReleaseContacts(db.Model):
     :type: int, foreign key to :attr:`ClientRelease.idx`
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
     """
     User ID number
 
-    :type: int, foreign key to :attr:`ClientInfo.user_id`
+    :type: int, foreign key to :attr:`User.user_id`
     """
 
     release_direction = db.Column(db.String, nullable=False)

@@ -1304,7 +1304,10 @@ class NewUserSchema(Schema):
     lastname = fields.String()
     email = fields.Email(validate=validate.Length(min=0,max=50))
     phone_number = fields.String(validate=validate.Length(min=0,max=50))
+    password = fields.String(dump_only=True)
     is_staff = fields.Boolean()
+    is_client = fields.Boolean()
+
 
 #
 #   Schemas for the wearables API

@@ -12,7 +12,6 @@ from odyssey.models.client import (
 
 from tests.data import (
     test_new_client_info,
-    test_new_remote_registration,
     signature,
     test_client_consent_data,
     test_client_release_data,

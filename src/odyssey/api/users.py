@@ -26,7 +26,6 @@ class User(Resource):
 
 @ns.route('/<int:user_id>/')
 class NewUser(Resource):
-
     @token_auth.login_required
     @accepts(schema=NewUserSchema, api=ns)
     @responds(schema=UserSchema, status_code=201, api=ns)
@@ -46,9 +45,15 @@ class NewUser(Resource):
                     user.is_staff = True
                     staff_profile = StaffProfileSchema().load({'user_id': user.user_id})
                     db.session.add(staff_profile)
-                    db.session.commit()
             else:
                 #user account does not yet exist for this email
+                password = data['password']
+                del data['password']
+                user = UserSchema().load(data)
+                user_login = UserLoginSchema().load({"user_id": user.user_id})
+                user_login.set_password(password)
+                db.session.add(user)
+                db.session.add(user_login)
         else:
             user = User.query.filter_by(email=data.get('email')).first()
             if user:
@@ -57,7 +62,16 @@ class NewUser(Resource):
                     raise ClientEmailInUse(email=data.get('email'))
                 else:
                     #user account exists but only the staff portion of the account is defined
-
+                    user.is_client = True
+                    client_info = ClientInfoSchema().load({'user_id': user.user_id})
+                    db.session.add(client_info)
             else:
                 #user account does not yet exist fo this email
-        
+                password = data['password']
+                del data['password']
+                user = UserSchema().load(data)
+                user_login = UserLoginSchema().load({"user_id": user.user_id})
+                user_login.set_password(password)
+                db.session.add(user)
+                db.session.add(user_login)
+        db.session.commit()

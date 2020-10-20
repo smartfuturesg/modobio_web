@@ -1,5 +1,5 @@
 
-from odyssey.models.client import ClientInfo
+from odyssey.models.user import User
 
 def test_new_client(test_client, init_database):
     """
@@ -7,6 +7,6 @@ def test_new_client(test_client, init_database):
     WHEN a new client is created
     THEN check the model attributes and functionality
     """
-    new_client = ClientInfo().query.first()
+    new_client = User.query.filter_by(is_client = True).first()
     assert new_client.email == 'test_this_client@gmail.com'
     assert new_client.user_id == 1

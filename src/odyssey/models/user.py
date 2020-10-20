@@ -57,7 +57,28 @@ class User(db.Model):
     """
     User phone number
 
-    :type: str, max length 20
+    :type: str, max length 50
+    """
+
+    firstname = db.Column(db.String(50))
+    """
+    User first name
+
+    :type: str, max length 50
+    """
+
+    middlename = db.Column(db.String(50))
+    """
+    User first name
+
+    :type: str, max length 50
+    """
+
+    lastname = db.Column(db.String(50))
+    """
+    User first name
+
+    :type: str, max length 50
     """
 
     is_staff = db.Column(db.Boolean, nullable=False)
@@ -98,7 +119,14 @@ class UserLogin(db.Model):
     :type: datetime
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id'), primary_key=True, nullable=False)
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Auto incrementing primary key
+
+    :type: int, primary key
+    """
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
     """
     User ID number, foreign key to User.user_id
 

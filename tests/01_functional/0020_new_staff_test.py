@@ -4,7 +4,7 @@ from requests.auth import _basic_auth_str
 from odyssey.models.user import User, UserLogin
 
 from tests.data import (
-    test_new_staff_member,
+    test_staff_member,
 )
 
 
