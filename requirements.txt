@@ -2,7 +2,6 @@ boto3
 Flask
 flask-accepts
 Flask-Cors
-Flask-HTTPAuth
 flask-marshmallow
 Flask-Migrate
 flask-restx
