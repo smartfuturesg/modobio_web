@@ -188,7 +188,8 @@ class WearablesOuraAuthEndpoint(Resource):
     'clientid': 'Client ID number',
     'state': 'OAuth2 state token',
     'code': 'OAuth2 access grant code',
-    'redirect_uri': 'OAuth2 redirect URI'
+    'redirect_uri': 'OAuth2 redirect URI',
+    'scope': 'The accepted scope of information: email, personal, and/or daily'
 })
 class WearablesOuraCallbackEndpoint(Resource):
     @token_auth.login_required
@@ -210,9 +211,13 @@ class WearablesOuraCallbackEndpoint(Resource):
         oauth_state = request.args.get('state')
         oauth_grant_code = request.args.get('code')
         redirect_uri = request.args.get('redirect_uri')
+        scope = request.args.get('scope')
 
         if oauth_state != oura.oauth_state:
             raise UnknownError(message='OAuth state changed between requests.')
+
+        if not scope or 'daily' not in scope:
+            raise UnknownError(message='You must agree to share at least the sleep and activity data.')
 
         # Exchange access grant code for access token
         oura_id = current_app.config['OURA_CLIENT_ID']
