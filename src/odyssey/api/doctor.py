@@ -109,7 +109,6 @@ class MedImaging(Resource):
             db.session.add(mi_data)
             db.session.commit()
             return 
-            # raise InputError(400, 'Empty input file')
 
         files = request.files #ImmutableMultiDict of key : FileStorage object
         MAX_bytes = 524288000 #500 mb
