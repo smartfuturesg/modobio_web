@@ -573,11 +573,17 @@ class MedicalBloodTestResultTypes(db.Model):
 
     unit = db.Column(db.String)
     """
-    Unit of reported blood test. 
+    Units of the blood test.
+
+    :type: string
+    """
+
+    panel = db.Column(db.String)
+    """
+    Which panel, if any, this test is part of.
 
     :type: str
     """
-
 class MedicalBloodTestResults(db.Model):
     """Holds the results of a blood test identified by a blood test id"""
 

@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------------------------------
--- Apply an auto amtic interpretation of blood test results 
+-- Apply an automamtic interpretation of blood test results 
 -- Based optimal and normal ranges for test results from
 -- American Board of Internal Medicine: 
 -- Labratory Test Reference Ranges
@@ -15,6 +15,7 @@ declare
 begin
   query := 'SELECT 
 				CASE
+					when normal_max is null and normal_min is null and optimal_max is null and optimal_min is null then ''N/A''
 					when '||test_value||' between optimal_min and optimal_max then ''optimal''
 					when ' || test_value || ' >= optimal_min and optimal_max is null then ''optimal''
 					when ' || test_value || ' <= optimal_max and optimal_min is null then ''optimal''

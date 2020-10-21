@@ -65,9 +65,7 @@ def init_database():
     # some tables
     #  read .sql files, remove comments,
     #  execute, raw sql on database
-
     sql_scripts = ['database/'+f for f in os.listdir('database/') if f.endswith(".sql")]
-    #TODO RUN ALL SCRIPTS WHAT BEND WITH .SQL
     for sql_script in sql_scripts:
         with open (sql_script, "r") as f:
             data=f.readlines()

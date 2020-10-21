@@ -1,435 +1,521 @@
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('dihydroxyvitaminD');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('hydroxyprogesteroneSerumFemaleFollicular');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('hydroxyprogesteroneSerumFemaleLuteal');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('hydroxyprogesteroneSerumFemalePostmenopausal');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('hydroxyprogesteroneSerumMaleAdult');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('hydroxyvitaminD');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('hydroxyindoleaceticAcidUrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('thioguanineWholeBlood');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('absoluteNeutrophilCountANC');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('acidPhosphataseSerumTotal');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('acidPhosphataseSerumProstaticFraction');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('acthPlasma');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('activatedPartialThromboplastinTime');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('adamtsActivity');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('adrenocorticotropicHormoneACTHPlasma');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('albuminUrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('albumintocreatinineRatioUrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('aldolaseSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('aldosteronePlasmaSupineOrSeated');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('aldosteronePlasmaStanding');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('aldosteronePlasmaLowsodiumDietSupine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('aldosteroneUrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('alkalinePhosphataseBoneSpecific');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('alphaAntitrypsinAATSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('alphaAntiplasminActivityPlasma');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('alphaaminoNitrogenUrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('alphafetoproteinSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('aminoAcidsUrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('ammoniaBlood');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('amylaseSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('amylaseUrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('androstenedioneSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('angiotensinconvertingEnzymeSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('anionGapSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('antibodiesToDoublestrandedDNA');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('anticardiolipinAntibodiesIgg');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('anticardiolipinAntibodiesIgm');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('anticyclicCitrullinatedPeptideAntibodiesTo');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('antideoxyribonucleaseB');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('antifactinAntibodiesSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('antihistoneAntibodies');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('antiliverkidneyMicrosomalAntibodiesAntiLKM');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('antimitochondrialAntibodies');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('antimyelinAssociatedGlycoproteinAntibody');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('antimyeloperoxidaseAntibodies');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('antinuclearAntibodies');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('antismoothMuscleAntibodies');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('antistreptolysinOTiter');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('antithrombinActivity');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('antithyroglobulinAntibodies');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('antithyroidPeroxidaseAntibodies');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('antitissueTransglutaminaseAntibodies');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('arterialBloodGasStudiesPh');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('arterialBloodGasStudiesPaco');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('arterialBloodGasStudiesPao');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('arterialBloodGasStudiesBicarbonate');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('arterialBloodGasStudiesOxygenSaturation');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('arterialBloodGasStudiesMethemoglobin');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('ascorbicAcidVitaminCBlood');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('ascorbicAcidLeukocyte');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('betadglucanSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('betahumanChorionicGonadotropinBetahCGSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('betahumanChorionicGonadotropinBetahCGUrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('beta2glycoproteinIAntibodiesIgg');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('beta2glycoproteinIAntibodiesIgm');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('betahydroxybutyrateSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('betaMicroglobulinSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('bilirubinSerumDirect');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('bilirubinSerumIndirect');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('bleedingTimeTemplate');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('btypeNatriureticPeptidePlasma');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('calcitoninSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('calciumIonizedSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('calciumUrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('carbohydrateAntigensSerumCa19');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('carbohydrateAntigensSerumCa27');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('carbohydrateAntigensSerumCa125');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('carbonDioxideContentSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('carboxyhemoglobinBlood');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('carcinoembryonicAntigenPlasma');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('caroteneSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('catecholaminesPlasmaDopamine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('catecholaminesPlasmaEpinephrineSupine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('catecholaminesPlasmaEpinephrineStanding');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('catecholaminesPlasmaNorepinephrineSupine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('catecholaminesPlasmaNorepinephrineStanding');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('catecholaminesUrineDopamine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('catecholaminesUrineEpinephrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('catecholaminesUrineNorepinephrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('catecholaminesUrineTotal');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('cdTlymphocyteCount');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('cellCountCSFLeukocytesWBCs');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('cellCountCSFErythrocytesRBCs');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('ceruloplasminSerumPlasma');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('chlorideCSF');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('chlorideUrineSpot');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('chlorideUrineHourMeasurement');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('cholinesteraseSerumPseudocholinesterase');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('packedCells');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('chromograninASerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('citrateUrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('clottingTimeLeeWhite');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('factorIFibrinogen');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('factorIIProthrombin');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('factorVAcceleratorGlobulin');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('factorVIIProconvertin');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('factorVIIIAntihemophilicGlobulin');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('factorIXPlasmaThromboplastinComponent');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('factorXStuartFactor');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('factorXIPlasmaThromboplastinAntecedent');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('factorXIIHagemanFactor');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('factorXIII');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('coldAgglutininTiter');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('complementComponentsSerumC3');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('complementComponentsSerumC4');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('complementComponentsSerumCH50');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('copperSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('copperUrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('coproporphyrinUrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('cortisolFreeUrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('cortisolPlasma8AM');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('cortisolPlasma4PM');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('cortisolPlasma1hourAfterCosyntropin');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('cortisolPlasmaOvernightSuppressionTest1Mg');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('cortisolPlasmaOvernightSuppressionTest8Mg');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('cortisolSalivaPMMidnight');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('creactiveProteinSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('creactiveProteinHighSensitivitySerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('creatineKinaseSerumTotal');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('creatineKinaseSerumMbIsoenzymes');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('creatineUrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('creatinineClearanceUrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('creatinineUrineSpot');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('creatinineUrineHourMeasurement');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('cyclosporineWholeBloodTroughTherapeutic');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('cyclosporineWholeBloodTrough0to3monthsPostTransplantation');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('cyclosporineWholeBloodTroughMoreThan3MonthsPostTransplantation');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('ddimerPlasma');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('dehydroepiandrosteroneSulfateDHEASSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('deltaaminolevulinicAcidSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('digoxinSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('dihydrotestosteroneSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('dopaminePlasma');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('dopamineUrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('dXyloseAbsorptionserum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('dXyloseAbsorptionUrinaryExcretion');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('epinephrinePlasmaSupine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('epinephrinePlasmaStanding');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('epinephrineUrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('erythrocyteCount');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('erythrocyteSedimentationRateWestergren');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('erythrocyteSurvivalRateCr');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('erythropoietinSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('estradiolSerumFemaleFollicular');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('estradiolSerumMidcyclePeak');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('estradiolSerumLuteal');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('estradiolSerumPostmenopausal');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('estradiolSerumMale');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('estriolUrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('estrogenReceptorProtein');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('estroneSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('ethanolBlood');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('comaLevel');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('intoxication');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('euglobulinClotLysisTime');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('everolimusWholeBloodTrough');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('factorXIIIBSubunitPlasma');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('fecalFat');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('fecalNitrogen');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('fecalPH');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('fecalPotassium');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('fecalSodium');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('fecalUrobilinogen');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('fecalWeight');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('ferritinSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('fibrinogenDegradationProducts');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('fibrinogenPlasma');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('fibroblastGrowthFactorSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('flecainideSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('folateRedCell');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('folateSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('follicleStimulatingHormoneSerumFemaleFollicularluteal');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('follicleStimulatingHormoneSerumFemaleMidcyclePeak');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('follicleStimulatingHormoneSerumFemalePostmenopausal');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('follicleStimulatingHormoneSerumMaleAdult');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('follicleStimulatingHormoneSerumChildrenTannerStages12');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('follicleStimulatingHormoneSerumChildrenTannerStages345');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('freeKappaLightChainSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('freeKappatofreeLambdaLightChainRatioSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('freeLambdaLightChainSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('fructosamineSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('gammaGlobulinCSF');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('gastricSecretionBasalAcidAnalysis');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('gastricSecretionBasalAcidOutput');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('gastricSecretionMaximalOutputAfterPentagastrinStimulation');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('gastrinSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('gentamicinSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('glucoseCSF');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('glucosephosphateDehydrogenaseBlood');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('glycoproteinΑsubunitSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('growthHormoneSerumAtRest');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('growthHormoneSerumResponseToProvocativeStimuli');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('haptoglobinSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('hemoglobinFractionationHbA');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('hemoglobinFractionationHbA2');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('hemoglobinFractionationHbF');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('hemoglobinPlasma');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('heparinantifactorXaAssayPlasma');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('heparinplateletFactorAntibodySerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('hepaticCopper');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('hepaticIronIndex');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('histamineExcretionUrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('homocysteinePlasma');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('βhumanChorionicGonadotropinΒhCGSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('βhumanChorionicGonadotropinΒhCGUrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('hydroxyprolineUrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('immaturePlateletFraction');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('immuneComplexesSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('immunoglobulinsSerumIga');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('immunoglobulinsSerumIge');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('immunoglobulinsSerumIgg');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('immunoglobulinsSerumIgm');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('immunoglobulinFreeLightChainsSerumKappa');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('immunoglobulinFreeLightChainsSerumLambda');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('immunoglobulinFreeLightChainsSerumKappatolambdaRatio');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('insulinSerumFasting');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('insulinLikeGrowthFactorAges16to24');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('insulinLikeGrowthFactorAges25to39');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('insulinLikeGrowthFactorAges40to54');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('insulinLikeGrowthFactorAges55AndOlder');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('iodineUrineSpot');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('lactateArterialBlood');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('lactateSerumOrPlasma');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('lactateVenousBlood');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('lacticAcidSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('lactoseToleranceTestGI');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('leadBlood');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('leadUrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('lipaseSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('lipoproteinaSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('lithiumPlasmaTherapeutic');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('lithiumPlasmaToxicLevel');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('luteinizinghormoneSerumFemaleFollicularluteal');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('luteinizinghormoneSerumFemaleMidcyclePeak');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('luteinizinghormoneSerumFemalePostmenopausal');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('luteinizinghormoneSerumMaleAdult');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('luteinizinghormoneSerumChildrenTannerStages123');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('luteinizinghormoneSerumChildrenTannerStages45');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('lymphocyteSubsetsCD3');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('lymphocyteSubsetsCD4');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('lymphocyteSubsetsCD8');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('lymphocyteSubsetsC19');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('lymphocyteSubsetsC56');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('magnesiumUrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('meanPlateletVolume');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('metanephrinesFractionatedPlasmaMetanephrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('metanephrinesFractionatedPlasmaMetanephrineNormetanephrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('metanephrinesFractionated24hourUrineMetanephrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('metanephrinesFractionated24hourUrineNormetanephrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('myoglobinSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('norepinephrinePlasmaSupine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('norepinephrinePlasmaStanding');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('norepinephrineUrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('normetanephrineFractionatedPlasma');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('normetanephrineFractionatedHourUrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('nTelopeptideUrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('nTerminalproBtypeNatriureticPeptideNTproBNP');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('osmolalitySerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('osmolalityUrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('osmoticFragilityOfErythrocytes');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('osteocalcinSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('oxalateUrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('oxygenConsumption');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('oxygenSaturationArterialBlood');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('parathyroidHormoneSerumCTerminal');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('parathyroidHormoneSerumIntact');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('parathyroidHormoneSerumIntactDialysisPatientsOnly');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('parathyroidHormonerelatedProteinSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('partialThromboplastinTimeActivated');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('phUrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('phenolsulfonphthaleinUrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('phenytoinSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('phosphataseAcidSerumTotal');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('phosphataseAcidSerumProstaticFraction');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('phosphataseAlkalineSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('phospholipidsSerumTotal');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('phosphorusUrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('collagenepinephrineClosureTime');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('collagenadpClosureTime');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('plateletSurvivalRateCr');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('potassiumUrineSpot');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('potassiumUrine24hourMeasurement');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('prealbuminSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('pregnanetriolUrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('pressureOpeningInitialCSF');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('procalcitoninSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('progesteroneSerumFemaleFollicular');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('progesteroneSerumFemaleLuteal');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('progesteroneSerumMaleAdult');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('proinsulinSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('prolactinSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('prostatespecificAntigenSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('proteinCActivityPlasma');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('proteinCAntigenPlasma');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('proteinCatabolicRateUrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('proteinSActivityPlasma');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('proteinSAntigenPlasmaTotal');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('proteinSAntigenPlasmaFree');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('proteinUrineSpot');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('proteinUrine24hourMeasurement');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('proteinsCSFTotal');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('proteinsSerumAlbumin');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('proteinsSerumGlobulin');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('proteinsSerumAlpha1');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('proteinsSerumAlpha2');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('proteinsSerumBeta');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('proteinsSerumGamma');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('proteintocreatinineRatioUrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('prothrombinTimePlasma');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('pyruvicAcidBlood');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('quinidineSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('redCellMass');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('peripheralPlasmaNormalDietSupine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('peripheralPlasmaNormalDietUpright');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('peripheralPlasmaLowSodiumDietSupine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('peripheralPlasmaLowSodiumDietUpright');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('diureticsLowSodiumDiet');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('renalVeinConcentration');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('reptilaseTime');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('reticulocyteCount');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('reticulocyteCountAbsolute');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('rheumatoidFactorNephelometry');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('rheumatoidFactorLatexTestFor');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('ristocetinCofactorActivityOfPlasma');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('russellViperVenomTimeDilute');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('salicylatePlasma');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('sexHormonebindingGlobulin');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('sodiumUrineSpot');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('sodiumUrine24hourMeasurement');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('specificGravityUrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('spermDensity');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('sweatTestForSodiumAndChloride');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('tResinUptake');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('tlymphocyteCountCD');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('tacrolimusWholeBloodTrough');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('testosteroneSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('testosteroneBioavailableSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('testosteroneFreeSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('theophyllineSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('thrombinTime');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('tissueTransglutaminaseAntibodyIgA');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('tissueTransglutaminaseAntibodyIgG');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('tissueTransglutaminaseAntibodyIgAbyE');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('tissueTransglutaminaseAntibodyIgGbyE');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('totalProteinsCSF');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('transferrinSaturation');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('transferrinSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('troponinICardiacSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('troponinTCardiacSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('tryptaseSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('ureaClearanceUrineStandard');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('ureaClearanceUrineMaximal');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('ureaNitrogenUrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('uricAcidUrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('uroporphyrinUrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('vanillylmandelicAcidUrine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('venousOxygenContentMixed');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('venousStudiesMixedBloodpH');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('venousStudiesMixedBloodPco2');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('venousStudiesMixedBloodPo2');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('venousStudiesMixedBloodBicarbonate');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('venousStudiesMixedBloodBicarbonateOxygenSaturationSvO');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('viscositySerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('vitaminASerumAdult');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('vitaminASerumPediatricAge1to2YrRetinol');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('vitaminB12Serum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('vitaminESerumAdult');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('vitaminESerumPediatricAge1to2YrAlphatocopherol');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('volumeBloodPlasma');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('volumeBloodRedCell');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('vonWillebrandFactorAntigenPlasma');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('zincSerum');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('t3ResinUptake');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('thyroglobulin');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('thyroidialIodineUptake');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('tsh');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('tsi');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('thyroxineBindingGlobulin');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('thyroxineIndex');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('t4SerumTotal');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('t4SerumFree');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('t3SerumTotal');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('t3SerumReverse');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('t3SerumFree');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('a1c');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('cholesterolTotal');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('cholesterolLdl');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('cholesterolHdl');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('triglycerides');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('rbc');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('hemoglobin');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('hematocrit');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('mcv');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('mch');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('mchc');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('rdw');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('wbc');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('relNeutrophils');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('absNeutrophils');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('relLymphocytes');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('absLymphocytes');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('relMonocytes');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('absMonocytes');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('relEosinophils');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('absEosinophils');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('basophils');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('platelets');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('glucose');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('sodium');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('potassium');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('carbonDioxide');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('chloride');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('magnesium');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('calcium');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('phosphorus');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('uricAcid');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('bun');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('creatinine');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('ast');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('alt');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('alkPhophatase');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('bilirubin');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('protein');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('albumin');
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name") VALUES ('globulin');
+
+-----------------------------
+-- Empty table and reset index. 
+-- Rather than altering the table, this script inserts data 
+-- So to avoid duplicates, we empty the table and reindex.
+-- This is a solution that should be run only once on 
+-- persistent databases. 
+-- Further changes to this table will be done through the API
+-----------------------------
+DO $$
+DECLARE
+  x integer;
+  query varchar := 'select count(*) from "MedicalBloodTestResultTypes"';
+BEGIN 
+execute query into x;
+  IF x >= 1 THEN
+   execute 
+   		'delete from "MedicalBloodTestResultTypes" 
+			where resultid >= 1;
+		alter sequence "MedicalBloodTestResultTypes_resultid_seq"
+			restart with 1;';
+  END IF;
+END $$;
+
+INSERT INTO "MedicalBloodTestResultTypes" ("result_name", "normal_min", "normal_max", "optimal_min", "optimal_max", "unit", "panel" ) 
+VALUES 
+('dihydroxyvitaminD',15,60,null,null,'pg/mL',null),
+('hydroxyprogesteroneSerumFemaleFollicular',0,80,null,null,'ng/dL',null),
+('hydroxyprogesteroneSerumFemaleLuteal',0,285,null,null,'ng/dL',null),
+('hydroxyprogesteroneSerumFemalePostmenopausal',0,51,null,null,'ng/dL',null),
+('hydroxyprogesteroneSerumMaleAdult',0,220,null,null,'ng/dL',null),
+('hydroxyvitaminD',30,60,null,null,'ng/mL',null),
+('hydroxyindoleaceticAcidUrine',2,24,null,null,'mg/24hr',null),
+('thioguanineWholeBlood',230,400,null,null,'pmol/8x10^8 RBCs',null),
+('absoluteNeutrophilCountANC',2000,8250,null,null,'/micro L',null),
+('acidPhosphataseSerumTotal',0.5,2,null,null,'Bodansky units/mL',null),
+('acidPhosphataseSerumProstaticFraction',0.1,0.4,null,null,'unit/mL',null),
+('acthPlasma',10,60,null,null,'pg/mL',null),
+('activatedPartialThromboplastinTime',25,35,null,null,'seconds',null),
+('adamtsActivity',60,null,null,null,'%',null),
+('adrenocorticotropicHormoneACTHPlasma',10,60,null,null,'pg/mL',null),
+('albuminUrine',null,25,null,null,'mg/24hr',null),
+('albumintocreatinineRatioUrine',null,30,null,null,'mg/g',null),
+('aldolaseSerum',0.8,3,null,null,'IU/mL',null),
+('aldosteronePlasmaSupineOrSeated',null,10,null,null,'ng/dL',null),
+('aldosteronePlasmaStanding',null,21,null,null,'ng/dL',null),
+('aldosteronePlasmaLowsodiumDietSupine',null,30,null,null,'ng/dL',null),
+('aldosteroneUrine',5,19,null,null,'micro g/24hr',null),
+('alkalinePhosphataseSerum',30,120,null,null,'U/L',null),
+('alkalinePhosphataseBoneSpecific',5.6,18,null,null,'micro g/L',null),
+('alphaAntitrypsinAATSerum',150,350,null,null,'mg/dL',null),
+('alphaAntiplasminActivityPlasma',75,115,null,null,'%',null),
+('alphaaminoNitrogenUrine',100,290,null,null,'mg/24hr',null),
+('alphafetoproteinSerum',null,10,null,null,'ng/mL',null),
+('aminoAcidsUrine',200,400,null,null,'mg/24hr',null),
+('aminotransferaseSerumAlanineFemale',10,40,10,19,'U/L','CMP'),
+('aminotransferaseSerumAlanineMale',10,40,13,22,'U/L','CMP'),
+('aminotransferaseSerumAspartateMale',10,40,12,25,'U/L','CMP'),
+('aminotransferaseSerumAspartateFemale',10,40,9,21,'U/L','CMP'),
+('ammoniaBlood',40,70,null,null,'micro g/dL',null),
+('amylaseSerum',25,125,null,null,'U/L',null),
+('amylaseUrine',1,17,null,null,'U/hr',null),
+('androstenedioneSerumFemale',30,200,null,null,'ng/dL',null),
+('androstenedioneSerumMale',40,150,null,null,'ng/dL',null),
+('angiotensinconvertingEnzymeSerum',8,53,null,null,'U/L',null),
+('anionGapSerum',7,13,null,null,'mEq/L',null),
+('antibodiesToDoublestrandedDNA',0,6.999,null,null,'IU/mL',null),
+('anticardiolipinAntibodiesIgg',0,19.999,null,null,'GPL',null),
+('anticardiolipinAntibodiesIgm',0,19.999,null,null,'MPL',null),
+('anticyclicCitrullinatedPeptideAntibodiesTo',0,19.999,null,null,'units',null),
+('antideoxyribonucleaseB',0,279.999,null,null,'units',null),
+('antifactinAntibodiesSerum',80,null,null,null,'ratio',null),
+('antihistoneAntibodies',16.001,null,null,null,'ratio',null),
+('antiliverkidneyMicrosomalAntibodiesAntiLKM',20.001,null,null,null,'ratio',null),
+('antimitochondrialAntibodies',5,null,null,null,'ratio',null),
+('antimyelinAssociatedGlycoproteinAntibody',1600,null,null,null,'ratio',null),
+('antimyeloperoxidaseAntibodies',null,0.999,null,null,'U',null),
+('antinuclearAntibodies',40,null,null,null,'ratio',null),
+('antismoothMuscleAntibodies',80,null,null,null,'ratio',null),
+('antistreptolysinOTiter',0,199.999,null,null,'Todd Units',null),
+('antithrombinActivity',80,120,null,null,'%',null),
+('antithyroglobulinAntibodies',0,19.999,null,null,'U/ml',null),
+('antithyroidPeroxidaseAntibodies',0,1.999,null,null,'U/ml',null),
+('antitissueTransglutaminaseAntibodies',null,null,null,null,null,null),
+('arterialBloodGasStudiesPh',7.38,7.44,null,null,'pH',null),
+('arterialBloodGasStudiesPaco',38,42,null,null,'mm Hg',null),
+('arterialBloodGasStudiesPao',75,100,null,null,'mm Hg',null),
+('arterialBloodGasStudiesBicarbonate',23,26,null,null,'mEq/L',null),
+('arterialBloodGasStudiesOxygenSaturation',95,null,null,null,'%',null),
+('arterialBloodGasStudiesMethemoglobin',0.5,3,null,null,'%',null),
+('ascorbicAcidVitaminCBlood',0.4,1.5,null,null,'mg/dL',null),
+('ascorbicAcidLeukocyte',11.4,21.6,null,null,'mg/dL of leukocytes',null),
+('betadglucanSerum',0,59.999,null,null,'pg/mL',null),
+('betahumanChorionicGonadotropinBetahCGSerumFemalePremonopausal',null,0.999,null,null,'U/L',null),
+('betahumanChorionicGonadotropinBetahCGSerumFemalePostmonopausal',null,6.999,null,null,'U/L',null),
+('betahumanChorionicGonadotropinBetahCGSerum',0,1.3999,null,null,'U/L',null),
+('betahumanChorionicGonadotropinBetahCGUrine',0,1.999,null,null,'mIU/24hr',null),
+('beta2glycoproteinIAntibodiesIgg',0,20.999,null,null,'SGU',null),
+('beta2glycoproteinIAntibodiesIgm',0,20.999,null,null,'SMU',null),
+('betahydroxybutyrateSerum',0,0.3999,null,null,'mmol/L',null),
+('betaMicroglobulinSerum',0.54,2.75,null,null,'mg/L',null),
+('bicarbonateSerum',23,28,null,null,'mEq/L',null),
+('bilirubinSerumTotal',0.3,1,0.5,0.8,'mg/dL','CMP'),
+('bilirubinSerumDirect',0.1,0.3,null,null,'mg/dL',null),
+('bilirubinSerumIndirect',0.2,0.7,null,null,'mg/dL',null),
+('bleedingTimeTemplate',0,8,null,null,'minutes',null),
+('btypeNatriureticPeptidePlasma',null,100,null,null,'pg/mL',null),
+('cPeptideSerum',0.8,3.1,1.1,2.1,'ng/mL',null),
+('calcitoninSerumFemale',null,5,null,null,'pg/mL',null),
+('calcitoninSerumMale',0,10,null,null,'pg/mL',null),
+('calciumIonizedSerum',1.12,1.23,null,null,'mmol/L',null),
+('calciumSerum',8.6,10.2,9.4,9.8,'mg/dL','CMP'),
+('calciumUrineFemale',null,249.999,null,null,'mg/24hr',null),
+('calciumUrineMale',0,299.999,null,null,'mg/24hr',null),
+('carbohydrateAntigensSerumCa19',0,37,null,null,'U/mL',null),
+('carbohydrateAntigensSerumCa27',0,37.999,null,null,'U/mL',null),
+('carbohydrateAntigensSerumCa125',0,34.999,null,null,'U/mL',null),
+('carbonDioxideContentSerum',23,30,25,28,'mEq/L','CMP'),
+('carboxyhemoglobinBlood',0,4.999,null,null,'%',null),
+('carcinoembryonicAntigenPlasma',0,2.499,null,null,'ng/mL',null),
+('caroteneSerum',75,300,null,null,'micro g/dL',null),
+('catecholaminesPlasmaDopamine',0,29.999,null,null,'pg/mL',null),
+('catecholaminesPlasmaEpinephrineSupine',0,49.999,null,null,'pg/mL',null),
+('catecholaminesPlasmaEpinephrineStanding',0,94.999,null,null,'pg/mL',null),
+('catecholaminesPlasmaNorepinephrineSupine',112,658,null,null,'pg/mL',null),
+('catecholaminesPlasmaNorepinephrineStanding',217,1109,null,null,'pg/mL',null),
+('catecholaminesUrineDopamine',65,400,null,null,'micro g/24hr',null),
+('catecholaminesUrineEpinephrine',2,24,null,null,'micro g/24hr',null),
+('catecholaminesUrineNorepinephrine',15,100,null,null,'micro g/24hr',null),
+('catecholaminesUrineTotal',26,121,null,null,'micro g/24hr',null),
+('cdTlymphocyteCount',530,1570,null,null,'/micro L',null),
+('cellCountCSFLeukocytesWBCs',0,5,null,null,'cells/micro L',null),
+('cellCountCSFErythrocytesRBCs',null,0.1,null,null,'cells/micro L',null),
+('ceruloplasminSerumPlasma',25,43,null,null,'mg/dL',null),
+('chlorideCSF',120,130,102,105,'mEq/L',null),
+('chlorideSerum',98,106,null,null,'mEq/L',null),
+('chlorideUrineSpot',null,null,null,null,'mEq/L',null),
+('chlorideUrineHourMeasurement',null,null,null,null,'mEq/24hr',null),
+('cholesterolSerumTotal',null,239,null,199.999,'mg/dL','Lipid'),
+('cholesterolSerumHDLFemale',40,90,65,85,'mg/dL','Lipid'),
+('cholesterolSerumHDLMale',50,80,55,75,'mg/dL','Lipid'),
+('cholesterolSerumLDL',null,159,80,170,'mg/dL','Lipid'),
+('cholinesteraseSerumPseudocholinesterase',0.5,null,null,null,'pH units/hr',null),
+('packedCells',0.7,null,null,null,'pH units/hr',null),
+('chromograninASerum',null,92.999,null,null,'ng/mL',null),
+('citrateUrine',250,1000,null,null,'mg/24hr',null),
+('clottingTimeLeeWhite',5,15,null,null,'minutes',null),
+('factorIFibrinogen',200,400,null,null,'mg/dL',null),
+('factorIIProthrombin',60,130,null,null,'%',null),
+('factorVAcceleratorGlobulin',60,130,null,null,'%',null),
+('factorVIIProconvertin',60,130,null,null,'%',null),
+('factorVIIIAntihemophilicGlobulin',50,150,null,null,'%',null),
+('factorIXPlasmaThromboplastinComponent',60,130,null,null,'%',null),
+('factorXStuartFactor',60,130,null,null,'%',null),
+('factorXIPlasmaThromboplastinAntecedent',60,130,null,null,'%',null),
+('factorXIIHagemanFactor',60,130,null,null,'%',null),
+('factorXIII',57,192,null,null,'%',null),
+('coldAgglutininTiter',0,63.999,null,null,'ratio',null),
+('complementComponentsSerumC3',100,233,null,null,'mg/dL',null),
+('complementComponentsSerumC4',14,48,null,null,'mg/dL',null),
+('complementComponentsSerumCH50',110,190,null,null,'units/mL',null),
+('copperSerum',100,200,null,null,'micro g/dL',null),
+('copperUrine',0,100,null,null,'micro g/24hr',null),
+('coproporphyrinUrine',50,250,null,null,'micro g/24hr',null),
+('cortisolFreeUrine',4,50,null,null,'micro g/24hr',null),
+('cortisolPlasma8AM',5,25,null,null,'micro g/dL',null),
+('cortisolPlasma4PM',0,9.999,null,null,'micro g/dL',null),
+('cortisolPlasma1hourAfterCosyntropin',18,null,null,null,'micro g/dL',null),
+('cortisolPlasmaOvernightSuppressionTest1Mg',0,1.799,null,null,'micro g/dL',null),
+('cortisolPlasmaOvernightSuppressionTest8Mg',50.001,null,null,null,'% reduction in cortisol',null),
+('cortisolSalivaPMMidnight',null,0.0899,null,null,'micro g/dL',null),
+('creactiveProteinSerum',null,0.8,null,null,'mg/dL',null),
+('creactiveProteinHighSensitivitySerum',null,2.999,null,null,'mg/L',null),
+('creatineKinaseSerumTotalFemale',30,135,null,null,'U/l',null),
+('creatineKinaseSerumTotal',55,170,null,null,'U/L',null),
+('creatineKinaseSerumMbIsoenzymes',null,4.999,null,null,'% of total',null),
+('creatineUrineFemale',0,100,null,null,'mg/24hr',null),
+('creatineUrineMale',0,40,null,null,'mg/24hr',null),
+('creatinineClearanceUrine',90,140,null,null,'mL/min/1.73m^2',null),
+('creatinineUrineSerumFemale',0.5,1.1,0.9,1.3,'mg/dL','CMP'),
+('creatinineUrineSerumMale',0.7,1.3,0.9,1.3,'mg/dL','CMP'),
+('creatinineUrineSpot',null,null,null,null,'mg/dL',null),
+('creatinineUrineHourMeasurement',15,25,null,null,'mg/kg body weight /24hr',null),
+('cyclosporineWholeBloodTroughTherapeutic',100,200,null,null,'ng/mL',null),
+('cyclosporineWholeBloodTrough0to3monthsPostTransplantation',150,250,null,null,'ng/mL',null),
+('cyclosporineWholeBloodTroughMoreThan3MonthsPostTransplantation',75,125,null,null,'ng/mL',null),
+('ddimerPlasma',null,0.499,null,null,'micro g/mL',null),
+('dehydroepiandrosteroneSulfateDHEASSerumFemale',44,332,null,null,'micro g/dL',null),
+('dehydroepiandrosteroneSulfateDHEASSerumMale',89,457,null,null,'micro g/dL',null),
+('deltaaminolevulinicAcidSerum',null,19.999,null,null,'micro g/dL',null),
+('digoxinSerum',1,2,null,null,'ng/mL',null),
+('dihydrotestosteroneSerum',25,80,null,null,'ng/dL',null),
+('dopaminePlasma',null,29.999,null,null,'pg/mL',null),
+('dopamineUrine',65,400,null,null,'micro g/24hr',null),
+('dXyloseAbsorptionserum',25,40,null,null,'mg/dL',null),
+('dXyloseAbsorptionUrinaryExcretion',4.5,7.5,null,null,'g during 5hr period',null),
+('electrolytesSerumSodium',136,145,139,142,'mEq/L','CMP'),
+('electrolytesSerumPotassium',3.5,5,4,4.4,'mEq/L','CMP'),
+('electrolytesSerumChloride',98,106,102,105,'mEq/L','CMP'),
+('electrolytesSerumBicarbonate',23,28,null,null,'mEq/L','CMP'),
+('epinephrinePlasmaSupine',null,109.999,null,null,'pg/mL',null),
+('epinephrinePlasmaStanding',null,139.999,null,null,'pg/mL',null),
+('epinephrineUrine',null,19.999,null,null,'micro g/24hr',null),
+('erythrocyteCount',4.2,5.9,null,null,'million/micro L',null),
+('erythrocyteSedimentationRateWestergrenMale',0,15,null,null,'mm/hr',null),
+('erythrocyteSedimentationRateWestergrenFemale',0,20,null,null,'mm/hr',null),
+('erythrocyteSurvivalRateCr',null,28,null,null,'days',null),
+('erythropoietinSerum',4,26,null,null,'mU/mL',null),
+('estradiolSerumFemaleFollicular',10,180,null,null,'pg/mL',null),
+('estradiolSerumMidcyclePeak',100,300,null,null,'pg/mL',null),
+('estradiolSerumLuteal',40,200,null,null,'pg/mL',null),
+('estradiolSerumPostmenopausal',null,9.999,null,null,'pg/mL',null),
+('estradiolSerumMale',20,50,null,null,'pg/mL',null),
+('estriolUrine',12.001,null,null,null,'mg/24hr',null),
+('estrogenReceptorProtein',null,9.999,null,null,'fmol/mg protein',null),
+('estroneSerum',10,60,null,null,'pg/mL',null),
+('ethanolBlood',null,0.00499,null,null,'%',null),
+('comaLevel',null,0.4999,null,null,'%',null),
+('intoxication',0.08,null,null,null,'%',null),
+('euglobulinClotLysisTime',2,4,null,null,'hours',null),
+('everolimusWholeBloodTrough',3,8,null,null,'ng/mL',null),
+('factorXIIIBSubunitPlasma',60,130,null,null,'U/dL',null),
+('fecalFat',null,6.999,null,null,'g/24hr',null),
+('fecalNitrogen',null,1.999,null,null,'g/24hr',null),
+('fecalPH',7,7.5,null,null,'ph',null),
+('fecalPotassium',null,9.999,null,null,'mEq/L',null),
+('fecalSodium',null,9.999,null,null,'mEq/L',null),
+('fecalUrobilinogen',40,280,null,null,'mg/24hr',null),
+('fecalWeight',null,249.999,null,null,'g/24hr',null),
+('ferritinSerumFemale',11,307,50,125,'ng/mL',null),
+('ferritinSerumMale',24,336,75,150,'ng/mL',null),
+('fibrinogenDegradationProducts',null,9.999,null,null,'micro g/mL',null),
+('fibrinogenPlasma',200,400,null,null,'mg/dL',null),
+('fibroblastGrowthFactorSerum',30,80,null,null,'RU/mL',null),
+('flecainideSerum',0.2,1,null,null,'micro g/mL',null),
+('folateRedCell',150,450,null,null,'ng/mL',null),
+('folateSerum',1.8,9,null,null,'ng/mL',null),
+('follicleStimulatingHormoneSerumFemaleFollicularluteal',2,9,null,null,'mIU/mL',null),
+('follicleStimulatingHormoneSerumFemaleMidcyclePeak',4,22,null,null,'mIU/mL',null),
+('follicleStimulatingHormoneSerumFemalePostmenopausal',30.001,null,null,null,'mIU/mL',null),
+('follicleStimulatingHormoneSerumMaleAdult',1,7,null,null,'mIU/mL',null),
+('follicleStimulatingHormoneSerumChildrenTannerStages12',0.5,8,null,null,'mIU/mL',null),
+('follicleStimulatingHormoneSerumChildrenTannerStages345',1,12,null,null,'mIU/mL',null),
+('freeKappaLightChainSerum',3.3,19.4,null,null,'mg/L',null),
+('freeKappatofreeLambdaLightChainRatioSerum',0.26,1.65,null,null,null,null),
+('freeLambdaLightChainSerum',5.7,26.3,null,null,'mg/L',null),
+('fructosamineSerum',175,380,null,null,'mmol/L',null),
+('gammaGlobulinCSF',6.1,8.3,null,null,'mg/dL',null),
+('gastricSecretionBasalAcidAnalysis',10,30,null,null,'units of free acid',null),
+('gastricSecretionBasalAcidOutputFemale',0.2,3.8,null,null,'mEq of HCI/hr',null),
+('gastricSecretionBasalAcidOutput',1,5,null,null,'mEq of HCI/hr',null),
+('gastricSecretionMaximalOutputAfterPentagastrinStimulation',18,25,null,null,'mEq of HCI/hr',null),
+('gastrinSerum',null,99.999,null,null,'pg/ml',null),
+('gentamicinSerumPeak',5,10,null,null,'micro g/mL',null),
+('gentamicinSerumTrough',null,1.999,null,null,'micro g/mL',null),
+('glucoseCSF',50,75,null,null,'mg/dL',null),
+('glucosePlasmaFasting',70,99,82,88,'mg/dL','CMP'),
+('glucosephosphateDehydrogenaseBlood',5,15,null,null,'units/g of hemoglobin',null),
+('glycoproteinΑsubunitSerum',null,0.999,null,null,'ng/mL',null),
+('growthHormoneSerumAtRest',null,4.999,null,null,'ng/mL',null),
+('growthHormoneSerumResponseToProvocativeStimuli',7.001,null,null,null,'ng/mL',null),
+('haptoglobinSerum',83,267,null,null,'mg/dL',null),
+('hematocritBloodMale',42,50,44,49,'%','CBC'),
+('hematocritBloodFemale',37,47,35,42,'%','CBC'),
+('hemoglobinA1C',4,5.6,5,5.3,'%',null),
+('hemoglobinBloodMale',14,18,13,16,'g/dL','CBC'),
+('hemoglobinBloodFemale',12,16,13,14,'g/dL','CBC'),
+('hemoglobinFractionationHbA',96,98,null,null,'%',null),
+('hemoglobinFractionationHbA2',1.5,3.5,null,null,'%',null),
+('hemoglobinFractionationHbF',null,0.999,null,null,'%',null),
+('hemoglobinPlasma',null,4.999,null,null,'mg/dL',null),
+('heparinantifactorXaAssayPlasma',0.3,0.7,null,null,'IU/mL',null),
+('heparinplateletFactorAntibodySerum',0.4001,null,null,null,'optical density units',null),
+('hepaticCopper',25,40,null,null,'micro g/g dry weight',null),
+('hepaticIronIndex',null,0.999,null,null,null,null),
+('histamineExcretionUrine',20,50,null,null,'micro g/24hr',null),
+('homocysteinePlasma',5,15,null,null,'micro mol/L',null),
+('βhumanChorionicGonadotropinΒhCGSerumFemalePremenopausalNonpregnant',null,0.999,null,null,'U/L',null),
+('βhumanChorionicGonadotropinΒhCGSerumFemalePostmenopausal',null,0.699,null,null,'U/L',null),
+('βhumanChorionicGonadotropinΒhCGSerumMale',null,1.399,null,null,'U/L',null),
+('βhumanChorionicGonadotropinΒhCGUrine',null,1.999,null,null,'mIU/24hr',null),
+('hydroxyprolineUrine',10,30,null,null,'mg/sq meter of body surface/24hr',null),
+('immaturePlateletFraction',1,5,null,null,'%',null),
+('immuneComplexesSerum',0,50,null,null,'micro g/dL',null),
+('immunoglobulinsSerumIga',90,325,null,null,'mg/dL',null),
+('immunoglobulinsSerumIge',null,379.999,null,null,'mg/dL',null),
+('immunoglobulinsSerumIgg',800,1500,null,null,'mg/dL',null),
+('immunoglobulinsSerumIgm',45,150,null,null,'mg/dL',null),
+('immunoglobulinFreeLightChainsSerumKappa',3.3,19.4,null,null,'mg/L',null),
+('immunoglobulinFreeLightChainsSerumLambda',5.7,26.3,null,null,'mg/L',null),
+('immunoglobulinFreeLightChainsSerumKappatolambdaRatio',0.26,1.65,null,null,null,null),
+('insulinSerumFasting',null,19.999,null,null,'micro U/mL',null),
+('insulinLikeGrowthFactorAges16to24',182,780,null,null,'ng/mL',null),
+('insulinLikeGrowthFactorAges25to39',114,492,null,null,'ng/mL',null),
+('insulinLikeGrowthFactorAges40to54',90,360,null,null,'ng/mL',null),
+('insulinLikeGrowthFactorAges55AndOlder',71,290,null,null,'ng/mL',null),
+('iodineUrineSpot',null,null,null,null,'micro g/L',null),
+('ironSerum',50,150,80,100,'micro g/dL',null),
+('ironBindingCapacitySerumFemale',250,310,250,315,'micro g/dL',null),
+('ironBindingCapacitySerumMale',250,310,250,370,'micro g/dL',null),
+('lactateDehydrogenaseSerum',80,255,140,175,'U/L',null),
+('lactateArterialBlood',null,1.2999,null,null,'mmol/L',null),
+('lactateSerumOrPlasma',0.7,2.1,null,null,'mmol/L',null),
+('lactateVenousBlood',0.7,1.8,null,null,'mEq/L',null),
+('lacticAcidSerum',6,19,null,null,'mg/dL',null),
+('lactoseToleranceTestGI',15,null,null,null,'Increase in plasma glucose mg/dL',null),
+('leadBlood',15,40,null,null,'micro g/dL',null),
+('leadUrine',null,79.999,null,null,'micro g/24hr',null),
+('leukocyteCount',4000,11000,null,3200,'/micro L','CBC'),
+('leukocyteCountSegmentedNeutrophils',50,70,50,60,'%','CBC'),
+('leukocyteCountBandForms',0,5,null,null,'%',null),
+('leukocyteCountLymphocytes',30,45,30,35,'%','CBC'),
+('leukocyteCountMonocytes',0,6,null,7,'%','CBC'),
+('leukocyteCountBasophils',0,1,null,1,'%','CBC'),
+('leukocyteCountEosinophils',0,3,null,3,'%','CBC'),
+('monocytes',null,null,null,400,'/micro L','CBC'),
+('lipaseSerum',10,140,null,null,'U/L',null),
+('lipoproteinaSerum',null,29.999,null,null,'mg/dL',null),
+('lithiumPlasmaTherapeutic',0.6,1.2,null,null,'mEq/L',null),
+('lithiumPlasmaToxicLevel',null,1.999,null,null,'mEq/L',null),
+('luteinizinghormoneSerumFemaleFollicularluteal',1,12,null,null,'mIU/mL',null),
+('luteinizinghormoneSerumFemaleMidcyclePeak',9,80,null,null,'mIU/mL',null),
+('luteinizinghormoneSerumFemalePostmenopausal',30.001,null,null,null,'mIU/mL',null),
+('luteinizinghormoneSerumMaleAdult',2,9,null,null,'mIU/mL',null),
+('luteinizinghormoneSerumChildrenTannerStages123',null,8.999,null,null,'mIU/mL',null),
+('luteinizinghormoneSerumChildrenTannerStages45',1,15,null,null,'mIU/mL',null),
+('lymphocytes',null,null,null,2000,'/micro L',null),
+('lymphocyteSubsetsCD3',900,3245,null,null,'/micro L',null),
+('lymphocyteSubsetsCD4',530,1570,null,null,'/micro L',null),
+('lymphocyteSubsetsCD8',430,1060,null,null,'/micro L',null),
+('lymphocyteSubsetsC19',208,590,null,null,'/micro L',null),
+('lymphocyteSubsetsC56',40,500,null,null,'/micro L',null),
+('magnesiumSerum',1.6,2.6,2,2.3,'mEq/L','CMP'),
+('magnesiumUrine',14,290,null,null,'mg/24hr',null),
+('meanCorpuscularHemoglobin',28,32,28,32,'pg','CBC'),
+('meanCorpuscularHemoglobinConcentration',33,36,33,35,'g/dL','CBC'),
+('meanCorpuscularVolume',80,98,84,90,'fL','CBC'),
+('meanPlateletVolume',7,9,null,null,'fL',null),
+('metanephrinesFractionatedPlasmaMetanephrine',null,0.4999,null,null,'nmol/L',null),
+('metanephrinesFractionatedPlasmaMetanephrineNormetanephrine',null,0.8999,null,null,'nmol/L',null),
+('metanephrinesFractionated24hourUrineMetanephrine',null,399.999,null,null,'micro g/24hr',null),
+('metanephrinesFractionated24hourUrineNormetanephrine',null,899.999,null,null,'micro g/24hr',null),
+('myoglobinSerum',null,99.999,null,null,'micro g/L',null),
+('norepinephrinePlasmaSupine',700,750,null,null,'pg/mL',null),
+('norepinephrinePlasmaStanding',200,1700,null,null,'pg/mL',null),
+('norepinephrineUrine',0,100,null,null,'micro g/24hr',null),
+('normetanephrineFractionatedPlasma',null,0.8999,null,null,'nmol/L',null),
+('normetanephrineFractionatedHourUrine',null,899.999,null,null,'micro g/24hr',null),
+('nTelopeptideUrineFemale',11,48,null,null,'nmol BCE/mmol creatine',null),
+('nTelopeptideUrineMale',7,68,null,null,'nmol BCE/mmol creatine',null),
+('nTerminalproBtypeNatriureticPeptideNTproBNP',null,300,null,null,'pg/mL',null),
+('osmolalitySerum',275,295,null,null,'mOsm/kg H2O',null),
+('osmolalityUrine',38,1400,null,null,'mOsm/kg H2O',null),
+('osmoticFragilityOfErythrocytes',null,null,null,null,null,null),
+('osteocalcinSerumFemale',7.2,27.9,null,null,'ng/mL',null),
+('osteocalcinSerumMale',11.3,35.4,null,null,'ng/mL',null),
+('oxalateUrine',null,39.999,null,null,'mg/24hr',null),
+('oxygenConsumption',225,275,null,null,'mL/min',null),
+('oxygenSaturationArterialBlood',95,null,null,null,'%',null),
+('parathyroidHormoneSerumCTerminal',150,350,null,null,'pg/mL',null),
+('parathyroidHormoneSerumIntact',10,65,null,null,'pg/mL',null),
+('parathyroidHormoneSerumIntactDialysisPatientsOnly',130,585,null,null,'pg/mL',null),
+('parathyroidHormonerelatedProteinSerum',null,1.499,null,null,'pmol/L',null),
+('partialThromboplastinTimeActivated',25,35,null,null,'seconds',null),
+('phUrine',4.5,8,null,null,null,null),
+('phenolsulfonphthaleinUrine15Minutes',25,null,null,null,'%',null),
+('phenolsulfonphthaleinUrine30Minutes',40,null,null,null,'%',null),
+('phenolsulfonphthaleinUrine120Minutes',60,null,null,null,'%',null),
+('phenytoinSerum',10,20,null,null,'micro g/mL',null),
+('phosphataseAcidSerumTotal',0.5,2,null,null,'(Bodansky) units/mL',null),
+('phosphataseAcidSerumProstaticFraction',0.1,0.4,null,null,'unit/mL',null),
+('phosphataseAlkalineSerum',30,120,40,80,'U/L','CMP'),
+('phospholipidsSerumTotal',200,300,null,null,'mg/dL',null),
+('phosphorusUrine',500,1200,null,null,'mg/24hr',null),
+('collagenepinephrineClosureTime',60,143,null,null,'seconds',null),
+('collagenadpClosureTime',58,123,null,null,'seconds',null),
+('plateletSurvivalRateCr',9,11,null,null,'days',null),
+('potassiumSerum',3.5,5,null,null,'mEq/L',null),
+('potassiumUrineSpot',null,null,null,null,'mEq/24hr',null),
+('potassiumUrine24hourMeasurement',null,null,null,null,'mEq/24hr',null),
+('prealbuminSerum',16,30,null,null,'mg/dL',null),
+('pregnanetriolUrine',0.2,3.5,null,null,'mg/24hr',null),
+('pressureOpeningInitialCSF',70,180,null,null,'mm CSF',null),
+('procalcitoninSerum',null,0.1,null,null,'ng/mL',null),
+('progesteroneSerumFemaleFollicular',0.02,0.9,null,null,'ng/mL',null),
+('progesteroneSerumFemaleLuteal',2,30,null,null,'ng/mL',null),
+('progesteroneSerumMaleAdult',0.12,0.3,null,null,'ng/mL',null),
+('proinsulinSerum',3,20,null,null,'pmol/L',null),
+('prolactinSerum',null,19.999,null,null,'ng/mL',null),
+('prostatespecificAntigenSerum',null,null,null,null,'ng/mL',null),
+('proteinCActivityPlasma',65,150,null,null,'%',null),
+('proteinCAntigenPlasma',70,140,null,null,'%',null),
+('proteinCatabolicRateUrine',1,1.2,null,null,'g/kg/24hr',null),
+('proteinSActivityPlasma',57,131,null,null,'%',null),
+('proteinSAntigenPlasmaTotal',60,140,null,null,'%',null),
+('proteinSAntigenPlasmaFree',60,130,null,null,'%',null),
+('proteinUrineSpot',null,null,null,null,null,null),
+('proteinUrine24hourMeasurement',null,99.999,null,null,'mg/24hr',null),
+('proteinsCSFTotal',15,45,null,null,'mg/dL',null),
+('proteinsSerumTotal',5.5,9,6.5,8,'g/dL','CMP'),
+('proteinsSerumAlbumin',3.5,5.5,4.5,5,'g/dL','CMP'),
+('proteinsSerumGlobulin',2,3.5,1.9,3,'g/dL','CMP'),
+('proteinsSerumAlpha1',0.2,0.4,null,null,'g/dL',null),
+('proteinsSerumAlpha2',0.5,0.9,null,null,'g/dL',null),
+('proteinsSerumBeta',0.6,1.1,null,null,'g/dL',null),
+('proteinsSerumGamma',0.7,1.7,null,null,'g/dL',null),
+('proteintocreatinineRatioUrine',null,0.1999,null,null,'mg/mg',null),
+('prothrombinTimePlasma',11,13,null,null,'seconds',null),
+('pyruvicAcidBlood',0.08,0.16,null,null,'mmol/L',null),
+('quinidineSerum',2,5,null,null,'micro g/mL',null),
+('redCellDistributionWidth',9,14.5,0,13,'%','CBC'),
+('redCellMassFemale',22.7,27.9,null,null,'mL/kg',null),
+('redCellMassMale',24.9,32.5,null,null,'mL/kg',null),
+('peripheralPlasmaNormalDietSupine',0.3,2.5,null,null,'ng/mL/hr',null),
+('peripheralPlasmaNormalDietUpright',0.2,3.6,null,null,'ng/mL/hr',null),
+('peripheralPlasmaLowSodiumDietSupine',0.9,4.5,null,null,'ng/mL/hr',null),
+('peripheralPlasmaLowSodiumDietUpright',4.1,9.1,null,null,'ng/mL/hr',null),
+('diureticsLowSodiumDiet',6.3,13.7,null,null,'ng/mL/hr',null),
+('renalVeinConcentration',null,1.499,null,null,null,null),
+('reptilaseTime',10,12,null,null,'seconds',null),
+('reticulocyteCount',0.5,1.5,0.6,2.6,'% of red cells',null),
+('reticulocyteCountAbsolute',25000,100000,null,null,'/micro L',null),
+('rheumatoidFactorNephelometry',null,23.999,null,null,'IUmL',null),
+('rheumatoidFactorLatexTestFor',80,null,null,null,null,null),
+('ristocetinCofactorActivityOfPlasma',50,150,null,null,'%',null),
+('russellViperVenomTimeDilute',33,44,null,null,'seconds',null),
+('salicylatePlasma',20,30,null,null,'mg/dL',null),
+('sexHormonebindingGlobulinFemale',18,144,null,null,'nmol/L',null),
+('sexHormonebindingGlobulinMale',10,57,null,null,'nmol/L',null),
+('sodiumUrineSpot',0,1.00E+12,null,null,'mEq/L',null),
+('sodiumUrine24hourMeasurement',0,1.00E+12,null,null,'mEq/24hr',null),
+('specificGravityUrine',1.002,1.03,null,null,null,null),
+('spermDensity',15,150,null,null,'million/mL',null),
+('sweatTestForSodiumAndChloride',null,59.999,null,null,'mEq/L',null),
+('tResinUptake',25,35,null,null,'%',null),
+('tlymphocyteCountCD4',530,1570,null,null,'/micro L',null),
+('tacrolimusWholeBloodTrough',5,15,null,null,'ng/mL',null),
+('testosteroneSerumFemale',18,54,null,null,'ng/dL',null),
+('testosteroneSerumMale',291,1100,null,null,'ng/dL',null),
+('testosteroneBioavailableSerumFemale',0.5,8.5,null,null,'ng/dL',null),
+('testosteroneFreeSerum',70,300,null,null,'pg/mL',null),
+('theophyllineSerum',8,20,null,null,'micro g/mL',null),
+('thrombinTime',17,23,null,null,'seconds',null),
+('thyroidFunctionStudiesT3ResinUptake',25,35,null,null,'%',null),
+('thyroidFunctionStudiesThyroglobulinSerum',null,19.999,null,null,'ng/mL',null),
+('thyroidFunctionStudiesThyroidalIodintUptake',5,30,null,null,'%',null),
+('thyroidFunctionStudiesThyroidStimulatingHormoneSerum',0.5,4,null,null,'micro U/mL',null),
+('thyroidFunctionStudiesThyroidStimulatingImmunoglobulin',null,129.999,null,null,'%',null),
+('thyroidFunctionStudiesThyroxineBindingGlobulinSerum',12,27,null,null,'micro g/mL',null),
+('thyroidFunctionStudiesThyroxineIndexFree',5,12,null,null,null,null),
+('thyroidFunctionStudiesThyroxineSerumTotal',5,12,null,null,'micro g/dL',null),
+('thyroidFunctionStudiesThyroxineSerumFree',0.8,1.8,null,null,'ng/dL',null),
+('thyroidFunctionStudiesTriiodothyronineSerumTotal',80,180,null,null,'ng/dL',null),
+('thyroidFunctionStudiesTriiodothyronineSerumReverse',20,40,null,null,'ng/dL',null),
+('thyroidFunctionStudiesTriiodothyronineSerumFree',2.3,4.2,null,null,'pg/mL',null),
+('tissueTransglutaminaseAntibodyIgA',null,19.999,null,null,'AU',null),
+('tissueTransglutaminaseAntibodyIgG',null,19.999,null,null,'AU',null),
+('tissueTransglutaminaseAntibodyIgAbyE',null,3.999,null,null,'U/mL',null),
+('tissueTransglutaminaseAntibodyIgGbyE',null,5.999,null,null,'U/mL',null),
+('totalProteinsCSF',15,45,null,null,'mg/dL',null),
+('transaminaseSerumGlutamicOxaloacetic',10,40,null,null,'U/L',null),
+('transaminaseSerumGlutamicPyruvic',10,40,null,null,'U/L',null),
+('transferrinSaturation',20,50,24,35,'%',null),
+('transferrinSerum',200,400,null,null,'mg/dL',null),
+('triglyceridesSerumFasting',null,149.999,50,90,'mg/dL','Lipid'),
+('troponinICardiacSerum',null,0.04,null,null,'ng/mL',null),
+('troponinTCardiacSerum',null,0.01,null,null,'ng/mL',null),
+('tryptaseSerum',null,11.499,null,null,'ng/mL',null),
+('ureaClearanceUrineStandard',40,60,null,null,'mL/min',null),
+('ureaClearanceUrineMaximal',60,100,null,null,'mL/min',null),
+('ureaNitrogenBlood',8,20,12,19,'mg/dL','CMP'),
+('ureaNitrogenUrine',12,20,null,null,'g/24hr',null),
+('uricAcidSerumMale',3,7,3.7,5.5,'mg/dL','CMP'),
+('uricAcidSerumFemale',3,7,3.2,4.4,'mg/dL','CMP'),
+('uricAcidUrine',250,750,null,null,'mg/24hr',null),
+('uroporphyrinUrine',10,30,null,null,'micro g/24hr',null),
+('vanillylmandelicAcidUrine',null,8.999,null,null,'mg/24hr',null),
+('venousOxygenContentMixed',14,16,null,null,'mL/dL',null),
+('venousStudiesMixedBloodpH',7.32,7.41,null,null,null,null),
+('venousStudiesMixedBloodPco2',52,53,null,null,'mm Hg',null),
+('venousStudiesMixedBloodPo2',35,42,null,null,'mm Hg',null),
+('venousStudiesMixedBloodBicarbonate',24,28,null,null,'mEq/L',null),
+('venousStudiesMixedBloodBicarbonateOxygenSaturationSvO',65,75,null,null,'%',null),
+('viscositySerum',1.4,1.8,null,null,'cp',null),
+('vitaminASerumAdult',32.5,78,null,null,'micro g/dL',null),
+('vitaminASerumPediatricAge1to2YrRetinol',20,43,null,null,'micro g/dL',null),
+('vitaminB12Serum',200,800,null,null,'pg/mL',null),
+('vitaminESerumAdult',5.5,17,null,null,'mg/L',null),
+('vitaminESerumPediatricAge1to2YrAlphatocopherol',2.9,16.6,null,null,'mg/L',null),
+('volumeBloodPlasmaFemale',43,null,null,null,'mL/kg body weight',null),
+('volumeBloodPlasmaMale',44,null,null,null,'mL/kg body weight',null),
+('volumeBloodRedCellMale',25,35,null,null,'mL/kg body weight',null),
+('volumeBloodRedCellFemale',20,30,null,null,'mL/kg body weight',null),
+('vonWillebrandFactorAntigenPlasma',50,150,null,null,'%',null),
+('zincSerum',75,140,null,null,'micro g/dL',null),
+('t3ResinUptake',null,null,null,null,null,null),
+('thyroglobulin',null,null,null,null,null,null),
+('thyroidialIodineUptake',null,null,null,null,null,null),
+('tsh',null,null,null,null,null,null),
+('tsi',null,null,null,null,null,null),
+('thyroxineBindingGlobulin',null,null,null,null,null,null),
+('thyroxineIndex',null,null,null,null,null,null),
+('t4SerumTotal',null,null,null,null,null,null),
+('t4SerumFree',null,null,null,null,null,null),
+('t3SerumTotal',null,null,null,null,null,null),
+('rbcRccFemale',null,null,4.3,4.8,null,'CBC'),
+('rbcRccMale',null,null,4.8,5.5,null,'CBC'),
+('wbcWcc',null,null,3500,6000,'/micro L','CBC'),
+('eosinophils',null,null,null,150,'/micro L','CBC'),
+('platelets',150000,450000,225000,275000,'/micro L','CBC'),
+('glycoMark',null,null,15,30,'micro g/mL',null),
+('sodiumSerum',136,145,139,142,'mmol/L','CMP'),
+('potassium',null,null,4,4.4,'mmol/L',null),
+('carbonDioxide',null,null,25,28,'mmol/L',null),
+('chloride',null,null,null,null,null,null),
+('magnesium',null,null,2,2.3,'mg/dL',null),
+('phosphorusSerumFemale',3.5,5,3,4,'mg/dL',null),
+('phosphorusSerumMale',3.5,5,3,3.5,'mg/dL',null),
+('totalProtein',null,null,6.5,8,'g/dL',null),
+('gammaGlutamylTransferaseMale',null,null,12,24,'U/L',null),
+('gammaGlutamylTransferaseFemale',null,null,9,22,'U/L',null);

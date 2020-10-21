@@ -545,7 +545,7 @@ test_fitness_questionnaire = {
     "Finances",
     "Social Obligations"
   ],
-  "trainer_expectation": ["Expertise"],
+  "trainer_expectations": ["Expertise"],
   "current_fitness_level": 6,
   "lifestyle_goals": [
     "Increased Energy"
