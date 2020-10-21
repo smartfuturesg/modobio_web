@@ -39,13 +39,10 @@ bp = Blueprint('api', __name__)
 api = Api(bp, authorizations=authorizations, security='apikey')
 
 from odyssey.api import (
-    clients,
     errors,
+    clients,
     pt,
-    remote_clients,
-    staff,
     tokens,
-    trainer,
     wearables,
     version,
     registeredfacilities

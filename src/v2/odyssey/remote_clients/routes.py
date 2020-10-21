@@ -27,6 +27,9 @@ from odyssey.utils.misc import check_remote_client_portal_validity
 from odyssey.doctor.schemas import (
     MedicalHistorySchema
 )
+from odyssey.trainer.schemas import (
+    FitnessQuestionnaireSchema
+)
 from odyssey.utils.schemas import (
     ClientInfoSchema,
     ClientConsentSchema,
@@ -35,10 +38,9 @@ from odyssey.utils.schemas import (
     ClientIndividualContractSchema,
     ClientSubscriptionContractSchema,
     ClientReleaseSchema,
-    FitnessQuestionnaireSchema,
-    PTHistorySchema,
-    SignedDocumentsSchema
-) 
+    SignedDocumentsSchema,
+    PTHistorySchema
+)
 
 
 ns = api.namespace('remoteclient', description='Operations related to clients')

@@ -12,8 +12,8 @@ from odyssey.api import api
 from odyssey.api.auth import token_auth, basic_auth
 from odyssey.api.errors import UnauthorizedUser, StaffEmailInUse, StaffNotFound
 from odyssey.utils.email import send_email_password_reset
-from odyssey.utils.schemas import (
-    StaffPasswordRecoveryContactSchema, 
+from odyssey.staff.schemas import (
+    StaffPasswordRecoveryContactSchema,
     StaffPasswordResetSchema,
     StaffPasswordUpdateSchema,
     StaffSchema, 

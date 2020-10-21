@@ -62,8 +62,18 @@ def create_app():
     app.register_blueprint(bp)
     api.version = app.config['VERSION']
 
+    #Blueprint import and register
+    from odyssey.remote_clients import r_client_bp
+    app.register_blueprint(r_client_bp)
+
     from odyssey.doctor import doctor_bp
     app.register_blueprint(doctor_bp)
+
+    from odyssey.staff import staff_bp
+    app.register_blueprint(staff_bp)
+
+    from odyssey.trainer import trainer_bp
+    app.register_blueprint(trainer_bp)
 
     from odyssey.api.errors import register_handlers
     register_handlers(app)

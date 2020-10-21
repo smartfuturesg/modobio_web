@@ -21,8 +21,7 @@ from odyssey.models.trainer import (
     StrengthAssessment 
 )
 from odyssey.utils.misc import check_client_existence
-from odyssey.utils.schemas import (
-    ClientInfoSchema,
+from odyssey.trainer.schemas import (
     FitnessQuestionnaireSchema,
     HeartAssessmentSchema,
     LungAssessmentSchema,
@@ -32,6 +31,10 @@ from odyssey.utils.schemas import (
     PowerAssessmentSchema, 
     StrenghtAssessmentSchema
 )
+from odyssey.utils.schemas import (
+    ClientInfoSchema,
+)
+
 ns = api.namespace('trainer', description='Operations related to the trainer')
 
 @ns.route('/assessment/power/<int:clientid>/')
