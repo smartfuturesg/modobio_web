@@ -162,7 +162,7 @@ class MedBloodTest(Resource):
         client_bt = MedicalBloodTestSchema().load(data)
         db.session.add(client_bt)
         db.session.flush()
-
+        
         #insert results into the result table
         for result in results:
             check_blood_test_result_type_existence(result['result_name'])

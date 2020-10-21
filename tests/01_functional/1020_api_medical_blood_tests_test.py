@@ -62,3 +62,21 @@ def test_get_blood_test_results(test_client, init_database):
                                 content_type='application/json')
                                 
     assert response.status_code == 200
+
+def test_get_blood_test_result_types(test_client, init_database):
+    """
+    GIVEN a api end point for retrieving medical blood tests result types
+    WHEN the  '/bloodtest/result-types/' resource  is requested (GET)
+    THEN check the response is valid
+    """
+    # get staff authorization to view client data
+    staff = Staff().query.first()
+    token = staff.get_token()
+    headers = {'Authorization': f'Bearer {token}'}
+
+    # send get request for client info on clientid = 1 
+    response = test_client.get('doctor/bloodtest/result-types/',
+                                headers=headers, 
+                                content_type='application/json')
+                                
+    assert response.status_code == 200

@@ -561,8 +561,8 @@ test_fitness_questionnaire = {
 test_blood_tests = {
     "date": "2020-09-10",
     "results": [
-        {"result_name": "cholesterolTotal","result_value": 150.0},
-        {"result_name": "cholesterolLdl", "result_value": 20.0}
+        {"result_name": "cholesterolSerumTotal","result_value": 150.0},
+        {"result_name": "cholesterolSerumLDL", "result_value": 20.0}
     ],
     "panel_type": "Lipids",
     "notes": "test2"
