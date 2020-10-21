@@ -59,8 +59,10 @@ def create_app():
     db.Model.update = _update
 
     from odyssey.api import bp, api
-    app.register_blueprint(bp)
     api.version = app.config['VERSION']
+    if not app.config['SWAGGER_DOC']:
+        api._doc = False
+    app.register_blueprint(bp)
 
     from odyssey.api.errors import register_handlers
     register_handlers(app)
