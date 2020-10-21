@@ -8,12 +8,13 @@ from requests_oauthlib import OAuth2Session
 from odyssey.api import api
 from odyssey.api.auth import token_auth
 from odyssey.api.errors import ContentNotFound, StaffEmailInUse, ClientEmailInUse
+from odyssey.utils.schemas import UserSchema, NewUserSchema
 
 from odyssey import db
 
-ns = api.namespace('users', description='Endpoints for user accounts.')
+ns = api.namespace('user', description='Endpoints for user accounts.')
 
-@ns.route('/')
+@ns.route('/<int:user_id>/')
 class User(Resource):
     
     @token_auth.login_required
@@ -24,7 +25,7 @@ class User(Resource):
         return User.query.filter_by(user_id=user_id).one_or_none()
 
 
-@ns.route('/<int:user_id>/')
+@ns.route('/')
 class NewUser(Resource):
     @token_auth.login_required
     @accepts(schema=NewUserSchema, api=ns)

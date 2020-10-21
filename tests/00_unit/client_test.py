@@ -8,5 +8,5 @@ def test_new_client(test_client, init_database):
     THEN check the model attributes and functionality
     """
     new_client = User.query.filter_by(is_client = True).first()
-    assert new_client.email == 'test_this_client@gmail.com'
+    assert new_client.email == 'test_remote_registration@gmail.com'
     assert new_client.user_id == 1

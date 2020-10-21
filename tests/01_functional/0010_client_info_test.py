@@ -19,6 +19,7 @@ from tests.data import (
     test_client_consult_data,
     test_client_subscription_data,
     test_client_individual_data,
+    test_new_user_client
 )
 
 def test_get_client_info(test_client, init_database):
@@ -89,15 +90,26 @@ def test_creating_new_client(test_client, init_database):
     token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    # send get request for client info on user_id = 1 
-    response = test_client.post('/client/',
+    # send post request for a new client user account
+    response = test_client.post('/user/',
                                 headers=headers, 
-                                data=dumps(test_new_client_info), 
+                                data=dumps(test_new_user_client['userinfo']), 
                                 content_type='application/json')
-    client = ClientInfo.query.filter_by(email=test_new_client_info['email']).first()
+    user = User.query.filter_by(email=test_new_user_client['userinfo']['email']).first()
+    assert response.status_code == 201
+    assert user.email == 'test_this_client_two@gmail.com'
+
+    #send put request to fill out ClientInfo table for new user
+    test_new_user_client['clientinfo']['user_id'] = user.user_id
+    response = test_client.put('/client/',
+                                headers=headers,
+                                data=dumps(test_new_user_client["clientinfo"]),
+                                content_type='application/json')
+    client = ClientInfo.query.filter_by(user_id=user.user_id).first()
+
     # some simple checks for validity
     assert response.status_code == 201
-    assert client.email == 'test_this_client_two@gmail.com'
+    assert client.dob == '1991-10-14'
 
 def test_removing_client(test_client, init_database):
     """

@@ -18,7 +18,7 @@ phx_tz = pytz.timezone('America/Phoenix')
 
 
 
-@whooshee.register_model('firstname','lastname','dob', 'record_locator_id')
+@whooshee.register_model('dob', 'record_locator_id')
 class ClientInfo(db.Model):
     """ Client information table
 
@@ -208,14 +208,15 @@ class ClientInfo(db.Model):
 
     def client_info_search_dict(self):
         """returns just the searchable client info (name, email, number)"""
+        user = User.query.filter_by(user_id=self.user_id).one_or_none()
         data = {
             'user_id': self.user_id,
             'record_locator_id': self.record_locator_id,
-            'firstname': self.firstname,
-            'lastname': self.lastname,
+            'firstname': user.firstname,
+            'lastname': user.lastname,
             'dob': self.dob,
-            #'phone': self.phone,
-            #'email': self.email
+            'phone': user.phone_number,
+            'email': user.email
         }
         return data
 

@@ -10,6 +10,7 @@ from odyssey.api.auth import token_auth
 from odyssey.api.clients import ns as client_ns
 from odyssey.api.errors import UserNotFound, ClientNotFound
 
+from odyssey.models.user import UserLogin
 
 ns = api.namespace('tokens', description='Operations related to token authorization')
 
@@ -21,11 +22,11 @@ class Token(Resource):
     def post(self):
         """generates a token for the 'current_user' immediately after password authentication"""
         user = basic_auth.current_user()
+        user_login = UserLogin.query.filter_by(user_id=user.user_id).one_or_none()
         return {'email': user.email, 
                 'firstname': user.firstname, 
                 'lastname': user.lastname, 
-                'token': user.get_token(),
-                'access_roles': user.access_roles}, 201
+                'token': user_login.get_token()}, 201
 
     @ns.doc(security='password')
     @token_auth.login_required

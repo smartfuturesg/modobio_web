@@ -170,10 +170,10 @@ class UserLogin(db.Model):
     """
 
     def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
+        self.password = generate_password_hash(password)
 
     def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
+        return check_password_hash(self.password, password)
 
     def get_token(self,expires_in=86400):
         now = datetime.utcnow()
@@ -198,8 +198,9 @@ class UserLogin(db.Model):
     @staticmethod
     def check_token(token):
         """check if token is valid. returns user if so"""
-        user = User.query.filter_by(token=token).first()
+        user_login = UserLogin.query.filter_by(token=token).first()
 
-        if user is None or user.token_expiration < datetime.utcnow():
+        if user_login is None or user_login.token_expiration < datetime.utcnow():
             return None
+        user = User.query.filter_by(user_id=user_login.user_id).one_or_none()
         return user

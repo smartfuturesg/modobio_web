@@ -49,5 +49,6 @@ from odyssey.api import (
     trainer,
     wearables,
     version,
-    registered_facilities
+    registered_facilities,
+    users
 )

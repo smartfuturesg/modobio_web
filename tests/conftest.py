@@ -79,10 +79,11 @@ def init_database():
 
     # Insert test client data
     client_1 = User(**test_new_client_creation)
+    db.session.add(client_1)
+    db.session.flush()
     client_1_login = UserLogin(**{'user_id': client_1.user_id})
     test_new_client_info['user_id'] = client_1.user_id
     client_1_info = ClientInfo(**test_new_client_info)
-    db.session.add(client_1)
     db.session.add(client_1_login)
     db.session.add(client_1_info)
     db.session.flush()
@@ -97,9 +98,10 @@ def init_database():
     
     # initialize a test staff member
     staff_1 = User(**test_staff_member)
+    db.session.add(staff_1)
+    db.session.flush()
     staff_1_login = UserLogin(**{"user_id": staff_1.user_id})
     staff_1_login.set_password('password')
-    db.session.add(staff_1)
     db.session.add(staff_1_login)
 
     #initialize Medical institutes table
