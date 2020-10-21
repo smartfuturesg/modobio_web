@@ -100,12 +100,18 @@ class MedImaging(Resource):
         check_client_existence(clientid)
         bucket_name = current_app.config['S3_BUCKET_NAME']
 
+        mi_schema = MedicalImagingSchema()
         #Verify at least 1 file with key-name:image is selected for upload
+        
         if 'image' not in request.files:
-            raise InputError(400, 'Empty input file')
+            mi_data = mi_schema.load(request.form)
+            mi_data.clientid = clientid
+            db.session.add(mi_data)
+            db.session.commit()
+            return 
+            # raise InputError(400, 'Empty input file')
 
         files = request.files #ImmutableMultiDict of key : FileStorage object
-        mi_schema = MedicalImagingSchema()
         MAX_bytes = 524288000 #500 mb
         data_list = []
         hex_token = secrets.token_hex(4)
@@ -162,7 +168,7 @@ class MedBloodTest(Resource):
         client_bt = MedicalBloodTestSchema().load(data)
         db.session.add(client_bt)
         db.session.flush()
-        
+
         #insert results into the result table
         for result in results:
             check_blood_test_result_type_existence(result['result_name'])
