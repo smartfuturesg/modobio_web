@@ -689,7 +689,7 @@ class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
             missing=[None]) 
     current_fitness_level = fields.Integer(description="current fitness level 1-10", validate=validate.Range(min=1, max=10), missing=None)
     goal_fitness_level = fields.Integer(description="goal fitness level 1-10", validate=validate.Range(min=1, max=10), missing=None)
-    trainer_expectation = fields.List(fields.String,
+    trainer_expectations = fields.List(fields.String,
         description=f"Client's expectation for their trainer. Choice of: {trainer_goals_list}", 
         missing=[None])
     sleep_hours = fields.String(description=f"nightly hours of sleep bucketized by the following options: {sleep_hours_options_list}", missing=None)
@@ -736,8 +736,8 @@ class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
         if len(value) > 3:
             ValidationError("limit list length to 3 choices")
     
-    @validates('trainer_expectation')
-    def validate_trainer_expectations(self, value):
+    @validates('trainer_expectations')
+    def validate_trainer_expectationss(self, value):
         for item in value:
             if item not in self.trainer_goals_list and item != None:
                 raise ValidationError(f"{item} not a valid option. must be in {self.trainer_goals_list}")

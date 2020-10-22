@@ -23,9 +23,19 @@ from odyssey.api.errors import (
     UserNotFound, 
     IllegalSetting, 
     ContentNotFound, 
-    InputError
+    ExamNotFound, 
+    InputError,
+    InsufficientInputs,
+    MethodNotAllowed,
+    UnknownError
+)
+from odyssey.utils.misc import (
+    check_client_existence, 
+    check_blood_test_existence, 
+    check_blood_test_result_type_existence
 )
 from .schemas import (
+    AllMedicalBloodTestSchema,
     ClientExternalMREntrySchema, 
     ClientExternalMRSchema, 
     MedicalHistorySchema, 
@@ -38,7 +48,6 @@ from .schemas import (
     MedicalBloodTestResultTypesSchema,
     MedicalImagingSchema
 )
-from odyssey.utils.misc import check_client_existence, check_blood_test_existence, check_blood_test_result_type_existence
 
 
 ns = api.namespace('doctor', description='Operations related to doctor')
@@ -96,12 +105,17 @@ class MedImaging(Resource):
         check_client_existence(clientid)
         bucket_name = current_app.config['S3_BUCKET_NAME']
 
+        mi_schema = MedicalImagingSchema()
         #Verify at least 1 file with key-name:image is selected for upload
+        
         if 'image' not in request.files:
-            raise InputError(400, 'Empty input file')
+            mi_data = mi_schema.load(request.form)
+            mi_data.clientid = clientid
+            db.session.add(mi_data)
+            db.session.commit()
+            return 
 
         files = request.files #ImmutableMultiDict of key : FileStorage object
-        mi_schema = MedicalImagingSchema()
         MAX_bytes = 524288000 #500 mb
         data_list = []
         hex_token = secrets.token_hex(4)
@@ -145,20 +159,16 @@ class MedImaging(Resource):
 @ns.doc(params={'clientid': 'Client ID number'})
 class MedBloodTest(Resource):
     @token_auth.login_required
-    @responds(schema=MedicalBloodTestSchema(many=True), api=ns)
-    def get(self, clientid):
-        check_client_existence(clientid)
-        blood_tests = MedicalBloodTests.query.filter_by(clientid=clientid).all()
-
-        if not blood_tests:
-            raise ContentNotFound()
-
-        return blood_tests
-
-    @token_auth.login_required
     @accepts(schema=MedicalBloodTestsInputSchema, api=ns)
     @responds(schema=MedicalBloodTestSchema, status_code=201, api=ns)
     def post(self, clientid):
+        """
+        Resource to submit a new blood test instance for the specified client.
+
+        Test submissions are given a testid which can be used to reference back
+        to the results related to this submisison. Each submission may have 
+        multiple results (e.g. in a panel)
+        """
         check_client_existence(clientid)
         data = request.get_json()
 
@@ -168,43 +178,158 @@ class MedBloodTest(Resource):
         data['clientid'] = clientid
         client_bt = MedicalBloodTestSchema().load(data)
         db.session.add(client_bt)
-        db.session.commit()
+        db.session.flush()
 
         #insert results into the result table
-        test = MedicalBloodTests.query.filter_by(testid=client_bt.testid).first()
         for result in results:
             check_blood_test_result_type_existence(result['result_name'])
             resultid = MedicalBloodTestResultTypes.query.filter_by(result_name=result['result_name']).first().resultid
-            result_data = {'testid': client_bt.testid, 'resultid': resultid, 'result_value': result['result_value']}
-            bt_result = MedicalBloodTestResultsSchema().load(result_data)
-            db.session.add(bt_result)
+            result_data = {'testid': client_bt.testid, 
+                           'resultid': resultid, 
+                           'result_value': result['result_value']}
+            db.session.add(MedicalBloodTestResultsSchema().load(result_data))
+        
         db.session.commit()
-        return test
+        return client_bt
+
+@ns.route('/bloodtest/all/<int:clientid>/')
+@ns.doc(params={'clientid': 'Client ID number'})
+class MedBloodTest(Resource):
+    @token_auth.login_required
+    @responds(schema=AllMedicalBloodTestSchema, api=ns)
+    def get(self, clientid):
+        """
+        This resource returns every instance of blood test submissions for the 
+        specified clientid
+
+        Test submissions relate overall submission data: testid, date, notes, panel_type
+        to the actual results. Each submission may have multiple results
+        where the results can be referenced by the testid provided in this request
+        """
+        check_client_existence(clientid)
+        blood_tests = MedicalBloodTests.query.filter_by(clientid=clientid).all()
+
+        if not blood_tests:
+            raise ContentNotFound()
+        payload = {}
+        payload['items'] = blood_tests
+        payload['total'] = len(blood_tests)
+        payload['clientid'] = clientid
+        return payload
+
 
 @ns.route('/bloodtest/results/<int:testid>/')
 @ns.doc(params={'testid': 'Test ID number'})
 class MedBloodTestResults(Resource):
+    """
+    Resource for working with a single blood test 
+    entry instance, testid.
+
+    Each test instance may have multiple test results. 
+    """
     @token_auth.login_required
-    @responds(schema=MedicalBloodTestResultsOutputSchema(many=True), api=ns)
+    @responds(schema=MedicalBloodTestResultsOutputSchema, api=ns)
     def get(self, testid):
+        """
+        Returns details of the test denoted by testid as well as 
+        the actual results submitted.
+        """
         #query for join of MedicalBloodTestResults and MedicalBloodTestResultTypes tables
         check_blood_test_existence(testid)
         results = MedicalBloodTestResults.query.filter_by(testid=testid).all()
-
+        results =  db.session.query(
+                MedicalBloodTests, MedicalBloodTestResults, MedicalBloodTestResultTypes
+                ).join(
+                    MedicalBloodTestResultTypes
+                ).join(MedicalBloodTests
+                ).filter(
+                    MedicalBloodTests.testid == MedicalBloodTestResults.testid
+                ).filter(
+                    MedicalBloodTests.testid==testid
+                ).all()
+        if len(results) == 0:
+            raise ContentNotFound()
         #replace resultid with result name for readability      
-        response = []
-        for result in results:
-            output = {'idx': result.idx,'testid': result.testid,'result_value': result.result_value}
-            output['result_type'] = MedicalBloodTestResultTypes.query.filter_by(resultid=result.resultid).first().result_name
-            response.append(output) 
-        return response
+        nested_results = {'testid': testid, 
+                          'date' : results[0][0].date,
+                          'notes' : results[0][0].notes,
+                          'panel_type' : results[0][0].panel_type,
+                          'results': []} 
+        
+        # loop through results in order to nest results in their respective test
+        # entry instances (testid)
+        for _, test_result, result_type in results:
+                res = {'result_name': result_type.result_name, 
+                        'result_value': test_result.result_value,
+                        'evaluation': test_result.evaluation}
+                nested_results['results'].append(res)
 
-@ns.route('/bloodtest/resulttypes/')
-class MedBloodTestResultTypes(Resource):
+        payload = {}
+        payload['items'] = [nested_results]
+        payload['tests'] = 1
+        payload['test_results'] = len( nested_results['results'])
+        payload['clientid'] = results[0][0].clientid
+        return payload
+
+@ns.route('/bloodtest/results/all/<int:clientid>/')
+@ns.doc(params={'clientid': 'Client ID number'})
+class AllMedBloodTestResults(Resource):
+    """
+    Endpoint for returning all blood test results from a client
+    """
     @token_auth.login_required
-    @responds(schema=MedicalBloodTestResultTypesSchema(many=True), api=ns)
+    @responds(schema=MedicalBloodTestResultsOutputSchema, api=ns)
+    def get(self, clientid):
+        # pull up all tests, test results, and the test type names for this client
+        results =  db.session.query(
+                        MedicalBloodTests, MedicalBloodTestResults, MedicalBloodTestResultTypes
+                        ).join(
+                            MedicalBloodTestResultTypes
+                        ).join(MedicalBloodTests
+                        ).filter(
+                            MedicalBloodTests.testid == MedicalBloodTestResults.testid
+                        ).filter(
+                            MedicalBloodTests.clientid==clientid
+                        ).all()
+
+        test_ids = set([x[0].testid for x in results])
+        nested_results = [{'testid': x, 'results': []} for x in test_ids ]
+        
+        # loop through results in order to nest results in their respective test
+        # entry instances (testid)
+        for test_info, test_result, result_type in results:
+            for test in nested_results:
+                # add rest result to appropriate test entry instance (testid)
+                if test_result.testid == test['testid']:
+                    res = {'result_name': result_type.result_name, 
+                           'result_value': test_result.result_value,
+                           'evaluation': test_result.evaluation}
+                    test['results'].append(res)
+                    # add test details if not present
+                    if not test.get('date', False):
+                        test['date'] = test_info.date
+                        test['notes'] = test_info.notes
+                        test['panel_type'] = test_info.panel_type
+
+        payload = {}
+        payload['items'] = nested_results
+        payload['tests'] = len(test_ids)
+        payload['test_results'] = len(results)
+        payload['clientid'] = clientid
+        return payload
+
+
+@ns.route('/bloodtest/result-types/')
+class MedBloodTestResultTypes(Resource):
+    """
+    Returns the types of tests currently documented in the DB
+    """
+    @token_auth.login_required
+    @responds(schema=MedicalBloodTestResultTypesSchema, api=ns)
     def get(self):
-        return MedicalBloodTestResultTypes.query.all()
+        bt_types = MedicalBloodTestResultTypes.query.all()
+        payload = {'items' : bt_types, 'total' : len(bt_types)}
+        return payload
 
 @ns.route('/medicalhistory/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
