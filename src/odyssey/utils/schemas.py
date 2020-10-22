@@ -824,7 +824,6 @@ class LungAssessmentSchema(ma.SQLAlchemySchema):
     clientid = fields.Integer(missing=0)
     timestamp = ma.auto_field()
     notes = ma.auto_field(missing=None)
-    # Put in weight validation?
     vital_weight = fields.Float(description="weight pulled from doctor physical data", dump_only=True, missing=None)
     bag_size = fields.Float(description="in liters", validate=validate.Range(min=0, max=12), missing=None)
     duration = fields.Integer(description="in seconds", validate=validate.Range(min=0, max=400), missing=None)
