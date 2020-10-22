@@ -8,16 +8,15 @@ from odyssey.constants import DB_SERVER_TIME
 from odyssey import db
 
 class MedicalImaging(db.Model):
-    """ Medical Imaging table
+    """ Medical Imaging table.
 
-    This table stores the medical imaging history of a client. 
-    As long as the clientID exists, we can add images to this table and search by clientID
+    A table to store information about uploaded medical images.
     """
     __tablename__ = 'MedicalImaging'
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
-    Index
+    Table index.
 
     :type: int, primary key, autoincrement
     """
@@ -38,56 +37,68 @@ class MedicalImaging(db.Model):
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid', ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    Client ID number.
 
     :type: int, foreign key to :attr:`ClientInfo.clientid`
     """
 
     image_date = db.Column(db.Date)
     """
-    Date image was taken
-    To be filled in by the doctor
+    Date when image was taken.
 
     :type: :class:`datetime.date`
     """
 
     image_type = db.Column(db.String(1024))
     """
-    Type of image, to be filled in by the doctor via a drop down menu
-    Possible options are: Ultrasound, CT scan, X-Ray, MRI, PET scan.
+    Image type.
+
+    Describes the imaging technique used to create the image. Options are:
+
+    - CT
+    - MRI
+    - PET
+    - Scopes
+    - Special imaging
+    - Ultrasound
+    - X-ray
 
     :type: str, max length 1024
     """
     
     image_read = db.Column(db.Text)
     """
-    Text representing the doctors diagnosis or notes of the image
+    Doctor's diagnosis or notes of the image.
 
     :type: str
     """
 
     image_origin_location = db.Column(db.Text)
     """
-    Name of and information about clinic where image was gathered.
-    eg. SimonMed imaging, Banner imaging, etc.
-    May include name, address and contact information of clinic.
+    Where was image created.
+
+    Name and address of clinic where image was gathered.
 
     :type: str
     """
     
     image_path = db.Column(db.Text)
     """
-    image S3 path
+    Path where image is stored.
+
+    In development mode, it is a path on the local filesystem. In production
+    it is a path in an AWS S3 bucket.
 
     :type: str
     """
 
     image_size = db.Column(db.Integer)
     """
-    Size of image in bytes
+    Size of image in bytes.
 
     :type: int
     """
+
 
 class MedicalHistory(db.Model):
     """ Medical history table
