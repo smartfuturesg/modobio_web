@@ -4,7 +4,7 @@ All tables in this module are prefixed with 'Medical'.
 """
 from datetime import datetime
 
-from odyssey.constants import DB_SERVER_TIME
+from odyssey.constants import DB_SERVER_TIME, BLOODTEST_EVAL
 from odyssey import db
 
 class MedicalImaging(db.Model):
@@ -557,6 +557,44 @@ class MedicalBloodTestResultTypes(db.Model):
     :type: string
     """
 
+    normal_min = db.Column(db.Float)
+    """
+    Minimum of normal range for blood test
+
+    :type: float
+    """
+    normal_max = db.Column(db.Float)
+    """
+    Maximum of normal range for blood test
+
+    :type: float
+    """
+    optimal_min = db.Column(db.Float)
+    """
+    Minimum of optimal range for blood test
+
+    :type: float
+    """
+    optimal_max = db.Column(db.Float)
+    """
+    Maximum of optimal range for blood test
+
+    :type: float
+    """
+
+    unit = db.Column(db.String)
+    """
+    Units of the blood test.
+
+    :type: string
+    """
+
+    panel = db.Column(db.String)
+    """
+    Which panel, if any, this test is part of.
+
+    :type: str
+    """
 class MedicalBloodTestResults(db.Model):
     """Holds the results of a blood test identified by a blood test id"""
 
@@ -603,3 +641,21 @@ class MedicalBloodTestResults(db.Model):
 
     :type: int
     """
+
+    evaluation = db.Column(db.String)
+    """
+    Evaluation of blood test result based on
+    reccomended ranges for normal and optimal results
+    possible values are: 'optimal','normal','abnormal'
+
+    :type: str
+    """
+
+@db.event.listens_for(MedicalBloodTestResults, "after_insert")
+def add_rest_result_eval(mapper, connection, target):
+    """
+    Listens for inserts into blood test result table.
+    Runs evaluation on the DB side and stores the eval result.
+    Evaluation is based of normal and optimal ranges of each blood test type
+    """
+    connection.execute(BLOODTEST_EVAL.format(target.idx, target.resultid, target.result_value))

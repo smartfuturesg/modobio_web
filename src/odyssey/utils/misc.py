@@ -41,7 +41,7 @@ def check_blood_test_result_type_existence(result_name):
     """Check that a supplied blood test result type is in the database"""
     result = MedicalBloodTestResultTypes.query.filter_by(result_name=result_name).one_or_none()
     if not result:
-        raise ResultTypeNotFound(resultName)
+        raise ResultTypeNotFound(result_name)
 
 def check_facility_existence(facility_id):
     facility = RegisteredFacilities.query.filter_by(facility_id=facility_id).one_or_none()
