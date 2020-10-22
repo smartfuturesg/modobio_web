@@ -35,9 +35,6 @@ SECRET_KEY = 'dev'
 # SQLAlchemy settings
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-# Enable/disable swagger documentation
-SWAGGER_DOC = True
-
 # Testing
 TESTING = False
 WTF_CSRF_ENABLED = True
