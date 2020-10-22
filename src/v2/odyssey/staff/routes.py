@@ -13,7 +13,7 @@ from odyssey.api.auth import token_auth, basic_auth
 from odyssey.api.errors import UnauthorizedUser, StaffEmailInUse, StaffNotFound
 from odyssey.utils.email import send_email_password_reset
 from odyssey.staff.schemas import (
-    StaffPasswordRecoveryContactSchema,
+    StaffPasswordRecoveryContactSchema, 
     StaffPasswordResetSchema,
     StaffPasswordUpdateSchema,
     StaffSchema, 
@@ -151,7 +151,6 @@ class PasswordResetEmail(Resource):
                                   'sid': staff.staffid}, 
                                   secret, 
                                   algorithm='HS256').decode("utf-8") 
-
         if current_app.env == "development":
             return jsonify({"token": encoded_token})
         else:

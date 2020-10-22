@@ -41,6 +41,7 @@ class RemoteRegistrationToken(Resource):
     """generate and delete portal user API access tokens
         first validates that the user's basic authentication passes, then checks
         the url to validate the authenticity of the end point (i.e. in database and not expired)"""
+    
     @ns.doc(security='password')
     @basic_auth_client.login_required
     def post(self):
@@ -49,7 +50,6 @@ class RemoteRegistrationToken(Resource):
         #validate registration portal
         if not RemoteRegistration().check_portal_id(tmp_registration):
             raise ClientNotFound(message="Resource does not exist")
-        
         user = basic_auth_client.current_user()
 
         return {'email': user.email, 'token': user.get_token()}, 201
