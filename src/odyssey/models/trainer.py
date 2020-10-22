@@ -1349,9 +1349,16 @@ class FitnessQuestionnaire(db.Model):
     :type: int
     """
 
-    trainer_expectation = db.Column(db.String, nullable=True, server_default="other")
+    # trainer_expectation = db.Column(db.String, nullable=True, server_default="other")
+    # """
+    # Indicates the expectations the client has for their fitness trainer. There may be only one choice. One of the choices is 'other'.
+
+    # :type: str, default = other
+    # """
+
+    trainer_expectations = db.Column(db.ARRAY(db.String), nullable=True, server_default="{'other'}")
     """
-    Indicates the expectations the client has for their fitness trainer. There may be only one choice. One of the choices is 'other'.
+    Indicates the expectations the client has for their fitness trainer. 
 
     :type: str, default = other
     """

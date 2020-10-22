@@ -381,3 +381,6 @@ database column expects a Python :attr:`True` or :attr:`False` value. Use
 DB_SERVER_TIME = text("clock_timestamp()")
 
 ALPHANUMERIC = "BCDFGHJKLMNPQRSTVWXYZ01234567890123456789"
+
+# Call blood test assessment stored function
+BLOODTEST_EVAL = "SELECT public.blood_test_eval({}, {}, {});"
