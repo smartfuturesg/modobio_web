@@ -52,6 +52,7 @@ import os
 import pathlib
 import sys
 
+from typing import Any
 from botocore.exceptions import NoCredentialsError
 
 from odyssey import defaults
@@ -167,6 +168,9 @@ class Config:
         self.SECRET_KEY = self.getvar('SECRET_KEY', '/modobio/odyssey/app_secret')
         self.SQLALCHEMY_TRACK_MODIFICATIONS = self.getvar('SQLALCHEMY_TRACK_MODIFICATIONS', None, default=False)
 
+        # No swagger in production
+        self.SWAGGER_DOC = flask_env != 'production'
+
         # Testing config
         if testing:
             self.TESTING = True
@@ -184,7 +188,7 @@ class Config:
         else:
             self.VERSION = 'unknown version'
 
-    def getvar(self, var, param, decrypt=False, default=''):
+    def getvar(self, var: str, param: str, decrypt: bool=False, default: Any='') -> Any:
         """ Get a configuration setting.
 
         Order of lookup:
@@ -206,11 +210,33 @@ class Config:
 
         Returns
         -------
-        str
-            Value of the parameter.
+        object
+            Value of the parameter, interpreted as None, True, False, int, or float if
+            possible, str otherwise.
         """
         env = os.getenv(var)
-        if env:
+
+        # getenv always returns a string. Try to interpret
+        # a few basic types: None, True/False, int, or float.
+        # Otherwise keep as string.
+        if env is not None:
+            if env.lower() == 'none':
+                return None
+            elif env.lower() == 'false':
+                return False
+            elif env.lower() == 'true':
+                return True
+
+            try:
+                return int(env)
+            except ValueError:
+                pass
+
+            try:
+                return float(env)
+            except ValueError:
+                pass
+
             return env
 
         if not self.LOCAL_CONFIG and param:
