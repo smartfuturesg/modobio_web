@@ -1056,7 +1056,7 @@ class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
             missing=[None]) 
     current_fitness_level = fields.Integer(description="current fitness level 1-10", validate=validate.Range(min=1, max=10), missing=None)
     goal_fitness_level = fields.Integer(description="goal fitness level 1-10", validate=validate.Range(min=1, max=10), missing=None)
-    trainer_expectation = fields.List(fields.String,
+    trainer_expectations = fields.List(fields.String,
         description=f"Client's expectation for their trainer. Choice of: {trainer_goals_list}", 
         missing=[None])
     sleep_hours = fields.String(description=f"nightly hours of sleep bucketized by the following options: {sleep_hours_options_list}", missing=None)
@@ -1103,8 +1103,8 @@ class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
         if len(value) > 3:
             ValidationError("limit list length to 3 choices")
     
-    @validates('trainer_expectation')
-    def validate_trainer_expectations(self, value):
+    @validates('trainer_expectations')
+    def validate_trainer_expectationss(self, value):
         for item in value:
             if item not in self.trainer_goals_list and item != None:
                 raise ValidationError(f"{item} not a valid option. must be in {self.trainer_goals_list}")
@@ -1131,8 +1131,8 @@ class MedicalImagingSchema(ma.SQLAlchemyAutoSchema):
     
 class MedicalBloodTestSchema(Schema):
     testid = fields.Integer()
-    clientid = fields.Integer()
-    date = fields.Date(required=True)
+    clientid = fields.Integer(load_only=True)
+    date = fields.Date(required=True, format="iso")
     panel_type = fields.String(required=False)
     notes = fields.String(required=False)
 
@@ -1140,22 +1140,49 @@ class MedicalBloodTestSchema(Schema):
     def make_object(self, data, **kwargs):
         return MedicalBloodTests(**data)
 
-class MedicalBloodTestResultsInputSchema(Schema):
+class AllMedicalBloodTestSchema(Schema):
+    """
+    For returning several blood test instance details 
+    No actual results are returned, just details on
+    the test entry (notes, date, panel_type)
+    """
+    items = fields.Nested(MedicalBloodTestSchema(many=True))
+    total = fields.Integer()
+    clientid = fields.Integer()
+
+class MedicalBloodTestResultsSchema(Schema):
     result_name = fields.String()
     result_value = fields.Float()
-
-class MedicalBloodTestResultsOutputSchema(Schema):
-    idx = fields.Integer()
-    testid = fields.Integer()
-    result_type = fields.String()
-    result_value = fields.Float()
+    evaluation = fields.String(dump_only=True)
 
 class MedicalBloodTestsInputSchema(Schema):
     clientid = fields.Integer()
     date = fields.Date()
     panel_type = fields.String()
     notes = fields.String()
-    results = fields.Nested(MedicalBloodTestResultsInputSchema, many=True)
+    results = fields.Nested(MedicalBloodTestResultsSchema, many=True)
+
+class BloodTestsByTestID(Schema):
+    """
+    Organizes blood test results into a nested results field
+    General information about the test entry like testid, date, notes, panel
+    are in the outer most part of this schema.
+    """
+    testid = fields.Integer()
+    results = fields.Nested(MedicalBloodTestResultsSchema(many=True))
+    notes = fields.String()
+    panel = fields.String()
+    date = fields.Date(format="iso")
+
+class MedicalBloodTestResultsOutputSchema(Schema):
+    """
+    Schema for outputting a nested json 
+    of blood test results. 
+    """
+    tests = fields.Integer(description="# of test entry sessions. All each test may have more than one test result")
+    test_results = fields.Integer(description="# of test results")
+    items = fields.Nested(BloodTestsByTestID(many=True), missing = [])
+    clientid = fields.Integer()
 
 class MedicalBloodTestResultsSchema(Schema):
     idx = fields.Integer()
@@ -1167,10 +1194,17 @@ class MedicalBloodTestResultsSchema(Schema):
     def make_object(self, data, **kwargs):
         return MedicalBloodTestResults(**data)
 
-class MedicalBloodTestResultTypesSchema(Schema):
-    resultid = fields.Integer()
-    result_name = fields.String()
 
+class MedicalBloodTestTypes(ma.SQLAlchemyAutoSchema):
+    class Meta():
+        model = MedicalBloodTestResultTypes
+        exclude = ('created_at', 'resultid')
+
+class MedicalBloodTestResultTypesSchema(Schema):
+    
+    items = fields.Nested(MedicalBloodTestTypes(many=True)) 
+    total = fields.Integer()
+    
     @post_load
     def make_object(self, data, **kwargs):
         return MedicalBloodTestResultTypes(**data)
