@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>odyssey.models.staff module &mdash; Odyssey version: 0.1.55 documentation</title>
+  <title>odyssey.models.staff &mdash; Odyssey version: 0.1.57 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="odyssey.models.doctor" href="odyssey.models.doctor.html" />
-    <link rel="prev" title="odyssey.models.client module" href="odyssey.models.client.html" /> 
+    <link rel="prev" title="odyssey.models.client" href="odyssey.models.client.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -61,7 +61,7 @@
             
             
               <div class="version">
-                version: 0.1.55
+                version: 0.1.57
               </div>
             
           
@@ -148,7 +148,7 @@
         
           <li><a href="odyssey.models.html">Models</a> &raquo;</li>
         
-      <li>odyssey.models.staff module</li>
+      <li>odyssey.models.staff</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -168,9 +168,9 @@
            <div itemprop="articleBody">
             
   <div class="section" id="module-odyssey.models.staff">
-<span id="odyssey-models-staff-module"></span><h1>odyssey.models.staff module<a class="headerlink" href="#module-odyssey.models.staff" title="Permalink to this headline">¶</a></h1>
-<p>General database tables for the operation of the Modo Bio Staff application.
-There is no specific table name prefix for the tables in this module.</p>
+<span id="odyssey-models-staff"></span><h1>odyssey.models.staff<a class="headerlink" href="#module-odyssey.models.staff" title="Permalink to this headline">¶</a></h1>
+<p>Database tables staff member information for the Modo Bio Staff application.
+All tables in this module are prefixed with ‘Staff’.</p>
 <dl class="py class">
 <dt id="odyssey.models.staff.Staff">
 <em class="property">class </em><code class="sig-prename descclassname">odyssey.models.staff.</code><code class="sig-name descname">Staff</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.staff.Staff" title="Permalink to this definition">¶</a></dt>
@@ -184,7 +184,7 @@ staff members.</p>
 <dd><p>Creation timestamp of this row in the database.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>datetime</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -192,10 +192,10 @@ staff members.</p>
 <dl class="py attribute">
 <dt id="odyssey.models.staff.Staff.updated_at">
 <code class="sig-name descname">updated_at</code><a class="headerlink" href="#odyssey.models.staff.Staff.updated_at" title="Permalink to this definition">¶</a></dt>
-<dd><p>timestamp for when object was updated. DB server time is used.</p>
+<dd><p>Last update timestamp of this row in the database.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>datetime</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -203,7 +203,7 @@ staff members.</p>
 <dl class="py attribute">
 <dt id="odyssey.models.staff.Staff.token">
 <code class="sig-name descname">token</code><a class="headerlink" href="#odyssey.models.staff.Staff.token" title="Permalink to this definition">¶</a></dt>
-<dd><p>API authentication token</p>
+<dd><p>API authentication token.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 32, indexed, unique</p>
@@ -214,10 +214,10 @@ staff members.</p>
 <dl class="py attribute">
 <dt id="odyssey.models.staff.Staff.token_expiration">
 <code class="sig-name descname">token_expiration</code><a class="headerlink" href="#odyssey.models.staff.Staff.token_expiration" title="Permalink to this definition">¶</a></dt>
-<dd><p>token expiration date</p>
+<dd><p>Token expiration timestamp.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>datetime</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -225,7 +225,7 @@ staff members.</p>
 <dl class="py attribute">
 <dt id="odyssey.models.staff.Staff.staffid">
 <code class="sig-name descname">staffid</code><a class="headerlink" href="#odyssey.models.staff.Staff.staffid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Staff member ID number</p>
+<dd><p>Staff member ID number.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, autoincrement</p>
@@ -248,8 +248,8 @@ ability to add/delete members to the Staff table.</p>
 <dl class="py attribute">
 <dt id="odyssey.models.staff.Staff.is_system_admin">
 <code class="sig-name descname">is_system_admin</code><a class="headerlink" href="#odyssey.models.staff.Staff.is_system_admin" title="Permalink to this definition">¶</a></dt>
-<dd><p>Indicates whether staff member is a system administrator. There should be very few of these
-roles given out.</p>
+<dd><p>Indicates whether staff member is a system administrator, i.e. has the
+ability to set/unset the <a class="reference internal" href="#odyssey.models.staff.Staff.is_admin" title="odyssey.models.staff.Staff.is_admin"><code class="xref py py-attr docutils literal notranslate"><span class="pre">is_admin</span></code></a> attribute.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a>, default = False</p>
@@ -260,11 +260,21 @@ roles given out.</p>
 <dl class="py attribute">
 <dt id="odyssey.models.staff.Staff.access_roles">
 <code class="sig-name descname">access_roles</code><a class="headerlink" href="#odyssey.models.staff.Staff.access_roles" title="Permalink to this definition">¶</a></dt>
-<dd><p>Indicates the content access role of the staff member.
-roles include: stfappadmin, clntsvc, physthera, phystrain, datasci, doctor, docext, nutrition</p>
+<dd><p>Staff member role(s).</p>
+<p>One or more roles can be set for each staff member. Valid roles are:</p>
+<ul class="simple">
+<li><p>stfappadmin</p></li>
+<li><p>clntsvc</p></li>
+<li><p>physthera</p></li>
+<li><p>phystrain</p></li>
+<li><p>datasci</p></li>
+<li><p>doctor</p></li>
+<li><p>docext</p></li>
+<li><p>nutrition</p></li>
+</ul>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, default = clntsvc</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>), default = [‘clntsvc’]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -272,7 +282,8 @@ roles include: stfappadmin, clntsvc, physthera, phystrain, datasci, doctor, doce
 <dl class="py attribute">
 <dt id="odyssey.models.staff.Staff.email">
 <code class="sig-name descname">email</code><a class="headerlink" href="#odyssey.models.staff.Staff.email" title="Permalink to this definition">¶</a></dt>
-<dd><p>Email address of staff member, used as login.</p>
+<dd><p>Email address.</p>
+<p>The email address is also the login username.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 50, non-null, unique</p>
@@ -332,8 +343,16 @@ roles include: stfappadmin, clntsvc, physthera, phystrain, datasci, doctor, doce
 
 <dl class="py method">
 <dt id="odyssey.models.staff.Staff.set_password">
-<code class="sig-name descname">set_password</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">password</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.staff.Staff.set_password" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="sig-name descname">set_password</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">password</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.staff.Staff.set_password" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set hashed password in database.</p>
+<p>See <a class="reference external" href="https://werkzeug.palletsprojects.com/en/1.0.x/utils/#werkzeug.security.generate_password_hash" title="(in Werkzeug v1.0.x)"><code class="xref py py-func docutils literal notranslate"><span class="pre">werkzeug.security.generate_password_hash()</span></code></a> for more information on how
+the password is hashed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>password</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The unhashed password.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt id="odyssey.models.staff.Staff.whoosh_search">
@@ -362,30 +381,72 @@ Defaults to <code class="docutils literal notranslate"><span class="pre">None</s
 
 <dl class="py method">
 <dt id="odyssey.models.staff.Staff.check_password">
-<code class="sig-name descname">check_password</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">password</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.staff.Staff.check_password" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="sig-name descname">check_password</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">password</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a><a class="headerlink" href="#odyssey.models.staff.Staff.check_password" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check password.</p>
+<p>Checks whether the given password is identical to the stored password.
+Uses <a class="reference external" href="https://werkzeug.palletsprojects.com/en/1.0.x/utils/#werkzeug.security.check_password_hash" title="(in Werkzeug v1.0.x)"><code class="xref py py-func docutils literal notranslate"><span class="pre">werkzeug.security.check_password_hash()</span></code></a> to perform the check
+against the stored hash of the password.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>password</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The unhashed password to be checked.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><em>bool</em> – Whether or not the given password is identical to the stored password.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt id="odyssey.models.staff.Staff.get_token">
-<code class="sig-name descname">get_token</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">expires_in</span><span class="o">=</span><span class="default_value">360000</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.staff.Staff.get_token" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="sig-name descname">get_token</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">expires_in</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></span> <span class="o">=</span> <span class="default_value">360000</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><a class="headerlink" href="#odyssey.models.staff.Staff.get_token" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get authorization token.</p>
+<p>Returns the autorization token from the database if it is not expired,
+generates a new token otherwise.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>expires_in</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Authorization token expiration in seconds from moment of token generation.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><em>str</em> – The valid authorization token.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt id="odyssey.models.staff.Staff.revoke_token">
 <code class="sig-name descname">revoke_token</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.staff.Staff.revoke_token" title="Permalink to this definition">¶</a></dt>
-<dd><p>set token to expired, for logging out/generating new token</p>
+<dd><p>Revoke authorization token.</p>
+<p>Revoke authorization by setting the expiration to 1 second in the past.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="odyssey.models.staff.Staff.check_token">
-<em class="property">static </em><code class="sig-name descname">check_token</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">token</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.staff.Staff.check_token" title="Permalink to this definition">¶</a></dt>
-<dd><p>check if token is valid. returns user if so</p>
+<em class="property">classmethod </em><code class="sig-name descname">check_token</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">token</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#odyssey.models.staff.Staff" title="odyssey.models.staff.Staff">odyssey.models.staff.Staff</a><a class="headerlink" href="#odyssey.models.staff.Staff.check_token" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if authorization token is valid.</p>
+<p>If the given token exists in the database and is currently valid,
+return the staff member who holds the token.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>token</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The authorization token to be checked.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><a class="reference internal" href="#odyssey.models.staff.Staff" title="odyssey.models.staff.Staff"><code class="xref py py-class docutils literal notranslate"><span class="pre">Staff</span></code></a> – Returns the instance of <a class="reference internal" href="#odyssey.models.staff.Staff" title="odyssey.models.staff.Staff"><code class="xref py py-class docutils literal notranslate"><span class="pre">Staff</span></code></a> that has the valid token, or None
+if the token is not valid.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="odyssey.models.staff.Staff.get_admin_role">
-<code class="sig-name descname">get_admin_role</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.staff.Staff.get_admin_role" title="Permalink to this definition">¶</a></dt>
-<dd><p>check if this staff member is authorized to create new staff members</p>
+<code class="sig-name descname">get_admin_role</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><a class="headerlink" href="#odyssey.models.staff.Staff.get_admin_role" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether staff member is admin or system admin.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><em>str</em> – Returns <code class="docutils literal notranslate"><span class="pre">sys_admin</span></code> if staff member is a system admin,
+<code class="docutils literal notranslate"><span class="pre">staff_admin</span></code> if staff member is admin,
+or <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> otherwise.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -395,7 +456,7 @@ Defaults to <code class="docutils literal notranslate"><span class="pre">None</s
 <em class="property">class </em><code class="sig-prename descclassname">odyssey.models.staff.</code><code class="sig-name descname">ClientRemovalRequests</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.staff.ClientRemovalRequests" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
 <p>Client removal request table.</p>
-<p>Stores the history if client removal request by staff members</p>
+<p>Stores the history of client removal request by staff members.</p>
 <dl class="py attribute">
 <dt id="odyssey.models.staff.ClientRemovalRequests.idx">
 <code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.models.staff.ClientRemovalRequests.idx" title="Permalink to this definition">¶</a></dt>
@@ -413,7 +474,7 @@ Defaults to <code class="docutils literal notranslate"><span class="pre">None</s
 <dd><p>Creation timestamp of this row in the database.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>datetime</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -421,10 +482,10 @@ Defaults to <code class="docutils literal notranslate"><span class="pre">None</s
 <dl class="py attribute">
 <dt id="odyssey.models.staff.ClientRemovalRequests.updated_at">
 <code class="sig-name descname">updated_at</code><a class="headerlink" href="#odyssey.models.staff.ClientRemovalRequests.updated_at" title="Permalink to this definition">¶</a></dt>
-<dd><p>timestamp for when object was updated. DB server time is used.</p>
+<dd><p>Last update timestamp of this row in the database.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>datetime</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -432,7 +493,7 @@ Defaults to <code class="docutils literal notranslate"><span class="pre">None</s
 <dl class="py attribute">
 <dt id="odyssey.models.staff.ClientRemovalRequests.staffid">
 <code class="sig-name descname">staffid</code><a class="headerlink" href="#odyssey.models.staff.ClientRemovalRequests.staffid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Staff member ID number</p>
+<dd><p>Staff member ID number.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, autoincrement</p>
@@ -443,10 +504,10 @@ Defaults to <code class="docutils literal notranslate"><span class="pre">None</s
 <dl class="py attribute">
 <dt id="odyssey.models.staff.ClientRemovalRequests.timestamp">
 <code class="sig-name descname">timestamp</code><a class="headerlink" href="#odyssey.models.staff.ClientRemovalRequests.timestamp" title="Permalink to this definition">¶</a></dt>
-<dd><p>Timestamp of the removal request</p>
+<dd><p>Timestamp of the removal request.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)">datetime.datetime</a>, primary key</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a>, primary key</p>
 </dd>
 </dl>
 </dd></dl>
@@ -466,7 +527,7 @@ Defaults to <code class="docutils literal notranslate"><span class="pre">None</s
         <a href="odyssey.models.doctor.html" class="btn btn-neutral float-right" title="odyssey.models.doctor" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="odyssey.models.client.html" class="btn btn-neutral float-left" title="odyssey.models.client module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="odyssey.models.client.html" class="btn btn-neutral float-left" title="odyssey.models.client" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

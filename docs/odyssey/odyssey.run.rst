@@ -1,4 +1,4 @@
-odyssey.run module
+odyssey.run
 ==================
 
 .. automodule:: odyssey.run

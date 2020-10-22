@@ -24,14 +24,14 @@ class PTHistory(db.Model):
     """
     Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='PTHistory_clientid_fkey',ondelete="CASCADE"), nullable=False)
@@ -165,21 +165,21 @@ class Chessboard(db.Model):
     """
     Timestamp of the assessment.
 
-    :type: datetime.datetime
+    :type: :class:`datetime.datetime`
     """
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     isa_structure = db.Column(db.String(24))
@@ -422,21 +422,21 @@ class MobilityAssessment(db.Model):
     """
     Timestamp of the assessment.
 
-    :type: datetime.datetime
+    :type: :class:`datetime.datetime`
     """
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     isa_left = db.Column(db.Integer)

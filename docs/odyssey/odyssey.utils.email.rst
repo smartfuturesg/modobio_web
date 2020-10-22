@@ -1,4 +1,4 @@
-odyssey.utils.email module
+odyssey.utils.email
 ==========================
 
 .. automodule:: odyssey.utils.email

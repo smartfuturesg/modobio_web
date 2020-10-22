@@ -447,8 +447,7 @@ class ClientConsent(db.Model):
 
     signdate = db.Column(db.Date)
     """
-    Signature date. This is filled by the client upon signing the document. Therefore, we can assume that 
-    this date is in their local timezone. 
+    Signature date.
 
     :type: :class:`datetime.date`
     """
@@ -536,7 +535,7 @@ class ClientRelease(db.Model):
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientRelease_clientid_fkey',ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    Client ID number.
 
     :type: int, foreign key to :attr:`ClientInfo.clientid`
     """
@@ -578,8 +577,7 @@ class ClientRelease(db.Model):
 
     signdate = db.Column(db.Date)
     """
-    Signature date. This is filled by the client upon signing the document. Therefore, we can assume that 
-    this date is in their local timezone. 
+    Signature date.
 
     :type: :class:`datetime.date`
     """
@@ -674,8 +672,7 @@ class ClientPolicies(db.Model):
 
     signdate = db.Column(db.Date)
     """
-    Signature date. This is filled by the client upon signing the document. Therefore, we can assume that 
-    this date is in their local timezone. 
+    Signature date.
 
     :type: :class:`datetime.date`
     """
@@ -763,15 +760,14 @@ class ClientConsultContract(db.Model):
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientColusultContract_clientid_fkey',ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    Client ID number.
 
     :type: int, foreign key to :attr:`ClientInfo.clientid`
     """
 
     signdate = db.Column(db.Date)
     """
-    Signature date. This is filled by the client upon signing the document. Therefore, we can assume that 
-    this date is in their local timezone. 
+    Signature date.
 
     :type: :class:`datetime.date`
     """
@@ -859,15 +855,14 @@ class ClientSubscriptionContract(db.Model):
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientSubscriptionContract_clientid_fkey',ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    Client ID number.
 
     :type: int, foreign key to :attr:`ClientInfo.clientid`
     """
 
     signdate = db.Column(db.Date)
     """
-    Signature date. This is filled by the client upon signing the document. Therefore, we can assume that 
-    this date is in their local timezone. 
+    Signature date.
 
     :type: :class:`datetime.date`
     """
@@ -950,7 +945,7 @@ class ClientIndividualContract(db.Model):
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientIndividualContract_clientid_fkey',ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    Client ID number.
 
     :type: int, foreign key to :attr:`ClientInfo.clientid`
     """
@@ -985,8 +980,7 @@ class ClientIndividualContract(db.Model):
 
     signdate = db.Column(db.Date)
     """
-    Signature date. This is filled by the client upon signing the document. Therefore, we can assume that 
-    this date is in their local timezone. 
+    Signature date.
 
     :type: :class:`datetime.date`
     """
@@ -1025,14 +1019,11 @@ class ClientIndividualContract(db.Model):
     """
 
 class RemoteRegistration(db.Model):
-    """ At-home client registration parameter
+    """ At-home client registration table.
 
     Stores details to enable clients to register at home securely. This inclues the
     temporary registration url, client login details, and current api token. Each at-home
     client will have one entry in this table. Expired urls will remain for record keeping.
-
-    The primary index of this table is the
-    :attr:`clientid` number.
     """
 
     __tablename__ = 'ClientRemoteRegistration'
@@ -1061,7 +1052,7 @@ class RemoteRegistration(db.Model):
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='remote_registration_clientid_fkey',ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    Client ID number.
 
     :type: int, foreign key to :attr:`ClientInfo.clientid`
     """
@@ -1075,14 +1066,14 @@ class RemoteRegistration(db.Model):
 
     token = db.Column(db.String(32), index=True, unique=True)
     """
-    API authentication token
+    API authentication token.
 
     :type: str, max length 32, indexed, unique
     """
 
     token_expiration = db.Column(db.DateTime)
     """
-    token expiration date
+    Token expiration timestamp.
 
     :type: :class:`datetime.datetime`
     """
@@ -1096,21 +1087,38 @@ class RemoteRegistration(db.Model):
 
     registration_portal_id = db.Column(db.String(32), index=True, unique=True)
     """
-    registration portal endpoint
+    Registration portal ID.
+
+    This token is part of the URL that clients will use to sign up remotely. It is a randomly
+    generated string. It provides security by making the sign-up URL hard to guess.
 
     :type: str, max length 32, indexed, unique
     """
 
     registration_portal_expiration = db.Column(db.DateTime)
     """
-    token expiration date
+    Registration portal ID expiration timestamp.
 
     :type: :class:`datetime.datetime`
     """
 
-    def get_temp_registration_endpoint(self, expires_in = 86400):
-        """creates a temporary endpoint meant for at-home
-           registration
+    def get_temp_registration_endpoint(self, expires_in: int=86400) -> str:
+        """ Generate regustration portal ID.
+
+        Generates a random, unique, and hard to guess portal ID meant for at-home
+        registration. The ID expires in `expires_in` seconds. Both
+        :attr:`registration_portal_id` and :attr:`registration_portal_expiration`
+        are set in the database.
+
+        Parameters
+        ----------
+        expires_in : int
+            Expiration in seconds from moment of token creation.
+
+        Returns
+        -------
+        str
+            The registration portal ID token.
         """
         now = datetime.utcnow()
         self.registration_portal_id = secrets.token_hex(16)
@@ -1121,17 +1129,35 @@ class RemoteRegistration(db.Model):
 
         return self.registration_portal_id
 
-
-    def set_password(self):
-        """create temporary password, hash it"""
+    def set_password(self) -> str:
+        """ Create a temporary password.
+        
+        Returns
+        -------
+        str
+            Randomly generated password.
+        """
         password = self.email[0:2]+secrets.token_hex(4)
         self.password = password
         return password
 
-    def check_password(self, password):
+    def check_password(self, password: str) -> bool:
+        """ Check provided password against stored password.
+
+        Parameters
+        ----------
+        password : str
+            The password to be checked.
+
+        Returns
+        -------
+        bool
+            Whether the provided password is identical to the stored password.
+        """
         return password == self.password
 
-    def get_token(self,expires_in=86400):
+    def get_token(self, expires_in: int=86400) -> str:
+        """ Get current token, create new if expired. """
         now = datetime.utcnow()
         #returns current token if it is valid
         if self.token and self.token_expiration > now + timedelta(seconds=60):
@@ -1174,9 +1200,9 @@ class RemoteRegistration(db.Model):
         return remote_client
 
 class ClientExternalMR(db.Model):
-    """ Client external medical record table
+    """ External medical records table.
 
-    This table stored medical record ids from external medical institutes. 
+    This table stores medical record ID numbers from external medical institutes. 
     """
 
     __tablename__ = 'ClientExternalMR'
@@ -1207,28 +1233,31 @@ class ClientExternalMR(db.Model):
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientExternalMR_clientid_fkey',ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    Client ID number.
 
     :type: int, foreign key to :attr:`ClientInfo.clientid`
     """
 
     med_record_id = db.Column(db.String, nullable=False)
     """
-    medical record id 
-    :type: str
+    Medical record id.
+
+    This medical record ID comes from an external medical institution.
+
+    :type: str, non-null, unique
     """
 
     institute_id = db.Column(db.Integer, db.ForeignKey('MedicalInstitutions.institute_id',name='ClientExternalMR_institute_id_fkey', ondelete="CASCADE"), nullable=False)
     """
-    medical institute id 
+    Medical institute id.
 
     :type: int, foreign key to :attr:`MedicalInstitutions.institute_id`
     """
 
 class ClientReleaseContacts(db.Model):
-    """ Client external medical record table
+    """ Contact information for the release form.
 
-    This table stored medical record ids from external medical institutes. 
+    This table stores contact information for :attr:`ClientRelease.release_to`.
     """
 
     __tablename__ = 'ClientReleaseContacts'
@@ -1256,50 +1285,53 @@ class ClientReleaseContacts(db.Model):
 
     release_contract_id = db.Column(db.Integer, db.ForeignKey('ClientRelease.idx',name='ClientReleaseContacts_idx_fkey',ondelete="CASCADE"), nullable=False)
     """
-    ID refering back to the signed contract in the ClientRelease table
+    Index of the :class:``ClientRelease`` table.
 
     :type: int, foreign key to :attr:`ClientRelease.idx`
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientReleaseContacts_clientid_fkey',ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    Client ID number.
 
     :type: int, foreign key to :attr:`ClientInfo.clientid`
     """
 
     release_direction = db.Column(db.String, nullable=False)
     """
-    Direction of client medical dta release. Must be either 'TO' or 'FROM'
+    Direction of medical data release.
+
+    A client can release medical data to someone, or release someone else's data.
+    This variable indicates the direction of the release. Must be either ``to`` or
+    ``from``.
 
     :type: str
     """
 
     name = db.Column(db.String, nullable=False)
     """
-    Full name of the contact
+    Full name of the contact.
 
     :type: str
     """
 
     email = db.Column(db.String, nullable=True)
     """
-    Email of the contact 
+    Email address of the contact.
 
     :type: str
     """
 
     phone = db.Column(db.String, nullable=True)
     """
-    Email of the contact 
+    Phone number of the contact.
 
     :type: str
     """
 
     relationship = db.Column(db.String, nullable=True)
     """
-    Relationship the client has with the contact 
+    Relationship of the client with the contact.
 
     :type: str
     """
-

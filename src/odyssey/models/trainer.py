@@ -22,21 +22,21 @@ class PowerAssessment(db.Model):
     """
     Timestamp of the assessment.
 
-    :type: datetime.datetime
+    :type: :class:`datetime.datetime`
     """
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='power_assessment_clientid_fkey',ondelete="CASCADE"), nullable=False)
@@ -220,21 +220,21 @@ class StrengthAssessment(db.Model):
     """
     Timestamp of the assessment.
 
-    :type: datetime.datetime
+    :type: :class:`datetime.datetime`
     """
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='strength_assessment_clientid_fkey',ondelete="CASCADE"), nullable=False)
@@ -486,21 +486,21 @@ class MovementAssessment(db.Model):
     """
     Timestamp of the assessment.
 
-    :type: datetime.datetime
+    :type: :class:`datetime.datetime`
     """
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='movement_assessment_clientid_fkey',ondelete="CASCADE"), nullable=False)
@@ -631,21 +631,21 @@ class HeartAssessment(db.Model):
     """
     Timestamp of the assessment.
 
-    :type: datetime.datetime
+    :type: :class:`datetime.datetime`
     """
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='heart_assessment_clientid_fkey',ondelete="CASCADE"), nullable=False)
@@ -730,21 +730,21 @@ class MoxyAssessment(db.Model):
     """
     Timestamp of the assessment.
 
-    :type: datetime.datetime
+    :type: :class:`datetime.datetime`
     """
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='moxy_assessment_clientid_fkey',ondelete="CASCADE"), nullable=False)
@@ -866,21 +866,21 @@ class MoxyRipTest(db.Model):
     """
     Timestamp of the assessment.
 
-    :type: datetime.datetime
+    :type: :class:`datetime.datetime`
     """
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='moxy_rip_assessment_clientid_fkey',ondelete="CASCADE"), nullable=False)
@@ -1219,21 +1219,21 @@ class LungAssessment(db.Model):
     """
     Timestamp of the assessment.
 
-    :type: datetime.datetime
+    :type: :class:`datetime.datetime`
     """
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='lung_assessment_clientid_fkey',ondelete="CASCADE"), nullable=False)
@@ -1311,21 +1311,21 @@ class FitnessQuestionnaire(db.Model):
     """
     Timestamp of the assessment.
 
-    :type: datetime.datetime
+    :type: :class:`datetime.datetime`
     """
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     physical_goals = db.Column(db.ARRAY(db.String), nullable=True, server_default="{'other'}")

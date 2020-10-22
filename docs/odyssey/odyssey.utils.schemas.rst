@@ -1,4 +1,4 @@
-odyssey.utils.schemas module
+odyssey.utils.schemas
 ============================
 
 .. automodule:: odyssey.utils.schemas

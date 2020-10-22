@@ -1,4 +1,4 @@
-odyssey.api.remote\_clients module
+odyssey.api.remote\_clients
 ==================================
 
 .. automodule:: odyssey.api.remote_clients

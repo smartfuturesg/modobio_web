@@ -1,4 +1,4 @@
-odyssey.utils.misc module
+odyssey.utils.misc
 =========================
 
 .. automodule:: odyssey.utils.misc

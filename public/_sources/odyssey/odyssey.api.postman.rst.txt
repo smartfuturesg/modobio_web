@@ -1,4 +1,4 @@
-odyssey.api.postman module
+odyssey.api.postman
 ==========================
 
 .. automodule:: odyssey.api.postman

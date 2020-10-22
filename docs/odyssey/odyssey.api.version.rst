@@ -1,4 +1,4 @@
-odyssey.api.version module
+odyssey.api.version
 ==========================
 
 .. automodule:: odyssey.api.version

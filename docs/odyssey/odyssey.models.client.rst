@@ -1,5 +1,5 @@
-odyssey.models.client module
-============================
+odyssey.models.client
+=====================
 
 .. automodule:: odyssey.models.client
    :members:

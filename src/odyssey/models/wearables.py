@@ -41,14 +41,14 @@ class Wearables(_Base):
     """
     Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     clientid = Column(
@@ -117,14 +117,14 @@ class WearablesOura(_Base):
     """
     Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     oauth_state = Column(String(50))
@@ -198,14 +198,14 @@ class WearablesFreeStyle(_Base):
     """
     Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     timestamps = Column(ARRAY(DateTime, dimensions=1))
@@ -230,5 +230,5 @@ class WearablesFreeStyle(_Base):
     be converted to a timestamp before it can be added to the timestamps array.
     This timestamp can be used to calculate the timestamp for each data point.
 
-    :type: datetime.datetime
+    :type: :class:`datetime.datetime`
     """

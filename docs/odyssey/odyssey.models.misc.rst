@@ -1,4 +1,4 @@
-odyssey.models.misc module
+odyssey.models.misc
 ==========================
 
 .. automodule:: odyssey.models.misc

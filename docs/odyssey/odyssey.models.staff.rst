@@ -1,5 +1,5 @@
-odyssey.models.staff module
-===========================
+odyssey.models.staff
+====================
 
 .. automodule:: odyssey.models.staff
    :members:

@@ -1,4 +1,4 @@
-odyssey.api.registeredfacilities module
+odyssey.api.registeredfacilities
 =======================================
 
 .. automodule:: odyssey.api.registeredfacilities

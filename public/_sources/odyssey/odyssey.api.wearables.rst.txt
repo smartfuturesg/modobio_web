@@ -1,4 +1,4 @@
-odyssey.api.wearables module
+odyssey.api.wearables
 ============================
 
 .. automodule:: odyssey.api.wearables
