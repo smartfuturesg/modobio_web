@@ -1,7 +1,7 @@
 """changed thb variables from int to floats
 
 Revision ID: 181802f48ef7
-Revises: c629447e4622
+Revises: 8aa1864e8f00
 Create Date: 2020-10-21 17:39:35.932728
 
 """
@@ -11,7 +11,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = '181802f48ef7'
-down_revision = 'c629447e4622'
+down_revision = '8aa1864e8f00'
 branch_labels = None
 depends_on = None
 
