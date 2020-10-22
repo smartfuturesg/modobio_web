@@ -381,3 +381,5 @@ database column expects a Python :attr:`True` or :attr:`False` value. Use
 DB_SERVER_TIME = text("clock_timestamp()")
 
 ALPHANUMERIC = "BCDFGHJKLMNPQRSTVWXYZ01234567890123456789"
+
+roles = ['stfappadmin', 'clntsvc', 'physthera', 'phystrain', 'datasci', 'doctor', 'docext', 'nutrition']
