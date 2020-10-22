@@ -157,6 +157,13 @@ class MedBloodTest(Resource):
     @accepts(schema=MedicalBloodTestsInputSchema, api=ns)
     @responds(schema=MedicalBloodTestSchema, status_code=201, api=ns)
     def post(self, clientid):
+        """
+        Resource to submit a new blood test instance for the specified client.
+
+        Test submissions are given a testid which can be used to reference back
+        to the results related to this submisison. Each submission may have 
+        multiple results (e.g. in a panel)
+        """
         check_client_existence(clientid)
         data = request.get_json()
 
@@ -186,6 +193,14 @@ class MedBloodTest(Resource):
     @token_auth.login_required
     @responds(schema=AllMedicalBloodTestSchema, api=ns)
     def get(self, clientid):
+        """
+        This resource returns every instance of blood test submissions for the 
+        specified clientid
+
+        Test submissions relate overall submission data: testid, date, notes, panel_type
+        to the actual results. Each submission may have multiple results
+        where the results can be referenced by the testid provided in this request
+        """
         check_client_existence(clientid)
         blood_tests = MedicalBloodTests.query.filter_by(clientid=clientid).all()
 
@@ -211,8 +226,8 @@ class MedBloodTestResults(Resource):
     @responds(schema=MedicalBloodTestResultsOutputSchema, api=ns)
     def get(self, testid):
         """
-        Returns details of the test intance as well as 
-        the actual results submitted for testid.
+        Returns details of the test denoted by testid as well as 
+        the actual results submitted.
         """
         #query for join of MedicalBloodTestResults and MedicalBloodTestResultTypes tables
         check_blood_test_existence(testid)
@@ -255,7 +270,7 @@ class MedBloodTestResults(Resource):
 @ns.doc(params={'clientid': 'Client ID number'})
 class AllMedBloodTestResults(Resource):
     """
-    Endpoint for returning all blood tests from a client
+    Endpoint for returning all blood test results from a client
     """
     @token_auth.login_required
     @responds(schema=MedicalBloodTestResultsOutputSchema, api=ns)
