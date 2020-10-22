@@ -30,8 +30,8 @@ def test_post_medical_blood_test(test_client, init_database):
 
 def test_get_client_blood_tests(test_client, init_database):
     """
-    GIVEN a api end point for retrieving medical blood tests
-    WHEN the  '/doctor/bloodtest/<client id>/' resource  is requested (GET)
+    GIVEN a api end point for retrieving medical blood test instances
+    WHEN the  '/doctor/bloodtest/all/<client id>/' resource  is requested (GET)
     THEN check the response is valid
     """
     # get staff authorization to view client data
@@ -40,10 +40,9 @@ def test_get_client_blood_tests(test_client, init_database):
     headers = {'Authorization': f'Bearer {token}'}
 
     # send get request for client blood tests on clientid = 1 
-    response = test_client.get('/doctor/bloodtest/1/',
+    response = test_client.get('/doctor/bloodtest/all/1/',
                                 headers=headers, 
                                 content_type='application/json')
-                                
     assert response.status_code == 200
     
 def test_get_blood_test_results(test_client, init_database):
@@ -59,6 +58,26 @@ def test_get_blood_test_results(test_client, init_database):
 
     # send get request for client info on clientid = 1 
     response = test_client.get('/doctor/bloodtest/results/1/',
+                                headers=headers, 
+                                content_type='application/json')
+    response_data = response.get_json()
+    assert response.status_code == 200
+    assert response_data['items'][0]['results'][0]['evaluation'] == 'optimal'
+    assert response_data['items'][0]['results'][1]['evaluation'] == 'normal'
+
+def test_get_blood_test_result_types(test_client, init_database):
+    """
+    GIVEN a api end point for retrieving medical blood tests result types
+    WHEN the  '/bloodtest/result-types/' resource  is requested (GET)
+    THEN check the response is valid
+    """
+    # get staff authorization to view client data
+    staff = Staff().query.first()
+    token = staff.get_token()
+    headers = {'Authorization': f'Bearer {token}'}
+
+    # send get request for client info on clientid = 1 
+    response = test_client.get('doctor/bloodtest/result-types/',
                                 headers=headers, 
                                 content_type='application/json')
                                 
