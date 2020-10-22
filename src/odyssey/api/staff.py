@@ -151,7 +151,6 @@ class PasswordResetEmail(Resource):
                                   'sid': staff.staffid}, 
                                   secret, 
                                   algorithm='HS256').decode("utf-8") 
-
         if current_app.env == "development":
             return jsonify({"token": encoded_token})
         else:
