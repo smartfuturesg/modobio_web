@@ -10,3 +10,4 @@ import odyssey.models.staff
 import odyssey.models.misc 
 import odyssey.models.trainer
 import odyssey.models.wearables
+import odyssey.models.user

@@ -40,7 +40,6 @@ def test_get_client_info(test_client, init_database):
     
     assert response.status_code == 200
     assert response.json['user_id'] == 1
-    assert response.json['email'] == 'test_this_client@gmail.com'
 
 def test_put_client_info(test_client, init_database):
     """
@@ -63,7 +62,7 @@ def test_put_client_info(test_client, init_database):
     assert response.json['message'] == 'Illegal Setting of parameter, user_id. You cannot set this value manually'
 
     # test attempting to change the phone number
-    data = {'phone': '9123456789'}
+    data = {'guardianname': 'Testy'}
 
     response = test_client.put('/client/1/', 
                                 headers=headers, 
@@ -72,10 +71,10 @@ def test_put_client_info(test_client, init_database):
     
     #load the client from the database
 
-    client = ClientInfo().query.first()
+    client = ClientInfo.query.first()
 
     assert response.status_code == 200
-    assert client.phone == data['phone']
+    assert client.guardianname == data['guardianname']
 
 def test_creating_new_client(test_client, init_database):
     """
@@ -97,7 +96,7 @@ def test_creating_new_client(test_client, init_database):
                                 content_type='application/json')
     user = User.query.filter_by(email=test_new_user_client['userinfo']['email']).first()
     assert response.status_code == 201
-    assert user.email == 'test_this_client_two@gmail.com'
+    assert user.email == 'test_this_user_client@modobio.com'
 
     #send put request to fill out ClientInfo table for new user
     test_new_user_client['clientinfo']['user_id'] = user.user_id

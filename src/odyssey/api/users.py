@@ -8,25 +8,27 @@ from requests_oauthlib import OAuth2Session
 from odyssey.api import api
 from odyssey.api.auth import token_auth
 from odyssey.api.errors import ContentNotFound, StaffEmailInUse, ClientEmailInUse
-from odyssey.utils.schemas import UserSchema, NewUserSchema
+from odyssey.utils.schemas import UserSchema, UserLoginSchema, NewUserSchema, StaffProfileSchema, ClientInfoSchema
+from odyssey.models.user import User
+from odyssey.utils.misc import check_user_existence
 
 from odyssey import db
 
 ns = api.namespace('user', description='Endpoints for user accounts.')
 
 @ns.route('/<int:user_id>/')
-class User(Resource):
+class ApiUser(Resource):
     
     @token_auth.login_required
     @responds(schema=UserSchema, api=ns)
-    def get(self):
+    def get(self, user_id):
         check_user_existence(user_id)
 
         return User.query.filter_by(user_id=user_id).one_or_none()
 
 
 @ns.route('/')
-class NewUser(Resource):
+class ApiNewUser(Resource):
     @token_auth.login_required
     @accepts(schema=NewUserSchema, api=ns)
     @responds(schema=UserSchema, status_code=201, api=ns)
@@ -51,10 +53,12 @@ class NewUser(Resource):
                 password = data['password']
                 del data['password']
                 user = UserSchema().load(data)
-                user_login = UserLoginSchema().load({"user_id": user.user_id})
-                user_login.set_password(password)
                 db.session.add(user)
+                db.session.flush()
+                user_login = UserLoginSchema().load({"user_id": user.user_id, "password": password})
+                staff_profile = StaffProfileSchema().load({"user_id": user.user_id})
                 db.session.add(user_login)
+                db.session.add(staff_profile)
         else:
             user = User.query.filter_by(email=data.get('email')).first()
             if user:
@@ -71,8 +75,11 @@ class NewUser(Resource):
                 password = data['password']
                 del data['password']
                 user = UserSchema().load(data)
-                user_login = UserLoginSchema().load({"user_id": user.user_id})
-                user_login.set_password(password)
                 db.session.add(user)
+                db.session.flush()
+                user_login = UserLoginSchema().load({"user_id": user.user_id, "password": password})
+                client_info = ClientInfoSchema().load({"user_id": user.user_id})
+                db.session.add(client_info)
                 db.session.add(user_login)
         db.session.commit()
+        return user

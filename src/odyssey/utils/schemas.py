@@ -83,6 +83,8 @@ class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientInfo
 
+    idx = fields.Integer()
+    user_id = fields.Integer()
     record_locator_id = fields.String(missing=None)
 
     @post_load
@@ -1265,6 +1267,9 @@ class StaffProfileSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = StaffProfile
 
+    idx = fields.Integer()
+    user_id = fields.Integer()
+
     @post_load
     def make_object(self, data, **kwargs):
         return StaffProfile(**data)
@@ -1305,6 +1310,8 @@ class UserLoginSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = UserLogin
 
+    user_id = fields.Integer()
+
     @post_load
     def make_object(self, data, **kwargs):
         new_user = UserLogin(**data)
@@ -1318,7 +1325,7 @@ class NewUserSchema(Schema):
     lastname = fields.String()
     email = fields.Email(validate=validate.Length(min=0,max=50))
     phone_number = fields.String(validate=validate.Length(min=0,max=50))
-    password = fields.String(dump_only=True)
+    password = fields.String(validate=validate.Length(min=0,max=50))
     is_staff = fields.Boolean()
     is_client = fields.Boolean()
 

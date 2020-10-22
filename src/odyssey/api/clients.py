@@ -55,7 +55,7 @@ class Client(Resource):
     @responds(schema=ClientInfoSchema, api=ns)
     def get(self, user_id):
         """returns client info table as a json for the user_id specified"""
-        client = ClientInfo.query.filter_by(user_id=user_id)
+        client = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
         if not client:
             raise UserNotFound(user_id)
         return client

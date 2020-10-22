@@ -88,6 +88,33 @@ def upgrade():
     op.drop_index('ix_ClientRemoteRegistration_registration_portal_id', table_name='ClientRemoteRegistration')
     op.drop_index('ix_ClientRemoteRegistration_token', table_name='ClientRemoteRegistration')
     op.drop_table('ClientRemoteRegistration')
+    op.drop_table('ClientInfo')
+    op.create_table('ClientInfo',
+    sa.Column('created_at', sa.DateTime(), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), nullable=True),
+    sa.Column('idx', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('membersince', sa.DateTime(), nullable=True),
+    sa.Column('guardianname', sa.String(length=100), nullable=True),
+    sa.Column('guardianrole', sa.String(length=50), nullable=True),
+    sa.Column('street', sa.String(length=50), nullable=True),
+    sa.Column('city', sa.String(length=50), nullable=True),
+    sa.Column('state', sa.String(length=2), nullable=True),
+    sa.Column('zipcode', sa.String(length=10), nullable=True),
+    sa.Column('country', sa.String(length=2), nullable=True),
+    sa.Column('preferred', sa.SmallInteger(), nullable=True),
+    sa.Column('emergency_contact', sa.String(length=50), nullable=True),
+    sa.Column('emergency_phone', sa.String(length=20), nullable=True),
+    sa.Column('healthcare_contact', sa.String(length=50), nullable=True),
+    sa.Column('healthcare_phone', sa.String(length=20), nullable=True),
+    sa.Column('gender', sa.String(length=1), nullable=True),
+    sa.Column('dob', sa.Date(), nullable=True),
+    sa.Column('profession', sa.String(length=100), nullable=True),
+    sa.Column('receive_docs', sa.Boolean(), nullable=True),
+    sa.Column('record_locator_id', sa.String(length=12), nullable=True),
+    sa.ForeignKeyConstraint(['user_id'], ['User.user_id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('idx')
+    )
     op.add_column('ClientConsent', sa.Column('user_id', sa.Integer(), nullable=False))
     op.create_foreign_key(None, 'ClientConsent', 'User', ['user_id'], ['user_id'], ondelete='CASCADE')
     op.drop_column('ClientConsent', 'clientid')
@@ -107,18 +134,6 @@ def upgrade():
     op.add_column('ClientIndividualContract', sa.Column('user_id', sa.Integer(), nullable=False))
     op.create_foreign_key(None, 'ClientIndividualContract', 'User', ['user_id'], ['user_id'], ondelete='CASCADE')
     op.drop_column('ClientIndividualContract', 'clientid')
-    op.add_column('ClientInfo', sa.Column('created_at', sa.DateTime(), nullable=True))
-    op.add_column('ClientInfo', sa.Column('idx', sa.Integer(), autoincrement=True, nullable=False))
-    op.add_column('ClientInfo', sa.Column('user_id', sa.Integer(), nullable=False))
-    op.create_foreign_key(None, 'ClientInfo', 'User', ['user_id'], ['user_id'], ondelete='CASCADE')
-    op.drop_column('ClientInfo', 'firstname')
-    op.drop_column('ClientInfo', 'middlename')
-    op.drop_column('ClientInfo', 'phone')
-    op.drop_column('ClientInfo', 'address')
-    op.drop_column('ClientInfo', 'clientid')
-    op.drop_column('ClientInfo', 'lastname')
-    op.drop_column('ClientInfo', 'email')
-    op.drop_column('ClientInfo', 'fullname')
     op.add_column('ClientPolicies', sa.Column('user_id', sa.Integer(), nullable=False))
     op.create_foreign_key(None, 'ClientPolicies', 'User', ['user_id'], ['user_id'], ondelete='CASCADE')
     op.drop_column('ClientPolicies', 'clientid')

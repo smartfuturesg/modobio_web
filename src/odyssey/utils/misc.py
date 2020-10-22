@@ -9,6 +9,7 @@ from datetime import datetime, date, time
 import flask.json
 from odyssey.models.client import ClientInfo, ClientFacilities
 from odyssey.models.doctor import MedicalBloodTests, MedicalBloodTestResultTypes
+from odyssey.models.user import User
 from odyssey.models.misc import RegisteredFacilities
 from odyssey.api.errors import UserNotFound, FacilityNotFound, RelationAlreadyExists, TestNotFound, ResultTypeNotFound
 
@@ -29,6 +30,13 @@ def check_client_existence(user_id):
     All clients must be in the CLientInfo table before any other procedure"""
     client = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
     if not client:
+        raise UserNotFound(user_id)
+
+def check_user_existence(user_id):
+    """Check that the user is in the database
+    All users must be in the User table before any other procedure"""
+    user = User.query.filter_by(user_id=user_id).one_or_none()
+    if not user:
         raise UserNotFound(user_id)
 
 def check_blood_test_existence(test_id):

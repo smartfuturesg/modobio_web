@@ -124,15 +124,6 @@ class ClientInfo(db.Model):
     :type: int, smallint, signed int16
     """
 
-    ringsize = db.Column(db.Float)
-    """
-    Client ring size.
-
-    Used for ordering an Oura Ring.
-
-    :type: float
-    """
-
     emergency_contact = db.Column(db.String(50))
     """
     Client emergency contact name.
