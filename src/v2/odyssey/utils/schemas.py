@@ -278,6 +278,7 @@ class AllClientsDataTier(Schema):
     total_stored_bytes = fields.Integer(description="Total bytes stored for all clients", missing=0)
     total_items = fields.Integer(description="number of clients in this payload", missing=0)
 
+
 """
     Schemas for the pt API
 """
@@ -295,21 +296,21 @@ class PTHistorySchema(ma.SQLAlchemyAutoSchema):
 
 
 class ShoulderRotationSchema(Schema):
-    ir = fields.Integer(description="internal rotation", validate=validate.Range(min=0, max=100), missing=None)
+    ir = fields.Integer(description="internal rotation", validate=validate.Range(min=0, max=110), missing=None)
     er = fields.Integer(description="external rotation", validate=validate.Range(min=0, max=130), missing=None)
-    abd = fields.Integer(description="abduction", validate=validate.Range(min=0, max=75), missing=None)
-    add = fields.Integer(description="adduction", validate=validate.Range(min=0, max=135), missing=None)
+    abd = fields.Integer(description="abduction", validate=validate.Range(min=0, max=90), missing=None)
+    add = fields.Integer(description="adduction", validate=validate.Range(min=0, max=150), missing=None)
     flexion  = fields.Integer(validate=validate.Range(min=0, max=190), missing=None)
-    extension  = fields.Integer(validate=validate.Range(min=0, max=75), missing=None)
+    extension  = fields.Integer(validate=validate.Range(min=0, max=90), missing=None)
 
 class HipRotationSchema(Schema):
-    ir = fields.Integer(description="internal rotation", validate=validate.Range(min=0, max=60), missing=None)
-    er = fields.Integer(description="external rotation", validate=validate.Range(min=0, max=90), missing=None)
-    abd = fields.Integer(description="abduction", validate=validate.Range(min=0, max=75), missing=None)
-    add = fields.Integer(description="adduction",validate=validate.Range(min=0, max=50), missing=None)
-    flexion  = fields.Integer(validate=validate.Range(min=0, max=160), missing=None)
-    extension  = fields.Integer(validate=validate.Range(min=0, max=110), missing=None)
-    slr  = fields.Integer(validate=validate.Range(min=0, max=120), missing=None)
+    ir = fields.Integer(description="internal rotation", validate=validate.Range(min=-20, max=100), missing=None)
+    er = fields.Integer(description="external rotation", validate=validate.Range(min=-20, max=100), missing=None)
+    abd = fields.Integer(description="abduction", validate=validate.Range(min=0, max=90), missing=None)
+    add = fields.Integer(description="adduction",validate=validate.Range(min=0, max=60), missing=None)
+    flexion  = fields.Integer(validate=validate.Range(min=0, max=180), missing=None)
+    extension  = fields.Integer(validate=validate.Range(min=0, max=120), missing=None)
+    slr  = fields.Integer(validate=validate.Range(min=0, max=180), missing=None)
 
 class ChessBoardShoulderSchema(Schema):
     left = fields.Nested(ShoulderRotationSchema, missing = ShoulderRotationSchema().load({}))

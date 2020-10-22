@@ -73,8 +73,8 @@ class PowerAssessmentSchema(Schema):
     timestamp = fields.DateTime()
     push_pull = fields.Nested(PowerPushPull, missing=PowerPushPull().load({}))
     leg_press = fields.Nested(PowerLegPress, missing=PowerLegPress().load({}))
-    upper_watts_per_kg = fields.Float(description = "watts per kg upper body", validate=validate.Range(min=0, max=100), missing=None)
-    lower_watts_per_kg = fields.Float(description = "watts per kg upper body", validate=validate.Range(min=0, max=250), missing=None)
+    upper_watts_per_kg = fields.Float(description = "watts per kg upper body", validate=validate.Range(min=0, max=120), missing=None)
+    lower_watts_per_kg = fields.Float(description = "watts per kg lower body", validate=validate.Range(min=0, max=300), missing=None)
     vital_weight = fields.Float(description="weight pulled from doctor physical data", dump_only=True)
 
     @post_load
@@ -418,7 +418,7 @@ class MoxyAssessmentSchema(ma.SQLAlchemySchema):
     recovery_baseline = fields.Integer(description="", validate=validate.Range(min=0, max=100), missing=None)
     gas_tank_size = fields.Integer(description="", validate=validate.Range(min=0, max=100), missing=None)
     starting_sm_o2 = fields.Integer(description="", validate=validate.Range(min=0, max=100), missing=None)
-    starting_thb = fields.Integer(description="", validate=validate.Range(min=9, max=18), missing=None)
+    starting_thb = fields.Float(description="", validate=validate.Range(min=9, max=18), missing=None)
     limiter = fields.String(description=f"must be one of: {limiter_list}", missing=None)
     intervention = ma.auto_field(missing=None)
     performance_metric_1 = fields.String(description=f"must be one of: {performance_metric_list}", missing=None)
@@ -458,11 +458,11 @@ class LungAssessmentSchema(ma.SQLAlchemySchema):
     timestamp = ma.auto_field()
     notes = ma.auto_field(missing=None)
     vital_weight = fields.Float(description="weight pulled from doctor physical data", dump_only=True, missing=None)
-    bag_size = fields.Float(description="in liters", validate=validate.Range(min=0, max=10), missing=None)
-    duration = fields.Integer(description="in seconds", validate=validate.Range(min=0, max=300), missing=None)
-    breaths_per_minute = fields.Integer(description="", validate=validate.Range(min=0, max=100), missing=None)
-    max_minute_volume = fields.Float(description="", validate=validate.Range(min=0, max=500), missing=None)
-    liters_min_kg = fields.Float(description="liters per minute per kg", validate=validate.Range(min=0, max=100), missing=None)
+    bag_size = fields.Float(description="in liters", validate=validate.Range(min=0, max=12), missing=None)
+    duration = fields.Integer(description="in seconds", validate=validate.Range(min=0, max=400), missing=None)
+    breaths_per_minute = fields.Integer(description="", validate=validate.Range(min=0, max=120), missing=None)
+    max_minute_volume = fields.Float(description="", validate=validate.Range(min=0, max=600), missing=None)
+    liters_min_kg = fields.Float(description="liters per minute per kg", validate=validate.Range(min=0, max=110), missing=None)
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -483,8 +483,8 @@ class LungAssessmentSchema(ma.SQLAlchemySchema):
 class MoxyRipExaminationSchema(Schema):
 
     smo2 = fields.Integer(description="", validate=validate.Range(min=0, max=100), missing=None)
-    thb = fields.Integer(description="", validate=validate.Range(min=9, max=18), missing=None)
-    avg_power = fields.Integer(description="", validate=validate.Range(min=0, max=1500), missing=None)
+    thb = fields.Float(description="", validate=validate.Range(min=9, max=18), missing=None)
+    avg_power = fields.Integer(description="", validate=validate.Range(min=0, max=1800), missing=None)
     hr_max_min = fields.Integer(description="", validate=validate.Range(min=0, max=220), missing=None)
 
 class MoxyTries(Schema):
@@ -501,15 +501,15 @@ class MoxyRipSchema(Schema):
     vl_side = fields.String(description="vl_side must be either 'right' or 'left'", missing=None)
     performance = fields.Nested(MoxyTries, missing=MoxyTries().load({}))
     recovery = fields.Nested(MoxyTries, missing=MoxyTries().load({}))
-    smo2_tank_size = fields.Integer(description="", validate=validate.Range(min=0, max=100), missing=None)
-    thb_tank_size = fields.Integer(description="", validate=validate.Range(min=9, max=18), missing=None)
-    performance_baseline_smo2 = fields.Integer(description="", validate=validate.Range(min=0, max=100), missing=None)
-    performance_baseline_thb = fields.Integer(description="", validate=validate.Range(min=9, max=18), missing=None)
-    recovery_baseline_smo2 = fields.Integer(description="", validate=validate.Range(min=0, max=100), missing=None)
-    recovery_baseline_thb = fields.Integer(description="", validate=validate.Range(min=9, max=18), missing=None)
-    avg_watt_kg = fields.Float(description="", validate=validate.Range(min=0, max=20), missing=None)
-    avg_interval_time = fields.Integer(description="seconds", validate=validate.Range(min=0, max=360), missing=None)
-    avg_recovery_time = fields.Integer(description="seconds", validate=validate.Range(min=0, max=360), missing=None)
+    smo2_tank_size = fields.Integer(description="", validate=validate.Range(min=0, max=110), missing=None)
+    thb_tank_size = fields.Float(description="", validate=validate.Range(min=9, max=18), missing=None)
+    performance_baseline_smo2 = fields.Integer(description="", validate=validate.Range(min=0, max=110), missing=None)
+    performance_baseline_thb = fields.Float(description="", validate=validate.Range(min=9, max=18), missing=None)
+    recovery_baseline_smo2 = fields.Integer(description="", validate=validate.Range(min=0, max=110), missing=None)
+    recovery_baseline_thb = fields.Float(description="", validate=validate.Range(min=9, max=18), missing=None)
+    avg_watt_kg = fields.Float(description="", validate=validate.Range(min=0, max=60), missing=None)
+    avg_interval_time = fields.Integer(description="seconds", validate=validate.Range(min=0, max=400), missing=None)
+    avg_recovery_time = fields.Integer(description="seconds", validate=validate.Range(min=0, max=400), missing=None)
 
     limiter = fields.String(description=f"must be one of the following choices: {limiter_options}", missing=None)
 
