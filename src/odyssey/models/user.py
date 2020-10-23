@@ -11,6 +11,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from odyssey import db
 from odyssey.constants import DB_SERVER_TIME
 
+#@whooshee.register_model('firstname', 'lastname', 'email', 'phone', 'user_id')
 class User(db.Model):
     """ 
     Stores details to relating to user account not related to the login system

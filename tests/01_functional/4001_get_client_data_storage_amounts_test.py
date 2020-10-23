@@ -23,4 +23,7 @@ def test_get_client_storage_tiers(test_client, init_database):
     data = response.get_json()
     # some simple checks for validity
     assert response.status_code == 200
-    assert data['items'][0]['stored_bytes'] == data['total_stored_bytes']
+    total_bytes = 0
+    for item in data['items']:
+        total_bytes += item['stored_bytes']
+    assert total_bytes == data['total_stored_bytes']

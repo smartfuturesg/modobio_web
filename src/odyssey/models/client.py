@@ -18,7 +18,7 @@ phx_tz = pytz.timezone('America/Phoenix')
 
 
 
-@whooshee.register_model('dob', 'record_locator_id')
+#@whooshee.register_model('firstname', 'lastname', 'dob', 'phone', 'email', 'record_locator_id')
 class ClientInfo(db.Model):
     """ Client information table
 

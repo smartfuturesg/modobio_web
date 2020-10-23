@@ -1162,7 +1162,7 @@ class MedicalBloodTestsInputSchema(Schema):
 class MedicalBloodTestResultsSchema(Schema):
     idx = fields.Integer()
     test_id = fields.Integer()
-    resultid = fields.Integer()
+    result_id = fields.Integer()
     result_value = fields.Float()
 
     @post_load
@@ -1170,7 +1170,7 @@ class MedicalBloodTestResultsSchema(Schema):
         return MedicalBloodTestResults(**data)
 
 class MedicalBloodTestResultTypesSchema(Schema):
-    resultid = fields.Integer()
+    result_id = fields.Integer()
     result_name = fields.String()
 
     @post_load

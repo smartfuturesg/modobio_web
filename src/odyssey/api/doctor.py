@@ -177,7 +177,7 @@ class MedBloodTest(Resource):
         test = MedicalBloodTests.query.filter_by(test_id=client_bt.test_id).first()
         for result in results:
             check_blood_test_result_type_existence(result['result_name'])
-            resultid = MedicalBloodTestResultTypes.query.filter_by(result_name=result['result_name']).first().result_id
+            result_id = MedicalBloodTestResultTypes.query.filter_by(result_name=result['result_name']).first().result_id
             result_data = {'test_id': client_bt.test_id, 'result_id': result_id, 'result_value': result['result_value']}
             bt_result = MedicalBloodTestResultsSchema().load(result_data)
             db.session.add(bt_result)

@@ -44,7 +44,8 @@ from odyssey.utils.schemas import (
     ClientSummarySchema,
     NewRemoteClientSchema, 
     SignAndDateSchema,
-    SignedDocumentsSchema
+    SignedDocumentsSchema,
+    UserSchema
 )
 
 ns = api.namespace('client', description='Operations related to clients')
@@ -135,89 +136,92 @@ class ClientSummary(Resource):
         return data
 
 @ns.route('/clientsearch/')
-@ns.doc(params={'page': 'request page for paginated clients list',
-                'per_page': 'number of clients per page',
-                'firstname': 'first name to search',
-                'lastname': 'last name to search',
-                'email': 'email to search',
-                'phone': 'phone number to search',
-                'dob': 'date of birth to search',
-                'record_locator_id': 'record locator id to search'})
+#@ns.doc(params={'page': 'request page for paginated clients list',
+#                'per_page': 'number of clients per page',
+#                'firstname': 'first name to search',
+#                'lastname': 'last name to search',
+#                'email': 'email to search',
+#                'phone': 'phone number to search',
+#                'dob': 'date of birth to search',
+#                'record_locator_id': 'record locator id to search'})
 
 #todo - fix to work with new user system
 class Clients(Resource):
     @token_auth.login_required
-    @responds(schema=ClientSearchOutSchema, api=ns)
+    #@responds(schema=ClientSearchOutSchema, api=ns)
+    @responds(schema=UserSchema(many=True), api=ns)
     def get(self):
         """returns list of clients given query parameters"""
-        page = request.args.get('page', 1, type=int)
-        per_page = min(request.args.get('per_page', 10, type=int), 100)                 
-        
-        # These payload keys should be the same as what's indexed in 
-        # the model.
-        param = {}
-        param_keys = ['firstname', 'lastname', 'email', 'phone', 'dob', 'record_locator_id']
-        searchStr = ''
-        for key in param_keys:
-            param[key] = request.args.get(key, default=None, type=str)
-            # Cleans up search query
-            if param[key] is None:
-                param[key] = ''          
-            elif key == 'record_locator_id' and param.get(key, None):
-                tempId = param[key]
-            elif key == 'email' and param.get(key, None):
-                tempEmail = param[key]
-                param[key] = param[key].replace("@"," ")
-            elif key == 'phone' and param.get(key, None):
-                param[key] = param[key].replace("-"," ")
-                param[key] = param[key].replace("("," ")
-                param[key] = param[key].replace(")"," ")                
-            elif key == 'dob' and param.get(key, None):
-                param[key] = param[key].replace("-"," ")
+        return User.query.filter_by(is_client=True).all()
 
-            searchStr = searchStr + param[key] + ' '        
+        # page = request.args.get('page', 1, type=int)
+        # per_page = min(request.args.get('per_page', 10, type=int), 100)                 
         
-        if(searchStr.isspace()):
-            data, resources = ClientInfo.all_clients_dict(ClientInfo.query.order_by(ClientInfo.lastname.asc()),
-                                                page=page,per_page=per_page)
-        else:
-            data, resources = ClientInfo.all_clients_dict(ClientInfo.query.whooshee_search(searchStr),
-                                                page=page,per_page=per_page)
+        # # These payload keys should be the same as what's indexed in 
+        # # the model.
+        # param = {}
+        # param_keys = ['firstname', 'lastname', 'email', 'phone', 'dob', 'record_locator_id']
+        # searchStr = ''
+        # for key in param_keys:
+        #     param[key] = request.args.get(key, default=None, type=str)
+        #     # Cleans up search query
+        #     if param[key] is None:
+        #         param[key] = ''          
+        #     elif key == 'record_locator_id' and param.get(key, None):
+        #         tempId = param[key]
+        #     elif key == 'email' and param.get(key, None):
+        #         tempEmail = param[key]
+        #         param[key] = param[key].replace("@"," ")
+        #     elif key == 'phone' and param.get(key, None):
+        #         param[key] = param[key].replace("-"," ")
+        #         param[key] = param[key].replace("("," ")
+        #         param[key] = param[key].replace(")"," ")                
+        #     elif key == 'dob' and param.get(key, None):
+        #         param[key] = param[key].replace("-"," ")
 
-        # Since email and record locator idshould be unique, 
-        # if the input email or rli exactly matches 
-        # the profile, only display that user
-        exactMatch = False
+        #     searchStr = searchStr + param[key] + ' '        
         
-        if param['email']:
-            for val in data['items']:
-                if val['email'].lower() == tempEmail.lower():
-                    data['items'] = [val]
-                    exactMatch = True
-                    break
-        
-        # Assuming client will most likely remember their 
-        # email instead of their RLI. If the email is correct
-        # no need to search through RLI. 
-        #
-        # If BOTH are incorrect, return data as normal.
-        if param['record_locator_id'] and not exactMatch:
-            for val in data['items']:
-                if val['record_locator_id'] is None:
-                    pass
-                elif val['record_locator_id'].lower() == tempId.lower():
-                    data['items'] = [val]
-                    break
+        # if(searchStr.isspace()):
+        #     data, resources = ClientInfo.all_clients_dict(ClientInfo.query.order_by(ClientInfo.lastname.asc()),
+        #                                         page=page,per_page=per_page)
+        # else:
+        #     data, resources = ClientInfo.all_clients_dict(ClientInfo.query.whooshee_search(searchStr),
+        #                                         page=page,per_page=per_page)
 
-        data['_links']= {
-            '_self': api.url_for(Clients, page=page, per_page=per_page),
-            '_next': api.url_for(Clients, page=page + 1, per_page=per_page)
-            if resources.has_next else None,
-            '_prev': api.url_for(Clients, page=page - 1, per_page=per_page)
-            if resources.has_prev else None,
-        }
+        # # Since email and record locator idshould be unique, 
+        # # if the input email or rli exactly matches 
+        # # the profile, only display that user
+        # exactMatch = False
         
-        return data
+        # if param['email']:
+        #     for val in data['items']:
+        #         if val['email'].lower() == tempEmail.lower():
+        #             data['items'] = [val]
+        #             exactMatch = True
+        #             break
+        
+        # # Assuming client will most likely remember their 
+        # # email instead of their RLI. If the email is correct
+        # # no need to search through RLI. 
+        # #
+        # # If BOTH are incorrect, return data as normal.
+        # if param['record_locator_id'] and not exactMatch:
+        #     for val in data['items']:
+        #         if val['record_locator_id'] is None:
+        #             pass
+        #         elif val['record_locator_id'].lower() == tempId.lower():
+        #             data['items'] = [val]
+        #             break
+
+        # data['_links']= {
+        #     '_self': api.url_for(Clients, page=page, per_page=per_page),
+        #     '_next': api.url_for(Clients, page=page + 1, per_page=per_page)
+        #     if resources.has_next else None,
+        #     '_prev': api.url_for(Clients, page=page - 1, per_page=per_page)
+        #     if resources.has_prev else None,
+        # }
+        
+        # return data
 
 @ns.route('/consent/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})

@@ -8,7 +8,7 @@ import jwt
 
 from odyssey import db
 from odyssey.models.staff import StaffProfile
-from odyssey.models.user import User
+from odyssey.models.user import User, UserLogin
 from odyssey.api import api
 from odyssey.api.auth import token_auth, basic_auth
 from odyssey.api.errors import UnauthorizedUser, StaffEmailInUse, StaffNotFound
@@ -25,75 +25,78 @@ from odyssey.utils.schemas import (
 ns = api.namespace('staff', description='Operations related to staff members')
 
 @ns.route('/')
-@ns.doc(params={'firstname': 'first name to search',
-                'lastname': 'last name to search',
-                'user_id': 'user_id to search',
-                'email': 'email to search'})
+#@ns.doc(params={'firstname': 'first name to search',
+#                'lastname': 'last name to search',
+#                'user_id': 'user_id to search',
+#                'email': 'email to search'})
 class StaffMembers(Resource):
     """staff member class for creating, getting staff"""
     
-    @token_auth.login_required(role=['sys_admin', 'staff_admin'])
-    @responds(schema=StaffSearchItemsSchema(many=True), api=ns)
+    @token_auth.login_required
+    #@responds(schema=StaffSearchItemsSchema(many=True), api=ns)
+    @responds(schema=UserSchema(many=True), api=ns)
     def get(self):
         """returns list of staff members given query parameters"""                
         # These payload keys should be the same as what's indexed in 
         # the model.
-        param = {}
-        param_keys = ['firstname', 'lastname', 'email', 'user_id']
-        noMoreSearch = False
+        return User.query.filter_by(is_staff=True)
+
+        # param = {}
+        # param_keys = ['firstname', 'lastname', 'email', 'user_id']
+        # noMoreSearch = False
         
-        if not request.args:
-            data = User.query.filter_by(is_staff=True).order_by(Staff.lastname.asc()).all()
-            noMoreSearch = True
-        elif len(request.args) == 1 and request.args.get('user_id'):
-            data = [User.query.filter_by(user_id=request.args.get('user_id')).first()]
-            if not any(data):
-                raise StaffNotFound(request.args.get('user_id'))
-            noMoreSearch = True
+        # if not request.args:
+        #     data = User.query.filter_by(is_staff=True).order_by(Staff.lastname.asc()).all()
+        #     noMoreSearch = True
+        # elif len(request.args) == 1 and request.args.get('user_id'):
+        #     data = [User.query.filter_by(user_id=request.args.get('user_id')).first()]
+        #     if not any(data):
+        #         raise StaffNotFound(request.args.get('user_id'))
+        #     noMoreSearch = True
         
-        if not noMoreSearch:
-            searchStr = ''
-            exactMatch = False
-            for key in param_keys:
-                param[key] = request.args.get(key, default=None, type=str)
-                # Cleans up search query
-                if param[key] is None:
-                    param[key] = ''     
-                elif key == 'email' and param.get(key, None):
-                    tempEmail = param[key]
-                    param[key] = param[key].replace("@"," ")
-                searchStr = searchStr + param[key] + ' '
+        # if not noMoreSearch:
+        #     searchStr = ''
+        #     exactMatch = False
+        #     for key in param_keys:
+        #         param[key] = request.args.get(key, default=None, type=str)
+        #         # Cleans up search query
+        #         if param[key] is None:
+        #             param[key] = ''     
+        #         elif key == 'email' and param.get(key, None):
+        #             tempEmail = param[key]
+        #             param[key] = param[key].replace("@"," ")
+        #         searchStr = searchStr + param[key] + ' '
             
-            data = Staff.query.whooshee_search(searchStr).all()
+        #     data = User.query.whooshee_search(searchStr).all()
 
-            # Since email and user_id should be unique, 
-            # if the input email or user_id exactly matches 
-            # the profile, only display that user
-            if param['email']:
-                for val in data:
-                    if val.email.lower() == tempEmail.lower():
-                        data = [val]
-                        exactMatch = True
-                        break
+        #     # Since email and user_id should be unique, 
+        #     # if the input email or user_id exactly matches 
+        #     # the profile, only display that user
+        #     if param['email']:
+        #         for val in data:
+        #             if val.email.lower() == tempEmail.lower():
+        #                 data = [val]
+        #                 exactMatch = True
+        #                 break
 
-            # Assuming staff will most likely remember their 
-            # email instead of their staff. If the email is correct
-            # no need to search through RLI. 
-            #
-            # This next check depends on if the whooshee search returns 
-            # Relevant staff with the correct ID. It is possible for the
-            # search to return different staff members (and NOT the user_id
-            # that was a search parameter
-            #
-            # If BOTH are incorrect, return data as normal.
-            if param['user_id'] and not exactMatch:
-                for val in data:
-                    if val.user_id == param['user_id']:
-                        data = [val]
-                        break
-        return data 
+        #     # Assuming staff will most likely remember their 
+        #     # email instead of their staff. If the email is correct
+        #     # no need to search through RLI. 
+        #     #
+        #     # This next check depends on if the whooshee search returns 
+        #     # Relevant staff with the correct ID. It is possible for the
+        #     # search to return different staff members (and NOT the user_id
+        #     # that was a search parameter
+        #     #
+        #     # If BOTH are incorrect, return data as normal.
+        #     if param['user_id'] and not exactMatch:
+        #         for val in data:
+        #             if val.user_id == param['user_id']:
+        #                 data = [val]
+        #                 break
+        # return data 
     
-    @token_auth.login_required(role=['sys_admin', 'staff_admin'])
+    @token_auth.login_required
     @accepts(schema=StaffProfileSchema, api=ns)
     @responds(schema=StaffProfileSchema, status_code=201, api=ns)     
     def post(self):
@@ -153,7 +156,7 @@ class PasswordResetEmail(Resource):
         """
         email = request.get_json()['email']
 
-        staff = Staff.query.filter_by(email=email.lower()).first()
+        staff = User.query.filter_by(email=email.lower()).first()
         
         if not email or not staff:
             return 200
@@ -193,9 +196,9 @@ class ResetPassword(Resource):
         # bring up the staff member and reset their password
         pswd = request.get_json()['password']
 
-        staff = Staff.query.filter_by(user_id=decoded_token['sid']).first()
+        staff = UserLogin.query.filter_by(user_id=decoded_token['sid']).first()
         staff.set_password(pswd)
-        
+
         db.session.commit()
 
         return 200
@@ -203,7 +206,7 @@ class ResetPassword(Resource):
 @ns.route('/password/update')
 class ChangePassword(Resource):
     """Reset the user's password."""
-    @token_auth.login_required()
+    @token_auth.login_required
     @accepts(schema=StaffPasswordUpdateSchema, api=ns)
     def post(self):
         """
@@ -215,10 +218,11 @@ class ChangePassword(Resource):
         staff_email = token_auth.current_user().email
 
         # bring up the staff member and reset their password
-        staff = Staff.query.filter_by(email=staff_email).first()
+        staff = User.query.filter_by(email=staff_email).one_or_none()
+        staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
 
-        if staff.check_password(password=data["current_password"]):
-            staff.set_password(data["new_password"])
+        if staffLogin.check_password(password=data["current_password"]):
+            staffLogin.set_password(data["new_password"])
         else:
             raise UnauthorizedUser(message="please enter the correct current password \
                                       otherwise, visit the password recovery endpoint \
