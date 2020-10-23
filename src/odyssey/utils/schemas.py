@@ -72,7 +72,7 @@ class ClientSearchOutSchema(Schema):
 class ClientFacilitiesSchema(Schema):
 
     idx = fields.Integer()
-    client_id = fields.Integer()
+    user_id = fields.Integer()
     facility_id = fields.Integer()
 
     @post_load

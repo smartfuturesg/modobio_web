@@ -25,6 +25,7 @@ from odyssey.models.pt import PTHistory
 from odyssey.models.staff import ClientRemovalRequests
 from odyssey.models.trainer import FitnessQuestionnaire
 from odyssey.models.misc import RegisteredFacilities
+from odyssey.models.user import User
 from odyssey.pdf import to_pdf, merge_pdfs
 from odyssey.utils.email import send_email_remote_registration_portal, send_test_email
 from odyssey.utils.misc import check_client_existence
@@ -80,29 +81,37 @@ class Client(Resource):
         
         return client
 
-@ns.route('/remove/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
-class RemoveClient(Resource):
-    @token_auth.login_required
-    def delete(self, user_id):
-        """deletes client from database entirely"""
-        client = ClientInfo.query.filter_by(user_id=user_id).one_or_none
 
-        if not client:
-            raise UserNotFound(user_id)
-        
-        # find the staff member requesting client delete
-        staff = token_auth.current_user()
-        new_removal_request = ClientRemovalRequests(user_id=staff.user_id)
-        
-        db.session.add(new_removal_request)
-        db.session.flush()
+#############
+#temporarily disabled until a better user delete system is created
+#############
 
-        #TODO: some logic on who gets to delete clients+ email to staff admin
-        db.session.delete(client)
-        db.session.commit()
+# @ns.route('/remove/<int:user_id>/')
+# @ns.doc(params={'user_id': 'User ID number'})
+# class RemoveClient(Resource):
+#     @token_auth.login_required
+#     def delete(self, user_id):
+#         """deletes client from database entirely"""
+#         client = User.query.filter_by(user_id=user_id, is_client=True).one_or_none()
+
+#         if not client:
+#             raise ClientNotFound(user_id)
         
-        return {'message': f'client with id {user_id} has been removed'}
+#         if client.is_staff:
+#             #only delete the client portio
+
+#         # find the staff member requesting client delete
+#         staff = token_auth.current_user()
+#         new_removal_request = ClientRemovalRequests(user_id=staff.user_id)
+        
+#         db.session.add(new_removal_request)
+#         db.session.flush()
+
+#         #TODO: some logic on who gets to delete clients+ email to staff admin
+#         db.session.delete(client)
+#         db.session.commit()
+        
+#         return {'message': f'client with id {user_id} has been removed'}
 
 @ns.route('/summary/<int:user_id>/')
 class ClientSummary(Resource):

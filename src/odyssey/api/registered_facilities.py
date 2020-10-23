@@ -13,6 +13,7 @@ from odyssey.models.client import ClientFacilities
 from odyssey.models.misc import RegisteredFacilities
 from odyssey.utils.schemas import RegisteredFacilitiesSchema, ClientFacilitiesSchema
 from odyssey.utils.misc import check_facility_existence, check_client_existence, check_client_facility_relation_existence
+from odyssey.models.user import User
 
 from odyssey import db
 

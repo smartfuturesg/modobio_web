@@ -87,8 +87,9 @@ def test_post_client_facility(test_client, init_database):
 
     payload = test_client_facilities
 
-    #send post request for a client-facility relation with facility_id = 1 and user_id = 1
-    response = test_client.post('/registeredfacility/client/1/',
+    client = User.query.filter_by(is_client=True).first()
+    #send post request for a client-facility relation with facility_id = 1 and user_id = client.user_id
+    response = test_client.post('/registeredfacility/client/' + str(client.user_id) + '/',
                                  headers=headers,
                                  data=dumps(payload),
                                  content_type='application/json')
@@ -107,10 +108,11 @@ def test_get_client_facility(test_client, init_database):
     token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    #send post request for a client-facility relation with facility_id = 1 and user_id = 1
-    response = test_client.get('/registeredfacility/client/1/',
-                                 headers=headers,
-                                 content_type='application/json')
+    client = User.query.filter_by(is_client=True).first()
+    #send get request for a client with user_id = client.user_id
+    response = test_client.get('/registeredfacility/client/' + str(client.user_id) + '/',
+                                headers=headers,
+                                content_type='application/json')
 
     assert response.status_code == 200
 
@@ -126,8 +128,9 @@ def test_get_client_summary(test_client, init_database):
     token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    #send get request for a client with user_id = 1
-    response = test_client.get('/client/summary/1/',
+    client = User.query.filter_by(is_client=True).first()
+    #send get request for a client with user_id = client.user_id
+    response = test_client.get('/client/summary/' + str(client.user_id) + '/',
                                 headers=headers,
                                 content_type='application/json')
 

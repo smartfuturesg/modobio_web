@@ -1,5 +1,6 @@
 import pathlib
 import time
+from datetime import datetime
 
 from flask.json import dumps
 from requests.auth import _basic_auth_str
@@ -96,46 +97,48 @@ def test_creating_new_client(test_client, init_database):
                                 content_type='application/json')
     user = User.query.filter_by(email=test_new_user_client['userinfo']['email']).first()
     assert response.status_code == 201
-    assert user.email == 'test_this_user_client@modobio.com'
+    assert user.email == test_new_user_client['userinfo']['email']
 
-    #send put request to fill out ClientInfo table for new user
-    test_new_user_client['clientinfo']['user_id'] = user.user_id
-    response = test_client.put('/client/',
-                                headers=headers,
-                                data=dumps(test_new_user_client["clientinfo"]),
-                                content_type='application/json')
+    resposne = test_client.put('/client/' + str(user.user_id) + '/',
+                               headers=headers,
+                               data = dumps(test_new_user_client['clientinfo']),
+                               content_type='application/json')
     client = ClientInfo.query.filter_by(user_id=user.user_id).first()
 
     # some simple checks for validity
     assert response.status_code == 201
-    assert client.dob == '1991-10-14'
+    assert client.guardianname == test_new_user_client['clientinfo']['guardianname']
 
-def test_removing_client(test_client, init_database):
-    """
-    GIVEN a api end point for retrieving client info
-    WHEN the '/client/remove/<user_id>' resource  is requested to be changed (DELETE)
-    THEN check the response is valid
-    """
+############
+#Removing client is temporarily disabled until a better user deletion system is created
+############
 
-    # get staff authorization to view client data
-    staff = User.query.filter_by(is_staff=True).first()
-    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
-    token = staffLogin.get_token()
-    headers = {'Authorization': f'Bearer {token}'}
+# def test_removing_client(test_client, init_database):
+#     """
+#     GIVEN a api end point for retrieving client info
+#     WHEN the '/client/remove/<user_id>' resource  is requested to be changed (DELETE)
+#     THEN check the response is valid
+#     """
 
-    # send post request to create client
-    test_client.post('/client/',
-                    headers=headers, 
-                    data=dumps(test_new_client_info), 
-                    content_type='application/json')
+#     # get staff authorization to view client data
+#     staff = User.query.filter_by(is_staff=True).first()
+#     staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
+#     token = staffLogin.get_token()
+#     headers = {'Authorization': f'Bearer {token}'}
+
+#     # send post request to create client
+#     test_client.post('/user/',
+#                     headers=headers, 
+#                     data=dumps(test_new_user_client_2["clientinfo"]), 
+#                     content_type='application/json')
                     
-    client = ClientInfo.query.filter_by(email=test_new_client_info['email']).first()
+#     client = User.query.filter_by(email=test_new_user_client_2["clientinfo"]['email']).first()
     
-    #take this new user_id
-    remove_user_id = client.user_id
+#     #take this new user_id
+#     remove_user_id = client.user_id
 
-    response = test_client.delete(f'/client/remove/{remove_user_id}/',
-                                headers=headers, 
-                                content_type='application/json')
-    # some simple checks for validity
-    assert response.status_code == 200
+#     response = test_client.delete(f'/client/remove/{remove_user_id}/',
+#                                 headers=headers, 
+#                                 content_type='application/json')
+#     # some simple checks for validity
+#     assert response.status_code == 200

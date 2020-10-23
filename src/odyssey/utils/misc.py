@@ -57,7 +57,7 @@ def check_facility_existence(facility_id):
         raise FacilityNotFound(facility_id)
 
 def check_client_facility_relation_existence(user_id, facility_id):
-    relation = ClientFacilities.query.filter_by(userid=userid,facility_id=facility_id).one_or_none()
+    relation = ClientFacilities.query.filter_by(user_id=user_id,facility_id=facility_id).one_or_none()
     if relation:
         raise RelationAlreadyExists(user_id, facility_id)
 

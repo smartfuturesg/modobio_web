@@ -581,7 +581,7 @@ class MedicalBloodTestResults(db.Model):
 
     result_id = db.Column(db.Integer, db.ForeignKey('MedicalBloodTestResultTypes.result_id', ondelete="CASCADE"), nullable=False)
     """
-    foreign key to MedicalBloodTestResultTypes.resultid
+    foreign key to MedicalBloodTestResultTypes.result_id
 
     :type: int, foreign key
     """

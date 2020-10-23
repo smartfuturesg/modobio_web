@@ -22,8 +22,9 @@ def test_post_medical_blood_test(test_client, init_database):
 
     payload = test_blood_tests
     
-    # send post request for client info on user_id = 1 
-    response = test_client.post('/doctor/bloodtest/1/',
+    client = User.query.filter_by(is_client=True).first()
+    # send post request for client info on user_id = client.user_id
+    response = test_client.post('/doctor/bloodtest/' + str(client.user_id) + '/',
                                 headers=headers, 
                                 data=dumps(payload), 
                                 content_type='application/json')
@@ -41,8 +42,9 @@ def test_get_client_blood_tests(test_client, init_database):
     token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    # send get request for client blood tests on user_id = 1 
-    response = test_client.get('/doctor/bloodtest/1/',
+    client = User.query.filter_by(is_client=True).first()
+    # send get request for client blood tests on user_id = client.user_id
+    response = test_client.get('/doctor/bloodtest/' + str(client.user_id) + '/',
                                 headers=headers, 
                                 content_type='application/json')
                                 
@@ -60,8 +62,9 @@ def test_get_blood_test_results(test_client, init_database):
     token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    # send get request for client info on user_id = 1 
-    response = test_client.get('/doctor/bloodtest/results/1/',
+    client = User.query.filter_by(is_client=True).first()
+    # send get request for client info on user_id = client.user_id
+    response = test_client.get('/doctor/bloodtest/results/' + str(client.user_id) + '/',
                                 headers=headers, 
                                 content_type='application/json')
                                 

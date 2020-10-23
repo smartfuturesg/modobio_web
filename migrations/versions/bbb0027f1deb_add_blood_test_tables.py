@@ -21,30 +21,30 @@ def upgrade():
     resultTypes = op.create_table('MedicalBloodTestResultTypes',
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
-    sa.Column('resultid', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('result_id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('result_name', sa.String(), nullable=True),
-    sa.PrimaryKeyConstraint('resultid')
+    sa.PrimaryKeyConstraint('result_id')
     )
     op.create_table('MedicalBloodTests',
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
-    sa.Column('testid', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('test_id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('clientid', sa.Integer(), nullable=False),
     sa.Column('date', sa.Date(), nullable=True),
     sa.Column('panel_type', sa.String(), nullable=True),
     sa.Column('notes', sa.String(), nullable=True),
     sa.ForeignKeyConstraint(['clientid'], ['ClientInfo.clientid'], ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('testid')
+    sa.PrimaryKeyConstraint('test_id')
     )
     op.create_table('MedicalBloodTestResults',
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.Column('idx', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('testid', sa.Integer(), nullable=False),
-    sa.Column('resultid', sa.Integer(), nullable=False),
+    sa.Column('test_id', sa.Integer(), nullable=False),
+    sa.Column('result_id', sa.Integer(), nullable=False),
     sa.Column('result_value', sa.Float(), nullable=True),
-    sa.ForeignKeyConstraint(['resultid'], ['MedicalBloodTestResultTypes.resultid'], ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['testid'], ['MedicalBloodTests.testid'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['result_id'], ['MedicalBloodTestResultTypes.result_id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['test_id'], ['MedicalBloodTests.test_id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('idx')
     )
     op.drop_table('MedicalBloodChemistryLipids')
