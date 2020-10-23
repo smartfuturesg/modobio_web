@@ -1,3 +1,4 @@
+import os
 import pytest
 from datetime import datetime
 
@@ -62,20 +63,18 @@ def init_database():
     # Create the database and the database table
     db.create_all()
 
-    # run .sql file to create db procedures
-    #  read client_data_storage_file, remove comments,
+    # run .sql files to create db procedures and initialize 
+    # some tables
+    #  read .sql files, remove comments,
     #  execute, raw sql on database
-    with open ("database/client_data_storage.sql", "r") as f:
-        data=f.readlines()
+    sql_scripts = ['database/'+f for f in os.listdir('database/') if f.endswith(".sql")]
+    for sql_script in sql_scripts:
+        with open (sql_script, "r") as f:
+            data=f.readlines()
 
-    dat = [x for x in data if not x.startswith('--')]
+        dat = [x for x in data if not x.startswith('--')]
     
-    db.session.execute(''.join(dat))
-
-    with open ("database/addResultTypes.sql", "r") as f:
-        data=f.readlines()
-
-    db.session.execute(''.join(data))
+        db.session.execute(''.join(dat))
 
     # Insert test client data
     client_1 = User(**test_new_client_creation)
