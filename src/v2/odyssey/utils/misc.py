@@ -10,7 +10,13 @@ import flask.json
 from odyssey.models.client import ClientInfo, RemoteRegistration, ClientFacilities
 from odyssey.models.doctor import MedicalBloodTests, MedicalBloodTestResultTypes
 from odyssey.models.misc import RegisteredFacilities
-from odyssey.api.errors import UserNotFound, FacilityNotFound, RelationAlreadyExists, TestNotFound, ResultTypeNotFound
+from odyssey.errors.handlers import(
+    UserNotFound, 
+    FacilityNotFound, 
+    RelationAlreadyExists, 
+    TestNotFound, 
+    ResultTypeNotFound
+)
 
 
 _uuid_rx = re.compile(r'[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}', flags=re.IGNORECASE)

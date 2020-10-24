@@ -70,19 +70,34 @@ def create_app():
     app.register_blueprint(bp)
 
     #Blueprint import and register
-    from odyssey.remote_clients import r_client_bp
+    from odyssey.client import client_bp
+    app.register_blueprint(client_bp)
+
+    from odyssey.remoteclient import r_client_bp
     app.register_blueprint(r_client_bp)
 
     from odyssey.doctor import doctor_bp
     app.register_blueprint(doctor_bp)
 
+    from odyssey.pt import pt_bp
+    app.register_blueprint(pt_bp)
+
+    from odyssey.registeredfacility import reg_facility_bp
+    app.register_blueprint(reg_facility_bp)
+
     from odyssey.staff import staff_bp
     app.register_blueprint(staff_bp)
+
+    from odyssey.tokens import tokens_bp
+    app.register_blueprint(tokens_bp)
 
     from odyssey.trainer import trainer_bp
     app.register_blueprint(trainer_bp)
 
-    from odyssey.api.errors import register_handlers
+    from odyssey.wearables import wearables_bp
+    app.register_blueprint(wearables_bp)
+
+    from odyssey.errors import register_handlers
     register_handlers(app)
 
     # Unprotected route, only relevant to developers

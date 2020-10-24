@@ -6,9 +6,9 @@ from odyssey.models.pt import Chessboard, PTHistory
 from odyssey import db
 from odyssey.api import api
 from odyssey.api.auth import token_auth
-from odyssey.api.errors import UserNotFound, IllegalSetting, ContentNotFound
+from odyssey.errors.handlers import UserNotFound, IllegalSetting, ContentNotFound
 from odyssey.utils.misc import check_client_existence
-from odyssey.utils.schemas import ChessboardSchema, PTHistorySchema
+from odyssey.pt.schemas import ChessboardSchema, PTHistorySchema
 
 ns = api.namespace('pt', description='Operations related to physical therapy services')
 

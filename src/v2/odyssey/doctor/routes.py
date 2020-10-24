@@ -19,7 +19,7 @@ from odyssey.models.doctor import (
 from odyssey.models.misc import MedicalInstitutions
 from odyssey.api import api
 from odyssey.api.auth import token_auth
-from odyssey.api.errors import (
+from odyssey.errors.handlers import (
     UserNotFound, 
     IllegalSetting, 
     ContentNotFound, 
@@ -34,7 +34,7 @@ from odyssey.utils.misc import (
     check_blood_test_existence, 
     check_blood_test_result_type_existence
 )
-from .schemas import (
+from odyssey.doctor.schemas import (
     AllMedicalBloodTestSchema,
     ClientExternalMREntrySchema, 
     ClientExternalMRSchema, 

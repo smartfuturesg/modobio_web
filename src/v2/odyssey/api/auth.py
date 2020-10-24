@@ -1,6 +1,6 @@
 from odyssey.models.staff import Staff
 from odyssey.models.client import RemoteRegistration
-from odyssey.api.errors import error_response
+from odyssey.errors.handlers import error_response
 from odyssey.utils.auth.odyssey_auth import BasicAuth, TokenAuth
 
 # simple authentication handler allows password authentication and

@@ -10,7 +10,7 @@ from sqlalchemy.sql import text
 
 from odyssey.api import api
 from odyssey.api.auth import token_auth
-from odyssey.api.errors import (
+from odyssey.errors.handlers import (
     ClientDeniedAccess,
     ContentNotFound,
     IllegalSetting,
@@ -23,13 +23,13 @@ from odyssey.models.wearables import (
     WearablesOura,
     WearablesFreeStyle
 )
-from odyssey.utils.schemas import (
+from odyssey.wearables.schemas import (
     WearablesSchema,
     WearablesFreeStyleSchema,
-    WearablesFreeStyleActivateSchema
+    WearablesFreeStyleActivateSchema,
+    WearablesOuraAuthSchema
 )
 from odyssey.models.wearables import Wearables, WearablesOura
-from odyssey.utils.schemas import WearablesSchema, WearablesOuraAuthSchema
 from odyssey.utils.misc import check_client_existence
 
 from odyssey import db

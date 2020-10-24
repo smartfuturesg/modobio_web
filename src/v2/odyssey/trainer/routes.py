@@ -7,7 +7,14 @@ from flask_accepts import accepts, responds
 
 from odyssey.api import api
 from odyssey.api.auth import token_auth, token_auth_client
-from odyssey.api.errors import UserNotFound, ClientAlreadyExists, ClientNotFound, ContentNotFound, ContentNotFoundReturnData, IllegalSetting
+from odyssey.errors.handlers import (
+    UserNotFound, 
+    ClientAlreadyExists, 
+    ClientNotFound, 
+    ContentNotFound, 
+    ContentNotFoundReturnData, 
+    IllegalSetting
+)
 from odyssey import db
 from odyssey.models.doctor import MedicalPhysicalExam
 from odyssey.models.trainer import (
@@ -31,7 +38,7 @@ from odyssey.trainer.schemas import (
     PowerAssessmentSchema, 
     StrenghtAssessmentSchema
 )
-from odyssey.utils.schemas import (
+from odyssey.client.schemas import (
     ClientInfoSchema,
 )
 

@@ -7,7 +7,13 @@ from flask_restx import Resource, Api
 
 from odyssey.api import api
 from odyssey.api.auth import token_auth, token_auth_client
-from odyssey.api.errors import UserNotFound, ClientAlreadyExists, ClientNotFound, IllegalSetting, ContentNotFound
+from odyssey.errors.handlers import (
+    UserNotFound, 
+    ClientAlreadyExists, 
+    ClientNotFound, 
+    IllegalSetting, 
+    ContentNotFound
+)
 from odyssey import db
 from odyssey.constants import TABLE_TO_URI
 from odyssey.models.client import (
@@ -30,7 +36,7 @@ from odyssey.pdf import to_pdf, merge_pdfs
 from odyssey.utils.email import send_email_remote_registration_portal, send_test_email
 from odyssey.utils.misc import check_client_existence
 from odyssey.staff.schemas import ClientSummarySchema
-from odyssey.utils.schemas import (
+from odyssey.client.schemas import (
     AllClientsDataTier,
     ClientConsentSchema,
     ClientConsultContractSchema,

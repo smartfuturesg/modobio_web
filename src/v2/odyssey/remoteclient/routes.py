@@ -7,7 +7,12 @@ from flask_restx import Resource
 
 from odyssey.api import api
 from odyssey.api.auth import token_auth_client
-from odyssey.api.errors import ClientNotFound, ContentNotFound, IllegalSetting, UserNotFound
+from odyssey.errors.handlers import (
+    ClientNotFound, 
+    ContentNotFound, 
+    IllegalSetting, 
+    UserNotFound
+)
 from odyssey import db
 from odyssey.pdf import merge_pdfs, to_pdf
 from odyssey.models.client import (
@@ -30,7 +35,7 @@ from odyssey.doctor.schemas import (
 from odyssey.trainer.schemas import (
     FitnessQuestionnaireSchema
 )
-from odyssey.utils.schemas import (
+from odyssey.client.schemas import (
     ClientInfoSchema,
     ClientConsentSchema,
     ClientConsultContractSchema,
@@ -38,9 +43,9 @@ from odyssey.utils.schemas import (
     ClientIndividualContractSchema,
     ClientSubscriptionContractSchema,
     ClientReleaseSchema,
-    SignedDocumentsSchema,
-    PTHistorySchema
+    SignedDocumentsSchema
 )
+from odyssey.pt.schemas import PTHistorySchema
 
 
 ns = api.namespace('remoteclient', description='Operations related to clients')
