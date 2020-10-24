@@ -647,4 +647,4 @@ def add_rest_result_eval(mapper, connection, target):
     Runs evaluation on the DB side and stores the eval result.
     Evaluation is based of normal and optimal ranges of each blood test type
     """
-    connection.execute(BLOODTEST_EVAL.format(target.idx, target.resultid, target.result_value))
+    connection.execute(BLOODTEST_EVAL.format(target.idx, target.result_id, target.result_value))

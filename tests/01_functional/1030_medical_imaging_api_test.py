@@ -41,18 +41,19 @@ def test_post_medical_imaging_no_image(test_client, init_database):
     THEN check the response is valid
     """
     # get staff authorization to view client data
-    staff = Staff.query.first()
-    token = staff.get_token()
+    staff = User.query.filter_by(is_staff=True).first()
+    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
+    token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
     payload = test_medical_imaging
     del payload["image"]
-    # send get request for client info on clientid = 1
+    # send get request for client info on user_id = 1
             
     response = test_client.post('/doctor/images/1/', 
                             headers=headers, 
                             data = payload)
     
-    data = MedicalImaging.query.filter_by(clientid=1).order_by(MedicalImaging.created_at.desc()).first()
+    data = MedicalImaging.query.filter_by(user_id=1).order_by(MedicalImaging.created_at.desc()).first()
     assert response.status_code == 201
     assert data.image_read == payload['image_read']
 

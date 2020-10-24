@@ -1203,7 +1203,7 @@ class MedicalBloodTestResultTypesSchema(Schema):
 class MedicalBloodTestTypes(ma.SQLAlchemyAutoSchema):
     class Meta():
         model = MedicalBloodTestResultTypes
-        exclude = ('created_at', 'resultid')
+        exclude = ('created_at', 'result_id')
 
 class MedicalBloodTestResultTypesSchema(Schema):
     
