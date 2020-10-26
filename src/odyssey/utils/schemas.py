@@ -298,21 +298,21 @@ class PTHistorySchema(ma.SQLAlchemyAutoSchema):
 
 
 class ShoulderRotationSchema(Schema):
-    ir = fields.Integer(description="internal rotation", validate=validate.Range(min=0, max=100), missing=None)
+    ir = fields.Integer(description="internal rotation", validate=validate.Range(min=0, max=110), missing=None)
     er = fields.Integer(description="external rotation", validate=validate.Range(min=0, max=130), missing=None)
-    abd = fields.Integer(description="abduction", validate=validate.Range(min=0, max=75), missing=None)
-    add = fields.Integer(description="adduction", validate=validate.Range(min=0, max=135), missing=None)
+    abd = fields.Integer(description="abduction", validate=validate.Range(min=0, max=90), missing=None)
+    add = fields.Integer(description="adduction", validate=validate.Range(min=0, max=150), missing=None)
     flexion  = fields.Integer(validate=validate.Range(min=0, max=190), missing=None)
-    extension  = fields.Integer(validate=validate.Range(min=0, max=75), missing=None)
+    extension  = fields.Integer(validate=validate.Range(min=0, max=90), missing=None)
 
 class HipRotationSchema(Schema):
-    ir = fields.Integer(description="internal rotation", validate=validate.Range(min=0, max=60), missing=None)
-    er = fields.Integer(description="external rotation", validate=validate.Range(min=0, max=90), missing=None)
-    abd = fields.Integer(description="abduction", validate=validate.Range(min=0, max=75), missing=None)
-    add = fields.Integer(description="adduction",validate=validate.Range(min=0, max=50), missing=None)
-    flexion  = fields.Integer(validate=validate.Range(min=0, max=160), missing=None)
-    extension  = fields.Integer(validate=validate.Range(min=0, max=110), missing=None)
-    slr  = fields.Integer(validate=validate.Range(min=0, max=120), missing=None)
+    ir = fields.Integer(description="internal rotation", validate=validate.Range(min=-20, max=100), missing=None)
+    er = fields.Integer(description="external rotation", validate=validate.Range(min=-20, max=100), missing=None)
+    abd = fields.Integer(description="abduction", validate=validate.Range(min=0, max=90), missing=None)
+    add = fields.Integer(description="adduction",validate=validate.Range(min=0, max=60), missing=None)
+    flexion  = fields.Integer(validate=validate.Range(min=0, max=180), missing=None)
+    extension  = fields.Integer(validate=validate.Range(min=0, max=120), missing=None)
+    slr  = fields.Integer(validate=validate.Range(min=0, max=180), missing=None)
 
 class ChessBoardShoulderSchema(Schema):
     left = fields.Nested(ShoulderRotationSchema, missing = ShoulderRotationSchema().load({}))
@@ -441,8 +441,8 @@ class PowerAssessmentSchema(Schema):
     timestamp = fields.DateTime()
     push_pull = fields.Nested(PowerPushPull, missing=PowerPushPull().load({}))
     leg_press = fields.Nested(PowerLegPress, missing=PowerLegPress().load({}))
-    upper_watts_per_kg = fields.Float(description = "watts per kg upper body", validate=validate.Range(min=0, max=100), missing=None)
-    lower_watts_per_kg = fields.Float(description = "watts per kg upper body", validate=validate.Range(min=0, max=250), missing=None)
+    upper_watts_per_kg = fields.Float(description = "watts per kg upper body", validate=validate.Range(min=0, max=120), missing=None)
+    lower_watts_per_kg = fields.Float(description = "watts per kg lower body", validate=validate.Range(min=0, max=300), missing=None)
     vital_weight = fields.Float(description="weight pulled from doctor physical data", dump_only=True)
 
     @post_load
@@ -786,7 +786,7 @@ class MoxyAssessmentSchema(ma.SQLAlchemySchema):
     recovery_baseline = fields.Integer(description="", validate=validate.Range(min=0, max=100), missing=None)
     gas_tank_size = fields.Integer(description="", validate=validate.Range(min=0, max=100), missing=None)
     starting_sm_o2 = fields.Integer(description="", validate=validate.Range(min=0, max=100), missing=None)
-    starting_thb = fields.Integer(description="", validate=validate.Range(min=9, max=18), missing=None)
+    starting_thb = fields.Float(description="", validate=validate.Range(min=9, max=18), missing=None)
     limiter = fields.String(description=f"must be one of: {limiter_list}", missing=None)
     intervention = ma.auto_field(missing=None)
     performance_metric_1 = fields.String(description=f"must be one of: {performance_metric_list}", missing=None)
@@ -826,11 +826,11 @@ class LungAssessmentSchema(ma.SQLAlchemySchema):
     timestamp = ma.auto_field()
     notes = ma.auto_field(missing=None)
     vital_weight = fields.Float(description="weight pulled from doctor physical data", dump_only=True, missing=None)
-    bag_size = fields.Float(description="in liters", validate=validate.Range(min=0, max=10), missing=None)
-    duration = fields.Integer(description="in seconds", validate=validate.Range(min=0, max=300), missing=None)
-    breaths_per_minute = fields.Integer(description="", validate=validate.Range(min=0, max=100), missing=None)
-    max_minute_volume = fields.Float(description="", validate=validate.Range(min=0, max=500), missing=None)
-    liters_min_kg = fields.Float(description="liters per minute per kg", validate=validate.Range(min=0, max=100), missing=None)
+    bag_size = fields.Float(description="in liters", validate=validate.Range(min=0, max=12), missing=None)
+    duration = fields.Integer(description="in seconds", validate=validate.Range(min=0, max=400), missing=None)
+    breaths_per_minute = fields.Integer(description="", validate=validate.Range(min=0, max=120), missing=None)
+    max_minute_volume = fields.Float(description="", validate=validate.Range(min=0, max=600), missing=None)
+    liters_min_kg = fields.Float(description="liters per minute per kg", validate=validate.Range(min=0, max=110), missing=None)
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -851,8 +851,8 @@ class LungAssessmentSchema(ma.SQLAlchemySchema):
 class MoxyRipExaminationSchema(Schema):
 
     smo2 = fields.Integer(description="", validate=validate.Range(min=0, max=100), missing=None)
-    thb = fields.Integer(description="", validate=validate.Range(min=9, max=18), missing=None)
-    avg_power = fields.Integer(description="", validate=validate.Range(min=0, max=1500), missing=None)
+    thb = fields.Float(description="", validate=validate.Range(min=9, max=18), missing=None)
+    avg_power = fields.Integer(description="", validate=validate.Range(min=0, max=1800), missing=None)
     hr_max_min = fields.Integer(description="", validate=validate.Range(min=0, max=220), missing=None)
 
 class MoxyTries(Schema):
@@ -869,15 +869,15 @@ class MoxyRipSchema(Schema):
     vl_side = fields.String(description="vl_side must be either 'right' or 'left'", missing=None)
     performance = fields.Nested(MoxyTries, missing=MoxyTries().load({}))
     recovery = fields.Nested(MoxyTries, missing=MoxyTries().load({}))
-    smo2_tank_size = fields.Integer(description="", validate=validate.Range(min=0, max=100), missing=None)
-    thb_tank_size = fields.Integer(description="", validate=validate.Range(min=9, max=18), missing=None)
-    performance_baseline_smo2 = fields.Integer(description="", validate=validate.Range(min=0, max=100), missing=None)
-    performance_baseline_thb = fields.Integer(description="", validate=validate.Range(min=9, max=18), missing=None)
-    recovery_baseline_smo2 = fields.Integer(description="", validate=validate.Range(min=0, max=100), missing=None)
-    recovery_baseline_thb = fields.Integer(description="", validate=validate.Range(min=9, max=18), missing=None)
-    avg_watt_kg = fields.Float(description="", validate=validate.Range(min=0, max=20), missing=None)
-    avg_interval_time = fields.Integer(description="seconds", validate=validate.Range(min=0, max=360), missing=None)
-    avg_recovery_time = fields.Integer(description="seconds", validate=validate.Range(min=0, max=360), missing=None)
+    smo2_tank_size = fields.Integer(description="", validate=validate.Range(min=0, max=110), missing=None)
+    thb_tank_size = fields.Float(description="", validate=validate.Range(min=9, max=18), missing=None)
+    performance_baseline_smo2 = fields.Integer(description="", validate=validate.Range(min=0, max=110), missing=None)
+    performance_baseline_thb = fields.Float(description="", validate=validate.Range(min=9, max=18), missing=None)
+    recovery_baseline_smo2 = fields.Integer(description="", validate=validate.Range(min=0, max=110), missing=None)
+    recovery_baseline_thb = fields.Float(description="", validate=validate.Range(min=9, max=18), missing=None)
+    avg_watt_kg = fields.Float(description="", validate=validate.Range(min=0, max=60), missing=None)
+    avg_interval_time = fields.Integer(description="seconds", validate=validate.Range(min=0, max=400), missing=None)
+    avg_recovery_time = fields.Integer(description="seconds", validate=validate.Range(min=0, max=400), missing=None)
 
     limiter = fields.String(description=f"must be one of the following choices: {limiter_options}", missing=None)
 
@@ -1057,7 +1057,7 @@ class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
             missing=[None]) 
     current_fitness_level = fields.Integer(description="current fitness level 1-10", validate=validate.Range(min=1, max=10), missing=None)
     goal_fitness_level = fields.Integer(description="goal fitness level 1-10", validate=validate.Range(min=1, max=10), missing=None)
-    trainer_expectation = fields.List(fields.String,
+    trainer_expectations = fields.List(fields.String,
         description=f"Client's expectation for their trainer. Choice of: {trainer_goals_list}", 
         missing=[None])
     sleep_hours = fields.String(description=f"nightly hours of sleep bucketized by the following options: {sleep_hours_options_list}", missing=None)
@@ -1104,8 +1104,8 @@ class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
         if len(value) > 3:
             ValidationError("limit list length to 3 choices")
     
-    @validates('trainer_expectation')
-    def validate_trainer_expectations(self, value):
+    @validates('trainer_expectations')
+    def validate_trainer_expectationss(self, value):
         for item in value:
             if item not in self.trainer_goals_list and item != None:
                 raise ValidationError(f"{item} not a valid option. must be in {self.trainer_goals_list}")
@@ -1132,8 +1132,8 @@ class MedicalImagingSchema(ma.SQLAlchemyAutoSchema):
     
 class MedicalBloodTestSchema(Schema):
     testid = fields.Integer()
-    clientid = fields.Integer()
-    date = fields.Date(required=True)
+    clientid = fields.Integer(load_only=True)
+    date = fields.Date(required=True, format="iso")
     panel_type = fields.String(required=False)
     notes = fields.String(required=False)
 
@@ -1141,22 +1141,49 @@ class MedicalBloodTestSchema(Schema):
     def make_object(self, data, **kwargs):
         return MedicalBloodTests(**data)
 
-class MedicalBloodTestResultsInputSchema(Schema):
+class AllMedicalBloodTestSchema(Schema):
+    """
+    For returning several blood test instance details 
+    No actual results are returned, just details on
+    the test entry (notes, date, panel_type)
+    """
+    items = fields.Nested(MedicalBloodTestSchema(many=True))
+    total = fields.Integer()
+    clientid = fields.Integer()
+
+class MedicalBloodTestResultsSchema(Schema):
     result_name = fields.String()
     result_value = fields.Float()
-
-class MedicalBloodTestResultsOutputSchema(Schema):
-    idx = fields.Integer()
-    testid = fields.Integer()
-    result_type = fields.String()
-    result_value = fields.Float()
+    evaluation = fields.String(dump_only=True)
 
 class MedicalBloodTestsInputSchema(Schema):
     clientid = fields.Integer()
     date = fields.Date()
     panel_type = fields.String()
     notes = fields.String()
-    results = fields.Nested(MedicalBloodTestResultsInputSchema, many=True)
+    results = fields.Nested(MedicalBloodTestResultsSchema, many=True)
+
+class BloodTestsByTestID(Schema):
+    """
+    Organizes blood test results into a nested results field
+    General information about the test entry like testid, date, notes, panel
+    are in the outer most part of this schema.
+    """
+    testid = fields.Integer()
+    results = fields.Nested(MedicalBloodTestResultsSchema(many=True))
+    notes = fields.String()
+    panel = fields.String()
+    date = fields.Date(format="iso")
+
+class MedicalBloodTestResultsOutputSchema(Schema):
+    """
+    Schema for outputting a nested json 
+    of blood test results. 
+    """
+    tests = fields.Integer(description="# of test entry sessions. All each test may have more than one test result")
+    test_results = fields.Integer(description="# of test results")
+    items = fields.Nested(BloodTestsByTestID(many=True), missing = [])
+    clientid = fields.Integer()
 
 class MedicalBloodTestResultsSchema(Schema):
     idx = fields.Integer()
@@ -1168,10 +1195,17 @@ class MedicalBloodTestResultsSchema(Schema):
     def make_object(self, data, **kwargs):
         return MedicalBloodTestResults(**data)
 
-class MedicalBloodTestResultTypesSchema(Schema):
-    resultid = fields.Integer()
-    result_name = fields.String()
 
+class MedicalBloodTestTypes(ma.SQLAlchemyAutoSchema):
+    class Meta():
+        model = MedicalBloodTestResultTypes
+        exclude = ('created_at', 'resultid')
+
+class MedicalBloodTestResultTypesSchema(Schema):
+    
+    items = fields.Nested(MedicalBloodTestTypes(many=True)) 
+    total = fields.Integer()
+    
     @post_load
     def make_object(self, data, **kwargs):
         return MedicalBloodTestResultTypes(**data)

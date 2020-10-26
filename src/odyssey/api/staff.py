@@ -30,7 +30,7 @@ ns = api.namespace('staff', description='Operations related to staff members')
 class StaffMembers(Resource):
     """staff member class for creating, getting staff"""
     
-    @token_auth.login_required(role=['sys_admin', 'staff_admin'])
+    @token_auth.login_required(admin=['sys_admin', 'staff_admin'])
     @responds(schema=StaffSearchItemsSchema(many=True), api=ns)
     def get(self):
         """returns list of staff members given query parameters"""                
@@ -91,7 +91,7 @@ class StaffMembers(Resource):
                         break
         return data 
     
-    @token_auth.login_required(role=['sys_admin', 'staff_admin'])
+    @token_auth.login_required(admin=['sys_admin', 'staff_admin'])
     @accepts(schema=StaffSchema, api=ns)
     @responds(schema=StaffSchema, status_code=201, api=ns)     
     def post(self):
@@ -191,7 +191,7 @@ class ResetPassword(Resource):
 @ns.route('/password/update')
 class ChangePassword(Resource):
     """Reset the user's password."""
-    @token_auth.login_required()
+    @token_auth.login_required
     @accepts(schema=StaffPasswordUpdateSchema, api=ns)
     def post(self):
         """
