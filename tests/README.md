@@ -25,7 +25,6 @@ In order to achieve that, the tests were renamed and prefixed with a 4 digit num
 - 3xxx trainer
 - 4xxx staff
 - 5xxx wearables
-- 6xxx in house tools
 - 9999 remote client test, placing this test last seems to fix hanging
 
 Within each group, the tests are numbered by the 10s, e.g. xx10, xx20, etc. That leaves room for future expansion, so a test can be inserted without renaming all of them.
