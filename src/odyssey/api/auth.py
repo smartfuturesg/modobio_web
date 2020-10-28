@@ -32,17 +32,17 @@ def verify_password(email, password):
     if staff_member and staff_member.check_password(password):
         return staff_member
 
-@basic_auth.error_handler
-def basic_auth_error(status):
-    return error_response(status)
+# @basic_auth.error_handler
+# def basic_auth_error(status):
+#     return error_response(status)
 
 @token_auth.verify_token
 def verify_token(token):
     return Staff.check_token(token) if token else None
 
-@token_auth.error_handler
-def token_auth_error(status):
-    return error_response(status)
+# @token_auth.error_handler
+# def token_auth_error(status):
+#     return error_response(status)
 
 # @token_auth.get_user_roles
 # def get_user_roles(user):

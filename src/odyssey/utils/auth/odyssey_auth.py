@@ -8,21 +8,22 @@ from base64 import b64decode
 from odyssey.models.staff import Staff
 from odyssey.models.client import RemoteRegistration
 
+from odyssey.api.errors import LoginNotAuthorized
 class BasicAuth(object):
     ''' BasicAuth class is the main authentication class for 
         the ModoBio project. It's primary function is to do basic
         authentications. '''
-    def __init__(self, scheme=None, realm=None, header=None):
+    def __init__(self, scheme=None, header=None):
         self.scheme = scheme
-        self.realm = realm or "Authentication Required"
+        # self.realm = realm or "Authentication Required" # "ModoBio Login"
         self.header = header
-        self.auth_error_callback = None
+        # self.auth_error_callback = None
         self.verify_password_callback = None
 
-        def default_auth_error(status):
-            return "Unauthorized Access", status
+        # def default_auth_error(status):
+        #     return "Unauthorized Access", status
         
-        self.error_handler(default_auth_error)
+        # self.error_handler(default_auth_error)
 
     def login_required(self, f=None, admin=None, user_type=None, role=None):
         ''' The login_required method is the main method that we will be using
@@ -44,11 +45,11 @@ class BasicAuth(object):
                 status = 410 (admin_check: User does not have correct admin requirements)
                 status = 411 (user_check: User is not correctly Staff or Client type)
                 status = 412 (role_check: User is not the correct role [doctor, pt, datasci, etc])
-             '''
-        if f is not None and \
-                (admin is not None or role is not None or user_type is not None):  # pragma: no cover
-            raise ValueError(
-                'role and user_type are the only supported arguments')
+        '''
+        # if f is not None and \
+        #         (admin is not None or role is not None or user_type is not None):  # pragma: no cover
+        #     raise ValueError(
+        #         'role and user_type are the only supported arguments')
         
         def login_required_internal(f):
             @wraps(f)
@@ -65,7 +66,7 @@ class BasicAuth(object):
                 user = self.authenticate(auth)
         
                 if user in (False, None):
-                    status = 401
+                    raise LoginNotAuthorized()
                 if admin:
                     status = self.admin_check(user, admin)
                 if user_type:
@@ -76,13 +77,13 @@ class BasicAuth(object):
                 elif role:
                     status = self.role_check(user,role)                   
                 
-                if status:
-                    # Clear TCP receive buffer of any pending data
-                    request.data
-                    try:
-                        return self.auth_error_callback(status)
-                    except TypeError:
-                        return self.auth_error_callback()
+                # if status:
+                #     # Clear TCP receive buffer of any pending data
+                #     request.data
+                #     try:
+                #         return self.auth_error_callback(status)
+                #     except TypeError:
+                #         return self.auth_error_callback()
                 
                 g.flask_httpauth_user = user if user is not True \
                     else auth.username if auth else None
@@ -103,17 +104,16 @@ class BasicAuth(object):
             # if sys_admin is in the login requirement, check if user has that access
             if 'sys_admin' in admin:
                 if not user.is_system_admin:
-                    
-                    return 410
+                    raise LoginNotAuthorized()
             # if staff_admin is in the login requirement, check if user has that access
             if 'staff_admin' in admin:
                 if not user.is_admin:
-                    return 410
+                    raise LoginNotAuthorized()
         else:
             if user.is_system_admin or user.is_admin:
                 return None
             else:
-                return 410
+                raise LoginNotAuthorized()
         return None
         
     def user_check(self, user, user_type, roles=None):
@@ -124,14 +124,14 @@ class BasicAuth(object):
 
         if 'Staff' in user_type and \
                 not isinstance(user,Staff):
-                return 411
+                raise LoginNotAuthorized()
         else:
             # USER IS STAFF
             return self.role_check(user,roles)
         
         if 'RemoteRegistration' in user_type and \
                 not isinstance(user,RemoteRegistration):
-                return 411
+                raise LoginNotAuthorized()
         else:
             # USER IS CLIENT
             # Now, check if the api requires a clientid, and if it does,
@@ -141,7 +141,7 @@ class BasicAuth(object):
                 # check if the user's client id matches the parameter id
                 # if they are NOT equal, return 411
                 if user.clientid != request.args.get('clientid'):
-                    return 411
+                    raise LoginNotAuthorized()
 
     def role_check(self, user, roles=None):
         ''' role_check method will be used to determine if a Staff
@@ -153,26 +153,26 @@ class BasicAuth(object):
             # Staff member's role matches the Role Requirement in the API
             return None
         else:
-            return 412
+            raise LoginNotAuthorized()
 
-    def error_handler(self, f):
-        ''' Error handler for OdyBasicAuth class. '''
-        @wraps(f)
-        def decorated(*args, **kwargs):
-            res = f(*args, **kwargs)
-            res = make_response(res)
-            if res.status_code == 200:
-                # if user didn't set status code, use 401
-                res.status_code = 401
-            if 'WWW-Authenticate' not in res.headers:
-                res.headers['WWW-Authenticate'] = self.authenticate_header()
-            return res
-        self.auth_error_callback = decorated
-        return decorated
+    # def error_handler(self, f):
+    #     ''' Error handler for OdyBasicAuth class. '''
+    #     @wraps(f)
+    #     def decorated(*args, **kwargs):
+    #         res = f(*args, **kwargs)
+    #         res = make_response(res)
+    #         if res.status_code == 200:
+    #             # if user didn't set status code, use 401
+    #             res.status_code = 401
+    #         if 'WWW-Authenticate' not in res.headers:
+    #             res.headers['WWW-Authenticate'] = self.authenticate_header()
+    #         return res
+    #     self.auth_error_callback = decorated
+    #     return decorated
 
-    def authenticate_header(self):
-        ''' authenticate header '''
-        return '{0} realm="{1}"'.format(self.scheme, self.realm)
+    # def authenticate_header(self):
+    #     ''' authenticate header '''
+    #     return '{0} realm="{1}"'.format(self.scheme, self.realm)
 
     def verify_password(self, f):
         ''' This method is used as a decorator and to store 
@@ -219,8 +219,8 @@ class BasicAuth(object):
 class TokenAuth(BasicAuth):
     ''' TokenAuth class extends the OdyBasicAuth class. 
         It's primary function is to do token authentications. '''    
-    def __init__(self, scheme='Bearer', realm=None, header=None):
-        super(TokenAuth, self).__init__(scheme, realm, header)
+    def __init__(self, scheme='Bearer', header=None):
+        super(TokenAuth, self).__init__(scheme, header)
 
         self.verify_token_callback = None
 
