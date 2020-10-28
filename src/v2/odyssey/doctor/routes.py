@@ -7,7 +7,7 @@ from flask_restx import Resource, Api
 
 from odyssey import db
 from odyssey.models.client import ClientExternalMR
-from odyssey.models.doctor import (
+from odyssey.doctor.models import (
     MedicalPhysicalExam, 
     MedicalHistory, 
     MedicalBloodTests,
@@ -18,7 +18,7 @@ from odyssey.models.doctor import (
 
 from odyssey.models.misc import MedicalInstitutions
 from odyssey.api import api
-from odyssey.api.auth import token_auth
+from odyssey.auth.authorize import token_auth
 from odyssey.errors.handlers import (
     UserNotFound, 
     IllegalSetting, 

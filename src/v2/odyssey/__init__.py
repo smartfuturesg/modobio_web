@@ -58,18 +58,17 @@ def create_app():
 
     db.Model.update = _update
 
+    ###Blueprint imports and registration
+    
     from odyssey.api import bp, api
-
     # api._doc or Api(doc=...) is not True/False,
     # it is 'path' (default '/') or False to disable.
     if not app.config['SWAGGER_DOC']:
         api._doc = False
     api.version = app.config['VERSION']
-
     # api and bp are connected, register after changing settings.
     app.register_blueprint(bp)
 
-    #Blueprint import and register
     from odyssey.client import client_bp
     app.register_blueprint(client_bp)
 
@@ -102,7 +101,7 @@ def create_app():
 
     # Unprotected route, only relevant to developers
     if app.config['LOCAL_CONFIG']:
-        from odyssey.api.postman import bp
+        from odyssey.postman.routes import bp
         app.register_blueprint(bp, url_prefix='/postman')
 
     # If you want to add another field to search for in the database by whooshee

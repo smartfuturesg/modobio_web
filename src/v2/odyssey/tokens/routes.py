@@ -5,8 +5,12 @@ from flask_restx import Resource
 
 from odyssey import db
 from odyssey.api import api
-from odyssey.api.auth import basic_auth, basic_auth_client
-from odyssey.api.auth import token_auth, token_auth_client
+from odyssey.auth.authorize import (
+    basic_auth, 
+    basic_auth_client, 
+    token_auth, 
+    token_auth_client
+)
 from odyssey.client.routes import ns as client_ns
 from odyssey.errors.handlers import UserNotFound, ClientNotFound
 from odyssey.models.client import RemoteRegistration

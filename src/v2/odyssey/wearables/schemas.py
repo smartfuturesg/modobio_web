@@ -4,7 +4,7 @@ from marshmallow import Schema, fields, post_load, ValidationError, validates, v
 from marshmallow import post_load, post_dump, pre_dump, pre_load
 
 from odyssey import ma
-from odyssey.models.doctor import ( 
+from odyssey.doctor.models import ( 
     MedicalHistory,
     MedicalPhysicalExam,
     MedicalImaging,

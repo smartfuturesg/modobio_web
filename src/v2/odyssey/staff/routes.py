@@ -9,7 +9,7 @@ import jwt
 from odyssey import db
 from odyssey.models.staff import Staff
 from odyssey.api import api
-from odyssey.api.auth import token_auth, basic_auth
+from odyssey.auth.authorize import token_auth, basic_auth
 from odyssey.errors.handlers import (
     UnauthorizedUser, 
     StaffEmailInUse, 

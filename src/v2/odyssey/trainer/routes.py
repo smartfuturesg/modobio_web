@@ -6,7 +6,7 @@ from flask_restx import Resource, Api
 from flask_accepts import accepts, responds
 
 from odyssey.api import api
-from odyssey.api.auth import token_auth, token_auth_client
+from odyssey.auth.authorize import token_auth, token_auth_client
 from odyssey.errors.handlers import (
     UserNotFound, 
     ClientAlreadyExists, 
@@ -16,7 +16,7 @@ from odyssey.errors.handlers import (
     IllegalSetting
 )
 from odyssey import db
-from odyssey.models.doctor import MedicalPhysicalExam
+from odyssey.doctor.models import MedicalPhysicalExam
 from odyssey.models.trainer import (
     FitnessQuestionnaire,
     HeartAssessment,

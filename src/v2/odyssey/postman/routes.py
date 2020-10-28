@@ -9,8 +9,8 @@ JSON file for download. That JSON file can be imported into Postman and provides
 a collection containing all endpoints in this API.
 """
 
-from flask import Blueprint, json, Response
-
+from flask import json, Response
+from flask import Blueprint
 from odyssey.api import api
 
 bp = Blueprint('postman', __name__)

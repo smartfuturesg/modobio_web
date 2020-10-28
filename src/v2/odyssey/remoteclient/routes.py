@@ -6,7 +6,7 @@ from flask_accepts import accepts, responds
 from flask_restx import Resource
 
 from odyssey.api import api
-from odyssey.api.auth import token_auth_client
+from odyssey.auth.authorize import token_auth_client
 from odyssey.errors.handlers import (
     ClientNotFound, 
     ContentNotFound, 
@@ -25,7 +25,7 @@ from odyssey.models.client import (
     ClientSubscriptionContract,
     RemoteRegistration
 )
-from odyssey.models.doctor import MedicalHistory
+from odyssey.doctor.models import MedicalHistory
 from odyssey.models.pt import PTHistory
 from odyssey.models.trainer import FitnessQuestionnaire
 from odyssey.utils.misc import check_remote_client_portal_validity
