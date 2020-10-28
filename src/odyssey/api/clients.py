@@ -54,7 +54,7 @@ ns = api.namespace('client', description='Operations related to clients')
 @ns.route('/<int:clientid>/')
 @ns.doc(params={'clientid': 'Client ID number'})
 class Client(Resource):
-    @token_auth.login_required(user_type=['RemoteRegistration'])
+    @token_auth.login_required
     @responds(schema=ClientInfoSchema, api=ns)
     def get(self, clientid):
         """returns client info table as a json for the clientid specified"""
