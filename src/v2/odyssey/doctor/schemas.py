@@ -4,7 +4,7 @@ from marshmallow import Schema, fields, post_load, ValidationError, validates, v
 from marshmallow import post_load, post_dump, pre_dump, pre_load
 
 from odyssey import ma
-from .models import ( 
+from odyssey.doctor.models import ( 
     MedicalHistory,
     MedicalPhysicalExam,
     MedicalImaging,
@@ -26,8 +26,8 @@ from odyssey.models.client import (
     RemoteRegistration
 )
 from odyssey.models.misc import MedicalInstitutions, RegisteredFacilities
-from odyssey.models.pt import Chessboard, PTHistory
-from odyssey.models.staff import Staff
+from odyssey.pt.models import Chessboard, PTHistory
+from odyssey.staff.models import Staff
 from odyssey.models.trainer import (
     FitnessQuestionnaire,
     HeartAssessment, 

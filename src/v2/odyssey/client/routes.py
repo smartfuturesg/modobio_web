@@ -28,8 +28,8 @@ from odyssey.models.client import (
     RemoteRegistration
 )
 from odyssey.doctor.models import MedicalHistory, MedicalPhysicalExam
-from odyssey.models.pt import PTHistory 
-from odyssey.models.staff import ClientRemovalRequests
+from odyssey.pt.models import PTHistory 
+from odyssey.staff.models import ClientRemovalRequests
 from odyssey.models.trainer import FitnessQuestionnaire
 from odyssey.models.misc import RegisteredFacilities
 from odyssey.pdf import to_pdf, merge_pdfs

@@ -26,7 +26,7 @@ from odyssey.models.client import (
     RemoteRegistration
 )
 from odyssey.doctor.models import MedicalHistory
-from odyssey.models.pt import PTHistory
+from odyssey.pt.models import PTHistory
 from odyssey.models.trainer import FitnessQuestionnaire
 from odyssey.utils.misc import check_remote_client_portal_validity
 from odyssey.doctor.schemas import (

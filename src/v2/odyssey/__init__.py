@@ -96,7 +96,7 @@ def create_app():
     from odyssey.wearables import wearables_bp
     app.register_blueprint(wearables_bp)
 
-    from odyssey.errors import register_handlers
+    from odyssey.errors.handlers import register_handlers
     register_handlers(app)
 
     # Unprotected route, only relevant to developers

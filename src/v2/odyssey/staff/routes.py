@@ -7,7 +7,7 @@ from flask_accepts import accepts, responds
 import jwt
 
 from odyssey import db
-from odyssey.models.staff import Staff
+from odyssey.staff.models import Staff
 from odyssey.api import api
 from odyssey.auth.authorize import token_auth, basic_auth
 from odyssey.errors.handlers import (

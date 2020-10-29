@@ -2,7 +2,7 @@ from flask import request, jsonify
 from flask_restx import Resource, Api
 from flask_accepts import accepts , responds
 
-from odyssey.models.pt import Chessboard, PTHistory
+from odyssey.pt.models import Chessboard, PTHistory
 from odyssey import db
 from odyssey.api import api
 from odyssey.auth.authorize import token_auth

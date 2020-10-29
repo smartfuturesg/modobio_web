@@ -26,8 +26,8 @@ from odyssey.models.client import (
     RemoteRegistration
 )
 from odyssey.models.misc import MedicalInstitutions, RegisteredFacilities
-from odyssey.models.pt import Chessboard, PTHistory
-from odyssey.models.staff import Staff
+from odyssey.pt.models import Chessboard, PTHistory
+from odyssey.staff.models import Staff
 from odyssey.models.trainer import (
     FitnessQuestionnaire,
     HeartAssessment, 
