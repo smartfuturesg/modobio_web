@@ -9,7 +9,7 @@ import jwt
 from odyssey import db
 from odyssey.models.staff import Staff
 from odyssey.api import api
-from odyssey.api.auth import token_auth, basic_auth
+from odyssey.utils.auth.odyssey_auth import token_auth
 from odyssey.api.errors import UnauthorizedUser, StaffEmailInUse, StaffNotFound
 from odyssey.utils.email import send_email_password_reset
 from odyssey.utils.schemas import (
@@ -19,6 +19,8 @@ from odyssey.utils.schemas import (
     StaffSchema, 
     StaffSearchItemsSchema
 )
+
+from werkzeug.security import check_password_hash
 
 ns = api.namespace('staff', description='Operations related to staff members')
 
@@ -30,7 +32,7 @@ ns = api.namespace('staff', description='Operations related to staff members')
 class StaffMembers(Resource):
     """staff member class for creating, getting staff"""
     
-    @token_auth.login_required(admin=['sys_admin', 'staff_admin'])
+    @token_auth.login_required(admin_role=['sys_admin', 'staff_admin'])
     @responds(schema=StaffSearchItemsSchema(many=True), api=ns)
     def get(self):
         """returns list of staff members given query parameters"""                
@@ -91,7 +93,7 @@ class StaffMembers(Resource):
                         break
         return data 
     
-    @token_auth.login_required(admin=['sys_admin', 'staff_admin'])
+    @token_auth.login_required(admin_role=['sys_admin', 'staff_admin'])
     @accepts(schema=StaffSchema, api=ns)
     @responds(schema=StaffSchema, status_code=201, api=ns)     
     def post(self):
@@ -198,14 +200,15 @@ class ChangePassword(Resource):
             Change the current password to the one given
             in the body of this request
             response 200 OK
-       """
+        """
+
         data = request.get_json()
         staff_email = token_auth.current_user().email
 
         # bring up the staff member and reset their password
         staff = Staff.query.filter_by(email=staff_email).first()
 
-        if staff.check_password(password=data["current_password"]):
+        if check_password_hash(staff.password, data["current_password"]):
             staff.set_password(data["new_password"])
         else:
             raise UnauthorizedUser(message="please enter the correct current password \

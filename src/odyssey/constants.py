@@ -385,7 +385,7 @@ ALPHANUMERIC = "BCDFGHJKLMNPQRSTVWXYZ01234567890123456789"
 # Authentication for admins, user_types, and roles
 ADMIN_TYPES = ['sys_admin','staff_admin']
 USER_TYPES = ['Staff', 'RemoteRegistration']
-ROLE_TYPES = ['stfappadmin', 'clntsvc', 'physthera', 'phystrain', 'datasci', 'doctor', 'docext', 'nutrition']
+STAFF_TYPES = ['stfappadmin', 'clntsvc', 'physthera', 'phystrain', 'datasci', 'doctor', 'docext', 'nutrition']
 
 # Call blood test assessment stored function
 BLOODTEST_EVAL = "SELECT public.blood_test_eval({}, {}, {});"
