@@ -1171,7 +1171,7 @@ class BloodTestsByTestID(Schema):
     testid = fields.Integer()
     results = fields.Nested(MedicalBloodTestResultsSchema(many=True))
     notes = fields.String()
-    panel = fields.String()
+    panel_type = fields.String()
     date = fields.Date(format="iso")
 
 class MedicalBloodTestResultsOutputSchema(Schema):
