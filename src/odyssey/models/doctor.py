@@ -43,6 +43,14 @@ class MedicalImaging(db.Model):
     :type: int, foreign key to :attr:`ClientInfo.clientid`
     """
 
+    reporterid = db.Column(db.Integer, nullable=False)
+    #TODO: convert this to refer back to userid as a foreign key
+    """
+    Staff id of the reporting staff member. Should be a staff with the role of 'doc' or 'docext'. 
+
+    :type: int
+    """
+
     image_date = db.Column(db.Date)
     """
     Date image was taken
@@ -253,7 +261,7 @@ class MedicalPhysicalExam(db.Model):
     reporterid = db.Column(db.Integer, nullable=False)
     #TODO: convert this to refer back to userid as a foreign key
     """
-    Staff id  of the reporting staff member. Should be a staff with the role of 'doc' or 'docext'. 
+    Staff id of the reporting staff member. Should be a staff with the role of 'doc' or 'docext'. 
 
     :type: int
     """
@@ -498,6 +506,14 @@ class MedicalBloodTests(db.Model):
     Client ID number
 
     :type: int, foreign key
+    """
+
+    reporterid = db.Column(db.Integer, nullable=False)
+    #TODO: convert this to refer back to userid as a foreign key
+    """
+    Staff id of the reporting staff member. Should be a staff with the role of 'doc' or 'docext'. 
+
+    :type: int
     """
 
     date = db.Column(db.Date)

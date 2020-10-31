@@ -17,6 +17,7 @@ from odyssey.models.doctor import (
 )
 
 from odyssey.models.misc import MedicalInstitutions
+from odyssey.models.staff import Staff
 from odyssey.api import api
 from odyssey.api.auth import token_auth
 from odyssey.api.errors import (
@@ -398,15 +399,28 @@ class MedPhysical(Resource):
     @token_auth.login_required
     @responds(schema=MedicalPhysicalExamSchema(many=True), api=ns)
     def get(self, clientid):
-        """returns client's medical physical exam as a json for the clientid specified"""
+        """returns all client's medical physical exams for the clientid specified"""
         check_client_existence(clientid)
 
-        client = MedicalPhysicalExam.query.filter_by(clientid=clientid).order_by(MedicalPhysicalExam.timestamp.asc()).all()
+        query =  db.session.query(
+                MedicalPhysicalExam, Staff.firstname, Staff.lastname
+                ).filter(
+                    MedicalPhysicalExam.clientid == clientid
+                ).filter(
+                    MedicalPhysicalExam.reporterid == Staff.staffid
+                ).all()
 
-        if not client:
+        if not query:
             raise ContentNotFound()
 
-        return client
+        # prepare response with staff name and medical physical data
+        response = []
+        for data in query:
+            physical = data[0].__dict__    
+            physical.update({'reporter_firstname': query[1], 'reporter_lastname': query[2]})
+            response.append(physical)
+            
+        return response
 
     @token_auth.login_required
     @accepts(schema=MedicalPhysicalExamSchema, api=ns)
