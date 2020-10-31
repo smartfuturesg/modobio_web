@@ -250,6 +250,14 @@ class MedicalPhysicalExam(db.Model):
     :type: int, foreign key to :attr:`ClientInfo.clientid`
     """
 
+    reporterid = db.Column(db.Integer, nullable=False)
+    #TODO: convert this to refer back to userid as a foreign key
+    """
+    Staff id  of the reporting staff member. Should be a staff with the role of 'doc' or 'docext'. 
+
+    :type: int
+    """
+
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     timestamp for when object was created. DB server time is used. 

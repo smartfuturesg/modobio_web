@@ -1222,9 +1222,13 @@ class MedicalHistorySchema(ma.SQLAlchemyAutoSchema):
 class MedicalPhysicalExamSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = MedicalPhysicalExam
+        exclude = ('idx', 'reporterid')
         
     clientid = fields.Integer(missing=0)
     vital_height = fields.String(description="Deprecated, use vital_height_inches instead", missing="")
+    reporter_firstname = fields.String(description="first name of reporting physician", dump_only=True)
+    reporter_lastname = fields.String(description="last name of reporting physician", dump_only=True)
+    reporterid = fields.Integer(description="id of reporting physician", dump_only=True)
     
     @post_load
     def make_object(self, data, **kwargs):

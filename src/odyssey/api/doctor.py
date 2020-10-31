@@ -418,14 +418,21 @@ class MedPhysical(Resource):
         data = request.get_json()
         data["clientid"] = clientid
 
-        mh_schema = MedicalPhysicalExamSchema()
+        client_mp = MedicalPhysicalExamSchema().load(data)
 
-        client_mp = mh_schema.load(data)
+        # look up the reporting staff member and add their id to the 
+        # client's physical entry
+        reporter = token_auth.current_user()
+        client_mp.reporterid = reporter.staffid
+
+        # prepare api response with reporter name
+        response = client_mp.__dict__.copy()
+        response["reporter_firstname"] = reporter.firstname
+        response["reporter_lastname"] = reporter.lastname
 
         db.session.add(client_mp)
         db.session.commit()
-
-        return client_mp
+        return response
 
 @ns.route('/medicalinstitutions/')
 class AllMedInstitutes(Resource):
