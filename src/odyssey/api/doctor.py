@@ -168,15 +168,17 @@ class MedBloodTest(Resource):
         check_client_existence(clientid)
         data = request.get_json()
 
-        #remove results from data, commit test info without results to db
+        # remove results from data, commit test info without results to db
         results = data['results']
         del data['results']
         data['clientid'] = clientid
+        data['reporterid'] = token_auth.current_user().staffid
         client_bt = MedicalBloodTestSchema().load(data)
+        
         db.session.add(client_bt)
         db.session.flush()
 
-        #insert results into the result table
+        # insert results into the result table
         for result in results:
             check_blood_test_result_type_existence(result['result_name'])
             resultid = MedicalBloodTestResultTypes.query.filter_by(result_name=result['result_name']).first().resultid
@@ -203,12 +205,24 @@ class MedBloodTest(Resource):
         where the results can be referenced by the testid provided in this request
         """
         check_client_existence(clientid)
-        blood_tests = MedicalBloodTests.query.filter_by(clientid=clientid).all()
+        blood_tests =  db.session.query(
+                    MedicalBloodTests, Staff.firstname, Staff.lastname
+                ).filter(
+                    MedicalBloodTests.reporterid == Staff.staffid
+                ).filter(
+                    MedicalBloodTests.clientid == clientid
+                ).all()
 
         if not blood_tests:
             raise ContentNotFound()
+        # prepare response items with reporter name from Staff table
+        response = []
+        for test in blood_tests:
+            data = test[0].__dict__
+            data.update({'reporter_firstname': test[1], 'reporter_lastname': test[2]})
+            response.append(data)
         payload = {}
-        payload['items'] = blood_tests
+        payload['items'] = response
         payload['total'] = len(blood_tests)
         payload['clientid'] = clientid
         return payload
@@ -232,9 +246,8 @@ class MedBloodTestResults(Resource):
         """
         #query for join of MedicalBloodTestResults and MedicalBloodTestResultTypes tables
         check_blood_test_existence(testid)
-        results = MedicalBloodTestResults.query.filter_by(testid=testid).all()
         results =  db.session.query(
-                MedicalBloodTests, MedicalBloodTestResults, MedicalBloodTestResultTypes
+                MedicalBloodTests, MedicalBloodTestResults, MedicalBloodTestResultTypes, Staff
                 ).join(
                     MedicalBloodTestResultTypes
                 ).join(MedicalBloodTests
@@ -242,19 +255,25 @@ class MedBloodTestResults(Resource):
                     MedicalBloodTests.testid == MedicalBloodTestResults.testid
                 ).filter(
                     MedicalBloodTests.testid==testid
+                ).filter(
+                    MedicalBloodTests.reporterid == Staff.staffid
                 ).all()
         if len(results) == 0:
             raise ContentNotFound()
-        #replace resultid with result name for readability      
+        
+        # prepare response with test details   
         nested_results = {'testid': testid, 
                           'date' : results[0][0].date,
                           'notes' : results[0][0].notes,
                           'panel_type' : results[0][0].panel_type,
+                          'reporterid': results[0][0].reporterid,
+                          'reporter_firstname': results[0][3].firstname,
+                          'reporter_lastname': results[0][3].lastname,
                           'results': []} 
         
         # loop through results in order to nest results in their respective test
         # entry instances (testid)
-        for _, test_result, result_type in results:
+        for _, test_result, result_type, _ in results:
                 res = {'result_name': result_type.result_name, 
                         'result_value': test_result.result_value,
                         'evaluation': test_result.evaluation}
@@ -278,7 +297,7 @@ class AllMedBloodTestResults(Resource):
     def get(self, clientid):
         # pull up all tests, test results, and the test type names for this client
         results =  db.session.query(
-                        MedicalBloodTests, MedicalBloodTestResults, MedicalBloodTestResultTypes
+                        MedicalBloodTests, MedicalBloodTestResults, MedicalBloodTestResultTypes, Staff
                         ).join(
                             MedicalBloodTestResultTypes
                         ).join(MedicalBloodTests
@@ -286,14 +305,16 @@ class AllMedBloodTestResults(Resource):
                             MedicalBloodTests.testid == MedicalBloodTestResults.testid
                         ).filter(
                             MedicalBloodTests.clientid==clientid
+                        ).filter(
+                            MedicalBloodTests.reporterid == Staff.staffid
                         ).all()
 
-        test_ids = set([x[0].testid for x in results])
-        nested_results = [{'testid': x, 'results': []} for x in test_ids ]
+        test_ids = set([(x[0].testid, x[0].reporterid, x[3].firstname, x[3].lastname) for x in results])
+        nested_results = [{'testid': x[0], 'reporterid': x[1], 'reporter_firstname': x[2], 'reporter_lastname': x[3], 'results': []} for x in test_ids ]
         
         # loop through results in order to nest results in their respective test
         # entry instances (testid)
-        for test_info, test_result, result_type in results:
+        for test_info, test_result, result_type, _ in results:
             for test in nested_results:
                 # add rest result to appropriate test entry instance (testid)
                 if test_result.testid == test['testid']:
@@ -306,7 +327,6 @@ class AllMedBloodTestResults(Resource):
                         test['date'] = test_info.date
                         test['notes'] = test_info.notes
                         test['panel_type'] = test_info.panel_type
-
         payload = {}
         payload['items'] = nested_results
         payload['tests'] = len(test_ids)
@@ -419,7 +439,7 @@ class MedPhysical(Resource):
             physical = data[0].__dict__    
             physical.update({'reporter_firstname': query[1], 'reporter_lastname': query[2]})
             response.append(physical)
-            
+
         return response
 
     @token_auth.login_required

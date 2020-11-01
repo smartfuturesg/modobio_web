@@ -1135,6 +1135,9 @@ class MedicalBloodTestSchema(Schema):
     date = fields.Date(required=True, format="iso")
     panel_type = fields.String(required=False)
     notes = fields.String(required=False)
+    reporter_firstname = fields.String(description="first name of reporting physician", dump_only=True)
+    reporter_lastname = fields.String(description="last name of reporting physician", dump_only=True)
+    reporterid = fields.Integer(description="id of reporting physician")
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -1173,6 +1176,9 @@ class BloodTestsByTestID(Schema):
     notes = fields.String()
     panel_type = fields.String()
     date = fields.Date(format="iso")
+    reporter_firstname = fields.String(description="first name of reporting physician", dump_only=True)
+    reporter_lastname = fields.String(description="last name of reporting physician", dump_only=True)
+    reporterid = fields.Integer(description="id of reporting physician", dump_only=True)
 
 class MedicalBloodTestResultsOutputSchema(Schema):
     """
@@ -1229,7 +1235,7 @@ class MedicalPhysicalExamSchema(ma.SQLAlchemyAutoSchema):
     reporter_firstname = fields.String(description="first name of reporting physician", dump_only=True)
     reporter_lastname = fields.String(description="last name of reporting physician", dump_only=True)
     reporterid = fields.Integer(description="id of reporting physician", dump_only=True)
-    
+
     @post_load
     def make_object(self, data, **kwargs):
         return MedicalPhysicalExam(**data)
