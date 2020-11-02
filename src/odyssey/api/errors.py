@@ -219,7 +219,7 @@ class StaffNotFound(Exception):
         self.status_code = 404
 
 class LoginNotAuthorized(Exception):
-    """Used for odyssey_auth if a user does not have certain authorizations
+    """Used for auth.py if a user does not have certain authorizations
        for using the ModoBio APIs"""
     def __init__(self, message = None):
         Exception.__init__(self)

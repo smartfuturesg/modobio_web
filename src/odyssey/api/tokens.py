@@ -5,7 +5,7 @@ from flask_restx import Resource
 
 from odyssey import db
 from odyssey.api import api
-from odyssey.utils.auth.odyssey_auth import basic_auth, token_auth
+from odyssey.utils.auth import basic_auth, token_auth
 from odyssey.api.clients import ns as client_ns
 from odyssey.api.errors import UserNotFound, ClientNotFound
 from odyssey.models.client import RemoteRegistration
@@ -17,7 +17,7 @@ ns = api.namespace('tokens', description='Operations related to token authorizat
 class Token(Resource):
     """create and revoke tokens"""
     @ns.doc(security='password')
-    @basic_auth.login_required(user_type=['Staff'])
+    @basic_auth.login_required(user_type=['staff'])
     def post(self):
         """generates a token for the 'current_user' immediately after password authentication"""
         user = basic_auth.current_user()
@@ -29,7 +29,7 @@ class Token(Resource):
                 'access_roles': user.access_roles}, 201
 
     @ns.doc(security='password')
-    @token_auth.login_required(user_type=['Staff'])
+    @token_auth.login_required(user_type=['staff'])
     def delete(self):
         """invalidate urrent token. Used to effectively logout a user"""
         token_auth.current_user().revoke_token()
@@ -43,7 +43,7 @@ class RemoteRegistrationToken(Resource):
         the url to validate the authenticity of the end point (i.e. in database and not expired)"""
     
     @ns.doc(security='password')
-    @basic_auth.login_required(user_type=['RemoteRegistration'])
+    @basic_auth.login_required(user_type=['remoteregistration'])
     def post(self):
         """generate api token for portal user"""
         tmp_registration = request.args.get('tmp_registration')
@@ -55,7 +55,7 @@ class RemoteRegistrationToken(Resource):
         return {'email': user.email, 'token': user.get_token()}, 201
 
     @ns.doc(security='password')
-    @basic_auth.login_required(user_type=['RemoteRegistration'])
+    @basic_auth.login_required(user_type=['remoteregistration'])
     def delete(self):
         """invalidate current token. Used to effectively logout a user"""
         token_auth.current_user().revoke_token()

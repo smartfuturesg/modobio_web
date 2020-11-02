@@ -6,7 +6,7 @@ from flask_restx import Resource
 from requests_oauthlib import OAuth2Session
 
 from odyssey.api import api
-from odyssey.utils.auth.odyssey_auth import token_auth
+from odyssey.utils.auth import token_auth
 from odyssey.api.errors import ContentNotFound
 
 from odyssey.models.client import ClientFacilities

@@ -10,7 +10,7 @@ from odyssey.models.staff import Staff
 from odyssey.models.client import RemoteRegistration
 
 # Constants to compare to
-from odyssey.constants import ADMIN_TYPES, USER_TYPES, STAFF_TYPES
+from odyssey.constants import ADMIN_ROLES, USER_TYPES, STAFF_ROLES
 
 # Import Errors
 from odyssey.api.errors import LoginNotAuthorized
@@ -44,7 +44,7 @@ class BasicAuth(object):
                 raise ValueError('admin_role must be a list.')
             else:
                 # Validate 
-                self.validate_roles(admin_role, ADMIN_TYPES)
+                self.validate_roles(admin_role, ADMIN_ROLES)
 
         if user_type is not None:
             # Check if user type is a list:
@@ -60,7 +60,7 @@ class BasicAuth(object):
                 raise ValueError('staff_role must be a list.')   
             else:
                 # Validate 
-                self.validate_roles(staff_role, STAFF_TYPES)                              
+                self.validate_roles(staff_role, STAFF_ROLES)                              
 
         def login_required_internal(f):
             @wraps(f)
@@ -127,14 +127,14 @@ class BasicAuth(object):
                 # User is NEITHER Staff nor RemoteRegistration
                 raise LoginNotAuthorized
         else:
-            if 'Staff' in user_type:
+            if 'staff' in user_type:
                 if not isinstance(user,Staff):
                     raise LoginNotAuthorized
                 else:
                     # USER IS STAFF
                     return self.role_check(user,staff_roles)
             
-            elif 'RemoteRegistration' in user_type:
+            elif 'remoteregistration' in user_type:
                 if not isinstance(user,RemoteRegistration):
                     raise LoginNotAuthorized
                 else:
@@ -165,7 +165,7 @@ class BasicAuth(object):
         # Validate 
         for role in roles:
             if role not in constants:
-                ValueError('{} is not in {}'.format(role, ADMIN_TYPES))
+                ValueError('{} is not in {}'.format(role, ADMIN_ROLES))
         return 
 
     def verify_password(self, user_type, username, password):
@@ -173,12 +173,12 @@ class BasicAuth(object):
             the basic authorization password check
             that is defined in auth.py '''
         
-        if 'Staff' in user_type:
+        if 'staff' in user_type:
             """check password for API user"""
             staff_member = Staff.query.filter_by(email=username.lower()).one_or_none()
             if staff_member and check_password_hash(staff_member.password, password):
                 return staff_member
-        elif 'RemoteRegistration' in user_type:
+        elif 'remoteregistration' in user_type:
             """check password for at-home client"""
             client = RemoteRegistration.query.filter_by(
                         email=username.lower()).order_by(
@@ -234,11 +234,11 @@ class TokenAuth(BasicAuth):
         
         # TODO REMOVE THIS
         if user_type is None:
-            user_type = ['Staff']
+            user_type = ['staff']
 
-        if 'Staff' in user_type:
+        if 'staff' in user_type:
             return Staff.check_token(token) if token else None
-        elif 'RemoteRegistration' in user_type:
+        elif 'remoteregistration' in user_type:
             return RemoteRegistration.check_token(token) if token else None
 
     def get_auth(self):

@@ -40,7 +40,7 @@ from odyssey.models.trainer import (
 )
 from odyssey.models.wearables import Wearables, WearablesOura, WearablesFreeStyle
 from odyssey.utils.misc import list_average
-from odyssey.constants import STAFF_TYPES
+from odyssey.constants import STAFF_ROLES
 
 class ClientSearchItemsSchema(Schema):
     clientid = fields.Integer()
@@ -1300,7 +1300,7 @@ class StaffSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Staff
 
-    possible_roles = STAFF_TYPES
+    possible_roles = STAFF_ROLES
 
     token = fields.String(dump_only=True)
     token_expiration = fields.DateTime(dump_only=True)
