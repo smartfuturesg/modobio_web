@@ -165,7 +165,7 @@ class BasicAuth(object):
         # Validate 
         for role in roles:
             if role not in constants:
-                ValueError('{} is not in {}'.format(role, ADMIN_ROLES))
+                ValueError('{} is not in {}'.format(role, constants))
         return 
 
     def verify_password(self, user_type, username, password):
