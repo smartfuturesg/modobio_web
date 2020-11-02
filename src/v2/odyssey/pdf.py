@@ -18,7 +18,7 @@ from PyPDF2 import PdfFileMerger
 from weasyprint import HTML, CSS
 
 from odyssey import db
-from odyssey.models.client import *
+from odyssey.client.models import ClientInfo
 
 _executor = concurrent.futures.ThreadPoolExecutor(thread_name_prefix='PDF_')
 

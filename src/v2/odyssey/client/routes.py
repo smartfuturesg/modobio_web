@@ -1,12 +1,12 @@
 import boto3
-from datetime import datetime, date
+from datetime import date
 
-from flask import request, jsonify, current_app
+from flask import request, current_app
 from flask_accepts import accepts, responds
 from flask_restx import Resource, Api
 
 from odyssey.api import api
-from odyssey.auth.authorize import token_auth, token_auth_client
+from odyssey.auth.authorize import token_auth
 from odyssey.errors.handlers import (
     UserNotFound, 
     ClientAlreadyExists, 
@@ -16,7 +16,7 @@ from odyssey.errors.handlers import (
 )
 from odyssey import db
 from odyssey.constants import TABLE_TO_URI
-from odyssey.models.client import (
+from odyssey.client.models import (
     ClientInfo,
     ClientConsent,
     ClientConsultContract,
@@ -30,8 +30,8 @@ from odyssey.models.client import (
 from odyssey.doctor.models import MedicalHistory, MedicalPhysicalExam
 from odyssey.pt.models import PTHistory 
 from odyssey.staff.models import ClientRemovalRequests
-from odyssey.models.trainer import FitnessQuestionnaire
-from odyssey.models.misc import RegisteredFacilities
+from odyssey.trainer.models import FitnessQuestionnaire
+from odyssey.misc.models import RegisteredFacilities
 from odyssey.pdf import to_pdf, merge_pdfs
 from odyssey.utils.email import send_email_remote_registration_portal, send_test_email
 from odyssey.utils.misc import check_client_existence

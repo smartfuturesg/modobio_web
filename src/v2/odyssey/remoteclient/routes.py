@@ -15,19 +15,18 @@ from odyssey.errors.handlers import (
 )
 from odyssey import db
 from odyssey.pdf import merge_pdfs, to_pdf
-from odyssey.models.client import (
+from odyssey.client.models import (
     ClientInfo,
     ClientConsent,
     ClientConsultContract,
     ClientIndividualContract,
     ClientPolicies,
     ClientRelease,
-    ClientSubscriptionContract,
-    RemoteRegistration
+    ClientSubscriptionContract
 )
 from odyssey.doctor.models import MedicalHistory
 from odyssey.pt.models import PTHistory
-from odyssey.models.trainer import FitnessQuestionnaire
+from odyssey.trainer.models import FitnessQuestionnaire
 from odyssey.utils.misc import check_remote_client_portal_validity
 from odyssey.doctor.schemas import (
     MedicalHistorySchema

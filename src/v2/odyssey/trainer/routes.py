@@ -1,23 +1,17 @@
 
-from datetime import datetime
-
-from flask import request, jsonify
+from flask import request
 from flask_restx import Resource, Api
 from flask_accepts import accepts, responds
 
 from odyssey.api import api
-from odyssey.auth.authorize import token_auth, token_auth_client
+from odyssey.auth.authorize import token_auth
 from odyssey.errors.handlers import (
-    UserNotFound, 
-    ClientAlreadyExists, 
-    ClientNotFound, 
     ContentNotFound, 
-    ContentNotFoundReturnData, 
-    IllegalSetting
+    ContentNotFoundReturnData
 )
 from odyssey import db
 from odyssey.doctor.models import MedicalPhysicalExam
-from odyssey.models.trainer import (
+from odyssey.trainer.models import (
     FitnessQuestionnaire,
     HeartAssessment,
     LungAssessment,
@@ -37,9 +31,6 @@ from odyssey.trainer.schemas import (
     MoxyRipSchema,
     PowerAssessmentSchema, 
     StrenghtAssessmentSchema
-)
-from odyssey.client.schemas import (
-    ClientInfoSchema,
 )
 
 ns = api.namespace('trainer', description='Operations related to the trainer')

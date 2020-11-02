@@ -1,4 +1,4 @@
-from flask import request, jsonify
+from flask import request
 from flask_restx import Resource, Api
 from flask_accepts import accepts , responds
 

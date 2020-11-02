@@ -1,15 +1,14 @@
 from datetime import datetime, timedelta
-import secrets
 
 from flask import current_app, request, jsonify
-from flask_restx import Resource, fields
+from flask_restx import Resource
 from flask_accepts import accepts, responds
 import jwt
 
 from odyssey import db
 from odyssey.staff.models import Staff
 from odyssey.api import api
-from odyssey.auth.authorize import token_auth, basic_auth
+from odyssey.auth.authorize import token_auth
 from odyssey.errors.handlers import (
     UnauthorizedUser, 
     StaffEmailInUse, 

@@ -3,18 +3,10 @@ import pytest
 from sqlalchemy import text
 
 from odyssey import create_app, db
-from odyssey.models.client import (
-    ClientInfo,
-    ClientConsent,
-    ClientRelease,
-    ClientPolicies,
-    ClientConsultContract,
-    ClientSubscriptionContract,
-    ClientIndividualContract
-)
-from odyssey.models.misc import MedicalInstitutions
+from odyssey.client.models import ClientInfo
+from odyssey.misc.models import MedicalInstitutions
 
-from odyssey.models.staff import Staff
+from odyssey.staff.models import Staff
 
 from .data import (
     test_client_info,

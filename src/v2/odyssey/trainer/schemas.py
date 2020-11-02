@@ -1,34 +1,14 @@
 from datetime import datetime
-from hashlib import md5
+
 from marshmallow import Schema, fields, post_load, ValidationError, validates, validate
-from marshmallow import post_load, post_dump, pre_dump, pre_load
+from marshmallow import post_load, pre_dump
 
 from odyssey import ma
-from odyssey.doctor.models import ( 
-    MedicalHistory,
-    MedicalPhysicalExam,
-    MedicalImaging,
-    MedicalBloodTests,
-    MedicalBloodTestResults,
-    MedicalBloodTestResultTypes
+from odyssey.doctor.models import (
+    MedicalPhysicalExam
 )
-from odyssey.models.client import (
-    ClientConsent,
-    ClientConsultContract,
-    ClientExternalMR,
-    ClientInfo,
-    ClientIndividualContract, 
-    ClientPolicies,
-    ClientRelease,
-    ClientReleaseContacts,
-    ClientSubscriptionContract,
-    ClientFacilities,
-    RemoteRegistration
-)
-from odyssey.models.misc import MedicalInstitutions, RegisteredFacilities
-from odyssey.pt.models import Chessboard, PTHistory
-from odyssey.staff.models import Staff
-from odyssey.models.trainer import (
+
+from odyssey.trainer.models import (
     FitnessQuestionnaire,
     HeartAssessment, 
     PowerAssessment, 
@@ -38,7 +18,6 @@ from odyssey.models.trainer import (
     MovementAssessment,
     LungAssessment
 )
-from odyssey.models.wearables import Wearables, WearablesOura, WearablesFreeStyle
 from odyssey.utils.misc import list_average
 
 """

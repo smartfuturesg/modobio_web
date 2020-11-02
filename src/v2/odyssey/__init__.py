@@ -59,8 +59,18 @@ def create_app():
     db.Model.update = _update
 
     ###Blueprint imports and registration
-    
     from odyssey.api import bp, api
+    from odyssey.client import client_bp
+    from odyssey.remoteclient import r_client_bp
+    from odyssey.doctor import doctor_bp
+    from odyssey.pt import pt_bp
+    from odyssey.registeredfacility import reg_facility_bp
+    from odyssey.staff import staff_bp
+    from odyssey.tokens import tokens_bp
+    from odyssey.trainer import trainer_bp
+    from odyssey.wearables import wearables_bp
+    from odyssey.errors.handlers import register_handlers
+
     # api._doc or Api(doc=...) is not True/False,
     # it is 'path' (default '/') or False to disable.
     if not app.config['SWAGGER_DOC']:
@@ -68,35 +78,15 @@ def create_app():
     api.version = app.config['VERSION']
     # api and bp are connected, register after changing settings.
     app.register_blueprint(bp)
-
-    from odyssey.client import client_bp
     app.register_blueprint(client_bp)
-
-    from odyssey.remoteclient import r_client_bp
     app.register_blueprint(r_client_bp)
-
-    from odyssey.doctor import doctor_bp
     app.register_blueprint(doctor_bp)
-
-    from odyssey.pt import pt_bp
     app.register_blueprint(pt_bp)
-
-    from odyssey.registeredfacility import reg_facility_bp
     app.register_blueprint(reg_facility_bp)
-
-    from odyssey.staff import staff_bp
     app.register_blueprint(staff_bp)
-
-    from odyssey.tokens import tokens_bp
     app.register_blueprint(tokens_bp)
-
-    from odyssey.trainer import trainer_bp
     app.register_blueprint(trainer_bp)
-
-    from odyssey.wearables import wearables_bp
     app.register_blueprint(wearables_bp)
-
-    from odyssey.errors.handlers import register_handlers
     register_handlers(app)
 
     # Unprotected route, only relevant to developers
@@ -128,4 +118,3 @@ import wtforms
 class DateInput(wtforms.widgets.Input):
     input_type = 'date'
 
-import odyssey.models

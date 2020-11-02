@@ -7,9 +7,9 @@ import uuid
 from datetime import datetime, date, time
 
 import flask.json
-from odyssey.models.client import ClientInfo, RemoteRegistration, ClientFacilities
+from odyssey.client.models import ClientInfo, RemoteRegistration, ClientFacilities
 from odyssey.doctor.models import MedicalBloodTests, MedicalBloodTestResultTypes
-from odyssey.models.misc import RegisteredFacilities
+from odyssey.misc.models import RegisteredFacilities
 from odyssey.errors.handlers import(
     UserNotFound, 
     FacilityNotFound, 

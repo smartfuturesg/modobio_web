@@ -1,7 +1,5 @@
-from datetime import datetime
-from hashlib import md5
-from marshmallow import Schema, fields, post_load, ValidationError, validates, validate
-from marshmallow import post_load, post_dump, pre_dump, pre_load
+from marshmallow import Schema, fields, post_load, validate
+from marshmallow import post_load, pre_dump
 
 from odyssey import ma
 from odyssey.doctor.models import ( 
@@ -12,34 +10,9 @@ from odyssey.doctor.models import (
     MedicalBloodTestResults,
     MedicalBloodTestResultTypes
 )
-from odyssey.models.client import (
-    ClientConsent,
-    ClientConsultContract,
-    ClientExternalMR,
-    ClientInfo,
-    ClientIndividualContract, 
-    ClientPolicies,
-    ClientRelease,
-    ClientReleaseContacts,
-    ClientSubscriptionContract,
-    ClientFacilities,
-    RemoteRegistration
-)
-from odyssey.models.misc import MedicalInstitutions, RegisteredFacilities
-from odyssey.pt.models import Chessboard, PTHistory
-from odyssey.staff.models import Staff
-from odyssey.models.trainer import (
-    FitnessQuestionnaire,
-    HeartAssessment, 
-    PowerAssessment, 
-    StrengthAssessment, 
-    MoxyRipTest, 
-    MoxyAssessment, 
-    MovementAssessment,
-    LungAssessment
-)
-from odyssey.models.wearables import Wearables, WearablesOura, WearablesFreeStyle
-from odyssey.utils.misc import list_average
+from odyssey.client.models import ClientExternalMR
+from odyssey.misc.models import MedicalInstitutions
+from odyssey.wearables.models import Wearables
 
 """
     Schemas for the doctor's API

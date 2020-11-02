@@ -6,7 +6,7 @@ from flask_accepts import accepts, responds
 from flask_restx import Resource, Api
 
 from odyssey import db
-from odyssey.models.client import ClientExternalMR
+from odyssey.client.models import ClientExternalMR
 from odyssey.doctor.models import (
     MedicalPhysicalExam, 
     MedicalHistory, 
@@ -16,18 +16,14 @@ from odyssey.doctor.models import (
     MedicalImaging
 )
 
-from odyssey.models.misc import MedicalInstitutions
+from odyssey.misc.models import MedicalInstitutions
 from odyssey.api import api
 from odyssey.auth.authorize import token_auth
 from odyssey.errors.handlers import (
     UserNotFound, 
     IllegalSetting, 
     ContentNotFound, 
-    ExamNotFound, 
-    InputError,
-    InsufficientInputs,
-    MethodNotAllowed,
-    UnknownError
+    InputError
 )
 from odyssey.utils.misc import (
     check_client_existence, 

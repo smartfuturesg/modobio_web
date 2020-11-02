@@ -2,7 +2,7 @@ import secrets
 
 from datetime import datetime, timedelta
 
-from flask import current_app, request, url_for
+from flask import current_app, request
 from flask_accepts import accepts, responds
 from flask_restx import Resource
 from requests_oauthlib import OAuth2Session
@@ -11,14 +11,11 @@ from sqlalchemy.sql import text
 from odyssey.api import api
 from odyssey.auth.authorize import token_auth
 from odyssey.errors.handlers import (
-    ClientDeniedAccess,
     ContentNotFound,
-    IllegalSetting,
     MethodNotAllowed,
-    UnknownError,
-    UserNotFound
+    UnknownError
 )
-from odyssey.models.wearables import (
+from odyssey.wearables.models import (
     Wearables,
     WearablesOura,
     WearablesFreeStyle
@@ -28,8 +25,7 @@ from odyssey.wearables.schemas import (
     WearablesFreeStyleSchema,
     WearablesFreeStyleActivateSchema,
     WearablesOuraAuthSchema
-)
-from odyssey.models.wearables import Wearables, WearablesOura
+) 
 from odyssey.utils.misc import check_client_existence
 
 from odyssey import db

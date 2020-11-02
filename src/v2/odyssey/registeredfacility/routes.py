@@ -1,16 +1,13 @@
-from datetime import datetime, timedelta
-
-from flask import current_app, request, url_for
+from flask import request
 from flask_accepts import accepts, responds
 from flask_restx import Resource
-from requests_oauthlib import OAuth2Session
 
 from odyssey.api import api
 from odyssey.auth.authorize import token_auth
 from odyssey.errors.handlers import ContentNotFound
 
-from odyssey.models.client import ClientFacilities
-from odyssey.models.misc import RegisteredFacilities
+from odyssey.client.models import ClientFacilities
+from odyssey.misc.models import RegisteredFacilities
 from odyssey.client.schemas import ClientFacilitiesSchema
 from odyssey.staff.schemas import RegisteredFacilitiesSchema
 from odyssey.utils.misc import check_facility_existence, check_client_existence, check_client_facility_relation_existence
