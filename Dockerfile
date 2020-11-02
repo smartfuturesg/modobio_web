@@ -10,5 +10,3 @@ RUN apt install -y libpq-dev python3-dev build-essential libpango-1.0-0 libpango
 
 COPY ./ /usr/src/app
 RUN pip install -r requirements.txt
-
-CMD ["flask", "run", "--host", "0.0.0.0"]
