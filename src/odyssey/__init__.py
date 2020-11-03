@@ -59,8 +59,15 @@ def create_app():
     db.Model.update = _update
 
     from odyssey.api import bp, api
-    app.register_blueprint(bp)
+
+    # api._doc or Api(doc=...) is not True/False,
+    # it is 'path' (default '/') or False to disable.
+    if not app.config['SWAGGER_DOC']:
+        api._doc = False
     api.version = app.config['VERSION']
+
+    # api and bp are connected, register after changing settings.
+    app.register_blueprint(bp)
 
     from odyssey.api.errors import register_handlers
     register_handlers(app)
