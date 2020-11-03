@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>odyssey.models.trainer &mdash; Odyssey version: 0.1.57 documentation</title>
+  <title>odyssey.models.trainer &mdash; Odyssey version: 0.1.59 documentation</title>
   
 
   
@@ -30,13 +30,14 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="odyssey.models.wearables module" href="odyssey.models.wearables.html" />
+    <link rel="next" title="odyssey.models.wearables" href="odyssey.models.wearables.html" />
     <link rel="prev" title="odyssey.models.pt" href="odyssey.models.pt.html" /> 
 </head>
 
@@ -61,7 +62,7 @@
             
             
               <div class="version">
-                version: 0.1.57
+                version: 0.1.59
               </div>
             
           
@@ -169,11 +170,17 @@
             
   <div class="section" id="module-odyssey.models.trainer">
 <span id="odyssey-models-trainer"></span><h1>odyssey.models.trainer<a class="headerlink" href="#module-odyssey.models.trainer" title="Permalink to this headline">¶</a></h1>
+<p>Database tables for the trainer’s portion of the Modo Bio Staff application.
+All tables in this module are prefixed with <code class="docutils literal notranslate"><span class="pre">Trainer</span></code>.</p>
 <dl class="py class">
 <dt id="odyssey.models.trainer.PowerAssessment">
 <em class="property">class </em><code class="sig-prename descclassname">odyssey.models.trainer.</code><code class="sig-name descname">PowerAssessment</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.trainer.PowerAssessment" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
-<p>Power assessment table</p>
+<p>Power assessment table.</p>
+<p>In the power assessment, the average maximum power a client
+can generate is measured relative to body mass. This is measured
+separately for the upper and lower body. The assessment is
+performed on a Keiser machine with pneumatic resistance.</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.PowerAssessment.idx">
 <code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.models.trainer.PowerAssessment.idx" title="Permalink to this definition">¶</a></dt>
@@ -221,10 +228,10 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.PowerAssessment.clientid">
 <code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.trainer.PowerAssessment.clientid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client ID number</p>
+<dd><p>Client ID number.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>int, foreign key to <code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></p>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="odyssey.models.client.html#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -232,10 +239,13 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.PowerAssessment.keiser_upper_r_weight">
 <code class="sig-name descname">keiser_upper_r_weight</code><a class="headerlink" href="#odyssey.models.trainer.PowerAssessment.keiser_upper_r_weight" title="Permalink to this definition">¶</a></dt>
-<dd><p>keiser push/pull weight (right)</p>
+<dd><p>Keiser push/pull weight (pneumatic, expressed as psi), right.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>psi</p>
 </dd>
 </dl>
 </dd></dl>
@@ -243,10 +253,13 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.PowerAssessment.keiser_upper_r_attempt_1">
 <code class="sig-name descname">keiser_upper_r_attempt_1</code><a class="headerlink" href="#odyssey.models.trainer.PowerAssessment.keiser_upper_r_attempt_1" title="Permalink to this definition">¶</a></dt>
-<dd><p>keiser push/pull weight (right) attempt 1 of 3</p>
+<dd><p>Keiser push/pull max power generated, right, attempt 1 of 3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>W</p>
 </dd>
 </dl>
 </dd></dl>
@@ -254,10 +267,13 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.PowerAssessment.keiser_upper_r_attempt_2">
 <code class="sig-name descname">keiser_upper_r_attempt_2</code><a class="headerlink" href="#odyssey.models.trainer.PowerAssessment.keiser_upper_r_attempt_2" title="Permalink to this definition">¶</a></dt>
-<dd><p>keiser push/pull weight (right) attempt 2 of 3</p>
+<dd><p>Keiser push/pull max power generated, right, attempt 2 of 3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>W</p>
 </dd>
 </dl>
 </dd></dl>
@@ -265,10 +281,13 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.PowerAssessment.keiser_upper_r_attempt_3">
 <code class="sig-name descname">keiser_upper_r_attempt_3</code><a class="headerlink" href="#odyssey.models.trainer.PowerAssessment.keiser_upper_r_attempt_3" title="Permalink to this definition">¶</a></dt>
-<dd><p>keiser push/pull weight (right) attempt 3 of 3</p>
+<dd><p>Keiser push/pull max power generated, right, attempt 3 of 3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>W</p>
 </dd>
 </dl>
 </dd></dl>
@@ -276,10 +295,13 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.PowerAssessment.keiser_upper_l_weight">
 <code class="sig-name descname">keiser_upper_l_weight</code><a class="headerlink" href="#odyssey.models.trainer.PowerAssessment.keiser_upper_l_weight" title="Permalink to this definition">¶</a></dt>
-<dd><p>keiser push/pull weight (left)</p>
+<dd><p>Keiser push/pull weight (pneumatic, expressed as psi), left.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>psi</p>
 </dd>
 </dl>
 </dd></dl>
@@ -287,10 +309,13 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.PowerAssessment.keiser_upper_l_attempt_1">
 <code class="sig-name descname">keiser_upper_l_attempt_1</code><a class="headerlink" href="#odyssey.models.trainer.PowerAssessment.keiser_upper_l_attempt_1" title="Permalink to this definition">¶</a></dt>
-<dd><p>keiser push/pull weight (left) attempt 1 of 3</p>
+<dd><p>Keiser push/pull max power generated, left, attempt 1 of 3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>W</p>
 </dd>
 </dl>
 </dd></dl>
@@ -298,10 +323,13 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.PowerAssessment.keiser_upper_l_attempt_2">
 <code class="sig-name descname">keiser_upper_l_attempt_2</code><a class="headerlink" href="#odyssey.models.trainer.PowerAssessment.keiser_upper_l_attempt_2" title="Permalink to this definition">¶</a></dt>
-<dd><p>keiser push/pull weight (left) attempt 2 of 3</p>
+<dd><p>Keiser push/pull max power generated, left, attempt 2 of 3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>W</p>
 </dd>
 </dl>
 </dd></dl>
@@ -309,10 +337,13 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.PowerAssessment.keiser_upper_l_attempt_3">
 <code class="sig-name descname">keiser_upper_l_attempt_3</code><a class="headerlink" href="#odyssey.models.trainer.PowerAssessment.keiser_upper_l_attempt_3" title="Permalink to this definition">¶</a></dt>
-<dd><p>keiser push/pull weight (left) attempt 3 of 3</p>
+<dd><p>Keiser push/pull max power generated, left, attempt 3 of 3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>W</p>
 </dd>
 </dl>
 </dd></dl>
@@ -320,10 +351,13 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.PowerAssessment.keiser_lower_bi_weight">
 <code class="sig-name descname">keiser_lower_bi_weight</code><a class="headerlink" href="#odyssey.models.trainer.PowerAssessment.keiser_lower_bi_weight" title="Permalink to this definition">¶</a></dt>
-<dd><p>keiser leg press weight (bilateral)</p>
+<dd><p>Keiser leg press weight (pneumatic, expressed as psi), bilateral.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>psi</p>
 </dd>
 </dl>
 </dd></dl>
@@ -331,10 +365,13 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.PowerAssessment.keiser_lower_bi_attempt_1">
 <code class="sig-name descname">keiser_lower_bi_attempt_1</code><a class="headerlink" href="#odyssey.models.trainer.PowerAssessment.keiser_lower_bi_attempt_1" title="Permalink to this definition">¶</a></dt>
-<dd><p>keiser leg press attemp 1 of 3 (bilateral)</p>
+<dd><p>Keiser leg press max power generated, bilateral, attemp 1 of 3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>W</p>
 </dd>
 </dl>
 </dd></dl>
@@ -342,10 +379,13 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.PowerAssessment.keiser_lower_bi_attempt_2">
 <code class="sig-name descname">keiser_lower_bi_attempt_2</code><a class="headerlink" href="#odyssey.models.trainer.PowerAssessment.keiser_lower_bi_attempt_2" title="Permalink to this definition">¶</a></dt>
-<dd><p>keiser leg press attemp 2 of 3 (bilateral)</p>
+<dd><p>Keiser leg press max power generated, bilateral, attemp 2 of 3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>W</p>
 </dd>
 </dl>
 </dd></dl>
@@ -353,10 +393,13 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.PowerAssessment.keiser_lower_bi_attempt_3">
 <code class="sig-name descname">keiser_lower_bi_attempt_3</code><a class="headerlink" href="#odyssey.models.trainer.PowerAssessment.keiser_lower_bi_attempt_3" title="Permalink to this definition">¶</a></dt>
-<dd><p>keiser leg press attemp 3 of 3 (bilateral)</p>
+<dd><p>Keiser leg press max power generated, bilateral, attemp 3 of 3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>W</p>
 </dd>
 </dl>
 </dd></dl>
@@ -364,10 +407,13 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.PowerAssessment.keiser_lower_r_weight">
 <code class="sig-name descname">keiser_lower_r_weight</code><a class="headerlink" href="#odyssey.models.trainer.PowerAssessment.keiser_lower_r_weight" title="Permalink to this definition">¶</a></dt>
-<dd><p>keiser leg press weight (right)</p>
+<dd><p>Keiser leg press weight (pneumatic, expressed as psi), right.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>psi</p>
 </dd>
 </dl>
 </dd></dl>
@@ -375,10 +421,13 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.PowerAssessment.keiser_lower_r_attempt_1">
 <code class="sig-name descname">keiser_lower_r_attempt_1</code><a class="headerlink" href="#odyssey.models.trainer.PowerAssessment.keiser_lower_r_attempt_1" title="Permalink to this definition">¶</a></dt>
-<dd><p>keiser leg press attempt 1 of 3 (right)</p>
+<dd><p>Keiser leg press max power generated, right, attempt 1 of 3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>W</p>
 </dd>
 </dl>
 </dd></dl>
@@ -386,10 +435,13 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.PowerAssessment.keiser_lower_r_attempt_2">
 <code class="sig-name descname">keiser_lower_r_attempt_2</code><a class="headerlink" href="#odyssey.models.trainer.PowerAssessment.keiser_lower_r_attempt_2" title="Permalink to this definition">¶</a></dt>
-<dd><p>keiser leg press attempt 2 of 3 (right)</p>
+<dd><p>Keiser leg press max power generated, right, attempt 2 of 3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>W</p>
 </dd>
 </dl>
 </dd></dl>
@@ -397,10 +449,13 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.PowerAssessment.keiser_lower_r_attempt_3">
 <code class="sig-name descname">keiser_lower_r_attempt_3</code><a class="headerlink" href="#odyssey.models.trainer.PowerAssessment.keiser_lower_r_attempt_3" title="Permalink to this definition">¶</a></dt>
-<dd><p>keiser leg press attempt 3 of 3 (right)</p>
+<dd><p>Keiser leg press max power generated, right, attempt 3 of 3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>W</p>
 </dd>
 </dl>
 </dd></dl>
@@ -408,10 +463,13 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.PowerAssessment.keiser_lower_l_weight">
 <code class="sig-name descname">keiser_lower_l_weight</code><a class="headerlink" href="#odyssey.models.trainer.PowerAssessment.keiser_lower_l_weight" title="Permalink to this definition">¶</a></dt>
-<dd><p>keiser leg press weight (left)</p>
+<dd><p>Keiser leg press weight (pneumatic, expressed as psi), left.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>psi</p>
 </dd>
 </dl>
 </dd></dl>
@@ -419,10 +477,13 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.PowerAssessment.keiser_lower_l_attempt_1">
 <code class="sig-name descname">keiser_lower_l_attempt_1</code><a class="headerlink" href="#odyssey.models.trainer.PowerAssessment.keiser_lower_l_attempt_1" title="Permalink to this definition">¶</a></dt>
-<dd><p>keiser leg press attempt 1 of 3  (left)</p>
+<dd><p>Keiser leg press max power generated, left, attempt 1 of 3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>W</p>
 </dd>
 </dl>
 </dd></dl>
@@ -430,10 +491,13 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.PowerAssessment.keiser_lower_l_attempt_2">
 <code class="sig-name descname">keiser_lower_l_attempt_2</code><a class="headerlink" href="#odyssey.models.trainer.PowerAssessment.keiser_lower_l_attempt_2" title="Permalink to this definition">¶</a></dt>
-<dd><p>keiser leg press attempt 2 of 3  (left)</p>
+<dd><p>Keiser leg press max power generated, left, attempt 2 of 3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>W</p>
 </dd>
 </dl>
 </dd></dl>
@@ -441,10 +505,13 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.PowerAssessment.keiser_lower_l_attempt_3">
 <code class="sig-name descname">keiser_lower_l_attempt_3</code><a class="headerlink" href="#odyssey.models.trainer.PowerAssessment.keiser_lower_l_attempt_3" title="Permalink to this definition">¶</a></dt>
-<dd><p>keiser leg press attempt 3 of 3  (left)</p>
+<dd><p>Keiser leg press max power generated, left, attempt 3 of 3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>W</p>
 </dd>
 </dl>
 </dd></dl>
@@ -452,10 +519,14 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.PowerAssessment.upper_watts_per_kg">
 <code class="sig-name descname">upper_watts_per_kg</code><a class="headerlink" href="#odyssey.models.trainer.PowerAssessment.upper_watts_per_kg" title="Permalink to this definition">¶</a></dt>
-<dd><p>measure of upper body watts per kg</p>
+<dd><p>Average power generated by the upper body on Keiser push/pull
+exercise (average of left + right), divided by body mass.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>W/kg</p>
 </dd>
 </dl>
 </dd></dl>
@@ -463,10 +534,15 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.PowerAssessment.lower_watts_per_kg">
 <code class="sig-name descname">lower_watts_per_kg</code><a class="headerlink" href="#odyssey.models.trainer.PowerAssessment.lower_watts_per_kg" title="Permalink to this definition">¶</a></dt>
-<dd><p>measure of lower body watts per kg</p>
+<dd><p>Average power generated by the lower body on Keiser leg press
+exercise (average of left + right or bilateral, whichever was
+testerd), divided by body mass.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>W/kg</p>
 </dd>
 </dl>
 </dd></dl>
@@ -477,7 +553,9 @@
 <dt id="odyssey.models.trainer.StrengthAssessment">
 <em class="property">class </em><code class="sig-prename descclassname">odyssey.models.trainer.</code><code class="sig-name descname">StrengthAssessment</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.trainer.StrengthAssessment" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
-<p>Strength assessment table</p>
+<p>Strength assessment table.</p>
+<p>In the strength assessment, the maximum weight a client can lift
+is measured for the upper and lower body.</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.StrengthAssessment.idx">
 <code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.models.trainer.StrengthAssessment.idx" title="Permalink to this definition">¶</a></dt>
@@ -525,10 +603,10 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.StrengthAssessment.clientid">
 <code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.trainer.StrengthAssessment.clientid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client ID number</p>
+<dd><p>Client ID number.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>int, foreign key to <code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></p>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="odyssey.models.client.html#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -536,7 +614,7 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.StrengthAssessment.upper_push_notes">
 <code class="sig-name descname">upper_push_notes</code><a class="headerlink" href="#odyssey.models.trainer.StrengthAssessment.upper_push_notes" title="Permalink to this definition">¶</a></dt>
-<dd><p>notes on the push exercise</p>
+<dd><p>Push exercise notes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
@@ -547,7 +625,7 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.StrengthAssessment.upper_pull_notes">
 <code class="sig-name descname">upper_pull_notes</code><a class="headerlink" href="#odyssey.models.trainer.StrengthAssessment.upper_pull_notes" title="Permalink to this definition">¶</a></dt>
-<dd><p>notes on the pull exercise</p>
+<dd><p>Pull exercise notes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
@@ -558,10 +636,13 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.StrengthAssessment.upper_push_l_weight">
 <code class="sig-name descname">upper_push_l_weight</code><a class="headerlink" href="#odyssey.models.trainer.StrengthAssessment.upper_push_l_weight" title="Permalink to this definition">¶</a></dt>
-<dd><p>push weight (left)</p>
+<dd><p>Weight to be pushed in the 3 attempts to estimate 10RM, left.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>lb</p>
 </dd>
 </dl>
 </dd></dl>
@@ -569,10 +650,14 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.StrengthAssessment.upper_push_l_attempt_1">
 <code class="sig-name descname">upper_push_l_attempt_1</code><a class="headerlink" href="#odyssey.models.trainer.StrengthAssessment.upper_push_l_attempt_1" title="Permalink to this definition">¶</a></dt>
-<dd><p>push weight (left) attempt 1 of 3</p>
+<dd><p>Number of reps the weight in <a class="reference internal" href="#odyssey.models.trainer.StrengthAssessment.upper_push_l_weight" title="odyssey.models.trainer.StrengthAssessment.upper_push_l_weight"><code class="xref py py-attr docutils literal notranslate"><span class="pre">upper_push_l_weight</span></code></a> is pushed
+until fail, left, attempt 1 of 3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>reps</p>
 </dd>
 </dl>
 </dd></dl>
@@ -580,10 +665,14 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.StrengthAssessment.upper_push_l_attempt_2">
 <code class="sig-name descname">upper_push_l_attempt_2</code><a class="headerlink" href="#odyssey.models.trainer.StrengthAssessment.upper_push_l_attempt_2" title="Permalink to this definition">¶</a></dt>
-<dd><p>push weight (left) attempt 2 of 3</p>
+<dd><p>Number of reps the weight in <a class="reference internal" href="#odyssey.models.trainer.StrengthAssessment.upper_push_l_weight" title="odyssey.models.trainer.StrengthAssessment.upper_push_l_weight"><code class="xref py py-attr docutils literal notranslate"><span class="pre">upper_push_l_weight</span></code></a> is pushed
+until fail, left, attempt 2 of 3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>reps</p>
 </dd>
 </dl>
 </dd></dl>
@@ -591,10 +680,14 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.StrengthAssessment.upper_push_l_attempt_3">
 <code class="sig-name descname">upper_push_l_attempt_3</code><a class="headerlink" href="#odyssey.models.trainer.StrengthAssessment.upper_push_l_attempt_3" title="Permalink to this definition">¶</a></dt>
-<dd><p>push weight (left) attempt 3 of 3</p>
+<dd><p>Number of reps the weight in <a class="reference internal" href="#odyssey.models.trainer.StrengthAssessment.upper_push_l_weight" title="odyssey.models.trainer.StrengthAssessment.upper_push_l_weight"><code class="xref py py-attr docutils literal notranslate"><span class="pre">upper_push_l_weight</span></code></a> is pushed
+until fail, left, attempt 3 of 3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>reps</p>
 </dd>
 </dl>
 </dd></dl>
@@ -602,10 +695,16 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.StrengthAssessment.upper_push_l_estimated_10rm">
 <code class="sig-name descname">upper_push_l_estimated_10rm</code><a class="headerlink" href="#odyssey.models.trainer.StrengthAssessment.upper_push_l_estimated_10rm" title="Permalink to this definition">¶</a></dt>
-<dd><p>estimate of 10RM</p>
+<dd><p>Ten rep max, the estimated weight a client can push 10 times,
+upper body, left.</p>
+<p>Uses the average of 3 attempts and a modified Brzycki method
+to estimate the 10RM.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>lb</p>
 </dd>
 </dl>
 </dd></dl>
@@ -613,10 +712,13 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.StrengthAssessment.upper_push_r_weight">
 <code class="sig-name descname">upper_push_r_weight</code><a class="headerlink" href="#odyssey.models.trainer.StrengthAssessment.upper_push_r_weight" title="Permalink to this definition">¶</a></dt>
-<dd><p>push weight (right)</p>
+<dd><p>Weight to be pushed in the 3 attempts to estimate 10RM, right.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>lb</p>
 </dd>
 </dl>
 </dd></dl>
@@ -624,43 +726,58 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.StrengthAssessment.upper_push_r_attempt_1">
 <code class="sig-name descname">upper_push_r_attempt_1</code><a class="headerlink" href="#odyssey.models.trainer.StrengthAssessment.upper_push_r_attempt_1" title="Permalink to this definition">¶</a></dt>
-<dd><p>push weight (right) attempt 1 of 3</p>
+<dd><p>Number of reps the weight in <a class="reference internal" href="#odyssey.models.trainer.StrengthAssessment.upper_push_r_weight" title="odyssey.models.trainer.StrengthAssessment.upper_push_r_weight"><code class="xref py py-attr docutils literal notranslate"><span class="pre">upper_push_r_weight</span></code></a> is pushed
+until fail, right, attempt 1 of 3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
 </dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p></p></dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.StrengthAssessment.upper_push_r_attempt_2">
 <code class="sig-name descname">upper_push_r_attempt_2</code><a class="headerlink" href="#odyssey.models.trainer.StrengthAssessment.upper_push_r_attempt_2" title="Permalink to this definition">¶</a></dt>
-<dd><p>push weight (right) attempt 2 of 3</p>
+<dd><p>Number of reps the weight in <a class="reference internal" href="#odyssey.models.trainer.StrengthAssessment.upper_push_r_weight" title="odyssey.models.trainer.StrengthAssessment.upper_push_r_weight"><code class="xref py py-attr docutils literal notranslate"><span class="pre">upper_push_r_weight</span></code></a> is pushed
+until fail, right, attempt 2 of 3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
 </dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p></p></dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.StrengthAssessment.upper_push_r_attempt_3">
 <code class="sig-name descname">upper_push_r_attempt_3</code><a class="headerlink" href="#odyssey.models.trainer.StrengthAssessment.upper_push_r_attempt_3" title="Permalink to this definition">¶</a></dt>
-<dd><p>push weight (right) attempt 3 of 3</p>
+<dd><p>Number of reps the weight in <a class="reference internal" href="#odyssey.models.trainer.StrengthAssessment.upper_push_r_weight" title="odyssey.models.trainer.StrengthAssessment.upper_push_r_weight"><code class="xref py py-attr docutils literal notranslate"><span class="pre">upper_push_r_weight</span></code></a> is pushed
+until fail, right, attempt 3 of 3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
 </dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p></p></dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.StrengthAssessment.upper_push_r_estimated_10rm">
 <code class="sig-name descname">upper_push_r_estimated_10rm</code><a class="headerlink" href="#odyssey.models.trainer.StrengthAssessment.upper_push_r_estimated_10rm" title="Permalink to this definition">¶</a></dt>
-<dd><p>estimate of 10RM</p>
+<dd><p>Ten rep max, the estimated weight a client can push 10 times,
+upper body, right.</p>
+<p>Uses the average of 3 attempts and a modified Brzycki method
+to estimate the 10RM.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>lb</p>
 </dd>
 </dl>
 </dd></dl>
@@ -668,10 +785,13 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.StrengthAssessment.upper_push_bi_weight">
 <code class="sig-name descname">upper_push_bi_weight</code><a class="headerlink" href="#odyssey.models.trainer.StrengthAssessment.upper_push_bi_weight" title="Permalink to this definition">¶</a></dt>
-<dd><p>push weight (bilateral)</p>
+<dd><p>Weight to be pushed in the 3 attempts to estimate 10RM, bilateral.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>lb</p>
 </dd>
 </dl>
 </dd></dl>
@@ -679,10 +799,14 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.StrengthAssessment.upper_push_bi_attempt_1">
 <code class="sig-name descname">upper_push_bi_attempt_1</code><a class="headerlink" href="#odyssey.models.trainer.StrengthAssessment.upper_push_bi_attempt_1" title="Permalink to this definition">¶</a></dt>
-<dd><p>push weight (bilateral) attempt 1 of 3</p>
+<dd><p>Number of reps the weight in <a class="reference internal" href="#odyssey.models.trainer.StrengthAssessment.upper_push_bi_weight" title="odyssey.models.trainer.StrengthAssessment.upper_push_bi_weight"><code class="xref py py-attr docutils literal notranslate"><span class="pre">upper_push_bi_weight</span></code></a> is pushed
+until fail, bilateral, attempt 1 of 3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>reps</p>
 </dd>
 </dl>
 </dd></dl>
@@ -690,10 +814,14 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.StrengthAssessment.upper_push_bi_attempt_2">
 <code class="sig-name descname">upper_push_bi_attempt_2</code><a class="headerlink" href="#odyssey.models.trainer.StrengthAssessment.upper_push_bi_attempt_2" title="Permalink to this definition">¶</a></dt>
-<dd><p>push weight (bilateral) attempt 2 of 3</p>
+<dd><p>Number of reps the weight in <a class="reference internal" href="#odyssey.models.trainer.StrengthAssessment.upper_push_bi_weight" title="odyssey.models.trainer.StrengthAssessment.upper_push_bi_weight"><code class="xref py py-attr docutils literal notranslate"><span class="pre">upper_push_bi_weight</span></code></a> is pushed
+until fail, bilateral, attempt 2 of 3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>reps</p>
 </dd>
 </dl>
 </dd></dl>
@@ -701,10 +829,14 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.StrengthAssessment.upper_push_bi_attempt_3">
 <code class="sig-name descname">upper_push_bi_attempt_3</code><a class="headerlink" href="#odyssey.models.trainer.StrengthAssessment.upper_push_bi_attempt_3" title="Permalink to this definition">¶</a></dt>
-<dd><p>push weight (bilateral) attempt 3 of 3</p>
+<dd><p>Number of reps the weight in <a class="reference internal" href="#odyssey.models.trainer.StrengthAssessment.upper_push_bi_weight" title="odyssey.models.trainer.StrengthAssessment.upper_push_bi_weight"><code class="xref py py-attr docutils literal notranslate"><span class="pre">upper_push_bi_weight</span></code></a> is pushed
+until fail, bilateral, attempt 3 of 3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>reps</p>
 </dd>
 </dl>
 </dd></dl>
@@ -712,10 +844,16 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.StrengthAssessment.upper_push_bi_estimated_10rm">
 <code class="sig-name descname">upper_push_bi_estimated_10rm</code><a class="headerlink" href="#odyssey.models.trainer.StrengthAssessment.upper_push_bi_estimated_10rm" title="Permalink to this definition">¶</a></dt>
-<dd><p>estimate of 10RM</p>
+<dd><p>Ten rep max, the estimated weight a client can push 10 times,
+upper body, bilateral.</p>
+<p>Uses the average of 3 attempts and a modified Brzycki method
+to estimate the 10RM.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>lb</p>
 </dd>
 </dl>
 </dd></dl>
@@ -723,10 +861,13 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.StrengthAssessment.upper_pull_l_weight">
 <code class="sig-name descname">upper_pull_l_weight</code><a class="headerlink" href="#odyssey.models.trainer.StrengthAssessment.upper_pull_l_weight" title="Permalink to this definition">¶</a></dt>
-<dd><p>pull weight (left)</p>
+<dd><p>Weight to be pulled in the 3 attempts to estimate 10RM, left.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>lb</p>
 </dd>
 </dl>
 </dd></dl>
@@ -734,10 +875,14 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.StrengthAssessment.upper_pull_l_attempt_1">
 <code class="sig-name descname">upper_pull_l_attempt_1</code><a class="headerlink" href="#odyssey.models.trainer.StrengthAssessment.upper_pull_l_attempt_1" title="Permalink to this definition">¶</a></dt>
-<dd><p>pull weight (left) attempt 1 of 3</p>
+<dd><p>Number of reps the weight in <a class="reference internal" href="#odyssey.models.trainer.StrengthAssessment.upper_pull_l_weight" title="odyssey.models.trainer.StrengthAssessment.upper_pull_l_weight"><code class="xref py py-attr docutils literal notranslate"><span class="pre">upper_pull_l_weight</span></code></a> is pulled
+until fail, left, attempt 1 of 3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>reps</p>
 </dd>
 </dl>
 </dd></dl>
@@ -745,10 +890,14 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.StrengthAssessment.upper_pull_l_attempt_2">
 <code class="sig-name descname">upper_pull_l_attempt_2</code><a class="headerlink" href="#odyssey.models.trainer.StrengthAssessment.upper_pull_l_attempt_2" title="Permalink to this definition">¶</a></dt>
-<dd><p>pull weight (left) attempt 2 of 3</p>
+<dd><p>Number of reps the weight in <a class="reference internal" href="#odyssey.models.trainer.StrengthAssessment.upper_pull_l_weight" title="odyssey.models.trainer.StrengthAssessment.upper_pull_l_weight"><code class="xref py py-attr docutils literal notranslate"><span class="pre">upper_pull_l_weight</span></code></a> is pulled
+until fail, left, attempt 2 of 3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>reps</p>
 </dd>
 </dl>
 </dd></dl>
@@ -756,10 +905,14 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.StrengthAssessment.upper_pull_l_attempt_3">
 <code class="sig-name descname">upper_pull_l_attempt_3</code><a class="headerlink" href="#odyssey.models.trainer.StrengthAssessment.upper_pull_l_attempt_3" title="Permalink to this definition">¶</a></dt>
-<dd><p>pull weight (left) attempt 3 of 3</p>
+<dd><p>Number of reps the weight in <a class="reference internal" href="#odyssey.models.trainer.StrengthAssessment.upper_pull_l_weight" title="odyssey.models.trainer.StrengthAssessment.upper_pull_l_weight"><code class="xref py py-attr docutils literal notranslate"><span class="pre">upper_pull_l_weight</span></code></a> is pulled
+until fail, left, attempt 3 of 3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>reps</p>
 </dd>
 </dl>
 </dd></dl>
@@ -767,10 +920,16 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.StrengthAssessment.upper_pull_l_estimated_10rm">
 <code class="sig-name descname">upper_pull_l_estimated_10rm</code><a class="headerlink" href="#odyssey.models.trainer.StrengthAssessment.upper_pull_l_estimated_10rm" title="Permalink to this definition">¶</a></dt>
-<dd><p>estimate of 10RM</p>
+<dd><p>Ten rep max, the estimated weight a client can pull 10 times,
+upper body, left.</p>
+<p>Uses the average of 3 attempts and a modified Brzycki method
+to estimate the 10RM.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>lb</p>
 </dd>
 </dl>
 </dd></dl>
@@ -778,10 +937,13 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.StrengthAssessment.upper_pull_r_weight">
 <code class="sig-name descname">upper_pull_r_weight</code><a class="headerlink" href="#odyssey.models.trainer.StrengthAssessment.upper_pull_r_weight" title="Permalink to this definition">¶</a></dt>
-<dd><p>pull weight (right)</p>
+<dd><p>Weight to be pulled in the 3 attempts to estimate 10RM, right.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>lb</p>
 </dd>
 </dl>
 </dd></dl>
@@ -789,10 +951,14 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.StrengthAssessment.upper_pull_r_attempt_1">
 <code class="sig-name descname">upper_pull_r_attempt_1</code><a class="headerlink" href="#odyssey.models.trainer.StrengthAssessment.upper_pull_r_attempt_1" title="Permalink to this definition">¶</a></dt>
-<dd><p>pull weight (right) attempt 1 of 3</p>
+<dd><p>Number of reps the weight in <a class="reference internal" href="#odyssey.models.trainer.StrengthAssessment.upper_pull_r_weight" title="odyssey.models.trainer.StrengthAssessment.upper_pull_r_weight"><code class="xref py py-attr docutils literal notranslate"><span class="pre">upper_pull_r_weight</span></code></a> is pulled
+until fail, right, attempt 1 of 3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>reps</p>
 </dd>
 </dl>
 </dd></dl>
@@ -800,10 +966,14 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.StrengthAssessment.upper_pull_r_attempt_2">
 <code class="sig-name descname">upper_pull_r_attempt_2</code><a class="headerlink" href="#odyssey.models.trainer.StrengthAssessment.upper_pull_r_attempt_2" title="Permalink to this definition">¶</a></dt>
-<dd><p>pull weight (right) attempt 2 of 3</p>
+<dd><p>Number of reps the weight in <a class="reference internal" href="#odyssey.models.trainer.StrengthAssessment.upper_pull_r_weight" title="odyssey.models.trainer.StrengthAssessment.upper_pull_r_weight"><code class="xref py py-attr docutils literal notranslate"><span class="pre">upper_pull_r_weight</span></code></a> is pulled
+until fail, right, attempt 2 of 3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>reps</p>
 </dd>
 </dl>
 </dd></dl>
@@ -811,10 +981,14 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.StrengthAssessment.upper_pull_r_attempt_3">
 <code class="sig-name descname">upper_pull_r_attempt_3</code><a class="headerlink" href="#odyssey.models.trainer.StrengthAssessment.upper_pull_r_attempt_3" title="Permalink to this definition">¶</a></dt>
-<dd><p>pull weight (right) attempt 3 of 3</p>
+<dd><p>Number of reps the weight in <a class="reference internal" href="#odyssey.models.trainer.StrengthAssessment.upper_pull_r_weight" title="odyssey.models.trainer.StrengthAssessment.upper_pull_r_weight"><code class="xref py py-attr docutils literal notranslate"><span class="pre">upper_pull_r_weight</span></code></a> is pulled
+until fail, right, attempt 1 of 3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>reps</p>
 </dd>
 </dl>
 </dd></dl>
@@ -822,10 +996,16 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.StrengthAssessment.upper_pull_r_estimated_10rm">
 <code class="sig-name descname">upper_pull_r_estimated_10rm</code><a class="headerlink" href="#odyssey.models.trainer.StrengthAssessment.upper_pull_r_estimated_10rm" title="Permalink to this definition">¶</a></dt>
-<dd><p>estimate of 10RM</p>
+<dd><p>Ten rep max, the estimated weight a client can pull 10 times,
+upper body, right.</p>
+<p>Uses the average of 3 attempts and a modified Brzycki method
+to estimate the 10RM.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>lb</p>
 </dd>
 </dl>
 </dd></dl>
@@ -833,10 +1013,13 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.StrengthAssessment.upper_pull_bi_weight">
 <code class="sig-name descname">upper_pull_bi_weight</code><a class="headerlink" href="#odyssey.models.trainer.StrengthAssessment.upper_pull_bi_weight" title="Permalink to this definition">¶</a></dt>
-<dd><p>pull weight (bilateral)</p>
+<dd><p>Weight to be pulled in the 3 attempts to estimate 10RM, bilateral.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>lb</p>
 </dd>
 </dl>
 </dd></dl>
@@ -844,10 +1027,14 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.StrengthAssessment.upper_pull_bi_attempt_1">
 <code class="sig-name descname">upper_pull_bi_attempt_1</code><a class="headerlink" href="#odyssey.models.trainer.StrengthAssessment.upper_pull_bi_attempt_1" title="Permalink to this definition">¶</a></dt>
-<dd><p>pull weight (bilateral) attempt 1 of 3</p>
+<dd><p>Number of reps the weight in <a class="reference internal" href="#odyssey.models.trainer.StrengthAssessment.upper_pull_bi_weight" title="odyssey.models.trainer.StrengthAssessment.upper_pull_bi_weight"><code class="xref py py-attr docutils literal notranslate"><span class="pre">upper_pull_bi_weight</span></code></a> is pulled
+until fail, bilateral, attempt 1 of 3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>reps</p>
 </dd>
 </dl>
 </dd></dl>
@@ -855,10 +1042,14 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.StrengthAssessment.upper_pull_bi_attempt_2">
 <code class="sig-name descname">upper_pull_bi_attempt_2</code><a class="headerlink" href="#odyssey.models.trainer.StrengthAssessment.upper_pull_bi_attempt_2" title="Permalink to this definition">¶</a></dt>
-<dd><p>pull weight (bilateral) attempt 2 of 3</p>
+<dd><p>Number of reps the weight in <a class="reference internal" href="#odyssey.models.trainer.StrengthAssessment.upper_pull_bi_weight" title="odyssey.models.trainer.StrengthAssessment.upper_pull_bi_weight"><code class="xref py py-attr docutils literal notranslate"><span class="pre">upper_pull_bi_weight</span></code></a> is pulled
+until fail, bilateral, attempt 2 of 3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>reps</p>
 </dd>
 </dl>
 </dd></dl>
@@ -866,10 +1057,14 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.StrengthAssessment.upper_pull_bi_attempt_3">
 <code class="sig-name descname">upper_pull_bi_attempt_3</code><a class="headerlink" href="#odyssey.models.trainer.StrengthAssessment.upper_pull_bi_attempt_3" title="Permalink to this definition">¶</a></dt>
-<dd><p>pull weight (bilateral) attempt 3 of 3</p>
+<dd><p>Number of reps the weight in <a class="reference internal" href="#odyssey.models.trainer.StrengthAssessment.upper_pull_bi_weight" title="odyssey.models.trainer.StrengthAssessment.upper_pull_bi_weight"><code class="xref py py-attr docutils literal notranslate"><span class="pre">upper_pull_bi_weight</span></code></a> is pulled
+until fail, bilateral, attempt 3 of 3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>reps</p>
 </dd>
 </dl>
 </dd></dl>
@@ -877,10 +1072,16 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.StrengthAssessment.upper_pull_bi_estimated_10rm">
 <code class="sig-name descname">upper_pull_bi_estimated_10rm</code><a class="headerlink" href="#odyssey.models.trainer.StrengthAssessment.upper_pull_bi_estimated_10rm" title="Permalink to this definition">¶</a></dt>
-<dd><p>estimate of 10RM</p>
+<dd><p>Ten rep max, the estimated weight a client can pull 10 times,
+upper body, bilateral.</p>
+<p>Uses the average of 3 attempts and a modified Brzycki method
+to estimate the 10RM.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>lb</p>
 </dd>
 </dl>
 </dd></dl>
@@ -891,7 +1092,8 @@
 <dt id="odyssey.models.trainer.MovementAssessment">
 <em class="property">class </em><code class="sig-prename descclassname">odyssey.models.trainer.</code><code class="sig-name descname">MovementAssessment</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.trainer.MovementAssessment" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
-<p>Movement Assessment table</p>
+<p>Movement assessment table.</p>
+<p>This set of tests assesses movement through squats and forward bends.</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MovementAssessment.idx">
 <code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.models.trainer.MovementAssessment.idx" title="Permalink to this definition">¶</a></dt>
@@ -939,10 +1141,10 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MovementAssessment.clientid">
 <code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.trainer.MovementAssessment.clientid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client ID number</p>
+<dd><p>Client ID number.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>int, foreign key to <code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></p>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="odyssey.models.client.html#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -950,11 +1152,13 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MovementAssessment.squat_depth">
 <code class="sig-name descname">squat_depth</code><a class="headerlink" href="#odyssey.models.trainer.MovementAssessment.squat_depth" title="Permalink to this definition">¶</a></dt>
-<dd><p>Regarding squat depth, the client  ust be one of the following
-‘Above Parallel’,
-‘Parallel’,
-‘Below Parallel’,
-‘Full Depth’</p>
+<dd><p>Depth of a squat. Qualified as one of the following:</p>
+<ul class="simple">
+<li><p>above parallel</p></li>
+<li><p>parallel</p></li>
+<li><p>below parallel</p></li>
+<li><p>full depth</p></li>
+</ul>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
@@ -965,10 +1169,13 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MovementAssessment.squat_ramp">
 <code class="sig-name descname">squat_ramp</code><a class="headerlink" href="#odyssey.models.trainer.MovementAssessment.squat_ramp" title="Permalink to this definition">¶</a></dt>
-<dd><p>If client requires a ramp to squat, must be one of the following:
-‘30 Degree Ramp’,
-‘15 Degree Ramp’,
-‘No Ramp’</p>
+<dd><p>Did a client use a ramp to squat, and how steep?
+Must be one of the following:</p>
+<ul class="simple">
+<li><p>30 degree ramp</p></li>
+<li><p>15 degree ramp</p></li>
+<li><p>no ramp</p></li>
+</ul>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
@@ -979,10 +1186,11 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MovementAssessment.squat_eye_test">
 <code class="sig-name descname">squat_eye_test</code><a class="headerlink" href="#odyssey.models.trainer.MovementAssessment.squat_eye_test" title="Permalink to this definition">¶</a></dt>
-<dd><p>pass-True fail-False of wheather client passes test</p>
+<dd><p>Whether or not the squat was being performed correctly. The trainer
+assesses it by <em>eye-balling</em> the client.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>Boolean</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -990,12 +1198,10 @@
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MovementAssessment.squat_can_breathe">
 <code class="sig-name descname">squat_can_breathe</code><a class="headerlink" href="#odyssey.models.trainer.MovementAssessment.squat_can_breathe" title="Permalink to this definition">¶</a></dt>
-<dd><p>while squatting client:
-can breathe-True
-cannot breathe-False</p>
+<dd><p>Indicates whether or not a client can breathe while squatting.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>Boolean</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1003,12 +1209,10 @@ cannot breathe-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MovementAssessment.squat_can_look_up">
 <code class="sig-name descname">squat_can_look_up</code><a class="headerlink" href="#odyssey.models.trainer.MovementAssessment.squat_can_look_up" title="Permalink to this definition">¶</a></dt>
-<dd><p>while squatting client:
-can look up-True
-cannot look up-False</p>
+<dd><p>Indicates whether or not a client can look up while squatting</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>Boolean</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1016,12 +1220,14 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MovementAssessment.toe_touch_depth">
 <code class="sig-name descname">toe_touch_depth</code><a class="headerlink" href="#odyssey.models.trainer.MovementAssessment.toe_touch_depth" title="Permalink to this definition">¶</a></dt>
-<dd><p>Depth of toe touch test
-‘Knee Height’,
-‘Mid Shin’,
-‘Low Shin’,
-‘Toes’,
-‘Floor’</p>
+<dd><p>Indicates depth of a forward bend. One of the following results:</p>
+<ul class="simple">
+<li><p>knee height</p></li>
+<li><p>mid shin</p></li>
+<li><p>low shin</p></li>
+<li><p>toes</p></li>
+<li><p>floor</p></li>
+</ul>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
@@ -1032,12 +1238,15 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MovementAssessment.toe_touch_pelvis_movement">
 <code class="sig-name descname">toe_touch_pelvis_movement</code><a class="headerlink" href="#odyssey.models.trainer.MovementAssessment.toe_touch_pelvis_movement" title="Permalink to this definition">¶</a></dt>
-<dd><p>Pelvis movement during toe touch test
-‘Right Hip High’,
-‘Right Hip Back’,
-‘Left Hip High’,
-‘Left Hip Back’,
-‘Even Bilaterally’</p>
+<dd><p>Describes pelvis movement during toe touch test.
+Can be any of the following (multiple allowed):</p>
+<ul class="simple">
+<li><p>right hip high</p></li>
+<li><p>right hip back</p></li>
+<li><p>left hip high</p></li>
+<li><p>left hip back</p></li>
+<li><p>even bilaterally</p></li>
+</ul>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
@@ -1048,12 +1257,15 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MovementAssessment.toe_touch_ribcage_movement">
 <code class="sig-name descname">toe_touch_ribcage_movement</code><a class="headerlink" href="#odyssey.models.trainer.MovementAssessment.toe_touch_ribcage_movement" title="Permalink to this definition">¶</a></dt>
-<dd><p>Ribcage movement during toe touch test
-‘Right Posterior Ribcage High’,
-‘Right Posterior Ribcage Back’,
-‘Left Posterior Ribcage High’,
-‘Left Posterior Ribcage Back’,
-‘Even Bilaterally’</p>
+<dd><p>Describes ribcage movement during toe touch test.
+Can be any of the following (multiple allowed):</p>
+<ul class="simple">
+<li><p>right posterior ribcage high</p></li>
+<li><p>right posterior ribcage back</p></li>
+<li><p>left posterior ribcage high</p></li>
+<li><p>left posterior ribcage back</p></li>
+<li><p>even bilaterally</p></li>
+</ul>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
@@ -1064,7 +1276,7 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MovementAssessment.toe_touch_notes">
 <code class="sig-name descname">toe_touch_notes</code><a class="headerlink" href="#odyssey.models.trainer.MovementAssessment.toe_touch_notes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Notes regarding toe touch test</p>
+<dd><p>Toe touch test notes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
@@ -1075,7 +1287,7 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MovementAssessment.standing_rotation_r_notes">
 <code class="sig-name descname">standing_rotation_r_notes</code><a class="headerlink" href="#odyssey.models.trainer.MovementAssessment.standing_rotation_r_notes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Notes regarding standing rotation right</p>
+<dd><p>Standing rotation right notes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
@@ -1086,7 +1298,7 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MovementAssessment.standing_rotation_l_notes">
 <code class="sig-name descname">standing_rotation_l_notes</code><a class="headerlink" href="#odyssey.models.trainer.MovementAssessment.standing_rotation_l_notes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Notes regarding standing rotation right</p>
+<dd><p>Standing rotation right notes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
@@ -1100,7 +1312,8 @@ cannot look up-False</p>
 <dt id="odyssey.models.trainer.HeartAssessment">
 <em class="property">class </em><code class="sig-prename descclassname">odyssey.models.trainer.</code><code class="sig-name descname">HeartAssessment</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.trainer.HeartAssessment" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
-<p>Heart assessment table</p>
+<p>Heart assessment table.</p>
+<p>Assessment of heartrate and breathing capabilities.</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.HeartAssessment.idx">
 <code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.models.trainer.HeartAssessment.idx" title="Permalink to this definition">¶</a></dt>
@@ -1148,10 +1361,10 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.HeartAssessment.clientid">
 <code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.trainer.HeartAssessment.clientid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client ID number</p>
+<dd><p>Client ID number.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>int, foreign key to <code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></p>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="odyssey.models.client.html#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1159,10 +1372,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.HeartAssessment.resting_hr">
 <code class="sig-name descname">resting_hr</code><a class="headerlink" href="#odyssey.models.trainer.HeartAssessment.resting_hr" title="Permalink to this definition">¶</a></dt>
-<dd><p>resting heartrate</p>
+<dd><p>Resting heartrate.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>bpm</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1170,10 +1386,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.HeartAssessment.max_hr">
 <code class="sig-name descname">max_hr</code><a class="headerlink" href="#odyssey.models.trainer.HeartAssessment.max_hr" title="Permalink to this definition">¶</a></dt>
-<dd><p>maximum measured heartrate</p>
+<dd><p>Maximum measured heartrate.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>bpm</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1181,10 +1400,17 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.HeartAssessment.theoretical_max_hr">
 <code class="sig-name descname">theoretical_max_hr</code><a class="headerlink" href="#odyssey.models.trainer.HeartAssessment.theoretical_max_hr" title="Permalink to this definition">¶</a></dt>
-<dd><p>theoretical maximum heartrate</p>
+<dd><p>Theoretical maximum heartrate. This is calculated with:</p>
+<blockquote>
+<div><div class="math notranslate nohighlight">
+\[max_hr = 220 - age\]</div>
+</div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>bpm</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1192,10 +1418,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.HeartAssessment.avg_eval_hr">
 <code class="sig-name descname">avg_eval_hr</code><a class="headerlink" href="#odyssey.models.trainer.HeartAssessment.avg_eval_hr" title="Permalink to this definition">¶</a></dt>
-<dd><p>average heartrate during evaluation</p>
+<dd><p>Average heartrate during evaluation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>bpm</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1203,10 +1432,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.HeartAssessment.avg_training_hr">
 <code class="sig-name descname">avg_training_hr</code><a class="headerlink" href="#odyssey.models.trainer.HeartAssessment.avg_training_hr" title="Permalink to this definition">¶</a></dt>
-<dd><p>avergage heatrate during training</p>
+<dd><p>Avergage heatrate during training.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>bpm</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1214,10 +1446,18 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.HeartAssessment.estimated_vo2_max">
 <code class="sig-name descname">estimated_vo2_max</code><a class="headerlink" href="#odyssey.models.trainer.HeartAssessment.estimated_vo2_max" title="Permalink to this definition">¶</a></dt>
-<dd><p>estimation of VO2 Max</p>
+<dd><p>Estimation of the maximum oxygen consumption rate per body mass per
+minute (VO2 max). The VO2 max is calculated from the <a class="reference internal" href="#odyssey.models.trainer.HeartAssessment.max_hr" title="odyssey.models.trainer.HeartAssessment.max_hr"><code class="xref py py-attr docutils literal notranslate"><span class="pre">max_hr</span></code></a>
+or <code class="xref py py-attr docutils literal notranslate"><span class="pre">theorerical_max_hr</span></code>, which ever is higher, and the
+<a class="reference internal" href="#odyssey.models.trainer.HeartAssessment.resting_hr" title="odyssey.models.trainer.HeartAssessment.resting_hr"><code class="xref py py-attr docutils literal notranslate"><span class="pre">resting_hr</span></code></a>:</p>
+<div class="math notranslate nohighlight">
+\[VO2 max = (max(max_hr, theoretical_max_hr) / resting_hr) * 15.3\]</div>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>mL/kg/min</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1225,10 +1465,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.HeartAssessment.co2_tolerance">
 <code class="sig-name descname">co2_tolerance</code><a class="headerlink" href="#odyssey.models.trainer.HeartAssessment.co2_tolerance" title="Permalink to this definition">¶</a></dt>
-<dd><p>CO2 tolerance 0-120</p>
+<dd><p>CO2 tolerance test, duration of slow exhale until next inhale.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>seconds</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1236,7 +1479,7 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.HeartAssessment.notes">
 <code class="sig-name descname">notes</code><a class="headerlink" href="#odyssey.models.trainer.HeartAssessment.notes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Notes on the client’s heatrate tests</p>
+<dd><p>Heatrate test notes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
@@ -1250,7 +1493,14 @@ cannot look up-False</p>
 <dt id="odyssey.models.trainer.MoxyAssessment">
 <em class="property">class </em><code class="sig-prename descclassname">odyssey.models.trainer.</code><code class="sig-name descname">MoxyAssessment</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.trainer.MoxyAssessment" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
-<p>Moxy assessment table</p>
+<p>Moxy assessment table.</p>
+<p>A moxy sensor is a device that measures muscle oxygen concentration. It
+is used to determine a client’s capacity for short duration full power
+exercise (the size of their “gas tank”) and the speed of recovery afterwards.</p>
+<p>In <code class="xref py py-class docutils literal notranslate"><span class="pre">MoxyRipAssessment</span></code>, a specific stationary bike exercise is used to
+perform the moxy test. If a stationary bike is not available, another type of
+exercise may be used to do the moxy test. This table holds results of the
+alternative moxy test, with the test described in the <a class="reference internal" href="#odyssey.models.trainer.MoxyAssessment.notes" title="odyssey.models.trainer.MoxyAssessment.notes"><code class="xref py py-attr docutils literal notranslate"><span class="pre">notes</span></code></a>.</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyAssessment.idx">
 <code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.models.trainer.MoxyAssessment.idx" title="Permalink to this definition">¶</a></dt>
@@ -1298,10 +1548,10 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyAssessment.clientid">
 <code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.trainer.MoxyAssessment.clientid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client ID number</p>
+<dd><p>Client ID number.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>int, foreign key to <code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></p>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="odyssey.models.client.html#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1309,7 +1559,8 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyAssessment.vl_side">
 <code class="sig-name descname">vl_side</code><a class="headerlink" href="#odyssey.models.trainer.MoxyAssessment.vl_side" title="Permalink to this definition">¶</a></dt>
-<dd><p>VL side, right or left leg</p>
+<dd><p>Which vastus lateralus (VL, part of quadriceps in upper leg) the moxy
+sensor is placed on. Either right or left leg.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
@@ -1320,7 +1571,7 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyAssessment.notes">
 <code class="sig-name descname">notes</code><a class="headerlink" href="#odyssey.models.trainer.MoxyAssessment.notes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Notes on the client’s moxy tests</p>
+<dd><p>Moxy test notes. Describes the exercise used to do the moxy test.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
@@ -1331,10 +1582,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyAssessment.recovery_baseline">
 <code class="sig-name descname">recovery_baseline</code><a class="headerlink" href="#odyssey.models.trainer.MoxyAssessment.recovery_baseline" title="Permalink to this definition">¶</a></dt>
-<dd><p>int</p>
+<dd><p>Average peak of repeated moxy test.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.9)">type</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>%</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1342,10 +1596,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyAssessment.performance_baseline">
 <code class="sig-name descname">performance_baseline</code><a class="headerlink" href="#odyssey.models.trainer.MoxyAssessment.performance_baseline" title="Permalink to this definition">¶</a></dt>
-<dd><p>int</p>
+<dd><p>Average valley of repeated moxy test</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.9)">type</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>%</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1353,10 +1610,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyAssessment.gas_tank_size">
 <code class="sig-name descname">gas_tank_size</code><a class="headerlink" href="#odyssey.models.trainer.MoxyAssessment.gas_tank_size" title="Permalink to this definition">¶</a></dt>
-<dd><p>int</p>
+<dd><p>Difference of <a class="reference internal" href="#odyssey.models.trainer.MoxyAssessment.recovery_baseline" title="odyssey.models.trainer.MoxyAssessment.recovery_baseline"><code class="xref py py-attr docutils literal notranslate"><span class="pre">recovery_baseline</span></code></a> - <a class="reference internal" href="#odyssey.models.trainer.MoxyAssessment.performance_baseline" title="odyssey.models.trainer.MoxyAssessment.performance_baseline"><code class="xref py py-attr docutils literal notranslate"><span class="pre">performance_baseline</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.9)">type</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>%</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1364,10 +1624,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyAssessment.starting_sm_o2">
 <code class="sig-name descname">starting_sm_o2</code><a class="headerlink" href="#odyssey.models.trainer.MoxyAssessment.starting_sm_o2" title="Permalink to this definition">¶</a></dt>
-<dd><p>int</p>
+<dd><p>Starting value for muscle oxygen level.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.9)">type</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>%</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1375,10 +1638,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyAssessment.starting_thb">
 <code class="sig-name descname">starting_thb</code><a class="headerlink" href="#odyssey.models.trainer.MoxyAssessment.starting_thb" title="Permalink to this definition">¶</a></dt>
-<dd><p>int</p>
+<dd><p>Starting value for the total hemoglobin.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.9)">type</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>g/dL</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1386,10 +1652,12 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyAssessment.limiter">
 <code class="sig-name descname">limiter</code><a class="headerlink" href="#odyssey.models.trainer.MoxyAssessment.limiter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Must be one of:
-‘Demand’,
-‘Supply’,
-‘Respiratory’</p>
+<dd><p>Limiting factor to the “gas tank” size. Must be one of:</p>
+<ul class="simple">
+<li><p>demand</p></li>
+<li><p>supply</p></li>
+<li><p>respiratory</p></li>
+</ul>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
@@ -1400,7 +1668,7 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyAssessment.intervention">
 <code class="sig-name descname">intervention</code><a class="headerlink" href="#odyssey.models.trainer.MoxyAssessment.intervention" title="Permalink to this definition">¶</a></dt>
-<dd><p>text box of letters and numbers</p>
+<dd><p>Proposed intervention by the trainer to improve the “gas tank” size.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
@@ -1411,10 +1679,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyAssessment.performance_metric_1">
 <code class="sig-name descname">performance_metric_1</code><a class="headerlink" href="#odyssey.models.trainer.MoxyAssessment.performance_metric_1" title="Permalink to this definition">¶</a></dt>
-<dd><p>Must be one of:
-‘Watts’,
-‘Lbs’,
-‘Feet/Min’</p>
+<dd><p>The test described in <a class="reference internal" href="#odyssey.models.trainer.MoxyAssessment.notes" title="odyssey.models.trainer.MoxyAssessment.notes"><code class="xref py py-attr docutils literal notranslate"><span class="pre">notes</span></code></a> has an asociated unit.
+Free-form, but examples are:</p>
+<ul class="simple">
+<li><p>watt</p></li>
+<li><p>lb</p></li>
+<li><p>foot/min</p></li>
+</ul>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
@@ -1425,10 +1696,16 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyAssessment.performance_metric_1_value">
 <code class="sig-name descname">performance_metric_1_value</code><a class="headerlink" href="#odyssey.models.trainer.MoxyAssessment.performance_metric_1_value" title="Permalink to this definition">¶</a></dt>
-<dd><p>The number behind the performance metric</p>
+<dd><p>The size of the 1st property that is part of the exercise described
+in <a class="reference internal" href="#odyssey.models.trainer.MoxyAssessment.notes" title="odyssey.models.trainer.MoxyAssessment.notes"><code class="xref py py-attr docutils literal notranslate"><span class="pre">notes</span></code></a>. For example, if a kettle bell exercise is used for
+the moxy test, and <a class="reference internal" href="#odyssey.models.trainer.MoxyAssessment.performance_metric_1" title="odyssey.models.trainer.MoxyAssessment.performance_metric_1"><code class="xref py py-attr docutils literal notranslate"><span class="pre">performance_metric_1</span></code></a> is set to ‘lb’,
+then the value might be 35 (i.e. 35 lb weight is used).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>given in <a class="reference internal" href="#odyssey.models.trainer.MoxyAssessment.performance_metric_1" title="odyssey.models.trainer.MoxyAssessment.performance_metric_1"><code class="xref py py-attr docutils literal notranslate"><span class="pre">performance_metric_1</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1436,10 +1713,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyAssessment.performance_metric_2">
 <code class="sig-name descname">performance_metric_2</code><a class="headerlink" href="#odyssey.models.trainer.MoxyAssessment.performance_metric_2" title="Permalink to this definition">¶</a></dt>
-<dd><p>Must be one of:
-‘Watts’,
-‘Lbs’,
-‘Feet/Min’</p>
+<dd><p>The test described in <a class="reference internal" href="#odyssey.models.trainer.MoxyAssessment.notes" title="odyssey.models.trainer.MoxyAssessment.notes"><code class="xref py py-attr docutils literal notranslate"><span class="pre">notes</span></code></a> has an asociated unit.
+Free-form, but examples are:</p>
+<ul class="simple">
+<li><p>watt</p></li>
+<li><p>lb</p></li>
+<li><p>foot/min</p></li>
+</ul>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
@@ -1450,10 +1730,17 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyAssessment.performance_metric_2_value">
 <code class="sig-name descname">performance_metric_2_value</code><a class="headerlink" href="#odyssey.models.trainer.MoxyAssessment.performance_metric_2_value" title="Permalink to this definition">¶</a></dt>
-<dd><p>The number behind the performance metric</p>
+<dd><p>The size of the 2st property that is part of the exercise described
+in <a class="reference internal" href="#odyssey.models.trainer.MoxyAssessment.notes" title="odyssey.models.trainer.MoxyAssessment.notes"><code class="xref py py-attr docutils literal notranslate"><span class="pre">notes</span></code></a>. For example, if a kettle bell exercise is used for
+the moxy test, with a 35 lb weight (i.e. <a class="reference internal" href="#odyssey.models.trainer.MoxyAssessment.performance_metric_1" title="odyssey.models.trainer.MoxyAssessment.performance_metric_1"><code class="xref py py-attr docutils literal notranslate"><span class="pre">performance_metric_1</span></code></a>
+= ‘lb’ and <a class="reference internal" href="#odyssey.models.trainer.MoxyAssessment.performance_metric_1_value" title="odyssey.models.trainer.MoxyAssessment.performance_metric_1_value"><code class="xref py py-attr docutils literal notranslate"><span class="pre">performance_metric_1_value</span></code></a> = 35), then the 2nd
+property might describe the number of reps.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>given in <a class="reference internal" href="#odyssey.models.trainer.MoxyAssessment.performance_metric_2" title="odyssey.models.trainer.MoxyAssessment.performance_metric_2"><code class="xref py py-attr docutils literal notranslate"><span class="pre">performance_metric_2</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1464,7 +1751,13 @@ cannot look up-False</p>
 <dt id="odyssey.models.trainer.MoxyRipTest">
 <em class="property">class </em><code class="sig-prename descclassname">odyssey.models.trainer.</code><code class="sig-name descname">MoxyRipTest</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
-<p>Moxy rop test table</p>
+<p>Moxy rip test table.</p>
+<p>A moxy sensor is a device that measures muscle oxygen concentration. It
+is used to determine a client’s capacity for short duration full power
+exercise (the size of their “gas tank”) and the speed of recovery afterwards.</p>
+<p>A stationary bike exercise is used to perform the moxy test. The client
+does 4 sprints of 20 s each, with 1:40 min rest in between, while wearing
+a moxy sensor.</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.idx">
 <code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.idx" title="Permalink to this definition">¶</a></dt>
@@ -1512,10 +1805,10 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.clientid">
 <code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.clientid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client ID number</p>
+<dd><p>Client ID number.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>int, foreign key to <code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></p>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="odyssey.models.client.html#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1523,7 +1816,8 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.vl_side">
 <code class="sig-name descname">vl_side</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.vl_side" title="Permalink to this definition">¶</a></dt>
-<dd><p>VL side, right or left leg</p>
+<dd><p>Which vastus lateralus (VL, part of quadriceps in upper leg) the moxy
+sensor is placed on. Either right or left leg.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
@@ -1534,10 +1828,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.performance_smo2_1">
 <code class="sig-name descname">performance_smo2_1</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.performance_smo2_1" title="Permalink to this definition">¶</a></dt>
-<dd><p>performance assessment 1 smo2</p>
+<dd><p>Muscle oxygen saturation level (SmO2) after sprint 1.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>%</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1545,10 +1842,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.performance_thb_1">
 <code class="sig-name descname">performance_thb_1</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.performance_thb_1" title="Permalink to this definition">¶</a></dt>
-<dd><p>performance assessment 1 thb</p>
+<dd><p>Total hemoglobin level after sprint 1.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>g/dL</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1556,10 +1856,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.performance_average_power_1">
 <code class="sig-name descname">performance_average_power_1</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.performance_average_power_1" title="Permalink to this definition">¶</a></dt>
-<dd><p>performance assessment 1 average power</p>
+<dd><p>Average power generated during sprint 1.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>W</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1567,10 +1870,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.performance_hr_max_1">
 <code class="sig-name descname">performance_hr_max_1</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.performance_hr_max_1" title="Permalink to this definition">¶</a></dt>
-<dd><p>performance assessment 1 max hr</p>
+<dd><p>Maximum heartrate during sprint 1.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>bpm</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1578,10 +1884,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.performance_smo2_2">
 <code class="sig-name descname">performance_smo2_2</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.performance_smo2_2" title="Permalink to this definition">¶</a></dt>
-<dd><p>performance assessment 2 smo2</p>
+<dd><p>Muscle oxygen saturation level (SmO2) after sprint 2.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>%</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1589,10 +1898,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.performance_thb_2">
 <code class="sig-name descname">performance_thb_2</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.performance_thb_2" title="Permalink to this definition">¶</a></dt>
-<dd><p>performance assessment 2 thb</p>
+<dd><p>Total hemoglobin level after sprint 2.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>g/dL</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1600,10 +1912,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.performance_average_power_2">
 <code class="sig-name descname">performance_average_power_2</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.performance_average_power_2" title="Permalink to this definition">¶</a></dt>
-<dd><p>performance assessment 2 average power</p>
+<dd><p>Average power generated during sprint 1.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>W</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1611,10 +1926,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.performance_hr_max_2">
 <code class="sig-name descname">performance_hr_max_2</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.performance_hr_max_2" title="Permalink to this definition">¶</a></dt>
-<dd><p>performance assessment 2 max hr</p>
+<dd><p>Maximum heartrate during sprint 1.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>bpm</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1622,10 +1940,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.performance_smo2_3">
 <code class="sig-name descname">performance_smo2_3</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.performance_smo2_3" title="Permalink to this definition">¶</a></dt>
-<dd><p>performance assessment 3 smo2</p>
+<dd><p>Muscle oxygen saturation level (SmO2) after sprint 3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>%</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1633,10 +1954,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.performance_thb_3">
 <code class="sig-name descname">performance_thb_3</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.performance_thb_3" title="Permalink to this definition">¶</a></dt>
-<dd><p>performance assessment 3 thb</p>
+<dd><p>Total hemoglobin level after sprint 3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>g/dL</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1644,10 +1968,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.performance_average_power_3">
 <code class="sig-name descname">performance_average_power_3</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.performance_average_power_3" title="Permalink to this definition">¶</a></dt>
-<dd><p>performance assessment 3 average power</p>
+<dd><p>Average power generated during sprint 1.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>W</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1655,10 +1982,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.performance_hr_max_3">
 <code class="sig-name descname">performance_hr_max_3</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.performance_hr_max_3" title="Permalink to this definition">¶</a></dt>
-<dd><p>performance assessment 3 max hr</p>
+<dd><p>Maximum heartrate during sprint 1.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>bpm</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1666,10 +1996,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.performance_smo2_4">
 <code class="sig-name descname">performance_smo2_4</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.performance_smo2_4" title="Permalink to this definition">¶</a></dt>
-<dd><p>performance assessment 4 smo2</p>
+<dd><p>Muscle oxygen saturation level (SmO2) after sprint 4.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>%</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1677,10 +2010,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.performance_thb_4">
 <code class="sig-name descname">performance_thb_4</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.performance_thb_4" title="Permalink to this definition">¶</a></dt>
-<dd><p>performance assessment 4 thb</p>
+<dd><p>Total hemoglobin level after sprint 4.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>g/dL</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1688,10 +2024,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.performance_average_power_4">
 <code class="sig-name descname">performance_average_power_4</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.performance_average_power_4" title="Permalink to this definition">¶</a></dt>
-<dd><p>performance assessment 4 average power</p>
+<dd><p>Average power generated during sprint 1.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>W</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1699,10 +2038,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.performance_hr_max_4">
 <code class="sig-name descname">performance_hr_max_4</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.performance_hr_max_4" title="Permalink to this definition">¶</a></dt>
-<dd><p>performance assessment 4 max hr</p>
+<dd><p>Maximum heartrate during sprint 1.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>bpm</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1710,10 +2052,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.recovery_smo2_1">
 <code class="sig-name descname">recovery_smo2_1</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.recovery_smo2_1" title="Permalink to this definition">¶</a></dt>
-<dd><p>recovery assessment 1 smo2</p>
+<dd><p>Muscle oxygen saturation level (SmO2) after recovery period 1.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>%</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1721,10 +2066,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.recovery_thb_1">
 <code class="sig-name descname">recovery_thb_1</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.recovery_thb_1" title="Permalink to this definition">¶</a></dt>
-<dd><p>recovery assessment 1 thb</p>
+<dd><p>Total hemoglobin level after recovery period 1.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>g/dL</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1732,10 +2080,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.recovery_average_power_1">
 <code class="sig-name descname">recovery_average_power_1</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.recovery_average_power_1" title="Permalink to this definition">¶</a></dt>
-<dd><p>recovery assessment 1 average power</p>
+<dd><p>Average power generated during recovery period 1.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>W</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1743,10 +2094,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.recovery_hr_min_1">
 <code class="sig-name descname">recovery_hr_min_1</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.recovery_hr_min_1" title="Permalink to this definition">¶</a></dt>
-<dd><p>recovery assessment 1 min hr</p>
+<dd><p>Minimum heartrate during recovery period 1.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>bpm</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1754,7 +2108,7 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.recovery_smo2_2">
 <code class="sig-name descname">recovery_smo2_2</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.recovery_smo2_2" title="Permalink to this definition">¶</a></dt>
-<dd><p>recovery assessment 2 smo2</p>
+<dd><p>Muscle oxygen saturation level (SmO2) after recovery period 2.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
@@ -1765,10 +2119,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.recovery_thb_2">
 <code class="sig-name descname">recovery_thb_2</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.recovery_thb_2" title="Permalink to this definition">¶</a></dt>
-<dd><p>recovery assessment 2 thb</p>
+<dd><p>Total hemoglobin level after recovery period 2.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>g/dL</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1776,10 +2133,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.recovery_average_power_2">
 <code class="sig-name descname">recovery_average_power_2</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.recovery_average_power_2" title="Permalink to this definition">¶</a></dt>
-<dd><p>recovery assessment 2 average power</p>
+<dd><p>Average power generated during recovery period 2.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>W</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1787,10 +2147,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.recovery_hr_min_2">
 <code class="sig-name descname">recovery_hr_min_2</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.recovery_hr_min_2" title="Permalink to this definition">¶</a></dt>
-<dd><p>recovery assessment 2 min hr</p>
+<dd><p>Minimum heartrate during recovery period 2.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>bpm</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1798,7 +2161,7 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.recovery_smo2_3">
 <code class="sig-name descname">recovery_smo2_3</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.recovery_smo2_3" title="Permalink to this definition">¶</a></dt>
-<dd><p>recovery assessment 3 smo2</p>
+<dd><p>Muscle oxygen saturation level (SmO2) after recovery period 3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
@@ -1809,10 +2172,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.recovery_thb_3">
 <code class="sig-name descname">recovery_thb_3</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.recovery_thb_3" title="Permalink to this definition">¶</a></dt>
-<dd><p>recovery assessment 3 thb</p>
+<dd><p>Total hemoglobin level after recovery period 3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>g/dL</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1820,10 +2186,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.recovery_average_power_3">
 <code class="sig-name descname">recovery_average_power_3</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.recovery_average_power_3" title="Permalink to this definition">¶</a></dt>
-<dd><p>recovery assessment 3 average power</p>
+<dd><p>Average power generated during recovery period 3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>W</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1831,10 +2200,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.recovery_hr_min_3">
 <code class="sig-name descname">recovery_hr_min_3</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.recovery_hr_min_3" title="Permalink to this definition">¶</a></dt>
-<dd><p>recovery assessment 3 min hr</p>
+<dd><p>Minimum heartrate during recovery period 3.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>bpm</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1842,7 +2214,7 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.recovery_smo2_4">
 <code class="sig-name descname">recovery_smo2_4</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.recovery_smo2_4" title="Permalink to this definition">¶</a></dt>
-<dd><p>recovery assessment 4 smo2</p>
+<dd><p>Muscle oxygen saturation level (SmO2) after recovery period 4.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
@@ -1853,10 +2225,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.recovery_thb_4">
 <code class="sig-name descname">recovery_thb_4</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.recovery_thb_4" title="Permalink to this definition">¶</a></dt>
-<dd><p>recovery assessment 4 thb</p>
+<dd><p>Total hemoglobin level after recovery period 4.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>g/dL</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1864,10 +2239,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.recovery_average_power_4">
 <code class="sig-name descname">recovery_average_power_4</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.recovery_average_power_4" title="Permalink to this definition">¶</a></dt>
-<dd><p>recovery assessment 4 average power</p>
+<dd><p>Average power generated during recovery period 4.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>W</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1875,10 +2253,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.recovery_hr_min_4">
 <code class="sig-name descname">recovery_hr_min_4</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.recovery_hr_min_4" title="Permalink to this definition">¶</a></dt>
-<dd><p>recovery assessment 4 min hr</p>
+<dd><p>Minimum heartrate during recovery period 1.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>bpm</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1886,10 +2267,15 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.smo2_tank_size">
 <code class="sig-name descname">smo2_tank_size</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.smo2_tank_size" title="Permalink to this definition">¶</a></dt>
-<dd><p>SmO2 tank size</p>
+<dd><p>“Gas tank” size based on muscle oxygen saturation level (SmO2).
+Difference of <a class="reference internal" href="#odyssey.models.trainer.MoxyRipTest.recovery_baseline_smo2" title="odyssey.models.trainer.MoxyRipTest.recovery_baseline_smo2"><code class="xref py py-attr docutils literal notranslate"><span class="pre">recovery_baseline_smo2</span></code></a> -
+<a class="reference internal" href="#odyssey.models.trainer.MoxyRipTest.performance_baseline_smo2" title="odyssey.models.trainer.MoxyRipTest.performance_baseline_smo2"><code class="xref py py-attr docutils literal notranslate"><span class="pre">performance_baseline_smo2</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>%</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1897,10 +2283,15 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.thb_tank_size">
 <code class="sig-name descname">thb_tank_size</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.thb_tank_size" title="Permalink to this definition">¶</a></dt>
-<dd><p>tHB tank size</p>
+<dd><p>“Gas tank” size based on total hemoglobin level.
+Difference of <a class="reference internal" href="#odyssey.models.trainer.MoxyRipTest.recovery_baseline_thb" title="odyssey.models.trainer.MoxyRipTest.recovery_baseline_thb"><code class="xref py py-attr docutils literal notranslate"><span class="pre">recovery_baseline_thb</span></code></a> -
+<a class="reference internal" href="#odyssey.models.trainer.MoxyRipTest.performance_baseline_thb" title="odyssey.models.trainer.MoxyRipTest.performance_baseline_thb"><code class="xref py py-attr docutils literal notranslate"><span class="pre">performance_baseline_thb</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>g/dL</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1908,10 +2299,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.performance_baseline_smo2">
 <code class="sig-name descname">performance_baseline_smo2</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.performance_baseline_smo2" title="Permalink to this definition">¶</a></dt>
-<dd><p>performance baseline SmO2</p>
+<dd><p>Muscle oxygen saturation level (SmO2) after sprint, average of 4 sprints.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>%</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1919,10 +2313,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.performance_baseline_thb">
 <code class="sig-name descname">performance_baseline_thb</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.performance_baseline_thb" title="Permalink to this definition">¶</a></dt>
-<dd><p>performance baseline tHB</p>
+<dd><p>Total hemoglobin level after sprint, average of 4 sprints.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>g/dL</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1930,10 +2327,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.recovery_baseline_smo2">
 <code class="sig-name descname">recovery_baseline_smo2</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.recovery_baseline_smo2" title="Permalink to this definition">¶</a></dt>
-<dd><p>recovery baseline SmO2</p>
+<dd><p>Muscle oxygen saturation level (SmO2) after recovery period, average of 4 sprints.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>%</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1941,10 +2341,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.recovery_baseline_thb">
 <code class="sig-name descname">recovery_baseline_thb</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.recovery_baseline_thb" title="Permalink to this definition">¶</a></dt>
-<dd><p>recovery baseline tHB</p>
+<dd><p>Total hemoglobin level after recovery period, average of 4 periods.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>g/dL</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1952,10 +2355,14 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.avg_watt_kg">
 <code class="sig-name descname">avg_watt_kg</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.avg_watt_kg" title="Permalink to this definition">¶</a></dt>
-<dd><p>Average watts per kg</p>
+<dd><p>Average power generated per body mass.</p>
+<p>difference of ………………………………………….</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>W/kg</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1963,10 +2370,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.avg_interval_time">
 <code class="sig-name descname">avg_interval_time</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.avg_interval_time" title="Permalink to this definition">¶</a></dt>
-<dd><p>Average interval time in seconds</p>
+<dd><p>Average interval time calculated how? ………………………</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>s</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1974,10 +2384,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.avg_recovery_time">
 <code class="sig-name descname">avg_recovery_time</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.avg_recovery_time" title="Permalink to this definition">¶</a></dt>
-<dd><p>Average recovery time in seconds</p>
+<dd><p>Average recovery time calculated how?………………………</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>s</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1985,10 +2398,12 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.limiter">
 <code class="sig-name descname">limiter</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.limiter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Must be one of:
-‘Demand’,
-‘Supply’,
-‘Respiratory’</p>
+<dd><p>Limiting factor to the “gas tank” size. Must be one of:</p>
+<ul class="simple">
+<li><p>demand</p></li>
+<li><p>supply</p></li>
+<li><p>respiratory</p></li>
+</ul>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
@@ -1999,7 +2414,7 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.MoxyRipTest.intervention">
 <code class="sig-name descname">intervention</code><a class="headerlink" href="#odyssey.models.trainer.MoxyRipTest.intervention" title="Permalink to this definition">¶</a></dt>
-<dd><p>note. Letters &amp; numbers</p>
+<dd><p>Proposed intervention by the trainer to improve the “gas tank” size.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
@@ -2013,7 +2428,14 @@ cannot look up-False</p>
 <dt id="odyssey.models.trainer.LungAssessment">
 <em class="property">class </em><code class="sig-prename descclassname">odyssey.models.trainer.</code><code class="sig-name descname">LungAssessment</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.trainer.LungAssessment" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
-<p>Lung assessment</p>
+<p>Lung capacity assessment table.</p>
+<p>The lung capacity of a client is measured using a SpiroTiger device.
+The SpiroTiger has an elastic bag which has to be filled by the client
+on every exhale. When the client stops exhaling into the bag, the bag
+automatically empties itself and the client can continue with the
+next exhale. This inhale-exhale cycle continues for a fixed number of
+minutes. The SpiroTiger comes with a set of bags of different volumes.
+The total exhaled volume per minute is calculated.</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.LungAssessment.idx">
 <code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.models.trainer.LungAssessment.idx" title="Permalink to this definition">¶</a></dt>
@@ -2061,10 +2483,10 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.LungAssessment.clientid">
 <code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.trainer.LungAssessment.clientid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client ID number</p>
+<dd><p>Client ID number.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>int, foreign key to <code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></p>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="odyssey.models.client.html#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -2072,7 +2494,7 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.LungAssessment.notes">
 <code class="sig-name descname">notes</code><a class="headerlink" href="#odyssey.models.trainer.LungAssessment.notes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Notes on the client’s lung tests</p>
+<dd><p>Trainer notes on the lung assessment test.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
@@ -2083,10 +2505,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.LungAssessment.bag_size">
 <code class="sig-name descname">bag_size</code><a class="headerlink" href="#odyssey.models.trainer.LungAssessment.bag_size" title="Permalink to this definition">¶</a></dt>
-<dd><p>Lung capcity in liters</p>
+<dd><p>Volume of the SpiroTiger bag used in this assessment.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>L</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2094,10 +2519,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.LungAssessment.duration">
 <code class="sig-name descname">duration</code><a class="headerlink" href="#odyssey.models.trainer.LungAssessment.duration" title="Permalink to this definition">¶</a></dt>
-<dd><p>seconds (0-300)</p>
+<dd><p>Duration of the entire test.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>s</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2105,10 +2533,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.LungAssessment.breaths_per_minute">
 <code class="sig-name descname">breaths_per_minute</code><a class="headerlink" href="#odyssey.models.trainer.LungAssessment.breaths_per_minute" title="Permalink to this definition">¶</a></dt>
-<dd><p>breathing rate</p>
+<dd><p>Breathing rate.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>breath/min</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2116,10 +2547,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.LungAssessment.max_minute_volume">
 <code class="sig-name descname">max_minute_volume</code><a class="headerlink" href="#odyssey.models.trainer.LungAssessment.max_minute_volume" title="Permalink to this definition">¶</a></dt>
-<dd><p>MMV 0-500</p>
+<dd><p>Maximum volume per minute.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>L/min</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2127,10 +2561,13 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.LungAssessment.liters_min_kg">
 <code class="sig-name descname">liters_min_kg</code><a class="headerlink" href="#odyssey.models.trainer.LungAssessment.liters_min_kg" title="Permalink to this definition">¶</a></dt>
-<dd><p>liters per minute per kg (0-100)</p>
+<dd><p>Maximum volume per minute per body mass.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>L/min/kg</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2141,10 +2578,12 @@ cannot look up-False</p>
 <dt id="odyssey.models.trainer.FitnessQuestionnaire">
 <em class="property">class </em><code class="sig-prename descclassname">odyssey.models.trainer.</code><code class="sig-name descname">FitnessQuestionnaire</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.trainer.FitnessQuestionnaire" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
-<p>Initial fitness questionnaire</p>
+<p>Fitness questionnaire.</p>
+<p>The fitness questionnaire is filled in by the client on
+first sign up to Modo Bio.</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.FitnessQuestionnaire.displayname">
-<code class="sig-name descname">displayname</code><em class="property"> = 'Fitness Questionnaire'</em><a class="headerlink" href="#odyssey.models.trainer.FitnessQuestionnaire.displayname" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">displayname</code><em class="property"> = 'Fitness questionnaire'</em><a class="headerlink" href="#odyssey.models.trainer.FitnessQuestionnaire.displayname" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -2161,10 +2600,10 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.FitnessQuestionnaire.clientid">
 <code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.trainer.FitnessQuestionnaire.clientid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client ID number</p>
+<dd><p>Client ID number.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>int, foreign key to <code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></p>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="odyssey.models.client.html#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -2205,10 +2644,24 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.FitnessQuestionnaire.physical_goals">
 <code class="sig-name descname">physical_goals</code><a class="headerlink" href="#odyssey.models.trainer.FitnessQuestionnaire.physical_goals" title="Permalink to this definition">¶</a></dt>
-<dd><p>Indicates the goals the client has for their fitness journey. There may be only three choices. One of the choices is ‘other’.</p>
+<dd><p>The goals selected by the client from a predefined list of goals.
+Must be one or more of:</p>
+<ul class="simple">
+<li><p>weight loss</p></li>
+<li><p>increase strength</p></li>
+<li><p>increase aerobic capacity</p></li>
+<li><p>body composition</p></li>
+<li><p>sport specific performance</p></li>
+<li><p>improve mobility</p></li>
+<li><p>injury rehabilitation</p></li>
+<li><p>injury prevention</p></li>
+<li><p>increase longevity</p></li>
+<li><p>general health</p></li>
+<li><p>other</p></li>
+</ul>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, default = other</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -2216,7 +2669,7 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.FitnessQuestionnaire.current_fitness_level">
 <code class="sig-name descname">current_fitness_level</code><a class="headerlink" href="#odyssey.models.trainer.FitnessQuestionnaire.current_fitness_level" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client’s current fitness level [1-10]</p>
+<dd><p>Client’s current fitness level [1-10].</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
@@ -2227,7 +2680,7 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.FitnessQuestionnaire.goal_fitness_level">
 <code class="sig-name descname">goal_fitness_level</code><a class="headerlink" href="#odyssey.models.trainer.FitnessQuestionnaire.goal_fitness_level" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client’s current fitness level [1-10]</p>
+<dd><p>Client’s fitness level goal [1-10].</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
@@ -2236,31 +2689,17 @@ cannot look up-False</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.models.trainer.FitnessQuestionnaire.trainer_expectation">
-<code class="sig-name descname">trainer_expectation</code><a class="headerlink" href="#odyssey.models.trainer.FitnessQuestionnaire.trainer_expectation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Indicates the expectations the client has for their fitness trainer. There may be only one choice. One of the choices is ‘other’.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, default = other</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.models.trainer.FitnessQuestionnaire.lifestyle_goals">
-<code class="sig-name descname">lifestyle_goals</code><a class="headerlink" href="#odyssey.models.trainer.FitnessQuestionnaire.lifestyle_goals" title="Permalink to this definition">¶</a></dt>
-<dd><p>Indicates the lifestyle goals the client has for their fitness journey. There may be only three choices. One of the choices is ‘other’.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, default = other</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.models.trainer.FitnessQuestionnaire.sleep_hours">
-<code class="sig-name descname">sleep_hours</code><a class="headerlink" href="#odyssey.models.trainer.FitnessQuestionnaire.sleep_hours" title="Permalink to this definition">¶</a></dt>
-<dd><p>How many hours the client sleeps per night on average.</p>
+<dt id="odyssey.models.trainer.FitnessQuestionnaire.trainer_expectations">
+<code class="sig-name descname">trainer_expectations</code><a class="headerlink" href="#odyssey.models.trainer.FitnessQuestionnaire.trainer_expectations" title="Permalink to this definition">¶</a></dt>
+<dd><p>The expectations the client has for the trainer, selected from a
+predefined list of expectations. Must be one or more of:</p>
+<ul class="simple">
+<li><p>expertise</p></li>
+<li><p>motivation</p></li>
+<li><p>accountability</p></li>
+<li><p>time efficiency</p></li>
+<li><p>other</p></li>
+</ul>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
@@ -2269,9 +2708,45 @@ cannot look up-False</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt id="odyssey.models.trainer.FitnessQuestionnaire.lifestyle_goals">
+<code class="sig-name descname">lifestyle_goals</code><a class="headerlink" href="#odyssey.models.trainer.FitnessQuestionnaire.lifestyle_goals" title="Permalink to this definition">¶</a></dt>
+<dd><p>The lifestyle goals the client has. Selected from a predefined list
+of goals. Must be one or more of:</p>
+<ul class="simple">
+<li><p>increased energy</p></li>
+<li><p>increased mental clarity</p></li>
+<li><p>increased libido</p></li>
+<li><p>overall happiness</p></li>
+<li><p>decreased stress</p></li>
+<li><p>improved sleep</p></li>
+<li><p>healthier eating</p></li>
+<li><p>other</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.trainer.FitnessQuestionnaire.sleep_hours">
+<code class="sig-name descname">sleep_hours</code><a class="headerlink" href="#odyssey.models.trainer.FitnessQuestionnaire.sleep_hours" title="Permalink to this definition">¶</a></dt>
+<dd><p>How many hours the client sleeps on average per night.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str ………………… should be float</p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>h</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
 <dt id="odyssey.models.trainer.FitnessQuestionnaire.sleep_quality_level">
 <code class="sig-name descname">sleep_quality_level</code><a class="headerlink" href="#odyssey.models.trainer.FitnessQuestionnaire.sleep_quality_level" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client’s current sleep quality level [1-10]</p>
+<dd><p>Client’s quality of sleep [1-10].</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
@@ -2282,7 +2757,7 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.FitnessQuestionnaire.stress_level">
 <code class="sig-name descname">stress_level</code><a class="headerlink" href="#odyssey.models.trainer.FitnessQuestionnaire.stress_level" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client’s current average stress level [1-10]</p>
+<dd><p>Client’s stress level [1-10].</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
@@ -2293,10 +2768,24 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.FitnessQuestionnaire.stress_sources">
 <code class="sig-name descname">stress_sources</code><a class="headerlink" href="#odyssey.models.trainer.FitnessQuestionnaire.stress_sources" title="Permalink to this definition">¶</a></dt>
-<dd><p>Indicates the client’s most prominent life stressors. Choices come from a set picklist where ‘other’ is one of the choices.</p>
+<dd><p>Which sources cause the most stress. Selected from a predefined list
+of stress sources. Must be one or more of:</p>
+<ul class="simple">
+<li><p>family</p></li>
+<li><p>work</p></li>
+<li><p>finances</p></li>
+<li><p>social obligations</p></li>
+<li><p>health</p></li>
+<li><p>relationships</p></li>
+<li><p>school</p></li>
+<li><p>body image</p></li>
+<li><p>sports performance</p></li>
+<li><p>general environment</p></li>
+<li><p>other</p></li>
+</ul>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, default = other</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -2304,7 +2793,7 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.FitnessQuestionnaire.energy_level">
 <code class="sig-name descname">energy_level</code><a class="headerlink" href="#odyssey.models.trainer.FitnessQuestionnaire.energy_level" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client’s current average energy level [1-10]</p>
+<dd><p>Client’s energy level [1-10].</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
@@ -2315,7 +2804,7 @@ cannot look up-False</p>
 <dl class="py attribute">
 <dt id="odyssey.models.trainer.FitnessQuestionnaire.libido_level">
 <code class="sig-name descname">libido_level</code><a class="headerlink" href="#odyssey.models.trainer.FitnessQuestionnaire.libido_level" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client’s current average libido level [1-10]</p>
+<dd><p>Client’s libido level [1-10].</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
@@ -2335,7 +2824,7 @@ cannot look up-False</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="odyssey.models.wearables.html" class="btn btn-neutral float-right" title="odyssey.models.wearables module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="odyssey.models.wearables.html" class="btn btn-neutral float-right" title="odyssey.models.wearables" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="odyssey.models.pt.html" class="btn btn-neutral float-left" title="odyssey.models.pt" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

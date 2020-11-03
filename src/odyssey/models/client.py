@@ -1,6 +1,6 @@
 """
 Database tables for the client intake portion of the Modo Bio Staff application.
-All tables in this module are prefixed with 'Client'.
+All tables in this module are prefixed with ``Client``.
 """
 import base64
 import os
@@ -33,7 +33,7 @@ class ClientInfo(db.Model):
 
     clientid = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
-    Client ID number
+    Client ID number.
 
     The main identifier of a client throughout the Modo Bio system.
 
@@ -374,7 +374,7 @@ class ClientFacilities(db.Model):
     """
     Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
     """
     
     facility_id = db.Column(db.ForeignKey('RegisteredFacilities.facility_id', ondelete="CASCADE"))
@@ -435,7 +435,7 @@ class ClientConsent(db.Model):
     """
     Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
     """
 
     infectious_disease = db.Column(db.Boolean)
@@ -537,7 +537,7 @@ class ClientRelease(db.Model):
     """
     Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
     """
 
     release_of_all = db.Column(db.Boolean)
@@ -665,9 +665,9 @@ class ClientPolicies(db.Model):
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientPolicies_clientid_fkey',ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
     """
 
     signdate = db.Column(db.Date)
@@ -762,7 +762,7 @@ class ClientConsultContract(db.Model):
     """
     Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
     """
 
     signdate = db.Column(db.Date)
@@ -857,7 +857,7 @@ class ClientSubscriptionContract(db.Model):
     """
     Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
     """
 
     signdate = db.Column(db.Date)
@@ -947,7 +947,7 @@ class ClientIndividualContract(db.Model):
     """
     Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
     """
 
     doctor = db.Column(db.Boolean, default=False)
@@ -1054,7 +1054,7 @@ class RemoteRegistration(db.Model):
     """
     Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
     """
 
     email = db.Column(db.String(50))
@@ -1235,7 +1235,7 @@ class ClientExternalMR(db.Model):
     """
     Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
     """
 
     med_record_id = db.Column(db.String, nullable=False)
@@ -1294,7 +1294,7 @@ class ClientReleaseContacts(db.Model):
     """
     Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
     """
 
     release_direction = db.Column(db.String, nullable=False)

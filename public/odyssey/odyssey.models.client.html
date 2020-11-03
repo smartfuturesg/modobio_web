@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>odyssey.models.client &mdash; Odyssey version: 0.1.57 documentation</title>
+  <title>odyssey.models.client &mdash; Odyssey version: 0.1.59 documentation</title>
   
 
   
@@ -30,13 +30,14 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="odyssey.models.staff module" href="odyssey.models.staff.html" />
+    <link rel="next" title="odyssey.models.staff" href="odyssey.models.staff.html" />
     <link rel="prev" title="Models" href="odyssey.models.html" /> 
 </head>
 
@@ -61,7 +62,7 @@
             
             
               <div class="version">
-                version: 0.1.57
+                version: 0.1.59
               </div>
             
           
@@ -170,7 +171,7 @@
   <div class="section" id="module-odyssey.models.client">
 <span id="odyssey-models-client"></span><h1>odyssey.models.client<a class="headerlink" href="#module-odyssey.models.client" title="Permalink to this headline">¶</a></h1>
 <p>Database tables for the client intake portion of the Modo Bio Staff application.
-All tables in this module are prefixed with ‘Client’.</p>
+All tables in this module are prefixed with <code class="docutils literal notranslate"><span class="pre">Client</span></code>.</p>
 <dl class="py class">
 <dt id="odyssey.models.client.ClientInfo">
 <em class="property">class </em><code class="sig-prename descclassname">odyssey.models.client.</code><code class="sig-name descname">ClientInfo</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.client.ClientInfo" title="Permalink to this definition">¶</a></dt>
@@ -184,7 +185,7 @@ generate the <a class="reference internal" href="#odyssey.models.client.ClientIn
 <dl class="py attribute">
 <dt id="odyssey.models.client.ClientInfo.clientid">
 <code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.clientid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client ID number</p>
+<dd><p>Client ID number.</p>
 <p>The main identifier of a client throughout the Modo Bio system.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -544,7 +545,7 @@ The returned dict contains the following keys:</p>
 
 <dl class="py method">
 <dt id="odyssey.models.client.ClientInfo.all_clients_dict">
-<em class="property">static </em><code class="sig-name descname">all_clients_dict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">query</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.sqlalchemy.org/en/13/orm/query.html#sqlalchemy.orm.query.Query" title="(in SQLAlchemy v1.3)">sqlalchemy.orm.query.Query</a></span></em>, <em class="sig-param"><span class="n">page</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></span></em>, <em class="sig-param"><span class="n">per_page</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.9)">tuple</a><a class="headerlink" href="#odyssey.models.client.ClientInfo.all_clients_dict" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="sig-name descname">all_clients_dict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">query</span><span class="p">:</span> <span class="n">sqlalchemy.orm.query.Query</span></em>, <em class="sig-param"><span class="n">page</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></span></em>, <em class="sig-param"><span class="n">per_page</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.9)">tuple</a><a class="headerlink" href="#odyssey.models.client.ClientInfo.all_clients_dict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Paginate a search in this table.</p>
 <p>Given a search query in this table, return the results for page <code class="docutils literal notranslate"><span class="pre">page</span></code>
 with <code class="docutils literal notranslate"><span class="pre">per_page</span></code> results per page. The returned result itmes are generated
@@ -552,7 +553,7 @@ by <a class="reference internal" href="#odyssey.models.client.ClientInfo.client_
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>query</strong> (<a class="reference external" href="https://docs.sqlalchemy.org/en/13/orm/query.html#sqlalchemy.orm.query.Query" title="(in SQLAlchemy v1.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.query.Query</span></code></a>) – The SQL query with a (possibly) long list of results to paginate.</p></li>
+<li><p><strong>query</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.query.Query</span></code>) – The SQL query with a (possibly) long list of results to paginate.</p></li>
 <li><p><strong>page</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The current page to display results for.</p></li>
 <li><p><strong>per_page</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – How many results to display per page.</p></li>
 </ul>
@@ -1068,7 +1069,7 @@ date (e.g. 20200519).</p>
 <dl class="py attribute">
 <dt id="odyssey.models.client.ClientPolicies.clientid">
 <code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.client.ClientPolicies.clientid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client ID number</p>
+<dd><p>Client ID number.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
@@ -1980,7 +1981,7 @@ This variable indicates the direction of the release. Must be either <code class
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="odyssey.models.staff.html" class="btn btn-neutral float-right" title="odyssey.models.staff module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="odyssey.models.staff.html" class="btn btn-neutral float-right" title="odyssey.models.staff" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="odyssey.models.html" class="btn btn-neutral float-left" title="Models" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

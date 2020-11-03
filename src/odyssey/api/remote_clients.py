@@ -475,7 +475,7 @@ class SignedDocuments(Resource):
         Parameters
         ----------
         clientid : int
-            Client ID number
+            Client ID number.
 
         Returns
         -------

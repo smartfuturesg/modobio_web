@@ -1,6 +1,6 @@
 """
 Database tables staff member information for the Modo Bio Staff application.
-All tables in this module are prefixed with 'Staff'.
+All tables in this module are prefixed with ``Staff``.
 """
 from __future__ import annotations
 

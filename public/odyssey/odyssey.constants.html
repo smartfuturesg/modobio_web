@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>odyssey.constants &mdash; Odyssey version: 0.1.57 documentation</title>
+  <title>odyssey.constants &mdash; Odyssey version: 0.1.59 documentation</title>
   
 
   
@@ -30,6 +30,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -61,7 +62,7 @@
             
             
               <div class="version">
-                version: 0.1.57
+                version: 0.1.59
               </div>
             
           
@@ -217,7 +218,7 @@
 <code class="sig-prename descclassname">odyssey.constants.</code><code class="sig-name descname">YESNO</code><a class="headerlink" href="#odyssey.constants.YESNO" title="Permalink to this definition">¶</a></dt>
 <dd><p>Boolean options of ‘Yes’ or ‘No’.</p>
 <p>This can be used to link a <a class="reference external" href="https://wtforms.readthedocs.io/en/2.3.x/fields/#wtforms.fields.RadioField" title="(in WTForms v2.3.x)"><code class="xref py py-class docutils literal notranslate"><span class="pre">wtforms.fields.RadioField</span></code></a> form field
-to a <a class="reference external" href="https://docs.sqlalchemy.org/en/13/core/type_basics.html#sqlalchemy.types.Boolean" title="(in SQLAlchemy v1.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.types.Boolean</span></code></a> database column. Use in conjunction
+to a <a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/type_basics.html#sqlalchemy.types.Boolean" title="(in SQLAlchemy v1.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.types.Boolean</span></code></a> database column. Use in conjunction
 with <a class="reference internal" href="#odyssey.constants.BOOLIFY" title="odyssey.constants.BOOLIFY"><code class="xref py py-const docutils literal notranslate"><span class="pre">BOOLIFY</span></code></a>.:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">name</span> <span class="o">=</span> <span class="n">RadioField</span><span class="p">(</span><span class="s1">&#39;label&#39;</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="n">YESNO</span><span class="p">,</span> <span class="n">coerce</span><span class="o">=</span><span class="n">BOOLIFY</span><span class="p">)</span>
 </pre></div>
@@ -233,7 +234,7 @@ with <a class="reference internal" href="#odyssey.constants.BOOLIFY" title="odys
 <dt id="odyssey.constants.BOOLIFY">
 <code class="sig-prename descclassname">odyssey.constants.</code><code class="sig-name descname">BOOLIFY</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.constants.BOOLIFY" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert a number into a boolean.</p>
-<p>A POST request always returns a string. A <a class="reference external" href="https://docs.sqlalchemy.org/en/13/core/type_basics.html#sqlalchemy.types.Boolean" title="(in SQLAlchemy v1.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.types.Boolean</span></code></a>
+<p>A POST request always returns a string. A <a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/type_basics.html#sqlalchemy.types.Boolean" title="(in SQLAlchemy v1.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.types.Boolean</span></code></a>
 database column expects a Python <code class="xref py py-attr docutils literal notranslate"><span class="pre">True</span></code> or <code class="xref py py-attr docutils literal notranslate"><span class="pre">False</span></code> value. Use
 <a class="reference internal" href="#odyssey.constants.BOOLIFY" title="odyssey.constants.BOOLIFY"><code class="xref py py-func docutils literal notranslate"><span class="pre">BOOLIFY()</span></code></a> to convert the returned string value ‘0’ or ‘1’ into
 <code class="xref py py-attr docutils literal notranslate"><span class="pre">False</span></code> or <code class="xref py py-attr docutils literal notranslate"><span class="pre">True</span></code>, respectively. Use in conjunction with

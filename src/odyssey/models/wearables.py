@@ -62,7 +62,7 @@ class Wearables(_Base):
     """
     Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
     """
 
     has_oura = Column(Boolean, default=False, nullable=False)
@@ -110,7 +110,7 @@ class WearablesOura(_Base):
     """
     Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
     """
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
@@ -191,7 +191,7 @@ class WearablesFreeStyle(_Base):
     """
     Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
     """
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Index &mdash; Odyssey version: 0.1.57 documentation</title>
+  <title>Index &mdash; Odyssey version: 0.1.59 documentation</title>
   
 
   
@@ -30,6 +30,7 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -59,7 +60,7 @@
             
             
               <div class="version">
-                version: 0.1.57
+                version: 0.1.59
               </div>
             
           
@@ -202,14 +203,16 @@
 </li>
       <li><a href="odyssey/odyssey.models.wearables.html#odyssey.models.wearables.WearablesFreeStyle.activation_timestamp">activation_timestamp (odyssey.models.wearables.WearablesFreeStyle attribute)</a>
 </li>
+      <li><a href="odyssey/odyssey.models.doctor.html#odyssey.models.doctor.add_rest_result_eval">add_rest_result_eval() (in module odyssey.models.doctor)</a>
+</li>
       <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.HeartAssessmentSchema.add_vital_heartrate">add_vital_heartrate() (odyssey.utils.schemas.HeartAssessmentSchema method)</a>
 </li>
       <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.LungAssessmentSchema.add_weight">add_weight() (odyssey.utils.schemas.LungAssessmentSchema method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="odyssey/odyssey.models.client.html#odyssey.models.client.ClientInfo.address">address (odyssey.models.client.ClientInfo attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="odyssey/odyssey.models.client.html#odyssey.models.client.ClientInfo.all_clients_dict">all_clients_dict() (odyssey.models.client.ClientInfo static method)</a>
 </li>
       <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.AllClientsDataTier">AllClientsDataTier (class in odyssey.utils.schemas)</a>
@@ -217,6 +220,10 @@
       <li><a href="odyssey/odyssey.models.doctor.html#odyssey.models.doctor.MedicalHistory.allergies">allergies (odyssey.models.doctor.MedicalHistory attribute)</a>
 </li>
       <li><a href="odyssey/odyssey.api.registeredfacilities.html#odyssey.api.registeredfacilities.AllFacilities">AllFacilities (class in odyssey.api.registeredfacilities)</a>
+</li>
+      <li><a href="odyssey/odyssey.api.doctor.html#odyssey.api.doctor.AllMedBloodTestResults">AllMedBloodTestResults (class in odyssey.api.doctor)</a>
+</li>
+      <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.AllMedicalBloodTestSchema">AllMedicalBloodTestSchema (class in odyssey.utils.schemas)</a>
 </li>
       <li><a href="odyssey/odyssey.api.doctor.html#odyssey.api.doctor.AllMedInstitutes">AllMedInstitutes (class in odyssey.api.doctor)</a>
 </li>
@@ -245,6 +252,8 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="odyssey/odyssey.models.pt.html#odyssey.models.pt.PTHistory.best_pain">best_pain (odyssey.models.pt.PTHistory attribute)</a>
+</li>
+      <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.BloodTestsByTestID">BloodTestsByTestID (class in odyssey.utils.schemas)</a>
 </li>
       <li><a href="odyssey/odyssey.constants.html#odyssey.constants.BOOLIFY">BOOLIFY() (in module odyssey.constants)</a>
 </li>
@@ -715,6 +724,8 @@
 </li>
         <li><a href="odyssey/odyssey.api.clients.html#odyssey.api.clients.TestEmail.endpoint">(odyssey.api.clients.TestEmail attribute)</a>
 </li>
+        <li><a href="odyssey/odyssey.api.doctor.html#odyssey.api.doctor.AllMedBloodTestResults.endpoint">(odyssey.api.doctor.AllMedBloodTestResults attribute)</a>
+</li>
         <li><a href="odyssey/odyssey.api.doctor.html#odyssey.api.doctor.AllMedInstitutes.endpoint">(odyssey.api.doctor.AllMedInstitutes attribute)</a>
 </li>
         <li><a href="odyssey/odyssey.api.doctor.html#odyssey.api.doctor.ExternalMedicalRecordIDs.endpoint">(odyssey.api.doctor.ExternalMedicalRecordIDs attribute)</a>
@@ -848,12 +859,16 @@
 </li>
       <li><a href="odyssey/odyssey.models.trainer.html#odyssey.models.trainer.HeartAssessment.estimated_vo2_max">estimated_vo2_max (odyssey.models.trainer.HeartAssessment attribute)</a>
 </li>
+      <li><a href="odyssey/odyssey.models.doctor.html#odyssey.models.doctor.MedicalBloodTestResults.evaluation">evaluation (odyssey.models.doctor.MedicalBloodTestResults attribute)</a>
+</li>
       <li><a href="odyssey/odyssey.api.errors.html#odyssey.api.errors.ExamNotFound">ExamNotFound</a>
 </li>
       <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.ClientReleaseContactsSchema.Meta.exclude">exclude (odyssey.utils.schemas.ClientReleaseContactsSchema.Meta attribute)</a>
 
       <ul>
         <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.FitnessQuestionnaireSchema.Meta.exclude">(odyssey.utils.schemas.FitnessQuestionnaireSchema.Meta attribute)</a>
+</li>
+        <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.MedicalBloodTestTypes.Meta.exclude">(odyssey.utils.schemas.MedicalBloodTestTypes.Meta attribute)</a>
 </li>
         <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.MedicalImagingSchema.Meta.exclude">(odyssey.utils.schemas.MedicalImagingSchema.Meta attribute)</a>
 </li>
@@ -950,6 +965,8 @@
         <li><a href="odyssey/odyssey.api.clients.html#odyssey.api.clients.SubscriptionContract.get">(odyssey.api.clients.SubscriptionContract method)</a>
 </li>
         <li><a href="odyssey/odyssey.api.clients.html#odyssey.api.clients.TestEmail.get">(odyssey.api.clients.TestEmail method)</a>
+</li>
+        <li><a href="odyssey/odyssey.api.doctor.html#odyssey.api.doctor.AllMedBloodTestResults.get">(odyssey.api.doctor.AllMedBloodTestResults method)</a>
 </li>
         <li><a href="odyssey/odyssey.api.doctor.html#odyssey.api.doctor.AllMedInstitutes.get">(odyssey.api.doctor.AllMedInstitutes method)</a>
 </li>
@@ -1539,6 +1556,8 @@
 </li>
         <li><a href="odyssey/odyssey.api.clients.html#odyssey.api.clients.TestEmail.mediatypes">(odyssey.api.clients.TestEmail method)</a>
 </li>
+        <li><a href="odyssey/odyssey.api.doctor.html#odyssey.api.doctor.AllMedBloodTestResults.mediatypes">(odyssey.api.doctor.AllMedBloodTestResults method)</a>
+</li>
         <li><a href="odyssey/odyssey.api.doctor.html#odyssey.api.doctor.AllMedInstitutes.mediatypes">(odyssey.api.doctor.AllMedInstitutes method)</a>
 </li>
         <li><a href="odyssey/odyssey.api.doctor.html#odyssey.api.doctor.ExternalMedicalRecordIDs.mediatypes">(odyssey.api.doctor.ExternalMedicalRecordIDs method)</a>
@@ -1632,8 +1651,6 @@
       </ul></li>
       <li><a href="odyssey/odyssey.models.doctor.html#odyssey.models.doctor.MedicalBloodTestResults">MedicalBloodTestResults (class in odyssey.models.doctor)</a>
 </li>
-      <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.MedicalBloodTestResultsInputSchema">MedicalBloodTestResultsInputSchema (class in odyssey.utils.schemas)</a>
-</li>
       <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.MedicalBloodTestResultsOutputSchema">MedicalBloodTestResultsOutputSchema (class in odyssey.utils.schemas)</a>
 </li>
       <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.MedicalBloodTestResultsSchema">MedicalBloodTestResultsSchema (class in odyssey.utils.schemas)</a>
@@ -1647,6 +1664,10 @@
       <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.MedicalBloodTestSchema">MedicalBloodTestSchema (class in odyssey.utils.schemas)</a>
 </li>
       <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.MedicalBloodTestsInputSchema">MedicalBloodTestsInputSchema (class in odyssey.utils.schemas)</a>
+</li>
+      <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.MedicalBloodTestTypes">MedicalBloodTestTypes (class in odyssey.utils.schemas)</a>
+</li>
+      <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.MedicalBloodTestTypes.Meta">MedicalBloodTestTypes.Meta (class in odyssey.utils.schemas)</a>
 </li>
       <li><a href="odyssey/odyssey.models.doctor.html#odyssey.models.doctor.MedicalHistory">MedicalHistory (class in odyssey.models.doctor)</a>
 </li>
@@ -1718,6 +1739,8 @@
         <li><a href="odyssey/odyssey.api.clients.html#odyssey.api.clients.SubscriptionContract.methods">(odyssey.api.clients.SubscriptionContract attribute)</a>
 </li>
         <li><a href="odyssey/odyssey.api.clients.html#odyssey.api.clients.TestEmail.methods">(odyssey.api.clients.TestEmail attribute)</a>
+</li>
+        <li><a href="odyssey/odyssey.api.doctor.html#odyssey.api.doctor.AllMedBloodTestResults.methods">(odyssey.api.doctor.AllMedBloodTestResults attribute)</a>
 </li>
         <li><a href="odyssey/odyssey.api.doctor.html#odyssey.api.doctor.AllMedInstitutes.methods">(odyssey.api.doctor.AllMedInstitutes attribute)</a>
 </li>
@@ -1838,6 +1861,8 @@
         <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.HeartAssessmentSchema.Meta.model">(odyssey.utils.schemas.HeartAssessmentSchema.Meta attribute)</a>
 </li>
         <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.LungAssessmentSchema.Meta.model">(odyssey.utils.schemas.LungAssessmentSchema.Meta attribute)</a>
+</li>
+        <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.MedicalBloodTestTypes.Meta.model">(odyssey.utils.schemas.MedicalBloodTestTypes.Meta attribute)</a>
 </li>
         <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.MedicalHistorySchema.Meta.model">(odyssey.utils.schemas.MedicalHistorySchema.Meta attribute)</a>
 </li>
@@ -1969,8 +1994,12 @@
 </li>
       <li><a href="odyssey/odyssey.api.clients.html#odyssey.api.clients.NewRemoteRegistration">NewRemoteRegistration (class in odyssey.api.clients)</a>
 </li>
+      <li><a href="odyssey/odyssey.models.doctor.html#odyssey.models.doctor.MedicalBloodTestResultTypes.normal_max">normal_max (odyssey.models.doctor.MedicalBloodTestResultTypes attribute)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="odyssey/odyssey.models.doctor.html#odyssey.models.doctor.MedicalBloodTestResultTypes.normal_min">normal_min (odyssey.models.doctor.MedicalBloodTestResultTypes attribute)</a>
+</li>
       <li><a href="odyssey/odyssey.models.doctor.html#odyssey.models.doctor.MedicalBloodTests.notes">notes (odyssey.models.doctor.MedicalBloodTests attribute)</a>
 
       <ul>
@@ -2210,9 +2239,17 @@
         <li><a href="odyssey/odyssey.utils.schemas.html#module-odyssey.utils.schemas">module</a>
 </li>
       </ul></li>
+      <li><a href="odyssey/odyssey.models.doctor.html#odyssey.models.doctor.MedicalBloodTestResultTypes.optimal_max">optimal_max (odyssey.models.doctor.MedicalBloodTestResultTypes attribute)</a>
+</li>
+      <li><a href="odyssey/odyssey.models.doctor.html#odyssey.models.doctor.MedicalBloodTestResultTypes.optimal_min">optimal_min (odyssey.models.doctor.MedicalBloodTestResultTypes attribute)</a>
+</li>
       <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.AllClientsDataTier.opts">opts (odyssey.utils.schemas.AllClientsDataTier attribute)</a>
 
       <ul>
+        <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.AllMedicalBloodTestSchema.opts">(odyssey.utils.schemas.AllMedicalBloodTestSchema attribute)</a>
+</li>
+        <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.BloodTestsByTestID.opts">(odyssey.utils.schemas.BloodTestsByTestID attribute)</a>
+</li>
         <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.ChessBoardHipSchema.opts">(odyssey.utils.schemas.ChessBoardHipSchema attribute)</a>
 </li>
         <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.ChessboardSchema.opts">(odyssey.utils.schemas.ChessboardSchema attribute)</a>
@@ -2265,8 +2302,6 @@
 </li>
         <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.LungAssessmentSchema.opts">(odyssey.utils.schemas.LungAssessmentSchema attribute)</a>
 </li>
-        <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.MedicalBloodTestResultsInputSchema.opts">(odyssey.utils.schemas.MedicalBloodTestResultsInputSchema attribute)</a>
-</li>
         <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.MedicalBloodTestResultsOutputSchema.opts">(odyssey.utils.schemas.MedicalBloodTestResultsOutputSchema attribute)</a>
 </li>
         <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.MedicalBloodTestResultsSchema.opts">(odyssey.utils.schemas.MedicalBloodTestResultsSchema attribute)</a>
@@ -2276,6 +2311,8 @@
         <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.MedicalBloodTestSchema.opts">(odyssey.utils.schemas.MedicalBloodTestSchema attribute)</a>
 </li>
         <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.MedicalBloodTestsInputSchema.opts">(odyssey.utils.schemas.MedicalBloodTestsInputSchema attribute)</a>
+</li>
+        <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.MedicalBloodTestTypes.opts">(odyssey.utils.schemas.MedicalBloodTestTypes attribute)</a>
 </li>
         <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.MedicalHistorySchema.opts">(odyssey.utils.schemas.MedicalHistorySchema attribute)</a>
 </li>
@@ -2373,6 +2410,8 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="odyssey/odyssey.models.pt.html#odyssey.models.pt.PTHistory.pain_areas">pain_areas (odyssey.models.pt.PTHistory attribute)</a>
+</li>
+      <li><a href="odyssey/odyssey.models.doctor.html#odyssey.models.doctor.MedicalBloodTestResultTypes.panel">panel (odyssey.models.doctor.MedicalBloodTestResultTypes attribute)</a>
 </li>
       <li><a href="odyssey/odyssey.models.doctor.html#odyssey.models.doctor.MedicalBloodTests.panel_type">panel_type (odyssey.models.doctor.MedicalBloodTests attribute)</a>
 </li>
@@ -2512,8 +2551,6 @@
         <li><a href="odyssey/odyssey.api.clients.html#odyssey.api.clients.SubscriptionContract.post">(odyssey.api.clients.SubscriptionContract method)</a>
 </li>
         <li><a href="odyssey/odyssey.api.doctor.html#odyssey.api.doctor.ExternalMedicalRecordIDs.post">(odyssey.api.doctor.ExternalMedicalRecordIDs method)</a>
-</li>
-        <li><a href="odyssey/odyssey.api.doctor.html#odyssey.api.doctor.MedBloodTest.post">(odyssey.api.doctor.MedBloodTest method)</a>
 </li>
         <li><a href="odyssey/odyssey.api.doctor.html#odyssey.api.doctor.MedHistory.post">(odyssey.api.doctor.MedHistory method)</a>
 </li>
@@ -2985,6 +3022,8 @@
 </li>
         <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.LungAssessmentSchema.Meta.sqla_session">(odyssey.utils.schemas.LungAssessmentSchema.Meta attribute)</a>
 </li>
+        <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.MedicalBloodTestTypes.Meta.sqla_session">(odyssey.utils.schemas.MedicalBloodTestTypes.Meta attribute)</a>
+</li>
         <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.MedicalHistorySchema.Meta.sqla_session">(odyssey.utils.schemas.MedicalHistorySchema.Meta attribute)</a>
 </li>
         <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.MedicalImagingSchema.Meta.sqla_session">(odyssey.utils.schemas.MedicalImagingSchema.Meta attribute)</a>
@@ -3168,7 +3207,7 @@
       </ul></li>
       <li><a href="odyssey/odyssey.models.wearables.html#odyssey.models.wearables.WearablesOura.token_expires">token_expires (odyssey.models.wearables.WearablesOura attribute)</a>
 </li>
-      <li><a href="odyssey/odyssey.models.trainer.html#odyssey.models.trainer.FitnessQuestionnaire.trainer_expectation">trainer_expectation (odyssey.models.trainer.FitnessQuestionnaire attribute)</a>
+      <li><a href="odyssey/odyssey.models.trainer.html#odyssey.models.trainer.FitnessQuestionnaire.trainer_expectations">trainer_expectations (odyssey.models.trainer.FitnessQuestionnaire attribute)</a>
 </li>
       <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.FitnessQuestionnaireSchema.trainer_goals_list">trainer_goals_list (odyssey.utils.schemas.FitnessQuestionnaireSchema attribute)</a>
 </li>
@@ -3179,6 +3218,8 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="odyssey/odyssey.api.errors.html#odyssey.api.errors.UnauthorizedUser">UnauthorizedUser</a>
+</li>
+      <li><a href="odyssey/odyssey.models.doctor.html#odyssey.models.doctor.MedicalBloodTestResultTypes.unit">unit (odyssey.models.doctor.MedicalBloodTestResultTypes attribute)</a>
 </li>
       <li><a href="odyssey/odyssey.api.errors.html#odyssey.api.errors.UnknownError">UnknownError</a>
 </li>
@@ -3360,7 +3401,7 @@
 </li>
       <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.FitnessQuestionnaireSchema.validate_stress_sources">validate_stress_sources() (odyssey.utils.schemas.FitnessQuestionnaireSchema method)</a>
 </li>
-      <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.FitnessQuestionnaireSchema.validate_trainer_expectations">validate_trainer_expectations() (odyssey.utils.schemas.FitnessQuestionnaireSchema method)</a>
+      <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.FitnessQuestionnaireSchema.validate_trainer_expectationss">validate_trainer_expectationss() (odyssey.utils.schemas.FitnessQuestionnaireSchema method)</a>
 </li>
       <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.MoxyAssessmentSchema.validate_vl_side">validate_vl_side() (odyssey.utils.schemas.MoxyAssessmentSchema method)</a>
 

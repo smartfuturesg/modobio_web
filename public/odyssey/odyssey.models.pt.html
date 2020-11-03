@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>odyssey.models.pt &mdash; Odyssey version: 0.1.57 documentation</title>
+  <title>odyssey.models.pt &mdash; Odyssey version: 0.1.59 documentation</title>
   
 
   
@@ -30,6 +30,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -61,7 +62,7 @@
             
             
               <div class="version">
-                version: 0.1.57
+                version: 0.1.59
               </div>
             
           
@@ -169,16 +170,18 @@
             
   <div class="section" id="module-odyssey.models.pt">
 <span id="odyssey-models-pt"></span><h1>odyssey.models.pt<a class="headerlink" href="#module-odyssey.models.pt" title="Permalink to this headline">¶</a></h1>
+<p>Database tables for the physical therapist’s portion of the Modo Bio Staff application.
+All tables in this module are prefixed with <code class="docutils literal notranslate"><span class="pre">PT</span></code>.</p>
 <dl class="py class">
 <dt id="odyssey.models.pt.PTHistory">
 <em class="property">class </em><code class="sig-prename descclassname">odyssey.models.pt.</code><code class="sig-name descname">PTHistory</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.pt.PTHistory" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
-<p>Physical therapy history table</p>
+<p>Physical therapy history table.</p>
 <p>This table stores the physical therapy history of a client. The information
 is taken only once, during the initial consult.</p>
 <dl class="py attribute">
 <dt id="odyssey.models.pt.PTHistory.displayname">
-<code class="sig-name descname">displayname</code><em class="property"> = 'Physical Therapy History'</em><a class="headerlink" href="#odyssey.models.pt.PTHistory.displayname" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">displayname</code><em class="property"> = 'Physical therapy history'</em><a class="headerlink" href="#odyssey.models.pt.PTHistory.displayname" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -217,10 +220,10 @@ is taken only once, during the initial consult.</p>
 <dl class="py attribute">
 <dt id="odyssey.models.pt.PTHistory.clientid">
 <code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.pt.PTHistory.clientid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client ID number</p>
+<dd><p>Client ID number.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>int, foreign key to <code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></p>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="odyssey.models.client.html#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -378,10 +381,8 @@ JSON dictionary.</p>
 <dt id="odyssey.models.pt.Chessboard">
 <em class="property">class </em><code class="sig-prename descclassname">odyssey.models.pt.</code><code class="sig-name descname">Chessboard</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.pt.Chessboard" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
-<p>Mobility assessment table a.k.a Chessboard</p>
-<p>This table stores the repeated mobility assessment measurements. The measurements
-are indexed by <a class="reference internal" href="#odyssey.models.pt.Chessboard.clientid" title="odyssey.models.pt.Chessboard.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">clientid</span></code></a> and assessment <a class="reference internal" href="#odyssey.models.pt.Chessboard.timestamp" title="odyssey.models.pt.Chessboard.timestamp"><code class="xref py py-attr docutils literal notranslate"><span class="pre">timestamp</span></code></a>. All values in
-this table, with the exception of <code class="xref py py-attr docutils literal notranslate"><span class="pre">isa_dynamic</span></code>, are angles in degrees.</p>
+<p>Mobility assessment table a.k.a the chessboard.</p>
+<p>This table stores the repeated mobility assessment measurements.</p>
 <dl class="py attribute">
 <dt id="odyssey.models.pt.Chessboard.idx">
 <code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.idx" title="Permalink to this definition">¶</a></dt>
@@ -396,10 +397,10 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 <dl class="py attribute">
 <dt id="odyssey.models.pt.Chessboard.clientid">
 <code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.clientid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client ID number</p>
+<dd><p>Client ID number.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>int, foreign key to <code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></p>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="odyssey.models.client.html#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -440,11 +441,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 <dl class="py attribute">
 <dt id="odyssey.models.pt.Chessboard.isa_structure">
 <code class="sig-name descname">isa_structure</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.isa_structure" title="Permalink to this definition">¶</a></dt>
-<dd><p>must be one of the following
-‘Inhaled’,
-‘Exhaled’,
-‘Asymmetrical Normal’,
-‘Asymmetrical Atypical’</p>
+<dd><p>Structure of the Infrasternal Angle (ISA). Allowed values are:</p>
+<ul class="simple">
+<li><p>inhaled</p></li>
+<li><p>exhaled</p></li>
+<li><p>asymmetrical normal</p></li>
+<li><p>asymmetrical atypical</p></li>
+</ul>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 24</p>
@@ -455,11 +458,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 <dl class="py attribute">
 <dt id="odyssey.models.pt.Chessboard.isa_movement">
 <code class="sig-name descname">isa_movement</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.isa_movement" title="Permalink to this definition">¶</a></dt>
-<dd><p>must be one of the following
-‘Dynamic’,
-‘Static’,
-‘R Static/Left Dyanamic’,
-‘L Static/Right Dyanamic’</p>
+<dd><p>Movement of the Infrasternal Angle (ISA). Allowed values are:</p>
+<ul class="simple">
+<li><p>static</p></li>
+<li><p>dynamic</p></li>
+<li><p>left static/right dynamic</p></li>
+<li><p>left dynamic/right static</p></li>
+</ul>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 24</p>
@@ -470,10 +475,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 <dl class="py attribute">
 <dt id="odyssey.models.pt.Chessboard.left_shoulder_er">
 <code class="sig-name descname">left_shoulder_er</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.left_shoulder_er" title="Permalink to this definition">¶</a></dt>
-<dd><p>Left shoulder external rotation</p>
+<dd><p>Left shoulder external rotation angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -481,10 +489,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 <dl class="py attribute">
 <dt id="odyssey.models.pt.Chessboard.left_shoulder_ir">
 <code class="sig-name descname">left_shoulder_ir</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.left_shoulder_ir" title="Permalink to this definition">¶</a></dt>
-<dd><p>Left shoulder internal rotation</p>
+<dd><p>Left shoulder internal rotation angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -492,10 +503,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 <dl class="py attribute">
 <dt id="odyssey.models.pt.Chessboard.left_shoulder_abd">
 <code class="sig-name descname">left_shoulder_abd</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.left_shoulder_abd" title="Permalink to this definition">¶</a></dt>
-<dd><p>Left shoulder abduction.</p>
+<dd><p>Left shoulder abduction angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -503,10 +517,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 <dl class="py attribute">
 <dt id="odyssey.models.pt.Chessboard.left_shoulder_add">
 <code class="sig-name descname">left_shoulder_add</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.left_shoulder_add" title="Permalink to this definition">¶</a></dt>
-<dd><p>Left shoulder adduction</p>
+<dd><p>Left shoulder adduction angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -514,10 +531,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 <dl class="py attribute">
 <dt id="odyssey.models.pt.Chessboard.left_shoulder_flexion">
 <code class="sig-name descname">left_shoulder_flexion</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.left_shoulder_flexion" title="Permalink to this definition">¶</a></dt>
-<dd><p>Left shoulder flexion.</p>
+<dd><p>Left shoulder flexion angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -525,10 +545,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 <dl class="py attribute">
 <dt id="odyssey.models.pt.Chessboard.left_shoulder_extension">
 <code class="sig-name descname">left_shoulder_extension</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.left_shoulder_extension" title="Permalink to this definition">¶</a></dt>
-<dd><p>Left shoulder extension.</p>
+<dd><p>Left shoulder extension angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -536,10 +559,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 <dl class="py attribute">
 <dt id="odyssey.models.pt.Chessboard.right_shoulder_er">
 <code class="sig-name descname">right_shoulder_er</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.right_shoulder_er" title="Permalink to this definition">¶</a></dt>
-<dd><p>Right shoulder external rotation</p>
+<dd><p>Right shoulder external rotation angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -547,10 +573,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 <dl class="py attribute">
 <dt id="odyssey.models.pt.Chessboard.right_shoulder_ir">
 <code class="sig-name descname">right_shoulder_ir</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.right_shoulder_ir" title="Permalink to this definition">¶</a></dt>
-<dd><p>Right shoulder internal rotation</p>
+<dd><p>Right shoulder internal rotation angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -558,10 +587,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 <dl class="py attribute">
 <dt id="odyssey.models.pt.Chessboard.right_shoulder_abd">
 <code class="sig-name descname">right_shoulder_abd</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.right_shoulder_abd" title="Permalink to this definition">¶</a></dt>
-<dd><p>Right shoulder abduction.</p>
+<dd><p>Right shoulder abduction angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -569,10 +601,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 <dl class="py attribute">
 <dt id="odyssey.models.pt.Chessboard.right_shoulder_add">
 <code class="sig-name descname">right_shoulder_add</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.right_shoulder_add" title="Permalink to this definition">¶</a></dt>
-<dd><p>Right shoulder adduction</p>
+<dd><p>Right shoulder adduction angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -580,10 +615,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 <dl class="py attribute">
 <dt id="odyssey.models.pt.Chessboard.right_shoulder_flexion">
 <code class="sig-name descname">right_shoulder_flexion</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.right_shoulder_flexion" title="Permalink to this definition">¶</a></dt>
-<dd><p>Right shoulder flexion.</p>
+<dd><p>Right shoulder flexion angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -591,21 +629,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 <dl class="py attribute">
 <dt id="odyssey.models.pt.Chessboard.right_shoulder_extension">
 <code class="sig-name descname">right_shoulder_extension</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.right_shoulder_extension" title="Permalink to this definition">¶</a></dt>
-<dd><p>Right shoulder extension.</p>
+<dd><p>Right shoulder extension angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
 </dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.models.pt.Chessboard.left_hip_slr">
-<code class="sig-name descname">left_hip_slr</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.left_hip_slr" title="Permalink to this definition">¶</a></dt>
-<dd><p>Left hip SLR</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -613,10 +643,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 <dl class="py attribute">
 <dt id="odyssey.models.pt.Chessboard.left_hip_er">
 <code class="sig-name descname">left_hip_er</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.left_hip_er" title="Permalink to this definition">¶</a></dt>
-<dd><p>Left hip external rotation</p>
+<dd><p>Left hip external rotation angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -624,10 +657,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 <dl class="py attribute">
 <dt id="odyssey.models.pt.Chessboard.left_hip_ir">
 <code class="sig-name descname">left_hip_ir</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.left_hip_ir" title="Permalink to this definition">¶</a></dt>
-<dd><p>Left hip internal rotation</p>
+<dd><p>Left hip internal rotation angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -635,10 +671,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 <dl class="py attribute">
 <dt id="odyssey.models.pt.Chessboard.left_hip_abd">
 <code class="sig-name descname">left_hip_abd</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.left_hip_abd" title="Permalink to this definition">¶</a></dt>
-<dd><p>Left hip abduction.</p>
+<dd><p>Left hip abduction angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -646,10 +685,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 <dl class="py attribute">
 <dt id="odyssey.models.pt.Chessboard.left_hip_add">
 <code class="sig-name descname">left_hip_add</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.left_hip_add" title="Permalink to this definition">¶</a></dt>
-<dd><p>Left hip adduction</p>
+<dd><p>Left hip adduction angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -657,10 +699,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 <dl class="py attribute">
 <dt id="odyssey.models.pt.Chessboard.left_hip_flexion">
 <code class="sig-name descname">left_hip_flexion</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.left_hip_flexion" title="Permalink to this definition">¶</a></dt>
-<dd><p>Left hip flexion.</p>
+<dd><p>Left hip flexion angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -668,10 +713,27 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 <dl class="py attribute">
 <dt id="odyssey.models.pt.Chessboard.left_hip_extension">
 <code class="sig-name descname">left_hip_extension</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.left_hip_extension" title="Permalink to this definition">¶</a></dt>
-<dd><p>Left hip extension.</p>
+<dd><p>Left hip extension angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.models.pt.Chessboard.left_hip_slr">
+<code class="sig-name descname">left_hip_slr</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.left_hip_slr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Left hip straight leg raise angle.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -679,10 +741,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 <dl class="py attribute">
 <dt id="odyssey.models.pt.Chessboard.right_hip_er">
 <code class="sig-name descname">right_hip_er</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.right_hip_er" title="Permalink to this definition">¶</a></dt>
-<dd><p>Right hip external rotation</p>
+<dd><p>Right hip external rotation angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -690,10 +755,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 <dl class="py attribute">
 <dt id="odyssey.models.pt.Chessboard.right_hip_ir">
 <code class="sig-name descname">right_hip_ir</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.right_hip_ir" title="Permalink to this definition">¶</a></dt>
-<dd><p>Right hip internal rotation</p>
+<dd><p>Right hip internal rotation angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -701,10 +769,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 <dl class="py attribute">
 <dt id="odyssey.models.pt.Chessboard.right_hip_abd">
 <code class="sig-name descname">right_hip_abd</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.right_hip_abd" title="Permalink to this definition">¶</a></dt>
-<dd><p>Right hip abduction.</p>
+<dd><p>Right hip abduction angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -712,10 +783,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 <dl class="py attribute">
 <dt id="odyssey.models.pt.Chessboard.right_hip_add">
 <code class="sig-name descname">right_hip_add</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.right_hip_add" title="Permalink to this definition">¶</a></dt>
-<dd><p>Right hip adduction</p>
+<dd><p>Right hip adduction angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -723,10 +797,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 <dl class="py attribute">
 <dt id="odyssey.models.pt.Chessboard.right_hip_flexion">
 <code class="sig-name descname">right_hip_flexion</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.right_hip_flexion" title="Permalink to this definition">¶</a></dt>
-<dd><p>Right hip flexion.</p>
+<dd><p>Right hip flexion angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -734,10 +811,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 <dl class="py attribute">
 <dt id="odyssey.models.pt.Chessboard.right_hip_extension">
 <code class="sig-name descname">right_hip_extension</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.right_hip_extension" title="Permalink to this definition">¶</a></dt>
-<dd><p>Right hip extension.</p>
+<dd><p>Right hip extension angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -745,10 +825,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 <dl class="py attribute">
 <dt id="odyssey.models.pt.Chessboard.right_hip_slr">
 <code class="sig-name descname">right_hip_slr</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.right_hip_slr" title="Permalink to this definition">¶</a></dt>
-<dd><p>Right hip SLR</p>
+<dd><p>Right hip straight leg raise angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -756,7 +839,7 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 <dl class="py attribute">
 <dt id="odyssey.models.pt.Chessboard.notes">
 <code class="sig-name descname">notes</code><a class="headerlink" href="#odyssey.models.pt.Chessboard.notes" title="Permalink to this definition">¶</a></dt>
-<dd><p>notes on the assessment</p>
+<dd><p>Assessment notes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
@@ -770,17 +853,23 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 <dt id="odyssey.models.pt.MobilityAssessment">
 <em class="property">class </em><code class="sig-prename descclassname">odyssey.models.pt.</code><code class="sig-name descname">MobilityAssessment</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
-<p>Mobility assessment table</p>
-<p>This table stores the repeated mobility assessment measurements. The measurements
-are indexed by <a class="reference internal" href="#odyssey.models.pt.MobilityAssessment.clientid" title="odyssey.models.pt.MobilityAssessment.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">clientid</span></code></a> and assessment <a class="reference internal" href="#odyssey.models.pt.MobilityAssessment.timestamp" title="odyssey.models.pt.MobilityAssessment.timestamp"><code class="xref py py-attr docutils literal notranslate"><span class="pre">timestamp</span></code></a>. All values in
-this table, with the exception of <a class="reference internal" href="#odyssey.models.pt.MobilityAssessment.isa_dynamic" title="odyssey.models.pt.MobilityAssessment.isa_dynamic"><code class="xref py py-attr docutils literal notranslate"><span class="pre">isa_dynamic</span></code></a>, are angles in degrees.</p>
+<p>Mobility assessment table.</p>
+<p>The previous version of the mobility assessment table.
+Superceded by <a class="reference internal" href="#odyssey.models.pt.Chessboard" title="odyssey.models.pt.Chessboard"><code class="xref py py-class docutils literal notranslate"><span class="pre">Chessboard</span></code></a>.</p>
+<div class="deprecated">
+<p><span class="versionmodified deprecated">Deprecated since version v0.0.3.</span></p>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#odyssey.models.pt.Chessboard" title="odyssey.models.pt.Chessboard"><code class="xref py py-class docutils literal notranslate"><span class="pre">Chessboard</span></code></a></p>
+</div>
 <dl class="py attribute">
 <dt id="odyssey.models.pt.MobilityAssessment.clientid">
 <code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.clientid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client ID number</p>
+<dd><p>Client ID number.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>int, foreign key to <code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></p>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="odyssey.models.client.html#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -821,10 +910,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.m
 <dl class="py attribute">
 <dt id="odyssey.models.pt.MobilityAssessment.isa_left">
 <code class="sig-name descname">isa_left</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.isa_left" title="Permalink to this definition">¶</a></dt>
-<dd><p>ISA? left</p>
+<dd><p>Infasternal angle (ISA) left.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -832,10 +924,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.m
 <dl class="py attribute">
 <dt id="odyssey.models.pt.MobilityAssessment.isa_right">
 <code class="sig-name descname">isa_right</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.isa_right" title="Permalink to this definition">¶</a></dt>
-<dd><p>ISA? left</p>
+<dd><p>Infasternal angle (ISA) right.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -843,7 +938,7 @@ this table, with the exception of <a class="reference internal" href="#odyssey.m
 <dl class="py attribute">
 <dt id="odyssey.models.pt.MobilityAssessment.isa_dynamic">
 <code class="sig-name descname">isa_dynamic</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.isa_dynamic" title="Permalink to this definition">¶</a></dt>
-<dd><p>Indicates whether or not the ISA is dynamic.</p>
+<dd><p>Indicates whether or not the Infasternal angle (ISA) is dynamic.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
@@ -854,10 +949,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.m
 <dl class="py attribute">
 <dt id="odyssey.models.pt.MobilityAssessment.left_shoulder_er">
 <code class="sig-name descname">left_shoulder_er</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.left_shoulder_er" title="Permalink to this definition">¶</a></dt>
-<dd><p>Left shoulder external rotation</p>
+<dd><p>Left shoulder external rotation angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -865,10 +963,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.m
 <dl class="py attribute">
 <dt id="odyssey.models.pt.MobilityAssessment.left_shoulder_ir">
 <code class="sig-name descname">left_shoulder_ir</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.left_shoulder_ir" title="Permalink to this definition">¶</a></dt>
-<dd><p>Left shoulder internal rotation</p>
+<dd><p>Left shoulder internal rotation angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -876,10 +977,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.m
 <dl class="py attribute">
 <dt id="odyssey.models.pt.MobilityAssessment.left_shoulder_abd">
 <code class="sig-name descname">left_shoulder_abd</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.left_shoulder_abd" title="Permalink to this definition">¶</a></dt>
-<dd><p>Left shoulder abduction.</p>
+<dd><p>Left shoulder abduction angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -887,10 +991,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.m
 <dl class="py attribute">
 <dt id="odyssey.models.pt.MobilityAssessment.left_shoulder_add">
 <code class="sig-name descname">left_shoulder_add</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.left_shoulder_add" title="Permalink to this definition">¶</a></dt>
-<dd><p>Left shoulder adduction</p>
+<dd><p>Left shoulder adduction angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -898,10 +1005,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.m
 <dl class="py attribute">
 <dt id="odyssey.models.pt.MobilityAssessment.left_shoulder_flexion">
 <code class="sig-name descname">left_shoulder_flexion</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.left_shoulder_flexion" title="Permalink to this definition">¶</a></dt>
-<dd><p>Left shoulder flexion.</p>
+<dd><p>Left shoulder flexion angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -909,10 +1019,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.m
 <dl class="py attribute">
 <dt id="odyssey.models.pt.MobilityAssessment.left_shoulder_extension">
 <code class="sig-name descname">left_shoulder_extension</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.left_shoulder_extension" title="Permalink to this definition">¶</a></dt>
-<dd><p>Left shoulder extension.</p>
+<dd><p>Left shoulder extension angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -920,10 +1033,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.m
 <dl class="py attribute">
 <dt id="odyssey.models.pt.MobilityAssessment.right_shoulder_er">
 <code class="sig-name descname">right_shoulder_er</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.right_shoulder_er" title="Permalink to this definition">¶</a></dt>
-<dd><p>Right shoulder external rotation</p>
+<dd><p>Right shoulder external rotation angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -931,10 +1047,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.m
 <dl class="py attribute">
 <dt id="odyssey.models.pt.MobilityAssessment.right_shoulder_ir">
 <code class="sig-name descname">right_shoulder_ir</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.right_shoulder_ir" title="Permalink to this definition">¶</a></dt>
-<dd><p>Right shoulder internal rotation</p>
+<dd><p>Right shoulder internal rotation angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -942,10 +1061,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.m
 <dl class="py attribute">
 <dt id="odyssey.models.pt.MobilityAssessment.right_shoulder_abd">
 <code class="sig-name descname">right_shoulder_abd</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.right_shoulder_abd" title="Permalink to this definition">¶</a></dt>
-<dd><p>Right shoulder abduction.</p>
+<dd><p>Right shoulder abduction angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -953,10 +1075,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.m
 <dl class="py attribute">
 <dt id="odyssey.models.pt.MobilityAssessment.right_shoulder_add">
 <code class="sig-name descname">right_shoulder_add</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.right_shoulder_add" title="Permalink to this definition">¶</a></dt>
-<dd><p>Right shoulder adduction</p>
+<dd><p>Right shoulder adduction angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -964,10 +1089,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.m
 <dl class="py attribute">
 <dt id="odyssey.models.pt.MobilityAssessment.right_shoulder_flexion">
 <code class="sig-name descname">right_shoulder_flexion</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.right_shoulder_flexion" title="Permalink to this definition">¶</a></dt>
-<dd><p>Right shoulder flexion.</p>
+<dd><p>Right shoulder flexion angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -975,10 +1103,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.m
 <dl class="py attribute">
 <dt id="odyssey.models.pt.MobilityAssessment.right_shoulder_extension">
 <code class="sig-name descname">right_shoulder_extension</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.right_shoulder_extension" title="Permalink to this definition">¶</a></dt>
-<dd><p>Right shoulder extension.</p>
+<dd><p>Right shoulder extension angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -986,10 +1117,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.m
 <dl class="py attribute">
 <dt id="odyssey.models.pt.MobilityAssessment.left_hip_er">
 <code class="sig-name descname">left_hip_er</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.left_hip_er" title="Permalink to this definition">¶</a></dt>
-<dd><p>Left hip external rotation</p>
+<dd><p>Left hip external rotation angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -997,10 +1131,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.m
 <dl class="py attribute">
 <dt id="odyssey.models.pt.MobilityAssessment.left_hip_ir">
 <code class="sig-name descname">left_hip_ir</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.left_hip_ir" title="Permalink to this definition">¶</a></dt>
-<dd><p>Left hip internal rotation</p>
+<dd><p>Left hip internal rotation angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1008,10 +1145,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.m
 <dl class="py attribute">
 <dt id="odyssey.models.pt.MobilityAssessment.left_hip_abd">
 <code class="sig-name descname">left_hip_abd</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.left_hip_abd" title="Permalink to this definition">¶</a></dt>
-<dd><p>Left hip abduction.</p>
+<dd><p>Left hip abduction angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1019,10 +1159,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.m
 <dl class="py attribute">
 <dt id="odyssey.models.pt.MobilityAssessment.left_hip_add">
 <code class="sig-name descname">left_hip_add</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.left_hip_add" title="Permalink to this definition">¶</a></dt>
-<dd><p>Left hip adduction</p>
+<dd><p>Left hip adduction angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1030,10 +1173,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.m
 <dl class="py attribute">
 <dt id="odyssey.models.pt.MobilityAssessment.left_hip_flexion">
 <code class="sig-name descname">left_hip_flexion</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.left_hip_flexion" title="Permalink to this definition">¶</a></dt>
-<dd><p>Left hip flexion.</p>
+<dd><p>Left hip flexion angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1041,10 +1187,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.m
 <dl class="py attribute">
 <dt id="odyssey.models.pt.MobilityAssessment.left_hip_extension">
 <code class="sig-name descname">left_hip_extension</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.left_hip_extension" title="Permalink to this definition">¶</a></dt>
-<dd><p>Left hip extension.</p>
+<dd><p>Left hip extension angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1052,10 +1201,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.m
 <dl class="py attribute">
 <dt id="odyssey.models.pt.MobilityAssessment.right_hip_er">
 <code class="sig-name descname">right_hip_er</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.right_hip_er" title="Permalink to this definition">¶</a></dt>
-<dd><p>Right hip external rotation</p>
+<dd><p>Right hip external rotation angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1063,10 +1215,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.m
 <dl class="py attribute">
 <dt id="odyssey.models.pt.MobilityAssessment.right_hip_ir">
 <code class="sig-name descname">right_hip_ir</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.right_hip_ir" title="Permalink to this definition">¶</a></dt>
-<dd><p>Right hip internal rotation</p>
+<dd><p>Right hip internal rotation angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1074,10 +1229,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.m
 <dl class="py attribute">
 <dt id="odyssey.models.pt.MobilityAssessment.right_hip_abd">
 <code class="sig-name descname">right_hip_abd</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.right_hip_abd" title="Permalink to this definition">¶</a></dt>
-<dd><p>Right hip abduction.</p>
+<dd><p>Right hip abduction angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1085,10 +1243,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.m
 <dl class="py attribute">
 <dt id="odyssey.models.pt.MobilityAssessment.right_hip_add">
 <code class="sig-name descname">right_hip_add</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.right_hip_add" title="Permalink to this definition">¶</a></dt>
-<dd><p>Right hip adduction</p>
+<dd><p>Right hip adduction angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1096,10 +1257,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.m
 <dl class="py attribute">
 <dt id="odyssey.models.pt.MobilityAssessment.right_hip_flexion">
 <code class="sig-name descname">right_hip_flexion</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.right_hip_flexion" title="Permalink to this definition">¶</a></dt>
-<dd><p>Right hip flexion.</p>
+<dd><p>Right hip flexion angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1107,10 +1271,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.m
 <dl class="py attribute">
 <dt id="odyssey.models.pt.MobilityAssessment.right_hip_extension">
 <code class="sig-name descname">right_hip_extension</code><a class="headerlink" href="#odyssey.models.pt.MobilityAssessment.right_hip_extension" title="Permalink to this definition">¶</a></dt>
-<dd><p>Right hip extension.</p>
+<dd><p>Right hip extension angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+<dt class="field-even">Unit</dt>
+<dd class="field-even"><p>degree</p>
 </dd>
 </dl>
 </dd></dl>

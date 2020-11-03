@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>odyssey.api.doctor &mdash; Odyssey version: 0.1.57 documentation</title>
+  <title>odyssey.api.doctor &mdash; Odyssey version: 0.1.59 documentation</title>
   
 
   
@@ -30,6 +30,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -61,7 +62,7 @@
             
             
               <div class="version">
-                version: 0.1.57
+                version: 0.1.59
               </div>
             
           
@@ -225,16 +226,16 @@ if running locally, it is the path to a local temp file</p>
 <dl class="py method">
 <dt id="odyssey.api.doctor.MedBloodTest.get">
 <code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.MedBloodTest.get" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt id="odyssey.api.doctor.MedBloodTest.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.MedBloodTest.post" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>This resource returns every instance of blood test submissions for the
+specified clientid</p>
+<p>Test submissions relate overall submission data: testid, date, notes, panel_type
+to the actual results. Each submission may have multiple results
+where the results can be referenced by the testid provided in this request</p>
+</dd></dl>
 
 <dl class="py attribute">
 <dt id="odyssey.api.doctor.MedBloodTest.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'doctor_med_blood_test'</em><a class="headerlink" href="#odyssey.api.doctor.MedBloodTest.endpoint" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">endpoint</code><em class="property"> = 'doctor_med_blood_test_2'</em><a class="headerlink" href="#odyssey.api.doctor.MedBloodTest.endpoint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -244,7 +245,7 @@ if running locally, it is the path to a local temp file</p>
 
 <dl class="py attribute">
 <dt id="odyssey.api.doctor.MedBloodTest.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'GET', 'POST'}</em><a class="headerlink" href="#odyssey.api.doctor.MedBloodTest.methods" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">methods</code><em class="property"> = {'GET'}</em><a class="headerlink" href="#odyssey.api.doctor.MedBloodTest.methods" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -253,10 +254,15 @@ if running locally, it is the path to a local temp file</p>
 <dt id="odyssey.api.doctor.MedBloodTestResults">
 <em class="property">class </em><code class="sig-prename descclassname">odyssey.api.doctor.</code><code class="sig-name descname">MedBloodTestResults</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.MedBloodTestResults" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<p>Resource for working with a single blood test
+entry instance, testid.</p>
+<p>Each test instance may have multiple test results.</p>
 <dl class="py method">
 <dt id="odyssey.api.doctor.MedBloodTestResults.get">
 <code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">testid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.MedBloodTestResults.get" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns details of the test denoted by testid as well as
+the actual results submitted.</p>
+</dd></dl>
 
 <dl class="py attribute">
 <dt id="odyssey.api.doctor.MedBloodTestResults.endpoint">
@@ -276,9 +282,37 @@ if running locally, it is the path to a local temp file</p>
 </dd></dl>
 
 <dl class="py class">
+<dt id="odyssey.api.doctor.AllMedBloodTestResults">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.doctor.</code><code class="sig-name descname">AllMedBloodTestResults</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.AllMedBloodTestResults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<p>Endpoint for returning all blood test results from a client</p>
+<dl class="py method">
+<dt id="odyssey.api.doctor.AllMedBloodTestResults.get">
+<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.AllMedBloodTestResults.get" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.doctor.AllMedBloodTestResults.endpoint">
+<code class="sig-name descname">endpoint</code><em class="property"> = 'doctor_all_med_blood_test_results'</em><a class="headerlink" href="#odyssey.api.doctor.AllMedBloodTestResults.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.api.doctor.AllMedBloodTestResults.mediatypes">
+<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.AllMedBloodTestResults.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.doctor.AllMedBloodTestResults.methods">
+<code class="sig-name descname">methods</code><em class="property"> = {'GET'}</em><a class="headerlink" href="#odyssey.api.doctor.AllMedBloodTestResults.methods" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt id="odyssey.api.doctor.MedBloodTestResultTypes">
 <em class="property">class </em><code class="sig-prename descclassname">odyssey.api.doctor.</code><code class="sig-name descname">MedBloodTestResultTypes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.MedBloodTestResultTypes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<p>Returns the types of tests currently documented in the DB</p>
 <dl class="py method">
 <dt id="odyssey.api.doctor.MedBloodTestResultTypes.get">
 <code class="sig-name descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.MedBloodTestResultTypes.get" title="Permalink to this definition">¶</a></dt>
@@ -410,16 +444,16 @@ if running locally, it is the path to a local temp file</p>
 <dd><p>for submitting client medical record ids from external medical institutions</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt id="odyssey.api.doctor.ExternalMedicalRecordIDs.endpoint">
+<code class="sig-name descname">endpoint</code><em class="property"> = 'doctor_external_medical_record_i_ds'</em><a class="headerlink" href="#odyssey.api.doctor.ExternalMedicalRecordIDs.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt id="odyssey.api.doctor.ExternalMedicalRecordIDs.get">
 <code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.ExternalMedicalRecordIDs.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns all medical record ids for clientid</p>
 </dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.api.doctor.ExternalMedicalRecordIDs.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'doctor_external_medical_record_i_ds'</em><a class="headerlink" href="#odyssey.api.doctor.ExternalMedicalRecordIDs.endpoint" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt id="odyssey.api.doctor.ExternalMedicalRecordIDs.mediatypes">
