@@ -24,7 +24,6 @@ from tests.data import (
     test_fitness_questionnaire
 )
 
-
 def test_creating_new_remote_client(test_client, init_database):
     """
     GIVEN a api endpoint for creating a new client at home registration 
