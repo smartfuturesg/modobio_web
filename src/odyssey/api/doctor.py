@@ -62,10 +62,25 @@ class MedImaging(Resource):
             if running locally, it is the path to a local temp file
         """
         check_client_existence(clientid)
-        data = MedicalImaging.query.filter_by(clientid=clientid).all()
-        if not data:
+        query = db.session.query(
+                    MedicalImaging, Staff.firstname, Staff.lastname
+                ).filter(
+                    MedicalImaging.clientid == clientid
+                ).filter(
+                    MedicalImaging.reporterid == Staff.staffid
+                ).all()
+        
+        # if no tests have been submitted
+        if not query:
             raise ContentNotFound()
         
+        # prepare response with reporter info
+        response = []
+        for data in query:
+            img_dat = data[0].__dict__
+            img_dat.update({'reporter_firstname': data[1], 'reporter_lastname': data[2]})
+            response.append(img_dat)
+
         if not current_app.config['LOCAL_CONFIG']:
             bucket_name = current_app.config['S3_BUCKET_NAME']
 
@@ -74,13 +89,13 @@ class MedImaging(Resource):
                         'Bucket' : bucket_name,
                         'Key' : None
                     }
-            for img in data:
+            for img in response:
                 if img.image_path:
                     params['Key'] = img.image_path
                     url = s3.generate_presigned_url('get_object', Params=params, ExpiresIn=3600)
                     img.image_path = url
  
-        return data
+        return response
 
     #Unable to use @accepts because the input files come in a form-data, not json.
     @token_auth.login_required
@@ -101,12 +116,14 @@ class MedImaging(Resource):
         check_client_existence(clientid)
         bucket_name = current_app.config['S3_BUCKET_NAME']
 
+        # bring up reporting staff member
+        reporter = token_auth.current_user()
         mi_schema = MedicalImagingSchema()
         #Verify at least 1 file with key-name:image is selected for upload
-        
         if 'image' not in request.files:
             mi_data = mi_schema.load(request.form)
             mi_data.clientid = clientid
+            mi_data.reporterid = reporter.staffid
             db.session.add(mi_data)
             db.session.commit()
             return 
@@ -119,6 +136,7 @@ class MedImaging(Resource):
         for i, img in enumerate(files.getlist('image')):
             mi_data = mi_schema.load(request.form)
             mi_data.clientid = clientid
+            mi_data.reporterid = reporter.staffid
             date = mi_data.image_date
 
             #Verifying image size is within a safe threashold (MAX = 500 mb)

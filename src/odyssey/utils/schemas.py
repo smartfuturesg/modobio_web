@@ -1128,7 +1128,10 @@ class MedicalImagingSchema(ma.SQLAlchemyAutoSchema):
     image_type = fields.String(validate=validate.OneOf(possible_image_types), required=True)
     image_date = fields.Date(required=True)
     image_read = fields.String(required=True)
-    
+    reporter_firstname = fields.String(description="first name of reporting physician", dump_only=True)
+    reporter_lastname = fields.String(description="last name of reporting physician", dump_only=True)
+    reporterid = fields.Integer(description="id of reporting physician", missing=None)
+
 class MedicalBloodTestSchema(Schema):
     testid = fields.Integer()
     clientid = fields.Integer(load_only=True)
