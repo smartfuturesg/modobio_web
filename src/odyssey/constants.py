@@ -382,5 +382,10 @@ DB_SERVER_TIME = text("clock_timestamp()")
 
 ALPHANUMERIC = "BCDFGHJKLMNPQRSTVWXYZ01234567890123456789"
 
+# Authentication for admins, user_types, and roles
+ADMIN_ROLES = ['sys_admin','staff_admin']
+USER_TYPES = ['staff', 'remoteregistration']
+STAFF_ROLES = ['stfappadmin', 'clntsvc', 'physthera', 'phystrain', 'datasci', 'doctor', 'docext', 'nutrition']
+
 # Call blood test assessment stored function
 BLOODTEST_EVAL = "SELECT public.blood_test_eval({}, {}, {});"

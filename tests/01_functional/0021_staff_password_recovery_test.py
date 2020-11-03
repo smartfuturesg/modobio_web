@@ -8,6 +8,7 @@ from requests.auth import _basic_auth_str
 from odyssey.models.staff import Staff
 
 from tests.data import test_user_passwords
+from werkzeug.security import check_password_hash
 
 
 
@@ -65,4 +66,4 @@ def test_full_password_recovery_routine(test_client, init_database):
     staff = Staff.query.filter_by(email=staff.email).first()
 
     assert response.status_code == 200
-    assert staff.check_password(password=payload_password_reset['password'])
+    assert check_password_hash(staff.password, payload_password_reset['password'])    
