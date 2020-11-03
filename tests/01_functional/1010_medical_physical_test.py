@@ -23,7 +23,6 @@ def test_post_medical_physical(test_client, init_database):
                                 headers=headers, 
                                 data=dumps(payload), 
                                 content_type='application/json')
-    
     assert response.status_code == 201
 
 def test_get_medical_physical(test_client, init_database):
@@ -41,6 +40,5 @@ def test_get_medical_physical(test_client, init_database):
     response = test_client.get('/doctor/physical/1/',
                                 headers=headers, 
                                 content_type='application/json')
-                                
     assert response.status_code == 200
     

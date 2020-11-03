@@ -432,12 +432,11 @@ class MedPhysical(Resource):
 
         if not query:
             raise ContentNotFound()
-
         # prepare response with staff name and medical physical data
         response = []
         for data in query:
             physical = data[0].__dict__    
-            physical.update({'reporter_firstname': query[1], 'reporter_lastname': query[2]})
+            physical.update({'reporter_firstname': data[1], 'reporter_lastname': data[2]})
             response.append(physical)
 
         return response
