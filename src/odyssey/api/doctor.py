@@ -20,7 +20,6 @@ from odyssey.models.misc import MedicalInstitutions
 from odyssey.api import api
 from odyssey.utils.auth import token_auth
 
-# from odyssey.api.auth import token_auth
 from odyssey.api.errors import (
     UserNotFound, 
     IllegalSetting, 

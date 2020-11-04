@@ -6,11 +6,11 @@ from flask_restx import Resource
 from requests_oauthlib import OAuth2Session
 
 from odyssey.api import api
-from odyssey.api.auth import token_auth
 from odyssey.api.errors import ContentNotFound, StaffEmailInUse, ClientEmailInUse
 from odyssey.utils.schemas import UserSchema, UserLoginSchema, NewUserSchema, StaffProfileSchema, ClientInfoSchema
 from odyssey.models.user import User
 from odyssey.utils.misc import check_user_existence
+from odyssey.utils.auth import token_auth
 
 from odyssey import db
 
