@@ -8,7 +8,7 @@ import jwt
 from odyssey import db
 from odyssey.staff.models import Staff
 from odyssey.api import api
-from odyssey.auth.authorize import token_auth
+from odyssey.utils.auth import token_auth
 from odyssey.errors.handlers import (
     UnauthorizedUser, 
     StaffEmailInUse, 
@@ -23,6 +23,8 @@ from odyssey.staff.schemas import (
     StaffSearchItemsSchema
 )
 
+from werkzeug.security import check_password_hash
+
 ns = api.namespace('staff', description='Operations related to staff members')
 
 @ns.route('/')
@@ -33,7 +35,7 @@ ns = api.namespace('staff', description='Operations related to staff members')
 class StaffMembers(Resource):
     """staff member class for creating, getting staff"""
     
-    @token_auth.login_required(role=['sys_admin', 'staff_admin'])
+    @token_auth.login_required(admin_role=['sys_admin', 'staff_admin'])
     @responds(schema=StaffSearchItemsSchema(many=True), api=ns)
     def get(self):
         """returns list of staff members given query parameters"""                
@@ -94,7 +96,7 @@ class StaffMembers(Resource):
                         break
         return data 
     
-    @token_auth.login_required(role=['sys_admin', 'staff_admin'])
+    @token_auth.login_required(admin_role=['sys_admin', 'staff_admin'])
     @accepts(schema=StaffSchema, api=ns)
     @responds(schema=StaffSchema, status_code=201, api=ns)     
     def post(self):
@@ -194,7 +196,7 @@ class ResetPassword(Resource):
 @ns.route('/password/update')
 class ChangePassword(Resource):
     """Reset the user's password."""
-    @token_auth.login_required()
+    @token_auth.login_required
     @accepts(schema=StaffPasswordUpdateSchema, api=ns)
     def post(self):
         """
@@ -208,7 +210,7 @@ class ChangePassword(Resource):
         # bring up the staff member and reset their password
         staff = Staff.query.filter_by(email=staff_email).first()
 
-        if staff.check_password(password=data["current_password"]):
+        if check_password_hash(staff.password, data["current_password"]):
             staff.set_password(data["new_password"])
         else:
             raise UnauthorizedUser(message="please enter the correct current password \

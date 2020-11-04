@@ -6,6 +6,7 @@ from odyssey import ma
 from odyssey.misc.models import RegisteredFacilities
 from odyssey.staff.models import Staff
 from odyssey.wearables.models import Wearables
+from odyssey.constants import STAFF_ROLES
 
 """
     Schemas for the staff API
@@ -36,7 +37,7 @@ class StaffSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Staff
 
-    possible_roles = ['stfappadmin', 'clntsvc', 'physthera', 'phystrain', 'datasci', 'doctor', 'docext', 'nutrition']
+    possible_roles = STAFF_ROLES
 
     token = fields.String(dump_only=True)
     token_expiration = fields.DateTime(dump_only=True)

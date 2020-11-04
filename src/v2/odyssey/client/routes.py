@@ -6,7 +6,7 @@ from flask_accepts import accepts, responds
 from flask_restx import Resource, Api
 
 from odyssey.api import api
-from odyssey.auth.authorize import token_auth
+from odyssey.utils.auth import token_auth
 from odyssey.errors.handlers import (
     UserNotFound, 
     ClientAlreadyExists, 

@@ -5,7 +5,7 @@ from flask_accepts import accepts , responds
 from odyssey.pt.models import Chessboard, PTHistory
 from odyssey import db
 from odyssey.api import api
-from odyssey.auth.authorize import token_auth
+from odyssey.utils.auth import token_auth
 from odyssey.errors.handlers import UserNotFound, IllegalSetting, ContentNotFound
 from odyssey.utils.misc import check_client_existence
 from odyssey.pt.schemas import ChessboardSchema, PTHistorySchema

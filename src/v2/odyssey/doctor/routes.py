@@ -18,7 +18,7 @@ from odyssey.doctor.models import (
 
 from odyssey.misc.models import MedicalInstitutions
 from odyssey.api import api
-from odyssey.auth.authorize import token_auth
+from odyssey.utils.auth import token_auth
 from odyssey.errors.handlers import (
     UserNotFound, 
     IllegalSetting, 
