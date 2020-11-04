@@ -222,7 +222,7 @@ class MedBloodTest(Resource):
 
 @ns.route('/bloodtest/all/<int:user_id>/')
 @ns.doc(params={'user_id': 'Client ID number'})
-class MedBloodTest(Resource):
+class MedBloodTestAll(Resource):
     @token_auth.login_required
     @responds(schema=AllMedicalBloodTestSchema, api=ns)
     def get(self, user_id):
@@ -275,7 +275,7 @@ class MedBloodTestResults(Resource):
         the actual results submitted.
         """
         #query for join of MedicalBloodTestResults and MedicalBloodTestResultTypes tables
-        check_blood_test_existence(testid)
+        check_blood_test_existence(test_id)
         results =  db.session.query(
                 MedicalBloodTests, MedicalBloodTestResults, MedicalBloodTestResultTypes, User
                 ).join(
@@ -284,7 +284,7 @@ class MedBloodTestResults(Resource):
                 ).filter(
                     MedicalBloodTests.test_id == MedicalBloodTestResults.test_id
                 ).filter(
-                    MedicalBloodTests.testid==testid
+                    MedicalBloodTests.test_id==test_id
                 ).filter(
                     MedicalBloodTests.reporter_id == User.user_id
                 ).all()
@@ -292,7 +292,7 @@ class MedBloodTestResults(Resource):
             raise ContentNotFound()
         
         # prepare response with test details   
-        nested_results = {'testid': testid, 
+        nested_results = {'test_id': test_id, 
                           'date' : results[0][0].date,
                           'notes' : results[0][0].notes,
                           'panel_type' : results[0][0].panel_type,
@@ -302,7 +302,7 @@ class MedBloodTestResults(Resource):
                           'results': []} 
         
         # loop through results in order to nest results in their respective test
-        # entry instances (testid)
+        # entry instances (test_id)
         for _, test_result, result_type, _ in results:
                 res = {'result_name': result_type.result_name, 
                         'result_value': test_result.result_value,
@@ -339,11 +339,11 @@ class AllMedBloodTestResults(Resource):
                             MedicalBloodTests.reporter_id == User.user_id
                         ).all()
 
-        test_ids = set([(x[0].testid, x[0].reporter_id, x[3].firstname, x[3].lastname) for x in results])
-        nested_results = [{'testid': x[0], 'reporter_id': x[1], 'reporter_firstname': x[2], 'reporter_lastname': x[3], 'results': []} for x in test_ids ]
+        test_ids = set([(x[0].test_id, x[0].reporter_id, x[3].firstname, x[3].lastname) for x in results])
+        nested_results = [{'test_id': x[0], 'reporter_id': x[1], 'reporter_firstname': x[2], 'reporter_lastname': x[3], 'results': []} for x in test_ids ]
         
         # loop through results in order to nest results in their respective test
-        # entry instances (testid)
+        # entry instances (test_id)
         for test_info, test_result, result_type, _ in results:
             for test in nested_results:
                 # add rest result to appropriate test entry instance (test_id)
@@ -463,6 +463,7 @@ class MedPhysical(Resource):
         if not query:
             raise ContentNotFound()
         # prepare response with staff name and medical physical data
+        
         response = []
         for data in query:
             physical = data[0].__dict__    
@@ -486,7 +487,7 @@ class MedPhysical(Resource):
         # look up the reporting staff member and add their id to the 
         # client's physical entry
         reporter = token_auth.current_user()
-        client_mp.reporter_id = reporter.staffid
+        client_mp.reporter_id = reporter.user_id
 
         # prepare api response with reporter name
         response = client_mp.__dict__.copy()

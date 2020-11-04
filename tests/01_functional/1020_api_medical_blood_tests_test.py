@@ -63,7 +63,7 @@ def test_get_blood_test_results(test_client, init_database):
 
     client = User.query.filter_by(is_client=True).first()
     # send get request for client info on user_id = client.user_id
-    response = test_client.get('/doctor/bloodtest/results/' + str(client.user_id) + '/',
+    response = test_client.get('/doctor/bloodtest/results/1/',
                                 headers=headers, 
                                 content_type='application/json')
     response_data = response.get_json()
