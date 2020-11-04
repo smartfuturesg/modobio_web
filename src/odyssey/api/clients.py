@@ -642,7 +642,7 @@ class RefreshRemoteRegistration(Resource):
         refresh client portal a client for remote registration
     """
     @token_auth.login_required
-    @accepts(schema=RefreshRemoteRegistrationSchema)
+    @accepts(schema=RefreshRemoteRegistrationSchema, api=ns)
     @responds(schema=ClientRemoteRegistrationPortalSchema, api=ns, status_code=201)
     def post(self):
         """refresh the portal endpoint and password
