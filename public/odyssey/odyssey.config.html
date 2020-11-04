@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>odyssey.config &mdash; Odyssey version: 0.1.59 documentation</title>
+  <title>odyssey.config &mdash; Odyssey version: 0.1.64 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                version: 0.1.59
+                version: 0.1.64
               </div>
             
           
@@ -227,7 +227,7 @@ Load this class in the <a class="reference internal" href="../index.html#odyssey
 </div>
 <dl class="py method">
 <dt id="odyssey.config.Config.getvar">
-<code class="sig-name descname">getvar</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">var</span></em>, <em class="sig-param"><span class="n">param</span></em>, <em class="sig-param"><span class="n">decrypt</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.config.Config.getvar" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">getvar</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">var</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span></em>, <em class="sig-param"><span class="n">param</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span></em>, <em class="sig-param"><span class="n">decrypt</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">default</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="default_value">''</span></em><span class="sig-paren">)</span> &#x2192; Any<a class="headerlink" href="#odyssey.config.Config.getvar" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get a configuration setting.</p>
 <p>Order of lookup:</p>
 <ol class="arabic simple">
@@ -246,7 +246,8 @@ be skipped if param is None.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><em>str</em> – Value of the parameter.</p>
+<dd class="field-even"><p><em>object</em> – Value of the parameter, interpreted as None, True, False, int, or float if
+possible, str otherwise.</p>
 </dd>
 </dl>
 </dd></dl>

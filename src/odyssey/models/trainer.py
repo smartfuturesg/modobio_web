@@ -1120,7 +1120,7 @@ class MoxyRipTest(db.Model):
 
     performance_average_power_2 = db.Column(db.Integer)
     """
-    Average power generated during sprint 1.
+    Average power generated during sprint 2.
 
     :type: int
     :unit: W
@@ -1128,7 +1128,7 @@ class MoxyRipTest(db.Model):
 
     performance_hr_max_2 = db.Column(db.Integer)
     """
-    Maximum heartrate during sprint 1.
+    Maximum heartrate during sprint 2.
 
     :type: int
     :unit: bpm
@@ -1152,7 +1152,7 @@ class MoxyRipTest(db.Model):
 
     performance_average_power_3 = db.Column(db.Integer)
     """
-    Average power generated during sprint 1.
+    Average power generated during sprint 3.
 
     :type: int
     :unit: W
@@ -1160,7 +1160,7 @@ class MoxyRipTest(db.Model):
 
     performance_hr_max_3 = db.Column(db.Integer)
     """
-    Maximum heartrate during sprint 1.
+    Maximum heartrate during sprint 3.
 
     :type: int
     :unit: bpm
@@ -1184,7 +1184,7 @@ class MoxyRipTest(db.Model):
 
     performance_average_power_4 = db.Column(db.Integer)
     """
-    Average power generated during sprint 1.
+    Average power generated during sprint 4.
 
     :type: int
     :unit: W
@@ -1192,7 +1192,7 @@ class MoxyRipTest(db.Model):
 
     performance_hr_max_4 = db.Column(db.Integer)
     """
-    Maximum heartrate during sprint 1.
+    Maximum heartrate during sprint 4.
 
     :type: int
     :unit: bpm
@@ -1317,7 +1317,7 @@ class MoxyRipTest(db.Model):
 
     recovery_hr_min_4 = db.Column(db.Integer)
     """
-    Minimum heartrate during recovery period 1.
+    Minimum heartrate during recovery period 4.
 
     :type: int
     :unit: bpm
@@ -1361,7 +1361,7 @@ class MoxyRipTest(db.Model):
 
     recovery_baseline_smo2 = db.Column(db.Integer)
     """
-    Muscle oxygen saturation level (SmO2) after recovery period, average of 4 sprints.
+    Muscle oxygen saturation level (SmO2) after recovery period, average of 4 periods.
 
     :type: int
     :unit: %
@@ -1379,7 +1379,8 @@ class MoxyRipTest(db.Model):
     """
     Average power generated per body mass.
 
-    difference of .................................................
+    Calculated from average of ``performance_average_power_1-4`` - 
+    average of ``recovery_average_power_1-4`` divided by body mass.
 
     :type: float
     :unit: W/kg
@@ -1387,7 +1388,7 @@ class MoxyRipTest(db.Model):
 
     avg_interval_time = db.Column(db.Integer)
     """
-    Average interval time calculated how? ...........................
+    Duration of the interval, should always be 100 s.
 
     :type: int
     :unit: s
@@ -1395,7 +1396,8 @@ class MoxyRipTest(db.Model):
 
     avg_recovery_time = db.Column(db.Integer)
     """
-    Average recovery time calculated how?...........................
+    Duration from end of sprint to SmO2 value back at 100 %.
+    Average of 4 sprints.
 
     :type: int
     :unit: s
@@ -1632,7 +1634,9 @@ class FitnessQuestionnaire(db.Model):
     """
     How many hours the client sleeps on average per night.
 
-    :type: str ..................... should be float
+    .. note:: This is type ``str`` but should be ``float``.
+
+    :type: str
     :unit: h
     """
 
