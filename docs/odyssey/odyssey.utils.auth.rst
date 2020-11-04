@@ -1,7 +1,7 @@
-odyssey.models.intake
-=====================
+odyssey.utils.auth
+==================
 
-.. automodule:: odyssey.models.intake
+.. automodule:: odyssey.utils.auth
    :members:
    :member-order: bysource
    :undoc-members:

@@ -1,7 +1,7 @@
 odyssey.api.schemas
 ===================
 
-.. automodule:: odyssey.api.schemas
+.. automodule:: odyssey.utils.schemas
    :members:
    :member-order: bysource
    :undoc-members:

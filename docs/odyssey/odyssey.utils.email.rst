@@ -1,7 +1,7 @@
-odyssey.api.schemas
+odyssey.utils.email
 ===================
 
-.. automodule:: odyssey.api.schemas
+.. automodule:: odyssey.utils.email
    :members:
    :member-order: bysource
    :undoc-members:

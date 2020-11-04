@@ -5,4 +5,5 @@ The new (as of version 0.1.0) API based Modo Bio staff application. The frontend
 
 .. toctree::
 
-   odyssey/odyssey.api
+   Models <odyssey/odyssey.models>
+   Endpoints <odyssey/odyssey.api>
