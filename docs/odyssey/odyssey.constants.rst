@@ -1,4 +1,4 @@
-odyssey.constants module
+odyssey.constants
 ========================
 
 .. automodule:: odyssey.constants

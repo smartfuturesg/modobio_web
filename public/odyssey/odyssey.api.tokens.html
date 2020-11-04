@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>odyssey.api.tokens &mdash; Odyssey 0.1.1.dev151+gc03d6f9 documentation</title>
+  <title>odyssey.api.tokens &mdash; Odyssey version: 0.1.66 documentation</title>
   
 
   
@@ -30,13 +30,14 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="odyssey.api.staff" href="odyssey.api.staff.html" />
+    <link rel="next" title="odyssey.api.errors" href="odyssey.api.errors.html" />
     <link rel="prev" title="odyssey.api.auth" href="odyssey.api.auth.html" /> 
 </head>
 
@@ -61,7 +62,7 @@
             
             
               <div class="version">
-                0.1.1.dev151+gc03d6f9
+                version: 0.1.66
               </div>
             
           
@@ -87,25 +88,25 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../toc_flask.html">Flask app</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../toc_api.html">API server</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="odyssey.api.html">API</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.auth.html">Authorization</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Authorization tokens</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.staff.html">Staff</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.clients.html">Client</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.doctor.html">Doctor</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.pt.html">Physical therapist</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.trainer.html">Trainer</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.schemas.html">Schemas</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.errors.html">Error messages</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.serializers.html">Serializers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey.api.utils.html">Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.config.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.models.html">Models</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="odyssey.api.html">Endpoints</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.clients.html">Client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.staff.html">Staff</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.doctor.html">Doctor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.pt.html">Physical therapist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.trainer.html">Trainer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.remote_clients.html">Remote registration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.registeredfacilities.html">Registered facilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.wearables.html">Wearable devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.auth.html">Authorization</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Authorization tokens</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.errors.html">Error messages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.postman.html">Postman</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.version.html">Version</a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="../toc_rest.html">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.utils.html">Utilities</a></li>
 </ul>
 
             
@@ -151,8 +152,6 @@
   <ul class="wy-breadcrumbs">
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="../toc_api.html">API server</a> &raquo;</li>
         
           <li><a href="odyssey.api.html">API</a> &raquo;</li>
         
@@ -220,13 +219,13 @@ first validates that the user’s basic authentication passes, then checks
 the url to validate the authenticity of the end point (i.e. in database and not expired)</p>
 <dl class="py method">
 <dt id="odyssey.api.tokens.RemoteRegistrationToken.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tmp_registration</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.tokens.RemoteRegistrationToken.post" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">post</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.tokens.RemoteRegistrationToken.post" title="Permalink to this definition">¶</a></dt>
 <dd><p>generate api token for portal user</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="odyssey.api.tokens.RemoteRegistrationToken.delete">
-<code class="sig-name descname">delete</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tmp_registration</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.tokens.RemoteRegistrationToken.delete" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">delete</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.tokens.RemoteRegistrationToken.delete" title="Permalink to this definition">¶</a></dt>
 <dd><p>invalidate current token. Used to effectively logout a user</p>
 </dd></dl>
 
@@ -257,7 +256,7 @@ the url to validate the authenticity of the end point (i.e. in database and not 
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="odyssey.api.staff.html" class="btn btn-neutral float-right" title="odyssey.api.staff" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="odyssey.api.errors.html" class="btn btn-neutral float-right" title="odyssey.api.errors" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="odyssey.api.auth.html" class="btn btn-neutral float-left" title="odyssey.api.auth" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

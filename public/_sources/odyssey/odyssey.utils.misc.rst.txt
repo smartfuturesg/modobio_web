@@ -1,7 +1,7 @@
-odyssey.api.utils
-=================
+odyssey.utils.misc
+==================
 
-.. automodule:: odyssey.api.utils
+.. automodule:: odyssey.utils.misc
    :members:
    :member-order: bysource
    :undoc-members:

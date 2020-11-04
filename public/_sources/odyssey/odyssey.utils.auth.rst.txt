@@ -1,7 +1,7 @@
-odyssey.api.auth
-================
+odyssey.utils.auth
+==================
 
-.. automodule:: odyssey.api.auth
+.. automodule:: odyssey.utils.auth
    :members:
    :member-order: bysource
    :undoc-members:

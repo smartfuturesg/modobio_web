@@ -1,12 +1,21 @@
+"""
+Database tables for the trainer's portion of the Modo Bio Staff application.
+All tables in this module are prefixed with ``Trainer``.
+"""
+
 from datetime import datetime
 
 from odyssey import db
 from odyssey.constants import DB_SERVER_TIME
 
 
-
 class PowerAssessment(db.Model):
-    """ Power assessment table
+    """ Power assessment table.
+
+    In the power assessment, the average maximum power a client
+    can generate is measured relative to body mass. This is measured
+    separately for the upper and lower body. The assessment is
+    performed on a Keiser machine with pneumatic resistance.
     """
 
     __tablename__ = 'TrainerPowerAssessment'
@@ -17,194 +26,220 @@ class PowerAssessment(db.Model):
 
     :type: int, primary key, autoincrement
     """
-    
+
     timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     Timestamp of the assessment.
 
-    :type: datetime.datetime
+    :type: :class:`datetime.datetime`
     """
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    timestamp for when object was created. DB server time is used. 
+    Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='power_assessment_clientid_fkey',ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
     """
 
     keiser_upper_r_weight = db.Column(db.Integer)
     """
-    keiser push/pull weight (right)
+    Keiser push/pull weight (pneumatic, expressed as psi), right.
 
     :type: int
+    :unit: psi
     """
 
     keiser_upper_r_attempt_1 = db.Column(db.Integer)
     """
-    keiser push/pull weight (right) attempt 1 of 3
+    Keiser push/pull max power generated, right, attempt 1 of 3.
 
     :type: int
+    :unit: W
     """
     
     keiser_upper_r_attempt_2 = db.Column(db.Integer)
     """
-    keiser push/pull weight (right) attempt 2 of 3
+    Keiser push/pull max power generated, right, attempt 2 of 3.
 
     :type: int
+    :unit: W
     """
 
     keiser_upper_r_attempt_3 = db.Column(db.Integer)
     """
-    keiser push/pull weight (right) attempt 3 of 3
+    Keiser push/pull max power generated, right, attempt 3 of 3.
 
     :type: int
+    :unit: W
     """
 
     keiser_upper_l_weight = db.Column(db.Integer)
     """
-    keiser push/pull weight (left)
+    Keiser push/pull weight (pneumatic, expressed as psi), left.
 
     :type: int
+    :unit: psi
     """
 
     keiser_upper_l_attempt_1 = db.Column(db.Integer)
     """
-    keiser push/pull weight (left) attempt 1 of 3
+    Keiser push/pull max power generated, left, attempt 1 of 3.
 
     :type: int
+    :unit: W
     """
 
     keiser_upper_l_attempt_2 = db.Column(db.Integer)
     """
-    keiser push/pull weight (left) attempt 2 of 3
+    Keiser push/pull max power generated, left, attempt 2 of 3.
 
     :type: int
+    :unit: W
     """
 
     keiser_upper_l_attempt_3 = db.Column(db.Integer)
     """
-    keiser push/pull weight (left) attempt 3 of 3
+    Keiser push/pull max power generated, left, attempt 3 of 3.
 
     :type: int
+    :unit: W
     """
-    
+
     keiser_lower_bi_weight = db.Column(db.Integer)
     """
-    keiser leg press weight (bilateral)
+    Keiser leg press weight (pneumatic, expressed as psi), bilateral.
 
     :type: int
+    :unit: psi
     """
 
     keiser_lower_bi_attempt_1 = db.Column(db.Integer)
     """
-    keiser leg press attemp 1 of 3 (bilateral)
+    Keiser leg press max power generated, bilateral, attemp 1 of 3.
 
     :type: int
+    :unit: W
     """
-
 
     keiser_lower_bi_attempt_2 = db.Column(db.Integer)
     """
-    keiser leg press attemp 2 of 3 (bilateral)
+    Keiser leg press max power generated, bilateral, attemp 2 of 3.
 
     :type: int
+    :unit: W
     """
-
 
     keiser_lower_bi_attempt_3 = db.Column(db.Integer)
     """
-    keiser leg press attemp 3 of 3 (bilateral)
+    Keiser leg press max power generated, bilateral, attemp 3 of 3.
 
     :type: int
+    :unit: W
     """
-        
+
     keiser_lower_r_weight = db.Column(db.Integer)
     """
-    keiser leg press weight (right)
+    Keiser leg press weight (pneumatic, expressed as psi), right.
 
     :type: int
+    :unit: psi
     """
 
     keiser_lower_r_attempt_1 = db.Column(db.Integer)
     """
-    keiser leg press attempt 1 of 3 (right)
+    Keiser leg press max power generated, right, attempt 1 of 3.
 
     :type: int
+    :unit: W
     """
 
     keiser_lower_r_attempt_2 = db.Column(db.Integer)
     """
-    keiser leg press attempt 2 of 3 (right)
+    Keiser leg press max power generated, right, attempt 2 of 3.
 
     :type: int
+    :unit: W
     """
 
     keiser_lower_r_attempt_3 = db.Column(db.Integer)
     """
-    keiser leg press attempt 3 of 3 (right)
+    Keiser leg press max power generated, right, attempt 3 of 3.
 
     :type: int
+    :unit: W
     """
-        
+
     keiser_lower_l_weight = db.Column(db.Integer)
     """
-    keiser leg press weight (left)
+    Keiser leg press weight (pneumatic, expressed as psi), left.
 
     :type: int
+    :unit: psi
     """
 
     keiser_lower_l_attempt_1 = db.Column(db.Integer)
     """
-    keiser leg press attempt 1 of 3  (left)
+    Keiser leg press max power generated, left, attempt 1 of 3.
 
     :type: int
+    :unit: W
     """
 
     keiser_lower_l_attempt_2 = db.Column(db.Integer)
     """
-    keiser leg press attempt 2 of 3  (left)
+    Keiser leg press max power generated, left, attempt 2 of 3.
 
     :type: int
+    :unit: W
     """
 
     keiser_lower_l_attempt_3 = db.Column(db.Integer)
     """
-    keiser leg press attempt 3 of 3  (left)
+    Keiser leg press max power generated, left, attempt 3 of 3.
 
     :type: int
+    :unit: W
     """
 
     upper_watts_per_kg = db.Column(db.Float)
     """
-    measure of upper body watts per kg
+    Average power generated by the upper body on Keiser push/pull
+    exercise (average of left + right), divided by body mass.
 
     :type: float
+    :unit: W/kg
     """
 
     lower_watts_per_kg = db.Column(db.Float)
     """
-    measure of lower body watts per kg
-    
+    Average power generated by the lower body on Keiser leg press
+    exercise (average of left + right or bilateral, whichever was
+    testerd), divided by body mass.
+
     :type: float
+    :unit: W/kg
     """
 
 
 class StrengthAssessment(db.Model):
-    """ Strength assessment table
+    """ Strength assessment table.
+
+    In the strength assessment, the maximum weight a client can lift
+    is measured for the upper and lower body.
     """
 
     __tablename__ = 'TrainerStrengthAssessment'
@@ -220,257 +255,331 @@ class StrengthAssessment(db.Model):
     """
     Timestamp of the assessment.
 
-    :type: datetime.datetime
+    :type: :class:`datetime.datetime`
     """
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    timestamp for when object was created. DB server time is used. 
+    Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='strength_assessment_clientid_fkey',ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
     """
 
     upper_push_notes = db.Column(db.Text)
     """
-    notes on the push exercise
+    Push exercise notes.
 
     :type: str
     """
 
     upper_pull_notes = db.Column(db.Text)
     """
-    notes on the pull exercise
+    Pull exercise notes.
 
     :type: str
     """
 
     upper_push_l_weight = db.Column(db.Integer)
     """
-    push weight (left)
+    Weight to be pushed in the 3 attempts to estimate 10RM, left.
 
     :type: int
+    :unit: lb
     """
 
     upper_push_l_attempt_1 = db.Column(db.Integer)
     """
-    push weight (left) attempt 1 of 3
+    Number of reps the weight in :attr:`upper_push_l_weight` is pushed
+    until fail, left, attempt 1 of 3.
 
     :type: int
+    :unit: reps
     """
     
     upper_push_l_attempt_2 = db.Column(db.Integer)
     """
-    push weight (left) attempt 2 of 3
+    Number of reps the weight in :attr:`upper_push_l_weight` is pushed
+    until fail, left, attempt 2 of 3.
 
     :type: int
+    :unit: reps
     """
 
     upper_push_l_attempt_3 = db.Column(db.Integer)
     """
-    push weight (left) attempt 3 of 3
+    Number of reps the weight in :attr:`upper_push_l_weight` is pushed
+    until fail, left, attempt 3 of 3.
 
     :type: int
+    :unit: reps
     """
 
     upper_push_l_estimated_10rm = db.Column(db.Float)
     """
-    estimate of 10RM
-    
+    Ten rep max, the estimated weight a client can push 10 times,
+    upper body, left.
+
+    Uses the average of 3 attempts and a modified Brzycki method
+    to estimate the 10RM.
+
     :type: float
+    :unit: lb
     """
 
     upper_push_r_weight = db.Column(db.Integer)
     """
-    push weight (right)
+    Weight to be pushed in the 3 attempts to estimate 10RM, right.
 
     :type: int
+    :unit: lb
     """
 
     upper_push_r_attempt_1 = db.Column(db.Integer)
     """
-    push weight (right) attempt 1 of 3
+    Number of reps the weight in :attr:`upper_push_r_weight` is pushed
+    until fail, right, attempt 1 of 3.
 
     :type: int
+    :unit:
     """
     
     upper_push_r_attempt_2 = db.Column(db.Integer)
     """
-    push weight (right) attempt 2 of 3
+    Number of reps the weight in :attr:`upper_push_r_weight` is pushed
+    until fail, right, attempt 2 of 3.
 
     :type: int
+    :unit:
     """
 
     upper_push_r_attempt_3 = db.Column(db.Integer)
     """
-    push weight (right) attempt 3 of 3
+    Number of reps the weight in :attr:`upper_push_r_weight` is pushed
+    until fail, right, attempt 3 of 3.
 
     :type: int
+    :unit:
     """
 
     upper_push_r_estimated_10rm = db.Column(db.Float)
     """
-    estimate of 10RM
-    
+    Ten rep max, the estimated weight a client can push 10 times,
+    upper body, right.
+
+    Uses the average of 3 attempts and a modified Brzycki method
+    to estimate the 10RM.
+
     :type: float
+    :unit: lb
     """
 
     upper_push_bi_weight = db.Column(db.Integer)
     """
-    push weight (bilateral)
+    Weight to be pushed in the 3 attempts to estimate 10RM, bilateral.
 
     :type: int
+    :unit: lb
     """
 
     upper_push_bi_attempt_1 = db.Column(db.Integer)
     """
-    push weight (bilateral) attempt 1 of 3
+    Number of reps the weight in :attr:`upper_push_bi_weight` is pushed
+    until fail, bilateral, attempt 1 of 3.
 
     :type: int
+    :unit: reps
     """
     
     upper_push_bi_attempt_2 = db.Column(db.Integer)
     """
-    push weight (bilateral) attempt 2 of 3
+    Number of reps the weight in :attr:`upper_push_bi_weight` is pushed
+    until fail, bilateral, attempt 2 of 3.
 
     :type: int
+    :unit: reps
     """
 
     upper_push_bi_attempt_3 = db.Column(db.Integer)
     """
-    push weight (bilateral) attempt 3 of 3
+    Number of reps the weight in :attr:`upper_push_bi_weight` is pushed
+    until fail, bilateral, attempt 3 of 3.
 
     :type: int
+    :unit: reps
     """
 
     upper_push_bi_estimated_10rm = db.Column(db.Float)
     """
-    estimate of 10RM
+    Ten rep max, the estimated weight a client can push 10 times,
+    upper body, bilateral.
+
+    Uses the average of 3 attempts and a modified Brzycki method
+    to estimate the 10RM.
     
     :type: float
+    :unit: lb
     """
 
     upper_pull_l_weight = db.Column(db.Integer)
     """
-    pull weight (left)
+    Weight to be pulled in the 3 attempts to estimate 10RM, left.
 
     :type: int
+    :unit: lb
     """
 
     upper_pull_l_attempt_1 = db.Column(db.Integer)
     """
-    pull weight (left) attempt 1 of 3
+    Number of reps the weight in :attr:`upper_pull_l_weight` is pulled
+    until fail, left, attempt 1 of 3.
 
     :type: int
+    :unit: reps
     """
     
     upper_pull_l_attempt_2 = db.Column(db.Integer)
     """
-    pull weight (left) attempt 2 of 3
+    Number of reps the weight in :attr:`upper_pull_l_weight` is pulled
+    until fail, left, attempt 2 of 3.
 
     :type: int
+    :unit: reps
     """
 
     upper_pull_l_attempt_3 = db.Column(db.Integer)
     """
-    pull weight (left) attempt 3 of 3
+    Number of reps the weight in :attr:`upper_pull_l_weight` is pulled
+    until fail, left, attempt 3 of 3.
 
     :type: int
+    :unit: reps
     """
 
     upper_pull_l_estimated_10rm = db.Column(db.Float)
     """
-    estimate of 10RM
-    
+    Ten rep max, the estimated weight a client can pull 10 times,
+    upper body, left.
+
+    Uses the average of 3 attempts and a modified Brzycki method
+    to estimate the 10RM.
+
     :type: float
+    :unit: lb
     """
 
     upper_pull_r_weight = db.Column(db.Integer)
     """
-    pull weight (right)
+    Weight to be pulled in the 3 attempts to estimate 10RM, right.
 
     :type: int
+    :unit: lb
     """
 
     upper_pull_r_attempt_1 = db.Column(db.Integer)
     """
-    pull weight (right) attempt 1 of 3
+    Number of reps the weight in :attr:`upper_pull_r_weight` is pulled
+    until fail, right, attempt 1 of 3.
 
     :type: int
+    :unit: reps
     """
     
     upper_pull_r_attempt_2 = db.Column(db.Integer)
     """
-    pull weight (right) attempt 2 of 3
+    Number of reps the weight in :attr:`upper_pull_r_weight` is pulled
+    until fail, right, attempt 2 of 3.
 
     :type: int
+    :unit: reps
     """
 
     upper_pull_r_attempt_3 = db.Column(db.Integer)
     """
-    pull weight (right) attempt 3 of 3
+    Number of reps the weight in :attr:`upper_pull_r_weight` is pulled
+    until fail, right, attempt 1 of 3.
 
     :type: int
+    :unit: reps
     """
 
     upper_pull_r_estimated_10rm = db.Column(db.Float)
     """
-    estimate of 10RM
-    
+    Ten rep max, the estimated weight a client can pull 10 times,
+    upper body, right.
+
+    Uses the average of 3 attempts and a modified Brzycki method
+    to estimate the 10RM.
+
     :type: float
+    :unit: lb
     """
 
     upper_pull_bi_weight = db.Column(db.Integer)
     """
-    pull weight (bilateral)
+    Weight to be pulled in the 3 attempts to estimate 10RM, bilateral.
 
     :type: int
+    :unit: lb
     """
 
     upper_pull_bi_attempt_1 = db.Column(db.Integer)
     """
-    pull weight (bilateral) attempt 1 of 3
+    Number of reps the weight in :attr:`upper_pull_bi_weight` is pulled
+    until fail, bilateral, attempt 1 of 3.
 
     :type: int
+    :unit: reps
     """
     
     upper_pull_bi_attempt_2 = db.Column(db.Integer)
     """
-    pull weight (bilateral) attempt 2 of 3
+    Number of reps the weight in :attr:`upper_pull_bi_weight` is pulled
+    until fail, bilateral, attempt 2 of 3.
 
     :type: int
+    :unit: reps
     """
 
     upper_pull_bi_attempt_3 = db.Column(db.Integer)
     """
-    pull weight (bilateral) attempt 3 of 3
+    Number of reps the weight in :attr:`upper_pull_bi_weight` is pulled
+    until fail, bilateral, attempt 3 of 3.
 
     :type: int
+    :unit: reps
     """
 
     upper_pull_bi_estimated_10rm = db.Column(db.Float)
     """
-    estimate of 10RM
-    
+    Ten rep max, the estimated weight a client can pull 10 times,
+    upper body, bilateral.
+
+    Uses the average of 3 attempts and a modified Brzycki method
+    to estimate the 10RM.
+
     :type: float
+    :unit: lb
     """
 
 
 class MovementAssessment(db.Model):
-    """ Movement Assessment table
+    """ Movement assessment table.
+
+    This set of tests assesses movement through squats and forward bends.
     """
 
     __tablename__ = 'TrainerMovementAssessment'
@@ -486,136 +595,143 @@ class MovementAssessment(db.Model):
     """
     Timestamp of the assessment.
 
-    :type: datetime.datetime
+    :type: :class:`datetime.datetime`
     """
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    timestamp for when object was created. DB server time is used. 
+    Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='movement_assessment_clientid_fkey',ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
     """
 
     squat_depth = db.Column(db.String)
     """
-    Regarding squat depth, the client  ust be one of the following
-    'Above Parallel',
-    'Parallel',
-    'Below Parallel',
-    'Full Depth'
+    Depth of a squat. Qualified as one of the following:
+
+    - above parallel
+    - parallel
+    - below parallel
+    - full depth
 
     :type: str
     """
 
     squat_ramp = db.Column(db.String)
     """
-    If client requires a ramp to squat, must be one of the following:
-    '30 Degree Ramp',
-    '15 Degree Ramp',
-    'No Ramp'
+    Did a client use a ramp to squat, and how steep?
+    Must be one of the following:
+
+    - 30 degree ramp
+    - 15 degree ramp
+    - no ramp
 
     :type: str
     """
 
     squat_eye_test = db.Column(db.Boolean)
     """
-    pass-True fail-False of wheather client passes test
+    Whether or not the squat was being performed correctly. The trainer
+    assesses it by *eye-balling* the client.
 
-    :type: Boolean
+    :type: bool
     """
 
     squat_can_breathe = db.Column(db.Boolean)
     """
-    while squatting client:
-    can breathe-True 
-    cannot breathe-False 
+    Indicates whether or not a client can breathe while squatting.
 
-    :type: Boolean
+    :type: bool
     """
 
     squat_can_look_up = db.Column(db.Boolean)
     """
-    while squatting client:
-    can look up-True 
-    cannot look up-False 
+    Indicates whether or not a client can look up while squatting
 
-    :type: Boolean
+    :type: bool
     """
 
     toe_touch_depth = db.Column(db.String)
     """
-    Depth of toe touch test
-    'Knee Height',
-    'Mid Shin',
-    'Low Shin',
-    'Toes',
-    'Floor'
+    Indicates depth of a forward bend. One of the following results:
+
+    - knee height
+    - mid shin
+    - low shin
+    - toes
+    - floor
 
     :type: str
     """
 
     toe_touch_pelvis_movement = db.Column(db.ARRAY(db.String), nullable=True, server_default="{'Even Bilaterally'}")
     """
-    Pelvis movement during toe touch test
-    'Right Hip High',
-    'Right Hip Back',
-    'Left Hip High',
-    'Left Hip Back',
-    'Even Bilaterally'
+    Describes pelvis movement during toe touch test.
+    Can be any of the following (multiple allowed):
+
+    - right hip high
+    - right hip back
+    - left hip high
+    - left hip back
+    - even bilaterally
 
     :type: str
     """
 
     toe_touch_ribcage_movement = db.Column(db.ARRAY(db.String), nullable=True, server_default="{'Even Bilaterally'}")
     """
-    Ribcage movement during toe touch test
-    'Right Posterior Ribcage High',
-    'Right Posterior Ribcage Back',
-    'Left Posterior Ribcage High',
-    'Left Posterior Ribcage Back',
-    'Even Bilaterally'
+    Describes ribcage movement during toe touch test.
+    Can be any of the following (multiple allowed):
+
+    - right posterior ribcage high
+    - right posterior ribcage back
+    - left posterior ribcage high
+    - left posterior ribcage back
+    - even bilaterally
 
     :type: str
     """
 
     toe_touch_notes = db.Column(db.String)
     """
-    Notes regarding toe touch test
+    Toe touch test notes.
 
     :type: str
     """ 
 
     standing_rotation_r_notes = db.Column(db.String)
     """
-    Notes regarding standing rotation right
+    Standing rotation right notes.
 
     :type: str
     """ 
 
     standing_rotation_l_notes = db.Column(db.String)
     """
-    Notes regarding standing rotation right
+    Standing rotation right notes.
 
     :type: str
     """ 
 
 
 class HeartAssessment(db.Model):
-    """ Heart assessment table
+    """ Heart assessment table.
+
+    Assessment of heartrate and breathing capabilities.
     """
 
     __tablename__ = 'TrainerHeartAssessment'
@@ -631,90 +747,112 @@ class HeartAssessment(db.Model):
     """
     Timestamp of the assessment.
 
-    :type: datetime.datetime
+    :type: :class:`datetime.datetime`
     """
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    timestamp for when object was created. DB server time is used. 
+    Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='heart_assessment_clientid_fkey',ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
     """
 
     resting_hr = db.Column(db.Integer)
     """
-    resting heartrate
+    Resting heartrate.
 
     :type: int
+    :unit: bpm
     """
 
     max_hr = db.Column(db.Integer)
     """
-    maximum measured heartrate
+    Maximum measured heartrate.
 
     :type: int
+    :unit: bpm
     """
    
     theoretical_max_hr = db.Column(db.Integer)
     """
-    theoretical maximum heartrate
+    Theoretical maximum heartrate. This is calculated with:
+
+     .. math:: max_hr = 220 - age
 
     :type: int
+    :unit: bpm
     """ 
 
     avg_eval_hr = db.Column(db.Integer)
     """
-    average heartrate during evaluation
+    Average heartrate during evaluation.
 
     :type: int
+    :unit: bpm
     """
 
     avg_training_hr = db.Column(db.Integer)
     """
-    avergage heatrate during training
+    Avergage heatrate during training.
 
     :type: int
+    :unit: bpm
     """
 
     estimated_vo2_max = db.Column(db.Integer)
     """
-    estimation of VO2 Max
+    Estimation of the maximum oxygen consumption rate per body mass per
+    minute (VO2 max). The VO2 max is calculated from the :attr:`max_hr`
+    or :attr:`theorerical_max_hr`, which ever is higher, and the
+    :attr:`resting_hr`:
+
+    .. math:: VO2 max = (max(max_hr, theoretical_max_hr) / resting_hr) * 15.3
 
     :type: int
+    :unit: mL/kg/min
     """
 
     co2_tolerance = db.Column(db.Integer)
     """
-    CO2 tolerance 0-120
-    
+    CO2 tolerance test, duration of slow exhale until next inhale.
+
     :type: int
+    :unit: seconds
     """
 
     notes = db.Column(db.String)
     """
-    Notes on the client's heatrate tests
+    Heatrate test notes.
 
     :type: str
     """
 
 
 class MoxyAssessment(db.Model):
-    """ Moxy assessment table
+    """ Moxy assessment table.
+    
+    A moxy sensor is a device that measures muscle oxygen concentration. It
+    is used to determine a client's capacity for short duration full power
+    exercise (the size of their "gas tank") and the speed of recovery afterwards.
 
+    In :class:`MoxyRipAssessment`, a specific stationary bike exercise is used to
+    perform the moxy test. If a stationary bike is not available, another type of
+    exercise may be used to do the moxy test. This table holds results of the
+    alternative moxy test, with the test described in the :attr:`notes`.
     """
 
     __tablename__ = 'TrainerMoxyAssessment'
@@ -730,127 +868,161 @@ class MoxyAssessment(db.Model):
     """
     Timestamp of the assessment.
 
-    :type: datetime.datetime
+    :type: :class:`datetime.datetime`
     """
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    timestamp for when object was created. DB server time is used. 
+    Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='moxy_assessment_clientid_fkey',ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
     """
 
     vl_side = db.Column(db.String)
     """
-    VL side, right or left leg
+    Which vastus lateralus (VL, part of quadriceps in upper leg) the moxy
+    sensor is placed on. Either right or left leg.
 
     :type: str
     """
-    
+
     notes = db.Column(db.String)
     """
-    Notes on the client's moxy tests
+    Moxy test notes. Describes the exercise used to do the moxy test.
 
     :type: str
     """
 
     recovery_baseline = db.Column(db.Integer)
     """
+    Average peak of repeated moxy test.
 
     :type: int
+    :unit: %
     """
 
     performance_baseline = db.Column(db.Integer)
     """
-
+    Average valley of repeated moxy test
+    
     :type: int
+    :unit: %
     """    
 
     gas_tank_size = db.Column(db.Integer)
     """
+    Difference of :attr:`recovery_baseline` - :attr:`performance_baseline`.
 
     :type: int
+    :unit: %
     """
     
     starting_sm_o2 = db.Column(db.Integer)
     """
+    Starting value for muscle oxygen level.
 
     :type: int
+    :unit: %
     """
 
     starting_thb = db.Column(db.Float)
     """
+    Starting value for the total hemoglobin.
 
     :type: float
+    :unit: g/dL
     """
 
     limiter = db.Column(db.String)
     """
-    Must be one of:
-    'Demand',
-    'Supply',
-    'Respiratory'
+    Limiting factor to the "gas tank" size. Must be one of:
+
+    - demand
+    - supply
+    - respiratory
 
     :type: str
     """    
 
     intervention = db.Column(db.String)
     """
-    text box of letters and numbers
+    Proposed intervention by the trainer to improve the "gas tank" size.
 
     :type: str
     """
 
     performance_metric_1 = db.Column(db.String)
     """
-    Must be one of:
-    'Watts',
-    'Lbs',
-    'Feet/Min'
+    The test described in :attr:`notes` has an asociated unit.
+    Free-form, but examples are:
+
+    - watt
+    - lb
+    - foot/min
 
     :type: str
-    """   
+    """
 
     performance_metric_1_value = db.Column(db.Integer)
     """
-    The number behind the performance metric 
+    The size of the 1st property that is part of the exercise described
+    in :attr:`notes`. For example, if a kettle bell exercise is used for
+    the moxy test, and :attr:`performance_metric_1` is set to 'lb',
+    then the value might be 35 (i.e. 35 lb weight is used).
 
     :type: int
+    :unit: given in :attr:`performance_metric_1`
     """
 
     performance_metric_2 = db.Column(db.String)
     """
-    Must be one of:
-    'Watts',
-    'Lbs',
-    'Feet/Min'
+    The test described in :attr:`notes` has an asociated unit.
+    Free-form, but examples are:
+
+    - watt
+    - lb
+    - foot/min
 
     :type: str
     """   
 
     performance_metric_2_value = db.Column(db.Integer)
     """
-    The number behind the performance metric 
-    
+    The size of the 2st property that is part of the exercise described
+    in :attr:`notes`. For example, if a kettle bell exercise is used for
+    the moxy test, with a 35 lb weight (i.e. :attr:`performance_metric_1`
+    = 'lb' and :attr:`performance_metric_1_value` = 35), then the 2nd
+    property might describe the number of reps.
+
     :type: int
+    :unit: given in :attr:`performance_metric_2`
     """
 
+
 class MoxyRipTest(db.Model):
-    """ Moxy rop test table
+    """ Moxy rip test table.
+
+    A moxy sensor is a device that measures muscle oxygen concentration. It
+    is used to determine a client's capacity for short duration full power
+    exercise (the size of their "gas tank") and the speed of recovery afterwards.
+
+    A stationary bike exercise is used to perform the moxy test. The client
+    does 4 sprints of 20 s each, with 1:40 min rest in between, while wearing
+    a moxy sensor.
     """
 
     __tablename__ = 'TrainerMoxyRipTest'
@@ -866,344 +1038,400 @@ class MoxyRipTest(db.Model):
     """
     Timestamp of the assessment.
 
-    :type: datetime.datetime
+    :type: :class:`datetime.datetime`
     """
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    timestamp for when object was created. DB server time is used. 
+    Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='moxy_rip_assessment_clientid_fkey',ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
     """
        
     vl_side = db.Column(db.String)
     """
-    VL side, right or left leg
+    Which vastus lateralus (VL, part of quadriceps in upper leg) the moxy
+    sensor is placed on. Either right or left leg.
 
     :type: str
     """
     
     performance_smo2_1 = db.Column(db.Integer)
     """
-    performance assessment 1 smo2
+    Muscle oxygen saturation level (SmO2) after sprint 1.
 
     :type: int
+    :unit: %
     """
 
     performance_thb_1 = db.Column(db.Float)
     """
-    performance assessment 1 thb
+    Total hemoglobin level after sprint 1.
 
     :type: float
+    :unit: g/dL
     """
 
     performance_average_power_1 = db.Column(db.Integer)
     """
-    performance assessment 1 average power
+    Average power generated during sprint 1.
 
     :type: int
+    :unit: W
     """
 
     performance_hr_max_1 = db.Column(db.Integer)
     """
-    performance assessment 1 max hr
+    Maximum heartrate during sprint 1.
 
     :type: int
+    :unit: bpm
     """
 
     performance_smo2_2 = db.Column(db.Integer)
     """
-    performance assessment 2 smo2
+    Muscle oxygen saturation level (SmO2) after sprint 2.
 
     :type: int
+    :unit: %
     """
 
     performance_thb_2 = db.Column(db.Float)
     """
-    performance assessment 2 thb
+    Total hemoglobin level after sprint 2.
 
     :type: float
+    :unit: g/dL
     """
 
     performance_average_power_2 = db.Column(db.Integer)
     """
-    performance assessment 2 average power
+    Average power generated during sprint 2.
 
     :type: int
+    :unit: W
     """
 
     performance_hr_max_2 = db.Column(db.Integer)
     """
-    performance assessment 2 max hr
+    Maximum heartrate during sprint 2.
 
     :type: int
+    :unit: bpm
     """
 
     performance_smo2_3 = db.Column(db.Integer)
     """
-    performance assessment 3 smo2
+    Muscle oxygen saturation level (SmO2) after sprint 3.
 
     :type: int
+    :unit: %
     """
 
     performance_thb_3 = db.Column(db.Float)
     """
-    performance assessment 3 thb
+    Total hemoglobin level after sprint 3.
 
     :type: float
+    :unit: g/dL
     """
 
     performance_average_power_3 = db.Column(db.Integer)
     """
-    performance assessment 3 average power
+    Average power generated during sprint 3.
 
     :type: int
+    :unit: W
     """
 
     performance_hr_max_3 = db.Column(db.Integer)
     """
-    performance assessment 3 max hr
+    Maximum heartrate during sprint 3.
 
     :type: int
+    :unit: bpm
     """
     
     performance_smo2_4 = db.Column(db.Integer)
     """
-    performance assessment 4 smo2
+    Muscle oxygen saturation level (SmO2) after sprint 4.
 
     :type: int
+    :unit: %
     """
 
     performance_thb_4 = db.Column(db.Float)
     """
-    performance assessment 4 thb
+    Total hemoglobin level after sprint 4.
 
     :type: float
+    :unit: g/dL
     """
 
     performance_average_power_4 = db.Column(db.Integer)
     """
-    performance assessment 4 average power
+    Average power generated during sprint 4.
 
     :type: int
+    :unit: W
     """
 
     performance_hr_max_4 = db.Column(db.Integer)
     """
-    performance assessment 4 max hr
+    Maximum heartrate during sprint 4.
 
     :type: int
+    :unit: bpm
     """
 
     recovery_smo2_1 = db.Column(db.Integer)
     """
-    recovery assessment 1 smo2
+    Muscle oxygen saturation level (SmO2) after recovery period 1.
 
     :type: int
+    :unit: %
     """
 
     recovery_thb_1 = db.Column(db.Float)
     """
-    recovery assessment 1 thb
+    Total hemoglobin level after recovery period 1.
 
     :type: float
+    :unit: g/dL
     """
 
     recovery_average_power_1 = db.Column(db.Integer)
     """
-    recovery assessment 1 average power
+    Average power generated during recovery period 1.
 
     :type: int
+    :unit: W
     """
 
     recovery_hr_min_1 = db.Column(db.Integer)
     """
-    recovery assessment 1 min hr
+    Minimum heartrate during recovery period 1.
 
     :type: int
+    :unit: bpm
     """
 
     recovery_smo2_2 = db.Column(db.Integer)
     """
-    recovery assessment 2 smo2
+    Muscle oxygen saturation level (SmO2) after recovery period 2.
 
     :type: int
     """
 
     recovery_thb_2 = db.Column(db.Float)
     """
-    recovery assessment 2 thb
+    Total hemoglobin level after recovery period 2.
 
     :type: float
+    :unit: g/dL
     """
 
     recovery_average_power_2 = db.Column(db.Integer)
     """
-    recovery assessment 2 average power
+    Average power generated during recovery period 2.
 
     :type: int
+    :unit: W
     """
 
     recovery_hr_min_2 = db.Column(db.Integer)
     """
-    recovery assessment 2 min hr
+    Minimum heartrate during recovery period 2.
 
     :type: int
+    :unit: bpm
     """
 
     recovery_smo2_3 = db.Column(db.Integer)
     """
-    recovery assessment 3 smo2
+    Muscle oxygen saturation level (SmO2) after recovery period 3.
 
     :type: int
     """
 
     recovery_thb_3 = db.Column(db.Float)
     """
-    recovery assessment 3 thb
+    Total hemoglobin level after recovery period 3.
 
     :type: float
+    :unit: g/dL
     """
 
     recovery_average_power_3 = db.Column(db.Integer)
     """
-    recovery assessment 3 average power
+    Average power generated during recovery period 3.
 
     :type: int
+    :unit: W
     """
 
     recovery_hr_min_3 = db.Column(db.Integer)
     """
-    recovery assessment 3 min hr
+    Minimum heartrate during recovery period 3.
 
     :type: int
+    :unit: bpm
     """
     
     recovery_smo2_4 = db.Column(db.Integer)
     """
-    recovery assessment 4 smo2
+    Muscle oxygen saturation level (SmO2) after recovery period 4.
 
     :type: int
     """
 
     recovery_thb_4 = db.Column(db.Float)
     """
-    recovery assessment 4 thb
+    Total hemoglobin level after recovery period 4.
 
     :type: float
+    :unit: g/dL
     """
 
     recovery_average_power_4 = db.Column(db.Integer)
     """
-    recovery assessment 4 average power
+    Average power generated during recovery period 4.
 
     :type: int
+    :unit: W
     """
 
     recovery_hr_min_4 = db.Column(db.Integer)
     """
-    recovery assessment 4 min hr
+    Minimum heartrate during recovery period 4.
 
     :type: int
+    :unit: bpm
     """
 
     smo2_tank_size = db.Column(db.Integer)
     """
-    SmO2 tank size
+    "Gas tank" size based on muscle oxygen saturation level (SmO2).
+    Difference of :attr:`recovery_baseline_smo2` -
+    :attr:`performance_baseline_smo2`.
 
     :type: int
+    :unit: %
     """
 
     thb_tank_size = db.Column(db.Float)
     """
-    tHB tank size
+    "Gas tank" size based on total hemoglobin level.
+    Difference of :attr:`recovery_baseline_thb` -
+    :attr:`performance_baseline_thb`.
 
     :type: float
+    :unit: g/dL
     """
 
     performance_baseline_smo2 = db.Column(db.Integer)
     """
-    performance baseline SmO2 
+    Muscle oxygen saturation level (SmO2) after sprint, average of 4 sprints.
 
     :type: int
+    :unit: %
     """
 
     performance_baseline_thb = db.Column(db.Float)
     """
-    performance baseline float
+    Total hemoglobin level after sprint, average of 4 sprints.
 
-    :type: int
+    :type: float
+    :unit: g/dL
     """
 
     recovery_baseline_smo2 = db.Column(db.Integer)
     """
-    recovery baseline SmO2 
+    Muscle oxygen saturation level (SmO2) after recovery period, average of 4 periods.
 
     :type: int
+    :unit: %
     """
 
     recovery_baseline_thb = db.Column(db.Float)
     """
-    recovery baseline tHB
+    Total hemoglobin level after recovery period, average of 4 periods.
 
     :type: float
+    :unit: g/dL
     """
 
     avg_watt_kg = db.Column(db.Float)
     """
-    Average watts per kg
+    Average power generated per body mass.
+
+    Calculated from average of ``performance_average_power_1-4`` - 
+    average of ``recovery_average_power_1-4`` divided by body mass.
 
     :type: float
+    :unit: W/kg
     """
 
     avg_interval_time = db.Column(db.Integer)
     """
-    Average interval time in seconds 
+    Duration of the interval, should always be 100 s.
 
     :type: int
+    :unit: s
     """
 
     avg_recovery_time = db.Column(db.Integer)
     """
-    Average recovery time in seconds 
+    Duration from end of sprint to SmO2 value back at 100 %.
+    Average of 4 sprints.
 
     :type: int
+    :unit: s
     """
     
     limiter = db.Column(db.String)
     """
-    Must be one of:
-    'Demand',
-    'Supply',
-    'Respiratory'
+    Limiting factor to the "gas tank" size. Must be one of:
+
+    - demand
+    - supply
+    - respiratory
 
     :type: str
     """    
 
     intervention = db.Column(db.String)
     """
-    note. Letters & numbers
+    Proposed intervention by the trainer to improve the "gas tank" size.
 
     :type: str
-    """    
+    """
 
 
 class LungAssessment(db.Model):
-    """ Lung assessment
+    """ Lung capacity assessment table.
+
+    The lung capacity of a client is measured using a SpiroTiger device.
+    The SpiroTiger has an elastic bag which has to be filled by the client
+    on every exhale. When the client stops exhaling into the bag, the bag
+    automatically empties itself and the client can continue with the
+    next exhale. This inhale-exhale cycle continues for a fixed number of
+    minutes. The SpiroTiger comes with a set of bags of different volumes.
+    The total exhaled volume per minute is calculated.
     """
 
     __tablename__ = 'TrainerLungAssessment'
@@ -1219,79 +1447,88 @@ class LungAssessment(db.Model):
     """
     Timestamp of the assessment.
 
-    :type: datetime.datetime
+    :type: :class:`datetime.datetime`
     """
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    timestamp for when object was created. DB server time is used. 
+    Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='lung_assessment_clientid_fkey',ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
     """
 
     notes = db.Column(db.String)
     """
-    Notes on the client's lung tests
+    Trainer notes on the lung assessment test.
 
     :type: str
     """
 
     bag_size = db.Column(db.Float)
     """
-    Lung capcity in liters
+    Volume of the SpiroTiger bag used in this assessment.
 
     :type: float
+    :unit: L
     """
 
     duration = db.Column(db.Integer)
     """
-    seconds (0-300)
+    Duration of the entire test.
 
     :type: int
+    :unit: s
     """
 
     breaths_per_minute = db.Column(db.Integer)
     """
-    breathing rate
+    Breathing rate.
 
     :type: int
+    :unit: breath/min
     """
 
     max_minute_volume = db.Column(db.Float)
     """
-    MMV 0-500
+    Maximum volume per minute.
 
     :type: float
+    :unit: L/min
     """
 
     liters_min_kg = db.Column(db.Float)
     """
-    liters per minute per kg (0-100)
+    Maximum volume per minute per body mass.
 
     :type: float
+    :unit: L/min/kg
     """
 
+
 class FitnessQuestionnaire(db.Model):
-    """ Initial fitness questionnaire
+    """ Fitness questionnaire.
+
+    The fitness questionnaire is filled in by the client on
+    first sign up to Modo Bio.
     """
 
     __tablename__ = 'TrainerFitnessQuestionnaire'
 
-    displayname = 'Fitness Questionnaire'
+    displayname = 'Fitness questionnaire'
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -1302,115 +1539,151 @@ class FitnessQuestionnaire(db.Model):
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='fitness_questionnaire_clientid_fkey',ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
     """
     
     timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     Timestamp of the assessment.
 
-    :type: datetime.datetime
+    :type: :class:`datetime.datetime`
     """
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    timestamp for when object was created. DB server time is used. 
+    Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     physical_goals = db.Column(db.ARRAY(db.String), nullable=True, server_default="{'other'}")
     """
-    Indicates the goals the client has for their fitness journey. There may be only three choices. One of the choices is 'other'.
+    The goals selected by the client from a predefined list of goals.
+    Must be one or more of:
 
-    :type: str, default = other
+    - weight loss
+    - increase strength
+    - increase aerobic capacity
+    - body composition
+    - sport specific performance
+    - improve mobility
+    - injury rehabilitation
+    - injury prevention
+    - increase longevity
+    - general health
+    - other
+
+    :type: str
     """
 
     current_fitness_level = db.Column(db.Integer, nullable=True)
     """
-    Client's current fitness level [1-10]
+    Client's current fitness level [1-10].
 
     :type: int
     """
 
     goal_fitness_level = db.Column(db.Integer, nullable=True)
     """
-    Client's current fitness level [1-10]
+    Client's fitness level goal [1-10].
     
     :type: int
     """
 
-    # trainer_expectation = db.Column(db.String, nullable=True, server_default="other")
-    # """
-    # Indicates the expectations the client has for their fitness trainer. There may be only one choice. One of the choices is 'other'.
-
-    # :type: str, default = other
-    # """
-
     trainer_expectations = db.Column(db.ARRAY(db.String), nullable=True, server_default="{'other'}")
     """
-    Indicates the expectations the client has for their fitness trainer. 
+    The expectations the client has for the trainer, selected from a
+    predefined list of expectations. Must be one or more of:
 
-    :type: str, default = other
+    - expertise
+    - motivation
+    - accountability
+    - time efficiency
+    - other
+
+    :type: str
     """
 
     lifestyle_goals = db.Column(db.ARRAY(db.String), nullable=True, server_default="{'other'}")
     """
-    Indicates the lifestyle goals the client has for their fitness journey. There may be only three choices. One of the choices is 'other'.
+    The lifestyle goals the client has. Selected from a predefined list
+    of goals. Must be one or more of:
 
-    :type: str, default = other
+    - increased energy
+    - increased mental clarity
+    - increased libido
+    - overall happiness
+    - decreased stress
+    - improved sleep
+    - healthier eating
+    - other
+
+    :type: str
     """
 
     sleep_hours = db.Column(db.String, nullable=True)
     """
-    How many hours the client sleeps per night on average. 
-    
+    How many hours the client sleeps on average per night.
+
+    .. note:: This is type ``str`` but should be ``float``.
+
     :type: str
+    :unit: h
     """
 
     sleep_quality_level = db.Column(db.Integer, nullable=True)
     """
-    Client's current sleep quality level [1-10]
+    Client's quality of sleep [1-10].
     
     :type: int
     """
 
     stress_level = db.Column(db.Integer, nullable=True)
     """
-    Client's current average stress level [1-10]
+    Client's stress level [1-10].
     
     :type: int
     """
 
     stress_sources = db.Column(db.ARRAY(db.String), nullable=True, server_default="{'other'}")
     """
-    Indicates the client's most prominent life stressors. Choices come from a set picklist where 'other' is one of the choices.
-    
-    :type: str, default = other
+    Which sources cause the most stress. Selected from a predefined list
+    of stress sources. Must be one or more of:
+
+    - family
+    - work
+    - finances
+    - social obligations
+    - health
+    - relationships
+    - school
+    - body image
+    - sports performance
+    - general environment
+    - other
+
+    :type: str
     """
 
     energy_level = db.Column(db.Integer, nullable=True)
     """
-    Client's current average energy level [1-10]
+    Client's energy level [1-10].
     
     :type: int
     """
 
     libido_level = db.Column(db.Integer, nullable=True)
     """
-    Client's current average libido level [1-10]
+    Client's libido level [1-10].
     
     :type: int
     """
-
-
-

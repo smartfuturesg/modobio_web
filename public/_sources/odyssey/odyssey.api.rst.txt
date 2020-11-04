@@ -9,14 +9,15 @@ API
 
 .. toctree::
 
-   Authorization <odyssey.api.auth>
-   Authorization tokens <odyssey.api.tokens>
-   Staff <odyssey.api.staff>
    Client <odyssey.api.clients>
+   Staff <odyssey.api.staff>
    Doctor <odyssey.api.doctor>
    Physical therapist <odyssey.api.pt>
    Trainer <odyssey.api.trainer>
-   Schemas <odyssey.api.schemas>
+   Remote registration <odyssey.api.remote_clients>
+   Registered facilities <odyssey.api.registeredfacilities>
+   Wearable devices <odyssey.api.wearables>
+   Authorization tokens <odyssey.api.tokens>
    Error messages <odyssey.api.errors>
-   Serializers <odyssey.api.serializers>
-   Utilities <odyssey.api.utils>
+   Postman <odyssey.api.postman>
+   Version <odyssey.api.version>
