@@ -229,6 +229,18 @@ class StaffNotFound(Exception):
 
         self.status_code = 404
 
+class LoginNotAuthorized(Exception):
+    """Used for auth.py if a user does not have certain authorizations
+       for using the ModoBio APIs"""
+    def __init__(self, message = None):
+        Exception.__init__(self)
+        if message:
+            self.message = message
+        else:
+            self.message = 'Not Authorized'
+
+        self.status_code = 401
+
 def bad_request(message):
     return error_response(400, message)
 
@@ -338,6 +350,11 @@ def error_insufficient_inputs(error):
 
 @api.errorhandler(StaffNotFound)
 def error_staff_id_does_not_exist(error):
+    '''Return a custom message and 400 status code'''
+    return error_response(error.status_code, error.message)
+
+@api.errorhandler(LoginNotAuthorized)
+def error_login_not_authorized(error):
     '''Return a custom message and 400 status code'''
     return error_response(error.status_code, error.message)
 

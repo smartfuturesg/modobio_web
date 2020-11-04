@@ -1,6 +1,7 @@
 import os
 import pytest
 from datetime import datetime
+from sqlalchemy import text
 
 from odyssey import create_app, db
 from odyssey.models.client import (
@@ -74,7 +75,7 @@ def init_database():
 
         dat = [x for x in data if not x.startswith('--')]
     
-        db.session.execute(''.join(dat))
+        db.session.execute(text(''.join(dat)))
 
     # Insert test client data
     client_1 = User(**test_new_client_creation)

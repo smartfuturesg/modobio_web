@@ -24,6 +24,7 @@ from flask_restx import Api
 #
 # https://swagger.io/docs/specification/authentication/bearer-authentication/
 # https://swagger.io/docs/specification/2-0/authentication/api-keys/
+
 authorizations = {
     'apikey': {
         'type': 'apiKey',

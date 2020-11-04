@@ -24,7 +24,7 @@ import os
 import sys
 
 import boto3
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 
 
 parser = argparse.ArgumentParser(description='')
@@ -61,19 +61,18 @@ if __name__ == "__main__":
     #  read each file, remove comments,
     #  execute raw sql on database
     raw_sql_cleaned = []
-    for sql_script in sql_files:
-        script_name = sql_script[len(current_dir)::]
-        with open (sql_script, "r") as f:
-            raw_sql = f.readlines()
-            _raw_sql = [x for x in raw_sql if not x.startswith('--')]
-            raw_sql_cleaned.append((script_name, ''.join(_raw_sql)))
-    
     with engine.connect() as conn:
-        for script, query in raw_sql_cleaned:
-            try:
-                conn.execute(query)
-                print(f"{script} succeeded")
-            except Exception as e:
-                print(e)
-                print(f"\n{script} failed for the reasons above")
-                sys.exit()
+        for sql_script in sql_files:
+            script_name = sql_script[len(current_dir)::]
+            with open(sql_script, "r") as f:
+                raw_sql = f.readlines()
+                _raw_sql = [x for x in raw_sql if not x.startswith('--')]
+                try:
+                    conn.execute(text(''.join(_raw_sql)))
+                    print(f"{script_name} succeeded")
+                except Exception as e:
+                    print(e)
+                    print(f"\n{script_name} failed for the reasons above")
+                    #sys.exit()
+                
+   

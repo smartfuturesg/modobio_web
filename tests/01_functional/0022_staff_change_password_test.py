@@ -7,6 +7,7 @@ from requests.auth import _basic_auth_str
 
 from odyssey.models.user import User, UserLogin
 from tests.data import test_user_passwords
+from werkzeug.security import check_password_hash
 
 def test_password_update(test_client, init_database):
     """

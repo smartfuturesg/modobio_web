@@ -40,6 +40,7 @@ from odyssey.models.trainer import (
 )
 from odyssey.models.wearables import Wearables, WearablesOura, WearablesFreeStyle
 from odyssey.utils.misc import list_average
+from odyssey.constants import STAFF_ROLES
 
 class ClientSearchItemsSchema(Schema):
     user_id = fields.Integer()
@@ -1173,7 +1174,7 @@ class BloodTestsByTestID(Schema):
     testid = fields.Integer()
     results = fields.Nested(MedicalBloodTestResultsSchema(many=True))
     notes = fields.String()
-    panel = fields.String()
+    panel_type = fields.String()
     date = fields.Date(format="iso")
 
 class MedicalBloodTestResultsOutputSchema(Schema):
@@ -1306,6 +1307,7 @@ class StaffProfileSchema(ma.SQLAlchemyAutoSchema):
 
     idx = fields.Integer()
     user_id = fields.Integer()
+    possible_roles = STAFF_ROLES
 
     @post_load
     def make_object(self, data, **kwargs):

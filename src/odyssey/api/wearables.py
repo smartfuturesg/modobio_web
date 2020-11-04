@@ -9,7 +9,7 @@ from requests_oauthlib import OAuth2Session
 from sqlalchemy.sql import text
 
 from odyssey.api import api
-from odyssey.api.auth import token_auth
+from odyssey.utils.auth import token_auth
 from odyssey.api.errors import (
     ClientDeniedAccess,
     ContentNotFound,
