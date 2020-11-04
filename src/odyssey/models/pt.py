@@ -446,7 +446,7 @@ class MobilityAssessment(db.Model):
     :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
     """
 
-    timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME, nullable=False)
     """
     Timestamp of the assessment.
 
