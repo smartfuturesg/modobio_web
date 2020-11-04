@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>odyssey.pdf &mdash; Odyssey 0.1.1.dev151+gc03d6f9 documentation</title>
+  <title>odyssey.pdf &mdash; Odyssey version: 0.1.66 documentation</title>
   
 
   
@@ -30,14 +30,15 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="odyssey.utils" href="odyssey.utils.html" />
-    <link rel="prev" title="odyssey.constants module" href="odyssey.constants.html" /> 
+    <link rel="next" title="odyssey.utils.misc" href="odyssey.utils.misc.html" />
+    <link rel="prev" title="odyssey.utils.email" href="odyssey.utils.email.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -61,7 +62,7 @@
             
             
               <div class="version">
-                0.1.1.dev151+gc03d6f9
+                version: 0.1.66
               </div>
             
           
@@ -87,13 +88,15 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../toc_flask.html">Flask app</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../toc_api.html">API server</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../toc_rest.html">Support</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="odyssey.config.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.config.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.api.html">Endpoints</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="odyssey.utils.html">Utilities</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="odyssey.utils.schemas.html">Schemas</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.constants.html">Constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.utils.email.html">Email</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">PDF generation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey.utils.html">Utility functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.utils.misc.html">Other</a></li>
 </ul>
 </li>
 </ul>
@@ -142,7 +145,7 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-          <li><a href="../toc_rest.html">Support</a> &raquo;</li>
+          <li><a href="odyssey.utils.html">Utilities</a> &raquo;</li>
         
       <li>odyssey.pdf</li>
     
@@ -168,17 +171,17 @@
 <p>This module handles the generation and storage of PDF files for signed documents.</p>
 <dl class="py function">
 <dt id="odyssey.pdf.to_pdf">
-<code class="sig-prename descclassname">odyssey.pdf.</code><code class="sig-name descname">to_pdf</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span></em>, <em class="sig-param"><span class="n">doctype</span><span class="p">:</span> <span class="n"><a class="reference internal" href="odyssey.constants.html#odyssey.constants.DOCTYPE" title="odyssey.constants.DOCTYPE">odyssey.constants.DOCTYPE</a></span></em>, <em class="sig-param"><span class="n">template</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">form</span><span class="p">:</span> <span class="n">flask_wtf.form.FlaskForm</span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.pdf.to_pdf" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">odyssey.pdf.</code><code class="sig-name descname">to_pdf</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></span></em>, <em class="sig-param"><span class="n">table</span><span class="p">:</span> <span class="n">Type<span class="p">[</span>sqlalchemy.ext.declarative.api.Model<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">template</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">form</span><span class="p">:</span> <span class="n">flask_wtf.form.FlaskForm</span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.pdf.to_pdf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate and store a PDF file from a signed document.</p>
 <p>PDF generation and storage is done in a separate thread in a ‘fire-and-forget’
 style, so that this process is non-blocking.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>clientid</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Client ID number.</p></li>
-<li><p><strong>doctype</strong> (<a class="reference internal" href="odyssey.constants.html#odyssey.constants.DOCTYPE" title="odyssey.constants.DOCTYPE"><code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.constants.DOCTYPE</span></code></a>) – The type of document that is being processed. Must be a member of
-<a class="reference internal" href="odyssey.constants.html#odyssey.constants.DOCTYPE" title="odyssey.constants.DOCTYPE"><code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.constants.DOCTYPE</span></code></a>, e.g. <code class="docutils literal notranslate"><span class="pre">DOCTYPE.consent</span></code>.</p></li>
-<li><p><strong>template</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Filename of the Flask template for which a PDF file is requested.
+<li><p><strong>clientid</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Client ID number.</p></li>
+<li><p><strong>table</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">flask_sqlalchemy.SQLAlchemy.Model</span></code>) – Table that stores information for the document about to be PDFed. Must be
+one of the models in <a class="reference internal" href="odyssey.models.client.html#module-odyssey.models.client" title="odyssey.models.client"><code class="xref py py-mod docutils literal notranslate"><span class="pre">odyssey.models.client</span></code></a>.</p></li>
+<li><p><strong>template</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Filename of the Flask template for which a PDF file is requested.
 If template=None, it is assumed that the HTML comes from the React frontend.
 This is not yet supported.</p></li>
 <li><p><strong>form</strong> (<a class="reference external" href="https://flask.palletsprojects.com/en/1.1.x/api/#flask.Request.form" title="(in Flask v1.1.x)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">flask.Request.form</span></code></a>) – Form data needed to fill out the forms in the given template.
@@ -186,7 +189,23 @@ If template is not None, form <strong>must</strong> also be given and can not be
 </ul>
 </dd>
 <dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.8)"><strong>ValueError</strong></a> – Raised when <code class="xref py py-attr docutils literal notranslate"><span class="pre">clientid</span></code> does not exist in a database table.</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.9)"><strong>ValueError</strong></a> – Raised when <code class="xref py py-attr docutils literal notranslate"><span class="pre">clientid</span></code> does not exist in a database table.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="odyssey.pdf.merge_pdfs">
+<code class="sig-prename descclassname">odyssey.pdf.</code><code class="sig-name descname">merge_pdfs</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">documents</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a></span></em>, <em class="sig-param"><span class="n">clientid</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><a class="headerlink" href="#odyssey.pdf.merge_pdfs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merge multiple pdf files into a single pdf.</p>
+<p>Generated document is stored in an S3 bucket with a temp prefix. It expires
+after 1 day. The link to the generated document expires after 10 minutes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>documents</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>)</em>) – List of links where PDF documents are stored.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><em>str</em> – Link to merged PDF file.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -201,10 +220,10 @@ If template is not None, form <strong>must</strong> also be given and can not be
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="odyssey.utils.html" class="btn btn-neutral float-right" title="odyssey.utils" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="odyssey.utils.misc.html" class="btn btn-neutral float-right" title="odyssey.utils.misc" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="odyssey.constants.html" class="btn btn-neutral float-left" title="odyssey.constants module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="odyssey.utils.email.html" class="btn btn-neutral float-left" title="odyssey.utils.email" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

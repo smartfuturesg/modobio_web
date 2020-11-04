@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>odyssey.constants module &mdash; Odyssey 0.1.1.dev151+gc03d6f9 documentation</title>
+  <title>odyssey.constants &mdash; Odyssey version: 0.1.66 documentation</title>
   
 
   
@@ -30,14 +30,15 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="odyssey.pdf" href="odyssey.pdf.html" />
-    <link rel="prev" title="odyssey.config" href="odyssey.config.html" /> 
+    <link rel="next" title="odyssey.utils.email" href="odyssey.utils.email.html" />
+    <link rel="prev" title="odyssey.utils.schemas" href="odyssey.utils.schemas.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -61,7 +62,7 @@
             
             
               <div class="version">
-                0.1.1.dev151+gc03d6f9
+                version: 0.1.66
               </div>
             
           
@@ -87,13 +88,15 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../toc_flask.html">Flask app</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../toc_api.html">API server</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../toc_rest.html">Support</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="odyssey.config.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.config.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.api.html">Endpoints</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="odyssey.utils.html">Utilities</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="odyssey.utils.schemas.html">Schemas</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.utils.email.html">Email</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.pdf.html">PDF generation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey.utils.html">Utility functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.utils.misc.html">Other</a></li>
 </ul>
 </li>
 </ul>
@@ -142,9 +145,9 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-          <li><a href="../toc_rest.html">Support</a> &raquo;</li>
+          <li><a href="odyssey.utils.html">Utilities</a> &raquo;</li>
         
-      <li>odyssey.constants module</li>
+      <li>odyssey.constants</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -164,7 +167,7 @@
            <div itemprop="articleBody">
             
   <div class="section" id="module-odyssey.constants">
-<span id="odyssey-constants-module"></span><h1>odyssey.constants module<a class="headerlink" href="#module-odyssey.constants" title="Permalink to this headline">¶</a></h1>
+<span id="odyssey-constants"></span><h1>odyssey.constants<a class="headerlink" href="#module-odyssey.constants" title="Permalink to this headline">¶</a></h1>
 <p>Various constants used throughout the Odyssey package.</p>
 <dl class="py data">
 <dt id="odyssey.constants.COUNTRIES">
@@ -172,7 +175,7 @@
 <dd><p>Names of countries and their 2-letter codes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.9)">tuple</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.9)">tuple</a>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -183,7 +186,7 @@
 <dd><p>Names of US states and their 2-letter codes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.9)">tuple</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.9)">tuple</a>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -194,7 +197,7 @@
 <dd><p>Genders and a 1-letter abbreviation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.9)">tuple</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.9)">tuple</a>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -205,7 +208,7 @@
 <dd><p>Available methods to contact a client.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.9)">tuple</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.9)">tuple</a>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -215,14 +218,14 @@
 <code class="sig-prename descclassname">odyssey.constants.</code><code class="sig-name descname">YESNO</code><a class="headerlink" href="#odyssey.constants.YESNO" title="Permalink to this definition">¶</a></dt>
 <dd><p>Boolean options of ‘Yes’ or ‘No’.</p>
 <p>This can be used to link a <a class="reference external" href="https://wtforms.readthedocs.io/en/2.3.x/fields/#wtforms.fields.RadioField" title="(in WTForms v2.3.x)"><code class="xref py py-class docutils literal notranslate"><span class="pre">wtforms.fields.RadioField</span></code></a> form field
-to a <a class="reference external" href="https://docs.sqlalchemy.org/en/13/core/type_basics.html#sqlalchemy.types.Boolean" title="(in SQLAlchemy v1.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.types.Boolean</span></code></a> database column. Use in conjunction
+to a <a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/type_basics.html#sqlalchemy.types.Boolean" title="(in SQLAlchemy v1.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.types.Boolean</span></code></a> database column. Use in conjunction
 with <a class="reference internal" href="#odyssey.constants.BOOLIFY" title="odyssey.constants.BOOLIFY"><code class="xref py py-const docutils literal notranslate"><span class="pre">BOOLIFY</span></code></a>.:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">name</span> <span class="o">=</span> <span class="n">RadioField</span><span class="p">(</span><span class="s1">&#39;label&#39;</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="n">YESNO</span><span class="p">,</span> <span class="n">coerce</span><span class="o">=</span><span class="n">BOOLIFY</span><span class="p">)</span>
 </pre></div>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.9)">tuple</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.9)">tuple</a>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -231,10 +234,10 @@ with <a class="reference internal" href="#odyssey.constants.BOOLIFY" title="odys
 <dt id="odyssey.constants.BOOLIFY">
 <code class="sig-prename descclassname">odyssey.constants.</code><code class="sig-name descname">BOOLIFY</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.constants.BOOLIFY" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert a number into a boolean.</p>
-<p>A POST request always returns a string. A <a class="reference external" href="https://docs.sqlalchemy.org/en/13/core/type_basics.html#sqlalchemy.types.Boolean" title="(in SQLAlchemy v1.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.types.Boolean</span></code></a>
+<p>A POST request always returns a string. A <a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/type_basics.html#sqlalchemy.types.Boolean" title="(in SQLAlchemy v1.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.types.Boolean</span></code></a>
 database column expects a Python <code class="xref py py-attr docutils literal notranslate"><span class="pre">True</span></code> or <code class="xref py py-attr docutils literal notranslate"><span class="pre">False</span></code> value. Use
 <a class="reference internal" href="#odyssey.constants.BOOLIFY" title="odyssey.constants.BOOLIFY"><code class="xref py py-func docutils literal notranslate"><span class="pre">BOOLIFY()</span></code></a> to convert the returned string value ‘0’ or ‘1’ into
-<code class="xref py py-attr docutils literal notranslate"><span class="pre">False</span></code> or <code class="xref py py-attr docutils literal notranslate"><span class="pre">True</span></code>, respectively. Use in conjuction with
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">False</span></code> or <code class="xref py py-attr docutils literal notranslate"><span class="pre">True</span></code>, respectively. Use in conjunction with
 <a class="reference internal" href="#odyssey.constants.YESNO" title="odyssey.constants.YESNO"><code class="xref py py-const docutils literal notranslate"><span class="pre">YESNO</span></code></a>.:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">name</span> <span class="o">=</span> <span class="n">RadioField</span><span class="p">(</span><span class="s1">&#39;label&#39;</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="n">YESNO</span><span class="p">,</span> <span class="n">coerce</span><span class="o">=</span><span class="n">BOOLIFY</span><span class="p">)</span>
 </pre></div>
@@ -242,74 +245,6 @@ database column expects a Python <code class="xref py py-attr docutils literal n
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>function</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py class">
-<dt id="odyssey.constants.DOCTYPE">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.constants.</code><code class="sig-name descname">DOCTYPE</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.constants.DOCTYPE" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">enum.Enum</span></code></a></p>
-<p>Enumeration defining the different types of signable documents.</p>
-<dl class="py attribute">
-<dt id="odyssey.constants.DOCTYPE.policies">
-<code class="sig-name descname">policies</code><em class="property"> = 1</em><a class="headerlink" href="#odyssey.constants.DOCTYPE.policies" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.constants.DOCTYPE.release">
-<code class="sig-name descname">release</code><em class="property"> = 2</em><a class="headerlink" href="#odyssey.constants.DOCTYPE.release" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.constants.DOCTYPE.consent">
-<code class="sig-name descname">consent</code><em class="property"> = 3</em><a class="headerlink" href="#odyssey.constants.DOCTYPE.consent" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.constants.DOCTYPE.consult">
-<code class="sig-name descname">consult</code><em class="property"> = 4</em><a class="headerlink" href="#odyssey.constants.DOCTYPE.consult" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.constants.DOCTYPE.subscription">
-<code class="sig-name descname">subscription</code><em class="property"> = 5</em><a class="headerlink" href="#odyssey.constants.DOCTYPE.subscription" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.constants.DOCTYPE.individual">
-<code class="sig-name descname">individual</code><em class="property"> = 6</em><a class="headerlink" href="#odyssey.constants.DOCTYPE.individual" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py data">
-<dt id="odyssey.constants.DOCTYPE_TABLE_MAP">
-<code class="sig-prename descclassname">odyssey.constants.</code><code class="sig-name descname">DOCTYPE_TABLE_MAP</code><a class="headerlink" href="#odyssey.constants.DOCTYPE_TABLE_MAP" title="Permalink to this definition">¶</a></dt>
-<dd><p>Maps signable documents to the database tables.</p>
-<p>The keys of this dict are the members of <a class="reference internal" href="#odyssey.constants.DOCTYPE" title="odyssey.constants.DOCTYPE"><code class="xref py py-class docutils literal notranslate"><span class="pre">DOCTYPE</span></code></a>. The values are
-the SQLAlchemy models defined in <a class="reference internal" href="odyssey.models.intake.html#module-odyssey.models.intake" title="odyssey.models.intake"><code class="xref py py-mod docutils literal notranslate"><span class="pre">odyssey.models.intake</span></code></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py data">
-<dt id="odyssey.constants.DOCTYPE_DOCREV_MAP">
-<code class="sig-prename descclassname">odyssey.constants.</code><code class="sig-name descname">DOCTYPE_DOCREV_MAP</code><a class="headerlink" href="#odyssey.constants.DOCTYPE_DOCREV_MAP" title="Permalink to this definition">¶</a></dt>
-<dd><p>Maps signable documents to the latest document revision.</p>
-<p>The keys of this dict are the members of <a class="reference internal" href="#odyssey.constants.DOCTYPE" title="odyssey.constants.DOCTYPE"><code class="xref py py-class docutils literal notranslate"><span class="pre">DOCTYPE</span></code></a>.</p>
-<p>The revision string is updated whenever the contents of the document change. The
-revision string can be anything, but it typically consists of the ISO formatted
-date (e.g. 20200519).</p>
-<p>This map is the “ground truth” for revision numbers. If one needs to be updated,
-do it here. The revision numbers stored in the database are the revision numbers
-of the latest <em>signed</em> documents.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -324,10 +259,10 @@ of the latest <em>signed</em> documents.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="odyssey.pdf.html" class="btn btn-neutral float-right" title="odyssey.pdf" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="odyssey.utils.email.html" class="btn btn-neutral float-right" title="odyssey.utils.email" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="odyssey.config.html" class="btn btn-neutral float-left" title="odyssey.config" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="odyssey.utils.schemas.html" class="btn btn-neutral float-left" title="odyssey.utils.schemas" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

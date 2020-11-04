@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>odyssey.config &mdash; Odyssey 0.1.1.dev151+gc03d6f9 documentation</title>
+  <title>odyssey.config &mdash; Odyssey version: 0.1.66 documentation</title>
   
 
   
@@ -30,14 +30,15 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="odyssey.constants module" href="odyssey.constants.html" />
-    <link rel="prev" title="Support" href="../toc_rest.html" /> 
+    <link rel="next" title="odyssey.defaults" href="odyssey.defaults.html" />
+    <link rel="prev" title="Odyssey" href="../index.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -61,7 +62,7 @@
             
             
               <div class="version">
-                0.1.1.dev151+gc03d6f9
+                version: 0.1.66
               </div>
             
           
@@ -87,15 +88,13 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../toc_flask.html">Flask app</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../toc_api.html">API server</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../toc_rest.html">Support</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Configuration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey.constants.html">Constants</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey.pdf.html">PDF generation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey.utils.html">Utility functions</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.defaults.html">Defaults</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.api.html">Endpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.utils.html">Utilities</a></li>
 </ul>
 
             
@@ -142,8 +141,6 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-          <li><a href="../toc_rest.html">Support</a> &raquo;</li>
-        
       <li>odyssey.config</li>
     
     
@@ -165,140 +162,106 @@
             
   <div class="section" id="module-odyssey.config">
 <span id="odyssey-config"></span><h1>odyssey.config<a class="headerlink" href="#module-odyssey.config" title="Permalink to this headline">¶</a></h1>
-<p class="rubric">Flask app configuration</p>
-<p>Flask makes use of environmental variables to changes its behaviour. Since we have multiple
-development/testing/production environments, an extra variable is introduced to fine-tune
-the behaviour of the app.</p>
-<p class="rubric">FLASK_ENV</p>
-<p><code class="docutils literal notranslate"><span class="pre">FLASK_ENV</span></code> is a Flask-native variable and has special meaning to Flask. Only two values are
-recognized: <code class="docutils literal notranslate"><span class="pre">production</span></code> and <code class="docutils literal notranslate"><span class="pre">development</span></code>. If <code class="docutils literal notranslate"><span class="pre">FLASK_ENV</span></code> is not set, it defaults to
-<code class="docutils literal notranslate"><span class="pre">production</span></code>. You set <code class="docutils literal notranslate"><span class="pre">FLASK_ENV</span></code> in the environment, but it is stored in <code class="docutils literal notranslate"><span class="pre">app.config</span></code>
-as <code class="docutils literal notranslate"><span class="pre">ENV</span></code>.</p>
-<p>Do not repurpose this variable. Flask may add new functionality in the future that is dependent
-on this variable. Keep this variable as it is and respect its values.</p>
-<p class="rubric">FLASK_DEV and flask_dev</p>
-<p>This is a new variable to indicate which development environment is being used. At the moment,
-there are 5 possible options: <code class="docutils literal notranslate"><span class="pre">local</span></code> for local development, <code class="docutils literal notranslate"><span class="pre">development</span></code> for development
-on the AWS development server, <code class="docutils literal notranslate"><span class="pre">test</span></code> for running unit tests, <code class="docutils literal notranslate"><span class="pre">production</span></code> for the live
-production environment, and <code class="docutils literal notranslate"><span class="pre">mock</span></code> which is identical to production, except that a database
-with mock data is used.</p>
-<p>The main difference between <code class="docutils literal notranslate"><span class="pre">local</span></code> and <code class="docutils literal notranslate"><span class="pre">test</span></code> and the other settings is that development
-on the local computer does not use any AWS parameters or S3 storage. Everything is kept locally.
-For the other settings (<code class="docutils literal notranslate"><span class="pre">development</span></code>, <code class="docutils literal notranslate"><span class="pre">mock</span></code>, and <code class="docutils literal notranslate"><span class="pre">production</span></code>) everything takes place
-on AWS servers and therefore options such as AWS parameter store and S3 storage are available.</p>
-<p>In stead of setting environmental variable <code class="docutils literal notranslate"><span class="pre">FLASK_DEV</span></code>, it is also possible to pass the
-parameter <code class="docutils literal notranslate"><span class="pre">flask_dev</span></code> to app factory <a class="reference internal" href="../index.html#odyssey.create_app" title="odyssey.create_app"><code class="xref py py-func docutils literal notranslate"><span class="pre">odyssey.create_app()</span></code></a>. It has the same meaning
-and accepts the same values as <code class="docutils literal notranslate"><span class="pre">FLASK_DEV</span></code>. If both are set, <code class="docutils literal notranslate"><span class="pre">flask_dev</span></code> takes precedence
-over <code class="docutils literal notranslate"><span class="pre">FLASK_DEV</span></code>.</p>
-<p class="rubric">FLASK_DEV = local</p>
-<p>This is the default if <code class="docutils literal notranslate"><span class="pre">FLASK_ENV</span></code> is <code class="docutils literal notranslate"><span class="pre">development</span></code>. Its intended use is local developement.
-The database used is also on localhost. The following environmental variables can be used to
-further fine-tune the database connection.</p>
-<div class="line-block">
-<div class="line"><code class="docutils literal notranslate"><span class="pre">FLASK_DB_FLAV</span></code>: database type, default: postgres</div>
-<div class="line"><code class="docutils literal notranslate"><span class="pre">FLASK_DB_USER</span></code>: database username, default: empty</div>
-<div class="line"><code class="docutils literal notranslate"><span class="pre">FLASK_DB_PASS</span></code>: database password, default: empty</div>
-<div class="line"><code class="docutils literal notranslate"><span class="pre">FLASK_DB_HOST</span></code>: database hostname, default: localhost</div>
-<div class="line"><code class="docutils literal notranslate"><span class="pre">FLASK_DB_NAME</span></code>: database name, default: modobio</div>
+<div class="section" id="flask-app-configuration">
+<h2>Flask app configuration<a class="headerlink" href="#flask-app-configuration" title="Permalink to this headline">¶</a></h2>
+<p>The configuration of the Odyssey API is defined by two environmental parameters, <code class="docutils literal notranslate"><span class="pre">FLASK_ENV</span></code>
+and <code class="docutils literal notranslate"><span class="pre">FLASK_DEV</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">FLASK_ENV</span></code> is native to Flask and can be set to <code class="docutils literal notranslate"><span class="pre">production</span></code> (the
+default) or <code class="docutils literal notranslate"><span class="pre">development</span></code>. Setting <code class="docutils literal notranslate"><span class="pre">FLASK_ENV=development</span></code> enables debugging
+and automatic reloading of changed code.</p>
+<p><code class="docutils literal notranslate"><span class="pre">FLASK_DEV</span></code> determines the development environment and can be either <code class="docutils literal notranslate"><span class="pre">local</span></code> or
+<code class="docutils literal notranslate"><span class="pre">remote</span></code>. In local development, all storage (database and files) are kept on the localhost.
+Configuration parameters are read from <a class="reference internal" href="odyssey.defaults.html#module-odyssey.defaults" title="odyssey.defaults"><code class="xref py py-mod docutils literal notranslate"><span class="pre">odyssey.defaults</span></code></a>.</p>
+<p>When <code class="docutils literal notranslate"><span class="pre">FLASK_DEV</span></code> is set to <code class="docutils literal notranslate"><span class="pre">remote</span></code>, the default configuration parameters are obtained
+from the AWS Parameter store where possible. The database is a database on a separate machine,
+and files are stored in AWS S3 buckets.</p>
 </div>
-<p>The above variables default to the following connection string: postgres://localhost/modobio</p>
-<p class="rubric">FLASK_DEV = development</p>
-<p>This setting is to be used on the development servers. It uses the AWS parameter store to
-discover database and other settings.</p>
-<p class="rubric">FLASK_DEV = test</p>
-<p>This setting is to be used on local machines for unit testing with pytest. It sets <code class="docutils literal notranslate"><span class="pre">TESTING</span> <span class="pre">=</span> <span class="pre">True</span></code>
-and enables a few testing specific settings. Similar to the <code class="docutils literal notranslate"><span class="pre">local</span></code> setting, the following
-environmental variables can be used to change database settings.</p>
-<div class="line-block">
-<div class="line"><code class="docutils literal notranslate"><span class="pre">FLASK_DB_FLAV</span></code>: database type, default: sqlite</div>
-<div class="line"><code class="docutils literal notranslate"><span class="pre">FLASK_DB_USER</span></code>: database username, default: empty</div>
-<div class="line"><code class="docutils literal notranslate"><span class="pre">FLASK_DB_PASS</span></code>: database password, default: empty</div>
-<div class="line"><code class="docutils literal notranslate"><span class="pre">FLASK_DB_HOST</span></code>: database hostname, default: /</div>
-<div class="line"><code class="docutils literal notranslate"><span class="pre">FLASK_DB_NAME</span></code>: database name, default: &lt;path-to-installation&gt;/app.db</div>
+<div class="section" id="defaults">
+<h2>Defaults<a class="headerlink" href="#defaults" title="Permalink to this headline">¶</a></h2>
+<p>Configuration parameters can be set in one of four ways (in order of precedense):</p>
+<ol class="arabic simple">
+<li><p>Environmental variables</p></li>
+<li><p>AWS Parameter Store, if available</p></li>
+<li><p>Defaults from <a class="reference internal" href="odyssey.defaults.html#module-odyssey.defaults" title="odyssey.defaults"><code class="xref py py-mod docutils literal notranslate"><span class="pre">odyssey.defaults</span></code></a></p></li>
+<li><p>Hard-coded defaults is all else fails</p></li>
+</ol>
+<p>Defaults are set in <a class="reference internal" href="odyssey.defaults.html#module-odyssey.defaults" title="odyssey.defaults"><code class="xref py py-mod docutils literal notranslate"><span class="pre">odyssey.defaults</span></code></a>. These defaults can be overriden by setting an
+environmental variable with the same name. If AWS credentials are available and
+<code class="docutils literal notranslate"><span class="pre">FLASK_ENV=remote</span></code>, default parameters are pulled from the AWS parameter store.</p>
 </div>
-<p>The above variables default to the following connection string: sqlite:///&lt;path&gt;/app.db.
-Set <code class="docutils literal notranslate"><span class="pre">FLASK_DB_NAME</span></code> to “:memory:” to have an in-memory database without need for cleanup.</p>
-<p class="rubric">FLASK_DEV = mock</p>
-<p>This setting is to be used on production server, but serving mock data. It uses the AWS
-parameter store to discover database and other settings.</p>
-<p class="rubric">FLASK_DEV = production</p>
-<p>This is the default if <code class="docutils literal notranslate"><span class="pre">FLASK_ENV</span></code> is <code class="docutils literal notranslate"><span class="pre">production</span></code> or unset. It is to be used on the
-live production server. It uses the AWS parameter store to discover database and other settings.</p>
+<div class="section" id="aws-access">
+<h2>AWS access<a class="headerlink" href="#aws-access" title="Permalink to this headline">¶</a></h2>
+<p>In order for remote development to work, the program must have access to AWS. A client key
+ID and secret key must be provided either in <code class="docutils literal notranslate"><span class="pre">$HOME/.aws/credentials</span></code> or in the environment as
+<code class="docutils literal notranslate"><span class="pre">AWS_ACCESS_KEY_ID</span></code> and <code class="docutils literal notranslate"><span class="pre">AWS_SECRET_ACCESS_KEY</span></code>, respectively. Additionally, a default
+region must be set in <code class="docutils literal notranslate"><span class="pre">$HOME/.aws/config</span></code> or <code class="docutils literal notranslate"><span class="pre">AWS_DEFAULT_REGION</span></code>.</p>
+</div>
+<div class="section" id="special-cases">
+<h2>Special cases<a class="headerlink" href="#special-cases" title="Permalink to this headline">¶</a></h2>
+<p><strong>Testing</strong>: when <code class="docutils literal notranslate"><span class="pre">pytest</span></code> is running the unit tests, the environment is always local
+(i.e. <code class="docutils literal notranslate"><span class="pre">FLASK_DEV=local</span></code> and <code class="docutils literal notranslate"><span class="pre">LOCAL_CONFIG=True</span></code>).</p>
+<p><strong>Production</strong>: when <code class="docutils literal notranslate"><span class="pre">FLASK_ENV=development</span></code>, the environment is always remote
+(i.e. <code class="docutils literal notranslate"><span class="pre">FLASK_DEV=remote</span></code> and  <code class="docutils literal notranslate"><span class="pre">LOCAL_CONFIG=False</span></code>).</p>
 <p class="rubric">Notes</p>
 <ul class="simple">
 <li><p>This file is loaded by the main Flask app using <code class="docutils literal notranslate"><span class="pre">app.config.from_object(Config())</span></code>.</p></li>
 <li><p>Only uppercase attributes defined on the Config instance will be added to app.config.</p></li>
+<li><p>The development environment is accessible in the Flask program as <code class="docutils literal notranslate"><span class="pre">LOCAL_CONFIG</span></code> (bool).</p></li>
+<li><p><strong>Do NOT</strong> use any other logic to determine what state the app is in. All configuration
+logic should take place in config.py.</p></li>
 </ul>
 <dl class="py class">
 <dt id="odyssey.config.Config">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.config.</code><code class="sig-name descname">Config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">flask_dev</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">migrate</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.config.Config" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.config.</code><code class="sig-name descname">Config</code><a class="headerlink" href="#odyssey.config.Config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Main configuration class.</p>
 <p>This class needs to be instantiated before it can be loaded by Flask.
-Load this class from the <a class="reference internal" href="../index.html#odyssey.create_app" title="odyssey.create_app"><code class="xref py py-func docutils literal notranslate"><span class="pre">odyssey.create_app()</span></code></a> app factory:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">create_app</span><span class="p">(</span><span class="n">flask_dev</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="n">__name</span><span class="p">)</span>
-    <span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">from_object</span><span class="p">(</span><span class="n">Config</span><span class="p">(</span><span class="n">flask_dev</span><span class="o">=</span><span class="n">flask_dev</span><span class="p">))</span>
+Load this class in the <a class="reference internal" href="../index.html#odyssey.create_app" title="odyssey.create_app"><code class="xref py py-func docutils literal notranslate"><span class="pre">odyssey.create_app()</span></code></a> app factory using
+<a class="reference external" href="https://flask.palletsprojects.com/en/1.1.x/api/#flask.Config.from_object" title="(in Flask v1.1.x)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">flask.Config.from_object()</span></code></a>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">odyssey.config</span> <span class="kn">import</span> <span class="n">Config</span>
+
+<span class="k">def</span> <span class="nf">create_app</span><span class="p">():</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">from_object</span><span class="p">(</span><span class="n">Config</span><span class="p">())</span>
 </pre></div>
 </div>
-<p>Then create an app instance by either setting the environmental variables,
-or passing in the parameter. On the command line</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ <span class="nb">export</span> <span class="nv">FLASK_ENV</span><span class="o">=</span>development
-$ <span class="nb">export</span> <span class="nv">FLASK_APP</span><span class="o">=</span>odyssey:create_app<span class="o">(</span><span class="s2">&quot;local&quot;</span><span class="o">)</span>
-$ flask run
-</pre></div>
-</div>
-<p>is equivalent to</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ <span class="nb">export</span> <span class="nv">FLASK_ENV</span><span class="o">=</span>development
-$ <span class="nb">export</span> <span class="nv">FLASK_DEV</span><span class="o">=</span><span class="nb">local</span>
-$ <span class="nb">export</span> <span class="nv">FLASK_APP</span><span class="o">=</span>odyssey:create_app
-$ flask run
-</pre></div>
-</div>
+<dl class="py method">
+<dt id="odyssey.config.Config.getvar">
+<code class="sig-name descname">getvar</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">var</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span></em>, <em class="sig-param"><span class="n">param</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span></em>, <em class="sig-param"><span class="n">decrypt</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">default</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="default_value">''</span></em><span class="sig-paren">)</span> &#x2192; Any<a class="headerlink" href="#odyssey.config.Config.getvar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a configuration setting.</p>
+<p>Order of lookup:</p>
+<ol class="arabic simple">
+<li><p>Environmental variables</p></li>
+<li><p>AWS Parameter Store</p></li>
+<li><p>Defaults from <a class="reference internal" href="odyssey.defaults.html#module-odyssey.defaults" title="odyssey.defaults"><code class="xref py py-mod docutils literal notranslate"><span class="pre">odyssey.defaults</span></code></a></p></li>
+<li><p>Given <code class="docutils literal notranslate"><span class="pre">default</span></code> (defaults to ‘’) if all else fails</p></li>
+</ol>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>flask_dev</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The development environment for which the configuration will be loaded.</p></li>
-<li><p><strong>migrate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Indicates whether we are running <cite>flask db …</cite> from <code class="xref py py-mod docutils literal notranslate"><span class="pre">flask_migrate</span></code>.</p></li>
+<li><p><strong>var</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Name of the configuration variable, which has the same name as the
+environmental variable and the variable in <a class="reference internal" href="odyssey.defaults.html#module-odyssey.defaults" title="odyssey.defaults"><code class="xref py py-mod docutils literal notranslate"><span class="pre">odyssey.defaults</span></code></a>.</p></li>
+<li><p><strong>param</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Name of the parameter on the AWS Parameter Store. AWS lookup will
+be skipped if param is None.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.8)"><strong>ValueError</strong></a> – Raised when <code class="docutils literal notranslate"><span class="pre">FLASK_ENV</span></code>, <code class="docutils literal notranslate"><span class="pre">FLASK_DEV</span></code>, or <code class="docutils literal notranslate"><span class="pre">flask_dev</span></code> are set to
-    unsupported values.</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><em>object</em> – Value of the parameter, interpreted as None, True, False, int, or float if
+possible, str otherwise.</p>
 </dd>
 </dl>
-<dl class="py method">
-<dt id="odyssey.config.Config.local_config">
-<code class="sig-name descname">local_config</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.config.Config.local_config" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set the configuration for local development.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="odyssey.config.Config.development_config">
-<code class="sig-name descname">development_config</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.config.Config.development_config" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set the configuration for the development server.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="odyssey.config.Config.test_config">
-<code class="sig-name descname">test_config</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.config.Config.test_config" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set the configuration for running local unittests.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="odyssey.config.Config.production_config">
-<code class="sig-name descname">production_config</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.config.Config.production_config" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set the configuration for the production environment.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="odyssey.config.Config.mock_config">
-<code class="sig-name descname">mock_config</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.config.Config.mock_config" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set the configuration for the production environment, but with mock data.</p>
 </dd></dl>
 
 </dd></dl>
 
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.defaults.html">Defaults</a><ul class="simple">
+</ul>
+</li>
+</ul>
+</div>
 </div>
 
 
@@ -309,10 +272,10 @@ $ flask run
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="odyssey.constants.html" class="btn btn-neutral float-right" title="odyssey.constants module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="odyssey.defaults.html" class="btn btn-neutral float-right" title="odyssey.defaults" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../toc_rest.html" class="btn btn-neutral float-left" title="Support" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="../index.html" class="btn btn-neutral float-left" title="Odyssey" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
