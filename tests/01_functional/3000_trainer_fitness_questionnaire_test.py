@@ -7,7 +7,7 @@ from odyssey.models.staff import Staff
 from tests.data import test_fitness_questionnaire
 
 
-def test_post_strength_assessment(test_client, init_database):
+def test_post_fitness_questionnaire(test_client, init_database):
     """
     GIVEN a api end point for fitness questionnaire
     WHEN the '/trainer/questionnaire/<client id>' resource  is requested (POST)
@@ -24,10 +24,9 @@ def test_post_strength_assessment(test_client, init_database):
                                 headers=headers, 
                                 data=dumps(payload), 
                                 content_type='application/json')
-
     assert response.status_code == 201
 
-def test_get_strength_assessment(test_client, init_database):
+def test_get_fitness_questionnaire(test_client, init_database):
     """
     GIVEN a api end point for retrieving fitness questionnaire
     WHEN the  '/trainer/questionnaire/<client id>' resource  is requested (GET)

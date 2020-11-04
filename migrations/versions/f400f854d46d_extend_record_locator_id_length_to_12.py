@@ -1,7 +1,7 @@
 """extend record_locator_id length to 12
 
 Revision ID: f400f854d46d
-Revises: bbb0027f1deb
+Revises: 625fb2a459b0
 Create Date: 2020-10-08 10:48:56.275275
 
 """

@@ -536,45 +536,33 @@ test_medical_physical = {
 }
 
 test_fitness_questionnaire = {
-  "stress_sources_notes": "many things stress me out",
   "sleep_hours": "6-8",
   "energy_level": 5,
   "libido_level": 2,
   "stress_level": 4,
-  "obstacles_expected": "mostly motivating myself consistently",
-  "confidence_level": 4,
-  "clientid": 0,
-  "physical_goals_other": "",
   "stress_sources": [
     "Family",
     "Finances",
     "Social Obligations"
   ],
-  "trainer_expectation_other": "",
-  "lifestyle_goals_other": "just want to get into a routine",
-  "trainer_expectation": "Expertise",
-  "physical_goals_notes": "I want to be fit",
-  "lifestyle_goals_notes": "doing fine for now",
+  "trainer_expectations": ["Expertise"],
   "current_fitness_level": 6,
   "lifestyle_goals": [
-    "Increased Energy",
-    "Other"
+    "Increased Energy"
   ],
   "physical_goals": [
     "Weight Loss",
     "Increase Strength"
   ],
   "sleep_quality_level": 2,
-  "obstacles_likely": True,
-  "stress_sources_other": "",
   "goal_fitness_level": 9
 }
 
 test_blood_tests = {
     "date": "2020-09-10",
     "results": [
-        {"result_name": "cholesterolTotal","result_value": 150.0},
-        {"result_name": "cholesterolLdl", "result_value": 20.0}
+        {"result_name": "cholesterolSerumTotal","result_value": 150.0},
+        {"result_name": "cholesterolSerumLDL", "result_value": 20.0}
     ],
     "panel_type": "Lipids",
     "notes": "test2"
@@ -595,7 +583,7 @@ test_medical_imaging = {
   'image': (img_file.as_posix() , open(img_file, mode='rb'), 'image/jpg'),
   'image_date': '2020-09-29',
   'image_origin_location': 'testing clinic',
-  'image_type': 'XRay',
+  'image_type': 'X-ray',
   'image_read': 'Check Check'
 }
 

@@ -7,6 +7,7 @@ from requests.auth import _basic_auth_str
 
 from odyssey.models.staff import Staff
 from tests.data import test_user_passwords
+from werkzeug.security import check_password_hash
 
 def test_password_update(test_client, init_database):
     """
@@ -36,7 +37,7 @@ def test_password_update(test_client, init_database):
     staff = Staff.query.filter_by(email=staff.email).first()
 
     assert response.status_code == 200
-    assert staff.check_password(password=test_user_passwords['new_password'])
+    assert check_password_hash(staff.password, test_user_passwords['new_password'])    
 
     ###
     # Update Password with the incorrect current password and a 

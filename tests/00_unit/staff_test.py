@@ -1,6 +1,7 @@
 
 from odyssey.models.staff import Staff
 from tests.data import test_staff_member
+from werkzeug.security import check_password_hash
 
 def test_regular_staff_member(test_client, init_database):
     """
@@ -11,7 +12,7 @@ def test_regular_staff_member(test_client, init_database):
     staff = Staff().query.first()
 
     assert staff.email == 'staff_member@modobio.com'
-    assert staff.check_password(test_staff_member['password'])
+    assert check_password_hash(staff.password, test_staff_member['password'])
     assert type(staff.get_token()) == str 
     assert staff.check_token(staff.token)
     assert staff.get_admin_role() == 'staff_admin'

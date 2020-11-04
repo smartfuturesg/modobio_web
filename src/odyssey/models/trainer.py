@@ -792,10 +792,10 @@ class MoxyAssessment(db.Model):
     :type: int
     """
 
-    starting_thb = db.Column(db.Integer)
+    starting_thb = db.Column(db.Float)
     """
 
-    :type: int
+    :type: float
     """
 
     limiter = db.Column(db.String)
@@ -904,11 +904,11 @@ class MoxyRipTest(db.Model):
     :type: int
     """
 
-    performance_thb_1 = db.Column(db.Integer)
+    performance_thb_1 = db.Column(db.Float)
     """
     performance assessment 1 thb
 
-    :type: int
+    :type: float
     """
 
     performance_average_power_1 = db.Column(db.Integer)
@@ -932,11 +932,11 @@ class MoxyRipTest(db.Model):
     :type: int
     """
 
-    performance_thb_2 = db.Column(db.Integer)
+    performance_thb_2 = db.Column(db.Float)
     """
     performance assessment 2 thb
 
-    :type: int
+    :type: float
     """
 
     performance_average_power_2 = db.Column(db.Integer)
@@ -960,11 +960,11 @@ class MoxyRipTest(db.Model):
     :type: int
     """
 
-    performance_thb_3 = db.Column(db.Integer)
+    performance_thb_3 = db.Column(db.Float)
     """
     performance assessment 3 thb
 
-    :type: int
+    :type: float
     """
 
     performance_average_power_3 = db.Column(db.Integer)
@@ -988,11 +988,11 @@ class MoxyRipTest(db.Model):
     :type: int
     """
 
-    performance_thb_4 = db.Column(db.Integer)
+    performance_thb_4 = db.Column(db.Float)
     """
     performance assessment 4 thb
 
-    :type: int
+    :type: float
     """
 
     performance_average_power_4 = db.Column(db.Integer)
@@ -1016,11 +1016,11 @@ class MoxyRipTest(db.Model):
     :type: int
     """
 
-    recovery_thb_1 = db.Column(db.Integer)
+    recovery_thb_1 = db.Column(db.Float)
     """
     recovery assessment 1 thb
 
-    :type: int
+    :type: float
     """
 
     recovery_average_power_1 = db.Column(db.Integer)
@@ -1044,11 +1044,11 @@ class MoxyRipTest(db.Model):
     :type: int
     """
 
-    recovery_thb_2 = db.Column(db.Integer)
+    recovery_thb_2 = db.Column(db.Float)
     """
     recovery assessment 2 thb
 
-    :type: int
+    :type: float
     """
 
     recovery_average_power_2 = db.Column(db.Integer)
@@ -1072,11 +1072,11 @@ class MoxyRipTest(db.Model):
     :type: int
     """
 
-    recovery_thb_3 = db.Column(db.Integer)
+    recovery_thb_3 = db.Column(db.Float)
     """
     recovery assessment 3 thb
 
-    :type: int
+    :type: float
     """
 
     recovery_average_power_3 = db.Column(db.Integer)
@@ -1100,11 +1100,11 @@ class MoxyRipTest(db.Model):
     :type: int
     """
 
-    recovery_thb_4 = db.Column(db.Integer)
+    recovery_thb_4 = db.Column(db.Float)
     """
     recovery assessment 4 thb
 
-    :type: int
+    :type: float
     """
 
     recovery_average_power_4 = db.Column(db.Integer)
@@ -1128,11 +1128,11 @@ class MoxyRipTest(db.Model):
     :type: int
     """
 
-    thb_tank_size = db.Column(db.Integer)
+    thb_tank_size = db.Column(db.Float)
     """
     tHB tank size
 
-    :type: int
+    :type: float
     """
 
     performance_baseline_smo2 = db.Column(db.Integer)
@@ -1142,9 +1142,9 @@ class MoxyRipTest(db.Model):
     :type: int
     """
 
-    performance_baseline_thb = db.Column(db.Integer)
+    performance_baseline_thb = db.Column(db.Float)
     """
-    performance baseline tHB
+    performance baseline float
 
     :type: int
     """
@@ -1156,11 +1156,11 @@ class MoxyRipTest(db.Model):
     :type: int
     """
 
-    recovery_baseline_thb = db.Column(db.Integer)
+    recovery_baseline_thb = db.Column(db.Float)
     """
     recovery baseline tHB
 
-    :type: int
+    :type: float
     """
 
     avg_watt_kg = db.Column(db.Float)
@@ -1335,20 +1335,6 @@ class FitnessQuestionnaire(db.Model):
     :type: str, default = other
     """
 
-    physical_goals_other = db.Column(db.String, nullable=True)
-    """
-    To elaborate on 'other' choice of physical fitness goal
-    
-    :type: str
-    """
-
-    physical_goals_notes = db.Column(db.String, nullable=True)
-    """
-    Free text field for adding any more detail on the client's physical fitness goals
-
-    :type: str
-    """
-
     current_fitness_level = db.Column(db.Integer, nullable=True)
     """
     Client's current fitness level [1-10]
@@ -1363,32 +1349,18 @@ class FitnessQuestionnaire(db.Model):
     :type: int
     """
 
-    trainer_expectation = db.Column(db.String, nullable=True, server_default="other")
+    # trainer_expectation = db.Column(db.String, nullable=True, server_default="other")
+    # """
+    # Indicates the expectations the client has for their fitness trainer. There may be only one choice. One of the choices is 'other'.
+
+    # :type: str, default = other
+    # """
+
+    trainer_expectations = db.Column(db.ARRAY(db.String), nullable=True, server_default="{'other'}")
     """
-    Indicates the expectations the client has for their fitness trainer. There may be only one choice. One of the choices is 'other'.
+    Indicates the expectations the client has for their fitness trainer. 
 
     :type: str, default = other
-    """
-
-    trainer_expectation_other = db.Column(db.String, nullable=True)
-    """
-    For the client to ellaborate on their choice of 'other' for their trainer expectation
-
-    :type: str
-    """
-
-    obstacles_likely = db.Column(db.Boolean, nullable=True)
-    """
-    Indicates wheather or not the client expects obstacles to their modobio fitness journey
-
-    :type: boolean, default=False
-    """
-
-    obstacles_expected = db.Column(db.String, nullable=True)
-    """
-    For the client to ellaborate on their expected obstacles on their modobio journey
-
-    :type: str
     """
 
     lifestyle_goals = db.Column(db.ARRAY(db.String), nullable=True, server_default="{'other'}")
@@ -1396,20 +1368,6 @@ class FitnessQuestionnaire(db.Model):
     Indicates the lifestyle goals the client has for their fitness journey. There may be only three choices. One of the choices is 'other'.
 
     :type: str, default = other
-    """
-
-    lifestyle_goals_other = db.Column(db.String, nullable=True)
-    """
-    To elaborate on 'other' choice of lifestyle goal
-    
-    :type: str
-    """
-
-    lifestyle_goals_notes = db.Column(db.String, nullable=True)
-    """
-    Free text field for adding any more detail on the client's lifestyle goals
-
-    :type: str
     """
 
     sleep_hours = db.Column(db.String, nullable=True)
@@ -1421,14 +1379,14 @@ class FitnessQuestionnaire(db.Model):
 
     sleep_quality_level = db.Column(db.Integer, nullable=True)
     """
-    Client's current sleep quality level [1-5]
+    Client's current sleep quality level [1-10]
     
     :type: int
     """
 
     stress_level = db.Column(db.Integer, nullable=True)
     """
-    Client's current average stress level [1-5]
+    Client's current average stress level [1-10]
     
     :type: int
     """
@@ -1440,41 +1398,19 @@ class FitnessQuestionnaire(db.Model):
     :type: str, default = other
     """
 
-    stress_sources_other = db.Column(db.String, nullable=True)
-    """
-    To elaborate on 'other' choice of client's stress sources. 
-
-    :type: str
-    """
-
-    stress_sources_notes = db.Column(db.String, nullable=True)
-    """
-    Free text field for adding any more detail on the client's sources of stress. 
-
-    :type: str
-    """
-
     energy_level = db.Column(db.Integer, nullable=True)
     """
-    Client's current average energy level [1-5]
+    Client's current average energy level [1-10]
     
     :type: int
     """
 
     libido_level = db.Column(db.Integer, nullable=True)
     """
-    Client's current average libido level [1-5]
+    Client's current average libido level [1-10]
     
     :type: int
     """
-
-    confidence_level = db.Column(db.Integer, nullable=True)
-    """
-    Client's current confidence level in regards to their ability to achieve their modobio goals [1-5]
-    
-    :type: int
-    """
-
 
 
 
