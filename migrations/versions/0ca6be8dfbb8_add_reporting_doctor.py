@@ -17,14 +17,14 @@ depends_on = None
 
 
 def upgrade():
-    op.add_column('MedicalPhysicalExam', sa.Column('reporterid', sa.Integer(), nullable=True))
-    op.add_column('MedicalImaging', sa.Column('reporterid', sa.Integer(), nullable=True))
-    op.add_column('MedicalBloodTests', sa.Column('reporterid', sa.Integer(), nullable=True))
+    op.add_column('MedicalPhysicalExam', sa.Column('reporter_id', sa.Integer(), nullable=True))
+    op.add_column('MedicalImaging', sa.Column('reporter_id', sa.Integer(), nullable=True))
+    op.add_column('MedicalBloodTests', sa.Column('reporter_id', sa.Integer(), nullable=True))
     # ### end Alembic commands ###
 
 
 def downgrade():
-    op.drop_column('MedicalPhysicalExam', 'reporterid')
-    op.drop_column('MedicalBloodTests', 'reporterid')
-    op.drop_column('MedicalImaging', 'reporterid')
+    op.drop_column('MedicalPhysicalExam', 'reporter_id')
+    op.drop_column('MedicalBloodTests', 'reporter_id')
+    op.drop_column('MedicalImaging', 'reporter_id')
     # ### end Alembic commands ###

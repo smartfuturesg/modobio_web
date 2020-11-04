@@ -69,7 +69,7 @@ class MedImaging(Resource):
                 ).filter(
                     MedicalImaging.clientid == clientid
                 ).filter(
-                    MedicalImaging.reporterid == Staff.staffid
+                    MedicalImaging.reporter_id == Staff.staffid
                 ).all()
         
         # if no tests have been submitted
@@ -125,7 +125,7 @@ class MedImaging(Resource):
         if 'image' not in request.files:
             mi_data = mi_schema.load(request.form)
             mi_data.clientid = clientid
-            mi_data.reporterid = reporter.staffid
+            mi_data.reporter_id = reporter.staffid
             db.session.add(mi_data)
             db.session.commit()
             return 
@@ -138,7 +138,7 @@ class MedImaging(Resource):
         for i, img in enumerate(files.getlist('image')):
             mi_data = mi_schema.load(request.form)
             mi_data.clientid = clientid
-            mi_data.reporterid = reporter.staffid
+            mi_data.reporter_id = reporter.staffid
             date = mi_data.image_date
 
             #Verifying image size is within a safe threashold (MAX = 500 mb)
@@ -192,7 +192,7 @@ class MedBloodTest(Resource):
         results = data['results']
         del data['results']
         data['clientid'] = clientid
-        data['reporterid'] = token_auth.current_user().staffid
+        data['reporter_id'] = token_auth.current_user().staffid
         client_bt = MedicalBloodTestSchema().load(data)
         
         db.session.add(client_bt)
@@ -228,7 +228,7 @@ class MedBloodTest(Resource):
         blood_tests =  db.session.query(
                     MedicalBloodTests, Staff.firstname, Staff.lastname
                 ).filter(
-                    MedicalBloodTests.reporterid == Staff.staffid
+                    MedicalBloodTests.reporter_id == Staff.staffid
                 ).filter(
                     MedicalBloodTests.clientid == clientid
                 ).all()
@@ -276,7 +276,7 @@ class MedBloodTestResults(Resource):
                 ).filter(
                     MedicalBloodTests.testid==testid
                 ).filter(
-                    MedicalBloodTests.reporterid == Staff.staffid
+                    MedicalBloodTests.reporter_id == Staff.staffid
                 ).all()
         if len(results) == 0:
             raise ContentNotFound()
@@ -286,7 +286,7 @@ class MedBloodTestResults(Resource):
                           'date' : results[0][0].date,
                           'notes' : results[0][0].notes,
                           'panel_type' : results[0][0].panel_type,
-                          'reporterid': results[0][0].reporterid,
+                          'reporter_id': results[0][0].reporter_id,
                           'reporter_firstname': results[0][3].firstname,
                           'reporter_lastname': results[0][3].lastname,
                           'results': []} 
@@ -326,11 +326,11 @@ class AllMedBloodTestResults(Resource):
                         ).filter(
                             MedicalBloodTests.clientid==clientid
                         ).filter(
-                            MedicalBloodTests.reporterid == Staff.staffid
+                            MedicalBloodTests.reporter_id == Staff.staffid
                         ).all()
 
-        test_ids = set([(x[0].testid, x[0].reporterid, x[3].firstname, x[3].lastname) for x in results])
-        nested_results = [{'testid': x[0], 'reporterid': x[1], 'reporter_firstname': x[2], 'reporter_lastname': x[3], 'results': []} for x in test_ids ]
+        test_ids = set([(x[0].testid, x[0].reporter_id, x[3].firstname, x[3].lastname) for x in results])
+        nested_results = [{'testid': x[0], 'reporter_id': x[1], 'reporter_firstname': x[2], 'reporter_lastname': x[3], 'results': []} for x in test_ids ]
         
         # loop through results in order to nest results in their respective test
         # entry instances (testid)
@@ -447,7 +447,7 @@ class MedPhysical(Resource):
                 ).filter(
                     MedicalPhysicalExam.clientid == clientid
                 ).filter(
-                    MedicalPhysicalExam.reporterid == Staff.staffid
+                    MedicalPhysicalExam.reporter_id == Staff.staffid
                 ).all()
 
         if not query:
@@ -476,7 +476,7 @@ class MedPhysical(Resource):
         # look up the reporting staff member and add their id to the 
         # client's physical entry
         reporter = token_auth.current_user()
-        client_mp.reporterid = reporter.staffid
+        client_mp.reporter_id = reporter.staffid
 
         # prepare api response with reporter name
         response = client_mp.__dict__.copy()
