@@ -43,9 +43,10 @@ class MedicalImaging(db.Model):
     """
 
     reporter_id = db.Column(db.Integer, nullable=False)
-    #TODO: convert this to refer back to userid as a foreign key
+    # TODO: convert this to refer back to userid as a foreign key
     """
-    Staff id of the reporting staff member. Should be a staff with the role of 'doc' or 'docext'. 
+    Staff ID number of the reporting staff member. Should be a staff member
+    with the role of 'doc' or 'docext'.
 
     :type: int
     """
@@ -270,9 +271,10 @@ class MedicalPhysicalExam(db.Model):
     """
 
     reporter_id = db.Column(db.Integer, nullable=False)
-    #TODO: convert this to refer back to userid as a foreign key
+    # TODO: convert this to refer back to userid as a foreign key
     """
-    Staff id of the reporting staff member. Should be a staff with the role of 'doc' or 'docext'. 
+    Staff ID number of the reporting staff member. Should be a staff member
+    with the role of 'doc' or 'docext'.
 
     :type: int
     """
@@ -522,9 +524,10 @@ class MedicalBloodTests(db.Model):
     """
 
     reporter_id = db.Column(db.Integer, nullable=False)
-    #TODO: convert this to refer back to userid as a foreign key
+    # TODO: convert this to refer back to userid as a foreign key
     """
-    Staff id of the reporting staff member. Should be a staff with the role of 'doc' or 'docext'. 
+    Staff ID number of the reporting staff member. Should be a staff member
+    with the role of 'doc' or 'docext'.
 
     :type: int
     """

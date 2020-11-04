@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>odyssey.api.errors &mdash; Odyssey version: 0.1.64 documentation</title>
+  <title>odyssey.api.errors &mdash; Odyssey version: 0.1.66 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                version: 0.1.64
+                version: 0.1.66
               </div>
             
           
@@ -314,6 +314,14 @@ message – explanation of the error</p>
 <p>in the case a non-existent staff member is being requested</p>
 </dd></dl>
 
+<dl class="py exception">
+<dt id="odyssey.api.errors.LoginNotAuthorized">
+<em class="property">exception </em><code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">LoginNotAuthorized</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">message</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.LoginNotAuthorized" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>Used for auth.py if a user does not have certain authorizations
+for using the ModoBio APIs</p>
+</dd></dl>
+
 <dl class="py function">
 <dt id="odyssey.api.errors.bad_request">
 <code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">bad_request</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">message</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.bad_request" title="Permalink to this definition">¶</a></dt>
@@ -423,6 +431,12 @@ message – explanation of the error</p>
 <dl class="py function">
 <dt id="odyssey.api.errors.error_staff_id_does_not_exist">
 <code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">error_staff_id_does_not_exist</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">error</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.error_staff_id_does_not_exist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a custom message and 400 status code</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="odyssey.api.errors.error_login_not_authorized">
+<code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">error_login_not_authorized</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">error</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.error_login_not_authorized" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a custom message and 400 status code</p>
 </dd></dl>
 

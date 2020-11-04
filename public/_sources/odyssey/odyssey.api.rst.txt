@@ -14,14 +14,9 @@ API
    Doctor <odyssey.api.doctor>
    Physical therapist <odyssey.api.pt>
    Trainer <odyssey.api.trainer>
-
    Remote registration <odyssey.api.remote_clients>
-
    Registered facilities <odyssey.api.registeredfacilities>
-
    Wearable devices <odyssey.api.wearables>
-
-   Authorization <odyssey.api.auth>
    Authorization tokens <odyssey.api.tokens>
    Error messages <odyssey.api.errors>
    Postman <odyssey.api.postman>

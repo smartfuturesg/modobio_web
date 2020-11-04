@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Index &mdash; Odyssey version: 0.1.64 documentation</title>
+  <title>Index &mdash; Odyssey version: 0.1.66 documentation</title>
   
 
   
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                version: 0.1.64
+                version: 0.1.66
               </div>
             
           
@@ -211,6 +211,8 @@
 </li>
       <li><a href="odyssey/odyssey.models.client.html#odyssey.models.client.ClientInfo.address">address (odyssey.models.client.ClientInfo attribute)</a>
 </li>
+      <li><a href="odyssey/odyssey.utils.auth.html#odyssey.utils.auth.BasicAuth.admin_check">admin_check() (odyssey.utils.auth.BasicAuth method)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="odyssey/odyssey.models.client.html#odyssey.models.client.ClientInfo.all_clients_dict">all_clients_dict() (odyssey.models.client.ClientInfo static method)</a>
@@ -227,6 +229,12 @@
 </li>
       <li><a href="odyssey/odyssey.api.doctor.html#odyssey.api.doctor.AllMedInstitutes">AllMedInstitutes (class in odyssey.api.doctor)</a>
 </li>
+      <li><a href="odyssey/odyssey.utils.auth.html#odyssey.utils.auth.BasicAuth.authenticate">authenticate() (odyssey.utils.auth.BasicAuth method)</a>
+
+      <ul>
+        <li><a href="odyssey/odyssey.utils.auth.html#odyssey.utils.auth.TokenAuth.authenticate">(odyssey.utils.auth.TokenAuth method)</a>
+</li>
+      </ul></li>
       <li><a href="odyssey/odyssey.models.trainer.html#odyssey.models.trainer.HeartAssessment.avg_eval_hr">avg_eval_hr (odyssey.models.trainer.HeartAssessment attribute)</a>
 </li>
       <li><a href="odyssey/odyssey.models.trainer.html#odyssey.models.trainer.MoxyRipTest.avg_interval_time">avg_interval_time (odyssey.models.trainer.MoxyRipTest attribute)</a>
@@ -247,7 +255,7 @@
 </li>
       <li><a href="odyssey/odyssey.models.trainer.html#odyssey.models.trainer.LungAssessment.bag_size">bag_size (odyssey.models.trainer.LungAssessment attribute)</a>
 </li>
-      <li><a href="odyssey/odyssey.api.auth.html#odyssey.api.auth.basic_auth_error">basic_auth_error() (in module odyssey.api.auth)</a>
+      <li><a href="odyssey/odyssey.utils.auth.html#odyssey.utils.auth.BasicAuth">BasicAuth (class in odyssey.utils.auth)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -290,11 +298,7 @@
       <li><a href="odyssey/odyssey.utils.misc.html#odyssey.utils.misc.check_facility_existence">check_facility_existence() (in module odyssey.utils.misc)</a>
 </li>
       <li><a href="odyssey/odyssey.models.client.html#odyssey.models.client.RemoteRegistration.check_password">check_password() (odyssey.models.client.RemoteRegistration method)</a>
-
-      <ul>
-        <li><a href="odyssey/odyssey.models.staff.html#odyssey.models.staff.Staff.check_password">(odyssey.models.staff.Staff method)</a>
 </li>
-      </ul></li>
       <li><a href="odyssey/odyssey.models.client.html#odyssey.models.client.RemoteRegistration.check_portal_id">check_portal_id() (odyssey.models.client.RemoteRegistration static method)</a>
 </li>
       <li><a href="odyssey/odyssey.utils.misc.html#odyssey.utils.misc.check_remote_client_portal_validity">check_remote_client_portal_validity() (in module odyssey.utils.misc)</a>
@@ -427,10 +431,10 @@
 </li>
       <li><a href="odyssey/odyssey.models.client.html#odyssey.models.client.ClientPolicies">ClientPolicies (class in odyssey.models.client)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.ClientPoliciesContractSchema">ClientPoliciesContractSchema (class in odyssey.utils.schemas)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.ClientPoliciesContractSchema.Meta">ClientPoliciesContractSchema.Meta (class in odyssey.utils.schemas)</a>
 </li>
       <li><a href="odyssey/odyssey.api.pt.html#odyssey.api.pt.ClientPTHistory">ClientPTHistory (class in odyssey.api.pt)</a>
@@ -595,6 +599,8 @@
         <li><a href="odyssey/odyssey.models.client.html#odyssey.models.client.ClientSubscriptionContract.current_revision">(odyssey.models.client.ClientSubscriptionContract attribute)</a>
 </li>
       </ul></li>
+      <li><a href="odyssey/odyssey.utils.auth.html#odyssey.utils.auth.BasicAuth.current_user">current_user() (odyssey.utils.auth.BasicAuth method)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -837,6 +843,8 @@
 </li>
       <li><a href="odyssey/odyssey.api.errors.html#odyssey.api.errors.error_insufficient_inputs">error_insufficient_inputs() (in module odyssey.api.errors)</a>
 </li>
+      <li><a href="odyssey/odyssey.api.errors.html#odyssey.api.errors.error_login_not_authorized">error_login_not_authorized() (in module odyssey.api.errors)</a>
+</li>
       <li><a href="odyssey/odyssey.api.errors.html#odyssey.api.errors.error_method_not_allowed">error_method_not_allowed() (in module odyssey.api.errors)</a>
 </li>
       <li><a href="odyssey/odyssey.api.errors.html#odyssey.api.errors.error_relation_already_exists">error_relation_already_exists() (in module odyssey.api.errors)</a>
@@ -871,6 +879,8 @@
         <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.MedicalBloodTestTypes.Meta.exclude">(odyssey.utils.schemas.MedicalBloodTestTypes.Meta attribute)</a>
 </li>
         <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.MedicalImagingSchema.Meta.exclude">(odyssey.utils.schemas.MedicalImagingSchema.Meta attribute)</a>
+</li>
+        <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.MedicalPhysicalExamSchema.Meta.exclude">(odyssey.utils.schemas.MedicalPhysicalExamSchema.Meta attribute)</a>
 </li>
         <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.WearablesFreeStyleSchema.Meta.exclude">(odyssey.utils.schemas.WearablesFreeStyleSchema.Meta attribute)</a>
 </li>
@@ -1051,6 +1061,12 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="odyssey/odyssey.models.staff.html#odyssey.models.staff.Staff.get_admin_role">get_admin_role() (odyssey.models.staff.Staff method)</a>
 </li>
+      <li><a href="odyssey/odyssey.utils.auth.html#odyssey.utils.auth.BasicAuth.get_auth">get_auth() (odyssey.utils.auth.BasicAuth method)</a>
+
+      <ul>
+        <li><a href="odyssey/odyssey.utils.auth.html#odyssey.utils.auth.TokenAuth.get_auth">(odyssey.utils.auth.TokenAuth method)</a>
+</li>
+      </ul></li>
       <li><a href="odyssey/odyssey.models.client.html#odyssey.models.client.RemoteRegistration.get_temp_registration_endpoint">get_temp_registration_endpoint() (odyssey.models.client.RemoteRegistration method)</a>
 </li>
       <li><a href="odyssey/odyssey.models.client.html#odyssey.models.client.RemoteRegistration.get_token">get_token() (odyssey.models.client.RemoteRegistration method)</a>
@@ -1379,14 +1395,14 @@
         <li><a href="odyssey/odyssey.models.pt.html#odyssey.models.pt.MobilityAssessment.left_shoulder_er">(odyssey.models.pt.MobilityAssessment attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="odyssey/odyssey.models.pt.html#odyssey.models.pt.Chessboard.left_shoulder_extension">left_shoulder_extension (odyssey.models.pt.Chessboard attribute)</a>
 
       <ul>
         <li><a href="odyssey/odyssey.models.pt.html#odyssey.models.pt.MobilityAssessment.left_shoulder_extension">(odyssey.models.pt.MobilityAssessment attribute)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="odyssey/odyssey.models.pt.html#odyssey.models.pt.Chessboard.left_shoulder_flexion">left_shoulder_flexion (odyssey.models.pt.Chessboard attribute)</a>
 
       <ul>
@@ -1431,6 +1447,10 @@
         <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.WearablesSchema.Meta.load_instance">(odyssey.utils.schemas.WearablesSchema.Meta attribute)</a>
 </li>
       </ul></li>
+      <li><a href="odyssey/odyssey.utils.auth.html#odyssey.utils.auth.BasicAuth.login_required">login_required() (odyssey.utils.auth.BasicAuth method)</a>
+</li>
+      <li><a href="odyssey/odyssey.api.errors.html#odyssey.api.errors.LoginNotAuthorized">LoginNotAuthorized</a>
+</li>
       <li><a href="odyssey/odyssey.models.trainer.html#odyssey.models.trainer.PowerAssessment.lower_watts_per_kg">lower_watts_per_kg (odyssey.models.trainer.PowerAssessment attribute)</a>
 </li>
       <li><a href="odyssey/odyssey.models.trainer.html#odyssey.models.trainer.LungAssessment">LungAssessment (class in odyssey.models.trainer)</a>
@@ -1895,8 +1915,6 @@
 </li>
         <li><a href="odyssey/odyssey.api.html#module-odyssey.api">odyssey.api</a>
 </li>
-        <li><a href="odyssey/odyssey.api.auth.html#module-odyssey.api.auth">odyssey.api.auth</a>
-</li>
         <li><a href="odyssey/odyssey.api.clients.html#module-odyssey.api.clients">odyssey.api.clients</a>
 </li>
         <li><a href="odyssey/odyssey.api.doctor.html#module-odyssey.api.doctor">odyssey.api.doctor</a>
@@ -1946,6 +1964,8 @@
         <li><a href="odyssey/odyssey.pdf.html#module-odyssey.pdf">odyssey.pdf</a>
 </li>
         <li><a href="odyssey/odyssey.utils.html#module-odyssey.utils">odyssey.utils</a>
+</li>
+        <li><a href="odyssey/odyssey.utils.auth.html#module-odyssey.utils.auth">odyssey.utils.auth</a>
 </li>
         <li><a href="odyssey/odyssey.utils.email.html#module-odyssey.utils.email">odyssey.utils.email</a>
 </li>
@@ -2034,13 +2054,6 @@
 
       <ul>
         <li><a href="odyssey/odyssey.api.html#module-odyssey.api">module</a>
-</li>
-      </ul></li>
-      <li>
-    odyssey.api.auth
-
-      <ul>
-        <li><a href="odyssey/odyssey.api.auth.html#module-odyssey.api.auth">module</a>
 </li>
       </ul></li>
       <li>
@@ -2216,6 +2229,13 @@
 
       <ul>
         <li><a href="odyssey/odyssey.utils.html#module-odyssey.utils">module</a>
+</li>
+      </ul></li>
+      <li>
+    odyssey.utils.auth
+
+      <ul>
+        <li><a href="odyssey/odyssey.utils.auth.html#module-odyssey.utils.auth">module</a>
 </li>
       </ul></li>
       <li>
@@ -2793,8 +2813,6 @@
 </li>
       <li><a href="odyssey/odyssey.models.client.html#odyssey.models.client.ClientRelease.release_of_other">release_of_other (odyssey.models.client.ClientRelease attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="odyssey/odyssey.models.client.html#odyssey.models.client.ClientRelease.release_purpose">release_purpose (odyssey.models.client.ClientRelease attribute)</a>
 </li>
       <li><a href="odyssey/odyssey.api.clients.html#odyssey.api.clients.ReleaseContract">ReleaseContract (class in odyssey.api.clients)</a>
@@ -2803,6 +2821,8 @@
         <li><a href="odyssey/odyssey.api.remote_clients.html#odyssey.api.remote_clients.ReleaseContract">(class in odyssey.api.remote_clients)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="odyssey/odyssey.api.remote_clients.html#odyssey.api.remote_clients.RemoteClientInfo">RemoteClientInfo (class in odyssey.api.remote_clients)</a>
 </li>
       <li><a href="odyssey/odyssey.models.client.html#odyssey.models.client.RemoteRegistration">RemoteRegistration (class in odyssey.models.client)</a>
@@ -2811,6 +2831,14 @@
 </li>
       <li><a href="odyssey/odyssey.api.clients.html#odyssey.api.clients.RemoveClient">RemoveClient (class in odyssey.api.clients)</a>
 </li>
+      <li><a href="odyssey/odyssey.models.doctor.html#odyssey.models.doctor.MedicalBloodTests.reporter_id">reporter_id (odyssey.models.doctor.MedicalBloodTests attribute)</a>
+
+      <ul>
+        <li><a href="odyssey/odyssey.models.doctor.html#odyssey.models.doctor.MedicalImaging.reporter_id">(odyssey.models.doctor.MedicalImaging attribute)</a>
+</li>
+        <li><a href="odyssey/odyssey.models.doctor.html#odyssey.models.doctor.MedicalPhysicalExam.reporter_id">(odyssey.models.doctor.MedicalPhysicalExam attribute)</a>
+</li>
+      </ul></li>
       <li><a href="odyssey/odyssey.api.staff.html#odyssey.api.staff.ResetPassword">ResetPassword (class in odyssey.api.staff)</a>
 </li>
       <li><a href="odyssey/odyssey.models.trainer.html#odyssey.models.trainer.HeartAssessment.resting_hr">resting_hr (odyssey.models.trainer.HeartAssessment attribute)</a>
@@ -2924,6 +2952,8 @@
 </li>
       </ul></li>
       <li><a href="odyssey/odyssey.models.client.html#odyssey.models.client.ClientInfo.ringsize">ringsize (odyssey.models.client.ClientInfo attribute)</a>
+</li>
+      <li><a href="odyssey/odyssey.utils.auth.html#odyssey.utils.auth.BasicAuth.role_check">role_check() (odyssey.utils.auth.BasicAuth method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -3197,8 +3227,6 @@
         <li><a href="odyssey/odyssey.models.staff.html#odyssey.models.staff.Staff.token">(odyssey.models.staff.Staff attribute)</a>
 </li>
       </ul></li>
-      <li><a href="odyssey/odyssey.api.auth.html#odyssey.api.auth.token_auth_error">token_auth_error() (in module odyssey.api.auth)</a>
-</li>
       <li><a href="odyssey/odyssey.models.client.html#odyssey.models.client.RemoteRegistration.token_expiration">token_expiration (odyssey.models.client.RemoteRegistration attribute)</a>
 
       <ul>
@@ -3206,6 +3234,8 @@
 </li>
       </ul></li>
       <li><a href="odyssey/odyssey.models.wearables.html#odyssey.models.wearables.WearablesOura.token_expires">token_expires (odyssey.models.wearables.WearablesOura attribute)</a>
+</li>
+      <li><a href="odyssey/odyssey.utils.auth.html#odyssey.utils.auth.TokenAuth">TokenAuth (class in odyssey.utils.auth)</a>
 </li>
       <li><a href="odyssey/odyssey.models.trainer.html#odyssey.models.trainer.FitnessQuestionnaire.trainer_expectations">trainer_expectations (odyssey.models.trainer.FitnessQuestionnaire attribute)</a>
 </li>
@@ -3375,6 +3405,8 @@
 </li>
       <li><a href="odyssey/odyssey.models.trainer.html#odyssey.models.trainer.PowerAssessment.upper_watts_per_kg">upper_watts_per_kg (odyssey.models.trainer.PowerAssessment attribute)</a>
 </li>
+      <li><a href="odyssey/odyssey.utils.auth.html#odyssey.utils.auth.BasicAuth.user_check">user_check() (odyssey.utils.auth.BasicAuth method)</a>
+</li>
       <li><a href="odyssey/odyssey.api.errors.html#odyssey.api.errors.UserNotFound">UserNotFound</a>
 </li>
       <li><a href="odyssey/odyssey.constants.html#odyssey.constants.USSTATES">USSTATES (in module odyssey.constants)</a>
@@ -3397,6 +3429,8 @@
 </li>
       <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.FitnessQuestionnaireSchema.validate_physical_goals">validate_physical_goals() (odyssey.utils.schemas.FitnessQuestionnaireSchema method)</a>
 </li>
+      <li><a href="odyssey/odyssey.utils.auth.html#odyssey.utils.auth.BasicAuth.validate_roles">validate_roles() (odyssey.utils.auth.BasicAuth method)</a>
+</li>
       <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.FitnessQuestionnaireSchema.validate_sleep_hours">validate_sleep_hours() (odyssey.utils.schemas.FitnessQuestionnaireSchema method)</a>
 </li>
       <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.FitnessQuestionnaireSchema.validate_stress_sources">validate_stress_sources() (odyssey.utils.schemas.FitnessQuestionnaireSchema method)</a>
@@ -3409,15 +3443,11 @@
         <li><a href="odyssey/odyssey.utils.schemas.html#odyssey.utils.schemas.MoxyRipSchema.validate_vl_side">(odyssey.utils.schemas.MoxyRipSchema method)</a>
 </li>
       </ul></li>
-      <li><a href="odyssey/odyssey.api.auth.html#odyssey.api.auth.verify_password">verify_password() (in module odyssey.api.auth)</a>
-</li>
-      <li><a href="odyssey/odyssey.api.auth.html#odyssey.api.auth.verify_password_client">verify_password_client() (in module odyssey.api.auth)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="odyssey/odyssey.api.auth.html#odyssey.api.auth.verify_token">verify_token() (in module odyssey.api.auth)</a>
+      <li><a href="odyssey/odyssey.utils.auth.html#odyssey.utils.auth.BasicAuth.verify_password">verify_password() (odyssey.utils.auth.BasicAuth method)</a>
 </li>
-      <li><a href="odyssey/odyssey.api.auth.html#odyssey.api.auth.verify_token_client">verify_token_client() (in module odyssey.api.auth)</a>
+      <li><a href="odyssey/odyssey.utils.auth.html#odyssey.utils.auth.TokenAuth.verify_token">verify_token() (odyssey.utils.auth.TokenAuth method)</a>
 </li>
       <li><a href="odyssey/odyssey.api.version.html#odyssey.api.version.VersionEndpoint">VersionEndpoint (class in odyssey.api.version)</a>
 </li>

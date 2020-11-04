@@ -10,6 +10,7 @@ Utilities
 .. toctree::
 
    Schemas <odyssey.utils.schemas>
+   Login <odyssey.utils.auth>
    Constants <odyssey.constants>
    Email <odyssey.utils.email>
    PDF generation <odyssey.pdf>

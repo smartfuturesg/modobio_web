@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>odyssey.models.staff &mdash; Odyssey version: 0.1.64 documentation</title>
+  <title>odyssey.models.staff &mdash; Odyssey version: 0.1.66 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                version: 0.1.64
+                version: 0.1.66
               </div>
             
           
@@ -343,19 +343,6 @@ ability to set/unset the <a class="reference internal" href="#odyssey.models.sta
 </dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.models.staff.Staff.set_password">
-<code class="sig-name descname">set_password</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">password</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.staff.Staff.set_password" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set hashed password in database.</p>
-<p>See <a class="reference external" href="https://werkzeug.palletsprojects.com/en/1.0.x/utils/#werkzeug.security.generate_password_hash" title="(in Werkzeug v1.0.x)"><code class="xref py py-func docutils literal notranslate"><span class="pre">werkzeug.security.generate_password_hash()</span></code></a> for more information on how
-the password is hashed.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>password</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The unhashed password.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt id="odyssey.models.staff.Staff.whoosh_search">
 <em class="property">classmethod </em><code class="sig-name descname">whoosh_search</code><span class="sig-paren">(</span><em class="sig-param">search_string</em>, <em class="sig-param">values_of=''</em>, <em class="sig-param">group=&lt;class 'whoosh.qparser.syntax.OrGroup'&gt;</em>, <em class="sig-param">match_substrings=True</em>, <em class="sig-param">limit=None</em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.staff.Staff.whoosh_search" title="Permalink to this definition">¶</a></dt>
 <dd><p>Searches the fields for given search_string.
@@ -381,18 +368,14 @@ Defaults to <code class="docutils literal notranslate"><span class="pre">None</s
 </dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.models.staff.Staff.check_password">
-<code class="sig-name descname">check_password</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">password</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a><a class="headerlink" href="#odyssey.models.staff.Staff.check_password" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check password.</p>
-<p>Checks whether the given password is identical to the stored password.
-Uses <a class="reference external" href="https://werkzeug.palletsprojects.com/en/1.0.x/utils/#werkzeug.security.check_password_hash" title="(in Werkzeug v1.0.x)"><code class="xref py py-func docutils literal notranslate"><span class="pre">werkzeug.security.check_password_hash()</span></code></a> to perform the check
-against the stored hash of the password.</p>
+<dt id="odyssey.models.staff.Staff.set_password">
+<code class="sig-name descname">set_password</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">password</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.staff.Staff.set_password" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set hashed password in database.</p>
+<p>See <a class="reference external" href="https://werkzeug.palletsprojects.com/en/1.0.x/utils/#werkzeug.security.generate_password_hash" title="(in Werkzeug v1.0.x)"><code class="xref py py-func docutils literal notranslate"><span class="pre">werkzeug.security.generate_password_hash()</span></code></a> for more information on how
+the password is hashed.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>password</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The unhashed password to be checked.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><em>bool</em> – Whether or not the given password is identical to the stored password.</p>
+<dd class="field-odd"><p><strong>password</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The unhashed password.</p>
 </dd>
 </dl>
 </dd></dl>
