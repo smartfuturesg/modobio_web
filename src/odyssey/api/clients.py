@@ -559,6 +559,105 @@ class JourneyStatusCheck(Resource):
 
         return {'outstanding': remaining_forms}
 
+
+
+# @ns.route('/remoteregistration/new/')
+# class NewRemoteRegistration(Resource):
+#     """
+#         initialize a client for remote registration
+#     """
+#     @token_auth.login_required
+#     @accepts(schema=NewRemoteClientSchema, api=ns)
+#     @responds(schema=ClientRemoteRegistrationPortalSchema, api=ns, status_code=201)
+#     def post(self):
+#         """create new remote registration client
+#             this will create a new entry into the client info table first
+#             then create an entry into the Remote registration table
+#             response includes the hash required to access the temporary portal for
+#             this client
+#         """
+#         data = request.get_json()
+
+#         #make sure this user email does not exist
+#         if ClientInfo.query.filter_by(email=data.get('email', None)).first():
+#             raise ClientAlreadyExists(identification = data['email'])
+
+#         # initialize schema objects
+#         rr_schema = NewRemoteClientSchema() #creates entry into clientinfo table
+#         client_rr_schema = ClientRemoteRegistrationPortalSchema() #remote registration table entry
+
+#         # enter client into basic info table and remote register table
+#         client = rr_schema.load(data)
+        
+#         # add client to database (creates clientid)
+#         db.session.add(client)
+#         db.session.flush()
+
+#         rli = {'record_locator_id': ClientInfo().generate_record_locator_id(firstname = client.firstname , lastname = client.lastname, clientid =client.clientid)}
+
+#         client.update(rli)        
+#         db.session.flush()
+
+#         # create a new remote client registration entry
+#         portal_data = {'clientid' : client.clientid, 'email': client.email}
+#         remote_client_portal = client_rr_schema.load(portal_data)
+
+#         db.session.add(remote_client_portal)
+#         db.session.commit()
+
+#         if not current_app.config['LOCAL_CONFIG']:
+#             # send email to client containing registration details
+#             send_email_remote_registration_portal(
+#                 recipient=remote_client_portal.email, 
+#                 password=remote_client_portal.password, 
+#                 remote_registration_portal=remote_client_portal.registration_portal_id
+#             )
+
+#         return remote_client_portal
+
+
+# @ns.route('/remoteregistration/refresh/')
+# class RefreshRemoteRegistration(Resource):
+#     """
+#         refresh client portal a client for remote registration
+#     """
+#     @token_auth.login_required
+#     @accepts(schema=RefreshRemoteRegistrationSchema, api=ns)
+#     @responds(schema=ClientRemoteRegistrationPortalSchema, api=ns, status_code=201)
+#     def post(self):
+#         """refresh the portal endpoint and password
+#         """
+#         data = request.get_json() #should only need the email
+
+#         client = ClientInfo.query.filter_by(email=data.get('email', None)).first()
+
+#         #if client isnt in the database return error
+#         if not client:
+#             raise ClientNotFound(identification = data['email'])
+
+#         client_rr_schema = ClientRemoteRegistrationPortalSchema() #remote registration table entry
+#         #add clientid to the data object from the current client
+#         data['clientid'] =  client.clientid
+
+#         # create a new remote client session registration entry
+#         remote_client_portal = client_rr_schema.load(data)
+
+#         # create temporary password and portal url
+
+#         db.session.add(remote_client_portal)
+#         db.session.commit()
+
+#         if not current_app.config['LOCAL_CONFIG']:
+#             # send email to client containing registration details
+#             send_email_remote_registration_portal(
+#                 recipient=remote_client_portal.email,
+#                 password=remote_client_portal.password, 
+#                 remote_registration_portal=remote_client_portal.registration_portal_id
+#             )
+
+#         return remote_client_portal
+
+
 @ns.route('/testemail/')
 class TestEmail(Resource):
     """

@@ -1131,13 +1131,19 @@ class MedicalImagingSchema(ma.SQLAlchemyAutoSchema):
     image_type = fields.String(validate=validate.OneOf(possible_image_types), required=True)
     image_date = fields.Date(required=True)
     image_read = fields.String(required=True)
-    
+    reporter_firstname = fields.String(description="first name of reporting physician", dump_only=True)
+    reporter_lastname = fields.String(description="last name of reporting physician", dump_only=True)
+    reporter_id = fields.Integer(description="id of reporting physician", missing=None)
+
 class MedicalBloodTestSchema(Schema):
     test_id = fields.Integer()
     user_id = fields.Integer()
     date = fields.Date(required=True)
     panel_type = fields.String(required=False)
     notes = fields.String(required=False)
+    reporter_firstname = fields.String(description="first name of reporting physician", dump_only=True)
+    reporter_lastname = fields.String(description="last name of reporting physician", dump_only=True)
+    reporter_id = fields.Integer(description="id of reporting physician")
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -1176,6 +1182,9 @@ class BloodTestsByTestID(Schema):
     notes = fields.String()
     panel_type = fields.String()
     date = fields.Date(format="iso")
+    reporter_firstname = fields.String(description="first name of reporting physician", dump_only=True)
+    reporter_lastname = fields.String(description="last name of reporting physician", dump_only=True)
+    reporter_id = fields.Integer(description="id of reporting physician", dump_only=True)
 
 class MedicalBloodTestResultsOutputSchema(Schema):
     """
@@ -1228,10 +1237,14 @@ class MedicalHistorySchema(ma.SQLAlchemyAutoSchema):
 class MedicalPhysicalExamSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = MedicalPhysicalExam
+        exclude = ('idx', 'reporter_id')
         
     user_id = fields.Integer(missing=0)
     vital_height = fields.String(description="Deprecated, use vital_height_inches instead", missing="")
-    
+    reporter_firstname = fields.String(description="first name of reporting physician", dump_only=True)
+    reporter_lastname = fields.String(description="last name of reporting physician", dump_only=True)
+    reporter_id = fields.Integer(description="id of reporting physician", dump_only=True)
+
     @post_load
     def make_object(self, data, **kwargs):
         return MedicalPhysicalExam(**data)

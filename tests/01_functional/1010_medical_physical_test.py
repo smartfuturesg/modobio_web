@@ -24,7 +24,6 @@ def test_post_medical_physical(test_client, init_database):
                                 headers=headers, 
                                 data=dumps(payload), 
                                 content_type='application/json')
-    
     assert response.status_code == 201
 
 def test_get_medical_physical(test_client, init_database):

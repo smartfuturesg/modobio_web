@@ -425,7 +425,7 @@ class MobilityAssessment(db.Model):
     :type: int, primary key, autoincrement
     """
 
-    timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME, nullable=False)
     """
     Timestamp of the assessment.
 
