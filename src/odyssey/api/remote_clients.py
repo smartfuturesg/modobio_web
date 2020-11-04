@@ -6,7 +6,7 @@ from flask_accepts import accepts, responds
 from flask_restx import Resource
 
 from odyssey.api import api
-from odyssey.api.auth import token_auth_client
+from odyssey.utils.auth import token_auth
 from odyssey.api.errors import ClientNotFound, ContentNotFound, IllegalSetting, UserNotFound
 from odyssey import db
 from odyssey.pdf import merge_pdfs, to_pdf
@@ -50,7 +50,7 @@ class RemoteClientInfo(Resource):
         For getting and altering client info table as a remote client.
         Requires token authorization in addition to a valid portal id (tmp_registration)
     """
-    @token_auth_client.login_required
+    @token_auth.login_required(user_type=['remoteregistration'])
     @responds(schema=ClientInfoSchema, api=ns)
     def get(self):
         """returns client info table as a json for the clientid specified"""
@@ -63,7 +63,7 @@ class RemoteClientInfo(Resource):
         return client
 
     @accepts(schema=ClientInfoSchema, api=ns)
-    @token_auth_client.login_required
+    @token_auth.login_required(user_type=['remoteregistration'])
     @responds(schema=ClientInfoSchema, api=ns)
     def put(self):
         """edit client info"""
@@ -81,7 +81,7 @@ class RemoteClientInfo(Resource):
 @ns.route('/medicalhistory/')
 @ns.doc(params={'tmp_registration': 'temporary registration portal hash'})
 class MedHistory(Resource):
-    @token_auth_client.login_required
+    @token_auth.login_required(user_type=['remoteregistration'])
     @responds(schema=MedicalHistorySchema, api=ns)
     def get(self):
         """returns client's medical history as a json for the clientid specified. Clientid is found by first pulling up the remoteclient entry"""
@@ -95,7 +95,7 @@ class MedHistory(Resource):
 
         return client_mh
 
-    @token_auth_client.login_required
+    @token_auth.login_required(user_type=['remoteregistration'])
     @accepts(schema=MedicalHistorySchema, api=ns)
     @responds(schema=MedicalHistorySchema, status_code=201, api=ns)
     def post(self):
@@ -120,7 +120,7 @@ class MedHistory(Resource):
 
         return client_mh
 
-    @token_auth_client.login_required
+    @token_auth.login_required(user_type=['remoteregistration'])
     @accepts(schema=MedicalHistorySchema, api=ns)
     @responds(schema=MedicalHistorySchema, api=ns)
     def put(self):
@@ -148,7 +148,7 @@ class MedHistory(Resource):
 @ns.doc(params={'tmp_registration': 'temporary registration portal hash'})
 class ClientPTHistory(Resource):
     """GET, POST, PUT for pt history data"""
-    @token_auth_client.login_required
+    @token_auth.login_required(user_type=['remoteregistration'])
     @responds(schema=PTHistorySchema)
     def get(self):
         """returns most recent mobility assessment data"""
@@ -162,7 +162,7 @@ class ClientPTHistory(Resource):
                 
         return client_pt
 
-    @token_auth_client.login_required
+    @token_auth.login_required(user_type=['remoteregistration'])
     @accepts(schema=PTHistorySchema, api=ns)
     @responds(schema=PTHistorySchema, status_code=201, api=ns)
     def post(self):
@@ -186,7 +186,7 @@ class ClientPTHistory(Resource):
 
         return client_pt
 
-    @token_auth_client.login_required
+    @token_auth.login_required(user_type=['remoteregistration'])
     @accepts(schema=PTHistorySchema, api=ns)
     @responds(schema=PTHistorySchema, api=ns)
     def put(self):
@@ -215,7 +215,7 @@ class ClientPTHistory(Resource):
 class ConsentContract(Resource):
     """client consent forms"""
 
-    @token_auth_client.login_required
+    @token_auth.login_required(user_type=['remoteregistration'])
     @responds(schema=ClientConsentSchema, api=ns)
     def get(self):
         """returns the most recent consent table as a json for the clientid specified"""
@@ -230,7 +230,7 @@ class ConsentContract(Resource):
         return client_consent_form
 
     @accepts(schema=ClientConsentSchema, api=ns)
-    @token_auth_client.login_required
+    @token_auth.login_required(user_type=['remoteregistration'])
     @responds(schema=ClientConsentSchema, status_code=201, api=ns)
     def post(self):
         """ Create client consent contract for the specified clientid """
@@ -256,7 +256,7 @@ class ConsentContract(Resource):
 class ReleaseContract(Resource):
     """Client release forms"""
 
-    @token_auth_client.login_required
+    @token_auth.login_required(user_type=['remoteregistration'])
     @responds(schema=ClientReleaseSchema, api=ns)
     def get(self):
         """returns most recent client release table as a json for the clientid specified"""
@@ -271,7 +271,7 @@ class ReleaseContract(Resource):
         return client_release_form
 
     @accepts(schema=ClientReleaseSchema)
-    @token_auth_client.login_required
+    @token_auth.login_required(user_type=['remoteregistration'])
     @responds(schema=ClientReleaseSchema, status_code=201, api=ns)
     def post(self):
         """create client release contract object for the specified clientid"""
@@ -297,7 +297,7 @@ class ReleaseContract(Resource):
 class PoliciesContract(Resource):
     """Client policies form"""
 
-    @token_auth_client.login_required
+    @token_auth.login_required(user_type=['remoteregistration'])
     @responds(schema=ClientPoliciesContractSchema, api=ns)
     def get(self):
         """returns most recent client policies table as a json for the clientid specified"""
@@ -312,7 +312,7 @@ class PoliciesContract(Resource):
         return client_policies
 
     @accepts(schema=ClientPoliciesContractSchema, api=ns)
-    @token_auth_client.login_required
+    @token_auth.login_required(user_type=['remoteregistration'])
     @responds(schema=ClientPoliciesContractSchema, status_code= 201, api=ns)
     def post(self):
         """create client policies contract object for the specified clientid"""
@@ -339,7 +339,7 @@ class PoliciesContract(Resource):
 class ConsultConstract(Resource):
     """client consult contract"""
 
-    @token_auth_client.login_required
+    @token_auth.login_required(user_type=['remoteregistration'])
     @responds(schema=ClientConsultContractSchema, api=ns)
     def get(self):
         """returns most recent client consultation table as a json for the clientid specified"""
@@ -354,7 +354,7 @@ class ConsultConstract(Resource):
         return client_consult
 
     @accepts(schema=ClientConsultContractSchema, api=ns)
-    @token_auth_client.login_required
+    @token_auth.login_required(user_type=['remoteregistration'])
     @responds(schema=ClientConsultContractSchema, status_code= 201, api=ns)
     def post(self):
         """create client consult contract object for the specified clientid"""
@@ -378,7 +378,7 @@ class ConsultConstract(Resource):
 class SubscriptionContract(Resource):
     """client subscription contract"""
 
-    @token_auth_client.login_required
+    @token_auth.login_required(user_type=['remoteregistration'])
     @responds(schema=ClientSubscriptionContractSchema, api=ns)
     def get(self):
         """returns most recent client subscription contract table as a json for the clientid specified"""
@@ -393,7 +393,7 @@ class SubscriptionContract(Resource):
         return client_subscription
 
     @accepts(schema=ClientSubscriptionContractSchema, api=ns)
-    @token_auth_client.login_required
+    @token_auth.login_required(user_type=['remoteregistration'])
     @responds(schema=ClientSubscriptionContractSchema, status_code= 201, api=ns)
     def post(self):
         """create client subscription contract object for the specified clientid"""
@@ -418,7 +418,7 @@ class SubscriptionContract(Resource):
 class IndividualContract(Resource):
     """client individual services contract"""
 
-    @token_auth_client.login_required
+    @token_auth.login_required(user_type=['remoteregistration'])
     @responds(schema=ClientIndividualContractSchema, api=ns)
     def get(self):
         """returns most recent client individual servies table as a json for the clientid specified"""
@@ -432,7 +432,7 @@ class IndividualContract(Resource):
 
         return  client_services
 
-    @token_auth_client.login_required
+    @token_auth.login_required(user_type=['remoteregistration'])
     @accepts(schema=ClientIndividualContractSchema, api=ns)
     @responds(schema=ClientIndividualContractSchema,status_code=201, api=ns)
     def post(self):
@@ -467,7 +467,7 @@ class SignedDocuments(Resource):
     Returns a list of URLs to the stored the PDF documents.
     The URLs expire after 10 min.
     """
-    @token_auth_client.login_required
+    @token_auth.login_required(user_type=['remoteregistration'])
     @responds(schema=SignedDocumentsSchema, api=ns)
     def get(self):
         """ Given a clientid, returns a dict of URLs for all signed documents.
@@ -529,7 +529,7 @@ class SignedDocuments(Resource):
 @ns.doc(params={'tmp_registration': 'temporary registration portal hash'})
 class InitialQuestionnaire(Resource):    
     """GET and POST initial fitness questionnaire"""
-    @token_auth_client.login_required
+    @token_auth.login_required(user_type=['remoteregistration'])
     @responds(schema=FitnessQuestionnaireSchema, api=ns)
     def get(self):
         """returns client's most recent fitness questionnaire"""
@@ -543,7 +543,7 @@ class InitialQuestionnaire(Resource):
         
         return client_fq
 
-    @token_auth_client.login_required
+    @token_auth.login_required(user_type=['remoteregistration'])
     @accepts(schema=FitnessQuestionnaireSchema, api=ns)
     @responds(schema=FitnessQuestionnaireSchema, status_code=201, api=ns)
     def post(self):

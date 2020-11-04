@@ -141,25 +141,6 @@ class Staff(db.Model):
         """
         self.password = generate_password_hash(password)
 
-    def check_password(self, password: str) -> bool:
-        """ Check password.
-        
-        Checks whether the given password is identical to the stored password.
-        Uses :func:`werkzeug.security.check_password_hash` to perform the check
-        against the stored hash of the password.
-
-        Parameters
-        ----------
-        password : str
-            The unhashed password to be checked.
-
-        Returns
-        -------
-        bool
-            Whether or not the given password is identical to the stored password.
-        """
-        return check_password_hash(self.password, password)
-
     def get_token(self, expires_in: int=360000) -> str:
         """ Get authorization token.
 
