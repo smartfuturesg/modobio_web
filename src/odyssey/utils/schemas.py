@@ -1,7 +1,7 @@
 from datetime import datetime
 from hashlib import md5
 from marshmallow import Schema, fields, post_load, ValidationError, validates, validate
-from marshmallow import post_load, post_dump, pre_dump, pre_load
+from marshmallow import post_load, pre_dump, pre_load
 
 from odyssey import ma
 from odyssey.models.doctor import ( 
@@ -50,6 +50,7 @@ class ClientSearchItemsSchema(Schema):
     phone = fields.String(required=False, validate=validate.Length(min=0,max=50), missing=None)
     dob = fields.Date(required=False, missing=None)
     record_locator_id = fields.String(required=False, validate=validate.Length(min=0,max=10), missing=None)
+    modobio_id = fields.String(required=False, validate=validate.Length(min=0,max=12), missing=None)
 
 class ClientSearchMetaSchema(Schema):
     page = fields.Integer(required=False, missing=0)
@@ -87,10 +88,21 @@ class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
     idx = fields.Integer()
     user_id = fields.Integer()
     record_locator_id = fields.String(missing=None)
+    modobio_id = fields.String(required=False, validate=validate.Length(min=0,max=12), dump_only=True)
+    firstname = fields.String(dump_only=True)
+    lastname = fields.String(dump_only=True)
+    email = fields.Email(dump_only=True)
 
     @post_load
     def make_object(self, data, **kwargs):
         return ClientInfo(**data)
+    @pre_dump
+    def ravel(self, data, **kwargs):
+        # take a dict copy of client_info and add user data 
+        client_info = data[0].__dict__.copy()
+        user_data = data[1].__dict__
+        client_info.update(user_data)
+        return client_info
 
 class NewRemoteClientSchema(Schema):
 
@@ -1353,10 +1365,13 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
 
+    modobio_id = fields.String(missing=None, dump_only=True)
+
     @post_load
     def make_object(self, data, **kwargs):
         new_user = User(**data)
         return new_user
+    
 
 class UserLoginSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

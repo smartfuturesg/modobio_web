@@ -18,7 +18,7 @@ from odyssey import db, whooshee
 phx_tz = pytz.timezone('America/Phoenix')
 
 
-@whooshee.register_model('firstname', 'lastname', 'email', 'phone', 'dob', 'record_locator_id')
+# @whooshee.register_model('firstname', 'lastname', 'email', 'phone', 'dob', 'record_locator_id')
 class ClientInfo(db.Model):
     """ Client information table
 
@@ -182,6 +182,7 @@ class ClientInfo(db.Model):
     
     record_locator_id = db.Column(db.String(12))
     """
+    Deprecated. Use User.modobio_id instead
     Medical decord Locator ID.
 
     See :meth:`generate_record_locator_id`.
@@ -189,35 +190,7 @@ class ClientInfo(db.Model):
     :type: str, max length 12
     """
 
-    @staticmethod
-    def generate_record_locator_id(firstname: str, lastname: str, user_id: int) -> str:
-        """ Generate the medical record identifier.
-
-        The medical record identifier can be exported to other healthcare providers.
-        It is made up of the firstname and lastname initials and 10 random alphanumeric
-        characters.
-
-        Parameters
-        ----------
-        firstname : str
-            Client first name.
-
-        lastname : str
-            Client last name.
-
-        clientid : int
-            Client ID number.
-
-        Returns
-        -------
-        str
-            Medical record ID
-        """
-        random.seed(user_id)
-        rli_hash = "".join([random.choice(ALPHANUMERIC) for i in range(10)])
-        return (firstname[0] + lastname[0] + rli_hash).upper()
-
-    def client_info_search_dict(self) -> dict:
+    def client_info_search_dict(self, user) -> dict:
         """ Searchable client info.
         
         Returns a subset of the data in this row object.

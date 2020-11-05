@@ -78,24 +78,21 @@ def init_database():
         db.session.execute(text(''.join(dat)))
 
     # Insert test client data
+    # 1) Create User instance. modobio_id populated automatically
     client_1 = User(**test_new_client_creation)
     db.session.add(client_1)
     db.session.flush()
+
+    # 2) User login
     client_1_login = UserLogin(**{'user_id': client_1.user_id})
+
+    # 3) Client info
     test_new_client_info['user_id'] = client_1.user_id
     client_1_info = ClientInfo(**test_new_client_info)
     db.session.add(client_1_login)
     db.session.add(client_1_info)
     db.session.flush()
 
-    rli = {'record_locator_id': ClientInfo().generate_record_locator_id(
-        firstname = client_1.firstname, 
-        lastname = client_1.lastname, 
-        user_id =client_1.user_id)}
-
-    client_1_info = ClientInfo.query.filter_by(user_id=client_1.user_id)
-    client_1.update(rli)
-    
     # initialize a test staff member
     staff_1 = User(**test_staff_member)
     db.session.add(staff_1)

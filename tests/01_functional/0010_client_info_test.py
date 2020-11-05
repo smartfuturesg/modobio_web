@@ -37,10 +37,11 @@ def test_get_client_info(test_client, init_database):
 
     # send get request for client info on user_id = 1 
     response = test_client.get('/client/1/', headers=headers)
+
     # some simple checks for validity
-    
     assert response.status_code == 200
     assert response.json['user_id'] == 1
+    assert response.json['modobio_id']
 
 def test_put_client_info(test_client, init_database):
     """
@@ -72,8 +73,7 @@ def test_put_client_info(test_client, init_database):
     
     #load the client from the database
 
-    client = ClientInfo.query.first()
-
+    client = ClientInfo.query.filter_by(user_id=1).one_or_none()
     assert response.status_code == 200
     assert client.guardianname == data['guardianname']
 
@@ -95,19 +95,12 @@ def test_creating_new_client(test_client, init_database):
                                 headers=headers, 
                                 data=dumps(test_new_user_client['userinfo']), 
                                 content_type='application/json')
+
     user = User.query.filter_by(email=test_new_user_client['userinfo']['email']).first()
     assert response.status_code == 201
     assert user.email == test_new_user_client['userinfo']['email']
+    assert response.json['modobio_id']
 
-    resposne = test_client.put('/client/' + str(user.user_id) + '/',
-                               headers=headers,
-                               data = dumps(test_new_user_client['clientinfo']),
-                               content_type='application/json')
-    client = ClientInfo.query.filter_by(user_id=user.user_id).first()
-
-    # some simple checks for validity
-    assert response.status_code == 201
-    assert client.guardianname == test_new_user_client['clientinfo']['guardianname']
 
 ############
 #Removing client is temporarily disabled until a better user deletion system is created

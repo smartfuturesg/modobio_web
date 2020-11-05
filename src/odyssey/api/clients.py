@@ -57,30 +57,38 @@ class Client(Resource):
     @responds(schema=ClientInfoSchema, api=ns)
     def get(self, user_id):
         """returns client info table as a json for the user_id specified"""
-        client = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
-        if not client:
+        client_data = db.session.query(
+                    ClientInfo, User
+                ).filter(
+                    ClientInfo.user_id == user_id
+                ).filter(
+                    User.user_id == user_id
+                ).first()
+        if not client_data:
             raise UserNotFound(user_id)
-        return client
+        return client_data
 
     @token_auth.login_required
     @accepts(schema=ClientInfoSchema, api=ns)
-    @responds(schema=ClientInfoSchema, api=ns)
+    @responds(status_code=200, api=ns)
     def put(self, user_id):
         """edit client info"""
         data = request.get_json()
-        client = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
-        if not client:
+
+        client_info_data = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
+
+        if not client_info_data:
             raise UserNotFound(user_id)
         #prevent requests to set user_id and send message back to api user
         elif data.get('user_id', None):
             raise IllegalSetting('user_id')
         elif data.get('membersince', None):
             raise IllegalSetting('membersince')
-        
-        client.update(data)
+
+        client_info_data.update(data)
         db.session.commit()
         
-        return client
+        return 
 
 
 #############

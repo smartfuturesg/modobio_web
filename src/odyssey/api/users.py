@@ -35,7 +35,6 @@ class ApiNewUser(Resource):
     def post(self):
         
         data = request.get_json()
-
         #staff user account creation request
         if data['is_staff']:
             user = User.query.filter_by(email=data.get('email')).first()
@@ -71,7 +70,7 @@ class ApiNewUser(Resource):
                     client_info = ClientInfoSchema().load({'user_id': user.user_id})
                     db.session.add(client_info)
             else:
-                #user account does not yet exist fo this email
+                #user account does not yet exist for this email
                 password = data['password']
                 del data['password']
                 user = UserSchema().load(data)
@@ -82,4 +81,5 @@ class ApiNewUser(Resource):
                 db.session.add(client_info)
                 db.session.add(user_login)
         db.session.commit()
+
         return user

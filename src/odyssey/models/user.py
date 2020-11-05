@@ -4,12 +4,13 @@ All tables in this module are prefixed with 'User'.
 """
 import base64
 import os
+import random
 
 from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from odyssey import db
-from odyssey.constants import DB_SERVER_TIME
+from odyssey.constants import ALPHANUMERIC, DB_SERVER_TIME
 
 #@whooshee.register_model('firstname', 'lastname', 'email', 'phone', 'user_id')
 class User(db.Model):
@@ -40,11 +41,11 @@ class User(db.Model):
     :type: int, primary key, auto-incrementing
     """
 
-    modobio_id = db.Column(db.Integer)
+    modobio_id = db.Column(db.String)
     """
     User modobio id - serves as a public id for api usage.
 
-    :type: int
+    :type: str
     """
 
     email = db.Column(db.String(50))
@@ -97,6 +98,60 @@ class User(db.Model):
 
     :type: boolean
     """
+
+    @staticmethod
+    def generate_modobio_id(firstname: str, lastname: str, user_id: int) -> str:
+        """ Generate the user's mdobio_id.
+
+        The modo bio identifier is used as a public user id, it
+        can also be exported to other healthcare providers (clients only).
+        It is made up of the firstname and lastname initials and 10 random alphanumeric
+        characters.
+
+        Parameters
+        ----------
+        firstname : str
+            Client first name.
+
+        lastname : str
+            Client last name.
+
+        user_id : int
+            User ID number.
+
+        Returns
+        -------
+        str
+            Medical record ID
+        """
+        random.seed(user_id)
+        rli_hash = "".join([random.choice(ALPHANUMERIC) for i in range(10)])
+        return (firstname[0] + lastname[0] + rli_hash).upper()
+
+@db.event.listens_for(User, "after_insert")
+def add_modobio_id(mapper, connection, target):
+    """
+    Parameters
+    ----------
+    mapper : ???
+        What does this do? Not used.
+
+    connection : :class:`sqlalchemy.engine.Connection`
+        Connection to the database engine.
+
+    target : :class:`sqlalchemy.schema.Table`
+        Target SQLAlchemy table, fixed to :class:`User` by decorator.
+    """
+    mb_id = User().generate_modobio_id(
+            firstname = target.firstname, 
+            lastname = target.lastname, 
+            user_id = target.user_id)
+
+    statement = f"""UPDATE public."User" 
+                set modobio_id = '{mb_id}'
+                where user_id = {target.user_id};"""
+
+    connection.execute(statement)
 
 class UserLogin(db.Model):
     """ 
