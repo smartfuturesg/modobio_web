@@ -39,16 +39,16 @@ class Wearables(_Base):
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    timestamp for when object was created. DB server time is used. 
+    Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     clientid = Column(
@@ -62,7 +62,7 @@ class Wearables(_Base):
     """
     Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
     """
 
     has_oura = Column(Boolean, default=False, nullable=False)
@@ -110,21 +110,21 @@ class WearablesOura(_Base):
     """
     Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
     """
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    timestamp for when object was created. DB server time is used. 
+    Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     oauth_state = Column(String(50))
@@ -191,21 +191,21 @@ class WearablesFreeStyle(_Base):
     """
     Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
     """
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    timestamp for when object was created. DB server time is used. 
+    Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     timestamps = Column(ARRAY(DateTime, dimensions=1))
@@ -230,5 +230,5 @@ class WearablesFreeStyle(_Base):
     be converted to a timestamp before it can be added to the timestamps array.
     This timestamp can be used to calculate the timestamp for each data point.
 
-    :type: datetime.datetime
+    :type: :class:`datetime.datetime`
     """

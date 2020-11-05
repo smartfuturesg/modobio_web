@@ -1,6 +1,6 @@
 """
 Database tables for the client intake portion of the Modo Bio Staff application.
-All tables in this module are prefixed with 'Client'.
+All tables in this module are prefixed with ``Client``.
 """
 import base64
 import os
@@ -11,29 +11,29 @@ import secrets
 from datetime import datetime, timedelta
 from hashlib import md5
 from sqlalchemy import text
+from sqlalchemy.orm.query import Query
 from odyssey.constants import DB_SERVER_TIME, ALPHANUMERIC
 from odyssey import db, whooshee
 
 phx_tz = pytz.timezone('America/Phoenix')
 
 
-
-@whooshee.register_model('firstname','lastname','email','phone','dob', 'record_locator_id')
+@whooshee.register_model('firstname', 'lastname', 'email', 'phone', 'dob', 'record_locator_id')
 class ClientInfo(db.Model):
     """ Client information table
 
-    This table stores general information of a client. The information is taken
-    only once, during the initial consult. The primary index of this table is the
-    :attr:`clientid` number. Many other tables in this database refer to the
-    :attr:`clientid` number, so a new client **MUST** be added to this table first,
-    in order to generate the :attr:`clientid` number.
+    This table stores general information of a client. The primary index of
+    this table is the :attr:`clientid` number, the main identifier of clients
+    in the system. Many other tables in this database refer to the :attr:`clientid`
+    number, so a new client **must** be added to this table first, in order to
+    generate the :attr:`clientid` number.
     """
 
     __tablename__ = 'ClientInfo'
 
     clientid = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
-    Client ID number
+    Client ID number.
 
     The main identifier of a client throughout the Modo Bio system.
 
@@ -44,16 +44,16 @@ class ClientInfo(db.Model):
     """
     Member since date
 
-    The date a member was first added to the system
+    The date a member was first added to the system.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     firstname = db.Column(db.String(50))
@@ -219,7 +219,7 @@ class ClientInfo(db.Model):
     """
     Client date of birth.
 
-    :type: datetime.date
+    :type: :class:`datetime.date`
     """
 
     profession = db.Column(db.String(100))
@@ -238,23 +238,60 @@ class ClientInfo(db.Model):
     
     record_locator_id = db.Column(db.String(12))
     """
-    Record Locator ID
+    Medical decord Locator ID.
 
-    name_hash = md5(bytes((data['firstname']+data['lastname']), 'utf-8')).hexdigest()
-    data['record_locator_id'] = (data['firstname'][0]+data['lastname'][0]+str(data['clientid'])+name_hash[0:6]).upper()    
+    See :meth:`generate_record_locator_id`.
 
-    :type: str, max length 10
+    :type: str, max length 12
     """
 
     @staticmethod
-    def generate_record_locator_id(firstname, lastname, clientid):
-        """medical record hash generation"""
+    def generate_record_locator_id(firstname: str, lastname: str, clientid: int) -> str:
+        """ Generate the medical record identifier.
+
+        The medical record identifier can be exported to other healthcare providers.
+        It is made up of the firstname and lastname initials and 10 random alphanumeric
+        characters.
+
+        Parameters
+        ----------
+        firstname : str
+            Client first name.
+
+        lastname : str
+            Client last name.
+
+        clientid : int
+            Client ID number.
+
+        Returns
+        -------
+        str
+            Medical record ID
+        """
         random.seed(clientid)
         rli_hash = "".join([random.choice(ALPHANUMERIC) for i in range(10)])
-        return (firstname[0]+lastname[0]+rli_hash).upper()
+        return (firstname[0] + lastname[0] + rli_hash).upper()
 
-    def client_info_search_dict(self):
-        """returns just the searchable client info (name, email, number)"""
+    def client_info_search_dict(self) -> dict:
+        """ Searchable client info.
+        
+        Returns a subset of the data in this row object.
+        The returned dict contains the following keys:
+
+        - clientid
+        - record_locator_id
+        - firstname
+        - lastename
+        - dob (date of birth)
+        - phone
+        - email
+
+        Returns
+        -------
+        dict
+            Subset of data in this row object.
+        """
         data = {
             'clientid': self.clientid,
             'record_locator_id': self.record_locator_id,
@@ -267,7 +304,33 @@ class ClientInfo(db.Model):
         return data
 
     @staticmethod
-    def all_clients_dict(query, page, per_page, **kwargs):
+    def all_clients_dict(query: Query, page: int, per_page: int, **kwargs) -> tuple:
+        """ Paginate a search in this table.
+        
+        Given a search query in this table, return the results for page ``page``
+        with ``per_page`` results per page. The returned result itmes are generated
+        by :meth:`client_info_search_dict`.
+
+        Parameters
+        ----------
+        query : :class:`sqlalchemy.orm.query.Query`
+            The SQL query with a (possibly) long list of results to paginate.
+
+        page : int
+            The current page to display results for.
+
+        per_page : int
+            How many results to display per page.
+
+        Returns
+        -------
+        dict
+            A dictionary with ``items``, a list of dicts containing the search results,
+            and ``_meta`` a dict containing pagination information.
+
+        :class:`flask_sqlalchemy.Pagination`
+            An object holding the paginated search results from the SQLAlchemy query.
+        """
         resources = query.paginate(page, per_page, False)
         data = {
             'items': [item.client_info_search_dict() for item in resources.items],
@@ -280,9 +343,9 @@ class ClientInfo(db.Model):
             }
         return data, resources
 
+
 class ClientFacilities(db.Model):
-    """ A mapping of client ids to registered facility ids
-    """
+    """ A mapping of client ID number to registered facility ID numbers. """
 
     __tablename__ = 'ClientFacilities'
 
@@ -295,30 +358,30 @@ class ClientFacilities(db.Model):
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    timestamp for when object was created. DB server time is used. 
+    Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
-    client_id = db.Column(db.ForeignKey('ClientInfo.clientid',ondelete="CASCADE"))
+    client_id = db.Column(db.ForeignKey('ClientInfo.clientid', ondelete="CASCADE"))
     """
-    Foreign key from ClientInfo table
+    Client ID number.
 
-    :type: int, foreign key
+    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
     """
     
-    facility_id = db.Column(db.ForeignKey('RegisteredFacilities.facility_id',ondelete="CASCADE"))
+    facility_id = db.Column(db.ForeignKey('RegisteredFacilities.facility_id', ondelete="CASCADE"))
     """
-    Foreign key from RegisteredFacilities table
+    RegisteredFacilities ID number.
 
-    :type: int, foreign key
+    :type: int, foreign key to :attr:`RegisteredFacilities.facility_id`
     """
 
 class ClientConsent(db.Model):
@@ -356,23 +419,23 @@ class ClientConsent(db.Model):
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    timestamp for when object was created. DB server time is used. 
+    Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientConsent_clientid_fkey',ondelete="CASCADE"), nullable=False)
     """
     Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
     """
 
     infectious_disease = db.Column(db.Boolean)
@@ -384,10 +447,9 @@ class ClientConsent(db.Model):
 
     signdate = db.Column(db.Date)
     """
-    Signature date. This is filled by the client upon signing the document. Therefore, we can assume that 
-    this date is in their local timezone. 
+    Signature date.
 
-    :type: datetime.date
+    :type: :class:`datetime.date`
     """
 
     signature = db.Column(db.Text)
@@ -459,23 +521,23 @@ class ClientRelease(db.Model):
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    timestamp for when object was created. DB server time is used. 
+    Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientRelease_clientid_fkey',ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
     """
 
     release_of_all = db.Column(db.Boolean)
@@ -496,14 +558,14 @@ class ClientRelease(db.Model):
     """
     Limits the release of protected health information to from this date.
 
-    :type: datetime.date
+    :type: :class:`datetime.date`
     """
 
     release_date_to = db.Column(db.Date)
     """
     Limits the release of protected health information to until this date.
 
-    :type: datetime.date
+    :type: :class:`datetime.date`
     """
 
     release_purpose = db.Column(db.String(1024))
@@ -515,10 +577,9 @@ class ClientRelease(db.Model):
 
     signdate = db.Column(db.Date)
     """
-    Signature date. This is filled by the client upon signing the document. Therefore, we can assume that 
-    this date is in their local timezone. 
+    Signature date.
 
-    :type: datetime.date
+    :type: :class:`datetime.date`
     """
 
     signature = db.Column(db.Text)
@@ -590,31 +651,30 @@ class ClientPolicies(db.Model):
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    timestamp for when object was created. DB server time is used. 
+    Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientPolicies_clientid_fkey',ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
     """
 
     signdate = db.Column(db.Date)
     """
-    Signature date. This is filled by the client upon signing the document. Therefore, we can assume that 
-    this date is in their local timezone. 
+    Signature date.
 
-    :type: datetime.date
+    :type: :class:`datetime.date`
     """
 
     signature = db.Column(db.Text)
@@ -686,31 +746,30 @@ class ClientConsultContract(db.Model):
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    timestamp for when object was created. DB server time is used. 
+    Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientColusultContract_clientid_fkey',ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
     """
 
     signdate = db.Column(db.Date)
     """
-    Signature date. This is filled by the client upon signing the document. Therefore, we can assume that 
-    this date is in their local timezone. 
+    Signature date.
 
-    :type: datetime.date
+    :type: :class:`datetime.date`
     """
 
     signature = db.Column(db.Text)
@@ -782,31 +841,30 @@ class ClientSubscriptionContract(db.Model):
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    timestamp for when object was created. DB server time is used. 
+    Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientSubscriptionContract_clientid_fkey',ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
     """
 
     signdate = db.Column(db.Date)
     """
-    Signature date. This is filled by the client upon signing the document. Therefore, we can assume that 
-    this date is in their local timezone. 
+    Signature date.
 
-    :type: datetime.date
+    :type: :class:`datetime.date`
     """
 
     signature = db.Column(db.Text)
@@ -873,23 +931,23 @@ class ClientIndividualContract(db.Model):
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    timestamp for when object was created. DB server time is used. 
+    Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientIndividualContract_clientid_fkey',ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
     """
 
     doctor = db.Column(db.Boolean, default=False)
@@ -922,10 +980,9 @@ class ClientIndividualContract(db.Model):
 
     signdate = db.Column(db.Date)
     """
-    Signature date. This is filled by the client upon signing the document. Therefore, we can assume that 
-    this date is in their local timezone. 
+    Signature date.
 
-    :type: datetime.date
+    :type: :class:`datetime.date`
     """
 
     signature = db.Column(db.Text)
@@ -962,14 +1019,11 @@ class ClientIndividualContract(db.Model):
     """
 
 class RemoteRegistration(db.Model):
-    """ At-home client registration parameter
+    """ At-home client registration table.
 
     Stores details to enable clients to register at home securely. This inclues the
     temporary registration url, client login details, and current api token. Each at-home
     client will have one entry in this table. Expired urls will remain for record keeping.
-
-    The primary index of this table is the
-    :attr:`clientid` number.
     """
 
     __tablename__ = 'ClientRemoteRegistration'
@@ -984,23 +1038,23 @@ class RemoteRegistration(db.Model):
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    timestamp for when object was created. DB server time is used. 
+    Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='remote_registration_clientid_fkey',ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
     """
 
     email = db.Column(db.String(50))
@@ -1012,16 +1066,16 @@ class RemoteRegistration(db.Model):
 
     token = db.Column(db.String(32), index=True, unique=True)
     """
-    API authentication token
+    API authentication token.
 
     :type: str, max length 32, indexed, unique
     """
 
     token_expiration = db.Column(db.DateTime)
     """
-    token expiration date
+    Token expiration timestamp.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     password = db.Column(db.String(128))
@@ -1033,21 +1087,38 @@ class RemoteRegistration(db.Model):
 
     registration_portal_id = db.Column(db.String(32), index=True, unique=True)
     """
-    registration portal endpoint
+    Registration portal ID.
+
+    This token is part of the URL that clients will use to sign up remotely. It is a randomly
+    generated string. It provides security by making the sign-up URL hard to guess.
 
     :type: str, max length 32, indexed, unique
     """
 
     registration_portal_expiration = db.Column(db.DateTime)
     """
-    token expiration date
+    Registration portal ID expiration timestamp.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
-    def get_temp_registration_endpoint(self, expires_in = 86400):
-        """creates a temporary endpoint meant for at-home
-           registration
+    def get_temp_registration_endpoint(self, expires_in: int=86400) -> str:
+        """ Generate regustration portal ID.
+
+        Generates a random, unique, and hard to guess portal ID meant for at-home
+        registration. The ID expires in `expires_in` seconds. Both
+        :attr:`registration_portal_id` and :attr:`registration_portal_expiration`
+        are set in the database.
+
+        Parameters
+        ----------
+        expires_in : int
+            Expiration in seconds from moment of token creation.
+
+        Returns
+        -------
+        str
+            The registration portal ID token.
         """
         now = datetime.utcnow()
         self.registration_portal_id = secrets.token_hex(16)
@@ -1058,17 +1129,35 @@ class RemoteRegistration(db.Model):
 
         return self.registration_portal_id
 
-
-    def set_password(self):
-        """create temporary password, hash it"""
+    def set_password(self) -> str:
+        """ Create a temporary password.
+        
+        Returns
+        -------
+        str
+            Randomly generated password.
+        """
         password = self.email[0:2]+secrets.token_hex(4)
         self.password = password
         return password
 
-    def check_password(self, password):
+    def check_password(self, password: str) -> bool:
+        """ Check provided password against stored password.
+
+        Parameters
+        ----------
+        password : str
+            The password to be checked.
+
+        Returns
+        -------
+        bool
+            Whether the provided password is identical to the stored password.
+        """
         return password == self.password
 
-    def get_token(self,expires_in=86400):
+    def get_token(self, expires_in: int=86400) -> str:
+        """ Get current token, create new if expired. """
         now = datetime.utcnow()
         #returns current token if it is valid
         if self.token and self.token_expiration > now + timedelta(seconds=60):
@@ -1111,9 +1200,9 @@ class RemoteRegistration(db.Model):
         return remote_client
 
 class ClientExternalMR(db.Model):
-    """ Client external medical record table
+    """ External medical records table.
 
-    This table stored medical record ids from external medical institutes. 
+    This table stores medical record ID numbers from external medical institutes. 
     """
 
     __tablename__ = 'ClientExternalMR'
@@ -1130,42 +1219,45 @@ class ClientExternalMR(db.Model):
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    timestamp for when object was created. DB server time is used. 
+    Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientExternalMR_clientid_fkey',ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
     """
 
     med_record_id = db.Column(db.String, nullable=False)
     """
-    medical record id 
-    :type: str
+    Medical record id.
+
+    This medical record ID comes from an external medical institution.
+
+    :type: str, non-null, unique
     """
 
     institute_id = db.Column(db.Integer, db.ForeignKey('MedicalInstitutions.institute_id',name='ClientExternalMR_institute_id_fkey', ondelete="CASCADE"), nullable=False)
     """
-    medical institute id 
+    Medical institute id.
 
     :type: int, foreign key to :attr:`MedicalInstitutions.institute_id`
     """
 
 class ClientReleaseContacts(db.Model):
-    """ Client external medical record table
+    """ Contact information for the release form.
 
-    This table stored medical record ids from external medical institutes. 
+    This table stores contact information for :attr:`ClientRelease.release_to`.
     """
 
     __tablename__ = 'ClientReleaseContacts'
@@ -1179,64 +1271,67 @@ class ClientReleaseContacts(db.Model):
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    timestamp for when object was created. DB server time is used. 
+    Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     release_contract_id = db.Column(db.Integer, db.ForeignKey('ClientRelease.idx',name='ClientReleaseContacts_idx_fkey',ondelete="CASCADE"), nullable=False)
     """
-    ID refering back to the signed contract in the ClientRelease table
+    Index of the :class:``ClientRelease`` table.
 
     :type: int, foreign key to :attr:`ClientRelease.idx`
     """
 
     clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='ClientReleaseContacts_clientid_fkey',ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid`
+    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
     """
 
     release_direction = db.Column(db.String, nullable=False)
     """
-    Direction of client medical dta release. Must be either 'TO' or 'FROM'
+    Direction of medical data release.
+
+    A client can release medical data to someone, or release someone else's data.
+    This variable indicates the direction of the release. Must be either ``to`` or
+    ``from``.
 
     :type: str
     """
 
     name = db.Column(db.String, nullable=False)
     """
-    Full name of the contact
+    Full name of the contact.
 
     :type: str
     """
 
     email = db.Column(db.String, nullable=True)
     """
-    Email of the contact 
+    Email address of the contact.
 
     :type: str
     """
 
     phone = db.Column(db.String, nullable=True)
     """
-    Email of the contact 
+    Phone number of the contact.
 
     :type: str
     """
 
     relationship = db.Column(db.String, nullable=True)
     """
-    Relationship the client has with the contact 
+    Relationship of the client with the contact.
 
     :type: str
     """
-
