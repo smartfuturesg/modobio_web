@@ -18,7 +18,6 @@ test_client_info = {
     "email": "test_this_client@gmail.com",
     "phone": "4805555555",
     "preferred": 0,
-    "ringsize": 11,
     "emergency_contact": "Emergency",
     "emergency_phone": "6025555555",
     "healthcare_contact": "United",
@@ -49,17 +48,18 @@ test_client_external_medical_records = {
   ]
 }
 
-test_new_remote_registration = {
+test_new_client_creation = {
     "firstname": "Remote",
     "middlename": "Client",
     "lastname": "Test",
-    "email": "rest_remote_registration@gmail.com"
+    "email": "test_remote_registration@gmail.com",
+    "phone_number": "1111111111",
+    "is_staff": False,
+    "is_client": True
     }
 
 test_new_client_info = {
-    "firstname": "Test",
-    "middlename": "This",
-    "lastname": "Client Two",
+    "user_id": 0,
     "guardianname": "guardian 1",
     "guardianrole": "guardian role",
     "street": "3325 S Malibu Dr.",
@@ -67,10 +67,7 @@ test_new_client_info = {
     "state": "AZ",
     "zipcode": "85282",
     "country": "US",
-    "email": "test_this_client_two@gmail.com",
-    "phone": "4805555555",
     "preferred": 0,
-    "ringsize": 11,
     "emergency_contact": "Emergency",
     "emergency_phone": "6025555555",
     "healthcare_contact": "United",
@@ -81,22 +78,26 @@ test_new_client_info = {
     "receive_docs": True
 }
 
+test_new_client_login = {
+  "password": "password"
+}
+
 test_staff_member = {
     "firstname": "testy",
     "lastname": "testerson",
     "email": "staff_member@modobio.com",
-    "password": "password",
-    "is_admin": True,
-    "is_system_admin": False,
-    "access_roles": ["datasci"]
+    "phone_number": "1111111111",
+    "is_staff": True,
+    "is_client": False
 }
 
 test_new_staff_member = {
     "firstname": "testy",
-    "lastname": "testerson",
-    "email": "staff_member_2@modobio.com",
-    "password": "password",
-    "access_roles": ["datasci"]
+    "lastname": "mctesterson",
+    "email": "staff_member2@modobio.com",
+    "phone_number": "1111111112",
+    "is_staff": True,
+    "is_client": False
 }
 
 signature = None
@@ -231,7 +232,7 @@ test_heart_assessment = {
 }
 
 test_strength_assessment = {
-    "clientid": 0,
+    "user_id": 0,
     "upper_push": {
     "right": {
       "estimated_10rm": 250,
@@ -656,4 +657,82 @@ test_user_passwords = {
   "password" : "gogoleplexitykatcity65",
   "current_password": "password",
   "new_password": "salt1ampintheruffs98"
+}
+
+test_new_user_client = {
+  "userinfo": {
+    "firstname": "Test",
+    "middlename": "User",
+    "lastname": "Client",
+    "email": "test_this_user_client@modobio.com",
+    "phone_number": "1111111111",
+    "password": "password",
+    "is_staff": False,
+    "is_client": True
+  },
+  "clientinfo": {
+    "guardianname": "guardian 1",
+    "guardianrole": "guardian role",
+    "street": "3325 S Malibu Dr.",
+    "city": "Tempe",
+    "state": "AZ",
+    "zipcode": "85282",
+    "country": "US",
+    "preferred": 0,
+    "emergency_contact": "Emergency",
+    "emergency_phone": "6025555555",
+    "healthcare_contact": "United",
+    "healthcare_phone": "1800676blue",
+    "gender": "m",
+    "dob": "1991-10-14",
+    "profession": "Chef",
+    "receive_docs": True
+  }
+}
+
+test_new_user_client_2 = {
+  "userinfo": {
+    "firstname": "Test",
+    "middlename": "User",
+    "lastname": "Client",
+    "email": "test_this_user_client_2@modobio.com",
+    "phone_number": "1111111111",
+    "password": "password",
+    "is_staff": False,
+    "is_client": True
+  },
+  "clientinfo": {
+    "guardianname": "guardian 1",
+    "guardianrole": "guardian role",
+    "street": "3325 S Malibu Dr.",
+    "city": "Tempe",
+    "state": "AZ",
+    "zipcode": "85282",
+    "country": "US",
+    "preferred": 0,
+    "emergency_contact": "Emergency",
+    "emergency_phone": "6025555555",
+    "healthcare_contact": "United",
+    "healthcare_phone": "1800676blue",
+    "gender": "m",
+    "dob": "1991-10-14",
+    "profession": "Chef",
+    "receive_docs": True
+  }
+}
+
+test_new_user_staff = {
+  "userinfo": {
+    "firstname": "Test",
+    "middlename": "User",
+    "lastname": "Staff",
+    "email": "test_this_user_staff@modobio.com",
+    "phone_number": "1111111112",
+    "password": "password",
+    "is_staff": True,
+    "is_client": False
+  },
+  "staffinfo": {
+    "bio": "Test this bio"
+  }
 }

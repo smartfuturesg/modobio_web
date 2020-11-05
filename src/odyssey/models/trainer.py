@@ -48,11 +48,11 @@ class PowerAssessment(db.Model):
     :type: :class:`datetime.datetime`
     """
 
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='power_assessment_clientid_fkey',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
     """
     Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
     keiser_upper_r_weight = db.Column(db.Integer)
@@ -272,11 +272,11 @@ class StrengthAssessment(db.Model):
     :type: :class:`datetime.datetime`
     """
 
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='strength_assessment_clientid_fkey',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
     """
     Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
     upper_push_notes = db.Column(db.Text)
@@ -612,11 +612,11 @@ class MovementAssessment(db.Model):
     :type: :class:`datetime.datetime`
     """
 
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='movement_assessment_clientid_fkey',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
     """
     Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
     squat_depth = db.Column(db.String)
@@ -764,11 +764,11 @@ class HeartAssessment(db.Model):
     :type: :class:`datetime.datetime`
     """
 
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='heart_assessment_clientid_fkey',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
     """
     Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
     resting_hr = db.Column(db.Integer)
@@ -885,11 +885,11 @@ class MoxyAssessment(db.Model):
     :type: :class:`datetime.datetime`
     """
 
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='moxy_assessment_clientid_fkey',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
     """
     Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
     vl_side = db.Column(db.String)
@@ -1055,11 +1055,11 @@ class MoxyRipTest(db.Model):
     :type: :class:`datetime.datetime`
     """
 
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='moxy_rip_assessment_clientid_fkey',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
     """
     Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
        
     vl_side = db.Column(db.String)
@@ -1464,11 +1464,11 @@ class LungAssessment(db.Model):
     :type: :class:`datetime.datetime`
     """
 
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='lung_assessment_clientid_fkey',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
     """
     Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
     notes = db.Column(db.String)
@@ -1537,11 +1537,11 @@ class FitnessQuestionnaire(db.Model):
     :type: int, primary key, autoincrement
     """
 
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='fitness_questionnaire_clientid_fkey',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
     """
     Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
     
     timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)

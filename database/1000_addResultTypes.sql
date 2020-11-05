@@ -16,7 +16,7 @@ execute query into x;
   IF x >= 1 THEN
    execute 
    		'delete from "MedicalBloodTestResultTypes" 
-			where resultid >= 1;
+			where result_id >= 1;
 		alter sequence "MedicalBloodTestResultTypes_resultid_seq"
 			restart with 1;';
   END IF;

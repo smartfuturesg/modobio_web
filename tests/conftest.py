@@ -1,5 +1,6 @@
 import os
 import pytest
+from datetime import datetime
 from sqlalchemy import text
 
 from odyssey import create_app, db
@@ -13,11 +14,12 @@ from odyssey.models.client import (
     ClientIndividualContract
 )
 from odyssey.models.misc import MedicalInstitutions
-
-from odyssey.models.staff import Staff
+from odyssey.models.user import User, UserLogin
 
 from .data import (
-    test_client_info,
+    test_new_client_creation,
+    test_new_client_info,
+    test_new_client_login,
     test_staff_member,
     test_client_consent_data,
     test_client_release_data,
@@ -76,21 +78,28 @@ def init_database():
         db.session.execute(text(''.join(dat)))
 
     # Insert test client data
-    client_1 = ClientInfo(**test_client_info)
+    # 1) Create User instance. modobio_id populated automatically
+    client_1 = User(**test_new_client_creation)
     db.session.add(client_1)
     db.session.flush()
 
-    rli = {'record_locator_id': ClientInfo().generate_record_locator_id(
-        firstname = client_1.firstname, 
-        lastname = client_1.lastname, 
-        clientid =client_1.clientid)}
+    # 2) User login
+    client_1_login = UserLogin(**{'user_id': client_1.user_id})
 
-    client_1.update(rli)
-    
+    # 3) Client info
+    test_new_client_info['user_id'] = client_1.user_id
+    client_1_info = ClientInfo(**test_new_client_info)
+    db.session.add(client_1_login)
+    db.session.add(client_1_info)
+    db.session.flush()
+
     # initialize a test staff member
-    staff_1 = Staff(**test_staff_member)
-    staff_1.set_password(test_staff_member['password'])
+    staff_1 = User(**test_staff_member)
     db.session.add(staff_1)
+    db.session.flush()
+    staff_1_login = UserLogin(**{"user_id": staff_1.user_id})
+    staff_1_login.set_password('password')
+    db.session.add(staff_1_login)
 
     #initialize Medical institutes table
     med_institute1 = MedicalInstitutions(institute_name='Mercy Gilbert Medical Center')
