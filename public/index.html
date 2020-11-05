@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Odyssey &mdash; Odyssey 0.1.1.dev151+gc03d6f9 documentation</title>
+  <title>Odyssey &mdash; Odyssey version: 0.1.66 documentation</title>
   
 
   
@@ -30,13 +30,14 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Flask app" href="toc_flask.html" /> 
+    <link rel="next" title="odyssey.config" href="odyssey/odyssey.config.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -60,7 +61,7 @@
             
             
               <div class="version">
-                0.1.1.dev151+gc03d6f9
+                version: 0.1.66
               </div>
             
           
@@ -86,9 +87,10 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="toc_flask.html">Flask app</a></li>
-<li class="toctree-l1"><a class="reference internal" href="toc_api.html">API server</a></li>
-<li class="toctree-l1"><a class="reference internal" href="toc_rest.html">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey/odyssey.config.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey/odyssey.models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey/odyssey.api.html">Endpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey/odyssey.utils.html">Utilities</a></li>
 </ul>
 
             
@@ -160,91 +162,69 @@
 <p>This is a <a class="reference external" href="https://flask.palletsprojects.com">Flask</a> based app that serves webpages to the <a class="reference external" href="https://modobio.com">ModoBio</a> staff. The pages contain the intake and data gathering forms for the <em>client journey</em>. The <a class="reference external" href="https://en.wikipedia.org/wiki/Odyssey">Odyssey</a> is of course the most famous journey of all time! 🤓</p>
 <dl class="py function">
 <dt id="odyssey.create_app">
-<code class="sig-prename descclassname">odyssey.</code><code class="sig-name descname">create_app</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">flask_dev</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.create_app" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">odyssey.</code><code class="sig-name descname">create_app</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.create_app" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize an instance of the Flask app.</p>
 <p>This function is an ‘app factory’. It creates an instance of <a class="reference external" href="https://flask.palletsprojects.com/en/1.1.x/api/#flask.Flask" title="(in Flask v1.1.x)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flask.Flask</span></code></a>.
 It is the main function to call to get the program started.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>flask_dev</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Sets the development environment, which determines a range of configuration
-options that will be used. See <a class="reference internal" href="odyssey/odyssey.config.html#module-odyssey.config" title="odyssey.config"><code class="xref py py-mod docutils literal notranslate"><span class="pre">odyssey.config</span></code></a> for more information.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>An instance of <a class="reference external" href="https://flask.palletsprojects.com/en/1.1.x/api/#flask.Flask" title="(in Flask v1.1.x)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flask.Flask</span></code></a>, with approrpiate configuration.</p>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>An instance of <a class="reference external" href="https://flask.palletsprojects.com/en/1.1.x/api/#flask.Flask" title="(in Flask v1.1.x)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flask.Flask</span></code></a>, with appropriate configuration.</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
 <p>Running the flask builtin test server from the command line:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ <span class="nb">export</span> <span class="nv">FLASK_ENV</span><span class="o">=</span>development
-$ <span class="nb">export</span> <span class="nv">FLASK_APP</span><span class="o">=</span>odyssey:create_app<span class="o">(</span><span class="s2">&quot;local&quot;</span><span class="o">)</span>
+$ <span class="nb">export</span> <span class="nv">FLASK_DEV</span><span class="o">=</span><span class="nb">local</span>
+$ <span class="nb">export</span> <span class="nv">FLASK_APP</span><span class="o">=</span>odyssey:create_app<span class="o">()</span>
 $ flask run
-</pre></div>
-</div>
-<p>Running as a uWSGI program:</p>
-<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[uwsgi]</span>
-<span class="na">plugins</span> <span class="o">=</span> <span class="s">python</span>
-<span class="na">pythonpath</span> <span class="o">=</span> <span class="s">&lt;path-to-installation&gt;</span>
-<span class="na">wsgi-file</span> <span class="o">=</span> <span class="s">&lt;path-to-installation&gt;/odyssey/__init__.py</span>
-<span class="na">callable</span> <span class="o">=</span> <span class="s">create_app(flask_dev=&#39;local&#39;)</span>
-<span class="na">env</span> <span class="o">=</span> <span class="s">FLASK_ENV=development</span>
 </pre></div>
 </div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><a class="reference internal" href="odyssey/odyssey.config.html#module-odyssey.config" title="odyssey.config"><code class="xref py py-func docutils literal notranslate"><span class="pre">odyssey.config()</span></code></a></p>
+<p><a class="reference internal" href="odyssey/odyssey.config.html#module-odyssey.config" title="odyssey.config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">odyssey.config</span></code></a></p>
 </div>
 </dd></dl>
 
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="toc_flask.html">Flask app</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.models.html">Models</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="odyssey/odyssey.models.main.html">Main</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey/odyssey.models.intake.html">Intake forms</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey/odyssey.models.doctor.html">Doctor</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey/odyssey.models.pt.html">Physical therapist</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey/odyssey.models.trainer.html">Trainer</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.views.html">Views</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="odyssey/odyssey.views.main.html">Main</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey/odyssey.views.menu.html">Menu</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey/odyssey.views.intake.html">Intake forms</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey/odyssey.views.doctor.html">Doctor</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey/odyssey.views.pt.html">Physical therapist</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.forms.html">Forms</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="odyssey/odyssey.forms.main.html">Main</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey/odyssey.forms.intake.html">Intake forms</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey/odyssey.forms.doctor.html">Doctor</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey/odyssey.forms.pt.html">Physical therapist</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey/odyssey.config.html">Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.defaults.html">Defaults</a><ul class="simple">
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="toc_api.html">API server</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.html">API</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="odyssey/odyssey.api.auth.html">Authorization</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey/odyssey.api.tokens.html">Authorization tokens</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey/odyssey.api.staff.html">Staff</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey/odyssey.api.clients.html">Client</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey/odyssey.api.doctor.html">Doctor</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey/odyssey.api.pt.html">Physical therapist</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey/odyssey.api.trainer.html">Trainer</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey/odyssey.api.schemas.html">Schemas</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey/odyssey.api.errors.html">Error messages</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey/odyssey.api.serializers.html">Serializers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="odyssey/odyssey.api.utils.html">Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey/odyssey.models.html">Models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.models.client.html">Client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.models.staff.html">Staff</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.models.doctor.html">Doctor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.models.pt.html">Physical therapist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.models.trainer.html">Trainer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.models.wearables.html">Wearable devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.models.misc.html">Other</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey/odyssey.api.html">Endpoints</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.clients.html">Client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.staff.html">Staff</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.doctor.html">Doctor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.pt.html">Physical therapist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.trainer.html">Trainer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.remote_clients.html">Remote registration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.registeredfacilities.html">Registered facilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.wearables.html">Wearable devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.tokens.html">Authorization tokens</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.errors.html">Error messages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.postman.html">Postman</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.version.html">Version</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="toc_rest.html">Support</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.config.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey/odyssey.utils.html">Utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.utils.schemas.html">Schemas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.utils.auth.html">Login</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.constants.html">Constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.utils.email.html">Email</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.pdf.html">PDF generation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.utils.html">Utility functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.utils.misc.html">Other</a></li>
 </ul>
 </li>
 </ul>
@@ -267,7 +247,7 @@ $ flask run
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="toc_flask.html" class="btn btn-neutral float-right" title="Flask app" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="odyssey/odyssey.config.html" class="btn btn-neutral float-right" title="odyssey.config" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
     </div>

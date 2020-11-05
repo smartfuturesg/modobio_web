@@ -9,8 +9,10 @@ Models
 
 .. toctree::
 
-   Main <odyssey.models.main>
-   Intake forms <odyssey.models.intake>
+   Client <odyssey.models.client>
+   Staff <odyssey.models.staff>
    Doctor <odyssey.models.doctor>
    Physical therapist <odyssey.models.pt>
    Trainer <odyssey.models.trainer>
+   Wearable devices <odyssey.models.wearables>
+   Other <odyssey.models.misc>

@@ -49,9 +49,11 @@ class User(db.Model):
 
     email = db.Column(db.String(50))
     """
-    User email address.
+    Email address.
 
-    :type: str, max length 50
+    The email address is also the login username.
+
+    :type: str, max length 50, non-null, unique
     """
 
     phone_number = db.Column(db.String(50))

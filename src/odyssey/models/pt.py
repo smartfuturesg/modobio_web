@@ -1,9 +1,14 @@
+"""
+Database tables for the physical therapist's portion of the Modo Bio Staff application.
+All tables in this module are prefixed with ``PT``.
+"""
+
 from odyssey import db
 from odyssey.constants import DB_SERVER_TIME
 
 
 class PTHistory(db.Model):
-    """ Physical therapy history table
+    """ Physical therapy history table.
 
     This table stores the physical therapy history of a client. The information
     is taken only once, during the initial consult.
@@ -11,7 +16,7 @@ class PTHistory(db.Model):
 
     __tablename__ = 'PTHistory'
 
-    displayname = 'Physical Therapy History'
+    displayname = 'Physical therapy history'
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -22,23 +27,23 @@ class PTHistory(db.Model):
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    timestamp for when object was created. DB server time is used. 
+    Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
     """
     User ID number
 
-    :type: int, foreign key to :attr:`User.user_id`
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
     exercise = db.Column(db.Text)
@@ -139,7 +144,7 @@ class PTHistory(db.Model):
 
 
 class Chessboard(db.Model):
-    """ Mobility assessment table a.k.a Chessboard
+    """ Mobility assessment table a.k.a the chessboard.
 
     This table stores the repeated mobility assessment measurements. The measurements
     are indexed by :attr:`user_id` and assessment :attr:`timestamp`. All values in
@@ -157,256 +162,284 @@ class Chessboard(db.Model):
 
     user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
     """
-    Client ID number
+    Client ID number.
 
-    :type: int, foreign key to :attr:`User.user_id`
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
     timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     Timestamp of the assessment.
 
-    :type: datetime.datetime
+    :type: :class:`datetime.datetime`
     """
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    timestamp for when object was created. DB server time is used. 
+    Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     isa_structure = db.Column(db.String(24))
     """
-    must be one of the following
-    'Inhaled',
-    'Exhaled',
-    'Asymmetrical Normal',
-    'Asymmetrical Atypical'
+    Structure of the Infrasternal Angle (ISA). Allowed values are:
+
+    - inhaled
+    - exhaled
+    - asymmetrical normal
+    - asymmetrical atypical
 
     :type: str, max length 24
     """
 
     isa_movement = db.Column(db.String(24))
     """
-    must be one of the following
-    'Dynamic',
-    'Static',
-    'R Static/Left Dyanamic',
-    'L Static/Right Dyanamic'
+    Movement of the Infrasternal Angle (ISA). Allowed values are:
+
+    - static
+    - dynamic
+    - left static/right dynamic
+    - left dynamic/right static
 
     :type: str, max length 24
     """
 
     left_shoulder_er = db.Column(db.Integer)
     """
-    Left shoulder external rotation
+    Left shoulder external rotation angle.
 
     :type: int
+    :unit: degree
     """
 
     left_shoulder_ir = db.Column(db.Integer)
     """
-    Left shoulder internal rotation
+    Left shoulder internal rotation angle.
 
     :type: int
+    :unit: degree
     """
 
     left_shoulder_abd = db.Column(db.Integer)
     """
-    Left shoulder abduction.
+    Left shoulder abduction angle.
 
     :type: int
+    :unit: degree
     """
 
     left_shoulder_add = db.Column(db.Integer)
     """
-    Left shoulder adduction
+    Left shoulder adduction angle.
 
     :type: int
+    :unit: degree
     """
 
     left_shoulder_flexion = db.Column(db.Integer)
     """
-    Left shoulder flexion.
+    Left shoulder flexion angle.
 
     :type: int
+    :unit: degree
     """
 
     left_shoulder_extension = db.Column(db.Integer)
     """
-    Left shoulder extension.
+    Left shoulder extension angle.
 
     :type: int
+    :unit: degree
     """
 
     right_shoulder_er = db.Column(db.Integer)
     """
-    Right shoulder external rotation
+    Right shoulder external rotation angle.
 
     :type: int
+    :unit: degree
     """
 
     right_shoulder_ir = db.Column(db.Integer)
     """
-    Right shoulder internal rotation
+    Right shoulder internal rotation angle.
 
     :type: int
+    :unit: degree
     """
 
     right_shoulder_abd = db.Column(db.Integer)
     """
-    Right shoulder abduction.
+    Right shoulder abduction angle.
 
     :type: int
+    :unit: degree
     """
 
     right_shoulder_add = db.Column(db.Integer)
     """
-    Right shoulder adduction
+    Right shoulder adduction angle.
 
     :type: int
+    :unit: degree
     """
 
     right_shoulder_flexion = db.Column(db.Integer)
     """
-    Right shoulder flexion.
+    Right shoulder flexion angle.
 
     :type: int
+    :unit: degree
     """
 
     right_shoulder_extension = db.Column(db.Integer)
     """
-    Right shoulder extension.
+    Right shoulder extension angle.
 
     :type: int
-    """
-
-    left_hip_slr = db.Column(db.Integer)
-    """
-    Left hip SLR
-
-    :type: int
+    :unit: degree
     """
 
     left_hip_er = db.Column(db.Integer)
     """
-    Left hip external rotation
+    Left hip external rotation angle.
 
     :type: int
+    :unit: degree
     """
 
     left_hip_ir = db.Column(db.Integer)
     """
-    Left hip internal rotation
+    Left hip internal rotation angle.
 
     :type: int
+    :unit: degree
     """
 
     left_hip_abd = db.Column(db.Integer)
     """
-    Left hip abduction.
+    Left hip abduction angle.
 
     :type: int
+    :unit: degree
     """
 
     left_hip_add = db.Column(db.Integer)
     """
-    Left hip adduction
+    Left hip adduction angle.
 
     :type: int
+    :unit: degree
     """
 
     left_hip_flexion = db.Column(db.Integer)
     """
-    Left hip flexion.
+    Left hip flexion angle.
 
     :type: int
+    :unit: degree
     """
 
     left_hip_extension = db.Column(db.Integer)
     """
-    Left hip extension.
+    Left hip extension angle.
 
     :type: int
+    :unit: degree
     """
 
-    right_hip_slr = db.Column(db.Integer)
+    left_hip_slr = db.Column(db.Integer)
     """
-    Right hip SLR
+    Left hip straight leg raise angle.
 
     :type: int
+    :unit: degree
     """
 
     right_hip_er = db.Column(db.Integer)
     """
-    Right hip external rotation
+    Right hip external rotation angle.
 
     :type: int
+    :unit: degree
     """
 
     right_hip_ir = db.Column(db.Integer)
     """
-    Right hip internal rotation
+    Right hip internal rotation angle.
 
     :type: int
+    :unit: degree
     """
 
     right_hip_abd = db.Column(db.Integer)
     """
-    Right hip abduction.
+    Right hip abduction angle.
 
     :type: int
+    :unit: degree
     """
 
     right_hip_add = db.Column(db.Integer)
     """
-    Right hip adduction
+    Right hip adduction angle.
 
     :type: int
+    :unit: degree
     """
 
     right_hip_flexion = db.Column(db.Integer)
     """
-    Right hip flexion.
+    Right hip flexion angle.
 
     :type: int
+    :unit: degree
     """
 
     right_hip_extension = db.Column(db.Integer)
     """
-    Right hip extension.
+    Right hip extension angle.
 
     :type: int
+    :unit: degree
     """
 
     right_hip_slr = db.Column(db.Integer)
     """
-    Right hip SLR
+    Right hip straight leg raise angle.
 
     :type: int
+    :unit: degree
     """
 
     notes = db.Column(db.Text)
     """
-    notes on the assessment
+    Assessment notes.
 
     :type: str
     """
 
 class MobilityAssessment(db.Model):
-    """ Mobility assessment table
+    """ Mobility assessment table.
+
+    The previous version of the mobility assessment table.
+    Superceded by :class:`Chessboard`.
+
+    .. deprecated:: v0.0.3
 
     This table stores the repeated mobility assessment measurements. The measurements
     are indexed by :attr:`user_id` and assessment :attr:`timestamp`. All values in
     this table, with the exception of :attr:`isa_dynamic`, are angles in degrees.
+    
+    .. seealso:: :class:`Chessboard`
     """
 
     __tablename__ = 'MobilityAssessment'
@@ -415,7 +448,7 @@ class MobilityAssessment(db.Model):
     """
     User ID number
 
-    :type: int, foreign key to :attr:`User.user_id`
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -429,208 +462,234 @@ class MobilityAssessment(db.Model):
     """
     Timestamp of the assessment.
 
-    :type: datetime.datetime
+    :type: :class:`datetime.datetime`
     """
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
-    timestamp for when object was created. DB server time is used. 
+    Creation timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    timestamp for when object was updated. DB server time is used. 
+    Last update timestamp of this row in the database.
 
-    :type: datetime
+    :type: :class:`datetime.datetime`
     """
 
     isa_left = db.Column(db.Integer)
     """
-    ISA? left
+    Infasternal angle (ISA) left.
 
     :type: int
+    :unit: degree
     """
 
     isa_right = db.Column(db.Integer)
     """
-    ISA? left
+    Infasternal angle (ISA) right.
 
     :type: int
+    :unit: degree
     """
 
     isa_dynamic = db.Column(db.Boolean)
     """
-    Indicates whether or not the ISA is dynamic.
+    Indicates whether or not the Infasternal angle (ISA) is dynamic.
 
     :type: bool
     """
 
     left_shoulder_er = db.Column(db.Integer)
     """
-    Left shoulder external rotation
+    Left shoulder external rotation angle.
 
     :type: int
+    :unit: degree
     """
 
     left_shoulder_ir = db.Column(db.Integer)
     """
-    Left shoulder internal rotation
+    Left shoulder internal rotation angle.
 
     :type: int
+    :unit: degree
     """
 
     left_shoulder_abd = db.Column(db.Integer)
     """
-    Left shoulder abduction.
+    Left shoulder abduction angle.
 
     :type: int
+    :unit: degree
     """
 
     left_shoulder_add = db.Column(db.Integer)
     """
-    Left shoulder adduction
+    Left shoulder adduction angle.
 
     :type: int
+    :unit: degree
     """
 
     left_shoulder_flexion = db.Column(db.Integer)
     """
-    Left shoulder flexion.
+    Left shoulder flexion angle.
 
     :type: int
+    :unit: degree
     """
 
     left_shoulder_extension = db.Column(db.Integer)
     """
-    Left shoulder extension.
+    Left shoulder extension angle.
 
     :type: int
+    :unit: degree
     """
 
     right_shoulder_er = db.Column(db.Integer)
     """
-    Right shoulder external rotation
+    Right shoulder external rotation angle.
 
     :type: int
+    :unit: degree
     """
 
     right_shoulder_ir = db.Column(db.Integer)
     """
-    Right shoulder internal rotation
+    Right shoulder internal rotation angle.
 
     :type: int
+    :unit: degree
     """
 
     right_shoulder_abd = db.Column(db.Integer)
     """
-    Right shoulder abduction.
+    Right shoulder abduction angle.
 
     :type: int
+    :unit: degree
     """
 
     right_shoulder_add = db.Column(db.Integer)
     """
-    Right shoulder adduction
+    Right shoulder adduction angle.
 
     :type: int
+    :unit: degree
     """
 
     right_shoulder_flexion = db.Column(db.Integer)
     """
-    Right shoulder flexion.
+    Right shoulder flexion angle.
 
     :type: int
+    :unit: degree
     """
 
     right_shoulder_extension = db.Column(db.Integer)
     """
-    Right shoulder extension.
+    Right shoulder extension angle.
 
     :type: int
+    :unit: degree
     """
 
     left_hip_er = db.Column(db.Integer)
     """
-    Left hip external rotation
+    Left hip external rotation angle.
 
     :type: int
+    :unit: degree
     """
 
     left_hip_ir = db.Column(db.Integer)
     """
-    Left hip internal rotation
+    Left hip internal rotation angle.
 
     :type: int
+    :unit: degree
     """
 
     left_hip_abd = db.Column(db.Integer)
     """
-    Left hip abduction.
+    Left hip abduction angle.
 
     :type: int
+    :unit: degree
     """
 
     left_hip_add = db.Column(db.Integer)
     """
-    Left hip adduction
+    Left hip adduction angle.
 
     :type: int
+    :unit: degree
     """
 
     left_hip_flexion = db.Column(db.Integer)
     """
-    Left hip flexion.
+    Left hip flexion angle.
 
     :type: int
+    :unit: degree
     """
 
     left_hip_extension = db.Column(db.Integer)
     """
-    Left hip extension.
+    Left hip extension angle.
 
     :type: int
+    :unit: degree
     """
 
     right_hip_er = db.Column(db.Integer)
     """
-    Right hip external rotation
+    Right hip external rotation angle.
 
     :type: int
+    :unit: degree
     """
 
     right_hip_ir = db.Column(db.Integer)
     """
-    Right hip internal rotation
+    Right hip internal rotation angle.
 
     :type: int
+    :unit: degree
     """
 
     right_hip_abd = db.Column(db.Integer)
     """
-    Right hip abduction.
+    Right hip abduction angle.
 
     :type: int
+    :unit: degree
     """
 
     right_hip_add = db.Column(db.Integer)
     """
-    Right hip adduction
+    Right hip adduction angle.
 
     :type: int
+    :unit: degree
     """
 
     right_hip_flexion = db.Column(db.Integer)
     """
-    Right hip flexion.
+    Right hip flexion angle.
 
     :type: int
+    :unit: degree
     """
 
     right_hip_extension = db.Column(db.Integer)
     """
-    Right hip extension.
+    Right hip extension angle.
 
     :type: int
+    :unit: degree
     """
