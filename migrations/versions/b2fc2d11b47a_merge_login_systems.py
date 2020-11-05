@@ -216,6 +216,16 @@ def upgrade():
     op.create_foreign_key(None, 'WearablesOura', 'User', ['user_id'], ['user_id'], ondelete='CASCADE')
     op.drop_column('WearablesOura', 'clientid')
     op.drop_table('Staff')
+
+    op.alter_column('MedicalBloodTests', 'reporter_id',
+               existing_type=sa.INTEGER(),
+               nullable=False)
+    op.alter_column('MedicalImaging', 'reporter_id',
+               existing_type=sa.INTEGER(),
+               nullable=False)
+    op.alter_column('MedicalPhysicalExam', 'reporter_id',
+               existing_type=sa.INTEGER(),
+               nullable=False)
     # ### end Alembic commands ###
 
 
@@ -405,4 +415,15 @@ def downgrade():
     op.drop_table('UserLogin')
     op.drop_table('StaffProfile')
     op.drop_table('User')
+
+    op.drop_column('User', 'modobio_id')
+    op.alter_column('MedicalPhysicalExam', 'reporter_id',
+               existing_type=sa.INTEGER(),
+               nullable=True)
+    op.alter_column('MedicalImaging', 'reporter_id',
+               existing_type=sa.INTEGER(),
+               nullable=True)
+    op.alter_column('MedicalBloodTests', 'reporter_id',
+               existing_type=sa.INTEGER(),
+               nullable=True)
     # ### end Alembic commands ###
