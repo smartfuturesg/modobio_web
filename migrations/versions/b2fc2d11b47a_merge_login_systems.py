@@ -23,7 +23,7 @@ def upgrade():
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.Column('user_id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('modobio_id', sa.String(), nullable=True),
-    sa.Column('email', sa.String(length=50), nullable=True),
+    sa.Column('email', sa.String(length=50), nullable=True,unique=True),
     sa.Column('phone_number', sa.String(length=50), nullable=True),
     sa.Column('firstname', sa.String(length=50), nullable=True),
     sa.Column('middlename', sa.String(length=50), nullable=True),
