@@ -1,10 +1,11 @@
 from flask.json import dumps
 from requests.auth import _basic_auth_str
 
-from odyssey.models.staff import Staff
+from odyssey.models.user import User, UserLogin
+from odyssey.models.staff import StaffProfile
 
 from tests.data import (
-    test_new_staff_member,
+    test_new_user_staff
 )
 
 
@@ -15,23 +16,22 @@ def test_creating_new_staff(test_client, init_database):
     THEN check the response is valid
     """
     # get staff authorization to view client data
-    staff = Staff.query.first()
-    token = staff.get_token()
+    staff = User.query.filter_by(is_staff=True).first()
+    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
+    token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
     
-    response = test_client.post('/staff/',
+    response = test_client.post('/user/',
                                 headers=headers, 
-                                data=dumps(test_new_staff_member), 
+                                data=dumps(test_new_user_staff['userinfo']), 
                                 content_type='application/json')
     
-    #the new client should be in the ClientInfo database 
-    staff = Staff.query.filter_by(email=test_new_staff_member['email']).first()
+    #the new staff member should be in the StaffProfile database 
+    staff = StaffProfile.query.filter_by(user_id=1).one_or_none()
     
     # some simple checks for validity
     assert response.status_code == 201
-    assert staff.email == test_new_staff_member['email']
     
-
 def test_creating_new_staff_same_email(test_client, init_database):
     """
     GIVEN a api end point for creating a new staff 
@@ -40,20 +40,15 @@ def test_creating_new_staff_same_email(test_client, init_database):
     """
 
     # get staff authorization to view client data
-    staff = Staff.query.first()
-    token = staff.get_token()
+    staff = User.query.filter_by(is_staff=True).first()
+    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
+    token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
     
-    response = test_client.post('/staff/',
+    response = test_client.post('/user/',
                                 headers=headers, 
-                                data=dumps(test_new_staff_member), 
+                                data=dumps(test_new_user_staff['userinfo']), 
                                 content_type='application/json')
     
-    #the new client should be in the ClientInfo database 
-    
-    
-    # some simple checks for validity
+    # 409 should be returned because user email is already in use
     assert response.status_code == 409
-    
-
-

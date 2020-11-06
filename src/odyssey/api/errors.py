@@ -5,12 +5,12 @@ from odyssey.api import api
 
 class UserNotFound(Exception):
     """in the case a non-existent client is being requested"""
-    def __init__(self, clientid=None, message = None):
+    def __init__(self, user_id=None, message = None):
         Exception.__init__(self)
         if message:
             self.message = message
         else:
-            self.message = f'The client with clientid {clientid}, does not exist. Please try again.'
+            self.message = f'The client with user_id {user_id}, does not exist. Please try again.'
 
         self.status_code = 404
 
@@ -88,9 +88,9 @@ class InputError(Exception):
 
 class ContentNotFoundReturnData(Exception):
     """Special case for when a resource has not yet been created but the client must see other data to proceed"""
-    def __init__(self, data=None, clientid = None):
+    def __init__(self, data=None, user_id = None):
         Exception.__init__(self)
-        data.update({"clientid": clientid})
+        data.update({"user_id": user_id})
         self.status_code = 200
         self.message = "no instance of resource exists yet"
 
@@ -130,13 +130,24 @@ class RelationAlreadyExists(Exception):
         self.status_code = 409
 
 class StaffEmailInUse(Exception):
-    """in the case a staff member is creating a staff member with the same email"""
+    """in the case a staff member is creating a staff account with the same email"""
     def __init__(self, email, message = None):
         Exception.__init__(self)
         if message:
             self.message = message
         else:
-            self.message = f'The email, {email} is already in use.'
+            self.message = f'The email, {email} is already in use for a staff account.'
+
+        self.status_code = 409
+
+class ClientEmailInUse(Exception):
+    """in the case a staff member is creating a client account with the same email"""
+    def __init__(self, email, message = None):
+        Exception.__init__(self)
+        if message:
+            self.message = message
+        else:
+            self.message = f'The email, {email} is already in use for a client account.'
 
         self.status_code = 409
 
@@ -209,12 +220,12 @@ class InsufficientInputs(Exception):
 
 class StaffNotFound(Exception):
     """in the case a non-existent staff member is being requested"""
-    def __init__(self, staffid=None, message = None):
+    def __init__(self, user_id=None, message = None):
         Exception.__init__(self)
         if message:
             self.message = message
         else:
-            self.message = f'The Staff member with staffid {staffid}, does not exist. Please try again.'
+            self.message = f'The Staff member with user_id {user_id}, does not exist. Please try again.'
 
         self.status_code = 404
 
@@ -324,6 +335,11 @@ def error_relation_already_exists(error):
 
 @api.errorhandler(StaffEmailInUse)
 def error_staff_email_in_use(error):
+    '''Return a custom message and 409 status code'''
+    return error_response(error.status_code, error.message)
+
+@api.errorhandler(ClientEmailInUse)
+def error_client_email_in_use(error):
     '''Return a custom message and 409 status code'''
     return error_response(error.status_code, error.message)
 

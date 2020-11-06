@@ -2,7 +2,7 @@ from datetime import datetime
 
 from flask.json import dumps
 
-from odyssey.models.staff import Staff
+from odyssey.models.user import User, UserLogin
 from odyssey.models.wearables import Wearables, WearablesFreeStyle
 
 from tests.data import (
@@ -18,11 +18,12 @@ from tests.data import (
 def test_wearables_post(test_client, init_database):
     """
     GIVEN an API end point for wearable devices
-    WHEN the '/wearables/<client id>' resource is requested (POST)
+    WHEN the '/wearables/<user_id>' resource is requested (POST)
     THEN check the response is valid
     """
-    staff = Staff.query.first()
-    token = staff.get_token()
+    staff = User.query.filter_by(is_staff=True).first()
+    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
+    token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
     response = test_client.post(
@@ -34,7 +35,7 @@ def test_wearables_post(test_client, init_database):
 
     assert response.status_code == 201
 
-    data = Wearables.query.filter_by(clientid=1).first()
+    data = Wearables.query.filter_by(user_id=1).first()
 
     assert data
     assert data.has_freestyle
@@ -44,11 +45,12 @@ def test_wearables_post(test_client, init_database):
 def test_wearables_get(test_client, init_database):
     """
     GIVEN an API end point for wearable devices
-    WHEN the '/wearables/<client id>' resource is requested (GET)
+    WHEN the '/wearables/<user_id>' resource is requested (GET)
     THEN check the response is valid
     """
-    staff = Staff.query.first()
-    token = staff.get_token()
+    staff = User.query.filter_by(is_staff=True).first()
+    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
+    token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
     response = test_client.get(
@@ -62,11 +64,12 @@ def test_wearables_get(test_client, init_database):
 def test_wearables_put(test_client, init_database):
     """
     GIVEN an API end point for wearable devices
-    WHEN the '/wearables/<client id>' resource is requested (PUT)
+    WHEN the '/wearables/<user_id>' resource is requested (PUT)
     THEN check the response is valid
     """
-    staff = Staff.query.first()
-    token = staff.get_token()
+    staff = User.query.filter_by(is_staff=True).first()
+    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
+    token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
     new_data = wearables_data.copy()
@@ -81,7 +84,7 @@ def test_wearables_put(test_client, init_database):
 
     assert response.status_code == 204
 
-    data = Wearables.query.filter_by(clientid=1).first()
+    data = Wearables.query.filter_by(user_id=1).first()
 
     assert data.has_freestyle
     assert not data.has_oura
@@ -89,11 +92,12 @@ def test_wearables_put(test_client, init_database):
 def test_wearables_freestyle_activate_post(test_client, init_database):
     """
     GIVEN an API end point for the FreeStyle Libre CGM
-    WHEN the '/wearables/freestyle/activate/<client id>' resource is requested (POST)
+    WHEN the '/wearables/freestyle/activate/<user_id>' resource is requested (POST)
     THEN check the response is valid
     """
-    staff = Staff.query.first()
-    token = staff.get_token()
+    staff = User.query.filter_by(is_staff=True).first()
+    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
+    token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
     ts = wearables_freestyle_data['activation_timestamp']
 
@@ -106,7 +110,7 @@ def test_wearables_freestyle_activate_post(test_client, init_database):
 
     assert response.status_code == 201
 
-    data = WearablesFreeStyle.query.filter_by(clientid=1).first()
+    data = WearablesFreeStyle.query.filter_by(user_id=1).first()
 
     assert data
     assert data.activation_timestamp == datetime.fromisoformat(ts)
@@ -115,11 +119,12 @@ def test_wearables_freestyle_activate_post(test_client, init_database):
 def test_wearables_freestyle_activate_get(test_client, init_database):
     """
     GIVEN an API end point for the FreeStyle Libre CGM
-    WHEN the '/wearables/freestyle/activate/<client id>' resource is requested (GET)
+    WHEN the '/wearables/freestyle/activate/<user_id>' resource is requested (GET)
     THEN check the response is valid
     """
-    staff = Staff.query.first()
-    token = staff.get_token()
+    staff = User.query.filter_by(is_staff=True).first()
+    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
+    token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
     response = test_client.get(
@@ -135,11 +140,12 @@ def test_wearables_freestyle_activate_get(test_client, init_database):
 def test_wearables_freestyle_put(test_client, init_database):
     """
     GIVEN an API end point for the FreeStyle Libre CGM
-    WHEN the '/wearables/freestyle/<client id>' resource is requested (PUT)
+    WHEN the '/wearables/freestyle/<user_id>' resource is requested (PUT)
     THEN check the response is valid
     """
-    staff = Staff.query.first()
-    token = staff.get_token()
+    staff = User.query.filter_by(is_staff=True).first()
+    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
+    token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
     tss = [datetime.fromisoformat(d) for d in wearables_freestyle_data['timestamps']]
 
@@ -153,7 +159,7 @@ def test_wearables_freestyle_put(test_client, init_database):
 
     assert response.status_code == 201
 
-    data = WearablesFreeStyle.query.filter_by(clientid=1).first()
+    data = WearablesFreeStyle.query.filter_by(user_id=1).first()
 
     assert data
     assert data.glucose == wearables_freestyle_data['glucose']
@@ -223,11 +229,12 @@ def test_wearables_freestyle_put(test_client, init_database):
 def test_wearables_freestyle_get(test_client, init_database):
     """
     GIVEN an API end point for the FreeStyle Libre CGM
-    WHEN the '/wearables/freestyle/<client id>' resource is requested (GET)
+    WHEN the '/wearables/freestyle/<user_id>' resource is requested (GET)
     THEN check the response is valid
     """
-    staff = Staff.query.first()
-    token = staff.get_token()
+    staff = User.query.filter_by(is_staff=True).first()
+    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
+    token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
     response = test_client.get(

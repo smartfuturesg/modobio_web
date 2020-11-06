@@ -7,8 +7,9 @@ import uuid
 from datetime import datetime, date, time
 
 import flask.json
-from odyssey.models.client import ClientInfo, RemoteRegistration, ClientFacilities
+from odyssey.models.client import ClientInfo, ClientFacilities
 from odyssey.models.doctor import MedicalBloodTests, MedicalBloodTestResultTypes
+from odyssey.models.user import User
 from odyssey.models.misc import RegisteredFacilities
 from odyssey.api.errors import UserNotFound, FacilityNotFound, RelationAlreadyExists, TestNotFound, ResultTypeNotFound
 
@@ -24,18 +25,25 @@ def list_average(values_list):
     else:
         return None
 
-def check_client_existence(clientid):
+def check_client_existence(user_id):
     """Check that the client is in the database
     All clients must be in the CLientInfo table before any other procedure"""
-    client = ClientInfo.query.filter_by(clientid=clientid).one_or_none()
+    client = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
     if not client:
-        raise UserNotFound(clientid)
+        raise UserNotFound(user_id)
 
-def check_blood_test_existence(testid):
+def check_user_existence(user_id):
+    """Check that the user is in the database
+    All users must be in the User table before any other procedure"""
+    user = User.query.filter_by(user_id=user_id).one_or_none()
+    if not user:
+        raise UserNotFound(user_id)
+
+def check_blood_test_existence(test_id):
     """Check that the blood test is in the database"""
-    test = MedicalBloodTests.query.filter_by(testid=testid).one_or_none()
+    test = MedicalBloodTests.query.filter_by(test_id=test_id).one_or_none()
     if not test:
-        raise TestNotFound(testid)
+        raise TestNotFound(test_id)
 
 def check_blood_test_result_type_existence(result_name):
     """Check that a supplied blood test result type is in the database"""
@@ -48,21 +56,21 @@ def check_facility_existence(facility_id):
     if not facility:
         raise FacilityNotFound(facility_id)
 
-def check_client_facility_relation_existence(clientid, facility_id):
-    relation = ClientFacilities.query.filter_by(client_id=clientid,facility_id=facility_id).one_or_none()
+def check_client_facility_relation_existence(user_id, facility_id):
+    relation = ClientFacilities.query.filter_by(user_id=user_id,facility_id=facility_id).one_or_none()
     if relation:
-        raise RelationAlreadyExists(clientid, facility_id)
+        raise RelationAlreadyExists(user_id, facility_id)
 
-def check_remote_client_portal_validity(portal_id):
-    """
-    Ensure portal is valid. If not raise 404 error
-    """
-    remote_client = RemoteRegistration().check_portal_id(portal_id)
-
-    if not remote_client:
-        raise UserNotFound(message="Unauthorized. Portal is either expired or never existed")
-
-    return remote_client
+#def check_remote_client_portal_validity(portal_id):
+#    """
+#    Ensure portal is valid. If not raise 404 error
+#    """
+#    remote_client = RemoteRegistration().check_portal_id(portal_id)
+#
+#    if not remote_client:
+#        raise UserNotFound(message="Unauthorized. Portal is either expired or never existed")
+#
+#    return remote_client
 
 class JSONEncoder(flask.json.JSONEncoder):
     """ Converts :class:`datetime.datetime`, :class:`datetime.date`,

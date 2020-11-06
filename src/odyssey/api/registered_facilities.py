@@ -13,6 +13,7 @@ from odyssey.models.client import ClientFacilities
 from odyssey.models.misc import RegisteredFacilities
 from odyssey.utils.schemas import RegisteredFacilitiesSchema, ClientFacilitiesSchema
 from odyssey.utils.misc import check_facility_existence, check_client_existence, check_client_facility_relation_existence
+from odyssey.models.user import User
 
 from odyssey import db
 
@@ -75,7 +76,7 @@ class NewFacility(Resource):
         """create a new registered facility"""
         data = request.get_json()
 
-        #prevent requests to set clientid and send message back to api user
+        #prevent requests to set facility_id and send message back to api user
         if data.get('facility_id', None):
             raise IllegalSetting('facility_id')
 
@@ -84,17 +85,17 @@ class NewFacility(Resource):
         db.session.commit()
         return facility_data
 
-@ns.route('/client/<int:clientid>/')
+@ns.route('/client/<int:user_id>/')
 class RegisterClient(Resource):
     """api to handle actions revolving around what facilities a client is registered to"""
 
     @token_auth.login_required
     @responds(schema=RegisteredFacilitiesSchema(many=True), api=ns)
-    def get(self, clientid):
+    def get(self, user_id):
         """get list of facilities a client is associated with"""
-        check_client_existence(clientid)
+        check_client_existence(user_id)
 
-        clientFacilities = ClientFacilities.query.filter_by(client_id=clientid).all()
+        clientFacilities = ClientFacilities.query.filter_by(user_id=user_id).all()
 
         facilityList = [item.facility_id for item in clientFacilities]
 
@@ -107,18 +108,18 @@ class RegisterClient(Resource):
     @token_auth.login_required
     @accepts(schema=ClientFacilitiesSchema, api=ns)
     @responds(schema=ClientFacilitiesSchema, status_code=201, api=ns)
-    def post(self, clientid):
+    def post(self, user_id):
         """create a new client-facility relation"""        
-        check_client_existence(clientid)
+        check_client_existence(user_id)
         
         data = request.get_json()
 
-        data['client_id'] = clientid
+        data['user_id'] = user_id
 
         check_facility_existence(data['facility_id'])
 
         #check if this client-facility relation already exists
-        check_client_facility_relation_existence(clientid, data['facility_id'])
+        check_client_facility_relation_existence(user_id, data['facility_id'])
 
         facility_data = ClientFacilitiesSchema().load(data)
 

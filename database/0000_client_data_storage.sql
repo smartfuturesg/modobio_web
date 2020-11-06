@@ -26,17 +26,17 @@ language plpgsql;;
 
 ---------------------------------------------------------------------------------------------------
 -- client_entries_per_table
--- number of rows per specified table and clientid
+-- number of rows per specified table anduser_id
 ---------------------------------------------------------------------------------------------------
 create or replace function 
-client_entries_per_table(schema text, tablename text, client_id integer ) returns integer
+client_entries_per_table(schema text, tablename text, user_id integer ) returns integer
 as
 $body$
 declare
   result integer;
   query varchar;
 begin
-  query := 'SELECT count(1) FROM ' || schema || '.' || tablename || 'where clientid =' || client_id ;
+  query := 'SELECT count(1) FROM ' || schema || '.' || tablename || 'where user_id =' || user_id ;
   execute query into result;
   return result;
 end;
@@ -49,9 +49,9 @@ language plpgsql;;
 
 ---------------------------------------------------------------------------------------------------
 -- client_medical_images_total_bytes
--- total byte size of medical images stored for specified clientid 
+-- total byte size of medical images stored for specified user_id 
 ---------------------------------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION public.client_medical_images_total_bytes(client_id integer)
+CREATE OR REPLACE FUNCTION public.client_medical_images_total_bytes(user_id integer)
  RETURNS integer
  LANGUAGE plpgsql
 AS $function$
@@ -59,7 +59,7 @@ declare
   result integer;
   query varchar;
 begin
-  query := 'SELECT SUM(image_size) FROM public."MedicalImaging" ' || 'where clientid =' || client_id || 'GROUP BY clientid';
+  query := 'SELECT SUM(image_size) FROM public."MedicalImaging" ' || 'where user_id =' || user_id || 'GROUP BY user_id';
   execute query into result;
   return coalesce(result, 0);
 end;
@@ -72,7 +72,7 @@ $function$
 
 ---------------------------------------------------------------------------------------------------
 -- client_table_sizes
--- Size and average row size in bytes of all public tables which hold client data referenced by clientid 
+-- Size and average row size in bytes of all public tables which hold client data referenced by user_id 
 ---------------------------------------------------------------------------------------------------
 create or replace view public.client_table_sizes 
 as
@@ -91,7 +91,7 @@ inner join information_schema.columns as c
 		and t.table_schema = c.table_schema 
 where t.table_schema = 'public'
 	and t.table_type = 'BASE TABLE'
-	and c.column_name = 'clientid';
+	and c.column_name = 'user_id';
 ---------------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------------
 
@@ -101,17 +101,17 @@ where t.table_schema = 'public'
 ---------------------------------------------------------------------------------------------------
 create or replace view public.data_per_client
 as
-select  clientid, 
-		sum(client_entries_per_table(table_schema, '"'||table_name||'"', clientid) * bytes_per_row)
-			+ client_medical_images_total_bytes(clientid) as total_bytes,
+select  user_id, 
+		sum(client_entries_per_table(table_schema, '"'||table_name||'"', user_id) * bytes_per_row)
+			+ client_medical_images_total_bytes(user_id) as total_bytes,
 		case
-			when sum(client_entries_per_table(table_schema, '"'||table_name||'"', clientid) * bytes_per_row)
-				+ client_medical_images_total_bytes(clientid) < 10000000 
+			when sum(client_entries_per_table(table_schema, '"'||table_name||'"', user_id) * bytes_per_row)
+				+ client_medical_images_total_bytes(user_id) < 10000000 
 				then 'Tier 1'
 			else 'Tier 2'
 		end as data_usage_tier
 from public.client_table_sizes
 join "ClientInfo" on 1=1
-group by clientid ;
+group by user_id ;
 ---------------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------------
