@@ -5,7 +5,7 @@ from flask.json import dumps
 
 from odyssey.models.staff import Staff
 from odyssey.models.doctor import MedicalHistory 
-from tests.data import test_medical_history
+from tests.data.doctor.doctor_data import doctor_medical_history_data
 
 
 def test_post_medical_history(test_client, init_database):
@@ -19,7 +19,7 @@ def test_post_medical_history(test_client, init_database):
     token = staff.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    payload = test_medical_history
+    payload = doctor_medical_history_data
     
     # send get request for client info on clientid = 1 
     response = test_client.post('/doctor/medicalhistory/1/',
@@ -40,8 +40,8 @@ def test_put_medical_history(test_client, init_database):
     token = staff.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    test_medical_history["diagnostic_other"] = "testing put"
-    payload = test_medical_history
+    doctor_medical_history_data["diagnostic_other"] = "testing put"
+    payload = doctor_medical_history_data
     
     # send get request for client info on clientid = 1 
     response = test_client.put('/doctor/medicalhistory/1/',

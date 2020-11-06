@@ -5,7 +5,7 @@ from flask.json import dumps
 
 from odyssey.models.staff import Staff
 from odyssey.models.pt import PTHistory 
-from tests.data import test_pt_history
+from tests.data.pt.pt_data import pt_history_data
 
 
 def test_post_pt_history(test_client, init_database):

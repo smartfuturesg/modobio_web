@@ -3,9 +3,7 @@ from requests.auth import _basic_auth_str
 
 from odyssey.models.staff import Staff
 
-from tests.data import (
-    test_new_staff_member,
-)
+from tests.data.staff.staff_data import staff_new_staff_member_data
 
 
 def test_creating_new_staff(test_client, init_database):
@@ -21,15 +19,15 @@ def test_creating_new_staff(test_client, init_database):
     
     response = test_client.post('/staff/',
                                 headers=headers, 
-                                data=dumps(test_new_staff_member), 
+                                data=dumps(staff_new_staff_member_data), 
                                 content_type='application/json')
     
     #the new client should be in the ClientInfo database 
-    staff = Staff.query.filter_by(email=test_new_staff_member['email']).first()
+    staff = Staff.query.filter_by(email=staff_new_staff_member_data['email']).first()
     
     # some simple checks for validity
     assert response.status_code == 201
-    assert staff.email == test_new_staff_member['email']
+    assert staff.email == staff_new_staff_member_data['email']
     
 
 def test_creating_new_staff_same_email(test_client, init_database):
@@ -46,7 +44,7 @@ def test_creating_new_staff_same_email(test_client, init_database):
     
     response = test_client.post('/staff/',
                                 headers=headers, 
-                                data=dumps(test_new_staff_member), 
+                                data=dumps(staff_new_staff_member_data), 
                                 content_type='application/json')
     
     #the new client should be in the ClientInfo database 

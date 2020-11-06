@@ -2,7 +2,7 @@
 from flask.json import dumps
 
 from odyssey.models.staff import Staff
-from tests.data import test_medical_physical
+from tests.data.trainer.trainer_data import trainer_medical_physical_data
 
 
 def test_post_medical_physical(test_client, init_database):
@@ -16,7 +16,7 @@ def test_post_medical_physical(test_client, init_database):
     token = staff.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    payload = test_medical_physical
+    payload = trainer_medical_physical_data
     
     # send get request for client info on clientid = 1 
     response = test_client.post('/doctor/physical/1/',

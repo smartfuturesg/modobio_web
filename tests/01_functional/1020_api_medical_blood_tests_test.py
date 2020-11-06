@@ -5,7 +5,7 @@ from flask.json import dumps
 
 from odyssey.models.staff import Staff
 from odyssey.models.doctor import MedicalBloodTests, MedicalBloodTestResults, MedicalBloodTestResultTypes
-from tests.data import test_blood_tests
+from tests.data.doctor.doctor_data import doctor_blood_tests_data
 
 
 def test_post_medical_blood_test(test_client, init_database):
@@ -19,7 +19,7 @@ def test_post_medical_blood_test(test_client, init_database):
     token = staff.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    payload = test_blood_tests
+    payload = doctor_blood_tests_data
     
     # send post request for client info on clientid = 1 
     response = test_client.post('/doctor/bloodtest/1/',

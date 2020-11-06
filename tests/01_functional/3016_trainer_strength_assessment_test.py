@@ -5,8 +5,7 @@ from flask.json import dumps
 
 from odyssey.models.staff import Staff
 from odyssey.models.trainer import StrengthAssessment 
-from tests.data import test_strength_assessment
-
+from tests.data.trainer.trainer_data import trainer_strength_assessment_data
 
 def test_post_strength_assessment(test_client, init_database):
     """
@@ -19,7 +18,7 @@ def test_post_strength_assessment(test_client, init_database):
     token = staff.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    payload = test_strength_assessment
+    payload = trainer_strength_assessment_data
     # send get request for client info on clientid = 1 
     response = test_client.post('/trainer/assessment/strength/1/',
                                 headers=headers, 

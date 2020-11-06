@@ -16,17 +16,10 @@ from odyssey.models.misc import MedicalInstitutions
 
 from odyssey.models.staff import Staff
 
-from .data import (
-    test_client_info,
-    test_staff_member,
-    test_client_consent_data,
-    test_client_release_data,
-    test_client_policies_data,
-    test_client_consult_data,
-    test_client_subscription_data,
-    test_client_individual_data
-)
+from tests.data.clients.clients_data import clients_info_data
+from tests.data.staff.staff_data import staff_member_data
 
+    
 def clean_db(db):
     for table in reversed(db.metadata.sorted_tables):
         try:
@@ -76,7 +69,7 @@ def init_database():
         db.session.execute(text(''.join(dat)))
 
     # Insert test client data
-    client_1 = ClientInfo(**test_client_info)
+    client_1 = ClientInfo(**clients_info_data)
     db.session.add(client_1)
     db.session.flush()
 
@@ -88,8 +81,8 @@ def init_database():
     client_1.update(rli)
     
     # initialize a test staff member
-    staff_1 = Staff(**test_staff_member)
-    staff_1.set_password(test_staff_member['password'])
+    staff_1 = Staff(**staff_member_data)
+    staff_1.set_password(staff_member_data['password'])
     db.session.add(staff_1)
 
     #initialize Medical institutes table

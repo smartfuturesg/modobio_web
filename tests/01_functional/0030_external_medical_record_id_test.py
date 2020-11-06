@@ -4,8 +4,7 @@ import time
 from flask.json import dumps
 
 from odyssey.models.staff import Staff
-from tests.data import test_client_external_medical_records
-
+from tests.data.doctor.doctor_data import doctor_clients_external_medical_records_data
 
 def test_post_medical_record_ids(test_client, init_database):
     """
@@ -18,7 +17,7 @@ def test_post_medical_record_ids(test_client, init_database):
     token = staff.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    payload = test_client_external_medical_records
+    payload = doctor_clients_external_medical_records_data
     
     # send get request for client info on clientid = 1 
     response = test_client.post('/doctor/medicalinstitutions/recordid/1/',

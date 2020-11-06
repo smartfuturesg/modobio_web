@@ -5,8 +5,37 @@ from flask.json import dumps
 
 from odyssey.models.staff import Staff
 from odyssey.models.trainer import StrengthAssessment 
-from tests.data import test_movement_assessment
+from tests.data.trainer.trainer_data import trainer_movement_assessment_data
 
+
+test_movement_assessment = {
+  "toe_touch": {
+    "ribcage_movement": [
+      "Even Bilaterally"
+    ],
+    "notes": "string",
+    "pelvis_movement": [
+      "Right Hip High",
+      "Left Hip High"
+    ],
+    "depth": "string"
+  },
+  "squat": {
+    "eye_test": True,
+    "depth": "string",
+    "can_breathe": True,
+    "can_look_up": True,
+    "ramp": "string"
+  },
+  "standing_rotation": {
+    "left": {
+      "notes": "string"
+    },
+    "right": {
+      "notes": "string"
+    }
+  }
+}
 
 def test_post_movement_assessment(test_client, init_database):
     """
@@ -19,7 +48,7 @@ def test_post_movement_assessment(test_client, init_database):
     token = staff.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    payload = test_movement_assessment
+    payload = trainer_movement_assessment_data
     # send get request for client info on clientid = 1 
     response = test_client.post('/trainer/assessment/movement/1/',
                                 headers=headers, 

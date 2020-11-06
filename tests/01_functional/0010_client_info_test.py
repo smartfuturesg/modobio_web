@@ -10,17 +10,8 @@ from odyssey.models.client import (
     ClientConsent
 )
 
-from tests.data import (
-    test_new_client_info,
-    test_new_remote_registration,
-    signature,
-    test_client_consent_data,
-    test_client_release_data,
-    test_client_policies_data,
-    test_client_consult_data,
-    test_client_subscription_data,
-    test_client_individual_data,
-)
+from tests.data.clients.clients_data import clients_new_client_info_data
+
 
 def test_get_client_info(test_client, init_database):
     """
@@ -90,9 +81,9 @@ def test_creating_new_client(test_client, init_database):
     # send get request for client info on clientid = 1 
     response = test_client.post('/client/',
                                 headers=headers, 
-                                data=dumps(test_new_client_info), 
+                                data=dumps(clients_new_client_info_data), 
                                 content_type='application/json')
-    client = ClientInfo.query.filter_by(email=test_new_client_info['email']).first()
+    client = ClientInfo.query.filter_by(email=clients_new_client_info_data['email']).first()
     # some simple checks for validity
     assert response.status_code == 201
     assert client.email == 'test_this_client_two@gmail.com'
@@ -112,10 +103,10 @@ def test_removing_client(test_client, init_database):
     # send post request to create client
     test_client.post('/client/',
                     headers=headers, 
-                    data=dumps(test_new_client_info), 
+                    data=dumps(clients_new_client_info_data), 
                     content_type='application/json')
                     
-    client = ClientInfo.query.filter_by(email=test_new_client_info['email']).first()
+    client = ClientInfo.query.filter_by(email=clients_new_client_info_data['email']).first()
     
     #take this new clientid
     remove_clientid = client.clientid

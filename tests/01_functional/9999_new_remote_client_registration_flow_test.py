@@ -24,6 +24,14 @@ from tests.data import (
     test_fitness_questionnaire
 )
 
+from tests.data.clients.clients_data import (
+    clients_new_remote_registration_data,
+    clients_new_client_info_data
+)
+
+from tests.data.doctor.doctor_data import (
+    doctor_medical_history_data
+)
 def test_creating_new_remote_client(test_client, init_database):
     """
     GIVEN a api endpoint for creating a new client at home registration 

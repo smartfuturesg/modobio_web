@@ -4,7 +4,7 @@ import time
 from flask.json import dumps
 
 from odyssey.models.staff import Staff
-from tests.data import test_fitness_questionnaire
+from tests.data.trainer.trainer_data import trainer_fitness_questionnaire_data
 
 
 def test_post_fitness_questionnaire(test_client, init_database):
@@ -18,7 +18,7 @@ def test_post_fitness_questionnaire(test_client, init_database):
     token = staff.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    payload = test_fitness_questionnaire
+    payload = trainer_fitness_questionnaire_data
     # send get request for client info on clientid = 1 
     response = test_client.post('/trainer/questionnaire/1/',
                                 headers=headers, 

@@ -3,8 +3,10 @@ from flask.json import dumps
 from odyssey.models.staff import Staff
 from odyssey.models.client import ClientFacilities
 from odyssey.models.misc import RegisteredFacilities
-from tests.data import test_registered_facilities, test_client_facilities
-
+from tests.data.registeredfacilities.registeredfacilities_data import (
+    registeredfacilities_registered_facilities_data, 
+    registeredfacilities_client_facilities_data
+)
 
 def test_post_registered_facilities(test_client, init_database):
     """
@@ -17,7 +19,7 @@ def test_post_registered_facilities(test_client, init_database):
     token = staff.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    payload = test_registered_facilities
+    payload = registeredfacilities_registered_facilities_data
     
     # send psot request for a new facility 
     response = test_client.post('/registeredfacility/',
@@ -38,8 +40,8 @@ def test_put_registered_facility(test_client, init_database):
     token = staff.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    test_registered_facilities["facility_address"] = "123 Test Address"
-    payload = test_registered_facilities
+    registerfacilities_registered_facilities_data["facility_address"] = "123 Test Address"
+    payload = registerfacilities_registered_facilities_data
     
     # send get request for facility info on facility_id = 1
     response = test_client.put('/registeredfacility/1/',
@@ -81,7 +83,7 @@ def test_post_client_facility(test_client, init_database):
     token = staff.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    payload = test_client_facilities
+    payload = registeredfacilities_client_facilities_data
 
     #send post request for a client-facility relation with facility_id = 1 and client_id = 1
     response = test_client.post('/registeredfacility/client/1/',

@@ -5,8 +5,7 @@ from flask.json import dumps
 
 from odyssey.models.staff import Staff
 from odyssey.models.trainer import PowerAssessment 
-from tests.data import test_medical_physical, test_power_assessment
-
+from tests.data.trainer.trainer_data import trainer_medical_physical_data, trainer_power_assessment_data
 
 def test_post_power_assessment(test_client, init_database):
     """
@@ -22,7 +21,7 @@ def test_post_power_assessment(test_client, init_database):
     ## the power assessment requires the client's vital weight in order to work
     # this is pulled from the medical physical data
     # so we submit a medical physical exam first
-    payload = test_medical_physical
+    payload = trainer_medical_physical_data
     
     # send get request for client info on clientid = 1 
     response = test_client.post('/doctor/physical/1/',
@@ -30,7 +29,7 @@ def test_post_power_assessment(test_client, init_database):
                                 data=dumps(payload), 
                                 content_type='application/json')
 
-    payload = test_power_assessment
+    payload = trainer_power_assessment_data
     # send get request for client info on clientid = 1 
     response = test_client.post('/trainer/assessment/power/1/',
                                 headers=headers, 
