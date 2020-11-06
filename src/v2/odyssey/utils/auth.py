@@ -114,8 +114,8 @@ class BasicAuth(object):
                 return None
             else:
                 raise LoginNotAuthorized
-        return None
-        
+        return None 
+
     def user_check(self, user, user_type, staff_roles=None):
         ''' user_check is to determine if the user accessing the API
             is a Staff member or Client '''

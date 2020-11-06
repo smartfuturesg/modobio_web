@@ -7,7 +7,7 @@ from odyssey.utils.auth import token_auth
 from odyssey.errors.handlers import ContentNotFound
 
 from odyssey.client.models import ClientFacilities
-from odyssey.misc.models import RegisteredFacilities
+from odyssey.registeredfacility.models import RegisteredFacilities
 from odyssey.client.schemas import ClientFacilitiesSchema
 from odyssey.staff.schemas import RegisteredFacilitiesSchema
 from odyssey.utils.misc import check_facility_existence, check_client_existence, check_client_facility_relation_existence

@@ -15,7 +15,7 @@ from odyssey.doctor.models import (
     MedicalBloodTestResultTypes, 
     MedicalImaging
 )
-from odyssey.misc.models import MedicalInstitutions
+from odyssey.registeredfacility.models import MedicalInstitutions
 from odyssey.staff.models import Staff
 from odyssey.api import api
 from odyssey.utils.auth import token_auth

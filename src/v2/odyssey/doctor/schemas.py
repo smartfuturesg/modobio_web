@@ -11,7 +11,7 @@ from odyssey.doctor.models import (
     MedicalBloodTestResultTypes
 )
 from odyssey.client.models import ClientExternalMR
-from odyssey.misc.models import MedicalInstitutions
+from odyssey.registeredfacility.models import MedicalInstitutions
 from odyssey.wearables.models import Wearables
 
 """

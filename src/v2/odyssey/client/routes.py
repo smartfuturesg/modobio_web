@@ -5,17 +5,7 @@ from flask import request, current_app
 from flask_accepts import accepts, responds
 from flask_restx import Resource, Api
 
-from odyssey.api import api
-from odyssey.utils.auth import token_auth
-from odyssey.errors.handlers import (
-    UserNotFound, 
-    ClientAlreadyExists, 
-    ClientNotFound, 
-    IllegalSetting, 
-    ContentNotFound
-)
 from odyssey import db
-from odyssey.constants import TABLE_TO_URI
 from odyssey.client.models import (
     ClientInfo,
     ClientConsent,
@@ -27,11 +17,21 @@ from odyssey.client.models import (
     ClientFacilities,
     RemoteRegistration
 )
+from odyssey.api import api
+from odyssey.utils.auth import token_auth
+from odyssey.errors.handlers import (
+    UserNotFound, 
+    ClientAlreadyExists, 
+    ClientNotFound, 
+    IllegalSetting, 
+    ContentNotFound
+)
+from odyssey.constants import TABLE_TO_URI
 from odyssey.doctor.models import MedicalHistory, MedicalPhysicalExam
 from odyssey.pt.models import PTHistory 
 from odyssey.staff.models import ClientRemovalRequests
 from odyssey.trainer.models import FitnessQuestionnaire
-from odyssey.misc.models import RegisteredFacilities
+from odyssey.registeredfacility.models import RegisteredFacilities
 from odyssey.pdf import to_pdf, merge_pdfs
 from odyssey.utils.email import send_email_remote_registration_portal, send_test_email
 from odyssey.utils.misc import check_client_existence

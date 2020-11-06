@@ -3,7 +3,7 @@ from marshmallow import Schema, fields, post_load, ValidationError, validates, v
 from marshmallow import post_load
 
 from odyssey import ma
-from odyssey.misc.models import RegisteredFacilities
+from odyssey.registeredfacility.models import RegisteredFacilities
 from odyssey.staff.models import Staff
 from odyssey.wearables.models import Wearables
 from odyssey.constants import STAFF_ROLES

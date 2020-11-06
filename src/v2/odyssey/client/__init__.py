@@ -1,5 +1,5 @@
 from flask import Blueprint
-from odyssey.client import routes
+#from odyssey.client import routes
 
 client_bp = Blueprint('client_bp', __name__)
 

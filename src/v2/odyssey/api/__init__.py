@@ -39,4 +39,4 @@ authorizations = {
 bp = Blueprint('api', __name__)
 api = Api(bp, authorizations=authorizations, security='apikey')
 
-import odyssey.api.version
+from odyssey.api import version
