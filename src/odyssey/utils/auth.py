@@ -9,7 +9,7 @@ from base64 import b64decode
 from odyssey.constants import ADMIN_ROLES, USER_TYPES, STAFF_ROLES
 
 # Import Errors
-from odyssey.api.errors import LoginNotAuthorized
+from odyssey.api.errors import LoginNotAuthorized, StaffNotFound
 
 from odyssey.models.user import User, UserLogin
 
@@ -154,9 +154,16 @@ class BasicAuth(object):
         if 'staff' in user_type:
             """check password for API user"""
             staff_member = User.query.filter_by(email=username.lower()).one_or_none()
-            staff_login  = UserLogin.filter_by(user_id = staff_member.user_id)
-            if staff_login and check_password_hash(staff_login.password, password):
-                return staff_member       
+            staff_login  = UserLogin.query.filter_by(user_id = staff_member.user_id).one_or_none()
+
+            if not staff_member:
+                raise StaffNotFound(message='Staff member does not exist')
+            elif not staff_login:
+                raise LoginNotAuthorized(message='Login details for staff are missing')
+            elif check_password_hash(staff_login.password, password):
+                return staff_member
+            else:
+                raise LoginNotAuthorized       
 
     def get_auth(self):
         ''' This method is to authorize basic connections '''
