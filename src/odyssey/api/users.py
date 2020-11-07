@@ -29,7 +29,7 @@ class ApiUser(Resource):
 
 @ns.route('/')
 class ApiNewUser(Resource):
-    @token_auth.login_required
+    # @token_auth.login_required
     @accepts(schema=NewUserSchema, api=ns)
     @responds(schema=UserSchema, status_code=201, api=ns)
     def post(self):

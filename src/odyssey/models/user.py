@@ -131,6 +131,9 @@ class User(db.Model):
 @db.event.listens_for(User, "after_insert")
 def add_modobio_id(mapper, connection, target):
     """
+    Listens for new entries into the User table and 
+    automatically assigns a modibio_id to new users.
+
     Parameters
     ----------
     mapper : ???
