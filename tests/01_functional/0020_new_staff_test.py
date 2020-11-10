@@ -21,7 +21,7 @@ def test_creating_new_staff(test_client, init_database):
     token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
     
-    response = test_client.post('/user/',
+    response = test_client.post('/user/staff/',
                                 headers=headers, 
                                 data=dumps(test_new_user_staff['userinfo']), 
                                 content_type='application/json')
@@ -45,7 +45,7 @@ def test_creating_new_staff_same_email(test_client, init_database):
     token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
     
-    response = test_client.post('/user/',
+    response = test_client.post('/user/staff/',
                                 headers=headers, 
                                 data=dumps(test_new_user_staff['userinfo']), 
                                 content_type='application/json')
