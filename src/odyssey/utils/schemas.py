@@ -1411,7 +1411,7 @@ class NewClientUserSchema(Schema):
     lastname = fields.String()
     email = fields.Email(validate=validate.Length(min=0,max=50))
     phone_number = fields.String(validate=validate.Length(min=0,max=50))
-    password = fields.String(validate=validate.Length(min=0,max=50))
+    password = fields.String(validate=validate.Length(min=0,max=50), dump_only=True)
     modobio_id = fields.String()
 
 class UserInfoSchema(Schema):
@@ -1423,6 +1423,7 @@ class UserInfoSchema(Schema):
     password = fields.String(description="password required when creating a staff member",
                             validate=validate.Length(min=0,max=50), 
                             required=False)
+    
 
 class StaffInfoSchema(Schema):
     """
@@ -1439,7 +1440,9 @@ class NewUserSchema(Schema):
     """
 
     userinfo = fields.Nested(UserInfoSchema, required=True)
-    staffinfo = fields.Nested(StaffInfoSchema, missing={})
+    staffinfo = fields.Nested(StaffInfoSchema,
+                              missing={}, 
+                              description="used when registering a staff member")
 
 #
 #   Schemas for the wearables API
