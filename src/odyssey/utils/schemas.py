@@ -27,7 +27,7 @@ from odyssey.models.client import (
 )
 from odyssey.models.misc import MedicalInstitutions, RegisteredFacilities
 from odyssey.models.pt import Chessboard, PTHistory
-from odyssey.models.staff import StaffProfile
+from odyssey.models.staff import StaffProfile, StaffRecentClients
 from odyssey.models.trainer import (
     FitnessQuestionnaire,
     HeartAssessment, 
@@ -1304,6 +1304,14 @@ class ClientExternalMREntrySchema(Schema):
 """
     Schemas for the staff API
 """
+class StaffRecentClientsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = StaffRecentClients
+
+    @post_load
+    def make_object(self, data):
+        return StaffRecentClients(**data)
+
 
 class StaffPasswordRecoveryContactSchema(Schema):
     """contact methods for password recovery.

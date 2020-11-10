@@ -7,7 +7,7 @@ from flask_accepts import accepts, responds
 import jwt
 
 from odyssey import db
-from odyssey.models.staff import StaffProfile
+from odyssey.models.staff import StaffProfile, StaffRecentClients
 from odyssey.models.user import User, UserLogin
 from odyssey.api import api
 from odyssey.utils.auth import token_auth
@@ -234,5 +234,39 @@ class ChangePassword(Resource):
 
         return 200
 
+@ns.route('recentclient/<int:client_user_id>/')
+class RecentClient(resource):
 
+    """register loaded client in StaffRecentClients table"""
+    @token_auth.login_required
+    @accepts(schema=StaffRecentClientsSchema, api=ns)
+    def post(self, client_user_id):
+        data = request.get_json()
+        data['staff_id'] = token_auth.current_user().user_id
 
+        #check if supplied client is already in staff recent clients
+        client_exists = StaffRecentClients.query.filter_by(staff_user_id=data['staff_id']).filter_by(client_user_id=client_user_id).one_or_none()
+        if client_exists:
+            #update timestamp
+            client_exists.timestamp = datetime.now()
+            db.session.add(client_exists)
+        else:
+            #enter new recent client information
+            recent_client_schema = StaffRecentClientsSchema().load(data)
+            db.session.add(recent_client_schema)
+            db.session.flush()
+
+            #check if staff member has more than 10 recent clients
+            staff_recent_searches = StaffRecentClients.query.filter_by(staff_user_id=data['staff_id']).order_by(StaffRecentClients.timestamp.asc()).all()
+            if len(staff_recent_searches) > 10:
+                #remove the oldest client in the list
+                db.session.delete(staff_recent_searches[0])
+        
+        db.session.commit()
+        return recent_client_schema
+
+    """get the 10 most recent clients a staff member has loaded"""
+    @token_auth.login_required
+    @accepts(schema=StaffRecentClientsSchema, api=ns)
+    def get(self):
+        return StaffRecentClients.query.filter_by(staff_user_id=token_auth.current_user().user_id).all()
