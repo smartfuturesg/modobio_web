@@ -7,7 +7,15 @@ from requests_oauthlib import OAuth2Session
 
 from odyssey.api import api
 from odyssey.api.errors import ContentNotFound, StaffEmailInUse, ClientEmailInUse
-from odyssey.utils.schemas import UserSchema, UserLoginSchema, NewUserSchema, StaffProfileSchema, ClientInfoSchema
+from odyssey.utils.schemas import (
+    ClientInfoSchema, 
+    NewClientUserSchema,
+    NewStaffUserSchema, 
+    StaffProfileSchema, 
+    StaffRolesSchema,
+    UserSchema, 
+    UserLoginSchema 
+)
 from odyssey.models.user import User
 from odyssey.utils.misc import check_user_existence
 from odyssey.utils.auth import token_auth
@@ -27,59 +35,87 @@ class ApiUser(Resource):
         return User.query.filter_by(user_id=user_id).one_or_none()
 
 
-@ns.route('/')
-class ApiNewUser(Resource):
-    # @token_auth.login_required
-    @accepts(schema=NewUserSchema, api=ns)
+@ns.route('/staff/')
+class NewStaffUser(Resource):
+    @token_auth.login_required
+    @accepts(schema=NewStaffUserSchema, api=ns)
     @responds(schema=UserSchema, status_code=201, api=ns)
     def post(self):
         
         data = request.get_json()
-        #staff user account creation request
-        if data['is_staff']:
-            user = User.query.filter_by(email=data.get('email')).first()
-            if user:
-                if user.is_staff:
-                    #user account already exists for this email and is already a staff account
-                    raise StaffEmailInUse(email=data.get('email'))
-                else:
-                    #user account exists but only the client portion of the account is defined
-                    user.is_staff = True
-                    staff_profile = StaffProfileSchema().load({'user_id': user.user_id})
-                    db.session.add(staff_profile)
+        
+        # Check if user exists already
+        user = User.query.filter_by(email=data.get('email')).first()
+
+        # store access role for later
+        access_roles = data.get('access_roles',[])
+        del data['access_roles']
+
+        if user:
+            if user.is_staff:
+                # user account already exists for this email and is already a staff account
+                raise StaffEmailInUse(email=data.get('email'))
             else:
-                #user account does not yet exist for this email
-                password = data['password']
-                del data['password']
-                user = UserSchema().load(data)
-                db.session.add(user)
-                db.session.flush()
-                user_login = UserLoginSchema().load({"user_id": user.user_id, "password": password})
-                staff_profile = StaffProfileSchema().load({"user_id": user.user_id})
-                db.session.add(user_login)
+                #user account exists but only the client portion of the account is defined
+                user.is_staff = True
+                staff_profile = StaffProfileSchema().load({'user_id': user.user_id})
                 db.session.add(staff_profile)
         else:
-            user = User.query.filter_by(email=data.get('email')).first()
-            if user:
-                if user.is_client:
-                    #user account already exists for this email and is already a client account
-                    raise ClientEmailInUse(email=data.get('email'))
-                else:
-                    #user account exists but only the staff portion of the account is defined
-                    user.is_client = True
-                    client_info = ClientInfoSchema().load({'user_id': user.user_id})
-                    db.session.add(client_info)
+            # user account does not yet exist for this email
+            password = data['password']
+            del data['password']
+            data["is_client"] = False
+            data["is_staff"] = True
+            # create entry into User table first
+            # use rthe generated user_id for UserLogin & StaffProfile tables
+            db.session.add(UserSchema().load(data)) 
+            db.session.flush()
+
+            user_login = UserLoginSchema().load({"user_id": user.user_id, "password": password})
+            staff_profile = StaffProfileSchema().load({"user_id": user.user_id})
+            db.session.add(user_login)
+            db.session.add(staff_profile)
+            
+        # create entries for role assignments 
+        for role in access_roles:
+            db.session.add(StaffRolesSchema().load(
+                                            {'user_id': user.user_id,
+                                             'role': role}
+                                            ))
+        return user
+
+@ns.route('/client/')
+class NewClientUser(Resource):
+    @token_auth.login_required
+    @accepts(schema=NewClientUserSchema, api=ns)
+    @responds(schema=UserSchema, status_code=201, api=ns)
+    def post(self): 
+        data = request.get_json()             
+        
+        user = User.query.filter_by(email=data.get('email')).first()
+        if user:
+            if user.is_client:
+                # user account already exists for this email and is already a client account
+                raise ClientEmailInUse(email=data.get('email'))
             else:
-                #user account does not yet exist for this email
-                password = data['password']
-                del data['password']
-                user = UserSchema().load(data)
-                db.session.add(user)
-                db.session.flush()
-                user_login = UserLoginSchema().load({"user_id": user.user_id, "password": password})
-                client_info = ClientInfoSchema().load({"user_id": user.user_id})
+                # user account exists but only the staff portion of the account is defined
+                user.is_client = True
+                client_info = ClientInfoSchema().load({'user_id': user.user_id})
                 db.session.add(client_info)
-                db.session.add(user_login)
+        else:
+            # user account does not yet exist for this email
+            password = data['password']
+            del data['password']
+            data["is_client"] = True
+            data["is_staff"] = False
+            user = UserSchema().load(data)
+            db.session.add(user)
+            db.session.flush()
+            user_login = UserLoginSchema().load({"user_id": user.user_id, "password": password})
+            client_info = ClientInfoSchema().load({"user_id": user.user_id})
+            db.session.add(client_info)
+            db.session.add(user_login)
+
         db.session.commit()
 
         return user

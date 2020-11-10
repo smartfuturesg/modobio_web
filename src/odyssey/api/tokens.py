@@ -21,7 +21,6 @@ class Token(Resource):
     def post(self):
         """generates a token for the 'current_user' immediately after password authentication"""
         user = basic_auth.current_user()
-        breakpoint()
         user_login = UserLogin.query.filter_by(user_id=user.user_id).one_or_none()
         return {'email': user.email, 
                 'firstname': user.firstname, 

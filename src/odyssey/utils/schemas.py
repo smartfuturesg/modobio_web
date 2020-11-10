@@ -27,7 +27,7 @@ from odyssey.models.client import (
 )
 from odyssey.models.misc import MedicalInstitutions, RegisteredFacilities
 from odyssey.models.pt import Chessboard, PTHistory
-from odyssey.models.staff import StaffProfile
+from odyssey.models.staff import StaffProfile, StaffRoles
 from odyssey.models.trainer import (
     FitnessQuestionnaire,
     HeartAssessment, 
@@ -40,7 +40,7 @@ from odyssey.models.trainer import (
 )
 from odyssey.models.wearables import Wearables, WearablesOura, WearablesFreeStyle
 from odyssey.utils.misc import list_average
-from odyssey.constants import STAFF_ROLES
+from odyssey.constants import ACCESS_ROLES
 
 class ClientSearchItemsSchema(Schema):
     user_id = fields.Integer()
@@ -1332,7 +1332,7 @@ class StaffProfileSchema(ma.SQLAlchemyAutoSchema):
 
     idx = fields.Integer()
     user_id = fields.Integer()
-    possible_roles = STAFF_ROLES
+    possible_roles = ACCESS_ROLES
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -1347,6 +1347,21 @@ class RegisteredFacilitiesSchema(Schema):
     @post_load
     def make_object(self, data, **kwargs):
         return RegisteredFacilities(**data)
+
+class StaffRolesSchema(Schema):
+    """
+    Schema loads data into a StaffRoles object
+    """
+    
+    user_id = fields.Integer()
+    role = fields.String()
+    # TDOD: default to false once verification process is created
+    verified = fields.Boolean(default=True) 
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return StaffRoles(**data)
+
 
 class ClientSummarySchema(Schema):
 
@@ -1385,16 +1400,45 @@ class UserLoginSchema(ma.SQLAlchemyAutoSchema):
         new_user.set_password(data['password'])
         return new_user
 
-class NewUserSchema(Schema):
-
+class NewStaffUserSchema(Schema):
+    """
+    Schema for validating payload which creates a new staff user
+    Accepts access_roles and login detail which are loaded into StaffRoles 
+    and UserLogin tables respectively
+    """
     firstname = fields.String()
     middlename = fields.String()
     lastname = fields.String()
     email = fields.Email(validate=validate.Length(min=0,max=50))
     phone_number = fields.String(validate=validate.Length(min=0,max=50))
     password = fields.String(validate=validate.Length(min=0,max=50))
-    is_staff = fields.Boolean()
-    is_client = fields.Boolean()
+    # is_staff = fields.Boolean(missing=True, dump_only = True)
+    # is_client = fields.Boolean(missing=True, dump_only = True)
+    access_roles = fields.List(fields.String,
+                description=f"Access roles the new user will have. Options include: {ACCESS_ROLES}"
+                )
+
+    @validates('access_roles')
+    def access_roles_options(self,values):
+        for value in values:
+            if value not in ACCESS_ROLES:
+                raise ValidationError(f"access role, {value} invalid. Please use one of the following: {ACCESS_ROLES}")
+
+class NewClientUserSchema(Schema):
+    """
+    Schema for validating which creates a new client user
+    """
+    firstname = fields.String()
+    middlename = fields.String()
+    lastname = fields.String()
+    email = fields.Email(validate=validate.Length(min=0,max=50))
+    phone_number = fields.String(validate=validate.Length(min=0,max=50))
+    password = fields.String(validate=validate.Length(min=0,max=50))
+    # is_staff = fields.Boolean(missing=False, dump_only = True)
+    # is_client = fields.Boolean(missing=True, dump_only = True)
+    access_roles = fields.List(fields.String,
+                description=f"Access roles the new user will have. Options include: {ACCESS_ROLES}"
+                )
 
 
 #
