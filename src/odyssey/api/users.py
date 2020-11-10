@@ -6,13 +6,12 @@ from flask_restx import Resource
 from requests_oauthlib import OAuth2Session
 
 from odyssey.api import api
-from odyssey.api.errors import ContentNotFound, StaffEmailInUse, ClientEmailInUse
+from odyssey.api.errors import ContentNotFound, InputError, StaffEmailInUse, ClientEmailInUse
 from odyssey.utils.schemas import (
     ClientInfoSchema, 
-    NewClientUserSchema,
-    NewStaffUserSchema, 
-    StaffProfileSchema, 
+    NewUserSchema,
     StaffRolesSchema,
+    StaffProfileSchema,
     UserSchema, 
     UserLoginSchema 
 )
@@ -38,23 +37,21 @@ class ApiUser(Resource):
 @ns.route('/staff/')
 class NewStaffUser(Resource):
     @token_auth.login_required
-    @accepts(schema=NewStaffUserSchema, api=ns)
+    @accepts(schema=NewUserSchema, api=ns)
     @responds(schema=UserSchema, status_code=201, api=ns)
     def post(self):
         
         data = request.get_json()
         
         # Check if user exists already
-        user = User.query.filter_by(email=data.get('email')).first()
+        user_info = data.get('userinfo')
+        staff_info = data.get('staffinfo')
 
-        # store access role for later
-        access_roles = data.get('access_roles',[])
-        del data['access_roles']
-
+        user = User.query.filter(User.email.ilike(user_info.get('email'))).first()
         if user:
             if user.is_staff:
                 # user account already exists for this email and is already a staff account
-                raise StaffEmailInUse(email=data.get('email'))
+                raise StaffEmailInUse(email=user_info.get('email'))
             else:
                 #user account exists but only the client portion of the account is defined
                 user.is_staff = True
@@ -62,13 +59,18 @@ class NewStaffUser(Resource):
                 db.session.add(staff_profile)
         else:
             # user account does not yet exist for this email
-            password = data['password']
-            del data['password']
-            data["is_client"] = False
-            data["is_staff"] = True
+            # require password
+            password = user_info.get('password', None)
+            if not password:
+                raise InputError(status_code=400,message='password required')
+            del user_info['password']
+            
+            user_info["is_client"] = False
+            user_info["is_staff"] = True
             # create entry into User table first
-            # use rthe generated user_id for UserLogin & StaffProfile tables
-            db.session.add(UserSchema().load(data)) 
+            # use the generated user_id for UserLogin & StaffProfile tables
+            user = UserSchema().load(user_info)
+            db.session.add(user) 
             db.session.flush()
 
             user_login = UserLoginSchema().load({"user_id": user.user_id, "password": password})
@@ -77,22 +79,23 @@ class NewStaffUser(Resource):
             db.session.add(staff_profile)
             
         # create entries for role assignments 
-        for role in access_roles:
+        for role in staff_info.get('access_roles', []):
             db.session.add(StaffRolesSchema().load(
                                             {'user_id': user.user_id,
                                              'role': role}
                                             ))
+        db.session.commit()
         return user
 
 @ns.route('/client/')
 class NewClientUser(Resource):
     @token_auth.login_required
-    @accepts(schema=NewClientUserSchema, api=ns)
+    @accepts(schema=NewUserSchema, api=ns)
     @responds(schema=UserSchema, status_code=201, api=ns)
     def post(self): 
         data = request.get_json()             
         
-        user = User.query.filter_by(email=data.get('email')).first()
+        user = User.query.filter(User.email.ilike(user_info.get('email'))).first()
         if user:
             if user.is_client:
                 # user account already exists for this email and is already a client account

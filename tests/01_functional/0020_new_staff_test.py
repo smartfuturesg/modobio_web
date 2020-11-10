@@ -21,9 +21,9 @@ def test_creating_new_staff(test_client, init_database):
     token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
     
-    response = test_client.post('/user/',
+    response = test_client.post('/user/staff/',
                                 headers=headers, 
-                                data=dumps(test_new_user_staff['userinfo']), 
+                                data=dumps(test_new_user_staff), 
                                 content_type='application/json')
     
     #the new staff member should be in the StaffProfile database 
@@ -45,10 +45,10 @@ def test_creating_new_staff_same_email(test_client, init_database):
     token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
     
-    response = test_client.post('/user/',
+    response = test_client.post('/user/staff/',
                                 headers=headers, 
-                                data=dumps(test_new_user_staff['userinfo']), 
+                                data=dumps(test_new_user_staff), 
                                 content_type='application/json')
-    
+                                
     # 409 should be returned because user email is already in use
     assert response.status_code == 409
