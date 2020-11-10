@@ -44,9 +44,10 @@ class NewStaffUser(Resource):
         data = request.get_json()
         
         # Check if user exists already
-        user = User.query.filter_by(email=data.get('email')).first()
         user_info = data.get('userinfo')
         staff_info = data.get('staffinfo')
+
+        user = User.query.filter(User.email.ilike(user_info.get('email'))).first()
         if user:
             if user.is_staff:
                 # user account already exists for this email and is already a staff account
@@ -83,7 +84,7 @@ class NewStaffUser(Resource):
                                             {'user_id': user.user_id,
                                              'role': role}
                                             ))
-        
+        db.session.commit()
         return user
 
 @ns.route('/client/')
@@ -94,7 +95,7 @@ class NewClientUser(Resource):
     def post(self): 
         data = request.get_json()             
         
-        user = User.query.filter_by(email=data.get('email')).first()
+        user = User.query.filter(User.email.ilike(user_info.get('email'))).first()
         if user:
             if user.is_client:
                 # user account already exists for this email and is already a client account
