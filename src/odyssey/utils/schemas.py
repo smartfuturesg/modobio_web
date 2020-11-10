@@ -1412,8 +1412,6 @@ class NewStaffUserSchema(Schema):
     email = fields.Email(validate=validate.Length(min=0,max=50))
     phone_number = fields.String(validate=validate.Length(min=0,max=50))
     password = fields.String(validate=validate.Length(min=0,max=50))
-    # is_staff = fields.Boolean(missing=True, dump_only = True)
-    # is_client = fields.Boolean(missing=True, dump_only = True)
     access_roles = fields.List(fields.String,
                 description=f"Access roles the new user will have. Options include: {ACCESS_ROLES}"
                 )
@@ -1434,12 +1432,6 @@ class NewClientUserSchema(Schema):
     email = fields.Email(validate=validate.Length(min=0,max=50))
     phone_number = fields.String(validate=validate.Length(min=0,max=50))
     password = fields.String(validate=validate.Length(min=0,max=50))
-    # is_staff = fields.Boolean(missing=False, dump_only = True)
-    # is_client = fields.Boolean(missing=True, dump_only = True)
-    access_roles = fields.List(fields.String,
-                description=f"Access roles the new user will have. Options include: {ACCESS_ROLES}"
-                )
-
 
 #
 #   Schemas for the wearables API
