@@ -14,6 +14,7 @@ from odyssey.utils.schemas import (
     StaffRolesSchema,
     StaffProfileSchema,
     UserSchema, 
+    NewClientUserSchema,
     UserLoginSchema 
 )
 from odyssey.models.user import User
@@ -92,7 +93,7 @@ class NewStaffUser(Resource):
 class NewClientUser(Resource):
     @token_auth.login_required
     @accepts(schema=NewUserSchema, api=ns)
-    @responds(schema=NewUserSchema, status_code=201, api=ns)
+    @responds(schema=NewClientUserSchema, status_code=201, api=ns)
     def post(self): 
         data = request.get_json()     
 
@@ -101,20 +102,22 @@ class NewClientUser(Resource):
         if user:
             if user.is_client:
                 # user account already exists for this email and is already a client account
-                raise ClientEmailInUse(email=data.get('email'))
+                raise ClientEmailInUse(email=user_info.get('email'))
             else:
                 # user account exists but only the staff portion of the account is defined
                 user.is_client = True
                 client_info = ClientInfoSchema().load({'user_id': user.user_id})
+                password=""
                 db.session.add(client_info)
         else:
             # user account does not yet exist for this email
             # create a password
             password=user_info.get('password')
             if not password:
-                password = user_info.get('email')+secrets.token_hex(4)
+                password = user_info.get('email')[:2]+secrets.token_hex(4)
             else:
                 del user_info['password']
+
             user_info["is_client"] = True
             user_info["is_staff"] = False
             user = UserSchema().load(user_info)
@@ -125,7 +128,9 @@ class NewClientUser(Resource):
             db.session.add(client_info)
             db.session.add(user_login)
 
-        breakpoint()
+        payload=user.__dict__
+        payload['password']=password
+        
         db.session.commit()
 
         return user

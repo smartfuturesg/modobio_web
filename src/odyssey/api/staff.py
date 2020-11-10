@@ -113,10 +113,10 @@ class StaffMembers(Resource):
         # system_admin: permisison to create staff admin.
         # staff_admin:  can create all other roles except staff/systemadmin
         if data.get('is_system_admin'):
-            raise UnauthorizedUser(message=f"Staff member with email {token_auth.current_user().email} is unauthorized to create a system administrator role.")
+            raise UnauthorizedUser(message=f"Staff member with email {token_auth.current_user()[0].email} is unauthorized to create a system administrator role.")
 
         if data.get('is_admin') and token_auth.current_user().get_admin_role() != 'sys_admin':
-            raise UnauthorizedUser(message=f"Staff member with email {token_auth.current_user().email} is unauthorized to create a staff administrator role. \
+            raise UnauthorizedUser(message=f"Staff member with email {token_auth.current_user()[0].email} is unauthorized to create a staff administrator role. \
                                  Please contact system admin")
    
         #remove user data from staff data

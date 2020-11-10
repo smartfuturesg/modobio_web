@@ -1379,6 +1379,7 @@ class ClientSummarySchema(Schema):
 class UserSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
+        exclude = ('created_at', 'updated_at')
 
     modobio_id = fields.String(missing=None, dump_only=True)
 
@@ -1424,7 +1425,7 @@ class UserLoginSchema(ma.SQLAlchemyAutoSchema):
 
 class NewClientUserSchema(Schema):
     """
-    Schema for validating which creates a new client user
+    Schema for validating payloads from the creation of a new client user
     """
     firstname = fields.String()
     middlename = fields.String()

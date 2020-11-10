@@ -62,7 +62,7 @@ class BasicAuth(object):
                 # let the request through to avoid unwanted interactions with
                 # CORS.
                 
-                user = self.authenticate(auth, user_type)
+                user, user_login = self.authenticate(auth, user_type)
                 
                 if user in (False, None):
                     raise LoginNotAuthorized()
@@ -75,7 +75,7 @@ class BasicAuth(object):
                 elif staff_role:
                     self.role_check(user,staff_role)                   
                 
-                g.flask_httpauth_user = user if user else None
+                g.flask_httpauth_user = (user, user_login) if user else (None,None)
                 return f(*args, **kwargs)
             return decorated
         
@@ -137,26 +137,24 @@ class BasicAuth(object):
         return 
 
     def verify_password(self, user_type, username, password):
-        ''' This method is used as a decorator and to store 
+        """ This method is used as a decorator and to store 
             the basic authorization password check
-            that is defined in auth.py '''
-        
-        if 'staff' in user_type:
-            """check password for API user"""
-            staff_member = User.query.filter_by(email=username.lower()).one_or_none()
-            # if staff member is not found in db, raise error
-            if not staff_member:
-                raise LoginNotAuthorized
+            that is defined in auth.py """
+    
+        user = User.query.filter_by(email=username.lower()).one_or_none()
+        # if staff member is not found in db, raise error
+        if not user:
+            raise LoginNotAuthorized
             
-            staff_login  = UserLogin.query.filter_by(user_id = staff_member.user_id).one_or_none()
+        user_login  = UserLogin.query.filter_by(user_id = user.user_id).one_or_none()
             
-            # make sure staff login details exist, check password
-            if not staff_login:
-                raise LoginNotAuthorized
-            elif check_password_hash(staff_login.password, password):
-                return staff_member
-            else:
-                raise LoginNotAuthorized         
+        # make sure staff login details exist, check password
+        if not user_login:
+            raise LoginNotAuthorized
+        elif check_password_hash(user_login.password, password):
+            return user, user_login
+        else:
+            raise LoginNotAuthorized         
 
     def get_auth(self):
         ''' This method is to authorize basic connections '''
