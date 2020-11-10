@@ -19,6 +19,7 @@ from odyssey.utils.schemas import (
     StaffPasswordUpdateSchema,
     StaffProfileSchema, 
     StaffSearchItemsSchema,
+    StaffRecentClientsSchema,
     UserSchema
 )
 
@@ -235,7 +236,7 @@ class ChangePassword(Resource):
         return 200
 
 @ns.route('recentclient/<int:client_user_id>/')
-class RecentClient(resource):
+class RecentClient(Resource):
 
     """register loaded client in StaffRecentClients table"""
     @token_auth.login_required
