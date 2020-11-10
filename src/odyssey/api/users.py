@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import secrets
 
 from flask import current_app, request, url_for
 from flask_accepts import accepts, responds
@@ -91,10 +92,11 @@ class NewStaffUser(Resource):
 class NewClientUser(Resource):
     @token_auth.login_required
     @accepts(schema=NewUserSchema, api=ns)
-    @responds(schema=UserSchema, status_code=201, api=ns)
+    @responds(schema=NewUserSchema, status_code=201, api=ns)
     def post(self): 
-        data = request.get_json()             
-        
+        data = request.get_json()     
+
+        user_info = data.get('userinfo')
         user = User.query.filter(User.email.ilike(user_info.get('email'))).first()
         if user:
             if user.is_client:
@@ -107,11 +109,15 @@ class NewClientUser(Resource):
                 db.session.add(client_info)
         else:
             # user account does not yet exist for this email
-            password = data['password']
-            del data['password']
-            data["is_client"] = True
-            data["is_staff"] = False
-            user = UserSchema().load(data)
+            # create a password
+            password=user_info.get('password')
+            if not password:
+                password = user_info.get('email')+secrets.token_hex(4)
+            else:
+                del user_info['password']
+            user_info["is_client"] = True
+            user_info["is_staff"] = False
+            user = UserSchema().load(user_info)
             db.session.add(user)
             db.session.flush()
             user_login = UserLoginSchema().load({"user_id": user.user_id, "password": password})
@@ -119,6 +125,7 @@ class NewClientUser(Resource):
             db.session.add(client_info)
             db.session.add(user_login)
 
+        breakpoint()
         db.session.commit()
 
         return user

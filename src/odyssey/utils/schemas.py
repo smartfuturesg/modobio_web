@@ -1422,17 +1422,17 @@ class UserLoginSchema(ma.SQLAlchemyAutoSchema):
 #             if value not in ACCESS_ROLES:
 #                 raise ValidationError(f"access role, {value} invalid. Please use one of the following: {ACCESS_ROLES}")
 
-# class NewClientUserSchema(Schema):
-#     """
-#     Schema for validating which creates a new client user
-#     """
-#     firstname = fields.String()
-#     middlename = fields.String()
-#     lastname = fields.String()
-#     email = fields.Email(validate=validate.Length(min=0,max=50))
-#     phone_number = fields.String(validate=validate.Length(min=0,max=50))
-#     password = fields.String(validate=validate.Length(min=0,max=50))
-
+class NewClientUserSchema(Schema):
+    """
+    Schema for validating which creates a new client user
+    """
+    firstname = fields.String()
+    middlename = fields.String()
+    lastname = fields.String()
+    email = fields.Email(validate=validate.Length(min=0,max=50))
+    phone_number = fields.String(validate=validate.Length(min=0,max=50))
+    password = fields.String(validate=validate.Length(min=0,max=50))
+    modobio_id = fields.String()
 
 class UserInfoSchema(Schema):
     firstname = fields.String()
