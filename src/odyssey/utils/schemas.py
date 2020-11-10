@@ -1401,27 +1401,6 @@ class UserLoginSchema(ma.SQLAlchemyAutoSchema):
         new_user.set_password(data['password'])
         return new_user
 
-# class NewStaffUserSchema(Schema):
-#     """
-#     Schema for validating payload which creates a new staff user
-#     Accepts access_roles and login detail which are loaded into StaffRoles 
-#     and UserLogin tables respectively
-#     """
-#     firstname = fields.String()
-#     middlename = fields.String()
-#     lastname = fields.String()
-#     email = fields.Email(validate=validate.Length(min=0,max=50))
-#     phone_number = fields.String(validate=validate.Length(min=0,max=50))
-#     password = fields.String(validate=validate.Length(min=0,max=50))
-#     access_roles = fields.List(fields.String,
-#                 description=f"Access roles the new user will have. Options include: {ACCESS_ROLES}"
-#                 )
-
-#     @validates('access_roles')
-#     def access_roles_options(self,values):
-#         for value in values:
-#             if value not in ACCESS_ROLES:
-#                 raise ValidationError(f"access role, {value} invalid. Please use one of the following: {ACCESS_ROLES}")
 
 class NewClientUserSchema(Schema):
     """
@@ -1450,8 +1429,9 @@ class StaffInfoSchema(Schema):
     Staff-user specific creation payload validation
     Currently just holds access_roles 
     """
-    access_roles = fields.List(fields.String,
-                description=f"Access roles the new user will have. Options include: {ACCESS_ROLES}"
+    access_roles = fields.List(
+                    fields.String(validate=validate.OneOf(ACCESS_ROLES)), 
+                    description=f"Access roles the new user will have. Options include: {ACCESS_ROLES}"
                 )
 class NewUserSchema(Schema):
     """

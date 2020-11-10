@@ -20,7 +20,6 @@ def test_password_update(test_client, init_database):
     staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
     token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
- 
     ###
     # Update Password with the correct current password and a 
     # valid new password
@@ -29,11 +28,10 @@ def test_password_update(test_client, init_database):
                 "new_password": test_user_passwords["new_password"]
     }
 
-    response = test_client.post('/staff/password/update',
+    response = test_client.post('/staff/password/update/',
                                 headers=headers,
                                 data=dumps(payload), 
                                 content_type='application/json')
-    
     # bring up staff member again for updated data
     staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).first()
 
@@ -45,7 +43,7 @@ def test_password_update(test_client, init_database):
     # valid new password
     ###
 
-    response = test_client.post('/staff/password/update',
+    response = test_client.post('/staff/password/update/',
                                 headers=headers,
                                 data=dumps(payload), 
                                 content_type='application/json')

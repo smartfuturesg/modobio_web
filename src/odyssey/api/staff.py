@@ -109,15 +109,15 @@ class StaffMembers(Resource):
         if staff:
             raise StaffEmailInUse(email=data.get('email'))
 
-        ## Role suppression
+        ## TODO: rework Role suppression
         # system_admin: permisison to create staff admin.
         # staff_admin:  can create all other roles except staff/systemadmin
-        if data.get('is_system_admin'):
-            raise UnauthorizedUser(message=f"Staff member with email {token_auth.current_user()[0].email} is unauthorized to create a system administrator role.")
+        # if data.get('is_system_admin'):
+        #     raise UnauthorizedUser(message=f"Staff member with email {token_auth.current_user()[0].email} is unauthorized to create a system administrator role.")
 
-        if data.get('is_admin') and token_auth.current_user().get_admin_role() != 'sys_admin':
-            raise UnauthorizedUser(message=f"Staff member with email {token_auth.current_user()[0].email} is unauthorized to create a staff administrator role. \
-                                 Please contact system admin")
+        # if data.get('is_admin') and token_auth.current_user()[0].get_admin_role() != 'sys_admin':
+        #     raise UnauthorizedUser(message=f"Staff member with email {token_auth.current_user()[0].email} is unauthorized to create a staff administrator role. \
+        #                          Please contact system admin")
    
         #remove user data from staff data
         user_data = {'email': data['email'], 'password': data['password']}
@@ -139,7 +139,7 @@ class StaffMembers(Resource):
 
         return new_staff
 
-@ns.route('/password/forgot-password/recovery-link')
+@ns.route('/password/forgot-password/recovery-link/')
 class PasswordResetEmail(Resource):
     """Password reset endpoints."""
     
@@ -205,7 +205,7 @@ class ResetPassword(Resource):
 
         return 200
 
-@ns.route('/password/update')
+@ns.route('/password/update/')
 class ChangePassword(Resource):
     """Reset the user's password."""
     @token_auth.login_required
@@ -218,14 +218,11 @@ class ChangePassword(Resource):
         """
 
         data = request.get_json()
-        staff_email = token_auth.current_user().email
-
         # bring up the staff member and reset their password
-        staff = User.query.filter_by(email=staff_email).one_or_none()
-        staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
+        _, user_login = token_auth.current_user()
 
-        if staffLogin.check_password(password=data["current_password"]):
-            staffLogin.set_password(data["new_password"])
+        if user_login.check_password(password=data["current_password"]):
+            user_login.set_password(data["new_password"])
         else:
             raise UnauthorizedUser(message="please enter the correct current password \
                                       otherwise, visit the password recovery endpoint \

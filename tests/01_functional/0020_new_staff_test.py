@@ -28,7 +28,6 @@ def test_creating_new_staff(test_client, init_database):
     
     #the new staff member should be in the StaffProfile database 
     staff = StaffProfile.query.filter_by(user_id=1).one_or_none()
-    
     # some simple checks for validity
     assert response.status_code == 201
     
