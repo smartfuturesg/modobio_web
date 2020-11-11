@@ -14,7 +14,7 @@ wearables_freestyle_data = {
     ]
 }
 
-wearables_freestyle_data_more = {
+wearables_freestyle_more_data = {
     'activation_timestamp': '2020-04-05T12:34:56.000',
     'glucose': [2.2, 3.3, 4.4, 5.5],
     'timestamps': [
@@ -26,7 +26,7 @@ wearables_freestyle_data_more = {
 }
 
 # Combine previous two to check against merge
-wearables_freestyle_data_combo = {
+wearables_freestyle_combo_data = {
     'activation_timestamp': '2020-04-05T12:34:56.000',
     'glucose': [1.1, 2.2, 3.3, 4.4, 5.5],
     'timestamps': [
@@ -38,13 +38,13 @@ wearables_freestyle_data_combo = {
     ]
 }
 
-wearables_freestyle_data_empty = {
+wearables_freestyle_empty_data = {
     'activation_timestamp': '2020-04-05T12:34:56.000',
     'glucose': [],
     'timestamps': []
 }
 
-wearables_freestyle_data_unequal = {
+wearables_freestyle_unequal_data = {
     'activation_timestamp': '2020-04-05T12:34:56.000',
     'glucose': [6.6, 7.7, 8.8],
     'timestamps': [
@@ -53,7 +53,7 @@ wearables_freestyle_data_unequal = {
     ]
 }
 
-wearables_freestyle_data_duplicate = {
+wearables_freestyle_duplicate_data = {
     'activation_timestamp': '2020-04-05T12:34:56.000',
     'glucose': [6.6, 7.7, 7.7],
     'timestamps': [

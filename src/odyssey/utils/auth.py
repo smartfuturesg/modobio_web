@@ -5,15 +5,13 @@ from werkzeug.security import safe_str_cmp, check_password_hash
 
 from base64 import b64decode
 
-# Objects are purely for comparison purposes
-from odyssey.models.staff import Staff
-from odyssey.models.client import RemoteRegistration
-
 # Constants to compare to
 from odyssey.constants import ADMIN_ROLES, USER_TYPES, STAFF_ROLES
 
 # Import Errors
 from odyssey.api.errors import LoginNotAuthorized
+
+from odyssey.models.user import User, UserLogin
 
 class BasicAuth(object):
     ''' BasicAuth class is the main authentication class for 
@@ -121,33 +119,13 @@ class BasicAuth(object):
             is a Staff member or Client '''
         # First check the user type. If the user_type is wrong, then
         # the user absolutely has no access
-
-        if len(user_type) == 2:
-            if not isinstance(user,(Staff,RemoteRegistration)):
-                # User is NEITHER Staff nor RemoteRegistration
+        
+        if 'staff' in user_type:
+            if not user.is_staff:
                 raise LoginNotAuthorized
-        else:
-            if 'staff' in user_type:
-                if not isinstance(user,Staff):
-                    raise LoginNotAuthorized
-                else:
-                    # USER IS STAFF
-                    return self.role_check(user,staff_roles)
-            
-            elif 'remoteregistration' in user_type:
-                if not isinstance(user,RemoteRegistration):
-                    raise LoginNotAuthorized
-                else:
-                    # USER IS CLIENT
-                    # Now, check if the api requires a clientid, and if it does,
-                    # the Current Client can ONLY see their own information
-                    if 'clientid' in request.args:
-                        # If the request parameter contains clientid,
-                        # check if the user's client id matches the parameter id
-                        # if they are NOT equal, return 411
-                        if user.clientid != request.args.get('clientid'):
-                            raise LoginNotAuthorized
-        return
+            else:
+                # USER IS STAFF
+                return self.role_check(user,staff_roles)
 
     def role_check(self, user, staff_roles=None):
         ''' role_check method will be used to determine if a Staff
@@ -175,16 +153,10 @@ class BasicAuth(object):
         
         if 'staff' in user_type:
             """check password for API user"""
-            staff_member = Staff.query.filter_by(email=username.lower()).one_or_none()
-            if staff_member and check_password_hash(staff_member.password, password):
-                return staff_member
-        elif 'remoteregistration' in user_type:
-            """check password for at-home client"""
-            client = RemoteRegistration.query.filter_by(
-                        email=username.lower()).order_by(
-                        RemoteRegistration.registration_portal_expiration.desc()).first()
-            if client and password == client.password:
-                return client            
+            staff_member = User.query.filter_by(email=username.lower()).one_or_none()
+            staff_login  = UserLogin.filter_by(user_id = staff_member.user_id)
+            if staff_login and check_password_hash(staff_login.password, password):
+                return staff_member       
 
     def get_auth(self):
         ''' This method is to authorize basic connections '''
@@ -236,10 +208,8 @@ class TokenAuth(BasicAuth):
         if user_type is None:
             user_type = ['staff']
 
-        if 'staff' in user_type:
-            return Staff.check_token(token) if token else None
-        elif 'remoteregistration' in user_type:
-            return RemoteRegistration.check_token(token) if token else None
+        return UserLogin.check_token(token) if token else None
+
 
     def get_auth(self):
         ''' This method is to authorize tokens '''

@@ -1,7 +1,7 @@
 
 from flask.json import dumps
 
-from odyssey.models.staff import Staff
+from odyssey.models.user import User, UserLogin
 from tests.data.trainer.trainer_data import trainer_medical_physical_data
 
 
@@ -12,13 +12,14 @@ def test_post_medical_physical(test_client, init_database):
     THEN check the response is valid
     """
     # get staff authorization to view client data
-    staff = Staff().query.first()
-    token = staff.get_token()
+    staff = User.query.filter_by(is_staff=True).first()
+    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
+    token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
     payload = trainer_medical_physical_data
     
-    # send get request for client info on clientid = 1 
+    # send get request for client info on user_id = 1 
     response = test_client.post('/doctor/physical/1/',
                                 headers=headers, 
                                 data=dumps(payload), 
@@ -32,13 +33,14 @@ def test_get_medical_physical(test_client, init_database):
     THEN check the response is valid
     """
     # get staff authorization to view client data
-    staff = Staff().query.first()
-    token = staff.get_token()
+    staff = User.query.filter_by(is_staff=True).first()
+    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
+    token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    # send get request for client info on clientid = 1 
+    # send get request for client info on user_id = 1 
     response = test_client.get('/doctor/physical/1/',
                                 headers=headers, 
                                 content_type='application/json')
+                                
     assert response.status_code == 200
-    

@@ -26,7 +26,7 @@ trainer_heart_assessment_data = {
 }
 
 trainer_strength_assessment_data = {
-    "clientid": 0,
+  "user_id": 0,
     "upper_push": {
     "right": {
       "estimated_10rm": 250,

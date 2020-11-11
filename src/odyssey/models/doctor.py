@@ -10,7 +10,8 @@ from odyssey import db
 class MedicalImaging(db.Model):
     """ Medical Imaging table.
 
-    A table to store information about uploaded medical images.
+    This table stores the medical imaging history of a client. 
+    As long as the user_id exists, we can add images to this table and search by user_id
     """
     __tablename__ = 'MedicalImaging'
 
@@ -35,11 +36,11 @@ class MedicalImaging(db.Model):
     :type: :class:`datetime.datetime`
     """
 
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid', ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
     """
-    Client ID number.
+    User ID number
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
     reporter_id = db.Column(db.Integer, nullable=False)
@@ -140,11 +141,11 @@ class MedicalHistory(db.Model):
     :type: :class:`datetime.datetime`
     """
 
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='MedicalHistory_clientid_fkey', ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
     """
-    Client ID number.
+    User ID number
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
     last_examination_date = db.Column(db.Date)
@@ -263,11 +264,11 @@ class MedicalPhysicalExam(db.Model):
     :type: int, primary key, autoincrement
     """
 
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid',name='MedicalPhysicalExam_clientid_fkey',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
     """
-    Client ID number.
+    User ID number
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
     reporter_id = db.Column(db.Integer, nullable=False)
@@ -495,7 +496,7 @@ class MedicalBloodTests(db.Model):
 
     __tablename__ = 'MedicalBloodTests'
 
-    testid = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    test_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     Unique ID number identifying the test.
 
@@ -516,11 +517,11 @@ class MedicalBloodTests(db.Model):
     :type: :class:`datetime.datetime`
     """
 
-    clientid = db.Column(db.Integer, db.ForeignKey('ClientInfo.clientid', ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
     """
-    Client ID number.
+    User ID number
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
     reporter_id = db.Column(db.Integer, nullable=False)
@@ -565,7 +566,7 @@ class MedicalBloodTestResultTypes(db.Model):
 
     __tablename__ = "MedicalBloodTestResultTypes"
 
-    resultid = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    result_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     Unique ID number identifying the results.
 
@@ -667,14 +668,14 @@ class MedicalBloodTestResults(db.Model):
     :type: :class:`datetime.datetime`
     """
 
-    testid = db.Column(db.Integer, db.ForeignKey('MedicalBloodTests.testid', ondelete="CASCADE"), nullable=False)
+    test_id = db.Column(db.Integer, db.ForeignKey('MedicalBloodTests.test_id', ondelete="CASCADE"), nullable=False)
     """
     Unique test ID number.
 
     :type: int, foreign key to :attr:`MedicalBloodTests.testid`
     """
 
-    resultid = db.Column(db.Integer, db.ForeignKey('MedicalBloodTestResultTypes.resultid', ondelete="CASCADE"), nullable=False)
+    result_id = db.Column(db.Integer, db.ForeignKey('MedicalBloodTestResultTypes.result_id', ondelete="CASCADE"), nullable=False)
     """
     Unique result ID number.
 
@@ -722,4 +723,4 @@ def add_rest_result_eval(mapper, connection, target):
     target : :class:`sqlalchemy.schema.Table`
         Target SQLAlchemy table, fixed to :class:`MedicalBloodTestResults` by decorator.
     """
-    connection.execute(BLOODTEST_EVAL.format(target.idx, target.resultid, target.result_value))
+    connection.execute(BLOODTEST_EVAL.format(target.idx, target.result_id, target.result_value))

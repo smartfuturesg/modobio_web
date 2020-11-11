@@ -3,7 +3,7 @@ import time
 
 from flask.json import dumps
 
-from odyssey.models.staff import Staff
+from odyssey.models.user import User, UserLogin
 from odyssey.models.doctor import MedicalBloodTests, MedicalBloodTestResults, MedicalBloodTestResultTypes
 from tests.data.doctor.doctor_data import doctor_blood_tests_data
 
@@ -11,18 +11,20 @@ from tests.data.doctor.doctor_data import doctor_blood_tests_data
 def test_post_medical_blood_test(test_client, init_database):
     """
     GIVEN a api end point for medical blood test
-    WHEN the '/doctor/bloodtest/<client id>/' resource  is requested (POST)
+    WHEN the '/doctor/bloodtest/<user_id>/' resource  is requested (POST)
     THEN check the response is valid
     """
     # get staff authorization to view client data
-    staff = Staff().query.first()
-    token = staff.get_token()
+    staff = User.query.filter_by(is_staff=True).first()
+    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
+    token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
     payload = doctor_blood_tests_data
     
-    # send post request for client info on clientid = 1 
-    response = test_client.post('/doctor/bloodtest/1/',
+    client = User.query.filter_by(is_client=True).first()
+    # send post request for client info on user_id = client.user_id
+    response = test_client.post('/doctor/bloodtest/' + str(client.user_id) + '/',
                                 headers=headers, 
                                 data=dumps(payload), 
                                 content_type='application/json')
@@ -35,12 +37,14 @@ def test_get_client_blood_tests(test_client, init_database):
     THEN check the response is valid
     """
     # get staff authorization to view client data
-    staff = Staff().query.first()
-    token = staff.get_token()
+    staff = User.query.filter_by(is_staff=True).first()
+    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
+    token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    # send get request for client blood tests on clientid = 1 
-    response = test_client.get('/doctor/bloodtest/all/1/',
+    client = User.query.filter_by(is_client=True).first()
+    # send get request for client blood tests on user_id = client.user_id
+    response = test_client.get('/doctor/bloodtest/all/'  + str(client.user_id) + '/',
                                 headers=headers, 
                                 content_type='application/json')
     assert response.status_code == 200
@@ -52,11 +56,13 @@ def test_get_blood_test_results(test_client, init_database):
     THEN check the response is valid
     """
     # get staff authorization to view client data
-    staff = Staff().query.first()
-    token = staff.get_token()
+    staff = User.query.filter_by(is_staff=True).first()
+    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
+    token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    # send get request for client info on clientid = 1 
+    client = User.query.filter_by(is_client=True).first()
+    # send get request for client info on user_id = client.user_id
     response = test_client.get('/doctor/bloodtest/results/1/',
                                 headers=headers, 
                                 content_type='application/json')
@@ -72,8 +78,9 @@ def test_get_blood_test_result_types(test_client, init_database):
     THEN check the response is valid
     """
     # get staff authorization to view client data
-    staff = Staff().query.first()
-    token = staff.get_token()
+    staff = User.query.filter_by(is_staff=True).first()
+    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
+    token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
     # send get request for client info on clientid = 1 

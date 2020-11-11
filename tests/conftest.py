@@ -1,5 +1,6 @@
 import os
 import pytest
+from datetime import datetime
 from sqlalchemy import text
 
 from odyssey import create_app, db
@@ -13,13 +14,10 @@ from odyssey.models.client import (
     ClientIndividualContract
 )
 from odyssey.models.misc import MedicalInstitutions
+from odyssey.models.user import User, UserLogin
 
-from odyssey.models.staff import Staff
+from tests.data.users.users_data import users_staff_member_data, users_client_new_creation_data, users_client_new_info_data
 
-from tests.data.clients.clients_data import clients_info_data
-from tests.data.staff.staff_data import staff_member_data
-
-    
 def clean_db(db):
     for table in reversed(db.metadata.sorted_tables):
         try:
@@ -68,22 +66,28 @@ def init_database():
     
         db.session.execute(text(''.join(dat)))
 
-    # Insert test client data
-    client_1 = ClientInfo(**clients_info_data)
+    # 1) Create User instance. modobio_id populated automatically
+    client_1 = User(**users_client_new_creation_data)
     db.session.add(client_1)
     db.session.flush()
 
-    rli = {'record_locator_id': ClientInfo().generate_record_locator_id(
-        firstname = client_1.firstname, 
-        lastname = client_1.lastname, 
-        clientid =client_1.clientid)}
+    # 2) User login
+    client_1_login = UserLogin(**{'user_id': client_1.user_id})
 
-    client_1.update(rli)
-    
+    # 3) Client info
+    users_client_new_info_data['user_id'] = client_1.user_id
+    client_1_info = ClientInfo(**users_client_new_info_data)
+    db.session.add(client_1_login)
+    db.session.add(client_1_info)
+    db.session.flush()
+
     # initialize a test staff member
-    staff_1 = Staff(**staff_member_data)
-    staff_1.set_password(staff_member_data['password'])
+    staff_1 = User(**users_staff_member_data)
     db.session.add(staff_1)
+    db.session.flush()
+    staff_1_login = UserLogin(**{"user_id": staff_1.user_id})
+    staff_1_login.set_password('password')
+    db.session.add(staff_1_login)
 
     #initialize Medical institutes table
     med_institute1 = MedicalInstitutions(institute_name='Mercy Gilbert Medical Center')

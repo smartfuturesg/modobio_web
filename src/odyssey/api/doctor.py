@@ -17,11 +17,10 @@ from odyssey.models.doctor import (
 )
 
 from odyssey.models.misc import MedicalInstitutions
-from odyssey.models.staff import Staff
+from odyssey.models.user import User
 from odyssey.api import api
 from odyssey.utils.auth import token_auth
 
-# from odyssey.api.auth import token_auth
 from odyssey.api.errors import (
     UserNotFound, 
     IllegalSetting, 
@@ -51,25 +50,25 @@ from odyssey.utils.schemas import (
 ns = api.namespace('doctor', description='Operations related to doctor')
 
 
-@ns.route('/images/<int:clientid>/')
-@ns.doc(params={'clientid': 'Client ID number'})
+@ns.route('/images/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
 class MedImaging(Resource):
     @token_auth.login_required
     @responds(schema=MedicalImagingSchema(many=True), api=ns)
-    def get(self, clientid):
-        """returns a json file of all the medical images in the database for the specified clientid
+    def get(self, user_id):
+        """returns a json file of all the medical images in the database for the specified user_id
 
             Note:
             image_path is a sharable url for an image saved in S3 Bucket,
             if running locally, it is the path to a local temp file
         """
-        check_client_existence(clientid)
+        check_client_existence(user_id)
         query = db.session.query(
-                    MedicalImaging, Staff.firstname, Staff.lastname
+                    MedicalImaging, User.firstname, User.lastname
                 ).filter(
-                    MedicalImaging.clientid == clientid
+                    MedicalImaging.user_id == user_id
                 ).filter(
-                    MedicalImaging.reporter_id == Staff.staffid
+                    MedicalImaging.reporter_id == User.user_id
                 ).all()
         
         # if no tests have been submitted
@@ -102,8 +101,8 @@ class MedImaging(Resource):
     #Unable to use @accepts because the input files come in a form-data, not json.
     @token_auth.login_required
     @responds(status_code=201, api=ns)
-    def post(self, clientid):
-        """For adding one or many medical images to the database for the specified clientid
+    def post(self, user_id):
+        """For adding one or many medical images to the database for the specified user_id
 
         Expects form-data
 
@@ -115,7 +114,7 @@ class MedImaging(Resource):
         "image_path": "string"
 
         """
-        check_client_existence(clientid)
+        check_client_existence(user_id)
         bucket_name = current_app.config['S3_BUCKET_NAME']
 
         # bring up reporting staff member
@@ -124,8 +123,8 @@ class MedImaging(Resource):
         #Verify at least 1 file with key-name:image is selected for upload
         if 'image' not in request.files:
             mi_data = mi_schema.load(request.form)
-            mi_data.clientid = clientid
-            mi_data.reporter_id = reporter.staffid
+            mi_data.user_id = user_id
+            mi_data.reporter_id = reporter.user_id
             db.session.add(mi_data)
             db.session.commit()
             return 
@@ -137,8 +136,8 @@ class MedImaging(Resource):
         
         for i, img in enumerate(files.getlist('image')):
             mi_data = mi_schema.load(request.form)
-            mi_data.clientid = clientid
-            mi_data.reporter_id = reporter.staffid
+            mi_data.user_id = user_id
+            mi_data.reporter_id = reporter.user_id
             date = mi_data.image_date
 
             #Verifying image size is within a safe threashold (MAX = 500 mb)
@@ -153,7 +152,7 @@ class MedImaging(Resource):
             img.seek(0)
 
             if current_app.config['LOCAL_CONFIG']:
-                path = pathlib.Path(bucket_name) / f'id{clientid:05d}' / 'medical_images'
+                path = pathlib.Path(bucket_name) / f'id{user_id:05d}' / 'medical_images'
                 path.mkdir(parents=True, exist_ok=True)
                 s3key = f'{mi_data.image_type}_{date}_{hex_token}_{i}{img_extension}'
                 file_name = (path / s3key).as_posix()
@@ -161,7 +160,7 @@ class MedImaging(Resource):
                 img.save(file_name)
 
             else:
-                s3key = f'id{clientid:05d}/medical_images/{mi_data.image_type}_{date}_{hex_token}_{i}{img_extension}'
+                s3key = f'id{user_id:05d}/medical_images/{mi_data.image_type}_{date}_{hex_token}_{i}{img_extension}'
                 s3 = boto3.resource('s3')
                 s3.Bucket(bucket_name).put_object(Key= s3key, Body=img.stream) 
                 mi_data.image_path = s3key  
@@ -171,28 +170,39 @@ class MedImaging(Resource):
         db.session.add_all(data_list)  
         db.session.commit()
 
-@ns.route('/bloodtest/<int:clientid>/')
-@ns.doc(params={'clientid': 'Client ID number'})
+@ns.route('/bloodtest/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
 class MedBloodTest(Resource):
+    @token_auth.login_required
+    @responds(schema=MedicalBloodTestSchema(many=True), api=ns)
+    def get(self, user_id):
+        check_client_existence(user_id)
+        blood_tests = MedicalBloodTests.query.filter_by(user_id=user_id).all()
+
+        if not blood_tests:
+            raise ContentNotFound()
+
+        return blood_tests
+
     @token_auth.login_required
     @accepts(schema=MedicalBloodTestsInputSchema, api=ns)
     @responds(schema=MedicalBloodTestSchema, status_code=201, api=ns)
-    def post(self, clientid):
+    def post(self, user_id):
         """
         Resource to submit a new blood test instance for the specified client.
 
-        Test submissions are given a testid which can be used to reference back
+        Test submissions are given a test_id which can be used to reference back
         to the results related to this submisison. Each submission may have 
         multiple results (e.g. in a panel)
         """
-        check_client_existence(clientid)
+        check_client_existence(user_id)
         data = request.get_json()
 
         # remove results from data, commit test info without results to db
         results = data['results']
         del data['results']
-        data['clientid'] = clientid
-        data['reporter_id'] = token_auth.current_user().staffid
+        data['user_id'] = user_id
+        data['reporter_id'] = token_auth.current_user().user_id
         client_bt = MedicalBloodTestSchema().load(data)
         
         db.session.add(client_bt)
@@ -201,41 +211,41 @@ class MedBloodTest(Resource):
         # insert results into the result table
         for result in results:
             check_blood_test_result_type_existence(result['result_name'])
-            resultid = MedicalBloodTestResultTypes.query.filter_by(result_name=result['result_name']).first().resultid
-            result_data = {'testid': client_bt.testid, 
-                           'resultid': resultid, 
+            result_id = MedicalBloodTestResultTypes.query.filter_by(result_name=result['result_name']).first().result_id
+            result_data = {'test_id': client_bt.test_id, 
+                           'result_id': result_id, 
                            'result_value': result['result_value']}
             db.session.add(MedicalBloodTestResultsSchema().load(result_data))
         
         db.session.commit()
         return client_bt
 
-@ns.route('/bloodtest/all/<int:clientid>/')
-@ns.doc(params={'clientid': 'Client ID number'})
-class MedBloodTest(Resource):
+@ns.route('/bloodtest/all/<int:user_id>/')
+@ns.doc(params={'user_id': 'Client ID number'})
+class MedBloodTestAll(Resource):
     @token_auth.login_required
     @responds(schema=AllMedicalBloodTestSchema, api=ns)
-    def get(self, clientid):
+    def get(self, user_id):
         """
         This resource returns every instance of blood test submissions for the 
-        specified clientid
+        specified user_id
 
-        Test submissions relate overall submission data: testid, date, notes, panel_type
+        Test submissions relate overall submission data: test_id, date, notes, panel_type
         to the actual results. Each submission may have multiple results
-        where the results can be referenced by the testid provided in this request
+        where the results can be referenced by the test_id provided in this request
         """
-        check_client_existence(clientid)
+        check_client_existence(user_id)
         blood_tests =  db.session.query(
-                    MedicalBloodTests, Staff.firstname, Staff.lastname
+                    MedicalBloodTests, User.firstname, User.lastname
                 ).filter(
-                    MedicalBloodTests.reporter_id == Staff.staffid
+                    MedicalBloodTests.reporter_id == User.user_id
                 ).filter(
-                    MedicalBloodTests.clientid == clientid
+                    MedicalBloodTests.user_id == user_id
                 ).all()
 
         if not blood_tests:
             raise ContentNotFound()
-        # prepare response items with reporter name from Staff table
+        # prepare response items with reporter name from User table
         response = []
         for test in blood_tests:
             data = test[0].__dict__
@@ -244,45 +254,45 @@ class MedBloodTest(Resource):
         payload = {}
         payload['items'] = response
         payload['total'] = len(blood_tests)
-        payload['clientid'] = clientid
+        payload['user_id'] = user_id
         return payload
 
 
-@ns.route('/bloodtest/results/<int:testid>/')
-@ns.doc(params={'testid': 'Test ID number'})
+@ns.route('/bloodtest/results/<int:test_id>/')
+@ns.doc(params={'test_id': 'Test ID number'})
 class MedBloodTestResults(Resource):
     """
     Resource for working with a single blood test 
-    entry instance, testid.
+    entry instance, test_id.
 
     Each test instance may have multiple test results. 
     """
     @token_auth.login_required
     @responds(schema=MedicalBloodTestResultsOutputSchema, api=ns)
-    def get(self, testid):
+    def get(self, test_id):
         """
-        Returns details of the test denoted by testid as well as 
+        Returns details of the test denoted by test_id as well as 
         the actual results submitted.
         """
         #query for join of MedicalBloodTestResults and MedicalBloodTestResultTypes tables
-        check_blood_test_existence(testid)
+        check_blood_test_existence(test_id)
         results =  db.session.query(
-                MedicalBloodTests, MedicalBloodTestResults, MedicalBloodTestResultTypes, Staff
+                MedicalBloodTests, MedicalBloodTestResults, MedicalBloodTestResultTypes, User
                 ).join(
                     MedicalBloodTestResultTypes
                 ).join(MedicalBloodTests
                 ).filter(
-                    MedicalBloodTests.testid == MedicalBloodTestResults.testid
+                    MedicalBloodTests.test_id == MedicalBloodTestResults.test_id
                 ).filter(
-                    MedicalBloodTests.testid==testid
+                    MedicalBloodTests.test_id==test_id
                 ).filter(
-                    MedicalBloodTests.reporter_id == Staff.staffid
+                    MedicalBloodTests.reporter_id == User.user_id
                 ).all()
         if len(results) == 0:
             raise ContentNotFound()
         
         # prepare response with test details   
-        nested_results = {'testid': testid, 
+        nested_results = {'test_id': test_id, 
                           'date' : results[0][0].date,
                           'notes' : results[0][0].notes,
                           'panel_type' : results[0][0].panel_type,
@@ -292,7 +302,7 @@ class MedBloodTestResults(Resource):
                           'results': []} 
         
         # loop through results in order to nest results in their respective test
-        # entry instances (testid)
+        # entry instances (test_id)
         for _, test_result, result_type, _ in results:
                 res = {'result_name': result_type.result_name, 
                         'result_value': test_result.result_value,
@@ -303,41 +313,41 @@ class MedBloodTestResults(Resource):
         payload['items'] = [nested_results]
         payload['tests'] = 1
         payload['test_results'] = len( nested_results['results'])
-        payload['clientid'] = results[0][0].clientid
+        payload['user_id'] = results[0][0].user_id
         return payload
 
-@ns.route('/bloodtest/results/all/<int:clientid>/')
-@ns.doc(params={'clientid': 'Client ID number'})
+@ns.route('/bloodtest/results/all/<int:user_id>/')
+@ns.doc(params={'user_id': 'Client ID number'})
 class AllMedBloodTestResults(Resource):
     """
     Endpoint for returning all blood test results from a client
     """
     @token_auth.login_required
     @responds(schema=MedicalBloodTestResultsOutputSchema, api=ns)
-    def get(self, clientid):
+    def get(self, user_id):
         # pull up all tests, test results, and the test type names for this client
         results =  db.session.query(
-                        MedicalBloodTests, MedicalBloodTestResults, MedicalBloodTestResultTypes, Staff
+                        MedicalBloodTests, MedicalBloodTestResults, MedicalBloodTestResultTypes, User
                         ).join(
                             MedicalBloodTestResultTypes
                         ).join(MedicalBloodTests
                         ).filter(
-                            MedicalBloodTests.testid == MedicalBloodTestResults.testid
+                            MedicalBloodTests.test_id == MedicalBloodTestResults.test_id
                         ).filter(
-                            MedicalBloodTests.clientid==clientid
+                            MedicalBloodTests.user_id==user_id
                         ).filter(
-                            MedicalBloodTests.reporter_id == Staff.staffid
+                            MedicalBloodTests.reporter_id == User.user_id
                         ).all()
 
-        test_ids = set([(x[0].testid, x[0].reporter_id, x[3].firstname, x[3].lastname) for x in results])
-        nested_results = [{'testid': x[0], 'reporter_id': x[1], 'reporter_firstname': x[2], 'reporter_lastname': x[3], 'results': []} for x in test_ids ]
+        test_ids = set([(x[0].test_id, x[0].reporter_id, x[3].firstname, x[3].lastname) for x in results])
+        nested_results = [{'test_id': x[0], 'reporter_id': x[1], 'reporter_firstname': x[2], 'reporter_lastname': x[3], 'results': []} for x in test_ids ]
         
         # loop through results in order to nest results in their respective test
-        # entry instances (testid)
+        # entry instances (test_id)
         for test_info, test_result, result_type, _ in results:
             for test in nested_results:
-                # add rest result to appropriate test entry instance (testid)
-                if test_result.testid == test['testid']:
+                # add rest result to appropriate test entry instance (test_id)
+                if test_result.test_id == test['test_id']:
                     res = {'result_name': result_type.result_name, 
                            'result_value': test_result.result_value,
                            'evaluation': test_result.evaluation}
@@ -351,7 +361,7 @@ class AllMedBloodTestResults(Resource):
         payload['items'] = nested_results
         payload['tests'] = len(test_ids)
         payload['test_results'] = len(results)
-        payload['clientid'] = clientid
+        payload['user_id'] = user_id
         return payload
 
 
@@ -367,16 +377,16 @@ class MedBloodTestResultTypes(Resource):
         payload = {'items' : bt_types, 'total' : len(bt_types)}
         return payload
 
-@ns.route('/medicalhistory/<int:clientid>/')
-@ns.doc(params={'clientid': 'Client ID number'})
+@ns.route('/medicalhistory/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
 class MedHistory(Resource):
     @token_auth.login_required
     @responds(schema=MedicalHistorySchema, api=ns)
-    def get(self, clientid):
-        """returns client's medical history as a json for the clientid specified"""
-        check_client_existence(clientid)
+    def get(self, user_id):
+        """returns client's medical history as a json for the user_id specified"""
+        check_client_existence(user_id)
 
-        client = MedicalHistory.query.filter_by(clientid=clientid).first()
+        client = MedicalHistory.query.filter_by(user_id=user_id).first()
 
         if not client:
             raise ContentNotFound()
@@ -386,18 +396,18 @@ class MedHistory(Resource):
     @token_auth.login_required
     @accepts(schema=MedicalHistorySchema, api=ns)
     @responds(schema=MedicalHistorySchema, status_code=201, api=ns)
-    def post(self, clientid):
-        """returns client's medical history as a json for the clientid specified"""
-        check_client_existence(clientid)
+    def post(self, user_id):
+        """returns client's medical history as a json for the user_id specified"""
+        check_client_existence(user_id)
 
-        current_med_history = MedicalHistory.query.filter_by(clientid=clientid).first()
+        current_med_history = MedicalHistory.query.filter_by(user_id=user_id).first()
         
         if current_med_history:
-            raise IllegalSetting(message=f"Medical History for clientid {clientid} already exists. Please use PUT method")
+            raise IllegalSetting(message=f"Medical History for user_id {user_id} already exists. Please use PUT method")
 
 
         data = request.get_json()
-        data["clientid"] = clientid
+        data["user_id"] = user_id
 
         mh_schema = MedicalHistorySchema()
 
@@ -411,14 +421,14 @@ class MedHistory(Resource):
     @token_auth.login_required
     @accepts(schema=MedicalHistorySchema, api=ns)
     @responds(schema=MedicalHistorySchema, api=ns)
-    def put(self, clientid):
-        """updates client's medical history as a json for the clientid specified"""
-        check_client_existence(clientid)
+    def put(self, user_id):
+        """updates client's medical history as a json for the user_id specified"""
+        check_client_existence(user_id)
 
-        client_mh = MedicalHistory.query.filter_by(clientid=clientid).first()
+        client_mh = MedicalHistory.query.filter_by(user_id=user_id).first()
 
         if not client_mh:
-            raise UserNotFound(clientid, message = f"The client with id: {clientid} does not yet have a medical history in the database")
+            raise UserNotFound(user_id, message = f"The client with id: {user_id} does not yet have a medical history in the database")
         
         # get payload and update the current instance followd by db commit
         data = request.get_json()
@@ -433,26 +443,27 @@ class MedHistory(Resource):
         return client_mh
 
 
-@ns.route('/physical/<int:clientid>/')
-@ns.doc(params={'clientid': 'Client ID number'})
+@ns.route('/physical/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
 class MedPhysical(Resource):
     @token_auth.login_required
     @responds(schema=MedicalPhysicalExamSchema(many=True), api=ns)
-    def get(self, clientid):
-        """returns all client's medical physical exams for the clientid specified"""
-        check_client_existence(clientid)
+    def get(self, user_id):
+        """returns all client's medical physical exams for the user_id specified"""
+        check_client_existence(user_id)
 
         query =  db.session.query(
-                MedicalPhysicalExam, Staff.firstname, Staff.lastname
+                MedicalPhysicalExam, User.firstname, User.lastname
                 ).filter(
-                    MedicalPhysicalExam.clientid == clientid
+                    MedicalPhysicalExam.user_id == user_id
                 ).filter(
-                    MedicalPhysicalExam.reporter_id == Staff.staffid
+                    MedicalPhysicalExam.reporter_id == User.user_id
                 ).all()
 
         if not query:
             raise ContentNotFound()
         # prepare response with staff name and medical physical data
+        
         response = []
         for data in query:
             physical = data[0].__dict__    
@@ -464,19 +475,19 @@ class MedPhysical(Resource):
     @token_auth.login_required
     @accepts(schema=MedicalPhysicalExamSchema, api=ns)
     @responds(schema=MedicalPhysicalExamSchema, status_code=201, api=ns)
-    def post(self, clientid):
-        """creates new db entry of client's medical physical exam as a json for the clientid specified"""
-        check_client_existence(clientid)
+    def post(self, user_id):
+        """creates new db entry of client's medical physical exam as a json for the clientuser_idid specified"""
+        check_client_existence(user_id)
 
         data = request.get_json()
-        data["clientid"] = clientid
+        data["user_id"] = user_id
 
         client_mp = MedicalPhysicalExamSchema().load(data)
 
         # look up the reporting staff member and add their id to the 
         # client's physical entry
         reporter = token_auth.current_user()
-        client_mp.reporter_id = reporter.staffid
+        client_mp.reporter_id = reporter.user_id
 
         # prepare api response with reporter name
         response = client_mp.__dict__.copy()
@@ -498,13 +509,13 @@ class AllMedInstitutes(Resource):
         
         return institutes
 
-@ns.route('/medicalinstitutions/recordid/<int:clientid>/')
-@ns.doc(params={'clientid': 'Client ID number'})
+@ns.route('/medicalinstitutions/recordid/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
 class ExternalMedicalRecordIDs(Resource):
     @token_auth.login_required
     @accepts(schema=ClientExternalMREntrySchema,  api=ns)
     @responds(schema=ClientExternalMREntrySchema,status_code=201, api=ns)
-    def post(self, clientid):
+    def post(self, user_id):
         """for submitting client medical record ids from external medical institutions"""
 
         data = request.get_json()
@@ -512,7 +523,7 @@ class ExternalMedicalRecordIDs(Resource):
         # the new institute into the dabase before proceeding
         data_cleaned = []
         for record in data['record_locators']:
-            record["clientid"] = clientid # add in the clientid
+            record["user_id"] = user_id # add in the user_id
             if record["institute_id"] == 9999 and len(record["institute_name"]) > 0:
                 # enter new insitute name into database
                 new_institute = MedicalInstitutions(institute_name = record["institute_name"])
@@ -531,9 +542,9 @@ class ExternalMedicalRecordIDs(Resource):
 
     @token_auth.login_required
     @responds(schema=ClientExternalMREntrySchema, api=ns)
-    def get(self, clientid):
-        """returns all medical record ids for clientid"""
+    def get(self, user_id):
+        """returns all medical record ids for user_id"""
 
-        client_med_record_ids = ClientExternalMR.query.filter_by(clientid=clientid).all()
+        client_med_record_ids = ClientExternalMR.query.filter_by(user_id=user_id).all()
 
         return client_med_record_ids

@@ -5,9 +5,8 @@ import time
 from flask.json import dumps
 from requests.auth import _basic_auth_str
 
-from odyssey.models.staff import Staff
-from tests.data.staff.staff_data import staff_user_passwords_data
-from werkzeug.security import check_password_hash
+from odyssey.models.user import User, UserLogin
+from tests.data.users.users_data import users_staff_passwords_data
 
 def test_password_update(test_client, init_database):
     """
@@ -16,16 +15,17 @@ def test_password_update(test_client, init_database):
     THEN check the response is valid
     """
     # Get staff member to update password
-    staff = Staff.query.first()
-    token = staff.get_token()
+    staff = User.query.filter_by(is_staff=True).first()
+    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
+    token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
  
     ###
     # Update Password with the correct current password and a 
     # valid new password
     ###
-    payload = {"current_password": staff_user_passwords_data["current_password"],
-                "new_password": staff_user_passwords_data["new_password"]
+    payload = {"current_password": users_staff_passwords_data["password"],
+                "new_password": users_staff_passwords_data["new_password"]
     }
 
     response = test_client.post('/staff/password/update',
@@ -34,10 +34,10 @@ def test_password_update(test_client, init_database):
                                 content_type='application/json')
     
     # bring up staff member again for updated data
-    staff = Staff.query.filter_by(email=staff.email).first()
+    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).first()
 
     assert response.status_code == 200
-    assert check_password_hash(staff.password, staff_user_passwords_data['new_password'])    
+    assert staffLogin.check_password(password=users_staff_passwords_data['new_password'])
 
     ###
     # Update Password with the incorrect current password and a 
@@ -50,7 +50,3 @@ def test_password_update(test_client, init_database):
                                 content_type='application/json')
     
     assert response.status_code == 401
-    
-
-
-

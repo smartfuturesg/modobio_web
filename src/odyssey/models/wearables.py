@@ -51,18 +51,18 @@ class Wearables(_Base):
     :type: :class:`datetime.datetime`
     """
 
-    clientid = Column(
+    user_id = Column(
         Integer,
         ForeignKey(
-             'ClientInfo.clientid',
+             'User.user_id',
              ondelete="CASCADE"
         ),
         nullable=False
     )
     """
-    Client ID number.
+    User ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
     has_oura = Column(Boolean, default=False, nullable=False)
@@ -99,10 +99,10 @@ class WearablesOura(_Base):
     :type: int, primary key, autoincrement
     """
 
-    clientid = Column(
+    user_id = Column(
         Integer,
         ForeignKey(
-             'ClientInfo.clientid',
+             'User.user_id',
              ondelete="CASCADE"
         ),
         nullable=False
@@ -110,7 +110,7 @@ class WearablesOura(_Base):
     """
     Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
@@ -180,10 +180,10 @@ class WearablesFreeStyle(_Base):
     :type: int, primary key, autoincrement
     """
 
-    clientid = Column(
+    user_id = Column(
         Integer,
         ForeignKey(
-             'ClientInfo.clientid',
+             'User.user_id',
              ondelete="CASCADE"
         ),
         nullable=False
@@ -191,7 +191,7 @@ class WearablesFreeStyle(_Base):
     """
     Client ID number.
 
-    :type: int, foreign key to :attr:`ClientInfo.clientid <odyssey.models.client.ClientInfo.clientid>`
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
