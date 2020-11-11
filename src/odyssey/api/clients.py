@@ -144,23 +144,37 @@ class ClientSummary(Resource):
         return data
 
 @ns.route('/clientsearch/')
-#@ns.doc(params={'page': 'request page for paginated clients list',
-#                'per_page': 'number of clients per page',
-#                'firstname': 'first name to search',
-#                'lastname': 'last name to search',
-#                'email': 'email to search',
-#                'phone': 'phone number to search',
-#                'dob': 'date of birth to search',
-#                'record_locator_id': 'record locator id to search'})
+@ns.doc(params={'page': 'request page for paginated clients list',
+                'per_page': 'number of clients per page',
+                'firstname': 'first name to search',
+                'lastname': 'last name to search',
+                'email': 'email to search',
+                'phone': 'phone number to search',
+                'dob': 'date of birth to search',
+                'record_locator_id': 'record locator id to search'})
 
 #todo - fix to work with new user system
 class Clients(Resource):
     @token_auth.login_required
-    #@responds(schema=ClientSearchOutSchema, api=ns)
-    @responds(schema=UserSchema(many=True), api=ns)
+    @responds(schema=ClientSearchOutSchema, api=ns)
+    #@responds(schema=UserSchema(many=True), api=ns)
     def get(self):
         """returns list of clients given query parameters"""
-        return User.query.filter_by(is_client=True).all()
+        clients = []
+        for user in User.query.filter_by(is_client=True).all():
+            client = {
+                'user_id': user.user_id,
+                'firstname': user.firstname,
+                'lastname': user.lastname,
+                'email': user.email,
+                'phone': user.phone_number,
+                'dob': None,
+                'record_locator_id': None,
+                'modobio_id': user.modobio_id
+            }
+            clients.append(client)
+        response = {'items': clients, '_meta': None, '_links': None}
+        return response
 
         # page = request.args.get('page', 1, type=int)
         # per_page = min(request.args.get('per_page', 10, type=int), 100)                 
