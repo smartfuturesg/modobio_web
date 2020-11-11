@@ -4,7 +4,9 @@ from flask.json import dumps
 from requests.auth import _basic_auth_str
 
 from odyssey.models.user import User, UserLogin
-from odyssey.models.staff import StaffProfile
+from odyssey.models.staff import StaffProfile, StaffRoles
+
+from odyssey.constants import ACCESS_ROLES
 
 from tests.data import (
     test_new_user_staff
@@ -68,3 +70,29 @@ def test_creating_new_staff_same_email(test_client, init_database):
                                 
     # 409 should be returned because user email is already in use
     assert response.status_code == 409
+
+
+def test_add_roles_to_staff(test_client, init_database):
+    """
+    GIVEN a api end point for creating a new staff 
+    WHEN the '/staff/roles/<user_id>/' resource  is requested to be created
+    THEN check the response is valid
+    """
+    # get staff authorization to view client data
+    staff = User.query.filter_by(is_staff=True).first()
+    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
+    token = staffLogin.get_token()
+    headers = {'Authorization': f'Bearer {token}'}
+    
+    payload = {'access_roles': ACCESS_ROLES}
+    response = test_client.post(f'/staff/roles/{staff.user_id}/',
+                                headers=headers, 
+                                data=dumps(payload), 
+                                content_type='application/json')
+    
+    staff_roles = StaffRoles.query.filter_by(user_id=staff.user_id).all()
+    staff_roles = [x.role for x in staff_roles]
+    
+    # some simple checks for validity
+    assert response.status_code == 201
+    assert staff_roles.sort() == ACCESS_ROLES.sort()
