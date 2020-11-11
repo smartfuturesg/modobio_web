@@ -385,17 +385,17 @@ ALPHANUMERIC = "BCDFGHJKLMNPQRSTVWXYZ01234567890123456789"
 # Authentication for admins, user_types, and roles
 USER_TYPES = ['staff', 'client']
 
-ACCESS_ROLES = ['stfappadmin',
-                'sysadmin',
-                'clntsvc',
-                'physthera',
-                'phystrain',
-                'datasci',
+ACCESS_ROLES = ['staff_admin',
+                'system_admin',
+                'client_services',
+                'physical_therapist',
+                'trainer',
+                'data_science',
                 'doctor',
                 'nutrition',
-                'clntsvc_internal',
-                'physthera_internal',
-                'phystrain_internal',
+                'client_services_internal',
+                'physical_therapist_internal',
+                'trainer_internal',
                 'doctor_internal',
                 'nutrition_internal']
 

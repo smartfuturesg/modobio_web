@@ -34,6 +34,7 @@ class StaffToken(Resource):
                 'firstname': user.firstname, 
                 'lastname': user.lastname, 
                 'token': user_login.get_token(),
+                'user_id': user.user_id,
                 'access_roles': [item[0] for item in access_roles]}, 201
 
     @ns.doc(security='password')

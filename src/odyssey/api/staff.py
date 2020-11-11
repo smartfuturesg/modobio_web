@@ -7,17 +7,19 @@ from flask_accepts import accepts, responds
 import jwt
 
 from odyssey import db
-from odyssey.models.staff import StaffProfile
+from odyssey.models.staff import StaffProfile, StaffRoles
 from odyssey.models.user import User, UserLogin
 from odyssey.api import api
 from odyssey.utils.auth import token_auth
 from odyssey.api.errors import UnauthorizedUser, StaffEmailInUse, StaffNotFound
 from odyssey.utils.email import send_email_password_reset
 from odyssey.utils.schemas import (
+    StaffInfoSchema,
     StaffPasswordRecoveryContactSchema, 
     StaffPasswordResetSchema,
     StaffPasswordUpdateSchema,
     StaffProfileSchema, 
+    StaffRolesSchema,
     StaffSearchItemsSchema,
     UserSchema
 )
@@ -139,6 +141,38 @@ class StaffMembers(Resource):
 
         return new_staff
 
+@ns.route('/roles/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class UpdateRoles(Resource):
+    """
+    View and update roles for staff member with a given user_id
+    """
+    @token_auth.login_required
+    @accepts(schema=StaffInfoSchema, api=ns)
+    @responds(status_code=201, api=ns)   
+    def post(self, user_id):
+        staff_user, _ = token_auth.current_user()
+
+        # staff are only allowed to edit their own info
+        if staff_user.user_id != user_id:
+            raise UnauthorizedUser(message="")
+        
+        data = request.get_json()
+        staff_roles = db.session.query(StaffRoles.role).filter(StaffRoles.user_id==user_id).all()
+        staff_roles = [x[0] for x in staff_roles]
+        staff_role_schema = StaffRolesSchema()
+
+        # loop through submitted roles, add role if not already in db
+        for role in data['access_roles']:
+            if role not in staff_roles:
+                db.session.add(staff_role_schema.load(
+                    {'user_id': user_id, 
+                    'role': role}))
+        
+        db.session.commit()
+        
+        return
+    
 @ns.route('/password/forgot-password/recovery-link/')
 class PasswordResetEmail(Resource):
     """Password reset endpoints."""
