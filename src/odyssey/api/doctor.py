@@ -118,7 +118,7 @@ class MedImaging(Resource):
         bucket_name = current_app.config['S3_BUCKET_NAME']
 
         # bring up reporting staff member
-        reporter = token_auth.current_user()
+        reporter = token_auth.current_user()[0]
         mi_schema = MedicalImagingSchema()
         #Verify at least 1 file with key-name:image is selected for upload
         if 'image' not in request.files:
@@ -197,12 +197,12 @@ class MedBloodTest(Resource):
         """
         check_client_existence(user_id)
         data = request.get_json()
-
+        
         # remove results from data, commit test info without results to db
         results = data['results']
         del data['results']
         data['user_id'] = user_id
-        data['reporter_id'] = token_auth.current_user().user_id
+        data['reporter_id'] = token_auth.current_user()[0].user_id
         client_bt = MedicalBloodTestSchema().load(data)
         
         db.session.add(client_bt)
@@ -486,7 +486,7 @@ class MedPhysical(Resource):
 
         # look up the reporting staff member and add their id to the 
         # client's physical entry
-        reporter = token_auth.current_user()
+        reporter = token_auth.current_user()[0]
         client_mp.reporter_id = reporter.user_id
 
         # prepare api response with reporter name

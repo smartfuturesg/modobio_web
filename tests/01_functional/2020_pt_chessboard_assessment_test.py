@@ -19,6 +19,13 @@ def test_post_chessboard_assessment(test_client, init_database):
     token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
     
+    # For COVERAGE, raise ContentNotFound error
+    response = test_client.get('/pt/chessboard/1/',
+                                headers=headers, 
+                                content_type='application/json')  
+
+    assert response.status_code == 204
+
     payload = trainer_chessboard_assessment_data
     # send get request for client info on user_id = 1 
     response = test_client.post('/pt/chessboard/1/',

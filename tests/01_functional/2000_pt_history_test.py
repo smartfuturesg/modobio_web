@@ -22,6 +22,22 @@ def test_post_pt_history(test_client, init_database):
 
     payload = pt_history_data
     
+    # For COVERAGE, raise a ContentNotFound error
+    # send get request for client info on user_id = 1
+    response = test_client.get('/pt/history/1/',
+                                headers=headers, 
+                                content_type='application/json')
+    assert response.status_code == 204
+
+    # For coverage, raise a UserNotFound error
+    # send get request for client info on user_id = 1 
+    response = test_client.put('/pt/history/1/',
+                                headers=headers, 
+                                data=dumps(payload), 
+                                content_type='application/json')
+
+    assert response.status_code == 404  
+
     # send get request for client info on user_id = 1 
     response = test_client.post('/pt/history/1/',
                                 headers=headers, 
@@ -45,6 +61,15 @@ def test_put_pt_history(test_client, init_database):
     pt_history_data["exercise"] = "test put"
     payload = pt_history_data
     
+    # For COVERAGE, raise an IllegalSettings Error
+    # send get request for client info on user_id = 1 
+    response = test_client.post('/pt/history/1/',
+                                headers=headers, 
+                                data=dumps(payload), 
+                                content_type='application/json')
+
+    assert response.status_code == 400
+
     # send get request for client info on user_id = 1 
     response = test_client.put('/pt/history/1/',
                                 headers=headers, 
@@ -55,6 +80,8 @@ def test_put_pt_history(test_client, init_database):
 
     assert response.status_code == 200
     assert client.exercise == "test put"
+
+
 
 def test_get_pt_history(test_client, init_database):
     """
@@ -68,9 +95,12 @@ def test_get_pt_history(test_client, init_database):
     token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
+
+
     # send get request for client info on user_id = 1 
     response = test_client.get('/pt/history/1/',
                                 headers=headers, 
                                 content_type='application/json')
                                 
     assert response.status_code == 200
+

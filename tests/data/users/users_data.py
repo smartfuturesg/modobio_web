@@ -15,9 +15,7 @@ users_new_user_client_data = {
     "lastname": "Client",
     "email": "test_this_user_client@modobio.com",
     "phone_number": "1111111111",
-    "password": "password",
-    "is_staff": False,
-    "is_client": True
+    "password": "password"
   },
   "clientinfo": {
     "guardianname": "guardian 1",
@@ -67,12 +65,13 @@ users_staff_new_user_data = {
     "lastname": "Staff",
     "email": "test_this_user_staff@modobio.com",
     "phone_number": "1111111112",
-    "password": "password",
-    "is_staff": True,
-    "is_client": False
+    "password": "password"
   },
   "staffinfo": {
-    "bio": "Test this bio"
+    "access_roles" : [
+            "doctor",
+            "doctor_internal"
+  ]
   }
 }
 

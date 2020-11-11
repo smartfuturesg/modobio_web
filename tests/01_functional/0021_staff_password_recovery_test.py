@@ -21,11 +21,10 @@ def test_password_recovery_link(test_client, init_database):
     staff = User.query.filter_by(is_staff=True).first()
     staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
     token = staffLogin.get_token()
-    headers = {'Authorization': f'Bearer {token}'}
  
     payload = {"email": staff.email}
 
-    response = test_client.post('/staff/password/forgot-password/recovery-link',
+    response = test_client.post('/staff/password/forgot-password/recovery-link/',
                                 data=dumps(payload), 
                                 content_type='application/json')
     
@@ -47,10 +46,9 @@ def test_full_password_recovery_routine(test_client, init_database):
     
     payload_email = {"email": staff.email}
 
-    response = test_client.post('/staff/password/forgot-password/recovery-link',
+    response = test_client.post('/staff/password/forgot-password/recovery-link/',
                                 data=dumps(payload_email), 
                                 content_type='application/json')
-    
     ##
     # Using the password reset token returned from the request above
     # send put request to reset password with new password in payload
@@ -62,7 +60,6 @@ def test_full_password_recovery_routine(test_client, init_database):
     response = test_client.put(f'/staff/password/forgot-password/reset?reset_token={pswd_rest_token}',
                                 data=dumps(payload_password_reset), 
                                 content_type='application/json')
-
     # re-query database for staff member
     staff = User.query.filter_by(email=staff.email).first()
 
