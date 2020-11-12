@@ -267,7 +267,6 @@ class ChangePassword(Resource):
 
         return 200
 
-@ns.param('user_id', 'User ID number', type=int)
 @ns.route('/recentclients/')
 class RecentClients(Resource):
     """get the 10 most recent clients a staff member has loaded"""
@@ -275,37 +274,3 @@ class RecentClients(Resource):
     @responds(schema=StaffRecentClientsSchema(many=True), api=ns)
     def get(self):
         return StaffRecentClients.query.filter_by(staff_user_id=token_auth.current_user()[0].user_id).all()
-    
-    """register loaded client in StaffRecentClients table"""
-    @token_auth.login_required
-    @accepts(schema=StaffRecentClientsSchema, api=ns)
-    @responds(schema=StaffRecentClientsSchema, api=ns, status_code=201)
-    def post(self):
-        data = request.get_json()
-        data['staff_user_id'] = token_auth.current_user()[0].user_id
-
-        #check supplied client id exists
-        check_client_existence(data['client_user_id'])
-
-        #check if supplied client is already in staff recent clients
-        client_exists = StaffRecentClients.query.filter_by(staff_user_id=data['staff_user_id']).filter_by(client_user_id=data['client_user_id']).one_or_none()
-        if client_exists:
-            #update timestamp
-            client_exists.timestamp = datetime.now()
-            db.session.add(client_exists)
-            db.session.commit()
-            return client_exists
-        else:
-            #enter new recent client information
-            recent_client_schema = StaffRecentClientsSchema().load(data)
-            db.session.add(recent_client_schema)
-            db.session.flush()
-
-            #check if staff member has more than 10 recent clients
-            staff_recent_searches = StaffRecentClients.query.filter_by(staff_user_id=data['staff_user_id']).order_by(StaffRecentClients.timestamp.asc()).all()
-            if len(staff_recent_searches) > 10:
-                #remove the oldest client in the list
-                db.session.delete(staff_recent_searches[0])
-        
-        db.session.commit()
-        return recent_client_schema
