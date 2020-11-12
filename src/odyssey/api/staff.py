@@ -266,7 +266,7 @@ class ChangePassword(Resource):
 
         return 200
 
-@ns.route('recentclient/<int:client_user_id>/')
+@ns.route('/recentclients/<int:client_user_id>/')
 class RecentClient(Resource):
 
     """register loaded client in StaffRecentClients table"""
