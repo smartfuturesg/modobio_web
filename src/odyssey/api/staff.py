@@ -267,6 +267,7 @@ class ChangePassword(Resource):
 
         return 200
 
+@ns.param('user_id', 'User ID number', type=int)
 @ns.route('/recentclients/')
 class RecentClients(Resource):
     """get the 10 most recent clients a staff member has loaded"""
