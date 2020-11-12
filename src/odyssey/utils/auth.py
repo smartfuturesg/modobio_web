@@ -5,15 +5,13 @@ from werkzeug.security import safe_str_cmp, check_password_hash
 
 from base64 import b64decode
 
-# Objects are purely for comparison purposes
-from odyssey.models.staff import Staff
-from odyssey.models.client import RemoteRegistration
-
 # Constants to compare to
-from odyssey.constants import ADMIN_ROLES, USER_TYPES, STAFF_ROLES
+from odyssey.constants import ACCESS_ROLES, USER_TYPES
 
 # Import Errors
-from odyssey.api.errors import LoginNotAuthorized
+from odyssey.api.errors import LoginNotAuthorized, StaffNotFound
+
+from odyssey.models.user import User, UserLogin
 
 class BasicAuth(object):
     ''' BasicAuth class is the main authentication class for 
@@ -23,7 +21,7 @@ class BasicAuth(object):
         self.scheme = scheme
         self.header = header
 
-    def login_required(self, f=None, admin_role=None, user_type=None, staff_role=None):
+    def login_required(self, f=None, user_type=None, staff_role=None):
         ''' The login_required method is the main method that we will be using
             for authenticating both tokens and basic authorizations.
             This method decorates each CRUD request and verifies the person
@@ -38,14 +36,6 @@ class BasicAuth(object):
                   authenticate(auth,pass)
         '''
         # Validate each entry
-        if admin_role is not None:
-            # Check if admin role is a list:
-            if type(admin_role) is not list:
-                raise ValueError('admin_role must be a list.')
-            else:
-                # Validate 
-                self.validate_roles(admin_role, ADMIN_ROLES)
-
         if user_type is not None:
             # Check if user type is a list:
             if type(user_type) is not list:
@@ -60,7 +50,7 @@ class BasicAuth(object):
                 raise ValueError('staff_role must be a list.')   
             else:
                 # Validate 
-                self.validate_roles(staff_role, STAFF_ROLES)                              
+                self.validate_roles(staff_role, ACCESS_ROLES)                              
 
         def login_required_internal(f):
             @wraps(f)
@@ -72,12 +62,10 @@ class BasicAuth(object):
                 # let the request through to avoid unwanted interactions with
                 # CORS.
                 
-                user = self.authenticate(auth, user_type)
+                user, user_login = self.authenticate(auth, user_type)
                 
                 if user in (False, None):
                     raise LoginNotAuthorized()
-                if admin_role:
-                    self.admin_check(user, admin_role)
                 if user_type:
                     # If user_type exists (Staff or Client, etc)
                     # Check if they are allowed access
@@ -87,7 +75,7 @@ class BasicAuth(object):
                 elif staff_role:
                     self.role_check(user,staff_role)                   
                 
-                g.flask_httpauth_user = user if user else None
+                g.flask_httpauth_user = (user, user_login) if user else (None,None)
                 return f(*args, **kwargs)
             return decorated
         
@@ -121,33 +109,13 @@ class BasicAuth(object):
             is a Staff member or Client '''
         # First check the user type. If the user_type is wrong, then
         # the user absolutely has no access
-
-        if len(user_type) == 2:
-            if not isinstance(user,(Staff,RemoteRegistration)):
-                # User is NEITHER Staff nor RemoteRegistration
+        
+        if 'staff' in user_type:
+            if not user.is_staff:
                 raise LoginNotAuthorized
-        else:
-            if 'staff' in user_type:
-                if not isinstance(user,Staff):
-                    raise LoginNotAuthorized
-                else:
-                    # USER IS STAFF
-                    return self.role_check(user,staff_roles)
-            
-            elif 'remoteregistration' in user_type:
-                if not isinstance(user,RemoteRegistration):
-                    raise LoginNotAuthorized
-                else:
-                    # USER IS CLIENT
-                    # Now, check if the api requires a clientid, and if it does,
-                    # the Current Client can ONLY see their own information
-                    if 'clientid' in request.args:
-                        # If the request parameter contains clientid,
-                        # check if the user's client id matches the parameter id
-                        # if they are NOT equal, return 411
-                        if user.clientid != request.args.get('clientid'):
-                            raise LoginNotAuthorized
-        return
+            else:
+                # USER IS STAFF
+                return self.role_check(user,staff_roles)
 
     def role_check(self, user, staff_roles=None):
         ''' role_check method will be used to determine if a Staff
@@ -169,22 +137,24 @@ class BasicAuth(object):
         return 
 
     def verify_password(self, user_type, username, password):
-        ''' This method is used as a decorator and to store 
+        """ This method is used as a decorator and to store 
             the basic authorization password check
-            that is defined in auth.py '''
-        
-        if 'staff' in user_type:
-            """check password for API user"""
-            staff_member = Staff.query.filter_by(email=username.lower()).one_or_none()
-            if staff_member and check_password_hash(staff_member.password, password):
-                return staff_member
-        elif 'remoteregistration' in user_type:
-            """check password for at-home client"""
-            client = RemoteRegistration.query.filter_by(
-                        email=username.lower()).order_by(
-                        RemoteRegistration.registration_portal_expiration.desc()).first()
-            if client and password == client.password:
-                return client            
+            that is defined in auth.py """
+    
+        user = User.query.filter_by(email=username.lower()).one_or_none()
+        # if staff member is not found in db, raise error
+        if not user:
+            raise LoginNotAuthorized
+            
+        user_login  = UserLogin.query.filter_by(user_id = user.user_id).one_or_none()
+            
+        # make sure staff login details exist, check password
+        if not user_login:
+            raise LoginNotAuthorized
+        elif check_password_hash(user_login.password, password):
+            return user, user_login
+        else:
+            raise LoginNotAuthorized         
 
     def get_auth(self):
         ''' This method is to authorize basic connections '''
@@ -231,15 +201,13 @@ class TokenAuth(BasicAuth):
     def verify_token(self, user_type, token):
         ''' verify_token is a method that is used as a decorator to store 
             the token checking process that is defined in auth.py '''
-        
+
         # TODO REMOVE THIS
         if user_type is None:
             user_type = ['staff']
 
-        if 'staff' in user_type:
-            return Staff.check_token(token) if token else None
-        elif 'remoteregistration' in user_type:
-            return RemoteRegistration.check_token(token) if token else None
+        return UserLogin.check_token(token) if token else (None,None)
+
 
     def get_auth(self):
         ''' This method is to authorize tokens '''

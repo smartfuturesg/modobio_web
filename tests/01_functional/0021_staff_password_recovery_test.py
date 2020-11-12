@@ -5,7 +5,7 @@ import time
 from flask.json import dumps
 from requests.auth import _basic_auth_str
 
-from odyssey.models.staff import Staff
+from odyssey.models.user import User, UserLogin
 
 from tests.data import test_user_passwords
 from werkzeug.security import check_password_hash
@@ -20,11 +20,13 @@ def test_password_recovery_link(test_client, init_database):
     THEN check the response is valid
     """
     # Get staff member to reset lost password
-    staff = Staff.query.first()
+    staff = User.query.filter_by(is_staff=True).first()
+    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
+    token = staffLogin.get_token()
  
     payload = {"email": staff.email}
 
-    response = test_client.post('/staff/password/forgot-password/recovery-link',
+    response = test_client.post('/staff/password/forgot-password/recovery-link/',
                                 data=dumps(payload), 
                                 content_type='application/json')
     
@@ -42,14 +44,13 @@ def test_full_password_recovery_routine(test_client, init_database):
     THEN check the response is valid
     """
     # Get staff member to reset lost password
-    staff = Staff.query.first()
+    staff = User.query.filter_by(is_staff=True).first()
     
     payload_email = {"email": staff.email}
 
-    response = test_client.post('/staff/password/forgot-password/recovery-link',
+    response = test_client.post('/staff/password/forgot-password/recovery-link/',
                                 data=dumps(payload_email), 
                                 content_type='application/json')
-    
     ##
     # Using the password reset token returned from the request above
     # send put request to reset password with new password in payload
@@ -61,9 +62,10 @@ def test_full_password_recovery_routine(test_client, init_database):
     response = test_client.put(f'/staff/password/forgot-password/reset?reset_token={pswd_rest_token}',
                                 data=dumps(payload_password_reset), 
                                 content_type='application/json')
-
     # re-query database for staff member
-    staff = Staff.query.filter_by(email=staff.email).first()
+    staff = User.query.filter_by(email=staff.email).first()
 
     assert response.status_code == 200
-    assert check_password_hash(staff.password, payload_password_reset['password'])    
+
+    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
+    assert staffLogin.check_password(password=payload_password_reset['password'])
