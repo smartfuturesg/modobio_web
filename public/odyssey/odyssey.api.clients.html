@@ -7,11 +7,11 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>odyssey.api.clients &mdash; Odyssey version: 0.1.66 documentation</title>
+  <title>odyssey.api.clients &mdash; Odyssey version: 0.1.71 documentation</title>
   
 
   
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
 
   
@@ -38,7 +38,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="odyssey.api.staff" href="odyssey.api.staff.html" />
-    <link rel="prev" title="API" href="odyssey.api.html" /> 
+    <link rel="prev" title="odyssey.api.users" href="odyssey.api.users.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                version: 0.1.66
+                version: 0.1.71
               </div>
             
           
@@ -91,15 +91,15 @@
 <li class="toctree-l1"><a class="reference internal" href="odyssey.config.html">Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.models.html">Models</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="odyssey.api.html">Endpoints</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.users.html">User</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Client</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.staff.html">Staff</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.doctor.html">Doctor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.pt.html">Physical therapist</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.trainer.html">Trainer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.remote_clients.html">Remote registration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey.api.registeredfacilities.html">Registered facilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.registered_facilities.html">Registered facilities</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.wearables.html">Wearable devices</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey.api.auth.html">Authorization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.tokens.html">Authorization tokens</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.errors.html">Error messages</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.postman.html">Postman</a></li>
@@ -182,13 +182,13 @@
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
 <dl class="py method">
 <dt id="odyssey.api.clients.Client.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.Client.get" title="Permalink to this definition">¶</a></dt>
-<dd><p>returns client info table as a json for the clientid specified</p>
+<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.Client.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns client info table as a json for the user_id specified</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="odyssey.api.clients.Client.put">
-<code class="sig-name descname">put</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.Client.put" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">put</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.Client.put" title="Permalink to this definition">¶</a></dt>
 <dd><p>edit client info</p>
 </dd></dl>
 
@@ -210,67 +210,12 @@
 </dd></dl>
 
 <dl class="py class">
-<dt id="odyssey.api.clients.RemoveClient">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.clients.</code><code class="sig-name descname">RemoveClient</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.RemoveClient" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
-<dl class="py method">
-<dt id="odyssey.api.clients.RemoveClient.delete">
-<code class="sig-name descname">delete</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.RemoveClient.delete" title="Permalink to this definition">¶</a></dt>
-<dd><p>deletes client from database entirely</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.api.clients.RemoveClient.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'client_remove_client'</em><a class="headerlink" href="#odyssey.api.clients.RemoveClient.endpoint" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt id="odyssey.api.clients.RemoveClient.mediatypes">
-<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.RemoveClient.mediatypes" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.api.clients.RemoveClient.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'DELETE'}</em><a class="headerlink" href="#odyssey.api.clients.RemoveClient.methods" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt id="odyssey.api.clients.NewClient">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.clients.</code><code class="sig-name descname">NewClient</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.NewClient" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
-<p>create new clients. This is part of the normal flow where clients register on location</p>
-<dl class="py method">
-<dt id="odyssey.api.clients.NewClient.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.NewClient.post" title="Permalink to this definition">¶</a></dt>
-<dd><p>create new client</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.api.clients.NewClient.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'client_new_client'</em><a class="headerlink" href="#odyssey.api.clients.NewClient.endpoint" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt id="odyssey.api.clients.NewClient.mediatypes">
-<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.NewClient.mediatypes" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.api.clients.NewClient.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'POST'}</em><a class="headerlink" href="#odyssey.api.clients.NewClient.methods" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
 <dt id="odyssey.api.clients.ClientSummary">
 <em class="property">class </em><code class="sig-prename descclassname">odyssey.api.clients.</code><code class="sig-name descname">ClientSummary</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.ClientSummary" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
 <dl class="py method">
 <dt id="odyssey.api.clients.ClientSummary.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.ClientSummary.get" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.ClientSummary.get" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -324,14 +269,14 @@
 <p>client consent forms</p>
 <dl class="py method">
 <dt id="odyssey.api.clients.ConsentContract.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.ConsentContract.get" title="Permalink to this definition">¶</a></dt>
-<dd><p>returns the most recent consent table as a json for the clientid specified</p>
+<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.ConsentContract.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns the most recent consent table as a json for the user_id specified</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="odyssey.api.clients.ConsentContract.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.ConsentContract.post" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create client consent contract for the specified clientid</p>
+<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.ConsentContract.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create client consent contract for the specified user_id</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -358,14 +303,14 @@
 <p>Client release forms</p>
 <dl class="py method">
 <dt id="odyssey.api.clients.ReleaseContract.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.ReleaseContract.get" title="Permalink to this definition">¶</a></dt>
-<dd><p>returns most recent client release table as a json for the clientid specified</p>
+<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.ReleaseContract.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns most recent client release table as a json for the user_id specified</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="odyssey.api.clients.ReleaseContract.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.ReleaseContract.post" title="Permalink to this definition">¶</a></dt>
-<dd><p>create client release contract object for the specified clientid</p>
+<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.ReleaseContract.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>create client release contract object for the specified user_id</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -392,14 +337,14 @@
 <p>Client policies form</p>
 <dl class="py method">
 <dt id="odyssey.api.clients.PoliciesContract.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.PoliciesContract.get" title="Permalink to this definition">¶</a></dt>
-<dd><p>returns most recent client policies table as a json for the clientid specified</p>
+<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.PoliciesContract.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns most recent client policies table as a json for the user_id specified</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="odyssey.api.clients.PoliciesContract.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.PoliciesContract.post" title="Permalink to this definition">¶</a></dt>
-<dd><p>create client policies contract object for the specified clientid</p>
+<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.PoliciesContract.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>create client policies contract object for the specified user_id</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -426,14 +371,14 @@
 <p>client consult contract</p>
 <dl class="py method">
 <dt id="odyssey.api.clients.ConsultConstract.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.ConsultConstract.get" title="Permalink to this definition">¶</a></dt>
-<dd><p>returns most recent client consultation table as a json for the clientid specified</p>
+<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.ConsultConstract.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns most recent client consultation table as a json for the user_id specified</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="odyssey.api.clients.ConsultConstract.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.ConsultConstract.post" title="Permalink to this definition">¶</a></dt>
-<dd><p>create client consult contract object for the specified clientid</p>
+<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.ConsultConstract.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>create client consult contract object for the specified user_id</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -460,14 +405,14 @@
 <p>client subscription contract</p>
 <dl class="py method">
 <dt id="odyssey.api.clients.SubscriptionContract.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.SubscriptionContract.get" title="Permalink to this definition">¶</a></dt>
-<dd><p>returns most recent client subscription contract table as a json for the clientid specified</p>
+<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.SubscriptionContract.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns most recent client subscription contract table as a json for the user_id specified</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="odyssey.api.clients.SubscriptionContract.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.SubscriptionContract.post" title="Permalink to this definition">¶</a></dt>
-<dd><p>create client subscription contract object for the specified clientid</p>
+<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.SubscriptionContract.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>create client subscription contract object for the specified user_id</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -494,14 +439,14 @@
 <p>client individual services contract</p>
 <dl class="py method">
 <dt id="odyssey.api.clients.IndividualContract.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.IndividualContract.get" title="Permalink to this definition">¶</a></dt>
-<dd><p>returns most recent client individual servies table as a json for the clientid specified</p>
+<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.IndividualContract.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns most recent client individual servies table as a json for the user_id specified</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="odyssey.api.clients.IndividualContract.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.IndividualContract.post" title="Permalink to this definition">¶</a></dt>
-<dd><p>create client individual services contract object for the specified clientid</p>
+<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.IndividualContract.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>create client individual services contract object for the specified user_id</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -538,11 +483,11 @@ by the client and stored as PDF files.</p>
 </dl>
 <dl class="py method">
 <dt id="odyssey.api.clients.SignedDocuments.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.SignedDocuments.get" title="Permalink to this definition">¶</a></dt>
-<dd><p>Given a clientid, returns a dict of URLs for all signed documents.</p>
+<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.SignedDocuments.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a user_id, returns a dict of URLs for all signed documents.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>clientid</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Client ID number</p>
+<dd class="field-odd"><p><strong>user_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – User ID number</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><em>dict</em> – Keys are the display names of the documents,
@@ -575,7 +520,7 @@ values are URLs to the generated PDF documents.</p>
 <p>Returns the outstanding forms needed to complete the client journey</p>
 <dl class="py method">
 <dt id="odyssey.api.clients.JourneyStatusCheck.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.JourneyStatusCheck.get" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.JourneyStatusCheck.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the client’s outstanding registration items and their URIs.</p>
 </dd></dl>
 
@@ -592,66 +537,6 @@ values are URLs to the generated PDF documents.</p>
 <dl class="py attribute">
 <dt id="odyssey.api.clients.JourneyStatusCheck.methods">
 <code class="sig-name descname">methods</code><em class="property"> = {'GET'}</em><a class="headerlink" href="#odyssey.api.clients.JourneyStatusCheck.methods" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt id="odyssey.api.clients.NewRemoteRegistration">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.clients.</code><code class="sig-name descname">NewRemoteRegistration</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.NewRemoteRegistration" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
-<p>initialize a client for remote registration</p>
-<dl class="py method">
-<dt id="odyssey.api.clients.NewRemoteRegistration.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.NewRemoteRegistration.post" title="Permalink to this definition">¶</a></dt>
-<dd><p>create new remote registration client
-this will create a new entry into the client info table first
-then create an entry into the Remote registration table
-response includes the hash required to access the temporary portal for
-this client</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.api.clients.NewRemoteRegistration.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'client_new_remote_registration'</em><a class="headerlink" href="#odyssey.api.clients.NewRemoteRegistration.endpoint" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt id="odyssey.api.clients.NewRemoteRegistration.mediatypes">
-<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.NewRemoteRegistration.mediatypes" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.api.clients.NewRemoteRegistration.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'POST'}</em><a class="headerlink" href="#odyssey.api.clients.NewRemoteRegistration.methods" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt id="odyssey.api.clients.RefreshRemoteRegistration">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.clients.</code><code class="sig-name descname">RefreshRemoteRegistration</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.RefreshRemoteRegistration" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
-<p>refresh client portal a client for remote registration</p>
-<dl class="py method">
-<dt id="odyssey.api.clients.RefreshRemoteRegistration.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.RefreshRemoteRegistration.post" title="Permalink to this definition">¶</a></dt>
-<dd><p>refresh the portal endpoint and password</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.api.clients.RefreshRemoteRegistration.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'client_refresh_remote_registration'</em><a class="headerlink" href="#odyssey.api.clients.RefreshRemoteRegistration.endpoint" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt id="odyssey.api.clients.RefreshRemoteRegistration.mediatypes">
-<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.clients.RefreshRemoteRegistration.mediatypes" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.api.clients.RefreshRemoteRegistration.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'POST'}</em><a class="headerlink" href="#odyssey.api.clients.RefreshRemoteRegistration.methods" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -725,7 +610,7 @@ this client</p>
         <a href="odyssey.api.staff.html" class="btn btn-neutral float-right" title="odyssey.api.staff" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="odyssey.api.html" class="btn btn-neutral float-left" title="API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="odyssey.api.users.html" class="btn btn-neutral float-left" title="odyssey.api.users" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

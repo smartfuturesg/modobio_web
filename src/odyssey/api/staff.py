@@ -7,17 +7,19 @@ from flask_accepts import accepts, responds
 import jwt
 
 from odyssey import db
-from odyssey.models.staff import StaffProfile
+from odyssey.models.staff import StaffProfile, StaffRoles
 from odyssey.models.user import User, UserLogin
 from odyssey.api import api
 from odyssey.utils.auth import token_auth
 from odyssey.api.errors import UnauthorizedUser, StaffEmailInUse, StaffNotFound
 from odyssey.utils.email import send_email_password_reset
 from odyssey.utils.schemas import (
+    StaffInfoSchema,
     StaffPasswordRecoveryContactSchema, 
     StaffPasswordResetSchema,
     StaffPasswordUpdateSchema,
     StaffProfileSchema, 
+    StaffRolesSchema,
     StaffSearchItemsSchema,
     UserSchema
 )
@@ -109,15 +111,15 @@ class StaffMembers(Resource):
         if staff:
             raise StaffEmailInUse(email=data.get('email'))
 
-        ## Role suppression
+        ## TODO: rework Role suppression
         # system_admin: permisison to create staff admin.
         # staff_admin:  can create all other roles except staff/systemadmin
-        if data.get('is_system_admin'):
-            raise UnauthorizedUser(message=f"Staff member with email {token_auth.current_user().email} is unauthorized to create a system administrator role.")
+        # if data.get('is_system_admin'):
+        #     raise UnauthorizedUser(message=f"Staff member with email {token_auth.current_user()[0].email} is unauthorized to create a system administrator role.")
 
-        if data.get('is_admin') and token_auth.current_user().get_admin_role() != 'sys_admin':
-            raise UnauthorizedUser(message=f"Staff member with email {token_auth.current_user().email} is unauthorized to create a staff administrator role. \
-                                 Please contact system admin")
+        # if data.get('is_admin') and token_auth.current_user()[0].get_admin_role() != 'sys_admin':
+        #     raise UnauthorizedUser(message=f"Staff member with email {token_auth.current_user()[0].email} is unauthorized to create a staff administrator role. \
+        #                          Please contact system admin")
    
         #remove user data from staff data
         user_data = {'email': data['email'], 'password': data['password']}
@@ -139,7 +141,39 @@ class StaffMembers(Resource):
 
         return new_staff
 
-@ns.route('/password/forgot-password/recovery-link')
+@ns.route('/roles/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class UpdateRoles(Resource):
+    """
+    View and update roles for staff member with a given user_id
+    """
+    @token_auth.login_required
+    @accepts(schema=StaffInfoSchema, api=ns)
+    @responds(status_code=201, api=ns)   
+    def post(self, user_id):
+        staff_user, _ = token_auth.current_user()
+
+        # staff are only allowed to edit their own info
+        if staff_user.user_id != user_id:
+            raise UnauthorizedUser(message="")
+        
+        data = request.get_json()
+        staff_roles = db.session.query(StaffRoles.role).filter(StaffRoles.user_id==user_id).all()
+        staff_roles = [x[0] for x in staff_roles]
+        staff_role_schema = StaffRolesSchema()
+
+        # loop through submitted roles, add role if not already in db
+        for role in data['access_roles']:
+            if role not in staff_roles:
+                db.session.add(staff_role_schema.load(
+                    {'user_id': user_id, 
+                    'role': role}))
+        
+        db.session.commit()
+        
+        return
+    
+@ns.route('/password/forgot-password/recovery-link/')
 class PasswordResetEmail(Resource):
     """Password reset endpoints."""
     
@@ -205,7 +239,7 @@ class ResetPassword(Resource):
 
         return 200
 
-@ns.route('/password/update')
+@ns.route('/password/update/')
 class ChangePassword(Resource):
     """Reset the user's password."""
     @token_auth.login_required
@@ -218,14 +252,11 @@ class ChangePassword(Resource):
         """
 
         data = request.get_json()
-        staff_email = token_auth.current_user().email
-
         # bring up the staff member and reset their password
-        staff = User.query.filter_by(email=staff_email).one_or_none()
-        staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
+        _, user_login = token_auth.current_user()
 
-        if staffLogin.check_password(password=data["current_password"]):
-            staffLogin.set_password(data["new_password"])
+        if user_login.check_password(password=data["current_password"]):
+            user_login.set_password(data["new_password"])
         else:
             raise UnauthorizedUser(message="please enter the correct current password \
                                       otherwise, visit the password recovery endpoint \

@@ -7,11 +7,11 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>odyssey.models.client &mdash; Odyssey version: 0.1.66 documentation</title>
+  <title>odyssey.models.client &mdash; Odyssey version: 0.1.71 documentation</title>
   
 
   
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
 
   
@@ -38,7 +38,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="odyssey.models.staff" href="odyssey.models.staff.html" />
-    <link rel="prev" title="Models" href="odyssey.models.html" /> 
+    <link rel="prev" title="odyssey.models.user" href="odyssey.models.user.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                version: 0.1.66
+                version: 0.1.71
               </div>
             
           
@@ -90,6 +90,7 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="odyssey.config.html">Configuration</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="odyssey.models.html">Models</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="odyssey.models.user.html">User</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Client</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.models.staff.html">Staff</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.models.doctor.html">Doctor</a></li>
@@ -177,28 +178,11 @@ All tables in this module are prefixed with <code class="docutils literal notran
 <em class="property">class </em><code class="sig-prename descclassname">odyssey.models.client.</code><code class="sig-name descname">ClientInfo</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.client.ClientInfo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
 <p>Client information table</p>
-<p>This table stores general information of a client. The primary index of
-this table is the <a class="reference internal" href="#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">clientid</span></code></a> number, the main identifier of clients
-in the system. Many other tables in this database refer to the <a class="reference internal" href="#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">clientid</span></code></a>
-number, so a new client <strong>must</strong> be added to this table first, in order to
-generate the <a class="reference internal" href="#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">clientid</span></code></a> number.</p>
+<p>This table stores general information of a client.</p>
 <dl class="py attribute">
-<dt id="odyssey.models.client.ClientInfo.clientid">
-<code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.clientid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client ID number.</p>
-<p>The main identifier of a client throughout the Modo Bio system.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, autoincrement</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.models.client.ClientInfo.membersince">
-<code class="sig-name descname">membersince</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.membersince" title="Permalink to this definition">¶</a></dt>
-<dd><p>Member since date</p>
-<p>The date a member was first added to the system.</p>
+<dt id="odyssey.models.client.ClientInfo.created_at">
+<code class="sig-name descname">created_at</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>timestamp for when object was created. DB server time is used.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
@@ -218,47 +202,35 @@ generate the <a class="reference internal" href="#odyssey.models.client.ClientIn
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.models.client.ClientInfo.firstname">
-<code class="sig-name descname">firstname</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.firstname" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client first name.</p>
+<dt id="odyssey.models.client.ClientInfo.idx">
+<code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>autoincrementing primary key</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 50</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, autoincrement</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.models.client.ClientInfo.middlename">
-<code class="sig-name descname">middlename</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.middlename" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client middle name(s).</p>
+<dt id="odyssey.models.client.ClientInfo.user_id">
+<code class="sig-name descname">user_id</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.user_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>User ID number, foreign key to User.user_id</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 50</p>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="odyssey.models.user.html#odyssey.models.user.User.user_id" title="odyssey.models.user.User.user_id"><code class="xref py py-attr docutils literal notranslate"><span class="pre">User.user_id</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.models.client.ClientInfo.lastname">
-<code class="sig-name descname">lastname</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.lastname" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client last name or family name.</p>
+<dt id="odyssey.models.client.ClientInfo.membersince">
+<code class="sig-name descname">membersince</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.membersince" title="Permalink to this definition">¶</a></dt>
+<dd><p>Member since date</p>
+<p>The date a client was first added to the system</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 50</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.models.client.ClientInfo.fullname">
-<code class="sig-name descname">fullname</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.fullname" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client full name.</p>
-<p>Create this field by combining <a class="reference internal" href="#odyssey.models.client.ClientInfo.firstname" title="odyssey.models.client.ClientInfo.firstname"><code class="xref py py-attr docutils literal notranslate"><span class="pre">firstname</span></code></a> + ‘ ‘ + <a class="reference internal" href="#odyssey.models.client.ClientInfo.lastname" title="odyssey.models.client.ClientInfo.lastname"><code class="xref py py-attr docutils literal notranslate"><span class="pre">lastname</span></code></a>.
-The full name is used for displaying and addressing the client.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 100</p>
+<dd class="field-odd"><p>datetime</p>
 </dd>
 </dl>
 </dd></dl>
@@ -343,59 +315,12 @@ The full name is used for displaying and addressing the client.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.models.client.ClientInfo.address">
-<code class="sig-name descname">address</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.address" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client full address.</p>
-<p>Generate by combining <a class="reference internal" href="#odyssey.models.client.ClientInfo.street" title="odyssey.models.client.ClientInfo.street"><code class="xref py py-attr docutils literal notranslate"><span class="pre">street</span></code></a>, <a class="reference internal" href="#odyssey.models.client.ClientInfo.city" title="odyssey.models.client.ClientInfo.city"><code class="xref py py-attr docutils literal notranslate"><span class="pre">city</span></code></a>, <a class="reference internal" href="#odyssey.models.client.ClientInfo.state" title="odyssey.models.client.ClientInfo.state"><code class="xref py py-attr docutils literal notranslate"><span class="pre">state</span></code></a>,
-<a class="reference internal" href="#odyssey.models.client.ClientInfo.zipcode" title="odyssey.models.client.ClientInfo.zipcode"><code class="xref py py-attr docutils literal notranslate"><span class="pre">zipcode</span></code></a>, and <a class="reference internal" href="#odyssey.models.client.ClientInfo.country" title="odyssey.models.client.ClientInfo.country"><code class="xref py py-attr docutils literal notranslate"><span class="pre">country</span></code></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 120</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.models.client.ClientInfo.email">
-<code class="sig-name descname">email</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.email" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client email address.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 50</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.models.client.ClientInfo.phone">
-<code class="sig-name descname">phone</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.phone" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client phone number.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 20</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
 <dt id="odyssey.models.client.ClientInfo.preferred">
 <code class="sig-name descname">preferred</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.preferred" title="Permalink to this definition">¶</a></dt>
 <dd><p>Client preferred contact method.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, smallint, signed int16</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.models.client.ClientInfo.ringsize">
-<code class="sig-name descname">ringsize</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.ringsize" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client ring size.</p>
-<p>Used for ordering an Oura Ring.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -491,8 +416,9 @@ The full name is used for displaying and addressing the client.</p>
 <dl class="py attribute">
 <dt id="odyssey.models.client.ClientInfo.record_locator_id">
 <code class="sig-name descname">record_locator_id</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.record_locator_id" title="Permalink to this definition">¶</a></dt>
-<dd><p>Medical decord Locator ID.</p>
-<p>See <a class="reference internal" href="#odyssey.models.client.ClientInfo.generate_record_locator_id" title="odyssey.models.client.ClientInfo.generate_record_locator_id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">generate_record_locator_id()</span></code></a>.</p>
+<dd><p>Deprecated. Use User.modobio_id instead
+Medical decord Locator ID.</p>
+<p>See <code class="xref py py-meth docutils literal notranslate"><span class="pre">generate_record_locator_id()</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 12</p>
@@ -501,34 +427,13 @@ The full name is used for displaying and addressing the client.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.models.client.ClientInfo.generate_record_locator_id">
-<em class="property">static </em><code class="sig-name descname">generate_record_locator_id</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">firstname</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span></em>, <em class="sig-param"><span class="n">lastname</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span></em>, <em class="sig-param"><span class="n">clientid</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><a class="headerlink" href="#odyssey.models.client.ClientInfo.generate_record_locator_id" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate the medical record identifier.</p>
-<p>The medical record identifier can be exported to other healthcare providers.
-It is made up of the firstname and lastname initials and 10 random alphanumeric
-characters.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>firstname</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Client first name.</p></li>
-<li><p><strong>lastname</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Client last name.</p></li>
-<li><p><strong>clientid</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Client ID number.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><em>str</em> – Medical record ID</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt id="odyssey.models.client.ClientInfo.client_info_search_dict">
-<code class="sig-name descname">client_info_search_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a><a class="headerlink" href="#odyssey.models.client.ClientInfo.client_info_search_dict" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">client_info_search_dict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a><a class="headerlink" href="#odyssey.models.client.ClientInfo.client_info_search_dict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Searchable client info.</p>
 <p>Returns a subset of the data in this row object.
 The returned dict contains the following keys:</p>
 <ul class="simple">
-<li><p>clientid</p></li>
+<li><p>user_id</p></li>
 <li><p>record_locator_id</p></li>
 <li><p>firstname</p></li>
 <li><p>lastename</p></li>
@@ -565,37 +470,6 @@ and <code class="docutils literal notranslate"><span class="pre">_meta</span></c
 <li><p><a class="reference external" href="https://flask-sqlalchemy.palletsprojects.com/en/2.x/api/#flask_sqlalchemy.Pagination" title="(in Flask-SQLAlchemy v2.x)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flask_sqlalchemy.Pagination</span></code></a> – An object holding the paginated search results from the SQLAlchemy query.</p></li>
 </ul>
 </p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.models.client.ClientInfo.query_class">
-<code class="sig-name descname">query_class</code><a class="headerlink" href="#odyssey.models.client.ClientInfo.query_class" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_whooshee.WhoosheeQuery</span></code></p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="odyssey.models.client.ClientInfo.whoosh_search">
-<em class="property">classmethod </em><code class="sig-name descname">whoosh_search</code><span class="sig-paren">(</span><em class="sig-param">search_string</em>, <em class="sig-param">values_of=''</em>, <em class="sig-param">group=&lt;class 'whoosh.qparser.syntax.OrGroup'&gt;</em>, <em class="sig-param">match_substrings=True</em>, <em class="sig-param">limit=None</em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.client.ClientInfo.whoosh_search" title="Permalink to this definition">¶</a></dt>
-<dd><p>Searches the fields for given search_string.
-Returns the found records if ‘values_of’ is left empty,
-else the values of the given columns.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>search_string</strong> – The string to search for.</p></li>
-<li><p><strong>values_of</strong> – If given, the method will not return the whole
-records, but only values of given column.
-Defaults to returning whole records.</p></li>
-<li><p><strong>group</strong> – The whoosh group to use for searching.
-Defaults to <a class="reference external" href="https://whoosh.readthedocs.io/en/latest/api/qparser.html#whoosh.qparser.OrGroup" title="(in Whoosh v2.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">whoosh.qparser.OrGroup</span></code></a> which
-searches for all words in all columns.</p></li>
-<li><p><strong>match_substrings</strong> – <code class="docutils literal notranslate"><span class="pre">True</span></code> if you want to match substrings,
-<code class="docutils literal notranslate"><span class="pre">False</span></code> otherwise.</p></li>
-<li><p><strong>limit</strong> – The number of the top records to be returned.
-Defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code> and returns all records.</p></li>
-</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -641,12 +515,12 @@ Defaults to <code class="docutils literal notranslate"><span class="pre">None</s
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.models.client.ClientFacilities.client_id">
-<code class="sig-name descname">client_id</code><a class="headerlink" href="#odyssey.models.client.ClientFacilities.client_id" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client ID number.</p>
+<dt id="odyssey.models.client.ClientFacilities.user_id">
+<code class="sig-name descname">user_id</code><a class="headerlink" href="#odyssey.models.client.ClientFacilities.user_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Foreign key from User table</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="odyssey.models.user.html#odyssey.models.user.User.user_id" title="odyssey.models.user.User.user_id"><code class="xref py py-attr docutils literal notranslate"><span class="pre">User.user_id</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -729,12 +603,12 @@ date (e.g. 20200519).</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.models.client.ClientConsent.clientid">
-<code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.client.ClientConsent.clientid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client ID number.</p>
+<dt id="odyssey.models.client.ClientConsent.user_id">
+<code class="sig-name descname">user_id</code><a class="headerlink" href="#odyssey.models.client.ClientConsent.user_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>User ID number.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="odyssey.models.user.html#odyssey.models.user.User.user_id" title="odyssey.models.user.User.user_id"><code class="xref py py-attr docutils literal notranslate"><span class="pre">User.user_id</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -876,12 +750,12 @@ date (e.g. 20200519).</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.models.client.ClientRelease.clientid">
-<code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.client.ClientRelease.clientid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client ID number.</p>
+<dt id="odyssey.models.client.ClientRelease.user_id">
+<code class="sig-name descname">user_id</code><a class="headerlink" href="#odyssey.models.client.ClientRelease.user_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>User ID number</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="odyssey.models.user.html#odyssey.models.user.User.user_id" title="odyssey.models.user.User.user_id"><code class="xref py py-attr docutils literal notranslate"><span class="pre">User.user_id</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1067,12 +941,12 @@ date (e.g. 20200519).</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.models.client.ClientPolicies.clientid">
-<code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.client.ClientPolicies.clientid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client ID number.</p>
+<dt id="odyssey.models.client.ClientPolicies.user_id">
+<code class="sig-name descname">user_id</code><a class="headerlink" href="#odyssey.models.client.ClientPolicies.user_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>User ID number</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="odyssey.models.user.html#odyssey.models.user.User.user_id" title="odyssey.models.user.User.user_id"><code class="xref py py-attr docutils literal notranslate"><span class="pre">User.user_id</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1203,12 +1077,12 @@ date (e.g. 20200519).</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.models.client.ClientConsultContract.clientid">
-<code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.client.ClientConsultContract.clientid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client ID number.</p>
+<dt id="odyssey.models.client.ClientConsultContract.user_id">
+<code class="sig-name descname">user_id</code><a class="headerlink" href="#odyssey.models.client.ClientConsultContract.user_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>User ID number</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="odyssey.models.user.html#odyssey.models.user.User.user_id" title="odyssey.models.user.User.user_id"><code class="xref py py-attr docutils literal notranslate"><span class="pre">User.user_id</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1339,12 +1213,12 @@ date (e.g. 20200519).</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.models.client.ClientSubscriptionContract.clientid">
-<code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.client.ClientSubscriptionContract.clientid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client ID number.</p>
+<dt id="odyssey.models.client.ClientSubscriptionContract.user_id">
+<code class="sig-name descname">user_id</code><a class="headerlink" href="#odyssey.models.client.ClientSubscriptionContract.user_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>User ID number</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="odyssey.models.user.html#odyssey.models.user.User.user_id" title="odyssey.models.user.User.user_id"><code class="xref py py-attr docutils literal notranslate"><span class="pre">User.user_id</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1472,12 +1346,12 @@ date (e.g. 20200519).</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.models.client.ClientIndividualContract.clientid">
-<code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.client.ClientIndividualContract.clientid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client ID number.</p>
+<dt id="odyssey.models.client.ClientIndividualContract.user_id">
+<code class="sig-name descname">user_id</code><a class="headerlink" href="#odyssey.models.client.ClientIndividualContract.user_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>User ID number</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="odyssey.models.user.html#odyssey.models.user.User.user_id" title="odyssey.models.user.User.user_id"><code class="xref py py-attr docutils literal notranslate"><span class="pre">User.user_id</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1587,195 +1461,6 @@ The revision stored here is the revision of the newest signed document.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt id="odyssey.models.client.RemoteRegistration">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.models.client.</code><code class="sig-name descname">RemoteRegistration</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.client.RemoteRegistration" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
-<p>At-home client registration table.</p>
-<p>Stores details to enable clients to register at home securely. This inclues the
-temporary registration url, client login details, and current api token. Each at-home
-client will have one entry in this table. Expired urls will remain for record keeping.</p>
-<dl class="py attribute">
-<dt id="odyssey.models.client.RemoteRegistration.idx">
-<code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.models.client.RemoteRegistration.idx" title="Permalink to this definition">¶</a></dt>
-<dd><p>Table index.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, autoincrement</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.models.client.RemoteRegistration.created_at">
-<code class="sig-name descname">created_at</code><a class="headerlink" href="#odyssey.models.client.RemoteRegistration.created_at" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creation timestamp of this row in the database.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.models.client.RemoteRegistration.updated_at">
-<code class="sig-name descname">updated_at</code><a class="headerlink" href="#odyssey.models.client.RemoteRegistration.updated_at" title="Permalink to this definition">¶</a></dt>
-<dd><p>Last update timestamp of this row in the database.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.models.client.RemoteRegistration.clientid">
-<code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.client.RemoteRegistration.clientid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client ID number.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.models.client.RemoteRegistration.email">
-<code class="sig-name descname">email</code><a class="headerlink" href="#odyssey.models.client.RemoteRegistration.email" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client email address.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 50</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.models.client.RemoteRegistration.token">
-<code class="sig-name descname">token</code><a class="headerlink" href="#odyssey.models.client.RemoteRegistration.token" title="Permalink to this definition">¶</a></dt>
-<dd><p>API authentication token.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 32, indexed, unique</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.models.client.RemoteRegistration.token_expiration">
-<code class="sig-name descname">token_expiration</code><a class="headerlink" href="#odyssey.models.client.RemoteRegistration.token_expiration" title="Permalink to this definition">¶</a></dt>
-<dd><p>Token expiration timestamp.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.models.client.RemoteRegistration.password">
-<code class="sig-name descname">password</code><a class="headerlink" href="#odyssey.models.client.RemoteRegistration.password" title="Permalink to this definition">¶</a></dt>
-<dd><p>Hashed password string, as generated by <a class="reference external" href="https://werkzeug.palletsprojects.com/en/1.0.x/utils/#werkzeug.security.generate_password_hash" title="(in Werkzeug v1.0.x)"><code class="xref py py-func docutils literal notranslate"><span class="pre">werkzeug.security.generate_password_hash()</span></code></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 128</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.models.client.RemoteRegistration.registration_portal_id">
-<code class="sig-name descname">registration_portal_id</code><a class="headerlink" href="#odyssey.models.client.RemoteRegistration.registration_portal_id" title="Permalink to this definition">¶</a></dt>
-<dd><p>Registration portal ID.</p>
-<p>This token is part of the URL that clients will use to sign up remotely. It is a randomly
-generated string. It provides security by making the sign-up URL hard to guess.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 32, indexed, unique</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.models.client.RemoteRegistration.registration_portal_expiration">
-<code class="sig-name descname">registration_portal_expiration</code><a class="headerlink" href="#odyssey.models.client.RemoteRegistration.registration_portal_expiration" title="Permalink to this definition">¶</a></dt>
-<dd><p>Registration portal ID expiration timestamp.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="odyssey.models.client.RemoteRegistration.get_temp_registration_endpoint">
-<code class="sig-name descname">get_temp_registration_endpoint</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">expires_in</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></span> <span class="o">=</span> <span class="default_value">86400</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><a class="headerlink" href="#odyssey.models.client.RemoteRegistration.get_temp_registration_endpoint" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate regustration portal ID.</p>
-<p>Generates a random, unique, and hard to guess portal ID meant for at-home
-registration. The ID expires in <cite>expires_in</cite> seconds. Both
-<a class="reference internal" href="#odyssey.models.client.RemoteRegistration.registration_portal_id" title="odyssey.models.client.RemoteRegistration.registration_portal_id"><code class="xref py py-attr docutils literal notranslate"><span class="pre">registration_portal_id</span></code></a> and <a class="reference internal" href="#odyssey.models.client.RemoteRegistration.registration_portal_expiration" title="odyssey.models.client.RemoteRegistration.registration_portal_expiration"><code class="xref py py-attr docutils literal notranslate"><span class="pre">registration_portal_expiration</span></code></a>
-are set in the database.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>expires_in</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Expiration in seconds from moment of token creation.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><em>str</em> – The registration portal ID token.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="odyssey.models.client.RemoteRegistration.set_password">
-<code class="sig-name descname">set_password</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><a class="headerlink" href="#odyssey.models.client.RemoteRegistration.set_password" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a temporary password.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><em>str</em> – Randomly generated password.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="odyssey.models.client.RemoteRegistration.check_password">
-<code class="sig-name descname">check_password</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">password</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a><a class="headerlink" href="#odyssey.models.client.RemoteRegistration.check_password" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check provided password against stored password.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>password</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The password to be checked.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><em>bool</em> – Whether the provided password is identical to the stored password.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="odyssey.models.client.RemoteRegistration.get_token">
-<code class="sig-name descname">get_token</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">expires_in</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></span> <span class="o">=</span> <span class="default_value">86400</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><a class="headerlink" href="#odyssey.models.client.RemoteRegistration.get_token" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get current token, create new if expired.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="odyssey.models.client.RemoteRegistration.revoke_token">
-<code class="sig-name descname">revoke_token</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.client.RemoteRegistration.revoke_token" title="Permalink to this definition">¶</a></dt>
-<dd><p>set token to expired, for logging out/generating new token</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="odyssey.models.client.RemoteRegistration.check_token">
-<em class="property">static </em><code class="sig-name descname">check_token</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">token</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.client.RemoteRegistration.check_token" title="Permalink to this definition">¶</a></dt>
-<dd><p>check if token is valid. returns user if so</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="odyssey.models.client.RemoteRegistration.check_portal_id">
-<em class="property">static </em><code class="sig-name descname">check_portal_id</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">portal_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.client.RemoteRegistration.check_portal_id" title="Permalink to this definition">¶</a></dt>
-<dd><p>check if token is valid. returns user if so</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
 <dt id="odyssey.models.client.ClientExternalMR">
 <em class="property">class </em><code class="sig-prename descclassname">odyssey.models.client.</code><code class="sig-name descname">ClientExternalMR</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.client.ClientExternalMR" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
@@ -1815,12 +1500,12 @@ are set in the database.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.models.client.ClientExternalMR.clientid">
-<code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.client.ClientExternalMR.clientid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client ID number.</p>
+<dt id="odyssey.models.client.ClientExternalMR.user_id">
+<code class="sig-name descname">user_id</code><a class="headerlink" href="#odyssey.models.client.ClientExternalMR.user_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>User ID number</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="odyssey.models.user.html#odyssey.models.user.User.user_id" title="odyssey.models.user.User.user_id"><code class="xref py py-attr docutils literal notranslate"><span class="pre">User.user_id</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1901,12 +1586,12 @@ are set in the database.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.models.client.ClientReleaseContacts.clientid">
-<code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.client.ClientReleaseContacts.clientid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client ID number.</p>
+<dt id="odyssey.models.client.ClientReleaseContacts.user_id">
+<code class="sig-name descname">user_id</code><a class="headerlink" href="#odyssey.models.client.ClientReleaseContacts.user_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>User ID number</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="odyssey.models.user.html#odyssey.models.user.User.user_id" title="odyssey.models.user.User.user_id"><code class="xref py py-attr docutils literal notranslate"><span class="pre">User.user_id</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1984,7 +1669,7 @@ This variable indicates the direction of the release. Must be either <code class
         <a href="odyssey.models.staff.html" class="btn btn-neutral float-right" title="odyssey.models.staff" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="odyssey.models.html" class="btn btn-neutral float-left" title="Models" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="odyssey.models.user.html" class="btn btn-neutral float-left" title="odyssey.models.user" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

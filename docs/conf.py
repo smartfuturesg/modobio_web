@@ -16,7 +16,7 @@ version = get_version(
 release = version
 
 project = 'Odyssey'
-author = 'Zan'
+author = 'AVP developers'
 
 with open('../LICENSE.md') as fh:
     copyright = fh.read().strip()
@@ -42,6 +42,8 @@ exclude_patterns = [
 ]
 
 html_theme = 'sphinx_rtd_theme'
+html_static_path = ['_static']
+html_style = 'css/custom.css'
 
 napoleon_use_ivar = True
 napoleon_use_rtype = False

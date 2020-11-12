@@ -131,6 +131,9 @@ class User(db.Model):
 @db.event.listens_for(User, "after_insert")
 def add_modobio_id(mapper, connection, target):
     """
+    Listens for new entries into the User table and 
+    automatically assigns a modibio_id to new users.
+
     Parameters
     ----------
     mapper : ???
@@ -261,4 +264,4 @@ class UserLogin(db.Model):
         if user_login is None or user_login.token_expiration < datetime.utcnow():
             return None
         user = User.query.filter_by(user_id=user_login.user_id).one_or_none()
-        return user
+        return user, user_login

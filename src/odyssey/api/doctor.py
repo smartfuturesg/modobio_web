@@ -46,6 +46,7 @@ from odyssey.utils.schemas import (
     MedicalBloodTestResultTypesSchema,
     MedicalImagingSchema
 )
+from odyssey.constants import MEDICAL_CONDITIONS
 
 ns = api.namespace('doctor', description='Operations related to doctor')
 
@@ -118,7 +119,7 @@ class MedImaging(Resource):
         bucket_name = current_app.config['S3_BUCKET_NAME']
 
         # bring up reporting staff member
-        reporter = token_auth.current_user()
+        reporter = token_auth.current_user()[0]
         mi_schema = MedicalImagingSchema()
         #Verify at least 1 file with key-name:image is selected for upload
         if 'image' not in request.files:
@@ -197,12 +198,12 @@ class MedBloodTest(Resource):
         """
         check_client_existence(user_id)
         data = request.get_json()
-
+        
         # remove results from data, commit test info without results to db
         results = data['results']
         del data['results']
         data['user_id'] = user_id
-        data['reporter_id'] = token_auth.current_user().user_id
+        data['reporter_id'] = token_auth.current_user()[0].user_id
         client_bt = MedicalBloodTestSchema().load(data)
         
         db.session.add(client_bt)
@@ -486,7 +487,7 @@ class MedPhysical(Resource):
 
         # look up the reporting staff member and add their id to the 
         # client's physical entry
-        reporter = token_auth.current_user()
+        reporter = token_auth.current_user()[0]
         client_mp.reporter_id = reporter.user_id
 
         # prepare api response with reporter name
@@ -548,3 +549,34 @@ class ExternalMedicalRecordIDs(Resource):
         client_med_record_ids = ClientExternalMR.query.filter_by(user_id=user_id).all()
 
         return client_med_record_ids
+
+
+def _generate_lut_endpoints(name, lut):
+    # Set up the GET method
+    @token_auth.login_required
+    @responds(status_code=200, api=ns)
+    def get(self):
+        return jsonify(lut)
+
+    # Normal docstring cannot be an f-string or use .format(), but this works.
+    get.__doc__ = f"""
+        Lookup table for supported medical conditions -- {name}.
+
+        Returns
+        -------
+        dict(dict(...))
+            Nested dicts, where the keys are the supported (category of)
+            medical issues. The values are either another dict to specify
+            a subdivision, or ``null`` indicating no further nesting.
+        """
+
+    # Create class based on name
+    endp = type(f'MedicalLUT{name}Endpoint', (Resource,), {'get': get})
+
+    # Add class as endpoint to namespace (instead of class decorator)
+    ns.add_resource(endp, f'/condition/{name}/')
+
+    return endp
+
+for name, lut in MEDICAL_CONDITIONS:
+    _generate_lut_endpoints(name, lut)
