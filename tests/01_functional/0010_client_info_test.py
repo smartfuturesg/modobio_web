@@ -1,3 +1,4 @@
+import base64
 import pathlib
 import time
 from datetime import datetime
@@ -90,10 +91,11 @@ def test_creating_new_client(test_client, init_database):
     token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
+    payload = {'userinfo': test_new_user_client['userinfo'] }
     # send post request for a new client user account
-    response = test_client.post('/user/',
+    response = test_client.post('/user/client/',
                                 headers=headers, 
-                                data=dumps(test_new_user_client['userinfo']), 
+                                data=dumps(payload), 
                                 content_type='application/json')
 
     user = User.query.filter_by(email=test_new_user_client['userinfo']['email']).first()
@@ -101,6 +103,17 @@ def test_creating_new_client(test_client, init_database):
     assert user.email == test_new_user_client['userinfo']['email']
     assert response.json['modobio_id']
 
+    # Use generated password to test token generation
+    password = response.json['password']
+    valid_credentials = base64.b64encode(
+            f"{test_new_user_client['userinfo']['email']}:{password}".encode("utf-8")).decode("utf-8")
+    
+    headers = {'Authorization': f'Basic {valid_credentials}'}
+    response = test_client.post('/tokens/client/',
+                            headers=headers, 
+                            content_type='application/json')
+
+    assert response.status_code == 201
 
 ############
 #Removing client is temporarily disabled until a better user deletion system is created
