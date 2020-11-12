@@ -46,7 +46,7 @@ from odyssey.utils.schemas import (
     MedicalBloodTestResultTypesSchema,
     MedicalImagingSchema
 )
-from odyssey.constants import MEDICAL_DISEASES
+from odyssey.constants import MEDICAL_CONDITIONS
 
 ns = api.namespace('doctor', description='Operations related to doctor')
 
@@ -560,7 +560,7 @@ def _generate_lut_endpoints(name, lut):
 
     # Normal docstring cannot be an f-string or use .format(), but this works.
     get.__doc__ = f"""
-        Lookup table for supported medical issues -- {name}.
+        Lookup table for supported medical conditions -- {name}.
 
         Returns
         -------
@@ -574,9 +574,9 @@ def _generate_lut_endpoints(name, lut):
     endp = type(f'MedicalLUT{name}Endpoint', (Resource,), {'get': get})
 
     # Add class as endpoint to namespace (instead of class decorator)
-    ns.add_resource(endp, f'/diseases/{name}/')
+    ns.add_resource(endp, f'/condition/{name}/')
 
     return endp
 
-for name, lut in MEDICAL_DISEASES:
+for name, lut in MEDICAL_CONDITIONS:
     _generate_lut_endpoints(name, lut)
