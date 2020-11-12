@@ -46,6 +46,7 @@ from odyssey.utils.schemas import (
     MedicalBloodTestResultTypesSchema,
     MedicalImagingSchema
 )
+from odyssey.constants import MEDICAL_DISEASES
 
 ns = api.namespace('doctor', description='Operations related to doctor')
 
@@ -548,3 +549,34 @@ class ExternalMedicalRecordIDs(Resource):
         client_med_record_ids = ClientExternalMR.query.filter_by(user_id=user_id).all()
 
         return client_med_record_ids
+
+
+def _generate_lut_endpoints(name, lut):
+    # Set up the GET method
+    @token_auth.login_required
+    @responds(status_code=200, api=ns)
+    def get(self):
+        return jsonify(lut)
+
+    # Normal docstring cannot be an f-string or use .format(), but this works.
+    get.__doc__ = f"""
+        Lookup table for supported medical issues -- {name}.
+
+        Returns
+        -------
+        dict(dict(...))
+            Nested dicts, where the keys are the supported (category of)
+            medical issues. The values are either another dict to specify
+            a subdivision, or ``null`` indicating no further nesting.
+        """
+
+    # Create class based on name
+    endp = type(f'MedicalLUT{name}Endpoint', (Resource,), {'get': get})
+
+    # Add class as endpoint to namespace (instead of class decorator)
+    ns.add_resource(endp, f'/diseases/{name}/')
+
+    return endp
+
+for name, lut in MEDICAL_DISEASES:
+    _generate_lut_endpoints(name, lut)
