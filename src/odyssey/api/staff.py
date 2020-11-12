@@ -267,7 +267,7 @@ class ChangePassword(Resource):
         return 200
 
 @ns.route('/recentclients/<int:client_user_id>/')
-class RecentClient(Resource):
+class UpdateRecentClients(Resource):
 
     """register loaded client in StaffRecentClients table"""
     @token_auth.login_required
@@ -297,6 +297,8 @@ class RecentClient(Resource):
         db.session.commit()
         return recent_client_schema
 
+@ns.route('/recentclients/')
+class RecentClients(Resource):
     """get the 10 most recent clients a staff member has loaded"""
     @token_auth.login_required
     @accepts(schema=StaffRecentClientsSchema, api=ns)
