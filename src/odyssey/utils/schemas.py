@@ -1304,12 +1304,14 @@ class ClientExternalMREntrySchema(Schema):
 """
     Schemas for the staff API
 """
-class StaffRecentClientsSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = StaffRecentClients
+class StaffRecentClientsSchema(Schema):
+    idx = fields.Integer()
+    staff_user_id = fields.Integer()
+    client_user_id = fields.Integer(required=True)
+    timestamp = fields.DateTime()
 
     @post_load
-    def make_object(self, data):
+    def make_object(self, data, **kwargs):
         return StaffRecentClients(**data)
 
 
