@@ -7,11 +7,11 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>odyssey.api.pt &mdash; Odyssey version: 0.1.66 documentation</title>
+  <title>odyssey.api.pt &mdash; Odyssey version: 0.1.71 documentation</title>
   
 
   
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                version: 0.1.66
+                version: 0.1.71
               </div>
             
           
@@ -91,15 +91,15 @@
 <li class="toctree-l1"><a class="reference internal" href="odyssey.config.html">Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.models.html">Models</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="odyssey.api.html">Endpoints</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.users.html">User</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.clients.html">Client</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.staff.html">Staff</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.doctor.html">Doctor</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Physical therapist</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.trainer.html">Trainer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.remote_clients.html">Remote registration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey.api.registeredfacilities.html">Registered facilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.registered_facilities.html">Registered facilities</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.wearables.html">Wearable devices</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey.api.auth.html">Authorization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.tokens.html">Authorization tokens</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.errors.html">Error messages</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.postman.html">Postman</a></li>
@@ -183,19 +183,19 @@
 <p>GET, POST, PUT for pt history data</p>
 <dl class="py method">
 <dt id="odyssey.api.pt.ClientPTHistory.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.pt.ClientPTHistory.get" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.pt.ClientPTHistory.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns most recent pt history</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="odyssey.api.pt.ClientPTHistory.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.pt.ClientPTHistory.post" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.pt.ClientPTHistory.post" title="Permalink to this definition">¶</a></dt>
 <dd><p>create client’s pt history</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="odyssey.api.pt.ClientPTHistory.put">
-<code class="sig-name descname">put</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.pt.ClientPTHistory.put" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">put</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.pt.ClientPTHistory.put" title="Permalink to this definition">¶</a></dt>
 <dd><p>edit user’s pt history</p>
 </dd></dl>
 
@@ -226,13 +226,13 @@ Trainers may update some or all fields. The backend will store every update as a
 fields left blank will be left as null</p>
 <dl class="py method">
 <dt id="odyssey.api.pt.ClientChessboard.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.pt.ClientChessboard.get" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.pt.ClientChessboard.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns all chessboard entries for the specified client</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="odyssey.api.pt.ClientChessboard.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.pt.ClientChessboard.post" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.pt.ClientChessboard.post" title="Permalink to this definition">¶</a></dt>
 <dd><p>create new chessboard entry</p>
 </dd></dl>
 
