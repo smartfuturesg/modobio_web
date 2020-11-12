@@ -1,0 +1,29 @@
+<nav>
+<div class="menu-bar">
+    <label for="menu-button">
+        <img class="menu-icon" src="{{ url_for('static', filename='menu-icon.svg') }}">
+    </label>
+    <input type="checkbox" class="menu-button" id="menu-button">
+    <div class="menu">
+        {% for item in menu recursive %}
+        {% if 'submenu' in item %}
+            <label for="menu-button-{{ loop.depth0 }}-{{ loop.index0 }}"
+                   class="menuitem submenu-depth-{{ loop.depth }}">
+                {{ item.title }}
+            </label>
+            <input id="menu-button-{{ loop.depth0 }}-{{ loop.index0 }}"
+                   class="menu-button"
+                   type="checkbox">
+            <div class="submenu submenu-depth-{{ loop.depth }}">
+                {{ loop(item.submenu) }}
+            </div>
+        {% else %}
+            <span class="submenuitem">
+                <a href="{{ url_for(item.url) }}">{{ item.title }}</a>
+            </span>
+        {% endif %}
+        {% endfor %}
+        </div>
+    </div>
+</div>
+</nav>

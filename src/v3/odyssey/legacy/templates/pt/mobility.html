@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Mobility assessment{% endblock %}
+{% block content %}
+<form class="input" method="POST" action="{{ url_for('pt.mobility') }}">
+    <div class="row">
+        <span class="label">{{ form.timestamp.label }}</span>
+        <span class="field">{{ form.timestamp() }}</span>
+    </div>
+    <div class="row">
+        <span class="label">{{ form.isa_left.label }}</span>
+        <span class="field">{{ form.isa_left() }}</span>
+    </div>
+    <div class="row">
+        <span class="label">{{ form.isa_right.label }}</span>
+        <span class="field">{{ form.isa_right() }}</span>
+    </div>
+    <div class="row">
+        <span class="label">{{ form.isa_dynamic.label }}</span>
+        <span class="field">{{ form.isa_dynamic() }}</span>
+    </div>
+    <div class="row">&nbsp;</div>
+    <div class="multicol">
+    {% for subform in (form.left_shoulder, form.left_hip, form.right_shoulder, form.right_hip) %}
+        <h1>{{ subform.title }}</h1>
+        {% for element in subform %}
+            {% if element.type == 'IntegerField' %}
+            <div class="row">
+                <span class="label">{{ element.label }}</span>
+                <span class="field">{{ element() }}</span>
+            </div>
+            {% else %}
+            {# Do CSRF tokens need to be generated? #}
+            {# {{ element() }} #}
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+    </div>
+    <div class="row">&nbsp;</div>
+    <div class="row center"><button type="submit">Next</button></div>
+</form>
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block title %}Release of information{% endblock %}
+{% block content %}
+<div class="docrev">Document revision: 2020-04-16</div>
+<p>Your privacy is important to us. We protect the confidentiality of your health information. Modo Bio Health Systems LLC ("Modo Bio") and Modo Bio's affiliated doctor ("The Doctor") may share your health information for purposes of your treatment, payment for that treatment, and health care operations activities. They may also share your health information as authorized by you or as otherwise permitted by law.</p>
+
+<h1>Who can release your health information?</h1>
+<p>I authorize Modo Bio, The Doctor, and the following individuals and organizations to release my health information:</p>
+<div class="row">{{ macros.textinput(form.release_by_other, formid='signform', pdf=pdf) }}</div>
+
+<h1>Who can receive your health information?</h1>
+<p>I authorize Modo Bio, The Doctor, and the following individuals and organizations to receive my health information:</p>
+<div class="row">{{ macros.textinput(form.release_to_other, formid='signform', pdf=pdf) }}</div>
+
+<h1>What kind of health information?</h1>
+<p>I authorize the release of:</p>
+{% for choice in form.release_of_all %}
+    {% if choice.label.text == 'all' %}
+        <div class="row">
+            <span class="radiofield">{{ macros.radioinput(choice, formid='signform', pdf=pdf) }}</span>
+            <span class="radiolabel">All of my health information, such as my medical care, medications, and records from The Doctor and the Modo Bio health and wellness program. This information may also include sensitive information about me, such as my genetic testing information, communicable disease information (like HIV/AIDS or sexually transmitted diseases), mental health information, and substance use disorder information (like drugs and alcohol).</span>
+        </div>
+    {% else %}
+        <div class="row">
+            <span class="radiofield">{{ macros.radioinput(choice, formid='signform', pdf=pdf) }}</span>
+            <span class="radiolabel">Other: please tell us what health information we can release.</span>
+        </div>
+        <div class="row">{{ macros.textinput(form.release_of_other, formid='signform', pdf=pdf) }}</div>
+    {% endif %}
+{% endfor %}
+
+<h1>How long?</h1>
+<p>Please tell us if we should apply date restrictions on the amount of health information we release about you:</p>
+<div class="row">
+    From &ensp; {{ macros.dateinput(form.release_date_from, formid='signform', pdf=pdf) }}
+    To &ensp; {{ macros.dateinput(form.release_date_to, formid='signform', pdf=pdf) }}
+</div>
+
+<h1>Purpose of the disclosure</h1>
+<p>I authorize the release of my health information for my treatment, for Modo Bio's health and wellness programs, and for the following additional reason(s):</p>
+<div class="row">{{ macros.textinput(form.release_purpose, formid='signform', pdf=pdf) }}</div>
+
+<h1>Expiration and revocation</h1>
+<p>I may revoke (take back) or change the above permissions at any time, except to the extent that the individuals or organizations listed on this release have already taken action based on my consent. To revoke this consent, please write to: <a href="mailto:privacy@modobio.com">privacy@modobio.com</a>.</p>
+<p><b>This consent automatically ends one (1) year from the date of signature below.</b></p>
+
+<h1>Referrals to The Doctor</h1>
+<p>Modo Bio has an affiliation with a doctor ("The Doctor"), who operates an independent medical practice in space subleased from Modo Bio. While The Doctor is part of our team, Modo Bio does not control The Doctor or The Doctor's practice. The Doctor will use independent judgment in evaluating your medical needs.</p>
+
+<h1>Emergency Contact</h1>
+<p>We will only contact this person if there is an emergency. We will only share information we think is necessary to respond to the emergency, unless you give us permission to share more information.</p>
+<div class="row">
+    <span class="label">{{ form.emergency_contact.label }}</span>
+    <span class="field">{{ macros.textinput(form.emergency_contact, formid='signform', pdf=pdf) }}</span>
+</div>
+<div class="row">
+    <span class="label">{{ form.emergency_phone.label }}</span>
+    <span class="field">{{ macros.textinput(form.emergency_phone, formid='signform', pdf=pdf) }}</span>
+</div>
+
+<h1>Your contact information</h1>
+<div class="row">
+    <span class="label">{{ form.fullname.label }}</span>
+    <span class="field">{{ macros.textinput(form.fullname, formid='signform', pdf=pdf) }}</span>
+</div>
+<div class="row">
+    <span class="label">{{ form.dob.label }}</span>
+    <span class="field">{{ macros.dateinput(form.dob, formid='signform', pdf=pdf) }}</span>
+</div>
+<div class="row">
+    <span class="label">{{ form.address.label }}</span>
+    <span class="field">{{ macros.textinput(form.address, formid='signform', pdf=pdf) }}</span>
+</div>
+<div class="row">
+    <span class="label">{{ form.phone.label }}</span>
+    <span class="field">{{ macros.textinput(form.phone, formid='signform', pdf=pdf) }}</span>
+</div>
+<div class="row">
+    <span class="label">{{ form.email.label }}</span>
+    <span class="field">{{ macros.textinput(form.email, formid='signform', pdf=pdf) }}</span>
+</div>
+
+<h1></h1>
+<p>I understand that I cannot be denied treatment, payment for treatment, enrollment in a health plan, or eligibility for benefits if I refuse to sign this release. I understand that my health information disclosed as a result of this release may be redisclosed by the recipient and might not be protected by any privacy laws. I understand that I will receive a copy of this signed release of information.</p>
+
+{{ macros.signform(form, 'signform', url_for('intake.release'), pdf=pdf) }}
+{% endblock %}
