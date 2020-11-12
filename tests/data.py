@@ -733,7 +733,3 @@ test_new_user_staff = {
   ]
   }
 }
-
-test_staff_recent_client = {
-  "client_user_id": 1
-}

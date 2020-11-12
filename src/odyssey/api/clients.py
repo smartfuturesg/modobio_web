@@ -35,7 +35,6 @@ from odyssey.utils.schemas import (
     ClientConsultContractSchema,
     ClientIndividualContractSchema,
     ClientInfoSchema,
-    ClientUserInfoSchema,
     ClientPoliciesContractSchema, 
     ClientRegistrationStatusSchema,
     ClientReleaseSchema,
