@@ -436,7 +436,7 @@ This constant lists the roles supported by the MOdo Bio login system.
 :type: tuple
 """
 
-MEDICAL_ISSUES_AUTOIMMUNE = {
+MEDICAL_DISEASES_AUTOIMMUNE = {
     'Diabetes type 1': None,
     'Diabetes type 2': None,
     'Low blood sugar/hypoglycemia': None,
@@ -475,7 +475,7 @@ further nesting.
 :type: dict(dict(...))
 """
 
-MEDICAL_ISSUES_CANCER = {
+MEDICAL_DISEASES_CANCER = {
     'Brain': None,
     'Bone': None,
     'Blood': {
@@ -523,4 +523,16 @@ dict to specify a subdivision, or :attr:`None` indicating no
 further nesting.
 
 :type: dict(dict(...))
+"""
+
+MEDICAL_DISEASES = (
+    ('autoimmune', MEDICAL_DISEASES_AUTOIMMUNE),
+    ('cancer', MEDICAL_DISEASES_CANCER)
+)
+"""
+Combination of all medical disease lookup tables with a short name.
+The short name should have no other characters than letters, because
+it is used to derive a class name.
+
+:type: tuple(tuple)
 """
