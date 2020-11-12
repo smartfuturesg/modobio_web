@@ -108,8 +108,7 @@ class ClientRemovalRequests(db.Model):
     """
 
 class StaffRoles(db.Model):
-    """ 
-    Stores informaiton on staff role assignments. 
+    """ Stores informaiton on staff role assignments. 
 
     Roles must be verified either by a manual or automatic internal review process.
     Some roles will be location based where verification is required for each locality
@@ -150,20 +149,22 @@ class StaffRoles(db.Model):
     role = db.Column(db.String, nullable=False)
     """
     Name of the role assignment
+
     Possible roles include:
-        - stfappadmin
-        - sysadmin
-        - clntsvc
-        - physthera
-        - phystrain
-        - datasci
-        - doctor
-        - nutrition
-        - clntsvc_internal
-        - physthera_internal
-        - phystrain_internal
-        - doctor_internal
-        - nutrition_internal
+
+    - stfappadmin
+    - sysadmin
+    - clntsvc
+    - physthera
+    - phystrain
+    - datasci
+    - doctor
+    - nutrition
+    - clntsvc_internal
+    - physthera_internal
+    - phystrain_internal
+    - doctor_internal
+    - nutrition_internal
 
     Internal roles are intended for staff members who are part of the internal application development team. 
     

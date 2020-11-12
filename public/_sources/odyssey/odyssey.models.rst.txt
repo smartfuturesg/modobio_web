@@ -9,6 +9,7 @@ Models
 
 .. toctree::
 
+   User <odyssey.models.user>
    Client <odyssey.models.client>
    Staff <odyssey.models.staff>
    Doctor <odyssey.models.doctor>

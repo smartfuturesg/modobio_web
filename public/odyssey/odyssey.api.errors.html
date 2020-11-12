@@ -7,11 +7,11 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>odyssey.api.errors &mdash; Odyssey version: 0.1.66 documentation</title>
+  <title>odyssey.api.errors &mdash; Odyssey version: 0.1.71 documentation</title>
   
 
   
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                version: 0.1.66
+                version: 0.1.71
               </div>
             
           
@@ -91,15 +91,15 @@
 <li class="toctree-l1"><a class="reference internal" href="odyssey.config.html">Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.models.html">Models</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="odyssey.api.html">Endpoints</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.users.html">User</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.clients.html">Client</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.staff.html">Staff</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.doctor.html">Doctor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.pt.html">Physical therapist</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.trainer.html">Trainer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.remote_clients.html">Remote registration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey.api.registeredfacilities.html">Registered facilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.registered_facilities.html">Registered facilities</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.wearables.html">Wearable devices</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey.api.auth.html">Authorization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.tokens.html">Authorization tokens</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Error messages</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.postman.html">Postman</a></li>
@@ -178,7 +178,7 @@
 <span id="odyssey-api-errors"></span><h1>odyssey.api.errors<a class="headerlink" href="#module-odyssey.api.errors" title="Permalink to this headline">¶</a></h1>
 <dl class="py exception">
 <dt id="odyssey.api.errors.UserNotFound">
-<em class="property">exception </em><code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">UserNotFound</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clientid</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">message</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.UserNotFound" title="Permalink to this definition">¶</a></dt>
+<em class="property">exception </em><code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">UserNotFound</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">message</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.UserNotFound" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
 <p>in the case a non-existent client is being requested</p>
 </dd></dl>
@@ -232,7 +232,7 @@ message – explanation of the error</p>
 
 <dl class="py exception">
 <dt id="odyssey.api.errors.ContentNotFoundReturnData">
-<em class="property">exception </em><code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">ContentNotFoundReturnData</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">clientid</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.ContentNotFoundReturnData" title="Permalink to this definition">¶</a></dt>
+<em class="property">exception </em><code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">ContentNotFoundReturnData</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">user_id</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.ContentNotFoundReturnData" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
 <p>Special case for when a resource has not yet been created but the client must see other data to proceed</p>
 </dd></dl>
@@ -262,7 +262,14 @@ message – explanation of the error</p>
 <dt id="odyssey.api.errors.StaffEmailInUse">
 <em class="property">exception </em><code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">StaffEmailInUse</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">email</span></em>, <em class="sig-param"><span class="n">message</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.StaffEmailInUse" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
-<p>in the case a staff member is creating a staff member with the same email</p>
+<p>in the case a staff member is creating a staff account with the same email</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="odyssey.api.errors.ClientEmailInUse">
+<em class="property">exception </em><code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">ClientEmailInUse</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">email</span></em>, <em class="sig-param"><span class="n">message</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.ClientEmailInUse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>in the case a staff member is creating a client account with the same email</p>
 </dd></dl>
 
 <dl class="py exception">
@@ -309,7 +316,7 @@ message – explanation of the error</p>
 
 <dl class="py exception">
 <dt id="odyssey.api.errors.StaffNotFound">
-<em class="property">exception </em><code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">StaffNotFound</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">staffid</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">message</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.StaffNotFound" title="Permalink to this definition">¶</a></dt>
+<em class="property">exception </em><code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">StaffNotFound</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">message</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.StaffNotFound" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
 <p>in the case a non-existent staff member is being requested</p>
 </dd></dl>
@@ -419,6 +426,12 @@ for using the ModoBio APIs</p>
 <dl class="py function">
 <dt id="odyssey.api.errors.error_staff_email_in_use">
 <code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">error_staff_email_in_use</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">error</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.error_staff_email_in_use" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a custom message and 409 status code</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="odyssey.api.errors.error_client_email_in_use">
+<code class="sig-prename descclassname">odyssey.api.errors.</code><code class="sig-name descname">error_client_email_in_use</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">error</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.errors.error_client_email_in_use" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a custom message and 409 status code</p>
 </dd></dl>
 

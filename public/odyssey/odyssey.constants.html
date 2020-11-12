@@ -7,11 +7,11 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>odyssey.constants &mdash; Odyssey version: 0.1.66 documentation</title>
+  <title>odyssey.constants &mdash; Odyssey version: 0.1.71 documentation</title>
   
 
   
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
 
   
@@ -38,7 +38,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="odyssey.utils.email" href="odyssey.utils.email.html" />
-    <link rel="prev" title="odyssey.utils.schemas" href="odyssey.utils.schemas.html" /> 
+    <link rel="prev" title="odyssey.utils.auth" href="odyssey.utils.auth.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                version: 0.1.66
+                version: 0.1.71
               </div>
             
           
@@ -93,6 +93,7 @@
 <li class="toctree-l1"><a class="reference internal" href="odyssey.api.html">Endpoints</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="odyssey.utils.html">Utilities</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="odyssey.utils.schemas.html">Schemas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.utils.auth.html">Login</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Constants</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.utils.email.html">Email</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.pdf.html">PDF generation</a></li>
@@ -170,8 +171,21 @@
 <span id="odyssey-constants"></span><h1>odyssey.constants<a class="headerlink" href="#module-odyssey.constants" title="Permalink to this headline">¶</a></h1>
 <p>Various constants used throughout the Odyssey package.</p>
 <dl class="py data">
+<dt id="odyssey.constants.TABLE_TO_URI">
+<code class="sig-prename descclassname">odyssey.constants.</code><code class="sig-name descname">TABLE_TO_URI</code><em class="property"> = {'ClientConsent': '/client/consent/{}/', 'ClientConsultContract': '/client/consultcontract/{}/', 'ClientIndividualContract': '/client/servicescontract/{}/', 'ClientPolicies': '/client/policies/{}/', 'ClientRelease': '/client/release/{}/', 'ClientSubscriptionContract': '/client/subscriptioncontract/{}/', 'MedicalHistory': '/doctor/medicalhistory/{}/', 'MedicalPhysicalExam': '/doctor/physical/{}/', 'PTHistory': '/pt/history/{}/', 'TrainerFitnessQuestionnaire': '/trainer/questionnaire/{}/'}</em><a class="headerlink" href="#odyssey.constants.TABLE_TO_URI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup table that links documents that need to be filled in
+with their respective endpoint URIs. Keys are the models in
+<a class="reference internal" href="odyssey.models.html#module-odyssey.models" title="odyssey.models"><code class="xref py py-mod docutils literal notranslate"><span class="pre">odyssey.models</span></code></a>, values are the URIs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
 <dt id="odyssey.constants.COUNTRIES">
-<code class="sig-prename descclassname">odyssey.constants.</code><code class="sig-name descname">COUNTRIES</code><a class="headerlink" href="#odyssey.constants.COUNTRIES" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">odyssey.constants.</code><code class="sig-name descname">COUNTRIES</code><em class="property"> = (('AF', 'Afghanistan'), ('AX', 'Åland Islands'), ('AL', 'Albania'), ('DZ', 'Algeria'), ('AS', 'American Samoa'), ('AD', 'Andorra'), ('AO', 'Angola'), ('AI', 'Anguilla'), ('AQ', 'Antarctica'), ('AG', 'Antigua and Barbuda'), ('AR', 'Argentina'), ('AM', 'Armenia'), ('AW', 'Aruba'), ('AU', 'Australia'), ('AT', 'Austria'), ('AZ', 'Azerbaijan'), ('BS', 'Bahamas'), ('BH', 'Bahrain'), ('BD', 'Bangladesh'), ('BB', 'Barbados'), ('BY', 'Belarus'), ('BE', 'Belgium'), ('BZ', 'Belize'), ('BJ', 'Benin'), ('BM', 'Bermuda'), ('BT', 'Bhutan'), ('BO', 'Bolivia, Plurinational State of'), ('BQ', 'Bonaire, Sint Eustatius and Saba'), ('BA', 'Bosnia and Herzegovina'), ('BW', 'Botswana'), ('BV', 'Bouvet Island'), ('BR', 'Brazil'), ('IO', 'British Indian Ocean Territory'), ('BN', 'Brunei Darussalam'), ('BG', 'Bulgaria'), ('BF', 'Burkina Faso'), ('BI', 'Burundi'), ('KH', 'Cambodia'), ('CM', 'Cameroon'), ('CA', 'Canada'), ('CV', 'Cape Verde'), ('KY', 'Cayman Islands'), ('CF', 'Central African Republic'), ('TD', 'Chad'), ('CL', 'Chile'), ('CN', 'China'), ('CX', 'Christmas Island'), ('CC', 'Cocos (Keeling) Islands'), ('CO', 'Colombia'), ('KM', 'Comoros'), ('CG', 'Congo'), ('CD', 'Congo, the Democratic Republic of the'), ('CK', 'Cook Islands'), ('CR', 'Costa Rica'), ('CI', &quot;Côte d'Ivoire&quot;), ('HR', 'Croatia'), ('CU', 'Cuba'), ('CW', 'Curaçao'), ('CY', 'Cyprus'), ('CZ', 'Czech Republic'), ('DK', 'Denmark'), ('DJ', 'Djibouti'), ('DM', 'Dominica'), ('DO', 'Dominican Republic'), ('EC', 'Ecuador'), ('EG', 'Egypt'), ('SV', 'El Salvador'), ('GQ', 'Equatorial Guinea'), ('ER', 'Eritrea'), ('EE', 'Estonia'), ('ET', 'Ethiopia'), ('FK', 'Falkland Islands (Malvinas)'), ('FO', 'Faroe Islands'), ('FJ', 'Fiji'), ('FI', 'Finland'), ('FR', 'France'), ('GF', 'French Guiana'), ('PF', 'French Polynesia'), ('TF', 'French Southern Territories'), ('GA', 'Gabon'), ('GM', 'Gambia'), ('GE', 'Georgia'), ('DE', 'Germany'), ('GH', 'Ghana'), ('GI', 'Gibraltar'), ('GR', 'Greece'), ('GL', 'Greenland'), ('GD', 'Grenada'), ('GP', 'Guadeloupe'), ('GU', 'Guam'), ('GT', 'Guatemala'), ('GG', 'Guernsey'), ('GN', 'Guinea'), ('GW', 'Guinea-Bissau'), ('GY', 'Guyana'), ('HT', 'Haiti'), ('HM', 'Heard Island and McDonald Islands'), ('VA', 'Holy See (Vatican City State)'), ('HN', 'Honduras'), ('HK', 'Hong Kong'), ('HU', 'Hungary'), ('IS', 'Iceland'), ('IN', 'India'), ('ID', 'Indonesia'), ('IR', 'Iran, Islamic Republic of'), ('IQ', 'Iraq'), ('IE', 'Ireland'), ('IM', 'Isle of Man'), ('IL', 'Israel'), ('IT', 'Italy'), ('JM', 'Jamaica'), ('JP', 'Japan'), ('JE', 'Jersey'), ('JO', 'Jordan'), ('KZ', 'Kazakhstan'), ('KE', 'Kenya'), ('KI', 'Kiribati'), ('KP', &quot;Korea, Democratic People's Republic of&quot;), ('KR', 'Korea, Republic of'), ('KW', 'Kuwait'), ('KG', 'Kyrgyzstan'), ('LA', &quot;Lao People's Democratic Republic&quot;), ('LV', 'Latvia'), ('LB', 'Lebanon'), ('LS', 'Lesotho'), ('LR', 'Liberia'), ('LY', 'Libya'), ('LI', 'Liechtenstein'), ('LT', 'Lithuania'), ('LU', 'Luxembourg'), ('MO', 'Macao'), ('MK', 'North-Macedonia'), ('MG', 'Madagascar'), ('MW', 'Malawi'), ('MY', 'Malaysia'), ('MV', 'Maldives'), ('ML', 'Mali'), ('MT', 'Malta'), ('MH', 'Marshall Islands'), ('MQ', 'Martinique'), ('MR', 'Mauritania'), ('MU', 'Mauritius'), ('YT', 'Mayotte'), ('MX', 'Mexico'), ('FM', 'Micronesia, Federated States of'), ('MD', 'Moldova, Republic of'), ('MC', 'Monaco'), ('MN', 'Mongolia'), ('ME', 'Montenegro'), ('MS', 'Montserrat'), ('MA', 'Morocco'), ('MZ', 'Mozambique'), ('MM', 'Myanmar'), ('NA', 'Namibia'), ('NR', 'Nauru'), ('NP', 'Nepal'), ('NL', 'Netherlands'), ('NC', 'New Caledonia'), ('NZ', 'New Zealand'), ('NI', 'Nicaragua'), ('NE', 'Niger'), ('NG', 'Nigeria'), ('NU', 'Niue'), ('NF', 'Norfolk Island'), ('MP', 'Northern Mariana Islands'), ('NO', 'Norway'), ('OM', 'Oman'), ('PK', 'Pakistan'), ('PW', 'Palau'), ('PS', 'Palestinian Territory, Occupied'), ('PA', 'Panama'), ('PG', 'Papua New Guinea'), ('PY', 'Paraguay'), ('PE', 'Peru'), ('PH', 'Philippines'), ('PN', 'Pitcairn'), ('PL', 'Poland'), ('PT', 'Portugal'), ('PR', 'Puerto Rico'), ('QA', 'Qatar'), ('RE', 'Réunion'), ('RO', 'Romania'), ('RU', 'Russian Federation'), ('RW', 'Rwanda'), ('BL', 'Saint Barthélemy'), ('SH', 'Saint Helena, Ascension and Tristan da Cunha'), ('KN', 'Saint Kitts and Nevis'), ('LC', 'Saint Lucia'), ('MF', 'Saint Martin (French part)'), ('PM', 'Saint Pierre and Miquelon'), ('VC', 'Saint Vincent and the Grenadines'), ('WS', 'Samoa'), ('SM', 'San Marino'), ('ST', 'Sao Tome and Principe'), ('SA', 'Saudi Arabia'), ('SN', 'Senegal'), ('RS', 'Serbia'), ('SC', 'Seychelles'), ('SL', 'Sierra Leone'), ('SG', 'Singapore'), ('SX', 'Sint Maarten (Dutch part)'), ('SK', 'Slovakia'), ('SI', 'Slovenia'), ('SB', 'Solomon Islands'), ('SO', 'Somalia'), ('ZA', 'South Africa'), ('GS', 'South Georgia and the South Sandwich Islands'), ('SS', 'South Sudan'), ('ES', 'Spain'), ('LK', 'Sri Lanka'), ('SD', 'Sudan'), ('SR', 'Suriname'), ('SJ', 'Svalbard and Jan Mayen'), ('SZ', 'Swaziland'), ('SE', 'Sweden'), ('CH', 'Switzerland'), ('SY', 'Syrian Arab Republic'), ('TW', 'Taiwan, Republic of China'), ('TJ', 'Tajikistan'), ('TZ', 'Tanzania, United Republic of'), ('TH', 'Thailand'), ('TL', 'Timor-Leste'), ('TG', 'Togo'), ('TK', 'Tokelau'), ('TO', 'Tonga'), ('TT', 'Trinidad and Tobago'), ('TN', 'Tunisia'), ('TR', 'Turkey'), ('TM', 'Turkmenistan'), ('TC', 'Turks and Caicos Islands'), ('TV', 'Tuvalu'), ('UG', 'Uganda'), ('UA', 'Ukraine'), ('AE', 'United Arab Emirates'), ('GB', 'United Kingdom'), ('US', 'United States'), ('UM', 'United States Minor Outlying Islands'), ('UY', 'Uruguay'), ('UZ', 'Uzbekistan'), ('VU', 'Vanuatu'), ('VE', 'Venezuela, Bolivarian Republic of'), ('VN', 'Viet Nam'), ('VG', 'Virgin Islands, British'), ('VI', 'Virgin Islands, U.S.'), ('WF', 'Wallis and Futuna'), ('EH', 'Western Sahara'), ('YE', 'Yemen'), ('ZM', 'Zambia'), ('ZW', 'Zimbabwe'))</em><a class="headerlink" href="#odyssey.constants.COUNTRIES" title="Permalink to this definition">¶</a></dt>
 <dd><p>Names of countries and their 2-letter codes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -182,7 +196,7 @@
 
 <dl class="py data">
 <dt id="odyssey.constants.USSTATES">
-<code class="sig-prename descclassname">odyssey.constants.</code><code class="sig-name descname">USSTATES</code><a class="headerlink" href="#odyssey.constants.USSTATES" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">odyssey.constants.</code><code class="sig-name descname">USSTATES</code><em class="property"> = (('AL', 'Alabama'), ('AK', 'Alaska'), ('AZ', 'Arizona'), ('AR', 'Arkansas'), ('CA', 'California'), ('CO', 'Colorado'), ('CT', 'Connecticut'), ('DE', 'Delaware'), ('FL', 'Florida'), ('GA', 'Georgia'), ('HI', 'Hawaii'), ('ID', 'Idaho'), ('IL', 'Illinois'), ('IN', 'Indiana'), ('IA', 'Iowa'), ('KS', 'Kansas'), ('KY', 'Kentucky'), ('LA', 'Louisiana'), ('ME', 'Maine'), ('MD', 'Maryland'), ('MA', 'Massachusetts'), ('MI', 'Michigan'), ('MN', 'Minnesota'), ('MS', 'Mississippi'), ('MO', 'Missouri'), ('MT', 'Montana'), ('NE', 'Nebraska'), ('NV', 'Nevada'), ('NH', 'New Hampshire'), ('NJ', 'New Jersey'), ('NM', 'New Mexico'), ('NY', 'New York'), ('NC', 'North Carolina'), ('ND', 'North Dakota'), ('OH', 'Ohio'), ('OK', 'Oklahoma'), ('OR', 'Oregon'), ('PY', 'Pennsylvania'), ('RI', 'Rhode Island'), ('SC', 'South Carolina'), ('SD', 'South Dakota'), ('TN', 'Tennessee'), ('TX', 'Texas'), ('UT', 'Utah'), ('VT', 'Vermont'), ('VA', 'Virginia'), ('WA', 'Washington'), ('WV', 'West Virginia'), ('WI', 'Wisconsin'), ('WY', 'Wyoming'))</em><a class="headerlink" href="#odyssey.constants.USSTATES" title="Permalink to this definition">¶</a></dt>
 <dd><p>Names of US states and their 2-letter codes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -193,7 +207,7 @@
 
 <dl class="py data">
 <dt id="odyssey.constants.GENDERS">
-<code class="sig-prename descclassname">odyssey.constants.</code><code class="sig-name descname">GENDERS</code><a class="headerlink" href="#odyssey.constants.GENDERS" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">odyssey.constants.</code><code class="sig-name descname">GENDERS</code><em class="property"> = (('f', 'female'), ('m', 'male'), ('o', 'other'))</em><a class="headerlink" href="#odyssey.constants.GENDERS" title="Permalink to this definition">¶</a></dt>
 <dd><p>Genders and a 1-letter abbreviation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -204,7 +218,7 @@
 
 <dl class="py data">
 <dt id="odyssey.constants.CONTACT_METHODS">
-<code class="sig-prename descclassname">odyssey.constants.</code><code class="sig-name descname">CONTACT_METHODS</code><a class="headerlink" href="#odyssey.constants.CONTACT_METHODS" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">odyssey.constants.</code><code class="sig-name descname">CONTACT_METHODS</code><em class="property"> = ((0, 'phone'), (1, 'email'))</em><a class="headerlink" href="#odyssey.constants.CONTACT_METHODS" title="Permalink to this definition">¶</a></dt>
 <dd><p>Available methods to contact a client.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -215,7 +229,7 @@
 
 <dl class="py data">
 <dt id="odyssey.constants.YESNO">
-<code class="sig-prename descclassname">odyssey.constants.</code><code class="sig-name descname">YESNO</code><a class="headerlink" href="#odyssey.constants.YESNO" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">odyssey.constants.</code><code class="sig-name descname">YESNO</code><em class="property"> = ((0, 'No'), (1, 'Yes'))</em><a class="headerlink" href="#odyssey.constants.YESNO" title="Permalink to this definition">¶</a></dt>
 <dd><p>Boolean options of ‘Yes’ or ‘No’.</p>
 <p>This can be used to link a <a class="reference external" href="https://wtforms.readthedocs.io/en/2.3.x/fields/#wtforms.fields.RadioField" title="(in WTForms v2.3.x)"><code class="xref py py-class docutils literal notranslate"><span class="pre">wtforms.fields.RadioField</span></code></a> form field
 to a <a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/type_basics.html#sqlalchemy.types.Boolean" title="(in SQLAlchemy v1.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.types.Boolean</span></code></a> database column. Use in conjunction
@@ -244,7 +258,176 @@ database column expects a Python <code class="xref py py-attr docutils literal n
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>function</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#callable" title="(in Python v3.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">callable()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt id="odyssey.constants.DB_SERVER_TIME">
+<code class="sig-prename descclassname">odyssey.constants.</code><code class="sig-name descname">DB_SERVER_TIME</code><em class="property"> = &lt;sqlalchemy.sql.elements.TextClause object&gt;</em><a class="headerlink" href="#odyssey.constants.DB_SERVER_TIME" title="Permalink to this definition">¶</a></dt>
+<dd><p>Postgresql specific function that returns the timestamp,
+when the statement is run. It is independent of transaction time.
+The function is run on the server.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/sqlelement.html#sqlalchemy.sql.expression.TextClause" title="(in SQLAlchemy v1.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.sql.expression.TextClause</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt id="odyssey.constants.BLOODTEST_EVAL">
+<code class="sig-prename descclassname">odyssey.constants.</code><code class="sig-name descname">BLOODTEST_EVAL</code><em class="property"> = 'SELECT public.blood_test_eval({}, {}, {});'</em><a class="headerlink" href="#odyssey.constants.BLOODTEST_EVAL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Blood tests are evaluated (comparing the number against optimal
+and normal value ranges) by calling a stored function in the
+database. This constant holds the select statement to call
+that function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt id="odyssey.constants.ALPHANUMERIC">
+<code class="sig-prename descclassname">odyssey.constants.</code><code class="sig-name descname">ALPHANUMERIC</code><em class="property"> = 'BCDFGHJKLMNPQRSTVWXYZ01234567890123456789'</em><a class="headerlink" href="#odyssey.constants.ALPHANUMERIC" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of characters used to generated <a class="reference internal" href="odyssey.models.user.html#odyssey.models.user.User.modobio_id" title="odyssey.models.user.User.modobio_id"><code class="xref py py-attr docutils literal notranslate"><span class="pre">odyssey.models.user.User.modobio_id</span></code></a>.
+<code class="docutils literal notranslate"><span class="pre">modobio_id</span></code> is generated by randomly chosing 12 charaters from this list.
+Vowels were omitted to prevent type confusion when printed in certain fonts
+(U/V, O/0, I/1 etc.).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt id="odyssey.constants.USER_TYPES">
+<code class="sig-prename descclassname">odyssey.constants.</code><code class="sig-name descname">USER_TYPES</code><em class="property"> = ('staff', 'client')</em><a class="headerlink" href="#odyssey.constants.USER_TYPES" title="Permalink to this definition">¶</a></dt>
+<dd><p>The general category of <a class="reference internal" href="odyssey.models.user.html#odyssey.models.user.User" title="odyssey.models.user.User"><code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.models.user.User</span></code></a> consists of
+subtypes. This constant lists the types of user supported by the
+login system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.9)">tuple</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt id="odyssey.constants.ACCESS_ROLES">
+<code class="sig-prename descclassname">odyssey.constants.</code><code class="sig-name descname">ACCESS_ROLES</code><em class="property"> = ('staff_admin', 'system_admin', 'client_services', 'physical_therapist', 'trainer', 'data_science', 'doctor', 'nutrition', 'client_services_internal', 'physical_therapist_internal', 'trainer_internal', 'doctor_internal', 'nutrition_internal')</em><a class="headerlink" href="#odyssey.constants.ACCESS_ROLES" title="Permalink to this definition">¶</a></dt>
+<dd><p>Staff members are assigned roles, see <a class="reference internal" href="odyssey.models.staff.html#odyssey.models.staff.StaffRoles" title="odyssey.models.staff.StaffRoles"><code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.models.staff.StaffRoles</span></code></a>.
+This constant lists all possible staff roles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.9)">tuple</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt id="odyssey.constants.MEDICAL_CONDITIONS_AUTOIMMUNE">
+<code class="sig-prename descclassname">odyssey.constants.</code><code class="sig-name descname">MEDICAL_CONDITIONS_AUTOIMMUNE</code><em class="property"> = {'Adrenal': {&quot;Addison's&quot;: None, &quot;Cushing's&quot;: None}, 'Amyloidosis': None, 'Autoimmune vasculitis': None, 'Diabetes type 1': None, 'Diabetes type 2': None, 'Fibromyalgia': None, 'Gout': None, 'Low blood sugar/hypoglycemia': None, 'Multiple endocrine neoplasia (MEN) 1': None, 'Multiple endocrine neoplasia (MEN) 2': None, 'Psoriatic disease': None, 'Rheumatoid disease': None, 'Sarcoidosis': None, 'Scleroderma': None, &quot;Sjögren's disease&quot;: None, 'Systemic lupus erythematosus': None, 'Thymic disease': None, 'Thyroid': {'Graves': None, 'Hashimoto': None, 'Hyperthyroid': None, 'Hypothyroid': None}}</em><a class="headerlink" href="#odyssey.constants.MEDICAL_CONDITIONS_AUTOIMMUNE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup table for supported medical issues – autoimmune diseases.</p>
+<p>Implemented as a nested dicts, where the keys are the supported
+(category of) medical issues. The values are either another
+dict to specify a subdivision, or <code class="xref py py-attr docutils literal notranslate"><span class="pre">None</span></code> indicating no
+further nesting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>(..))</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt id="odyssey.constants.MEDICAL_CONDITIONS_CANCER">
+<code class="sig-prename descclassname">odyssey.constants.</code><code class="sig-name descname">MEDICAL_CONDITIONS_CANCER</code><em class="property"> = {'Blood': {'Leukemia': None, 'Lymphoma': None}, 'Bone': None, 'Brain': None, 'Breast': None, 'Gut': {'Colorectal': None, 'Esophageal': None, 'Liver': None, 'Pancreatic': None, 'Stomach': None}, 'Gynecological': {'Cervical/ovarian': None, 'Uterine': None, 'Vaginal': None}, 'Kidney': {'Renal Cell': None, 'Urothelial carcinoma (transitional cell)': None}, 'Lung': {'Non-small cell': None, 'Small cell': None}, 'Skin': {'Basal cell carcinoma': None, 'Melanoma': None, 'Squamous cell carcinoma': None}, 'Urological': {'Bladder': None, 'Penile': None, 'Prostatic': None}}</em><a class="headerlink" href="#odyssey.constants.MEDICAL_CONDITIONS_CANCER" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup table for supported medical issues – cancer.</p>
+<p>Implemented as a nested dicts, where the keys are the supported
+(category of) medical issues. The values are either another
+dict to specify a subdivision, or <code class="xref py py-attr docutils literal notranslate"><span class="pre">None</span></code> indicating no
+further nesting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>(..))</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt id="odyssey.constants.MEDICAL_CONDITIONS_NEURO">
+<code class="sig-prename descclassname">odyssey.constants.</code><code class="sig-name descname">MEDICAL_CONDITIONS_NEURO</code><em class="property"> = {&quot;Alzheimer's dementia&quot;: None, 'Balance disturbance': None, 'Blackouts': None, 'Brain aneurysm': None, 'Carpal tunnel': None, 'Dizziness/vertigo': None, 'Epilepsy/seizure disorder': None, 'Guillain barre': None, 'Headaches/migraines': None, 'Hearing loss': None, 'History of fall(s)': None, 'Hypothalamus disease': None, 'Insomnia': None, 'Lewy body dementia': None, 'Multiple sclerosis': None, 'Myasthenia gravis': None, 'Other dementia or memory loss': None, &quot;Parkinson's&quot;: None, 'Peripheral neuropathy': None, 'Pituitary disease': None, 'Sciatica': None, 'Spinal cord disease (disc herniation/bulging)': None, 'Spinal stenosis': None, 'Spondylolisthesis': None, 'Stroke/transient ischemic attack (TIA)': None, 'Traumatic head/brain injury': None, 'Vertebral fracture or fusion': None, 'Vision loss': None}</em><a class="headerlink" href="#odyssey.constants.MEDICAL_CONDITIONS_NEURO" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup table for supported medical issues – neurological.</p>
+<p>Implemented as a nested dicts, where the keys are the supported
+(category of) medical issues. The values are either another
+dict to specify a subdivision, or <code class="xref py py-attr docutils literal notranslate"><span class="pre">None</span></code> indicating no
+further nesting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>(..))</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt id="odyssey.constants.MEDICAL_CONDITIONS_MUSCLE">
+<code class="sig-prename descclassname">odyssey.constants.</code><code class="sig-name descname">MEDICAL_CONDITIONS_MUSCLE</code><em class="property"> = {'Bone spur': None, 'Closed': None, 'Dislocation': None, 'History of fractures': {'Comminuted': None, 'Compression': None, 'Greenstick': None, 'Oblique': None, 'Open/compound': None, 'Segmental': None, 'Spiral': None, 'Stress': None, 'Transverse': None}, 'Inguinal hernia': None, 'Osteoarthritis': None, 'Osteomalacia': None, 'Osteopenia': None, 'Osteoporosis': None, 'Torn ligament/meniscus/tendon': None, 'Torn muscle': None}</em><a class="headerlink" href="#odyssey.constants.MEDICAL_CONDITIONS_MUSCLE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup table for supported medical issues – musculoskeletal.</p>
+<p>Implemented as a nested dicts, where the keys are the supported
+(category of) medical issues. The values are either another
+dict to specify a subdivision, or <code class="xref py py-attr docutils literal notranslate"><span class="pre">None</span></code> indicating no
+further nesting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>(..))</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt id="odyssey.constants.MEDICAL_CONDITIONS_CARDIO">
+<code class="sig-prename descclassname">odyssey.constants.</code><code class="sig-name descname">MEDICAL_CONDITIONS_CARDIO</code><em class="property"> = {'Anemia': {'Aplastic (or other bone marrow disease)': None, 'Blood loss': None, 'Hemolytic': None, 'Iron deficiency': None, 'Megaloblastic (vitamin B12/folate deficiency)': None, 'Pernicious': None, 'Sickle cell': None, 'Thalassemia': None}, 'Aneurysm (aortic, or other blood vessels)': None, 'Bleeding disorder': {'Hemophilia A': None, 'Hemophilia B': None, 'Rare clotting factor deficiencies': None, &quot;Von Willebrand's disease&quot;: None}, 'Blood clots/deep venous thrombosis': {'Provoked': None, 'Spontaneous': None}, 'CABG/bypass surgery': None, 'Chest pain/angina': {'Stable': None, 'Unstable': None}, 'Congestive heart failure': None, 'Heart arrhythmia': {'Atrial fibrillation': None, 'Atrial flutter': None, 'Bradycardia': None, 'Paroxysmal supraventricular tachycardia': None, 'Premature heartbeat': None, 'Torsades de pointes': None, 'Ventricular fibrillation': None, 'Ventricular tachycardia': None, 'Wolfe-Parkinson white': None}, 'Heart attack/myocardial infarction (MI)': None, 'Heart murmur': None, 'Heart valvular disease': {'Aortic': None, 'Mitral': None, 'Pulmonic': None, 'Tricuspid': None}, 'High blood pressure (hypertension)': None, 'High cholesterol/hyperlipidemia': None, 'Hypertrophic cardiomyopathy': None, 'Pacemaker/defibrillator': None, 'Pericarditis': None, 'Splenic disorder': None, 'Vascular stents': None}</em><a class="headerlink" href="#odyssey.constants.MEDICAL_CONDITIONS_CARDIO" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup table for supported medical issues – cardiovascular.</p>
+<p>Implemented as a nested dicts, where the keys are the supported
+(category of) medical issues. The values are either another
+dict to specify a subdivision, or <code class="xref py py-attr docutils literal notranslate"><span class="pre">None</span></code> indicating no
+further nesting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>(..))</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt id="odyssey.constants.MEDICAL_CONDITIONS_KIDNEY">
+<code class="sig-prename descclassname">odyssey.constants.</code><code class="sig-name descname">MEDICAL_CONDITIONS_KIDNEY</code><em class="property"> = {'Acute kidney failure/injury': None, 'Chronic kidney disease': None, 'Hydronephrosis': None, 'Nephritic syndrome': None, 'Nephrolithiasis (kidney stones)': None, 'Nephrotic syndrome': None, 'Polycystic kidney disease': None, 'Pyelonephritis (kidney infection)': None}</em><a class="headerlink" href="#odyssey.constants.MEDICAL_CONDITIONS_KIDNEY" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup table for supported medical issues – nephrological.</p>
+<p>Implemented as a nested dicts, where the keys are the supported
+(category of) medical issues. The values are either another
+dict to specify a subdivision, or <code class="xref py py-attr docutils literal notranslate"><span class="pre">None</span></code> indicating no
+further nesting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>(..))</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt id="odyssey.constants.MEDICAL_CONDITIONS">
+<code class="sig-prename descclassname">odyssey.constants.</code><code class="sig-name descname">MEDICAL_CONDITIONS</code><em class="property"> = (('autoimmune', {'Diabetes type 1': None, 'Diabetes type 2': None, 'Low blood sugar/hypoglycemia': None, 'Thyroid': {'Graves': None, 'Hashimoto': None, 'Hyperthyroid': None, 'Hypothyroid': None}, 'Adrenal': {&quot;Cushing's&quot;: None, &quot;Addison's&quot;: None}, 'Thymic disease': None, 'Multiple endocrine neoplasia (MEN) 1': None, 'Multiple endocrine neoplasia (MEN) 2': None, 'Rheumatoid disease': None, &quot;Sjögren's disease&quot;: None, 'Systemic lupus erythematosus': None, 'Psoriatic disease': None, 'Fibromyalgia': None, 'Autoimmune vasculitis': None, 'Gout': None, 'Amyloidosis': None, 'Sarcoidosis': None, 'Scleroderma': None}), ('cancer', {'Brain': None, 'Bone': None, 'Blood': {'Leukemia': None, 'Lymphoma': None}, 'Gut': {'Esophageal': None, 'Stomach': None, 'Colorectal': None, 'Liver': None, 'Pancreatic': None}, 'Lung': {'Small cell': None, 'Non-small cell': None}, 'Kidney': {'Renal Cell': None, 'Urothelial carcinoma (transitional cell)': None}, 'Urological': {'Bladder': None, 'Penile': None, 'Prostatic': None}, 'Breast': None, 'Gynecological': {'Cervical/ovarian': None, 'Uterine': None, 'Vaginal': None}, 'Skin': {'Melanoma': None, 'Basal cell carcinoma': None, 'Squamous cell carcinoma': None}}), ('neurological', {'Headaches/migraines': None, 'Blackouts': None, 'Dizziness/vertigo': None, 'History of fall(s)': None, 'Balance disturbance': None, 'Vision loss': None, 'Hearing loss': None, 'Insomnia': None, 'Traumatic head/brain injury': None, 'Stroke/transient ischemic attack (TIA)': None, 'Multiple sclerosis': None, 'Peripheral neuropathy': None, 'Guillain barre': None, 'Myasthenia gravis': None, 'Epilepsy/seizure disorder': None, &quot;Parkinson's&quot;: None, &quot;Alzheimer's dementia&quot;: None, 'Lewy body dementia': None, 'Other dementia or memory loss': None, 'Spinal cord disease (disc herniation/bulging)': None, 'Vertebral fracture or fusion': None, 'Brain aneurysm': None, 'Pituitary disease': None, 'Hypothalamus disease': None, 'Carpal tunnel': None, 'Spinal stenosis': None, 'Sciatica': None, 'Spondylolisthesis': None}), ('musculoskeletal', {'Osteoarthritis': None, 'Osteoporosis': None, 'Osteopenia': None, 'Osteomalacia': None, 'History of fractures': {'Stress': None, 'Compression': None, 'Comminuted': None, 'Segmental': None, 'Spiral': None, 'Transverse': None, 'Oblique': None, 'Greenstick': None, 'Open/compound': None}, 'Closed': None, 'Dislocation': None, 'Torn ligament/meniscus/tendon': None, 'Torn muscle': None, 'Bone spur': None, 'Inguinal hernia': None}), ('cardiovascular', {'High blood pressure (hypertension)': None, 'Heart attack/myocardial infarction (MI)': None, 'Congestive heart failure': None, 'Hypertrophic cardiomyopathy': None, 'Heart valvular disease': {'Aortic': None, 'Pulmonic': None, 'Mitral': None, 'Tricuspid': None}, 'Heart murmur': None, 'Aneurysm (aortic, or other blood vessels)': None, 'Bleeding disorder': {'Hemophilia A': None, 'Hemophilia B': None, &quot;Von Willebrand's disease&quot;: None, 'Rare clotting factor deficiencies': None}, 'Blood clots/deep venous thrombosis': {'Provoked': None, 'Spontaneous': None}, 'Anemia': {'Iron deficiency': None, 'Blood loss': None, 'Thalassemia': None, 'Sickle cell': None, 'Hemolytic': None, 'Aplastic (or other bone marrow disease)': None, 'Megaloblastic (vitamin B12/folate deficiency)': None, 'Pernicious': None}, 'Chest pain/angina': {'Stable': None, 'Unstable': None}, 'Heart arrhythmia': {'Atrial fibrillation': None, 'Atrial flutter': None, 'Wolfe-Parkinson white': None, 'Paroxysmal supraventricular tachycardia': None, 'Ventricular tachycardia': None, 'Ventricular fibrillation': None, 'Torsades de pointes': None, 'Premature heartbeat': None, 'Bradycardia': None}, 'Pericarditis': None, 'High cholesterol/hyperlipidemia': None, 'Splenic disorder': None, 'CABG/bypass surgery': None, 'Pacemaker/defibrillator': None, 'Vascular stents': None}), ('nephrological', {'Chronic kidney disease': None, 'Acute kidney failure/injury': None, 'Pyelonephritis (kidney infection)': None, 'Nephrolithiasis (kidney stones)': None, 'Hydronephrosis': None, 'Polycystic kidney disease': None, 'Nephrotic syndrome': None, 'Nephritic syndrome': None}))</em><a class="headerlink" href="#odyssey.constants.MEDICAL_CONDITIONS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combination of all medical disease lookup tables with a short name.
+The short name should have no other characters than letters, because
+it is used to derive a class name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.9)">tuple</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.9)">tuple</a>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -262,7 +445,7 @@ database column expects a Python <code class="xref py py-attr docutils literal n
         <a href="odyssey.utils.email.html" class="btn btn-neutral float-right" title="odyssey.utils.email" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="odyssey.utils.schemas.html" class="btn btn-neutral float-left" title="odyssey.utils.schemas" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="odyssey.utils.auth.html" class="btn btn-neutral float-left" title="odyssey.utils.auth" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

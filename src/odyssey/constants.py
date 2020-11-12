@@ -3,17 +3,25 @@ import enum
 
 from sqlalchemy import text
 
-TABLE_TO_URI = {'ClientPolicies' : '/client/policies/{}/',
-                'ClientRelease': '/client/release/{}/',
-                'ClientConsent' : '/client/consent/{}/',
-                'ClientConsultContract' : '/client/consultcontract/{}/',
-                'ClientIndividualContract' : '/client/servicescontract/{}/' ,
-                'ClientSubscriptionContract' : '/client/subscriptioncontract/{}/',
-                'TrainerFitnessQuestionnaire': '/trainer/questionnaire/{}/',
-                'MedicalHistory': '/doctor/medicalhistory/{}/',
-                'PTHistory': '/pt/history/{}/',
-                'MedicalPhysicalExam': '/doctor/physical/{}/'
-                }
+TABLE_TO_URI = {
+    'ClientPolicies': '/client/policies/{}/',
+    'ClientRelease': '/client/release/{}/',
+    'ClientConsent': '/client/consent/{}/',
+    'ClientConsultContract': '/client/consultcontract/{}/',
+    'ClientIndividualContract': '/client/servicescontract/{}/' ,
+    'ClientSubscriptionContract': '/client/subscriptioncontract/{}/',
+    'TrainerFitnessQuestionnaire': '/trainer/questionnaire/{}/',
+    'MedicalHistory': '/doctor/medicalhistory/{}/',
+    'PTHistory': '/pt/history/{}/',
+    'MedicalPhysicalExam': '/doctor/physical/{}/'
+}
+"""
+Lookup table that links documents that need to be filled in
+with their respective endpoint URIs. Keys are the models in
+:mod:`odyssey.models`, values are the URIs.
+
+:type: dict
+"""
 
 COUNTRIES = (
     ('AF', 'Afghanistan'),
@@ -373,7 +381,7 @@ database column expects a Python :attr:`True` or :attr:`False` value. Use
 
     name = RadioField('label', choices=YESNO, coerce=BOOLIFY)
 
-:type: callable
+:type: :func:`callable`
 """
 
 DB_SERVER_TIME = text("clock_timestamp()")
@@ -382,7 +390,7 @@ Postgresql specific function that returns the timestamp,
 when the statement is run. It is independent of transaction time.
 The function is run on the server.
 
-:type: :meth:`sqlalchemy.text`
+:type: :class:`sqlalchemy.sql.expression.TextClause`
 """
 
 BLOODTEST_EVAL = "SELECT public.blood_test_eval({}, {}, {});"
@@ -430,8 +438,8 @@ ACCESS_ROLES = (
     'nutrition_internal'
 )
 """
-Staff members can have a number of roles, see :attr:`odyssey.models.user.Staff.roles`.
-This constant lists the roles supported by the MOdo Bio login system.
+Staff members are assigned roles, see :class:`odyssey.models.staff.StaffRoles`.
+This constant lists all possible staff roles.
 
 :type: tuple
 """
