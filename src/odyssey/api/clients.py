@@ -45,6 +45,7 @@ from odyssey.utils.schemas import (
     NewRemoteClientSchema, 
     SignAndDateSchema,
     SignedDocumentsSchema,
+    StaffRecentClientsSchema,
     UserSchema
 )
 
