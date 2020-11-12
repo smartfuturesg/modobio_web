@@ -43,11 +43,11 @@ if __name__ == "__main__":
     if args.db_uri:
         DB_URI = args.db_uri
     else: 
-        db_user = os.getenv('DB_USER')
-        db_pass = os.getenv('DB_PASS')    
-        db_host = os.getenv('DB_HOST')
-        db_flav = 'postgresql'
-        db_name = 'modobio'
+        db_user = os.getenv('DB_USER', '')
+        db_pass = os.getenv('DB_PASS', '')
+        db_host = os.getenv('DB_HOST', 'localhost')
+        db_flav = os.getenv('DB_FLAV', 'postgresql')
+        db_name = os.getenv('DB_NAME', 'modobio')
     
         DB_URI = f'{db_flav}://{db_user}:{db_pass}@{db_host}/{db_name}'
 
