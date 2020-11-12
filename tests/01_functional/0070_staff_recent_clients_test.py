@@ -5,11 +5,6 @@ from requests.auth import _basic_auth_str
 
 from odyssey.models.user import User, UserLogin
 
-from tests.data import (
-    test_staff_recent_client
-)
-
-
 def test_get_staff_recent_clients(test_client, init_database):
     """
     GIVEN a api end point for getting staff recent clients list

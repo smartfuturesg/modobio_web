@@ -84,7 +84,7 @@ class Client(Resource):
             db.session.flush()
 
             #check if staff member has more than 10 recent clients
-            staff_recent_searches = StaffRecentClients.query.filter_by(staff_user_id=data['staff_user_id']).order_by(StaffRecentClients.timestamp.asc()).all()
+            staff_recent_searches = StaffRecentClients.query.filter_by(staff_user_id=staff_user_id).order_by(StaffRecentClients.timestamp.asc()).all()
             if len(staff_recent_searches) > 10:
                 #remove the oldest client in the list
                 db.session.delete(staff_recent_searches[0])
