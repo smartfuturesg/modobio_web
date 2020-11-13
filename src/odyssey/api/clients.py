@@ -91,6 +91,9 @@ class Client(Resource):
                 db.session.delete(staff_recent_searches[0])
             db.session.commit()
 
+        #data must be refreshed because of db changes
+        db.session.refresh(client_data[0])
+        db.session.refresh(client_data[1])
         return client_data
 
     @token_auth.login_required

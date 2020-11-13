@@ -14,7 +14,7 @@ from flask_whooshee import Whooshee
 
 from odyssey.config import Config
 
-db = SQLAlchemy(session_options={'expire_on_commit': False})
+db = SQLAlchemy()
 migrate = Migrate()
 cors = CORS()
 ma = Marshmallow()
