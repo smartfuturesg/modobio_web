@@ -65,6 +65,37 @@ class StaffProfile(db.Model):
     :type: string
     """
 
+class StaffRecentClients(db.Model):
+    """this table stores the last 10 clients that a staff member has loaded"""
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
+
+    staff_user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    """
+    User_id of the staff member that loaded the client
+
+    :type: int, foreign key
+    """
+
+    client_user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    """
+    User_id of the client that was loaded
+
+    :type: int, foreign key
+    """
+
+    timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp denoting when the staff member last loaded the client
+
+    :type: datetime
+    """
+
 class ClientRemovalRequests(db.Model):
     """ Client removal request table.
 

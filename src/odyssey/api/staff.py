@@ -7,11 +7,11 @@ from flask_accepts import accepts, responds
 import jwt
 
 from odyssey import db
-from odyssey.models.staff import StaffProfile, StaffRoles
+from odyssey.models.staff import StaffProfile, StaffRoles, StaffRecentClients
 from odyssey.models.user import User, UserLogin
 from odyssey.api import api
 from odyssey.utils.auth import token_auth
-from odyssey.api.errors import UnauthorizedUser, StaffEmailInUse, StaffNotFound
+from odyssey.api.errors import UnauthorizedUser, StaffEmailInUse, StaffNotFound, ClientNotFound
 from odyssey.utils.email import send_email_password_reset
 from odyssey.utils.schemas import (
     StaffInfoSchema,
@@ -21,8 +21,10 @@ from odyssey.utils.schemas import (
     StaffProfileSchema, 
     StaffRolesSchema,
     StaffSearchItemsSchema,
+    StaffRecentClientsSchema,
     UserSchema
 )
+from odyssey.utils.misc import check_client_existence
 
 from werkzeug.security import check_password_hash
 
@@ -265,5 +267,12 @@ class ChangePassword(Resource):
 
         return 200
 
-
-
+@ns.route('/recentclients/')
+class RecentClients(Resource):
+    """endpoint related to the staff recent client feature"""
+    
+    @token_auth.login_required
+    @responds(schema=StaffRecentClientsSchema(many=True), api=ns)
+    def get(self):
+        """get the 10 most recent clients a staff member has loaded"""
+        return StaffRecentClients.query.filter_by(staff_user_id=token_auth.current_user()[0].user_id).all()
