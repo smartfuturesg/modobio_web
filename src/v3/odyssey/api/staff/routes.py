@@ -5,20 +5,20 @@ from flask_accepts import accepts, responds
 import jwt
 
 from odyssey import db
-from odyssey.api.staff.models import StaffProfile
+from odyssey.api.staff.models import StaffProfile, StaffRoles
 from odyssey.api.user.models import User, UserLogin
 from odyssey.api import api
 from odyssey.utils.auth import basic_auth, token_auth
-#from odyssey.api.client.routes import ns
 from odyssey.utils.errors import UnauthorizedUser, StaffEmailInUse, StaffNotFound, ClientNotFound
 from odyssey.utils.email import send_email_password_reset
-from odyssey.api.user.schemas import UserSchema
+from odyssey.api.user.schemas import UserSchema, StaffInfoSchema
 from odyssey.api.staff.schemas import (
     StaffPasswordRecoveryContactSchema, 
     StaffPasswordResetSchema,
     StaffPasswordUpdateSchema,
     StaffProfileSchema, 
-    StaffSearchItemsSchema
+    StaffSearchItemsSchema,
+    StaffRolesSchema
 )
 
 ns = api.namespace('staff', description='Operations related to staff members')
@@ -106,15 +106,15 @@ class StaffMembers(Resource):
         if staff:
             raise StaffEmailInUse(email=data.get('email'))
 
-        ## Role suppression
+        ## TODO: rework Role suppression
         # system_admin: permisison to create staff admin.
         # staff_admin:  can create all other roles except staff/systemadmin
-        if data.get('is_system_admin'):
-            raise UnauthorizedUser(message=f"Staff member with email {token_auth.current_user().email} is unauthorized to create a system administrator role.")
+        # if data.get('is_system_admin'):
+        #     raise UnauthorizedUser(message=f"Staff member with email {token_auth.current_user()[0].email} is unauthorized to create a system administrator role.")
 
-        if data.get('is_admin') and token_auth.current_user().get_admin_role() != 'sys_admin':
-            raise UnauthorizedUser(message=f"Staff member with email {token_auth.current_user().email} is unauthorized to create a staff administrator role. \
-                                 Please contact system admin")
+        # if data.get('is_admin') and token_auth.current_user()[0].get_admin_role() != 'sys_admin':
+        #     raise UnauthorizedUser(message=f"Staff member with email {token_auth.current_user()[0].email} is unauthorized to create a staff administrator role. \
+        #                          Please contact system admin")
    
         #remove user data from staff data
         user_data = {'email': data['email'], 'password': data['password']}
@@ -136,7 +136,39 @@ class StaffMembers(Resource):
 
         return new_staff
 
-@ns.route('/password/forgot-password/recovery-link')
+@ns.route('/roles/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class UpdateRoles(Resource):
+    """
+    View and update roles for staff member with a given user_id
+    """
+    @token_auth.login_required
+    @accepts(schema=StaffInfoSchema, api=ns)
+    @responds(status_code=201, api=ns)   
+    def post(self, user_id):
+        staff_user, _ = token_auth.current_user()
+
+        # staff are only allowed to edit their own info
+        if staff_user.user_id != user_id:
+            raise UnauthorizedUser(message="")
+        
+        data = request.get_json()
+        staff_roles = db.session.query(StaffRoles.role).filter(StaffRoles.user_id==user_id).all()
+        staff_roles = [x[0] for x in staff_roles]
+        staff_role_schema = StaffRolesSchema()
+
+        # loop through submitted roles, add role if not already in db
+        for role in data['access_roles']:
+            if role not in staff_roles:
+                db.session.add(staff_role_schema.load(
+                    {'user_id': user_id, 
+                    'role': role}))
+        
+        db.session.commit()
+        
+        return
+    
+@ns.route('/password/forgot-password/recovery-link/')
 class PasswordResetEmail(Resource):
     """Password reset endpoints."""
     
@@ -202,7 +234,7 @@ class ResetPassword(Resource):
 
         return 200
 
-@ns.route('/password/update')
+@ns.route('/password/update/')
 class ChangePassword(Resource):
     """Reset the user's password."""
     @token_auth.login_required
@@ -215,14 +247,11 @@ class ChangePassword(Resource):
         """
 
         data = request.get_json()
-        staff_email = token_auth.current_user().email
-
         # bring up the staff member and reset their password
-        staff = User.query.filter_by(email=staff_email).one_or_none()
-        staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
+        _, user_login = token_auth.current_user()
 
-        if staffLogin.check_password(password=data["current_password"]):
-            staffLogin.set_password(data["new_password"])
+        if user_login.check_password(password=data["current_password"]):
+            user_login.set_password(data["new_password"])
         else:
             raise UnauthorizedUser(message="please enter the correct current password \
                                       otherwise, visit the password recovery endpoint \
@@ -231,70 +260,35 @@ class ChangePassword(Resource):
 
         return 200
 
-"""Tokens"""
+
+""" Staff Token Endpoints """
 
 @ns.route('/token/')
-class Token(Resource):
+class StaffToken(Resource):
     """create and revoke tokens"""
     @ns.doc(security='password')
     @basic_auth.login_required(user_type=['staff'])
     def post(self):
         """generates a token for the 'current_user' immediately after password authentication"""
-        user = basic_auth.current_user()
-        user_login = UserLogin.query.filter_by(user_id=user.user_id).one_or_none()
+        user, user_login = basic_auth.current_user()
+        if not user:
+            return 401
+        # bring up list of staff roles
+        access_roles = db.session.query(
+                                StaffRoles.role
+                            ).filter(
+                                StaffRoles.user_id==user.user_id
+                            ).all()
         return {'email': user.email, 
                 'firstname': user.firstname, 
                 'lastname': user.lastname, 
-                'token': user_login.get_token()}, 201
+                'token': user_login.get_token(),
+                'user_id': user.user_id,
+                'access_roles': [item[0] for item in access_roles]}, 201
 
     @ns.doc(security='password')
     @token_auth.login_required(user_type=['staff'])
     def delete(self):
-        """invalidate urrent token. Used to effectively logout a user"""
-        token_auth.current_user().revoke_token()
+        """invalidate current token. Used to effectively logout a user"""
+        token_auth.current_user()[1].revoke_token()
         return '', 204
-
-# @ns.route('/remoteregistration/')
-# @ns.doc(params={'tmp_registration': 'temporary registration portal hash'})
-# class RemoteRegistrationToken(Resource):
-#     """generate and delete portal user API access tokens
-#         first validates that the user's basic authentication passes, then checks
-#         the url to validate the authenticity of the end point (i.e. in database and not expired)"""
-    
-#     @ns.doc(security='password')
-#     @basic_auth_client.login_required
-#     def post(self):
-#         """generate api token for portal user"""
-#         tmp_registration = request.args.get('tmp_registration')
-#         #validate registration portal
-#         if not RemoteRegistration().check_portal_id(tmp_registration):
-#             raise ClientNotFound(message="Resource does not exist")
-#         user = basic_auth_client.current_user()
-
-#         return {'email': user.email, 'token': user.get_token()}, 201
-
-#     @ns.doc(security='password')
-#     @basic_auth.login_required
-#     def delete(self):
-#         """invalidate current token. Used to effectively logout a user"""
-#         token_auth.current_user().revoke_token()
-#         return '', 204
-    # @ns.doc(security='password')
-    # @basic_auth.login_required(user_type=['remoteregistration'])
-    # def post(self):
-    #     """generate api token for portal user"""
-    #     tmp_registration = request.args.get('tmp_registration')
-    #     #validate registration portal
-    #     if not RemoteRegistration().check_portal_id(tmp_registration):
-    #         raise ClientNotFound(message="Resource does not exist")
-    #     user = basic_auth.current_user()
-
-    #     return {'email': user.email, 'token': user.get_token()}, 201
-
-    # @ns.doc(security='password')
-    # @basic_auth.login_required(user_type=['remoteregistration'])
-    # def delete(self):
-    #     """invalidate current token. Used to effectively logout a user"""
-    #     token_auth.current_user().revoke_token()
-    #     return '', 204
-

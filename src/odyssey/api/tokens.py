@@ -40,7 +40,7 @@ class StaffToken(Resource):
     @ns.doc(security='password')
     @token_auth.login_required(user_type=['staff'])
     def delete(self):
-        """invalidate urrent token. Used to effectively logout a user"""
+        """invalidate current token. Used to effectively logout a user"""
         token_auth.current_user()[1].revoke_token()
         return '', 204
 
@@ -62,7 +62,7 @@ class ClientToken(Resource):
     @ns.doc(security='password')
     @token_auth.login_required(user_type=['client'])
     def delete(self):
-        """invalidate urrent token. Used to effectively logout a user"""
+        """invalidate current token. Used to effectively logout a user"""
         token_auth.current_user()[1].revoke_token()
         return '', 204
 

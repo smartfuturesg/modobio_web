@@ -6,7 +6,7 @@ from flask_accepts import accepts, responds
 from flask_restx import Resource, Api
 
 from odyssey.api import api
-from odyssey.utils.auth import token_auth
+from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.errors import (
     UserNotFound, 
     ClientAlreadyExists, 
@@ -150,23 +150,37 @@ class ClientSummary(Resource):
         return data
 
 @ns.route('/clientsearch/')
-#@ns.doc(params={'page': 'request page for paginated clients list',
-#                'per_page': 'number of clients per page',
-#                'firstname': 'first name to search',
-#                'lastname': 'last name to search',
-#                'email': 'email to search',
-#                'phone': 'phone number to search',
-#                'dob': 'date of birth to search',
-#                'record_locator_id': 'record locator id to search'})
+@ns.doc(params={'page': 'request page for paginated clients list',
+                'per_page': 'number of clients per page',
+                'firstname': 'first name to search',
+                'lastname': 'last name to search',
+                'email': 'email to search',
+                'phone': 'phone number to search',
+                'dob': 'date of birth to search',
+                'record_locator_id': 'record locator id to search'})
 
 #todo - fix to work with new user system
 class Clients(Resource):
     @token_auth.login_required
-    #@responds(schema=ClientSearchOutSchema, api=ns)
-    @responds(schema=UserSchema(many=True), api=ns)
+    @responds(schema=ClientSearchOutSchema, api=ns)
+    #@responds(schema=UserSchema(many=True), api=ns)
     def get(self):
         """returns list of clients given query parameters"""
-        return User.query.filter_by(is_client=True).all()
+        clients = []
+        for user in User.query.filter_by(is_client=True).all():
+            client = {
+                'user_id': user.user_id,
+                'firstname': user.firstname,
+                'lastname': user.lastname,
+                'email': user.email,
+                'phone': user.phone_number,
+                'dob': None,
+                'record_locator_id': None,
+                'modobio_id': user.modobio_id
+            }
+            clients.append(client)
+        response = {'items': clients, '_meta': None, '_links': None}
+        return response
 
         # page = request.args.get('page', 1, type=int)
         # per_page = min(request.args.get('per_page', 10, type=int), 100)                 
@@ -708,3 +722,26 @@ class ClientDataStorageTiers(Resource):
         results['total_stored_bytes'] = total_bytes 
         
         return results
+
+""" Client Token Endpoints """
+@ns.route('/token/')
+class ClientToken(Resource):
+    """create and revoke tokens"""
+    @ns.doc(security='password')
+    @basic_auth.login_required(user_type=['client'])
+    def post(self):
+        """generates a token for the 'current_user' immediately after password authentication"""
+        user, user_login = basic_auth.current_user()
+        if not user:
+            return 401
+        return {'email': user.email, 
+                'firstname': user.firstname, 
+                'lastname': user.lastname, 
+                'token': user_login.get_token()}, 201
+
+    @ns.doc(security='password')
+    @token_auth.login_required(user_type=['client'])
+    def delete(self):
+        """invalidate current token. Used to effectively logout a user"""
+        token_auth.current_user()[1].revoke_token()
+        return '', 204

@@ -15,7 +15,7 @@ from odyssey.api.user.models import User
 
 from odyssey import db
 
-ns = api.namespace('registeredfacility', description='Endpoints for registered facilities.')
+ns = api.namespace('facility', description='Endpoints for registered facilities.')
 
 @ns.route('/<int:facility_id>/')
 class RegisteredFacility(Resource):

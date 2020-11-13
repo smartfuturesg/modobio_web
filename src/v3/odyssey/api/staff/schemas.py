@@ -2,8 +2,8 @@ from marshmallow import Schema, fields, post_load, validate
 
 from odyssey import ma
 from odyssey.api.user.models import User
-from odyssey.api.staff.models import StaffProfile
-from odyssey.utils.constants import STAFF_ROLES
+from odyssey.api.staff.models import StaffProfile, StaffRoles
+from odyssey.utils.constants import ACCESS_ROLES
 
 """
     Schemas for the staff API
@@ -36,10 +36,22 @@ class StaffProfileSchema(ma.SQLAlchemyAutoSchema):
 
     idx = fields.Integer()
     user_id = fields.Integer()
-    possible_roles = STAFF_ROLES
+    possible_roles = ACCESS_ROLES
 
     @post_load
     def make_object(self, data, **kwargs):
         return StaffProfile(**data)
 
+class StaffRolesSchema(Schema):
+    """
+    Schema loads data into a StaffRoles object
+    """
+    
+    user_id = fields.Integer()
+    role = fields.String()
+    # TDOD: default to false once verification process is created
+    verified = fields.Boolean(default=True) 
 
+    @post_load
+    def make_object(self, data, **kwargs):
+        return StaffRoles(**data)
