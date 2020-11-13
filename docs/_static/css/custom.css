@@ -1,0 +1,29 @@
+/*
+This custom CSS disables the dispay of values in the definition of constants.
+It is only used in the constants module.
+
+Module variable are autodetected by the ::autodata directive  sphinx-autodoc.
+This is what we want. They are displayed like this:
+
+odyssey.constants.COUNTRIES = (('AF', 'Afghanistan'), ('AX', ...))
+
+except that the full definition list is shown in the documentation. This is
+not what we want, lengthy lists are distracting in the documentation. It can
+be turned off by setting:
+
+.. autodata:: odyssey.constants.COUNTRIES
+   :annotation:
+
+in docs/odyssey/odyssey.constants.rst, but then autodetection is disabled and
+every new constant has to be added to the documentation manually. That is also
+not what we want.
+
+As a compromise, we keep using the autodata function of autodoc, but hide the
+values with this custom css.
+*/
+
+@import 'theme.css';
+
+.property {
+    display: none !important;
+}

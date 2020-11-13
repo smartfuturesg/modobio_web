@@ -95,4 +95,4 @@ def test_add_roles_to_staff(test_client, init_database):
     
     # some simple checks for validity
     assert response.status_code == 201
-    assert staff_roles.sort() == ACCESS_ROLES.sort()
+    assert sorted(staff_roles) == sorted(ACCESS_ROLES)

@@ -9,4 +9,5 @@
 sphinx-apidoc -Me -o odyssey ../src/odyssey/
 
 # Run the doc builder.
+rm -rf ../public/*
 sphinx-build -j auto -b html . ../public

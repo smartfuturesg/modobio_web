@@ -7,11 +7,11 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>odyssey.models.doctor &mdash; Odyssey version: 0.1.66 documentation</title>
+  <title>odyssey.models.doctor &mdash; Odyssey version: 0.1.71 documentation</title>
   
 
   
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                version: 0.1.66
+                version: 0.1.71
               </div>
             
           
@@ -90,6 +90,7 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="odyssey.config.html">Configuration</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="odyssey.models.html">Models</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="odyssey.models.user.html">User</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.models.client.html">Client</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.models.staff.html">Staff</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Doctor</a></li>
@@ -177,7 +178,8 @@ All tables in this module are prefixed with <code class="docutils literal notran
 <em class="property">class </em><code class="sig-prename descclassname">odyssey.models.doctor.</code><code class="sig-name descname">MedicalImaging</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.models.doctor.MedicalImaging" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
 <p>Medical Imaging table.</p>
-<p>A table to store information about uploaded medical images.</p>
+<p>This table stores the medical imaging history of a client.
+As long as the user_id exists, we can add images to this table and search by user_id</p>
 <dl class="py attribute">
 <dt id="odyssey.models.doctor.MedicalImaging.idx">
 <code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.models.doctor.MedicalImaging.idx" title="Permalink to this definition">¶</a></dt>
@@ -212,12 +214,12 @@ All tables in this module are prefixed with <code class="docutils literal notran
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.models.doctor.MedicalImaging.clientid">
-<code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.doctor.MedicalImaging.clientid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client ID number.</p>
+<dt id="odyssey.models.doctor.MedicalImaging.user_id">
+<code class="sig-name descname">user_id</code><a class="headerlink" href="#odyssey.models.doctor.MedicalImaging.user_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>User ID number</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="odyssey.models.client.html#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="odyssey.models.user.html#odyssey.models.user.User.user_id" title="odyssey.models.user.User.user_id"><code class="xref py py-attr docutils literal notranslate"><span class="pre">User.user_id</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -361,12 +363,12 @@ only once, during the initial consult.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.models.doctor.MedicalHistory.clientid">
-<code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.doctor.MedicalHistory.clientid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client ID number.</p>
+<dt id="odyssey.models.doctor.MedicalHistory.user_id">
+<code class="sig-name descname">user_id</code><a class="headerlink" href="#odyssey.models.doctor.MedicalHistory.user_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>User ID number</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="odyssey.models.client.html#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="odyssey.models.user.html#odyssey.models.user.User.user_id" title="odyssey.models.user.User.user_id"><code class="xref py py-attr docutils literal notranslate"><span class="pre">User.user_id</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -551,12 +553,12 @@ information is taken only once, during the initial consult.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.models.doctor.MedicalPhysicalExam.clientid">
-<code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.clientid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client ID number.</p>
+<dt id="odyssey.models.doctor.MedicalPhysicalExam.user_id">
+<code class="sig-name descname">user_id</code><a class="headerlink" href="#odyssey.models.doctor.MedicalPhysicalExam.user_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>User ID number</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="odyssey.models.client.html#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="odyssey.models.user.html#odyssey.models.user.User.user_id" title="odyssey.models.user.User.user_id"><code class="xref py py-attr docutils literal notranslate"><span class="pre">User.user_id</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -915,8 +917,8 @@ with the role of ‘doc’ or ‘docext’.</p>
 <p>Blood test table.</p>
 <p>This table stores metadata for blood tests.</p>
 <dl class="py attribute">
-<dt id="odyssey.models.doctor.MedicalBloodTests.testid">
-<code class="sig-name descname">testid</code><a class="headerlink" href="#odyssey.models.doctor.MedicalBloodTests.testid" title="Permalink to this definition">¶</a></dt>
+<dt id="odyssey.models.doctor.MedicalBloodTests.test_id">
+<code class="sig-name descname">test_id</code><a class="headerlink" href="#odyssey.models.doctor.MedicalBloodTests.test_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>Unique ID number identifying the test.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -948,12 +950,12 @@ with the role of ‘doc’ or ‘docext’.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.models.doctor.MedicalBloodTests.clientid">
-<code class="sig-name descname">clientid</code><a class="headerlink" href="#odyssey.models.doctor.MedicalBloodTests.clientid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client ID number.</p>
+<dt id="odyssey.models.doctor.MedicalBloodTests.user_id">
+<code class="sig-name descname">user_id</code><a class="headerlink" href="#odyssey.models.doctor.MedicalBloodTests.user_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>User ID number</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="odyssey.models.client.html#odyssey.models.client.ClientInfo.clientid" title="odyssey.models.client.ClientInfo.clientid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ClientInfo.clientid</span></code></a></p>
+<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="odyssey.models.user.html#odyssey.models.user.User.user_id" title="odyssey.models.user.User.user_id"><code class="xref py py-attr docutils literal notranslate"><span class="pre">User.user_id</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1015,8 +1017,8 @@ ranges. What constitutes as a normal or optimal range depends on gender
 and possibly other factors. The range limits are calculated for each
 client and stored in this table.</p>
 <dl class="py attribute">
-<dt id="odyssey.models.doctor.MedicalBloodTestResultTypes.resultid">
-<code class="sig-name descname">resultid</code><a class="headerlink" href="#odyssey.models.doctor.MedicalBloodTestResultTypes.resultid" title="Permalink to this definition">¶</a></dt>
+<dt id="odyssey.models.doctor.MedicalBloodTestResultTypes.result_id">
+<code class="sig-name descname">result_id</code><a class="headerlink" href="#odyssey.models.doctor.MedicalBloodTestResultTypes.result_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>Unique ID number identifying the results.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -1168,23 +1170,23 @@ stored in <a class="reference internal" href="#odyssey.models.doctor.MedicalBloo
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.models.doctor.MedicalBloodTestResults.testid">
-<code class="sig-name descname">testid</code><a class="headerlink" href="#odyssey.models.doctor.MedicalBloodTestResults.testid" title="Permalink to this definition">¶</a></dt>
+<dt id="odyssey.models.doctor.MedicalBloodTestResults.test_id">
+<code class="sig-name descname">test_id</code><a class="headerlink" href="#odyssey.models.doctor.MedicalBloodTestResults.test_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>Unique test ID number.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="#odyssey.models.doctor.MedicalBloodTests.testid" title="odyssey.models.doctor.MedicalBloodTests.testid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MedicalBloodTests.testid</span></code></a></p>
+<dd class="field-odd"><p>int, foreign key to <code class="xref py py-attr docutils literal notranslate"><span class="pre">MedicalBloodTests.testid</span></code></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.models.doctor.MedicalBloodTestResults.resultid">
-<code class="sig-name descname">resultid</code><a class="headerlink" href="#odyssey.models.doctor.MedicalBloodTestResults.resultid" title="Permalink to this definition">¶</a></dt>
+<dt id="odyssey.models.doctor.MedicalBloodTestResults.result_id">
+<code class="sig-name descname">result_id</code><a class="headerlink" href="#odyssey.models.doctor.MedicalBloodTestResults.result_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>Unique result ID number.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>int, foreign key to <a class="reference internal" href="#odyssey.models.doctor.MedicalBloodTestResultTypes.resultid" title="odyssey.models.doctor.MedicalBloodTestResultTypes.resultid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MedicalBloodTestResultTypes.resultid</span></code></a></p>
+<dd class="field-odd"><p>int, foreign key to <code class="xref py py-attr docutils literal notranslate"><span class="pre">MedicalBloodTestResultTypes.resultid</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1225,7 +1227,7 @@ and optimal results. Possible values are:</p>
 <dd><p>Event listener for the <a class="reference internal" href="#odyssey.models.doctor.MedicalBloodTestResults" title="odyssey.models.doctor.MedicalBloodTestResults"><code class="xref py py-class docutils literal notranslate"><span class="pre">MedicalBloodTestResults</span></code></a> table.</p>
 <p>Listens for inserts into the <a class="reference internal" href="#odyssey.models.doctor.MedicalBloodTestResults" title="odyssey.models.doctor.MedicalBloodTestResults"><code class="xref py py-class docutils literal notranslate"><span class="pre">MedicalBloodTestResults</span></code></a> table. When
 called, it runs the value evaluation on the DB side
-(<code class="xref py py-const docutils literal notranslate"><span class="pre">odyssey.constants.BLOODTEST_EVAL</span></code>) and stores the result.
+(<a class="reference internal" href="odyssey.constants.html#odyssey.constants.BLOODTEST_EVAL" title="odyssey.constants.BLOODTEST_EVAL"><code class="xref py py-const docutils literal notranslate"><span class="pre">odyssey.constants.BLOODTEST_EVAL</span></code></a>) and stores the result.
 Evaluation is based of normal and optimal ranges of each blood test type.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
