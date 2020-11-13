@@ -13,7 +13,7 @@ from odyssey.api.user.models import User
 from odyssey.api.pt.models import Chessboard, PTHistory
 
 """
-    Schemas for the pt API
+    Schemas for the pt (physical therapy) API
 """
 
 class PTHistorySchema(ma.SQLAlchemyAutoSchema):

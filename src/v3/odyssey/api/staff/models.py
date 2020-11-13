@@ -152,19 +152,19 @@ class StaffRoles(db.Model):
 
     Possible roles include:
 
-    - stfappadmin
-    - sysadmin
-    - clntsvc
-    - physthera
-    - phystrain
-    - datasci
-    - doctor
-    - nutrition
-    - clntsvc_internal
-    - physthera_internal
-    - phystrain_internal
-    - doctor_internal
-    - nutrition_internal
+    -staff_admin
+    -system_admin
+    -client_services
+    -physical_therapist
+    -trainer
+    -data_science
+    -doctor
+    -nutrition
+    -client_services_internal
+    -physical_therapist_internal
+    -trainer_internal
+    -doctor_internal
+    -nutrition_internal
 
     Internal roles are intended for staff members who are part of the internal application development team. 
     
