@@ -48,7 +48,7 @@ class User(db.Model):
     :type: str
     """
 
-    email = db.Column(db.String(50))
+    email = db.Column(db.String(50), unique=True)
     """
     Email address.
 
@@ -57,7 +57,7 @@ class User(db.Model):
     :type: str, max length 50, non-null, unique
     """
 
-    phone_number = db.Column(db.String(50))
+    phone_number = db.Column(db.String(50), unique=True)
     """
     User phone number
 
