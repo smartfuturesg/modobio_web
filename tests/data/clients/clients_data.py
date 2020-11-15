@@ -76,45 +76,45 @@ clients_consent_data = {
     'signature': signature
 }
 
-# clients_release_data = {
-#     'release_of_other': 'Only release my prescription drugs, not anything else.',
-#     'release_date_from': "2020-07-07",
-#     'release_date_to': "2021-07-07",
-#     'release_purpose': 'Release my data for the purpose of doctors having my required drugs.',
-#     'signdate': "2020-05-05",
-#     'signature': signature,
-#     "release_from": [{
-#             "email": "string@gmail.com",
-#             "release_direction": "FROM",
-#             "name": "string",
-#             "phone": "string",
-#             "relationship": "string"
-#             },
-#             {
-#             "email": "string@gmail.com",
-#             "release_direction": "FROM",
-#             "name": "string",
-#             "phone": "string",
-#             "relationship": "string"
-#             }
-#     ],
-#   "release_to": [{
-#             "email": "string@gmail.com",
-#             "release_direction": "TO",
-#             "name": "string",
-#             "phone": "string",
-#             "relationship": "string"
-#             },
-#             {
-#             "email": "string@gmail.com",
-#             "release_direction": "TO",
-#             "name": "string",
-#             "phone": "string",
-#             "relationship": "string"
-#             }
-#   ],
-#     "release_of_all": False,
-# }
+clients_release_data = {
+    'release_of_other': 'Only release my prescription drugs, not anything else.',
+    'release_date_from': "2020-07-07",
+    'release_date_to': "2021-07-07",
+    'release_purpose': 'Release my data for the purpose of doctors having my required drugs.',
+    'signdate': "2020-05-05",
+    'signature': signature,
+    "release_from": [{
+            "email": "string@gmail.com",
+            "release_direction": "FROM",
+            "name": "string",
+            "phone": "string",
+            "relationship": "string"
+            },
+            {
+            "email": "string@gmail.com",
+            "release_direction": "FROM",
+            "name": "string",
+            "phone": "string",
+            "relationship": "string"
+            }
+    ],
+  "release_to": [{
+            "email": "string@gmail.com",
+            "release_direction": "TO",
+            "name": "string",
+            "phone": "string",
+            "relationship": "string"
+            },
+            {
+            "email": "string@gmail.com",
+            "release_direction": "TO",
+            "name": "string",
+            "phone": "string",
+            "relationship": "string"
+            }
+  ],
+    "release_of_all": False,
+}
 
 clients_policies_data = {
     'signdate': "2020-04-05",

@@ -1,16 +1,14 @@
-import time 
-
 from flask.json import dumps
 
 from odyssey.models.user import User, UserLogin
 from tests.data.clients.clients_data import (
-    clients_consent_data
+    clients_release_data
 )
 
-def test_post_client_consent(test_client, init_database):
+def test_post_client_release(test_client, init_database):
     """
-    GIVEN a api end point for posting client consent
-    WHEN the '/client/consent/<client id>' resource  is requested (POST)
+    GIVEN a api end point for posting client release
+    WHEN the '/client/release/<client id>' resource  is requested (POST)
     THEN check the response is valid
     """
     # get staff authorization to view client data
@@ -19,21 +17,20 @@ def test_post_client_consent(test_client, init_database):
     token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    payload = clients_consent_data
+    payload = clients_release_data
     # send get request for client info on user_id = 1 
-    response = test_client.post('/client/consent/1/',
+    response = test_client.post('/client/release/1/',
                                 headers=headers, 
                                 data=dumps(payload), 
                                 content_type='application/json')
-    #wait for pdf generation
-    time.sleep(3)
     assert response.status_code == 201
-    assert response.json['infectious_disease'] == clients_consent_data['infectious_disease']
+    assert response.json['release_of_other'] == clients_release_data['release_of_other']
+    assert response.json['release_to'][0]['email'] == clients_release_data['release_to'][0]['email']
 
-def test_get_client_consent(test_client, init_database):
+def test_get_client_release(test_client, init_database):
     """
-    GIVEN a api end point for retrieving the client consent
-    WHEN the '/client/consent/<client id>' resource  is requested (GET)
+    GIVEN a api end point for retrieving the client release
+    WHEN the '/client/release/<client id>' resource  is requested (GET)
     THEN check the response is valid
     """
     # get staff authorization to view client data
@@ -43,10 +40,10 @@ def test_get_client_consent(test_client, init_database):
     headers = {'Authorization': f'Bearer {token}'}
 
     # send get request for client info on user_id = 1 
-    response = test_client.get('/client/consent/1/',
+    response = test_client.get('/client/release/1/',
                                 headers=headers, 
                                 content_type='application/json')
                                 
     assert response.status_code == 200
-    assert response.json['infectious_disease'] == False
+    assert response.json['release_of_other'] == 'Only release my prescription drugs, not anything else.'
     
