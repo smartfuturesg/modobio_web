@@ -14,7 +14,7 @@ users_new_user_client_data = {
     "middlename": "User",
     "lastname": "Client",
     "email": "test_this_user_client@modobio.com",
-    "phone_number": "1111111111",
+    "phone_number": "1111111121",
     "password": "password"
   },
   "clientinfo": {
@@ -79,7 +79,7 @@ users_staff_member_data = {
     "firstname": "testy",
     "lastname": "testerson",
     "email": "staff_member@modobio.com",
-    "phone_number": "1111111111",
+    "phone_number": "1111111113",
     "is_staff": True,
     "is_client": False
 }
