@@ -51,6 +51,28 @@ def test_get_client_blood_tests(test_client, init_database):
     assert response.status_code == 200
     assert response.json['items'][0]['notes'] == 'test2'
     
+def test_get_blood_test_results_all(test_client, init_database):
+    """
+    GIVEN a api end point for retrieving medical blood tests results
+    WHEN the  '/doctor/bloodtest/results/all/<test id>/' resource  is requested (GET)
+    THEN check the response is valid
+    """
+    # get staff authorization to view client data
+    staff = User.query.filter_by(is_staff=True).first()
+    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
+    token = staffLogin.get_token()
+    headers = {'Authorization': f'Bearer {token}'}
+
+    client = User.query.filter_by(is_client=True).first()
+    # send get request for client info on user_id = client.user_id
+    response = test_client.get('/doctor/bloodtest/results/all/1/',
+                                headers=headers, 
+                                content_type='application/json')
+    response_data = response.get_json()
+    assert response.status_code == 200
+    assert response.json['test_results'] == 2
+    assert response.json['items'][0]['panel_type'] == 'Lipids'
+
 def test_get_blood_test_results(test_client, init_database):
     """
     GIVEN a api end point for retrieving medical blood tests results
