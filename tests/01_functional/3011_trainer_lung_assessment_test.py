@@ -19,17 +19,6 @@ def test_post_lung_assessment(test_client, init_database):
     token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    ## the lung assessment requires the client's vital weight in order to work
-    # this is pulled from the medical physical data
-    # so we submit a medical physical exam first
-    payload = trainer_medical_physical_data
-    
-    # send get request for client info on user_id = 1 
-    response = test_client.post('/doctor/physical/1/',
-                                headers=headers, 
-                                data=dumps(payload), 
-                                content_type='application/json')
-
     payload = trainer_lung_assessment_data
     # send get request for client info on clientid = 1 
     response = test_client.post('/trainer/assessment/lungcapacity/1/',
@@ -38,6 +27,7 @@ def test_post_lung_assessment(test_client, init_database):
                                 content_type='application/json')
 
     assert response.status_code == 201
+    assert response.json['notes'] == trainer_lung_assessment_data['notes']
 
 def test_get_lung_assessment(test_client, init_database):
     """
@@ -57,3 +47,4 @@ def test_get_lung_assessment(test_client, init_database):
                                 content_type='application/json')
                                 
     assert response.status_code == 200
+    assert response.json[0]['notes'] == 'little struggle but overall fine'

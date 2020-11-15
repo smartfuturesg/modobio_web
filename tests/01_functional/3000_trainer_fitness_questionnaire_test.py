@@ -25,6 +25,8 @@ def test_post_fitness_questionnaire(test_client, init_database):
                                 data=dumps(payload), 
                                 content_type='application/json')
     assert response.status_code == 201
+    assert response.json['sleep_hours'] == trainer_fitness_questionnaire_data['sleep_hours']
+    assert response.json['stress_sources'][0] == trainer_fitness_questionnaire_data['stress_sources'][0]
 
 def test_get_fitness_questionnaire(test_client, init_database):
     """
@@ -44,3 +46,5 @@ def test_get_fitness_questionnaire(test_client, init_database):
                                 content_type='application/json')
                                 
     assert response.status_code == 200
+    assert response.json['sleep_hours'] == '6-8'
+    assert response.json['stress_sources'][0] == 'Family'

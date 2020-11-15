@@ -159,7 +159,7 @@ trainer_chessboard_assessment_data = {
       "er": 0,
       "add": 0,
       "slr": 0,
-      "flexion": 0,
+      "flexion": 70,
       "ir": 0,
       "extension": 0,
       "abd": 0

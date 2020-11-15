@@ -34,6 +34,8 @@ def test_post_chessboard_assessment(test_client, init_database):
                                 content_type='application/json')
     
     assert response.status_code == 201
+    assert response.json['isa_structure'] == trainer_chessboard_assessment_data['isa_structure']
+    assert response.json['hip']['left']['flexion'] == trainer_chessboard_assessment_data['hip']['left']['flexion']
 
 def test_get_chessboard_assessment(test_client, init_database):
     """
@@ -53,3 +55,5 @@ def test_get_chessboard_assessment(test_client, init_database):
                                 content_type='application/json')
                                 
     assert response.status_code == 200
+    assert response.json[0]['isa_structure'] == 'Asymmetrical Atypical'
+    assert response.json[0]['hip']['left']['flexion'] == 70

@@ -106,6 +106,7 @@ def test_creating_new_client(test_client, init_database):
                             content_type='application/json')
 
     assert response.status_code == 201
+    assert response.json['email'] == users_new_user_client_data['userinfo']['email']
 
 ############
 #Removing client is temporarily disabled until a better user deletion system is created

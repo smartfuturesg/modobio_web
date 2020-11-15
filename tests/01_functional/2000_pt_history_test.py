@@ -45,6 +45,8 @@ def test_post_pt_history(test_client, init_database):
                                 content_type='application/json')
 
     assert response.status_code == 201
+    assert response.json['exercise'] == pt_history_data['exercise']
+    assert response.json['best_pain'] == pt_history_data['best_pain']    
 
 def test_put_pt_history(test_client, init_database):
     """
@@ -81,8 +83,6 @@ def test_put_pt_history(test_client, init_database):
     assert response.status_code == 200
     assert client.exercise == "test put"
 
-
-
 def test_get_pt_history(test_client, init_database):
     """
     GIVEN a api end point for retrieving pt history
@@ -103,4 +103,6 @@ def test_get_pt_history(test_client, init_database):
                                 content_type='application/json')
                                 
     assert response.status_code == 200
+    assert response.json['exercise'] == 'test put'
+    assert response.json['best_pain'] == 7
 

@@ -51,10 +51,12 @@ def check_blood_test_result_type_existence(result_name):
     if not result:
         raise ResultTypeNotFound(result_name)
 
-def check_facility_existence(facility_id):
+def fetch_facility_existence(facility_id):
     facility = RegisteredFacilities.query.filter_by(facility_id=facility_id).one_or_none()
     if not facility:
         raise FacilityNotFound(facility_id)
+    else:
+        return facility
 
 def check_client_facility_relation_existence(user_id, facility_id):
     relation = ClientFacilities.query.filter_by(user_id=user_id,facility_id=facility_id).one_or_none()

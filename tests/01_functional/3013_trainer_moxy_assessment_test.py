@@ -27,6 +27,7 @@ def test_post_moxy_assessment(test_client, init_database):
                                 content_type='application/json')
 
     assert response.status_code == 201
+    assert response.json['vl_side'] == trainer_moxy_assessment_data['vl_side']
 
 def test_get_moxy_assessment(test_client, init_database):
     """
@@ -46,3 +47,4 @@ def test_get_moxy_assessment(test_client, init_database):
                                 content_type='application/json')
                                 
     assert response.status_code == 200
+    assert response.json[0]['vl_side'] == trainer_moxy_assessment_data['vl_side']

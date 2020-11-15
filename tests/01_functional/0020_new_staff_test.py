@@ -30,6 +30,9 @@ def test_creating_new_staff(test_client, init_database):
     
     # some simple checks for validity
     assert response.status_code == 201
+    assert response.json['firstname'] == users_staff_new_user_data['userinfo']['firstname']
+    assert response.json['is_staff'] == True
+    assert response.json['is_client'] == False
 
     ###
     # Login (get token) for newly created staff member

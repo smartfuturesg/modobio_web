@@ -27,6 +27,7 @@ def test_post_movement_assessment(test_client, init_database):
                                 content_type='application/json')
 
     assert response.status_code == 201
+    assert response.json['toe_touch']['ribcage_movement'][0] == trainer_movement_assessment_data['toe_touch']['ribcage_movement'][0]
 
 def test_get_movement_assessment(test_client, init_database):
     """
@@ -46,3 +47,4 @@ def test_get_movement_assessment(test_client, init_database):
                                 content_type='application/json')
                                 
     assert response.status_code == 200
+    assert response.json[0]['toe_touch']['ribcage_movement'][0] == 'Even Bilaterally'

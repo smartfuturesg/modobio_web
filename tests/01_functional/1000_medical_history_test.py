@@ -29,6 +29,7 @@ def test_post_medical_history(test_client, init_database):
                                 content_type='application/json')
     
     assert response.status_code == 201
+    assert response.json['concerns'] == doctor_medical_history_data['concerns']
 
 def test_put_medical_history(test_client, init_database):
     """
@@ -75,4 +76,5 @@ def test_get_medical_history(test_client, init_database):
                                 content_type='application/json')
                                 
     assert response.status_code == 200
-    
+    assert response.json['concerns'] == doctor_medical_history_data['concerns']
+    assert response.json['diagnostic_other'] == 'testing put'

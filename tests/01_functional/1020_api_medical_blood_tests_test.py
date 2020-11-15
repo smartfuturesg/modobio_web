@@ -29,6 +29,7 @@ def test_post_medical_blood_test(test_client, init_database):
                                 data=dumps(payload), 
                                 content_type='application/json')
     assert response.status_code == 201
+    assert response.json['panel_type'] == doctor_blood_tests_data['panel_type']
 
 def test_get_client_blood_tests(test_client, init_database):
     """
@@ -48,6 +49,7 @@ def test_get_client_blood_tests(test_client, init_database):
                                 headers=headers, 
                                 content_type='application/json')
     assert response.status_code == 200
+    assert response.json['items'][0]['notes'] == 'test2'
     
 def test_get_blood_test_results(test_client, init_database):
     """
@@ -89,3 +91,5 @@ def test_get_blood_test_result_types(test_client, init_database):
                                 content_type='application/json')
                                 
     assert response.status_code == 200
+    assert response.json['items'][0]['result_name'] == 'dihydroxyvitaminD'
+    assert response.json['items'][0]['normal_max'] == 60

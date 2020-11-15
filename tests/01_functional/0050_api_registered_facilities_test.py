@@ -21,14 +21,16 @@ def test_post_registered_facilities(test_client, init_database):
     headers = {'Authorization': f'Bearer {token}'}
 
     payload = registeredfacilities_registered_facilities_data
-    
-    # send psot request for a new facility 
+
+    # send post request for a new facility 
     response = test_client.post('/registeredfacility/',
                                 headers=headers, 
                                 data=dumps(payload), 
                                 content_type='application/json')
-    
+
     assert response.status_code == 201
+
+
 
 def test_put_registered_facility(test_client, init_database):
     """
@@ -74,6 +76,13 @@ def test_get_registered_facility(test_client, init_database):
                                 content_type='application/json')
                                 
     assert response.status_code == 200
+
+    # send get request for facility info on facility_id = 1 
+    response = test_client.get('/registeredfacility/all/',
+                                headers=headers, 
+                                content_type='application/json')
+                                
+    assert response.status_code == 200    
 
 def test_post_client_facility(test_client, init_database):
     """

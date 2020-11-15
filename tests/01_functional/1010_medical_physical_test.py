@@ -25,6 +25,8 @@ def test_post_medical_physical(test_client, init_database):
                                 data=dumps(payload), 
                                 content_type='application/json')
     assert response.status_code == 201
+    assert response.json['vital_weight'] == trainer_medical_physical_data['vital_weight']
+    assert response.json['abdominal_hard'] == trainer_medical_physical_data['abdominal_hard']
 
 def test_get_medical_physical(test_client, init_database):
     """
@@ -44,3 +46,6 @@ def test_get_medical_physical(test_client, init_database):
                                 content_type='application/json')
                                 
     assert response.status_code == 200
+    assert response.json[0]['vital_weight'] == 110.0
+    assert response.json[0]['abdominal_hard'] == True
+    assert response.json[0]['reporter_lastname'] == 'testerson'

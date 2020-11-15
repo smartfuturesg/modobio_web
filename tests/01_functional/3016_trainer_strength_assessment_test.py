@@ -26,6 +26,7 @@ def test_post_strength_assessment(test_client, init_database):
                                 content_type='application/json')
 
     assert response.status_code == 201
+    assert response.json['upper_push']['right']['estimated_10rm'] == trainer_strength_assessment_data['upper_push']['right']['estimated_10rm']
 
 def test_get_strength_assessment(test_client, init_database):
     """
@@ -45,3 +46,4 @@ def test_get_strength_assessment(test_client, init_database):
                                 content_type='application/json')
                                 
     assert response.status_code == 200
+    assert response.json[0]['upper_push']['right']['estimated_10rm'] == 250
