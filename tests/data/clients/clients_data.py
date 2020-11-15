@@ -131,11 +131,11 @@ clients_subscription_data = {
     'signature': signature
 }
 
-# clients_individual_data = {
-#     'doctor': True,
-#     'pt': True,
-#     'data': False,
-#     'drinks': True,
-#     'signdate': "2020-04-05",
-#     'signature': signature
-# }
+clients_individual_data = {
+    'doctor': True,
+    'pt': True,
+    'data': False,
+    'drinks': True,
+    'signdate': "2020-04-05",
+    'signature': signature
+}
