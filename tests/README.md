@@ -4,6 +4,7 @@
 
 - pytest
 - pytest-cov
+- pytest --cov-report term-missing --cov=odyssey tests/
 
 ## Run tests
 
@@ -28,3 +29,9 @@ In order to achieve that, the tests were renamed and prefixed with a 4 digit num
 - 9999 remote client test, placing this test last seems to fix hanging
 
 Within each group, the tests are numbered by the 10s, e.g. xx10, xx20, etc. That leaves room for future expansion, so a test can be inserted without renaming all of them.
+
+## Data Files Notes
+
+Variables to use for testing will be named as follows:
+
+<api name>_description_data

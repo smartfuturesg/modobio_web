@@ -70,11 +70,11 @@ with open(signature_file, mode='rb') as fh:
 
 signature = 'data:image/png;base64,' + base64.b64encode(signature).decode('utf-8')
 
-# clients_consent_data = {
-#     'infectious_disease': False,
-#     'signdate': "2020-04-05",
-#     'signature': signature
-# }
+clients_consent_data = {
+    'infectious_disease': False,
+    'signdate': "2020-04-05",
+    'signature': signature
+}
 
 # clients_release_data = {
 #     'release_of_other': 'Only release my prescription drugs, not anything else.',
