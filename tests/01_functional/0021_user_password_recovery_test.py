@@ -26,7 +26,7 @@ def test_password_recovery_link(test_client, init_database):
  
     payload = {"email": staff.email}
 
-    response = test_client.post('/staff/password/forgot-password/recovery-link/',
+    response = test_client.post('/user/password/forgot-password/recovery-link/',
                                 data=dumps(payload), 
                                 content_type='application/json')
     
@@ -43,12 +43,12 @@ def test_full_password_recovery_routine(test_client, init_database):
     request to `staff/password/forgot-password/reset`
     THEN check the response is valid
     """
-    # Get staff member to reset lost password
-    staff = User.query.filter_by(is_staff=True).first()
+    # Get user member to reset lost password
+    user = User.query.filter_by(is_staff=True).first()
     
-    payload_email = {"email": staff.email}
+    payload_email = {"email": user.email}
 
-    response = test_client.post('/staff/password/forgot-password/recovery-link/',
+    response = test_client.post('/user/password/forgot-password/recovery-link/',
                                 data=dumps(payload_email), 
                                 content_type='application/json')
     ##
@@ -59,13 +59,10 @@ def test_full_password_recovery_routine(test_client, init_database):
 
     payload_password_reset = {"password": test_user_passwords["password"]}
 
-    response = test_client.put(f'/staff/password/forgot-password/reset?reset_token={pswd_rest_token}',
+    response = test_client.put(f'/user/password/forgot-password/reset?reset_token={pswd_rest_token}',
                                 data=dumps(payload_password_reset), 
                                 content_type='application/json')
-    # re-query database for staff member
-    staff = User.query.filter_by(email=staff.email).first()
-
     assert response.status_code == 200
 
-    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
-    assert staffLogin.check_password(password=payload_password_reset['password'])
+    userLogin = UserLogin.query.filter_by(user_id=user.user_id).one_or_none()
+    assert userLogin.check_password(password=payload_password_reset['password'])
