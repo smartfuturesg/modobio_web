@@ -5,7 +5,7 @@ import time
 from flask.json import dumps
 from requests.auth import _basic_auth_str
 
-from odyssey.models.user import User, UserLogin
+from odyssey.api.user.models import User, UserLogin
 
 from tests.data import test_user_passwords
 from werkzeug.security import check_password_hash

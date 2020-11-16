@@ -3,10 +3,10 @@ import base64
 from flask.json import dumps
 from requests.auth import _basic_auth_str
 
-from odyssey.models.user import User, UserLogin
-from odyssey.models.staff import StaffProfile, StaffRoles
+from odyssey.api.user.models import User, UserLogin
+from odyssey.api.staff.models import StaffProfile, StaffRoles
 
-from odyssey.constants import ACCESS_ROLES
+from odyssey.utils.constants import ACCESS_ROLES
 
 from tests.data import (
     test_new_user_staff

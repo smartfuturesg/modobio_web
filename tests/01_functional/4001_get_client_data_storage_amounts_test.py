@@ -1,6 +1,6 @@
 from requests.auth import _basic_auth_str
 
-from odyssey.models.user import User, UserLogin
+from odyssey.api.user.models import User, UserLogin
 
 
 def test_get_client_storage_tiers(test_client, init_database):

@@ -10,7 +10,7 @@ from marshmallow import (
 )
 from odyssey import ma
 from odyssey.api.user.models import User
-from odyssey.api.pt.models import Chessboard, PTHistory
+from odyssey.api.physiotherapy.models import Chessboard, PTHistory
 
 """
     Schemas for the pt (physical therapy) API

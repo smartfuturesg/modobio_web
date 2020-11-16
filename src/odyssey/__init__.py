@@ -1,9 +1,10 @@
 """ A staff application for the Modo Bio client journey.
 
-This is a `Flask <https://flask.palletsprojects.com>`_ based app that serves webpages to the `ModoBio <https://modobio.com>`_ staff. The pages contain the intake and data gathering forms for the *client journey*. The `Odyssey <https://en.wikipedia.org/wiki/Odyssey>`_ is of course the most famous journey of all time! 🤓
+This is a `Flask <https://flask.palletsprojects.com>`_ based app that serves webpages to the `ModoBio <https://modobio.com>`_ staff. 
+The pages contain the intake and data gathering forms for the *client journey*. The `Odyssey <https://en.wikipedia.org/wiki/Odyssey>`_ 
+is of course the most famous journey of all time! 🤓
 """
 import os
-import tempfile
 
 from flask import Flask
 from flask_cors import CORS
@@ -69,12 +70,12 @@ def create_app():
     # api and bp are connected, register after changing settings.
     app.register_blueprint(bp)
 
-    from odyssey.api.errors import register_handlers
+    from odyssey.utils.errors import register_handlers
     register_handlers(app)
 
     # Unprotected route, only relevant to developers
     if app.config['LOCAL_CONFIG']:
-        from odyssey.api.postman import bp
+        from odyssey.api.misc.postman import bp
         app.register_blueprint(bp, url_prefix='/postman')
 
     # If you want to add another field to search for in the database by whooshee
@@ -101,4 +102,4 @@ import wtforms
 class DateInput(wtforms.widgets.Input):
     input_type = 'date'
 
-import odyssey.models
+#import odyssey.models

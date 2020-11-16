@@ -1,5 +1,5 @@
 
-from odyssey.models.user import User, UserLogin
+from odyssey.api.user.models import User, UserLogin
 from tests.data import test_staff_member
 from werkzeug.security import check_password_hash
 

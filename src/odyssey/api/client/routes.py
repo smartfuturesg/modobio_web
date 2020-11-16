@@ -27,7 +27,7 @@ from odyssey.api.client.models import (
     ClientFacilities
 )
 from odyssey.api.doctor.models import MedicalHistory, MedicalPhysicalExam
-from odyssey.api.pt.models import PTHistory 
+from odyssey.api.physiotherapy.models import PTHistory 
 from odyssey.api.staff.models import ClientRemovalRequests
 from odyssey.api.trainer.models import FitnessQuestionnaire
 from odyssey.api.facility.models import RegisteredFacilities

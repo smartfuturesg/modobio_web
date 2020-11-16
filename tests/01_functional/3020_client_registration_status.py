@@ -1,4 +1,4 @@
-from odyssey.models.user import User, UserLogin
+from odyssey.api.user.models import User, UserLogin
 
 def test_get_registration_status(test_client, init_database):
     """

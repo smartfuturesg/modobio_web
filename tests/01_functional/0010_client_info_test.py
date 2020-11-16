@@ -6,8 +6,8 @@ from datetime import datetime
 from flask.json import dumps
 from requests.auth import _basic_auth_str
 
-from odyssey.models.user import User, UserLogin
-from odyssey.models.client import (
+from odyssey.api.user.models import User, UserLogin
+from odyssey.api.client.models import (
     ClientInfo,
     ClientConsent
 )

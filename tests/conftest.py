@@ -4,7 +4,7 @@ from datetime import datetime
 from sqlalchemy import text
 
 from odyssey import create_app, db
-from odyssey.models.client import (
+from odyssey.api.client.models import (
     ClientInfo,
     ClientConsent,
     ClientRelease,
@@ -13,8 +13,8 @@ from odyssey.models.client import (
     ClientSubscriptionContract,
     ClientIndividualContract
 )
-from odyssey.models.misc import MedicalInstitutions
-from odyssey.models.user import User, UserLogin
+from odyssey.api.facility.models import MedicalInstitutions
+from odyssey.api.user.models import User, UserLogin
 
 from .data import (
     test_new_client_creation,

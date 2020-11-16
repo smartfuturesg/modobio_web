@@ -3,8 +3,8 @@ import time
 
 from flask.json import dumps
 
-from odyssey.models.user import User, UserLogin
-from odyssey.models.client import ClientConsultContract, ClientPolicies ,ClientSubscriptionContract
+from odyssey.api.user.models import User, UserLogin
+from odyssey.api.client.models import ClientConsultContract, ClientPolicies ,ClientSubscriptionContract
 from tests.data import (
     test_new_client_info,
     signature,

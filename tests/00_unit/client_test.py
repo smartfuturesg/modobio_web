@@ -1,5 +1,5 @@
 
-from odyssey.models.user import User
+from odyssey.api.user.models import User
 
 def test_new_client(test_client, init_database):
     """

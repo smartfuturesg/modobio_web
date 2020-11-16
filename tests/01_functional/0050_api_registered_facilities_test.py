@@ -1,8 +1,8 @@
 from flask.json import dumps
 
-from odyssey.models.user import User, UserLogin
-from odyssey.models.client import ClientFacilities
-from odyssey.models.misc import RegisteredFacilities
+from odyssey.api.user.models import User, UserLogin
+from odyssey.api.client.models import ClientFacilities
+from odyssey.api.facility.models import RegisteredFacilities
 from tests.data import test_registered_facilities, test_client_facilities
 
 
