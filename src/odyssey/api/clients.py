@@ -22,7 +22,7 @@ from odyssey.models.client import (
 )
 from odyssey.models.doctor import MedicalHistory, MedicalPhysicalExam
 from odyssey.models.pt import PTHistory 
-from odyssey.models.staff import ClientRemovalRequests
+from odyssey.models.staff import ClientRemovalRequests, StaffRecentClients
 from odyssey.models.trainer import FitnessQuestionnaire
 from odyssey.models.misc import RegisteredFacilities
 from odyssey.models.user import User
@@ -45,6 +45,7 @@ from odyssey.utils.schemas import (
     NewRemoteClientSchema, 
     SignAndDateSchema,
     SignedDocumentsSchema,
+    StaffRecentClientsSchema,
     UserSchema
 )
 
@@ -66,6 +67,33 @@ class Client(Resource):
                 ).first()
         if not client_data:
             raise UserNotFound(user_id)
+
+        #update staff recent clients information
+        staff_user_id = token_auth.current_user()[0].user_id
+
+        #check if supplied client is already in staff recent clients
+        client_exists = StaffRecentClients.query.filter_by(staff_user_id=staff_user_id).filter_by(client_user_id=user_id).one_or_none()
+        if client_exists:
+            #update timestamp
+            client_exists.timestamp = datetime.now()
+            db.session.add(client_exists)
+            db.session.commit()
+        else:
+            #enter new recent client information
+            recent_client_schema = StaffRecentClientsSchema().load({'staff_user_id': staff_user_id, 'client_user_id': user_id})
+            db.session.add(recent_client_schema)
+            db.session.flush()
+
+            #check if staff member has more than 10 recent clients
+            staff_recent_searches = StaffRecentClients.query.filter_by(staff_user_id=staff_user_id).order_by(StaffRecentClients.timestamp.asc()).all()
+            if len(staff_recent_searches) > 10:
+                #remove the oldest client in the list
+                db.session.delete(staff_recent_searches[0])
+            db.session.commit()
+
+        #data must be refreshed because of db changes
+        db.session.refresh(client_data[0])
+        db.session.refresh(client_data[1])
         return client_data
 
     @token_auth.login_required

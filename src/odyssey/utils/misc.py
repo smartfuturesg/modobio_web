@@ -30,7 +30,7 @@ def check_client_existence(user_id):
     All clients must be in the CLientInfo table before any other procedure"""
     client = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
     if not client:
-        raise UserNotFound(user_id)
+        raise ClientNotFound(user_id)
 
 def check_user_existence(user_id):
     """Check that the user is in the database

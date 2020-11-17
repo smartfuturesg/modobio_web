@@ -86,7 +86,7 @@ test_staff_member = {
     "firstname": "testy",
     "lastname": "testerson",
     "email": "staff_member@modobio.com",
-    "phone_number": "1111111111",
+    "phone_number": "1111111113",
     "is_staff": True,
     "is_client": False
 }
@@ -665,7 +665,7 @@ test_new_user_client = {
     "middlename": "User",
     "lastname": "Client",
     "email": "test_this_user_client@modobio.com",
-    "phone_number": "1111111111",
+    "phone_number": "1111111114",
     "password": "password",
   },
   "clientinfo": {
@@ -694,7 +694,7 @@ test_new_user_client_2 = {
     "middlename": "User",
     "lastname": "Client",
     "email": "test_this_user_client_2@modobio.com",
-    "phone_number": "1111111111",
+    "phone_number": "1111111115",
     "password": "password",
   },
   "clientinfo": {
@@ -723,7 +723,7 @@ test_new_user_staff = {
     "middlename": "User",
     "lastname": "Staff",
     "email": "test_this_user_staff@modobio.com",
-    "phone_number": "1111111112",
+    "phone_number": "1111111116",
     "password": "password"    
   },
   "staffinfo": {
