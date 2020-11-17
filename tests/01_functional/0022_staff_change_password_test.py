@@ -34,7 +34,7 @@ def test_password_update(test_client, init_database):
                                 content_type='application/json')
     # bring up staff member again for updated data
     staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).first()
-
+    breakpoint()
     assert response.status_code == 200
     assert staffLogin.check_password(password=test_user_passwords['new_password'])
 

@@ -109,10 +109,9 @@ def test_creating_new_client(test_client, init_database):
             f"{test_new_user_client['userinfo']['email']}:{password}".encode("utf-8")).decode("utf-8")
     
     headers = {'Authorization': f'Basic {valid_credentials}'}
-    response = test_client.post('/tokens/client/',
+    response = test_client.post('/client/token/',
                             headers=headers, 
                             content_type='application/json')
-
     assert response.status_code == 201
 
 ############

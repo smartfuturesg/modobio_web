@@ -42,7 +42,7 @@ def test_creating_new_staff(test_client, init_database):
             "utf-8")).decode("utf-8")
     
     headers = {'Authorization': f'Basic {valid_credentials}'}
-    response = test_client.post('/tokens/staff/',
+    response = test_client.post('/staff/token/',
                             headers=headers, 
                             content_type='application/json')
     
