@@ -3,8 +3,8 @@ import time
 
 from flask.json import dumps
 
-from odyssey.models.user import User, UserLogin
-from odyssey.models.pt import PTHistory 
+from odyssey.api.user.models import User, UserLogin
+from odyssey.api.physiotherapy.models import PTHistory 
 from tests.data import test_pt_history
 
 

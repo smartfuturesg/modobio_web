@@ -2,8 +2,8 @@ import pathlib
 
 from flask.json import dumps
 
-from odyssey.models.user import User, UserLogin
-from odyssey.models.doctor import MedicalImaging
+from odyssey.api.user.models import User, UserLogin
+from odyssey.api.doctor.models import MedicalImaging
 from tests.data import test_medical_imaging
 
 def test_post_medical_imaging(test_client, init_database):

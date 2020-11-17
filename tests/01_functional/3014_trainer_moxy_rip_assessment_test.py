@@ -3,8 +3,8 @@ import time
 
 from flask.json import dumps
 
-from odyssey.models.user import User, UserLogin
-from odyssey.models.trainer import MoxyRipTest 
+from odyssey.api.user.models import User, UserLogin
+from odyssey.api.trainer.models import MoxyRipTest 
 from tests.data import test_moxy_rip, test_medical_physical
 
 

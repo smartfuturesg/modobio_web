@@ -3,8 +3,8 @@ import time
 
 from flask.json import dumps
 
-from odyssey.models.user import User, UserLogin
-from odyssey.models.pt import Chessboard 
+from odyssey.api.user.models import User, UserLogin
+from odyssey.api.physiotherapy.models import Chessboard 
 from tests.data import test_chessboard_assessment
 
 

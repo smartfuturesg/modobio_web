@@ -2,8 +2,8 @@ import time
 
 from flask.json import dumps
 
-from odyssey.models.user import User, UserLogin
-from odyssey.models.trainer import StrengthAssessment 
+from odyssey.api.user.models import User, UserLogin
+from odyssey.api.trainer.models import StrengthAssessment 
 from tests.data import test_strength_assessment
 
 def test_post_strength_assessment(test_client, init_database):
