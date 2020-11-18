@@ -126,7 +126,6 @@ class NewClientUser(Resource):
                 password = user_info.get('email')[:2]+secrets.token_hex(4)
             else:
                 del user_info['password']
-
             user_info["is_client"] = True
             user_info["is_staff"] = False
             user = UserSchema().load(user_info)

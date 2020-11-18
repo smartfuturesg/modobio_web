@@ -6,8 +6,7 @@ from flask.json import dumps
 from requests.auth import _basic_auth_str
 
 from odyssey.models.user import User, UserLogin
-from tests.data import test_user_passwords
-from werkzeug.security import check_password_hash
+from tests.data.users.users_data import users_staff_passwords_data
 
 def test_password_update(test_client, init_database):
     """
@@ -24,8 +23,8 @@ def test_password_update(test_client, init_database):
     # Update Password with the correct current password and a 
     # valid new password
     ###
-    payload = {"current_password": test_user_passwords["password"],
-                "new_password": test_user_passwords["new_password"]
+    payload = {"current_password": users_staff_passwords_data["password"],
+                "new_password": users_staff_passwords_data["new_password"]
     }
 
     response = test_client.post('/staff/password/update/',
@@ -36,7 +35,7 @@ def test_password_update(test_client, init_database):
     staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).first()
 
     assert response.status_code == 200
-    assert staffLogin.check_password(password=test_user_passwords['new_password'])
+    assert staffLogin.check_password(password=users_staff_passwords_data['new_password'])
 
     ###
     # Update Password with the incorrect current password and a 

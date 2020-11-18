@@ -5,8 +5,7 @@ from flask.json import dumps
 
 from odyssey.models.user import User, UserLogin
 from odyssey.models.trainer import MoxyAssessment 
-from tests.data import test_moxy_assessment
-
+from tests.data.trainer.trainer_data import trainer_moxy_assessment_data
 
 def test_post_moxy_assessment(test_client, init_database):
     """
@@ -20,14 +19,15 @@ def test_post_moxy_assessment(test_client, init_database):
     token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    payload = test_moxy_assessment
-    # send get request for client info on user_id = 1 
+    payload = trainer_moxy_assessment_data
+    # send get request for client info on clientid = 1 
     response = test_client.post('/trainer/assessment/moxy/1/',
                                 headers=headers, 
                                 data=dumps(payload), 
                                 content_type='application/json')
 
     assert response.status_code == 201
+    assert response.json['vl_side'] == trainer_moxy_assessment_data['vl_side']
 
 def test_get_moxy_assessment(test_client, init_database):
     """
@@ -47,3 +47,4 @@ def test_get_moxy_assessment(test_client, init_database):
                                 content_type='application/json')
                                 
     assert response.status_code == 200
+    assert response.json[0]['vl_side'] == trainer_moxy_assessment_data['vl_side']

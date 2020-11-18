@@ -16,18 +16,7 @@ from odyssey.models.client import (
 from odyssey.models.misc import MedicalInstitutions
 from odyssey.models.user import User, UserLogin
 
-from .data import (
-    test_new_client_creation,
-    test_new_client_info,
-    test_new_client_login,
-    test_staff_member,
-    test_client_consent_data,
-    test_client_release_data,
-    test_client_policies_data,
-    test_client_consult_data,
-    test_client_subscription_data,
-    test_client_individual_data
-)
+from tests.data.users.users_data import users_staff_member_data, users_client_new_creation_data, users_client_new_info_data
 
 def clean_db(db):
     for table in reversed(db.metadata.sorted_tables):
@@ -77,9 +66,8 @@ def init_database():
     
         db.session.execute(text(''.join(dat)))
 
-    # Insert test client data
     # 1) Create User instance. modobio_id populated automatically
-    client_1 = User(**test_new_client_creation)
+    client_1 = User(**users_client_new_creation_data)
     db.session.add(client_1)
     db.session.flush()
 
@@ -87,14 +75,14 @@ def init_database():
     client_1_login = UserLogin(**{'user_id': client_1.user_id})
 
     # 3) Client info
-    test_new_client_info['user_id'] = client_1.user_id
-    client_1_info = ClientInfo(**test_new_client_info)
+    users_client_new_info_data['user_id'] = client_1.user_id
+    client_1_info = ClientInfo(**users_client_new_info_data)
     db.session.add(client_1_login)
     db.session.add(client_1_info)
     db.session.flush()
 
     # initialize a test staff member
-    staff_1 = User(**test_staff_member)
+    staff_1 = User(**users_staff_member_data)
     db.session.add(staff_1)
     db.session.flush()
     staff_1_login = UserLogin(**{"user_id": staff_1.user_id})

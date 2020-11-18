@@ -5,14 +5,14 @@ from flask.json import dumps
 from odyssey.models.user import User, UserLogin
 from odyssey.models.wearables import Wearables, WearablesFreeStyle
 
-from tests.data import (
+from tests.data.wearables.wearables_data import (
     wearables_data,
     wearables_freestyle_data,
-    wearables_freestyle_data_more,
-    wearables_freestyle_data_combo,
-    wearables_freestyle_data_empty,
-    wearables_freestyle_data_unequal,
-    wearables_freestyle_data_duplicate
+    wearables_freestyle_more_data,
+    wearables_freestyle_combo_data,
+    wearables_freestyle_empty_data,
+    wearables_freestyle_unequal_data,
+    wearables_freestyle_duplicate_data
 )
 
 def test_wearables_post(test_client, init_database):
@@ -172,17 +172,17 @@ def test_wearables_freestyle_put(test_client, init_database):
     response = test_client.put(
         '/wearables/freestyle/1/',
         headers=headers,
-        data=dumps(wearables_freestyle_data_more),
+        data=dumps(wearables_freestyle_more_data),
         content_type='application/json'
     )
 
     assert response.status_code == 201
     
     init_database.session.commit()
-    assert len(data.timestamps) == len(wearables_freestyle_data_combo['timestamps'])
-    assert data.glucose == wearables_freestyle_data_combo['glucose']
+    assert len(data.timestamps) == len(wearables_freestyle_combo_data['timestamps'])
+    assert data.glucose == wearables_freestyle_combo_data['glucose']
 
-    combo_dt = [datetime.fromisoformat(d) for d in wearables_freestyle_data_combo['timestamps']]
+    combo_dt = [datetime.fromisoformat(d) for d in wearables_freestyle_combo_data['timestamps']]
     assert all([ret == orig for ret, orig in zip(data.timestamps, combo_dt)])
 
     ### Add empty data set
@@ -191,7 +191,7 @@ def test_wearables_freestyle_put(test_client, init_database):
     response = test_client.put(
         '/wearables/freestyle/1/',
         headers=headers,
-        data=dumps(wearables_freestyle_data_empty),
+        data=dumps(wearables_freestyle_empty_data),
         content_type='application/json'
     )
 
@@ -204,7 +204,7 @@ def test_wearables_freestyle_put(test_client, init_database):
     response = test_client.put(
         '/wearables/freestyle/1/',
         headers=headers,
-        data=dumps(wearables_freestyle_data_unequal),
+        data=dumps(wearables_freestyle_unequal_data),
         content_type='application/json'
     )
 
@@ -217,7 +217,7 @@ def test_wearables_freestyle_put(test_client, init_database):
     response = test_client.put(
         '/wearables/freestyle/1/',
         headers=headers,
-        data=dumps(wearables_freestyle_data_duplicate),
+        data=dumps(wearables_freestyle_duplicate_data),
         content_type='application/json'
     )
 
@@ -243,8 +243,8 @@ def test_wearables_freestyle_get(test_client, init_database):
     )
 
     assert response.status_code == 200
-    assert response.json['glucose'] == wearables_freestyle_data_combo['glucose']
+    assert response.json['glucose'] == wearables_freestyle_combo_data['glucose']
 
     returned_dt = [datetime.fromisoformat(d) for d in response.json['timestamps']]
-    orig_dt = [datetime.fromisoformat(d) for d in wearables_freestyle_data_combo['timestamps']]
+    orig_dt = [datetime.fromisoformat(d) for d in wearables_freestyle_combo_data['timestamps']]
     assert all([ret == orig for ret, orig in zip(returned_dt, orig_dt)])

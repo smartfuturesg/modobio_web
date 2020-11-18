@@ -2,7 +2,7 @@
 from flask.json import dumps
 
 from odyssey.models.user import User, UserLogin
-from tests.data import test_medical_physical
+from tests.data.trainer.trainer_data import trainer_medical_physical_data
 
 
 def test_post_medical_physical(test_client, init_database):
@@ -17,7 +17,7 @@ def test_post_medical_physical(test_client, init_database):
     token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    payload = test_medical_physical
+    payload = trainer_medical_physical_data
     
     # send get request for client info on user_id = 1 
     response = test_client.post('/doctor/physical/1/',
@@ -25,6 +25,8 @@ def test_post_medical_physical(test_client, init_database):
                                 data=dumps(payload), 
                                 content_type='application/json')
     assert response.status_code == 201
+    assert response.json['vital_weight'] == trainer_medical_physical_data['vital_weight']
+    assert response.json['abdominal_hard'] == trainer_medical_physical_data['abdominal_hard']
 
 def test_get_medical_physical(test_client, init_database):
     """
@@ -44,3 +46,6 @@ def test_get_medical_physical(test_client, init_database):
                                 content_type='application/json')
                                 
     assert response.status_code == 200
+    assert response.json[0]['vital_weight'] == 110.0
+    assert response.json[0]['abdominal_hard'] == True
+    assert response.json[0]['reporter_lastname'] == 'testerson'

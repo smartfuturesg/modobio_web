@@ -6,9 +6,7 @@ from flask.json import dumps
 from requests.auth import _basic_auth_str
 
 from odyssey.models.user import User, UserLogin
-
-from tests.data import test_user_passwords
-from werkzeug.security import check_password_hash
+from tests.data.users.users_data import users_staff_passwords_data
 
 
 
@@ -57,7 +55,7 @@ def test_full_password_recovery_routine(test_client, init_database):
     ##
     pswd_rest_token = response.get_json()["token"]
 
-    payload_password_reset = {"password": test_user_passwords["password"]}
+    payload_password_reset = {"password": users_staff_passwords_data["password"]}
 
     response = test_client.put(f'/staff/password/forgot-password/reset?reset_token={pswd_rest_token}',
                                 data=dumps(payload_password_reset), 
