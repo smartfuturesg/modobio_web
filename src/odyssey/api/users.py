@@ -9,6 +9,7 @@ from requests_oauthlib import OAuth2Session
 
 from odyssey.api import api
 from odyssey.api.errors import ContentNotFound, InputError, StaffEmailInUse, ClientEmailInUse, UnauthorizedUser
+from odyssey.utils.email import send_email_password_reset
 from odyssey.utils.schemas import (
     ClientInfoSchema, 
     NewUserSchema,
