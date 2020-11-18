@@ -11,7 +11,7 @@ from odyssey.api.client.models import ClientInfo, ClientFacilities
 from odyssey.api.doctor.models import MedicalBloodTests, MedicalBloodTestResultTypes
 from odyssey.api.user.models import User
 from odyssey.api.facility.models import RegisteredFacilities
-from odyssey.utils.errors import UserNotFound, FacilityNotFound, RelationAlreadyExists, TestNotFound, ResultTypeNotFound
+from odyssey.utils.errors import ClientNotFound, UserNotFound, FacilityNotFound, RelationAlreadyExists, TestNotFound, ResultTypeNotFound
 
 
 _uuid_rx = re.compile(r'[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}', flags=re.IGNORECASE)
