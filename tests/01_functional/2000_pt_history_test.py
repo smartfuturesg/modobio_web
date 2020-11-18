@@ -11,7 +11,7 @@ from tests.data import test_pt_history
 def test_post_pt_history(test_client, init_database):
     """
     GIVEN a api end point for pt history assessment
-    WHEN the '/pt/history/<user_id>' resource  is requested (POST)
+    WHEN the '/physiotherapy/history/<user_id>' resource  is requested (POST)
     THEN check the response is valid
     """
     # get staff authorization to view client data
@@ -23,7 +23,7 @@ def test_post_pt_history(test_client, init_database):
     payload = test_pt_history
     
     # send get request for client info on user_id = 1 
-    response = test_client.post('/pt/history/1/',
+    response = test_client.post('/physiotherapy/history/1/',
                                 headers=headers, 
                                 data=dumps(payload), 
                                 content_type='application/json')
@@ -33,7 +33,7 @@ def test_post_pt_history(test_client, init_database):
 def test_put_pt_history(test_client, init_database):
     """
     GIVEN a api end point for pt history assessment
-    WHEN the '/pt/history/<user_id>' resource  is requested (PUT)
+    WHEN the '/physiotherapy/history/<user_id>' resource  is requested (PUT)
     THEN check the response is valid
     """
     # get staff authorization to view client data
@@ -46,7 +46,7 @@ def test_put_pt_history(test_client, init_database):
     payload = test_pt_history
     
     # send get request for client info on user_id = 1 
-    response = test_client.put('/pt/history/1/',
+    response = test_client.put('/physiotherapy/history/1/',
                                 headers=headers, 
                                 data=dumps(payload), 
                                 content_type='application/json')
@@ -59,7 +59,7 @@ def test_put_pt_history(test_client, init_database):
 def test_get_pt_history(test_client, init_database):
     """
     GIVEN a api end point for retrieving pt history
-    WHEN the  '/pt/history/<user_id>' resource  is requested (GET)
+    WHEN the  '/physiotherapy/history/<user_id>' resource  is requested (GET)
     THEN check the response is valid
     """
     # get staff authorization to view client data
@@ -69,7 +69,7 @@ def test_get_pt_history(test_client, init_database):
     headers = {'Authorization': f'Bearer {token}'}
 
     # send get request for client info on user_id = 1 
-    response = test_client.get('/pt/history/1/',
+    response = test_client.get('/physiotherapy/history/1/',
                                 headers=headers, 
                                 content_type='application/json')
                                 

@@ -21,7 +21,7 @@ def test_post_registered_facilities(test_client, init_database):
     payload = test_registered_facilities
     
     # send psot request for a new facility 
-    response = test_client.post('/registeredfacility/',
+    response = test_client.post('/facility/',
                                 headers=headers, 
                                 data=dumps(payload), 
                                 content_type='application/json')
@@ -31,7 +31,7 @@ def test_post_registered_facilities(test_client, init_database):
 def test_put_registered_facility(test_client, init_database):
     """
     GIVEN a api end point for registered facility
-    WHEN the '/registeredfacility/<facility id>/' resource  is requested (PUT)
+    WHEN the '/facility/<facility id>/' resource  is requested (PUT)
     THEN check the response is valid
     """
     # get staff authorization to view facility data
@@ -44,7 +44,7 @@ def test_put_registered_facility(test_client, init_database):
     payload = test_registered_facilities
     
     # send get request for facility info on facility_id = 1
-    response = test_client.put('/registeredfacility/1/',
+    response = test_client.put('/facility/1/',
                                 headers=headers, 
                                 data=dumps(payload), 
                                 content_type='application/json')
@@ -57,7 +57,7 @@ def test_put_registered_facility(test_client, init_database):
 def test_get_registered_facility(test_client, init_database):
     """
     GIVEN a api end point for registered facility
-    WHEN the  '/registeredfacility/<facility id>' resource  is requested (GET)
+    WHEN the  '/facility/<facility id>' resource  is requested (GET)
     THEN check the response is valid
     """
     # get staff authorization to view facility data
@@ -67,7 +67,7 @@ def test_get_registered_facility(test_client, init_database):
     headers = {'Authorization': f'Bearer {token}'}
 
     # send get request for facility info on facility_id = 1 
-    response = test_client.get('/registeredfacility/1/',
+    response = test_client.get('/facility/1/',
                                 headers=headers, 
                                 content_type='application/json')
                                 
@@ -76,7 +76,7 @@ def test_get_registered_facility(test_client, init_database):
 def test_post_client_facility(test_client, init_database):
     """
     GIVEN a api end point for client facility
-    WHEN the '/registeredfacility/client/<user_id>' resource is requested (POST)
+    WHEN the '/facility/client/<user_id>' resource is requested (POST)
     THEN check the response is valid
     """
     #get staff authorization to view facility data
@@ -89,7 +89,7 @@ def test_post_client_facility(test_client, init_database):
 
     client = User.query.filter_by(is_client=True).first()
     #send post request for a client-facility relation with facility_id = 1 and user_id = client.user_id
-    response = test_client.post('/registeredfacility/client/' + str(client.user_id) + '/',
+    response = test_client.post('/facility/client/' + str(client.user_id) + '/',
                                  headers=headers,
                                  data=dumps(payload),
                                  content_type='application/json')
@@ -99,7 +99,7 @@ def test_post_client_facility(test_client, init_database):
 def test_get_client_facility(test_client, init_database):
     """
     GIVEN a api end point for client facility
-    WHEN the '/registeredfacility/client/<user_id>' resource is requested (GET)
+    WHEN the '/facility/client/<user_id>' resource is requested (GET)
     THEN check the response is valid
     """
     #get staff authorization to view facility data
@@ -110,7 +110,7 @@ def test_get_client_facility(test_client, init_database):
 
     client = User.query.filter_by(is_client=True).first()
     #send get request for a client with user_id = client.user_id
-    response = test_client.get('/registeredfacility/client/' + str(client.user_id) + '/',
+    response = test_client.get('/facility/client/' + str(client.user_id) + '/',
                                 headers=headers,
                                 content_type='application/json')
 

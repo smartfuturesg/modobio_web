@@ -4,29 +4,14 @@ from datetime import datetime
 from sqlalchemy import text
 
 from odyssey import create_app, db
-from odyssey.api.client.models import (
-    ClientInfo,
-    ClientConsent,
-    ClientRelease,
-    ClientPolicies,
-    ClientConsultContract,
-    ClientSubscriptionContract,
-    ClientIndividualContract
-)
+from odyssey.api.client.models import ClientInfo
 from odyssey.api.facility.models import MedicalInstitutions
 from odyssey.api.user.models import User, UserLogin
 
-from .data import (
+from tests.data import (
     test_new_client_creation,
     test_new_client_info,
-    test_new_client_login,
     test_staff_member,
-    test_client_consent_data,
-    test_client_release_data,
-    test_client_policies_data,
-    test_client_consult_data,
-    test_client_subscription_data,
-    test_client_individual_data
 )
 
 def clean_db(db):
@@ -111,7 +96,8 @@ def init_database():
     db.session.commit()
 
     yield db  # this is where the testing happens!
-    clean_db(db)
-
+    
     # https://stackoverflow.com/questions/26350911/what-to-do-when-a-py-test-hangs-silently
     db.session.close()
+    
+    clean_db(db)
