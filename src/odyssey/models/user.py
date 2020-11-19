@@ -85,6 +85,13 @@ class User(db.Model):
     :type: str, max length 50
     """
 
+    biologoical_sex_male =  db.Column(db.Boolean)
+    """
+    Client biological sex, true for male, false for female.
+
+    :type: bool
+    """
+
     is_staff = db.Column(db.Boolean, nullable=False)
     """
     Denotes if this user is a staff member. Note: a user can be both a client and a staff member.
