@@ -3,8 +3,10 @@ from flask.json import dumps
 from odyssey.models.user import User, UserLogin
 from odyssey.models.client import ClientFacilities
 from odyssey.models.misc import RegisteredFacilities
-from tests.data import test_registered_facilities, test_client_facilities
-
+from tests.data.registeredfacilities.registeredfacilities_data import (
+    registeredfacilities_registered_facilities_data, 
+    registeredfacilities_client_facilities_data
+)
 
 def test_post_registered_facilities(test_client, init_database):
     """
@@ -18,15 +20,17 @@ def test_post_registered_facilities(test_client, init_database):
     token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    payload = test_registered_facilities
-    
-    # send psot request for a new facility 
+    payload = registeredfacilities_registered_facilities_data
+
+    # send post request for a new facility 
     response = test_client.post('/registeredfacility/',
                                 headers=headers, 
                                 data=dumps(payload), 
                                 content_type='application/json')
-    
+
     assert response.status_code == 201
+
+
 
 def test_put_registered_facility(test_client, init_database):
     """
@@ -40,8 +44,8 @@ def test_put_registered_facility(test_client, init_database):
     token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    test_registered_facilities["facility_address"] = "123 Test Address"
-    payload = test_registered_facilities
+    registeredfacilities_registered_facilities_data["facility_address"] = "123 Test Address"
+    payload = registeredfacilities_registered_facilities_data
     
     # send get request for facility info on facility_id = 1
     response = test_client.put('/registeredfacility/1/',
@@ -73,6 +77,13 @@ def test_get_registered_facility(test_client, init_database):
                                 
     assert response.status_code == 200
 
+    # send get request for facility info on facility_id = 1 
+    response = test_client.get('/registeredfacility/all/',
+                                headers=headers, 
+                                content_type='application/json')
+                                
+    assert response.status_code == 200    
+
 def test_post_client_facility(test_client, init_database):
     """
     GIVEN a api end point for client facility
@@ -85,7 +96,7 @@ def test_post_client_facility(test_client, init_database):
     token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    payload = test_client_facilities
+    payload = registeredfacilities_client_facilities_data
 
     client = User.query.filter_by(is_client=True).first()
     #send post request for a client-facility relation with facility_id = 1 and user_id = client.user_id
