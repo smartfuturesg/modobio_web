@@ -4,7 +4,7 @@ from flask.json import dumps
 
 from odyssey.models.user import User, UserLogin
 from odyssey.models.doctor import MedicalImaging
-from tests.data import test_medical_imaging
+from tests.data.doctor.doctor_data import doctor_medical_imaging_data
 
 def test_post_medical_imaging(test_client, init_database):
     """
@@ -17,7 +17,7 @@ def test_post_medical_imaging(test_client, init_database):
     staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
     token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
-    payload = test_medical_imaging
+    payload = doctor_medical_imaging_data
 
     # send get request for client info on user_id = 1
             
@@ -45,7 +45,7 @@ def test_post_medical_imaging_no_image(test_client, init_database):
     staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
     token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
-    payload = test_medical_imaging
+    payload = doctor_medical_imaging_data
     del payload["image"]
     # send get request for client info on user_id = 1
             
@@ -74,7 +74,7 @@ def test_get_medical_imaging(test_client, init_database):
     
     assert response.status_code == 200
     assert len(response.json) == 2
-    assert response.json[0]['image_type'] ==  test_medical_imaging['image_type']
-    assert response.json[0]['image_origin_location'] ==  test_medical_imaging['image_origin_location']
-    assert response.json[0]['image_date'] ==  test_medical_imaging['image_date']
-    assert response.json[0]['image_read'] ==  test_medical_imaging['image_read']
+    assert response.json[0]['image_type'] ==  doctor_medical_imaging_data['image_type']
+    assert response.json[0]['image_origin_location'] ==  doctor_medical_imaging_data['image_origin_location']
+    assert response.json[0]['image_date'] ==  doctor_medical_imaging_data['image_date']
+    assert response.json[0]['image_read'] ==  doctor_medical_imaging_data['image_read']

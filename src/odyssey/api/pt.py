@@ -25,7 +25,6 @@ class ClientPTHistory(Resource):
         
         if not client_pt:
             raise ContentNotFound() 
-                
         return client_pt
 
     @token_auth.login_required

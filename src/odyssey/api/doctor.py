@@ -177,6 +177,9 @@ class MedBloodTest(Resource):
     @token_auth.login_required
     @responds(schema=MedicalBloodTestSchema(many=True), api=ns)
     def get(self, user_id):
+        #
+        # ?? DEAD CODE ?? replaced by /bloodtest/all/user_id/ ?
+        #
         check_client_existence(user_id)
         blood_tests = MedicalBloodTests.query.filter_by(user_id=user_id).all()
 

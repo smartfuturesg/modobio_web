@@ -4,8 +4,7 @@ import time
 from flask.json import dumps
 
 from odyssey.models.user import User, UserLogin
-from tests.data import test_client_external_medical_records
-
+from tests.data.doctor.doctor_data import doctor_clients_external_medical_records_data
 
 def test_post_medical_record_ids(test_client, init_database):
     """
@@ -19,7 +18,7 @@ def test_post_medical_record_ids(test_client, init_database):
     token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    payload = test_client_external_medical_records
+    payload = doctor_clients_external_medical_records_data
     
     # send get request for client info on user_id = 1 
     response = test_client.post('/doctor/medicalinstitutions/recordid/1/',
@@ -28,6 +27,7 @@ def test_post_medical_record_ids(test_client, init_database):
                                 content_type='application/json')
     
     assert response.status_code == 201
+    assert response.json['record_locators'][0]['med_record_id'] == doctor_clients_external_medical_records_data['record_locators'][0]['med_record_id']
 
 
 def test_get_medical_record_ids(test_client, init_database):
@@ -48,6 +48,7 @@ def test_get_medical_record_ids(test_client, init_database):
                                 content_type='application/json')
                                 
     assert response.status_code == 200
+    assert response.json['record_locators'][0]['med_record_id'] == doctor_clients_external_medical_records_data['record_locators'][0]['med_record_id']
 
 def test_get_medical_institutes(test_client, init_database):
     """
@@ -67,4 +68,5 @@ def test_get_medical_institutes(test_client, init_database):
                                 content_type='application/json')
                                 
     assert response.status_code == 200
+    assert response.json[0]['institute_name'] == 'Mercy Gilbert Medical Center'
     

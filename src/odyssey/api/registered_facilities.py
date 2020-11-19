@@ -12,7 +12,7 @@ from odyssey.api.errors import ContentNotFound
 from odyssey.models.client import ClientFacilities
 from odyssey.models.misc import RegisteredFacilities
 from odyssey.utils.schemas import RegisteredFacilitiesSchema, ClientFacilitiesSchema
-from odyssey.utils.misc import check_facility_existence, check_client_existence, check_client_facility_relation_existence
+from odyssey.utils.misc import fetch_facility_existence, check_client_existence, check_client_facility_relation_existence
 from odyssey.models.user import User
 
 from odyssey import db
@@ -26,12 +26,7 @@ class RegisteredFacility(Resource):
     @responds(schema=RegisteredFacilitiesSchema, api=ns)
     def get(self, facility_id):
         """get registered facility info"""
-        check_facility_existence(facility_id)
-
-        facility = RegisteredFacilities.query.filter_by(facility_id=facility_id).first()
-
-        if not facility:
-            raise ContentNotFound()
+        facility = fetch_facility_existence(facility_id)
 
         return facility
 
@@ -41,10 +36,8 @@ class RegisteredFacility(Resource):
     def put(self, facility_id):
         """edit registered facility info"""
 
-        check_facility_existence(facility_id)
-
-        facility = RegisteredFacilities.query.filter_by(facility_id=facility_id).first()
-
+        facility = fetch_facility_existence(facility_id)
+        
         data = request.get_json()
 
         data['facility_id'] = facility_id
@@ -58,7 +51,6 @@ class RegisteredFacility(Resource):
 @ns.route('/all/')
 class AllFacilities(Resource):
     """api to return all registered facilities in the database"""
-
     @token_auth.login_required
     @responds(schema=RegisteredFacilitiesSchema(many=True), api=ns)
     def get(self):
@@ -116,7 +108,7 @@ class RegisterClient(Resource):
 
         data['user_id'] = user_id
 
-        check_facility_existence(data['facility_id'])
+        fetch_facility_existence(data['facility_id'])
 
         #check if this client-facility relation already exists
         check_client_facility_relation_existence(user_id, data['facility_id'])

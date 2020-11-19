@@ -277,7 +277,6 @@ class Clients(Resource):
 @ns.doc(params={'user_id': 'User ID number'})
 class ConsentContract(Resource):
     """client consent forms"""
-
     @token_auth.login_required
     @responds(schema=ClientConsentSchema, api=ns)
     def get(self, user_id):

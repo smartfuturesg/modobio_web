@@ -12,17 +12,8 @@ from odyssey.models.client import (
     ClientConsent
 )
 
-from tests.data import (
-    test_new_client_info,
-    signature,
-    test_client_consent_data,
-    test_client_release_data,
-    test_client_policies_data,
-    test_client_consult_data,
-    test_client_subscription_data,
-    test_client_individual_data,
-    test_new_user_client
-)
+from tests.data.users.users_data import users_new_user_client_data
+
 
 def test_get_client_info(test_client, init_database):
     """
@@ -91,22 +82,23 @@ def test_creating_new_client(test_client, init_database):
     token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    payload = {'userinfo': test_new_user_client['userinfo'] }
+    payload = {'userinfo': users_new_user_client_data['userinfo'] }
+    
     # send post request for a new client user account
     response = test_client.post('/user/client/',
                                 headers=headers, 
                                 data=dumps(payload), 
                                 content_type='application/json')
 
-    user = User.query.filter_by(email=test_new_user_client['userinfo']['email']).first()
+    user = User.query.filter_by(email=payload['userinfo']['email']).first()
     assert response.status_code == 201
-    assert user.email == test_new_user_client['userinfo']['email']
+    assert user.email == users_new_user_client_data['userinfo']['email']
     assert response.json['modobio_id']
 
     # Use generated password to test token generation
     password = response.json['password']
     valid_credentials = base64.b64encode(
-            f"{test_new_user_client['userinfo']['email']}:{password}".encode("utf-8")).decode("utf-8")
+            f"{users_new_user_client_data['userinfo']['email']}:{password}".encode("utf-8")).decode("utf-8")
     
     headers = {'Authorization': f'Basic {valid_credentials}'}
     response = test_client.post('/tokens/client/',
@@ -114,6 +106,7 @@ def test_creating_new_client(test_client, init_database):
                             content_type='application/json')
 
     assert response.status_code == 201
+    assert response.json['email'] == users_new_user_client_data['userinfo']['email']
 
 ############
 #Removing client is temporarily disabled until a better user deletion system is created
