@@ -95,7 +95,11 @@ def test_creating_new_client(test_client, init_database):
     assert user.email == users_new_user_client_data['userinfo']['email']
     assert response.json['modobio_id']
 
+    ###############
     # Use generated password to test token generation
+    # 1) correct password
+    # 2) Incorrect password
+    ###############
     password = response.json['password']
     valid_credentials = base64.b64encode(
             f"{users_new_user_client_data['userinfo']['email']}:{password}".encode("utf-8")).decode("utf-8")
@@ -107,6 +111,21 @@ def test_creating_new_client(test_client, init_database):
 
     assert response.status_code == 201
     assert response.json['email'] == users_new_user_client_data['userinfo']['email']
+
+
+    password = 'thewrongpassword?'
+    valid_credentials = base64.b64encode(
+            f"{users_new_user_client_data['userinfo']['email']}:{password}".encode("utf-8")).decode("utf-8")
+    
+    headers = {'Authorization': f'Basic {valid_credentials}'}
+    response = test_client.post('/tokens/client/',
+                            headers=headers, 
+                            content_type='application/json')
+
+    assert response.status_code == 401
+
+
+
 
 ############
 #Removing client is temporarily disabled until a better user deletion system is created

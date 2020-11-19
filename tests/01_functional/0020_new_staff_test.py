@@ -34,9 +34,17 @@ def test_creating_new_staff(test_client, init_database):
     assert response.json['is_staff'] == True
     assert response.json['is_client'] == False
 
+def test_staff_login(test_client, init_database):
+    """
+    GIVEN a api fr requesting an API access token
+    WHEN the 'tokens/staff/' resource  is requested to be created
+    THEN check the response is valid
+    """
+    
     ###
     # Login (get token) for newly created staff member
     ##
+
 
     valid_credentials = base64.b64encode(
         f"{users_staff_new_user_data['userinfo']['email']}:{users_staff_new_user_data['userinfo']['password']}".encode(
@@ -47,7 +55,9 @@ def test_creating_new_staff(test_client, init_database):
                             headers=headers, 
                             content_type='application/json')
     
+    # ensure access roles are correctly returned
     roles = response.get_json()['access_roles']
+
     assert response.status_code == 201
     assert roles.sort() == users_staff_new_user_data['staffinfo']['access_roles'].sort()
 
