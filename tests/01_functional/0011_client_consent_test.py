@@ -1,14 +1,16 @@
+import time 
 
 from flask.json import dumps
 
-from odyssey.api.user.models import User, UserLogin
-from tests.data.trainer.trainer_data import trainer_medical_physical_data
+from odyssey.models.user import User, UserLogin
+from tests.data.clients.clients_data import (
+    clients_consent_data
+)
 
-
-def test_post_medical_physical(test_client, init_database):
+def test_post_client_consent(test_client, init_database):
     """
-    GIVEN a api end point for medical history assessment
-    WHEN the '/doctor/physical/<client id>' resource  is requested (POST)
+    GIVEN a api end point for posting client consent
+    WHEN the '/client/consent/<client id>' resource  is requested (POST)
     THEN check the response is valid
     """
     # get staff authorization to view client data
@@ -17,21 +19,21 @@ def test_post_medical_physical(test_client, init_database):
     token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    payload = trainer_medical_physical_data
-    
+    payload = clients_consent_data
     # send get request for client info on user_id = 1 
-    response = test_client.post('/doctor/physical/1/',
+    response = test_client.post('/client/consent/1/',
                                 headers=headers, 
                                 data=dumps(payload), 
                                 content_type='application/json')
+    #wait for pdf generation
+    time.sleep(3)
     assert response.status_code == 201
-    assert response.json['vital_weight'] == trainer_medical_physical_data['vital_weight']
-    assert response.json['abdominal_hard'] == trainer_medical_physical_data['abdominal_hard']
+    assert response.json['infectious_disease'] == clients_consent_data['infectious_disease']
 
-def test_get_medical_physical(test_client, init_database):
+def test_get_client_consent(test_client, init_database):
     """
-    GIVEN a api end point for retrieving medical history
-    WHEN the  '/doctor/physical/<client id>' resource  is requested (GET)
+    GIVEN a api end point for retrieving the client consent
+    WHEN the '/client/consent/<client id>' resource  is requested (GET)
     THEN check the response is valid
     """
     # get staff authorization to view client data
@@ -41,11 +43,10 @@ def test_get_medical_physical(test_client, init_database):
     headers = {'Authorization': f'Bearer {token}'}
 
     # send get request for client info on user_id = 1 
-    response = test_client.get('/doctor/physical/1/',
+    response = test_client.get('/client/consent/1/',
                                 headers=headers, 
                                 content_type='application/json')
                                 
     assert response.status_code == 200
-    assert response.json[0]['vital_weight'] == 110.0
-    assert response.json[0]['abdominal_hard'] == True
-    assert response.json[0]['reporter_lastname'] == 'testerson'
+    assert response.json['infectious_disease'] == False
+    

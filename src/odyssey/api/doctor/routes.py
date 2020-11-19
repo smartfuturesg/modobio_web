@@ -171,6 +171,9 @@ class MedBloodTest(Resource):
     @token_auth.login_required
     @responds(schema=MedicalBloodTestSchema(many=True), api=ns)
     def get(self, user_id):
+        #
+        # ?? DEAD CODE ?? replaced by /bloodtest/all/user_id/ ?
+        #
         check_client_existence(user_id)
         blood_tests = MedicalBloodTests.query.filter_by(user_id=user_id).all()
 
@@ -545,32 +548,57 @@ class ExternalMedicalRecordIDs(Resource):
         return client_med_record_ids
 
 
-def _generate_lut_endpoints(name, lut):
-    # Set up the GET method
+##########################
+# This code became obsolete, because the medical lookup tables is now
+# provided by endpoint. But I'm keeping the code around because it might
+# be useful in the future.
+#
+# def _generate_lut_endpoints(name, lut):
+#     # Set up the GET method
+#     @token_auth.login_required
+#     @responds(status_code=200, api=ns)
+#     def get(self):
+#         return jsonify(lut)
+#
+#     # Normal docstring cannot be an f-string or use .format(), but this works.
+#     get.__doc__ = f"""
+#         Lookup table for supported medical conditions -- {name}.
+#
+#         Returns
+#         -------
+#         dict(dict(...))
+#             Nested dicts, where the keys are the supported (category of)
+#             medical issues. The values are either another dict to specify
+#             a subdivision, or ``null`` indicating no further nesting.
+#         """
+#
+#     # Create class based on name
+#     endp = type(f'MedicalLUT{name}Endpoint', (Resource,), {'get': get})
+#
+#     # Add class as endpoint to namespace (instead of class decorator)
+#     ns.add_resource(endp, f'/condition/{name}/')
+#
+#     return endp
+#
+# for name, lut in MEDICAL_CONDITIONS:
+#     _generate_lut_endpoints(name, lut)
+#
+##########################
+
+@ns.route('/conditions/')
+class MedicalConditionsEndpoint(Resource):
+    """ Lookup table for supported medical conditions. """
+
     @token_auth.login_required
     @responds(status_code=200, api=ns)
     def get(self):
-        return jsonify(lut)
-
-    # Normal docstring cannot be an f-string or use .format(), but this works.
-    get.__doc__ = f"""
-        Lookup table for supported medical conditions -- {name}.
+        """ Lookup table for supported medical conditions.
 
         Returns
         -------
         dict(dict(...))
-            Nested dicts, where the keys are the supported (category of)
+            Nested dict, where the keys are the supported (category of)
             medical issues. The values are either another dict to specify
             a subdivision, or ``null`` indicating no further nesting.
         """
-
-    # Create class based on name
-    endp = type(f'MedicalLUT{name}Endpoint', (Resource,), {'get': get})
-
-    # Add class as endpoint to namespace (instead of class decorator)
-    ns.add_resource(endp, f'/condition/{name}/')
-
-    return endp
-
-for name, lut in MEDICAL_CONDITIONS:
-    _generate_lut_endpoints(name, lut)
+        return jsonify(MEDICAL_CONDITIONS)

@@ -25,7 +25,6 @@ class ClientPTHistory(Resource):
         
         if not client_pt:
             raise ContentNotFound() 
-                
         return client_pt
 
     @token_auth.login_required
@@ -111,4 +110,3 @@ class ClientChessboard(Resource):
         #return the most recent entry (this one)
         most_recent =  Chessboard.query.filter_by(user_id=user_id).order_by(Chessboard.timestamp.desc()).first()
         return most_recent
-

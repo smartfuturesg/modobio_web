@@ -5,12 +5,8 @@ from requests.auth import _basic_auth_str
 
 from odyssey.api.user.models import User, UserLogin
 from odyssey.api.staff.models import StaffProfile, StaffRoles
-
 from odyssey.utils.constants import ACCESS_ROLES
-
-from tests.data import (
-    test_new_user_staff
-)
+from tests.data.users.users_data import users_staff_new_user_data
 
 
 def test_creating_new_staff(test_client, init_database):
@@ -27,18 +23,21 @@ def test_creating_new_staff(test_client, init_database):
     
     response = test_client.post('/user/staff/',
                                 headers=headers, 
-                                data=dumps(test_new_user_staff), 
+                                data=dumps(users_staff_new_user_data), 
                                 content_type='application/json')
     
     # some simple checks for validity
     assert response.status_code == 201
+    assert response.json['firstname'] == users_staff_new_user_data['userinfo']['firstname']
+    assert response.json['is_staff'] == True
+    assert response.json['is_client'] == False
 
     ###
     # Login (get token) for newly created staff member
     ##
 
     valid_credentials = base64.b64encode(
-        f"{test_new_user_staff['userinfo']['email']}:{test_new_user_staff['userinfo']['password']}".encode(
+        f"{users_staff_new_user_data['userinfo']['email']}:{users_staff_new_user_data['userinfo']['password']}".encode(
             "utf-8")).decode("utf-8")
     
     headers = {'Authorization': f'Basic {valid_credentials}'}
@@ -48,7 +47,7 @@ def test_creating_new_staff(test_client, init_database):
     
     roles = response.get_json()['access_roles']
     assert response.status_code == 201
-    assert roles.sort() == test_new_user_staff['staffinfo']['access_roles'].sort()
+    assert roles.sort() == users_staff_new_user_data['staffinfo']['access_roles'].sort()
 
 def test_creating_new_staff_same_email(test_client, init_database):
     """
@@ -65,7 +64,7 @@ def test_creating_new_staff_same_email(test_client, init_database):
     
     response = test_client.post('/user/staff/',
                                 headers=headers, 
-                                data=dumps(test_new_user_staff), 
+                                data=dumps(users_staff_new_user_data), 
                                 content_type='application/json')
                                 
     # 409 should be returned because user email is already in use

@@ -283,7 +283,6 @@ class Clients(Resource):
 @ns.doc(params={'user_id': 'User ID number'})
 class ConsentContract(Resource):
     """client consent forms"""
-
     @token_auth.login_required
     @responds(schema=ClientConsentSchema, api=ns)
     def get(self, user_id):
@@ -750,26 +749,3 @@ class ClientDataStorageTiers(Resource):
         results['total_stored_bytes'] = total_bytes 
         
         return results
-
-""" Client Token Endpoints """
-@ns.route('/token/')
-class ClientToken(Resource):
-    """create and revoke tokens"""
-    @ns.doc(security='password')
-    @basic_auth.login_required(user_type=['client'])
-    def post(self):
-        """generates a token for the 'current_user' immediately after password authentication"""
-        user, user_login = basic_auth.current_user()
-        if not user:
-            return 401
-        return {'email': user.email, 
-                'firstname': user.firstname, 
-                'lastname': user.lastname, 
-                'token': user_login.get_token()}, 201
-
-    @ns.doc(security='password')
-    @token_auth.login_required(user_type=['client'])
-    def delete(self):
-        """invalidate current token. Used to effectively logout a user"""
-        token_auth.current_user()[1].revoke_token()
-        return '', 204

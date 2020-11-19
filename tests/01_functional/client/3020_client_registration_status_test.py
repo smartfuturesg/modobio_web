@@ -18,3 +18,9 @@ def test_get_registration_status(test_client, init_database):
                                 content_type='application/json')
 
     assert response.status_code == 200
+
+    # Since this checks the registration status at the end of all of
+    # the unit tests, it produces an empty list, indicating
+    # the client is up to speed with paperwork.
+    assert response.json['outstanding'] == []
+    

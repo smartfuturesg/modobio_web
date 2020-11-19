@@ -444,269 +444,356 @@ This constant lists all possible staff roles.
 :type: tuple
 """
 
-MEDICAL_CONDITIONS_AUTOIMMUNE = {
-    'Diabetes type 1': None,
-    'Diabetes type 2': None,
-    'Low blood sugar/hypoglycemia': None,
-    'Thyroid': {
-        'Graves': None,
-        'Hashimoto': None,
-        'Hyperthyroid': None,
-        'Hypothyroid': None
+MEDICAL_CONDITIONS = {
+    'Autoimmune': {
+        'Diabetes type 1': None,
+        'Diabetes type 2': None,
+        'Low blood sugar/hypoglycemia': None,
+        'Thyroid': {
+            'Graves': None,
+            'Hashimoto': None,
+            'Hyperthyroid': None,
+            'Hypothyroid': None
+        },
+        'Adrenal': {
+            'Cushing\'s': None,
+            'Addison\'s': None
+        },
+        'Thymic disease': None,
+        'Multiple endocrine neoplasia (MEN) 1': None,
+        'Multiple endocrine neoplasia (MEN) 2': None,
+        'Rheumatoid disease': None,
+        'Sjögren\'s disease': None,
+        'Systemic lupus erythematosus': None,
+        'Psoriatic disease': None,
+        'Fibromyalgia': None,
+        'Autoimmune vasculitis': None,
+        'Gout': None,
+        'Amyloidosis': None,
+        'Sarcoidosis': None,
+        'Scleroderma': None
     },
-    'Adrenal': {
-        'Cushing\'s': None,
-        'Addison\'s': None
+    'Cancer': {
+        'Brain': None,
+        'Bone': None,
+        'Blood': {
+            'Leukemia': None,
+            'Lymphoma': None
+        },
+        'Gut': {
+            'Esophageal': None,
+            'Stomach': None,
+            'Colorectal': None,
+            'Liver': None,
+            'Pancreatic': None
+        },
+        'Lung': {
+            'Small cell': None,
+            'Non-small cell': None
+        },
+        'Kidney': {
+            'Renal Cell': None,
+            'Urothelial carcinoma (transitional cell)': None
+        },
+        'Urological': {
+            'Bladder': None,
+            'Penile': None,
+            'Prostatic': None
+        },
+        'Breast': None,
+        'Gynecological': {
+            'Cervical/ovarian': None,
+            'Uterine': None,
+            'Vaginal': None
+        },
+        'Skin': {
+            'Melanoma': None,
+            'Basal cell carcinoma': None,
+            'Squamous cell carcinoma': None
+        }
     },
-    'Thymic disease': None,
-    'Multiple endocrine neoplasia (MEN) 1': None,
-    'Multiple endocrine neoplasia (MEN) 2': None,
-    'Rheumatoid disease': None,
-    'Sjögren\'s disease': None,
-    'Systemic lupus erythematosus': None,
-    'Psoriatic disease': None,
-    'Fibromyalgia': None,
-    'Autoimmune vasculitis': None,
-    'Gout': None,
-    'Amyloidosis': None,
-    'Sarcoidosis': None,
-    'Scleroderma': None
-}
-"""
-Lookup table for supported medical issues -- autoimmune diseases.
-
-Implemented as a nested dicts, where the keys are the supported
-(category of) medical issues. The values are either another
-dict to specify a subdivision, or :attr:`None` indicating no
-further nesting.
-
-:type: dict(dict(...))
-"""
-
-MEDICAL_CONDITIONS_CANCER = {
-    'Brain': None,
-    'Bone': None,
-    'Blood': {
-        'Leukemia': None,
-        'Lymphoma': None
+    'Cardiovascular': {
+        'High blood pressure (hypertension)': None,
+        'Heart attack/myocardial infarction (MI)': None,
+        'Congestive heart failure': None,
+        'Hypertrophic cardiomyopathy': None,
+        'Heart valvular disease': {
+            'Aortic': None,
+            'Pulmonic': None,
+            'Mitral': None,
+            'Tricuspid': None
+        },
+        'Heart murmur': None,
+        'Aneurysm (aortic, or other blood vessels)': None,
+        'Bleeding disorder': {
+            'Hemophilia A': None,
+            'Hemophilia B': None,
+            'Von Willebrand\'s disease': None,
+            'Rare clotting factor deficiencies': None
+        },
+        'Blood clots/deep venous thrombosis': {
+            'Provoked': None,
+            'Spontaneous': None
+        },
+        'Anemia': {
+            'Iron deficiency': None,
+            'Blood loss': None,
+            'Thalassemia': None,
+            'Sickle cell': None,
+            'Hemolytic': None,
+            'Aplastic (or other bone marrow disease)': None,
+            'Megaloblastic (vitamin B12/folate deficiency)': None,
+            'Pernicious': None
+        },
+        'Chest pain/angina': {
+            'Stable': None,
+            'Unstable': None
+        },
+        'Heart arrhythmia': {
+            'Atrial fibrillation': None,
+            'Atrial flutter': None,
+            'Wolfe-Parkinson white': None,
+            'Paroxysmal supraventricular tachycardia': None,
+            'Ventricular tachycardia': None,
+            'Ventricular fibrillation': None,
+            'Torsades de pointes': None,
+            'Premature heartbeat': None,
+            'Bradycardia': None
+        },
+        'Pericarditis': None,
+        'High cholesterol/hyperlipidemia': None,
+        'Splenic disorder': None,
+        'CABG/bypass surgery': None,
+        'Pacemaker/defibrillator': None,
+        'Vascular stents': None,
     },
-    'Gut': {
-        'Esophageal': None,
-        'Stomach': None,
-        'Colorectal': None,
-        'Liver': None,
-        'Pancreatic': None
+    'Dermatological': {
+        'Acne': None,
+        'Rosacea': None,
+        'Hives/urticaria': None,
+        'Eczema/atopic dermatitis': None,
+        'Alopecia': None,
+        'Hirsutism': None,
+        'Hyperhidrosis': None,
+        'Hidradenitis suppurativa': None,
+        'Vitiligo': None,
+        'Keratosis pilaris': None,
+        'Fungal nail infection': None
     },
-    'Lung': {
-        'Small cell': None,
-        'Non-small cell': None
+    'Gastrointestinal': {
+        'Inflammatory bowel disease': {
+            'Crohn\'s disease': None,
+            'Ulcerative colitis': None
+        },
+        'Irritable bowel syndrome': None,
+        'Celiac disease': None,
+        'GERD/gastritis': None,
+        'Ulcer': {
+            'Stomach': None,
+            'Small intestine (duodenal, jejunum, ileum)': None,
+            'Large intestine': None
+        },
+        'Frequent loose stools': None,
+        'Frequent constipation': None,
+        'Hiatal hernia': None,
+        'Swallowing dysfunction': None,
+        'Liver disorder': None,
+        'Gallbladder disease': None,
+        'Diverticulitis (infection)': None,
+        'Diverticulosis': None,
+        'Zenker\'s diverticula': None,
+        'Nutritional deficiency': None,
+        'Food allergies': None,
+        'Pancreatic disease': None,
+        'Rectal disease': None
     },
-    'Kidney': {
-        'Renal Cell': None,
-        'Urothelial carcinoma (transitional cell)': None
+    'Infectious disease': {
+        'Hepatitis A': None,
+        'Hepatitis B': None,
+        'Hepatitis C': None,
+        'HIV/AIDS': None,
+        'Tuberculosis': None,
+        'Influenza A or B': None,
+        'COVID-19': None,
+        'Staph infection': None,
+        'Norovirus': None,
+        'Shigellosis': None,
+        'Salmonella': None,
+        'Chicken pox (varicella zoster)': None,
+        'Shingles (herpes zoster)': None,
+        'Measles': None,
+        'Mumps': None,
+        'Rubella': None,
+        'Meningitis': None,
+        'Polio': None,
+        'Lyme disease': None,
+        'Rocky mountain spotted fever': None,
+        'Diphtheria': None,
+        'Pertussis': None,
+        'Toxic shock syndrome': None,
+        'Tetanus': None,
+        'Malaria': None,
+        'Infectious mononucleosis': None,
+        'E. coli': None,
+        'Giardiasis': None
+    },
+    'Musculoskeletal': {
+        'Osteoarthritis': None,
+        'Osteoporosis': None,
+        'Osteopenia': None,
+        'Osteomalacia': None,
+        'History of fractures': {
+            'Stress': None,
+            'Compression': None,
+            'Comminuted': None,
+            'Segmental': None,
+            'Spiral': None,
+            'Transverse': None,
+            'Oblique': None,
+            'Greenstick': None,
+            'Open/compound': None
+        },
+        'Closed': None,
+        'Dislocation': None,
+        'Torn ligament/meniscus/tendon': None,
+        'Torn muscle': None,
+        'Bone spur': None,
+        'Inguinal hernia': None
+    },
+    'Nephrological': {
+        'Chronic kidney disease': None,
+        'Acute kidney failure/injury': None,
+        'Pyelonephritis (kidney infection)': None,
+        'Nephrolithiasis (kidney stones)': None,
+        'Hydronephrosis': None,
+        'Polycystic kidney disease': None,
+        'Nephrotic syndrome': None,
+        'Nephritic syndrome': None
+    },
+    'Neurological': {
+        'Headaches/migraines': None,
+        'Blackouts': None,
+        'Dizziness/vertigo': None,
+        'History of fall(s)': None,
+        'Balance disturbance': None,
+        'Vision loss': None,
+        'Hearing loss': None,
+        'Insomnia': None,
+        'Traumatic head/brain injury': None,
+        'Stroke/transient ischemic attack (TIA)': None,
+        'Multiple sclerosis': None,
+        'Peripheral neuropathy': None,
+        'Guillain barre': None,
+        'Myasthenia gravis': None,
+        'Epilepsy/seizure disorder': None,
+        'Parkinson\'s': None,
+        'Alzheimer\'s dementia': None,
+        'Lewy body dementia': None,
+        'Other dementia or memory loss': None,
+        'Spinal cord disease (disc herniation/bulging)': None,
+        'Vertebral fracture or fusion': None,
+        'Brain aneurysm': None,
+        'Pituitary disease': None,
+        'Hypothalamus disease': None,
+        'Carpal tunnel': None,
+        'Spinal stenosis': None,
+        'Sciatica': None,
+        'Spondylolisthesis': None
+    },
+    'Obstetrical/gynecological': {
+        'Uterine fibroids': None,
+        'Abnormal pap smear (cervical dysplasia)': None,
+        'Dysmenorrhea': None,
+        'Oligomenorrhea': None,
+        'Amenorrhea': None,
+        'Dysfunctional uterine bleeding (heavy or prolonged)': None,
+        'Metrorrhagia (too frequent periods)': None,
+        'Menorrhagia (heavy periods)': None,
+        'Premenstrual syndrome': None,
+        'Premenstrual dysmorphic disorder': None,
+        'Endometriosis': None,
+        'Polycystic ovarian syndrome': None,
+        'Ovarian cysts': None,
+        'Endometrial hyperplasia': None,
+        'Pelvic pain': None,
+        'Pelvic inflammatory disease': None,
+        'Pain with sex (dyspareunia)': None,
+        'Ovarian cysts': None,
+        'Preeclampsia': None,
+        'Eclampsia': None,
+        'Ectopic pregnancy': None,
+        'Gestational diabetes': None,
+        'Gestational hypertension': None,
+        'Lichen planus': None,
+        'Lichen sclerosis': None,
+        'Perimenopause': None,
+        'Post menopause': None,
+        'Placenta accreta': None,
+        'Placenta previa': None
+    },
+    'Pulmonological': {
+        'Asthma': None,
+        'Emphysema/COPD': None,
+        'Pneumonia': None,
+        'Chronic bronchitis': None,
+        'Allergies': None,
+        'Sleep apnea': None,
+        'Deviated septum': None,
+        'Shortness of breath': None,
+        'Interstitial lung disease': None,
+        'Pneumothorax': None,
+        'Atelectasis': None,
+        'Pulmonary embolus': None,
+        'Pulmonary hypertension': None,
+        'Pulmonary edema': None,
+        'Pleural effusion': None,
+        'Cystic fibrosis/bronchiectasis': None,
+        'Acute respiratory distress syndrome (ARDS)': None,
+        'Pneumoconiosis': None,
+        'Mesothelioma': None
+    },
+    'Surgery': {
+        'Cardiac ': None,
+        'Breast': None,
+        'Heart': None,
+        'Cosmetic': None,
+        'Dermatological': None,
+        'Ears, nose, throat': None,
+        'Gastrointestinal': None,
+        'Neurological': None,
+        'OB-GYN': None,
+        'Ophthalmic': None,
+        'Orthopedic': None,
+        'Pulmonological': None,
+        'Urological': None,
+        'Vascular': None
+    },
+    'Trauma': {
+        'Concussion': None,
+        'Traumatic brain injury': None,
+        'Motor vehicle accident': None,
+        'Whiplash': None,
+        'Gun shot wound': None,
+        'Amputation': None
     },
     'Urological': {
-        'Bladder': None,
-        'Penile': None,
-        'Prostatic': None
-    },
-    'Breast': None,
-    'Gynecological': {
-        'Cervical/ovarian': None,
-        'Uterine': None,
-        'Vaginal': None
-    },
-    'Skin': {
-        'Melanoma': None,
-        'Basal cell carcinoma': None,
-        'Squamous cell carcinoma': None
+        'Urinary tract infection': None,
+        'Urinary incontinence': None,
+        'Bladder prolapse': None,
+        'Interstitial cystitis (painful bladder syndrome)': None,
+        'Overactive bladder': None,
+        'Erectile dysfunction': None,
+        'Prostate disease': None,
+        'Vasectomy': None
     }
 }
 """
-Lookup table for supported medical issues -- cancer.
+Lookup table for supported medical issues.
 
-Implemented as a nested dicts, where the keys are the supported
+Implemented as nested dicts, where the keys are the supported
 (category of) medical issues. The values are either another
 dict to specify a subdivision, or :attr:`None` indicating no
 further nesting.
 
 :type: dict(dict(...))
-"""
-
-MEDICAL_CONDITIONS_NEURO = {
-    'Headaches/migraines': None,
-    'Blackouts': None,
-    'Dizziness/vertigo': None,
-    'History of fall(s)': None,
-    'Balance disturbance': None,
-    'Vision loss': None,
-    'Hearing loss': None,
-    'Insomnia': None,
-    'Traumatic head/brain injury': None,
-    'Stroke/transient ischemic attack (TIA)': None,
-    'Multiple sclerosis': None,
-    'Peripheral neuropathy': None,
-    'Guillain barre': None,
-    'Myasthenia gravis': None,
-    'Epilepsy/seizure disorder': None,
-    'Parkinson\'s': None,
-    'Alzheimer\'s dementia': None,
-    'Lewy body dementia': None,
-    'Other dementia or memory loss': None,
-    'Spinal cord disease (disc herniation/bulging)': None,
-    'Vertebral fracture or fusion': None,
-    'Brain aneurysm': None,
-    'Pituitary disease': None,
-    'Hypothalamus disease': None,
-    'Carpal tunnel': None,
-    'Spinal stenosis': None,
-    'Sciatica': None,
-    'Spondylolisthesis': None
-}
-"""
-Lookup table for supported medical issues -- neurological.
-
-Implemented as a nested dicts, where the keys are the supported
-(category of) medical issues. The values are either another
-dict to specify a subdivision, or :attr:`None` indicating no
-further nesting.
-
-:type: dict(dict(...))
-"""
-
-MEDICAL_CONDITIONS_MUSCLE = {
-    'Osteoarthritis': None,
-    'Osteoporosis': None,
-    'Osteopenia': None,
-    'Osteomalacia': None,
-    'History of fractures': {
-        'Stress': None,
-        'Compression': None,
-        'Comminuted': None,
-        'Segmental': None,
-        'Spiral': None,
-        'Transverse': None,
-        'Oblique': None,
-        'Greenstick': None,
-        'Open/compound': None
-    },
-    'Closed': None,
-    'Dislocation': None,
-    'Torn ligament/meniscus/tendon': None,
-    'Torn muscle': None,
-    'Bone spur': None,
-    'Inguinal hernia': None
-}
-"""
-Lookup table for supported medical issues -- musculoskeletal.
-
-Implemented as a nested dicts, where the keys are the supported
-(category of) medical issues. The values are either another
-dict to specify a subdivision, or :attr:`None` indicating no
-further nesting.
-
-:type: dict(dict(...))
-"""
-
-MEDICAL_CONDITIONS_CARDIO = {
-    'High blood pressure (hypertension)': None,
-    'Heart attack/myocardial infarction (MI)': None,
-    'Congestive heart failure': None,
-    'Hypertrophic cardiomyopathy': None,
-    'Heart valvular disease': {
-        'Aortic': None,
-        'Pulmonic': None,
-        'Mitral': None,
-        'Tricuspid': None
-    },
-    'Heart murmur': None,
-    'Aneurysm (aortic, or other blood vessels)': None,
-    'Bleeding disorder': {
-        'Hemophilia A': None,
-        'Hemophilia B': None,
-        'Von Willebrand\'s disease': None,
-        'Rare clotting factor deficiencies': None
-    },
-    'Blood clots/deep venous thrombosis': {
-        'Provoked': None,
-        'Spontaneous': None
-    },
-    'Anemia': {
-        'Iron deficiency': None,
-        'Blood loss': None,
-        'Thalassemia': None,
-        'Sickle cell': None,
-        'Hemolytic': None,
-        'Aplastic (or other bone marrow disease)': None,
-        'Megaloblastic (vitamin B12/folate deficiency)': None,
-        'Pernicious': None
-    },
-    'Chest pain/angina': {
-        'Stable': None,
-        'Unstable': None
-    },
-    'Heart arrhythmia': {
-        'Atrial fibrillation': None,
-        'Atrial flutter': None,
-        'Wolfe-Parkinson white': None,
-        'Paroxysmal supraventricular tachycardia': None,
-        'Ventricular tachycardia': None,
-        'Ventricular fibrillation': None,
-        'Torsades de pointes': None,
-        'Premature heartbeat': None,
-        'Bradycardia': None
-    },
-    'Pericarditis': None,
-    'High cholesterol/hyperlipidemia': None,
-    'Splenic disorder': None,
-    'CABG/bypass surgery': None,
-    'Pacemaker/defibrillator': None,
-    'Vascular stents': None,
-}
-"""
-Lookup table for supported medical issues -- cardiovascular.
-
-Implemented as a nested dicts, where the keys are the supported
-(category of) medical issues. The values are either another
-dict to specify a subdivision, or :attr:`None` indicating no
-further nesting.
-
-:type: dict(dict(...))
-"""
-
-MEDICAL_CONDITIONS_KIDNEY = {
-    'Chronic kidney disease': None,
-    'Acute kidney failure/injury': None,
-    'Pyelonephritis (kidney infection)': None,
-    'Nephrolithiasis (kidney stones)': None,
-    'Hydronephrosis': None,
-    'Polycystic kidney disease': None,
-    'Nephrotic syndrome': None,
-    'Nephritic syndrome': None
-}
-"""
-Lookup table for supported medical issues -- nephrological.
-
-Implemented as a nested dicts, where the keys are the supported
-(category of) medical issues. The values are either another
-dict to specify a subdivision, or :attr:`None` indicating no
-further nesting.
-
-:type: dict(dict(...))
-"""
-
-MEDICAL_CONDITIONS = (
-    ('autoimmune', MEDICAL_CONDITIONS_AUTOIMMUNE),
-    ('cancer', MEDICAL_CONDITIONS_CANCER),
-    ('neurological', MEDICAL_CONDITIONS_NEURO),
-    ('musculoskeletal', MEDICAL_CONDITIONS_MUSCLE),
-    ('cardiovascular', MEDICAL_CONDITIONS_CARDIO),
-    ('nephrological', MEDICAL_CONDITIONS_KIDNEY)
-)
-"""
-Combination of all medical disease lookup tables with a short name.
-The short name should have no other characters than letters, because
-it is used to derive a class name.
-
-:type: tuple(tuple)
 """

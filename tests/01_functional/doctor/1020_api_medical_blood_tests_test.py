@@ -5,7 +5,7 @@ from flask.json import dumps
 
 from odyssey.api.user.models import User, UserLogin
 from odyssey.api.doctor.models import MedicalBloodTests, MedicalBloodTestResults, MedicalBloodTestResultTypes
-from tests.data import test_blood_tests
+from tests.data.doctor.doctor_data import doctor_blood_tests_data
 
 
 def test_post_medical_blood_test(test_client, init_database):
@@ -20,7 +20,7 @@ def test_post_medical_blood_test(test_client, init_database):
     token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    payload = test_blood_tests
+    payload = doctor_blood_tests_data
     
     client = User.query.filter_by(is_client=True).first()
     # send post request for client info on user_id = client.user_id
@@ -29,6 +29,7 @@ def test_post_medical_blood_test(test_client, init_database):
                                 data=dumps(payload), 
                                 content_type='application/json')
     assert response.status_code == 201
+    assert response.json['panel_type'] == doctor_blood_tests_data['panel_type']
 
 def test_get_client_blood_tests(test_client, init_database):
     """
@@ -48,7 +49,30 @@ def test_get_client_blood_tests(test_client, init_database):
                                 headers=headers, 
                                 content_type='application/json')
     assert response.status_code == 200
+    assert response.json['items'][0]['notes'] == 'test2'
     
+def test_get_blood_test_results_all(test_client, init_database):
+    """
+    GIVEN a api end point for retrieving medical blood tests results
+    WHEN the  '/doctor/bloodtest/results/all/<test id>/' resource  is requested (GET)
+    THEN check the response is valid
+    """
+    # get staff authorization to view client data
+    staff = User.query.filter_by(is_staff=True).first()
+    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
+    token = staffLogin.get_token()
+    headers = {'Authorization': f'Bearer {token}'}
+
+    client = User.query.filter_by(is_client=True).first()
+    # send get request for client info on user_id = client.user_id
+    response = test_client.get('/doctor/bloodtest/results/all/1/',
+                                headers=headers, 
+                                content_type='application/json')
+    response_data = response.get_json()
+    assert response.status_code == 200
+    assert response.json['test_results'] == 2
+    assert response.json['items'][0]['panel_type'] == 'Lipids'
+
 def test_get_blood_test_results(test_client, init_database):
     """
     GIVEN a api end point for retrieving medical blood tests results
@@ -89,3 +113,5 @@ def test_get_blood_test_result_types(test_client, init_database):
                                 content_type='application/json')
                                 
     assert response.status_code == 200
+    assert response.json['items'][0]['result_name'] == 'dihydroxyvitaminD'
+    assert response.json['items'][0]['normal_max'] == 60
