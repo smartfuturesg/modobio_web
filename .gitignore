@@ -36,5 +36,6 @@ venv/
 pytestdebug.log
 
 # whooshee files
-whooshee
+whooshee/
+whooshee/*
 tests/01_functional/whooshee/*

@@ -11,7 +11,7 @@ from odyssey.api.client.models import (
     ClientInfo,
     ClientConsent
 )
-from tests.data.users.users_data import users_new_user_client_data
+from tests.functional.user.data import users_new_user_client_data
 
 
 def test_get_client_info(test_client, init_database):

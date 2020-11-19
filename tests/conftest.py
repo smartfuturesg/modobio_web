@@ -7,7 +7,7 @@ from odyssey import create_app, db
 from odyssey.api.client.models import ClientInfo
 from odyssey.api.facility.models import MedicalInstitutions
 from odyssey.api.user.models import User, UserLogin
-from tests.data.users.users_data import users_staff_member_data, users_client_new_creation_data, users_client_new_info_data
+from tests.functional.user.data import users_staff_member_data, users_client_new_creation_data, users_client_new_info_data
 
 def clean_db(db):
     for table in reversed(db.metadata.sorted_tables):

@@ -2,10 +2,8 @@ import time
 
 from flask.json import dumps
 
-from odyssey.models.user import User, UserLogin
-from tests.data.clients.clients_data import (
-    clients_consent_data
-)
+from odyssey.api.user.models import User, UserLogin
+from client.data import clients_consent_data
 
 def test_post_client_consent(test_client, init_database):
     """
