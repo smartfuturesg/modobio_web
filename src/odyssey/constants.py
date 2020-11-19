@@ -413,7 +413,7 @@ Vowels were omitted to prevent type confusion when printed in certain fonts
 :type: str
 """
 
-USER_TYPES = ('staff', 'client')
+USER_TYPES = ('staff', 'staff_self', 'client')
 """
 The general category of :class:`odyssey.models.user.User` consists of
 subtypes. This constant lists the types of user supported by the
