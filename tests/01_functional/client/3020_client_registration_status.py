@@ -2,8 +2,8 @@ from odyssey.api.user.models import User, UserLogin
 
 def test_get_registration_status(test_client, init_database):
     """
-    GIVEN a api end point for strength assessment
-    WHEN the '/trainer/assessment/strength/<user_id>' resource  is requested (POST)
+    GIVEN a api end point for client registrations status
+    WHEN the '/client/registrationstatus/1' resource  is requested (POST)
     THEN check the response is valid
     """
     # get staff authorization to view client data
