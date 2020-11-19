@@ -10,7 +10,9 @@ from odyssey.models.doctor import (
     MedicalImaging,
     MedicalBloodTests,
     MedicalBloodTestResults,
-    MedicalBloodTestResultTypes
+    MedicalBloodTestResultTypes,
+    OBPersonalFamilyHist,
+    MedicalConditions
 )
 from odyssey.models.user import User, UserLogin
 from odyssey.models.client import (
@@ -1300,6 +1302,32 @@ class ClientExternalMREntrySchema(Schema):
         """upon dump, add back the schema structure"""
         response = {"record_locators": data}
         return response
+
+class OBPersonalFamilyHistSchema(ma.SQLAlchemyAutoSchema):
+    # user_id = fields.Integer()
+    # medical_condition_id = fields.Integer()
+    # myself = fields.Boolean()
+    # father = fields.Boolean()
+    # mother = fields.Boolean()
+    # sister = fields.Boolean()
+    # brother = fields.Boolean()
+
+    class Meta:
+        model = OBPersonalFamilyHist
+        exclude = ('idx','created_at','updated_at')
+        include_fk = True
+
+    # user_id = fields.Integer(dump_only=True)
+    # medical_condition_id = fields.Integer(dump_only=True)
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        print('here5')
+        return OBPersonalFamilyHist(**data)        
+
+class MedicalConditionsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = MedicalConditions
 
 """
     Schemas for the staff API

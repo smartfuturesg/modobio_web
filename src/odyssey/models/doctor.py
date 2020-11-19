@@ -7,7 +7,7 @@ from datetime import datetime
 from odyssey.constants import DB_SERVER_TIME, BLOODTEST_EVAL
 from odyssey import db
 
-class OBPersonalFamilyHist(db.model):
+class OBPersonalFamilyHist(db.Model):
     """ Personal and Family Neurological History
 
     This table is used for client onboarding. It is used for 
@@ -43,7 +43,97 @@ class OBPersonalFamilyHist(db.model):
     :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
+    medical_condition_id = db.Column(db.Integer, db.ForeignKey('MedicalConditions.medical_condition_id',ondelete="CASCADE"), nullable=False)
+    """
+    Disease ID
 
+    :type: int, foreign key to :attr: MedicalConditions.medical_condition_id
+    """
+
+    myself = db.Column(db.Boolean)
+    """
+    If the user has a disease
+
+    :type: bool
+    """
+
+    father = db.Column(db.Boolean)
+    """
+    If the user's father has a disease
+
+    :type: bool
+    """
+
+    mother = db.Column(db.Boolean)
+    """
+    If the user's mother has a disease
+
+    :type: bool
+    """
+
+    sister = db.Column(db.Boolean)
+    """
+    If the user's sister has a disease
+
+    :type: bool
+    """
+
+    brother = db.Column(db.Boolean)
+    """
+    If the user's brother has a disease
+
+    :type: bool
+    """
+
+class MedicalConditions(db.Model):
+    """ Medical Conditions Table
+
+    This table will store the medical conditions
+    """
+
+    __tablename__ = "MedicalConditions"
+
+    medical_condition_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Unique ID number identifying the results.
+
+    :type: int, primary key, autoincrement
+    """
+
+    category = db.Column(db.String)
+    """
+    Category for the medical condition.
+    Examples:
+        Autoimmune
+        Cancer
+        Cardiovascular
+
+    :type: str
+    """
+
+    subcategory = db.Column(db.String)
+    """
+    Sub category for medical conditions
+    Examples:
+        Cardiovascular
+            Bleeding disorder
+            Anemia
+            Chest pain
+    
+    :type: str
+    """
+
+    condition = db.Column(db.String)
+    """
+    The medical condition.
+    Examples:
+        Cardiovascular:
+            - Heart murmur
+            Anemia
+                - Sickle cell
+
+    :type: Str
+    """
 
 class OBGeneralMedicalInfo(db.Model):
     """ General Medical Information.

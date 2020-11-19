@@ -8,6 +8,8 @@ from flask_restx import Resource, Api
 from odyssey import db
 from odyssey.models.client import ClientExternalMR
 from odyssey.models.doctor import (
+    OBPersonalFamilyHist,
+    MedicalConditions,
     MedicalPhysicalExam, 
     MedicalHistory, 
     MedicalBloodTests,
@@ -31,11 +33,12 @@ from odyssey.api.errors import (
     MethodNotAllowed,
     UnknownError
 )
-from odyssey.utils.misc import check_client_existence, check_blood_test_existence, check_blood_test_result_type_existence
+from odyssey.utils.misc import check_client_existence, check_blood_test_existence, check_blood_test_result_type_existence, check_user_existence
 from odyssey.utils.schemas import (
     AllMedicalBloodTestSchema,
     ClientExternalMREntrySchema, 
     ClientExternalMRSchema, 
+    MedicalConditionsSchema,
     MedicalHistorySchema, 
     MedicalPhysicalExamSchema, 
     MedicalInstitutionsSchema,
@@ -44,11 +47,93 @@ from odyssey.utils.schemas import (
     MedicalBloodTestResultsSchema,
     MedicalBloodTestResultsOutputSchema,
     MedicalBloodTestResultTypesSchema,
-    MedicalImagingSchema
+    MedicalImagingSchema,
+    OBPersonalFamilyHistSchema
 )
 from odyssey.constants import MEDICAL_CONDITIONS
 
 ns = api.namespace('doctor', description='Operations related to doctor')
+
+@ns.route('/medicalconditions/')
+class MedicalCondition(Resource):
+    """
+    Returns the medical conditions currently documented in the DB
+    """
+    # @token_auth.login_required
+    #@responds(schema=MedicalConditionsSchema, api=ns)
+    def get(self):
+        medcon_types = MedicalConditions.query.all()
+        medconDict = {}
+        # breakpoint()
+        for medcon in medcon_types:
+            print(medcon)
+            if medcon.category not in medconDict:
+                if medcon.subcategory is None:
+                    medconDict[medcon.category] = medcon.condition
+                else:
+                    medconDict[medcon.category][medcon.subcategory] = medcon.condition
+        # breakpoint()
+        # payload = {'items' : medcon_types, 'total' : len(medcon_types)}
+        return medcon_types
+
+@ns.route('/personalfamilyhist/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class OBPersonalFamily(Resource):
+    # @token_auth.login_required
+    # @responds(schema=MedicalBloodTestSchema(many=True), api=ns)
+    def get(self, user_id):
+        #
+        # ?? DEAD CODE ?? replaced by /bloodtest/all/user_id/ ?
+        #
+        check_user_existence(user_id)
+        client_personalfamilyhist = OBPersonalFamilyHist.query.filter_by(user_id=user_id).all()
+
+        if not client_personalfamilyhist:
+            raise ContentNotFound()
+
+        return client_personalfamilyhist
+
+    # @token_auth.login_required
+    # @accepts(schema=OBPersonalFamilyHistSchema, api=ns)
+    @responds(schema=OBPersonalFamilyHistSchema, status_code=201, api=ns)
+    def post(self, user_id):
+        """
+        Resource to submit a new blood test instance for the specified client.
+
+        Test submissions are given a test_id which can be used to reference back
+        to the results related to this submisison. Each submission may have 
+        multiple results (e.g. in a panel)
+        """
+
+        # First check if the client exists
+        
+        check_user_existence(user_id)
+
+        # the data expected for the backend is:
+        # user_id, medical_condition_id, myself, father, mother, brother, sister
+        data = request.get_json()
+        
+        # for result in data:
+        #     result_id = MedicalBloodTestResultTypes.query.filter_by(result_name=result['result_name']).first().result_id
+        #     result_data = {'test_id': client_bt.test_id, 
+        #                    'result_id': result_id, 
+        #                    'result_value': result['result_value']}
+        #     db.session.add(MedicalBloodTestResultsSchema().load(result_data))
+
+        data['user_id'] = user_id
+        # data['medical_condition_id'] = med_con_id.medical_condition_id
+        print(user_id)
+        print(data['medical_condition_id'])
+        print(data)
+        client_personalfamilyhist = OBPersonalFamilyHistSchema().load(data)
+        print('here2')
+        db.session.add(client_personalfamilyhist)
+        # db.session.flush()
+
+        # insert results into the result table
+
+        db.session.commit()
+        return client_personalfamilyhist
 
 
 @ns.route('/images/<int:user_id>/')
