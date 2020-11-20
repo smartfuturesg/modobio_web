@@ -67,7 +67,7 @@ signature = None
 signature_file = pathlib.Path(__file__).parent / 'signature.png'
 with open(signature_file, mode='rb') as fh:
     signature = fh.read()
-
+    
 signature = 'data:image/png;base64,' + base64.b64encode(signature).decode('utf-8')
 
 clients_consent_data = {

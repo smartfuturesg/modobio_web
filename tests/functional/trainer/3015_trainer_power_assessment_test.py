@@ -5,7 +5,7 @@ from flask.json import dumps
 
 from odyssey.api.user.models import User, UserLogin
 from odyssey.api.trainer.models import PowerAssessment 
-from tests.data.trainer.trainer_data import trainer_medical_physical_data, trainer_power_assessment_data
+from .data import trainer_medical_physical_data, trainer_power_assessment_data
 
 def test_post_power_assessment(test_client, init_database):
     """

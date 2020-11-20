@@ -4,7 +4,7 @@ from flask.json import dumps
 
 from odyssey.api.user.models import User, UserLogin
 from odyssey.api.trainer.models import StrengthAssessment 
-from tests.data.trainer.trainer_data import trainer_strength_assessment_data
+from .data import trainer_strength_assessment_data
 
 def test_post_strength_assessment(test_client, init_database):
     """

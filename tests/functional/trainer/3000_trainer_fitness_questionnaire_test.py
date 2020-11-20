@@ -4,7 +4,7 @@ import time
 from flask.json import dumps
 
 from odyssey.api.user.models import User, UserLogin
-from tests.data.trainer.trainer_data import trainer_fitness_questionnaire_data
+from .data import trainer_fitness_questionnaire_data
 
 
 def test_post_fitness_questionnaire(test_client, init_database):

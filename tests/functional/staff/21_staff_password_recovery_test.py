@@ -7,8 +7,7 @@ from requests.auth import _basic_auth_str
 
 from odyssey.api.user.models import User, UserLogin
 from werkzeug.security import check_password_hash
-from tests.data.users.users_data import users_staff_passwords_data
-
+from .data import users_staff_passwords_data
 
 
 def test_password_recovery_link(test_client, init_database):

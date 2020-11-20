@@ -5,7 +5,7 @@ from flask.json import dumps
 
 from odyssey.api.user.models import User, UserLogin
 from odyssey.api.trainer.models import MoxyAssessment 
-from tests.data.trainer.trainer_data import trainer_moxy_assessment_data
+from .data import trainer_moxy_assessment_data
 
 def test_post_moxy_assessment(test_client, init_database):
     """

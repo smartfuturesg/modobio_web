@@ -5,7 +5,7 @@ from flask.json import dumps
 
 from odyssey.api.user.models import User, UserLogin
 from odyssey.api.doctor.models import MedicalBloodTests, MedicalBloodTestResults, MedicalBloodTestResultTypes
-from tests.data.doctor.doctor_data import doctor_blood_tests_data
+from .data import doctor_blood_tests_data
 
 
 def test_post_medical_blood_test(test_client, init_database):

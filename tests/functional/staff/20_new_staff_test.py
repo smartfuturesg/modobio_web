@@ -6,7 +6,7 @@ from requests.auth import _basic_auth_str
 from odyssey.api.user.models import User, UserLogin
 from odyssey.api.staff.models import StaffProfile, StaffRoles
 from odyssey.utils.constants import ACCESS_ROLES
-from tests.data.users.users_data import users_staff_new_user_data
+from .data import users_staff_new_user_data
 
 
 def test_creating_new_staff(test_client, init_database):

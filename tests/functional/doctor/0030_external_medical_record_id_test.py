@@ -3,7 +3,7 @@ import time
 
 from flask.json import dumps
 from odyssey.api.user.models import User, UserLogin
-from tests.data.doctor.doctor_data import doctor_clients_external_medical_records_data
+from .data import doctor_clients_external_medical_records_data
 
 def test_post_medical_record_ids(test_client, init_database):
     """

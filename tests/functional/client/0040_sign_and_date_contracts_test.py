@@ -5,7 +5,7 @@ from flask.json import dumps
 
 from odyssey.api.user.models import User, UserLogin
 from odyssey.api.client.models import ClientConsultContract, ClientPolicies ,ClientSubscriptionContract
-from tests.data.clients.clients_data import (
+from .data import (
     clients_policies_data,
     clients_consult_data,
     clients_subscription_data
@@ -154,3 +154,5 @@ def test_get_policies_contract(test_client, init_database):
                                 
     assert response.status_code == 200
     assert response.json["signdate"] == clients_policies_data["signdate"]
+
+

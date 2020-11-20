@@ -9,7 +9,7 @@ from odyssey.api.staff.models import StaffProfile, StaffRoles, StaffRecentClient
 from odyssey.api.user.models import User, UserLogin
 from odyssey.api import api
 from odyssey.utils.auth import basic_auth, token_auth
-from odyssey.utils.errors import UnauthorizedUser, StaffEmailInUse, StaffNotFound, ClientNotFound
+from odyssey.utils.errors import UnauthorizedUser, StaffEmailInUse, StaffNotFound, ClientNotFound, UserNotFound
 from odyssey.utils.email import send_email_password_reset
 from odyssey.api.user.schemas import UserSchema, StaffInfoSchema
 from odyssey.api.staff.schemas import (
@@ -274,7 +274,7 @@ class RecentClients(Resource):
         return StaffRecentClients.query.filter_by(staff_user_id=token_auth.current_user()[0].user_id).all()
 
 
-""" Staff Token Endpoints """
+""" Staff Token Endpoint """
 
 @ns.route('/token/')
 class StaffToken(Resource):

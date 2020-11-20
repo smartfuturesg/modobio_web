@@ -9,7 +9,6 @@ def test_regular_staff_member(test_client, init_database):
     """
     user = User.query.filter_by(is_staff=True).first()
     user_login = UserLogin.query.filter_by(user_id=user.user_id).one_or_none()
-
     assert user.email == 'staff_member@modobio.com'
     assert user_login.check_password('password')
     assert type(user_login.get_token()) == str 

@@ -15,6 +15,7 @@ def clean_db(db):
             db.session.execute(table.delete())
         except:
             pass
+    #db.session.close()
     # specifically cascade drop clientinfo table
     try:
         db.session.execute('DROP TABLE "ClientInfo" CASCADE;')

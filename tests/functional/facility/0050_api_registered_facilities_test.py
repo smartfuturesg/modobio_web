@@ -3,7 +3,7 @@ from flask.json import dumps
 from odyssey.api.user.models import User, UserLogin
 from odyssey.api.client.models import ClientFacilities
 from odyssey.api.facility.models import RegisteredFacilities
-from tests.data.registeredfacilities.registeredfacilities_data import (
+from .data import (
     registeredfacilities_registered_facilities_data, 
     registeredfacilities_client_facilities_data
 )

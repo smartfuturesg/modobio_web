@@ -5,7 +5,7 @@ from flask.json import dumps
 
 from odyssey.api.user.models import User, UserLogin
 from odyssey.api.physiotherapy.models import Chessboard 
-from tests.data.trainer.trainer_data import trainer_chessboard_assessment_data
+from tests.functional.trainer.data import trainer_chessboard_assessment_data
 
 def test_post_chessboard_assessment(test_client, init_database):
     """

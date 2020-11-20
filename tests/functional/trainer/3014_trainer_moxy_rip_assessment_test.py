@@ -5,7 +5,7 @@ from flask.json import dumps
 
 from odyssey.api.user.models import User, UserLogin
 from odyssey.api.trainer.models import MoxyRipTest 
-from tests.data.trainer.trainer_data import trainer_moxy_rip_data, trainer_medical_physical_data
+from .data import trainer_moxy_rip_data, trainer_medical_physical_data
 
 def test_post_moxy_rip_assessment(test_client, init_database):
     """

@@ -4,7 +4,7 @@ from flask.json import dumps
 
 from odyssey.api.user.models import User, UserLogin
 from odyssey.api.doctor.models import MedicalImaging
-from tests.data.doctor.doctor_data import doctor_medical_imaging_data
+from .data import doctor_medical_imaging_data
 
 def test_post_medical_imaging(test_client, init_database):
     """

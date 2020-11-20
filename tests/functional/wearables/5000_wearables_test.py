@@ -5,7 +5,7 @@ from flask.json import dumps
 from odyssey.api.user.models import User, UserLogin
 from odyssey.api.wearables.models import Wearables, WearablesFreeStyle
 
-from tests.data.wearables.wearables_data import (
+from .data import (
     wearables_data,
     wearables_freestyle_data,
     wearables_freestyle_more_data,
