@@ -1,6 +1,4 @@
-
 from odyssey.models.user import User, UserLogin
-from tests.data import test_staff_member
 from werkzeug.security import check_password_hash
 
 def test_regular_staff_member(test_client, init_database):

@@ -5,7 +5,7 @@ from flask.json import dumps
 
 from odyssey.models.user import User, UserLogin
 from odyssey.models.pt import PTHistory 
-from tests.data import test_pt_history
+from tests.data.pt.pt_data import pt_history_data
 
 
 def test_post_pt_history(test_client, init_database):
@@ -20,8 +20,24 @@ def test_post_pt_history(test_client, init_database):
     token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    payload = test_pt_history
+    payload = pt_history_data
     
+    # For COVERAGE, raise a ContentNotFound error
+    # send get request for client info on user_id = 1
+    response = test_client.get('/pt/history/1/',
+                                headers=headers, 
+                                content_type='application/json')
+    assert response.status_code == 204
+
+    # For coverage, raise a UserNotFound error
+    # send get request for client info on user_id = 1 
+    response = test_client.put('/pt/history/1/',
+                                headers=headers, 
+                                data=dumps(payload), 
+                                content_type='application/json')
+
+    assert response.status_code == 404  
+
     # send get request for client info on user_id = 1 
     response = test_client.post('/pt/history/1/',
                                 headers=headers, 
@@ -29,6 +45,8 @@ def test_post_pt_history(test_client, init_database):
                                 content_type='application/json')
 
     assert response.status_code == 201
+    assert response.json['exercise'] == pt_history_data['exercise']
+    assert response.json['best_pain'] == pt_history_data['best_pain']    
 
 def test_put_pt_history(test_client, init_database):
     """
@@ -42,9 +60,18 @@ def test_put_pt_history(test_client, init_database):
     token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
-    test_pt_history["exercise"] = "test put"
-    payload = test_pt_history
+    pt_history_data["exercise"] = "test put"
+    payload = pt_history_data
     
+    # For COVERAGE, raise an IllegalSettings Error
+    # send get request for client info on user_id = 1 
+    response = test_client.post('/pt/history/1/',
+                                headers=headers, 
+                                data=dumps(payload), 
+                                content_type='application/json')
+
+    assert response.status_code == 400
+
     # send get request for client info on user_id = 1 
     response = test_client.put('/pt/history/1/',
                                 headers=headers, 
@@ -68,9 +95,14 @@ def test_get_pt_history(test_client, init_database):
     token = staffLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
 
+
+
     # send get request for client info on user_id = 1 
     response = test_client.get('/pt/history/1/',
                                 headers=headers, 
                                 content_type='application/json')
                                 
     assert response.status_code == 200
+    assert response.json['exercise'] == 'test put'
+    assert response.json['best_pain'] == 7
+

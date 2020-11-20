@@ -1,6 +1,5 @@
 from flask.json import dumps, loads, jsonify, load
-from tests.data import test_json_data, test_json_json, test_json_jsonify
-
+from tests.data.json.json_data import test_json_data, test_json_json, test_json_jsonify
 
 def test_json_serialization(test_client, init_database):
     """
