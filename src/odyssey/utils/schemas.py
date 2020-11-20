@@ -23,7 +23,8 @@ from odyssey.models.client import (
     ClientRelease,
     ClientReleaseContacts,
     ClientSubscriptionContract,
-    ClientFacilities
+    ClientFacilities,
+    ClientSurgeries
 )
 from odyssey.models.misc import MedicalInstitutions, RegisteredFacilities
 from odyssey.models.pt import Chessboard, PTHistory
@@ -40,7 +41,11 @@ from odyssey.models.trainer import (
 )
 from odyssey.models.wearables import Wearables, WearablesOura, WearablesFreeStyle
 from odyssey.utils.misc import list_average
-from odyssey.constants import ACCESS_ROLES
+from odyssey.constants import ACCESS_ROLES, MEDICAL_CONDITIONS
+
+class JustUserIdSchema(Schema):
+    """for use by get methods that only require a user_id, used in place of url argument"""
+    user_id = fields.Integer(required=True)
 
 class ClientSearchItemsSchema(Schema):
     user_id = fields.Integer()
@@ -1129,6 +1134,18 @@ class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
         if value not in self.sleep_hours_options_list and value != None:
             raise ValidationError(f"{value} not a valid option. Must be one of {self.sleep_hours_options_list}")
 
+class ClientSurgeriesSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = ClientSurgeries
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return ClientSurgeries(**data)
+
+    @validates('surgery_category')
+    def validate_sleep_hours(self, value):
+        if value not in MEDICAL_CONDITIONS['Surgery'].keys():
+            raise ValidationError(f"{value} not a valid option. Must be one of {MEDICAL_CONDITIONS['Surgery'].keys()}")
 
 """
     Schemas for the doctor's API

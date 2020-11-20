@@ -11,7 +11,7 @@ from odyssey.models.client import ClientInfo, ClientFacilities
 from odyssey.models.doctor import MedicalBloodTests, MedicalBloodTestResultTypes
 from odyssey.models.user import User
 from odyssey.models.misc import RegisteredFacilities
-from odyssey.api.errors import UserNotFound, FacilityNotFound, RelationAlreadyExists, TestNotFound, ResultTypeNotFound
+from odyssey.api.errors import UserNotFound, ClientNotFound, StaffNotFound, FacilityNotFound, RelationAlreadyExists, TestNotFound, ResultTypeNotFound
 
 
 _uuid_rx = re.compile(r'[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}', flags=re.IGNORECASE)
@@ -31,6 +31,12 @@ def check_client_existence(user_id):
     client = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
     if not client:
         raise ClientNotFound(user_id)
+
+def check_staff_existence(user_id):
+    """Check that the user is in the database and is a staff member"""
+    staff = StaffProfile.query.filter_by(user_id=user_id).one_or_none()
+    if not staff:
+        raise StaffNotFound(user_id)
 
 def check_user_existence(user_id):
     """Check that the user is in the database

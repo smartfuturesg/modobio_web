@@ -6,7 +6,7 @@ from flask_accepts import accepts, responds
 from flask_restx import Resource, Api
 
 from odyssey import db
-from odyssey.models.client import ClientExternalMR
+from odyssey.models.client import ClientExternalMR, ClientSurgeries
 from odyssey.models.doctor import (
     MedicalPhysicalExam, 
     MedicalHistory, 
@@ -31,11 +31,12 @@ from odyssey.api.errors import (
     MethodNotAllowed,
     UnknownError
 )
-from odyssey.utils.misc import check_client_existence, check_blood_test_existence, check_blood_test_result_type_existence
+from odyssey.utils.misc import check_client_existence, check_staff_existence, check_blood_test_existence, check_blood_test_result_type_existence
 from odyssey.utils.schemas import (
     AllMedicalBloodTestSchema,
     ClientExternalMREntrySchema, 
-    ClientExternalMRSchema, 
+    ClientExternalMRSchema,
+    ClientSurgeriesSchema,
     MedicalHistorySchema, 
     MedicalPhysicalExamSchema, 
     MedicalInstitutionsSchema,
@@ -44,7 +45,8 @@ from odyssey.utils.schemas import (
     MedicalBloodTestResultsSchema,
     MedicalBloodTestResultsOutputSchema,
     MedicalBloodTestResultTypesSchema,
-    MedicalImagingSchema
+    MedicalImagingSchema,
+    JustUserIdSchema
 )
 from odyssey.constants import MEDICAL_CONDITIONS
 
@@ -553,6 +555,33 @@ class ExternalMedicalRecordIDs(Resource):
 
         return client_med_record_ids
 
+
+@ns.route('/surgery/')
+class ClientSurgeriesAPI(Resource):
+
+    @token_auth.login_required
+    @accepts(schema=ClientSurgeriesSchema,  api=ns)
+    @responds(schema=ClientSurgeriesSchema, status_code=201, api=ns)
+    def post(self):
+        """register a client surgery in the db"""
+        #check client and reporting staff have valid user ids
+        check_client_existence(request.parsed_obj['client_user_id'])
+        check_staff_existence(request.parsed_obj['reporter_user_id'])
+
+        #add request data to db
+        surgery = ClientSurgeries().load(request.parsed_obj)
+        db.session.add(surgery)
+        db.session.commit()
+
+        return surgery
+
+    @token_auth.login_required
+    @accepts(schema=JustUserIdSchema)
+    @responds(schema=ClientSurgeriesSchema(many=True), api=ns)
+    def get(self):
+        """returns a list of all surgeries for the given client_user_id"""
+        check_client_existence(request.parsed_obj['client_user_id'])
+        return ClientSurgeries.query.filter_by(client_user_id=request.parsed_obj['client_user_id']).all()
 
 ##########################
 # This code became obsolete, because the medical lookup tables is now
