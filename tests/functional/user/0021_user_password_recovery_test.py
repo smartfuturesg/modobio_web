@@ -59,6 +59,7 @@ def test_full_password_recovery_routine(test_client, init_database):
     response = test_client.put(f'/user/password/forgot-password/reset?reset_token={pswd_rest_token}',
                                 data=dumps(payload_password_reset), 
                                 content_type='application/json')
+
     assert response.status_code == 200
 
     userLogin = UserLogin.query.filter_by(user_id=user.user_id).one_or_none()

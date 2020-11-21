@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import secrets
 import jwt
 
@@ -19,7 +20,7 @@ from odyssey.api.user.schemas import (
 ) 
 from odyssey.api.staff.schemas import StaffProfileSchema, StaffRolesSchema
 from odyssey.api.client.schemas import ClientInfoSchema
-from odyssey.api.user.models import User
+from odyssey.api.user.models import User, UserLogin
 from odyssey.utils.misc import check_user_existence
 from odyssey.utils.auth import token_auth
 
