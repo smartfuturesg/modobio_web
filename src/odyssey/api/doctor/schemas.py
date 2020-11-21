@@ -19,6 +19,16 @@ from odyssey.api.facility.models import MedicalInstitutions
     Schemas for the doctor's API
 """
 
+class MedicalConditionsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = MedicalConditions
+    
+    subcategory = fields.String(missing=None)
+
+class MedicalConditionsOutputSchema(Schema):
+    items = fields.Nested(MedicalConditionsSchema(many=True), missing = [])
+    total_items = fields.Integer()
+
 class MedicalFamilyHistSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = MedicalFamilyHistory

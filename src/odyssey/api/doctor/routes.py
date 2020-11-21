@@ -33,6 +33,7 @@ from odyssey.api.doctor.schemas import (
     AllMedicalBloodTestSchema,
     MedicalFamilyHistSchema,
     MedicalFamilyHistInputSchema,
+    MedicalConditionsOutputSchema,
     MedicalConditionsSchema,
     MedicalHistorySchema, 
     MedicalPhysicalExamSchema, 
@@ -56,21 +57,13 @@ class MedicalCondition(Resource):
     Returns the medical conditions currently documented in the DB
     """
     @token_auth.login_required
-    @responds(status_code=200, api=ns)
+    @responds(schema=MedicalConditionsOutputSchema,status_code=200, api=ns)
     def get(self):
         medcon_types = MedicalConditions.query.all()
-        medconDict = {}
-        
-        for medcon in medcon_types:
-            if medcon.category not in medconDict:
-                medconDict[medcon.category] = {}
-            if medcon.subcategory is None:
-                medconDict[medcon.category][medcon.condition] = medcon.medical_condition_id
-            else:
-                if medcon.subcategory not in medconDict[medcon.category]:
-                    medconDict[medcon.category][medcon.subcategory] = {}
-                medconDict[medcon.category][medcon.subcategory][medcon.condition] = medcon.medical_condition_id
-        return jsonify(medconDict)
+        payload = {'items': medcon_types,
+                   'total_items': len(medcon_types)}
+
+        return payload
 
 @ns.route('/personalfamilyhist/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})

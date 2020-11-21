@@ -18,5 +18,5 @@ def test_get_medical_conditions(test_client, init_database):
     response = test_client.get('/doctor/medicalconditions/', headers=headers)
 
     assert response.status_code == 200
-    assert response.json['Autoimmune']['Diabetes type 1'] == 1
-    assert response.json['Autoimmune']['Thyroid']['Graves'] == 4
+    assert response.json['total_items'] == 276
+    assert len(response.json['items']) == 276
