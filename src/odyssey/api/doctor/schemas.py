@@ -2,7 +2,7 @@ from marshmallow import Schema, fields, post_load, validate, pre_dump
 
 from odyssey import ma
 from odyssey.api.doctor.models import ( 
-    OBPersonalFamilyHist,
+    MedicalFamilyHistory,
     MedicalConditions,
     MedicalHistory,
     MedicalPhysicalExam,
@@ -19,9 +19,9 @@ from odyssey.api.facility.models import MedicalInstitutions
     Schemas for the doctor's API
 """
 
-class OBPersonalFamilyHistSchema(ma.SQLAlchemyAutoSchema):
+class MedicalFamilyHistSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        model = OBPersonalFamilyHist
+        model = MedicalFamilyHistory
         exclude = ('idx', 'created_at', 'updated_at')
 
     user_id = fields.Integer()
@@ -29,10 +29,10 @@ class OBPersonalFamilyHistSchema(ma.SQLAlchemyAutoSchema):
 
     @post_load
     def make_object(self, data, **kwargs):
-        return OBPersonalFamilyHist(**data)
+        return MedicalFamilyHistory(**data)
 
-class OBPersonalFamilyHistInputSchema(Schema):
-    conditions = fields.Nested(OBPersonalFamilyHistSchema, many=True)
+class MedicalFamilyHistInputSchema(Schema):
+    conditions = fields.Nested(MedicalFamilyHistSchema, many=True)
 
 class MedicalConditionsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

@@ -8,7 +8,7 @@ from flask_restx import Resource, Api
 from odyssey import db
 from odyssey.api.client.models import ClientExternalMR
 from odyssey.api.doctor.models import (
-    OBPersonalFamilyHist,
+    MedicalFamilyHistory,
     MedicalConditions,
     MedicalPhysicalExam, 
     MedicalHistory, 
@@ -31,8 +31,8 @@ from odyssey.utils.errors import (
 from odyssey.utils.misc import check_client_existence, check_blood_test_existence, check_blood_test_result_type_existence, check_user_existence, check_medical_condition_existence
 from odyssey.api.doctor.schemas import (
     AllMedicalBloodTestSchema,
-    OBPersonalFamilyHistSchema,
-    OBPersonalFamilyHistInputSchema,
+    MedicalFamilyHistSchema,
+    MedicalFamilyHistInputSchema,
     MedicalConditionsSchema,
     MedicalHistorySchema, 
     MedicalPhysicalExamSchema, 
@@ -74,21 +74,21 @@ class MedicalCondition(Resource):
 
 @ns.route('/personalfamilyhist/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class OBPersonalFamily(Resource):
+class MedicalFamilyHist(Resource):
     @token_auth.login_required
-    @responds(schema=OBPersonalFamilyHistSchema(many=True), api=ns)
+    @responds(schema=MedicalFamilyHistSchema(many=True), api=ns)
     def get(self, user_id):
         '''
         This request gets the users personal and family history if it exists
         '''
         check_client_existence(user_id)
-        client_personalfamilyhist = OBPersonalFamilyHist.query.filter_by(user_id=user_id).all()
+        client_personalfamilyhist = MedicalFamilyHistory.query.filter_by(user_id=user_id).all()
 
         return client_personalfamilyhist
 
     @token_auth.login_required
-    @accepts(schema=OBPersonalFamilyHistInputSchema, api=ns)
-    @responds(schema=OBPersonalFamilyHistSchema(many=True), status_code=201, api=ns)
+    @accepts(schema=MedicalFamilyHistInputSchema, api=ns)
+    @responds(schema=MedicalFamilyHistSchema(many=True), status_code=201, api=ns)
     def post(self, user_id):
         '''
         Post request to post the client's onboarding personal and family history
@@ -99,11 +99,9 @@ class OBPersonalFamily(Resource):
         # the data expected for the backend is:
         # parameter: user_id 
         # payload: medical_condition_id, myself, father, mother, brother, sister
-        
-        
         for result in request.parsed_obj['conditions']:
             check_medical_condition_existence(result.medical_condition_id)
-            user_and_medcon = OBPersonalFamilyHist.query.filter_by(user_id=user_id).filter_by(medical_condition_id=result.medical_condition_id).one_or_none()
+            user_and_medcon = MedicalFamilyHistory.query.filter_by(user_id=user_id).filter_by(medical_condition_id=result.medical_condition_id).one_or_none()
             if user_and_medcon:
                 raise MedicalConditionAlreadySubmitted(user_id,result.medical_condition_id)
             result.user_id = user_id
@@ -114,8 +112,8 @@ class OBPersonalFamily(Resource):
         return request.parsed_obj['conditions']
 
     @token_auth.login_required
-    @accepts(schema=OBPersonalFamilyHistInputSchema, api=ns)
-    @responds(schema=OBPersonalFamilyHistSchema(many=True), status_code=201, api=ns)
+    @accepts(schema=MedicalFamilyHistInputSchema, api=ns)
+    @responds(schema=MedicalFamilyHistSchema(many=True), status_code=201, api=ns)
     def put(self, user_id):
         '''
         Put request to update the client's onboarding personal and family history
@@ -130,7 +128,7 @@ class OBPersonalFamily(Resource):
         for result in request.parsed_obj['conditions']:
             del result.__dict__['_sa_instance_state']
             check_medical_condition_existence(result.medical_condition_id)
-            user_and_medcon = OBPersonalFamilyHist.query.filter_by(user_id=user_id).filter_by(medical_condition_id=result.medical_condition_id).one_or_none()
+            user_and_medcon = MedicalFamilyHistory.query.filter_by(user_id=user_id).filter_by(medical_condition_id=result.medical_condition_id).one_or_none()
             
             if not user_and_medcon:
                 raise ContentNotFound()
