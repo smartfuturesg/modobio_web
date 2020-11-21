@@ -15,8 +15,3 @@ users_staff_new_user_data = {
   }
 }
 
-users_staff_passwords_data = {
-  "password" : "gogoleplexitykatcity65",
-  "current_password": "password",
-  "new_password": "salt1ampintheruffs98"
-}

@@ -69,3 +69,8 @@ users_staff_member_data = {
     "is_client": False
 }
 
+users_staff_passwords_data = {
+  "password" : "gogoleplexitykatcity65",
+  "current_password": "password",
+  "new_password": "salt1ampintheruffs98"
+}

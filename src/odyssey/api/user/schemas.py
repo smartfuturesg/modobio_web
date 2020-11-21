@@ -74,3 +74,18 @@ class NewUserSchema(Schema):
     staffinfo = fields.Nested(StaffInfoSchema,
                               missing={}, 
                               description="used when registering a staff member")
+
+class UserPasswordRecoveryContactSchema(Schema):
+    """contact methods for password recovery.
+        currently just email but may be expanded to include sms
+    """
+    email = fields.Email(required=True)
+
+class UserPasswordResetSchema(Schema):
+    #TODO Validate password strength
+    password = fields.String(required=True,  validate=validate.Length(min=3,max=50), description="new password to be used going forward")
+
+class UserPasswordUpdateSchema(Schema):
+    #TODO Validate password strength
+    current_password = fields.String(required=True,  validate=validate.Length(min=3,max=50), description="current password")
+    new_password = fields.String(required=True,  validate=validate.Length(min=3,max=50), description="new password to be used going forward")

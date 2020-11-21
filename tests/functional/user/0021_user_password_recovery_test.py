@@ -6,7 +6,6 @@ from flask.json import dumps
 from requests.auth import _basic_auth_str
 
 from odyssey.api.user.models import User, UserLogin
-from werkzeug.security import check_password_hash
 from .data import users_staff_passwords_data
 
 
@@ -24,7 +23,7 @@ def test_password_recovery_link(test_client, init_database):
  
     payload = {"email": staff.email}
 
-    response = test_client.post('/staff/password/forgot-password/recovery-link/',
+    response = test_client.post('/user/password/forgot-password/recovery-link/',
                                 data=dumps(payload), 
                                 content_type='application/json')
     
@@ -41,12 +40,12 @@ def test_full_password_recovery_routine(test_client, init_database):
     request to `staff/password/forgot-password/reset`
     THEN check the response is valid
     """
-    # Get staff member to reset lost password
-    staff = User.query.filter_by(is_staff=True).first()
+    # Get user member to reset lost password
+    user = User.query.filter_by(is_staff=True).first()
     
-    payload_email = {"email": staff.email}
+    payload_email = {"email": user.email}
 
-    response = test_client.post('/staff/password/forgot-password/recovery-link/',
+    response = test_client.post('/user/password/forgot-password/recovery-link/',
                                 data=dumps(payload_email), 
                                 content_type='application/json')
     ##
@@ -57,27 +56,24 @@ def test_full_password_recovery_routine(test_client, init_database):
 
     payload_password_reset = {"password": users_staff_passwords_data["password"]}
 
-    response = test_client.put(f'/staff/password/forgot-password/reset?reset_token={pswd_rest_token}',
+    response = test_client.put(f'/user/password/forgot-password/reset?reset_token={pswd_rest_token}',
                                 data=dumps(payload_password_reset), 
                                 content_type='application/json')
-    # re-query database for staff member
-    staff = User.query.filter_by(email=staff.email).first()
-
     assert response.status_code == 200
 
-    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
-    assert staffLogin.check_password(password=payload_password_reset['password'])
+    userLogin = UserLogin.query.filter_by(user_id=user.user_id).one_or_none()
+    assert userLogin.check_password(password=payload_password_reset['password'])
 
 def test_password_update(test_client, init_database):
     """
     GIVEN a api end point for creating a link for recovering passwords 
-    WHEN the '/staff/password/update' PUT resource is requested
+    WHEN the '/user/password/update' PUT resource is requested
     THEN check the response is valid
     """
     # Get staff member to update password
-    staff = User.query.filter_by(is_staff=True).first()
-    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
-    token = staffLogin.get_token()
+    user = User.query.filter_by(is_staff=True).first()
+    userLogin = UserLogin.query.filter_by(user_id=user.user_id).one_or_none()
+    token = userLogin.get_token()
     headers = {'Authorization': f'Bearer {token}'}
     ###
     # Update Password with the correct current password and a 
@@ -87,22 +83,20 @@ def test_password_update(test_client, init_database):
                 "new_password": users_staff_passwords_data["new_password"]
     }
 
-    response = test_client.post('/staff/password/update/',
+    response = test_client.post('/user/password/update/',
                                 headers=headers,
                                 data=dumps(payload), 
                                 content_type='application/json')
-    # bring up staff member again for updated data
-    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).first()
 
     assert response.status_code == 200
-    assert staffLogin.check_password(password=users_staff_passwords_data['new_password'])
+    assert userLogin.check_password(password=users_staff_passwords_data['new_password'])
 
     ###
     # Update Password with the incorrect current password and a 
     # valid new password
     ###
 
-    response = test_client.post('/staff/password/update/',
+    response = test_client.post('/user/password/update/',
                                 headers=headers,
                                 data=dumps(payload), 
                                 content_type='application/json')

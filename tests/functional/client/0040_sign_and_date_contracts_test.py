@@ -11,7 +11,7 @@ from .data import (
     clients_subscription_data
 )
 
-#Skipping this test, figured out this is the test causing pytest to hang
+#Skipping this test, due to pytest hanging problem
 import pytest
 pytest.skip("Checking if this is the culprit", allow_module_level=True)
 
