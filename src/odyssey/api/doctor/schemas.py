@@ -23,7 +23,9 @@ class OBPersonalFamilyHistSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = OBPersonalFamilyHist
         exclude = ('idx', 'created_at', 'updated_at')
-        include_fk = True
+
+    user_id = fields.Integer()
+    medical_condition_id = fields.Integer()
 
     @post_load
     def make_object(self, data, **kwargs):

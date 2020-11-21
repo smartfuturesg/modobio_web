@@ -55,7 +55,7 @@ class MedicalCondition(Resource):
     """
     Returns the medical conditions currently documented in the DB
     """
-    # @token_auth.login_required
+    @token_auth.login_required
     @responds(status_code=200, api=ns)
     def get(self):
         medcon_types = MedicalConditions.query.all()
@@ -75,77 +75,71 @@ class MedicalCondition(Resource):
 @ns.route('/personalfamilyhist/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class OBPersonalFamily(Resource):
-    # @token_auth.login_required
+    @token_auth.login_required
     @responds(schema=OBPersonalFamilyHistSchema(many=True), api=ns)
     def get(self, user_id):
         '''
         This request gets the users personal and family history if it exists
         '''
-        check_user_existence(user_id)
+        check_client_existence(user_id)
         client_personalfamilyhist = OBPersonalFamilyHist.query.filter_by(user_id=user_id).all()
-
-        if not client_personalfamilyhist:
-            raise ContentNotFound()
 
         return client_personalfamilyhist
 
-    # @token_auth.login_required
-    # @accepts(schema=OBPersonalFamilyHistInputSchema, api=ns)
+    @token_auth.login_required
+    @accepts(schema=OBPersonalFamilyHistInputSchema, api=ns)
     @responds(schema=OBPersonalFamilyHistSchema(many=True), status_code=201, api=ns)
     def post(self, user_id):
         '''
         Post request to post the client's onboarding personal and family history
         '''
         # First check if the client exists
-        #TODO change to check client existence
-        check_user_existence(user_id)
+        check_client_existence(user_id)
         
         # the data expected for the backend is:
         # parameter: user_id 
         # payload: medical_condition_id, myself, father, mother, brother, sister
         
-        data = request.get_json()['conditions']
-        for result in data:
-            check_medical_condition_existence(result['medical_condition_id'])
-            user_and_medcon = OBPersonalFamilyHist.query.filter_by(user_id=user_id).filter_by(medical_condition_id=result['medical_condition_id']).one_or_none()
+        
+        for result in request.parsed_obj['conditions']:
+            check_medical_condition_existence(result.medical_condition_id)
+            user_and_medcon = OBPersonalFamilyHist.query.filter_by(user_id=user_id).filter_by(medical_condition_id=result.medical_condition_id).one_or_none()
             if user_and_medcon:
-                raise MedicalConditionAlreadySubmitted(user_id,result['medical_condition_id'])
-            result['user_id'] = user_id
-            client_personalfamilyhist = OBPersonalFamilyHistSchema().load(result)
-            db.session.add(client_personalfamilyhist)
+                raise MedicalConditionAlreadySubmitted(user_id,result.medical_condition_id)
+            result.user_id = user_id
+            db.session.add(result)
 
         # insert results into the result table
         db.session.commit()
-        return data
+        return request.parsed_obj['conditions']
 
-    # @token_auth.login_required
-    # @accepts(schema=OBPersonalFamilyHistInputSchema, api=ns)
+    @token_auth.login_required
+    @accepts(schema=OBPersonalFamilyHistInputSchema, api=ns)
     @responds(schema=OBPersonalFamilyHistSchema(many=True), status_code=201, api=ns)
     def put(self, user_id):
         '''
         Put request to update the client's onboarding personal and family history
         '''
         # First check if the client exists
-        #TODO change to check client existence
-        check_user_existence(user_id)
+        check_client_existence(user_id)
         
         # the data expected for the backend is:
         # parameter: user_id 
         # payload: medical_condition_id, myself, father, mother, brother, sister
-        
-        data = request.get_json()['conditions']
-        for result in data:
-            check_medical_condition_existence(result['medical_condition_id'])
-            user_and_medcon = OBPersonalFamilyHist.query.filter_by(user_id=user_id).filter_by(medical_condition_id=result['medical_condition_id']).one_or_none()
+
+        for result in request.parsed_obj['conditions']:
+            del result.__dict__['_sa_instance_state']
+            check_medical_condition_existence(result.medical_condition_id)
+            user_and_medcon = OBPersonalFamilyHist.query.filter_by(user_id=user_id).filter_by(medical_condition_id=result.medical_condition_id).one_or_none()
             
             if not user_and_medcon:
                 raise ContentNotFound()
             
-            user_and_medcon.update(result)
+            user_and_medcon.update(result.__dict__)
 
         # insert results into the result table
         db.session.commit()
-        return data   
+        return request.parsed_obj['conditions']
 
 
 @ns.route('/images/<int:user_id>/')
