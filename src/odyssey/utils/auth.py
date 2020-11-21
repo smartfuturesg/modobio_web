@@ -21,7 +21,7 @@ class BasicAuth(object):
         self.scheme = scheme
         self.header = header
 
-    def login_required(self, f=None, user_type=['staff'], staff_role=None):
+    def login_required(self, f=None, user_type=('staff',), staff_role=None):
         ''' The login_required method is the main method that we will be using
             for authenticating both tokens and basic authorizations.
             This method decorates each CRUD request and verifies the person
@@ -38,16 +38,16 @@ class BasicAuth(object):
         # Validate each entry
         if user_type is not None:
             # Check if user type is a list:
-            if type(user_type) is not list:
-                raise ValueError('user_type must be a list.')
+            if type(user_type) is not tuple:
+                raise ValueError('user_type must be a tuple.')
             else:
                 # Validate 
                 self.validate_roles(user_type, USER_TYPES)
          
         if staff_role is not None:
             # Check if staff role is a list:
-            if type(staff_role) is not list:
-                raise ValueError('staff_role must be a list.')   
+            if type(staff_role) is not tuple:
+                raise ValueError('staff_role must be a tuple.')   
             else:
                 # Validate 
                 self.validate_roles(staff_role, ACCESS_ROLES)                              
@@ -208,7 +208,7 @@ class TokenAuth(BasicAuth):
 
         # TODO REMOVE THIS
         if user_type is None:
-            user_type = ['staff']
+            user_type =('staff')
 
         return UserLogin.check_token(token) if token else (None,None)
 

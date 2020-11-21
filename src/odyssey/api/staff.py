@@ -144,7 +144,7 @@ class UpdateRoles(Resource):
     """
     View and update roles for staff member with a given user_id
     """
-    @token_auth.login_required(user_type=['staff_self'])
+    @token_auth.login_required(user_type=('staff_self',))
     @accepts(schema=StaffInfoSchema, api=ns)
     @responds(status_code=201, api=ns)   
     def post(self, user_id):
