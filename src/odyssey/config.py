@@ -25,7 +25,7 @@ Configuration parameters can be set in one of four ways (in order of precedense)
 1. Environmental variables
 2. AWS Parameter Store, if available
 3. Defaults from :mod:`odyssey.defaults`
-4. Hard-coded defaults is all else fails
+4. Hard-coded defaults if all else fails
 
 Defaults are set in :mod:`odyssey.defaults`. These defaults can be overriden by setting an
 environmental variable with the same name. If AWS credentials are available and
@@ -60,7 +60,6 @@ Notes
 
 import boto3
 import os
-import pathlib
 import sys
 
 from typing import Any
@@ -69,7 +68,7 @@ from botocore.exceptions import NoCredentialsError
 from odyssey import defaults
 
 try:
-    from odyssey.version import version as version_file
+    from odyssey.api.misc import version as version_file
 except:
     version_file = None
 

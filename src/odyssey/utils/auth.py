@@ -6,12 +6,12 @@ from werkzeug.security import safe_str_cmp, check_password_hash
 from base64 import b64decode
 
 # Constants to compare to
-from odyssey.constants import ACCESS_ROLES, USER_TYPES
+from odyssey.utils.constants import ACCESS_ROLES, USER_TYPES
 
 # Import Errors
-from odyssey.api.errors import LoginNotAuthorized, StaffNotFound
-from odyssey.models.staff import StaffRoles
-from odyssey.models.user import User, UserLogin
+from odyssey.utils.errors import LoginNotAuthorized, StaffNotFound
+from odyssey.api.staff.models import StaffRoles
+from odyssey.api.user.models import User, UserLogin
 
 class BasicAuth(object):
     ''' BasicAuth class is the main authentication class for 
