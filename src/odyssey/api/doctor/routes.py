@@ -33,6 +33,7 @@ from odyssey.api.doctor.schemas import (
     AllMedicalBloodTestSchema,
     MedicalFamilyHistSchema,
     MedicalFamilyHistInputSchema,
+    MedicalFamilyHistOutputSchema,
     MedicalConditionsOutputSchema,
     MedicalConditionsSchema,
     MedicalHistorySchema, 
@@ -65,23 +66,24 @@ class MedicalCondition(Resource):
 
         return payload
 
-@ns.route('/personalfamilyhist/<int:user_id>/')
+@ns.route('/familyhistory/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedicalFamilyHist(Resource):
     @token_auth.login_required
-    @responds(schema=MedicalFamilyHistSchema(many=True), api=ns)
+    @responds(schema=MedicalFamilyHistOutputSchema, api=ns)
     def get(self, user_id):
         '''
         This request gets the users personal and family history if it exists
         '''
         check_client_existence(user_id)
         client_personalfamilyhist = MedicalFamilyHistory.query.filter_by(user_id=user_id).all()
-
-        return client_personalfamilyhist
+        payload = {'items': client_personalfamilyhist,
+                   'total_items': len(client_personalfamilyhist)}
+        return payload
 
     @token_auth.login_required
     @accepts(schema=MedicalFamilyHistInputSchema, api=ns)
-    @responds(schema=MedicalFamilyHistSchema(many=True), status_code=201, api=ns)
+    @responds(schema=MedicalFamilyHistOutputSchema, status_code=201, api=ns)
     def post(self, user_id):
         '''
         Post request to post the client's onboarding personal and family history
@@ -92,6 +94,7 @@ class MedicalFamilyHist(Resource):
         # the data expected for the backend is:
         # parameter: user_id 
         # payload: medical_condition_id, myself, father, mother, brother, sister
+
         for result in request.parsed_obj['conditions']:
             check_medical_condition_existence(result.medical_condition_id)
             user_and_medcon = MedicalFamilyHistory.query.filter_by(user_id=user_id).filter_by(medical_condition_id=result.medical_condition_id).one_or_none()
@@ -99,14 +102,15 @@ class MedicalFamilyHist(Resource):
                 raise MedicalConditionAlreadySubmitted(user_id,result.medical_condition_id)
             result.user_id = user_id
             db.session.add(result)
-
+        payload = {'items': request.parsed_obj['conditions'],
+                   'total_items': len(request.parsed_obj['conditions'])}
         # insert results into the result table
         db.session.commit()
-        return request.parsed_obj['conditions']
+        return payload
 
     @token_auth.login_required
     @accepts(schema=MedicalFamilyHistInputSchema, api=ns)
-    @responds(schema=MedicalFamilyHistSchema(many=True), status_code=201, api=ns)
+    @responds(schema=MedicalFamilyHistOutputSchema, status_code=201, api=ns)
     def put(self, user_id):
         '''
         Put request to update the client's onboarding personal and family history
@@ -127,10 +131,11 @@ class MedicalFamilyHist(Resource):
                 raise ContentNotFound()
             
             user_and_medcon.update(result.__dict__)
-
+        payload = {'items': request.parsed_obj['conditions'],
+                   'total_items': len(request.parsed_obj['conditions'])}        
         # insert results into the result table
         db.session.commit()
-        return request.parsed_obj['conditions']
+        return payload
 
 
 @ns.route('/images/<int:user_id>/')

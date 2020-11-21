@@ -44,6 +44,10 @@ class MedicalFamilyHistSchema(ma.SQLAlchemyAutoSchema):
 class MedicalFamilyHistInputSchema(Schema):
     conditions = fields.Nested(MedicalFamilyHistSchema, many=True)
 
+class MedicalFamilyHistOutputSchema(Schema):
+    items = fields.Nested(MedicalFamilyHistSchema(many=True), missing = [])
+    total_items = fields.Integer()
+
 class MedicalConditionsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = MedicalConditions
