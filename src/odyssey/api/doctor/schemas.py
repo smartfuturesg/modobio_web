@@ -24,10 +24,13 @@ class OBPersonalFamilyHistSchema(ma.SQLAlchemyAutoSchema):
         model = OBPersonalFamilyHist
         exclude = ('idx', 'created_at', 'updated_at')
         include_fk = True
-    
+
     @post_load
     def make_object(self, data, **kwargs):
         return OBPersonalFamilyHist(**data)
+
+class OBPersonalFamilyHistInputSchema(Schema):
+    conditions = fields.Nested(OBPersonalFamilyHistSchema, many=True)
 
 class MedicalConditionsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

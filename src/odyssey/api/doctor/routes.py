@@ -25,12 +25,14 @@ from odyssey.utils.errors import (
     UserNotFound, 
     IllegalSetting, 
     ContentNotFound,
-    InputError
+    InputError,
+    MedicalConditionAlreadySubmitted
 )
-from odyssey.utils.misc import check_client_existence, check_blood_test_existence, check_blood_test_result_type_existence, check_user_existence
+from odyssey.utils.misc import check_client_existence, check_blood_test_existence, check_blood_test_result_type_existence, check_user_existence, check_medical_condition_existence
 from odyssey.api.doctor.schemas import (
     AllMedicalBloodTestSchema,
     OBPersonalFamilyHistSchema,
+    OBPersonalFamilyHistInputSchema,
     MedicalConditionsSchema,
     MedicalHistorySchema, 
     MedicalPhysicalExamSchema, 
@@ -54,31 +56,31 @@ class MedicalCondition(Resource):
     Returns the medical conditions currently documented in the DB
     """
     # @token_auth.login_required
-    #@responds(schema=MedicalConditionsSchema, api=ns)
+    @responds(status_code=200, api=ns)
     def get(self):
         medcon_types = MedicalConditions.query.all()
         medconDict = {}
-        # breakpoint()
+        
         for medcon in medcon_types:
-            print(medcon)
             if medcon.category not in medconDict:
-                if medcon.subcategory is None:
-                    medconDict[medcon.category] = medcon.condition
-                else:
-                    medconDict[medcon.category][medcon.subcategory] = medcon.condition
-        # breakpoint()
-        # payload = {'items' : medcon_types, 'total' : len(medcon_types)}
-        return medcon_types
+                medconDict[medcon.category] = {}
+            if medcon.subcategory is None:
+                medconDict[medcon.category][medcon.condition] = medcon.medical_condition_id
+            else:
+                if medcon.subcategory not in medconDict[medcon.category]:
+                    medconDict[medcon.category][medcon.subcategory] = {}
+                medconDict[medcon.category][medcon.subcategory][medcon.condition] = medcon.medical_condition_id
+        return jsonify(medconDict)
 
 @ns.route('/personalfamilyhist/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class OBPersonalFamily(Resource):
     # @token_auth.login_required
-    # @responds(schema=MedicalBloodTestSchema(many=True), api=ns)
+    @responds(schema=OBPersonalFamilyHistSchema(many=True), api=ns)
     def get(self, user_id):
-        #
-        # ?? DEAD CODE ?? replaced by /bloodtest/all/user_id/ ?
-        #
+        '''
+        This request gets the users personal and family history if it exists
+        '''
         check_user_existence(user_id)
         client_personalfamilyhist = OBPersonalFamilyHist.query.filter_by(user_id=user_id).all()
 
@@ -88,46 +90,62 @@ class OBPersonalFamily(Resource):
         return client_personalfamilyhist
 
     # @token_auth.login_required
-    # @accepts(schema=OBPersonalFamilyHistSchema, api=ns)
-    @responds(schema=OBPersonalFamilyHistSchema, status_code=201, api=ns)
+    # @accepts(schema=OBPersonalFamilyHistInputSchema, api=ns)
+    @responds(schema=OBPersonalFamilyHistSchema(many=True), status_code=201, api=ns)
     def post(self, user_id):
-        """
-        Resource to submit a new blood test instance for the specified client.
-
-        Test submissions are given a test_id which can be used to reference back
-        to the results related to this submisison. Each submission may have 
-        multiple results (e.g. in a panel)
-        """
-
+        '''
+        Post request to post the client's onboarding personal and family history
+        '''
         # First check if the client exists
-        
+        #TODO change to check client existence
         check_user_existence(user_id)
-
-        # the data expected for the backend is:
-        # user_id, medical_condition_id, myself, father, mother, brother, sister
-        data = request.get_json()
         
-        # for result in data:
-        #     result_id = MedicalBloodTestResultTypes.query.filter_by(result_name=result['result_name']).first().result_id
-        #     result_data = {'test_id': client_bt.test_id, 
-        #                    'result_id': result_id, 
-        #                    'result_value': result['result_value']}
-        #     db.session.add(MedicalBloodTestResultsSchema().load(result_data))
-
-        data['user_id'] = user_id
-        # data['medical_condition_id'] = med_con_id.medical_condition_id
-        print(user_id)
-        print(data['medical_condition_id'])
-        print(data)
-        client_personalfamilyhist = OBPersonalFamilyHistSchema().load(data)
-        print('here2')
-        db.session.add(client_personalfamilyhist)
-        # db.session.flush()
+        # the data expected for the backend is:
+        # parameter: user_id 
+        # payload: medical_condition_id, myself, father, mother, brother, sister
+        
+        data = request.get_json()['conditions']
+        for result in data:
+            check_medical_condition_existence(result['medical_condition_id'])
+            user_and_medcon = OBPersonalFamilyHist.query.filter_by(user_id=user_id).filter_by(medical_condition_id=result['medical_condition_id']).one_or_none()
+            if user_and_medcon:
+                raise MedicalConditionAlreadySubmitted(user_id,result['medical_condition_id'])
+            result['user_id'] = user_id
+            client_personalfamilyhist = OBPersonalFamilyHistSchema().load(result)
+            db.session.add(client_personalfamilyhist)
 
         # insert results into the result table
-
         db.session.commit()
-        return client_personalfamilyhist
+        return data
+
+    # @token_auth.login_required
+    # @accepts(schema=OBPersonalFamilyHistInputSchema, api=ns)
+    @responds(schema=OBPersonalFamilyHistSchema(many=True), status_code=201, api=ns)
+    def put(self, user_id):
+        '''
+        Put request to update the client's onboarding personal and family history
+        '''
+        # First check if the client exists
+        #TODO change to check client existence
+        check_user_existence(user_id)
+        
+        # the data expected for the backend is:
+        # parameter: user_id 
+        # payload: medical_condition_id, myself, father, mother, brother, sister
+        
+        data = request.get_json()['conditions']
+        for result in data:
+            check_medical_condition_existence(result['medical_condition_id'])
+            user_and_medcon = OBPersonalFamilyHist.query.filter_by(user_id=user_id).filter_by(medical_condition_id=result['medical_condition_id']).one_or_none()
+            
+            if not user_and_medcon:
+                raise ContentNotFound()
+            
+            user_and_medcon.update(result)
+
+        # insert results into the result table
+        db.session.commit()
+        return data   
 
 
 @ns.route('/images/<int:user_id>/')
