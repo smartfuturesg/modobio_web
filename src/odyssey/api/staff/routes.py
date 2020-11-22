@@ -1,16 +1,18 @@
 from datetime import datetime, timedelta
-from flask import current_app, request, jsonify
-from flask_restx import Resource
-from flask_accepts import accepts, responds
 import jwt
 
+from flask import current_app, request
+from flask_accepts import accepts, responds
+from flask_restx import Resource
+
 from odyssey import db
+from odyssey.api import api
 from odyssey.api.staff.models import StaffProfile, StaffRoles, StaffRecentClients
 from odyssey.api.user.models import User, UserLogin
-from odyssey.api import api
 from odyssey.utils.auth import token_auth, basic_auth
-from odyssey.utils.errors import UnauthorizedUser, StaffEmailInUse, StaffNotFound, ClientNotFound
+from odyssey.utils.constants import TOKEN_LIFETIME, REFRESH_TOKEN_LIFETIME
 from odyssey.utils.email import send_email_password_reset
+from odyssey.utils.errors import UnauthorizedUser, StaffEmailInUse, StaffNotFound, ClientNotFound
 from odyssey.api.user.schemas import UserSchema, StaffInfoSchema
 from odyssey.api.staff.schemas import (
     StaffProfileSchema, 
@@ -19,7 +21,6 @@ from odyssey.api.staff.schemas import (
     StaffRecentClientsSchema
 )
 from odyssey.utils.misc import check_client_existence
-from werkzeug.security import check_password_hash
 
 ns = api.namespace('staff', description='Operations related to staff members')
 
@@ -187,7 +188,7 @@ class StaffToken(Resource):
     @basic_auth.login_required(user_type=['staff'])
     def post(self):
         """generates a token for the 'current_user' immediately after password authentication"""
-        user, user_login = basic_auth.current_user()
+        user, _ = basic_auth.current_user()
         if not user:
             return 401
         # bring up list of staff roles
@@ -196,16 +197,35 @@ class StaffToken(Resource):
                             ).filter(
                                 StaffRoles.user_id==user.user_id
                             ).all()
+
+        secret = current_app.config['SECRET_KEY']
+
+        access_token = jwt.encode({'exp': datetime.utcnow()+timedelta(hours = TOKEN_LIFETIME), 
+                                  'uid': user.user_id,
+                                  'utype': 'staff'}, 
+                                  secret, 
+                                  algorithm='HS256').decode("utf-8")
+
+        refresh_token = jwt.encode({'exp': datetime.utcnow()+timedelta(hours = REFRESH_TOKEN_LIFETIME), 
+                                  'uid': user.user_id,
+                                  'utype': 'staff'}, 
+                                  secret, 
+                                  algorithm='HS256').decode("utf-8")
+
         return {'email': user.email, 
                 'firstname': user.firstname, 
                 'lastname': user.lastname, 
-                'token': user_login.get_token(),
+                'token': access_token,
+                'refresh_token': refresh_token,
                 'user_id': user.user_id,
                 'access_roles': [item[0] for item in access_roles]}, 201
+
 
     @ns.doc(security='password')
     @token_auth.login_required(user_type=['staff'])
     def delete(self):
-        """invalidate current token. Used to effectively logout a user"""
-        token_auth.current_user()[1].revoke_token()
-        return '', 204
+        """
+        Deprecated 11.23.20..does nothing now
+        """
+        return '', 200
+
