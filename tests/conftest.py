@@ -95,3 +95,7 @@ def init_database():
     db.session.close()
     
     clean_db(db)
+
+@pytest.fixture(scope='session')
+def staff_api_token(test_client):
+    breakpoint()
