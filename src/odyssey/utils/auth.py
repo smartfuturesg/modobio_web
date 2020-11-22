@@ -205,12 +205,24 @@ class TokenAuth(BasicAuth):
     def verify_token(self, user_type, token):
         ''' verify_token is a method that is used as a decorator to store 
             the token checking process that is defined in auth.py '''
+        
+        # decode and validate token 
+        secret = current_app.config['SECRET_KEY']
+        try:
+            decoded_token = jwt.decode(token, secret, algorithms='HS256')
+        except jwt.ExpiredSignatureError:
+            raise LoginNotAuthorized
+        
+        query = db.session.query(
+                            User, UserLogin
+                        ).filter(
+                            User.user_id==decoded_token['uid']
+                        ).filter(
+                            UserLogin.user_id == decoded_token['uid']
+                        ).one_or_none()
+                        
+        return query[0], query[1] 
 
-        # TODO REMOVE THIS
-        if user_type is None:
-            user_type =('staff')
-
-        return UserLogin.check_token(token) if token else (None,None)
 
 
     def get_auth(self):

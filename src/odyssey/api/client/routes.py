@@ -1,5 +1,5 @@
 import boto3
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 import jwt
 
 from flask import request, current_app
@@ -16,7 +16,7 @@ from odyssey.utils.errors import (
     ContentNotFound
 )
 from odyssey import db
-from odyssey.utils.constants import TABLE_TO_URI, TOKEN_LIFETIME, REFRESH_TOKEN_LIFETIME
+from odyssey.utils.constants import TABLE_TO_URI, TOKEN_LIFETIME, REFRESH_TOKEN_ LIFETIME
 from odyssey.api.client.models import (
     ClientInfo,
     ClientConsent,
@@ -756,7 +756,7 @@ class ClientDataStorageTiers(Resource):
 class ClientToken(Resource):
     """create and revoke tokens"""
     @ns.doc(security='password')
-    @basic_auth.login_required(user_type=('client',))
+    @basic_auth.login_required(user_type=('client'))
     def post(self):
         """generates a token for the 'current_user' immediately after password authentication"""
         user, _ = basic_auth.current_user()
@@ -785,7 +785,7 @@ class ClientToken(Resource):
                 'user_id': user.user_id}, 201
 
     @ns.doc(security='password')
-    @token_auth.login_required(user_type=('client',))
+    @token_auth.login_required(user_type=('client'))
     def delete(self):
         """
         Deprecated 11.19.20..does nothing now
