@@ -185,7 +185,7 @@ class RecentClients(Resource):
 class StaffToken(Resource):
     """create and revoke tokens"""
     @ns.doc(security='password')
-    @basic_auth.login_required(user_type=['staff'])
+    @basic_auth.login_required(user_type=('staff',))
     def post(self):
         """generates a token for the 'current_user' immediately after password authentication"""
         user, _ = basic_auth.current_user()
@@ -222,7 +222,7 @@ class StaffToken(Resource):
 
 
     @ns.doc(security='password')
-    @token_auth.login_required(user_type=['staff'])
+    @token_auth.login_required(user_type=('staff',))
     def delete(self):
         """
         Deprecated 11.23.20..does nothing now

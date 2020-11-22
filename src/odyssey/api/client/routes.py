@@ -756,7 +756,7 @@ class ClientDataStorageTiers(Resource):
 class ClientToken(Resource):
     """create and revoke tokens"""
     @ns.doc(security='password')
-    @basic_auth.login_required(user_type=['client'])
+    @basic_auth.login_required(user_type=('client',))
     def post(self):
         """generates a token for the 'current_user' immediately after password authentication"""
         user, _ = basic_auth.current_user()
@@ -785,7 +785,7 @@ class ClientToken(Resource):
                 'user_id': user.user_id}, 201
 
     @ns.doc(security='password')
-    @token_auth.login_required(user_type=['client'])
+    @token_auth.login_required(user_type=('client',))
     def delete(self):
         """
         Deprecated 11.19.20..does nothing now
