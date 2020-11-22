@@ -801,3 +801,18 @@ further nesting.
 
 :type: dict(dict(...))
 """
+
+
+TOKEN_LIFETIME = 1
+"""
+API access token lifetime in hours. 
+
+:type: int
+"""
+
+REFRESH_TOKEN_LIFETIME = 24
+"""
+Refresh token lifetime in hours. 
+
+:type: int
+"""

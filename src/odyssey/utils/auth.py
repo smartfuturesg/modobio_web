@@ -1,14 +1,13 @@
-from flask import request, make_response, g
+from base64 import b64decode
+import jwt
+
+from flask import current_app, request, make_response, g
 from functools import wraps
 from werkzeug.datastructures import Authorization
 from werkzeug.security import safe_str_cmp, check_password_hash
 
-from base64 import b64decode
-
-# Constants to compare to
+from odyssey import db
 from odyssey.utils.constants import ACCESS_ROLES, USER_TYPES
-
-# Import Errors
 from odyssey.utils.errors import LoginNotAuthorized, StaffNotFound
 from odyssey.api.staff.models import StaffRoles
 from odyssey.api.user.models import User, UserLogin
@@ -61,7 +60,7 @@ class BasicAuth(object):
                 # application, we need to ignore authentication headers and
                 # let the request through to avoid unwanted interactions with
                 # CORS.
-                user, user_login = self.authenticate(auth, user_type)
+                user, user_login, user_context = self.authenticate(auth, user_type)
 
                 if user in (False, None):
                     raise LoginNotAuthorized()
@@ -156,7 +155,7 @@ class BasicAuth(object):
         if not user_login:
             raise LoginNotAuthorized
         elif check_password_hash(user_login.password, password):
-            return user, user_login
+            return user, user_login, 'basic_auth'
         else:
             raise LoginNotAuthorized         
 
@@ -221,9 +220,7 @@ class TokenAuth(BasicAuth):
                             UserLogin.user_id == decoded_token['uid']
                         ).one_or_none()
                         
-        return query[0], query[1] 
-
-
+        return query[0], query[1], decoded_token.get('utype') 
 
     def get_auth(self):
         ''' This method is to authorize tokens '''
