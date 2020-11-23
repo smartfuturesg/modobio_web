@@ -102,4 +102,3 @@ import wtforms
 class DateInput(wtforms.widgets.Input):
     input_type = 'date'
 
-#import odyssey.models
