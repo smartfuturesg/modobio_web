@@ -7,11 +7,11 @@ import uuid
 from datetime import datetime, date, time
 
 import flask.json
-from odyssey.models.client import ClientInfo, ClientFacilities
-from odyssey.models.doctor import MedicalBloodTests, MedicalBloodTestResultTypes
-from odyssey.models.user import User
-from odyssey.models.misc import RegisteredFacilities
-from odyssey.api.errors import UserNotFound, FacilityNotFound, RelationAlreadyExists, TestNotFound, ResultTypeNotFound
+from odyssey.api.client.models import ClientInfo, ClientFacilities
+from odyssey.api.doctor.models import MedicalBloodTests, MedicalBloodTestResultTypes
+from odyssey.api.user.models import User
+from odyssey.api.facility.models import RegisteredFacilities
+from odyssey.utils.errors import ClientNotFound, UserNotFound, FacilityNotFound, RelationAlreadyExists, TestNotFound, ResultTypeNotFound
 
 
 _uuid_rx = re.compile(r'[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}', flags=re.IGNORECASE)

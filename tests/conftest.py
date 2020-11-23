@@ -4,19 +4,10 @@ from datetime import datetime
 from sqlalchemy import text
 
 from odyssey import create_app, db
-from odyssey.models.client import (
-    ClientInfo,
-    ClientConsent,
-    ClientRelease,
-    ClientPolicies,
-    ClientConsultContract,
-    ClientSubscriptionContract,
-    ClientIndividualContract
-)
-from odyssey.models.misc import MedicalInstitutions
-from odyssey.models.user import User, UserLogin
-
-from tests.data.users.users_data import users_staff_member_data, users_client_new_creation_data, users_client_new_info_data
+from odyssey.api.client.models import ClientInfo
+from odyssey.api.facility.models import MedicalInstitutions
+from odyssey.api.user.models import User, UserLogin
+from tests.functional.user.data import users_staff_member_data, users_client_new_creation_data, users_client_new_info_data
 
 def clean_db(db):
     for table in reversed(db.metadata.sorted_tables):
@@ -24,6 +15,7 @@ def clean_db(db):
             db.session.execute(table.delete())
         except:
             pass
+    #db.session.close()
     # specifically cascade drop clientinfo table
     try:
         db.session.execute('DROP TABLE "ClientInfo" CASCADE;')
@@ -99,7 +91,8 @@ def init_database():
     db.session.commit()
 
     yield db  # this is where the testing happens!
-    clean_db(db)
-
+    
     # https://stackoverflow.com/questions/26350911/what-to-do-when-a-py-test-hangs-silently
     db.session.close()
+    
+    clean_db(db)
