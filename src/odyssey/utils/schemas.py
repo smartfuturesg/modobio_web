@@ -1137,6 +1137,10 @@ class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
 class ClientSurgeriesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientSurgeries
+        exclude = ('surgery_id', 'created_at', 'updated_at')
+
+    client_user_id = fields.Integer()
+    reporter_user_id = fields.Integer()
 
     @post_load
     def make_object(self, data, **kwargs):

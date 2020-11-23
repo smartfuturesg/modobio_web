@@ -1079,6 +1079,20 @@ class ClientSurgeries(db.Model):
 
     __tablename__ = 'ClientSurgeries'
 
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
     surgery_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     Unique id of the surgery

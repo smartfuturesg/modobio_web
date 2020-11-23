@@ -576,12 +576,12 @@ class ClientSurgeriesAPI(Resource):
         return surgery
 
     @token_auth.login_required
-    @accepts(schema=JustUserIdSchema)
+    @accepts(schema=JustUserIdSchema, api=ns)
     @responds(schema=ClientSurgeriesSchema(many=True), api=ns)
     def get(self):
         """returns a list of all surgeries for the given client_user_id"""
-        check_client_existence(request.parsed_obj['client_user_id'])
-        return ClientSurgeries.query.filter_by(client_user_id=request.parsed_obj['client_user_id']).all()
+        check_client_existence(request.parsed_obj['user_id'])
+        return ClientSurgeries.query.filter_by(client_user_id=request.parsed_obj['user_id']).all()
 
 ##########################
 # This code became obsolete, because the medical lookup tables is now
