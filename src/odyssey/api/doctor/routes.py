@@ -10,7 +10,8 @@ from odyssey.api.client.models import ClientExternalMR
 from odyssey.api.doctor.models import (
     MedicalFamilyHistory,
     MedicalConditions,
-    MedicalPhysicalExam, 
+    MedicalPhysicalExam,
+    MedicalGeneralInfo,
     MedicalHistory, 
     MedicalBloodTests,
     MedicalBloodTestResults,
@@ -36,6 +37,9 @@ from odyssey.api.doctor.schemas import (
     MedicalFamilyHistOutputSchema,
     MedicalConditionsOutputSchema,
     MedicalConditionsSchema,
+    MedicalGeneralInfoSchema,
+    MedicalGeneralInfoMedicationsSchema,
+    MedicalGeneralInfoMedicationAllergySchema,
     MedicalHistorySchema, 
     MedicalPhysicalExamSchema, 
     MedicalInstitutionsSchema,
@@ -51,6 +55,121 @@ from odyssey.api.doctor.schemas import (
 from odyssey.utils.constants import MEDICAL_CONDITIONS
 
 ns = api.namespace('doctor', description='Operations related to doctor')
+
+@ns.route('/medicalgeneralinfo/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class MedicalGeneralInformation(Resource):
+    # @token_auth.login_required
+    # @responds(schema=MedicalGeneralInfoSchema, api=ns)
+    # def get(self, user_id):
+    #     '''
+    #     This request gets the users personal and family history if it exists
+    #     '''
+    #     check_client_existence(user_id)
+    #     client_personalfamilyhist = MedicalFamilyHistory.query.filter_by(user_id=user_id).all()
+    #     payload = {'items': client_personalfamilyhist,
+    #                'total_items': len(client_personalfamilyhist)}
+    #     return payload
+
+    @token_auth.login_required
+    @accepts(schema=MedicalGeneralInfoSchema, api=ns)
+    # @responds(schema=MedicalGeneralInfoSchema, status_code=201, api=ns)
+    def post(self, user_id):
+        '''
+        Post request to post the client's onboarding personal and family history
+        '''
+        # First check if the client exists
+        check_client_existence(user_id)
+
+        # If the client has a primary care doctor, we need either the 
+        # phone number or email
+        if request.parsed_obj['primary_doctor_contact_name']:
+            if not request.parsed_obj['primary_doctor_contact_phone'] and \
+                not request.parsed_obj['primary_doctor_contact_email']:
+                raise ContentNotFound()
+            
+            db.session.add(request.parsed_obj['primary_doctor_contact_name'])
+            
+            # if the client provided both, store both
+            if request.parsed_obj['primary_doctor_contact_phone'] and \
+                request.parsed_obj['primary_doctor_contact_email']:
+                db.session.add(request.parsed_obj['primary_doctor_contact_phone'])
+                db.session.add(request.parsed_obj['primary_doctor_contact_email'])
+            # if the client only provides doctor's phone
+            elif( request.parsed_obj['primary_doctor_contact_phone'] ):
+                db.session.add(request.parsed_obj['primary_doctor_contact_phone'])
+            # if the client only provides doctor's email
+            elif( request.parsed_obj['primary_doctor_contact_email'] ):
+                db.session.add(request.parsed_obj['primary_doctor_contact_email'])
+        
+        # If the client is taking medications, they MUST tell us what
+        # medication
+        if request.parsed_obj['medications']:
+            for medication in request.parsed_obj['medications']:
+                if not medication.medication_supplements:
+                    ContentNotFound()
+                else:
+                    # If the client gives a medication dosage, they must also give 
+                    # the units
+                    if medication.medication_dosage and not medication.medication_units:
+                        raise ContentNotFound()
+                    medication.user_id = user_id
+                    db.session.add(medication)
+                
+        
+        # If the client is allergic to certain medication, they MUST tell us what
+        # medication   
+        if request.parsed_obj['allergies']:
+            for allergicTo in request.parsed_obj['allergies']:
+                if not request.parsed_obj['allergies_to_meds_name']:
+                    # If the client indicates they have an allergy to a medication
+                    # they must AT LEAST send the name of the medication they are allergic to
+                    raise ContentNotFound()
+                else:
+                    allergicTo.user_id = user_id
+                    db.session.add(allergicTo)
+        
+        if request.parsed_obj['blood_type'] or request.parsed_obj['blood_type_pos_neg']:
+            # if the client starts by indication which blood type they have or the sign
+            # they also need the other.
+            if not request.parsed_obj['blood_type'] and not request.parsed_obj['blood_type_pos_neg']:
+                raise ContentNotFound()
+            else:
+                db.session.add(request.parsed_obj['blood_type'])
+                db.session.add(request.parsed_obj['blood_type_pos_neg'])
+
+        # insert results into the result table
+        db.session.commit()
+        return 201
+
+    # @token_auth.login_required
+    # @accepts(schema=MedicalFamilyHistInputSchema, api=ns)
+    # @responds(schema=MedicalFamilyHistOutputSchema, status_code=201, api=ns)
+    # def put(self, user_id):
+    #     '''
+    #     Put request to update the client's onboarding personal and family history
+    #     '''
+    #     # First check if the client exists
+    #     check_client_existence(user_id)
+        
+    #     # the data expected for the backend is:
+    #     # parameter: user_id 
+    #     # payload: medical_condition_id, myself, father, mother, brother, sister
+
+    #     for result in request.parsed_obj['conditions']:
+    #         del result.__dict__['_sa_instance_state']
+    #         check_medical_condition_existence(result.medical_condition_id)
+    #         user_and_medcon = MedicalFamilyHistory.query.filter_by(user_id=user_id).filter_by(medical_condition_id=result.medical_condition_id).one_or_none()
+            
+    #         if not user_and_medcon:
+    #             raise ContentNotFound()
+            
+    #         user_and_medcon.update(result.__dict__)
+    #     payload = {'items': request.parsed_obj['conditions'],
+    #                'total_items': len(request.parsed_obj['conditions'])}        
+    #     # insert results into the result table
+    #     db.session.commit()
+    #     return payload
 
 @ns.route('/medicalconditions/')
 class MedicalCondition(Resource):

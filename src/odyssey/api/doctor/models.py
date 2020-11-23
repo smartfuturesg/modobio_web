@@ -134,163 +134,215 @@ class MedicalConditions(db.Model):
 
     :type: Str
     """
-# TODO Continue working on GeneralMedicalInfo
-# class OBGeneralMedicalInfo(db.Model):
-#     """ General Medical Information.
 
-#     This table is used for client onboarding. It is used for 
-#     storing the client's general medical information.
-#     """    
-#     __tablename__ = 'OBGeneralMedicalInfo'
+class MedicalGeneralInfoMedicationAllergy(db.Model):
+    """ General Medical Information.
 
-#     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-#     """
-#     Table index.
+    This table is used for client onboarding. It is used for 
+    storing the client's general medical information.
+    """    
+    __tablename__ = 'MedicalGeneralInfoMedicationAllergy'
 
-#     :type: int, primary key, autoincrement
-#     """
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
 
-#     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-#     """
-#     Creation timestamp of this row in the database.
+    :type: int, primary key, autoincrement
+    """
 
-#     :type: :class:`datetime.datetime`
-#     """
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
 
-#     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-#     """
-#     Last update timestamp of this row in the database.
+    :type: :class:`datetime.datetime`
+    """
 
-#     :type: :class:`datetime.datetime`
-#     """
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
 
-#     user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
-#     """
-#     User ID number
+    :type: :class:`datetime.datetime`
+    """
 
-#     :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
-#     """
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    """
+    User ID number
 
-#     sex_at_birth = db.Column(db.String(1))
-#     """
-#     Client gender at birth.
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
+    """
 
-#     :type: str, max length 1
-#     """
+    allergic_to_meds_name = db.Column(db.String)
+    """
+    Medication name if client has allergic reaction to it
 
-#     health_goals = db.Column(db.Text)
-#     """
-#     Client's health goals
+    :type: str
+    """
 
-#     :type: str
-#     """
+    allergic_to_meds_symptoms = db.Column(db.String)
+    """
+    Symptoms of allergies to medication
 
-#     primary_doctor_contact_name = db.Column(db.String(50))
-#     """
-#     Client's primary doctor name
+    :type: str
+    """
 
-#     :type: str, max length 50
-#     """
+class MedicalGeneralInfoMedications(db.Model):
+    """ General Medical Information.
 
-#     primary_doctor_contact_phone = db.Column(db.String(20))
-#     """
-#     Client's primary doctor phone
+    This table is used for client onboarding. It is used for 
+    storing the client's general medical information.
+    """    
+    __tablename__ = 'MedicalGeneralInfoMedications'
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    """
+    User ID number
+
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
+    """
+
+    medication_supplements = db.Column(db.Text)
+    """
+    Client's Medication/Supplements
+
+    :type: text
+    """
+
+    medication_dosage = db.Column(db.Float)
+    """
+    Client's medication dosage
+
+    :type: float
+    """
+
+    medication_units = db.Column(db.String)
+    """
+    Client's medication units
+    mL, mg, g
+    :type: str
+    """
+
+    medication_freq = db.Column(db.Integer)
+    """
+    Client's medication frequency
+    0-9 times
+
+    medication_freq time(s) per medication_timesper_freq medication_time_units
+
+    :type: int
+    """
+
+    medication_timesper_freq = db.Column(db.Integer)
+    """
+    Client's medication frequency PER unit (hour, day, week)
+    0-9 timesper
+    medication_freq time(s) per medication_timesper_freq medication_time_units    
+    :type: int
+    """
+
+    medication_time_units = db.Column(db.String)
+    """
+    Client's medication time units
+    (Hour, Day, Week)
+    medication_freq time(s) per medication_timesper_freq medication_time_units    
+    Example:
+        1 time(s) per 1 Day
+        2 time(s) per 1 Week
+    """
+
+
+class MedicalGeneralInfo(db.Model):
+    """ General Medical Information.
+
+    This table is used for client onboarding. It is used for 
+    storing the client's general medical information.
+    """    
+    __tablename__ = 'MedicalGeneralInfo'
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    """
+    User ID number
+
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
+    """
+
+    primary_doctor_contact_name = db.Column(db.String(50))
+    """
+    Client's primary doctor name
+
+    :type: str, max length 50
+    """
+
+    primary_doctor_contact_phone = db.Column(db.String(20))
+    """
+    Client's primary doctor phone
     
-#     :type: str, max length 20
-#     """
+    :type: str, max length 20
+    """
 
-#     primary_doctor_contact_email = db.Column(db.String, nullable=True)
-#     """
-#     Client's primary doctor email
+    primary_doctor_contact_email = db.Column(db.String, nullable=True)
+    """
+    Client's primary doctor email
     
-#     :type: str
-#     """
+    :type: str
+    """
 
-#     medication_supplements = db.Column(db.Text)
-#     """
-#     Client's Medication/Supplements
+    blood_type = db.Column(db.String)
+    """
+    Client's blood type:
+    A, B, AB, O
 
-#     :type: text
-#     """
-
-#     medication_dosage = db.Column(db.Float)
-#     """
-#     Client's medication dosage
-
-#     :type: float
-#     """
-
-#     medication_units = db.Column(db.String)
-#     """
-#     Client's medication units
-#     mL, mg, g
-#     :type: str
-#     """
-
-#     medication_freq = db.Column(db.Integer)
-#     """
-#     Client's medication frequency
-#     0-9 times
-
-#     medication_freq time(s) per medication_timesper_freq medication_time_units
-
-#     :type: int
-#     """
-
-#     medication_timesper_freq = db.Column(db.Integer)
-#     """
-#     Client's medication frequency PER unit (hour, day, week)
-#     0-9 timesper
-#     medication_freq time(s) per medication_timesper_freq medication_time_units    
-#     :type: int
-#     """
-
-#     medication_time_units = db.Column(db.String)
-#     """
-#     Client's medication time units
-#     (Hour, Day, Week)
-#     medication_freq time(s) per medication_timesper_freq medication_time_units    
-#     Example:
-#         1 time(s) per 1 Day
-#         2 time(s) per 1 Week
-#     """
-
-#     allergies_to_meds = db.Column(db.Boolean)
-#     """
-#     Client has allergic reaction to medication
-
-#     :type: bool
-#     """
-
-#     allergic_to_meds_name = db.Column(db.String)
-#     """
-#     Medication name if client has allergic reaction to it
-
-#     :type: str
-#     """
-
-#     allergic_to_meds_severity = db.Column(db.String)
-#     """
-#     Severity of allergies to medication
-
-#     :type: str
-#     """
-
-#     blood_type = db.Column(db.String)
-#     """
-#     Client's blood type:
-#     A, B, AB, O
-
-#     :type: str
-#     """
+    :type: str
+    """
     
-#     blood_type_pos_neg = db.Column(db.Integer)
-#     """
-#     Client's blood type sign:
-#     positive or negative
+    blood_type_pos_neg = db.Column(db.Boolean)
+    """
+    Client's blood type sign:
+    positive or negative
 
-#     :type: int
-#     """
+    :type: bool
+    """
 
 class MedicalImaging(db.Model):
     """ Medical Imaging table.

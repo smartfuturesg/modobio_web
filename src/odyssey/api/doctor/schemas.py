@@ -1,7 +1,10 @@
 from marshmallow import Schema, fields, post_load, validate, pre_dump
 
 from odyssey import ma
-from odyssey.api.doctor.models import ( 
+from odyssey.api.doctor.models import (
+    MedicalGeneralInfo,
+    MedicalGeneralInfoMedications,
+    MedicalGeneralInfoMedicationAllergy,
     MedicalFamilyHistory,
     MedicalConditions,
     MedicalHistory,
@@ -18,6 +21,37 @@ from odyssey.api.facility.models import MedicalInstitutions
 """
     Schemas for the doctor's API
 """
+
+class MedicalGeneralInfoMedicationAllergySchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = MedicalGeneralInfoMedicationAllergy
+        exclude = ('idx', 'created_at', 'updated_at')
+
+    possible_allergy_symptoms = ['Rash', 'Vertigo', 'Nausea', 'Swelling', 'Diarrhea', 'Vomiting', 'Headache', 'Anaphylaxis', 'Blurred Vision', 'Abdominal Pain', 'Shortness of Breath']
+    allergic_to_meds_symptoms = fields.String(validate=validate.OneOf(possible_allergy_symptoms),missing=None)
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return MedicalGeneralInfoMedicationAllergy(**data)
+
+class MedicalGeneralInfoMedicationsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = MedicalGeneralInfoMedications
+        exclude = ('idx', 'created_at', 'updated_at')
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return MedicalGeneralInfoMedications(**data)
+
+class MedicalGeneralInfoSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = MedicalGeneralInfo
+        
+    primary_doctor_contact_name = fields.String(missing=None)
+    primary_doctor_contact_phone = fields.String(missing=None)
+    primary_doctor_contact_email = fields.String(missing=None)
+    medications = fields.Nested(MedicalGeneralInfoMedicationsSchema(many=True), missing = [])
+    allergies = fields.Nested(MedicalGeneralInfoMedicationAllergySchema(many=True), missing = [])
 
 class MedicalConditionsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
