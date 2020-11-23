@@ -5,6 +5,8 @@ import jwt
 from flask import current_app, request, url_for, jsonify
 from flask_accepts import accepts, responds
 from flask_restx import Resource
+from werkzeug.security import check_password_hash
+
 
 from odyssey.api import api
 from odyssey.utils.errors import ContentNotFound, InputError, StaffEmailInUse, ClientEmailInUse, UnauthorizedUser
@@ -98,7 +100,7 @@ class NewStaffUser(Resource):
 
 @ns.route('/client/')
 class NewClientUser(Resource):
-    @token_auth.login_required
+    #@token_auth.login_required
     @accepts(schema=NewUserSchema, api=ns)
     @responds(schema=NewClientUserSchema, status_code=201, api=ns)
     def post(self): 
@@ -226,7 +228,7 @@ class ChangePassword(Resource):
         # bring up the staff member and reset their password
         _, user_login = token_auth.current_user()
 
-        if user_login.check_password(password=request.parsed_obj['current_password']):
+        if check_password_hash(user_login.password, request.parsed_obj['current_password']):
             user_login.set_password(request.parsed_obj['new_password'])
         else:
             raise UnauthorizedUser(message="please enter the correct current password \
@@ -235,3 +237,25 @@ class ChangePassword(Resource):
         db.session.commit()
 
         return 200
+
+@ns.route('/token/refresh')
+@ns.doc(params={'refresh_token': "token from password reset endpoint"})
+class RefreshToken(Resource):
+    """User refesh token to issue a new token with a 1 hr TTL"""
+    def post(self):
+        """
+        Issues new API access token if refrsh_token is still valid
+        """
+        refresh_token = request.args.get("refresh_token")
+        secret = current_app.config['SECRET_KEY']
+        
+        # check that the token is valid
+        try:
+            decoded_token = jwt.decode(refresh_token, secret, algorithms='HS256')
+        except jwt.ExpiredSignatureError:
+            raise UnauthorizedUser(message="")
+        
+        # if valid, create a new access token, return it in the payload
+        token = UserLogin.generate_token(user_id=decoded_token['uid'], user_type=decoded_token['utype'], token_type='access')    
+        
+        return {'access_token': token}, 201
