@@ -46,12 +46,23 @@ class MedicalGeneralInfoMedicationsSchema(ma.SQLAlchemyAutoSchema):
 class MedicalGeneralInfoSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = MedicalGeneralInfo
-        
+        exclude = ('idx', 'created_at', 'updated_at')
+
     primary_doctor_contact_name = fields.String(missing=None)
     primary_doctor_contact_phone = fields.String(missing=None)
     primary_doctor_contact_email = fields.String(missing=None)
+    blood_type = fields.String(missing=None)
+    blood_type_pos_neg = fields.Boolean(missing=None)
+    
+    @post_load
+    def make_object(self, data, **kwargs):
+        return MedicalGeneralInfo(**data)
+
+class MedicalGeneralInfoInputSchema(Schema):
+    genInfo = fields.Nested(MedicalGeneralInfoSchema)
     medications = fields.Nested(MedicalGeneralInfoMedicationsSchema(many=True), missing = [])
     allergies = fields.Nested(MedicalGeneralInfoMedicationAllergySchema(many=True), missing = [])
+
 
 class MedicalConditionsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

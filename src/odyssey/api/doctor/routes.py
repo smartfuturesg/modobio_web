@@ -12,6 +12,8 @@ from odyssey.api.doctor.models import (
     MedicalConditions,
     MedicalPhysicalExam,
     MedicalGeneralInfo,
+    MedicalGeneralInfoMedications,
+    MedicalGeneralInfoMedicationAllergy,
     MedicalHistory, 
     MedicalBloodTests,
     MedicalBloodTestResults,
@@ -38,6 +40,7 @@ from odyssey.api.doctor.schemas import (
     MedicalConditionsOutputSchema,
     MedicalConditionsSchema,
     MedicalGeneralInfoSchema,
+    MedicalGeneralInfoInputSchema,
     MedicalGeneralInfoMedicationsSchema,
     MedicalGeneralInfoMedicationAllergySchema,
     MedicalHistorySchema, 
@@ -60,87 +63,90 @@ ns = api.namespace('doctor', description='Operations related to doctor')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedicalGeneralInformation(Resource):
     # @token_auth.login_required
-    # @responds(schema=MedicalGeneralInfoSchema, api=ns)
-    # def get(self, user_id):
-    #     '''
-    #     This request gets the users personal and family history if it exists
-    #     '''
-    #     check_client_existence(user_id)
-    #     client_personalfamilyhist = MedicalFamilyHistory.query.filter_by(user_id=user_id).all()
-    #     payload = {'items': client_personalfamilyhist,
-    #                'total_items': len(client_personalfamilyhist)}
-    #     return payload
+    @responds(schema=MedicalGeneralInfoInputSchema, api=ns)
+    def get(self, user_id):
+        '''
+        This request gets the users personal and family history if it exists
+        '''
+        check_user_existence(user_id)
+        genInfo = MedicalGeneralInfo.query.filter_by(user_id=user_id).first()
+        medications = MedicalGeneralInfoMedications.query.filter_by(user_id=user_id).all()
+        allergies = MedicalGeneralInfoMedicationAllergy.query.filter_by(user_id=user_id).all()
+        payload = {'genInfo': genInfo,
+                   'medications': medications,
+                   'allergies': allergies}
+        return payload
 
-    @token_auth.login_required
-    @accepts(schema=MedicalGeneralInfoSchema, api=ns)
-    # @responds(schema=MedicalGeneralInfoSchema, status_code=201, api=ns)
+    # @token_auth.login_required
+    @accepts(schema=MedicalGeneralInfoInputSchema, api=ns)
+    @responds(schema=MedicalGeneralInfoInputSchema, status_code=201, api=ns)
     def post(self, user_id):
         '''
         Post request to post the client's onboarding personal and family history
         '''
         # First check if the client exists
-        check_client_existence(user_id)
-
-        # If the client has a primary care doctor, we need either the 
-        # phone number or email
-        if request.parsed_obj['primary_doctor_contact_name']:
-            if not request.parsed_obj['primary_doctor_contact_phone'] and \
-                not request.parsed_obj['primary_doctor_contact_email']:
-                raise ContentNotFound()
-            
-            db.session.add(request.parsed_obj['primary_doctor_contact_name'])
-            
-            # if the client provided both, store both
-            if request.parsed_obj['primary_doctor_contact_phone'] and \
-                request.parsed_obj['primary_doctor_contact_email']:
-                db.session.add(request.parsed_obj['primary_doctor_contact_phone'])
-                db.session.add(request.parsed_obj['primary_doctor_contact_email'])
-            # if the client only provides doctor's phone
-            elif( request.parsed_obj['primary_doctor_contact_phone'] ):
-                db.session.add(request.parsed_obj['primary_doctor_contact_phone'])
-            # if the client only provides doctor's email
-            elif( request.parsed_obj['primary_doctor_contact_email'] ):
-                db.session.add(request.parsed_obj['primary_doctor_contact_email'])
-        
-        # If the client is taking medications, they MUST tell us what
-        # medication
+        check_user_existence(user_id)
+        payload = {}
         if request.parsed_obj['medications']:
-            for medication in request.parsed_obj['medications']:
+            medications = request.parsed_obj['medications']
+            payload['medications'] = []
+            for medication in medications:
+                # If the client is taking medications, they MUST tell us what
+                # medication
                 if not medication.medication_supplements:
-                    ContentNotFound()
+                    raise InputError(message='Medication Name Required')
                 else:
                     # If the client gives a medication dosage, they must also give 
                     # the units
                     if medication.medication_dosage and not medication.medication_units:
-                        raise ContentNotFound()
+                        raise InputError(message='Medication dosage requires units')
+                    if medication.freq:
+                        if not medication.medication_timesper_freq and not medication.medication_time_units:
+                            raise InputError(message='Medication frequency needs more information')
                     medication.user_id = user_id
+                    payload['medications'].append(medication)
                     db.session.add(medication)
-                
         
         # If the client is allergic to certain medication, they MUST tell us what
         # medication   
         if request.parsed_obj['allergies']:
-            for allergicTo in request.parsed_obj['allergies']:
-                if not request.parsed_obj['allergies_to_meds_name']:
+            allergies = request.parsed_obj['allergies']
+            payload['allergies'] = []
+            for allergicTo in allergies:
+                if not allergicTo.allergic_to_meds_name:
                     # If the client indicates they have an allergy to a medication
                     # they must AT LEAST send the name of the medication they are allergic to
-                    raise ContentNotFound()
+                    raise InputError(message='Must need the name of the medication client is allergic to.')
                 else:
                     allergicTo.user_id = user_id
+                    payload['allergies'].append(allergicTo)
                     db.session.add(allergicTo)
         
-        if request.parsed_obj['blood_type'] or request.parsed_obj['blood_type_pos_neg']:
-            # if the client starts by indication which blood type they have or the sign
-            # they also need the other.
-            if not request.parsed_obj['blood_type'] and not request.parsed_obj['blood_type_pos_neg']:
-                raise ContentNotFound()
-            else:
-                db.session.add(request.parsed_obj['blood_type'])
-                db.session.add(request.parsed_obj['blood_type_pos_neg'])
-
+        if request.parsed_obj['genInfo']:
+            generalInfo = request.parsed_obj['genInfo']
+            if generalInfo.primary_doctor_contact_name:
+                # If the client has a primary care doctor, we need either the 
+                # phone number or email
+                if not generalInfo.primary_doctor_contact_phone and \
+                    not generalInfo.primary_doctor_contact_email:
+                    raise InputError(message='If a primary doctor name is given, the client must also\
+                                        provide the doctors phone number or email')      
+            
+            if generalInfo.blood_type or generalInfo.blood_type_pos_neg:
+                # if the client starts by indication which blood type they have or the sign
+                # they also need the other.
+                if not generalInfo.blood_type and not generalInfo.blood_type_pos_neg:
+                    raise InputError(message='If bloodtype or sign is given, client must provide both.')
+                else:
+                    # db.session.add(request.parsed_obj['blood_type'])
+                    # db.session.add(request.parsed_obj['blood_type_pos_neg'])
+                    generalInfo.user_id = user_id
+            payload['genInfo'] = generalInfo
+            db.session.add(generalInfo)
+        
         # insert results into the result table
         db.session.commit()
-        return 201
+        return payload
 
     # @token_auth.login_required
     # @accepts(schema=MedicalFamilyHistInputSchema, api=ns)
