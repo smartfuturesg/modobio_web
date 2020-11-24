@@ -62,13 +62,13 @@ ns = api.namespace('doctor', description='Operations related to doctor')
 @ns.route('/medicalgeneralinfo/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedicalGeneralInformation(Resource):
-    # @token_auth.login_required
+    @token_auth.login_required
     @responds(schema=MedicalGeneralInfoInputSchema, api=ns)
     def get(self, user_id):
         '''
         This request gets the users personal and family history if it exists
         '''
-        check_user_existence(user_id)
+        check_client_existence(user_id)
         genInfo = MedicalGeneralInfo.query.filter_by(user_id=user_id).first()
         medications = MedicalGeneralInfoMedications.query.filter_by(user_id=user_id).all()
         allergies = MedicalGeneralInfoMedicationAllergy.query.filter_by(user_id=user_id).all()
@@ -86,7 +86,38 @@ class MedicalGeneralInformation(Resource):
         '''
         # First check if the client exists
         check_user_existence(user_id)
+        
+        genInfo = MedicalGeneralInfo.query.filter_by(user_id=user_id)
+        if genInfo:
+            raise InputError(status_code=405,message='Please use put request.')
+
         payload = {}
+
+        generalInfo = request.parsed_obj['genInfo']
+        if generalInfo:
+            if generalInfo.primary_doctor_contact_name:
+                # If the client has a primary care doctor, we need either the 
+                # phone number or email
+                if not generalInfo.primary_doctor_contact_phone and \
+                    not generalInfo.primary_doctor_contact_email:
+                    raise InputError(status_code = 405,message='If a primary doctor name is given, the client must also\
+                                        provide the doctors phone number or email')      
+            
+            if generalInfo.blood_type or generalInfo.blood_type_pos_neg:
+                # if the client starts by indication which blood type they have or the sign
+                # they also need the other.
+                if not generalInfo.blood_type and not generalInfo.blood_type_pos_neg:
+                    raise InputError(status_code = 405,message='If bloodtype or sign is given, client must provide both.')
+                else:
+                    generalInfo.user_id = user_id
+            payload['genInfo'] = generalInfo
+            db.session.add(generalInfo)
+        else:
+            # If first post is empty, put in a placeholder in this table to force to use
+            # a put request
+            generalInfo.user_id = user_id
+            db.session.add(generalInfo)  
+
         if request.parsed_obj['medications']:
             medications = request.parsed_obj['medications']
             payload['medications'] = []
@@ -94,15 +125,15 @@ class MedicalGeneralInformation(Resource):
                 # If the client is taking medications, they MUST tell us what
                 # medication
                 if not medication.medication_supplements:
-                    raise InputError(message='Medication Name Required')
+                    raise InputError(status_code = 405, message='Medication Name Required')
                 else:
                     # If the client gives a medication dosage, they must also give 
                     # the units
                     if medication.medication_dosage and not medication.medication_units:
-                        raise InputError(message='Medication dosage requires units')
+                        raise InputError(status_code = 405,message='Medication dosage requires units')
                     if medication.freq:
                         if not medication.medication_timesper_freq and not medication.medication_time_units:
-                            raise InputError(message='Medication frequency needs more information')
+                            raise InputError(status_code = 405,message='Medication frequency needs more information')
                     medication.user_id = user_id
                     payload['medications'].append(medication)
                     db.session.add(medication)
@@ -116,66 +147,88 @@ class MedicalGeneralInformation(Resource):
                 if not allergicTo.allergic_to_meds_name:
                     # If the client indicates they have an allergy to a medication
                     # they must AT LEAST send the name of the medication they are allergic to
-                    raise InputError(message='Must need the name of the medication client is allergic to.')
+                    raise InputError(status_code = 405,message='Must need the name of the medication client is allergic to.')
                 else:
                     allergicTo.user_id = user_id
                     payload['allergies'].append(allergicTo)
-                    db.session.add(allergicTo)
+                    db.session.add(allergicTo)      
         
-        if request.parsed_obj['genInfo']:
-            generalInfo = request.parsed_obj['genInfo']
+        # insert results into the result table
+        db.session.commit()
+        return payload
+
+    @token_auth.login_required
+    @accepts(schema=MedicalGeneralInfoInputSchema, api=ns)
+    @responds(schema=MedicalGeneralInfoInputSchema, status_code=201, api=ns)
+    def put(self, user_id):
+        '''
+        Put request to update the client's onboarding personal and family history
+        '''
+        payload = {}
+
+        generalInfo = request.parsed_obj['genInfo']
+        if generalInfo:
             if generalInfo.primary_doctor_contact_name:
                 # If the client has a primary care doctor, we need either the 
                 # phone number or email
                 if not generalInfo.primary_doctor_contact_phone and \
                     not generalInfo.primary_doctor_contact_email:
-                    raise InputError(message='If a primary doctor name is given, the client must also\
+                    raise InputError(status_code = 405,message='If a primary doctor name is given, the client must also\
                                         provide the doctors phone number or email')      
             
             if generalInfo.blood_type or generalInfo.blood_type_pos_neg:
                 # if the client starts by indication which blood type they have or the sign
                 # they also need the other.
                 if not generalInfo.blood_type and not generalInfo.blood_type_pos_neg:
-                    raise InputError(message='If bloodtype or sign is given, client must provide both.')
+                    raise InputError(status_code = 405,message='If bloodtype or sign is given, client must provide both.')
                 else:
-                    # db.session.add(request.parsed_obj['blood_type'])
-                    # db.session.add(request.parsed_obj['blood_type_pos_neg'])
                     generalInfo.user_id = user_id
             payload['genInfo'] = generalInfo
-            db.session.add(generalInfo)
+            db.session.update(generalInfo)
+        else:
+            # If first post is empty, put in a placeholder in this table to force to use
+            # a put request
+            generalInfo.user_id = user_id
+            db.session.add(generalInfo)  
+
+        if request.parsed_obj['medications']:
+            medications = request.parsed_obj['medications']
+            payload['medications'] = []
+            for medication in medications:
+                # If the client is taking medications, they MUST tell us what
+                # medication
+                if not medication.medication_supplements:
+                    raise InputError(status_code = 405, message='Medication Name Required')
+                else:
+                    # If the client gives a medication dosage, they must also give 
+                    # the units
+                    if medication.medication_dosage and not medication.medication_units:
+                        raise InputError(status_code = 405,message='Medication dosage requires units')
+                    if medication.freq:
+                        if not medication.medication_timesper_freq and not medication.medication_time_units:
+                            raise InputError(status_code = 405,message='Medication frequency needs more information')
+                    medication.user_id = user_id
+                    payload['medications'].append(medication)
+                    db.session.add(medication)
+        
+        # If the client is allergic to certain medication, they MUST tell us what
+        # medication   
+        if request.parsed_obj['allergies']:
+            allergies = request.parsed_obj['allergies']
+            payload['allergies'] = []
+            for allergicTo in allergies:
+                if not allergicTo.allergic_to_meds_name:
+                    # If the client indicates they have an allergy to a medication
+                    # they must AT LEAST send the name of the medication they are allergic to
+                    raise InputError(status_code = 405,message='Must need the name of the medication client is allergic to.')
+                else:
+                    allergicTo.user_id = user_id
+                    payload['allergies'].append(allergicTo)
+                    db.session.add(allergicTo)      
         
         # insert results into the result table
         db.session.commit()
         return payload
-
-    # @token_auth.login_required
-    # @accepts(schema=MedicalFamilyHistInputSchema, api=ns)
-    # @responds(schema=MedicalFamilyHistOutputSchema, status_code=201, api=ns)
-    # def put(self, user_id):
-    #     '''
-    #     Put request to update the client's onboarding personal and family history
-    #     '''
-    #     # First check if the client exists
-    #     check_client_existence(user_id)
-        
-    #     # the data expected for the backend is:
-    #     # parameter: user_id 
-    #     # payload: medical_condition_id, myself, father, mother, brother, sister
-
-    #     for result in request.parsed_obj['conditions']:
-    #         del result.__dict__['_sa_instance_state']
-    #         check_medical_condition_existence(result.medical_condition_id)
-    #         user_and_medcon = MedicalFamilyHistory.query.filter_by(user_id=user_id).filter_by(medical_condition_id=result.medical_condition_id).one_or_none()
-            
-    #         if not user_and_medcon:
-    #             raise ContentNotFound()
-            
-    #         user_and_medcon.update(result.__dict__)
-    #     payload = {'items': request.parsed_obj['conditions'],
-    #                'total_items': len(request.parsed_obj['conditions'])}        
-    #     # insert results into the result table
-    #     db.session.commit()
-    #     return payload
 
 @ns.route('/medicalconditions/')
 class MedicalCondition(Resource):
