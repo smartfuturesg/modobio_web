@@ -413,11 +413,15 @@ Vowels were omitted to prevent type confusion when printed in certain fonts
 :type: str
 """
 
-USER_TYPES = ('staff', 'client')
+USER_TYPES = ('staff', 'staff_self', 'client')
 """
 The general category of :class:`odyssey.models.user.User` consists of
-subtypes. This constant lists the types of user supported by the
-login system.
+subtypes. This constant lists the types resource access contexts APIs will 
+fit under.
+
+'client' - client may acess resource only for themselves. 
+'staff' - may access resource for clients who have given the staff member explicit permission
+'staff_self' - staff may access only thier own resource (profile, role assignment etc.)
 
 :type: tuple
 """

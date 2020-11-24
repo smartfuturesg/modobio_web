@@ -10,7 +10,7 @@ from odyssey.utils.constants import ACCESS_ROLES, USER_TYPES
 
 # Import Errors
 from odyssey.utils.errors import LoginNotAuthorized, StaffNotFound
-
+from odyssey.api.staff.models import StaffRoles
 from odyssey.api.user.models import User, UserLogin
 
 class BasicAuth(object):
@@ -21,13 +21,13 @@ class BasicAuth(object):
         self.scheme = scheme
         self.header = header
 
-    def login_required(self, f=None, user_type=None, staff_role=None):
+    def login_required(self, f=None, user_type=('staff',), staff_role=None):
         ''' The login_required method is the main method that we will be using
             for authenticating both tokens and basic authorizations.
             This method decorates each CRUD request and verifies the person
             making the request has the appropriate credentials
             
-            admin_role, user_type, and staff_role are expected to be lists. 
+            user_type, and staff_role are expected to be lists. 
 
             NOTE: Some methods have overrides depending if it is a 
                   OdyBasicAuth or OdyTokenAuth object
@@ -38,16 +38,16 @@ class BasicAuth(object):
         # Validate each entry
         if user_type is not None:
             # Check if user type is a list:
-            if type(user_type) is not list:
-                raise ValueError('user_type must be a list.')
+            if type(user_type) is not tuple:
+                raise ValueError('user_type must be a tuple.')
             else:
                 # Validate 
                 self.validate_roles(user_type, USER_TYPES)
          
         if staff_role is not None:
             # Check if staff role is a list:
-            if type(staff_role) is not list:
-                raise ValueError('staff_role must be a list.')   
+            if type(staff_role) is not tuple:
+                raise ValueError('staff_role must be a tuple.')   
             else:
                 # Validate 
                 self.validate_roles(staff_role, ACCESS_ROLES)                              
@@ -61,19 +61,14 @@ class BasicAuth(object):
                 # application, we need to ignore authentication headers and
                 # let the request through to avoid unwanted interactions with
                 # CORS.
-                
                 user, user_login = self.authenticate(auth, user_type)
-                
+
                 if user in (False, None):
                     raise LoginNotAuthorized()
                 if user_type:
                     # If user_type exists (Staff or Client, etc)
-                    # Check if they are allowed access
-                    # If user_type exists, it will call role_check
-                    
-                    self.user_check(user, user_type, staff_roles=staff_role)
-                elif staff_role:
-                    self.role_check(user,staff_role)                   
+                    # Check user and role access
+                    self.user_role_check(user,user_type=user_type, staff_roles=staff_role)                   
                 
                 g.flask_httpauth_user = (user, user_login) if user else (None,None)
                 return f(*args, **kwargs)
@@ -82,48 +77,57 @@ class BasicAuth(object):
         if f:
             return login_required_internal(f)
         return login_required_internal
-
-    def admin_check(self, user, admin_role):
-        ''' Role suppression
-        sys_admin: permisison to create staff admin.
-        staff_admin:  can create all other roles except staff/systemadmin
-        '''
-        if len(admin_role) == 1:
-            # if sys_admin is in the login requirement, check if user has that access
-            if 'sys_admin' in admin_role:
-                if not user.is_system_admin:
-                    raise LoginNotAuthorized
-            # if staff_admin is in the login requirement, check if user has that access
-            if 'staff_admin' in admin_role:
-                if not user.is_admin:
-                    raise LoginNotAuthorized
-        else:
-            if user.is_system_admin or user.is_admin:
-                return None
-            else:
-                raise LoginNotAuthorized
-        return None
-        
-    def user_check(self, user, user_type, staff_roles=None):
-        ''' user_check is to determine if the user accessing the API
+   
+    def user_role_check(self, user, user_type, staff_roles=None):
+        ''' user_role_check is to determine if the user accessing the API
             is a Staff member or Client '''
-        # First check the user type. If the user_type is wrong, then
-        # the user absolutely has no access
-        
-        if 'staff' in user_type:
-            if not user.is_staff:
-                raise LoginNotAuthorized
-            else:
-                # USER IS STAFF
-                return self.role_check(user,staff_roles)
+        # Check if logged-in user is authorized by type (staff,client)
+        # then ensure the logged_in user has role
 
-    def role_check(self, user, staff_roles=None):
-        ''' role_check method will be used to determine if a Staff
-            member has the correct role to access the API '''
+        # TODO: little bug here where we dont know which context the user is CURRENTLY logged in as
+        # when we switch to JWTs, this will be part of the token payload. Which resolves this bug
+        if ('staff' in user_type or 'staff_self' in user_type) and user.is_staff:
+            if staff_roles:
+                self.staff_access_check(user, user_type, staff_roles=staff_roles)
+            else:
+                return
+        elif 'client' in user_type and user.is_client:
+            self.client_access_check(user)
+        else:
+            raise LoginNotAuthorized()
+
+    def client_access_check(self, user):
+        """
+        Clients should only be able to access their own content
+        this check is in place to ensure that the user_id in the URI 
+        is the same as the logged in user's user_id
+        """
+
+        requested_user_id = request.view_args.get('user_id')
+
+        if requested_user_id:
+            if int(requested_user_id) != user.user_id:
+                raise LoginNotAuthorized()
+
+    def staff_access_check(self, user, user_type,  staff_roles=None):
+        ''' 
+        staff_access_check method will be used to determine if a Staff
+        member has the correct role to access the API 
+        Checks to see that staff memner is accessing their own resources
+        if 'staff_self' is in the user_type
+        '''
         # If roles are included, now do role checks
         # If no roles were going, then all Staff has access
         # If roles were given, check if Staff member has that role
-        if staff_roles is None or any(role in user.access_roles for role in staff_roles):
+        
+        # bring up the soles for the staff member
+        staff_user_roles = db.session.query(StaffRoles.role).filter(StaffRoles.user_id==user_id).all()
+        staff_user_roles = [x[0] for x in staff_roles]
+        
+        if 'staff_self' in user_type:
+            if request.view_args.get('user_id') != user.user_id:
+                raise LoginNotAuthorized
+        if staff_roles is None or any(role in staff_user_roles for role in staff_roles):
             # Staff member's role matches the Role Requirement in the API
             return None
         else:
@@ -136,7 +140,7 @@ class BasicAuth(object):
                 ValueError('{} is not in {}'.format(role, constants))
         return 
 
-    def verify_password(self, user_type, username, password):
+    def verify_password(self, username, password):
         """ This method is used as a decorator and to store 
             the basic authorization password check
             that is defined in auth.py """
@@ -182,7 +186,7 @@ class BasicAuth(object):
         else:
             username = ""
             password = ""
-        return self.verify_password(user_type, username, password)
+        return self.verify_password(username, password)
             
     def current_user(self):
         ''' current_user method returns the current instance 
@@ -204,7 +208,7 @@ class TokenAuth(BasicAuth):
 
         # TODO REMOVE THIS
         if user_type is None:
-            user_type = ['staff']
+            user_type =('staff')
 
         return UserLogin.check_token(token) if token else (None,None)
 

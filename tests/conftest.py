@@ -44,7 +44,6 @@ def init_database():
     clean_db(db)
     # Create the database and the database table
     db.create_all()
-
     # run .sql files to create db procedures and initialize 
     # some tables
     #  read .sql files, remove comments,
