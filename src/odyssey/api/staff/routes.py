@@ -198,19 +198,8 @@ class StaffToken(Resource):
                                 StaffRoles.user_id==user.user_id
                             ).all()
 
-        secret = current_app.config['SECRET_KEY']
-
-        access_token = jwt.encode({'exp': datetime.utcnow()+timedelta(hours = TOKEN_LIFETIME), 
-                                  'uid': user.user_id,
-                                  'utype': 'staff'}, 
-                                  secret, 
-                                  algorithm='HS256').decode("utf-8")
-
-        refresh_token = jwt.encode({'exp': datetime.utcnow()+timedelta(hours = REFRESH_TOKEN_LIFETIME), 
-                                  'uid': user.user_id,
-                                  'utype': 'staff'}, 
-                                  secret, 
-                                  algorithm='HS256').decode("utf-8")
+        access_token = UserLogin.generate_token(user_type='staff', user_id=user.user_id, token_type='access')
+        refresh_token = UserLogin.generate_token(user_type='staff', user_id=user.user_id, token_type='refresh')
 
         return {'email': user.email, 
                 'firstname': user.firstname, 

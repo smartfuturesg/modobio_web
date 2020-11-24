@@ -32,7 +32,7 @@ from odyssey.api.physiotherapy.models import PTHistory
 from odyssey.api.staff.models import ClientRemovalRequests, StaffRecentClients
 from odyssey.api.trainer.models import FitnessQuestionnaire
 from odyssey.api.facility.models import RegisteredFacilities
-from odyssey.api.user.models import User
+from odyssey.api.user.models import User, UserLogin
 from odyssey.utils.pdf import to_pdf, merge_pdfs
 from odyssey.utils.email import send_email_remote_registration_portal, send_test_email
 from odyssey.utils.misc import check_client_existence
@@ -763,19 +763,8 @@ class ClientToken(Resource):
         if not user:
             return 401
         
-        secret = current_app.config['SECRET_KEY']
-
-        access_token = jwt.encode({'exp': datetime.utcnow()+timedelta(hours = TOKEN_LIFETIME), 
-                                  'uid': user.user_id,
-                                  'utype': 'client'}, 
-                                  secret, 
-                                  algorithm='HS256').decode("utf-8")
-
-        refresh_token = jwt.encode({'exp': datetime.utcnow()+timedelta(hours = REFRESH_TOKEN_LIFETIME), 
-                                  'uid': user.user_id,
-                                  'utype': 'client'}, 
-                                  secret, 
-                                  algorithm='HS256').decode("utf-8")
+        access_token = UserLogin.generate_token(user_type='client', user_id=user.user_id, token_type='access')
+        refresh_token = UserLogin.generate_token(user_type='client', user_id=user.user_id, token_type='refresh')
 
         return {'email': user.email, 
                 'firstname': user.firstname, 

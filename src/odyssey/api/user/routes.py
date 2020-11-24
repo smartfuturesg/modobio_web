@@ -237,3 +237,30 @@ class ChangePassword(Resource):
         db.session.commit()
 
         return 200
+
+@ns.route('/token/refresh')
+@ns.doc(params={'refresh_token': "token from password reset endpoint"})
+class RefreshToken(Resource):
+    """User refesh token to issue a new token with a 1 hr TTL"""
+    @accepts(schema=UserPasswordUpdateSchema, api=ns)
+    def post(self):
+        """
+            Change the current password to the one given
+            in the body of this request
+            response 200 OK
+        """
+        # check that the token is valid
+
+        
+        # bring up the staff member and reset their password
+        _, user_login = token_auth.current_user()
+
+        if check_password_hash(user_login.password, request.parsed_obj['current_password']):
+            user_login.set_password(request.parsed_obj['new_password'])
+        else:
+            raise UnauthorizedUser(message="please enter the correct current password \
+                                      otherwise, visit the password recovery endpoint \
+                                      /staff/password/forgot-password/recovery-link")
+        db.session.commit()
+
+        return 200
