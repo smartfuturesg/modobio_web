@@ -45,8 +45,7 @@ from odyssey.utils.schemas import (
     MedicalBloodTestResultsSchema,
     MedicalBloodTestResultsOutputSchema,
     MedicalBloodTestResultTypesSchema,
-    MedicalImagingSchema,
-    JustUserIdSchema
+    MedicalImagingSchema
 )
 from odyssey.constants import MEDICAL_CONDITIONS
 
@@ -565,23 +564,26 @@ class ClientSurgeriesAPI(Resource):
     def post(self):
         """register a client surgery in the db"""
         #check client and reporting staff have valid user ids
-        check_client_existence(request.parsed_obj['client_user_id'])
-        check_staff_existence(request.parsed_obj['reporter_user_id'])
+        check_client_existence(request.parsed_obj.client_user_id)
+        check_staff_existence(request.parsed_obj.reporter_user_id)
 
         #add request data to db
-        surgery = ClientSurgeries().load(request.parsed_obj)
-        db.session.add(surgery)
+        db.session.add(request.parsed_obj)
         db.session.commit()
 
-        return surgery
+        return request.parsed_obj
 
+@ns.route('/surgery/<int:client_user_id>/')
+@ns.doc(params={'client_user_id': 'Client user ID number'})
+class ClientSurgeriesGetAPI(Resource):
     @token_auth.login_required
-    @accepts(schema=JustUserIdSchema, api=ns)
     @responds(schema=ClientSurgeriesSchema(many=True), api=ns)
-    def get(self):
+    def get(self, client_user_id):
         """returns a list of all surgeries for the given client_user_id"""
-        check_client_existence(request.parsed_obj['user_id'])
-        return ClientSurgeries.query.filter_by(client_user_id=request.parsed_obj['user_id']).all()
+        print("some things")
+        check_client_existence(client_user_id)
+        print(ClientSurgeries.query.filter_by(client_user_id=client_user_id).all())
+        return ClientSurgeries.query.filter_by(client_user_id=client_user_id).all()
 
 ##########################
 # This code became obsolete, because the medical lookup tables is now

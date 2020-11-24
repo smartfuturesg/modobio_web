@@ -8,6 +8,7 @@ from datetime import datetime, date, time
 
 import flask.json
 from odyssey.models.client import ClientInfo, ClientFacilities
+from odyssey.models.staff import StaffProfile
 from odyssey.models.doctor import MedicalBloodTests, MedicalBloodTestResultTypes
 from odyssey.models.user import User
 from odyssey.models.misc import RegisteredFacilities

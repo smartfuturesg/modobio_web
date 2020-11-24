@@ -43,10 +43,6 @@ from odyssey.models.wearables import Wearables, WearablesOura, WearablesFreeStyl
 from odyssey.utils.misc import list_average
 from odyssey.constants import ACCESS_ROLES, MEDICAL_CONDITIONS
 
-class JustUserIdSchema(Schema):
-    """for use by get methods that only require a user_id, used in place of url argument"""
-    user_id = fields.Integer(required=True)
-
 class ClientSearchItemsSchema(Schema):
     user_id = fields.Integer()
     firstname = fields.String(required=False, validate=validate.Length(min=1, max= 50), missing=None)
@@ -1147,9 +1143,9 @@ class ClientSurgeriesSchema(ma.SQLAlchemyAutoSchema):
         return ClientSurgeries(**data)
 
     @validates('surgery_category')
-    def validate_sleep_hours(self, value):
+    def validate_surgery_category(self,value):
         if value not in MEDICAL_CONDITIONS['Surgery'].keys():
-            raise ValidationError(f"{value} not a valid option. Must be one of {MEDICAL_CONDITIONS['Surgery'].keys()}")
+            raise ValidationError(f"{value} not a valid option. must be in {MEDICAL_CONDITIONS['Surgery'].keys()}")
 
 """
     Schemas for the doctor's API
