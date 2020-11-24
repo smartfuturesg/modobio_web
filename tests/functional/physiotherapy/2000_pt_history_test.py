@@ -8,7 +8,7 @@ from odyssey.api.physiotherapy.models import PTHistory
 from .data import pt_history_data
 
 
-def test_post_pt_history(test_client, init_database):
+def test_post_pt_history(test_client, init_database, staff_auth_header):
     """
     GIVEN a api end point for pt history assessment
     WHEN the '/physiotherapy/history/<user_id>' resource  is requested (POST)
@@ -18,21 +18,21 @@ def test_post_pt_history(test_client, init_database):
     staff = User.query.filter_by(is_staff=True).first()
     staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
     token = staffLogin.get_token()
-    headers = {'Authorization': f'Bearer {token}'}
+    
 
     payload = pt_history_data
     
     # For COVERAGE, raise a ContentNotFound error
     # send get request for client info on user_id = 1
     response = test_client.get('/physiotherapy/history/1/',
-                                headers=headers, 
+                                headers=staff_auth_header, 
                                 content_type='application/json')
     assert response.status_code == 204
 
     # For coverage, raise a UserNotFound error
     # send get request for client info on user_id = 1 
     response = test_client.put('/physiotherapy/history/1/',
-                                headers=headers, 
+                                headers=staff_auth_header, 
                                 data=dumps(payload), 
                                 content_type='application/json')
 
@@ -40,7 +40,7 @@ def test_post_pt_history(test_client, init_database):
 
     # send get request for client info on user_id = 1 
     response = test_client.post('/physiotherapy/history/1/',
-                                headers=headers, 
+                                headers=staff_auth_header, 
                                 data=dumps(payload), 
                                 content_type='application/json')
 
@@ -48,7 +48,7 @@ def test_post_pt_history(test_client, init_database):
     assert response.json['exercise'] == pt_history_data['exercise']
     assert response.json['best_pain'] == pt_history_data['best_pain']    
 
-def test_put_pt_history(test_client, init_database):
+def test_put_pt_history(test_client, init_database, staff_auth_header):
     """
     GIVEN a api end point for pt history assessment
     WHEN the '/physiotherapy/history/<user_id>' resource  is requested (PUT)
@@ -58,7 +58,7 @@ def test_put_pt_history(test_client, init_database):
     staff = User.query.filter_by(is_staff=True).first()
     staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
     token = staffLogin.get_token()
-    headers = {'Authorization': f'Bearer {token}'}
+    
 
     pt_history_data["exercise"] = "test put"
     payload = pt_history_data
@@ -66,7 +66,7 @@ def test_put_pt_history(test_client, init_database):
     # For COVERAGE, raise an IllegalSettings Error
     # send get request for client info on user_id = 1 
     response = test_client.post('/physiotherapy/history/1/',
-                                headers=headers, 
+                                headers=staff_auth_header, 
                                 data=dumps(payload), 
                                 content_type='application/json')
     
@@ -74,7 +74,7 @@ def test_put_pt_history(test_client, init_database):
 
     # send get request for client info on user_id = 1 
     response = test_client.put('/physiotherapy/history/1/',
-                                headers=headers, 
+                                headers=staff_auth_header, 
                                 data=dumps(payload), 
                                 content_type='application/json')
 
@@ -83,7 +83,7 @@ def test_put_pt_history(test_client, init_database):
     assert response.status_code == 200
     assert client.exercise == "test put"
 
-def test_get_pt_history(test_client, init_database):
+def test_get_pt_history(test_client, init_database, staff_auth_header):
     """
     GIVEN a api end point for retrieving pt history
     WHEN the  '/physiotherapy/history/<user_id>' resource  is requested (GET)
@@ -93,13 +93,13 @@ def test_get_pt_history(test_client, init_database):
     staff = User.query.filter_by(is_staff=True).first()
     staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
     token = staffLogin.get_token()
-    headers = {'Authorization': f'Bearer {token}'}
+    
 
 
 
     # send get request for client info on user_id = 1 
     response = test_client.get('/physiotherapy/history/1/',
-                                headers=headers, 
+                                headers=staff_auth_header, 
                                 content_type='application/json')                
     assert response.status_code == 200
     assert response.json['exercise'] == 'test put'

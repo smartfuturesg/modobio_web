@@ -9,7 +9,7 @@ from odyssey.api.user.models import User, UserLogin
 from .data import users_staff_passwords_data
 
 
-def test_password_recovery_link(test_client, init_database):
+def test_password_recovery_link(test_client, init_database, staff_auth_header):
     """
     GIVEN a api end point for creating a link for recovering passwords 
     WHEN the '/staff/password/forgot-password/recovery-link' resource  
@@ -31,7 +31,7 @@ def test_password_recovery_link(test_client, init_database):
     assert response.status_code == 200
     assert response.get_json()["token"]
 
-def test_full_password_recovery_routine(test_client, init_database):
+def test_full_password_recovery_routine(test_client, init_database, staff_auth_header):
     """
     GIVEN a api end points for facilitating password recovery
     WHEN the '/staff/password/forgot-password/recovery-link' resource  
@@ -65,7 +65,7 @@ def test_full_password_recovery_routine(test_client, init_database):
     userLogin = UserLogin.query.filter_by(user_id=user.user_id).one_or_none()
     assert userLogin.check_password(password=payload_password_reset['password'])
 
-def test_password_update(test_client, init_database):
+def test_password_update(test_client, init_database, staff_auth_header):
     """
     GIVEN a api end point for creating a link for recovering passwords 
     WHEN the '/user/password/update' PUT resource is requested
@@ -75,7 +75,7 @@ def test_password_update(test_client, init_database):
     user = User.query.filter_by(is_staff=True).first()
     userLogin = UserLogin.query.filter_by(user_id=user.user_id).one_or_none()
     token = userLogin.get_token()
-    headers = {'Authorization': f'Bearer {token}'}
+    
     ###
     # Update Password with the correct current password and a 
     # valid new password
@@ -85,7 +85,7 @@ def test_password_update(test_client, init_database):
     }
 
     response = test_client.post('/user/password/update/',
-                                headers=headers,
+                                headers=staff_auth_header,
                                 data=dumps(payload), 
                                 content_type='application/json')
 
@@ -98,7 +98,7 @@ def test_password_update(test_client, init_database):
     ###
 
     response = test_client.post('/user/password/update/',
-                                headers=headers,
+                                headers=staff_auth_header,
                                 data=dumps(payload), 
                                 content_type='application/json')
     

@@ -1,7 +1,7 @@
 from odyssey.api.user.models import User, UserLogin
 from werkzeug.security import check_password_hash
 
-def test_regular_staff_member(test_client, init_database):
+def test_regular_staff_member(test_client, init_database, staff_auth_header):
     """
     GIVEN a Staff model
     WHEN a new staff is created

@@ -1,7 +1,7 @@
 
 from odyssey.api.user.models import User
 
-def test_new_client(test_client, init_database):
+def test_new_client(test_client, init_database, staff_auth_header):
     """
     GIVEN a ClientInfo model
     WHEN a new client is created

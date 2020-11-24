@@ -1,6 +1,6 @@
 from odyssey.api.user.models import User, UserLogin
 
-def test_get_registration_status(test_client, init_database):
+def test_get_registration_status(test_client, init_database, staff_auth_header):
     """
     GIVEN a api end point for client registrations status
     WHEN the '/client/registrationstatus/1' resource  is requested (POST)
@@ -10,11 +10,11 @@ def test_get_registration_status(test_client, init_database):
     staff = User.query.filter_by(is_staff=True).first()
     staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
     token = staffLogin.get_token()
-    headers = {'Authorization': f'Bearer {token}'}
+    
 
     # send get request for client info on user_id = 1 
     response = test_client.get('/client/registrationstatus/1/',
-                                headers=headers, 
+                                headers=staff_auth_header, 
                                 content_type='application/json')
 
     assert response.status_code == 200

@@ -1,6 +1,8 @@
+import base64
+from datetime import datetime
 import os
 import pytest
-from datetime import datetime
+
 from sqlalchemy import text
 
 from odyssey import create_app, db
@@ -97,5 +99,23 @@ def init_database():
     clean_db(db)
 
 @pytest.fixture(scope='session')
-def staff_api_token(test_client):
-    breakpoint()
+def staff_auth_header(test_client):
+    ###
+    # Login (get token) for newly created staff member
+    ##
+
+
+    valid_credentials = base64.b64encode(
+        f"{users_staff_member_data['email']}:{'password'}".encode(
+            "utf-8")).decode("utf-8")
+    
+    headers = {'Authorization': f'Basic {valid_credentials}'}
+    response = test_client.post('/staff/token/',
+                            headers=headers, 
+                            content_type='application/json')
+    
+    token = response.json.get('token')
+
+    auth_header = {'Authorization': f'Bearer {token}'}
+    
+    yield auth_header
