@@ -56,3 +56,10 @@ doctor_medical_imaging_data = {
   'image_read': 'Check Check'
 }
 
+doctor_surgery_data = {
+  "surgery_category": "Heart",
+  "date": "2020-11-23",
+  "notes": "test some notes",
+  "surgeon": "John Q. Surgeon",
+  "institution": "Our Lady of Perpetual Surgery",
+}
