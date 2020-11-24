@@ -79,7 +79,7 @@ class MedicalGeneralInformation(Resource):
                    'allergies': allergies}
         return payload
 
-    # @token_auth.login_required
+    @token_auth.login_required
     @accepts(schema=MedicalGeneralInfoInputSchema, api=ns)
     @responds(schema=MedicalGeneralInfoInputSchema, status_code=201, api=ns)
     def post(self, user_id):
@@ -87,9 +87,9 @@ class MedicalGeneralInformation(Resource):
         Post request to post the client's onboarding personal and family history
         '''
         # First check if the client exists
-        check_user_existence(user_id)
+        check_client_existence(user_id)
         
-        genInfo = MedicalGeneralInfo.query.filter_by(user_id=user_id)
+        genInfo = MedicalGeneralInfo.query.filter_by(user_id=user_id).one_or_none()
         if genInfo:
             raise InputError(status_code=405,message='Please use put request.')
 
@@ -123,6 +123,7 @@ class MedicalGeneralInformation(Resource):
         if request.parsed_obj['medications']:
             medications = request.parsed_obj['medications']
             payload['medications'] = []
+
             for medication in medications:
                 # If the client is taking medications, they MUST tell us what
                 # medication
@@ -133,13 +134,12 @@ class MedicalGeneralInformation(Resource):
                     # the units
                     if medication.medication_dosage and not medication.medication_units:
                         raise InputError(status_code = 405,message='Medication dosage requires units')
-                    if medication.freq:
+                    if medication.medication_freq:
                         if not medication.medication_timesper_freq and not medication.medication_time_units:
                             raise InputError(status_code = 405,message='Medication frequency needs more information')
                     medication.user_id = user_id
                     payload['medications'].append(medication)
                     db.session.add(medication)
-        
         # If the client is allergic to certain medication, they MUST tell us what
         # medication   
         if request.parsed_obj['allergies']:
@@ -168,8 +168,11 @@ class MedicalGeneralInformation(Resource):
         '''
         payload = {}
 
+        check_client_existence(user_id)
+
         generalInfo = request.parsed_obj['genInfo']
         if generalInfo:
+            del generalInfo.__dict__['_sa_instance_state']
             if generalInfo.primary_doctor_contact_name:
                 # If the client has a primary care doctor, we need either the 
                 # phone number or email
@@ -177,21 +180,16 @@ class MedicalGeneralInformation(Resource):
                     not generalInfo.primary_doctor_contact_email:
                     raise InputError(status_code = 405,message='If a primary doctor name is given, the client must also\
                                         provide the doctors phone number or email')      
-            
             if generalInfo.blood_type or generalInfo.blood_type_pos_neg:
                 # if the client starts by indication which blood type they have or the sign
                 # they also need the other.
                 if not generalInfo.blood_type and not generalInfo.blood_type_pos_neg:
                     raise InputError(status_code = 405,message='If bloodtype or sign is given, client must provide both.')
                 else:
-                    generalInfo.user_id = user_id
+                    generalInfo.__dict__['user_id'] = user_id
             payload['genInfo'] = generalInfo
-            db.session.update(generalInfo)
-        else:
-            # If first post is empty, put in a placeholder in this table to force to use
-            # a put request
-            generalInfo.user_id = user_id
-            db.session.add(generalInfo)  
+            genInfo = MedicalGeneralInfo.query.filter_by(user_id=user_id).one_or_none()
+            genInfo.update(generalInfo.__dict__)
 
         if request.parsed_obj['medications']:
             medications = request.parsed_obj['medications']
@@ -206,15 +204,25 @@ class MedicalGeneralInformation(Resource):
                     # the units
                     if medication.medication_dosage and not medication.medication_units:
                         raise InputError(status_code = 405,message='Medication dosage requires units')
-                    if medication.freq:
+                    if medication.medication_freq:
                         if not medication.medication_timesper_freq and not medication.medication_time_units:
                             raise InputError(status_code = 405,message='Medication frequency needs more information')
-                    medication.user_id = user_id
+                    medication.__dict__['user_id'] = user_id
+                    # If medication and user are in it already, then send an update
+                    # else, add it to the db
+                    medicationInDB = MedicalGeneralInfoMedications.query.filter_by(user_id=user_id).filter_by(medication_supplements=medication.medication_supplements).one_or_none()
+                    if medicationInDB:
+                        del medication.__dict__['_sa_instance_state']
+                        medicationInDB.update(medication.__dict__)
+                    else:
+                        # db.session.add(MedicalGeneralInfoMedicationsSchema().load(medication.__dict__))
+                        db.session.add(medication)
+                    
                     payload['medications'].append(medication)
-                    db.session.add(medication)
+                    
         
         # If the client is allergic to certain medication, they MUST tell us what
-        # medication   
+        # medication
         if request.parsed_obj['allergies']:
             allergies = request.parsed_obj['allergies']
             payload['allergies'] = []
@@ -224,9 +232,14 @@ class MedicalGeneralInformation(Resource):
                     # they must AT LEAST send the name of the medication they are allergic to
                     raise InputError(status_code = 405,message='Must need the name of the medication client is allergic to.')
                 else:
-                    allergicTo.user_id = user_id
+                    allergicTo.__dict__['user_id'] = user_id
+                    allergyInDB = MedicalGeneralInfoMedicationAllergy.query.filter_by(user_id=user_id).filter_by(allergic_to_meds_name=allergicTo.allergic_to_meds_name).filter_by(allergic_to_meds_symptoms=allergicTo.allergic_to_meds_symptoms).one_or_none()
+                    if allergyInDB:
+                        del allergicTo.__dict__['_sa_instance_state']
+                        allergyInDB.update(allergicTo.__dict__)
+                    else:
+                        db.session.add(allergicTo)
                     payload['allergies'].append(allergicTo)
-                    db.session.add(allergicTo)      
         
         # insert results into the result table
         db.session.commit()

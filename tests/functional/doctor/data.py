@@ -1,5 +1,77 @@
 import pathlib
 
+doctor_generalmedicalhist_put_data = {
+    "genInfo": {
+        "primary_doctor_contact_name": "Dr Guy",
+        "primary_doctor_contact_phone": "4809999999",
+        "primary_doctor_contact_email": "drguy@gmail.com",
+        "blood_type": "A",
+        "blood_type_pos_neg": True
+    },
+    "medications": [{
+        "medication_supplements": "medName4",
+        "medication_dosage": 1.2,
+        "medication_units": "mg",
+        "medication_freq": 4,
+        "medication_timesper_freq": 3,
+        "medication_time_units": "day"
+    },
+    {
+        "medication_supplements": "medName2",
+        "medication_dosage": 3,
+        "medication_units": "mg",
+        "medication_freq": 5,
+        "medication_timesper_freq": 6,
+        "medication_time_units": "day"
+    } 
+    ],
+    "allergies": [{
+        "allergic_to_meds_name": "medName3",
+        "allergic_to_meds_symptoms": "Rash"
+    },
+    {                                   
+        "allergic_to_meds_name": "medName4",
+        "allergic_to_meds_symptoms": "Rash"
+    },   
+    ]
+}
+
+doctor_generalmedicalhist_post_data = {
+    "genInfo": {
+        "primary_doctor_contact_name": "Dr Guy",
+        "primary_doctor_contact_phone": "4809999999",
+        "primary_doctor_contact_email": "drguy@gmail.com",
+        "blood_type": "A",
+        "blood_type_pos_neg": True
+    },
+    "medications": [{
+        "medication_supplements": "medName1",
+        "medication_dosage": 1.2,
+        "medication_units": "mg",
+        "medication_freq": 4,
+        "medication_timesper_freq": 3,
+        "medication_time_units": "day"
+    },
+    {
+        "medication_supplements": "medName2",
+        "medication_dosage": 2.1,
+        "medication_units": "mg",
+        "medication_freq": 5,
+        "medication_timesper_freq": 6,
+        "medication_time_units": "day"
+    } 
+    ],
+    "allergies": [{
+        "allergic_to_meds_name": "medName3",
+        "allergic_to_meds_symptoms": "Rash"
+    },
+    {                                   
+        "allergic_to_meds_name": "medName3",
+        "allergic_to_meds_symptoms": "Vertigo"
+    }    
+    ]
+}
+
 doctor_personalfamilyhist_post_data = {
   "conditions":[
     {

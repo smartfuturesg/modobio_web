@@ -1,7 +1,7 @@
 """create db tables for medicalgeneralinfo
 
 Revision ID: c43262b78ba6
-Revises: 48526617897a
+Revises: 40e57e2da26a
 Create Date: 2020-11-22 19:58:30.259202
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'c43262b78ba6'
-down_revision = '48526617897a'
+down_revision = '40e57e2da26a'
 branch_labels = None
 depends_on = None
 
