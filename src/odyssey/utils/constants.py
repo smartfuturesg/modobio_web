@@ -651,9 +651,9 @@ MEDICAL_CONDITIONS = {
             'Transverse': None,
             'Oblique': None,
             'Greenstick': None,
-            'Open/compound': None
+            'Open/compound': None,
+            'Closed': None
         },
-        'Closed': None,
         'Dislocation': None,
         'Torn ligament/meniscus/tendon': None,
         'Torn muscle': None,
