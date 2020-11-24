@@ -9,15 +9,15 @@ users_client_new_creation_data = {
 }
 
 users_new_user_client_data = {
-  "userinfo": {
+  "user_info": {
     "firstname": "Test",
     "middlename": "User",
     "lastname": "Client",
     "email": "test_this_user_client@modobio.com",
     "phone_number": "1111111121",
-    "password": "password"
+    "password": "password",
   },
-  "clientinfo": {
+  "client_info": {
     "guardianname": "guardian 1",
     "guardianrole": "guardian role",
     "street": "3325 S Malibu Dr.",
@@ -59,7 +59,7 @@ users_client_new_info_data = {
 }
 
 users_new_self_registered_client_data = {
-  "userinfo": {
+  "user_info": {
     "email": "self_registered_client@mail.com",
     "password": "password_self_reg",
     "firstname": "Testron",

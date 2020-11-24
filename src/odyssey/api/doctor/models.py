@@ -1060,3 +1060,135 @@ def add_rest_result_eval(mapper, connection, target):
         Target SQLAlchemy table, fixed to :class:`MedicalBloodTestResults` by decorator.
     """
     connection.execute(BLOODTEST_EVAL.format(target.idx, target.result_id, target.result_value))
+
+class MedicalSurgeries(db.Model):
+    """ History of client surgeries.
+
+    """
+
+    __tablename__ = 'MedicalSurgeries'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    surgery_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Unique id of the surgery
+
+    :type: int, primary key, autoincrementing
+    """
+
+    client_user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    """
+    User id of the client that received this surgery
+
+    :type: int, foreign key to User.user_id
+    """
+
+    reporter_user_id = db.Column(db.Integer, db.ForeignKey('User.user_id'), nullable=False)
+    """
+    User id of the staff member that reported this surgery
+
+    :type: int, foreign key to User.user_id
+    """
+
+    surgery_category = db.Column(db.String, nullable=False)
+    """
+    Category of this surgery, must be defined in Constant.py MEDICAL_CONDITIONS['Surgery']
+
+    :type: string
+    """
+
+    date = db.Column(db.Date, nullable=False)
+    """
+    Date of this surgery
+
+    :type: date
+    """
+
+    surgeon = db.Column(db.String)
+    """
+    Name of the surgeon who performed this surgery
+
+    :type: string
+    """
+
+    institution = db.Column(db.String)
+    """
+    Name of the institution where this surgery took place
+
+    :type: string
+    """
+
+    notes = db.Column(db.String)
+    """
+    Notes about this surgery from the reporting staff member
+
+    :type: string
+    """
+
+class MedicalExternalMR(db.Model):
+    """ External medical records table.
+
+    This table stores medical record ID numbers from external medical institutes. 
+    """
+
+    __tablename__ = 'MedicalExternalMR'
+
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'med_record_id', 'institute_id'),)
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
+    """
+    User ID number
+
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
+    """
+
+    med_record_id = db.Column(db.String, nullable=False)
+    """
+    Medical record id.
+
+    This medical record ID comes from an external medical institution.
+
+    :type: str, non-null, unique
+    """
+
+    institute_id = db.Column(db.Integer, db.ForeignKey('MedicalInstitutions.institute_id', ondelete="CASCADE"), nullable=False)
+    """
+    Medical institute id.
+
+    :type: int, foreign key to :attr:`MedicalInstitutions.institute_id`
+    """
