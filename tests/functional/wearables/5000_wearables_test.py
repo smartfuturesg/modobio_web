@@ -21,9 +21,7 @@ def test_wearables_post(test_client, init_database, staff_auth_header):
     WHEN the '/wearables/<user_id>' resource is requested (POST)
     THEN check the response is valid
     """
-    staff = User.query.filter_by(is_staff=True).first()
-    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
-    token = staffLogin.get_token()
+
     
 
     response = test_client.post(
@@ -48,9 +46,7 @@ def test_wearables_get(test_client, init_database, staff_auth_header):
     WHEN the '/wearables/<user_id>' resource is requested (GET)
     THEN check the response is valid
     """
-    staff = User.query.filter_by(is_staff=True).first()
-    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
-    token = staffLogin.get_token()
+
     
 
     response = test_client.get(
@@ -67,9 +63,7 @@ def test_wearables_put(test_client, init_database, staff_auth_header):
     WHEN the '/wearables/<user_id>' resource is requested (PUT)
     THEN check the response is valid
     """
-    staff = User.query.filter_by(is_staff=True).first()
-    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
-    token = staffLogin.get_token()
+
     
 
     new_data = wearables_data.copy()
@@ -95,9 +89,7 @@ def test_wearables_freestyle_activate_post(test_client, init_database, staff_aut
     WHEN the '/wearables/freestyle/activate/<user_id>' resource is requested (POST)
     THEN check the response is valid
     """
-    staff = User.query.filter_by(is_staff=True).first()
-    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
-    token = staffLogin.get_token()
+
     
     ts = wearables_freestyle_data['activation_timestamp']
 
@@ -122,9 +114,7 @@ def test_wearables_freestyle_activate_get(test_client, init_database, staff_auth
     WHEN the '/wearables/freestyle/activate/<user_id>' resource is requested (GET)
     THEN check the response is valid
     """
-    staff = User.query.filter_by(is_staff=True).first()
-    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
-    token = staffLogin.get_token()
+
     
 
     response = test_client.get(
@@ -143,9 +133,7 @@ def test_wearables_freestyle_put(test_client, init_database, staff_auth_header):
     WHEN the '/wearables/freestyle/<user_id>' resource is requested (PUT)
     THEN check the response is valid
     """
-    staff = User.query.filter_by(is_staff=True).first()
-    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
-    token = staffLogin.get_token()
+
     
     tss = [datetime.fromisoformat(d) for d in wearables_freestyle_data['timestamps']]
 
@@ -232,9 +220,7 @@ def test_wearables_freestyle_get(test_client, init_database, staff_auth_header):
     WHEN the '/wearables/freestyle/<user_id>' resource is requested (GET)
     THEN check the response is valid
     """
-    staff = User.query.filter_by(is_staff=True).first()
-    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
-    token = staffLogin.get_token()
+
     
 
     response = test_client.get(

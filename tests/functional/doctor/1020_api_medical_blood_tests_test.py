@@ -15,9 +15,7 @@ def test_post_medical_blood_test(test_client, init_database, staff_auth_header):
     THEN check the response is valid
     """
     # get staff authorization to view client data
-    staff = User.query.filter_by(is_staff=True).first()
-    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
-    token = staffLogin.get_token()
+
     
 
     payload = doctor_blood_tests_data
@@ -38,9 +36,7 @@ def test_get_client_blood_tests(test_client, init_database, staff_auth_header):
     THEN check the response is valid
     """
     # get staff authorization to view client data
-    staff = User.query.filter_by(is_staff=True).first()
-    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
-    token = staffLogin.get_token()
+
     
 
     client = User.query.filter_by(is_client=True).first()
@@ -58,9 +54,7 @@ def test_get_blood_test_results_all(test_client, init_database, staff_auth_heade
     THEN check the response is valid
     """
     # get staff authorization to view client data
-    staff = User.query.filter_by(is_staff=True).first()
-    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
-    token = staffLogin.get_token()
+
     
 
     client = User.query.filter_by(is_client=True).first()
@@ -80,9 +74,7 @@ def test_get_blood_test_results(test_client, init_database, staff_auth_header):
     THEN check the response is valid
     """
     # get staff authorization to view client data
-    staff = User.query.filter_by(is_staff=True).first()
-    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
-    token = staffLogin.get_token()
+
     
 
     client = User.query.filter_by(is_client=True).first()
@@ -102,9 +94,7 @@ def test_get_blood_test_result_types(test_client, init_database, staff_auth_head
     THEN check the response is valid
     """
     # get staff authorization to view client data
-    staff = User.query.filter_by(is_staff=True).first()
-    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
-    token = staffLogin.get_token()
+
     
 
     # send get request for client info on clientid = 1 

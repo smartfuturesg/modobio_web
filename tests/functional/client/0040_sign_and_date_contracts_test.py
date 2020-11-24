@@ -128,9 +128,7 @@ def test_get_policies_contract(test_client, init_database, staff_auth_header):
     THEN check the response is valid
     """
     # get staff authorization to view client data
-    staff = User.query.filter_by(is_staff=True).first()
-    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
-    token = staffLogin.get_token()
+
     
 
     # send get request for client info on user_id = 1 

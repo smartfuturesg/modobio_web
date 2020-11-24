@@ -15,9 +15,7 @@ def test_post_pt_history(test_client, init_database, staff_auth_header):
     THEN check the response is valid
     """
     # get staff authorization to view client data
-    staff = User.query.filter_by(is_staff=True).first()
-    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
-    token = staffLogin.get_token()
+
     
 
     payload = pt_history_data
@@ -55,9 +53,7 @@ def test_put_pt_history(test_client, init_database, staff_auth_header):
     THEN check the response is valid
     """
     # get staff authorization to view client data
-    staff = User.query.filter_by(is_staff=True).first()
-    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
-    token = staffLogin.get_token()
+
     
 
     pt_history_data["exercise"] = "test put"
@@ -90,9 +86,7 @@ def test_get_pt_history(test_client, init_database, staff_auth_header):
     THEN check the response is valid
     """
     # get staff authorization to view client data
-    staff = User.query.filter_by(is_staff=True).first()
-    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
-    token = staffLogin.get_token()
+
     
 
 

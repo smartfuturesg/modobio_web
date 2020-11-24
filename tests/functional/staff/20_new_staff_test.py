@@ -16,9 +16,7 @@ def test_creating_new_staff(test_client, init_database, staff_auth_header):
     THEN check the response is valid
     """
     # get staff authorization to view client data
-    staff = User.query.filter_by(is_staff=True).first()
-    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
-    token = staffLogin.get_token()
+
     
     
     response = test_client.post('/user/staff/',
@@ -64,14 +62,7 @@ def test_creating_new_staff_same_email(test_client, init_database, staff_auth_he
     GIVEN a api end point for creating a new staff 
     WHEN the '/staff/' resource  is requested to be created
     THEN check the response is 409 error
-    """
-
-    # get staff authorization to view client data
-    staff = User.query.filter_by(is_staff=True).first()
-    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
-    token = staffLogin.get_token()
-    
-    
+    """   
     response = test_client.post('/user/staff/',
                                 headers=staff_auth_header, 
                                 data=dumps(users_staff_new_user_data), 
@@ -89,10 +80,6 @@ def test_add_roles_to_staff(test_client, init_database, staff_auth_header):
     """
     # get staff authorization to view client data
     staff = User.query.filter_by(is_staff=True).first()
-    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
-    token = staffLogin.get_token()
-    
-    
     payload = {'access_roles': ACCESS_ROLES}
     response = test_client.post(f'/staff/roles/{staff.user_id}/',
                                 headers=staff_auth_header, 

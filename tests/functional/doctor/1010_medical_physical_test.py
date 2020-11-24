@@ -11,12 +11,6 @@ def test_post_medical_physical(test_client, init_database, staff_auth_header):
     WHEN the '/doctor/physical/<client id>' resource  is requested (POST)
     THEN check the response is valid
     """
-    # get staff authorization to view client data
-    staff = User.query.filter_by(is_staff=True).first()
-    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
-    token = staffLogin.get_token()
-    
-
     payload = trainer_medical_physical_data
     
     # send get request for client info on user_id = 1 
@@ -34,12 +28,6 @@ def test_get_medical_physical(test_client, init_database, staff_auth_header):
     WHEN the  '/doctor/physical/<client id>' resource  is requested (GET)
     THEN check the response is valid
     """
-    # get staff authorization to view client data
-    staff = User.query.filter_by(is_staff=True).first()
-    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
-    token = staffLogin.get_token()
-    
-
     # send get request for client info on user_id = 1 
     response = test_client.get('/doctor/physical/1/',
                                 headers=staff_auth_header, 

@@ -15,9 +15,7 @@ def test_post_registered_facilities(test_client, init_database, staff_auth_heade
     THEN check the response is valid
     """
     # get staff authorization to view client data
-    staff = User.query.filter_by(is_staff=True).first()
-    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
-    token = staffLogin.get_token()
+
     
 
     payload = registeredfacilities_registered_facilities_data
@@ -39,9 +37,7 @@ def test_put_registered_facility(test_client, init_database, staff_auth_header):
     THEN check the response is valid
     """
     # get staff authorization to view facility data
-    staff = User.query.filter_by(is_staff=True).first()
-    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
-    token = staffLogin.get_token()
+
     
 
     registeredfacilities_registered_facilities_data["facility_address"] = "123 Test Address"
@@ -65,9 +61,7 @@ def test_get_registered_facility(test_client, init_database, staff_auth_header):
     THEN check the response is valid
     """
     # get staff authorization to view facility data
-    staff = User.query.filter_by(is_staff=True).first()
-    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
-    token = staffLogin.get_token()
+
     
 
     # send get request for facility info on facility_id = 1 
@@ -91,9 +85,7 @@ def test_post_client_facility(test_client, init_database, staff_auth_header):
     THEN check the response is valid
     """
     #get staff authorization to view facility data
-    staff = User.query.filter_by(is_staff=True).first()
-    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
-    token = staffLogin.get_token()
+
     
 
     payload = registeredfacilities_client_facilities_data
@@ -114,9 +106,7 @@ def test_get_client_facility(test_client, init_database, staff_auth_header):
     THEN check the response is valid
     """
     #get staff authorization to view facility data
-    staff = User.query.filter_by(is_staff=True).first()
-    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
-    token = staffLogin.get_token()
+
     
 
     client = User.query.filter_by(is_client=True).first()
@@ -134,9 +124,7 @@ def test_get_client_summary(test_client, init_database, staff_auth_header):
     THEN check the response is valid
     """
     #get staff authorization to view client data
-    staff = User.query.filter_by(is_staff=True).first()
-    staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
-    token = staffLogin.get_token()
+
     
 
     client = User.query.filter_by(is_client=True).first()
