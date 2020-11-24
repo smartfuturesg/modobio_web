@@ -113,7 +113,6 @@ def staff_auth_header(test_client):
     response = test_client.post('/staff/token/',
                             headers=headers, 
                             content_type='application/json')
-    breakpoint()
     token = response.json.get('token')
 
     auth_header = {'Authorization': f'Bearer {token}'}
