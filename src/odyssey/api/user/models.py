@@ -242,10 +242,8 @@ class UserLogin(db.Model):
         Generate a JWT with the appropriate user type and user_id
         """
         secret = current_app.config['SECRET_KEY']
-
-        return jwt.encode({'exp': datetime.utcnow()+timedelta(
-                                            hours = (
-                                                TOKEN_LIFETIME if token_type == 'access' else REFRESH_TOKEN_LIFETIME)), 
+        
+        return jwt.encode({'exp': datetime.utcnow()+timedelta(hours =(TOKEN_LIFETIME if token_type == 'access' else REFRESH_TOKEN_LIFETIME)), 
                             'uid': user_id,
                             'utype': user_type}, 
                             secret, 

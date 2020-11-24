@@ -242,25 +242,20 @@ class ChangePassword(Resource):
 @ns.doc(params={'refresh_token': "token from password reset endpoint"})
 class RefreshToken(Resource):
     """User refesh token to issue a new token with a 1 hr TTL"""
-    @accepts(schema=UserPasswordUpdateSchema, api=ns)
     def post(self):
         """
-            Change the current password to the one given
-            in the body of this request
-            response 200 OK
+        Issues new API access token if refrsh_token is still valid
         """
-        # check that the token is valid
-
+        refresh_token = request.args.get("refresh_token")
+        secret = current_app.config['SECRET_KEY']
         
-        # bring up the staff member and reset their password
-        _, user_login = token_auth.current_user()
-
-        if check_password_hash(user_login.password, request.parsed_obj['current_password']):
-            user_login.set_password(request.parsed_obj['new_password'])
-        else:
-            raise UnauthorizedUser(message="please enter the correct current password \
-                                      otherwise, visit the password recovery endpoint \
-                                      /staff/password/forgot-password/recovery-link")
-        db.session.commit()
-
-        return 200
+        # check that the token is valid
+        try:
+            decoded_token = jwt.decode(refresh_token, secret, algorithms='HS256')
+        except jwt.ExpiredSignatureError:
+            raise UnauthorizedUser(message="")
+        
+        # if valid, create a new access token, return it in the payload
+        token = UserLogin.generate_token(user_id=decoded_token['uid'], user_type=decoded_token['utype'], token_type='access')    
+        
+        return {'access_token': token}, 201
