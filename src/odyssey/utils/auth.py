@@ -60,14 +60,16 @@ class BasicAuth(object):
                 # application, we need to ignore authentication headers and
                 # let the request through to avoid unwanted interactions with
                 # CORS.
+
+                
                 user, user_login, user_context = self.authenticate(auth, user_type)
 
                 if user in (False, None):
                     raise LoginNotAuthorized()
-                if user_type:
+                if user_type and user_context!= 'basic_auth':
                     # If user_type exists (Staff or Client, etc)
                     # Check user and role access
-                    self.user_role_check(user,user_type=user_type, staff_roles=staff_role)                   
+                    self.user_role_check(user,user_type=user_type, staff_roles=staff_role, user_context = user_context)                   
                 
                 g.flask_httpauth_user = (user, user_login) if user else (None,None)
                 return f(*args, **kwargs)
@@ -77,21 +79,27 @@ class BasicAuth(object):
             return login_required_internal(f)
         return login_required_internal
    
-    def user_role_check(self, user, user_type, staff_roles=None):
+    def user_role_check(self, user, user_type, user_context, staff_roles=None):
         ''' user_role_check is to determine if the user accessing the API
             is a Staff member or Client '''
         # Check if logged-in user is authorized by type (staff,client)
         # then ensure the logged_in user has role
 
-        # TODO: little bug here where we dont know which context the user is CURRENTLY logged in as
-        # when we switch to JWTs, this will be part of the token payload. Which resolves this bug
-        if ('staff' in user_type or 'staff_self' in user_type) and user.is_staff:
-            if staff_roles:
-                self.staff_access_check(user, user_type, staff_roles=staff_roles)
+        # if the user is logged in as staff member, follow staff authorization routine
+        if user_context == 'staff' and ('staff' in user_type or 'staff_self' in user_type):
+            if user.is_staff:
+                if staff_roles: # role-based authorization 
+                    self.staff_access_check(user, user_type, staff_roles=staff_roles)
+                else:
+                    return
             else:
-                return
-        elif 'client' in user_type and user.is_client:
-            self.client_access_check(user)
+                LoginNotAuthorized()
+        # if the user is logged in as a client, follow the clietn authorization routine
+        elif user_context == 'client' and 'client' in user_type:
+            if user.is_client:
+                self.client_access_check(user)
+            else:
+                raise LoginNotAuthorized()
         else:
             raise LoginNotAuthorized()
 
@@ -108,7 +116,7 @@ class BasicAuth(object):
             if int(requested_user_id) != user.user_id:
                 raise LoginNotAuthorized()
 
-    def staff_access_check(self, user, user_type,  staff_roles=None):
+    def staff_access_check(self, user, user_type, staff_roles=None):
         ''' 
         staff_access_check method will be used to determine if a Staff
         member has the correct role to access the API 
@@ -120,7 +128,7 @@ class BasicAuth(object):
         # If roles were given, check if Staff member has that role
         
         # bring up the soles for the staff member
-        staff_user_roles = db.session.query(StaffRoles.role).filter(StaffRoles.user_id==user_id).all()
+        staff_user_roles = db.session.query(StaffRoles.role).filter(StaffRoles.user_id==user.user_id).all()
         staff_user_roles = [x[0] for x in staff_roles]
         
         if 'staff_self' in user_type:
