@@ -184,7 +184,7 @@ class RecentClients(Resource):
 class StaffToken(Resource):
     """create and revoke tokens"""
     @ns.doc(security='password')
-    @basic_auth.login_required(user_type=['staff'])
+    @basic_auth.login_required(user_type=('staff',))
     def post(self):
         """generates a token for the 'current_user' immediately after password authentication"""
         user, user_login = basic_auth.current_user()
@@ -204,8 +204,8 @@ class StaffToken(Resource):
                 'access_roles': [item[0] for item in access_roles]}, 201
 
     @ns.doc(security='password')
-    @token_auth.login_required(user_type=['staff'])
+    @token_auth.login_required(user_type=('staff',))
     def delete(self):
-        """invalidate current token. Used to effectively logout a user"""
+        """invalidate urrent token. Used to effectively logout a user"""
         token_auth.current_user()[1].revoke_token()
         return '', 204
