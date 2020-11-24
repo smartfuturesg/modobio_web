@@ -7,7 +7,7 @@ from werkzeug.datastructures import Authorization
 from werkzeug.security import safe_str_cmp, check_password_hash
 
 from odyssey import db
-from odyssey.utils.constants import ACCESS_ROLES, USER_TYPES
+from odyssey.utils.constants import ACCESS_ROLES, DB_SERVER_TIME, USER_TYPES 
 from odyssey.utils.errors import LoginNotAuthorized, StaffNotFound
 from odyssey.api.staff.models import StaffRoles
 from odyssey.api.user.models import User, UserLogin
@@ -155,6 +155,9 @@ class BasicAuth(object):
         if not user_login:
             raise LoginNotAuthorized
         elif check_password_hash(user_login.password, password):
+            user_login.last_login = DB_SERVER_TIME
+            db.session.commit()
+            db.session.refresh(user_login)
             return user, user_login, 'basic_auth'
         else:
             raise LoginNotAuthorized         

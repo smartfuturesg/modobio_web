@@ -232,9 +232,7 @@ class UserLogin(db.Model):
 
     def set_password(self, password):
         self.password = generate_password_hash(password)
-
-    def check_password(self, password):
-        return check_password_hash(self.password, password)
+        self.password_created_at = DB_SERVER_TIME
 
     def get_token(self,expires_in=86400):
         now = datetime.utcnow()

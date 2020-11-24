@@ -67,6 +67,7 @@ if __name__ == "__main__":
             with open(sql_script, "r") as f:
                 raw_sql = f.readlines()
                 _raw_sql = [x for x in raw_sql if not x.startswith('--')]
+                breakpoint()
                 try:
                     conn.execute(text(''.join(_raw_sql)))
                     print(f"{script_name} succeeded")
