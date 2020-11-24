@@ -5,6 +5,8 @@ import jwt
 from flask import current_app, request, url_for, jsonify
 from flask_accepts import accepts, responds
 from flask_restx import Resource
+from werkzeug.security import check_password_hash
+
 
 from odyssey.api import api
 from odyssey.utils.errors import ContentNotFound, InputError, StaffEmailInUse, ClientEmailInUse, UnauthorizedUser
@@ -226,7 +228,7 @@ class ChangePassword(Resource):
         # bring up the staff member and reset their password
         _, user_login = token_auth.current_user()
 
-        if user_login.check_password(password=request.parsed_obj['current_password']):
+        if check_password_hash(user_login.password, request.parsed_obj['current_password']):
             user_login.set_password(request.parsed_obj['new_password'])
         else:
             raise UnauthorizedUser(message="please enter the correct current password \

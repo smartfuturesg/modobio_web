@@ -1,6 +1,7 @@
 import datetime
 import pathlib
 import time
+from werkzeug.security import check_password_hash
 
 from flask.json import dumps
 from requests.auth import _basic_auth_str
@@ -60,10 +61,10 @@ def test_full_password_recovery_routine(test_client, init_database, staff_auth_h
                                 data=dumps(payload_password_reset), 
                                 content_type='application/json')
 
+    user_login = UserLogin.query.filter_by(user_id=user.user_id).one_or_none()
+    
     assert response.status_code == 200
-
-    userLogin = UserLogin.query.filter_by(user_id=user.user_id).one_or_none()
-    assert userLogin.check_password(password=payload_password_reset['password'])
+    assert check_password_hash(user_login.password, payload_password_reset['password'])
 
 def test_password_update(test_client, init_database, staff_auth_header):
     """
@@ -73,8 +74,7 @@ def test_password_update(test_client, init_database, staff_auth_header):
     """
     # Get staff member to update password
     user = User.query.filter_by(is_staff=True).first()
-    userLogin = UserLogin.query.filter_by(user_id=user.user_id).one_or_none()
-    token = userLogin.get_token()
+    user_login = UserLogin.query.filter_by(user_id=user.user_id).one_or_none()
     
     ###
     # Update Password with the correct current password and a 
@@ -90,7 +90,7 @@ def test_password_update(test_client, init_database, staff_auth_header):
                                 content_type='application/json')
 
     assert response.status_code == 200
-    assert userLogin.check_password(password=users_staff_passwords_data['new_password'])
+    assert check_password_hash(user_login.password, users_staff_passwords_data['new_password'])
 
     ###
     # Update Password with the incorrect current password and a 

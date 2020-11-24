@@ -234,32 +234,3 @@ class UserLogin(db.Model):
         self.password = generate_password_hash(password)
         self.password_created_at = DB_SERVER_TIME
 
-    def get_token(self,expires_in=86400):
-        now = datetime.utcnow()
-        #returns current token if it is valid
-        if self.token and self.token_expiration > now + timedelta(seconds=60):
-            return self.token
-        #otherwise generate new token, add to session
-        self.token = base64.b64encode(os.urandom(24)).decode('utf-8')
-        self.token_expiration = now + timedelta(seconds=expires_in)
-        db.session.add(self)
-        db.session.flush()
-        db.session.commit()
-        return self.token
-
-    def revoke_token(self):
-        """set token to expired, for logging out/generating new token"""
-        self.token_expiration = datetime.utcnow() - timedelta(seconds=1)
-        db.session.add(self)
-        db.session.flush()
-        db.session.commit()
-
-    @staticmethod
-    def check_token(token):
-        """check if token is valid. returns user if so"""
-        user_login = UserLogin.query.filter_by(token=token).first()
-
-        if user_login is None or user_login.token_expiration < datetime.utcnow():
-            return None
-        user = User.query.filter_by(user_id=user_login.user_id).one_or_none()
-        return user, user_login
