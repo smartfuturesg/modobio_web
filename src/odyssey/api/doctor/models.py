@@ -65,6 +65,42 @@ class MedicalSocialHistory(db.Model):
     :type: str
     """
 
+    avg_num_cigs = db.Column(db.Integer)
+    """
+    Average number of cigarettes smoked per day
+    :type: int
+    """
+
+    num_years_smoked = db.Column(db.Integer)
+    """
+    Number of years you have smoked
+
+    :type: int
+    """
+
+    plan_to_stop = db.Column(db.Boolean)
+    """
+    If client is planning to quit smoking
+
+    :type: int
+    """
+
+    currently_drink = db.Column(db.Boolean)
+    """
+    If client drinks
+
+    :type: bool
+    """
+
+    avg_num_drinks = db.Column(db.Integer)
+    """
+    Average number of drinks client drinks per week
+
+    :type: int
+    """
+
+    currently_exercise = db.Column(db.Boolean)
+
 class MedicalFamilyHistory(db.Model):
     """ Personal and Family Medical History
 
