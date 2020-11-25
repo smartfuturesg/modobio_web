@@ -108,7 +108,7 @@ class MedicalGeneralInformation(Resource):
             if generalInfo.blood_type or generalInfo.blood_type_pos_neg:
                 # if the client starts by indication which blood type they have or the sign
                 # they also need the other.
-                if not generalInfo.blood_type and not generalInfo.blood_type_pos_neg:
+                if generalInfo.blood_type not None and generalInfo.blood_type_pos_neg not None:
                     raise InputError(status_code = 405,message='If bloodtype or sign is given, client must provide both.')
                 else:
                     generalInfo.user_id = user_id
