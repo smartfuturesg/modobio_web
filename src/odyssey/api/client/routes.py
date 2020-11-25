@@ -16,7 +16,7 @@ from odyssey.utils.errors import (
     ContentNotFound
 )
 from odyssey import db
-from odyssey.utils.constants import TABLE_TO_URI, TOKEN_LIFETIME, REFRESH_TOKEN_LIFETIME
+from odyssey.utils.constants import TABLE_TO_URI
 from odyssey.api.client.models import (
     ClientInfo,
     ClientConsent,
