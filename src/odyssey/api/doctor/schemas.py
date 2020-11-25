@@ -30,7 +30,7 @@ class MedicalGeneralInfoMedicationAllergySchema(ma.SQLAlchemyAutoSchema):
         exclude = ('idx', 'created_at', 'updated_at')
 
     possible_allergy_symptoms = ['Rash', 'Vertigo', 'Nausea', 'Swelling', 'Diarrhea', 'Vomiting', 'Headache', 'Anaphylaxis', 'Blurred Vision', 'Abdominal Pain', 'Shortness of Breath']
-    allergic_to_meds_symptoms = fields.String(validate=validate.OneOf(possible_allergy_symptoms),missing=None)
+    allergy_symptoms = fields.String(validate=validate.OneOf(possible_allergy_symptoms),missing=None)
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -54,17 +54,17 @@ class MedicalGeneralInfoSchema(ma.SQLAlchemyAutoSchema):
     primary_doctor_contact_phone = fields.String(missing=None)
     primary_doctor_contact_email = fields.String(missing=None)
     blood_type = fields.String(missing=None)
-    blood_type_pos_neg = fields.Boolean(missing=None)
+    blood_type_positive = fields.Boolean(missing=None)
     
     @post_load
     def make_object(self, data, **kwargs):
         return MedicalGeneralInfo(**data)
 
-class MedicalGeneralInfoInputSchema(Schema):
-    genInfo = fields.Nested(MedicalGeneralInfoSchema)
+class MedicalMedicationsInfoInputSchema(Schema):
     medications = fields.Nested(MedicalGeneralInfoMedicationsSchema(many=True), missing = [])
-    allergies = fields.Nested(MedicalGeneralInfoMedicationAllergySchema(many=True), missing = [])
 
+class MedicalAllergiesInfoInputSchema(Schema):
+    allergies = fields.Nested(MedicalGeneralInfoMedicationAllergySchema(many=True), missing = [])
 
 class MedicalConditionsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

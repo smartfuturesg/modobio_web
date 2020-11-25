@@ -1,16 +1,16 @@
-"""create db tables for medicalgeneralinfo
+"""created tables for medical general history endpoint
 
-Revision ID: c43262b78ba6
+Revision ID: 65f48672909f
 Revises: 40e57e2da26a
-Create Date: 2020-11-22 19:58:30.259202
+Create Date: 2020-11-25 10:15:33.776520
 
 """
 from alembic import op
 import sqlalchemy as sa
-
+from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = 'c43262b78ba6'
+revision = '65f48672909f'
 down_revision = '40e57e2da26a'
 branch_labels = None
 depends_on = None
@@ -27,7 +27,7 @@ def upgrade():
     sa.Column('primary_doctor_contact_phone', sa.String(length=20), nullable=True),
     sa.Column('primary_doctor_contact_email', sa.String(), nullable=True),
     sa.Column('blood_type', sa.String(), nullable=True),
-    sa.Column('blood_type_pos_neg', sa.Boolean(), nullable=True),
+    sa.Column('blood_type_positive', sa.Boolean(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['User.user_id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('idx')
     )
@@ -36,8 +36,8 @@ def upgrade():
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('allergic_to_meds_name', sa.String(), nullable=True),
-    sa.Column('allergic_to_meds_symptoms', sa.String(), nullable=True),
+    sa.Column('medication_name', sa.String(), nullable=True),
+    sa.Column('allergy_symptoms', sa.String(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['User.user_id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('idx')
     )
@@ -46,11 +46,11 @@ def upgrade():
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('medication_supplements', sa.Text(), nullable=True),
+    sa.Column('medication_name', sa.Text(), nullable=True),
     sa.Column('medication_dosage', sa.Float(), nullable=True),
     sa.Column('medication_units', sa.String(), nullable=True),
     sa.Column('medication_freq', sa.Integer(), nullable=True),
-    sa.Column('medication_timesper_freq', sa.Integer(), nullable=True),
+    sa.Column('medication_times_per_freq', sa.Integer(), nullable=True),
     sa.Column('medication_time_units', sa.String(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['User.user_id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('idx')
