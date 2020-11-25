@@ -316,14 +316,16 @@ class MedicalFamilyHist(Resource):
         # payload: medical_condition_id, myself, father, mother, brother, sister
 
         for result in request.parsed_obj['conditions']:
-            del result.__dict__['_sa_instance_state']
             check_medical_condition_existence(result.medical_condition_id)
             user_and_medcon = MedicalFamilyHistory.query.filter_by(user_id=user_id).filter_by(medical_condition_id=result.medical_condition_id).one_or_none()
             
-            if not user_and_medcon:
-                raise ContentNotFound()
-            
-            user_and_medcon.update(result.__dict__)
+            if user_and_medcon:
+                # raise ContentNotFound()
+                del result.__dict__['_sa_instance_state']
+                user_and_medcon.update(result.__dict__)
+            else:
+                result.user_id = user_id
+                db.session.add(result)
         payload = {'items': request.parsed_obj['conditions'],
                    'total_items': len(request.parsed_obj['conditions'])}        
         # insert results into the result table

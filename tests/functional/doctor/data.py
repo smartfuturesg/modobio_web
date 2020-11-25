@@ -102,7 +102,15 @@ doctor_personalfamilyhist_put_data = {
       "mother": False,
       "sister": False,
       "brother": False
-    }  
+    },
+    {
+      "medical_condition_id": 3,
+      "myself": False,
+      "father": False,
+      "mother": False,
+      "sister": False,
+      "brother": False
+    }      
   ]
 }
 
