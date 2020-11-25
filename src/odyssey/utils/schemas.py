@@ -1135,7 +1135,7 @@ class ClientSurgeriesSchema(ma.SQLAlchemyAutoSchema):
         model = ClientSurgeries
         exclude = ('surgery_id', 'created_at', 'updated_at')
 
-    client_user_id = fields.Integer()
+    client_user_id = fields.Integer(dump_only=True)
     reporter_user_id = fields.Integer()
 
     @post_load

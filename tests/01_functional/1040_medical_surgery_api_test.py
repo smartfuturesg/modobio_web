@@ -20,15 +20,15 @@ def test_post_surgery(test_client, init_database):
     headers = {'Authorization': f'Bearer {token}'}
     
     payload = doctor_surgery_data
-    payload['client_user_id'] = User.query.filter_by(is_client=True).first().user_id
     payload['reporter_user_id'] = StaffProfile.query.first().user_id
 
-    response = test_client.post('/doctor/surgery/', 
+    client_user_id = User.query.filter_by(is_client=True).first().user_id
+    response = test_client.post('/doctor/surgery/' + str(client_user_id) +'/', 
                             headers=headers, 
                             data = dumps(payload),
                             content_type='application/json')
     
-    data = ClientSurgeries.query.filter_by(client_user_id=1).first()
+    data = ClientSurgeries.query.filter_by(client_user_id=client_user_id).first()
     assert response.status_code == 201
     assert data.institution == payload['institution']
     assert data.surgery_category == payload['surgery_category']
@@ -36,7 +36,7 @@ def test_post_surgery(test_client, init_database):
     #test with invalid sugery_category
     payload['surgery_category'] = "Nonsense garbage category"
 
-    response = test_client.post('/doctor/surgery/', 
+    response = test_client.post('/doctor/surgery/' + str(client_user_id) +'/', 
                         headers=headers, 
                         data = dumps(payload),
                         content_type='application/json')

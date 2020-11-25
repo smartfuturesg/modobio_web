@@ -555,34 +555,31 @@ class ExternalMedicalRecordIDs(Resource):
         return client_med_record_ids
 
 
-@ns.route('/surgery/')
+@ns.route('/surgery/<int:client_user_id>/')
+@ns.doc(params={'client_user_id': 'Client user ID number'})
 class ClientSurgeriesAPI(Resource):
 
     @token_auth.login_required
     @accepts(schema=ClientSurgeriesSchema,  api=ns)
     @responds(schema=ClientSurgeriesSchema, status_code=201, api=ns)
-    def post(self):
+    def post(self, client_user_id):
         """register a client surgery in the db"""
         #check client and reporting staff have valid user ids
-        check_client_existence(request.parsed_obj.client_user_id)
+        check_client_existence(client_user_id)
         check_staff_existence(request.parsed_obj.reporter_user_id)
 
         #add request data to db
+        request.parsed_obj.client_user_id = client_user_id
         db.session.add(request.parsed_obj)
         db.session.commit()
 
         return request.parsed_obj
 
-@ns.route('/surgery/<int:client_user_id>/')
-@ns.doc(params={'client_user_id': 'Client user ID number'})
-class ClientSurgeriesGetAPI(Resource):
     @token_auth.login_required
     @responds(schema=ClientSurgeriesSchema(many=True), api=ns)
     def get(self, client_user_id):
         """returns a list of all surgeries for the given client_user_id"""
-        print("some things")
         check_client_existence(client_user_id)
-        print(ClientSurgeries.query.filter_by(client_user_id=client_user_id).all())
         return ClientSurgeries.query.filter_by(client_user_id=client_user_id).all()
 
 ##########################
