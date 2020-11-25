@@ -7,6 +7,64 @@ from datetime import datetime
 from odyssey.utils.constants import DB_SERVER_TIME, BLOODTEST_EVAL
 from odyssey import db
 
+class MedicalSocialHistory(db.Model):
+    """ Medical Social History
+
+    This table is used for client onboarding. It is used for 
+    storing the client's medical social information.
+    """    
+    __tablename__ = 'MedicalSocialHistory'
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    """
+    User ID number
+
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
+    """
+
+    currently_smoke = db.Column(db.Boolean)
+    """
+    Does the client currently smoke
+
+    :type: bool
+    """
+
+    last_smoke = db.Column(db.Integer)
+    """
+    The last time the client smoked
+
+    :type: int
+    """
+
+    last_smoke_time = db.Column(db.String)
+    """
+    Drop down, time frame
+
+    options are months, years
+    :type: str
+    """
+
 class MedicalFamilyHistory(db.Model):
     """ Personal and Family Medical History
 
