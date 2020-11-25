@@ -66,7 +66,8 @@ def init_database():
 
     # 2) User login
     client_1_login = UserLogin(**{'user_id': client_1.user_id})
-
+    client_1_login.set_password('password')
+    
     # 3) Client info
     users_client_new_info_data['user_id'] = client_1.user_id
     client_1_info = ClientInfo(**users_client_new_info_data)
