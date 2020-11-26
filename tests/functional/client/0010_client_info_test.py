@@ -78,7 +78,7 @@ def test_creating_new_client(test_client, init_database, staff_auth_header):
                                 content_type='application/json')
 
     user = User.query.filter_by(email=users_new_user_client_data['user_info']['email']).first()
-    print(response.data)
+    
     assert response.status_code == 201
     assert user.email == users_new_user_client_data['user_info']['email']
     assert response.json['modobio_id']

@@ -10,7 +10,6 @@ from odyssey.api import api
 from odyssey.api.staff.models import StaffProfile, StaffRoles, StaffRecentClients
 from odyssey.api.user.models import User, UserLogin
 from odyssey.utils.auth import token_auth, basic_auth
-from odyssey.utils.email import send_email_password_reset
 from odyssey.utils.errors import UnauthorizedUser, StaffEmailInUse, StaffNotFound, ClientNotFound
 from odyssey.api.user.schemas import UserSchema, StaffInfoSchema
 from odyssey.api.staff.schemas import (

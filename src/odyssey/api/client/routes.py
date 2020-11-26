@@ -12,8 +12,9 @@ from odyssey.utils.errors import (
     UserNotFound, 
     ClientAlreadyExists, 
     ClientNotFound,
+    ContentNotFound,
     IllegalSetting, 
-    ContentNotFound
+    InputError
 )
 from odyssey import db
 from odyssey.utils.constants import TABLE_TO_URI
@@ -21,6 +22,7 @@ from odyssey.api.client.models import (
     ClientInfo,
     ClientConsent,
     ClientConsultContract,
+    ClientClinicalCareTeam,
     ClientIndividualContract,
     ClientPolicies,
     ClientRelease,
@@ -42,6 +44,7 @@ from odyssey.api.client.schemas import(
     ClientConsultContractSchema,
     ClientIndividualContractSchema,
     ClientInfoSchema,
+    ClientClinicalCareTeamSchema,
     ClientPoliciesContractSchema, 
     ClientRegistrationStatusSchema,
     ClientReleaseSchema,
@@ -68,9 +71,9 @@ class Client(Resource):
         """returns client info table as a json for the user_id specified"""
         client_data = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
         user_data = User.query.filter_by(user_id=user_id).one_or_none()
-        if not client_data or not user_data:
+        if not client_data and not user_data:
             raise UserNotFound(user_id)
-
+        
         #update staff recent clients information
         staff_user_id = token_auth.current_user()[0].user_id
 
@@ -95,8 +98,10 @@ class Client(Resource):
             db.session.commit()
 
         #data must be refreshed because of db changes
-        db.session.refresh(client_data)
-        db.session.refresh(user_data)
+        if client_data:
+            db.session.refresh(client_data)
+        if user_data:
+            db.session.refresh(user_data)
         return {'client_info': client_data, 'user_info': user_data}
 
     @token_auth.login_required
@@ -611,105 +616,6 @@ class JourneyStatusCheck(Resource):
 
         return {'outstanding': remaining_forms}
 
-
-
-# @ns.route('/remoteregistration/new/')
-# class NewRemoteRegistration(Resource):
-#     """
-#         initialize a client for remote registration
-#     """
-#     @token_auth.login_required
-#     @accepts(schema=NewRemoteClientSchema, api=ns)
-#     @responds(schema=ClientRemoteRegistrationPortalSchema, api=ns, status_code=201)
-#     def post(self):
-#         """create new remote registration client
-#             this will create a new entry into the client info table first
-#             then create an entry into the Remote registration table
-#             response includes the hash required to access the temporary portal for
-#             this client
-#         """
-#         data = request.get_json()
-
-#         #make sure this user email does not exist
-#         if ClientInfo.query.filter_by(email=data.get('email', None)).first():
-#             raise ClientAlreadyExists(identification = data['email'])
-
-#         # initialize schema objects
-#         rr_schema = NewRemoteClientSchema() #creates entry into clientinfo table
-#         client_rr_schema = ClientRemoteRegistrationPortalSchema() #remote registration table entry
-
-#         # enter client into basic info table and remote register table
-#         client = rr_schema.load(data)
-        
-#         # add client to database (creates clientid)
-#         db.session.add(client)
-#         db.session.flush()
-
-#         rli = {'record_locator_id': ClientInfo().generate_record_locator_id(firstname = client.firstname , lastname = client.lastname, clientid =client.clientid)}
-
-#         client.update(rli)        
-#         db.session.flush()
-
-#         # create a new remote client registration entry
-#         portal_data = {'clientid' : client.clientid, 'email': client.email}
-#         remote_client_portal = client_rr_schema.load(portal_data)
-
-#         db.session.add(remote_client_portal)
-#         db.session.commit()
-
-#         if not current_app.config['LOCAL_CONFIG']:
-#             # send email to client containing registration details
-#             send_email_user_registration_portal(
-#                 recipient=remote_client_portal.email, 
-#                 password=remote_client_portal.password, 
-#                 remote_registration_portal=remote_client_portal.registration_portal_id
-#             )
-
-#         return remote_client_portal
-
-
-# @ns.route('/remoteregistration/refresh/')
-# class RefreshRemoteRegistration(Resource):
-#     """
-#         refresh client portal a client for remote registration
-#     """
-#     @token_auth.login_required
-#     @accepts(schema=RefreshRemoteRegistrationSchema, api=ns)
-#     @responds(schema=ClientRemoteRegistrationPortalSchema, api=ns, status_code=201)
-#     def post(self):
-#         """refresh the portal endpoint and password
-#         """
-#         data = request.get_json() #should only need the email
-
-#         client = ClientInfo.query.filter_by(email=data.get('email', None)).first()
-
-#         #if client isnt in the database return error
-#         if not client:
-#             raise ClientNotFound(identification = data['email'])
-
-#         client_rr_schema = ClientRemoteRegistrationPortalSchema() #remote registration table entry
-#         #add clientid to the data object from the current client
-#         data['clientid'] =  client.clientid
-
-#         # create a new remote client session registration entry
-#         remote_client_portal = client_rr_schema.load(data)
-
-#         # create temporary password and portal url
-
-#         db.session.add(remote_client_portal)
-#         db.session.commit()
-
-#         if not current_app.config['LOCAL_CONFIG']:
-#             # send email to client containing registration details
-#             send_email_user_registration_portal(
-#                 recipient=remote_client_portal.email,
-#                 password=remote_client_portal.password, 
-#                 remote_registration_portal=remote_client_portal.registration_portal_id
-#             )
-
-#         return remote_client_portal
-
-
 @ns.route('/testemail/')
 class TestEmail(Resource):
     """
@@ -747,7 +653,6 @@ class ClientDataStorageTiers(Resource):
         
         return results
     
-""" Client token endpoint"""
 @ns.route('/token/')
 class ClientToken(Resource):
     """create and revoke tokens"""
@@ -777,4 +682,173 @@ class ClientToken(Resource):
         invalidate urrent token. Used to effectively logout a user
         """
         return '', 200
+
+
+@ns.route('/clinical-care-team/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class ClinicalCareTeam(Resource):
+    """
+    Create update and remove members of a client's clinical care team
+    only the client themselves may have access to these operations.
+    """
+    @token_auth.login_required(user_type=('client',))
+    @accepts(schema=ClientClinicalCareTeamSchema, api=ns)
+    @responds(schema=ClientClinicalCareTeamSchema, api=ns, status_code=201)
+    def post(self, user_id):
+        """
+        Make a new entry into a client's clinical care team using only the new team 
+        member's email. Clients may only have 6 team members stored. 
+
+        Emails are checked against the database. If the email is associated with a current user, 
+        the user's id is stored in the ClientClinicalCareTeam table. Otherwise, just the 
+        email address is registered. 
+
+        Parameters
+        ----------
+        user_id : int
+            User ID number
+
+        Expected payload includes
+        email : str
+            Email of new care team member
+        Returns
+        -------
+        dict
+            Returns the entries into the clinical care team. 
+        """
+        
+        data = request.parsed_obj
+
+
+        user = token_auth.current_user()[0]
+
+        current_team = ClientClinicalCareTeam.query.filter_by(user_id=user_id).all()
+        current_team_emails = [x.team_member_email for x in current_team]
+
+        # prevent users from having more than 6 clinical care team members
+        if len(current_team) + len(data.get("care_team")) > 6:
+            raise InputError(message="Attemping to add too many team members", status_code=400)
+
+        # enter new team members into client's clinical care team
+        # if email is associated with a current user account, add that user's id to 
+        #  the database entry
+        for team_member in data.get("care_team"):
+            if team_member["team_member_email"] == user.email:
+                continue
+            if team_member["team_member_email"].lower() in current_team_emails:
+                continue
+
+            team_memeber_user = User.query.filter_by(email=team_member["team_member_email"].lower()).one_or_none()
+            if team_memeber_user:
+                db.session.add(ClientClinicalCareTeam(**{"team_member_email": team_member["team_member_email"],
+                                                         "team_member_user_id": team_memeber_user.user_id,
+                                                         "user_id": user_id}))
+            else:
+                db.session.add(ClientClinicalCareTeam(**{"team_member_email": team_member["team_member_email"],
+                                                       "user_id": user_id}))
+            
+        db.session.commit()
+
+        # prepare response with names for clinical care team members who are also users 
+        current_team = ClientClinicalCareTeam.query.filter_by(user_id=user_id, team_member_user_id=None).all() # non-users
+
+        current_team_users = db.session.query(
+                                    ClientClinicalCareTeam, User.firstname, User.lastname
+                                ).filter(
+                                    ClientClinicalCareTeam.team_member_user_id == User.user_id
+                                ).all()
+        
+        for team_member in current_team_users:
+            team_member[0].__dict__.update({'firstname': team_member[1], 'lastname': team_member[2]})
+            current_team.append(team_member[0])
+        
+        response = {"care_team": current_team,
+                    "total_items": len(current_team) }
+
+        return response
+
+    @token_auth.login_required(user_type=('client',))
+    @accepts(schema=ClientClinicalCareTeamSchema, api=ns)
+    def delete(self, user_id):
+        """
+        Remove members of a client's clinical care team using the team member's email address.
+        Any matches between the incoming payload and current team members in the DB will be removed. 
+
+        Parameters
+        ----------
+        user_id : int
+            User ID number
+
+        Expected payload includes
+        email : str
+            Email of new care team member
+        Returns
+        -------
+        200 OK
+        """
+        
+        data = request.parsed_obj
+       
+        for team_member in data.get("care_team"):
+            ClientClinicalCareTeam.query.filter_by(user_id=user_id, team_member_email=team_member['team_member_email'].lower()).delete()
+            
+        db.session.commit()
+
+        return 200
+
+    @token_auth.login_required(user_type=('client',))
+    @responds(schema=ClientClinicalCareTeamSchema, api=ns, status_code=200)
+    def get(self, user_id):
+        """
+        Returns the client's clinical care team 
+
+        Parameters
+        ----------
+        user_id : int
+            User ID number
+
+        Expected payload includes
+        email : str
+            Email of new care team member
+        Returns
+        -------
+        200 OK
+        """
+        updates = False
+        # check if any team members are users
+        # if so, update their entry in the care team table with their user_id
+        current_team_non_users = ClientClinicalCareTeam.query.filter_by(user_id=user_id, team_member_user_id=None).all()
+        
+        for team_member in current_team_non_users:
+            team_memeber_user = User.query.filter_by(email=team_member.team_member_email).one_or_none()
+
+            if team_memeber_user:
+                team_member.team_member_user_id = team_memeber_user.user_id
+                db.session.add(team_memeber_user)
+                updates=True
+
+        if updates:
+            db.session.commit()
+            current_team = ClientClinicalCareTeam.query.filter_by(user_id=user_id, team_member_user_id=None).all()
+        else:
+            current_team = current_team_non_users
+        
+        # prepare response with names for clinical care team members who are also users 
+        current_team_users = db.session.query(
+                                    ClientClinicalCareTeam, User.firstname, User.lastname
+                                ).filter(
+                                    ClientClinicalCareTeam.team_member_user_id == User.user_id
+                                ).all()
+        
+        for team_member in current_team_users:
+            team_member[0].__dict__.update({'firstname': team_member[1], 'lastname': team_member[2]})
+            current_team.append(team_member[0])
+        
+        response = {"care_team": current_team,
+                    "total_items": len(current_team) }
+
+        return response
+
+
+
 
