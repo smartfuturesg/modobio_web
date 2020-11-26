@@ -2,6 +2,7 @@ from marshmallow import Schema, fields, post_load, validate, pre_dump, validates
 
 from odyssey import ma
 from odyssey.api.doctor.models import ( 
+    MedicalLookUpSTD,
     MedicalFamilyHistory,
     MedicalConditions,
     MedicalHistory,
@@ -11,6 +12,8 @@ from odyssey.api.doctor.models import (
     MedicalBloodTestResults,
     MedicalBloodTestResultTypes,
     MedicalExternalMR,
+    MedicalSocialHistory,
+    MedicalSTDHistory,
     MedicalSurgeries
 )
 from odyssey.api.user.models import User
@@ -20,6 +23,49 @@ from odyssey.utils.constants import MEDICAL_CONDITIONS
 """
     Schemas for the doctor's API
 """
+
+class MedicalLookUpSTDSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = MedicalLookUpSTD
+
+class MedicalSTDHistorySchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = MedicalSTDHistory
+        exclude = ('idx', 'created_at', 'updated_at')
+
+    user_id = fields.Integer()
+    std_id = fields.Integer()
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return MedicalSTDHistory(**data)
+
+class MedicalSTDHistoryInputSchema(Schema):
+    stds = fields.Nested(MedicalSTDHistorySchema(many=True))
+
+class MedicalLookUpSTDOutputSchema(Schema):
+    items = fields.Nested(MedicalLookUpSTDSchema(many=True),missing=[])
+    total_items = fields.Integer()
+
+class MedicalSocialHistorySchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = MedicalSocialHistory
+
+    user_id = fields.Integer()
+    currently_smoke = fields.Boolean(required=True)
+    avg_num_drinks = fields.Integer(missing=0)
+    avg_num_workouts = fields.Integer(missing=0)
+    job_title = fields.String(missing=None)
+    avg_num_meditates = fields.Integer(missing=0)
+    sexual_preference = fields.String(missing=None)
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return MedicalSocialHistory(**data)
+
+class MedicalSocialHistoryOutputSchema(Schema):
+    social_history = fields.Nested(MedicalSocialHistorySchema)
+    std_history = fields.Nested(MedicalSTDHistorySchema(many=True),missing=[])
 
 class MedicalConditionsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

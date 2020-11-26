@@ -7,6 +7,71 @@ from datetime import datetime
 from odyssey.utils.constants import DB_SERVER_TIME, BLOODTEST_EVAL
 from odyssey import db
 
+class MedicalLookUpSTD(db.Model):
+    """ Medical Look Up STD
+
+    This table will store the sexual transmitted diseases
+    that ModoBio works with
+    """
+
+    __tablename__ = "MedicalLookUpSTD"
+
+    std_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Unique ID number identifying the results.
+
+    :type: int, primary key, autoincrement
+    """
+
+    std = db.Column(db.String)
+    """
+    Sexual Transmitted Disease
+
+    :type: str
+    """
+
+class MedicalSTDHistory(db.Model):
+    """ Medical STD History
+
+    This table stores the client's STD history
+    """
+    __tablename__ = 'MedicalSTDHistory'
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    """
+    User ID number
+
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
+    """
+
+    std_id = db.Column(db.Integer, db.ForeignKey('MedicalLookUpSTD.std_id',ondelete="CASCADE"), nullable=False)
+    """
+    Disease ID
+
+    :type: int, foreign key to :attr: MedicalLookUpSTD.std_id
+    """
+
 class MedicalSocialHistory(db.Model):
     """ Medical Social History
 
@@ -85,12 +150,12 @@ class MedicalSocialHistory(db.Model):
     :type: int
     """
 
-    currently_drink = db.Column(db.Boolean)
-    """
-    If client drinks
+    # currently_drink = db.Column(db.Boolean)
+    # """
+    # If client drinks
 
-    :type: bool
-    """
+    # :type: bool
+    # """
 
     avg_num_drinks = db.Column(db.Integer)
     """
@@ -99,7 +164,54 @@ class MedicalSocialHistory(db.Model):
     :type: int
     """
 
-    currently_exercise = db.Column(db.Boolean)
+    # currently_exercise = db.Column(db.Boolean)
+    # """
+    # If the client exercises
+
+    # :type: bool
+    # """
+    
+    avg_num_workouts = db.Column(db.Integer)
+    """
+    Average number of times client worksout a week
+
+    :type: int
+    """
+
+    # currently_employed = db.Column(db.Boolean)
+    # """
+    # If the client is currently employed
+
+    # :type: bool
+    # """
+
+    job_title = db.Column(db.String(100))
+    """
+    If the client is employed, what is their job title
+
+    :type: str
+    """
+
+    # currently_meditate = db.Column(db.Boolean)
+    # """
+    # If the client prays or meditates
+
+    # :type: bool
+    # """
+
+    avg_num_meditates = db.Column(db.Integer)
+    """
+    Average number of hours client prays/meditates
+
+    :type: int
+    """
+
+    sexual_preference = db.Column(db.String)
+    """
+    Sexual preference men, women, both, prefer not to say
+
+    :type: str
+    """
 
 class MedicalFamilyHistory(db.Model):
     """ Personal and Family Medical History

@@ -7,6 +7,7 @@ from flask_restx import Resource, Api
 
 from odyssey import db
 from odyssey.api.doctor.models import (
+    MedicalLookUpSTD,
     MedicalFamilyHistory,
     MedicalConditions,
     MedicalPhysicalExam, 
@@ -16,6 +17,8 @@ from odyssey.api.doctor.models import (
     MedicalBloodTestResultTypes, 
     MedicalImaging,
     MedicalExternalMR,
+    MedicalSocialHistory,
+    MedicalSTDHistory,
     MedicalSurgeries
 )
 from odyssey.api.facility.models import MedicalInstitutions
@@ -29,7 +32,7 @@ from odyssey.utils.errors import (
     InputError,
     MedicalConditionAlreadySubmitted
 )
-from odyssey.utils.misc import check_client_existence, check_staff_existence, check_blood_test_existence, check_blood_test_result_type_existence, check_user_existence, check_medical_condition_existence
+from odyssey.utils.misc import check_client_existence, check_staff_existence, check_blood_test_existence, check_blood_test_result_type_existence, check_user_existence, check_medical_condition_existence, check_std_existence
 from odyssey.api.doctor.schemas import (
     AllMedicalBloodTestSchema,
     MedicalFamilyHistSchema,
@@ -48,11 +51,152 @@ from odyssey.api.doctor.schemas import (
     MedicalImagingSchema,
     MedicalExternalMREntrySchema, 
     MedicalExternalMRSchema,
+    MedicalSocialHistorySchema,
+    MedicalLookUpSTDOutputSchema,
+    MedicalSTDHistorySchema,
+    MedicalSTDHistoryInputSchema,
+    MedicalSocialHistoryOutputSchema,
     MedicalSurgeriesSchema
 )
 from odyssey.utils.constants import MEDICAL_CONDITIONS
 
 ns = api.namespace('doctor', description='Operations related to doctor')
+
+@ns.route('/lookupstd/')
+class MedicalLookUpSTDResource(Resource):
+    """
+    Returns the STDs currently documented in the DB
+    """
+    @token_auth.login_required
+    @responds(schema=MedicalLookUpSTDOutputSchema,status_code=200, api=ns)
+    def get(self):
+        std_types = MedicalLookUpSTD.query.all()
+        payload = {'items': std_types,
+                   'total_items': len(std_types)}
+
+        return payload
+
+@ns.route('/medicalinfo/std/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class MedicalSTDHist(Resource):
+    @token_auth.login_required
+    @accepts(schema=MedicalSTDHistoryInputSchema, api=ns)
+    @responds(schema=MedicalSTDHistoryInputSchema, status_code=201, api=ns)
+    def put(self, user_id):
+        '''
+        Post request to post the client's STD history
+        '''
+        # First check if the client exists
+        check_client_existence(user_id)
+        
+        # the data expected for the backend is:
+        # parameter: user_id 
+        # payload: medical_condition_id, myself, father, mother, brother, sister
+        stds = request.parsed_obj['stds']
+        for std in stds:
+            check_std_existence(std.std_id)
+            user_and_std = MedicalSTDHistory.query.filter_by(user_id=user_id).filter_by(std_id=std.std_id).one_or_none()
+            std.__dict__['user_id'] = user_id
+            if user_and_std:
+                del std.__dict__['_sa_instance_state']
+                user_and_std.update(std.__dict__)
+            else:
+                db.session.add(std)
+
+        payload = {'stds': stds}
+        
+        # insert results into the result table
+        db.session.commit()
+        return payload
+
+@ns.route('/medicalinfo/social/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class MedicalSocialHist(Resource):
+    # TODO
+    @token_auth.login_required
+    @responds(schema=MedicalSocialHistoryOutputSchema, api=ns)
+    def get(self, user_id):
+        '''
+        This request gets the users personal and family history if it exists
+        '''
+        check_client_existence(user_id)
+        social_hist = MedicalSocialHistory.query.filter_by(user_id=user_id).one_or_none()
+        std_hist = MedicalSTDHistory.query.filter_by(user_id=user_id).all()
+        payload = {'social_history': social_hist,
+                   'std_history': std_hist}
+        return payload
+
+    @token_auth.login_required
+    @accepts(schema=MedicalSocialHistorySchema, api=ns)
+    # @responds(schema=MedicalSocialHistorySchema, status_code=201, api=ns)
+    def post(self, user_id):
+        '''
+        Post request to post the client's onboarding personal and family history
+        '''
+
+        breakpoint()
+
+        # First check if the client exists
+        check_client_existence(user_id)
+
+        # Check if this information is already in the DB
+        socialHist = MedicalSocialHistory.query.filter_by(user_id=user_id).one_or_none()
+        data = request.parsed_obj
+        if socialHist:
+            raise InputError(status=405,message='Social History has already been posted, please use put request.')
+
+        # currently smoke is required (true/)
+        # if currently smoke is true
+        breakpoint()
+        if data.currently_smoke:
+            breakpoint()
+            if not data.avg_num_cigs and \
+                not data.num_years_smoked and \
+                    not data.plan_to_stop:
+                    raise InputError(status=405,message='User marked they currently smoke, must include: Average number of cigarettes, number of years smoking, plan to continue or stop.')
+        else:
+            # Currently smoke is false
+            breakpoint()
+            if not data.last_smoke and \
+                not data.last_smoke_time:
+                raise InputError(status=405, message='User must include when they last smoked, and include the time frame months or years.')
+        breakpoint()
+        data.__dict__['user_id'] = user_id
+        breakpoint()
+        db.session.add(data)
+        # insert results into the result table
+        db.session.commit()
+        return 200
+
+    @token_auth.login_required
+    @accepts(schema=MedicalSocialHistorySchema, api=ns)
+    # @responds(schema=MedicalSocialHistorySchema, status_code=201, api=ns)
+    def put(self, user_id):
+        '''
+        Put request to update the client's onboarding personal and family history
+        '''
+        # First check if the client exists
+        check_client_existence(user_id)
+                
+        # currently smoke is required (true/)
+        # if currently smoke is true
+        if request.parsed_obj['currently_smoke']:
+            if not request.parsed_obj['avg_num_cigs'] and \
+                not request.parsed_obj['num_years_smoked'] and \
+                    not request.parsed_obj['plan_to_stop']:
+                    raise InputError(status=405,message='User marked they currently smoke, must include: Average number of cigarettes, number of years smoking, plan to continue or stop.')
+        else:
+            # Currently smoke is false
+            if not request.parsed_obj['last_smoke'] and \
+                not request.parsed_obj['last_smoke_time']:
+                raise InputError(status=405, message='User must include when they last smoked, and include the time frame months or years.')
+        
+        socialHist = MedicalSocialHistory.query.filter_by(user_id=user_id).one_or_none()
+        socialHist.update(request.parsed_obj)
+
+        # insert results into the result table
+        db.session.commit()
+        return 200
 
 @ns.route('/medicalconditions/')
 class MedicalCondition(Resource):
@@ -138,7 +282,6 @@ class MedicalFamilyHist(Resource):
         # insert results into the result table
         db.session.commit()
         return payload
-
 
 @ns.route('/images/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})

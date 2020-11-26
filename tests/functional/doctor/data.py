@@ -1,5 +1,27 @@
 import pathlib
 
+doctor_std_put_data = {
+  "stds":[
+    {
+      "std_id": 1
+    },
+    {
+      "std_id": 2
+    }
+  ]
+}
+
+doctor_socialhist_post_data = {
+  "currently_smoke": False,
+  "last_smoke": 5,
+  "last_smoke_time": "months",
+  "avg_num_drinks": 1,
+  "avg_num_workouts": 2,
+  "job_title": "Engineer",
+  "avg_num_meditates": 3,
+  "sexual_preference": "Female"
+}
+
 doctor_personalfamilyhist_post_data = {
   "conditions":[
     {
