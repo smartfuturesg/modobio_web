@@ -157,7 +157,7 @@ class MedicalGeneralInformation(Resource):
 
 @ns.route('/medicalinfo/medications/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class MedicalGeneralInformation(Resource):
+class MedicalMedicationInformation(Resource):
     @token_auth.login_required
     @responds(schema=MedicalMedicationsInfoInputSchema, api=ns)
     def get(self, user_id):
@@ -251,7 +251,7 @@ class MedicalGeneralInformation(Resource):
 
 @ns.route('/medicalinfo/allergies/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class MedicalGeneralInformation(Resource):
+class MedicalAllergiesInformation(Resource):
     @token_auth.login_required
     @responds(schema=MedicalAllergiesInfoInputSchema, api=ns)
     def get(self, user_id):
