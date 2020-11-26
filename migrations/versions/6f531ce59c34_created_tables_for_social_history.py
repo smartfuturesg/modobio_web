@@ -1,8 +1,8 @@
-"""create social history tables
+"""created tables for social history
 
-Revision ID: d51b623aa7bc
+Revision ID: 6f531ce59c34
 Revises: 40e57e2da26a
-Create Date: 2020-11-25 18:39:56.140539
+Create Date: 2020-11-26 11:24:03.712647
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = 'd51b623aa7bc'
+revision = '6f531ce59c34'
 down_revision = '40e57e2da26a'
 branch_labels = None
 depends_on = None
@@ -29,6 +29,7 @@ def upgrade():
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('std_id', sa.Integer(), nullable=False),
+    sa.Column('std_selected', sa.Boolean(), nullable=True),
     sa.ForeignKeyConstraint(['std_id'], ['MedicalLookUpSTD.std_id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['user_id'], ['User.user_id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('idx')
@@ -52,7 +53,7 @@ def upgrade():
     sa.ForeignKeyConstraint(['user_id'], ['User.user_id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('idx')
     )
-    # ### end Alembic commands ###
+   # ### end Alembic commands ###
 
 
 def downgrade():

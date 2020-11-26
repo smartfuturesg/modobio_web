@@ -35,6 +35,7 @@ class MedicalSTDHistorySchema(ma.SQLAlchemyAutoSchema):
 
     user_id = fields.Integer()
     std_id = fields.Integer()
+    selected = fields.Boolean()
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -58,6 +59,10 @@ class MedicalSocialHistorySchema(ma.SQLAlchemyAutoSchema):
     job_title = fields.String(missing=None)
     avg_num_meditates = fields.Integer(missing=0)
     sexual_preference = fields.String(missing=None)
+    last_smoke = fields.Integer(missing=None)
+    last_smoke_time = fields.String(missing=None)
+    num_years_smoked = fields.Integer(missing=0)
+    plan_to_stop = fields.Boolean(missing=None)
 
     @post_load
     def make_object(self, data, **kwargs):

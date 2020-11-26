@@ -1,14 +1,41 @@
 import pathlib
 
-doctor_std_put_data = {
+doctor_std_put_2_data = {
   "stds":[
     {
-      "std_id": 1
+      "std_id": 3,
+      "std_selected": True
     },
     {
-      "std_id": 2
+      "std_id": 2,
+      "std_selected": False
     }
   ]
+}
+
+doctor_std_put_1_data = {
+  "stds":[
+    {
+      "std_id": 1,
+      "std_selected": True
+    },
+    {
+      "std_id": 2,
+      "std_selected": True
+    }
+  ]
+}
+
+doctor_socialhist_put_data = {
+  "currently_smoke": True,
+  "avg_num_cigs": 5,
+  "num_years_smoked": 6,
+  "plan_to_stop": False,
+  "avg_num_drinks": 1,
+  "avg_num_workouts": 2,
+  "job_title": "Engineer",
+  "avg_num_meditates": 3,
+  "sexual_preference": "Female"
 }
 
 doctor_socialhist_post_data = {

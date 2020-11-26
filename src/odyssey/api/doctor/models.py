@@ -72,6 +72,13 @@ class MedicalSTDHistory(db.Model):
     :type: int, foreign key to :attr: MedicalLookUpSTD.std_id
     """
 
+    std_selected = db.Column(db.Boolean)
+    """
+    This is used if the User made a mistake and unchecked the STD
+
+    :type: bool
+    """
+
 class MedicalSocialHistory(db.Model):
     """ Medical Social History
 
@@ -150,26 +157,12 @@ class MedicalSocialHistory(db.Model):
     :type: int
     """
 
-    # currently_drink = db.Column(db.Boolean)
-    # """
-    # If client drinks
-
-    # :type: bool
-    # """
-
     avg_num_drinks = db.Column(db.Integer)
     """
     Average number of drinks client drinks per week
 
     :type: int
     """
-
-    # currently_exercise = db.Column(db.Boolean)
-    # """
-    # If the client exercises
-
-    # :type: bool
-    # """
     
     avg_num_workouts = db.Column(db.Integer)
     """
@@ -178,26 +171,12 @@ class MedicalSocialHistory(db.Model):
     :type: int
     """
 
-    # currently_employed = db.Column(db.Boolean)
-    # """
-    # If the client is currently employed
-
-    # :type: bool
-    # """
-
     job_title = db.Column(db.String(100))
     """
     If the client is employed, what is their job title
 
     :type: str
     """
-
-    # currently_meditate = db.Column(db.Boolean)
-    # """
-    # If the client prays or meditates
-
-    # :type: bool
-    # """
 
     avg_num_meditates = db.Column(db.Integer)
     """

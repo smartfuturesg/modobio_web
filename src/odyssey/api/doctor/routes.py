@@ -88,21 +88,19 @@ class MedicalSTDHist(Resource):
         '''
         # First check if the client exists
         check_client_existence(user_id)
-        
         # the data expected for the backend is:
         # parameter: user_id 
-        # payload: medical_condition_id, myself, father, mother, brother, sister
         stds = request.parsed_obj['stds']
         for std in stds:
             check_std_existence(std.std_id)
             user_and_std = MedicalSTDHistory.query.filter_by(user_id=user_id).filter_by(std_id=std.std_id).one_or_none()
-            std.__dict__['user_id'] = user_id
+            # If the payload contains an STD for a user already, then just continue
             if user_and_std:
                 del std.__dict__['_sa_instance_state']
                 user_and_std.update(std.__dict__)
             else:
+                std.__dict__['user_id'] = user_id
                 db.session.add(std)
-
         payload = {'stds': stds}
         
         # insert results into the result table
@@ -112,7 +110,6 @@ class MedicalSTDHist(Resource):
 @ns.route('/medicalinfo/social/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedicalSocialHist(Resource):
-    # TODO
     @token_auth.login_required
     @responds(schema=MedicalSocialHistoryOutputSchema, api=ns)
     def get(self, user_id):
@@ -121,21 +118,18 @@ class MedicalSocialHist(Resource):
         '''
         check_client_existence(user_id)
         social_hist = MedicalSocialHistory.query.filter_by(user_id=user_id).one_or_none()
-        std_hist = MedicalSTDHistory.query.filter_by(user_id=user_id).all()
+        std_hist = MedicalSTDHistory.query.filter_by(user_id=user_id).filter_by(std_selected=True).all()
         payload = {'social_history': social_hist,
                    'std_history': std_hist}
         return payload
 
     @token_auth.login_required
     @accepts(schema=MedicalSocialHistorySchema, api=ns)
-    # @responds(schema=MedicalSocialHistorySchema, status_code=201, api=ns)
+    @responds(schema=MedicalSocialHistorySchema, status_code=201, api=ns)
     def post(self, user_id):
         '''
         Post request to post the client's onboarding personal and family history
         '''
-
-        breakpoint()
-
         # First check if the client exists
         check_client_existence(user_id)
 
@@ -147,30 +141,25 @@ class MedicalSocialHist(Resource):
 
         # currently smoke is required (true/)
         # if currently smoke is true
-        breakpoint()
         if data.currently_smoke:
-            breakpoint()
             if not data.avg_num_cigs and \
                 not data.num_years_smoked and \
                     not data.plan_to_stop:
                     raise InputError(status=405,message='User marked they currently smoke, must include: Average number of cigarettes, number of years smoking, plan to continue or stop.')
         else:
             # Currently smoke is false
-            breakpoint()
             if not data.last_smoke and \
                 not data.last_smoke_time:
                 raise InputError(status=405, message='User must include when they last smoked, and include the time frame months or years.')
-        breakpoint()
         data.__dict__['user_id'] = user_id
-        breakpoint()
         db.session.add(data)
         # insert results into the result table
         db.session.commit()
-        return 200
+        return data
 
     @token_auth.login_required
     @accepts(schema=MedicalSocialHistorySchema, api=ns)
-    # @responds(schema=MedicalSocialHistorySchema, status_code=201, api=ns)
+    @responds(schema=MedicalSocialHistorySchema, status_code=201, api=ns)
     def put(self, user_id):
         '''
         Put request to update the client's onboarding personal and family history
@@ -180,23 +169,26 @@ class MedicalSocialHist(Resource):
                 
         # currently smoke is required (true/)
         # if currently smoke is true
-        if request.parsed_obj['currently_smoke']:
-            if not request.parsed_obj['avg_num_cigs'] and \
-                not request.parsed_obj['num_years_smoked'] and \
-                    not request.parsed_obj['plan_to_stop']:
+        data = request.parsed_obj
+        if data.currently_smoke:
+            if not data.avg_num_cigs and \
+                not data.num_years_smoked and \
+                    not data.plan_to_stop:
                     raise InputError(status=405,message='User marked they currently smoke, must include: Average number of cigarettes, number of years smoking, plan to continue or stop.')
         else:
             # Currently smoke is false
-            if not request.parsed_obj['last_smoke'] and \
-                not request.parsed_obj['last_smoke_time']:
+            if not data.last_smoke and \
+                not data.last_smoke_time:
                 raise InputError(status=405, message='User must include when they last smoked, and include the time frame months or years.')
         
         socialHist = MedicalSocialHistory.query.filter_by(user_id=user_id).one_or_none()
-        socialHist.update(request.parsed_obj)
-
+        
+        del data.__dict__['_sa_instance_state']
+        
+        socialHist.update(data.__dict__)
         # insert results into the result table
         db.session.commit()
-        return 200
+        return data
 
 @ns.route('/medicalconditions/')
 class MedicalCondition(Resource):
