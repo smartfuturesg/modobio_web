@@ -31,7 +31,7 @@ def test_post_general_medical_history(test_client, init_database, client_auth_he
                                 content_type='application/json')
     
     assert response.status_code == 201 
-    assert response.json['general_info']['primary_doctor_contact_name'] == 'Dr Guy'
+    assert response.json['primary_doctor_contact_name'] == 'Dr Guy'
 
 
 def test_put_general_medical_history(test_client, init_database, client_auth_header):
@@ -49,7 +49,7 @@ def test_put_general_medical_history(test_client, init_database, client_auth_hea
                                 content_type='application/json')
 
     assert response.status_code == 201
-    assert response.json['general_info']['primary_doctor_contact_name'] == 'Dr Steve'
+    assert response.json['primary_doctor_contact_name'] == 'Dr Steve'
 
 def test_get_general_medical_history(test_client, init_database, client_auth_header, staff_auth_header):
     """
@@ -64,7 +64,7 @@ def test_get_general_medical_history(test_client, init_database, client_auth_hea
                                     content_type='application/json')
                                     
         assert response.status_code == 200
-        assert response.json['general_info']['primary_doctor_contact_name'] == 'Dr Steve'      
+        assert response.json['primary_doctor_contact_name'] == 'Dr Steve'      
 
 ################ TEST MEDICATION HISTORY ####################
 

@@ -46,7 +46,6 @@ doctor_medicalgeneralinfo_post_data = {
       "primary_doctor_contact_email": "drguy@gmail.com",
       "blood_type": "A",
       "blood_type_positive": True
-    
 }
 
 doctor_medicalmedicationsinfo_post_data = {

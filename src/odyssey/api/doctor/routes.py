@@ -87,10 +87,8 @@ class MedicalGeneralInformation(Resource):
         genInfo = MedicalGeneralInfo.query.filter_by(user_id=user_id).one_or_none()
         if genInfo:
             raise InputError(status_code=405,message='Please use put request.')
-        
-        payload = {}
 
-        generalInfo = request.parsed_obj['general_info']
+        generalInfo = request.parsed_obj
         if generalInfo:
             if generalInfo.primary_doctor_contact_name:
                 # If the client has a primary care doctor, we need either the 
@@ -107,14 +105,12 @@ class MedicalGeneralInformation(Resource):
                     raise InputError(status_code = 405,message='If bloodtype or sign is given, client must provide both.')
                 else:
                     generalInfo.user_id = user_id
-            payload['general_info'] = generalInfo
             db.session.add(generalInfo)
         else:
             # If first post is empty, put in a placeholder in this table to force to use
             # a put request
             generalInfo.user_id = user_id
             db.session.add(generalInfo)     
-        
         # insert results into the result table
         db.session.commit()
         return generalInfo
@@ -126,11 +122,9 @@ class MedicalGeneralInformation(Resource):
         '''
         Put request to update the client's onboarding personal and family history
         '''
-        payload = {}
-
         check_client_existence(user_id)
 
-        generalInfo = request.parsed_obj['general_info']
+        generalInfo = request.parsed_obj
         if generalInfo:
             del generalInfo.__dict__['_sa_instance_state']
             if generalInfo.primary_doctor_contact_name:
@@ -147,7 +141,6 @@ class MedicalGeneralInformation(Resource):
                     raise InputError(status_code = 405,message='If bloodtype or sign is given, client must provide both.')
                 else:
                     generalInfo.__dict__['user_id'] = user_id
-            payload['general_info'] = generalInfo
             genInfo = MedicalGeneralInfo.query.filter_by(user_id=user_id).one_or_none()
             genInfo.update(generalInfo.__dict__)
         
