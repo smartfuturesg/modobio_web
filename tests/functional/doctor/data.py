@@ -49,6 +49,86 @@ doctor_socialhist_post_data = {
   "sexual_preference": "Female"
 }
 
+doctor_medicalgeneralinfo_put_data = {
+      "primary_doctor_contact_name": "Dr Steve",
+      "primary_doctor_contact_phone": "4809999999",
+      "primary_doctor_contact_email": "drguy@gmail.com",
+      "blood_type": "A",
+      "blood_type_positive": True
+}
+
+doctor_medicalmedicationsinfo_put_data = {
+    "medications": [{
+        "medication_name": "medName4",
+        "medication_dosage": 1.2,
+        "medication_units": "mg",
+        "medication_freq": 4,
+        "medication_times_per_freq": 3,
+        "medication_time_units": "day"
+    },
+    {
+        "medication_name": "medName2",
+        "medication_dosage": 3,
+        "medication_units": "mg",
+        "medication_freq": 5,
+        "medication_times_per_freq": 6,
+        "medication_time_units": "day"
+    } 
+    ]
+}
+
+doctor_medicalallergiesinfo_put_data = {
+    "allergies": [{
+        "medication_name": "medName3",
+        "allergy_symptoms": "Rash"
+    },
+    {                                   
+        "medication_name": "medName4",
+        "allergy_symptoms": "Rash"
+    },   
+    ]
+}
+
+doctor_medicalgeneralinfo_post_data = {
+      "primary_doctor_contact_name": "Dr Guy",
+      "primary_doctor_contact_phone": "4809999999",
+      "primary_doctor_contact_email": "drguy@gmail.com",
+      "blood_type": "A",
+      "blood_type_positive": True
+}
+
+doctor_medicalmedicationsinfo_post_data = {
+    "medications": [{
+        "medication_name": "medName1",
+        "medication_dosage": 1.2,
+        "medication_units": "mg",
+        "medication_freq": 4,
+        "medication_times_per_freq": 3,
+        "medication_time_units": "day"
+    },
+    {
+        "medication_name": "medName2",
+        "medication_dosage": 2.1,
+        "medication_units": "mg",
+        "medication_freq": 5,
+        "medication_times_per_freq": 6,
+        "medication_time_units": "day"
+    } 
+    ]
+}
+
+doctor_medicalallergiesinfo_post_data = {
+    "allergies": [{
+        "medication_name": "medName3",
+        "allergy_symptoms": "Rash"
+    },
+    {                                   
+        "medication_name": "medName3",
+        "allergy_symptoms": "Vertigo"
+    }    
+    ]
+}
+
 doctor_personalfamilyhist_post_data = {
   "conditions":[
     {
@@ -79,7 +159,15 @@ doctor_personalfamilyhist_put_data = {
       "mother": False,
       "sister": False,
       "brother": False
-    }  
+    },
+    {
+      "medical_condition_id": 3,
+      "myself": False,
+      "father": False,
+      "mother": False,
+      "sister": False,
+      "brother": False
+    }      
   ]
 }
 
