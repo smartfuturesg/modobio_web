@@ -119,3 +119,23 @@ def staff_auth_header(test_client):
     auth_header = {'Authorization': f'Bearer {token}'}
     
     yield auth_header
+
+@pytest.fixture(scope='session')
+def client_auth_header(test_client):
+    ###
+    # Login (get token) for newly created client member
+    ##
+
+    valid_credentials = base64.b64encode(
+        f"{users_client_new_creation_data['email']}:{'password'}".encode(
+            "utf-8")).decode("utf-8")
+    
+    headers = {'Authorization': f'Basic {valid_credentials}'}
+    response = test_client.post('/client/token/',
+                            headers=headers, 
+                            content_type='application/json')
+    token = response.json.get('token')
+
+    auth_header = {'Authorization': f'Bearer {token}'}
+    
+    yield auth_header
