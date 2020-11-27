@@ -8,6 +8,8 @@ from flask_restx import Resource, Api
 from odyssey import db
 from odyssey.api.client.models import ClientExternalMR
 from odyssey.api.doctor.models import (
+    MedicalFamilyHistory,
+    MedicalConditions,
     MedicalPhysicalExam, 
     MedicalHistory, 
     MedicalBloodTests,
@@ -23,11 +25,17 @@ from odyssey.utils.errors import (
     UserNotFound, 
     IllegalSetting, 
     ContentNotFound,
-    InputError
+    InputError,
+    MedicalConditionAlreadySubmitted
 )
-from odyssey.utils.misc import check_client_existence, check_blood_test_existence, check_blood_test_result_type_existence
+from odyssey.utils.misc import check_client_existence, check_blood_test_existence, check_blood_test_result_type_existence, check_user_existence, check_medical_condition_existence
 from odyssey.api.doctor.schemas import (
     AllMedicalBloodTestSchema,
+    MedicalFamilyHistSchema,
+    MedicalFamilyHistInputSchema,
+    MedicalFamilyHistOutputSchema,
+    MedicalConditionsOutputSchema,
+    MedicalConditionsSchema,
     MedicalHistorySchema, 
     MedicalPhysicalExamSchema, 
     MedicalInstitutionsSchema,
@@ -43,6 +51,91 @@ from odyssey.api.doctor.schemas import (
 from odyssey.utils.constants import MEDICAL_CONDITIONS
 
 ns = api.namespace('doctor', description='Operations related to doctor')
+
+@ns.route('/medicalconditions/')
+class MedicalCondition(Resource):
+    """
+    Returns the medical conditions currently documented in the DB
+    """
+    @token_auth.login_required
+    @responds(schema=MedicalConditionsOutputSchema,status_code=200, api=ns)
+    def get(self):
+        medcon_types = MedicalConditions.query.all()
+        payload = {'items': medcon_types,
+                   'total_items': len(medcon_types)}
+
+        return payload
+
+@ns.route('/familyhistory/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class MedicalFamilyHist(Resource):
+    @token_auth.login_required
+    @responds(schema=MedicalFamilyHistOutputSchema, api=ns)
+    def get(self, user_id):
+        '''
+        This request gets the users personal and family history if it exists
+        '''
+        check_client_existence(user_id)
+        client_personalfamilyhist = MedicalFamilyHistory.query.filter_by(user_id=user_id).all()
+        payload = {'items': client_personalfamilyhist,
+                   'total_items': len(client_personalfamilyhist)}
+        return payload
+
+    @token_auth.login_required
+    @accepts(schema=MedicalFamilyHistInputSchema, api=ns)
+    @responds(schema=MedicalFamilyHistOutputSchema, status_code=201, api=ns)
+    def post(self, user_id):
+        '''
+        Post request to post the client's onboarding personal and family history
+        '''
+        # First check if the client exists
+        check_client_existence(user_id)
+        
+        # the data expected for the backend is:
+        # parameter: user_id 
+        # payload: medical_condition_id, myself, father, mother, brother, sister
+
+        for result in request.parsed_obj['conditions']:
+            check_medical_condition_existence(result.medical_condition_id)
+            user_and_medcon = MedicalFamilyHistory.query.filter_by(user_id=user_id).filter_by(medical_condition_id=result.medical_condition_id).one_or_none()
+            if user_and_medcon:
+                raise MedicalConditionAlreadySubmitted(user_id,result.medical_condition_id)
+            result.user_id = user_id
+            db.session.add(result)
+        payload = {'items': request.parsed_obj['conditions'],
+                   'total_items': len(request.parsed_obj['conditions'])}
+        # insert results into the result table
+        db.session.commit()
+        return payload
+
+    @token_auth.login_required
+    @accepts(schema=MedicalFamilyHistInputSchema, api=ns)
+    @responds(schema=MedicalFamilyHistOutputSchema, status_code=201, api=ns)
+    def put(self, user_id):
+        '''
+        Put request to update the client's onboarding personal and family history
+        '''
+        # First check if the client exists
+        check_client_existence(user_id)
+        
+        # the data expected for the backend is:
+        # parameter: user_id 
+        # payload: medical_condition_id, myself, father, mother, brother, sister
+
+        for result in request.parsed_obj['conditions']:
+            del result.__dict__['_sa_instance_state']
+            check_medical_condition_existence(result.medical_condition_id)
+            user_and_medcon = MedicalFamilyHistory.query.filter_by(user_id=user_id).filter_by(medical_condition_id=result.medical_condition_id).one_or_none()
+            
+            if not user_and_medcon:
+                raise ContentNotFound()
+            
+            user_and_medcon.update(result.__dict__)
+        payload = {'items': request.parsed_obj['conditions'],
+                   'total_items': len(request.parsed_obj['conditions'])}        
+        # insert results into the result table
+        db.session.commit()
+        return payload
 
 
 @ns.route('/images/<int:user_id>/')

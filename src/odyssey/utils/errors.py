@@ -119,6 +119,28 @@ class ClientAlreadyExists(Exception):
 
         self.status_code = 409
 
+class MedicalConditionNotFound(Exception):
+    """Used if a medical condition is not found"""
+    def __init__(self, medical_condition_id, message = None):
+        Exception.__init__(self)
+        if message:
+            self.message = message
+        else:
+            self.message = f'The medical condition with id, {medical_condition_id} does not exists.'
+
+        self.status_code = 409
+
+class MedicalConditionAlreadySubmitted(Exception):
+    """Used if a medical condition is already submitted for a user"""
+    def __init__(self,user_id, medical_condition_id, message = None):
+        Exception.__init__(self)
+        if message:
+            self.message = message
+        else:
+            self.message = f'The user, {user_id}, already submitted medical condition with id, {medical_condition_id}.'
+
+        self.status_code = 409
+
 class RelationAlreadyExists(Exception):
     """in the case a client is trying to be associated with a facility where this relationship is already defined"""
     def __init__(self, client_identification=None, facility_identification=None, message=None):
@@ -327,6 +349,16 @@ def error_unauthorized_user(error):
 def error_client_already_exists(error):
     '''Return a custom message and 409 status code'''
     return error_response(error.status_code, error.message)
+
+@api.errorhandler(MedicalConditionNotFound)
+def error_medical_condition_not_found(error):
+    '''Return a custom message and 409 status code'''
+    return error_response(error.status_code, error.message)    
+
+@api.errorhandler(MedicalConditionAlreadySubmitted)
+def error_medical_condition_already_submitted(error):
+    '''Return a custom message and 409 status code'''
+    return error_response(error.status_code, error.message)  
 
 @api.errorhandler(RelationAlreadyExists)
 def error_relation_already_exists(error):

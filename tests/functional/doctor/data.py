@@ -1,5 +1,39 @@
 import pathlib
 
+doctor_personalfamilyhist_post_data = {
+  "conditions":[
+    {
+      "medical_condition_id": 1,
+      "myself": True,
+      "father": True,
+      "mother": True,
+      "sister": True,
+      "brother": True
+    },
+    {
+      "medical_condition_id": 2,
+      "myself": False,
+      "father": False,
+      "mother": False,
+      "sister": False,
+      "brother": False
+    }    
+  ]
+}
+
+doctor_personalfamilyhist_put_data = {
+  "conditions":[
+    {
+      "medical_condition_id": 1,
+      "myself": False,
+      "father": False,
+      "mother": False,
+      "sister": False,
+      "brother": False
+    }  
+  ]
+}
+
 doctor_clients_external_medical_records_data = {
   "record_locators": [
     {
