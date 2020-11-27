@@ -8,10 +8,10 @@ from datetime import datetime, date, time
 
 import flask.json
 from odyssey.api.client.models import ClientInfo, ClientFacilities
-from odyssey.api.doctor.models import MedicalBloodTests, MedicalBloodTestResultTypes
+from odyssey.api.doctor.models import MedicalBloodTests, MedicalBloodTestResultTypes, MedicalConditions
 from odyssey.api.user.models import User
 from odyssey.api.facility.models import RegisteredFacilities
-from odyssey.utils.errors import ClientNotFound, UserNotFound, FacilityNotFound, RelationAlreadyExists, TestNotFound, ResultTypeNotFound
+from odyssey.utils.errors import ClientNotFound, UserNotFound, FacilityNotFound, RelationAlreadyExists, TestNotFound, ResultTypeNotFound,MedicalConditionNotFound
 
 
 _uuid_rx = re.compile(r'[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}', flags=re.IGNORECASE)
@@ -63,6 +63,10 @@ def check_client_facility_relation_existence(user_id, facility_id):
     if relation:
         raise RelationAlreadyExists(user_id, facility_id)
 
+def check_medical_condition_existence(medcon_id):
+    medcon = MedicalConditions.query.filter_by(medical_condition_id=medcon_id).one_or_none()
+    if not medcon:
+        raise MedicalConditionNotFound(medcon_id)
 #def check_remote_client_portal_validity(portal_id):
 #    """
 #    Ensure portal is valid. If not raise 404 error
