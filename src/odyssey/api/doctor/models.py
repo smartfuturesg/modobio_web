@@ -7,6 +7,291 @@ from datetime import datetime
 from odyssey.utils.constants import DB_SERVER_TIME, BLOODTEST_EVAL
 from odyssey import db
 
+class MedicalFamilyHistory(db.Model):
+    """ Personal and Family Medical History
+
+    This table is used for client onboarding. It is used for 
+    storing the client's general medical information.
+    """    
+    __tablename__ = 'MedicalFamilyHistory'
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    """
+    User ID number
+
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
+    """
+
+    medical_condition_id = db.Column(db.Integer, db.ForeignKey('MedicalConditions.medical_condition_id',ondelete="CASCADE"), nullable=False)
+    """
+    Disease ID
+
+    :type: int, foreign key to :attr: MedicalConditions.medical_condition_id
+    """
+
+    myself = db.Column(db.Boolean)
+    """
+    If the user has a disease
+
+    :type: bool
+    """
+
+    father = db.Column(db.Boolean)
+    """
+    If the user's father has a disease
+
+    :type: bool
+    """
+
+    mother = db.Column(db.Boolean)
+    """
+    If the user's mother has a disease
+
+    :type: bool
+    """
+
+    sister = db.Column(db.Boolean)
+    """
+    If the user's sister has a disease
+
+    :type: bool
+    """
+
+    brother = db.Column(db.Boolean)
+    """
+    If the user's brother has a disease
+
+    :type: bool
+    """
+
+class MedicalConditions(db.Model):
+    """ Medical Conditions Table
+
+    This table will store the medical conditions
+    """
+
+    __tablename__ = "MedicalConditions"
+
+    medical_condition_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Unique ID number identifying the results.
+
+    :type: int, primary key, autoincrement
+    """
+
+    category = db.Column(db.String)
+    """
+    Category for the medical condition.
+    Examples:
+        Autoimmune
+        Cancer
+        Cardiovascular
+
+    :type: str
+    """
+
+    subcategory = db.Column(db.String)
+    """
+    Sub category for medical conditions
+    Examples:
+        Cardiovascular
+            Bleeding disorder
+            Anemia
+            Chest pain
+    
+    :type: str
+    """
+
+    condition = db.Column(db.String)
+    """
+    The medical condition.
+    Examples:
+        Cardiovascular:
+            - Heart murmur
+            Anemia
+                - Sickle cell
+
+    :type: Str
+    """
+# TODO Continue working on GeneralMedicalInfo
+# class OBGeneralMedicalInfo(db.Model):
+#     """ General Medical Information.
+
+#     This table is used for client onboarding. It is used for 
+#     storing the client's general medical information.
+#     """    
+#     __tablename__ = 'OBGeneralMedicalInfo'
+
+#     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+#     """
+#     Table index.
+
+#     :type: int, primary key, autoincrement
+#     """
+
+#     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+#     """
+#     Creation timestamp of this row in the database.
+
+#     :type: :class:`datetime.datetime`
+#     """
+
+#     updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+#     """
+#     Last update timestamp of this row in the database.
+
+#     :type: :class:`datetime.datetime`
+#     """
+
+#     user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+#     """
+#     User ID number
+
+#     :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
+#     """
+
+#     sex_at_birth = db.Column(db.String(1))
+#     """
+#     Client gender at birth.
+
+#     :type: str, max length 1
+#     """
+
+#     health_goals = db.Column(db.Text)
+#     """
+#     Client's health goals
+
+#     :type: str
+#     """
+
+#     primary_doctor_contact_name = db.Column(db.String(50))
+#     """
+#     Client's primary doctor name
+
+#     :type: str, max length 50
+#     """
+
+#     primary_doctor_contact_phone = db.Column(db.String(20))
+#     """
+#     Client's primary doctor phone
+    
+#     :type: str, max length 20
+#     """
+
+#     primary_doctor_contact_email = db.Column(db.String, nullable=True)
+#     """
+#     Client's primary doctor email
+    
+#     :type: str
+#     """
+
+#     medication_supplements = db.Column(db.Text)
+#     """
+#     Client's Medication/Supplements
+
+#     :type: text
+#     """
+
+#     medication_dosage = db.Column(db.Float)
+#     """
+#     Client's medication dosage
+
+#     :type: float
+#     """
+
+#     medication_units = db.Column(db.String)
+#     """
+#     Client's medication units
+#     mL, mg, g
+#     :type: str
+#     """
+
+#     medication_freq = db.Column(db.Integer)
+#     """
+#     Client's medication frequency
+#     0-9 times
+
+#     medication_freq time(s) per medication_timesper_freq medication_time_units
+
+#     :type: int
+#     """
+
+#     medication_timesper_freq = db.Column(db.Integer)
+#     """
+#     Client's medication frequency PER unit (hour, day, week)
+#     0-9 timesper
+#     medication_freq time(s) per medication_timesper_freq medication_time_units    
+#     :type: int
+#     """
+
+#     medication_time_units = db.Column(db.String)
+#     """
+#     Client's medication time units
+#     (Hour, Day, Week)
+#     medication_freq time(s) per medication_timesper_freq medication_time_units    
+#     Example:
+#         1 time(s) per 1 Day
+#         2 time(s) per 1 Week
+#     """
+
+#     allergies_to_meds = db.Column(db.Boolean)
+#     """
+#     Client has allergic reaction to medication
+
+#     :type: bool
+#     """
+
+#     allergic_to_meds_name = db.Column(db.String)
+#     """
+#     Medication name if client has allergic reaction to it
+
+#     :type: str
+#     """
+
+#     allergic_to_meds_severity = db.Column(db.String)
+#     """
+#     Severity of allergies to medication
+
+#     :type: str
+#     """
+
+#     blood_type = db.Column(db.String)
+#     """
+#     Client's blood type:
+#     A, B, AB, O
+
+#     :type: str
+#     """
+    
+#     blood_type_pos_neg = db.Column(db.Integer)
+#     """
+#     Client's blood type sign:
+#     positive or negative
+
+#     :type: int
+#     """
+
 class MedicalImaging(db.Model):
     """ Medical Imaging table.
 
@@ -108,7 +393,6 @@ class MedicalImaging(db.Model):
 
     :type: int
     """
-
 
 class MedicalHistory(db.Model):
     """ Medical history table.
