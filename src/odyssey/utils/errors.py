@@ -137,7 +137,7 @@ class STDNotFound(Exception):
         if message:
             self.message = message
         else:
-            self.message = f'The STD with id, {std_id} does not exists.'
+            self.message = f'The STD with id, {std_id} does not exist.'
 
         self.status_code = 409        
 
