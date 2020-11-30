@@ -100,7 +100,7 @@ class NewStaffUser(Resource):
 
 @ns.route('/client/')
 class NewClientUser(Resource):
-    @token_auth.login_required
+    #@token_auth.login_required
     @accepts(schema=NewUserSchema, api=ns)
     @responds(schema=NewClientUserSchema, status_code=201, api=ns)
     def post(self): 
