@@ -1,5 +1,6 @@
 import boto3
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
+import jwt
 
 from flask import request, current_app
 from flask_accepts import accepts, responds
@@ -31,7 +32,7 @@ from odyssey.api.physiotherapy.models import PTHistory
 from odyssey.api.staff.models import ClientRemovalRequests, StaffRecentClients
 from odyssey.api.trainer.models import FitnessQuestionnaire
 from odyssey.api.facility.models import RegisteredFacilities
-from odyssey.api.user.models import User
+from odyssey.api.user.models import User, UserLogin
 from odyssey.utils.pdf import to_pdf, merge_pdfs
 from odyssey.utils.email import send_email_remote_registration_portal, send_test_email
 from odyssey.utils.misc import check_client_existence
@@ -758,17 +759,26 @@ class ClientToken(Resource):
     @basic_auth.login_required(user_type=('client',))
     def post(self):
         """generates a token for the 'current_user' immediately after password authentication"""
-        user, user_login = basic_auth.current_user()
+        user, _ = basic_auth.current_user()
         if not user:
             return 401
+        
+        access_token = UserLogin.generate_token(user_type='client', user_id=user.user_id, token_type='access')
+        refresh_token = UserLogin.generate_token(user_type='client', user_id=user.user_id, token_type='refresh')
+
         return {'email': user.email, 
                 'firstname': user.firstname, 
                 'lastname': user.lastname, 
-                'token': user_login.get_token()}, 201
+                'token': access_token,
+                'refresh_token': refresh_token,
+                'user_id': user.user_id}, 201
 
     @ns.doc(security='password')
     @token_auth.login_required(user_type=('client',))
     def delete(self):
-        """invalidate urrent token. Used to effectively logout a user"""
-        token_auth.current_user()[1].revoke_token()
-        return '', 204
+        """
+        Deprecated 11.19.20..does nothing now
+        invalidate urrent token. Used to effectively logout a user
+        """
+        return '', 200
+

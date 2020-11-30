@@ -1,14 +1,13 @@
-from flask import request, make_response, g
+from base64 import b64decode
+import jwt
+
+from flask import current_app, request, make_response, g
 from functools import wraps
 from werkzeug.datastructures import Authorization
 from werkzeug.security import safe_str_cmp, check_password_hash
 
-from base64 import b64decode
-
-# Constants to compare to
-from odyssey.utils.constants import ACCESS_ROLES, USER_TYPES
-
-# Import Errors
+from odyssey import db
+from odyssey.utils.constants import ACCESS_ROLES, DB_SERVER_TIME, USER_TYPES 
 from odyssey.utils.errors import LoginNotAuthorized, StaffNotFound
 from odyssey.api.staff.models import StaffRoles
 from odyssey.api.user.models import User, UserLogin
@@ -21,7 +20,7 @@ class BasicAuth(object):
         self.scheme = scheme
         self.header = header
 
-    def login_required(self, f=None, user_type=('staff', 'client'), staff_role=None):
+    def login_required(self, f=None, user_type=('staff','client'), staff_role=None):
         ''' The login_required method is the main method that we will be using
             for authenticating both tokens and basic authorizations.
             This method decorates each CRUD request and verifies the person
@@ -61,14 +60,15 @@ class BasicAuth(object):
                 # application, we need to ignore authentication headers and
                 # let the request through to avoid unwanted interactions with
                 # CORS.
-                user, user_login = self.authenticate(auth, user_type)
+
+                user, user_login, user_context = self.authenticate(auth, user_type)
 
                 if user in (False, None):
                     raise LoginNotAuthorized()
-                if user_type:
+                if user_type and user_context!= 'basic_auth':
                     # If user_type exists (Staff or Client, etc)
                     # Check user and role access
-                    self.user_role_check(user,user_type=user_type, staff_roles=staff_role)                   
+                    self.user_role_check(user,user_type=user_type, staff_roles=staff_role, user_context = user_context)                   
                 
                 g.flask_httpauth_user = (user, user_login) if user else (None,None)
                 return f(*args, **kwargs)
@@ -78,21 +78,27 @@ class BasicAuth(object):
             return login_required_internal(f)
         return login_required_internal
    
-    def user_role_check(self, user, user_type, staff_roles=None):
+    def user_role_check(self, user, user_type, user_context, staff_roles=None):
         ''' user_role_check is to determine if the user accessing the API
             is a Staff member or Client '''
         # Check if logged-in user is authorized by type (staff,client)
         # then ensure the logged_in user has role
 
-        # TODO: little bug here where we dont know which context the user is CURRENTLY logged in as
-        # when we switch to JWTs, this will be part of the token payload. Which resolves this bug
-        if ('staff' in user_type or 'staff_self' in user_type) and user.is_staff:
-            if staff_roles:
-                self.staff_access_check(user, user_type, staff_roles=staff_roles)
+        # if the user is logged in as staff member, follow staff authorization routine
+        if user_context == 'staff' and ('staff' in user_type or 'staff_self' in user_type):
+            if user.is_staff:
+                if staff_roles: # role-based authorization 
+                    self.staff_access_check(user, user_type, staff_roles=staff_roles)
+                else:
+                    return
             else:
-                return
-        elif 'client' in user_type and user.is_client:
-            self.client_access_check(user)
+                LoginNotAuthorized()
+        # if the user is logged in as a client, follow the clietn authorization routine
+        elif user_context == 'client' and 'client' in user_type:
+            if user.is_client:
+                self.client_access_check(user)
+            else:
+                raise LoginNotAuthorized()
         else:
             raise LoginNotAuthorized()
 
@@ -109,7 +115,7 @@ class BasicAuth(object):
             if int(requested_user_id) != user.user_id:
                 raise LoginNotAuthorized()
 
-    def staff_access_check(self, user, user_type,  staff_roles=None):
+    def staff_access_check(self, user, user_type, staff_roles=None):
         ''' 
         staff_access_check method will be used to determine if a Staff
         member has the correct role to access the API 
@@ -121,7 +127,7 @@ class BasicAuth(object):
         # If roles were given, check if Staff member has that role
         
         # bring up the soles for the staff member
-        staff_user_roles = db.session.query(StaffRoles.role).filter(StaffRoles.user_id==user_id).all()
+        staff_user_roles = db.session.query(StaffRoles.role).filter(StaffRoles.user_id==user.user_id).all()
         staff_user_roles = [x[0] for x in staff_roles]
         
         if 'staff_self' in user_type:
@@ -156,7 +162,10 @@ class BasicAuth(object):
         if not user_login:
             raise LoginNotAuthorized
         elif check_password_hash(user_login.password, password):
-            return user, user_login
+            user_login.last_login = DB_SERVER_TIME
+            db.session.commit()
+            db.session.refresh(user_login)
+            return user, user_login, 'basic_auth'
         else:
             raise LoginNotAuthorized         
 
@@ -205,13 +214,23 @@ class TokenAuth(BasicAuth):
     def verify_token(self, user_type, token):
         ''' verify_token is a method that is used as a decorator to store 
             the token checking process that is defined in auth.py '''
-
-        # TODO REMOVE THIS
-        if user_type is None:
-            user_type =('staff')
-
-        return UserLogin.check_token(token) if token else (None,None)
-
+        
+        # decode and validate token 
+        secret = current_app.config['SECRET_KEY']
+        try:
+            decoded_token = jwt.decode(token, secret, algorithms='HS256')
+        except jwt.ExpiredSignatureError:
+            raise LoginNotAuthorized
+        
+        query = db.session.query(
+                            User, UserLogin
+                        ).filter(
+                            User.user_id==decoded_token['uid']
+                        ).filter(
+                            UserLogin.user_id == decoded_token['uid']
+                        ).one_or_none()
+                        
+        return query[0], query[1], decoded_token.get('utype') 
 
     def get_auth(self):
         ''' This method is to authorize tokens '''

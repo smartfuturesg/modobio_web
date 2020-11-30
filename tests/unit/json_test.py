@@ -1,7 +1,7 @@
 from flask.json import dumps, loads, jsonify, load
 from .data import test_json_data, test_json_json, test_json_jsonify
 
-def test_json_serialization(test_client, init_database):
+def test_json_serialization(test_client, init_database, staff_auth_header):
     """
     GIVEN a Python dictionary
     WHEN the dictionary is serialized into a JSON string
@@ -14,7 +14,7 @@ def test_json_serialization(test_client, init_database):
     assert js == test_json_json
     # assert jsf.data == test_json_jsonify
 
-def test_json_deserialization(test_client, init_database):
+def test_json_deserialization(test_client, init_database, staff_auth_header):
     """
     GIVEN a JSON string
     WHEN the string is deserialized into a Python dictionary
