@@ -559,7 +559,7 @@ class ExternalMedicalRecordIDs(Resource):
 @ns.doc(params={'client_user_id': 'Client user ID number'})
 class ClientSurgeriesAPI(Resource):
 
-    @token_auth.login_required
+    @token_auth.login_required(staff_role=["doctor", "doctor_internal"])
     @accepts(schema=ClientSurgeriesSchema,  api=ns)
     @responds(schema=ClientSurgeriesSchema, status_code=201, api=ns)
     def post(self, client_user_id):
