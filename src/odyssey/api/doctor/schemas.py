@@ -1,4 +1,4 @@
-from marshmallow import Schema, fields, post_load, validate, pre_dump
+from marshmallow import Schema, fields, post_load, validate, pre_dump, validates, ValidationError
 
 from odyssey import ma
 from odyssey.api.doctor.models import ( 
@@ -12,8 +12,9 @@ from odyssey.api.doctor.models import (
     MedicalBloodTestResultTypes
 )
 from odyssey.api.user.models import User
-from odyssey.api.client.models import ClientExternalMR
+from odyssey.api.client.models import ClientExternalMR, ClientSurgeries
 from odyssey.api.facility.models import MedicalInstitutions
+from odyssey.utils.constants import MEDICAL_CONDITIONS
 
 """
     Schemas for the doctor's API
@@ -219,3 +220,20 @@ class ClientExternalMREntrySchema(Schema):
         """upon dump, add back the schema structure"""
         response = {"record_locators": data}
         return response
+
+class ClientSurgeriesSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = ClientSurgeries
+        exclude = ('surgery_id', 'created_at', 'updated_at')
+
+    client_user_id = fields.Integer(dump_only=True)
+    reporter_user_id = fields.Integer()
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return ClientSurgeries(**data)
+
+    @validates('surgery_category')
+    def validate_surgery_category(self,value):
+        if value not in MEDICAL_CONDITIONS['Surgery'].keys():
+            raise ValidationError(f"{value} not a valid option. must be in {MEDICAL_CONDITIONS['Surgery'].keys()}")

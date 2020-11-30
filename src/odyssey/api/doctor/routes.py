@@ -6,7 +6,7 @@ from flask_accepts import accepts, responds
 from flask_restx import Resource, Api
 
 from odyssey import db
-from odyssey.api.client.models import ClientExternalMR
+from odyssey.api.client.models import ClientExternalMR, ClientSurgeries
 from odyssey.api.doctor.models import (
     MedicalFamilyHistory,
     MedicalConditions,
@@ -28,7 +28,7 @@ from odyssey.utils.errors import (
     InputError,
     MedicalConditionAlreadySubmitted
 )
-from odyssey.utils.misc import check_client_existence, check_blood_test_existence, check_blood_test_result_type_existence, check_user_existence, check_medical_condition_existence
+from odyssey.utils.misc import check_client_existence, check_staff_existence, check_blood_test_existence, check_blood_test_result_type_existence, check_user_existence, check_medical_condition_existence
 from odyssey.api.doctor.schemas import (
     AllMedicalBloodTestSchema,
     MedicalFamilyHistSchema,
@@ -46,7 +46,8 @@ from odyssey.api.doctor.schemas import (
     MedicalBloodTestResultTypesSchema,
     MedicalImagingSchema,
     ClientExternalMREntrySchema, 
-    ClientExternalMRSchema
+    ClientExternalMRSchema,
+    ClientSurgeriesSchema
 )
 from odyssey.utils.constants import MEDICAL_CONDITIONS
 
@@ -645,7 +646,7 @@ class ExternalMedicalRecordIDs(Resource):
 @ns.doc(params={'client_user_id': 'Client user ID number'})
 class ClientSurgeriesAPI(Resource):
 
-    @token_auth.login_required(staff_role=["doctor", "doctor_internal"])
+    @token_auth.login_required
     @accepts(schema=ClientSurgeriesSchema,  api=ns)
     @responds(schema=ClientSurgeriesSchema, status_code=201, api=ns)
     def post(self, client_user_id):

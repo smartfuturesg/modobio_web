@@ -10,6 +10,7 @@ import flask.json
 from odyssey.api.client.models import ClientInfo, ClientFacilities
 from odyssey.api.doctor.models import MedicalBloodTests, MedicalBloodTestResultTypes, MedicalConditions
 from odyssey.api.user.models import User
+from odyssey.api.staff.models import StaffProfile
 from odyssey.api.facility.models import RegisteredFacilities
 from odyssey.utils.errors import ClientNotFound, UserNotFound, FacilityNotFound, RelationAlreadyExists, TestNotFound, ResultTypeNotFound,MedicalConditionNotFound
 

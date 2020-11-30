@@ -2,10 +2,10 @@ import pathlib
 
 from flask.json import dumps
 
-from odyssey.models.user import User, UserLogin
-from odyssey.models.client import ClientSurgeries
-from odyssey.models.staff import StaffProfile
-from tests.data.doctor.doctor_data import doctor_surgery_data
+from odyssey.api.user.models import User, UserLogin
+from odyssey.api.client.models import ClientSurgeries
+from odyssey.api.staff.models import StaffProfile
+from .data import doctor_surgery_data
 
 def test_post_surgery(test_client, init_database):
     """
@@ -20,7 +20,7 @@ def test_post_surgery(test_client, init_database):
     headers = {'Authorization': f'Bearer {token}'}
     
     payload = doctor_surgery_data
-    payload['reporter_user_id'] = StaffProfile.query.first().user_id
+    payload['reporter_user_id'] = staff.user_id
 
     client_user_id = User.query.filter_by(is_client=True).first().user_id
     response = test_client.post('/doctor/surgery/' + str(client_user_id) +'/', 

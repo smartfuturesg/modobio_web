@@ -20,7 +20,7 @@ from odyssey.api.client.models import (
     ClientRelease,
     ClientReleaseContacts,
     ClientSubscriptionContract,
-    ClientFacilities
+    ClientFacilities,
 )
 
 class ClientSearchItemsSchema(Schema):
