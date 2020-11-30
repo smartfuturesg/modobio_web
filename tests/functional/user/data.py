@@ -58,7 +58,16 @@ users_client_new_info_data = {
 
 }
 
-
+users_new_self_registered_client_data = {
+  "userinfo": {
+    "email": "self_registered_client@mail.com",
+    "password": "password_self_reg",
+    "firstname": "Testron",
+    "lastname": "McClient",
+    "phone_number": "1112223333",
+    "middlename": "Selfreg"
+  }
+}
 
 users_staff_member_data = {
     "firstname": "testy",

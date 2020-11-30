@@ -38,4 +38,4 @@ pytestdebug.log
 
 # whooshee files
 whooshee/*
-tests/01_functional/whooshee/*
+tests/functional/whooshee/*
