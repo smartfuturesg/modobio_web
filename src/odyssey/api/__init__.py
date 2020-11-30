@@ -39,17 +39,12 @@ authorizations = {
 bp = Blueprint('api', __name__)
 api = Api(bp, authorizations=authorizations, security='apikey')
 
-from odyssey.api import (
-    clients,
-    doctor,
-    errors,
-    pt,
-    remote_clients,
-    staff,
-    tokens,
-    trainer,
-    wearables,
-    version,
-    registered_facilities,
-    users
-)
+from odyssey.api.client import models, routes
+from odyssey.api.doctor import models, routes
+from odyssey.api.facility import models, routes
+from odyssey.api.physiotherapy import models, routes
+from odyssey.api.staff import models, routes
+from odyssey.api.trainer import models, routes
+from odyssey.api.user import models, routes
+from odyssey.api.version import routes
+from odyssey.api.wearables import models, routes
