@@ -8,7 +8,6 @@
 -- Further changes to this table will be done through the API
 -----------------------------
 
-
 DO $$
 DECLARE
   x integer;

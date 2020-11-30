@@ -3,14 +3,16 @@ Database tables for the user system portion of the Modo Bio Staff application.
 All tables in this module are prefixed with 'User'.
 """
 import base64
+from datetime import datetime, timedelta
+import jwt
 import os
 import random
-
-from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 
+from flask import current_app
+
 from odyssey import db
-from odyssey.utils.constants import ALPHANUMERIC, DB_SERVER_TIME
+from odyssey.utils.constants import ALPHANUMERIC, DB_SERVER_TIME, TOKEN_LIFETIME, REFRESH_TOKEN_LIFETIME
 
 #@whooshee.register_model('firstname', 'lastname', 'email', 'phone', 'user_id')
 class User(db.Model):
@@ -239,36 +241,19 @@ class UserLogin(db.Model):
 
     def set_password(self, password):
         self.password = generate_password_hash(password)
-
-    def check_password(self, password):
-        return check_password_hash(self.password, password)
-
-    def get_token(self,expires_in=86400):
-        now = datetime.utcnow()
-        #returns current token if it is valid
-        if self.token and self.token_expiration > now + timedelta(seconds=60):
-            return self.token
-        #otherwise generate new token, add to session
-        self.token = base64.b64encode(os.urandom(24)).decode('utf-8')
-        self.token_expiration = now + timedelta(seconds=expires_in)
-        db.session.add(self)
-        db.session.flush()
-        db.session.commit()
-        return self.token
-
-    def revoke_token(self):
-        """set token to expired, for logging out/generating new token"""
-        self.token_expiration = datetime.utcnow() - timedelta(seconds=1)
-        db.session.add(self)
-        db.session.flush()
-        db.session.commit()
+        self.password_created_at = DB_SERVER_TIME
 
     @staticmethod
-    def check_token(token):
-        """check if token is valid. returns user if so"""
-        user_login = UserLogin.query.filter_by(token=token).first()
+    def generate_token(user_type, user_id, token_type):
+        """
+        Generate a JWT with the appropriate user type and user_id
+        """
+        secret = current_app.config['SECRET_KEY']
+        
+        return jwt.encode({'exp': datetime.utcnow()+timedelta(hours =(TOKEN_LIFETIME if token_type == 'access' else REFRESH_TOKEN_LIFETIME)), 
+                            'uid': user_id,
+                            'utype': user_type}, 
+                            secret, 
+                            algorithm='HS256').decode("utf-8")
 
-        if user_login is None or user_login.token_expiration < datetime.utcnow():
-            return None
-        user = User.query.filter_by(user_id=user_login.user_id).one_or_none()
-        return user, user_login
+
