@@ -9,7 +9,7 @@ ns = api.namespace('version', description='Endpoint for API version.')
 
 @ns.route('/')
 class VersionEndpoint(Resource):
-    @token_auth.login_required
+    @ns.doc(security=None)
     @responds({'name': 'version', 'type': str}, status_code=200, api=ns)
     def get(self):
         """ Returns API version in response to a GET request.
