@@ -1,33 +1,15 @@
+import base64
+from datetime import datetime
 import os
 import pytest
-from datetime import datetime
+
 from sqlalchemy import text
 
 from odyssey import create_app, db
-from odyssey.models.client import (
-    ClientInfo,
-    ClientConsent,
-    ClientRelease,
-    ClientPolicies,
-    ClientConsultContract,
-    ClientSubscriptionContract,
-    ClientIndividualContract
-)
-from odyssey.models.misc import MedicalInstitutions
-from odyssey.models.user import User, UserLogin
-
-from .data import (
-    test_new_client_creation,
-    test_new_client_info,
-    test_new_client_login,
-    test_staff_member,
-    test_client_consent_data,
-    test_client_release_data,
-    test_client_policies_data,
-    test_client_consult_data,
-    test_client_subscription_data,
-    test_client_individual_data
-)
+from odyssey.api.client.models import ClientInfo
+from odyssey.api.facility.models import MedicalInstitutions
+from odyssey.api.user.models import User, UserLogin
+from tests.functional.user.data import users_staff_member_data, users_client_new_creation_data, users_client_new_info_data
 
 def clean_db(db):
     for table in reversed(db.metadata.sorted_tables):
@@ -35,6 +17,7 @@ def clean_db(db):
             db.session.execute(table.delete())
         except:
             pass
+    #db.session.close()
     # specifically cascade drop clientinfo table
     try:
         db.session.execute('DROP TABLE "ClientInfo" CASCADE;')
@@ -63,7 +46,6 @@ def init_database():
     clean_db(db)
     # Create the database and the database table
     db.create_all()
-
     # run .sql files to create db procedures and initialize 
     # some tables
     #  read .sql files, remove comments,
@@ -77,24 +59,24 @@ def init_database():
     
         db.session.execute(text(''.join(dat)))
 
-    # Insert test client data
     # 1) Create User instance. modobio_id populated automatically
-    client_1 = User(**test_new_client_creation)
+    client_1 = User(**users_client_new_creation_data)
     db.session.add(client_1)
     db.session.flush()
 
     # 2) User login
     client_1_login = UserLogin(**{'user_id': client_1.user_id})
-
+    client_1_login.set_password('password')
+    
     # 3) Client info
-    test_new_client_info['user_id'] = client_1.user_id
-    client_1_info = ClientInfo(**test_new_client_info)
+    users_client_new_info_data['user_id'] = client_1.user_id
+    client_1_info = ClientInfo(**users_client_new_info_data)
     db.session.add(client_1_login)
     db.session.add(client_1_info)
     db.session.flush()
 
     # initialize a test staff member
-    staff_1 = User(**test_staff_member)
+    staff_1 = User(**users_staff_member_data)
     db.session.add(staff_1)
     db.session.flush()
     staff_1_login = UserLogin(**{"user_id": staff_1.user_id})
@@ -111,7 +93,49 @@ def init_database():
     db.session.commit()
 
     yield db  # this is where the testing happens!
-    clean_db(db)
-
+    
     # https://stackoverflow.com/questions/26350911/what-to-do-when-a-py-test-hangs-silently
     db.session.close()
+    
+    clean_db(db)
+
+@pytest.fixture(scope='session')
+def staff_auth_header(test_client):
+    ###
+    # Login (get token) for newly created staff member
+    ##
+
+
+    valid_credentials = base64.b64encode(
+        f"{users_staff_member_data['email']}:{'password'}".encode(
+            "utf-8")).decode("utf-8")
+    
+    headers = {'Authorization': f'Basic {valid_credentials}'}
+    response = test_client.post('/staff/token/',
+                            headers=headers, 
+                            content_type='application/json')
+    token = response.json.get('token')
+
+    auth_header = {'Authorization': f'Bearer {token}'}
+    
+    yield auth_header
+
+@pytest.fixture(scope='session')
+def client_auth_header(test_client):
+    ###
+    # Login (get token) for newly created client member
+    ##
+
+    valid_credentials = base64.b64encode(
+        f"{users_client_new_creation_data['email']}:{'password'}".encode(
+            "utf-8")).decode("utf-8")
+    
+    headers = {'Authorization': f'Basic {valid_credentials}'}
+    response = test_client.post('/client/token/',
+                            headers=headers, 
+                            content_type='application/json')
+    token = response.json.get('token')
+
+    auth_header = {'Authorization': f'Bearer {token}'}
+    
+    yield auth_header
