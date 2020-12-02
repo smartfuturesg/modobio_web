@@ -46,6 +46,7 @@ class NewClientUserSchema(Schema):
     modobio_id = fields.String()
 
 class UserInfoSchema(Schema):
+
     firstname = fields.String()
     middlename = fields.String()
     lastname = fields.String()
@@ -53,7 +54,7 @@ class UserInfoSchema(Schema):
     phone_number = fields.String(validate=validate.Length(min=0,max=50))
     password = fields.String(description="password required when creating a staff member",
                             validate=validate.Length(min=0,max=50), 
-                            required=False)
+                            required=True)
     
 
 class StaffInfoSchema(Schema):

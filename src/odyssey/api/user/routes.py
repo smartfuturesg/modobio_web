@@ -18,7 +18,8 @@ from odyssey.api.user.schemas import (
     UserPasswordRecoveryContactSchema,
     UserPasswordResetSchema,
     UserPasswordUpdateSchema,
-    NewUserSchema
+    NewUserSchema,
+    UserInfoSchema
 ) 
 from odyssey.api.staff.schemas import StaffProfileSchema, StaffRolesSchema
 from odyssey.api.client.schemas import ClientInfoSchema
@@ -39,6 +40,24 @@ class ApiUser(Resource):
         check_user_existence(user_id)
 
         return User.query.filter_by(user_id=user_id).one_or_none()
+
+    def delete(self, user_id):
+        #is_staff   / is_client
+        #   f       /    f
+        #Return error, either user does not exist or user not found 
+
+        #   t       /   f
+        #Delete all, use cascade
+
+        #   f       /   t
+        #Delete all, use cascade
+
+        #   t       /   t
+        #Doest it want to delete both user and staff?
+        #Yes: Delete all, use cascade,
+        #No: Delete Staff?
+        #       Yes, Delete only from staff tables and change is_staff to false
+        #       No, Delete only from client tables and change is_client to false 
 
 
 @ns.route('/staff/')
@@ -100,8 +119,7 @@ class NewStaffUser(Resource):
 
 @ns.route('/client/')
 class NewClientUser(Resource):
-    #@token_auth.login_required
-    @accepts(schema=NewUserSchema, api=ns)
+    @accepts(schema=UserInfoSchema, api=ns)
     @responds(schema=NewClientUserSchema, status_code=201, api=ns)
     def post(self): 
         """
