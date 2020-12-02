@@ -40,7 +40,7 @@ class LookupDrinks(db.Model):
     :type: string
     """
 
-    color
+    color = db.Column(db.String)
     """
     Color of this drink.
 
