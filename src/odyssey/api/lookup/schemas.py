@@ -23,7 +23,7 @@ class LookupDrinkIngredientsSchema(ma.SQLAlchemyAutoSchema):
 
 class LookupGoalsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        model = LookupDrinks
+        model = LookupGoals
         exclude = ('created_at', 'updated_at')
 
     @post_load

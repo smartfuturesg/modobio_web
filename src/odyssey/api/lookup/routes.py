@@ -14,18 +14,18 @@ ns = api.namespace('lookup', description='Endpoints for lookup tables.')
 class LookupDrinksApi(Resource):
     
     @token_auth.login_required
-    @responds(schema=LookupDrinksSchema, api=ns)
+    @responds(schema=LookupDrinksSchema(many=True), api=ns)
     def get(self):
         """get contents of drinks lookup table"""
         return LookupDrinks.query.all()
 
-@ns.route('/drinks/ingredients/<int:drink_id>')
+@ns.route('/drinks/ingredients/<int:drink_id>/')
 @ns.doc('Id of the desired drink')
 class LookupDrinkIngredientsApi(Resource):
 
     @token_auth.login_required
-    @responds(schema=LookupDrinkIngredientsSchema(many=True))
-    def get(self):
+    @responds(schema=LookupDrinkIngredientsSchema(many=True), api=ns)
+    def get(self, drink_id):
         """get recipe of the drink denoted by drink_id"""
         return LookupDrinkIngredients.query.filter_by(drink_id=drink_id).all()
 
@@ -33,7 +33,7 @@ class LookupDrinkIngredientsApi(Resource):
 class LookupGoalsApi(Resource):
 
     @token_auth.login_required
-    @responds(schema=LookupGoalsSchema, api=ns)
+    @responds(schema=LookupGoalsSchema(many=True), api=ns)
     def get(self):
         """get contents of goals lookup table"""
         return LookupGoals.query.all()
