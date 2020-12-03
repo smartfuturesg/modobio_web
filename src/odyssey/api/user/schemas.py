@@ -44,6 +44,7 @@ class NewClientUserSchema(Schema):
     phone_number = fields.String(validate=validate.Length(min=0,max=50))
     password = fields.String(validate=validate.Length(min=0,max=50), dump_only=True)
     modobio_id = fields.String()
+    biological_sex_male = fields.Boolean()
 
 class UserInfoSchema(Schema):
     firstname = fields.String()
@@ -54,6 +55,7 @@ class UserInfoSchema(Schema):
     password = fields.String(description="password required when creating a staff member",
                             validate=validate.Length(min=0,max=50), 
                             required=False)
+    biological_sex_male = fields.Boolean() 
     
 
 class StaffInfoSchema(Schema):
