@@ -9,8 +9,9 @@ from werkzeug.security import check_password_hash
 
 
 from odyssey.api import api
-from odyssey.utils.errors import ContentNotFound, InputError, StaffEmailInUse, ClientEmailInUse, UnauthorizedUser
-from odyssey.utils.email import send_email_password_reset
+from odyssey.api.client.schemas import ClientInfoSchema
+from odyssey.api.staff.schemas import StaffProfileSchema, StaffRolesSchema
+from odyssey.api.user.models import User, UserLogin
 from odyssey.api.user.schemas import (
     UserSchema, 
     NewClientUserSchema,
@@ -20,11 +21,11 @@ from odyssey.api.user.schemas import (
     UserPasswordUpdateSchema,
     NewUserSchema
 ) 
-from odyssey.api.staff.schemas import StaffProfileSchema, StaffRolesSchema
-from odyssey.api.client.schemas import ClientInfoSchema
-from odyssey.api.user.models import User, UserLogin
-from odyssey.utils.misc import check_user_existence
 from odyssey.utils.auth import token_auth
+from odyssey.utils.constants import PASSWORD_RESET_URL
+from odyssey.utils.errors import ContentNotFound, InputError, StaffEmailInUse, ClientEmailInUse, UnauthorizedUser
+from odyssey.utils.email import send_email_password_reset
+from odyssey.utils.misc import check_user_existence
 
 from odyssey import db
 
@@ -173,14 +174,15 @@ class PasswordResetEmail(Resource):
             return 200
 
         secret = current_app.config['SECRET_KEY']
-        encoded_token = jwt.encode({'exp': datetime.utcnow()+timedelta(minutes = 15), 
+        password_reset_token = jwt.encode({'exp': datetime.utcnow()+timedelta(minutes = 15), 
                                   'sid': user.user_id}, 
                                   secret, 
                                   algorithm='HS256').decode("utf-8") 
         if current_app.env == "development":
-            return jsonify({"token": encoded_token})
+            return jsonify({"token": password_reset_token,
+                            "password_reset_url" : PASSWORD_RESET_URL.format(password_reset_token)})
         else:
-            send_email_password_reset(user.email, encoded_token)
+            send_email_password_reset(user.email, password_reset_token)
             return 200
         
 
