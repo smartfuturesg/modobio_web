@@ -1,17 +1,22 @@
 from datetime import datetime, timedelta
-import secrets, jwt
+import secrets
+import jwt
+
 from flask import current_app, request, url_for, jsonify
 from flask_accepts import accepts, responds
 from flask_restx import Resource
+
 from odyssey import db
-import odyssey.api as api
+from odyssey.api import api
 from odyssey.api.client_services.schemas import NewUserSchema, NewUserRegistrationPortalSchema
 from odyssey.api.user.schemas import UserLoginSchema, UserSchema
 from odyssey.api.user.models import User, UserLogin
 from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import REGISTRATION_PORTAL_URL
-from odyssey.utils.email import send_email_client_services_registration_portal
+from odyssey.utils.email import send_email_user_registration_portal
 from odyssey.utils.errors import ClientEmailInUse, InputError
+
+
 ns = api.namespace('client-services', description='Endpoints for client services operations.')
 
 @ns.route('/user/new/')
@@ -45,7 +50,7 @@ class NewUserClientServices(Resource):
 
         user_login = UserLoginSchema().load({'user_id':user.user_id,  'password':password})
         db.session.add(user_login)
-        db.session.commit()
+        # db.session.commit()
 
         secret = current_app.config['SECRET_KEY']
         portal_id = jwt.encode({'exp':datetime.utcnow() + timedelta(hours=24),  
@@ -53,7 +58,7 @@ class NewUserClientServices(Resource):
                                 secret,
                                 algorithm='HS256').decode('utf-8')
 
-        send_email_client_services_registration_portal(user.email, password, portal_id)
+        send_email_user_registration_portal(user.email, password, portal_id)
 
         return {'password':password,
                 'registration_portal_url': REGISTRATION_PORTAL_URL.format(portal_id)}

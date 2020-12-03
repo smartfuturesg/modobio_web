@@ -128,7 +128,7 @@ class BasicAuth(object):
         
         # bring up the soles for the staff member
         staff_user_roles = db.session.query(StaffRoles.role).filter(StaffRoles.user_id==user.user_id).all()
-        staff_user_roles = [x[0] for x in staff_roles]
+        staff_user_roles = [x[0] for x in staff_user_roles]
         
         if 'staff_self' in user_type:
             if request.view_args.get('user_id') != user.user_id:
