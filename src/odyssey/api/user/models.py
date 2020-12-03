@@ -87,7 +87,7 @@ class User(db.Model):
     :type: str, max length 50
     """
 
-    biologoical_sex_male =  db.Column(db.Boolean)
+    biological_sex_male =  db.Column(db.Boolean)
     """
     Client biological sex, true for male, false for female.
 
