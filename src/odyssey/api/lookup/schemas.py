@@ -15,6 +15,10 @@ class LookupDrinksSchema(ma.SQLAlchemyAutoSchema):
     def make_object(self, data, **kwargs):
         return LookupDrinks(**data)
 
+class LookupDrinksOutputSchema(Schema):
+    items = fields.Nested(LookupDrinksSchema(many=True), missing = [])
+    total_items = fields.Integer()
+
 class LookupDrinkIngredientsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupDrinkIngredients
@@ -24,6 +28,10 @@ class LookupDrinkIngredientsSchema(ma.SQLAlchemyAutoSchema):
     def make_object(self, data, **kwargs):
         return LookupDrinkIngredients(**data)
 
+class LookupDrinkIngredientsOutputSchema(Schema):
+    items = fields.Nested(LookupDrinkIngredientsSchema(many=True), missing = [])
+    total_items = fields.Integer()
+
 class LookupGoalsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupGoals
@@ -32,3 +40,7 @@ class LookupGoalsSchema(ma.SQLAlchemyAutoSchema):
     @post_load
     def make_object(self, data, **kwargs):
         return LookupGoals(**data)
+
+class LookupGoalsOutputSchema(Schema):
+    items = fields.Nested(LookupGoalsSchema(many=True), missing = [])
+    total_items = fields.Integer()
