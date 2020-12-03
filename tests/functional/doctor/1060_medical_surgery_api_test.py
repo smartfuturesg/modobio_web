@@ -15,7 +15,6 @@ def test_post_surgery(test_client, init_database, staff_auth_header):
     """
     
     payload = doctor_surgery_data
-    payload['reporter_user_id'] = User.query.filter_by(is_staff=True).first().user_id
 
     client_user_id = User.query.filter_by(is_client=True).first().user_id
     response = test_client.post('/doctor/surgery/' + str(client_user_id) +'/', 
