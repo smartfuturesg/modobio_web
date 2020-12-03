@@ -20,7 +20,7 @@ from odyssey.api.client.models import (
     ClientRelease,
     ClientReleaseContacts,
     ClientSubscriptionContract,
-    ClientFacilities
+    ClientFacilities,
 )
 
 class ClientSearchItemsSchema(Schema):
@@ -73,6 +73,7 @@ class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
     firstname = fields.String(dump_only=True)
     lastname = fields.String(dump_only=True)
     email = fields.Email(dump_only=True)
+    biological_sex_male = fields.Boolean()
 
     @post_load
     def make_object(self, data, **kwargs):

@@ -1,4 +1,4 @@
-from marshmallow import Schema, fields, post_load, validate, pre_dump
+from marshmallow import Schema, fields, post_load, validate, pre_dump, validates, ValidationError
 
 from odyssey import ma
 from odyssey.api.doctor.models import ( 
@@ -9,11 +9,13 @@ from odyssey.api.doctor.models import (
     MedicalImaging,
     MedicalBloodTests,
     MedicalBloodTestResults,
-    MedicalBloodTestResultTypes
+    MedicalBloodTestResultTypes,
+    MedicalExternalMR,
+    MedicalSurgeries
 )
 from odyssey.api.user.models import User
-from odyssey.api.client.models import ClientExternalMR
 from odyssey.api.facility.models import MedicalInstitutions
+from odyssey.utils.constants import MEDICAL_CONDITIONS
 
 """
     Schemas for the doctor's API
@@ -191,7 +193,7 @@ class MedicalInstitutionsSchema(ma.SQLAlchemyAutoSchema):
     def make_object(self, data):
         return MedicalInstitutions(**data)
 
-class ClientExternalMRSchema(Schema):
+class MedicalExternalMRSchema(Schema):
     """
     For returning medical institutions in GET request and also accepting new institute names
     """
@@ -204,17 +206,29 @@ class ClientExternalMRSchema(Schema):
     @post_load
     def make_object(self, data, **kwargs):
         data.pop("institute_name")
-        return ClientExternalMR(**data)
+        return MedicalExternalMR(**data)
 
-class ClientExternalMREntrySchema(Schema):
+class MedicalExternalMREntrySchema(Schema):
     """
     For returning medical institutions in GET request and also accepting new institute names
     """
 
-    record_locators = fields.Nested(ClientExternalMRSchema, many=True)
+    record_locators = fields.Nested(MedicalExternalMRSchema, many=True)
     
     @pre_dump
     def ravel(self, data, **kwargs):
         """upon dump, add back the schema structure"""
         response = {"record_locators": data}
         return response
+
+class MedicalSurgeriesSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = MedicalSurgeries
+        exclude = ('created_at', 'updated_at')
+        dump_only = ('surgery_id', 'client_user_id', 'reporter_user_id')
+
+    surgery_category = fields.String(validate=validate.OneOf(MEDICAL_CONDITIONS['Surgery'].keys()))
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return MedicalSurgeries(**data)

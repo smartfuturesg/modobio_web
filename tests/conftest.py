@@ -8,6 +8,7 @@ from sqlalchemy import text
 from odyssey import create_app, db
 from odyssey.api.client.models import ClientInfo
 from odyssey.api.facility.models import MedicalInstitutions
+from odyssey.api.staff.models import StaffProfile
 from odyssey.api.user.models import User, UserLogin
 from tests.functional.user.data import users_staff_member_data, users_client_new_creation_data, users_client_new_info_data
 
@@ -82,6 +83,11 @@ def init_database():
     staff_1_login = UserLogin(**{"user_id": staff_1.user_id})
     staff_1_login.set_password('password')
     db.session.add(staff_1_login)
+
+    # 4) Staff Profile
+    staff_profile = StaffProfile(**{"user_id": staff_1.user_id})
+    db.session.add(staff_profile)
+    db.session.flush()
 
     #initialize Medical institutes table
     med_institute1 = MedicalInstitutions(institute_name='Mercy Gilbert Medical Center')

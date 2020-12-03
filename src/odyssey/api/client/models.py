@@ -935,61 +935,6 @@ class ClientIndividualContract(db.Model):
     :type: str, max length 40
     """
 
-class ClientExternalMR(db.Model):
-    """ External medical records table.
-
-    This table stores medical record ID numbers from external medical institutes. 
-    """
-
-    __tablename__ = 'ClientExternalMR'
-
-    __table_args__ = (
-        db.UniqueConstraint('user_id', 'med_record_id', 'institute_id'),)
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
-    """
-    User ID number
-
-    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
-    """
-
-    med_record_id = db.Column(db.String, nullable=False)
-    """
-    Medical record id.
-
-    This medical record ID comes from an external medical institution.
-
-    :type: str, non-null, unique
-    """
-
-    institute_id = db.Column(db.Integer, db.ForeignKey('MedicalInstitutions.institute_id', ondelete="CASCADE"), nullable=False)
-    """
-    Medical institute id.
-
-    :type: int, foreign key to :attr:`MedicalInstitutions.institute_id`
-    """
-
 class ClientReleaseContacts(db.Model):
     """ Contact information for the release form.
 
