@@ -17,7 +17,12 @@ class LookupDrinksApi(Resource):
     @responds(schema=LookupDrinksSchema(many=True), api=ns)
     def get(self):
         """get contents of drinks lookup table"""
-        return LookupDrinks.query.all()
+        res = []
+        for drink in LookupDrinks.query.all():
+            drink.primary_ingredient = LookupDrinkIngredients.query.filter_by(drink_id=drink.drink_id).filter_by(is_primary_ingredient=True).first().ingredient_name
+            drink.goal = LookupGoals.query.filter_by(goal_id=drink.primary_goal_id).first().goal_name
+            res.append(drink)
+        return res
 
 @ns.route('/drinks/ingredients/<int:drink_id>/')
 @ns.doc('Id of the desired drink')

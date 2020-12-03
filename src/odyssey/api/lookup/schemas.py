@@ -1,4 +1,4 @@
-from marshmallow import Schema, post_load
+from marshmallow import Schema, fields, post_load
 
 from odyssey import ma
 from odyssey.api.lookup.models import LookupDrinks, LookupDrinkIngredients, LookupGoals
@@ -7,6 +7,9 @@ class LookupDrinksSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupDrinks
         exclude = ('created_at', 'updated_at')
+
+    primary_ingredient = fields.String()
+    goal = fields.String()
 
     @post_load
     def make_object(self, data, **kwargs):
