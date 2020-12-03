@@ -8,7 +8,7 @@ from flask_restx import Resource
 
 from odyssey import db
 from odyssey.api import api
-from odyssey.api.client_services.schemas import NewUserSchema, NewUserRegistrationPortalSchema
+from odyssey.api.client_services.schemas import NewRemoteRegisterUserSchema, NewUserRegistrationPortalSchema
 from odyssey.api.user.schemas import UserLoginSchema, UserSchema
 from odyssey.api.user.models import User, UserLogin
 from odyssey.utils.auth import token_auth
@@ -28,7 +28,7 @@ class NewUserClientServices(Resource):
 
     @token_auth.login_required(user_type=('staff', ), staff_role=('client_services',
                                                                   'client_services_internal'))
-    @accepts(schema=NewUserSchema, api=ns)
+    @accepts(schema=NewRemoteRegisterUserSchema, api=ns)
     @responds(schema=NewUserRegistrationPortalSchema, api=ns, status_code=201)
     def post(self):
         """
