@@ -225,10 +225,9 @@ class MedicalExternalMREntrySchema(Schema):
 class MedicalSurgeriesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = MedicalSurgeries
-        exclude = ('surgery_id', 'created_at', 'updated_at')
+        exclude = ('created_at', 'updated_at')
+        dump_only = ('surgery_id', 'client_user_id', 'reporter_user_id')
 
-    client_user_id = fields.Integer(dump_only=True)
-    reporter_user_id = fields.Integer(dump_only=True)
     surgery_category = fields.String(validate=validate.OneOf(MEDICAL_CONDITIONS['Surgery'].keys()))
 
     @post_load
