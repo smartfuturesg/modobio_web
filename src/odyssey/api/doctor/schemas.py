@@ -9,10 +9,11 @@ from odyssey.api.doctor.models import (
     MedicalImaging,
     MedicalBloodTests,
     MedicalBloodTestResults,
-    MedicalBloodTestResultTypes
+    MedicalBloodTestResultTypes,
+    MedicalExternalMR,
+    MedicalSurgeries
 )
 from odyssey.api.user.models import User
-from odyssey.api.client.models import ClientExternalMR, ClientSurgeries
 from odyssey.api.facility.models import MedicalInstitutions
 from odyssey.utils.constants import MEDICAL_CONDITIONS
 
@@ -193,7 +194,7 @@ class MedicalInstitutionsSchema(ma.SQLAlchemyAutoSchema):
     def make_object(self, data):
         return MedicalInstitutions(**data)
 
-class ClientExternalMRSchema(Schema):
+class MedicalExternalMRSchema(Schema):
     """
     For returning medical institutions in GET request and also accepting new institute names
     """
@@ -206,14 +207,14 @@ class ClientExternalMRSchema(Schema):
     @post_load
     def make_object(self, data, **kwargs):
         data.pop("institute_name")
-        return ClientExternalMR(**data)
+        return MedicalExternalMR(**data)
 
-class ClientExternalMREntrySchema(Schema):
+class MedicalExternalMREntrySchema(Schema):
     """
     For returning medical institutions in GET request and also accepting new institute names
     """
 
-    record_locators = fields.Nested(ClientExternalMRSchema, many=True)
+    record_locators = fields.Nested(MedicalExternalMRSchema, many=True)
     
     @pre_dump
     def ravel(self, data, **kwargs):
@@ -221,9 +222,9 @@ class ClientExternalMREntrySchema(Schema):
         response = {"record_locators": data}
         return response
 
-class ClientSurgeriesSchema(ma.SQLAlchemyAutoSchema):
+class MedicalSurgeriesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        model = ClientSurgeries
+        model = MedicalSurgeries
         exclude = ('surgery_id', 'created_at', 'updated_at')
 
     client_user_id = fields.Integer(dump_only=True)
@@ -232,4 +233,4 @@ class ClientSurgeriesSchema(ma.SQLAlchemyAutoSchema):
 
     @post_load
     def make_object(self, data, **kwargs):
-        return ClientSurgeries(**data)
+        return MedicalSurgeries(**data)

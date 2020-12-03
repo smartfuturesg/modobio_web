@@ -6,7 +6,6 @@ from flask_accepts import accepts, responds
 from flask_restx import Resource, Api
 
 from odyssey import db
-from odyssey.api.client.models import ClientExternalMR, ClientSurgeries
 from odyssey.api.doctor.models import (
     MedicalFamilyHistory,
     MedicalConditions,
@@ -15,7 +14,9 @@ from odyssey.api.doctor.models import (
     MedicalBloodTests,
     MedicalBloodTestResults,
     MedicalBloodTestResultTypes, 
-    MedicalImaging
+    MedicalImaging,
+    MedicalExternalMR,
+    MedicalSurgeries
 )
 from odyssey.api.facility.models import MedicalInstitutions
 from odyssey.api.user.models import User
@@ -45,9 +46,9 @@ from odyssey.api.doctor.schemas import (
     MedicalBloodTestResultsOutputSchema,
     MedicalBloodTestResultTypesSchema,
     MedicalImagingSchema,
-    ClientExternalMREntrySchema, 
-    ClientExternalMRSchema,
-    ClientSurgeriesSchema
+    MedicalExternalMREntrySchema, 
+    MedicalExternalMRSchema,
+    MedicalSurgeriesSchema
 )
 from odyssey.utils.constants import MEDICAL_CONDITIONS
 
@@ -605,8 +606,8 @@ class AllMedInstitutes(Resource):
 @ns.doc(params={'user_id': 'User ID number'})
 class ExternalMedicalRecordIDs(Resource):
     @token_auth.login_required
-    @accepts(schema=ClientExternalMREntrySchema,  api=ns)
-    @responds(schema=ClientExternalMREntrySchema,status_code=201, api=ns)
+    @accepts(schema=MedicalExternalMREntrySchema,  api=ns)
+    @responds(schema=MedicalExternalMREntrySchema,status_code=201, api=ns)
     def post(self, user_id):
         """for submitting client medical record ids from external medical institutions"""
 
@@ -625,7 +626,7 @@ class ExternalMedicalRecordIDs(Resource):
 
             data_cleaned.append(record)
             
-        client_med_record_ids = ClientExternalMRSchema(many=True).load(data_cleaned)
+        client_med_record_ids = MedicalExternalMRSchema(many=True).load(data_cleaned)
         
         db.session.add_all(client_med_record_ids)
         db.session.commit()
@@ -633,22 +634,22 @@ class ExternalMedicalRecordIDs(Resource):
         return client_med_record_ids
 
     @token_auth.login_required
-    @responds(schema=ClientExternalMREntrySchema, api=ns)
+    @responds(schema=MedicalExternalMREntrySchema, api=ns)
     def get(self, user_id):
         """returns all medical record ids for user_id"""
 
-        client_med_record_ids = ClientExternalMR.query.filter_by(user_id=user_id).all()
+        client_med_record_ids = MedicalExternalMR.query.filter_by(user_id=user_id).all()
 
         return client_med_record_ids
 
 
 @ns.route('/surgery/<int:client_user_id>/')
 @ns.doc(params={'client_user_id': 'Client user ID number'})
-class ClientSurgeriesAPI(Resource):
+class MedicalSurgeriesAPI(Resource):
 
     @token_auth.login_required(user_type=('staff',))
-    @accepts(schema=ClientSurgeriesSchema,  api=ns)
-    @responds(schema=ClientSurgeriesSchema, status_code=201, api=ns)
+    @accepts(schema=MedicalSurgeriesSchema,  api=ns)
+    @responds(schema=MedicalSurgeriesSchema, status_code=201, api=ns)
     def post(self, client_user_id):
         """register a client surgery in the db"""
         #check client and reporting staff have valid user ids
@@ -663,11 +664,11 @@ class ClientSurgeriesAPI(Resource):
         return request.parsed_obj
 
     @token_auth.login_required
-    @responds(schema=ClientSurgeriesSchema(many=True), api=ns)
+    @responds(schema=MedicalSurgeriesSchema(many=True), api=ns)
     def get(self, client_user_id):
         """returns a list of all surgeries for the given client_user_id"""
         check_client_existence(client_user_id)
-        return ClientSurgeries.query.filter_by(client_user_id=client_user_id).all()
+        return MedicalSurgeries.query.filter_by(client_user_id=client_user_id).all()
 
 ##########################
 # This code became obsolete, because the medical lookup tables is now
