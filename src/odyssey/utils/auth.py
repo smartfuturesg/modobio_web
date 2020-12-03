@@ -65,7 +65,7 @@ class BasicAuth(object):
 
                 if user in (False, None):
                     raise LoginNotAuthorized()
-                if user_type and user_context!= 'basic_auth':
+                if user_type:
                     # If user_type exists (Staff or Client, etc)
                     # Check user and role access
                     self.user_role_check(user,user_type=user_type, staff_roles=staff_role, user_context = user_context)                   
@@ -97,6 +97,13 @@ class BasicAuth(object):
         elif user_context == 'client' and 'client' in user_type:
             if user.is_client:
                 self.client_access_check(user)
+            else:
+                raise LoginNotAuthorized()
+        elif user_context == 'basic_auth':
+            if 'staff' in user_type and user.is_staff:
+                return
+            elif 'client' in user_type and user.is_client:
+                return
             else:
                 raise LoginNotAuthorized()
         else:

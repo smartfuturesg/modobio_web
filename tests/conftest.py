@@ -8,7 +8,9 @@ from sqlalchemy import text
 from odyssey import create_app, db
 from odyssey.api.client.models import ClientInfo
 from odyssey.api.facility.models import MedicalInstitutions
+from odyssey.api.staff.models import StaffRoles
 from odyssey.api.user.models import User, UserLogin
+from odyssey.utils.constants import ACCESS_ROLES
 from tests.functional.user.data import users_staff_member_data, users_client_new_creation_data, users_client_new_info_data
 
 def clean_db(db):
@@ -79,9 +81,14 @@ def init_database():
     staff_1 = User(**users_staff_member_data)
     db.session.add(staff_1)
     db.session.flush()
+
     staff_1_login = UserLogin(**{"user_id": staff_1.user_id})
     staff_1_login.set_password('password')
     db.session.add(staff_1_login)
+
+    # give staff member all roles
+    for role in ACCESS_ROLES:
+        db.session.add(StaffRoles(user_id=staff_1.user_id, role=role, verified=True))
 
     #initialize Medical institutes table
     med_institute1 = MedicalInstitutions(institute_name='Mercy Gilbert Medical Center')
