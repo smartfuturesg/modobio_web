@@ -43,10 +43,12 @@ class NewClientUserSchema(Schema):
     email = fields.Email(validate=validate.Length(min=0,max=50))
     phone_number = fields.String(validate=validate.Length(min=0,max=50))
     password = fields.String(validate=validate.Length(min=0,max=50), dump_only=True)
-    modobio_id = fields.String()
+    modobio_id = fields.String(dump_only=True)
 
 class UserInfoSchema(Schema):
-
+    """
+        Schema for validating payloads for the creating of a new User
+    """
     firstname = fields.String()
     middlename = fields.String()
     lastname = fields.String()

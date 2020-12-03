@@ -32,6 +32,7 @@ from odyssey import db
 ns = api.namespace('user', description='Endpoints for user accounts.')
 
 @ns.route('/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
 class ApiUser(Resource):
     
     @token_auth.login_required
@@ -41,24 +42,15 @@ class ApiUser(Resource):
 
         return User.query.filter_by(user_id=user_id).one_or_none()
 
+    @token_auth.login_required
     def delete(self, user_id):
-        #is_staff   / is_client
-        #   f       /    f
-        #Return error, either user does not exist or user not found 
+        #Search for user by user_id in User table
+        check_user_existence(user_id)
+        user = User.query.filter_by(user_id=user_id).one_or_none()
+        
 
-        #   t       /   f
-        #Delete all, use cascade
 
-        #   f       /   t
-        #Delete all, use cascade
-
-        #   t       /   t
-        #Doest it want to delete both user and staff?
-        #Yes: Delete all, use cascade,
-        #No: Delete Staff?
-        #       Yes, Delete only from staff tables and change is_staff to false
-        #       No, Delete only from client tables and change is_client to false 
-
+        return {'message': f'User with id {user_id} has been removed'}
 
 @ns.route('/staff/')
 class NewStaffUser(Resource):
@@ -119,7 +111,7 @@ class NewStaffUser(Resource):
 
 @ns.route('/client/')
 class NewClientUser(Resource):
-    @accepts(schema=UserInfoSchema, api=ns)
+    @accepts(schema=NewClientUserSchema, api=ns)
     @responds(schema=NewClientUserSchema, status_code=201, api=ns)
     def post(self): 
         """
