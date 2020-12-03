@@ -70,7 +70,7 @@ def upgrade():
     sa.Column('firstname', sa.String(length=50), nullable=True),
     sa.Column('middlename', sa.String(length=50), nullable=True),
     sa.Column('lastname', sa.String(length=50), nullable=True),
-    sa.Column('biological_sex_male', sa.Boolean(), nullable=True),
+    sa.Column('biologoical_sex_male', sa.Boolean(), nullable=True),
     sa.Column('is_staff', sa.Boolean(), nullable=False),
     sa.Column('is_client', sa.Boolean(), nullable=False),
     sa.PrimaryKeyConstraint('user_id'),
