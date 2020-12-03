@@ -227,13 +227,9 @@ class ClientSurgeriesSchema(ma.SQLAlchemyAutoSchema):
         exclude = ('surgery_id', 'created_at', 'updated_at')
 
     client_user_id = fields.Integer(dump_only=True)
-    reporter_user_id = fields.Integer()
+    reporter_user_id = fields.Integer(dump_only=True)
+    surgery_category = fields.String(validate=validate.OneOf(MEDICAL_CONDITIONS['Surgery'].keys()))
 
     @post_load
     def make_object(self, data, **kwargs):
         return ClientSurgeries(**data)
-
-    @validates('surgery_category')
-    def validate_surgery_category(self,value):
-        if value not in MEDICAL_CONDITIONS['Surgery'].keys():
-            raise ValidationError(f"{value} not a valid option. must be in {MEDICAL_CONDITIONS['Surgery'].keys()}")
