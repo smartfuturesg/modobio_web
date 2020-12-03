@@ -24,3 +24,4 @@ class NewUserRegistrationPortalSchema(Schema):
     """
     password = fields.String(description='auto-generated password for new user registration')
     registration_portal_url = fields.String(description='URL with registration portal_id as parameter')
+    portal_id = fields.String()

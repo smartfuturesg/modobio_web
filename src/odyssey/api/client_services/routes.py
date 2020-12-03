@@ -48,17 +48,21 @@ class NewUserClientServices(Resource):
         db.session.add(user)
         db.session.flush()
 
-        user_login = UserLoginSchema().load({'user_id':user.user_id,  'password':password})
+        user_id = user.user_id
+
+        user_login = UserLoginSchema().load({'user_id': user_id,  'password':password})
         db.session.add(user_login)
-        # db.session.commit()
+        db.session.commit()
 
         secret = current_app.config['SECRET_KEY']
-        portal_id = jwt.encode({'exp':datetime.utcnow() + timedelta(hours=24),  
-                                'utype':data.get('user_type')},
+        portal_id = jwt.encode({'exp': datetime.utcnow() + timedelta(hours=24),  
+                                'utype': user_type,
+                                'uid': user_id},
                                 secret,
                                 algorithm='HS256').decode('utf-8')
 
         send_email_user_registration_portal(user.email, password, portal_id)
 
         return {'password':password,
+                'portal_id': portal_id,
                 'registration_portal_url': REGISTRATION_PORTAL_URL.format(portal_id)}
