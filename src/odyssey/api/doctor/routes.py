@@ -646,17 +646,17 @@ class ExternalMedicalRecordIDs(Resource):
 @ns.doc(params={'client_user_id': 'Client user ID number'})
 class ClientSurgeriesAPI(Resource):
 
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('staff',))
     @accepts(schema=ClientSurgeriesSchema,  api=ns)
     @responds(schema=ClientSurgeriesSchema, status_code=201, api=ns)
     def post(self, client_user_id):
         """register a client surgery in the db"""
         #check client and reporting staff have valid user ids
         check_client_existence(client_user_id)
-        check_staff_existence(request.parsed_obj.reporter_user_id)
 
         #add request data to db
         request.parsed_obj.client_user_id = client_user_id
+        request.parsed_obj.reporter_user_id = token_auth.current_user()[0].user_id
         db.session.add(request.parsed_obj)
         db.session.commit()
 
