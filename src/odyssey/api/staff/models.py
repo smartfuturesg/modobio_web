@@ -68,6 +68,8 @@ class StaffProfile(db.Model):
 class StaffRecentClients(db.Model):
     """this table stores the last 10 clients that a staff member has loaded"""
 
+    __tablename__ = 'StaffRecentClients'
+
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     Table index.

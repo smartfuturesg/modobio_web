@@ -33,9 +33,16 @@ class LookupDrinks(db.Model):
     :type: int, primary key, autoincrement
     """
 
-    goal_name = db.Column(db.String)
+    primary_goal_id = db.Column(db.Integer, db.ForeignKey('LookupGoals.goal_id'), nullable=False)
     """
-    Name of the goal.
+    Id of the primary goal that is aided by this drink.
+
+    :type: string
+    """
+
+    color = db.Column(db.String)
+    """
+    Color of this drink.
 
     :type: string
     """
@@ -67,7 +74,26 @@ class LookupDrinkIngredients(db.Model):
     :type: int, primary key, autoincrement
     """
 
-    drink_id = db.Column(db.Integer, db.ForeignKey('LookupDrinks.drink_id'))
+    drink_id = db.Column(db.Integer, db.ForeignKey('LookupDrinks.drink_id'), nullable=False)
+    """
+    Id of the drink this ingredient belongs to.
+
+    :type: int, foreign key(LookupDrinks.drink_id)
+    """
+
+    is_primary_ingredient = db.Column(db.Boolean)
+    """
+    Denotes if this ingredient is they primary ingredient in the drink.
+
+    :type: boolean
+    """
+
+    is_key_additive = db.Column(db.Boolean)
+    """
+    Denotes if this ingredient is a key additive in the drink.
+
+    :type: boolean
+    """
 
     ingredient_name = db.Column(db.String)
     """
@@ -110,41 +136,16 @@ class LookupGoals(db.Model):
     :type: :class:`datetime.datetime`
     """
 
-    drink_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    goal_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
-    Unique id for this drink.
+    Id of this goal.
 
-    :type: int, primary key, autoincrement
-    """
-
-    primary_goal = db.Column(db.Integer, db.ForeignKey('LookupGoals.idx', ondelete="CASCADE"), nullable=False)
-    """
-    Primary user goal that this supplement helps to meet.
-
-    :type: int, foreign key(LookupGoals.idx)
+    :type: integer, primary key, autoincrementing
     """
 
-    primary_ingredient
+    goal_name = db.Column(db.String)
     """
-    Primary ingredient making up this drink.
+    Name of this goal.
 
     :type: string
     """
-
-    color
-    """
-    Color of this drink.
-
-    :type: string
-    """
-
-    key_additivies
-    """
-    Key additives in this drink.
-
-    :type: string
-    """
-
-    
-
-    

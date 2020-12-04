@@ -12,6 +12,7 @@ import flask.json
 from odyssey.api.client.models import ClientInfo, ClientFacilities
 from odyssey.api.doctor.models import MedicalBloodTests, MedicalBloodTestResultTypes, MedicalConditions
 from odyssey.api.user.models import User
+from odyssey.api.staff.models import StaffProfile
 from odyssey.api.facility.models import RegisteredFacilities
 from odyssey.utils.errors import (
     ClientNotFound, 
@@ -42,6 +43,12 @@ def check_client_existence(user_id):
     client = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
     if not client:
         raise ClientNotFound(user_id)
+
+def check_staff_existence(user_id):
+    """Check that the user is in the database and is a staff member"""
+    staff = StaffProfile.query.filter_by(user_id=user_id).one_or_none()
+    if not staff:
+        raise StaffNotFound(user_id)
 
 def check_user_existence(user_id):
     """Check that the user is in the database
