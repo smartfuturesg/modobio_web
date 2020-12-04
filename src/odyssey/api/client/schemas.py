@@ -67,7 +67,9 @@ class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientInfo
         exclude = ('created_at', 'updated_at', 'idx')
-        dump_only = ('user_id', 'modobio_id', 'membersince')
+        dump_only = ('modobio_id', 'membersince')
+
+    user_id = fields.Integer()
 
     @post_load
     def make_object(self, data, **kwargs):
