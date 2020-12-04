@@ -8,11 +8,7 @@ from sqlalchemy import text
 from odyssey import create_app, db
 from odyssey.api.client.models import ClientInfo
 from odyssey.api.facility.models import MedicalInstitutions
-<<<<<<< HEAD
-from odyssey.api.staff.models import StaffRoles
-=======
-from odyssey.api.staff.models import StaffProfile
->>>>>>> 4face533b39be3363a58553626287745f3b83050
+from odyssey.api.staff.models import StaffProfile, StaffRoles
 from odyssey.api.user.models import User, UserLogin
 from odyssey.utils.constants import ACCESS_ROLES
 from tests.functional.user.data import users_staff_member_data, users_client_new_creation_data, users_client_new_info_data
