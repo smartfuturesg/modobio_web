@@ -48,6 +48,7 @@ from odyssey.api.client.schemas import(
     ClientReleaseContactsSchema,
     ClientSearchOutSchema,
     ClientSubscriptionContractSchema,
+    ClientAndUserInfoSchema,
     NewRemoteClientSchema,
     SignAndDateSchema,
     SignedDocumentsSchema
@@ -62,17 +63,12 @@ ns = api.namespace('client', description='Operations related to clients')
 @ns.doc(params={'user_id': 'User ID number'})
 class Client(Resource):
     @token_auth.login_required
-    @responds(schema=ClientInfoSchema, api=ns)
+    @responds(schema=ClientAndUserInfoSchema, api=ns)
     def get(self, user_id):
         """returns client info table as a json for the user_id specified"""
-        client_data = db.session.query(
-                    ClientInfo, User
-                ).filter(
-                    ClientInfo.user_id == user_id
-                ).filter(
-                    User.user_id == user_id
-                ).first()
-        if not client_data:
+        client_data = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
+        user_data = User.query.filter_by(user_id=user_id).one_or_none()
+        if not client_data or not user_data:
             raise UserNotFound(user_id)
 
         #update staff recent clients information
@@ -99,28 +95,26 @@ class Client(Resource):
             db.session.commit()
 
         #data must be refreshed because of db changes
-        db.session.refresh(client_data[0])
-        db.session.refresh(client_data[1])
-        return client_data
+        db.session.refresh(client_data)
+        db.session.refresh(user_data)
+        return {'client_info': client_data, 'user_info': user_data}
 
     @token_auth.login_required
-    @accepts(schema=ClientInfoSchema, api=ns)
+    @accepts(schema=ClientAndUserInfoSchema, api=ns)
     @responds(status_code=200, api=ns)
     def put(self, user_id):
         """edit client info"""
-        data = request.get_json()
 
-        client_info_data = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
+        client_data = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
+        user_data = User.query.filter_by(user_id=user_id).one_or_none()
 
-        if not client_info_data:
+        if not client_data or not user_data:
             raise UserNotFound(user_id)
-        #prevent requests to set user_id and send message back to api user
-        elif data.get('user_id', None):
-            raise IllegalSetting('user_id')
-        elif data.get('membersince', None):
-            raise IllegalSetting('membersince')
+        
+        #update both tables with request data
+        client_data.update(request.pasrsed_obj['client_info'])
+        user_data.update(request.parsed_obj['user_info'])
 
-        client_info_data.update(data)
         db.session.commit()
         
         return 

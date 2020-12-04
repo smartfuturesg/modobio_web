@@ -11,8 +11,7 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
         exclude = ('created_at', 'updated_at')
-
-    modobio_id = fields.String(missing=None, dump_only=True)
+        dump_only = ('dump_only', 'is_staff', 'is_client', 'password', 'modobio_id', 'user_id')
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -46,7 +45,12 @@ class NewClientUserSchema(Schema):
     modobio_id = fields.String()
     biological_sex_male = fields.Boolean()
 
-class UserInfoSchema(Schema):
+class UserInfoSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = User
+        exclude = ('created_at', 'updated_at')
+        load_only = ('password')
+
     firstname = fields.String()
     middlename = fields.String()
     lastname = fields.String()
