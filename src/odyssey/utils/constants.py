@@ -816,3 +816,8 @@ Refresh token lifetime in hours.
 
 :type: int
 """
+
+
+REGISTRATION_PORTAL_URL = "www.modobio.com/user/registration-portal?portal_id={}"
+
+PASSWORD_RESET_URL = " www.modobio.com/password/reset?reset_token={}"

@@ -34,7 +34,7 @@ from odyssey.api.trainer.models import FitnessQuestionnaire
 from odyssey.api.facility.models import RegisteredFacilities
 from odyssey.api.user.models import User, UserLogin
 from odyssey.utils.pdf import to_pdf, merge_pdfs
-from odyssey.utils.email import send_email_remote_registration_portal, send_test_email
+from odyssey.utils.email import send_email_user_registration_portal, send_test_email
 from odyssey.utils.misc import check_client_existence
 from odyssey.api.client.schemas import(
     AllClientsDataTier,
@@ -663,7 +663,7 @@ class JourneyStatusCheck(Resource):
 
 #         if not current_app.config['LOCAL_CONFIG']:
 #             # send email to client containing registration details
-#             send_email_remote_registration_portal(
+#             send_email_user_registration_portal(
 #                 recipient=remote_client_portal.email, 
 #                 password=remote_client_portal.password, 
 #                 remote_registration_portal=remote_client_portal.registration_portal_id
@@ -705,7 +705,7 @@ class JourneyStatusCheck(Resource):
 
 #         if not current_app.config['LOCAL_CONFIG']:
 #             # send email to client containing registration details
-#             send_email_remote_registration_portal(
+#             send_email_user_registration_portal(
 #                 recipient=remote_client_portal.email,
 #                 password=remote_client_portal.password, 
 #                 remote_registration_portal=remote_client_portal.registration_portal_id

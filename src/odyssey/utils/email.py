@@ -2,24 +2,26 @@ import boto3
 from botocore.exceptions import ClientError
 from flask import current_app
 
-SUBJECTS = {"remote_registration_portal": "Modo Bio Client Registration Portal", 
+from odyssey.utils.constants import PASSWORD_RESET_URL, REGISTRATION_PORTAL_URL
+
+SUBJECTS = {"remote_registration_portal": "Modo Bio User Registration Portal", 
             "password_reset": "Modo bio password reset request - temporary link",
             "testing-bounce": "SES TEST EMAIL-BOUNCE",
             "testing-complaint": "SES TEST EMAIL-COMPLAINT",
             "testing-success": "SES TEST EMAIL"
             }
 
-def send_email_remote_registration_portal(recipient, password, remote_registration_portal):
+def send_email_user_registration_portal(recipient, password, portal_id):
     """
-    Email for sending clients their remote registration link and login details
+    Email for sending users their registration link and login details
+    That were createrd by a client services staff member
     """
     
     SUBJECT = SUBJECTS["remote_registration_portal"]
     
     SENDER = "Modo Bio no-reply <no-reply@modobio.com>"
 
-    domain="www.modobio.com/client/remoteregistration/"
-    remote_registration_url = domain+remote_registration_portal
+    remote_registration_url = REGISTRATION_PORTAL_URL.format(portal_id)
 
     # route emails to AWS mailbox simulator when in dev environment
     if current_app.env == "development":
@@ -27,12 +29,12 @@ def send_email_remote_registration_portal(recipient, password, remote_registrati
 
     # The email body for recipients with non-HTML email clients.
     BODY_TEXT = ("Welcome to Modo Bio!\r\n"
-                "Please visit your unique portal to complete your client registration:\n"
+                "Please visit your unique portal to complete your user registration:\n"
                 f"1) Copy and paste this portal link into your browser {remote_registration_url}\n"
                 "2) Enter your email and password to login:"
                 f"\t email: {recipient}\n"
                 f"\t password: {password}\n\n"
-                "If you have any issues, please contact client services at your Modo Bio clinic."
+                "If you have any issues, please contact client services."
                 )
                 
     # The HTML body of the email.
@@ -40,7 +42,7 @@ def send_email_remote_registration_portal(recipient, password, remote_registrati
     <head></head>
     <body>
     <h1>Welcome to Modo Bio!</h1>
-    <p>Please visit your unique portal to complete your client registration:
+    <p>Please visit your unique portal to complete your user registration:
     <br>1) Click on this link to be directed to your registration portal <a href={remote_registration_url}></a>
     <br> or copy and paste this portal link into your browser {remote_registration_url} 
     <br>2) Enter your email and password to login: 
@@ -48,7 +50,7 @@ def send_email_remote_registration_portal(recipient, password, remote_registrati
     <br>     password: {password}
     <br>
     <br>
-    <br>If you have any issues, please contact client services at your Modo Bio clinic
+    <br>If you have any issues, please contact client services.
     </body>
     </html>
     """     
@@ -64,11 +66,11 @@ def send_email_password_reset(recipient, reset_token):
     
     SENDER = "Modo Bio no-reply <no-reply@modobio.com>"
 
-    reset_password_url=f"www.modobio.com/staff/passwordreset/{reset_token}/"
+    reset_password_url = PASSWORD_RESET_URL.format(reset_token)
 
     # route emails to AWS mailbox simulator when in dev environment
-    # if current_app.env == "development":
-    #     recipient = "success@simulator.amazonses.com"
+    if current_app.env == "development":
+        recipient = "success@simulator.amazonses.com"
 
     # The email body for recipients with non-HTML email clients.
     BODY_TEXT = ("You have requested to reset your password\r\n"

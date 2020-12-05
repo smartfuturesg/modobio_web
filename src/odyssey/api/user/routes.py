@@ -9,8 +9,9 @@ from werkzeug.security import check_password_hash
 
 
 from odyssey.api import api
-from odyssey.utils.errors import ContentNotFound, InputError, StaffEmailInUse, ClientEmailInUse, UnauthorizedUser
-from odyssey.utils.email import send_email_password_reset
+from odyssey.api.client.schemas import ClientInfoSchema
+from odyssey.api.staff.schemas import StaffProfileSchema, StaffRolesSchema
+from odyssey.api.user.models import User, UserLogin
 from odyssey.api.user.schemas import (
     UserSchema, 
     NewClientUserSchema,
@@ -20,11 +21,11 @@ from odyssey.api.user.schemas import (
     UserPasswordUpdateSchema,
     NewUserSchema
 ) 
-from odyssey.api.staff.schemas import StaffProfileSchema, StaffRolesSchema
-from odyssey.api.client.schemas import ClientInfoSchema
-from odyssey.api.user.models import User, UserLogin
-from odyssey.utils.misc import check_user_existence
 from odyssey.utils.auth import token_auth
+from odyssey.utils.constants import PASSWORD_RESET_URL
+from odyssey.utils.errors import ContentNotFound, InputError, StaffEmailInUse, ClientEmailInUse, UnauthorizedUser
+from odyssey.utils.email import send_email_password_reset
+from odyssey.utils.misc import check_user_existence, verify_jwt
 
 from odyssey import db
 
@@ -173,14 +174,15 @@ class PasswordResetEmail(Resource):
             return 200
 
         secret = current_app.config['SECRET_KEY']
-        encoded_token = jwt.encode({'exp': datetime.utcnow()+timedelta(minutes = 15), 
+        password_reset_token = jwt.encode({'exp': datetime.utcnow()+timedelta(minutes = 15), 
                                   'sid': user.user_id}, 
                                   secret, 
                                   algorithm='HS256').decode("utf-8") 
         if current_app.env == "development":
-            return jsonify({"token": encoded_token})
+            return jsonify({"token": password_reset_token,
+                            "password_reset_url" : PASSWORD_RESET_URL.format(password_reset_token)})
         else:
-            send_email_password_reset(user.email, encoded_token)
+            send_email_password_reset(user.email, password_reset_token)
             return 200
         
 
@@ -247,15 +249,44 @@ class RefreshToken(Resource):
         Issues new API access token if refrsh_token is still valid
         """
         refresh_token = request.args.get("refresh_token")
-        secret = current_app.config['SECRET_KEY']
         
         # check that the token is valid
-        try:
-            decoded_token = jwt.decode(refresh_token, secret, algorithms='HS256')
-        except jwt.ExpiredSignatureError:
-            raise UnauthorizedUser(message="")
+        decoded_token = verify_jwt(refresh_token)
         
         # if valid, create a new access token, return it in the payload
         token = UserLogin.generate_token(user_id=decoded_token['uid'], user_type=decoded_token['utype'], token_type='access')    
         
         return {'access_token': token}, 201
+
+@ns.route('/registration-portal/verify')
+@ns.doc(params={'portal_id': "registration portal id"})
+class VerifyPortalId(Resource):
+    """
+    Verify registration portal id and update user type
+    
+    New users registered by client services must first go through this endpoint in 
+    order to access any other resource. This API completes the user's registration
+    so they may then request an API token. 
+    
+    """
+    def put(self):
+        """
+        check token validity
+        bring up user
+        update user type (client or staff)
+        """
+        portal_id = request.args.get("portal_id")
+
+        decoded_token = verify_jwt(portal_id)
+
+        user = User.query.filter_by(user_id=decoded_token['uid']).one_or_none()
+        
+        if not user:
+            raise UnauthorizedUser
+
+        if decoded_token['utype'] == 'client':
+            user.is_client = True
+        elif decoded_token['utype'] == 'staff':
+            user.is_staff = True
+        
+        return 200
