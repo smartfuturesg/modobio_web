@@ -56,8 +56,8 @@ class NewStaffUser(Resource):
         data = request.get_json()
         
         # Check if user exists already
-        user_info = data.get('userinfo')
-        staff_info = data.get('staffinfo')
+        user_info = data.get('user_info')
+        staff_info = data.get('staff_info')
 
         user = User.query.filter(User.email.ilike(user_info.get('email'))).first()
         if user:
@@ -112,7 +112,7 @@ class NewClientUser(Resource):
         """
         data = request.get_json()     
 
-        user_info = data.get('userinfo')
+        user_info = data.get('user_info')
         user = User.query.filter(User.email.ilike(user_info.get('email'))).first()
         if user:
             if user.is_client:
@@ -132,8 +132,8 @@ class NewClientUser(Resource):
                 password = user_info.get('email')[:2]+secrets.token_hex(4)
             else:
                 del user_info['password']
-            user_info["is_client"] = True
-            user_info["is_staff"] = False
+            user_info['is_client'] = True
+            user_info['is_staff'] = False
             user = UserSchema().load(user_info)
             db.session.add(user)
             db.session.flush()
@@ -146,7 +146,7 @@ class NewClientUser(Resource):
         payload['password']=password
         
         db.session.commit()
-
+        print(user.__dict__)
         return user
 
 @ns.route('/password/forgot-password/recovery-link/')

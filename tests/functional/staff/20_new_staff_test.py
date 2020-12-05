@@ -26,7 +26,7 @@ def test_creating_new_staff(test_client, init_database, staff_auth_header):
     
     # some simple checks for validity
     assert response.status_code == 201
-    assert response.json['firstname'] == users_staff_new_user_data['userinfo']['firstname']
+    assert response.json['firstname'] == users_staff_new_user_data['user_info']['firstname']
     assert response.json['is_staff'] == True
     assert response.json['is_client'] == False
 
@@ -41,7 +41,7 @@ def test_staff_login(test_client, init_database, staff_auth_header):
     # Login (get token) for newly created staff member
     ##
     valid_credentials = base64.b64encode(
-        f"{users_staff_new_user_data['userinfo']['email']}:{users_staff_new_user_data['userinfo']['password']}".encode(
+        f"{users_staff_new_user_data['user_info']['email']}:{users_staff_new_user_data['user_info']['password']}".encode(
             "utf-8")).decode("utf-8")
     
     headers = {'Authorization': f'Basic {valid_credentials}'}
@@ -53,7 +53,7 @@ def test_staff_login(test_client, init_database, staff_auth_header):
     roles = response.get_json()['access_roles']
 
     assert response.status_code == 201
-    assert roles.sort() == users_staff_new_user_data['staffinfo']['access_roles'].sort()
+    assert roles.sort() == users_staff_new_user_data['staff_info']['access_roles'].sort()
 
 
 def test_creating_new_staff_same_email(test_client, init_database, staff_auth_header):

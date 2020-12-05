@@ -22,6 +22,7 @@ from odyssey.api.client.models import (
     ClientSubscriptionContract,
     ClientFacilities,
 )
+from odyssey.api.user.schemas import UserSchema
 
 class ClientSearchItemsSchema(Schema):
     user_id = fields.Integer()
@@ -65,26 +66,19 @@ class ClientFacilitiesSchema(Schema):
 class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientInfo
+        exclude = ('created_at', 'updated_at', 'idx')
+        dump_only = ('modobio_id', 'membersince')
 
-    idx = fields.Integer()
     user_id = fields.Integer()
-    record_locator_id = fields.String(missing=None)
-    modobio_id = fields.String(required=False, validate=validate.Length(min=0,max=12), dump_only=True)
-    firstname = fields.String(dump_only=True)
-    lastname = fields.String(dump_only=True)
-    email = fields.Email(dump_only=True)
-    biological_sex_male = fields.Boolean()
 
     @post_load
     def make_object(self, data, **kwargs):
         return ClientInfo(**data)
-    @pre_dump
-    def ravel(self, data, **kwargs):
-        # take a dict copy of client_info and add user data 
-        client_info = data[0].__dict__.copy()
-        user_data = data[1].__dict__
-        client_info.update(user_data)
-        return client_info
+
+class ClientAndUserInfoSchema(Schema):
+
+    client_info = fields.Nested(ClientInfoSchema)
+    user_info = fields.Nested(UserSchema)
 
 class NewRemoteClientSchema(Schema):
 
