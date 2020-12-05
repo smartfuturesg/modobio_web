@@ -10,10 +10,9 @@ from werkzeug.security import check_password_hash
 
 from odyssey.api import api
 from odyssey.utils.errors import ContentNotFound, InputError, StaffEmailInUse, ClientEmailInUse, UnauthorizedUser
-from odyssey.utils.email import send_email_password_reset
+from odyssey.utils.email import send_email_password_reset, send_email_delete_account
 from odyssey.api.user.schemas import (
     UserSchema, 
-    NewClientUserSchema,
     UserLoginSchema,
     UserPasswordRecoveryContactSchema,
     UserPasswordResetSchema,
@@ -23,7 +22,7 @@ from odyssey.api.user.schemas import (
 ) 
 from odyssey.api.staff.schemas import StaffProfileSchema, StaffRolesSchema
 from odyssey.api.client.schemas import ClientInfoSchema
-from odyssey.api.user.models import User, UserLogin
+from odyssey.api.user.models import User, UserLogin, UserRemovalRequests
 from odyssey.utils.misc import check_user_existence
 from odyssey.utils.auth import token_auth
 
@@ -42,13 +41,25 @@ class ApiUser(Resource):
 
         return User.query.filter_by(user_id=user_id).one_or_none()
 
-    @token_auth.login_required
+    @token_auth.login_required()
     def delete(self, user_id):
         #Search for user by user_id in User table
         check_user_existence(user_id)
         user = User.query.filter_by(user_id=user_id).one_or_none()
+        requester = token_auth.current_user()[0]
+        removal_request = UserRemovalRequests(
+            requester_email=requester.email, 
+            deleting_email=user.email)
         
+        db.session.add(removal_request)
+        db.session.flush()
+        #TODO: some logic to email to staff admin
+        if user.email != requester.email:
+            send_email_delete_account(requester.email, user.email)
+        send_email_delete_account(user.email, user.email)
 
+        db.session.delete(user)
+        db.session.commit()
 
         return {'message': f'User with id {user_id} has been removed'}
 
@@ -111,8 +122,8 @@ class NewStaffUser(Resource):
 
 @ns.route('/client/')
 class NewClientUser(Resource):
-    @accepts(schema=NewClientUserSchema, api=ns)
-    @responds(schema=NewClientUserSchema, status_code=201, api=ns)
+    @accepts(schema=NewUserSchema, api=ns)
+    @responds(schema=UserInfoSchema, status_code=201, api=ns)
     def post(self): 
         """
         Create a client user. This endpoint requires a payload with just

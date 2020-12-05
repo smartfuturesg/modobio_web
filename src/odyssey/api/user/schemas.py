@@ -33,18 +33,19 @@ class UserLoginSchema(ma.SQLAlchemyAutoSchema):
         return new_user
 
 
-class NewClientUserSchema(Schema):
-    """
-    Schema for validating payloads from the creation of a new client user
-    """
-    firstname = fields.String()
-    middlename = fields.String()
-    lastname = fields.String()
-    email = fields.Email(validate=validate.Length(min=0,max=50))
-    phone_number = fields.String(validate=validate.Length(min=0,max=50))
-    password = fields.String(validate=validate.Length(min=0,max=50), dump_only=True)
-    modobio_id = fields.String(dump_only=True)
-    biological_sex_male = fields.Boolean()
+#Commented out because it felt redundant, using UserInfoSchema instead
+# class NewClientUserSchema(Schema):
+#    """
+#    Schema for validating payloads from the creation of a new client user
+#    """
+#    firstname = fields.String()
+#    middlename = fields.String()
+#    lastname = fields.String()
+#    email = fields.Email(validate=validate.Length(min=0,max=50))
+#    phone_number = fields.String(validate=validate.Length(min=0,max=50))
+#    password = fields.String(validate=validate.Length(min=0,max=50), load_only=True)
+#    modobio_id = fields.String()
+#    biological_sex_male = fields.Boolean()
 
 class UserInfoSchema(Schema):
     """
@@ -57,7 +58,9 @@ class UserInfoSchema(Schema):
     phone_number = fields.String(validate=validate.Length(min=0,max=50))
     password = fields.String(description="password required when creating a staff member",
                             validate=validate.Length(min=0,max=50), 
-                            required=False)
+                            required=False,
+                            load_only=True)
+    modobio_id = fields.String(dump_only=True)
     biological_sex_male = fields.Boolean() 
     
 
