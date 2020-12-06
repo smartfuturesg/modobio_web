@@ -24,8 +24,7 @@ def test_new_client_user(test_client, init_database, staff_auth_header):
     assert response.status_code == 201
     assert password
     assert portal_id
-    breakpoint()        
-    users = User.query.all()  
+
     ####
     # Verify the portal_id and complete client registration
     ####
