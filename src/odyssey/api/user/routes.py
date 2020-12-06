@@ -290,4 +290,5 @@ class VerifyPortalId(Resource):
             user.is_staff = True
         
         db.session.commit()
+        
         return 200

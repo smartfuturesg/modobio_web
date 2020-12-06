@@ -41,15 +41,15 @@ def test_put_client_info(test_client, init_database, staff_auth_header):
     
 
     # test attempting to change the user_id
-    data = {'client_info': {'user_id': 10}, 'user_info': {'is_staff': False, 'is_client': True}}
+    data = {'client_info': {'user_id': 10}}
     # send get request for client info on user_id = 1 
     response = test_client.put('/client/1/', headers=staff_auth_header, data=dumps(data),  content_type='application/json')
 
     print(response.data)
     assert response.status_code == 400
 
-    # test attempting to change the phone number
-    data = {'client_info': {'guardianname': 'Testy'}, 'user_info': {'is_staff': False, 'is_client': True}}
+    # test attempting to change the guardian name
+    data = {'client_info': {'guardianname': 'Testy'}}
 
     response = test_client.put('/client/1/', 
                                 headers=staff_auth_header, 
@@ -78,6 +78,7 @@ def test_creating_new_client(test_client, init_database, staff_auth_header):
                                 content_type='application/json')
 
     user = User.query.filter_by(email=users_new_user_client_data['user_info']['email']).first()
+    print(response.data)
     assert response.status_code == 201
     assert user.email == users_new_user_client_data['user_info']['email']
     assert response.json['modobio_id']

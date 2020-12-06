@@ -22,7 +22,7 @@ from odyssey.api.client.models import (
     ClientSubscriptionContract,
     ClientFacilities,
 )
-from odyssey.api.user.schemas import UserSchema
+from odyssey.api.user.schemas import UserInfoPutSchema
 
 class ClientSearchItemsSchema(Schema):
     user_id = fields.Integer()
@@ -75,10 +75,16 @@ class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
     def make_object(self, data, **kwargs):
         return ClientInfo(**data)
 
+class ClientInfoPutSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = ClientInfo
+        exclude = ('created_at', 'updated_at', 'idx')
+        dump_only = ('modobio_id', 'membersince', 'is_staff', 'is_client', 'user_id', 'receive_docs')
+
 class ClientAndUserInfoSchema(Schema):
 
-    client_info = fields.Nested(ClientInfoSchema)
-    user_info = fields.Nested(UserSchema)
+    client_info = fields.Nested(ClientInfoPutSchema, required=False, missing={})
+    user_info = fields.Nested(UserInfoPutSchema, required=False, missing={})
 
 class NewRemoteClientSchema(Schema):
 
