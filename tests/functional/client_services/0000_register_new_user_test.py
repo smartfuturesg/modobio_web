@@ -4,6 +4,7 @@ from flask.json import dumps
 
 from tests.functional.client_services.data import client_services_register_user_client, client_services_register_user_staff
 
+from odyssey.api.user.models import User
 
 def test_new_client_user(test_client, init_database, staff_auth_header):
     """
@@ -23,7 +24,8 @@ def test_new_client_user(test_client, init_database, staff_auth_header):
     assert response.status_code == 201
     assert password
     assert portal_id
-
+    breakpoint()        
+    users = User.query.all()  
     ####
     # Verify the portal_id and complete client registration
     ####
@@ -44,7 +46,7 @@ def test_new_client_user(test_client, init_database, staff_auth_header):
     response = test_client.post('/client/token/',
                             headers=headers, 
                             content_type='application/json')
-                            
+              
     assert response.status_code == 201
     assert response.json['email'] == client_services_register_user_client['email']
 
