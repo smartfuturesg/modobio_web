@@ -68,9 +68,12 @@ class NewUserClientServices(Resource):
 
         send_email_user_registration_portal(user.email, password, portal_id)
 
-        return {'password':password,
-                'portal_id': portal_id,
-                'registration_portal_url': REGISTRATION_PORTAL_URL.format(portal_id)}
+        if current_app.env == 'development':
+            return {'password':password,
+                    'portal_id': portal_id,
+                    'registration_portal_url': REGISTRATION_PORTAL_URL.format(portal_id)}
+        else:
+            return
 
 @ns.route("/user/registration-portal/refresh")
 class RefreshRegistrationPortal(Resource):
@@ -121,6 +124,9 @@ class RefreshRegistrationPortal(Resource):
         
         db.session.commit()
         
-        return {'password':password,
-                'portal_id': portal_id,
-                'registration_portal_url': REGISTRATION_PORTAL_URL.format(portal_id)}
+        if current_app.env == 'development':
+            return {'password':password,
+                    'portal_id': portal_id,
+                    'registration_portal_url': REGISTRATION_PORTAL_URL.format(portal_id)}
+        else:
+            return
