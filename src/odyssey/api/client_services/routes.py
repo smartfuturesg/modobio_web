@@ -14,7 +14,7 @@ from odyssey.api.user.models import User, UserLogin
 from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import REGISTRATION_PORTAL_URL
 from odyssey.utils.email import send_email_user_registration_portal
-from odyssey.utils.errors import ClientEmailInUse, InputError
+from odyssey.utils.errors import ClientEmailInUse, InputError, UserNotFound
 
 
 ns = api.namespace('client-services', description='Endpoints for client services operations.')
@@ -72,7 +72,7 @@ class NewUserClientServices(Resource):
                 'portal_id': portal_id,
                 'registration_portal_url': REGISTRATION_PORTAL_URL.format(portal_id)}
 
-@ns.route("/registration-portal/refresh")
+@ns.route("/user/registration-portal/refresh")
 class RefreshRegistrationPortal(Resource):
     """
     Routines related to registration portals.
@@ -80,7 +80,7 @@ class RefreshRegistrationPortal(Resource):
     """
     @token_auth.login_required(user_type=('staff', ), staff_role=('client_services',
                                                                   'client_services_internal'))
-    @accepts(dict(name='email', type=str), dict(name='user_type', type=str) api=ns)
+    @accepts(dict(name='email', type=str), dict(name='user_type', type=str), api=ns)
     def put(self):
         """
         Takes the email of a client already in the system and
@@ -94,6 +94,32 @@ class RefreshRegistrationPortal(Resource):
 
         user_type must be either 'client' or 'staff'
         """
-        
+        email = request.parsed_args.get('email')
+        user_type = request.parsed_args.get('user_type')
+        if user_type not in ('staff', 'client'):
+            raise InputError
+
+        user = User.query.filter_by(email=email.lower()).one_or_none()
+        if not user:
+            raise UserNotFound(message='')
     
-        return
+        # reset the user's password, send that password as part of the registration portal email
+        user_login = UserLogin.query.filter_by(user_id=user.user_id).one_or_none()
+        password = user.email[:2] + secrets.token_hex(8)
+
+        user_login.set_password(password)
+
+        secret = current_app.config['SECRET_KEY']
+        portal_id = jwt.encode({'exp': datetime.utcnow() + timedelta(hours=72),  
+                                'utype': user_type,
+                                'uid': user.user_id},
+                                secret,
+                                algorithm='HS256').decode('utf-8')
+
+        send_email_user_registration_portal(user.email, password, portal_id)
+        
+        db.session.commit()
+        
+        return {'password':password,
+                'portal_id': portal_id,
+                'registration_portal_url': REGISTRATION_PORTAL_URL.format(portal_id)}

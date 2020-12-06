@@ -23,6 +23,7 @@ from odyssey.utils.errors import (
     TestNotFound, 
     UnauthorizedUser,
     UserNotFound, 
+    StaffNotFound
 )
 
 
