@@ -289,4 +289,6 @@ class VerifyPortalId(Resource):
         elif decoded_token['utype'] == 'staff':
             user.is_staff = True
         
+        db.session.commit()
+        
         return 200
