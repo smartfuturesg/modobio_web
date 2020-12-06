@@ -4,8 +4,6 @@ from flask.json import dumps
 
 from tests.functional.client_services.data import client_services_register_user_client, client_services_register_user_staff
 
-from odyssey.api.user.models import User
-
 def test_new_client_user(test_client, init_database, staff_auth_header):
     """
     GIVEN a api end point for creating a new client with the client services API
