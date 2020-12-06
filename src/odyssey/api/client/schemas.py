@@ -268,6 +268,20 @@ class ClientDataTierSchema(Schema):
     stored_bytes = fields.Integer(description="total bytes stored for the client", missing=None)
     tier = fields.String(description="data storage tier. Either Tier 1/2/3", missing=None)
 
+class ClientClinicalCareTeamInternalSchema(Schema):
+    """
+    Schema is used for serializing/deserializing clinical care team related payloads
+    """
+    team_member_email = fields.Email(description="email for clinical care team member")
+    team_member_user_id = fields.Integer(description="user_id for clinical care team member", dump_only=True)
+
+class ClientClinicalCareTeamSchema(Schema):
+    """
+    Schema is used for nesting ClientClinicalCareTeamInternalSchema 
+    """
+    
+    care_team = fields.Nested(ClientClinicalCareTeamInternalSchema(many=True), missing=[])
+    total_items = fields.Integer(dump_only=True)
 
 class AllClientsDataTier(Schema):
 
