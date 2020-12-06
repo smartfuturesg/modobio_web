@@ -81,6 +81,7 @@ class RefreshRegistrationPortal(Resource):
     @token_auth.login_required(user_type=('staff', ), staff_role=('client_services',
                                                                   'client_services_internal'))
     @accepts(dict(name='email', type=str), dict(name='user_type', type=str), api=ns)
+    @responds(schema=NewUserRegistrationPortalSchema, api=ns, status_code=201)
     def put(self):
         """
         Takes the email of a client already in the system and
