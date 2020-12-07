@@ -110,15 +110,12 @@ class Client(Resource):
 
         if not client_data or not user_data:
             raise UserNotFound(user_id)
-
-        if 'user_id' in request.parsed_obj['user_info'].__dict__.keys() or 'user_id' in request.parsed_obj['client_info'].__dict__.keys():
-            raise IllegalSetting('user_id')
         
         #update both tables with request data
-        del request.parsed_obj['client_info'].__dict__['_sa_instance_state']
-        del request.parsed_obj['user_info'].__dict__['_sa_instance_state']
-        client_data.update(request.parsed_obj['client_info'].__dict__)
-        user_data.update(request.parsed_obj['user_info'].__dict__)
+        if request.parsed_obj['client_info']:
+            client_data.update(request.parsed_obj['client_info'])
+        if request.parsed_obj['user_info']:
+            user_data.update(request.parsed_obj['user_info'])
 
         db.session.commit()
         

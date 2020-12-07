@@ -58,6 +58,14 @@ class UserInfoSchema(ma.SQLAlchemyAutoSchema):
                             validate=validate.Length(min=0,max=50), 
                             required=False)
     
+class UserInfoPutSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = User
+        exclude = ('created_at', 'updated_at')
+        dump_only = ('is_staff', 'is_client', 'modobio_id', 'user_id')
+
+    email = fields.Email(validate=validate.Length(min=0,max=50))
+    phone_number = fields.String(validate=validate.Length(min=0,max=50))
 
 class StaffInfoSchema(Schema):
     """
