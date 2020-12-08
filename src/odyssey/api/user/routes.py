@@ -22,7 +22,7 @@ from odyssey.api.user.schemas import (
     NewUserSchema
 ) 
 from odyssey.utils.auth import token_auth
-from odyssey.utils.constants import PASSWORD_RESET_URL
+from odyssey.utils.constants import PASSWORD_RESET_URL, DB_SERVER_TIME
 from odyssey.utils.errors import ContentNotFound, InputError, StaffEmailInUse, ClientEmailInUse, UnauthorizedUser
 from odyssey.utils.email import send_email_password_reset
 from odyssey.utils.misc import check_user_existence, verify_jwt
@@ -292,3 +292,61 @@ class VerifyPortalId(Resource):
         db.session.commit()
         
         return 200
+
+@ns.route('/subscription/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class UserSubscriptionApi(Resource):
+
+    @token_auth.login_required
+    @responds(UserSubscriptionsSchema(many=True))
+    def get(user_id):
+        """
+        Returns active subscription information for the given user_id. Because a user_id
+        can belong to both a client and staff account, both active subscriptions will be
+        returned in this case.
+        """"
+        return UserSubscriptions.query.filter_by(user_id=user_id).filter_by(end_date=None).all()
+
+    @token_aut.login_required
+    @accepts(UserSubscriptionPutSchema)
+    @responds(UserSubscriptionsSchema)
+    def put(user_id):
+        """
+        Updates the currently active subscription for the given user_id. Also sets the end
+        date to the previously active subscription.
+        """
+        prev_sub = UserSubscriptions.query.filter_by(user_id=user_id).filter_by(end_date=None) \
+            .filter_by(is_staff=request.parsed_obj.is_staff).one_or_none()
+        prev_sub.update({'end_date': DB_SERVER_TIME})
+
+        new_sub = {
+            'subscription_type': request.parsed_obj['subscription_type'],
+            'subscription_rate': request.parsed_obj['subscription_rate'],
+            'is_staff': request.parsed_obj['is_staff'],
+            'user_id': user_id
+        }
+        db.session.add(UserSubscriptions().load(new_sub))
+        db.session.commit()
+
+        return request.parsed_obj
+
+    
+
+@ns.route('/subscription/history/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class UserSubscriptionHistoryApi(Resource):
+
+    @token_auth.login_required
+    @responds(UserSubscriptionHistorySchema)
+    def get(user_id):
+        """
+        Returns the complete subscription hisotyr for the given user_id. Because a user_id
+        can belong to both a client and staff account, both active subscriptions histories
+        will be returned in this case.
+        """
+        res = {}
+        res['client_subscription_history'] = UserSubscriptions.query.filter_by(user_id=user_id) \
+            .filter_by(is_staff=False).order_by(UserSubscriptions.start_date.asc).all()
+        res['staff_subscription_history'] = UserSubscriptions.query.filter_by(user_id=user_id) \
+            .filter_by(is_staff=True).order_by(UserSubscriptions.start_date.asc).all()
+        return (res)
