@@ -691,13 +691,13 @@ class ClinicalCareTeam(Resource):
     """
     @token_auth.login_required(user_type=('client',))
     @accepts(schema=ClientClinicalCareTeamSchema, api=ns)
-    @responds(schema=ClientClinicalCareTeamSchema, api=ns)
+    @responds(schema=ClientClinicalCareTeamSchema, api=ns, status_code=201)
     def post(self, user_id):
         """
         Make a new entry into a client's clinical care team using only the new team 
         member's email. Clients may only have 6 team members stored. 
 
-        Emails are check against the database. If the email is associated with a current user, 
+        Emails are checked against the database. If the email is associated with a current user, 
         the user's id is stored in the ClientClinicalCareTeam table. Otherwise, just the 
         email address is registered. 
 
@@ -747,6 +747,63 @@ class ClinicalCareTeam(Resource):
 
         current_team = ClientClinicalCareTeam.query.filter_by(user_id=user_id).all()
         response = {"care_team": current_team ,
+                    "total_items": len(current_team) }
+
+        return response
+
+    @token_auth.login_required(user_type=('client',))
+    @accepts(schema=ClientClinicalCareTeamSchema, api=ns)
+    # @responds(schema=ClientClinicalCareTeamSchema, api=ns)
+    def delete(self, user_id):
+        """
+        Remove members of a client's clinical care team using the team member's email address.
+        Any matches between the incoming payload and current team members in the DB will be removed. 
+
+        Parameters
+        ----------
+        user_id : int
+            User ID number
+
+        Expected payload includes
+        email : str
+            Email of new care team member
+        Returns
+        -------
+        200 OK
+        """
+        
+        data = request.parsed_obj
+       
+        for team_member in data.get("care_team"):
+            ClientClinicalCareTeam.query.filter_by(user_id=user_id, team_member_email=team_member['team_member_email'].lower()).delete()
+            
+        db.session.commit()
+
+        return 200
+
+    @token_auth.login_required(user_type=('client',))
+    @responds(schema=ClientClinicalCareTeamSchema, api=ns, status_code=200)
+    def get(self, user_id):
+        """
+        Remove members of a client's clinical care team using the team member's email address.
+        Any matches between the incoming payload and current team members in the DB will be removed. 
+
+        Parameters
+        ----------
+        user_id : int
+            User ID number
+
+        Expected payload includes
+        email : str
+            Email of new care team member
+        Returns
+        -------
+        200 OK
+        """
+        
+        current_team = ClientClinicalCareTeam.query.filter_by(user_id=user_id).all()
+        
+        response = {"care_team": current_team,
                     "total_items": len(current_team) }
 
         return response
