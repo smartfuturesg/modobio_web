@@ -71,9 +71,9 @@ class Client(Resource):
         """returns client info table as a json for the user_id specified"""
         client_data = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
         user_data = User.query.filter_by(user_id=user_id).one_or_none()
-        if not client_data or not user_data:
+        if not client_data and not user_data:
             raise UserNotFound(user_id)
-
+        
         #update staff recent clients information
         staff_user_id = token_auth.current_user()[0].user_id
 
@@ -98,8 +98,10 @@ class Client(Resource):
             db.session.commit()
 
         #data must be refreshed because of db changes
-        db.session.refresh(client_data)
-        db.session.refresh(user_data)
+        if client_data:
+            db.session.refresh(client_data)
+        if user_data:
+            db.session.refresh(user_data)
         return {'client_info': client_data, 'user_info': user_data}
 
     @token_auth.login_required
