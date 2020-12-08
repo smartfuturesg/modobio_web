@@ -257,7 +257,7 @@ class UserLogin(db.Model):
                             secret, 
                             algorithm='HS256').decode("utf-8")
 
-class UserSubscriptions(db.model):
+class UserSubscriptions(db.Model):
     """ 
     Stores details to relating to user account not related to the subscription system
     """
@@ -269,7 +269,7 @@ class UserSubscriptions(db.model):
         free_trial = 3
         sponsored = 4
 
-    __tablename__ = 'UserSubscriptions"
+    __tablename__ = 'UserSubscriptions'
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
@@ -292,7 +292,7 @@ class UserSubscriptions(db.model):
     :type: int, foreign key('User.user_id'), compund primary key with is_staff
     """
 
-    is_staff = db.Column(db.Boolean)
+    is_staff = db.Column(db.Boolean, primary_key=True)
     """
     Denotes if this subscription is for a staff member. Distinguishes between 
     subscriptions for users with both account types
