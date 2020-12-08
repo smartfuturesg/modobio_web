@@ -716,44 +716,57 @@ class ClinicalCareTeam(Resource):
         """
         
         data = request.parsed_obj
+
+
         user = token_auth.current_user()[0]
 
         current_team = ClientClinicalCareTeam.query.filter_by(user_id=user_id).all()
         current_team_emails = [x.team_member_email for x in current_team]
-        # enter new team members into client's clinical care team
-        # ensure care team does not exceed 6 total members
-        # if email is associated with a current user, add that user's id to 
-        #  the database entry
 
+        # prevent users from having more than 6 clinical care team members
         if len(current_team) + len(data.get("care_team")) > 6:
             raise InputError(message="Attemping to add too many team members", status_code=400)
-        
-        for team_member in data.get("care_team"):
 
+        # enter new team members into client's clinical care team
+        # if email is associated with a current user account, add that user's id to 
+        #  the database entry
+        for team_member in data.get("care_team"):
             if team_member["team_member_email"] == user.email:
                 continue
             if team_member["team_member_email"].lower() in current_team_emails:
                 continue
+
             team_memeber_user = User.query.filter_by(email=team_member["team_member_email"].lower()).one_or_none()
             if team_memeber_user:
                 db.session.add(ClientClinicalCareTeam(**{"team_member_email": team_member["team_member_email"],
-                                                       "team_member_user_id": team_memeber_user.user_id,
-                                                        "user_id": user_id}))
+                                                         "team_member_user_id": team_memeber_user.user_id,
+                                                         "user_id": user_id}))
             else:
                 db.session.add(ClientClinicalCareTeam(**{"team_member_email": team_member["team_member_email"],
                                                        "user_id": user_id}))
             
         db.session.commit()
 
-        current_team = ClientClinicalCareTeam.query.filter_by(user_id=user_id).all()
-        response = {"care_team": current_team ,
+        # prepare response with names for clinical care team members who are also users 
+        current_team = ClientClinicalCareTeam.query.filter_by(user_id=user_id, team_member_user_id=None).all() # non-users
+
+        current_team_users = db.session.query(
+                                    ClientClinicalCareTeam, User.firstname, User.lastname
+                                ).filter(
+                                    ClientClinicalCareTeam.team_member_user_id == User.user_id
+                                ).all()
+        
+        for team_member in current_team_users:
+            team_member[0].__dict__.update({'firstname': team_member[1], 'lastname': team_member[2]})
+            current_team.append(team_member[0])
+        
+        response = {"care_team": current_team,
                     "total_items": len(current_team) }
 
         return response
 
     @token_auth.login_required(user_type=('client',))
     @accepts(schema=ClientClinicalCareTeamSchema, api=ns)
-    # @responds(schema=ClientClinicalCareTeamSchema, api=ns)
     def delete(self, user_id):
         """
         Remove members of a client's clinical care team using the team member's email address.
@@ -785,8 +798,7 @@ class ClinicalCareTeam(Resource):
     @responds(schema=ClientClinicalCareTeamSchema, api=ns, status_code=200)
     def get(self, user_id):
         """
-        Remove members of a client's clinical care team using the team member's email address.
-        Any matches between the incoming payload and current team members in the DB will be removed. 
+        Returns the client's clinical care team 
 
         Parameters
         ----------
@@ -800,8 +812,35 @@ class ClinicalCareTeam(Resource):
         -------
         200 OK
         """
+        updates = False
+        # check if any team members are users
+        # if so, update their entry in the care team table with their user_id
+        current_team_non_users = ClientClinicalCareTeam.query.filter_by(user_id=user_id, team_member_user_id=None).all()
         
-        current_team = ClientClinicalCareTeam.query.filter_by(user_id=user_id).all()
+        for team_member in current_team_non_users:
+            team_memeber_user = User.query.filter_by(email=team_member.team_member_email).one_or_none()
+
+            if team_memeber_user:
+                team_member.team_member_user_id = team_memeber_user.user_id
+                db.session.add(team_memeber_user)
+                updates=True
+
+        if updates:
+            db.session.commit()
+            current_team = ClientClinicalCareTeam.query.filter_by(user_id=user_id, team_member_user_id=None).all()
+        else:
+            current_team = current_team_non_users
+        
+        # prepare response with names for clinical care team members who are also users 
+        current_team_users = db.session.query(
+                                    ClientClinicalCareTeam, User.firstname, User.lastname
+                                ).filter(
+                                    ClientClinicalCareTeam.team_member_user_id == User.user_id
+                                ).all()
+        
+        for team_member in current_team_users:
+            team_member[0].__dict__.update({'firstname': team_member[1], 'lastname': team_member[2]})
+            current_team.append(team_member[0])
         
         response = {"care_team": current_team,
                     "total_items": len(current_team) }

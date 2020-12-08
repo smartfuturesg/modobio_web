@@ -274,6 +274,8 @@ class ClientClinicalCareTeamInternalSchema(Schema):
     """
     team_member_email = fields.Email(description="email for clinical care team member")
     team_member_user_id = fields.Integer(description="user_id for clinical care team member", dump_only=True)
+    firstname = fields.String(dump_only=True, missing=None)
+    lastname = fields.String(dump_only=True, missing=None)
 
 class ClientClinicalCareTeamSchema(Schema):
     """
