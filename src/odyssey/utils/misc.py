@@ -23,6 +23,7 @@ from odyssey.utils.errors import (
     TestNotFound, 
     UnauthorizedUser,
     UserNotFound, 
+    StaffNotFound
 )
 
 
@@ -40,13 +41,13 @@ def list_average(values_list):
 def check_client_existence(user_id):
     """Check that the client is in the database
     All clients must be in the CLientInfo table before any other procedure"""
-    client = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
+    client = User.query.filter_by(user_id=user_id, is_client=True).one_or_none()
     if not client:
         raise ClientNotFound(user_id)
 
 def check_staff_existence(user_id):
     """Check that the user is in the database and is a staff member"""
-    staff = StaffProfile.query.filter_by(user_id=user_id).one_or_none()
+    staff = User.query.filter_by(user_id=user_id, is_staff=True).one_or_none()
     if not staff:
         raise StaffNotFound(user_id)
 
