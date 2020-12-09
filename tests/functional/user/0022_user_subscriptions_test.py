@@ -30,7 +30,6 @@ def test_put_user_subscription(test_client, init_database, staff_auth_header):
                                 data=dumps(users_subscription_data), 
                                 content_type='application/json')
 
-    print(response.data)
     assert response.status_code == 200
     assert response.get_json()['subscription_type'] == 'subscribed'
 

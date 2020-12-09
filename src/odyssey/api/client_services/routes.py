@@ -9,7 +9,7 @@ from flask_restx import Resource
 from odyssey import db
 from odyssey.api import api
 from odyssey.api.client_services.schemas import NewRemoteRegisterUserSchema, NewUserRegistrationPortalSchema
-from odyssey.api.user.schemas import UserLoginSchema, UserSchema
+from odyssey.api.user.schemas import UserLoginSchema, UserSchema, UserSubscriptionsSchema
 from odyssey.api.user.models import User, UserLogin
 from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import REGISTRATION_PORTAL_URL
