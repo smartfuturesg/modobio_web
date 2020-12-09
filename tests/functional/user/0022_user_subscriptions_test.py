@@ -17,7 +17,6 @@ def test_get_user_subscription(test_client, init_database, staff_auth_header):
     
     # some simple checks for validity
     assert response.status_code == 200
-    assert response.get_json()['subscription_type'] == 'unsubscribed'
 
 def test_put_user_subscription(test_client, init_database, staff_auth_header):
     """
@@ -67,4 +66,3 @@ def test_get_subscription_history(test_client, init_database, staff_auth_header)
                                 content_type='application/json')
 
     assert response.status_code == 200
-    assert response.get_json()['client_subscription']

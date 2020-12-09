@@ -57,6 +57,15 @@ class NewUserClientServices(Resource):
 
         user_login = UserLoginSchema().load({'user_id': user_id,  'password':password})
         db.session.add(user_login)
+
+        # add new user subscription information
+        client_sub = UserSubscriptionsSchema().load({
+            'user_id': user.user_id,
+            'subscription_type': 'unsubscribed',
+            'subscription_rate': 0.0,
+            'is_staff': False
+        })
+        db.session.add(client_sub)
         db.session.commit()
 
         secret = current_app.config['SECRET_KEY']
