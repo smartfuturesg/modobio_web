@@ -177,12 +177,14 @@ class PasswordResetEmail(Resource):
                                   'sid': user.user_id}, 
                                   secret, 
                                   algorithm='HS256').decode("utf-8") 
+                                  
+        send_email_password_reset(user.email, password_reset_token)
+
         if current_app.env == "development":
             return jsonify({"token": password_reset_token,
                             "password_reset_url" : PASSWORD_RESET_URL.format(password_reset_token)})
-        else:
-            send_email_password_reset(user.email, password_reset_token)
-            return 200
+            
+        return 200
         
 
 @ns.route('/password/forgot-password/reset')
