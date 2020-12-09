@@ -30,13 +30,14 @@ def test_put_user_subscription(test_client, init_database, staff_auth_header):
                                 data=dumps(users_subscription_data), 
                                 content_type='application/json')
 
-    assert response.status_code == 200
+    assert response.status_code == 201
     assert response.get_json()['subscription_type'] == 'subscribed'
 
     #test method with invalid subscription_type
     users_subscription_data['subscription_type'] = 'invalid_sub_type'
 
     response = test_client.put('/user/subscription/1/',
+                                headers=staff_auth_header,
                                 data=dumps(users_subscription_data), 
                                 content_type='application/json')
 
@@ -47,6 +48,7 @@ def test_put_user_subscription(test_client, init_database, staff_auth_header):
     users_subscription_data['is_staff'] = True
 
     response = test_client.put('/user/subscription/1/',
+                                headers=staff_auth_header,
                                 data=dumps(users_subscription_data), 
                                 content_type='application/json')
 
