@@ -11,7 +11,7 @@ from werkzeug.security import check_password_hash
 from odyssey.api import api
 from odyssey.api.client.schemas import ClientInfoSchema
 from odyssey.api.staff.schemas import StaffProfileSchema, StaffRolesSchema
-from odyssey.api.user.models import User, UserLogin
+from odyssey.api.user.models import User, UserLogin, UserSubscriptions
 from odyssey.api.user.schemas import (
     UserSchema, 
     NewClientUserSchema,
@@ -27,7 +27,7 @@ from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import PASSWORD_RESET_URL, DB_SERVER_TIME
 from odyssey.utils.errors import ContentNotFound, InputError, StaffEmailInUse, ClientEmailInUse, UnauthorizedUser
 from odyssey.utils.email import send_email_password_reset
-from odyssey.utils.misc import check_user_existence, verify_jwt
+from odyssey.utils.misc import check_user_existence, check_client_existence, check_staff_existence, verify_jwt
 
 from odyssey import db
 
@@ -354,19 +354,21 @@ class UserSubscriptionApi(Resource):
         Updates the currently active subscription for the given user_id. 
         Also sets the end date to the previously active subscription.
         """
-        check_user_existence(user_id)
+        if request.parsed_obj.is_staff:
+            check_staff_existence(user_id)
+        else:
+            check_client_existence(user_id)
 
         #update end_date for user's previous subscription
         #NOTE: users always have a subscription, even a brand new account will have an entry
         #      in this table as an 'unsubscribed' subscription
-        prev_sub = UserSubscriptions.query.filter_by(user_id=user_id).filter_by(end_date=None) \
-            .filter_by(is_staff=request.parsed_obj.is_staff).one_or_none()
+        prev_sub = UserSubscriptions.query.filter_by(user_id=user_id, end_date=None, is_staff=request.parsed_obj.is_staff).one_or_none()
         prev_sub.update({'end_date': DB_SERVER_TIME})
 
         new_data = {
-            'subscription_type': request.parsed_obj['subscription_type'],
-            'subscription_rate': request.parsed_obj['subscription_rate'],
-            'is_staff': request.parsed_obj['is_staff'],
+            'subscription_type': request.parsed_obj.subscription_type,
+            'subscription_rate': request.parsed_obj.subscription_rate,
+            'is_staff': request.parsed_obj.is_staff,
             'user_id': user_id
         }
         new_sub = UserSubscriptionsSchema().load(new_data)
@@ -386,13 +388,11 @@ class UserSubscriptionHistoryApi(Resource):
     def get(self, user_id):
         """
         Returns the complete subscription history for the given user_id.
-        Because a user_id can belong to both a client and staff account, both active subscriptions histories will be returned in this case.
+        Because a user_id can belong to both a client and staff account, both subscription histories will be returned in this case.
         """
         check_user_existence(user_id)
 
         res = {}
-        res['client_subscription_history'] = UserSubscriptions.query.filter_by(user_id=user_id) \
-            .filter_by(is_staff=False).order_by(UserSubscriptions.start_date.asc).all()
-        res['staff_subscription_history'] = UserSubscriptions.query.filter_by(user_id=user_id) \
-            .filter_by(is_staff=True).order_by(UserSubscriptions.start_date.asc).all()
-        return (res)
+        res['client_subscription_history'] = UserSubscriptions.query.filter_by(user_id=user_id).filter_by(is_staff=False).all()
+        res['staff_subscription_history'] = UserSubscriptions.query.filter_by(user_id=user_id).filter_by(is_staff=True).all()
+        return res
