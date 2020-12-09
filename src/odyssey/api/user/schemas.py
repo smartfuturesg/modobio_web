@@ -105,18 +105,15 @@ class UserSubscriptionsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = UserSubscriptions
         exclude = ('created_at', 'updated_at')
+        dump_only = ('start_date', 'end_date')
+
+    subscription_type = fields.String(validate=validate.OneOf(['unsubscribed', 'subscribed', 'free_trial', 'sponsored']))
     
     @post_load
     def make_object(self, data, **kwargs):
-        sub = UserSubscriptions(**data)
-        return sub
-
-class UserSubscriptionPutSchema(Schema):
-    subscription_type = fields.Enum(UserSubscriptions.SubTypes)
-    subscription_rate = fields.Float()
-    is_staff = fields.Boolean()
+        return UserSubscriptions(**data)
 
 class UserSubscriptionHistorySchema(Schema):
 
-    client_subscription_history = fields.Nested(UserSubscriptions, many=True)
-    staff_subscription_history = fields.Nested(UserSubscriptions, many=True)
+    client_subscription_history = fields.Nested(UserSubscriptionsSchema, many=True)
+    staff_subscription_history = fields.Nested(UserSubscriptionsSchema, many=True)
