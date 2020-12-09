@@ -15,7 +15,6 @@ def test_new_client_user(test_client, init_database, staff_auth_header):
                                 headers=staff_auth_header,
                                 data=dumps(client_services_register_user_client),  
                                 content_type='application/json')
-
     password = response.json['password']
     portal_id = response.json['portal_id']
 
