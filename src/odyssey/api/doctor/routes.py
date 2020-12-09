@@ -180,11 +180,12 @@ class MedImaging(Resource):
                         'Bucket' : bucket_name,
                         'Key' : None
                     }
+
             for img in response:
-                if img.image_path:
-                    params['Key'] = img.image_path
+                if img.get('image_path'):
+                    params['Key'] = img.get('image_path')
                     url = s3.generate_presigned_url('get_object', Params=params, ExpiresIn=3600)
-                    img.image_path = url
+                    img['image_path'] = url
  
         return response
 
