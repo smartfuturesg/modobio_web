@@ -257,17 +257,11 @@ class UserLogin(db.Model):
                             secret, 
                             algorithm='HS256').decode("utf-8")
 
+
 class UserSubscriptions(db.Model):
     """ 
     Stores details to relating to user account not related to the subscription system
     """
-
-    class SubTypes(enum.Enum):
-        """Internal enum type to hold types of subscriptions"""
-        unsubscribed = 1
-        subscribed = 2
-        free_trial = 3
-        sponsored = 4
 
     __tablename__ = 'UserSubscriptions'
 
@@ -321,9 +315,9 @@ class UserSubscriptions(db.Model):
     :type: float
     """
 
-    subscription_type = db.Column(db.Enum(SubTypes))
+    subscription_type = db.Column(db.String)
     """
     Type of this subscription. Possible values are: unsubscribed, subscribed, free_trial and sponsored
 
-    :type: Enum(SubTypes)
+    :type: String
     """
