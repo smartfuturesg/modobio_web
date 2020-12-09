@@ -279,19 +279,26 @@ class UserSubscriptions(db.Model):
     :type: datetime
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id'), primary_key=True)
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    table index
+
+    :type: integer, primary key, autoincrementing
+    """
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id'))
     """
     Id of the user that this subscription belongs to
 
-    :type: int, foreign key('User.user_id'), compund primary key with is_staff
+    :type: int, foreign key('User.user_id')
     """
 
-    is_staff = db.Column(db.Boolean, primary_key=True)
+    is_staff = db.Column(db.Boolean)
     """
     Denotes if this subscription is for a staff member. Distinguishes between 
     subscriptions for users with both account types
 
-    :type: bool, compund primary key with user_id
+    :type: bool
     """
 
     start_date = db.Column(db.DateTime, default=DB_SERVER_TIME)

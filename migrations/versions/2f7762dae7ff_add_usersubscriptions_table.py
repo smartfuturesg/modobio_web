@@ -1,8 +1,8 @@
-"""add UserSubscriptions table
+"""Add UserSubscriptions table
 
-Revision ID: 56b2a6e68f94
+Revision ID: 2f7762dae7ff
 Revises: 40e57e2da26a
-Create Date: 2020-12-08 11:29:19.158136
+Create Date: 2020-12-09 11:22:07.760724
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '56b2a6e68f94'
+revision = '2f7762dae7ff'
 down_revision = '40e57e2da26a'
 branch_labels = None
 depends_on = None
@@ -21,14 +21,15 @@ def upgrade():
     op.create_table('UserSubscriptions',
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
-    sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('is_staff', sa.Boolean(), nullable=False),
+    sa.Column('idx', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('is_staff', sa.Boolean(), nullable=True),
     sa.Column('start_date', sa.DateTime(), nullable=True),
     sa.Column('end_date', sa.DateTime(), nullable=True),
     sa.Column('subscription_rate', sa.Float(), nullable=True),
-    sa.Column('subscription_type', sa.Enum('unsubscribed', 'subscribed', 'free_trial', 'sponsored', name='subtypes'), nullable=True),
+    sa.Column('subscription_type', sa.String(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['User.user_id'], ),
-    sa.PrimaryKeyConstraint('user_id', 'is_staff')
+    sa.PrimaryKeyConstraint('idx')
     )
     # ### end Alembic commands ###
 
