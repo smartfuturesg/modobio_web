@@ -286,7 +286,7 @@ class UserSubscriptions(db.Model):
     :type: integer, primary key, autoincrementing
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
     """
     Id of the user that this subscription belongs to
 
