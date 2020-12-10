@@ -48,17 +48,33 @@ class ApiUser(Resource):
         user = User.query.filter_by(user_id=user_id).one_or_none()
         requester = token_auth.current_user()[0]
         removal_request = UserRemovalRequests(
-            requester_email=requester.email, 
-            deleting_email=user.email)
-        
+            requester_user_id=requester.user_id, 
+            deleting_user_id=user.user_id)
+
         db.session.add(removal_request)
         db.session.flush()
-        #TODO: some logic to email to staff admin
+
+        
+        if user.is_staff and user.is_client:
+            print("is both")
+        
+        elif user.is_staff:
+            print("it's staff only")
+        
+        else:
+            user.email = ""
+            user.phone_number = ""
+            user.firstname = ""
+            user.middlename = ""
+            user.lastname = ""
+            
+
+        #logic to email user being deleted and user requesting deletion
         if user.email != requester.email:
             send_email_delete_account(requester.email, user.email)
         send_email_delete_account(user.email, user.email)
 
-        db.session.delete(user)
+        #db.session.delete(user)
         db.session.commit()
 
         return {'message': f'User with id {user_id} has been removed'}

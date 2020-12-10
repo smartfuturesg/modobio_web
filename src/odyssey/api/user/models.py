@@ -284,16 +284,15 @@ class UserRemovalRequests(db.Model):
     :type: :class:`datetime.datetime`
     """
     
-    requester_email = db.Column(db.String, nullable=False)
+    requester_user_id = db.Column(db.Integer, nullable=False)
     """
     user_id number, foreign key to User.user_id of the User requesting removal
 
     :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
-    #requester_user_id = db.Column(db.)
 
-    deleting_email = db.Column(db.String, nullable=False)
+    deleting_user_id = db.Column(db.Integer, nullable=False)
     """
     user_id number, foreign key to User.user_id of the User to be removed
 
