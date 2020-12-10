@@ -1,7 +1,10 @@
 from marshmallow import Schema, fields, post_load, validate, pre_dump, validates, ValidationError
 
 from odyssey import ma
-from odyssey.api.doctor.models import ( 
+from odyssey.api.doctor.models import (
+    MedicalGeneralInfo,
+    MedicalGeneralInfoMedications,
+    MedicalGeneralInfoMedicationAllergy,
     MedicalFamilyHistory,
     MedicalConditions,
     MedicalHistory,
@@ -20,6 +23,48 @@ from odyssey.utils.constants import MEDICAL_CONDITIONS
 """
     Schemas for the doctor's API
 """
+
+class MedicalGeneralInfoMedicationAllergySchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = MedicalGeneralInfoMedicationAllergy
+        exclude = ('idx', 'created_at', 'updated_at')
+
+    possible_allergy_symptoms = ['Rash', 'Vertigo', 'Nausea', 'Swelling', 'Diarrhea', 'Vomiting', 'Headache', 'Anaphylaxis', 'Blurred Vision', 'Abdominal Pain', 'Shortness of Breath']
+    allergy_symptoms = fields.String(validate=validate.OneOf(possible_allergy_symptoms),missing=None)
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return MedicalGeneralInfoMedicationAllergy(**data)
+
+class MedicalGeneralInfoMedicationsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = MedicalGeneralInfoMedications
+        exclude = ('idx', 'created_at', 'updated_at')
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return MedicalGeneralInfoMedications(**data)
+
+class MedicalGeneralInfoSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = MedicalGeneralInfo
+        exclude = ('idx', 'created_at', 'updated_at')
+
+    primary_doctor_contact_name = fields.String(missing=None)
+    primary_doctor_contact_phone = fields.String(missing=None)
+    primary_doctor_contact_email = fields.String(missing=None)
+    blood_type = fields.String(missing=None)
+    blood_type_positive = fields.Boolean(missing=None)
+    
+    @post_load
+    def make_object(self, data, **kwargs):
+        return MedicalGeneralInfo(**data)
+
+class MedicalMedicationsInfoInputSchema(Schema):
+    medications = fields.Nested(MedicalGeneralInfoMedicationsSchema(many=True), missing = [])
+
+class MedicalAllergiesInfoInputSchema(Schema):
+    allergies = fields.Nested(MedicalGeneralInfoMedicationAllergySchema(many=True), missing = [])
 
 class MedicalConditionsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -49,10 +94,6 @@ class MedicalFamilyHistInputSchema(Schema):
 class MedicalFamilyHistOutputSchema(Schema):
     items = fields.Nested(MedicalFamilyHistSchema(many=True), missing = [])
     total_items = fields.Integer()
-
-class MedicalConditionsSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = MedicalConditions
 
 class MedicalImagingSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

@@ -1,18 +1,30 @@
 """ Utility functions for the odyssey package. """
 
+from datetime import datetime, date, time
+import jwt
 import re
 import statistics
 import uuid
 
-from datetime import datetime, date, time
-
+from flask import current_app
 import flask.json
+
 from odyssey.api.client.models import ClientInfo, ClientFacilities
 from odyssey.api.doctor.models import MedicalBloodTests, MedicalBloodTestResultTypes, MedicalConditions
 from odyssey.api.user.models import User
 from odyssey.api.staff.models import StaffProfile
 from odyssey.api.facility.models import RegisteredFacilities
-from odyssey.utils.errors import ClientNotFound, UserNotFound, FacilityNotFound, RelationAlreadyExists, TestNotFound, ResultTypeNotFound,MedicalConditionNotFound
+from odyssey.utils.errors import (
+    ClientNotFound, 
+    FacilityNotFound, 
+    MedicalConditionNotFound,
+    RelationAlreadyExists, 
+    ResultTypeNotFound,
+    TestNotFound, 
+    UnauthorizedUser,
+    UserNotFound, 
+    StaffNotFound
+)
 
 
 _uuid_rx = re.compile(r'[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}', flags=re.IGNORECASE)
@@ -29,13 +41,13 @@ def list_average(values_list):
 def check_client_existence(user_id):
     """Check that the client is in the database
     All clients must be in the CLientInfo table before any other procedure"""
-    client = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
+    client = User.query.filter_by(user_id=user_id, is_client=True).one_or_none()
     if not client:
         raise ClientNotFound(user_id)
 
 def check_staff_existence(user_id):
     """Check that the user is in the database and is a staff member"""
-    staff = StaffProfile.query.filter_by(user_id=user_id).one_or_none()
+    staff = User.query.filter_by(user_id=user_id, is_staff=True).one_or_none()
     if not staff:
         raise StaffNotFound(user_id)
 
@@ -202,3 +214,18 @@ class JSONDecoder(flask.json.JSONDecoder):
             for k, v in jsonobj.items():
                 jsonobj[k] = self.parse(v)
         return jsonobj
+
+
+def verify_jwt(token, error_message=""):
+    """
+    Ensure token is signed correctly and is not yet expired
+    Returns the token's payload
+    """
+    secret = current_app.config['SECRET_KEY']
+    try:
+        decoded_token = jwt.decode(token, secret, algorithms='HS256')
+    except jwt.ExpiredSignatureError:
+        raise UnauthorizedUser(message=error_message)
+
+    return decoded_token
+
