@@ -23,7 +23,8 @@ from odyssey.utils.errors import (
     TestNotFound, 
     UnauthorizedUser,
     UserNotFound, 
-    StaffNotFound
+    StaffNotFound,
+    DrinkNotFound
 )
 
 
@@ -86,6 +87,12 @@ def check_medical_condition_existence(medcon_id):
     medcon = MedicalConditions.query.filter_by(medical_condition_id=medcon_id).one_or_none()
     if not medcon:
         raise MedicalConditionNotFound(medcon_id)
+
+def check_drink_existence(drink_id):
+    drink = LookupDrinks.query.filter_by(drink_id=drink_id).one_or_none()
+    if not drink:
+        raise DrinkNotFound(drink_id)
+
 #def check_remote_client_portal_validity(portal_id):
 #    """
 #    Ensure portal is valid. If not raise 404 error
