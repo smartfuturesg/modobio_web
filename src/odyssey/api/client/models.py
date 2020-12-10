@@ -1016,3 +1016,62 @@ class ClientReleaseContacts(db.Model):
 
     :type: str
     """
+
+
+class ClientClinicalCareTeam(db.Model):
+    """ 
+    Stores emails and user_ids of clinical care team members.
+    Each client may have a maximum of 6 clinical care team members. These are 
+    individuals who are authorized on behalf of the client to view 
+    certain clinical data. 
+    
+      
+    """
+
+    __tablename__ = 'ClientClinicalCareTeam'
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
+    """
+    User ID number
+
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
+    """
+
+    team_member_email = db.Column(db.String, nullable=True)
+    """
+    Email address of the clinical care team member.
+
+    :type: str
+    """
+
+    team_member_user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=True)
+    """
+    User ID number
+
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
+    """
+
+
+
+

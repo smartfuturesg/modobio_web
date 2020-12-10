@@ -139,3 +139,15 @@ clients_individual_data = {
     'signdate': "2020-04-05",
     'signature': signature
 }
+
+clients_clinical_care_team = {
+    "care_team" : [
+        {
+            "team_member_email": "test_client@modomodo.com"
+        },
+        {
+            "team_member_email": "test_client_two@modomodo.com"
+        },
+    ]
+    
+    }
