@@ -1,7 +1,7 @@
 """Clinical care team table
 
 Revision ID: e2b7f6857eaf
-Revises: 40e57e2da26a
+Revises: 65f48672909f
 Create Date: 2020-12-06 13:46:07.920641
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'e2b7f6857eaf'
-down_revision = '40e57e2da26a'
+down_revision = '65f48672909f'
 branch_labels = None
 depends_on = None
 
