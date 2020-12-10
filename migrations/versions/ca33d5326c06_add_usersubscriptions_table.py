@@ -1,7 +1,7 @@
 """Add UserSubscriptions table
 
 Revision ID: ca33d5326c06
-Revises: 40e57e2da26a
+Revises: e2b7f6857eaf
 Create Date: 2020-12-09 15:54:16.627220
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'ca33d5326c06'
-down_revision = '40e57e2da26a'
+down_revision = 'e2b7f6857eaf'
 branch_labels = None
 depends_on = None
 
