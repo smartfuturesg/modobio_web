@@ -6,6 +6,8 @@ from flask_accepts import accepts, responds
 from flask_restx import Resource, Api
 
 from odyssey import db
+from odyssey.api.lookup.models import LookupDrinks, LookupGoals
+from odyssey.api.client.schemas import ClientAssignedDrinksSchema
 from odyssey.api.doctor.models import (
     MedicalFamilyHistory,
     MedicalConditions,
@@ -778,6 +780,14 @@ class MedHistory(Resource):
         client_mh = mh_schema.load(data)
 
         db.session.add(client_mh)
+        db.session.flush()
+
+        #add client automatically assigned drink based on their goal
+        goal_id = LookupGoals.query.filter_by(goal_name=client_mh.goals).one_or_none()
+        drink_id = LookupDrinks.query.filter_by(goal_id=goal_id).one_or_none()
+        client_drink = ClientAssignedDrinksSchema().load({'user_id': client_mh.user_id, 'drink_id': drink_id})
+
+        db.session.add(client_drink)
         db.session.commit()
 
         return client_mh
@@ -798,7 +808,14 @@ class MedHistory(Resource):
         data = request.get_json()
         
         data['last_examination_date'] = datetime.strptime(data['last_examination_date'], "%Y-%m-%d")
-        
+
+        #update client assigned drinks if a client goal is changed
+        if data['goals'] and client_mh.goals != data['goals']:
+            goal_id = LookupGoals.query.filter_by(goal_name=data['goals']).one_or_none()
+            drink_id = LookupDrinks.query.filter_by(goal_id=goal_id).one_or_none()
+            client_drink = ClientAssignedDrinksSchema().load({'user_id': client_mh.user_id, 'drink_id': drink_id})
+            db.session.add(client_drink)
+            
         # update resource 
         client_mh.update(data)
 
