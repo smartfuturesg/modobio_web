@@ -869,7 +869,7 @@ class ClientDrinksApi(Resource):
 
         request.parsed_obj.user_id = user_id
         db.session.add(request.parsed_obj)
-        db.session.commit
+        db.session.commit()
 
         return request.parsed_obj
 
@@ -885,12 +885,12 @@ class ClientDrinksApi(Resource):
     
     @token_auth.login_required
     @accepts(schema=ClientAssignedDrinksSchema, api=ns)
-    @responds(schema=ClientAssignedDrinksSchema, api=ns, status_code=200)
+    @responds(schema=ClientAssignedDrinksSchema, api=ns, status_code=204)
     def delete(self, user_id):
         """
         Delete a drink assignemnt for a user with user_id and drink_id
         """
-        drink = ClientAssignedDrinks.query.filter_by(user_id=user_id, drink_id=response.parsed_obj.drink_id)
+        drink = ClientAssignedDrinks.query.filter_by(user_id=user_id, drink_id=request.parsed_obj.drink_id).one_or_none()
 
         if not drink:
             raise ContentNotFound()

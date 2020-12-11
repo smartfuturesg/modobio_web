@@ -9,6 +9,7 @@ import uuid
 from flask import current_app
 import flask.json
 
+from odyssey.api.lookup.models import LookupDrinks
 from odyssey.api.client.models import ClientInfo, ClientFacilities
 from odyssey.api.doctor.models import MedicalBloodTests, MedicalBloodTestResultTypes, MedicalConditions
 from odyssey.api.user.models import User

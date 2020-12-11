@@ -783,9 +783,10 @@ class MedHistory(Resource):
         db.session.flush()
 
         #add client automatically assigned drink based on their goal
-        goal_id = LookupGoals.query.filter_by(goal_name=client_mh.goals).one_or_none()
-        drink_id = LookupDrinks.query.filter_by(goal_id=goal_id).one_or_none()
-        client_drink = ClientAssignedDrinksSchema().load({'user_id': client_mh.user_id, 'drink_id': drink_id})
+        goal_id = LookupGoals.query.filter_by(goal_name=client_mh.goals).one_or_none().goal_id
+        drink_id = LookupDrinks.query.filter_by(primary_goal_id=goal_id).one_or_none().drink_id
+        client_drink = ClientAssignedDrinksSchema().load({'drink_id': drink_id})
+        client_drink.user_id = user_id
 
         db.session.add(client_drink)
         db.session.commit()
@@ -811,9 +812,10 @@ class MedHistory(Resource):
 
         #update client assigned drinks if a client goal is changed
         if data['goals'] and client_mh.goals != data['goals']:
-            goal_id = LookupGoals.query.filter_by(goal_name=data['goals']).one_or_none()
-            drink_id = LookupDrinks.query.filter_by(goal_id=goal_id).one_or_none()
-            client_drink = ClientAssignedDrinksSchema().load({'user_id': client_mh.user_id, 'drink_id': drink_id})
+            goal_id = LookupGoals.query.filter_by(goal_name=data['goals']).one_or_none().goal_id
+            drink_id = LookupDrinks.query.filter_by(primary_goal_id=goal_id).one_or_none().drink_id
+            client_drink = ClientAssignedDrinksSchema().load({'drink_id': drink_id})
+            client_drink.user_id = user_id
             db.session.add(client_drink)
             
         # update resource 
