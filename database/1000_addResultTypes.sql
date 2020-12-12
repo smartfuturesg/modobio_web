@@ -192,7 +192,7 @@ VALUES
 ('dehydroepiandrosteroneSulfateDHEASSerumMale',89,457,null,null,'micro g/dL',null),
 ('deltaaminolevulinicAcidSerum',null,19.999,null,null,'micro g/dL',null),
 ('digoxinSerum',1,2,null,null,'ng/mL',null),
-('digoxinSerumHeartFailurePatients',null,1.1999,null,null,'ng/mL',null)
+('digoxinSerumHeartFailurePatients',null,1.1999,null,null,'ng/mL',null),
 ('dihydrotestosteroneSerum',25,80,null,null,'ng/dL',null),
 ('dopaminePlasma',null,29.999,null,null,'pg/mL',null),
 ('dopamineUrine',65,400,null,null,'micro g/24hr',null),
@@ -250,8 +250,8 @@ VALUES
 ('freeLambdaLightChainSerum',5.7,26.3,null,null,'mg/L',null),
 ('fructosamineSerum',175,380,null,null,'mmol/L',null),
 ('gammaGlobulinCSF',6.1,8.3,null,null,'mg/dL',null),
-('gammaGlutamylTranspeptidaseSerumFemale',8,40,9,22,'U/L',null)
-('gammaGlutamylTranspeptidaseSerumMale',9,50,12,24,'U/L',null)
+('gammaGlutamylTranspeptidaseSerumFemale',8,40,9,22,'U/L',null),
+('gammaGlutamylTranspeptidaseSerumMale',9,50,12,24,'U/L',null),
 ('gastricSecretionBasalAcidAnalysis',10,30,null,null,'units of free acid',null),
 ('gastricSecretionBasalAcidOutputFemale',0.2,3.8,null,null,'mEq of HCI/hr',null),
 ('gastricSecretionBasalAcidOutput',1,5,null,null,'mEq of HCI/hr',null),
@@ -383,7 +383,7 @@ VALUES
 ('phospholipidsSerumTotal',200,300,null,null,'mg/dL',null),
 ('phosphorusSerum',3,4.5,null,null,'mg/dL','CMP'),
 ('phosphorusUrine',500,1200,null,null,'mg/24hr',null),
-('plateletCount',150000,450000,null,null,'/micro L','CBC')
+('plateletCount',150000,450000,null,null,'/micro L','CBC'),
 ('pfacollagenepinephrineClosureTime',60,143,null,null,'seconds',null),
 ('pfacollagenadpClosureTime',58,123,null,null,'seconds',null),
 ('plateletSurvivalRateCr',9,11,null,null,'days',null),
