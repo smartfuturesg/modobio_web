@@ -106,7 +106,7 @@ VALUES
 ('bilirubinSerumDirect',0.1,0.3,null,null,'mg/dL',null),
 ('bilirubinSerumIndirect',0.2,0.7,null,null,'mg/dL',null),
 ('bleedingTimeTemplate',0,8,null,null,'minutes',null),
-('bloodUreaNitrogenSerumPlasmaBUN', 8,20,12,19,'mg/dL','CMP')
+('bloodUreaNitrogenSerumPlasmaBUN', 8,20,12,19,'mg/dL','CMP'),
 ('btypeNatriureticPeptidePlasma',null,100,null,null,'pg/mL',null),
 ('cPeptideSerum',0.8,3.1,1.1,2.1,'ng/mL',null),
 ('calcitoninSerumFemale',null,5,null,null,'pg/mL',null),
