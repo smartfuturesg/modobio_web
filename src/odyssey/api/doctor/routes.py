@@ -264,7 +264,7 @@ class MedicalMedicationInformation(Resource):
         for ids in ids_to_delete:
             medicationInDB = MedicalGeneralInfoMedications.query.filter_by(user_id=user_id).filter_by(idx=ids['idx']).one_or_none()
             if medicationInDB:
-                db.session.delete(allergyInDB)
+                db.session.delete(medicationInDB)
         
 
         # if request.parsed_obj['medications']:
