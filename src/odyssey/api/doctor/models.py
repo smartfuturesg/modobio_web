@@ -72,13 +72,6 @@ class MedicalSTDHistory(db.Model):
     :type: int, foreign key to :attr: MedicalLookUpSTD.std_id
     """
 
-    std_selected = db.Column(db.Boolean)
-    """
-    This is used if the User made a mistake and unchecked the STD
-
-    :type: bool
-    """
-
 class MedicalSocialHistory(db.Model):
     """ Medical Social History
 

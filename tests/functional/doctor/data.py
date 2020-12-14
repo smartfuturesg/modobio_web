@@ -1,17 +1,25 @@
 import pathlib
 
-doctor_std_put_2_data = {
+# doctor_std_post_2_data = {
+#   "stds":[
+#     {
+#       "std_id": 3
+#     },
+#     {
+#       "std_id": 2
+#     }
+#   ]
+# }
+
+doctor_std_delete_data = {
   "stds":[
-    {
-      "std_id": 3
-    },
     {
       "std_id": 2
     }
   ]
 }
 
-doctor_std_put_1_data = {
+doctor_std_post_1_data = {
   "stds":[
     {
       "std_id": 1

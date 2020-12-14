@@ -120,8 +120,8 @@ def test_get_medication_medical_history(test_client, init_database, client_auth_
                                     content_type='application/json')
 
         assert response.status_code == 200
-        assert response.json['medications'][0]['medication_name'] == 'medName1'
-        assert len(response.json['medications']) == 3
+        assert response.json['medications'][0]['medication_name'] == 'medName4'
+        assert len(response.json['medications']) == 2
 
 def test_delete_medication_medical_history(test_client, init_database, client_auth_header, staff_auth_header):
     """
@@ -139,7 +139,7 @@ def test_delete_medication_medical_history(test_client, init_database, client_au
 
     assert response.status_code == 201
 
-def test_get_medication_medical_history(test_client, init_database, client_auth_header, staff_auth_header):
+def test_get_medication_medical_history_after_delete(test_client, init_database, client_auth_header, staff_auth_header):
     """
     GIVEN a api end point for retrieving medication history
     WHEN the  '/doctor/medicalgeneralinfo/<user id>' resource  is requested (GET)

@@ -44,8 +44,7 @@ class MedicalSTDHistorySchema(ma.SQLAlchemyAutoSchema):
 
     user_id = fields.Integer()
     std_id = fields.Integer()
-    selected = fields.Boolean()
-
+    
     @post_load
     def make_object(self, data, **kwargs):
         return MedicalSTDHistory(**data)

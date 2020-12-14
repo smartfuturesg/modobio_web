@@ -266,30 +266,9 @@ class MedicalMedicationInformation(Resource):
             if medicationInDB:
                 db.session.delete(medicationInDB)
         
-
-        # if request.parsed_obj['medications']:
-        #     medications = request.parsed_obj['medications']
-        #     payload['medications'] = []
-        #     for medication in medications:
-        #         # If the client is taking medications, they MUST tell us what
-        #         # medication
-        #         if not medication.medication_name:
-        #             raise InputError(status_code = 405, message='Medication Name Required')
-        #         else:
-        #             medication.__dict__['user_id'] = user_id
-        #             # If medication and user are in it already, then send an update
-        #             # else, add it to the db
-        #             medicationInDB = MedicalGeneralInfoMedications.query.filter_by(user_id=user_id).filter_by(medication_name=medication.medication_name).one_or_none()
-        #             if medicationInDB:
-        #                 db.session.delete(medication)
-        #             else:
-        #                 raise InputError(status_code = 405,message='The medication name  does not exist in the table for this user')
-                    
-        #             payload['medications'].append(medication)
-        
         # insert results into the result table
         db.session.commit()
-        return payload        
+        return 201        
 
 
 @ns.route('/medicalinfo/allergies/<int:user_id>/')
@@ -419,7 +398,7 @@ class MedicalSTDHist(Resource):
     @token_auth.login_required
     @accepts(schema=MedicalSTDHistoryInputSchema, api=ns)
     @responds(schema=MedicalSTDHistoryInputSchema, status_code=201, api=ns)
-    def put(self, user_id):
+    def post(self, user_id):
         """ Submit STD History for client ``user_id`` in response to a PUT request.
 
         This endpoint submits or updates a client's STD history. 
@@ -427,20 +406,14 @@ class MedicalSTDHist(Resource):
         Example payload:
         {
             "stds": [
-                {"std_id": int,
-                 "std_selected: bool},
-                {"std_id": int,
-                 "std_selected: bool}
+                {"std_id": int},
+                {"std_id": int}
 
             ]
         }
 
         ***std_id is the STD id from the STDLookUp table in the database and can be retrieved
         from the endpoint /doctor/lookupstd/
-
-        ***std_selected should be sent as true when submitting, and if the user
-        unselects an STD, then the payload should send that STD id back with std_selected to false
-
 
         Parameters
         ----------
@@ -462,8 +435,7 @@ class MedicalSTDHist(Resource):
             user_and_std = MedicalSTDHistory.query.filter_by(user_id=user_id).filter_by(std_id=std.std_id).one_or_none()
             # If the payload contains an STD for a user already, then just continue
             if user_and_std:
-                del std.__dict__['_sa_instance_state']
-                user_and_std.update(std.__dict__)
+                continue
             else:
                 std.user_id = user_id
                 db.session.add(std)
@@ -475,7 +447,7 @@ class MedicalSTDHist(Resource):
 
     @token_auth.login_required
     @accepts(schema=MedicalSTDHistoryInputSchema, api=ns)
-    @responds(schema=MedicalSTDHistoryInputSchema, status_code=201, api=ns)
+    @responds(status_code=201, api=ns)
     def delete(self, user_id):
         """ Delete STD History for client ``user_id`` in response to a delete request.
 
@@ -491,9 +463,6 @@ class MedicalSTDHist(Resource):
 
         ***std_id is the STD id from the STDLookUp table in the database and can be retrieved
         from the endpoint /doctor/lookupstd/
-
-        ***std_selected should be sent as true when submitting, and if the user
-        unselects an STD, then the payload should send that STD id back with std_selected to false
 
         Parameters
         ----------
@@ -511,16 +480,11 @@ class MedicalSTDHist(Resource):
             user_and_std = MedicalSTDHistory.query.filter_by(user_id=user_id).filter_by(std_id=std.std_id).one_or_none()
             # If the payload contains an STD for a user already, then just continue
             if user_and_std:
-                del std.__dict__['_sa_instance_state']
-                user_and_std.update(std.__dict__)
-            else:
-                std.user_id = user_id
-                db.session.delete(std)
-        payload = {'stds': stds}
+                db.session.delete(user_and_std)
         
         # insert results into the result table
         db.session.commit()
-        return payload
+        return 201
 
 @ns.route('/medicalinfo/social/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
@@ -547,10 +511,8 @@ class MedicalSocialHist(Resource):
                 "sexual_preference": str
             }
             "std_history": [
-                {"std_id": int,
-                 "std_selected: bool},
-                {"std_id: int,
-                 "std_selected: bool}
+                {"std_id": int},
+                {"std_id: int}
             ]
         }
 
@@ -566,7 +528,7 @@ class MedicalSocialHist(Resource):
         """
         check_client_existence(user_id)
         social_hist = MedicalSocialHistory.query.filter_by(user_id=user_id).one_or_none()
-        std_hist = MedicalSTDHistory.query.filter_by(user_id=user_id).filter_by(std_selected=True).all()
+        std_hist = MedicalSTDHistory.query.filter_by(user_id=user_id).all()
         payload = {'social_history': social_hist,
                    'std_history': std_hist}
         return payload
