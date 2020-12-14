@@ -27,6 +27,12 @@ from odyssey.utils.constants import MEDICAL_CONDITIONS
     Schemas for the doctor's API
 """
 
+class CheckBoxDeleteSchema(Schema):
+    idx = fields.Integer()
+
+class CheckBoxArrayDeleteSchema(Schema):
+    delete_ids = fields.Nested(CheckBoxDeleteSchema(many=True))
+
 class MedicalLookUpSTDSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = MedicalLookUpSTD
@@ -57,10 +63,10 @@ class MedicalSocialHistorySchema(ma.SQLAlchemyAutoSchema):
 
     user_id = fields.Integer()
     currently_smoke = fields.Boolean(required=True)
-    avg_num_drinks = fields.Integer(missing=0)
-    avg_num_workouts = fields.Integer(missing=0)
+    avg_weekly_drinks = fields.Integer(missing=0)
+    avg_weekly_workouts = fields.Integer(missing=0)
     job_title = fields.String(missing=None)
-    avg_num_meditates = fields.Integer(missing=0)
+    avg_hourly_meditation = fields.Integer(missing=0)
     sexual_preference = fields.String(missing=None)
     last_smoke = fields.Integer(missing=None)
     last_smoke_time = fields.String(missing=None)
@@ -74,11 +80,13 @@ class MedicalSocialHistorySchema(ma.SQLAlchemyAutoSchema):
 class MedicalSocialHistoryOutputSchema(Schema):
     social_history = fields.Nested(MedicalSocialHistorySchema)
     std_history = fields.Nested(MedicalSTDHistorySchema(many=True),missing=[])
+
 class MedicalGeneralInfoMedicationAllergySchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = MedicalGeneralInfoMedicationAllergy
-        exclude = ('idx', 'created_at', 'updated_at')
+        exclude = ('created_at', 'updated_at')
 
+    idx = fields.Integer()
     possible_allergy_symptoms = ['Rash', 'Vertigo', 'Nausea', 'Swelling', 'Diarrhea', 'Vomiting', 'Headache', 'Anaphylaxis', 'Blurred Vision', 'Abdominal Pain', 'Shortness of Breath']
     allergy_symptoms = fields.String(validate=validate.OneOf(possible_allergy_symptoms),missing=None)
 
@@ -89,8 +97,9 @@ class MedicalGeneralInfoMedicationAllergySchema(ma.SQLAlchemyAutoSchema):
 class MedicalGeneralInfoMedicationsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = MedicalGeneralInfoMedications
-        exclude = ('idx', 'created_at', 'updated_at')
-
+        exclude = ('created_at', 'updated_at')
+    
+    idx = fields.Integer()
     @post_load
     def make_object(self, data, **kwargs):
         return MedicalGeneralInfoMedications(**data)
@@ -98,8 +107,9 @@ class MedicalGeneralInfoMedicationsSchema(ma.SQLAlchemyAutoSchema):
 class MedicalGeneralInfoSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = MedicalGeneralInfo
-        exclude = ('idx', 'created_at', 'updated_at')
-
+        exclude = ('created_at', 'updated_at')
+    
+    idx = fields.Integer(dump_only=True)
     primary_doctor_contact_name = fields.String(missing=None)
     primary_doctor_contact_phone = fields.String(missing=None)
     primary_doctor_contact_email = fields.String(missing=None)

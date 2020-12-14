@@ -10,8 +10,10 @@ from .data import (
     doctor_medicalgeneralinfo_put_data,
     doctor_medicalmedicationsinfo_post_data,
     doctor_medicalmedicationsinfo_put_data,
+    doctor_medicalmedicationsinfo_delete_data,
     doctor_medicalallergiesinfo_post_data,
-    doctor_medicalallergiesinfo_put_data
+    doctor_medicalallergiesinfo_put_data,
+    doctor_medicalallergiesinfo_delete_data
 )
 
 def test_post_general_medical_history(test_client, init_database, client_auth_header):
@@ -83,7 +85,6 @@ def test_post_medication_medical_history(test_client, init_database, client_auth
                                 headers=client_auth_header, 
                                 data=dumps(payload), 
                                 content_type='application/json')
-    
     assert response.status_code == 201 
     assert response.json['medications'][0]['medication_name'] == 'medName1'
     assert len(response.json['medications']) == 2
@@ -117,10 +118,41 @@ def test_get_medication_medical_history(test_client, init_database, client_auth_
         response = test_client.get('/doctor/medicalinfo/medications/1/',
                                     headers=header, 
                                     content_type='application/json')
-                                    
+
         assert response.status_code == 200
         assert response.json['medications'][0]['medication_name'] == 'medName1'
         assert len(response.json['medications']) == 3
+
+def test_delete_medication_medical_history(test_client, init_database, client_auth_header, staff_auth_header):
+    """
+    GIVEN a api end point for deleting an user's entry
+    WHEN the '/doctor/medicalinfo/allergies/1/' resource deletion is request is made (DELETE)
+    THEN the response will be 201
+    """
+
+    payload = doctor_medicalmedicationsinfo_delete_data
+
+    response = test_client.delete("/doctor/medicalinfo/allergies/1/",
+                                data=dumps(payload),
+                                headers=client_auth_header, 
+                                content_type='application/json')
+
+    assert response.status_code == 201
+
+def test_get_medication_medical_history(test_client, init_database, client_auth_header, staff_auth_header):
+    """
+    GIVEN a api end point for retrieving medication history
+    WHEN the  '/doctor/medicalgeneralinfo/<user id>' resource  is requested (GET)
+    THEN check the response is valid
+    """
+    for header in (staff_auth_header, client_auth_header):
+        # send get request for client medication history on user_id = 1 
+        response = test_client.get('/doctor/medicalinfo/medications/1/',
+                                    headers=header, 
+                                    content_type='application/json')
+
+        assert response.status_code == 200
+        assert len(response.json['medications']) == 2
 
 ################ TEST ALLERGY HISTORY ####################
 
@@ -142,7 +174,7 @@ def test_post_allergy_medical_history(test_client, init_database, client_auth_he
     
     assert response.status_code == 201 
     assert response.json['allergies'][0]['medication_name'] == 'medName3'
-    assert len(response.json['allergies']) == 2
+    assert len(response.json['allergies']) == 3
 
 def test_put_allergy_medical_history(test_client, init_database, client_auth_header):
     """
@@ -159,8 +191,8 @@ def test_put_allergy_medical_history(test_client, init_database, client_auth_hea
                                 content_type='application/json')
 
     assert response.status_code == 201
-    assert response.json['allergies'][0]['medication_name'] == 'medName3'
-    assert len(response.json['allergies']) == 2
+    assert response.json['allergies'][0]['medication_name'] == 'medName4'
+    assert len(response.json['allergies']) == 1
 
 
 def test_get_allergy_medical_history(test_client, init_database, client_auth_header, staff_auth_header):
@@ -176,5 +208,35 @@ def test_get_allergy_medical_history(test_client, init_database, client_auth_hea
                                     content_type='application/json')
                                     
         assert response.status_code == 200
-        assert response.json['allergies'][0]['medication_name'] == 'medName3'
-        assert len(response.json['allergies']) == 3  
+        assert len(response.json['allergies']) == 3
+
+def test_delete_allergy_medical_history(test_client, init_database, client_auth_header, staff_auth_header):
+    """
+    GIVEN a api end point for deleting an user's entry
+    WHEN the '/doctor/medicalinfo/allergies/1/' resource deletion is request is made (DELETE)
+    THEN the response will be 201
+    """
+
+    payload = doctor_medicalallergiesinfo_delete_data
+
+    response = test_client.delete("/doctor/medicalinfo/allergies/1/",
+                                data=dumps(payload),
+                                headers=client_auth_header, 
+                                content_type='application/json')
+
+    assert response.status_code == 201
+
+def test_get_allergy_medical_history_after_delete(test_client, init_database, client_auth_header, staff_auth_header):
+    """
+    GIVEN a api end point for retrieving allergy medical history
+    WHEN the  '/doctor/medicalgeneralinfo/<user id>' resource  is requested (GET)
+    THEN check the response is valid
+    """
+    for header in (staff_auth_header, client_auth_header):
+        # send get request for client medication allergy history on user_id = 1 
+        response = test_client.get('/doctor/medicalinfo/allergies/1/',
+                                    headers=header, 
+                                    content_type='application/json')
+                                    
+        assert response.status_code == 200
+        assert len(response.json['allergies']) == 2

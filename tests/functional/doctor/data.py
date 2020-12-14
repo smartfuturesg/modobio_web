@@ -3,12 +3,10 @@ import pathlib
 doctor_std_put_2_data = {
   "stds":[
     {
-      "std_id": 3,
-      "std_selected": True
+      "std_id": 3
     },
     {
-      "std_id": 2,
-      "std_selected": False
+      "std_id": 2
     }
   ]
 }
@@ -16,12 +14,10 @@ doctor_std_put_2_data = {
 doctor_std_put_1_data = {
   "stds":[
     {
-      "std_id": 1,
-      "std_selected": True
+      "std_id": 1
     },
     {
-      "std_id": 2,
-      "std_selected": True
+      "std_id": 2
     }
   ]
 }
@@ -31,10 +27,10 @@ doctor_socialhist_put_data = {
   "avg_num_cigs": 5,
   "num_years_smoked": 6,
   "plan_to_stop": False,
-  "avg_num_drinks": 1,
-  "avg_num_workouts": 2,
+  "avg_weekly_drinks": 1,
+  "avg_weekly_workouts": 2,
   "job_title": "Engineer",
-  "avg_num_meditates": 3,
+  "avg_hourly_meditation": 3,
   "sexual_preference": "Female"
 }
 
@@ -42,10 +38,10 @@ doctor_socialhist_post_data = {
   "currently_smoke": False,
   "last_smoke": 5,
   "last_smoke_time": "months",
-  "avg_num_drinks": 1,
-  "avg_num_workouts": 2,
+  "avg_weekly_drinks": 1,
+  "avg_weekly_workouts": 2,
   "job_title": "Engineer",
-  "avg_num_meditates": 3,
+  "avg_hourly_meditation": 3,
   "sexual_preference": "Female"
 }
 
@@ -57,8 +53,15 @@ doctor_medicalgeneralinfo_put_data = {
       "blood_type_positive": True
 }
 
+doctor_medicalmedicationsinfo_delete_data = {
+  "delete_ids":[
+    {"idx": 2}
+  ]
+}
+
 doctor_medicalmedicationsinfo_put_data = {
     "medications": [{
+        "idx": 1,
         "medication_name": "medName4",
         "medication_dosage": 1.2,
         "medication_units": "mg",
@@ -67,6 +70,7 @@ doctor_medicalmedicationsinfo_put_data = {
         "medication_time_units": "day"
     },
     {
+        "idx": 2,
         "medication_name": "medName2",
         "medication_dosage": 3,
         "medication_units": "mg",
@@ -77,15 +81,18 @@ doctor_medicalmedicationsinfo_put_data = {
     ]
 }
 
+doctor_medicalallergiesinfo_delete_data = {
+  "delete_ids":[
+    {"idx": 2}
+  ]
+}
+
 doctor_medicalallergiesinfo_put_data = {
     "allergies": [{
-        "medication_name": "medName3",
-        "allergy_symptoms": "Rash"
-    },
-    {                                   
+        "idx": 1,
         "medication_name": "medName4",
         "allergy_symptoms": "Rash"
-    },   
+    } 
     ]
 }
 
@@ -125,7 +132,11 @@ doctor_medicalallergiesinfo_post_data = {
     {                                   
         "medication_name": "medName3",
         "allergy_symptoms": "Vertigo"
-    }    
+    },
+    {                                   
+        "medication_name": "medName1",
+        "allergy_symptoms": "Vertigo"
+    }        
     ]
 }
 

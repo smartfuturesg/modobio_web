@@ -38,6 +38,7 @@ from odyssey.utils.errors import (
 from odyssey.utils.misc import check_client_existence, check_staff_existence, check_blood_test_existence, check_blood_test_result_type_existence, check_user_existence, check_medical_condition_existence, check_std_existence
 from odyssey.api.doctor.schemas import (
     AllMedicalBloodTestSchema,
+    CheckBoxArrayDeleteSchema,
     MedicalFamilyHistSchema,
     MedicalFamilyHistInputSchema,
     MedicalFamilyHistOutputSchema,
@@ -171,7 +172,7 @@ class MedicalMedicationInformation(Resource):
         return payload
 
     @token_auth.login_required
-    @accepts(schema=MedicalMedicationsInfoInputSchema, api=ns)
+    @accepts(schema=MedicalMedicationsInfoInputSchema(exclude=['medications.idx']), api=ns)
     @responds(schema=MedicalMedicationsInfoInputSchema, status_code=201, api=ns)
     def post(self, user_id):
         '''
@@ -237,18 +238,59 @@ class MedicalMedicationInformation(Resource):
                     medication.__dict__['user_id'] = user_id
                     # If medication and user are in it already, then send an update
                     # else, add it to the db
-                    medicationInDB = MedicalGeneralInfoMedications.query.filter_by(user_id=user_id).filter_by(medication_name=medication.medication_name).one_or_none()
+                    medicationInDB = MedicalGeneralInfoMedications.query.filter_by(user_id=user_id).filter_by(idx=medication.idx).one_or_none()
                     if medicationInDB:
                         del medication.__dict__['_sa_instance_state']
                         medicationInDB.update(medication.__dict__)
-                    else:
-                        db.session.add(medication)
                     
                     payload['medications'].append(medication)
         
         # insert results into the result table
         db.session.commit()
         return payload        
+
+    @token_auth.login_required
+    @accepts(schema=CheckBoxArrayDeleteSchema, api=ns)
+    @responds(status_code=201, api=ns)
+    def delete(self, user_id):
+        '''
+        Put request to update the client's onboarding personal and family history
+        '''
+        payload = {}
+
+        check_client_existence(user_id)
+        
+        ids_to_delete = request.parsed_obj['delete_ids']
+        for ids in ids_to_delete:
+            medicationInDB = MedicalGeneralInfoMedications.query.filter_by(user_id=user_id).filter_by(idx=ids['idx']).one_or_none()
+            if medicationInDB:
+                db.session.delete(allergyInDB)
+        
+
+        # if request.parsed_obj['medications']:
+        #     medications = request.parsed_obj['medications']
+        #     payload['medications'] = []
+        #     for medication in medications:
+        #         # If the client is taking medications, they MUST tell us what
+        #         # medication
+        #         if not medication.medication_name:
+        #             raise InputError(status_code = 405, message='Medication Name Required')
+        #         else:
+        #             medication.__dict__['user_id'] = user_id
+        #             # If medication and user are in it already, then send an update
+        #             # else, add it to the db
+        #             medicationInDB = MedicalGeneralInfoMedications.query.filter_by(user_id=user_id).filter_by(medication_name=medication.medication_name).one_or_none()
+        #             if medicationInDB:
+        #                 db.session.delete(medication)
+        #             else:
+        #                 raise InputError(status_code = 405,message='The medication name  does not exist in the table for this user')
+                    
+        #             payload['medications'].append(medication)
+        
+        # insert results into the result table
+        db.session.commit()
+        return payload        
+
 
 @ns.route('/medicalinfo/allergies/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
@@ -265,7 +307,7 @@ class MedicalAllergiesInformation(Resource):
         return payload
 
     @token_auth.login_required
-    @accepts(schema=MedicalAllergiesInfoInputSchema, api=ns)
+    @accepts(schema=MedicalAllergiesInfoInputSchema(exclude=['allergies.idx']), api=ns)
     @responds(schema=MedicalAllergiesInfoInputSchema, status_code=201, api=ns)
     def post(self, user_id):
         '''
@@ -305,7 +347,7 @@ class MedicalAllergiesInformation(Resource):
         payload = {}
 
         check_client_existence(user_id)
-        
+
         # If the client is allergic to certain medication, they MUST tell us what
         # medication
         if request.parsed_obj['allergies']:
@@ -318,7 +360,7 @@ class MedicalAllergiesInformation(Resource):
                     raise InputError(status_code = 405,message='Must need the name of the medication client is allergic to.')
                 else:
                     allergicTo.__dict__['user_id'] = user_id
-                    allergyInDB = MedicalGeneralInfoMedicationAllergy.query.filter_by(user_id=user_id).filter_by(medication_name=allergicTo.medication_name).filter_by(allergy_symptoms=allergicTo.allergy_symptoms).one_or_none()
+                    allergyInDB = MedicalGeneralInfoMedicationAllergy.query.filter_by(user_id=user_id).filter_by(idx=allergicTo.idx).one_or_none() 
                     if allergyInDB:
                         del allergicTo.__dict__['_sa_instance_state']
                         allergyInDB.update(allergicTo.__dict__)
@@ -329,6 +371,29 @@ class MedicalAllergiesInformation(Resource):
         # insert results into the result table
         db.session.commit()
         return payload
+
+    @token_auth.login_required
+    @accepts(schema=CheckBoxArrayDeleteSchema, api=ns)
+    @responds(status_code=201, api=ns)
+    def delete(self, user_id):
+        '''
+        delete request to update the client's onboarding personal and family history
+        '''
+
+        check_client_existence(user_id)
+        
+        # If the client is allergic to certain medication, they MUST tell us what
+        # medication
+
+        ids_to_delete = request.parsed_obj['delete_ids']
+        for ids in ids_to_delete:
+            allergyInDB = MedicalGeneralInfoMedicationAllergy.query.filter_by(user_id=user_id).filter_by(idx=ids['idx']).one_or_none()
+            if allergyInDB:
+                db.session.delete(allergyInDB)
+        
+        # insert results into the result table
+        db.session.commit()
+        return 
 
 @ns.route('/lookupstd/')
 class MedicalLookUpSTDResource(Resource):
@@ -408,6 +473,55 @@ class MedicalSTDHist(Resource):
         db.session.commit()
         return payload
 
+    @token_auth.login_required
+    @accepts(schema=MedicalSTDHistoryInputSchema, api=ns)
+    @responds(schema=MedicalSTDHistoryInputSchema, status_code=201, api=ns)
+    def delete(self, user_id):
+        """ Delete STD History for client ``user_id`` in response to a delete request.
+
+        This endpoint deletes a client's STD history. 
+
+        Example payload:
+        {
+            "stds": [
+                {"std_id": int},
+                {"std_id": int}
+            ]
+        }
+
+        ***std_id is the STD id from the STDLookUp table in the database and can be retrieved
+        from the endpoint /doctor/lookupstd/
+
+        ***std_selected should be sent as true when submitting, and if the user
+        unselects an STD, then the payload should send that STD id back with std_selected to false
+
+        Parameters
+        ----------
+        user_id : int
+            User ID number.
+
+        Returns
+        -------
+        dict
+            JSON encoded dict.
+        """
+        stds = request.parsed_obj['stds']
+        for std in stds:
+            check_std_existence(std.std_id)
+            user_and_std = MedicalSTDHistory.query.filter_by(user_id=user_id).filter_by(std_id=std.std_id).one_or_none()
+            # If the payload contains an STD for a user already, then just continue
+            if user_and_std:
+                del std.__dict__['_sa_instance_state']
+                user_and_std.update(std.__dict__)
+            else:
+                std.user_id = user_id
+                db.session.delete(std)
+        payload = {'stds': stds}
+        
+        # insert results into the result table
+        db.session.commit()
+        return payload
+
 @ns.route('/medicalinfo/social/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedicalSocialHist(Resource):
@@ -426,10 +540,10 @@ class MedicalSocialHist(Resource):
                 "last_smoke": int,
                 "last_smoke_time": str,
                 "plan_to_stop": bool,
-                "avg_num_drinks": int,
-                "avg_num_workouts": int,
+                "avg_weekly_drinks": int,
+                "avg_weekly_workouts": int,
                 "job_title": str,
-                "avg_num_meditates": bool,
+                "avg_hourly_meditation": int,
                 "sexual_preference": str
             }
             "std_history": [
@@ -472,10 +586,10 @@ class MedicalSocialHist(Resource):
             "last_smoke": int,
             "last_smoke_time": str,
             "plan_to_stop": bool,
-            "avg_num_drinks": int,
-            "avg_num_workouts": int,
+            "avg_weekly_drinks": int,
+            "avg_weekly_workouts": int,
             "job_title": str,
-            "avg_num_meditates": bool,
+            "avg_hourly_meditation": int,
             "sexual_preference": str
         }
 
@@ -526,10 +640,10 @@ class MedicalSocialHist(Resource):
             "last_smoke": int,
             "last_smoke_time": str,
             "plan_to_stop": bool,
-            "avg_num_drinks": int,
-            "avg_num_workouts": int,
+            "avg_weekly_drinks": int,
+            "avg_weekly_workouts": int,
             "job_title": str,
-            "avg_num_meditates": bool,
+            "avg_hourly_meditation": int,
             "sexual_preference": str
         }
 
@@ -564,7 +678,7 @@ class MedicalSocialHist(Resource):
         socialHist.update(data.__dict__)
         # insert results into the result table
         db.session.commit()
-        return data
+        return data    
 
 @ns.route('/medicalconditions/')
 class MedicalCondition(Resource):

@@ -157,14 +157,14 @@ class MedicalSocialHistory(db.Model):
     :type: int
     """
 
-    avg_num_drinks = db.Column(db.Integer)
+    avg_weekly_drinks = db.Column(db.Integer)
     """
     Average number of drinks client drinks per week
 
     :type: int
     """
     
-    avg_num_workouts = db.Column(db.Integer)
+    avg_weekly_workouts = db.Column(db.Integer)
     """
     Average number of times client worksout a week
 
@@ -178,7 +178,7 @@ class MedicalSocialHistory(db.Model):
     :type: str
     """
 
-    avg_num_meditates = db.Column(db.Integer)
+    avg_hourly_meditation = db.Column(db.Integer)
     """
     Average number of hours client prays/meditates
 
