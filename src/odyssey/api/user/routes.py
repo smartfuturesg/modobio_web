@@ -11,7 +11,7 @@ from werkzeug.security import check_password_hash
 from odyssey.api import api
 from odyssey.api.client.schemas import ClientInfoSchema
 from odyssey.api.staff.schemas import StaffProfileSchema, StaffRolesSchema
-from odyssey.api.user.models import User, UserLogin
+from odyssey.api.user.models import User, UserLogin, UserSubscriptions
 from odyssey.api.user.schemas import (
     UserSchema, 
     NewClientUserSchema,
@@ -19,13 +19,15 @@ from odyssey.api.user.schemas import (
     UserPasswordRecoveryContactSchema,
     UserPasswordResetSchema,
     UserPasswordUpdateSchema,
-    NewUserSchema
+    NewUserSchema,
+    UserSubscriptionsSchema,
+    UserSubscriptionHistorySchema
 ) 
 from odyssey.utils.auth import token_auth
-from odyssey.utils.constants import PASSWORD_RESET_URL
+from odyssey.utils.constants import PASSWORD_RESET_URL, DB_SERVER_TIME
 from odyssey.utils.errors import ContentNotFound, InputError, StaffEmailInUse, ClientEmailInUse, UnauthorizedUser
 from odyssey.utils.email import send_email_password_reset
-from odyssey.utils.misc import check_user_existence, verify_jwt
+from odyssey.utils.misc import check_user_existence, check_client_existence, check_staff_existence, verify_jwt
 
 from odyssey import db
 
@@ -69,6 +71,15 @@ class NewStaffUser(Resource):
                 user.is_staff = True
                 staff_profile = StaffProfileSchema().load({'user_id': user.user_id})
                 db.session.add(staff_profile)
+
+                # add new staff subscription information
+                staff_sub = UserSubscriptionsSchema().load({
+                    'user_id': user.user_id,
+                    'subscription_type': 'subscribed',
+                    'subscription_rate': 0.0,
+                    'is_staff': True
+                })
+                db.session.add(staff_sub)
         else:
             # user account does not yet exist for this email
             # require password
@@ -89,6 +100,15 @@ class NewStaffUser(Resource):
             staff_profile = StaffProfileSchema().load({"user_id": user.user_id})
             db.session.add(user_login)
             db.session.add(staff_profile)
+
+            # add new user subscription information
+            staff_sub = UserSubscriptionsSchema().load({
+                'user_id': user.user_id,
+                'subscription_type': 'subscribed',
+                'subscription_rate': 0.0,
+                'is_staff': True
+            })
+            db.session.add(staff_sub)
             
         # create entries for role assignments 
         for role in staff_info.get('access_roles', []):
@@ -123,6 +143,15 @@ class NewClientUser(Resource):
                 client_info = ClientInfoSchema().load({'user_id': user.user_id})
                 password=""
                 db.session.add(client_info)
+
+                # add new client subscription information
+                client_sub = UserSubscriptionsSchema().load({
+                    'user_id': user.user_id,
+                    'subscription_type': 'unsubscribed',
+                    'subscription_rate': 0.0,
+                    'is_staff': False
+                })
+                db.session.add(client_sub)
         else:
             # user account does not yet exist for this email
             # create a password
@@ -140,6 +169,15 @@ class NewClientUser(Resource):
             client_info = ClientInfoSchema().load({"user_id": user.user_id})
             db.session.add(client_info)
             db.session.add(user_login)
+
+            # add new user subscription information
+            client_sub = UserSubscriptionsSchema().load({
+                'user_id': user.user_id,
+                'subscription_type': 'unsubscribed',
+                'subscription_rate': 0.0,
+                'is_staff': False
+            })
+            db.session.add(client_sub)
 
         payload=user.__dict__
         payload['password']=password
@@ -293,3 +331,69 @@ class VerifyPortalId(Resource):
         db.session.commit()
         
         return 200
+
+@ns.route('/subscription/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class UserSubscriptionApi(Resource):
+
+    @token_auth.login_required
+    @responds(schema=UserSubscriptionsSchema(many=True), api=ns, status_code=200)
+    def get(self, user_id):
+        """
+        Returns active subscription information for the given user_id. 
+        Because a user_id can belong to both a client and staff account, both active subscriptions will be returned in this case.
+        """
+        check_user_existence(user_id)
+
+        return UserSubscriptions.query.filter_by(user_id=user_id).filter_by(end_date=None).all()
+
+    @token_auth.login_required
+    @accepts(schema=UserSubscriptionsSchema, api=ns)
+    @responds(schema=UserSubscriptionsSchema, api=ns, status_code=201)
+    def put(self, user_id):
+        """
+        Updates the currently active subscription for the given user_id. 
+        Also sets the end date to the previously active subscription.
+        """
+        if request.parsed_obj.is_staff:
+            check_staff_existence(user_id)
+        else:
+            check_client_existence(user_id)
+
+        #update end_date for user's previous subscription
+        #NOTE: users always have a subscription, even a brand new account will have an entry
+        #      in this table as an 'unsubscribed' subscription
+        prev_sub = UserSubscriptions.query.filter_by(user_id=user_id, end_date=None, is_staff=request.parsed_obj.is_staff).one_or_none()
+        prev_sub.update({'end_date': DB_SERVER_TIME})
+
+        new_data = {
+            'subscription_type': request.parsed_obj.subscription_type,
+            'subscription_rate': request.parsed_obj.subscription_rate,
+            'is_staff': request.parsed_obj.is_staff,
+            'user_id': user_id
+        }
+        new_sub = UserSubscriptionsSchema().load(new_data)
+        db.session.add(new_sub)
+        db.session.commit()
+
+        return new_sub
+
+    
+
+@ns.route('/subscription/history/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class UserSubscriptionHistoryApi(Resource):
+
+    @token_auth.login_required
+    @responds(schema=UserSubscriptionHistorySchema, api=ns, status_code=200)
+    def get(self, user_id):
+        """
+        Returns the complete subscription history for the given user_id.
+        Because a user_id can belong to both a client and staff account, both subscription histories will be returned in this case.
+        """
+        check_user_existence(user_id)
+
+        res = {}
+        res['client_subscription_history'] = UserSubscriptions.query.filter_by(user_id=user_id).filter_by(is_staff=False).all()
+        res['staff_subscription_history'] = UserSubscriptions.query.filter_by(user_id=user_id).filter_by(is_staff=True).all()
+        return res

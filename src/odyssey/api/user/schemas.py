@@ -1,7 +1,7 @@
 from marshmallow import Schema, fields, post_load, validate
 
 from odyssey import ma
-from odyssey.api.user.models import User, UserLogin
+from odyssey.api.user.models import User, UserLogin, UserSubscriptions
 from odyssey.utils.constants import ACCESS_ROLES
 
 """
@@ -100,3 +100,21 @@ class UserPasswordUpdateSchema(Schema):
     #TODO Validate password strength
     current_password = fields.String(required=True,  validate=validate.Length(min=3,max=50), description="current password")
     new_password = fields.String(required=True,  validate=validate.Length(min=3,max=50), description="new password to be used going forward")
+
+class UserSubscriptionsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = UserSubscriptions
+        exclude = ('created_at', 'updated_at', 'idx')
+        dump_only = ('start_date', 'end_date')
+
+    user_id = fields.Integer()
+    subscription_type = fields.String(validate=validate.OneOf(['unsubscribed', 'subscribed', 'free_trial', 'sponsored']))
+    
+    @post_load
+    def make_object(self, data, **kwargs):
+        return UserSubscriptions(**data)
+
+class UserSubscriptionHistorySchema(Schema):
+
+    client_subscription_history = fields.Nested(UserSubscriptionsSchema, many=True)
+    staff_subscription_history = fields.Nested(UserSubscriptionsSchema, many=True)
