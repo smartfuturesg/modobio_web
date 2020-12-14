@@ -22,6 +22,7 @@ from odyssey.api.client.models import (
     ClientSubscriptionContract,
     ClientFacilities,
 )
+from odyssey.api.user.schemas import UserInfoPutSchema
 
 class ClientSearchItemsSchema(Schema):
     user_id = fields.Integer()
@@ -65,25 +66,25 @@ class ClientFacilitiesSchema(Schema):
 class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientInfo
+        exclude = ('created_at', 'updated_at', 'idx')
+        dump_only = ('modobio_id', 'membersince')
 
-    idx = fields.Integer()
     user_id = fields.Integer()
-    record_locator_id = fields.String(missing=None)
-    modobio_id = fields.String(required=False, validate=validate.Length(min=0,max=12), dump_only=True)
-    firstname = fields.String(dump_only=True)
-    lastname = fields.String(dump_only=True)
-    email = fields.Email(dump_only=True)
 
     @post_load
     def make_object(self, data, **kwargs):
         return ClientInfo(**data)
-    @pre_dump
-    def ravel(self, data, **kwargs):
-        # take a dict copy of client_info and add user data 
-        client_info = data[0].__dict__.copy()
-        user_data = data[1].__dict__
-        client_info.update(user_data)
-        return client_info
+
+class ClientInfoPutSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = ClientInfo
+        exclude = ('created_at', 'updated_at', 'idx')
+        dump_only = ('modobio_id', 'membersince', 'is_staff', 'is_client', 'user_id', 'receive_docs')
+
+class ClientAndUserInfoSchema(Schema):
+
+    client_info = fields.Nested(ClientInfoPutSchema, required=False, missing={})
+    user_info = fields.Nested(UserInfoPutSchema, required=False, missing={})
 
 class NewRemoteClientSchema(Schema):
 
@@ -267,6 +268,22 @@ class ClientDataTierSchema(Schema):
     stored_bytes = fields.Integer(description="total bytes stored for the client", missing=None)
     tier = fields.String(description="data storage tier. Either Tier 1/2/3", missing=None)
 
+class ClientClinicalCareTeamInternalSchema(Schema):
+    """
+    Schema is used for serializing/deserializing clinical care team related payloads
+    """
+    team_member_email = fields.Email(description="email for clinical care team member")
+    team_member_user_id = fields.Integer(description="user_id for clinical care team member", dump_only=True)
+    firstname = fields.String(dump_only=True, missing=None)
+    lastname = fields.String(dump_only=True, missing=None)
+
+class ClientClinicalCareTeamSchema(Schema):
+    """
+    Schema is used for nesting ClientClinicalCareTeamInternalSchema 
+    """
+    
+    care_team = fields.Nested(ClientClinicalCareTeamInternalSchema(many=True), missing=[])
+    total_items = fields.Integer(dump_only=True)
 
 class AllClientsDataTier(Schema):
 

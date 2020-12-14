@@ -11,8 +11,7 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
         exclude = ('created_at', 'updated_at')
-
-    modobio_id = fields.String(missing=None, dump_only=True)
+        dump_only = ('password', 'modobio_id')
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -44,17 +43,29 @@ class NewClientUserSchema(Schema):
     phone_number = fields.String(validate=validate.Length(min=0,max=50))
     password = fields.String(validate=validate.Length(min=0,max=50), dump_only=True)
     modobio_id = fields.String()
+    biological_sex_male = fields.Boolean()
 
-class UserInfoSchema(Schema):
-    firstname = fields.String()
-    middlename = fields.String()
-    lastname = fields.String()
+
+class UserInfoSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = User
+        exclude = ('created_at', 'updated_at', 'is_staff', 'is_client')
+        load_only = ('password')
+
     email = fields.Email(validate=validate.Length(min=0,max=50))
     phone_number = fields.String(validate=validate.Length(min=0,max=50))
     password = fields.String(description="password required when creating a staff member",
                             validate=validate.Length(min=0,max=50), 
                             required=False)
     
+class UserInfoPutSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = User
+        exclude = ('created_at', 'updated_at')
+        dump_only = ('is_staff', 'is_client', 'modobio_id', 'user_id')
+
+    email = fields.Email(validate=validate.Length(min=0,max=50))
+    phone_number = fields.String(validate=validate.Length(min=0,max=50))
 
 class StaffInfoSchema(Schema):
     """
@@ -70,8 +81,8 @@ class NewUserSchema(Schema):
     General purpose user creation schema
     """
 
-    userinfo = fields.Nested(UserInfoSchema, required=True)
-    staffinfo = fields.Nested(StaffInfoSchema,
+    user_info = fields.Nested(UserInfoSchema, required=True)
+    staff_info = fields.Nested(StaffInfoSchema,
                               missing={}, 
                               description="used when registering a staff member")
 

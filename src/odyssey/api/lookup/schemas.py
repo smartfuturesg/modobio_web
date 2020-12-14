@@ -1,22 +1,46 @@
-from marshmallow import Schema, post_load
+from marshmallow import Schema, fields, post_load
 
 from odyssey import ma
-from odyssey.api.lookup.models import LookupDrinks, LookupGoals
+from odyssey.api.lookup.models import LookupDrinks, LookupDrinkIngredients, LookupGoals
 
 class LookupDrinksSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupDrinks
-        exclude = ('idx', 'created_at', 'updated_at')
+        exclude = ('created_at', 'updated_at')
+
+    primary_ingredient = fields.String()
+    goal = fields.String()
 
     @post_load
     def make_object(self, data, **kwargs):
         return LookupDrinks(**data)
 
-class LookupGoalsSchema(ma.SQLAlchemyAutoSchema):
+class LookupDrinksOutputSchema(Schema):
+    items = fields.Nested(LookupDrinksSchema(many=True), missing = [])
+    total_items = fields.Integer()
+
+class LookupDrinkIngredientsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        model = LookupDrinks
+        model = LookupDrinkIngredients
         exclude = ('idx', 'created_at', 'updated_at')
 
     @post_load
     def make_object(self, data, **kwargs):
+        return LookupDrinkIngredients(**data)
+
+class LookupDrinkIngredientsOutputSchema(Schema):
+    items = fields.Nested(LookupDrinkIngredientsSchema(many=True), missing = [])
+    total_items = fields.Integer()
+
+class LookupGoalsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupGoals
+        exclude = ('created_at', 'updated_at')
+
+    @post_load
+    def make_object(self, data, **kwargs):
         return LookupGoals(**data)
+
+class LookupGoalsOutputSchema(Schema):
+    items = fields.Nested(LookupGoalsSchema(many=True), missing = [])
+    total_items = fields.Integer()
