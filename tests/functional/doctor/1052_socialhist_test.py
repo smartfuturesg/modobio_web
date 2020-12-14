@@ -89,7 +89,7 @@ def test_get_social_medical_history(test_client, init_database, client_auth_head
         response = test_client.get('/doctor/medicalinfo/social/1/',
                                     headers=header, 
                                     content_type='application/json')
-        breakpoint()
+
         assert response.status_code == 200
         assert response.json['social_history']['currently_smoke'] == True
         assert len(response.json['std_history']) == 2
