@@ -50,7 +50,7 @@ def test_delete_client_assigned_drink(test_client, init_database, staff_auth_hea
     """
 
     response = test_client.delete("/client/drinks/1/",
-                                data=dumps(clients_assigned_drinks),
+                                data=dumps({ "drink_ids": [1] }),
                                 headers=staff_auth_header, 
                                 content_type='application/json')
     
