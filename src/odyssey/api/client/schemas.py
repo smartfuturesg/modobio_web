@@ -303,3 +303,6 @@ class ClientAssignedDrinksSchema(ma.SQLAlchemyAutoSchema):
     @post_load
     def make_object(self, data, **kwargs):
         return ClientAssignedDrinks(**data)
+
+class ClientAssignedDrinksDeleteSchema(Schema):
+    drink_ids = fields.List(fields.Integer)
