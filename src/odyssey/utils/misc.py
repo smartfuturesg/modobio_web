@@ -11,7 +11,7 @@ import flask.json
 
 from odyssey.api.lookup.models import LookupDrinks
 from odyssey.api.client.models import ClientInfo, ClientFacilities
-from odyssey.api.doctor.models import MedicalBloodTests, MedicalBloodTestResultTypes, MedicalConditions
+from odyssey.api.doctor.models import MedicalBloodTests, MedicalBloodTestResultTypes, MedicalConditions, MedicalLookUpSTD
 from odyssey.api.user.models import User
 from odyssey.api.staff.models import StaffProfile
 from odyssey.api.facility.models import RegisteredFacilities
@@ -26,6 +26,7 @@ from odyssey.utils.errors import (
     UserNotFound, 
     StaffNotFound,
     DrinkNotFound
+    STDNotFound
 )
 
 
@@ -93,6 +94,11 @@ def check_drink_existence(drink_id):
     drink = LookupDrinks.query.filter_by(drink_id=drink_id).one_or_none()
     if not drink:
         raise DrinkNotFound(drink_id)
+        
+def check_std_existence(std_id):
+    std = MedicalLookUpSTD.query.filter_by(std_id=std_id).one_or_none()
+    if not std:
+        raise STDNotFound(std_id)
 
 #def check_remote_client_portal_validity(portal_id):
 #    """
