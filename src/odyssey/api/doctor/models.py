@@ -115,20 +115,12 @@ class MedicalSocialHistory(db.Model):
     :type: bool
     """
 
-    last_smoke = db.Column(db.Integer)
+    last_smoke_date = db.Column(db.Date)
     """
-    The last time the client smoked
+    Date when client last smoked.
 
-    :type: int
-    """
-
-    last_smoke_time = db.Column(db.String)
-    """
-    Drop down, time frame
-
-    options are months, years
-    :type: str
-    """
+    :type: :class:`datetime.date`
+    """    
 
     avg_num_cigs = db.Column(db.Integer)
     """

@@ -57,7 +57,6 @@ def test_post_social_medical_history(test_client, init_database, client_auth_hea
     
     assert response.status_code == 201
     assert response.json['currently_smoke'] == False
-    assert response.json['last_smoke'] == 5
 
 def test_put_social_medical_history(test_client, init_database, client_auth_header):
     """
@@ -76,7 +75,6 @@ def test_put_social_medical_history(test_client, init_database, client_auth_head
     assert response.status_code == 201
     assert response.json['currently_smoke'] == True
     assert response.json['avg_num_cigs'] == 5
-    assert response.json['last_smoke'] == None
 
 def test_get_social_medical_history(test_client, init_database, client_auth_header, staff_auth_header):
     """

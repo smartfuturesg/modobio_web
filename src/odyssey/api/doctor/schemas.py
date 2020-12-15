@@ -56,24 +56,30 @@ class MedicalLookUpSTDOutputSchema(Schema):
     items = fields.Nested(MedicalLookUpSTDSchema(many=True),missing=[])
     total_items = fields.Integer()
 
-class MedicalSocialHistorySchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = MedicalSocialHistory
+class MedicalSocialHistorySchema(Schema):
 
-    user_id = fields.Integer()
+    # user_id = fields.Integer()
     currently_smoke = fields.Boolean(required=True)
+    avg_num_cigs = fields.Integer()
     avg_weekly_drinks = fields.Integer(missing=0)
     avg_weekly_workouts = fields.Integer(missing=0)
     job_title = fields.String(missing=None)
     avg_hourly_meditation = fields.Integer(missing=0)
     sexual_preference = fields.String(missing=None)
-    last_smoke = fields.Integer(missing=None)
-    last_smoke_time = fields.String(missing=None)
+    
+    last_smoke_date = fields.Date(dump_only=True)
+    last_smoke = fields.Integer(load_only=True,required=False,missing=None)
+
+    possible_date_units = ['days','months','years']
+
+    last_smoke_time = fields.String(load_only=True,required=False,description="days, months, years",validate=validate.OneOf(possible_date_units),missing=None)
     num_years_smoked = fields.Integer(missing=0)
     plan_to_stop = fields.Boolean(missing=None)
 
     @post_load
     def make_object(self, data, **kwargs):
+        data.pop("last_smoke")
+        data.pop("last_smoke_time")
         return MedicalSocialHistory(**data)
 
 class MedicalSocialHistoryOutputSchema(Schema):

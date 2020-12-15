@@ -1,5 +1,6 @@
 import os, boto3, secrets, pathlib
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
 from flask import request, current_app, jsonify
 from flask_accepts import accepts, responds
@@ -567,20 +568,26 @@ class MedicalSocialHist(Resource):
         """
         # First check if the client exists
         check_client_existence(user_id)
-
         # Check if this information is already in the DB
         socialHist = MedicalSocialHistory.query.filter_by(user_id=user_id).one_or_none()
         data = request.parsed_obj
+        payload = request.get_json()
         if socialHist:
             raise InputError(status=405,message='Social History has already been posted, please use put request.')
-
         # if currently smoke is false
         if not data.currently_smoke:
             # if last smoke or last smoke time (months/years)
             # is present, then both must be present
-            if data.last_smoke or data.last_smoke_time:
-                if data.last_smoke is None or data.last_smoke_time is None: 
+            if payload['last_smoke'] or payload['last_smoke_time']:
+                if payload['last_smoke'] is None or payload['last_smoke_time'] is None: 
                     raise InputError(status=405, message='User must include when they last smoked, and include the time frame months or years.')
+                
+                if(payload['last_smoke_time'] == 'days'):
+                    data.__dict__['last_smoke_date'] = datetime.now() - relativedelta(months=payload['last_smoke'])                
+                elif(payload['last_smoke_time'] == 'months'):
+                    data.__dict__['last_smoke_date'] = datetime.now() - relativedelta(months=payload['last_smoke'])
+                elif(payload['last_smoke_time'] == 'years'):
+                    data.__dict__['last_smoke_date'] = datetime.now() - relativedelta(years=payload['last_smoke'])
         data.__dict__['user_id'] = user_id
         db.session.add(data)
         # insert results into the result table
@@ -621,18 +628,24 @@ class MedicalSocialHist(Resource):
         """
         # First check if the client exists
         check_client_existence(user_id)
-                
-        # currently smoke is required (true/)
         # if currently smoke is false
         data = request.parsed_obj
+        payload = request.get_json()
+
         if not data.currently_smoke:
             # if last smoke or last smoke time (months/years)
             # is present, then both must be present
-            if data.last_smoke or data.last_smoke_time:
-                if data.last_smoke is None or  \
-                    data.last_smoke_time is None:
+            if payload['last_smoke'] or payload['last_smoke_time']:
+                if payload['last_smoke'] is None or payload['last_smoke_time'] is None: 
                         raise InputError(status=405, message='User must include when they last smoked, and include the time frame months or years.')
-        
+                
+                if(payload['last_smoke_time'] == 'days'):
+                    data.__dict__['last_smoke_date'] = datetime.now() - relativedelta(months=payload['last_smoke'])                
+                elif(payload['last_smoke_time'] == 'months'):
+                    data.__dict__['last_smoke_date'] = datetime.now() - relativedelta(months=payload['last_smoke'])
+                elif(payload['last_smoke_time'] == 'years'):
+                    data.__dict__['last_smoke_date'] = datetime.now() - relativedelta(years=payload['last_smoke'])
+
         socialHist = MedicalSocialHistory.query.filter_by(user_id=user_id).one_or_none()
         
         del data.__dict__['_sa_instance_state']
