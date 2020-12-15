@@ -25,7 +25,7 @@ from odyssey.utils.errors import (
     UnauthorizedUser,
     UserNotFound, 
     StaffNotFound,
-    DrinkNotFound
+    DrinkNotFound,
     STDNotFound
 )
 
