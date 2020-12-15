@@ -1,5 +1,6 @@
 import os, boto3, secrets, pathlib
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
 from flask import request, current_app, jsonify
 from flask_accepts import accepts, responds
@@ -7,6 +8,7 @@ from flask_restx import Resource, Api
 
 from odyssey import db
 from odyssey.api.doctor.models import (
+    MedicalLookUpSTD,
     MedicalFamilyHistory,
     MedicalConditions,
     MedicalPhysicalExam,
@@ -19,6 +21,8 @@ from odyssey.api.doctor.models import (
     MedicalBloodTestResultTypes, 
     MedicalImaging,
     MedicalExternalMR,
+    MedicalSocialHistory,
+    MedicalSTDHistory,
     MedicalSurgeries
 )
 from odyssey.api.facility.models import MedicalInstitutions
@@ -32,9 +36,10 @@ from odyssey.utils.errors import (
     InputError,
     MedicalConditionAlreadySubmitted
 )
-from odyssey.utils.misc import check_client_existence, check_staff_existence, check_blood_test_existence, check_blood_test_result_type_existence, check_user_existence, check_medical_condition_existence
+from odyssey.utils.misc import check_client_existence, check_staff_existence, check_blood_test_existence, check_blood_test_result_type_existence, check_user_existence, check_medical_condition_existence, check_std_existence
 from odyssey.api.doctor.schemas import (
     AllMedicalBloodTestSchema,
+    CheckBoxArrayDeleteSchema,
     MedicalFamilyHistSchema,
     MedicalFamilyHistInputSchema,
     MedicalFamilyHistOutputSchema,
@@ -54,6 +59,11 @@ from odyssey.api.doctor.schemas import (
     MedicalImagingSchema,
     MedicalExternalMREntrySchema, 
     MedicalExternalMRSchema,
+    MedicalSocialHistorySchema,
+    MedicalLookUpSTDOutputSchema,
+    MedicalSTDHistorySchema,
+    MedicalSTDHistoryInputSchema,
+    MedicalSocialHistoryOutputSchema,
     MedicalSurgeriesSchema
 )
 from odyssey.utils.constants import MEDICAL_CONDITIONS
@@ -163,7 +173,7 @@ class MedicalMedicationInformation(Resource):
         return payload
 
     @token_auth.login_required
-    @accepts(schema=MedicalMedicationsInfoInputSchema, api=ns)
+    @accepts(schema=MedicalMedicationsInfoInputSchema(exclude=['medications.idx']), api=ns)
     @responds(schema=MedicalMedicationsInfoInputSchema, status_code=201, api=ns)
     def post(self, user_id):
         '''
@@ -229,18 +239,38 @@ class MedicalMedicationInformation(Resource):
                     medication.__dict__['user_id'] = user_id
                     # If medication and user are in it already, then send an update
                     # else, add it to the db
-                    medicationInDB = MedicalGeneralInfoMedications.query.filter_by(user_id=user_id).filter_by(medication_name=medication.medication_name).one_or_none()
+                    medicationInDB = MedicalGeneralInfoMedications.query.filter_by(user_id=user_id).filter_by(idx=medication.idx).one_or_none()
                     if medicationInDB:
                         del medication.__dict__['_sa_instance_state']
                         medicationInDB.update(medication.__dict__)
-                    else:
-                        db.session.add(medication)
                     
                     payload['medications'].append(medication)
         
         # insert results into the result table
         db.session.commit()
         return payload        
+
+    @token_auth.login_required
+    @accepts(schema=CheckBoxArrayDeleteSchema, api=ns)
+    @responds(status_code=201, api=ns)
+    def delete(self, user_id):
+        '''
+        Put request to update the client's onboarding personal and family history
+        '''
+        payload = {}
+
+        check_client_existence(user_id)
+        
+        ids_to_delete = request.parsed_obj['delete_ids']
+        for ids in ids_to_delete:
+            medicationInDB = MedicalGeneralInfoMedications.query.filter_by(user_id=user_id).filter_by(idx=ids['idx']).one_or_none()
+            if medicationInDB:
+                db.session.delete(medicationInDB)
+        
+        # insert results into the result table
+        db.session.commit()
+        return 201        
+
 
 @ns.route('/medicalinfo/allergies/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
@@ -257,7 +287,7 @@ class MedicalAllergiesInformation(Resource):
         return payload
 
     @token_auth.login_required
-    @accepts(schema=MedicalAllergiesInfoInputSchema, api=ns)
+    @accepts(schema=MedicalAllergiesInfoInputSchema(exclude=['allergies.idx']), api=ns)
     @responds(schema=MedicalAllergiesInfoInputSchema, status_code=201, api=ns)
     def post(self, user_id):
         '''
@@ -297,7 +327,7 @@ class MedicalAllergiesInformation(Resource):
         payload = {}
 
         check_client_existence(user_id)
-        
+
         # If the client is allergic to certain medication, they MUST tell us what
         # medication
         if request.parsed_obj['allergies']:
@@ -310,7 +340,7 @@ class MedicalAllergiesInformation(Resource):
                     raise InputError(status_code = 405,message='Must need the name of the medication client is allergic to.')
                 else:
                     allergicTo.__dict__['user_id'] = user_id
-                    allergyInDB = MedicalGeneralInfoMedicationAllergy.query.filter_by(user_id=user_id).filter_by(medication_name=allergicTo.medication_name).filter_by(allergy_symptoms=allergicTo.allergy_symptoms).one_or_none()
+                    allergyInDB = MedicalGeneralInfoMedicationAllergy.query.filter_by(user_id=user_id).filter_by(idx=allergicTo.idx).one_or_none() 
                     if allergyInDB:
                         del allergicTo.__dict__['_sa_instance_state']
                         allergyInDB.update(allergicTo.__dict__)
@@ -321,6 +351,309 @@ class MedicalAllergiesInformation(Resource):
         # insert results into the result table
         db.session.commit()
         return payload
+
+    @token_auth.login_required
+    @accepts(schema=CheckBoxArrayDeleteSchema, api=ns)
+    @responds(status_code=201, api=ns)
+    def delete(self, user_id):
+        '''
+        delete request to update the client's onboarding personal and family history
+        '''
+
+        check_client_existence(user_id)
+        
+        # If the client is allergic to certain medication, they MUST tell us what
+        # medication
+
+        ids_to_delete = request.parsed_obj['delete_ids']
+        for ids in ids_to_delete:
+            allergyInDB = MedicalGeneralInfoMedicationAllergy.query.filter_by(user_id=user_id).filter_by(idx=ids['idx']).one_or_none()
+            if allergyInDB:
+                db.session.delete(allergyInDB)
+        
+        # insert results into the result table
+        db.session.commit()
+        return 
+
+@ns.route('/lookupstd/')
+class MedicalLookUpSTDResource(Resource):
+    """ Returns STD list stored in the database in response to a GET request.
+
+    Returns
+    -------
+    dict
+        JSON encoded dict.
+    """
+    @token_auth.login_required
+    @responds(schema=MedicalLookUpSTDOutputSchema,status_code=200, api=ns)
+    def get(self):
+        std_types = MedicalLookUpSTD.query.all()
+        payload = {'items': std_types,
+                   'total_items': len(std_types)}
+
+        return payload
+
+@ns.route('/medicalinfo/std/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class MedicalSTDHist(Resource):
+    @token_auth.login_required
+    @accepts(schema=MedicalSTDHistoryInputSchema, api=ns)
+    @responds(schema=MedicalSTDHistoryInputSchema, status_code=201, api=ns)
+    def post(self, user_id):
+        """ Submit STD History for client ``user_id`` in response to a PUT request.
+
+        This endpoint submits or updates a client's STD history. 
+
+        Example payload:
+        {
+            "stds": [
+                {"std_id": int},
+                {"std_id": int}
+
+            ]
+        }
+
+        ***std_id is the STD id from the STDLookUp table in the database and can be retrieved
+        from the endpoint /doctor/lookupstd/
+
+        Parameters
+        ----------
+        user_id : int
+            User ID number.
+
+        Returns
+        -------
+        dict
+            JSON encoded dict.
+        """
+        # First check if the client exists
+        check_client_existence(user_id)
+        # the data expected for the backend is:
+        # parameter: user_id 
+        stds = request.parsed_obj['stds']
+        for std in stds:
+            check_std_existence(std.std_id)
+            user_and_std = MedicalSTDHistory.query.filter_by(user_id=user_id).filter_by(std_id=std.std_id).one_or_none()
+            # If the payload contains an STD for a user already, then just continue
+            if user_and_std:
+                continue
+            else:
+                std.user_id = user_id
+                db.session.add(std)
+        payload = {'stds': stds}
+        
+        # insert results into the result table
+        db.session.commit()
+        return payload
+
+    @token_auth.login_required
+    @accepts(schema=MedicalSTDHistoryInputSchema, api=ns)
+    @responds(status_code=201, api=ns)
+    def delete(self, user_id):
+        """ Delete STD History for client ``user_id`` in response to a delete request.
+
+        This endpoint deletes a client's STD history. 
+
+        Example payload:
+        {
+            "stds": [
+                {"std_id": int},
+                {"std_id": int}
+            ]
+        }
+
+        ***std_id is the STD id from the STDLookUp table in the database and can be retrieved
+        from the endpoint /doctor/lookupstd/
+
+        Parameters
+        ----------
+        user_id : int
+            User ID number.
+
+        Returns
+        -------
+        dict
+            JSON encoded dict.
+        """
+        stds = request.parsed_obj['stds']
+        for std in stds:
+            check_std_existence(std.std_id)
+            user_and_std = MedicalSTDHistory.query.filter_by(user_id=user_id).filter_by(std_id=std.std_id).one_or_none()
+            # If the payload contains an STD for a user already, then just continue
+            if user_and_std:
+                db.session.delete(user_and_std)
+        
+        # insert results into the result table
+        db.session.commit()
+        return 201
+
+@ns.route('/medicalinfo/social/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class MedicalSocialHist(Resource):
+    @token_auth.login_required
+    @responds(schema=MedicalSocialHistoryOutputSchema, api=ns)
+    def get(self, user_id):
+        """ This request retrieves the social history
+        for client ``user_id`` in response to a GET request.
+
+        The example returned payload will look like 
+        {
+            "social_history": {
+                "currently_smoke": bool,
+                "avg_num_cigs": int,
+                "num_years_smoked": int,
+                "last_smoke": int,
+                "last_smoke_time": str,
+                "plan_to_stop": bool,
+                "avg_weekly_drinks": int,
+                "avg_weekly_workouts": int,
+                "job_title": str,
+                "avg_hourly_meditation": int,
+                "sexual_preference": str
+            }
+            "std_history": [
+                {"std_id": int},
+                {"std_id: int}
+            ]
+        }
+
+        Parameters
+        ----------
+        user_id : int
+            User ID number.
+
+        Returns
+        -------
+        dict
+            JSON encoded dict.
+        """
+        check_client_existence(user_id)
+        social_hist = MedicalSocialHistory.query.filter_by(user_id=user_id).one_or_none()
+        std_hist = MedicalSTDHistory.query.filter_by(user_id=user_id).all()
+        payload = {'social_history': social_hist,
+                   'std_history': std_hist}
+        return payload
+
+    @token_auth.login_required
+    @accepts(schema=MedicalSocialHistorySchema, api=ns)
+    @responds(schema=MedicalSocialHistorySchema, status_code=201, api=ns)
+    def post(self, user_id):
+        """ This request submits the social history
+        for client ``user_id`` in response to a POST request.
+
+        The example returned payload will look like 
+        {
+            "currently_smoke": bool,
+            "avg_num_cigs": int,
+            "num_years_smoked": int,
+            "last_smoke": int,
+            "last_smoke_time": str,
+            "plan_to_stop": bool,
+            "avg_weekly_drinks": int,
+            "avg_weekly_workouts": int,
+            "job_title": str,
+            "avg_hourly_meditation": int,
+            "sexual_preference": str
+        }
+
+        Parameters
+        ----------
+        user_id : int
+            User ID number.
+
+        Returns
+        -------
+        dict
+            JSON encoded dict.
+        """
+        # First check if the client exists
+        check_client_existence(user_id)
+        # Check if this information is already in the DB
+        socialHist = MedicalSocialHistory.query.filter_by(user_id=user_id).one_or_none()
+        data = request.parsed_obj
+        payload = request.get_json()
+        if socialHist:
+            raise InputError(status=405,message='Social History has already been posted, please use put request.')
+        # if currently smoke is false
+        if not data.currently_smoke:
+            # if last smoke or last smoke time (months/years)
+            # is present, then both must be present
+            if payload['last_smoke'] or payload['last_smoke_time']:
+                if payload['last_smoke'] is None or payload['last_smoke_time'] is None: 
+                    raise InputError(status=405, message='User must include when they last smoked, and include the time frame months or years.')
+                
+                if(payload['last_smoke_time'] == 'days'):
+                    data.__dict__['last_smoke_date'] = datetime.now() - relativedelta(months=payload['last_smoke'])                
+                elif(payload['last_smoke_time'] == 'months'):
+                    data.__dict__['last_smoke_date'] = datetime.now() - relativedelta(months=payload['last_smoke'])
+                elif(payload['last_smoke_time'] == 'years'):
+                    data.__dict__['last_smoke_date'] = datetime.now() - relativedelta(years=payload['last_smoke'])
+        data.__dict__['user_id'] = user_id
+        db.session.add(data)
+        # insert results into the result table
+        db.session.commit()
+        return data
+
+    @token_auth.login_required
+    @accepts(schema=MedicalSocialHistorySchema, api=ns)
+    @responds(schema=MedicalSocialHistorySchema, status_code=201, api=ns)
+    def put(self, user_id):
+        """ This request updates the social history
+        for client ``user_id`` in response to a PUT request.
+
+        The example returned payload will look like 
+        {
+            "currently_smoke": bool,
+            "avg_num_cigs": int,
+            "num_years_smoked": int,
+            "last_smoke": int,
+            "last_smoke_time": str,
+            "plan_to_stop": bool,
+            "avg_weekly_drinks": int,
+            "avg_weekly_workouts": int,
+            "job_title": str,
+            "avg_hourly_meditation": int,
+            "sexual_preference": str
+        }
+
+        Parameters
+        ----------
+        user_id : int
+            User ID number.
+
+        Returns
+        -------
+        dict
+            JSON encoded dict.
+        """
+        # First check if the client exists
+        check_client_existence(user_id)
+        # if currently smoke is false
+        data = request.parsed_obj
+        payload = request.get_json()
+
+        if not data.currently_smoke:
+            # if last smoke or last smoke time (months/years)
+            # is present, then both must be present
+            if payload['last_smoke'] or payload['last_smoke_time']:
+                if payload['last_smoke'] is None or payload['last_smoke_time'] is None: 
+                        raise InputError(status=405, message='User must include when they last smoked, and include the time frame months or years.')
+                
+                if(payload['last_smoke_time'] == 'days'):
+                    data.__dict__['last_smoke_date'] = datetime.now() - relativedelta(months=payload['last_smoke'])                
+                elif(payload['last_smoke_time'] == 'months'):
+                    data.__dict__['last_smoke_date'] = datetime.now() - relativedelta(months=payload['last_smoke'])
+                elif(payload['last_smoke_time'] == 'years'):
+                    data.__dict__['last_smoke_date'] = datetime.now() - relativedelta(years=payload['last_smoke'])
+
+        socialHist = MedicalSocialHistory.query.filter_by(user_id=user_id).one_or_none()
+        
+        del data.__dict__['_sa_instance_state']
+        
+        socialHist.update(data.__dict__)
+        # insert results into the result table
+        db.session.commit()
+        return data    
 
 @ns.route('/medicalconditions/')
 class MedicalCondition(Resource):
@@ -408,7 +741,6 @@ class MedicalFamilyHist(Resource):
         # insert results into the result table
         db.session.commit()
         return payload
-
 
 @ns.route('/images/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})

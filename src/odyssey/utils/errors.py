@@ -130,6 +130,17 @@ class MedicalConditionNotFound(Exception):
 
         self.status_code = 409
 
+class STDNotFound(Exception):
+    """Used if a STD is not found in DB"""
+    def __init__(self, std_id, message = None):
+        Exception.__init__(self)
+        if message:
+            self.message = message
+        else:
+            self.message = f'The STD with id, {std_id} does not exist.'
+
+        self.status_code = 409        
+
 class MedicalConditionAlreadySubmitted(Exception):
     """Used if a medical condition is already submitted for a user"""
     def __init__(self,user_id, medical_condition_id, message = None):
@@ -352,6 +363,11 @@ def error_client_already_exists(error):
 
 @api.errorhandler(MedicalConditionNotFound)
 def error_medical_condition_not_found(error):
+    '''Return a custom message and 409 status code'''
+    return error_response(error.status_code, error.message)
+
+@api.errorhandler(STDNotFound)
+def error_std_not_found(error):
     '''Return a custom message and 409 status code'''
     return error_response(error.status_code, error.message)    
 
