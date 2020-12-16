@@ -42,7 +42,6 @@ def test_get_1_general_medical_history(test_client, init_database, client_auth_h
                                     content_type='application/json')
                                     
         assert response.status_code == 200
-        breakpoint()
         assert response.json['gen_info']['primary_doctor_contact_name'] == 'Dr Guy'
         assert len(response.json['medications']) == 2
         assert len(response.json['allergies']) == 3
@@ -78,7 +77,6 @@ def test_get_2_general_medical_history(test_client, init_database, client_auth_h
                                     content_type='application/json')
                                     
         assert response.status_code == 200
-        breakpoint()
         assert response.json['gen_info']['primary_doctor_contact_name'] == 'Dr Steve'
         assert len(response.json['medications']) == 3
         assert len(response.json['allergies']) == 1
@@ -114,7 +112,6 @@ def test_get_3_general_medical_history(test_client, init_database, client_auth_h
                                     content_type='application/json')
                                     
         assert response.status_code == 200
-        breakpoint()
         assert response.json['gen_info']['primary_doctor_contact_name'] == 'Dr Steve'
         assert len(response.json['medications']) == 3
         assert len(response.json['allergies']) == 1
