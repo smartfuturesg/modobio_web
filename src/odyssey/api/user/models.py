@@ -2,6 +2,7 @@
 Database tables for the user system portion of the Modo Bio Staff application.
 All tables in this module are prefixed with 'User'.
 """
+import enum
 import base64
 from datetime import datetime, timedelta
 import jwt
@@ -257,3 +258,73 @@ class UserLogin(db.Model):
                             algorithm='HS256').decode("utf-8")
 
 
+class UserSubscriptions(db.Model):
+    """ 
+    Stores details to relating to user account not related to the subscription system
+    """
+
+    __tablename__ = 'UserSubscriptions'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
+    """
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    table index
+
+    :type: integer, primary key, autoincrementing
+    """
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    """
+    Id of the user that this subscription belongs to
+
+    :type: int, foreign key('User.user_id')
+    """
+
+    is_staff = db.Column(db.Boolean)
+    """
+    Denotes if this subscription is for a staff member. Distinguishes between 
+    subscriptions for users with both account types
+
+    :type: bool
+    """
+
+    start_date = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Datetime that this subscription level started
+
+    :type: datetime
+    """
+
+    end_date = db.Column(db.DateTime)
+    """
+    Datetime that this subscription level ended
+
+    :type: datetime
+    """
+
+    subscription_rate = db.Column(db.Float)
+    """
+    Monthly cost of the subscription in USD
+
+    :type: float
+    """
+
+    subscription_type = db.Column(db.String)
+    """
+    Type of this subscription. Possible values are: unsubscribed, subscribed, free_trial and sponsored
+
+    :type: String
+    """

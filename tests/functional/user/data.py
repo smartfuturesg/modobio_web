@@ -83,3 +83,9 @@ users_staff_passwords_data = {
   "current_password": "password",
   "new_password": "salt1ampintheruffs98"
 }
+
+users_subscription_data = {
+  "is_staff": False,
+  "subscription_rate": 9.99,
+  "subscription_type": "subscribed"
+}
