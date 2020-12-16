@@ -27,7 +27,8 @@ from odyssey.api.client.models import (
     ClientPolicies,
     ClientRelease,
     ClientSubscriptionContract,
-    ClientFacilities
+    ClientFacilities,
+    ClientMobileSettings
 )
 from odyssey.api.doctor.models import MedicalHistory, MedicalPhysicalExam
 from odyssey.api.physiotherapy.models import PTHistory 
@@ -45,6 +46,7 @@ from odyssey.api.client.schemas import(
     ClientIndividualContractSchema,
     ClientInfoSchema,
     ClientClinicalCareTeamSchema,
+    ClientMobileSettingsSchema,
     ClientPoliciesContractSchema, 
     ClientRegistrationStatusSchema,
     ClientReleaseSchema,
@@ -850,5 +852,59 @@ class ClinicalCareTeam(Resource):
         return response
 
 
+@ns.route('/mobile-settings/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class ClinicalCareTeam(Resource):
+    """
+    Create update and remove members of a client's clinical care team
+    only the client themselves may have access to these operations.
+    """
+    @token_auth.login_required(user_type=('client',))
+    @accepts(schema=ClientMobileSettingsSchema, api=ns)
+    @responds(schema=ClientMobileSettingsSchema, api=ns, status_code=201)
+    def post(self, user_id):
+        """
+        Set a client's mobile settings for the first time
+        """
 
+        check_client_existence(user_id)
 
+        if ClientMobileSettings.query.filter_by(user_id=user_id).one_or_none():
+            raise IllegalSetting(message=f"Mobile settings for user_id {user_id} already exists. Please use PUT method")
+
+        request.parsed_obj.user_id = user_id
+        db.session.add(request.parsed_obj)
+        db.session.commit()
+
+        return request.parsed_obj
+
+    @token_auth.login_required(user_type=('client',))
+    @responds(schema=ClientMobileSettingsSchema, api=ns, status_code=200)
+    def get(self, user_id):
+        """
+        Returns the mobile settings that a client has set.
+        """
+        check_client_existence()
+
+        return ClientMobileSettings.query.filter_by(user_id=user_id).one_or_none()
+
+    @token_auth.login_required(user_type=('client',))
+    @accepts(schema=ClientMobileSettingsSchema, api=ns)
+    @responds(schema=ClientMobileSettingsSchema, api=ns, status_code=201)
+    def put(self, user_id):
+        """
+        Update a client's mobile settings
+        """
+
+        check_client_existence(user_id)
+
+        settings = ClientMobileSettings.query.filter_by(user_id=user_id).one_or_none()
+        if not settings:
+            raise IllegalSetting(message=f"Mobile settings for user_id {user_id} do not exist. Please use POST method")
+
+        data = request.parsed_obj.__dict__
+        del data['_sa_instance_state']
+        settings.update(data)
+        db.session.commit()
+
+        return request.parsed_obj
