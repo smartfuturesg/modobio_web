@@ -98,73 +98,84 @@ class MedicalGenInformation(Resource):
         '''
         # First check if the client exists
         check_client_existence(user_id)
-
         payload = {}
         generalInfo = request.parsed_obj['gen_info']
         if generalInfo:
+
+            genInfo = MedicalGeneralInfo.query.filter_by(user_id=user_id).one_or_none()
+            if genInfo:
+                db.session.delete(genInfo)
+
             if generalInfo.primary_doctor_contact_name:
                 # If the client has a primary care doctor, we need either the 
                 # phone number or email
                 if not generalInfo.primary_doctor_contact_phone and \
                     not generalInfo.primary_doctor_contact_email:
+                    db.session.rollback()
                     raise InputError(status_code = 405,message='If a primary doctor name is given, the client must also\
                                         provide the doctors phone number or email')      
-            
-            if generalInfo.blood_type or generalInfo.blood_type_pos_neg:
+            if generalInfo.blood_type or generalInfo.blood_type_positive is not None:
                 # if the client starts by indication which blood type they have or the sign
                 # they also need the other.
-                if generalInfo.blood_type is None and generalInfo.blood_type_pos_neg is None:
+                if generalInfo.blood_type is None or generalInfo.blood_type_positive is None:
+                    db.session.rollback()
                     raise InputError(status_code = 405,message='If bloodtype or sign is given, client must provide both.')
-                    
-            MedicalGeneralInfo.query.filter_by(user_id=user_id).delete()
-            
             generalInfo.user_id = user_id
             db.session.add(generalInfo)
+
             payload['gen_info'] = generalInfo
-        
+
         if request.parsed_obj['medications']:
             medications = request.parsed_obj['medications']
             payload['medications'] = []
-
             # Before storing data, delete what exists in the database
-            MedicalGeneralInfoMedications.query.filter_by(user_id=user_id).delete()
-
+            meds = MedicalGeneralInfoMedications.query.filter_by(user_id=user_id).all()
+            for med in meds:
+                db.session.delete(med)
+            
             for medication in medications:
                 # If the client is taking medications, they MUST tell us what
                 # medication
-                if not medication.medication_name:
+                if medication.medication_name is None:
+                    db.session.rollback()
                     raise InputError(status_code = 405, message='Medication Name Required')
                 else:
                     # If the client gives a medication dosage, they must also give 
                     # the units
-                    if medication.medication_dosage and not medication.medication_units:
+                    if medication.medication_dosage and medication.medication_units is None:
+                        db.session.rollback()
                         raise InputError(status_code = 405,message='Medication dosage requires units')
                     if medication.medication_freq:
-                        if not medication.medication_times_per_freq and not medication.medication_time_units:
+                        if medication.medication_times_per_freq is None and medication.medication_time_units is None:
+                            db.session.rollback()
                             raise InputError(status_code = 405,message='Medication frequency needs more information')
-                    
                     medication.user_id = user_id
                     db.session.add(medication)
+
                     payload['medications'].append(medication)
-                    
+            
+
         # If the client is allergic to certain medication, they MUST tell us what
-        # medication   
+        # medication
         if request.parsed_obj['allergies']:
             allergies = request.parsed_obj['allergies']
             payload['allergies'] = []
-
-            MedicalGeneralInfoMedicationAllergy.query.filter_by(user_id=user_id).delete()
+            
+            allergiesInDB = MedicalGeneralInfoMedicationAllergy.query.filter_by(user_id=user_id).all()
+            for allergy in allergiesInDB:
+                db.session.delete(allergy)
 
             for allergicTo in allergies:
                 if not allergicTo.medication_name:
                     # If the client indicates they have an allergy to a medication
                     # they must AT LEAST send the name of the medication they are allergic to
+                    db.session.rollback()
                     raise InputError(status_code = 405,message='Must need the name of the medication client is allergic to.')
                 else:
                     allergicTo.user_id = user_id
                     payload['allergies'].append(allergicTo)
                     db.session.add(allergicTo)      
-        
+
         # insert results into the result table
         db.session.commit()
         return payload
@@ -244,7 +255,7 @@ class MedicalGeneralInformation(Resource):
                     not generalInfo.primary_doctor_contact_email:
                     raise InputError(status_code = 405,message='If a primary doctor name is given, the client must also\
                                         provide the doctors phone number or email')      
-            if generalInfo.blood_type or generalInfo.blood_type_pos_neg:
+            if generalInfo.blood_type or generalInfo.blood_type_positive:
                 # if the client starts by indication which blood type they have or the sign
                 # they also need the other.
                 if generalInfo.blood_type is None or generalInfo.blood_type_positive is None:

@@ -1,5 +1,44 @@
 import pathlib
 
+doctor_all_generalmedicalinfo_post_3_data = {
+  "gen_info": {
+      "primary_doctor_contact_name": "Dr Dude",
+      "primary_doctor_contact_phone": "4809999999",
+      "primary_doctor_contact_email": "drguy@gmail.com",
+      "blood_type": "A",
+      "blood_type_positive": True
+  },
+  "medications": [{
+        "medication_dosage": 1.2,
+        "medication_units": "mg",
+        "medication_freq": 4,
+        "medication_times_per_freq": 3,
+        "medication_time_units": "day"
+    },
+    {
+        "medication_name": "medName2",
+        "medication_dosage": 3,
+        "medication_units": "mg",
+        "medication_freq": 5,
+        "medication_times_per_freq": 6,
+        "medication_time_units": "day"
+    },
+    {
+        "medication_name": "medName5",
+        "medication_dosage": 7,
+        "medication_units": "mg",
+        "medication_freq": 5,
+        "medication_times_per_freq": 6,
+        "medication_time_units": "day"
+    }     
+    ],
+    "allergies": [{
+        "medication_name": "medName3",
+        "allergy_symptoms": "Rash"
+    }
+    ]    
+}
+
 doctor_all_generalmedicalinfo_post_2_data = {
   "gen_info": {
       "primary_doctor_contact_name": "Dr Steve",
