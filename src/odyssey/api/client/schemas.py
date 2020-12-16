@@ -298,7 +298,7 @@ class ClientMobileSettingsSchema(ma.SQLAlchemyAutoSchema):
         exclude = ('created_at', 'updated_at', 'idx')
 
     user_id = fields.Integer(dump_only=True)
-    date_format = fields.String(validate=validate.OneOf('%%d-%%b-%%Y','%%b-%%d-%%Y','%%d/%%m/%%Y','%%m/%%d/%%Y'))
+    date_format = fields.String(validate=validate.OneOf(('%%d-%%b-%%Y','%%b-%%d-%%Y','%%d/%%m/%%Y','%%m/%%d/%%Y')))
 
     @post_load
     def make_object(self, data, **kwargs):
