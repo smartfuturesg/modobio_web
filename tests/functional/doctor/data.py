@@ -1,15 +1,123 @@
 import pathlib
 
-# doctor_std_post_2_data = {
-#   "stds":[
-#     {
-#       "std_id": 3
-#     },
-#     {
-#       "std_id": 2
-#     }
-#   ]
-# }
+doctor_all_generalmedicalinfo_post_3_data = {
+  "gen_info": {
+      "primary_doctor_contact_name": "Dr Dude",
+      "primary_doctor_contact_phone": "4809999999",
+      "primary_doctor_contact_email": "drguy@gmail.com",
+      "blood_type": "A",
+      "blood_type_positive": True
+  },
+  "medications": [{
+        "medication_dosage": 1.2,
+        "medication_units": "mg",
+        "medication_freq": 4,
+        "medication_times_per_freq": 3,
+        "medication_time_units": "day"
+    },
+    {
+        "medication_name": "medName2",
+        "medication_dosage": 3,
+        "medication_units": "mg",
+        "medication_freq": 5,
+        "medication_times_per_freq": 6,
+        "medication_time_units": "day"
+    },
+    {
+        "medication_name": "medName5",
+        "medication_dosage": 7,
+        "medication_units": "mg",
+        "medication_freq": 5,
+        "medication_times_per_freq": 6,
+        "medication_time_units": "day"
+    }     
+    ],
+    "allergies": [{
+        "medication_name": "medName3",
+        "allergy_symptoms": "Rash"
+    }
+    ]    
+}
+
+doctor_all_generalmedicalinfo_post_2_data = {
+  "gen_info": {
+      "primary_doctor_contact_name": "Dr Steve",
+      "primary_doctor_contact_phone": "4809999999",
+      "primary_doctor_contact_email": "drguy@gmail.com",
+      "blood_type": "A",
+      "blood_type_positive": True
+  },
+  "medications": [{
+        "medication_name": "medName4",
+        "medication_dosage": 1.2,
+        "medication_units": "mg",
+        "medication_freq": 4,
+        "medication_times_per_freq": 3,
+        "medication_time_units": "day"
+    },
+    {
+        "medication_name": "medName2",
+        "medication_dosage": 3,
+        "medication_units": "mg",
+        "medication_freq": 5,
+        "medication_times_per_freq": 6,
+        "medication_time_units": "day"
+    },
+    {
+        "medication_name": "medName5",
+        "medication_dosage": 7,
+        "medication_units": "mg",
+        "medication_freq": 5,
+        "medication_times_per_freq": 6,
+        "medication_time_units": "day"
+    }     
+    ],
+    "allergies": [{
+        "medication_name": "medName3",
+        "allergy_symptoms": "Rash"
+    }
+    ]    
+}
+
+doctor_all_generalmedicalinfo_post_1_data = {
+  "gen_info": {
+      "primary_doctor_contact_name": "Dr Guy",
+      "primary_doctor_contact_phone": "4809999999",
+      "primary_doctor_contact_email": "drguy@gmail.com",
+      "blood_type": "A",
+      "blood_type_positive": True
+  },
+  "medications": [{
+        "medication_name": "medName4",
+        "medication_dosage": 1.2,
+        "medication_units": "mg",
+        "medication_freq": 4,
+        "medication_times_per_freq": 3,
+        "medication_time_units": "day"
+    },
+    {
+        "medication_name": "medName2",
+        "medication_dosage": 3,
+        "medication_units": "mg",
+        "medication_freq": 5,
+        "medication_times_per_freq": 6,
+        "medication_time_units": "day"
+    } 
+    ],
+    "allergies": [{
+        "medication_name": "medName3",
+        "allergy_symptoms": "Rash"
+    },
+    {                                   
+        "medication_name": "medName3",
+        "allergy_symptoms": "Vertigo"
+    },
+    {                                   
+        "medication_name": "medName1",
+        "allergy_symptoms": "Vertigo"
+    }        
+    ]    
+}
 
 doctor_std_delete_data = {
   "stds":[
