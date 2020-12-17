@@ -108,6 +108,13 @@ class MedicalSocialHistory(db.Model):
     :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
+    ever_smoked = db.Column(db.Boolean)
+    """
+    Has the client ever smoked
+
+    :type: bool
+    """   
+
     currently_smoke = db.Column(db.Boolean)
     """
     Does the client currently smoke
@@ -121,6 +128,22 @@ class MedicalSocialHistory(db.Model):
 
     :type: :class:`datetime.date`
     """    
+
+
+    last_smoke = db.Column(db.Integer)
+    """
+    The last time the client smoked
+
+    :type: int
+    """
+
+    last_smoke_time = db.Column(db.String)
+    """
+    Drop down, time frame
+
+    options are months, years
+    :type: str
+    """
 
     avg_num_cigs = db.Column(db.Integer)
     """

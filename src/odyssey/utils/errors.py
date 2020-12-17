@@ -229,6 +229,17 @@ class FacilityNotFound(Exception):
 
         self.status_code = 404
 
+class DrinkNotFound(Exception):
+    """in the case that drink_id is given where that drink_id does not exist"""
+    def __init__(self, identification=None, message = None):
+        Exception.__init__(self)
+        if message:
+            self.message = message
+        else:
+            self.message = f'The drink identified by, {identification} does not exit.'
+
+        self.status_code = 404
+
 class IllegalSetting(Exception):
     """in the case an API request includes a setting or parameter that is not allowed"""
     def __init__(self, param=None, message = None):
@@ -398,6 +409,11 @@ def error_insufficient_inputs(error):
 
 @api.errorhandler(StaffNotFound)
 def error_staff_id_does_not_exist(error):
+    '''Return a custom message and 400 status code'''
+    return error_response(error.status_code, error.message)
+
+@api.errorhandler(DrinkNotFound)
+def error_drink_id_does_not_exist(error):
     '''Return a custom message and 400 status code'''
     return error_response(error.status_code, error.message)
 

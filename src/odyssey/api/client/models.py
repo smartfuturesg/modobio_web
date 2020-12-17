@@ -1072,6 +1072,47 @@ class ClientClinicalCareTeam(db.Model):
     :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
+class ClientAssignedDrinks(db.Model):
+    """
+    Stores information about what nutrional beverages a client has been assigned.
+    Clients will only see drinks that have been assigned to them when viewing
+    the selection of nutritional beverages. Drinks can be assigned to a client
+    either automatically based on their goals or manually by staff members.
+    """
 
+    __tablename__ = "ClientAssignedDrinks"
 
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
 
+    :type: int, primary key, autoincrement
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    """
+    Id of the user for this assignment.
+
+    :type: int, foreign key('User.user_id')
+    """
+
+    drink_id = db.Column(db.Integer, db.ForeignKey('LookupDrinks.drink_id', ondelete="CASCADE"), nullable=False)
+    """
+    Id of the drink for this assignment.
+
+    :type: int, foreign key('LookupDrinks.drink_id)
+    """
