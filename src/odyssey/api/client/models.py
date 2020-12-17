@@ -1072,6 +1072,144 @@ class ClientClinicalCareTeam(db.Model):
     :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
+class ClientMobileSettings(db.Model):
+    """
+    Holds the values for mobile settings that users have enabled or disabled
+    """
 
+    __tablename__ = 'ClientMobileSettings'
 
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
 
+    :type: int, primary key, autoincrement
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
+    """
+    User ID number
+
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
+    """
+
+    use_24_hour_clock = db.Column(db.Boolean())
+    """
+    Time format preferred by the user, true for 24 hr clock, false for 12 hr
+
+    :type: boolean
+    """
+
+    date_format = db.Column(db.String())
+    """
+    Date format preferred by the user, options are:
+
+    %d-%b-%Y ( 14-Mar-2020 )
+    %b-%d-%Y ( Mar-14-2020 )
+    %d/%m/%Y ( 14/05/2020 )
+    %m/%d/%Y ( 05/14/2020 )
+
+    :type: string
+    """
+
+    include_timezone = db.Column(db.Boolean())
+    """
+    Denotes if timezone name should be included with the time
+
+    :type: boolean
+    """
+
+    biometrics_setup = db.Column(db.Boolean())
+    """
+    Denotes if user has setup biometric login and wishes to use it
+
+    :type: boolean
+    """
+
+    timezone_tracking = db.Column(db.Boolean())
+    """
+    Denotes if the user wishes to enable timezone tracking
+
+    :type: Boolean
+    """
+
+    is_right_handed = db.Column(db.Boolean())
+    """
+    Denotes if user is right-handed
+
+    :type: boolean
+    """
+
+    display_middle_name = db.Column(db.Boolean())
+    """
+    Denotes if the user would like their middle name to be displayed
+
+    :type: boolean
+    """
+
+    #todo: allow push notifications to be allow for specific categories and not others
+    enable_push_notifications = db.Column(db.Boolean())
+    """
+    Denotes if user has enabled push notifications
+
+    :type: boolean
+    """
+    
+class ClientAssignedDrinks(db.Model):
+    """
+    Stores information about what nutrional beverages a client has been assigned.
+    Clients will only see drinks that have been assigned to them when viewing
+    the selection of nutritional beverages. Drinks can be assigned to a client
+    either automatically based on their goals or manually by staff members.
+    """
+
+    __tablename__ = "ClientAssignedDrinks"
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    """
+    Id of the user for this assignment.
+
+    :type: int, foreign key('User.user_id')
+    """
+
+    drink_id = db.Column(db.Integer, db.ForeignKey('LookupDrinks.drink_id', ondelete="CASCADE"), nullable=False)
+    """
+    Id of the drink for this assignment.
+
+    :type: int, foreign key('LookupDrinks.drink_id)
+    """

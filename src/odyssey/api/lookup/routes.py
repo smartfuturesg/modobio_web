@@ -5,6 +5,7 @@ from odyssey.api import api
 from odyssey.utils.auth import token_auth
 from odyssey.api.lookup.models import LookupDrinks, LookupDrinkIngredients, LookupGoals
 from odyssey.api.lookup.schemas import LookupDrinksOutputSchema, LookupDrinkIngredientsOutputSchema, LookupGoalsOutputSchema
+from odyssey.utils.misc import check_drink_existence
 
 from odyssey import db
 
@@ -32,6 +33,8 @@ class LookupDrinkIngredientsApi(Resource):
     @responds(schema=LookupDrinkIngredientsOutputSchema, api=ns)
     def get(self, drink_id):
         """get recipe of the drink denoted by drink_id"""
+        check_drink_existence(drink_id)
+
         res = LookupDrinkIngredients.query.filter_by(drink_id=drink_id).all()
         return {'total_items': len(res), 'items': res}
 

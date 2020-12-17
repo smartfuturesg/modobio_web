@@ -9,6 +9,7 @@ import uuid
 from flask import current_app
 import flask.json
 
+from odyssey.api.lookup.models import LookupDrinks
 from odyssey.api.client.models import ClientInfo, ClientFacilities
 from odyssey.api.doctor.models import MedicalBloodTests, MedicalBloodTestResultTypes, MedicalConditions, MedicalLookUpSTD
 from odyssey.api.user.models import User
@@ -24,6 +25,7 @@ from odyssey.utils.errors import (
     UnauthorizedUser,
     UserNotFound, 
     StaffNotFound,
+    DrinkNotFound,
     STDNotFound
 )
 
@@ -88,6 +90,11 @@ def check_medical_condition_existence(medcon_id):
     if not medcon:
         raise MedicalConditionNotFound(medcon_id)
 
+def check_drink_existence(drink_id):
+    drink = LookupDrinks.query.filter_by(drink_id=drink_id).one_or_none()
+    if not drink:
+        raise DrinkNotFound(drink_id)
+        
 def check_std_existence(std_id):
     std = MedicalLookUpSTD.query.filter_by(std_id=std_id).one_or_none()
     if not std:

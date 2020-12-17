@@ -151,3 +151,18 @@ clients_clinical_care_team = {
     ]
     
     }
+
+clients_assigned_drinks = {
+    "drink_id": 1
+}
+
+clients_mobile_settings = {
+  "is_right_handed": True,
+  "enable_push_notifications": True,
+  "display_middle_name": True,
+  "biometrics_setup": True,
+  "timezone_tracking": True,
+  "use_24_hour_clock": True,
+  "date_format": "%d-%b-%Y",
+  "include_timezone": True
+}
