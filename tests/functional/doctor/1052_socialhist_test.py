@@ -30,8 +30,8 @@ def test_get_std_conditions(test_client, init_database, staff_auth_header):
 
 def test_post_1_social_history(test_client, init_database, client_auth_header):
     """
-    GIVEN a api end point for STD medical history assessment
-    WHEN the '/doctor/medicalinfo/std/<user id>/' resource  is requested (POST)
+    GIVEN a api end point for submitting new social medical history
+    WHEN the  '/doctor/medicalinfo/social/<user id>' resource  is requested (POST)
     THEN check the response is valid
     """
     payload = doctor_all_socialhistory_post_1_data
@@ -47,7 +47,7 @@ def test_post_1_social_history(test_client, init_database, client_auth_header):
 
 def test_get_social_medical_history(test_client, init_database, client_auth_header, staff_auth_header):
     """
-    GIVEN a api end point for retrieving personal and family medical history
+    GIVEN a api end point for retrieving social medical history
     WHEN the  '/doctor/medicalinfo/social/<user id>' resource  is requested (GET)
     THEN check the response is valid
     """
@@ -63,8 +63,8 @@ def test_get_social_medical_history(test_client, init_database, client_auth_head
 
 def test_post_2_social_history(test_client, init_database, client_auth_header):
     """
-    GIVEN a api end point for STD medical history assessment
-    WHEN the '/doctor/medicalinfo/std/<user id>/' resource  is requested (POST)
+    GIVEN a api end point for submitting new social medical history
+    WHEN the  '/doctor/medicalinfo/social/<user id>' resource  is requested (POST)
     THEN check the response is valid
     """
     payload = doctor_all_socialhistory_post_2_data
@@ -79,7 +79,7 @@ def test_post_2_social_history(test_client, init_database, client_auth_header):
     
 def test_get_2_social_medical_history(test_client, init_database, client_auth_header, staff_auth_header):
     """
-    GIVEN a api end point for retrieving personal and family medical history
+    GIVEN a api end point for retrieving social medical history
     WHEN the  '/doctor/medicalinfo/social/<user id>' resource  is requested (GET)
     THEN check the response is valid
     """
@@ -95,8 +95,8 @@ def test_get_2_social_medical_history(test_client, init_database, client_auth_he
 
 def test_break_post_1_social_history(test_client, init_database, client_auth_header):
     """
-    GIVEN a api end point for STD medical history assessment
-    WHEN the '/doctor/medicalinfo/std/<user id>/' resource  is requested (POST)
+    GIVEN a api end point for submitting new social medical history
+    WHEN the  '/doctor/medicalinfo/social/<user id>' resource  is requested (POST)
     THEN check the response is valid
     """
     payload = doctor_all_socialhistory_break_post_1_data
@@ -112,7 +112,7 @@ def test_break_post_1_social_history(test_client, init_database, client_auth_hea
 
 def test_get_broke_1_social_medical_history(test_client, init_database, client_auth_header, staff_auth_header):
     """
-    GIVEN a api end point for retrieving personal and family medical history
+    GIVEN a api end point for retrieving social medical history
     WHEN the  '/doctor/medicalinfo/social/<user id>' resource  is requested (GET)
     THEN check the response is valid
     """
@@ -128,8 +128,8 @@ def test_get_broke_1_social_medical_history(test_client, init_database, client_a
 
 def test_break_post_2_social_history(test_client, init_database, client_auth_header):
     """
-    GIVEN a api end point for STD medical history assessment
-    WHEN the '/doctor/medicalinfo/std/<user id>/' resource  is requested (POST)
+    GIVEN a api end point for submitting new social medical history
+    WHEN the  '/doctor/medicalinfo/social/<user id>' resource  is requested (POST)
     THEN check the response is valid
     """
     payload = doctor_all_socialhistory_break_post_2_data
@@ -144,7 +144,7 @@ def test_break_post_2_social_history(test_client, init_database, client_auth_hea
 
 def test_get_broke_2_social_medical_history(test_client, init_database, client_auth_header, staff_auth_header):
     """
-    GIVEN a api end point for retrieving personal and family medical history
+    GIVEN a api end point for retrieving social medical history
     WHEN the  '/doctor/medicalinfo/social/<user id>' resource  is requested (GET)
     THEN check the response is valid
     """
