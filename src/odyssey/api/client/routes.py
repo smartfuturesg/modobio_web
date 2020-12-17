@@ -870,7 +870,7 @@ class ClientDrinksApi(Resource):
         check_client_existence(user_id)
         check_drink_existence(request.parsed_obj.drink_id)
 
-     @token_auth.login_required
+    @token_auth.login_required
     @responds(schema=ClientAssignedDrinksSchema(many=True), api=ns, status_code=200)
     def get(self, user_id):
         """

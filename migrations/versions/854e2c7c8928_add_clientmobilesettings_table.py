@@ -1,7 +1,7 @@
 """add ClientMobileSettings table
 
 Revision ID: 854e2c7c8928
-Revises: 65f48672909f
+Revises: 3c8640f8727f
 Create Date: 2020-12-16 14:21:08.030651
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '854e2c7c8928'
-down_revision = '65f48672909f'
+down_revision = '3c8640f8727f'
 branch_labels = None
 depends_on = None
 
