@@ -68,18 +68,16 @@ class MedicalSocialHistorySchema(Schema):
     sexual_preference = fields.String(missing=None)
     
     last_smoke_date = fields.Date(dump_only=True)
-    last_smoke = fields.Integer(load_only=True,required=False,missing=None)
+    last_smoke = fields.Integer(required=False,missing=None)
 
     possible_date_units = ['days','months','years']
 
-    last_smoke_time = fields.String(load_only=True,required=False,description="days, months, years",validate=validate.OneOf(possible_date_units),missing=None)
+    last_smoke_time = fields.String(required=False,description="days, months, years",validate=validate.OneOf(possible_date_units),missing=None)
     num_years_smoked = fields.Integer(missing=0)
     plan_to_stop = fields.Boolean(missing=None)
 
     @post_load
     def make_object(self, data, **kwargs):
-        data.pop("last_smoke")
-        data.pop("last_smoke_time")
         return MedicalSocialHistory(**data)
 
 class MedicalSocialHistoryOutputSchema(Schema):

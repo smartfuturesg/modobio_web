@@ -122,6 +122,22 @@ class MedicalSocialHistory(db.Model):
     :type: :class:`datetime.date`
     """    
 
+
+    last_smoke = db.Column(db.Integer)
+    """
+    The last time the client smoked
+
+    :type: int
+    """
+
+    last_smoke_time = db.Column(db.String)
+    """
+    Drop down, time frame
+
+    options are months, years
+    :type: str
+    """
+
     avg_num_cigs = db.Column(db.Integer)
     """
     Average number of cigarettes smoked per day
