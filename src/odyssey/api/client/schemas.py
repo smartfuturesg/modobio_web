@@ -21,7 +21,8 @@ from odyssey.api.client.models import (
     ClientReleaseContacts,
     ClientSubscriptionContract,
     ClientFacilities,
-    ClientMobileSettings
+    ClientMobileSettings,
+    ClientAssignedDrinks
 )
 from odyssey.api.user.schemas import UserInfoPutSchema
 
@@ -303,3 +304,17 @@ class ClientMobileSettingsSchema(ma.SQLAlchemyAutoSchema):
     @post_load
     def make_object(self, data, **kwargs):
         return ClientMobileSettings(**data)
+class ClientAssignedDrinksSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = ClientAssignedDrinks
+        exclude = ('created_at', 'updated_at', 'idx')
+
+    user_id = fields.Integer(dump_only=True)
+    drink_id = fields.Integer()
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return ClientAssignedDrinks(**data)
+
+class ClientAssignedDrinksDeleteSchema(Schema):
+    drink_ids = fields.List(fields.Integer)

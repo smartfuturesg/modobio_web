@@ -28,7 +28,8 @@ from odyssey.api.client.models import (
     ClientRelease,
     ClientSubscriptionContract,
     ClientFacilities,
-    ClientMobileSettings
+    ClientMobileSettings,
+    ClientAssignedDrinks
 )
 from odyssey.api.doctor.models import MedicalHistory, MedicalPhysicalExam
 from odyssey.api.physiotherapy.models import PTHistory 
@@ -38,9 +39,11 @@ from odyssey.api.facility.models import RegisteredFacilities
 from odyssey.api.user.models import User, UserLogin
 from odyssey.utils.pdf import to_pdf, merge_pdfs
 from odyssey.utils.email import send_email_user_registration_portal, send_test_email
-from odyssey.utils.misc import check_client_existence
+from odyssey.utils.misc import check_client_existence, check_drink_existence
 from odyssey.api.client.schemas import(
     AllClientsDataTier,
+    ClientAssignedDrinksSchema,
+    ClientAssignedDrinksDeleteSchema,
     ClientConsentSchema,
     ClientConsultContractSchema,
     ClientIndividualContractSchema,
@@ -851,10 +854,52 @@ class ClinicalCareTeam(Resource):
 
         return response
 
+@ns.route('/drinks/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class ClientDrinksApi(Resource):
+    """
+    Endpoints related to nutritional beverages that are assigned to clients.
+    """
+    @token_auth.login_required(user_type=('staff',), staff_role=('doctor', 'nutrition', 'doctor_internal', 'nutrition_internal'))
+    @accepts(schema=ClientAssignedDrinksSchema, api=ns)
+    @responds(schema=ClientAssignedDrinksSchema, api=ns, status_code=201)
+    def post(self, user_id):
+        """
+        Add an assigned drink to the client designated by user_id.
+        """
+        check_client_existence(user_id)
+        check_drink_existence(request.parsed_obj.drink_id)
+
+     @token_auth.login_required
+    @responds(schema=ClientAssignedDrinksSchema(many=True), api=ns, status_code=200)
+    def get(self, user_id):
+        """
+        Returns the list of drinks assigned to the user designated by user_id.
+        """
+        check_client_existence(user_id)
+
+        return ClientAssignedDrinks.query.filter_by(user_id=user_id).all()
+    
+    @token_auth.login_required(user_type=('staff',), staff_role=('doctor', 'nutrition', 'doctor_internal', 'nutrition_internal'))
+    @accepts(schema=ClientAssignedDrinksDeleteSchema, api=ns)
+    @responds(schema=ClientAssignedDrinksSchema, api=ns, status_code=204)
+    def delete(self, user_id):
+        """
+        Delete a drink assignemnt for a user with user_id and drink_id
+        """
+        for drink_id in request.parsed_obj['drink_ids']:
+            drink = ClientAssignedDrinks.query.filter_by(user_id=user_id, drink_id=drink_id).one_or_none()
+
+            if not drink:
+                raise ContentNotFound()
+
+            db.session.delete(drink)
+        
+        db.session.commit()
 
 @ns.route('/mobile-settings/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class ClinicalCareTeam(Resource):
+class ClinicalMobileSettingsApi(Resource):
     """
     Create update and remove members of a client's clinical care team
     only the client themselves may have access to these operations.
@@ -906,6 +951,11 @@ class ClinicalCareTeam(Resource):
         data = request.parsed_obj.__dict__
         del data['_sa_instance_state']
         settings.update(data)
+        db.session.commit()
+
+        return request.parsed_obj
+        request.parsed_obj.user_id = user_id
+        db.session.add(request.parsed_obj)
         db.session.commit()
 
         return request.parsed_obj

@@ -151,3 +151,7 @@ clients_clinical_care_team = {
     ]
     
     }
+
+clients_assigned_drinks = {
+    "drink_id": 1
+}
