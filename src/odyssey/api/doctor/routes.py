@@ -603,20 +603,21 @@ class MedicalSocialHist(Resource):
             if socialHist:
                 db.session.delete(socialHist)
 
-            if not social.currently_smoke:
-                # if last smoke or last smoke time (months/years)
-                # is present, then both must be present
-                if social.last_smoke or social.last_smoke_time:
-                    if social.last_smoke is None or social.last_smoke_time is None: 
-                        db.session.rollback()
-                        raise InputError(status_code=405, message='User must include when they last smoked, and include the time frame months or years.')
-                    
-                    if(social.last_smoke_time == 'days'):
-                        social.__dict__['last_smoke_date'] = datetime.now() - relativedelta(months=social.last_smoke) 
-                    elif(social.last_smoke_time == 'months'):
-                        social.__dict__['last_smoke_date'] = datetime.now() - relativedelta(months=social.last_smoke)
-                    elif(social.last_smoke_time == 'years'):
-                        social.__dict__['last_smoke_date'] = datetime.now() - relativedelta(years=social.last_smoke)
+            if social.ever_smoked:
+                if not social.currently_smoke:
+                    # if last smoke or last smoke time (months/years)
+                    # is present, then both must be present
+                    if social.last_smoke or social.last_smoke_time:
+                        if social.last_smoke is None or social.last_smoke_time is None: 
+                            db.session.rollback()
+                            raise InputError(status_code=405, message='User must include when they last smoked, and include the time frame months or years.')
+                        
+                        if(social.last_smoke_time == 'days'):
+                            social.__dict__['last_smoke_date'] = datetime.now() - relativedelta(months=social.last_smoke) 
+                        elif(social.last_smoke_time == 'months'):
+                            social.__dict__['last_smoke_date'] = datetime.now() - relativedelta(months=social.last_smoke)
+                        elif(social.last_smoke_time == 'years'):
+                            social.__dict__['last_smoke_date'] = datetime.now() - relativedelta(years=social.last_smoke)
             social.__dict__['user_id'] = user_id
 
             db.session.add(social)

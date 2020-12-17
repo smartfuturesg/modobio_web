@@ -59,7 +59,8 @@ class MedicalLookUpSTDOutputSchema(Schema):
 class MedicalSocialHistorySchema(Schema):
 
     # user_id = fields.Integer()
-    currently_smoke = fields.Boolean(required=True)
+    ever_smoked = fields.Boolean(missing=False)
+    currently_smoke = fields.Boolean()
     avg_num_cigs = fields.Integer()
     avg_weekly_drinks = fields.Integer(missing=0)
     avg_weekly_workouts = fields.Integer(missing=0)

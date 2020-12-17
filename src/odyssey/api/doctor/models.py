@@ -108,6 +108,13 @@ class MedicalSocialHistory(db.Model):
     :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
+    ever_smoked = db.Column(db.Boolean)
+    """
+    Has the client ever smoked
+
+    :type: bool
+    """   
+
     currently_smoke = db.Column(db.Boolean)
     """
     Does the client currently smoke

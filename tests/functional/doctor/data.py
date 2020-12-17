@@ -2,6 +2,7 @@ import pathlib
 
 doctor_all_socialhistory_break_post_2_data = {
   "social_history": {
+    "ever_smoked": True,
     "currently_smoke": False,
     "last_smoke": 5,
     "last_smoke_time": "months",
@@ -23,6 +24,7 @@ doctor_all_socialhistory_break_post_2_data = {
 
 doctor_all_socialhistory_break_post_1_data = {
   "social_history": {
+    "ever_smoked": True,
     "currently_smoke": False,
     "last_smoke_time": "months",
     "avg_weekly_drinks": 1,
@@ -40,6 +42,7 @@ doctor_all_socialhistory_break_post_1_data = {
 
 doctor_all_socialhistory_post_2_data = {
   "social_history": {
+    "ever_smoked": True,
     "currently_smoke": False,
     "last_smoke": 5,
     "last_smoke_time": "months",
@@ -58,6 +61,7 @@ doctor_all_socialhistory_post_2_data = {
 
 doctor_all_socialhistory_post_1_data = {
   "social_history": {
+    "ever_smoked": True,
     "currently_smoke": True,
     "avg_num_cigs": 5,
     "num_years_smoked": 6,
