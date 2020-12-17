@@ -884,7 +884,8 @@ class ClinicalCareTeam(Resource):
         """
         Returns the mobile settings that a client has set.
         """
-        check_client_existence()
+
+        check_client_existence(user_id)
 
         return ClientMobileSettings.query.filter_by(user_id=user_id).one_or_none()
 
