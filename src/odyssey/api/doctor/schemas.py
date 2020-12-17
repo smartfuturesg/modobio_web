@@ -59,7 +59,8 @@ class MedicalLookUpSTDOutputSchema(Schema):
 class MedicalSocialHistorySchema(Schema):
 
     # user_id = fields.Integer()
-    currently_smoke = fields.Boolean(required=True)
+    ever_smoked = fields.Boolean(missing=False)
+    currently_smoke = fields.Boolean()
     avg_num_cigs = fields.Integer()
     avg_weekly_drinks = fields.Integer(missing=0)
     avg_weekly_workouts = fields.Integer(missing=0)
@@ -68,18 +69,16 @@ class MedicalSocialHistorySchema(Schema):
     sexual_preference = fields.String(missing=None)
     
     last_smoke_date = fields.Date(dump_only=True)
-    last_smoke = fields.Integer(load_only=True,required=False,missing=None)
+    last_smoke = fields.Integer(required=False,missing=None)
 
     possible_date_units = ['days','months','years']
 
-    last_smoke_time = fields.String(load_only=True,required=False,description="days, months, years",validate=validate.OneOf(possible_date_units),missing=None)
+    last_smoke_time = fields.String(required=False,description="days, months, years",validate=validate.OneOf(possible_date_units),missing=None)
     num_years_smoked = fields.Integer(missing=0)
     plan_to_stop = fields.Boolean(missing=None)
 
     @post_load
     def make_object(self, data, **kwargs):
-        data.pop("last_smoke")
-        data.pop("last_smoke_time")
         return MedicalSocialHistory(**data)
 
 class MedicalSocialHistoryOutputSchema(Schema):
