@@ -1,7 +1,8 @@
 from marshmallow import Schema, fields, post_load, validate, pre_dump, validates, ValidationError
 
 from odyssey import ma
-from odyssey.api.doctor.models import (
+from odyssey.api.doctor.models import ( 
+    MedicalLookUpSTD,
     MedicalGeneralInfo,
     MedicalGeneralInfoMedications,
     MedicalGeneralInfoMedicationAllergy,
@@ -14,6 +15,8 @@ from odyssey.api.doctor.models import (
     MedicalBloodTestResults,
     MedicalBloodTestResultTypes,
     MedicalExternalMR,
+    MedicalSocialHistory,
+    MedicalSTDHistory,
     MedicalSurgeries
 )
 from odyssey.api.user.models import User
@@ -24,11 +27,70 @@ from odyssey.utils.constants import MEDICAL_CONDITIONS
     Schemas for the doctor's API
 """
 
+class CheckBoxDeleteSchema(Schema):
+    idx = fields.Integer()
+
+class CheckBoxArrayDeleteSchema(Schema):
+    delete_ids = fields.Nested(CheckBoxDeleteSchema(many=True))
+
+class MedicalLookUpSTDSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = MedicalLookUpSTD
+
+class MedicalSTDHistorySchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = MedicalSTDHistory
+        exclude = ('idx', 'created_at', 'updated_at')
+
+    user_id = fields.Integer()
+    std_id = fields.Integer()
+    
+    @post_load
+    def make_object(self, data, **kwargs):
+        return MedicalSTDHistory(**data)
+
+class MedicalSTDHistoryInputSchema(Schema):
+    stds = fields.Nested(MedicalSTDHistorySchema(many=True))
+
+class MedicalLookUpSTDOutputSchema(Schema):
+    items = fields.Nested(MedicalLookUpSTDSchema(many=True),missing=[])
+    total_items = fields.Integer()
+
+class MedicalSocialHistorySchema(Schema):
+
+    # user_id = fields.Integer()
+    ever_smoked = fields.Boolean(missing=False)
+    currently_smoke = fields.Boolean()
+    avg_num_cigs = fields.Integer()
+    avg_weekly_drinks = fields.Integer(missing=0)
+    avg_weekly_workouts = fields.Integer(missing=0)
+    job_title = fields.String(missing=None)
+    avg_hourly_meditation = fields.Integer(missing=0)
+    sexual_preference = fields.String(missing=None)
+    
+    last_smoke_date = fields.Date(dump_only=True)
+    last_smoke = fields.Integer(required=False,missing=None)
+
+    possible_date_units = ['days','months','years']
+
+    last_smoke_time = fields.String(required=False,description="days, months, years",validate=validate.OneOf(possible_date_units),missing=None)
+    num_years_smoked = fields.Integer(missing=0)
+    plan_to_stop = fields.Boolean(missing=None)
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return MedicalSocialHistory(**data)
+
+class MedicalSocialHistoryOutputSchema(Schema):
+    social_history = fields.Nested(MedicalSocialHistorySchema)
+    std_history = fields.Nested(MedicalSTDHistorySchema(many=True),missing=[])
+
 class MedicalGeneralInfoMedicationAllergySchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = MedicalGeneralInfoMedicationAllergy
-        exclude = ('idx', 'created_at', 'updated_at')
+        exclude = ('created_at', 'updated_at')
 
+    idx = fields.Integer()
     possible_allergy_symptoms = ['Rash', 'Vertigo', 'Nausea', 'Swelling', 'Diarrhea', 'Vomiting', 'Headache', 'Anaphylaxis', 'Blurred Vision', 'Abdominal Pain', 'Shortness of Breath']
     allergy_symptoms = fields.String(validate=validate.OneOf(possible_allergy_symptoms),missing=None)
 
@@ -39,8 +101,9 @@ class MedicalGeneralInfoMedicationAllergySchema(ma.SQLAlchemyAutoSchema):
 class MedicalGeneralInfoMedicationsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = MedicalGeneralInfoMedications
-        exclude = ('idx', 'created_at', 'updated_at')
-
+        exclude = ('created_at', 'updated_at')
+    
+    idx = fields.Integer()
     @post_load
     def make_object(self, data, **kwargs):
         return MedicalGeneralInfoMedications(**data)
@@ -48,8 +111,9 @@ class MedicalGeneralInfoMedicationsSchema(ma.SQLAlchemyAutoSchema):
 class MedicalGeneralInfoSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = MedicalGeneralInfo
-        exclude = ('idx', 'created_at', 'updated_at')
-
+        exclude = ('created_at', 'updated_at')
+    
+    idx = fields.Integer(dump_only=True)
     primary_doctor_contact_name = fields.String(missing=None)
     primary_doctor_contact_phone = fields.String(missing=None)
     primary_doctor_contact_email = fields.String(missing=None)
@@ -59,6 +123,12 @@ class MedicalGeneralInfoSchema(ma.SQLAlchemyAutoSchema):
     @post_load
     def make_object(self, data, **kwargs):
         return MedicalGeneralInfo(**data)
+
+class MedicalGeneralInfoInputSchema(Schema):
+    gen_info = fields.Nested(MedicalGeneralInfoSchema)
+    medications = fields.Nested(MedicalGeneralInfoMedicationsSchema(many=True), missing = [])
+    allergies = fields.Nested(MedicalGeneralInfoMedicationAllergySchema(many=True), missing = [])
+
 
 class MedicalMedicationsInfoInputSchema(Schema):
     medications = fields.Nested(MedicalGeneralInfoMedicationsSchema(many=True), missing = [])

@@ -10,7 +10,7 @@ from flask import current_app
 import flask.json
 
 from odyssey.api.client.models import ClientInfo, ClientFacilities
-from odyssey.api.doctor.models import MedicalBloodTests, MedicalBloodTestResultTypes, MedicalConditions
+from odyssey.api.doctor.models import MedicalBloodTests, MedicalBloodTestResultTypes, MedicalConditions, MedicalLookUpSTD
 from odyssey.api.user.models import User
 from odyssey.api.staff.models import StaffProfile
 from odyssey.api.facility.models import RegisteredFacilities
@@ -23,7 +23,8 @@ from odyssey.utils.errors import (
     TestNotFound, 
     UnauthorizedUser,
     UserNotFound, 
-    StaffNotFound
+    StaffNotFound,
+    STDNotFound
 )
 
 
@@ -86,6 +87,12 @@ def check_medical_condition_existence(medcon_id):
     medcon = MedicalConditions.query.filter_by(medical_condition_id=medcon_id).one_or_none()
     if not medcon:
         raise MedicalConditionNotFound(medcon_id)
+
+def check_std_existence(std_id):
+    std = MedicalLookUpSTD.query.filter_by(std_id=std_id).one_or_none()
+    if not std:
+        raise STDNotFound(std_id)
+
 #def check_remote_client_portal_validity(portal_id):
 #    """
 #    Ensure portal is valid. If not raise 404 error
