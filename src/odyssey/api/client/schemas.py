@@ -77,11 +77,24 @@ class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
     def make_object(self, data, **kwargs):
         return ClientInfo(**data)
 
+    @validates('primary_goal_id')
+    def primary_goal_validation(self,value):
+        goal = LookupGoals.query.filter_by(goal_id=value)
+        if not goal:
+            raise ValidationError('Primary goal id  invalid.')
+
+
 class ClientInfoPutSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientInfo
         exclude = ('created_at', 'updated_at', 'idx')
         dump_only = ('modobio_id', 'membersince', 'is_staff', 'is_client', 'user_id', 'receive_docs')
+
+    @validates('primary_goal_id')
+    def primary_goal_validation(self,value):
+        goal = LookupGoals.query.filter_by(goal_id=value)
+        if not goal:
+            raise ValidationError('Primary goal id  invalid.')
 
 class ClientAndUserInfoSchema(Schema):
 
