@@ -1104,15 +1104,7 @@ class MedHistory(Resource):
         client_mh = mh_schema.load(data)
 
         db.session.add(client_mh)
-        db.session.flush()
 
-        #add client automatically assigned drink based on their goal
-        goal_id = LookupGoals.query.filter_by(goal_name=client_mh.goals).one_or_none().goal_id
-        drink_id = LookupDrinks.query.filter_by(primary_goal_id=goal_id).one_or_none().drink_id
-        client_drink = ClientAssignedDrinksSchema().load({'drink_id': drink_id})
-        client_drink.user_id = user_id
-
-        db.session.add(client_drink)
         db.session.commit()
 
         return client_mh
@@ -1133,14 +1125,6 @@ class MedHistory(Resource):
         data = request.get_json()
         
         data['last_examination_date'] = datetime.strptime(data['last_examination_date'], "%Y-%m-%d")
-
-        #update client assigned drinks if a client goal is changed
-        if data['goals'] and client_mh.goals != data['goals']:
-            goal_id = LookupGoals.query.filter_by(goal_name=data['goals']).one_or_none().goal_id
-            drink_id = LookupDrinks.query.filter_by(primary_goal_id=goal_id).one_or_none().drink_id
-            client_drink = ClientAssignedDrinksSchema().load({'drink_id': drink_id})
-            client_drink.user_id = user_id
-            db.session.add(client_drink)
             
         # update resource 
         client_mh.update(data)
