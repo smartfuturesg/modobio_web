@@ -1,5 +1,90 @@
 import pathlib
 
+doctor_all_socialhistory_break_post_2_data = {
+  "social_history": {
+    "ever_smoked": True,
+    "currently_smoke": False,
+    "last_smoke": 5,
+    "last_smoke_time": "months",
+    "avg_weekly_drinks": 1,
+    "avg_weekly_workouts": 2,
+    "job_title": "Engineer",
+    "avg_hourly_meditation": 3,
+    "sexual_preference": "Female"
+  },
+  "std_history": [
+    {
+      "std_id": 7
+    },
+    {
+      "std_id": 25
+    }    
+  ]
+}
+
+doctor_all_socialhistory_break_post_1_data = {
+  "social_history": {
+    "ever_smoked": True,
+    "currently_smoke": False,
+    "last_smoke_time": "months",
+    "avg_weekly_drinks": 1,
+    "avg_weekly_workouts": 2,
+    "job_title": "Engineer",
+    "avg_hourly_meditation": 3,
+    "sexual_preference": "Female"
+  },
+  "std_history": [
+    {
+      "std_id": 7
+    } 
+  ]
+}
+
+doctor_all_socialhistory_post_2_data = {
+  "social_history": {
+    "ever_smoked": True,
+    "currently_smoke": False,
+    "last_smoke": 5,
+    "last_smoke_time": "months",
+    "avg_weekly_drinks": 1,
+    "avg_weekly_workouts": 2,
+    "job_title": "Engineer",
+    "avg_hourly_meditation": 3,
+    "sexual_preference": "Female"
+  },
+  "std_history": [
+    {
+      "std_id": 7
+    } 
+  ]
+}
+
+doctor_all_socialhistory_post_1_data = {
+  "social_history": {
+    "ever_smoked": True,
+    "currently_smoke": True,
+    "avg_num_cigs": 5,
+    "num_years_smoked": 6,
+    "plan_to_stop": False,
+    "avg_weekly_drinks": 1,
+    "avg_weekly_workouts": 2,
+    "job_title": "Engineer",
+    "avg_hourly_meditation": 3,
+    "sexual_preference": "Female"
+  },
+  "std_history": [
+    {
+      "std_id": 1
+    },
+    {
+      "std_id": 2
+    },
+    {
+      "std_id": 5
+    }    
+  ]
+}
+
 doctor_all_generalmedicalinfo_post_3_data = {
   "gen_info": {
       "primary_doctor_contact_name": "Dr Dude",
