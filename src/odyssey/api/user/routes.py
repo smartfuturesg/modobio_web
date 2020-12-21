@@ -55,48 +55,48 @@ class ApiUser(Resource):
         db.session.add(removal_request)
         db.session.flush()
 
+        #Get a list of all tables in database
         tableList = db.session.execute("SELECT distinct(table_name) from information_schema.columns\
                 WHERE column_name='user_id';").fetchall()
 
-        if user.is_staff and user.is_client:
-            print('is both')
-            #keep name, email, modobio id, user id in User table
-            #delete lines with this user_id in all staff tables
-            #keep lines in tables where user_id is the reporter_id
-            #delete lines with this user_id in all other tables.
-        
-        elif user.is_staff:
-            print('staff only')
-            #keep name, email, modobio id, user id in User table
-            #delete lines with this user_id in all staff tables
-            #keep lines in tables where user_id is the reporter_id
-        
-        else:
-            #keep modobio id, user id in User table
-            user.email = ""
-            user.phone_number = ""
-            user.firstname = ""
-            user.middlename = ""
-            user.lastname = ""
-            #delete files or images saved in S3 bucket
-            if not current_app.config['LOCAL_CONFIG']:
-                bucket_name = current_app.config['S3_BUCKET_NAME']
-                s3 = boto3.client('s3')
-                directory_path = pathlib.Path(bucket_name) / f'id{user_id:05d}'
-                s3.Bucket(bucket_name).remove(directory_path)
-            #delete lines with this user_id in all other tables.
-            for table in tableList:
-                if table.table_name != "User":
-                    db.session.execute("DELETE FROM \"{}\" WHERE user_id={};".format(table.table_name, user_id))
-
         #Send notification email to user being deleted and user requesting deletion
+        #when FLASK_ENV=production
         if user.email != requester.email:
             send_email_delete_account(requester.email, user.email)
         send_email_delete_account(user.email, user.email)
 
-        #db.session.delete(user)
-        db.session.commit()
+        if user.is_staff:
+            #keep name, email, modobio id, user id in User table
+            #keep lines in tables where user_id is the reporter_id
+            user.phone_number = None
+        else:#it's client
+            #keep modobio id, user id in User table
+            user.email = None
+            user.phone_number = None
+            user.firstname = None
+            user.middlename = None
+            user.lastname = None
+            
+        #delete files or images saved in S3 bucket for user_id
+        #when FLASK_DEV=remote
+        if not current_app.config['LOCAL_CONFIG']:
+            s3 = boto3.client('s3')
 
+            bucket_name = current_app.config['S3_BUCKET_NAME']
+            user_directory=f'id{user_id:05d}/'
+
+            response = s3.list_objects_v2(Bucket=bucket_name, Prefix=user_directory)
+            breakpoint()
+            for object in response['Contents']:
+                print('Deleting', object['Key'])
+                s3.delete_object(Bucket=bucket_name, Key=object['Key'])
+
+        #delete lines with user_id in all other tables except "User"
+        for table in tableList:
+            if table.table_name != "User":
+                db.session.execute("DELETE FROM \"{}\" WHERE user_id={};".format(table.table_name, user_id))
+
+        db.session.commit()
         return {'message': f'User with id {user_id} has been removed'}
 
 @ns.route('/staff/')
