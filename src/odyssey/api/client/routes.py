@@ -126,38 +126,6 @@ class Client(Resource):
         
         return {'client_info': client_data, 'user_info': user_data}
 
-
-#############
-#temporarily disabled until a better user delete system is created
-#############
-
-# @ns.route('/remove/<int:user_id>/')
-# @ns.doc(params={'user_id': 'User ID number'})
-# class RemoveClient(Resource):
-#     @token_auth.login_required
-#     def delete(self, user_id):
-#         """deletes client from database entirely"""
-#         client = User.query.filter_by(user_id=user_id, is_client=True).one_or_none()
-
-#         if not client:
-#             raise ClientNotFound(user_id)
-        
-#         if client.is_staff:
-#             #only delete the client portio
-
-#         # find the staff member requesting client delete
-#         staff = token_auth.current_user()
-#         new_removal_request = ClientRemovalRequests(user_id=staff.user_id)
-        
-#         db.session.add(new_removal_request)
-#         db.session.flush()
-
-#         #TODO: some logic on who gets to delete clients+ email to staff admin
-#         db.session.delete(client)
-#         db.session.commit()
-        
-#         return {'message': f'client with id {user_id} has been removed'}
-
 @ns.route('/summary/<int:user_id>/')
 class ClientSummary(Resource):
     @token_auth.login_required
