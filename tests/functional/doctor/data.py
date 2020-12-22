@@ -415,7 +415,7 @@ doctor_medical_history_data = {
   "diagnostic_xray": "string",
   "last_examination_date": "2020-07-30",
   "diagnostic_ctscan": "string",
-  "goals": "string",
+  "goals": "Gut Health",
   "last_examination_reason": "string",
   "medication": "string"
 }

@@ -21,6 +21,7 @@ from odyssey.api.client.models import (
     ClientReleaseContacts,
     ClientSubscriptionContract,
     ClientFacilities,
+    ClientAssignedDrinks
 )
 from odyssey.api.user.schemas import UserInfoPutSchema
 
@@ -290,3 +291,18 @@ class AllClientsDataTier(Schema):
     items = fields.Nested(ClientDataTierSchema(many=True), missing=ClientDataTierSchema().load({}))
     total_stored_bytes = fields.Integer(description="Total bytes stored for all clients", missing=0)
     total_items = fields.Integer(description="number of clients in this payload", missing=0)
+
+class ClientAssignedDrinksSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = ClientAssignedDrinks
+        exclude = ('created_at', 'updated_at', 'idx')
+
+    user_id = fields.Integer(dump_only=True)
+    drink_id = fields.Integer()
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return ClientAssignedDrinks(**data)
+
+class ClientAssignedDrinksDeleteSchema(Schema):
+    drink_ids = fields.List(fields.Integer)
