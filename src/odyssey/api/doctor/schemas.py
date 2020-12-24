@@ -82,7 +82,7 @@ class MedicalSocialHistorySchema(Schema):
         return MedicalSocialHistory(**data)
 
 class MedicalSocialHistoryOutputSchema(Schema):
-    social_history = fields.Nested(MedicalSocialHistorySchema)
+    social_history = fields.Nested(MedicalSocialHistorySchema,missing=None)
     std_history = fields.Nested(MedicalSTDHistorySchema(many=True),missing=[])
 
 class MedicalGeneralInfoMedicationAllergySchema(ma.SQLAlchemyAutoSchema):
@@ -125,7 +125,7 @@ class MedicalGeneralInfoSchema(ma.SQLAlchemyAutoSchema):
         return MedicalGeneralInfo(**data)
 
 class MedicalGeneralInfoInputSchema(Schema):
-    gen_info = fields.Nested(MedicalGeneralInfoSchema)
+    gen_info = fields.Nested(MedicalGeneralInfoSchema, missing=None)
     medications = fields.Nested(MedicalGeneralInfoMedicationsSchema(many=True), missing = [])
     allergies = fields.Nested(MedicalGeneralInfoMedicationAllergySchema(many=True), missing = [])
 
