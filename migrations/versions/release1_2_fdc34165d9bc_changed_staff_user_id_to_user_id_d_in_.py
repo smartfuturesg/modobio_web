@@ -1,7 +1,7 @@
 """Changed staff_user_id to user_id d in StaffRecentClients
 
 Revision ID: fdc34165d9bc
-Revises: 775c36839703
+Revises: 3c8640f8727f
 Create Date: 2021-01-04 13:35:47.555237
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'fdc34165d9bc'
-down_revision = '775c36839703'
+down_revision = '3c8640f8727f'
 branch_labels = None
 depends_on = None
 
