@@ -17,7 +17,8 @@ from odyssey.api.doctor.models import (
     MedicalGeneralInfo,
     MedicalGeneralInfoMedications,
     MedicalGeneralInfoMedicationAllergy,
-    MedicalHistory, 
+    MedicalHistory,
+    MedicalBloodPressures,
     MedicalBloodTests,
     MedicalBloodTestResults,
     MedicalBloodTestResultTypes, 
@@ -42,6 +43,8 @@ from odyssey.utils.misc import check_client_existence, check_staff_existence, ch
 from odyssey.api.doctor.schemas import (
     AllMedicalBloodTestSchema,
     CheckBoxArrayDeleteSchema,
+    MedicalBloodPressuresSchema,
+    MedicalBloodPressuresOutputSchema,
     MedicalFamilyHistSchema,
     MedicalFamilyHistInputSchema,
     MedicalFamilyHistOutputSchema,
@@ -72,6 +75,39 @@ from odyssey.api.doctor.schemas import (
 from odyssey.utils.constants import MEDICAL_CONDITIONS
 
 ns = api.namespace('doctor', description='Operations related to doctor')
+
+@ns.route('/bloodpressure/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class MedBloodPressures(Resource):
+    @token_auth.login_required
+    @responds(schema=MedicalBloodPressuresOutputSchema, api=ns)
+    def get(self, user_id):
+        '''
+        This request gets the users submitted blood pressure if it exists
+        '''
+        check_client_existence(user_id)
+        bp_info = MedicalBloodPressures.query.filter_by(user_id=user_id).all()
+
+        payload = {'items': bp_info,
+                   'total_items': len(bp_info)}
+        return payload
+
+    @token_auth.login_required
+    @accepts(schema=MedicalBloodPressuresSchema, api=ns)
+    @responds(schema=MedicalBloodPressuresSchema, status_code=201, api=ns)
+    def post(self, user_id):
+        '''
+        Post request to post the client's blood pressure
+        '''
+        # First check if the client exists
+        check_client_existence(user_id)
+        data = request.parsed_obj
+        data.user_id = user_id
+        db.session.add(data)
+
+        # insert results into the result table
+        db.session.commit()
+        return data
 
 @ns.route('/medicalgeneralinfo/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
