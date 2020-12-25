@@ -49,6 +49,54 @@ class MedicalBloodPressures(db.Model):
     :type: float
     """
 
+class MedicalLookUpBloodPressureRange(db.Model):
+    """ Medical Look Up Blood Pressure Ranges
+
+    This table will store the blood pressure categories
+    and ranges.
+
+    Chart found from heart.org/bplevels
+    """
+
+    __tablename__ = "MedicalLookUpBloodPressureRange"
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Unique ID number identifying the results.
+
+    :type: int, primary key, autoincrement
+    """
+
+    category = db.Column(db.String)
+    """
+    Blood Pressure Category
+
+    :type: str
+    """
+    
+    systolic = db.Column(db.String)
+    """
+    Systolic mmHg is the upper number for the range
+
+    :type: str
+    """
+
+    and_or = db.Column(db.String)
+    """
+    and_or represents the union between systolic and diastolic
+    numbers
+
+    :type: str
+    """
+
+    diastolic = db.Column(db.String)
+    """
+    Diastolic mmHg is the lower number for the range
+
+    :type: str
+    """
+
+
 class MedicalLookUpSTD(db.Model):
     """ Medical Look Up STD
 

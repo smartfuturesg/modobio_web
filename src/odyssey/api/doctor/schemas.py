@@ -3,6 +3,7 @@ from marshmallow import Schema, fields, post_load, validate, pre_dump, validates
 from odyssey import ma
 from odyssey.api.doctor.models import ( 
     MedicalBloodPressures,
+    MedicalLookUpBloodPressureRange,
     MedicalLookUpSTD,
     MedicalGeneralInfo,
     MedicalGeneralInfoMedications,
@@ -41,6 +42,14 @@ class MedicalBloodPressuresSchema(ma.SQLAlchemyAutoSchema):
 
 class MedicalBloodPressuresOutputSchema(Schema):
     items = fields.Nested(MedicalBloodPressuresSchema(many=True), missing=[])
+    total_items = fields.Integer()
+
+class MedicalLookUpBloodPressureRangesSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = MedicalLookUpBloodPressureRange
+
+class MedicalLookUpBloodPressureRangesOutputSchema(Schema):
+    items = fields.Nested(MedicalLookUpBloodPressureRangesSchema(many=True),missing=[])
     total_items = fields.Integer()
 
 class CheckBoxDeleteSchema(Schema):

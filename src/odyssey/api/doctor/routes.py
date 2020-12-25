@@ -10,6 +10,7 @@ from odyssey import db
 from odyssey.api.lookup.models import LookupDrinks, LookupGoals
 from odyssey.api.client.schemas import ClientAssignedDrinksSchema
 from odyssey.api.doctor.models import (
+    MedicalLookUpBloodPressureRange,
     MedicalLookUpSTD,
     MedicalFamilyHistory,
     MedicalConditions,
@@ -67,6 +68,7 @@ from odyssey.api.doctor.schemas import (
     MedicalExternalMRSchema,
     MedicalSocialHistorySchema,
     MedicalLookUpSTDOutputSchema,
+    MedicalLookUpBloodPressureRangesOutputSchema,
     MedicalSTDHistorySchema,
     MedicalSTDHistoryInputSchema,
     MedicalSocialHistoryOutputSchema,
@@ -108,6 +110,23 @@ class MedBloodPressures(Resource):
         # insert results into the result table
         db.session.commit()
         return data
+@ns.route('/lookupbloodpressureranges/')
+class MedicalLookUpBloodPressureResource(Resource):
+    """ Returns blood pressure ranges stored in the database in response to a GET request.
+
+    Returns
+    -------
+    dict
+        JSON encoded dict.
+    """
+    @token_auth.login_required
+    @responds(schema=MedicalLookUpBloodPressureRangesOutputSchema,status_code=200, api=ns)
+    def get(self):
+        bp_ranges = MedicalLookUpBloodPressureRange.query.all()
+        payload = {'items': bp_ranges,
+                   'total_items': len(bp_ranges)}
+
+        return payload
 
 @ns.route('/medicalgeneralinfo/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
