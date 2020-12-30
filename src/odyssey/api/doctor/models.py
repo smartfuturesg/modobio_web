@@ -7,6 +7,48 @@ from datetime import datetime
 from odyssey.utils.constants import DB_SERVER_TIME, BLOODTEST_EVAL
 from odyssey import db
 
+class MedicalBloodPressures(db.Model):
+    """ Blood Pressure Table
+    
+    This table is used for storing the client's blood pressures.
+    """    
+    __tablename__ = 'MedicalBloodPressures'
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    """
+    User ID number
+
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
+    """
+
+    systolic = db.Column(db.Float)
+    """
+    Systolic value with units mmHg
+
+    :type: float
+    """
+
+    diastolic = db.Column(db.Float)
+    """
+    Diastolic value with units mmHg
+
+    :type: float
+    """
+
 class MedicalLookUpBloodPressureRange(db.Model):
     """ Medical Look Up Blood Pressure Ranges
 

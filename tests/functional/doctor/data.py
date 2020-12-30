@@ -1,5 +1,10 @@
 import pathlib
 
+doctor_blood_pressures_data = {
+  "systolic": 120.2,
+  "diastolic": 52.3
+}
+
 doctor_all_generalmedicalinfo_post_5_data = {
     "allergies": [{
         "allergy_symptoms": "Rash"
