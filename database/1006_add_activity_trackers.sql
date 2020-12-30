@@ -7,13 +7,13 @@
 -- Further changes to this table will be done through the API
 -----------------------------
 
-DELETE FROM "LookUpActivityTrackers"
+DELETE FROM "LookupActivityTrackers"
     WHERE idx >= 1;
 
-ALTER SEQUENCE "LookUpActivityTrackers_idx_seq"
+ALTER SEQUENCE "LookupActivityTrackers_idx_seq"
 		RESTART WITH 1;
 
-INSERT INTO "LookUpActivityTrackers" ("brand","series", "model","ecg_metric_1",
+INSERT INTO "LookupActivityTrackers" ("brand","series", "model","ecg_metric_1",
                                       "ecg_metric_2", "sp_o2_spot_check", "sp_o2_nighttime_avg", "sleep_total",
                                       "deep_sleep", "rem_sleep", "quality_sleep", "light_sleep",
                                       "awake", "sleep_latency", "bedtime_consistency", "wake_consistency",
