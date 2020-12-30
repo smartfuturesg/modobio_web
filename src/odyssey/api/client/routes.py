@@ -666,7 +666,6 @@ class ClientToken(Resource):
         
         access_token = UserLogin.generate_token(user_type='client', user_id=user.user_id, token_type='access')
         refresh_token = UserLogin.generate_token(user_type='client', user_id=user.user_id, token_type='refresh')
-
         return {'email': user.email, 
                 'firstname': user.firstname, 
                 'lastname': user.lastname, 
