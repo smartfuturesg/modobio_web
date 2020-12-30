@@ -27,7 +27,6 @@ def upgrade():
     sa.ForeignKeyConstraint(['user_id'], ['User.user_id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('idx')
     )
-    op.drop_table('MedicalLookUpBloodPressureRange')
     # ### end Alembic commands ###
 
 
