@@ -15,13 +15,11 @@ from odyssey.utils.errors import (
     UnknownError
 )
 from odyssey.api.wearables.models import (
-    LookUpActivityTrackers,
     Wearables,
     WearablesOura,
     WearablesFreeStyle,
 )
 from odyssey.api.wearables.schemas import (
-    WearablesLookUpActivityTrackersOutputSchema,
     WearablesSchema,
     WearablesFreeStyleSchema,
     WearablesFreeStyleActivateSchema,
@@ -32,85 +30,6 @@ from odyssey.utils.misc import check_client_existence
 from odyssey import db
 
 ns = api.namespace('wearables', description='Endpoints for registering wearable devices.')
-
-@ns.route('/lookupactivitytrackers/misc/')
-class WearablesLookUpFitbitActivityTrackersResource(Resource):
-    """ Returns misc activity trackers stored in the database in response to a GET request.
-
-    Returns
-    -------
-    dict
-        JSON encoded dict.
-    """
-    @token_auth.login_required
-    @responds(schema=WearablesLookUpActivityTrackersOutputSchema,status_code=200, api=ns)
-    def get(self):
-        activity_trackers = LookUpActivityTrackers.query.all()
-        tmp_at = []
-
-        delete_brands = ['Apple', 'Fitbit', 'Garmin', 'Samsung']
-        for at in activity_trackers:
-            if at.brand not in delete_brands:
-                tmp_at.append(at)
-
-        payload = {'items': tmp_at,
-                   'total_items': len(tmp_at)}
-
-        return payload
-
-@ns.route('/lookupactivitytrackers/fitbit/')
-class WearablesLookUpFitbitActivityTrackersResource(Resource):
-    """ Returns Fitbit activity trackers stored in the database in response to a GET request.
-
-    Returns
-    -------
-    dict
-        JSON encoded dict.
-    """
-    @token_auth.login_required
-    @responds(schema=WearablesLookUpActivityTrackersOutputSchema,status_code=200, api=ns)
-    def get(self):
-        activity_trackers = LookUpActivityTrackers.query.filter_by(brand='Fitbit').all()
-        payload = {'items': activity_trackers,
-                   'total_items': len(activity_trackers)}
-
-        return payload
-
-@ns.route('/lookupactivitytrackers/apple/')
-class WearablesLookUpAppleActivityTrackersResource(Resource):
-    """ Returns activity Apple trackers stored in the database in response to a GET request.
-
-    Returns
-    -------
-    dict
-        JSON encoded dict.
-    """
-    @token_auth.login_required
-    @responds(schema=WearablesLookUpActivityTrackersOutputSchema,status_code=200, api=ns)
-    def get(self):
-        activity_trackers = LookUpActivityTrackers.query.filter_by(brand='Apple').all()
-        payload = {'items': activity_trackers,
-                   'total_items': len(activity_trackers)}
-
-        return payload
-
-@ns.route('/lookupactivitytrackers/all/')
-class WearablesLookUpAllActivityTrackersResource(Resource):
-    """ Returns activity trackers stored in the database in response to a GET request.
-
-    Returns
-    -------
-    dict
-        JSON encoded dict.
-    """
-    @token_auth.login_required
-    @responds(schema=WearablesLookUpActivityTrackersOutputSchema,status_code=200, api=ns)
-    def get(self):
-        activity_trackers = LookUpActivityTrackers.query.all()
-        payload = {'items': activity_trackers,
-                   'total_items': len(activity_trackers)}
-
-        return payload
 
 @ns.route('/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})

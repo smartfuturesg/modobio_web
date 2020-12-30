@@ -2,19 +2,11 @@ from marshmallow import Schema, fields
 
 from odyssey import ma
 from odyssey.api.user.models import User
-from odyssey.api.wearables.models import LookUpActivityTrackers, Wearables, WearablesOura, WearablesFreeStyle
+from odyssey.api.wearables.models import Wearables, WearablesOura, WearablesFreeStyle
 
 """
   Schemas for the wearables API
 """
-
-class WearablesLookUpActivityTrackersSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = LookUpActivityTrackers
-
-class WearablesLookUpActivityTrackersOutputSchema(Schema):
-    items = fields.Nested(WearablesLookUpActivityTrackersSchema(many=True),missing=[])
-    total_items = fields.Integer()
 
 class WearablesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

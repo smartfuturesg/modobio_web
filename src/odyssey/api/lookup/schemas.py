@@ -1,7 +1,15 @@
 from marshmallow import Schema, fields, post_load
 
 from odyssey import ma
-from odyssey.api.lookup.models import LookupDrinks, LookupDrinkIngredients, LookupGoals
+from odyssey.api.lookup.models import LookupActivityTrackers, LookupDrinks, LookupDrinkIngredients, LookupGoals
+
+class LookupActivityTrackersSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupActivityTrackers
+
+class LookupActivityTrackersOutputSchema(Schema):
+    items = fields.Nested(LookupActivityTrackersSchema(many=True),missing=[])
+    total_items = fields.Integer()
 
 class LookupDrinksSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
