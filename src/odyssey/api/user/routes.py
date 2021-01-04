@@ -52,7 +52,7 @@ class ApiUser(Resource):
         requester = token_auth.current_user()[0]
         removal_request = UserRemovalRequests(
             requester_user_id=requester.user_id, 
-            deleting_user_id=user.user_id)
+            user_id=user.user_id)
 
         db.session.add(removal_request)
         db.session.flush()
@@ -60,7 +60,7 @@ class ApiUser(Resource):
         #Get a list of all tables in database
         tableList = db.session.execute("SELECT distinct(table_name) from information_schema.columns\
                 WHERE column_name='user_id';").fetchall()
-
+        
         #Send notification email to user being deleted and user requesting deletion
         #when FLASK_ENV=production
         if user.email != requester.email:
@@ -72,7 +72,7 @@ class ApiUser(Resource):
             #keep lines in tables where user_id is the reporter_id
             user.phone_number = None
         else:#it's client
-            #keep modobio id, user id in User table
+            #keep only modobio id, user id in User table
             user.email = None
             user.phone_number = None
             user.firstname = None
@@ -88,15 +88,17 @@ class ApiUser(Resource):
             user_directory=f'id{user_id:05d}/'
 
             response = s3.list_objects_v2(Bucket=bucket_name, Prefix=user_directory)
-            breakpoint()
+            
             for object in response['Contents']:
                 print('Deleting', object['Key'])
                 s3.delete_object(Bucket=bucket_name, Key=object['Key'])
-
-        #delete lines with user_id in all other tables except "User"
+        
+        #delete lines with user_id in all other tables except "User" and "UserRemovalRequests"
         for table in tableList:
-            if table.table_name != "User":
-                db.session.execute("DELETE FROM \"{}\" WHERE user_id={};".format(table.table_name, user_id))
+            tblname = table.table_name
+            #added data_per_client table due to issues with the testing database
+            if tblname != "User" and tblname != "UserRemovalRequests" and tblname != "data_per_client":
+                db.session.execute("DELETE FROM \"{}\" WHERE user_id={};".format(tblname, user_id))
 
         db.session.commit()
         return {'message': f'User with id {user_id} has been removed'}

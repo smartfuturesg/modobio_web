@@ -14,6 +14,7 @@ from odyssey.api.client.models import (
 )
 from tests.functional.user.data import users_to_delete_data, users_new_self_registered_client_data
 from tests.functional.doctor.data import doctor_medical_imaging_data
+from odyssey import db
 
 def test_account_delete_request(test_client, init_database, staff_auth_header):
     """
@@ -44,6 +45,7 @@ def test_account_delete_request(test_client, init_database, staff_auth_header):
             content_type='application/json')
     
     staff_client_id = staff_client_user.json['user_id']
+
     #3. Add info for client user, reported by staff/client
     valid_credentials = base64.b64encode(
             f"{payload['user_info']['email']}:{'password3'}".encode("utf-8")).decode("utf-8")
@@ -63,13 +65,31 @@ def test_account_delete_request(test_client, init_database, staff_auth_header):
             data = payload)
     med_imaging_record = MedicalImaging.query.filter_by(user_id=client_id).first()
     assert med_imaging_record
+    assert med_imaging_record.user_id == client_id
     assert med_imaging_record.reporter_id == staff_client_id
-    #4. Add staff info for staff/client user
-    #5. Delete staff/client
-    #   -Check no info for user_id is in staff tables
+    
+    #4. Delete staff/client
+    deleting_staff_client = test_client.delete(
+            f'/user/{staff_client_id}/',
+            headers=staff_user_auth_header)
+    
+    assert deleting_staff_client.status_code == 200
+    assert deleting_staff_client.json['message'] == f"User with id {staff_client_id} has been removed"
+    #Check no info for user_id is in staff tables
+    
+    tableList = db.session.execute("SELECT distinct(table_name) from information_schema.columns\
+                WHERE table_name like 'Staff%';").fetchall()
+                
+    for table in tableList: 
+        exists = db.session.execute("SELECT EXISTS(SELECT * from \"{}\" WHERE user_id={});".format(table.table_name, staff_client_id))
+        result = exists.fetchall().pop()
+        #breakpoint()
+        assert result.values()[0] == False
+    assert tableList
     #   -Check info reported by staff user on client user is still in db
+    
     #   -Check modobioid, userid, name, email are in User table, no phone#
-    #6. Delete client
+    #5. Delete client
     #   -Check only modobioid and userid are in User table
     #   -Check UserRemovalRequests tables is populated correctly
 

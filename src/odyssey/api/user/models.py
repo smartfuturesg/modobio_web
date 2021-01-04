@@ -285,7 +285,7 @@ class UserRemovalRequests(db.Model):
     :type: :class:`datetime.datetime`
     """
     
-    requester_user_id = db.Column(db.Integer, nullable=False)
+    requester_user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
     """
     user_id number, foreign key to User.user_id of the User requesting removal
 
@@ -293,7 +293,7 @@ class UserRemovalRequests(db.Model):
     """
 
 
-    deleting_user_id = db.Column(db.Integer, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
     """
     user_id number, foreign key to User.user_id of the User to be removed
 
