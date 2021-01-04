@@ -224,19 +224,12 @@ class UserLogin(db.Model):
     :type: datetime
     """
 
-    #todo - remove token after jwt integration
-    token = db.Column(db.String(32), index=True, unique=True)
+    refresh_token = db.Column(db.String, unique=True)
     """
-    API authentication token
+    API refresh authentication token. Used to generate new access and refresh tokens
+    We keep track of the current refresh tokens so we may blacklist tokens as needed.
 
-    :type: str, max length 32, indexed, unique
-    """
-
-    token_expiration = db.Column(db.DateTime)
-    """
-    token expiration date
-
-    :type: datetime
+    :type: str, unique
     """
 
     def set_password(self, password):
@@ -261,3 +254,40 @@ class UserLogin(db.Model):
                             algorithm='HS256').decode("utf-8")
 
 
+class UserTokensBlacklist(db.Model):
+    """ 
+    API tokens for either refresh or access which have been revoked either by the 
+    user or the API. 
+
+    :attr:`token` 
+    """
+
+    __tablename__ = 'UserTokensBlacklist'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
+    """
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Auto incrementing primary key
+
+    :type: int, primary key
+    """
+
+    token = db.Column(db.String, index=True, unique=True)
+    """
+    API token that has been revoked by the user or the API.
+
+    :type: str, unique
+    """
