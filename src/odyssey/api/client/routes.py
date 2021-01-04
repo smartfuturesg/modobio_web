@@ -81,7 +81,7 @@ class Client(Resource):
         staff_user_id = token_auth.current_user()[0].user_id
 
         #check if supplied client is already in staff recent clients
-        client_exists = StaffRecentClients.query.filter_by(staff_user_id=staff_user_id).filter_by(client_user_id=user_id).one_or_none()
+        client_exists = StaffRecentClients.query.filter_by(user_id=staff_user_id).filter_by(client_user_id=user_id).one_or_none()
         if client_exists:
             #update timestamp
             client_exists.timestamp = datetime.now()
@@ -89,12 +89,12 @@ class Client(Resource):
             db.session.commit()
         else:
             #enter new recent client information
-            recent_client_schema = StaffRecentClientsSchema().load({'staff_user_id': staff_user_id, 'client_user_id': user_id})
+            recent_client_schema = StaffRecentClientsSchema().load({'user_id': staff_user_id, 'client_user_id': user_id})
             db.session.add(recent_client_schema)
             db.session.flush()
 
             #check if staff member has more than 10 recent clients
-            staff_recent_searches = StaffRecentClients.query.filter_by(staff_user_id=staff_user_id).order_by(StaffRecentClients.timestamp.asc()).all()
+            staff_recent_searches = StaffRecentClients.query.filter_by(user_id=staff_user_id).order_by(StaffRecentClients.timestamp.asc()).all()
             if len(staff_recent_searches) > 10:
                 #remove the oldest client in the list
                 db.session.delete(staff_recent_searches[0])
