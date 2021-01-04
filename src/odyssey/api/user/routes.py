@@ -255,7 +255,9 @@ class RefreshToken(Resource):
         decoded_token = verify_jwt(refresh_token)
         
         # if valid, create a new access token, return it in the payload
-        token = UserLogin.generate_token(user_id=decoded_token['uid'], user_type=decoded_token['utype'], token_type='access')    
+        token = UserLogin.generate_token(user_id=decoded_token['uid'], user_type=decoded_token['utype'], token_type='access')  
+                access_token = UserLogin.generate_token(user_type='client', user_id=user.user_id, token_type='access')
+        refresh_token = UserLogin.generate_token(user_type='client', user_id=user.user_id, token_type='refresh')  
         
         return {'access_token': token}, 201
 
