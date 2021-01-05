@@ -48,6 +48,7 @@ from odyssey.api.doctor.schemas import (
     MedicalConditionsOutputSchema,
     MedicalConditionsSchema,
     MedicalGeneralInfoSchema,
+    MedicalGeneralInfoInputSchema,
     MedicalAllergiesInfoInputSchema,
     MedicalMedicationsInfoInputSchema,
     MedicalHistorySchema, 
@@ -66,8 +67,7 @@ from odyssey.api.doctor.schemas import (
     MedicalSTDHistorySchema,
     MedicalSTDHistoryInputSchema,
     MedicalSocialHistoryOutputSchema,
-    MedicalSurgeriesSchema,
-    MedicalGeneralInfoInputSchema
+    MedicalSurgeriesSchema
 )
 from odyssey.utils.constants import MEDICAL_CONDITIONS
 
@@ -266,7 +266,7 @@ class MedicalGeneralInformation(Resource):
                     not generalInfo.primary_doctor_contact_email:
                     raise InputError(status_code = 405,message='If a primary doctor name is given, the client must also\
                                         provide the doctors phone number or email')      
-            if generalInfo.blood_type or generalInfo.blood_type_pos_neg:
+            if generalInfo.blood_type or generalInfo.blood_type_positive:
                 # if the client starts by indication which blood type they have or the sign
                 # they also need the other.
                 if generalInfo.blood_type is None or generalInfo.blood_type_positive is None:
