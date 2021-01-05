@@ -124,12 +124,6 @@ class MedicalGeneralInfoSchema(ma.SQLAlchemyAutoSchema):
     def make_object(self, data, **kwargs):
         return MedicalGeneralInfo(**data)
 
-class MedicalGeneralInfoInputSchema(Schema):
-    gen_info = fields.Nested(MedicalGeneralInfoSchema)
-    medications = fields.Nested(MedicalGeneralInfoMedicationsSchema(many=True), missing = [])
-    allergies = fields.Nested(MedicalGeneralInfoMedicationAllergySchema(many=True), missing = [])
-
-
 class MedicalMedicationsInfoInputSchema(Schema):
     medications = fields.Nested(MedicalGeneralInfoMedicationsSchema(many=True), missing = [])
 
