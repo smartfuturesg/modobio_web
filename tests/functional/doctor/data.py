@@ -1,5 +1,27 @@
 import pathlib
 
+doctor_all_generalmedicalinfo_post_5_data = {
+    "allergies": [{
+        "allergy_symptoms": "Rash"
+    }
+    ]    
+}
+
+doctor_all_generalmedicalinfo_post_4_data = {
+  "gen_info": {
+      "primary_doctor_contact_name": "Dr Dude",
+      "primary_doctor_contact_phone": "4809999999",
+      "primary_doctor_contact_email": "drguy@gmail.com",
+      "blood_type": "A",
+      "blood_type_positive": True
+  },
+    "allergies": [{
+        "medication_name": "medName3",
+        "allergy_symptoms": "Rash"
+    }
+    ]    
+}
+
 doctor_all_socialhistory_break_post_2_data = {
   "social_history": {
     "ever_smoked": True,
