@@ -66,7 +66,8 @@ from odyssey.api.doctor.schemas import (
     MedicalSTDHistorySchema,
     MedicalSTDHistoryInputSchema,
     MedicalSocialHistoryOutputSchema,
-    MedicalSurgeriesSchema
+    MedicalSurgeriesSchema,
+    MedicalGeneralInfoInputSchema
 )
 from odyssey.utils.constants import MEDICAL_CONDITIONS
 
