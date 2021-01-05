@@ -32,7 +32,7 @@ from odyssey.api.client.models import (
 )
 from odyssey.api.doctor.models import MedicalHistory, MedicalPhysicalExam
 from odyssey.api.physiotherapy.models import PTHistory 
-from odyssey.api.staff.models import ClientRemovalRequests, StaffRecentClients
+from odyssey.api.staff.models import StaffRecentClients
 from odyssey.api.trainer.models import FitnessQuestionnaire
 from odyssey.api.facility.models import RegisteredFacilities
 from odyssey.api.user.models import User, UserLogin
@@ -81,7 +81,7 @@ class Client(Resource):
         staff_user_id = token_auth.current_user()[0].user_id
 
         #check if supplied client is already in staff recent clients
-        client_exists = StaffRecentClients.query.filter_by(staff_user_id=staff_user_id).filter_by(client_user_id=user_id).one_or_none()
+        client_exists = StaffRecentClients.query.filter_by(user_id=staff_user_id).filter_by(client_user_id=user_id).one_or_none()
         if client_exists:
             #update timestamp
             client_exists.timestamp = datetime.now()
@@ -89,12 +89,12 @@ class Client(Resource):
             db.session.commit()
         else:
             #enter new recent client information
-            recent_client_schema = StaffRecentClientsSchema().load({'staff_user_id': staff_user_id, 'client_user_id': user_id})
+            recent_client_schema = StaffRecentClientsSchema().load({'user_id': staff_user_id, 'client_user_id': user_id})
             db.session.add(recent_client_schema)
             db.session.flush()
 
             #check if staff member has more than 10 recent clients
-            staff_recent_searches = StaffRecentClients.query.filter_by(staff_user_id=staff_user_id).order_by(StaffRecentClients.timestamp.asc()).all()
+            staff_recent_searches = StaffRecentClients.query.filter_by(user_id=staff_user_id).order_by(StaffRecentClients.timestamp.asc()).all()
             if len(staff_recent_searches) > 10:
                 #remove the oldest client in the list
                 db.session.delete(staff_recent_searches[0])
@@ -128,38 +128,6 @@ class Client(Resource):
         db.session.commit()
         
         return {'client_info': client_data, 'user_info': user_data}
-
-
-#############
-#temporarily disabled until a better user delete system is created
-#############
-
-# @ns.route('/remove/<int:user_id>/')
-# @ns.doc(params={'user_id': 'User ID number'})
-# class RemoveClient(Resource):
-#     @token_auth.login_required
-#     def delete(self, user_id):
-#         """deletes client from database entirely"""
-#         client = User.query.filter_by(user_id=user_id, is_client=True).one_or_none()
-
-#         if not client:
-#             raise ClientNotFound(user_id)
-        
-#         if client.is_staff:
-#             #only delete the client portio
-
-#         # find the staff member requesting client delete
-#         staff = token_auth.current_user()
-#         new_removal_request = ClientRemovalRequests(user_id=staff.user_id)
-        
-#         db.session.add(new_removal_request)
-#         db.session.flush()
-
-#         #TODO: some logic on who gets to delete clients+ email to staff admin
-#         db.session.delete(client)
-#         db.session.commit()
-        
-#         return {'message': f'client with id {user_id} has been removed'}
 
 @ns.route('/summary/<int:user_id>/')
 class ClientSummary(Resource):
