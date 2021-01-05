@@ -7,20 +7,12 @@
 -- Further changes to this table will be done through the API
 -----------------------------
 
-DO $$
-DECLARE
-  x integer;
-  query varchar := 'select count(*) from "MedicalLookUpSTD"';
-BEGIN 
-execute query into x;
-  IF x >= 1 THEN
-   execute 
-   		'delete from "MedicalLookUpSTD" 
-			where std_id >= 1;
-		alter sequence "MedicalLookUpSTD_std_id_seq"
-			restart with 1;';
-  END IF;
-END $$;
+
+delete from "MedicalLookUpSTD" 
+	where std_id >= 1;
+
+alter sequence "MedicalLookUpSTD_std_id_seq"
+			restart with 1;
 
 INSERT INTO "MedicalLookUpSTD" ("std_id","std") 
 VALUES 
