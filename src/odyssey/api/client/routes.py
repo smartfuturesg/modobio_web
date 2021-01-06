@@ -631,12 +631,15 @@ class ClientToken(Resource):
     @basic_auth.login_required(user_type=('client',))
     def post(self):
         """generates a token for the 'current_user' immediately after password authentication"""
-        user, _ = basic_auth.current_user()
+        user, user_login = basic_auth.current_user()
         if not user:
             return 401
         
         access_token = UserLogin.generate_token(user_type='client', user_id=user.user_id, token_type='access')
         refresh_token = UserLogin.generate_token(user_type='client', user_id=user.user_id, token_type='refresh')
+
+        user_login.refresh_token = refresh_token
+        db.session.commit()
 
         return {'email': user.email, 
                 'firstname': user.firstname, 

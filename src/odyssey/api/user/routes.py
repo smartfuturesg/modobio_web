@@ -11,7 +11,7 @@ from werkzeug.security import check_password_hash
 from odyssey.api import api
 from odyssey.api.client.schemas import ClientInfoSchema
 from odyssey.api.staff.schemas import StaffProfileSchema, StaffRolesSchema
-from odyssey.api.user.models import User, UserLogin, UserRemovalRequests, UserSubscriptions
+from odyssey.api.user.models import User, UserLogin, UserRemovalRequests, UserSubscriptions, UserTokensBlacklist
 from odyssey.api.user.schemas import (
     UserSchema, 
     UserLoginSchema,
@@ -347,13 +347,27 @@ class RefreshToken(Resource):
         """
         refresh_token = request.args.get("refresh_token")
         
+        # ensure refresh token is not on blacklist
+        if UserTokensBlacklist.query.filter_by(token=refresh_token).one_or_none():
+            raise InputError(message="invalid token", status_code=401)
+
         # check that the token is valid
         decoded_token = verify_jwt(refresh_token)
         
         # if valid, create a new access token, return it in the payload
-        token = UserLogin.generate_token(user_id=decoded_token['uid'], user_type=decoded_token['utype'], token_type='access')    
+        access_token = UserLogin.generate_token(user_id=decoded_token['uid'], user_type=decoded_token['utype'], token_type='access')
+        new_refresh_token = UserLogin.generate_token(user_id=decoded_token['uid'], user_type=decoded_token['utype'], token_type='refresh')  
         
-        return {'access_token': token}, 201
+        # update user login details with latest refresh token
+        user_login_details = UserLogin.query.filter_by(user_id = decoded_token['uid']).one_or_none()
+        user_login_details.refresh_token = new_refresh_token
+
+        # add old refresh token to blacklist
+        db.session.add(UserTokensBlacklist(token=refresh_token))
+        db.session.commit()
+
+        return {'access_token': access_token,
+                'refresh_token': new_refresh_token}, 201
 
 @ns.route('/registration-portal/verify')
 @ns.doc(params={'portal_id': "registration portal id"})
