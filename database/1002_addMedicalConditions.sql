@@ -8,23 +8,11 @@
 -- Further changes to this table will be done through the API
 -----------------------------
 
+DELETE FROM "MedicalConditions"
+    WHERE medical_condition_id >= 1;
 
-
-
-DO $$
-DECLARE
-  x integer;
-  query varchar := 'select count(*) from "MedicalConditions"';
-BEGIN 
-execute query into x;
-  IF x >= 1 THEN
-   execute 
-   		'delete from "MedicalConditions" 
-			where medical_condition_id >= 1;
-		alter sequence "MedicalConditions_medical_condition_id_seq"
-			restart with 1;';
-  END IF;
-END $$;
+ALTER SEQUENCE "MedicalConditions_medical_condition_id_seq"
+		RESTART WITH 1;
 
 INSERT INTO "MedicalConditions" ("category", "subcategory", "condition") 
 VALUES 
