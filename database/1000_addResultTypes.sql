@@ -8,20 +8,11 @@
 -- Further changes to this table will be done through the API
 -----------------------------
 
-DO $$
-DECLARE
-  x integer;
-  query varchar := 'select count(*) from "MedicalBloodTestResultTypes"';
-BEGIN 
-execute query into x;
-  IF x >= 1 THEN
-   execute 
-   		'delete from "MedicalBloodTestResultTypes" 
-			where result_id >= 1;
-		alter sequence "MedicalBloodTestResultTypes_resultid_seq"
-			restart with 1;';
-  END IF;
-END $$;
+DELETE FROM "MedicalBloodTestResultTypes"
+    WHERE result_id >= 1;
+
+ALTER SEQUENCE "MedicalBloodTestResultTypes_result_id_seq"
+		RESTART WITH 1;
 
 INSERT INTO "MedicalBloodTestResultTypes" ("result_name", "normal_min", "normal_max", "optimal_min", "optimal_max", "unit", "panel" ) 
 VALUES 
