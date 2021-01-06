@@ -1,7 +1,7 @@
 """created tables for medical general history endpoint
 
 Revision ID: 65f48672909f
-Revises: 40e57e2da26a
+Revises: 209a381e9da6
 Create Date: 2020-11-25 10:15:33.776520
 
 """
