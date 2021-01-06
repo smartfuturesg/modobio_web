@@ -9,6 +9,7 @@ from odyssey.api.lookup.models import (
      LookupDrinkIngredients, 
      LookupGoals, 
      LookupRaces,
+     LookupTelehealthSessionCost,
      LookupTelehealthSessionDuration
 )
 from odyssey.api.lookup.schemas import (
@@ -17,6 +18,7 @@ from odyssey.api.lookup.schemas import (
     LookupDrinkIngredientsOutputSchema, 
     LookupGoalsOutputSchema,
     LookupRacesOutputSchema,
+    LookupTelehealthSessionCostOutputSchema,
     LookupTelehealthSessionDurationOutputSchema
 )
 from odyssey.utils.misc import check_drink_existence
@@ -24,6 +26,26 @@ from odyssey.utils.misc import check_drink_existence
 from odyssey import db
 
 ns = api.namespace('lookup', description='Endpoints for lookup tables.')
+
+@ns.route('/business/session-cost/')
+class LookupTelehealthSessionCostResource(Resource):
+    """ Returns stored telehealth session cost in database by GET request.
+
+    Returns
+    -------
+    dict
+        JSON encoded dict.
+    """
+    @token_auth.login_required
+    @responds(schema=LookupTelehealthSessionCostOutputSchema,status_code=200, api=ns)
+    def get(self):
+                
+        cost = LookupTelehealthSessionCost.query.all()
+        
+        payload = {'items': cost,
+                   'total_items': len(cost)}
+
+        return payload
 
 @ns.route('/business/session-duration/')
 class LookupTelehealthSessionDurationResource(Resource):
