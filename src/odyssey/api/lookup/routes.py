@@ -3,19 +3,47 @@ from flask_restx import Resource
 
 from odyssey.api import api
 from odyssey.utils.auth import token_auth
-from odyssey.api.lookup.models import LookupActivityTrackers, LookupDrinks, LookupDrinkIngredients, LookupGoals, LookupRaces
+from odyssey.api.lookup.models import (
+     LookupActivityTrackers,
+     LookupDrinks, 
+     LookupDrinkIngredients, 
+     LookupGoals, 
+     LookupRaces,
+     LookupTelehealthSessionDuration
+)
 from odyssey.api.lookup.schemas import (
     LookupActivityTrackersOutputSchema, 
     LookupDrinksOutputSchema, 
     LookupDrinkIngredientsOutputSchema, 
     LookupGoalsOutputSchema,
-    LookupRacesOutputSchema
+    LookupRacesOutputSchema,
+    LookupTelehealthSessionDurationOutputSchema
 )
 from odyssey.utils.misc import check_drink_existence
 
 from odyssey import db
 
 ns = api.namespace('lookup', description='Endpoints for lookup tables.')
+
+@ns.route('/business/session-duration/')
+class LookupTelehealthSessionDurationResource(Resource):
+    """ Returns stored telehealth session duration in database by GET request.
+
+    Returns
+    -------
+    dict
+        JSON encoded dict.
+    """
+    @token_auth.login_required
+    @responds(schema=LookupTelehealthSessionDurationOutputSchema,status_code=200, api=ns)
+    def get(self):
+                
+        durations = LookupTelehealthSessionDuration.query.all()
+        
+        payload = {'items': durations,
+                   'total_items': len(durations)}
+
+        return payload
 
 @ns.route('/activity-trackers/misc/')
 class WearablesLookUpFitbitActivityTrackersResource(Resource):
