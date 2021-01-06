@@ -9,6 +9,7 @@ from odyssey.api.lookup.models import (
      LookupDrinkIngredients, 
      LookupGoals, 
      LookupRaces,
+     LookupSubscriptions,
      LookupTelehealthSessionCost,
      LookupTelehealthSessionDuration
 )
@@ -18,6 +19,7 @@ from odyssey.api.lookup.schemas import (
     LookupDrinkIngredientsOutputSchema, 
     LookupGoalsOutputSchema,
     LookupRacesOutputSchema,
+    LookupSubscriptionsOutputSchema,
     LookupTelehealthSessionCostOutputSchema,
     LookupTelehealthSessionDurationOutputSchema
 )
@@ -188,4 +190,14 @@ class LookupRacesApi(Resource):
     def get(self):
         """get contents of races lookup table"""
         res = LookupRaces.query.all()
+        return {'total_items': len(res), 'items': res}
+
+@ns.route('/subscriptions/')
+class LookupSubscriptionsApi(Resource):
+
+    @token_auth.login_required
+    @responds(schema=LookupSubscriptionsOutputSchema, api=ns)
+    def get(self):
+        """get contents of subscription plans lookup table"""
+        res = LookupSubscriptions.query.all()
         return {'total_items': len(res), 'items': res}
