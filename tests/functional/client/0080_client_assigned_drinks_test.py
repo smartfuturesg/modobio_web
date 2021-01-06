@@ -15,7 +15,6 @@ def test_post_client_assigned_drink(test_client, init_database, staff_auth_heade
                                 data=dumps(clients_assigned_drinks), 
                                 content_type='application/json')
 
-    
     assert response.status_code == 201
     assert response.json.get('drink_id') == clients_assigned_drinks['drink_id']
 
