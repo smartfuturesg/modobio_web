@@ -190,6 +190,21 @@ class ClientInfo(db.Model):
     :type: str, max length 12
     """
 
+    primary_pharmacy_name = db.Column(db.String)
+    """
+    Primary Pharmacy Name
+
+    :type: str
+    """
+
+    primary_pharmacy_address = db.Column(db.String)
+    """
+    Primary Pharmacy address
+
+    :type: str
+    """
+
+
     def client_info_search_dict(self, user) -> dict:
         """ Searchable client info.
         

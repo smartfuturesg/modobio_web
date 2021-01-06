@@ -32,31 +32,32 @@ class UserLoginSchema(ma.SQLAlchemyAutoSchema):
         return new_user
 
 
-class NewClientUserSchema(Schema):
-    """
-    Schema for validating payloads from the creation of a new client user
-    """
-    firstname = fields.String()
-    middlename = fields.String()
-    lastname = fields.String()
-    email = fields.Email(validate=validate.Length(min=0,max=50))
-    phone_number = fields.String(validate=validate.Length(min=0,max=50))
-    password = fields.String(validate=validate.Length(min=0,max=50), dump_only=True)
-    modobio_id = fields.String()
-    biological_sex_male = fields.Boolean()
+#Commented out because it felt redundant, using UserInfoSchema instead
+# class NewClientUserSchema(Schema):
+#    """
+#    Schema for validating payloads from the creation of a new client user
+#    """
+#    firstname = fields.String()
+#    middlename = fields.String()
+#    lastname = fields.String()
+#    email = fields.Email(validate=validate.Length(min=0,max=50))
+#    phone_number = fields.String(validate=validate.Length(min=0,max=50))
+#    password = fields.String(validate=validate.Length(min=0,max=50), load_only=True)
+#    modobio_id = fields.String()
+#    biological_sex_male = fields.Boolean()
 
 
 class UserInfoSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
         exclude = ('created_at', 'updated_at', 'is_staff', 'is_client')
-        load_only = ('password')
+        dump_only = ('modobio_id', 'user_id')
 
     email = fields.Email(validate=validate.Length(min=0,max=50))
     phone_number = fields.String(validate=validate.Length(min=0,max=50))
     password = fields.String(description="password required when creating a staff member",
                             validate=validate.Length(min=0,max=50), 
-                            required=False)
+                            required=True, load_only=True)
     
 class UserInfoPutSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

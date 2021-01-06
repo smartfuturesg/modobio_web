@@ -77,7 +77,7 @@ class StaffRecentClients(db.Model):
     :type: int, primary key, autoincrement
     """
 
-    staff_user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
     """
     User_id of the staff member that loaded the client
 
@@ -96,48 +96,6 @@ class StaffRecentClients(db.Model):
     timestamp denoting when the staff member last loaded the client
 
     :type: datetime
-    """
-
-class ClientRemovalRequests(db.Model):
-    """ Client removal request table.
-
-    Stores the history of client removal request by staff members.
-    """
-    __tablename__ = 'ClientRemovalRequests'
-    
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-    
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
-    """
-    Staff member user_id number, foreign key to User.user_id
-
-    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
-    """
-
-    timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Timestamp of the removal request.
-
-    :type: :class:`datetime.datetime`, primary key
     """
 
 class StaffRoles(db.Model):
