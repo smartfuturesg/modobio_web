@@ -54,7 +54,9 @@ users_client_new_info_data = {
     "gender": "m",
     "dob": "1991-10-14",
     "profession": "Chef",
-    "receive_docs": True
+    "receive_docs": True,
+    "primary_pharmacy_name": "pharmCo",
+    "primary_pharmacy_address": "123 E Pharm Ave Gilbert AZ 85295"
 
 }
 
