@@ -226,9 +226,13 @@ class TokenAuth(BasicAuth):
         secret = current_app.config['SECRET_KEY']
         try:
             decoded_token = jwt.decode(token, secret, algorithms='HS256')
-        except jwt.ExpiredSignatureError:
+        except:
             raise LoginNotAuthorized
         
+        # ensure token is an access token type
+        if decoded_token['ttype'] != 'access':
+            raise LoginNotAuthorized()
+
         query = db.session.query(
                             User, UserLogin
                         ).filter(

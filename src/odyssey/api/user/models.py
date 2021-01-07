@@ -225,19 +225,12 @@ class UserLogin(db.Model):
     :type: datetime
     """
 
-    #todo - remove token after jwt integration
-    token = db.Column(db.String(32), index=True, unique=True)
+    refresh_token = db.Column(db.String, unique=True)
     """
-    API authentication token
+    API refresh authentication token. Used to generate new access and refresh tokens
+    We keep track of the current refresh tokens so we may blacklist tokens as needed.
 
-    :type: str, max length 32, indexed, unique
-    """
-
-    token_expiration = db.Column(db.DateTime)
-    """
-    token expiration date
-
-    :type: datetime
+    :type: str, unique
     """
 
     def set_password(self, password):
@@ -249,14 +242,67 @@ class UserLogin(db.Model):
         """
         Generate a JWT with the appropriate user type and user_id
         """
-        secret = current_app.config['SECRET_KEY']
+        if token_type not in ('access', 'refresh'):
+            raise ValueError
         
+        secret = current_app.config['SECRET_KEY']
+
         return jwt.encode({'exp': datetime.utcnow()+timedelta(hours =(TOKEN_LIFETIME if token_type == 'access' else REFRESH_TOKEN_LIFETIME)), 
                             'uid': user_id,
-                            'utype': user_type}, 
+                            'utype': user_type,
+                            'ttype': token_type}, 
                             secret, 
                             algorithm='HS256').decode("utf-8")
 
+class UserRemovalRequests(db.Model):
+    """ User removal request table.
+
+    Stores the history of user removal request by all Users.
+    """
+    __tablename__ = 'UserRemovalRequests'
+    
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+    
+    requester_user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    """
+    user_id number, foreign key to User.user_id of the User requesting removal
+
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
+    """
+
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    """
+    user_id number, foreign key to User.user_id of the User to be removed
+
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
+    """
+    
+    timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Timestamp of the removal request.
+
+    :type: :class:`datetime.datetime`, primary key
+    """
 
 class UserSubscriptions(db.Model):
     """ 
@@ -328,3 +374,43 @@ class UserSubscriptions(db.Model):
 
     :type: String
     """
+
+    
+class UserTokensBlacklist(db.Model):
+    """ 
+    API tokens for either refresh or access which have been revoked either by the 
+    user or the API. 
+
+    :attr:`token` 
+    """
+
+    __tablename__ = 'UserTokensBlacklist'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
+    """
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Auto incrementing primary key
+
+    :type: int, primary key
+    """
+
+    token = db.Column(db.String, index=True, unique=True)
+    """
+    API token that has been revoked by the user or the API.
+
+    :type: str, unique
+    """
+
