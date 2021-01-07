@@ -637,8 +637,8 @@ class ClientToken(Resource):
         if not user:
             return 401
         
-        access_token = UserLogin.generate_token(user_type='client', user_id=user.user_id, token_type='access')
-        refresh_token = UserLogin.generate_token(user_type='client', user_id=user.user_id, token_type='refresh')
+        access_token = UserLogin.generate_token(user_type='client', user_id=user.user_id, token_type='access', is_internal=user.is_internal)
+        refresh_token = UserLogin.generate_token(user_type='client', user_id=user.user_id, token_type='refresh', is_internal=user.is_internal)
 
         user_login.refresh_token = refresh_token
         db.session.commit()

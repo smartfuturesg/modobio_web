@@ -50,7 +50,7 @@ class UserLoginSchema(ma.SQLAlchemyAutoSchema):
 class UserInfoSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
-        exclude = ('created_at', 'updated_at', 'is_staff', 'is_client')
+        exclude = ('created_at', 'updated_at', 'is_staff', 'is_client', 'is_internal')
         dump_only = ('modobio_id', 'user_id')
 
     email = fields.Email(validate=validate.Length(min=0,max=50))

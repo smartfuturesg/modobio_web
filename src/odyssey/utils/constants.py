@@ -434,12 +434,7 @@ ACCESS_ROLES = (
     'trainer',
     'data_science',
     'doctor',
-    'nutrition',
-    'client_services_internal',
-    'physical_therapist_internal',
-    'trainer_internal',
-    'doctor_internal',
-    'nutrition_internal'
+    'nutrition'
 )
 """
 Staff members are assigned roles, see :class:`odyssey.models.staff.StaffRoles`.
