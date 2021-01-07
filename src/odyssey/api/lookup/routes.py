@@ -5,6 +5,7 @@ from odyssey.api import api
 from odyssey.utils.auth import token_auth
 from odyssey.api.lookup.models import (
      LookupActivityTrackers,
+     LookupClientBookingWindow,
      LookupDrinks, 
      LookupDrinkIngredients, 
      LookupGoals, 
@@ -15,6 +16,7 @@ from odyssey.api.lookup.models import (
 )
 from odyssey.api.lookup.schemas import (
     LookupActivityTrackersOutputSchema, 
+    LookupClientBookingWindowOutputSchema,
     LookupDrinksOutputSchema, 
     LookupDrinkIngredientsOutputSchema, 
     LookupGoalsOutputSchema,
@@ -28,6 +30,26 @@ from odyssey.utils.misc import check_drink_existence
 from odyssey import db
 
 ns = api.namespace('lookup', description='Endpoints for lookup tables.')
+
+@ns.route('/business/booking-window/')
+class LookupTelehealthSessionCostResource(Resource):
+    """ Returns stored client booking windows in database by GET request.
+
+    Returns
+    -------
+    dict
+        JSON encoded dict.
+    """
+    @token_auth.login_required
+    @responds(schema=LookupClientBookingWindowOutputSchema,status_code=200, api=ns)
+    def get(self):
+                
+        window = LookupClientBookingWindow.query.all()
+        
+        payload = {'items': window,
+                   'total_items': len(window)}
+
+        return payload
 
 @ns.route('/business/session-cost/')
 class LookupTelehealthSessionCostResource(Resource):
