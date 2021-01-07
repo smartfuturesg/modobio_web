@@ -246,7 +246,7 @@ class UserLogin(db.Model):
         self.password_created_at = DB_SERVER_TIME
 
     @staticmethod
-    def generate_token(user_type, user_id, token_type, is_internal):
+    def generate_token(user_type, user_id, token_type):
         """
         Generate a JWT with the appropriate user type and user_id
         """
@@ -258,8 +258,8 @@ class UserLogin(db.Model):
         return jwt.encode({'exp': datetime.utcnow()+timedelta(hours =(TOKEN_LIFETIME if token_type == 'access' else REFRESH_TOKEN_LIFETIME)), 
                             'uid': user_id,
                             'utype': user_type,
-                            'ttype': token_type,
-                            'internal': is_internal}, 
+                            'ttype': token_type
+                            }, 
                             secret, 
                             algorithm='HS256').decode("utf-8")
 
