@@ -20,7 +20,7 @@ class BasicAuth(object):
         self.scheme = scheme
         self.header = header
 
-    def login_required(self, f=None, user_type=('staff','client'), staff_role=None, internal_required=True):
+    def login_required(self, f=None, user_type=('staff','client'), staff_role=None, internal_required=False):
         ''' The login_required method is the main method that we will be using
             for authenticating both tokens and basic authorizations.
             This method decorates each CRUD request and verifies the person

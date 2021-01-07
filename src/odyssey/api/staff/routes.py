@@ -196,8 +196,8 @@ class StaffToken(Resource):
                                 StaffRoles.user_id==user.user_id
                             ).all()
 
-        access_token = UserLogin.generate_token(user_type='staff', user_id=user.user_id, token_type='access', is_internal=user.is_internal)
-        refresh_token = UserLogin.generate_token(user_type='staff', user_id=user.user_id, token_type='refresh', is_internal=user.is_internal)
+        access_token = UserLogin.generate_token(user_type='staff', user_id=user.user_id, token_type='access')
+        refresh_token = UserLogin.generate_token(user_type='staff', user_id=user.user_id, token_type='refresh')
 
         user_login.refresh_token = refresh_token
         db.session.commit()
