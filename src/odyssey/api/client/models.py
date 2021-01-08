@@ -187,6 +187,21 @@ class ClientInfo(db.Model):
     :type: int, foreign key('LookupGoal.goal_id')
     """
 
+    primary_pharmacy_name = db.Column(db.String)
+    """
+    Primary Pharmacy Name
+
+    :type: str
+    """
+
+    primary_pharmacy_address = db.Column(db.String)
+    """
+    Primary Pharmacy address
+
+    :type: str
+    """
+
+
     def client_info_search_dict(self, user) -> dict:
         """ Searchable client info.
         

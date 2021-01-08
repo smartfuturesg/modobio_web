@@ -101,13 +101,15 @@ class MedicalGenInformation(Resource):
         # First check if the client exists
         check_client_existence(user_id)
         payload = {}
-        generalInfo = request.parsed_obj['gen_info']
-        if generalInfo:
 
-            genInfo = MedicalGeneralInfo.query.filter_by(user_id=user_id).one_or_none()
-            if genInfo:
-                db.session.delete(genInfo)
+        # If the user submits something for general history, then removes it from the payload, 
+        # remove the everything for that user in general history table
+        genInfo = MedicalGeneralInfo.query.filter_by(user_id=user_id).one_or_none()
+        if genInfo:
+            db.session.delete(genInfo)
 
+        if request.parsed_obj['gen_info']:
+            generalInfo = request.parsed_obj['gen_info']
             if generalInfo.primary_doctor_contact_name:
                 # If the client has a primary care doctor, we need either the 
                 # phone number or email
@@ -127,14 +129,19 @@ class MedicalGenInformation(Resource):
 
             payload['gen_info'] = generalInfo
 
+        # breakpoint()
+        # Before storing data, delete what exists in the database
+        # If the user submits something for medication history, then removes it from the payload, 
+        # remove everything for that user in medication history table
+        meds = MedicalGeneralInfoMedications.query.filter_by(user_id=user_id).all()
+        if meds:
+            for med in meds:
+                db.session.delete(med)
+
         if request.parsed_obj['medications']:
             medications = request.parsed_obj['medications']
             payload['medications'] = []
-            # Before storing data, delete what exists in the database
-            meds = MedicalGeneralInfoMedications.query.filter_by(user_id=user_id).all()
-            for med in meds:
-                db.session.delete(med)
-            
+
             for medication in medications:
                 # If the client is taking medications, they MUST tell us what
                 # medication
@@ -156,16 +163,18 @@ class MedicalGenInformation(Resource):
 
                     payload['medications'].append(medication)
             
+        # If the user submits something for allergy history, then removes it from the payload, 
+        # remove everything for that user in allergy history table
+        allergiesInDB = MedicalGeneralInfoMedicationAllergy.query.filter_by(user_id=user_id).all()
+        if allergiesInDB:
+            for allergy in allergiesInDB:
+                db.session.delete(allergy)
 
         # If the client is allergic to certain medication, they MUST tell us what
         # medication
         if request.parsed_obj['allergies']:
             allergies = request.parsed_obj['allergies']
             payload['allergies'] = []
-            
-            allergiesInDB = MedicalGeneralInfoMedicationAllergy.query.filter_by(user_id=user_id).all()
-            for allergy in allergiesInDB:
-                db.session.delete(allergy)
 
             for allergicTo in allergies:
                 if not allergicTo.medication_name:
@@ -598,13 +607,14 @@ class MedicalSocialHist(Resource):
 
         social = request.parsed_obj['social_history']
 
+        # If the user submits something for Social history, then removes it from the payload, 
+        # remove the everything for that user in social history table
+        socialHist = MedicalSocialHistory.query.filter_by(user_id=user_id).one_or_none()
+        if socialHist:
+            db.session.delete(socialHist)
+
         # if currently smoke is false
         if social:
-            socialHist = MedicalSocialHistory.query.filter_by(user_id=user_id).one_or_none()
-
-            if socialHist:
-                db.session.delete(socialHist)
-
             if social.ever_smoked:
                 if not social.currently_smoke:
                     # if last smoke or last smoke time (months/years)
@@ -625,14 +635,18 @@ class MedicalSocialHist(Resource):
             db.session.add(social)
             payload['social_history'] = social
 
+
+        # If the user submits something for STD history, then removes it from the payload, 
+        # remove their STD history from the table
+        user_and_std = MedicalSTDHistory.query.filter_by(user_id=user_id).all()
+        # If the payload contains an STD for a user already, then just continue
+        if user_and_std:
+            for std in user_and_std:
+                db.session.delete(std)
+
         stds = request.parsed_obj['std_history']
         if stds:
-            user_and_std = MedicalSTDHistory.query.filter_by(user_id=user_id).all()
             payload['std_history'] = []
-            # If the payload contains an STD for a user already, then just continue
-            if user_and_std:
-                for std in user_and_std:
-                    db.session.delete(std)
 
             for std in stds:
                 stdInDB = MedicalLookUpSTD.query.filter_by(std_id=std.std_id).one_or_none()
@@ -642,8 +656,6 @@ class MedicalSocialHist(Resource):
                 std.user_id = user_id
                 db.session.add(std)
                 payload['std_history'].append(std)
-
-
 
         # insert results into the result table
         db.session.commit()

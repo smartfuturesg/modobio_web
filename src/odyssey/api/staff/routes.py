@@ -175,7 +175,7 @@ class RecentClients(Resource):
     @responds(schema=StaffRecentClientsSchema(many=True), api=ns)
     def get(self):
         """get the 10 most recent clients a staff member has loaded"""
-        return StaffRecentClients.query.filter_by(staff_user_id=token_auth.current_user()[0].user_id).all()
+        return StaffRecentClients.query.filter_by(user_id=token_auth.current_user()[0].user_id).all()
 
 """ Staff Token Endpoint """
 
@@ -186,7 +186,7 @@ class StaffToken(Resource):
     @basic_auth.login_required(user_type=('staff',))
     def post(self):
         """generates a token for the 'current_user' immediately after password authentication"""
-        user, _ = basic_auth.current_user()
+        user, user_login = basic_auth.current_user()
         if not user:
             return 401
         # bring up list of staff roles
@@ -198,6 +198,9 @@ class StaffToken(Resource):
 
         access_token = UserLogin.generate_token(user_type='staff', user_id=user.user_id, token_type='access')
         refresh_token = UserLogin.generate_token(user_type='staff', user_id=user.user_id, token_type='refresh')
+
+        user_login.refresh_token = refresh_token
+        db.session.commit()
 
         return {'email': user.email, 
                 'firstname': user.firstname, 

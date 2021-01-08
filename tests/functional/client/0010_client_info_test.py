@@ -69,7 +69,7 @@ def test_creating_new_client(test_client, init_database, staff_auth_header):
     THEN check the response is valid
     """
     
-    payload = {'user_info': users_new_user_client_data['user_info'] }
+    payload = users_new_user_client_data['user_info']
     
     # send post request for a new client user account
     response = test_client.post('/user/client/',
@@ -88,7 +88,7 @@ def test_creating_new_client(test_client, init_database, staff_auth_header):
     # 1) correct password
     # 2) Incorrect password
     ###############
-    password = response.json['password']
+    password = payload['password']
     valid_credentials = base64.b64encode(
             f"{users_new_user_client_data['user_info']['email']}:{password}".encode("utf-8")).decode("utf-8")
     
@@ -120,34 +120,34 @@ def test_self_registered_new_client(test_client, init_database):
     """
 
     # We don't need a staff to be logged-in for a client to self-register
-    payload = {'user_info': users_new_self_registered_client_data['user_info'] }
+    payload = users_new_self_registered_client_data
     
     # send post request for a new client user account
     response = test_client.post('/user/client/', 
                                 data=dumps(payload), 
                                 content_type='application/json')
 
-    user = User.query.filter_by(email=payload['user_info']['email']).first()
+    user = User.query.filter_by(email=payload['email']).first()
     assert response.status_code == 201
-    assert user.email == users_new_self_registered_client_data['user_info']['email']
+    assert user.email == users_new_self_registered_client_data['email']
     assert response.json['modobio_id']
 
     #Test token generation
-    password = response.json['password']
+    password = payload['password']
     valid_credentials = base64.b64encode(
-            f"{users_new_self_registered_client_data['user_info']['email']}:{password}".encode("utf-8")).decode("utf-8")
+            f"{users_new_self_registered_client_data['email']}:{password}".encode("utf-8")).decode("utf-8")
     
     headers = {'Authorization': f'Basic {valid_credentials}'}
     response = test_client.post('/client/token/',
                             headers=headers, 
                             content_type='application/json')
     assert response.status_code == 201
-    assert response.json['email'] == users_new_self_registered_client_data['user_info']['email']
+    assert response.json['email'] == users_new_self_registered_client_data['email']
 
     #Test using wrong password
     password = 'thewrongpassword?'
     valid_credentials = base64.b64encode(
-            f"{users_new_self_registered_client_data['user_info']['email']}:{password}".encode("utf-8")).decode("utf-8")
+            f"{users_new_self_registered_client_data['email']}:{password}".encode("utf-8")).decode("utf-8")
     
     headers = {'Authorization': f'Basic {valid_credentials}'}
     response = test_client.post('/client/token/',
