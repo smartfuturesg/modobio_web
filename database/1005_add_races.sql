@@ -1,16 +1,7 @@
-DO $$
-DECLARE
-  x integer;
-  query varchar := 'select count(*) from "LookupRaces"';
-BEGIN 
-execute query into x;
-  IF x >= 1 THEN
-   execute 
-   		'delete from "LookupRaces" 
-			where idx >= 1;
-		alter sequence "LookupRaces_idx_seq"
-			restart with 1;';
-  END IF;
+delete from "LookupRaces" 
+			where race_id >= 1;
+alter sequence "LookupRaces_race_id_seq"
+  restart with 1;
 
 INSERT INTO "LookupRaces" ("race_name", "race_id") 
 VALUES
