@@ -54,6 +54,6 @@ class LookupRacesApi(Resource):
     @token_auth.login_required
     @responds(schema=LookupRacesOutputSchema, api=ns)
     def get(self):
-        """get contents of goals lookup table"""
+        """get contents of races lookup table"""
         res = LookupRaces.query.all()
         return {'total_items': len(res), 'items': res}

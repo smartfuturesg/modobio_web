@@ -84,6 +84,8 @@ class ClientInfoPutSchema(ma.SQLAlchemyAutoSchema):
         exclude = ('created_at', 'updated_at', 'idx')
         dump_only = ('modobio_id', 'membersince', 'is_staff', 'is_client', 'user_id', 'receive_docs')
 
+    race_id = fields.Integer()
+
 class ClientAndUserInfoSchema(Schema):
 
     client_info = fields.Nested(ClientInfoPutSchema, required=False, missing={})
