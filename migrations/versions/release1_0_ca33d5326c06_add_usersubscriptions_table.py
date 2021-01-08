@@ -1,7 +1,7 @@
 """Add UserSubscriptions table
 
 Revision ID: ca33d5326c06
-Revises: 6d6c668f16ae
+Revises: 6eb08a56735d
 Create Date: 2020-12-09 15:54:16.627220
 
 """

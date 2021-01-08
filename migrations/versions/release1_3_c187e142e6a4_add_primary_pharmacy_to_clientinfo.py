@@ -1,7 +1,7 @@
 """add primary pharmacy to clientinfo
 
 Revision ID: c187e142e6a4
-Revises: 3c8640f8727f
+Revises: fdc34165d9bc
 Create Date: 2020-12-23 04:19:59.391886
 
 """
