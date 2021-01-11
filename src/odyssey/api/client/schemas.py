@@ -79,7 +79,7 @@ class ClientInfoPutSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientInfo
         exclude = ('created_at', 'updated_at', 'idx')
-        dump_only = ('modobio_id', 'membersince', 'is_staff', 'is_client', 'user_id', 'receive_docs')
+        dump_only = ('modobio_id', 'membersince', 'is_staff', 'is_client', 'user_id')
 
 class ClientAndUserInfoSchema(Schema):
 
