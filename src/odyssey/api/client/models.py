@@ -166,6 +166,13 @@ class ClientInfo(db.Model):
     :type: :class:`datetime.date`
     """
 
+    race_id = db.Column(db.Integer, db.ForeignKey('LookupRaces.race_id', ondelete="CASCADE"))
+    """
+    Client race_id as defined in LookupRaces
+
+    :type: int, foreign key(LookupRaces.race_id)
+    """
+
     profession = db.Column(db.String(100))
     """
     Client profession.

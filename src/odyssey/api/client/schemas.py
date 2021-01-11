@@ -74,6 +74,7 @@ class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
 
     user_id = fields.Integer()
     primary_goal_id = fields.Integer()
+    race_id = fields.Integer()
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -86,6 +87,7 @@ class ClientInfoPutSchema(ma.SQLAlchemyAutoSchema):
         dump_only = ('modobio_id', 'membersince', 'is_staff', 'is_client', 'user_id', 'receive_docs')
 
     primary_goal_id = fields.Integer()
+    race_id = fields.Integer()
 
 class ClientAndUserInfoSchema(Schema):
 
