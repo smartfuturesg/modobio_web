@@ -29,12 +29,14 @@ class BasicAuth(object):
             user_type, and staff_role are expected to be lists. 
 
             NOTE: Some methods have overrides depending if it is a 
-                  OdyBasicAuth or OdyTokenAuth object
+                  BasicAuth or TokenAuth object
         
                   get_auth()
                   authenticate(auth,pass)
         '''
-        # Validate each entry
+        ###
+        ##  Validate kwargs: user_type, staff_role
+        ###
         if user_type is not None:
             # Check if user type is a list:
             if type(user_type) is not tuple:
@@ -54,13 +56,24 @@ class BasicAuth(object):
         def login_required_internal(f):
             @wraps(f)
             def decorated(*args, **kwargs):
+                """
+                Steps to authentication and authorization
+                1. Pull auth details from headers (basic or bearer token)
+                2. Authenticate credentials and bring up the user and user login details
+                    -user_context either 'basic_auth' (loggin in) or 
+                     pulled from token: 'client' or 'staff' 
+                3. Verify that user meets authorization requirements for the endpoint. These include
+                    - user_type: 'client', 'staff', or 'staff_self' (for staff editing their own personal details)
+                    - staff_role: roles specified in utils/constants
+                    - internal_required: some resources are meant only for 'internal' or 'beta' users
+                    
+                Any issues coming from the above should raise a 401 error with no message. In general, the LoginNotAuthorized error
+                is used. 
+                """
                 auth = self.get_auth()
-                # Flask normally handles OPTIONS requests on its own, but in
-                # the case it is configured to forward those to the
-                # application, we need to ignore authentication headers and
-                # let the request through to avoid unwanted interactions with
-                # CORS.
 
+
+                # Authenticate and load user and user login details
                 user, user_login, user_context = self.authenticate(auth)
 
                 if user in (False, None):

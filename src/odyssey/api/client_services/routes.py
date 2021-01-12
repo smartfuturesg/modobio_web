@@ -26,7 +26,7 @@ class NewUserClientServices(Resource):
     This endpoint is intended to be used by client services. 
     """
 
-    @token_auth.login_required(user_type=('staff', ), staff_role=('client_services'))
+    @token_auth.login_required(user_type=('staff', ), staff_role=('client_services',))
     @accepts(schema=NewRemoteRegisterUserSchema, api=ns)
     @responds(schema=NewUserRegistrationPortalSchema, api=ns, status_code=201)
     def post(self):
@@ -89,7 +89,7 @@ class RefreshRegistrationPortal(Resource):
     Routines related to registration portals.
 
     """
-    @token_auth.login_required(user_type=('staff', ), staff_role=('client_services'))
+    @token_auth.login_required(user_type=('staff', ), staff_role=('client_services',))
     @accepts(dict(name='email', type=str), dict(name='user_type', type=str), api=ns)
     @responds(schema=NewUserRegistrationPortalSchema, api=ns, status_code=201)
     def put(self):
