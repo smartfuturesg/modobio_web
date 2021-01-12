@@ -57,7 +57,7 @@ class UserInfoSchema(ma.SQLAlchemyAutoSchema):
     phone_number = fields.String(validate=validate.Length(min=0,max=50))
     password = fields.String(description="password required when creating a staff member",
                             validate=validate.Length(min=0,max=50), 
-                            required=True, load_only=True)
+                            required=False)
     
 class UserInfoPutSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

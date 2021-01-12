@@ -169,28 +169,28 @@ class Clients(Resource):
     def get(self):
         """returns list of clients given query parameters"""
         clients = []
-        #for user in User.query.filter_by(is_client=True).all():
-        #    client = {
-        #        'user_id': user.user_id,
-        #        'firstname': user.firstname,
-        #        'lastname': user.lastname,
-        #        'email': user.email,
-        #        'phone': user.phone_number,
-        #        'dob': None,
-        #        'modobio_id': user.modobio_id
-        #    }
-        #    clients.append(client)
-        #response = {'items': clients, '_meta': None, '_links': None}
-        #return response
+        for user in User.query.filter_by(is_client=True).all():
+            client = {
+                'user_id': user.user_id,
+                'firstname': user.firstname,
+                'lastname': user.lastname,
+                'email': user.email,
+                'phone': user.phone_number,
+                'dob': None,
+                'record_locator_id': None,
+                'modobio_id': user.modobio_id
+            }
+            clients.append(client)
+        response = {'items': clients, '_meta': None, '_links': None}
+        return response
 
-        page = request.args.get('page', 1, type=int)
-        per_page = min(request.args.get('per_page', 10, type=int), 100)                 
+        # page = request.args.get('page', 1, type=int)
+        # per_page = min(request.args.get('per_page', 10, type=int), 100)                 
         
-        breakpoint()
-        # These payload keys should be the same as what's indexed in the model.
-        param = {}
-        param_keys = ['firstname', 'lastname', 'email', 'phone', 'dob', 'user_id', 'modobio_id']
-        breakpoint()
+        # # These payload keys should be the same as what's indexed in 
+        # # the model.
+        # param = {}
+        # param_keys = ['firstname', 'lastname', 'email', 'phone', 'dob', 'record_locator_id']
         # searchStr = ''
         # for key in param_keys:
         #     param[key] = request.args.get(key, default=None, type=str)
