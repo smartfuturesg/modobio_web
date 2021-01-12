@@ -12,7 +12,7 @@ TABLE_TO_URI = {
     'ClientSubscriptionContract': '/client/subscriptioncontract/{}/',
     'TrainerFitnessQuestionnaire': '/trainer/questionnaire/{}/',
     'MedicalHistory': '/doctor/medicalhistory/{}/',
-    'MedicalGeneralInfo': '/medicalgeneralinfo/{}/',
+    'MedicalGeneralInfo': '/medicalinfo/general/{}/',
     'MedicalGeneralInfoMedications': '/medicalinfo/medications/{}/',
     'MedicalGeneralInfoMedicationAllergy': '/medicalinfo/allergies/{}/',
     'MedicalSocialHistory':'/medicalinfo/social/{}/',

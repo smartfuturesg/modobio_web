@@ -128,6 +128,8 @@ class MedicalSocialHistory(db.Model):
     """    
     __tablename__ = 'MedicalSocialHistory'
 
+    displayname = 'Medical General Info - Social History'
+
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     Table index.
@@ -255,6 +257,8 @@ class MedicalFamilyHistory(db.Model):
     storing the client's general medical information.
     """    
     __tablename__ = 'MedicalFamilyHistory'
+
+    displayname = 'Medical General Info - Family History'
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -384,6 +388,8 @@ class MedicalGeneralInfoMedicationAllergy(db.Model):
     """    
     __tablename__ = 'MedicalGeneralInfoMedicationAllergy'
 
+    displayname = 'Medical General Info - Medication Allergies'
+
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     Table index.
@@ -433,6 +439,8 @@ class MedicalGeneralInfoMedications(db.Model):
     storing the client's general medical information.
     """    
     __tablename__ = 'MedicalGeneralInfoMedications'
+
+    displayname = 'Medical General Info - Medications'
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -519,6 +527,8 @@ class MedicalGeneralInfo(db.Model):
     storing the client's general medical information.
     """    
     __tablename__ = 'MedicalGeneralInfo'
+
+    displayname = displayname = 'Medical General Info'
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
