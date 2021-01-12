@@ -16,7 +16,7 @@ TABLE_TO_URI = {
     'MedicalGeneralInfoMedications': '/medicalinfo/medications/{}/',
     'MedicalGeneralInfoMedicationAllergy': '/medicalinfo/allergies/{}/',
     'MedicalSocialHistory':'/medicalinfo/social/{}/',
-    'MedicalFamilyHistory': '/familyhistory/{}/'
+    'MedicalFamilyHistory': '/familyhistory/{}/',
     'PTHistory': '/pt/history/{}/',
     'MedicalPhysicalExam': '/doctor/physical/{}/'
 }
