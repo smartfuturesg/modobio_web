@@ -161,6 +161,7 @@ class ClientSummary(Resource):
                 'phone': 'phone number to search',
                 'dob': 'date of birth to search',
                 'record_locator_id': 'record locator id to search'})
+                
 #todo - fix to work with new user system
 class Clients(Resource):
     @token_auth.login_required
