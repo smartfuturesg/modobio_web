@@ -12,6 +12,11 @@ TABLE_TO_URI = {
     'ClientSubscriptionContract': '/client/subscriptioncontract/{}/',
     'TrainerFitnessQuestionnaire': '/trainer/questionnaire/{}/',
     'MedicalHistory': '/doctor/medicalhistory/{}/',
+    'MedicalGeneralInfo': '/medicalgeneralinfo/{}/',
+    'MedicalGeneralInfoMedications': '/medicalinfo/medications/{}/',
+    'MedicalGeneralInfoMedicationAllergy': '/medicalinfo/allergies/{}/',
+    'MedicalSocialHistory':'/medicalinfo/social/{}/',
+    'MedicalFamilyHistory': '/familyhistory/{}/'
     'PTHistory': '/pt/history/{}/',
     'MedicalPhysicalExam': '/doctor/physical/{}/'
 }

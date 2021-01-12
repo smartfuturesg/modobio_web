@@ -31,7 +31,15 @@ from odyssey.api.client.models import (
     ClientMobileSettings,
     ClientAssignedDrinks
 )
-from odyssey.api.doctor.models import MedicalHistory, MedicalPhysicalExam
+from odyssey.api.doctor.models import (
+    MedicalFamilyHistory,
+    MedicalGeneralInfo,
+    MedicalGeneralInfoMedications,
+    MedicalGeneralInfoMedicationAllergy,
+    MedicalHistory, 
+    MedicalPhysicalExam,               
+    MedicalSocialHistory
+)
 from odyssey.api.physiotherapy.models import PTHistory 
 from odyssey.api.staff.models import StaffRecentClients
 from odyssey.api.trainer.models import FitnessQuestionnaire
@@ -579,6 +587,11 @@ class JourneyStatusCheck(Resource):
                 ClientIndividualContract,
                 FitnessQuestionnaire,
                 MedicalHistory,
+                MedicalGeneralInfo,
+                MedicalGeneralInfoMedications,
+                MedicalGeneralInfoMedicationAllergy,
+                MedicalSocialHistory,
+                MedicalFamilyHistory,
                 MedicalPhysicalExam,
                 PTHistory
         ):
