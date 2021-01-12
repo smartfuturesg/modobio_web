@@ -53,11 +53,10 @@ class UserInfoSchema(ma.SQLAlchemyAutoSchema):
         exclude = ('created_at', 'updated_at', 'is_staff', 'is_client')
         dump_only = ('modobio_id', 'user_id')
 
-    email = fields.Email(validate=validate.Length(min=0,max=50))
+    email = fields.Email(validate=validate.Length(min=0,max=50), required=True)
     phone_number = fields.String(validate=validate.Length(min=0,max=50))
-    password = fields.String(description="password required when creating a staff member",
-                            validate=validate.Length(min=0,max=50), 
-                            required=False)
+    password = fields.String(validate=validate.Length(min=0,max=50), 
+                            required=True)
     
 class UserInfoPutSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
