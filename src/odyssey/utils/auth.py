@@ -72,7 +72,6 @@ class BasicAuth(object):
                 """
                 auth = self.get_auth()
 
-
                 # Authenticate and load user and user login details
                 user, user_login, user_context = self.authenticate(auth)
 
