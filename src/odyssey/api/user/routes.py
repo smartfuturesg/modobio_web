@@ -112,7 +112,10 @@ class NewStaffUser(Resource):
         """
         Create a staff user. Payload will require userinfo and staffinfo
         sections. Currently, staffinfo is used to register the staff user with 
-        one or more access_roles. This endpoint expects a password field. 
+        one or more access_roles. 
+
+        If registering an already existing CLIENT user as a STAFF user, 
+        the password must match, or be and empty string (ie. "")
         """
         data = request.get_json()
         
@@ -184,8 +187,10 @@ class NewClientUser(Resource):
     @responds(schema=UserInfoSchema, status_code=201, api=ns)
     def post(self): 
         """
-        Create a client user. This endpoint requires a payload with just
-        userinfo. 
+        Create a client user. This endpoint requires a payload with just userinfo.
+        
+        If registering an already existing staff user as a client, 
+        the password must match, or be and empty string (ie. "")
         """
         user_info = request.get_json()     
 
