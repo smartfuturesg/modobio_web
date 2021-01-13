@@ -893,7 +893,7 @@ class ClientDrinksApi(Resource):
 
 @ns.route('/mobile-settings/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class ClinicalMobileSettingsApi(Resource):
+class ClientMobileSettingsApi(Resource):
     """
     Create update and remove members of a client's clinical care team
     only the client themselves may have access to these operations.
@@ -956,7 +956,7 @@ class ClinicalMobileSettingsApi(Resource):
 
 @ns.route('/height/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class ClinicalHeightApi(Resource):
+class ClientHeightApi(Resource):
     """
     Endpoints related to submitting client height and viewing
     a client's height history.
@@ -985,7 +985,7 @@ class ClinicalHeightApi(Resource):
         return request.parsed_obj
 
     @token_auth.login_required(user_type=('client', 'staff'))
-    @responds(schema=ClientHeightSchema(many=True), api=ns, status_code=201)
+    @responds(schema=ClientHeightSchema(many=True), api=ns, status_code=200)
     def get(self, user_id):
         """
         Returns all heights reported for a client and the dates they were reported.
@@ -1000,7 +1000,7 @@ class ClinicalHeightApi(Resource):
 
 @ns.route('/weight/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class ClinicalWeightApi(Resource):
+class ClientWeightApi(Resource):
     """
     Endpoints related to submitting client weight and viewing
     a client's weight history.
@@ -1029,7 +1029,7 @@ class ClinicalWeightApi(Resource):
         return request.parsed_obj
 
     @token_auth.login_required(user_type=('client', 'staff'))
-    @responds(schema=ClientWeightSchema(many=True), api=ns, status_code=201)
+    @responds(schema=ClientWeightSchema(many=True), api=ns, status_code=200)
     def get(self, user_id):
         """
         Returns all weights reported for a client and the dates they were reported.
