@@ -89,7 +89,7 @@ class ApiUser(Resource):
 
             response = s3.list_objects_v2(Bucket=bucket_name, Prefix=user_directory)
             
-            for object in response['Contents']:
+            for object in response.get('Contents', []):
                 print('Deleting', object['Key'])
                 s3.delete_object(Bucket=bucket_name, Key=object['Key'])
         
