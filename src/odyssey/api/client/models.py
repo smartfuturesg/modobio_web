@@ -166,7 +166,7 @@ class ClientInfo(db.Model):
     :type: :class:`datetime.date`
     """
 
-    race_id = db.Column(db.Integer, db.ForeignKey('LookupRaces.race_id', ondelete="CASCADE"))
+    race_id = db.Column(db.Integer, db.ForeignKey('LookupRaces.race_id'))
     """
     Client race_id as defined in LookupRaces
 
@@ -187,7 +187,7 @@ class ClientInfo(db.Model):
     :type: bool
     """
     
-    primary_goal_id = db.Column(db.Integer, db.ForeignKey('LookupGoals.goal_id', ondelete='CASCADE'))
+    primary_goal_id = db.Column(db.Integer, db.ForeignKey('LookupGoals.goal_id'))
     """
     The client's stated primary goal for using modobio. Must be an option in the LookupGoals table.
 
