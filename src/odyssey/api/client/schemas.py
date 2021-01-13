@@ -72,7 +72,7 @@ class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientInfo
         exclude = ('created_at', 'updated_at', 'idx')
-        dump_only = ('modobio_id', 'membersince', 'height')
+        dump_only = ('modobio_id', 'membersince', 'height', 'weight')
 
     user_id = fields.Integer()
     primary_goal_id = fields.Integer()
@@ -86,7 +86,7 @@ class ClientInfoPutSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientInfo
         exclude = ('created_at', 'updated_at', 'idx')
-        dump_only = ('modobio_id', 'membersince', 'is_staff', 'is_client', 'user_id', 'height')
+        dump_only = ('modobio_id', 'membersince', 'is_staff', 'is_client', 'user_id', 'height', 'weight')
 
     primary_goal_id = fields.Integer()
     race_id = fields.Integer()
@@ -331,7 +331,7 @@ class ClientHeightSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientHeightHistory
         exclude = ('created_at', 'idx')
-        dump_only = ('updated_at')
+        dump_only = ('updated_at', 'user_id')
 
     user_id = fields.Integer()
 
@@ -343,7 +343,7 @@ class ClientWeightSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientWeightHistory
         exclude = ('created_at', 'idx')
-        dump_only = ('updated_at')
+        dump_only = ('updated_at', 'user_id')
 
     user_id = fields.Integer()
 

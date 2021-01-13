@@ -968,10 +968,13 @@ class ClinicalHeightApi(Resource):
         """
         Submits a new height for the client.
         """
+        check_client_existence(user_id)
+
         if token_auth.current_user()[0].user_id != user_id:
             #clients can only submit heights for themselves
             raise IllegalSetting(message="Requested user_id does not match logged in user_id. Clients can only submit height measurements for themselves.")
 
+        request.parsed_obj.user_id = user_id
         db.session.add(request.parsed_obj)
 
         #clientInfo should hold the most recent height given for the client so update here
@@ -987,6 +990,8 @@ class ClinicalHeightApi(Resource):
         """
         Returns all heights reported for a client and the dates they were reported.
         """
+        check_client_existence(user_id)
+
         if token_auth.current_user()[0].is_client and token_auth.current_user()[0].user_id != user_id:
             #clients can only view height history for themselves
             raise IllegalSetting(message="Requested user_id does not match logged in user_id. Clients can only view height history for themselves.")
@@ -1007,15 +1012,18 @@ class ClinicalWeightApi(Resource):
         """
         Submits a new weight for the client.
         """
+        check_client_existence(user_id)
+
         if token_auth.current_user()[0].user_id != user_id:
             #clients can only submit heights for themselves
             raise IllegalSetting(message="Requested user_id does not match logged in user_id. Clients can only submit weight measurements for themselves.")
 
+        request.parsed_obj.user_id = user_id
         db.session.add(request.parsed_obj)
 
         #clientInfo should hold the most recent height given for the client so update here
         client = ClientInfo.query.filter_by(user_id=user_id)
-        client.update({'weight': request.parsed_obj.height})
+        client.update({'weight': request.parsed_obj.weight})
 
         db.session.commit()
         return request.parsed_obj
@@ -1026,6 +1034,8 @@ class ClinicalWeightApi(Resource):
         """
         Returns all weights reported for a client and the dates they were reported.
         """
+        check_client_existence(user_id)
+
         if token_auth.current_user()[0].is_client and token_auth.current_user()[0].user_id != user_id:
             #clients can only view height history for themselves
             raise IllegalSetting(message="Requested user_id does not match logged in user_id. Clients can only view weight history for themselves.")
