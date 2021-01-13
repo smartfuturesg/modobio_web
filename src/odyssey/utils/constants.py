@@ -757,7 +757,7 @@ MEDICAL_CONDITIONS = {
         'Mesothelioma': None
     },
     'Surgery': {
-        'Cardiac ': None,
+        'Cardiac': None,
         'Breast': None,
         'Heart': None,
         'Cosmetic': None,

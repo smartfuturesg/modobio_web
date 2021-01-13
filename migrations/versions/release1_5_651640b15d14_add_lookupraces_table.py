@@ -26,7 +26,7 @@ def upgrade():
     sa.PrimaryKeyConstraint('race_id')
     )
     op.add_column('ClientInfo', sa.Column('race_id', sa.Integer(), nullable=True))
-    op.create_foreign_key(None, 'ClientInfo', 'LookupRaces', ['race_id'], ['race_id'], ondelete='CASCADE')
+    op.create_foreign_key(None, 'ClientInfo', 'LookupRaces', ['race_id'], ['race_id'])
     # ### end Alembic commands ###
 
 

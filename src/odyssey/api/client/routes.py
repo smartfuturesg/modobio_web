@@ -178,7 +178,7 @@ class ClientSummary(Resource):
                 'phone': 'phone number to search',
                 'dob': 'date of birth to search',
                 'record_locator_id': 'record locator id to search'})
-
+                
 #todo - fix to work with new user system
 class Clients(Resource):
     @token_auth.login_required
@@ -217,6 +217,7 @@ class Clients(Resource):
         #         param[key] = ''          
         #     elif key == 'record_locator_id' and param.get(key, None):
         #         tempId = param[key]
+
         #     elif key == 'email' and param.get(key, None):
         #         tempEmail = param[key]
         #         param[key] = param[key].replace("@"," ")
