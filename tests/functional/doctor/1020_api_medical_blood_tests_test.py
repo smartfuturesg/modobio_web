@@ -84,7 +84,6 @@ def test_get_blood_test_results(test_client, init_database, staff_auth_header):
                                 content_type='application/json')
     response_data = response.get_json()
 
-    breakpoint()
     assert response.status_code == 200
     assert response_data['items'][0]['results'][0]['evaluation'] == 'optimal'
     assert response_data['items'][0]['results'][1]['evaluation'] == 'normal'
