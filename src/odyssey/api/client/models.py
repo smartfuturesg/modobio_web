@@ -187,14 +187,11 @@ class ClientInfo(db.Model):
     :type: bool
     """
     
-    record_locator_id = db.Column(db.String(12))
+    primary_goal_id = db.Column(db.Integer, db.ForeignKey('LookupGoals.goal_id'))
     """
-    Deprecated. Use User.modobio_id instead
-    Medical decord Locator ID.
+    The client's stated primary goal for using modobio. Must be an option in the LookupGoals table.
 
-    See :meth:`generate_record_locator_id`.
-
-    :type: str, max length 12
+    :type: int, foreign key('LookupGoal.goal_id')
     """
 
     primary_pharmacy_name = db.Column(db.String)
@@ -219,7 +216,6 @@ class ClientInfo(db.Model):
         The returned dict contains the following keys:
 
         - user_id
-        - record_locator_id
         - firstname
         - lastename
         - dob (date of birth)
@@ -233,7 +229,6 @@ class ClientInfo(db.Model):
         """
         data = {
             'user_id': self.user_id,
-            'record_locator_id': self.record_locator_id,
             'firstname': user.firstname,
             'lastname': user.lastname,
             'dob': self.dob,

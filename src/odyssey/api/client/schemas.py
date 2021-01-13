@@ -11,6 +11,7 @@ from marshmallow import (
 
 from odyssey import ma
 from odyssey.api.user.models import User
+from odyssey.api.lookup.models import LookupGoals
 from odyssey.api.client.models import (
     ClientConsent,
     ClientConsultContract,
@@ -72,6 +73,7 @@ class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
         dump_only = ('modobio_id', 'membersince')
 
     user_id = fields.Integer()
+    primary_goal_id = fields.Integer()
     race_id = fields.Integer()
 
     @post_load
@@ -84,6 +86,7 @@ class ClientInfoPutSchema(ma.SQLAlchemyAutoSchema):
         exclude = ('created_at', 'updated_at', 'idx')
         dump_only = ('modobio_id', 'membersince', 'is_staff', 'is_client', 'user_id')
 
+    primary_goal_id = fields.Integer()
     race_id = fields.Integer()
 
 class ClientAndUserInfoSchema(Schema):
