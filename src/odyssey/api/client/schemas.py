@@ -72,6 +72,7 @@ class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
         dump_only = ('modobio_id', 'membersince')
 
     user_id = fields.Integer()
+    race_id = fields.Integer()
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -82,6 +83,8 @@ class ClientInfoPutSchema(ma.SQLAlchemyAutoSchema):
         model = ClientInfo
         exclude = ('created_at', 'updated_at', 'idx')
         dump_only = ('modobio_id', 'membersince', 'is_staff', 'is_client', 'user_id')
+
+    race_id = fields.Integer()
 
 class ClientAndUserInfoSchema(Schema):
 
