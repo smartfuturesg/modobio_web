@@ -873,20 +873,6 @@ class MedImaging(Resource):
 @ns.doc(params={'user_id': 'User ID number'})
 class MedBloodTest(Resource):
     @token_auth.login_required
-    @responds(schema=MedicalBloodTestSchema(many=True), api=ns)
-    def get(self, user_id):
-        #
-        # ?? DEAD CODE ?? replaced by /bloodtest/all/user_id/ ?
-        #
-        check_client_existence(user_id)
-        blood_tests = MedicalBloodTests.query.filter_by(user_id=user_id).all()
-
-        if not blood_tests:
-            raise ContentNotFound()
-
-        return blood_tests
-
-    @token_auth.login_required
     @accepts(schema=MedicalBloodTestsInputSchema, api=ns)
     @responds(schema=MedicalBloodTestSchema, status_code=201, api=ns)
     def post(self, user_id):
@@ -929,12 +915,20 @@ class MedBloodTestAll(Resource):
     @responds(schema=AllMedicalBloodTestSchema, api=ns)
     def get(self, user_id):
         """
-        This resource returns every instance of blood test submissions for the 
-        specified user_id
+        This resource returns every instance of blood test submissions for the specified user_id
 
-        Test submissions relate overall submission data: test_id, date, notes, panel_type
-        to the actual results. Each submission may have multiple results
-        where the results can be referenced by the test_id provided in this request
+        Each test submission includes the following data:
+        - date
+        - test_id
+        - notes
+        - panel_type
+        - reporter (a staff member who reported the test results)
+        
+        To see the actual test results for a given test, use the test_id
+        to query the (GET) `/bloodtest/results/<int:test_id>/` endpoint
+
+        To see test results for every blood test submission for a specified client, 
+        use the (GET)`/bloodtest/results/all/<int:user_id>/` endpoint. 
         """
         check_client_existence(user_id)
         blood_tests =  db.session.query(
@@ -1022,7 +1016,10 @@ class MedBloodTestResults(Resource):
 @ns.doc(params={'user_id': 'Client ID number'})
 class AllMedBloodTestResults(Resource):
     """
-    Endpoint for returning all blood test results from a client
+    Endpoint for returning all blood test results from a client.
+
+    This includes all test submisison details along with the test
+    results associated with each test submission. 
     """
     @token_auth.login_required
     @responds(schema=MedicalBloodTestResultsOutputSchema, api=ns)
