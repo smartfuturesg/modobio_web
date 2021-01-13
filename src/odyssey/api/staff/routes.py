@@ -167,6 +167,18 @@ class UpdateRoles(Resource):
         
         return
 
+    @token_auth.login_required
+    @responds(schema=StaffRolesSchema(many=True), status_code=200, api=ns)   
+    def get(self, user_id):
+        """
+        Get staff roles
+        """
+        staff_user, _ = token_auth.current_user()
+       
+        staff_roles = db.session.query(StaffRoles.role).filter(StaffRoles.user_id==user_id).all()
+
+        return staff_roles
+
 @ns.route('/recentclients/')
 class RecentClients(Resource):
     """endpoint related to the staff recent client feature"""
