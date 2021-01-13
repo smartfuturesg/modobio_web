@@ -5,9 +5,9 @@ alter sequence "LookupRaces_race_id_seq"
 
 INSERT INTO "LookupRaces" ("race_name", "race_id") 
 VALUES
-('White / Caucasian', 1),
-('Black / African American', 2),
-('Native American / Alaska Native', 3),
-('Asian', 4),
-('Pacific Islander / Native Hawaiian', 5),
-('Hispanic / Latino', 6);
+('White / Caucasian'),
+('Black / African American'),
+('Native American / Alaska Native'),
+('Asian'),
+('Pacific Islander / Native Hawaiian'),
+('Hispanic / Latino');
