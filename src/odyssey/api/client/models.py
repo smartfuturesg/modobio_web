@@ -166,7 +166,7 @@ class ClientInfo(db.Model):
     :type: :class:`datetime.date`
     """
 
-    race_id = db.Column(db.Integer, db.ForeignKey('LookupRaces.race_id', ondelete="CASCADE"))
+    race_id = db.Column(db.Integer, db.ForeignKey('LookupRaces.race_id'))
     """
     Client race_id as defined in LookupRaces
 
