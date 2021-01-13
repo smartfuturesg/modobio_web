@@ -16,7 +16,8 @@ from odyssey.api.staff.schemas import (
     StaffProfileSchema, 
     StaffSearchItemsSchema,
     StaffRolesSchema,
-    StaffRecentClientsSchema
+    StaffRecentClientsSchema,
+    StaffTokenRequestSchema
 )
 from odyssey.utils.misc import check_client_existence
 
@@ -167,6 +168,18 @@ class UpdateRoles(Resource):
         
         return
 
+    @token_auth.login_required
+    @responds(schema=StaffRolesSchema(many=True), status_code=200, api=ns)   
+    def get(self, user_id):
+        """
+        Get staff roles
+        """
+        staff_user, _ = token_auth.current_user()
+       
+        staff_roles = db.session.query(StaffRoles.role).filter(StaffRoles.user_id==user_id).all()
+
+        return staff_roles
+
 @ns.route('/recentclients/')
 class RecentClients(Resource):
     """endpoint related to the staff recent client feature"""
@@ -184,6 +197,7 @@ class StaffToken(Resource):
     """create and revoke tokens"""
     @ns.doc(security='password')
     @basic_auth.login_required(user_type=('staff',))
+    @responds(schema=StaffTokenRequestSchema, status_code=201, api=ns)
     def post(self):
         """generates a token for the 'current_user' immediately after password authentication"""
         user, user_login = basic_auth.current_user()
@@ -208,7 +222,7 @@ class StaffToken(Resource):
                 'token': access_token,
                 'refresh_token': refresh_token,
                 'user_id': user.user_id,
-                'access_roles': [item[0] for item in access_roles]}, 201
+                'access_roles': [item[0] for item in access_roles]}
 
 
     @ns.doc(security='password')
