@@ -3,7 +3,7 @@ delete from "LookupRaces"
 alter sequence "LookupRaces_race_id_seq"
   restart with 1;
 
-INSERT INTO "LookupRaces" ("race_name", "race_id") 
+INSERT INTO "LookupRaces" ("race_name") 
 VALUES
 ('White / Caucasian'),
 ('Black / African American'),
