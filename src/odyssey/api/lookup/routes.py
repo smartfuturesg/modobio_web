@@ -12,7 +12,8 @@ from odyssey.api.lookup.models import (
      LookupRaces,
      LookupSubscriptions,
      LookupTelehealthSessionCost,
-     LookupTelehealthSessionDuration
+     LookupTelehealthSessionDuration,
+     LookupTransactionTypes
 )
 from odyssey.api.lookup.schemas import (
     LookupActivityTrackersOutputSchema, 
@@ -23,13 +24,35 @@ from odyssey.api.lookup.schemas import (
     LookupRacesOutputSchema,
     LookupSubscriptionsOutputSchema,
     LookupTelehealthSessionCostOutputSchema,
-    LookupTelehealthSessionDurationOutputSchema
+    LookupTelehealthSessionDurationOutputSchema,
+    LookupTransactionTypesOutputSchema
 )
 from odyssey.utils.misc import check_drink_existence
 
 from odyssey import db
 
 ns = api.namespace('lookup', description='Endpoints for lookup tables.')
+
+@ns.route('/transaction-types/')
+class LookupTransactionTypesResource(Resource):
+    """ Returns stored transaction types in database by GET request.
+
+    Returns
+    -------
+    dict
+        JSON encoded dict.
+    """
+    @token_auth.login_required
+    @responds(schema=LookupTransactionTypesOutputSchema,status_code=200, api=ns)
+    def get(self):
+                
+        transaction_types = LookupTransactionTypes.query.all()
+        
+        payload = {'items': transaction_types,
+                   'total_items': len(transaction_types)}
+
+        return payload
+
 
 @ns.route('/business/booking-window/')
 class LookupTelehealthSessionCostResource(Resource):

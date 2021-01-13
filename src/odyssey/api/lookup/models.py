@@ -5,6 +5,57 @@ not to be edited at runtime.
 
 from odyssey import db
 from odyssey.utils.constants import DB_SERVER_TIME
+class LookupTransactionTypes(db.Model):
+    """ Stored transaction types in database. 
+    """
+
+    __tablename__ = 'LookupTransactionTypes'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Primary index for 
+
+    :type: int, primary key, autoincrement
+    """
+
+    category = db.Column(db.String)
+    """
+    Category
+    The overall category of the transaction type.
+    
+    :type: str
+    """
+
+    name = db.Column(db.String)
+    """
+    Name
+    The name or subcategory further describing the 
+    transaction type if any.
+    
+    :type: str
+    """
+
+    icon = db.Column(db.String)
+    """
+    icon
+    Referenced image name for the FE to use
+
+    :type: str
+    """        
 
 class LookupClientBookingWindow(db.Model):
     """ Stored booking windows for the client in database. 
