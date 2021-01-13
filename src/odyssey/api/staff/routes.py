@@ -222,7 +222,7 @@ class StaffToken(Resource):
                 'token': access_token,
                 'refresh_token': refresh_token,
                 'user_id': user.user_id,
-                'access_roles': [item[0] for item in access_roles]}, 201
+                'access_roles': [item[0] for item in access_roles]}
 
 
     @ns.doc(security='password')

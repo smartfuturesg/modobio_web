@@ -677,7 +677,7 @@ class ClientToken(Resource):
                 'lastname': user.lastname, 
                 'token': access_token,
                 'refresh_token': refresh_token,
-                'user_id': user.user_id}, 201
+                'user_id': user.user_id}
 
     @ns.doc(security='password')
     @token_auth.login_required(user_type=('client',))
