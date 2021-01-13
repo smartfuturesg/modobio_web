@@ -290,3 +290,11 @@ class AllClientsDataTier(Schema):
     items = fields.Nested(ClientDataTierSchema(many=True), missing=ClientDataTierSchema().load({}))
     total_stored_bytes = fields.Integer(description="Total bytes stored for all clients", missing=0)
     total_items = fields.Integer(description="number of clients in this payload", missing=0)
+
+class ClientTokenRequestSchema(Schema):
+    user_id = fields.Integer()
+    firstname = fields.String(required=False, validate=validate.Length(min=1, max= 50), missing=None)
+    lastname = fields.String(required=False, validate=validate.Length(min=1,max=50), missing=None)
+    email = fields.Email(required=False, missing=None)   
+    token = fields.String()
+    refresh_token = fields.String()

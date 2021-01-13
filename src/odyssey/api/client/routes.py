@@ -52,6 +52,7 @@ from odyssey.api.client.schemas import(
     ClientSearchOutSchema,
     ClientSubscriptionContractSchema,
     ClientAndUserInfoSchema,
+    ClientTokenRequestSchema,
     NewRemoteClientSchema,
     SignAndDateSchema,
     SignedDocumentsSchema
@@ -658,6 +659,7 @@ class ClientToken(Resource):
     """create and revoke tokens"""
     @ns.doc(security='password')
     @basic_auth.login_required(user_type=('client',))
+    @responds(schema=ClientTokenRequestSchema, status_code=201, api=ns)
     def post(self):
         """generates a token for the 'current_user' immediately after password authentication"""
         user, user_login = basic_auth.current_user()

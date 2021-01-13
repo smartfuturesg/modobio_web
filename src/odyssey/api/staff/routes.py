@@ -16,7 +16,8 @@ from odyssey.api.staff.schemas import (
     StaffProfileSchema, 
     StaffSearchItemsSchema,
     StaffRolesSchema,
-    StaffRecentClientsSchema
+    StaffRecentClientsSchema,
+    StaffTokenRequestSchema
 )
 from odyssey.utils.misc import check_client_existence
 
@@ -196,6 +197,7 @@ class StaffToken(Resource):
     """create and revoke tokens"""
     @ns.doc(security='password')
     @basic_auth.login_required(user_type=('staff',))
+    @responds(schema=StaffTokenRequestSchema, status_code=201, api=ns)
     def post(self):
         """generates a token for the 'current_user' immediately after password authentication"""
         user, user_login = basic_auth.current_user()
