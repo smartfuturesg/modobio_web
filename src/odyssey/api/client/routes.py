@@ -32,6 +32,7 @@ from odyssey.api.client.models import (
     ClientAssignedDrinks
 )
 from odyssey.api.doctor.models import MedicalHistory, MedicalPhysicalExam
+from odyssey.api.lookup.models import LookupGoals, LookupDrinks
 from odyssey.api.physiotherapy.models import PTHistory 
 from odyssey.api.staff.models import StaffRecentClients
 from odyssey.api.trainer.models import FitnessQuestionnaire
@@ -121,6 +122,18 @@ class Client(Resource):
         if not client_data or not user_data:
             raise UserNotFound(user_id)
         
+        #validate primary_goal_id if supplied and automatically create drink recommendation
+        if 'primary_goal_id' in request.parsed_obj['client_info'].keys():
+            goal = LookupGoals.query.filter_by(goal_id=request.parsed_obj['client_info']['primary_goal_id']).one_or_none()
+            if not goal:
+                raise InputError(400, 'Invalid primary_goal_id.')
+            
+            #make automatic drink recommendation
+            drink_id = LookupDrinks.query.filter_by(primary_goal_id=request.parsed_obj['client_info']['primary_goal_id']).one_or_none().drink_id
+            recommendation = ClientAssignedDrinksSchema().load({'drink_id': drink_id})
+            recommendation.user_id = user_id
+            db.session.add(recommendation)
+
         #update both tables with request data
         if request.parsed_obj['client_info']:
             client_data.update(request.parsed_obj['client_info'])
@@ -161,7 +174,7 @@ class ClientSummary(Resource):
                 'phone': 'phone number to search',
                 'dob': 'date of birth to search',
                 'record_locator_id': 'record locator id to search'})
-
+                
 #todo - fix to work with new user system
 class Clients(Resource):
     @token_auth.login_required
@@ -200,6 +213,7 @@ class Clients(Resource):
         #         param[key] = ''          
         #     elif key == 'record_locator_id' and param.get(key, None):
         #         tempId = param[key]
+
         #     elif key == 'email' and param.get(key, None):
         #         tempEmail = param[key]
         #         param[key] = param[key].replace("@"," ")

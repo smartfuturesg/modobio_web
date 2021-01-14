@@ -373,3 +373,37 @@ class LookupGoals(db.Model):
 
     :type: string
     """
+
+class LookupRaces(db.Model):
+    """ Static list of races that a client can choose from. 
+    """
+
+    __tablename__ = 'LookupRaces'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    race_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Id of this race.
+
+    :type: integer, primary key, autoincrementing
+    """
+
+    race_name = db.Column(db.String)
+    """
+    Name of this race.
+
+    :type: string
+    """
