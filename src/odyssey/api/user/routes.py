@@ -301,6 +301,8 @@ class VerifyPortalId(Resource):
 
         if decoded_token['utype'] == 'client':
             user.is_client = True
+            client_info = ClientInfoSchema().load({'user_id': user.user_id})
+            db.session.add(client_info)
         elif decoded_token['utype'] == 'staff':
             user.is_staff = True
         
