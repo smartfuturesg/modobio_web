@@ -1,8 +1,8 @@
-"""look up activity tracker
+"""activity_tracker_lookup
 
-Revision ID: 60c7a4ef3c9a
-Revises: d4b6966523ba
-Create Date: 2020-12-26 10:47:10.807343
+Revision ID: 599aa0b1eb85
+Revises: c4509d5ead42
+Create Date: 2021-01-14 11:18:53.332621
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '60c7a4ef3c9a'
+revision = '599aa0b1eb85'
 down_revision = 'c4509d5ead42'
 branch_labels = None
 depends_on = None
@@ -42,6 +42,8 @@ def upgrade():
     sa.Column('hr_walking', sa.Boolean(), nullable=True),
     sa.Column('hr_24hr_avg', sa.Boolean(), nullable=True),
     sa.Column('hrv_avg', sa.Boolean(), nullable=True),
+    sa.Column('hrv_highest', sa.Boolean(), nullable=True),
+    sa.Column('respiratory_rate', sa.Boolean(), nullable=True),
     sa.Column('body_temperature', sa.Boolean(), nullable=True),
     sa.Column('steps', sa.Boolean(), nullable=True),
     sa.Column('total_calories', sa.Boolean(), nullable=True),
