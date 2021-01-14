@@ -604,7 +604,8 @@ class MedicalSocialHist(Resource):
         payload = {}
 
         social = request.parsed_obj['social_history']
-
+        if social.last_smoke_time == '':
+            social.last_smoke_time = None
         # If the user submits something for Social history, then removes it from the payload, 
         # remove the everything for that user in social history table
         socialHist = MedicalSocialHistory.query.filter_by(user_id=user_id).one_or_none()
