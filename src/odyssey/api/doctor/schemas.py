@@ -64,7 +64,7 @@ class MedicalSocialHistorySchema(Schema):
     avg_num_cigs = fields.Integer()
     avg_weekly_drinks = fields.Integer(missing=0)
     avg_weekly_workouts = fields.Integer(missing=0)
-    job_title = fields.String(missing=None)
+    job_title = fields.String(missing=None, validate=validate.Length(max=99))
     avg_hourly_meditation = fields.Integer(missing=0)
     sexual_preference = fields.String(missing=None)
     

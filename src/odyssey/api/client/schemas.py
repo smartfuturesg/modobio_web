@@ -312,6 +312,7 @@ class ClientMobileSettingsSchema(ma.SQLAlchemyAutoSchema):
     @post_load
     def make_object(self, data, **kwargs):
         return ClientMobileSettings(**data)
+        
 class ClientAssignedDrinksSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientAssignedDrinks
@@ -350,3 +351,10 @@ class ClientWeightSchema(ma.SQLAlchemyAutoSchema):
     @post_load
     def make_object(self, data, **kwargs):
         return ClientWeightHistory(**data)
+class ClientTokenRequestSchema(Schema):
+    user_id = fields.Integer()
+    firstname = fields.String(required=False, validate=validate.Length(min=1, max= 50), missing=None)
+    lastname = fields.String(required=False, validate=validate.Length(min=1,max=50), missing=None)
+    email = fields.Email(required=False, missing=None)   
+    token = fields.String()
+    refresh_token = fields.String()

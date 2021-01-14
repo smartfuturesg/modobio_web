@@ -50,3 +50,13 @@ class StaffRolesSchema(Schema):
     @post_load
     def make_object(self, data, **kwargs):
         return StaffRoles(**data)
+
+class StaffTokenRequestSchema(Schema):
+    user_id = fields.Integer()
+    firstname = fields.String(required=False, validate=validate.Length(min=1, max= 50), missing=None)
+    lastname = fields.String(required=False, validate=validate.Length(min=1,max=50), missing=None)
+    email = fields.Email(required=False, missing=None)   
+    token = fields.String()
+    refresh_token = fields.String()
+    access_roles = fields.List(fields.String)
+    
