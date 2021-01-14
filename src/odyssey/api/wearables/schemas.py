@@ -7,12 +7,12 @@ from odyssey.api.wearables.models import Wearables, WearablesOura, WearablesFree
 """
   Schemas for the wearables API
 """
+
 class WearablesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Wearables
         load_instance = True
         exclude = ('idx', 'user_id', 'created_at', 'updated_at')
-
 
 class WearablesOuraAuthSchema(Schema):
     oura_client_id = fields.String()
