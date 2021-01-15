@@ -5,6 +5,7 @@ from odyssey.api.lookup.models import (
     LookupActivityTrackers, 
     LookupClinicalCareTeamResources,
     LookupClientBookingWindow,
+    LookupCountriesOfOperations,
     LookupDrinks, 
     LookupDrinkIngredients, 
     LookupGoals, 
@@ -13,6 +14,14 @@ from odyssey.api.lookup.models import (
     LookupTelehealthSessionCost,
     LookupTelehealthSessionDuration
 )
+
+class LookupCountriesOfOperationsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupCountriesOfOperations
+
+class LookupCountriesOfOperationsOutputSchema(Schema):
+    items = fields.Nested(LookupCountriesOfOperationsSchema(many=True),missing=[])
+    total_items = fields.Integer()
 
 class LookupClientBookingWindowSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
