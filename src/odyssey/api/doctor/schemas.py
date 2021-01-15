@@ -71,7 +71,7 @@ class MedicalSocialHistorySchema(Schema):
     last_smoke_date = fields.Date(dump_only=True)
     last_smoke = fields.Integer(required=False,missing=None)
 
-    possible_date_units = ['days','months','years']
+    possible_date_units = ['','days','months','years']
 
     last_smoke_time = fields.String(required=False,description="days, months, years",validate=validate.OneOf(possible_date_units),missing=None)
     num_years_smoked = fields.Integer(missing=0)
