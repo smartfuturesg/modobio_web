@@ -21,7 +21,8 @@ from odyssey.api.user.schemas import (
     NewUserSchema,
     UserInfoSchema,
     UserSubscriptionsSchema,
-    UserSubscriptionHistorySchema
+    UserSubscriptionHistorySchema,
+    UserClinicalCareTeamSchema
 ) 
 from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import PASSWORD_RESET_URL, DB_SERVER_TIME
@@ -468,4 +469,25 @@ class UserSubscriptionHistoryApi(Resource):
         res = {}
         res['client_subscription_history'] = UserSubscriptions.query.filter_by(user_id=user_id).filter_by(is_staff=False).all()
         res['staff_subscription_history'] = UserSubscriptions.query.filter_by(user_id=user_id).filter_by(is_staff=True).all()
+        return res
+
+@ns.route('/clinical-care-team/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class UserClinicalCareTeamApi(Resource):
+
+    @token_auth.login_required
+    @responds(schema=UserClinicalCareTeamSchema(many=True), api=ns, status_code=200)
+    def get(self, user_id):
+        """
+        returns the list of clients whose clinical care team the given user_id
+        is a part of
+        """
+
+        res = []
+        for client in ClientClinicalCareTeam.query.filter_by(team_member_user_id=user_id).all():
+            user = User.query.filter_by(user_id=client.user_id).one_or_none()
+            res.append({'client_user_id': user.user_id, 
+                        'client_name': user.firstname + ' ' + user.middlename + ' ' + user.lastname,
+                        'client_email': user.email})
+        
         return res
