@@ -31,6 +31,18 @@ class UserLoginSchema(ma.SQLAlchemyAutoSchema):
         new_user.set_password(data['password'])
         return new_user
 
+class UserInfoSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = User
+        exclude = ('created_at', 'updated_at')
+        load_only = ('password')
+        dump_only = ('is_staff', 'is_client')
+
+    email = fields.Email(validate=validate.Length(min=0,max=50))
+    phone_number = fields.String(validate=validate.Length(min=0,max=50))
+    password = fields.String(description="password required when creating a staff member",
+                            validate=validate.Length(min=0,max=50), 
+                            required=False)
 
 class NewClientUserSchema(Schema):
     """
@@ -45,18 +57,9 @@ class NewClientUserSchema(Schema):
     modobio_id = fields.String()
     biological_sex_male = fields.Boolean()
 
+    user_info = fields.Nested(UserInfoSchema, required=True)
 
-class UserInfoSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = User
-        exclude = ('created_at', 'updated_at', 'is_staff', 'is_client')
-        load_only = ('password')
 
-    email = fields.Email(validate=validate.Length(min=0,max=50))
-    phone_number = fields.String(validate=validate.Length(min=0,max=50))
-    password = fields.String(description="password required when creating a staff member",
-                            validate=validate.Length(min=0,max=50), 
-                            required=False)
     
 class UserInfoPutSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -77,6 +80,16 @@ class StaffInfoSchema(Schema):
                     description=f"Access roles the new user will have. Options include: {ACCESS_ROLES}"
                 )
 class NewUserSchema(Schema):
+    """
+    General purpose user creation schema
+    """
+
+    user_info = fields.Nested(UserInfoSchema, required=True)
+    staff_info = fields.Nested(StaffInfoSchema,
+                              missing={}, 
+                              description="used when registering a staff member")
+
+class NewStaffUserSchema(UserInfoSchema):
     """
     General purpose user creation schema
     """
