@@ -86,7 +86,7 @@ class NewUserSchema(Schema):
                               missing={}, 
                               description="used when registering a staff member")
 
-class NewStaffUserSchema(Schema):
+class NewStaffUserSchema(UserInfoSchema):
     """
     General purpose user creation schema
     """
