@@ -101,7 +101,7 @@ class NewStaffUser(Resource):
             
 
         db.session.commit()
-
+        db.session.refresh(user)
         payload = user.__dict__
         payload["staff_info"] = {"access_roles": staff_info.get('access_roles', []) }
         payload["user_info"] =  user
@@ -112,7 +112,7 @@ class NewStaffUser(Resource):
 @ns.doc(params={'user_id': 'User ID number'})
 class StaffUserInfo(Resource):
     @token_auth.login_required
-    @responds(schema=NewStaffUserSchema, status_code=201, api=ns)
+    @responds(schema=NewStaffUserSchema, status_code=200, api=ns)
     def get(self, user_id):
         user = User.query.filter_by(user_id=user_id).one_or_none()
         staff_roles = db.session.query(StaffRoles.role).filter(StaffRoles.user_id==user_id).all()
