@@ -5,6 +5,53 @@ not to be edited at runtime.
 
 from odyssey import db
 from odyssey.utils.constants import DB_SERVER_TIME
+
+class LookupTransactionTypeIcons(db.Model):
+""" Stored transaction type icons in database. 
+    """
+
+    __tablename__ = 'LookupTransactionTypeIcons'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Primary index for 
+
+    :type: int, primary key, autoincrement
+    """
+
+    name = db.Column(db.String)
+    """
+    Name
+    The name of the icon image
+    
+    :type: str
+    """
+
+    icon = db.Column(db.Text)
+    """
+    icon
+    Referenced image name for the FE to use
+
+    :type: text
+    """
+
+    mimetype = db.Column(db.Text)
+
+
 class LookupTransactionTypes(db.Model):
     """ Stored transaction types in database. 
     """
