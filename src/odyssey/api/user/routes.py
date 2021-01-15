@@ -10,6 +10,7 @@ from werkzeug.security import check_password_hash
 
 from odyssey.api import api
 from odyssey.api.client.schemas import ClientInfoSchema
+from odyssey.api.client.models import ClientClinicalCareTeam
 from odyssey.api.staff.schemas import StaffProfileSchema, StaffRolesSchema
 from odyssey.api.user.models import User, UserLogin, UserRemovalRequests, UserSubscriptions, UserTokensBlacklist
 from odyssey.api.user.schemas import (
