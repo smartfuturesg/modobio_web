@@ -3,7 +3,7 @@ from flask.json import dumps
 
 from tests.functional.client.data import clients_clinical_care_team
 from tests.functional.user.data import users_new_user_client_data
-def test_adding_clinical_care_team(test_client, init_database, client_auth_header):
+def test_adding_clinical_care_team(test_client, init_database, client_auth_header, staff_auth_header):
     """
     GIVEN a api end point for adding members to a client's care team
     WHEN the '/client/clinical-care-team/<client id>' resource  is requested to be added (POST)
@@ -27,11 +27,11 @@ def test_adding_clinical_care_team(test_client, init_database, client_auth_heade
 
     #check that the person added to the client's care team above sees the client
     #when viewing the list of clients whose care team they belong to
-    response = test_client.get("/user/clinical-care-team/2/",
+    response = test_client.get("/user/clinical-care-team/3/",
                                 headers=staff_auth_header,
                                 content_type='application/json')
-
     assert response.status_code == 200
+    assert response.json[0]['client_user_id'] == 1
 
     ###
     # Attempt to add more than 6 clinical care team members
