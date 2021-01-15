@@ -176,7 +176,9 @@ class NewClientUser(Resource):
         payload['password']=password
         
         db.session.commit()
-        print(user.__dict__)
+
+        payload['user_info'] = user
+        
         return user
 
 @ns.route('/password/forgot-password/recovery-link/')
