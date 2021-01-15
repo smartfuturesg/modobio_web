@@ -19,7 +19,8 @@ from odyssey.api.user.schemas import (
     UserPasswordRecoveryContactSchema,
     UserPasswordResetSchema,
     UserPasswordUpdateSchema,
-    NewUserSchema
+    NewUserSchema,
+    NewStaffUserSchema
 ) 
 from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import PASSWORD_RESET_URL
@@ -45,8 +46,8 @@ class ApiUser(Resource):
 @ns.route('/staff/')
 class NewStaffUser(Resource):
     @token_auth.login_required
-    @accepts(schema=NewUserSchema, api=ns)
-    @responds(schema=UserSchema, status_code=201, api=ns)
+    @accepts(schema=NewStaffUserSchema, api=ns)
+    @responds(schema=NewStaffUserSchema, status_code=201, api=ns)
     def post(self):
         """
         Create a staff user. Payload will require userinfo and staffinfo
@@ -96,8 +97,13 @@ class NewStaffUser(Resource):
                                             {'user_id': user.user_id,
                                              'role': role}
                                             ))
+            
+
         db.session.commit()
-        return user
+
+        payload = {"staff_info": {"access_roles": staff_info.get('access_roles', [])},
+                   "user_info": user }
+        return payload
 
 @ns.route('/client/')
 class NewClientUser(Resource):

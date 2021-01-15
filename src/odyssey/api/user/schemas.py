@@ -86,6 +86,16 @@ class NewUserSchema(Schema):
                               missing={}, 
                               description="used when registering a staff member")
 
+class NewStaffUserSchema(Schema):
+    """
+    General purpose user creation schema
+    """
+
+    user_info = fields.Nested(UserInfoSchema, required=True)
+    staff_info = fields.Nested(StaffInfoSchema,
+                              missing={}, 
+                              description="used when registering a staff member")
+
 class UserPasswordRecoveryContactSchema(Schema):
     """contact methods for password recovery.
         currently just email but may be expanded to include sms
