@@ -11,7 +11,12 @@ from werkzeug.security import check_password_hash
 from odyssey.api import api
 from odyssey.api.client.schemas import ClientInfoSchema
 from odyssey.api.staff.schemas import StaffProfileSchema, StaffRolesSchema
+<<<<<<< HEAD
 from odyssey.api.user.models import User, UserLogin, UserRemovalRequests, UserSubscriptions, UserTokensBlacklist
+=======
+from odyssey.api.staff.models import StaffRoles
+from odyssey.api.user.models import User, UserLogin, UserTokensBlacklist
+>>>>>>> 2299a998fdec27882826b22675906c5fc5c0ec5a
 from odyssey.api.user.schemas import (
     UserSchema, 
     UserLoginSchema,
@@ -19,9 +24,13 @@ from odyssey.api.user.schemas import (
     UserPasswordResetSchema,
     UserPasswordUpdateSchema,
     NewUserSchema,
+<<<<<<< HEAD
     UserInfoSchema,
     UserSubscriptionsSchema,
     UserSubscriptionHistorySchema
+=======
+    NewStaffUserSchema
+>>>>>>> 2299a998fdec27882826b22675906c5fc5c0ec5a
 ) 
 from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import PASSWORD_RESET_URL, DB_SERVER_TIME
@@ -106,8 +115,8 @@ class ApiUser(Resource):
 @ns.route('/staff/')
 class NewStaffUser(Resource):
     @token_auth.login_required
-    @accepts(schema=NewUserSchema, api=ns)
-    @responds(schema=UserSchema, status_code=201, api=ns)
+    @accepts(schema=NewStaffUserSchema, api=ns)
+    @responds(schema=NewStaffUserSchema, status_code=201, api=ns)
     def post(self):
         """
         Create a staff user. Payload will require userinfo and staffinfo
@@ -178,8 +187,37 @@ class NewStaffUser(Resource):
                                             {'user_id': user.user_id,
                                              'role': role}
                                             ))
+            
+
         db.session.commit()
-        return user
+        db.session.refresh(user)
+        payload = user.__dict__
+        payload["staff_info"] = {"access_roles": staff_info.get('access_roles', []) }
+        payload["user_info"] =  user
+        return payload
+
+
+@ns.route('/staff/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class StaffUserInfo(Resource):
+    @token_auth.login_required
+    @responds(schema=NewStaffUserSchema, status_code=200, api=ns)
+    def get(self, user_id):
+        user = User.query.filter_by(user_id=user_id).one_or_none()
+        staff_roles = db.session.query(StaffRoles.role).filter(StaffRoles.user_id==user_id).all()
+
+        access_roles = []
+        for role in staff_roles:
+            access_roles.append(role.role)
+
+        payload = {
+                    "staff_info": 
+                        {
+                            "access_roles": access_roles
+                        },
+                    "user_info": 
+                        user}
+        return payload
 
 @ns.route('/client/')
 class NewClientUser(Resource):
@@ -242,6 +280,12 @@ class NewClientUser(Resource):
         payload['password']=password
         
         db.session.commit()
+<<<<<<< HEAD
+=======
+
+        payload['user_info'] = user
+        
+>>>>>>> 2299a998fdec27882826b22675906c5fc5c0ec5a
         return user
 
 @ns.route('/password/forgot-password/recovery-link/')
@@ -397,6 +441,8 @@ class VerifyPortalId(Resource):
 
         if decoded_token['utype'] == 'client':
             user.is_client = True
+            client_info = ClientInfoSchema().load({'user_id': user.user_id})
+            db.session.add(client_info)
         elif decoded_token['utype'] == 'staff':
             user.is_staff = True
         

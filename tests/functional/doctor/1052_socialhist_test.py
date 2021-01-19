@@ -8,6 +8,7 @@ from odyssey.api.doctor.models import MedicalHistory
 from .data import (
     doctor_all_socialhistory_post_1_data, 
     doctor_all_socialhistory_post_2_data,
+    doctor_all_socialhistory_post_3_data,
     doctor_all_socialhistory_break_post_1_data,
     doctor_all_socialhistory_break_post_2_data
 )
@@ -158,4 +159,34 @@ def test_get_broke_2_social_medical_history(test_client, init_database, client_a
         assert len(response.json['std_history']) == 1
         assert response.json['social_history']['currently_smoke'] == False        
 
+# NRV 1577, FE Bug
+def test_post_3_social_history(test_client, init_database, client_auth_header):
+    """
+    GIVEN a api end point for submitting new social medical history
+    WHEN the  '/doctor/medicalinfo/social/<user id>' resource  is requested (POST)
+    THEN check the response is valid
+    """
+    payload = doctor_all_socialhistory_post_3_data
     
+    # send put request for client social history on user_id = 1 
+    response = test_client.post('/doctor/medicalinfo/social/1/',
+                                headers=client_auth_header, 
+                                data=dumps(payload), 
+                                content_type='application/json')
+
+    assert response.status_code == 201
+    
+def test_get_3_social_medical_history(test_client, init_database, client_auth_header, staff_auth_header):
+    """
+    GIVEN a api end point for retrieving social medical history
+    WHEN the  '/doctor/medicalinfo/social/<user id>' resource  is requested (GET)
+    THEN check the response is valid
+    """
+    for header in (staff_auth_header, client_auth_header):
+        # send get request for client family history on user_id = 1 
+        response = test_client.get('/doctor/medicalinfo/social/1/',
+                                    headers=header, 
+                                    content_type='application/json')
+
+        assert response.status_code == 200
+        assert response.json['social_history']['currently_smoke'] == False
