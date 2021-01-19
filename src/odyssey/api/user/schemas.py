@@ -31,6 +31,7 @@ class UserLoginSchema(ma.SQLAlchemyAutoSchema):
         new_user.set_password(data['password'])
         return new_user
 
+    
 class UserInfoSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
@@ -44,33 +45,8 @@ class UserInfoSchema(ma.SQLAlchemyAutoSchema):
                             validate=validate.Length(min=0,max=50), 
                             required=False)
 
-#Commented out because it felt redundant, using UserInfoSchema instead
-# class NewClientUserSchema(Schema):
-#    """
-#    Schema for validating payloads from the creation of a new client user
-#    """
-#    firstname = fields.String()
-#    middlename = fields.String()
-#    lastname = fields.String()
-#    email = fields.Email(validate=validate.Length(min=0,max=50))
-#    phone_number = fields.String(validate=validate.Length(min=0,max=50))
-#    password = fields.String(validate=validate.Length(min=0,max=50), load_only=True)
-#    modobio_id = fields.String()
-#    biological_sex_male = fields.Boolean()
 
-    user_info = fields.Nested(UserInfoSchema, required=True)
 
-class UserInfoSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = User
-        exclude = ('created_at', 'updated_at', 'is_staff', 'is_client')
-        dump_only = ('modobio_id', 'user_id')
-
-    email = fields.Email(validate=validate.Length(min=0,max=50), required=True)
-    phone_number = fields.String(validate=validate.Length(min=0,max=50))
-    password = fields.String(validate=validate.Length(min=0,max=50), 
-                            required=True)
-    
 class UserInfoPutSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
