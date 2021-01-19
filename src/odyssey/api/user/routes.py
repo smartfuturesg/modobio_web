@@ -11,12 +11,8 @@ from werkzeug.security import check_password_hash
 from odyssey.api import api
 from odyssey.api.client.schemas import ClientInfoSchema
 from odyssey.api.staff.schemas import StaffProfileSchema, StaffRolesSchema
-<<<<<<< HEAD
 from odyssey.api.user.models import User, UserLogin, UserRemovalRequests, UserSubscriptions, UserTokensBlacklist
-=======
 from odyssey.api.staff.models import StaffRoles
-from odyssey.api.user.models import User, UserLogin, UserTokensBlacklist
->>>>>>> 2299a998fdec27882826b22675906c5fc5c0ec5a
 from odyssey.api.user.schemas import (
     UserSchema, 
     UserLoginSchema,
@@ -24,13 +20,10 @@ from odyssey.api.user.schemas import (
     UserPasswordResetSchema,
     UserPasswordUpdateSchema,
     NewUserSchema,
-<<<<<<< HEAD
     UserInfoSchema,
     UserSubscriptionsSchema,
-    UserSubscriptionHistorySchema
-=======
+    UserSubscriptionHistorySchema,
     NewStaffUserSchema
->>>>>>> 2299a998fdec27882826b22675906c5fc5c0ec5a
 ) 
 from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import PASSWORD_RESET_URL, DB_SERVER_TIME
@@ -280,12 +273,9 @@ class NewClientUser(Resource):
         payload['password']=password
         
         db.session.commit()
-<<<<<<< HEAD
-=======
 
         payload['user_info'] = user
         
->>>>>>> 2299a998fdec27882826b22675906c5fc5c0ec5a
         return user
 
 @ns.route('/password/forgot-password/recovery-link/')
