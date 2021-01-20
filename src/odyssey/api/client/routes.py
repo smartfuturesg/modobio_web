@@ -33,7 +33,15 @@ from odyssey.api.client.models import (
     ClientHeightHistory,
     ClientWeightHistory
 )
-from odyssey.api.doctor.models import MedicalHistory, MedicalPhysicalExam
+from odyssey.api.doctor.models import (
+    MedicalFamilyHistory,
+    MedicalGeneralInfo,
+    MedicalGeneralInfoMedications,
+    MedicalGeneralInfoMedicationAllergy,
+    MedicalHistory, 
+    MedicalPhysicalExam,               
+    MedicalSocialHistory
+)
 from odyssey.api.lookup.models import LookupGoals, LookupDrinks
 from odyssey.api.physiotherapy.models import PTHistory 
 from odyssey.api.staff.models import StaffRecentClients
@@ -598,6 +606,11 @@ class JourneyStatusCheck(Resource):
                 ClientIndividualContract,
                 FitnessQuestionnaire,
                 MedicalHistory,
+                MedicalGeneralInfo,
+                MedicalGeneralInfoMedications,
+                MedicalGeneralInfoMedicationAllergy,
+                MedicalSocialHistory,
+                MedicalFamilyHistory,
                 MedicalPhysicalExam,
                 PTHistory
         ):
@@ -851,7 +864,7 @@ class ClientDrinksApi(Resource):
     """
     Endpoints related to nutritional beverages that are assigned to clients.
     """
-    @token_auth.login_required(user_type=('staff',), staff_role=('doctor', 'nutrition', 'doctor_internal', 'nutrition_internal'))
+    @token_auth.login_required(user_type=('staff',), staff_role=('doctor', 'nutrition'))
     @accepts(schema=ClientAssignedDrinksSchema, api=ns)
     @responds(schema=ClientAssignedDrinksSchema, api=ns, status_code=201)
     def post(self, user_id):
@@ -877,7 +890,7 @@ class ClientDrinksApi(Resource):
 
         return ClientAssignedDrinks.query.filter_by(user_id=user_id).all()
     
-    @token_auth.login_required(user_type=('staff',), staff_role=('doctor', 'nutrition', 'doctor_internal', 'nutrition_internal'))
+    @token_auth.login_required(user_type=('staff',), staff_role=('doctor', 'nutrition'))
     @accepts(schema=ClientAssignedDrinksDeleteSchema, api=ns)
     @responds(schema=ClientAssignedDrinksSchema, api=ns, status_code=204)
     def delete(self, user_id):

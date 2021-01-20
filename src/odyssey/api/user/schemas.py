@@ -37,7 +37,7 @@ class UserInfoSchema(ma.SQLAlchemyAutoSchema):
         model = User
         exclude = ('created_at', 'updated_at')
         load_only = ('password')
-        dump_only = ('is_staff', 'is_client')
+        dump_only = ('modobio_id', 'user_id', 'is_internal','is_staff', 'is_client')
 
     email = fields.Email(validate=validate.Length(min=0,max=50))
     phone_number = fields.String(validate=validate.Length(min=0,max=50))
