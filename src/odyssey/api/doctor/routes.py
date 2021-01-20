@@ -18,7 +18,8 @@ from odyssey.api.doctor.models import (
     MedicalGeneralInfo,
     MedicalGeneralInfoMedications,
     MedicalGeneralInfoMedicationAllergy,
-    MedicalHistory, 
+    MedicalHistory,
+    MedicalBloodPressures,
     MedicalBloodTests,
     MedicalBloodTestResults,
     MedicalBloodTestResultTypes, 
@@ -43,6 +44,8 @@ from odyssey.utils.misc import check_client_existence, check_staff_existence, ch
 from odyssey.api.doctor.schemas import (
     AllMedicalBloodTestSchema,
     CheckBoxArrayDeleteSchema,
+    MedicalBloodPressuresSchema,
+    MedicalBloodPressuresOutputSchema,
     MedicalFamilyHistSchema,
     MedicalFamilyHistInputSchema,
     MedicalFamilyHistOutputSchema,
@@ -75,8 +78,40 @@ from odyssey.utils.constants import MEDICAL_CONDITIONS
 
 ns = api.namespace('doctor', description='Operations related to doctor')
 
+@ns.route('/bloodpressure/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class MedBloodPressures(Resource):
+    @token_auth.login_required
+    @responds(schema=MedicalBloodPressuresOutputSchema, api=ns)
+    def get(self, user_id):
+        '''
+        This request gets the users submitted blood pressure if it exists
+        '''
+        check_client_existence(user_id)
+        bp_info = MedicalBloodPressures.query.filter_by(user_id=user_id).all()
+
+        payload = {'items': bp_info,
+                   'total_items': len(bp_info)}
+        return payload
+
+    @token_auth.login_required
+    @accepts(schema=MedicalBloodPressuresSchema, api=ns)
+    @responds(schema=MedicalBloodPressuresSchema, status_code=201, api=ns)
+    def post(self, user_id):
+        '''
+        Post request to post the client's blood pressure
+        '''
+        # First check if the client exists
+        check_client_existence(user_id)
+        data = request.parsed_obj
+        data.user_id = user_id
+        db.session.add(data)
+
+        # insert results into the result table
+        db.session.commit()
+        return data
 @ns.route('/lookupbloodpressureranges/')
-class MedicalLookUpSTDResource(Resource):
+class MedicalLookUpBloodPressureResource(Resource):
     """ Returns blood pressure ranges stored in the database in response to a GET request.
 
     Returns
@@ -626,7 +661,8 @@ class MedicalSocialHist(Resource):
         payload = {}
 
         social = request.parsed_obj['social_history']
-
+        if social.last_smoke_time == '':
+            social.last_smoke_time = None
         # If the user submits something for Social history, then removes it from the payload, 
         # remove the everything for that user in social history table
         socialHist = MedicalSocialHistory.query.filter_by(user_id=user_id).one_or_none()
@@ -893,20 +929,6 @@ class MedImaging(Resource):
 @ns.doc(params={'user_id': 'User ID number'})
 class MedBloodTest(Resource):
     @token_auth.login_required
-    @responds(schema=MedicalBloodTestSchema(many=True), api=ns)
-    def get(self, user_id):
-        #
-        # ?? DEAD CODE ?? replaced by /bloodtest/all/user_id/ ?
-        #
-        check_client_existence(user_id)
-        blood_tests = MedicalBloodTests.query.filter_by(user_id=user_id).all()
-
-        if not blood_tests:
-            raise ContentNotFound()
-
-        return blood_tests
-
-    @token_auth.login_required
     @accepts(schema=MedicalBloodTestsInputSchema, api=ns)
     @responds(schema=MedicalBloodTestSchema, status_code=201, api=ns)
     def post(self, user_id):
@@ -949,12 +971,20 @@ class MedBloodTestAll(Resource):
     @responds(schema=AllMedicalBloodTestSchema, api=ns)
     def get(self, user_id):
         """
-        This resource returns every instance of blood test submissions for the 
-        specified user_id
+        This resource returns every instance of blood test submissions for the specified user_id
 
-        Test submissions relate overall submission data: test_id, date, notes, panel_type
-        to the actual results. Each submission may have multiple results
-        where the results can be referenced by the test_id provided in this request
+        Each test submission includes the following data:
+        - date
+        - test_id
+        - notes
+        - panel_type
+        - reporter (a staff member who reported the test results)
+        
+        To see the actual test results for a given test, use the test_id
+        to query the (GET) `/bloodtest/results/<int:test_id>/` endpoint
+
+        To see test results for every blood test submission for a specified client, 
+        use the (GET)`/bloodtest/results/all/<int:user_id>/` endpoint. 
         """
         check_client_existence(user_id)
         blood_tests =  db.session.query(
@@ -1042,7 +1072,10 @@ class MedBloodTestResults(Resource):
 @ns.doc(params={'user_id': 'Client ID number'})
 class AllMedBloodTestResults(Resource):
     """
-    Endpoint for returning all blood test results from a client
+    Endpoint for returning all blood test results from a client.
+
+    This includes all test submisison details along with the test
+    results associated with each test submission. 
     """
     @token_auth.login_required
     @responds(schema=MedicalBloodTestResultsOutputSchema, api=ns)
@@ -1136,15 +1169,7 @@ class MedHistory(Resource):
         client_mh = mh_schema.load(data)
 
         db.session.add(client_mh)
-        db.session.flush()
 
-        #add client automatically assigned drink based on their goal
-        goal_id = LookupGoals.query.filter_by(goal_name=client_mh.goals).one_or_none().goal_id
-        drink_id = LookupDrinks.query.filter_by(primary_goal_id=goal_id).one_or_none().drink_id
-        client_drink = ClientAssignedDrinksSchema().load({'drink_id': drink_id})
-        client_drink.user_id = user_id
-
-        db.session.add(client_drink)
         db.session.commit()
 
         return client_mh
@@ -1165,14 +1190,6 @@ class MedHistory(Resource):
         data = request.get_json()
         
         data['last_examination_date'] = datetime.strptime(data['last_examination_date'], "%Y-%m-%d")
-
-        #update client assigned drinks if a client goal is changed
-        if data['goals'] and client_mh.goals != data['goals']:
-            goal_id = LookupGoals.query.filter_by(goal_name=data['goals']).one_or_none().goal_id
-            drink_id = LookupDrinks.query.filter_by(primary_goal_id=goal_id).one_or_none().drink_id
-            client_drink = ClientAssignedDrinksSchema().load({'drink_id': drink_id})
-            client_drink.user_id = user_id
-            db.session.add(client_drink)
             
         # update resource 
         client_mh.update(data)

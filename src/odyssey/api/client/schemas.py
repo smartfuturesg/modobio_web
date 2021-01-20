@@ -11,6 +11,7 @@ from marshmallow import (
 
 from odyssey import ma
 from odyssey.api.user.models import User
+from odyssey.api.lookup.models import LookupGoals
 from odyssey.api.client.models import (
     ClientConsent,
     ClientConsultContract,
@@ -22,7 +23,9 @@ from odyssey.api.client.models import (
     ClientSubscriptionContract,
     ClientFacilities,
     ClientMobileSettings,
-    ClientAssignedDrinks
+    ClientAssignedDrinks,
+    ClientHeightHistory,
+    ClientWeightHistory
 )
 from odyssey.api.user.schemas import UserInfoPutSchema
 
@@ -69,9 +72,11 @@ class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientInfo
         exclude = ('created_at', 'updated_at', 'idx')
-        dump_only = ('modobio_id', 'membersince')
+        dump_only = ('modobio_id', 'membersince', 'height', 'weight')
 
     user_id = fields.Integer()
+    primary_goal_id = fields.Integer()
+    race_id = fields.Integer()
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -81,7 +86,10 @@ class ClientInfoPutSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientInfo
         exclude = ('created_at', 'updated_at', 'idx')
-        dump_only = ('modobio_id', 'membersince', 'is_staff', 'is_client', 'user_id', 'receive_docs')
+        dump_only = ('modobio_id', 'membersince', 'is_staff', 'is_client', 'user_id')
+
+    primary_goal_id = fields.Integer()
+    race_id = fields.Integer()
 
 class ClientAndUserInfoSchema(Schema):
 
@@ -304,6 +312,7 @@ class ClientMobileSettingsSchema(ma.SQLAlchemyAutoSchema):
     @post_load
     def make_object(self, data, **kwargs):
         return ClientMobileSettings(**data)
+        
 class ClientAssignedDrinksSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientAssignedDrinks
@@ -318,3 +327,34 @@ class ClientAssignedDrinksSchema(ma.SQLAlchemyAutoSchema):
 
 class ClientAssignedDrinksDeleteSchema(Schema):
     drink_ids = fields.List(fields.Integer)
+
+class ClientHeightSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = ClientHeightHistory
+        exclude = ('created_at', 'idx')
+        dump_only = ('updated_at', 'user_id')
+
+    user_id = fields.Integer()
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return ClientHeightHistory(**data)
+
+class ClientWeightSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = ClientWeightHistory
+        exclude = ('created_at', 'idx')
+        dump_only = ('updated_at', 'user_id')
+
+    user_id = fields.Integer()
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return ClientWeightHistory(**data)
+class ClientTokenRequestSchema(Schema):
+    user_id = fields.Integer()
+    firstname = fields.String(required=False, validate=validate.Length(min=1, max= 50), missing=None)
+    lastname = fields.String(required=False, validate=validate.Length(min=1,max=50), missing=None)
+    email = fields.Email(required=False, missing=None)   
+    token = fields.String()
+    refresh_token = fields.String()

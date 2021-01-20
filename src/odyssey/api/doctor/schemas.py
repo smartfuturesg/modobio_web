@@ -1,7 +1,8 @@
 from marshmallow import Schema, fields, post_load, validate, pre_dump, validates, ValidationError
 
 from odyssey import ma
-from odyssey.api.doctor.models import (
+from odyssey.api.doctor.models import ( 
+    MedicalBloodPressures,
     MedicalLookUpBloodPressureRange,
     MedicalLookUpSTD,
     MedicalGeneralInfo,
@@ -27,6 +28,21 @@ from odyssey.utils.constants import MEDICAL_CONDITIONS
 """
     Schemas for the doctor's API
 """
+
+class MedicalBloodPressuresSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = MedicalBloodPressures
+        exclude = ('idx', 'created_at')
+
+    systolic = fields.Float(description='units mmHg',required=True)
+    diastolic = fields.Float(description='units mmHg',required=True)
+    @post_load
+    def make_object(self, data, **kwargs):
+        return MedicalBloodPressures(**data)
+
+class MedicalBloodPressuresOutputSchema(Schema):
+    items = fields.Nested(MedicalBloodPressuresSchema(many=True), missing=[])
+    total_items = fields.Integer()
 
 class MedicalLookUpBloodPressureRangesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -73,14 +89,14 @@ class MedicalSocialHistorySchema(Schema):
     avg_num_cigs = fields.Integer()
     avg_weekly_drinks = fields.Integer(missing=0)
     avg_weekly_workouts = fields.Integer(missing=0)
-    job_title = fields.String(missing=None)
+    job_title = fields.String(missing=None, validate=validate.Length(max=99))
     avg_hourly_meditation = fields.Integer(missing=0)
     sexual_preference = fields.String(missing=None)
     
     last_smoke_date = fields.Date(dump_only=True)
     last_smoke = fields.Integer(required=False,missing=None)
 
-    possible_date_units = ['days','months','years']
+    possible_date_units = ['','days','months','years']
 
     last_smoke_time = fields.String(required=False,description="days, months, years",validate=validate.OneOf(possible_date_units),missing=None)
     num_years_smoked = fields.Integer(missing=0)

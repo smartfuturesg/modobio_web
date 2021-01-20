@@ -1,5 +1,10 @@
 import pathlib
 
+doctor_blood_pressures_data = {
+  "systolic": 120.2,
+  "diastolic": 52.3
+}
+
 doctor_all_generalmedicalinfo_post_5_data = {
     "allergies": [{
         "allergy_symptoms": "Rash"
@@ -60,6 +65,24 @@ doctor_all_socialhistory_break_post_1_data = {
       "std_id": 7
     } 
   ]
+}
+# This is the payload that the frontend was sending
+# that was causing the error
+doctor_all_socialhistory_post_3_data = {
+  "social_history": {
+    "currently_smoke": False,
+    "last_smoke": 1,
+    "last_smoke_time": "",
+    "avg_weekly_drinks": 0,
+    "avg_weekly_workouts": 0,
+    "job_title": "",
+    "avg_hourly_meditation": 0,
+    "sexual_preference": "",
+    "plan_to_stop": None,
+    "num_years_smoked": 0,
+    "avg_num_cigs": 0
+  },
+  "std_history": []
 }
 
 doctor_all_socialhistory_post_2_data = {

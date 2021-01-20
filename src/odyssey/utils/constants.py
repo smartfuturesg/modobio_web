@@ -757,7 +757,7 @@ MEDICAL_CONDITIONS = {
         'Mesothelioma': None
     },
     'Surgery': {
-        'Cardiac ': None,
+        'Cardiac': None,
         'Breast': None,
         'Heart': None,
         'Cosmetic': None,
@@ -810,7 +810,7 @@ API access token lifetime in hours.
 :type: int
 """
 
-REFRESH_TOKEN_LIFETIME = 24
+REFRESH_TOKEN_LIFETIME = 168
 """
 Refresh token lifetime in hours. 
 
