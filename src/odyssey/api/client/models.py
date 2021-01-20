@@ -1328,3 +1328,58 @@ class ClientWeightHistory(db.Model):
 
     :type: int
     """
+
+    
+class ClientClinicalCareTeamAuthorizations(db.Model):
+    """ 
+    Stores clinical care team authorizations.
+    One line per user, team memmber, resource combinaiton. Resource IDs come from 
+    the LookupCareTeamTables table    
+      
+    """
+
+    __tablename__ = 'ClientClinicalCareTeamAuthorizations'
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
+    """
+    User ID number
+
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
+    """
+
+    team_member_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
+    """
+    User ID number of the clinical care team member. Only modobio users may be entered into this table. With that, team members must
+    be signed up as a user in order to recieve care team data from modobio. 
+
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
+    """
+
+    resource_id = db.Column(db.Integer, db.ForeignKey('LookupClinicalCareTeamResources.resource_id',ondelete="CASCADE"), nullable=False)
+    """
+    Resource ID refers back to the care team resources table which stores the tables that can be accessed by care team members
+
+    :type: int, foreign key to :attr:`LookupClinicalCareTeamResources.resource_id <odyssey.models.lookup.LookupClinicalCareTeamResources.resource_id>`
+    """
+    
