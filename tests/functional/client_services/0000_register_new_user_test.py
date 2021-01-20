@@ -43,7 +43,9 @@ def test_new_client_user(test_client, init_database, staff_auth_header):
     response = test_client.post('/client/token/',
                             headers=headers, 
                             content_type='application/json')
-              
+    
+    new_remote_user_id = response.json['user_id']
+
     assert response.status_code == 201
     assert response.json['email'] == client_services_register_user_client['email']
 
@@ -54,6 +56,17 @@ def test_new_client_user(test_client, init_database, staff_auth_header):
                         headers=headers, 
                         content_type='application/json')
     assert response.status_code == 401
+
+    ####
+    # Bring up ClientInfo for user
+    ####
+    response = test_client.get(f'/client/{new_remote_user_id}/', 
+                        headers=staff_auth_header,
+                        content_type='application/json')
+
+    assert response.status_code == 200
+
+
 
 
 def test_new_staff_user(test_client, init_database, staff_auth_header):

@@ -16,7 +16,7 @@ def test_creating_new_staff(test_client, init_database, staff_auth_header):
     THEN check the response is valid
     """
     # get staff authorization to view client data
-
+    global new_staff_uid
     
     
     response = test_client.post('/user/staff/',
@@ -24,11 +24,28 @@ def test_creating_new_staff(test_client, init_database, staff_auth_header):
                                 data=dumps(users_staff_new_user_data), 
                                 content_type='application/json')
     
+    new_staff_uid = response.json['user_info']['user_id']
     # some simple checks for validity
     assert response.status_code == 201
     assert response.json['firstname'] == users_staff_new_user_data['user_info']['firstname']
     assert response.json['is_staff'] == True
     assert response.json['is_client'] == False
+
+def test_get_staff_user_info(test_client, init_database, staff_auth_header):
+    """
+    GIVEN a api end point for retrieving staff and user info
+    WHEN the '/staff/user_id' resource  is requested
+    THEN check the response is valid
+    """
+    response = test_client.get(f'/user/staff/{new_staff_uid}/',
+                                headers=staff_auth_header, 
+                                content_type='application/json')
+
+    assert response.status_code == 200
+    assert response.json['staff_info']
+    assert response.json['user_info']
+
+                
 
 def test_staff_login(test_client, init_database, staff_auth_header):
     """
