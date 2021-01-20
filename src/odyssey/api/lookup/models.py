@@ -6,6 +6,41 @@ not to be edited at runtime.
 from odyssey import db
 from odyssey.utils.constants import DB_SERVER_TIME
 
+class LookupTelehealthSessionDuration(db.Model):
+    """ Static list of drinks that a client can purchase or be recommended. 
+    """
+
+    __tablename__ = 'LookupTelehealthSessionDuration'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Primary index for 
+
+    :type: int, primary key, autoincrement
+    """
+
+    session_duration = db.Column(db.Integer)
+    """
+    session duration
+    from 10 minutes to 60 minutes in increments of 5 minutes
+    
+    :type: int
+    """
+
 class LookupActivityTrackers(db.Model):
     """ Look up table for activity trackers and their capabilities. """
 
