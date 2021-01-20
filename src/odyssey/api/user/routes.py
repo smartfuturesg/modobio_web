@@ -508,6 +508,25 @@ class UserSubscriptionHistoryApi(Resource):
         res['staff_subscription_history'] = UserSubscriptions.query.filter_by(user_id=user_id).filter_by(is_staff=True).all()
         return res
 
+@ns.route('/logout/')
+class UserLogoutApi(Resource):
+
+    @token_auth.login_required
+    def post(self):
+        """
+        Places the user's current set of tokens on the token blacklist.
+        The user will have to login with a username and password to regain access.
+        """
+        refresh_token = token_auth.current_user()[1].refresh_token
+        
+        #remove 'Bearer ' from the front of the access token
+        access_token = request.headers.get('Authorization').split()[1]
+
+        db.session.add(UserTokensBlacklist(token=refresh_token))
+        db.session.add(UserTokensBlacklist(token=access_token))
+        db.session.commit()
+
+        return 200
 @ns.route('/clinical-care-team/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class UserClinicalCareTeamApi(Resource):
