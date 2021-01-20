@@ -407,3 +407,58 @@ class LookupRaces(db.Model):
 
     :type: string
     """
+
+class LookupSubscriptions(db.Model):
+    """ Static list of subscription plans that a user can choose from. 
+    """
+
+    __tablename__ = 'LookupSubscriptions'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    sub_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Id of this subscription plan.
+
+    :type: integer, primary key, autoincrementing
+    """
+
+    name = db.Column(db.String)
+    """
+    Name of this subscription plan.
+
+    :type: string
+    """
+
+    description = db.Column(db.String)
+    """
+    Description of this subscription plan.
+
+    :type: string
+    """
+
+    cost = db.Column(db.Float)
+    """
+    Cost of this subscription plan in USD.
+
+    :type: float
+    """
+
+    frequency = db.Column(db.String)
+    """
+    Frequency that this subscription plan is paid, must be one of (weekly, monthly, annually)
+
+    :type: string
+    """
