@@ -6,8 +6,17 @@ from odyssey.api.lookup.models import (
     LookupDrinks, 
     LookupDrinkIngredients, 
     LookupGoals, 
-    LookupRaces
+    LookupRaces,
+    LookupTelehealthSessionDuration
 )
+
+class LookupTelehealthSessionDurationSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupTelehealthSessionDuration
+
+class LookupTelehealthSessionDurationOutputSchema(Schema):
+    items = fields.Nested(LookupTelehealthSessionDurationSchema(many=True),missing=[])
+    total_items = fields.Integer()
 
 class LookupActivityTrackersSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
