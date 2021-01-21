@@ -7,6 +7,7 @@ from odyssey.api.lookup.models import (
     LookupDrinkIngredients, 
     LookupGoals, 
     LookupRaces,
+    LookupSubscriptions,
     LookupTelehealthSessionDuration
 )
 
@@ -79,4 +80,17 @@ class LookupRacesSchema(ma.SQLAlchemyAutoSchema):
 
 class LookupRacesOutputSchema(Schema):
     items = fields.Nested(LookupRacesSchema(many=True), missing = [])
+    total_items = fields.Integer()
+
+class LookupSubscriptionsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupSubscriptions
+        exclude = ('created_at', 'updated_at')
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return LookupSubscriptions(**data)
+
+class LookupSubscriptionsOutputSchema(Schema):
+    items = fields.Nested(LookupSubscriptionsSchema(many=True), missing = [])
     total_items = fields.Integer()

@@ -4,12 +4,13 @@ from flask_restx import Resource
 from odyssey.api import api
 from odyssey.utils.auth import token_auth
 from odyssey.api.lookup.models import (
-     LookupActivityTrackers,
-     LookupDrinks, 
-     LookupDrinkIngredients, 
-     LookupGoals, 
-     LookupRaces,
-     LookupTelehealthSessionDuration
+    LookupActivityTrackers,
+    LookupDrinks,
+    LookupDrinkIngredients,
+    LookupGoals,
+    LookupRaces,
+    LookupSubscriptions,
+    LookupTelehealthSessionDuration
 )
 from odyssey.api.lookup.schemas import (
     LookupActivityTrackersOutputSchema, 
@@ -17,6 +18,7 @@ from odyssey.api.lookup.schemas import (
     LookupDrinkIngredientsOutputSchema, 
     LookupGoalsOutputSchema,
     LookupRacesOutputSchema,
+    LookupSubscriptionsOutputSchema,
     LookupTelehealthSessionDurationOutputSchema
 )
 from odyssey.utils.misc import check_drink_existence
@@ -166,4 +168,14 @@ class LookupRacesApi(Resource):
     def get(self):
         """get contents of races lookup table"""
         res = LookupRaces.query.all()
+        return {'total_items': len(res), 'items': res}
+
+@ns.route('/subscriptions/')
+class LookupSubscriptionsApi(Resource):
+
+    @token_auth.login_required
+    @responds(schema=LookupSubscriptionsOutputSchema, api=ns)
+    def get(self):
+        """get contents of subscription plans lookup table"""
+        res = LookupSubscriptions.query.all()
         return {'total_items': len(res), 'items': res}
