@@ -10,5 +10,5 @@ VALUES
 ('MedicalGeneralInfo', 'General Medical Information'),
 ('MedicalGeneralInfoMedications', 'Medications'),
 ('MedicalImaging', 'Medical Images'),
-('MedicalSTDHistory', 'STD History')
+('MedicalSTDHistory', 'STD History'),
 ('MedicalSocialHistory', 'Social History');
