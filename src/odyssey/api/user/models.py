@@ -251,7 +251,7 @@ class UserLogin(db.Model):
                             'utype': user_type,
                             'ttype': token_type}, 
                             secret, 
-                            algorithm='HS256').decode("utf-8")
+                            algorithm='HS256')
 
 
 class UserTokensBlacklist(db.Model):
