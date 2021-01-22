@@ -10,8 +10,10 @@ from werkzeug.security import check_password_hash
 
 from odyssey.api import api
 from odyssey.api.client.schemas import ClientInfoSchema
+from odyssey.api.client.models import ClientClinicalCareTeam
 from odyssey.api.staff.schemas import StaffProfileSchema, StaffRolesSchema
 from odyssey.api.user.models import User, UserLogin, UserRemovalRequests, UserSubscriptions, UserTokensBlacklist
+from odyssey.api.staff.models import StaffRoles
 from odyssey.api.user.schemas import (
     UserSchema, 
     UserLoginSchema,
@@ -21,7 +23,9 @@ from odyssey.api.user.schemas import (
     NewUserSchema,
     UserInfoSchema,
     UserSubscriptionsSchema,
-    UserSubscriptionHistorySchema
+    UserSubscriptionHistorySchema,
+    NewStaffUserSchema,
+    UserClinicalCareTeamSchema
 ) 
 from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import PASSWORD_RESET_URL, DB_SERVER_TIME
@@ -106,8 +110,8 @@ class ApiUser(Resource):
 @ns.route('/staff/')
 class NewStaffUser(Resource):
     @token_auth.login_required
-    @accepts(schema=NewUserSchema, api=ns)
-    @responds(schema=UserSchema, status_code=201, api=ns)
+    @accepts(schema=NewStaffUserSchema, api=ns)
+    @responds(schema=NewStaffUserSchema, status_code=201, api=ns)
     def post(self):
         """
         Create a staff user. Payload will require userinfo and staffinfo
@@ -178,8 +182,37 @@ class NewStaffUser(Resource):
                                             {'user_id': user.user_id,
                                              'role': role}
                                             ))
+            
+
         db.session.commit()
-        return user
+        db.session.refresh(user)
+        payload = user.__dict__
+        payload["staff_info"] = {"access_roles": staff_info.get('access_roles', []) }
+        payload["user_info"] =  user
+        return payload
+
+
+@ns.route('/staff/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class StaffUserInfo(Resource):
+    @token_auth.login_required
+    @responds(schema=NewStaffUserSchema, status_code=200, api=ns)
+    def get(self, user_id):
+        user = User.query.filter_by(user_id=user_id).one_or_none()
+        staff_roles = db.session.query(StaffRoles.role).filter(StaffRoles.user_id==user_id).all()
+
+        access_roles = []
+        for role in staff_roles:
+            access_roles.append(role.role)
+
+        payload = {
+                    "staff_info": 
+                        {
+                            "access_roles": access_roles
+                        },
+                    "user_info": 
+                        user}
+        return payload
 
 @ns.route('/client/')
 class NewClientUser(Resource):
@@ -192,9 +225,8 @@ class NewClientUser(Resource):
         If registering an already existing staff user as a client, 
         the password must match, or be and empty string (ie. "")
         """
-        user_info = request.get_json()     
-
-        #user_info = data.get('user_info')
+        user_info = request.get_json()   
+          
         user = User.query.filter(User.email.ilike(user_info.get('email'))).first()
         if user:
             if user.is_client:
@@ -242,6 +274,9 @@ class NewClientUser(Resource):
         payload['password']=password
         
         db.session.commit()
+
+        payload['user_info'] = user
+        
         return user
 
 @ns.route('/password/forgot-password/recovery-link/')
@@ -397,6 +432,8 @@ class VerifyPortalId(Resource):
 
         if decoded_token['utype'] == 'client':
             user.is_client = True
+            client_info = ClientInfoSchema().load({'user_id': user.user_id})
+            db.session.add(client_info)
         elif decoded_token['utype'] == 'staff':
             user.is_staff = True
         
@@ -468,4 +505,44 @@ class UserSubscriptionHistoryApi(Resource):
         res = {}
         res['client_subscription_history'] = UserSubscriptions.query.filter_by(user_id=user_id).filter_by(is_staff=False).all()
         res['staff_subscription_history'] = UserSubscriptions.query.filter_by(user_id=user_id).filter_by(is_staff=True).all()
+        return res
+
+@ns.route('/logout/')
+class UserLogoutApi(Resource):
+
+    @token_auth.login_required
+    def post(self):
+        """
+        Places the user's current set of tokens on the token blacklist.
+        The user will have to login with a username and password to regain access.
+        """
+        refresh_token = token_auth.current_user()[1].refresh_token
+        
+        #remove 'Bearer ' from the front of the access token
+        access_token = request.headers.get('Authorization').split()[1]
+
+        db.session.add(UserTokensBlacklist(token=refresh_token))
+        db.session.add(UserTokensBlacklist(token=access_token))
+        db.session.commit()
+
+        return 200
+@ns.route('/clinical-care-team/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class UserClinicalCareTeamApi(Resource):
+
+    @token_auth.login_required
+    @responds(schema=UserClinicalCareTeamSchema(many=True), api=ns, status_code=200)
+    def get(self, user_id):
+        """
+        returns the list of clients whose clinical care team the given user_id
+        is a part of
+        """
+
+        res = []
+        for client in ClientClinicalCareTeam.query.filter_by(team_member_user_id=user_id).all():
+            user = User.query.filter_by(user_id=client.user_id).one_or_none()
+            res.append({'client_user_id': user.user_id, 
+                        'client_name': user.firstname + ' ' + user.middlename + ' ' + user.lastname,
+                        'client_email': user.email})
+        
         return res

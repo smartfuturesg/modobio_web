@@ -109,6 +109,14 @@ class User(db.Model):
     :type: boolean
     """
 
+    is_internal = db.Column(db.Boolean, nullable=False, default=False)
+    """
+    Whether or not the user is internal. If True, the user may be able to user features not yet 
+    fully released. 
+
+    :type: boolean, non-null 
+    """
+
     @staticmethod
     def generate_modobio_id(firstname: str, lastname: str, user_id: int) -> str:
         """ Generate the user's mdobio_id.
@@ -250,7 +258,8 @@ class UserLogin(db.Model):
         return jwt.encode({'exp': datetime.utcnow()+timedelta(hours =(TOKEN_LIFETIME if token_type == 'access' else REFRESH_TOKEN_LIFETIME)), 
                             'uid': user_id,
                             'utype': user_type,
-                            'ttype': token_type}, 
+                            'ttype': token_type
+                            }, 
                             secret, 
                             algorithm='HS256').decode("utf-8")
 

@@ -166,6 +166,20 @@ class ClientInfo(db.Model):
     :type: :class:`datetime.date`
     """
 
+    height = db.Column(db.Integer)
+    """
+    Most recently reported height in cm.
+
+    :type: int
+    """
+
+    weight = db.Column(db.Integer)
+    """
+    Most recently reported weight in g.
+
+    :type: int
+    """
+
     race_id = db.Column(db.Integer, db.ForeignKey('LookupRaces.race_id'))
     """
     Client race_id as defined in LookupRaces
@@ -1229,4 +1243,88 @@ class ClientAssignedDrinks(db.Model):
     Id of the drink for this assignment.
 
     :type: int, foreign key('LookupDrinks.drink_id)
+    """
+
+class ClientHeightHistory(db.Model):
+    """
+    Stores historical height readings of client.
+    """
+
+    __tablename__ = "ClientHeightHistory"
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    """
+    Id of the user for this height reading.
+
+    :type: int, foreign key('User.user_id')
+    """
+
+    height = db.Column(db.Integer)
+    """
+    Value for this height reading in cm.
+
+    :type: int
+    """
+
+class ClientWeightHistory(db.Model):
+    """
+    Stores historical weight readings of client.
+    """
+
+    __tablename__ = "ClientWeightHistory"
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    """
+    Id of the user for this height reading.
+
+    :type: int, foreign key('User.user_id')
+    """
+
+    weight = db.Column(db.Integer)
+    """
+    Value for this weight reading in g.
+
+    :type: int
     """

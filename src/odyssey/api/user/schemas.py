@@ -31,33 +31,22 @@ class UserLoginSchema(ma.SQLAlchemyAutoSchema):
         new_user.set_password(data['password'])
         return new_user
 
-
-#Commented out because it felt redundant, using UserInfoSchema instead
-# class NewClientUserSchema(Schema):
-#    """
-#    Schema for validating payloads from the creation of a new client user
-#    """
-#    firstname = fields.String()
-#    middlename = fields.String()
-#    lastname = fields.String()
-#    email = fields.Email(validate=validate.Length(min=0,max=50))
-#    phone_number = fields.String(validate=validate.Length(min=0,max=50))
-#    password = fields.String(validate=validate.Length(min=0,max=50), load_only=True)
-#    modobio_id = fields.String()
-#    biological_sex_male = fields.Boolean()
-
-
+    
 class UserInfoSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
-        exclude = ('created_at', 'updated_at', 'is_staff', 'is_client')
-        dump_only = ('modobio_id', 'user_id')
+        exclude = ('created_at', 'updated_at')
+        load_only = ('password')
+        dump_only = ('modobio_id', 'user_id', 'is_internal','is_staff', 'is_client')
 
-    email = fields.Email(validate=validate.Length(min=0,max=50), required=True)
+    email = fields.Email(validate=validate.Length(min=0,max=50))
     phone_number = fields.String(validate=validate.Length(min=0,max=50))
-    password = fields.String(validate=validate.Length(min=0,max=50), 
-                            required=True)
-    
+    password = fields.String(description="password required when creating a staff member",
+                            validate=validate.Length(min=0,max=50), 
+                            required=False)
+
+
+
 class UserInfoPutSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
@@ -77,6 +66,16 @@ class StaffInfoSchema(Schema):
                     description=f"Access roles the new user will have. Options include: {ACCESS_ROLES}"
                 )
 class NewUserSchema(Schema):
+    """
+    General purpose user creation schema
+    """
+
+    user_info = fields.Nested(UserInfoSchema, required=True)
+    staff_info = fields.Nested(StaffInfoSchema,
+                              missing={}, 
+                              description="used when registering a staff member")
+
+class NewStaffUserSchema(UserInfoSchema):
     """
     General purpose user creation schema
     """
@@ -118,3 +117,9 @@ class UserSubscriptionHistorySchema(Schema):
 
     client_subscription_history = fields.Nested(UserSubscriptionsSchema, many=True)
     staff_subscription_history = fields.Nested(UserSubscriptionsSchema, many=True)
+
+class UserClinicalCareTeamSchema(Schema):
+
+    client_user_id = fields.Integer()
+    client_name = fields.String()
+    client_email = fields.String()

@@ -84,23 +84,23 @@ class MedicalLookUpSTDOutputSchema(Schema):
 class MedicalSocialHistorySchema(Schema):
 
     # user_id = fields.Integer()
-    ever_smoked = fields.Boolean(missing=False)
-    currently_smoke = fields.Boolean()
-    avg_num_cigs = fields.Integer()
-    avg_weekly_drinks = fields.Integer(missing=0)
-    avg_weekly_workouts = fields.Integer(missing=0)
-    job_title = fields.String(missing=None, validate=validate.Length(max=99))
-    avg_hourly_meditation = fields.Integer(missing=0)
-    sexual_preference = fields.String(missing=None)
+    ever_smoked = fields.Boolean(missing=False,allow_none=True)
+    currently_smoke = fields.Boolean(allow_none=True)
+    avg_num_cigs = fields.Integer(allow_none=True)
+    avg_weekly_drinks = fields.Integer(missing=0,allow_none=True)
+    avg_weekly_workouts = fields.Integer(missing=0,allow_none=True)
+    job_title = fields.String(missing=None, validate=validate.Length(max=99),allow_none=True)
+    avg_hourly_meditation = fields.Integer(missing=0,allow_none=True)
+    sexual_preference = fields.String(missing=None,allow_none=True)
     
-    last_smoke_date = fields.Date(dump_only=True)
-    last_smoke = fields.Integer(required=False,missing=None)
+    last_smoke_date = fields.Date(dump_only=True,allow_none=True)
+    last_smoke = fields.Integer(required=False,missing=None,allow_none=True)
 
     possible_date_units = ['','days','months','years']
 
-    last_smoke_time = fields.String(required=False,description="days, months, years",validate=validate.OneOf(possible_date_units),missing=None)
-    num_years_smoked = fields.Integer(missing=0)
-    plan_to_stop = fields.Boolean(missing=None)
+    last_smoke_time = fields.String(required=False,description="days, months, years",validate=validate.OneOf(possible_date_units),missing=None,allow_none=True)
+    num_years_smoked = fields.Integer(missing=0,allow_none=True)
+    plan_to_stop = fields.Boolean(missing=None,allow_none=True)
 
     @post_load
     def make_object(self, data, **kwargs):
