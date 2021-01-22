@@ -4,13 +4,14 @@ from flask_restx import Resource
 from odyssey.api import api
 from odyssey.utils.auth import token_auth
 from odyssey.api.lookup.models import (
-    LookupActivityTrackers,
-    LookupDrinks,
-    LookupDrinkIngredients,
-    LookupGoals,
-    LookupRaces,
-    LookupSubscriptions,
-    LookupTelehealthSessionDuration
+     LookupActivityTrackers,
+     LookupDrinks, 
+     LookupDrinkIngredients, 
+     LookupGoals, 
+     LookupRaces,
+     LookupSubscriptions,
+     LookupTelehealthSessionCost,
+     LookupTelehealthSessionDuration
 )
 from odyssey.api.lookup.schemas import (
     LookupActivityTrackersOutputSchema, 
@@ -19,6 +20,7 @@ from odyssey.api.lookup.schemas import (
     LookupGoalsOutputSchema,
     LookupRacesOutputSchema,
     LookupSubscriptionsOutputSchema,
+    LookupTelehealthSessionCostOutputSchema,
     LookupTelehealthSessionDurationOutputSchema
 )
 from odyssey.utils.misc import check_drink_existence
@@ -26,6 +28,26 @@ from odyssey.utils.misc import check_drink_existence
 from odyssey import db
 
 ns = api.namespace('lookup', description='Endpoints for lookup tables.')
+
+@ns.route('/business/session-cost/')
+class LookupTelehealthSessionCostResource(Resource):
+    """ Returns stored telehealth session cost in database by GET request.
+
+    Returns
+    -------
+    dict
+        JSON encoded dict.
+    """
+    @token_auth.login_required
+    @responds(schema=LookupTelehealthSessionCostOutputSchema,status_code=200, api=ns)
+    def get(self):
+                
+        cost = LookupTelehealthSessionCost.query.all()
+        
+        payload = {'items': cost,
+                   'total_items': len(cost)}
+
+        return payload
 
 @ns.route('/business/session-duration/')
 class LookupTelehealthSessionDurationResource(Resource):
