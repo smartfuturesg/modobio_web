@@ -34,7 +34,7 @@ from odyssey.api.client.models import (
     ClientWeightHistory
 )
 from odyssey.api.doctor.models import MedicalHistory, MedicalPhysicalExam
-from odyssey.api.lookup.models import LookupGoals, LookupDrinks
+from odyssey.api.lookup.models import LookupGoals, LookupDrinks, LookupRaces
 from odyssey.api.physiotherapy.models import PTHistory 
 from odyssey.api.staff.models import StaffRecentClients
 from odyssey.api.trainer.models import FitnessQuestionnaire
@@ -80,7 +80,13 @@ class Client(Resource):
     @responds(schema=ClientAndUserInfoSchema, api=ns)
     def get(self, user_id):
         """returns client info table as a json for the user_id specified"""
-        client_data = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
+        client_data = db.session.query(ClientInfo, LookupGoals.goal_name, LookupRaces.race_name
+                                    ).filter(
+                                        ClientInfo.primary_goal_id == LookupGoals.goal_id
+                                    ).filter(
+                                        ClientInfo.race_id == LookupRaces.race_id
+                                    ).one_or_none()
+
         user_data = User.query.filter_by(user_id=user_id).one_or_none()
         if not client_data and not user_data:
             raise UserNotFound(user_id)
@@ -110,10 +116,15 @@ class Client(Resource):
 
         #data must be refreshed because of db changes
         if client_data:
-            db.session.refresh(client_data)
+            db.session.refresh(client_data[0])
         if user_data:
             db.session.refresh(user_data)
-        return {'client_info': client_data, 'user_info': user_data}
+        
+
+        client_info_payload = client_data[0].__dict__
+        client_info_payload["primary_goal"] = client_data[1] 
+        client_info_payload["race"] = client_data[2]
+        return {'client_info': client_info_payload, 'user_info': user_data}
 
     @token_auth.login_required
     @accepts(schema=ClientAndUserInfoSchema, api=ns)
