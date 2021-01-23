@@ -27,14 +27,14 @@ class ClientInfo(db.Model):
 
     __tablename__ = 'ClientInfo'
 
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    created_at = db.Column(db.DateTime, server_default=text('clock_timestamp()'))
     """
     timestamp for when object was created. DB server time is used. 
 
     :type: :class:`datetime.datetime`
     """
 
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    updated_at = db.Column(db.DateTime, server_default=text('clock_timestamp() ON UPDATE clock_timestamp()'))
     """
     Last update timestamp of this row in the database.
 
