@@ -133,6 +133,7 @@ class Client(Resource):
         """edit client info"""
 
         client_data = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
+        
         user_data = User.query.filter_by(user_id=user_id).one_or_none()
 
         if not client_data or not user_data:
@@ -157,7 +158,19 @@ class Client(Resource):
             user_data.update(request.parsed_obj['user_info'])
 
         db.session.commit()
+
+        # prepare client_info payload 
+        goal_and_race_data = db.session.query(LookupGoals.goal_name, LookupRaces.race_name
+                            ).filter(
+                                client_data.primary_goal_id == LookupGoals.goal_id
+                            ).filter(
+                                client_data.race_id == LookupRaces.race_id
+                            ).one_or_none()
         
+        client_info_payload = client_data.__dict__
+        client_info_payload["primary_goal"] = goal_and_race_data[0] 
+        client_info_payload["race"] = goal_and_race_data[1]
+
         return {'client_info': client_data, 'user_info': user_data}
 
 @ns.route('/summary/<int:user_id>/')
