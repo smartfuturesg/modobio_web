@@ -80,17 +80,12 @@ class Client(Resource):
     @responds(schema=ClientAndUserInfoSchema, api=ns)
     def get(self, user_id):
         """returns client info table as a json for the user_id specified"""
-        client_data = db.session.query(ClientInfo, LookupGoals.goal_name, LookupRaces.race_name
-                                    ).filter(
-                                        ClientInfo.primary_goal_id == LookupGoals.goal_id
-                                    ).filter(
-                                        ClientInfo.race_id == LookupRaces.race_id
-                                    ).one_or_none()
 
+        client_data = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
         user_data = User.query.filter_by(user_id=user_id).one_or_none()
         if not client_data and not user_data:
             raise UserNotFound(user_id)
-        
+
         #update staff recent clients information
         staff_user_id = token_auth.current_user()[0].user_id
 
@@ -116,14 +111,14 @@ class Client(Resource):
 
         #data must be refreshed because of db changes
         if client_data:
-            db.session.refresh(client_data[0])
+            db.session.refresh(client_data)
         if user_data:
             db.session.refresh(user_data)
-        
+       
+        client_info_payload = client_data.__dict__
+        client_info_payload["primary_goal"] = db.session.query(LookupGoals.goal_name).filter(client_data.primary_goal_id == LookupGoals.goal_id).one_or_none()
+        client_info_payload["race"] = db.session.query(LookupRaces.race_name).filter(client_data.race_id == LookupRaces.race_id).one_or_none()
 
-        client_info_payload = client_data[0].__dict__
-        client_info_payload["primary_goal"] = client_data[1] 
-        client_info_payload["race"] = client_data[2]
         return {'client_info': client_info_payload, 'user_info': user_data}
 
     @token_auth.login_required
@@ -159,17 +154,10 @@ class Client(Resource):
 
         db.session.commit()
 
-        # prepare client_info payload 
-        goal_and_race_data = db.session.query(LookupGoals.goal_name, LookupRaces.race_name
-                            ).filter(
-                                client_data.primary_goal_id == LookupGoals.goal_id
-                            ).filter(
-                                client_data.race_id == LookupRaces.race_id
-                            ).one_or_none()
-        
+        # prepare client_info payload  
         client_info_payload = client_data.__dict__
-        client_info_payload["primary_goal"] = goal_and_race_data[0] 
-        client_info_payload["race"] = goal_and_race_data[1]
+        client_info_payload["primary_goal"] = db.session.query(LookupGoals.goal_name).filter(client_data.primary_goal_id == LookupGoals.goal_id).one_or_none()
+        client_info_payload["race"] = db.session.query(LookupRaces.race_name).filter(client_data.race_id == LookupRaces.race_id).one_or_none()
 
         return {'client_info': client_data, 'user_info': user_data}
 
