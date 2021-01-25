@@ -6,6 +6,41 @@ not to be edited at runtime.
 from odyssey import db
 from odyssey.utils.constants import DB_SERVER_TIME
 
+class LookupClientBookingWindow(db.Model):
+    """ Stored booking windows for the client in database. 
+    """
+
+    __tablename__ = 'LookupClientBookingWindow'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Primary index for 
+
+    :type: int, primary key, autoincrement
+    """
+
+    booking_window = db.Column(db.Integer)
+    """
+    Booking Window
+    from 8 hours to 24 hours in increments of 1 hour
+    
+    :type: int
+    """
+
 class LookupTelehealthSessionCost(db.Model):
     """ Stored telehealth session costs in database. 
     """
