@@ -25,7 +25,7 @@ def test_get_client_info(test_client, init_database, staff_auth_header):
 
     # send get request for client info on user_id = 1 
     response = test_client.get('/client/1/', headers=staff_auth_header)
-
+    
     # some simple checks for validity
     assert response.status_code == 200
     assert response.json['user_info']['user_id'] == 1
