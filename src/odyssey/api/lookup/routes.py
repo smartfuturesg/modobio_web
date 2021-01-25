@@ -11,7 +11,8 @@ from odyssey.api.lookup.models import (
      LookupRaces,
      LookupSubscriptions,
      LookupTelehealthSessionCost,
-     LookupTelehealthSessionDuration
+     LookupTelehealthSessionDuration,
+     LookupNotifications
 )
 from odyssey.api.lookup.schemas import (
     LookupActivityTrackersOutputSchema, 
@@ -21,7 +22,8 @@ from odyssey.api.lookup.schemas import (
     LookupRacesOutputSchema,
     LookupSubscriptionsOutputSchema,
     LookupTelehealthSessionCostOutputSchema,
-    LookupTelehealthSessionDurationOutputSchema
+    LookupTelehealthSessionDurationOutputSchema,
+    LookupNotificationsOutputSchema
 )
 from odyssey.utils.misc import check_drink_existence
 
@@ -201,3 +203,13 @@ class LookupSubscriptionsApi(Resource):
         """get contents of subscription plans lookup table"""
         res = LookupSubscriptions.query.all()
         return {'total_items': len(res), 'items': res}
+
+@ns.route('/notifications/')
+class LookupNotificationsApi(Resource):
+
+    @token_auth.login_required
+    @responds(schema=LookupNotificationsOutputSchema, api=ns)
+        def get(self):
+            """get contents of notification types lookup table"""
+            res = LookupNotifications.query.all()
+            return {'total_items': len(res), 'items': res}
