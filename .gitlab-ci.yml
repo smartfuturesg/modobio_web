@@ -4,7 +4,7 @@ variables:
 stages:
   - test
   - build
-  - version
+#  - version
   - deploy
 
 test:
@@ -29,21 +29,23 @@ pages:
     - gitlab-runner
   only:
     - master
+    - /release-[0-9]+/
   script:
     - echo 'Nothing to do...'
   artifacts:
     paths:
       - public
 
-version:
-  stage: version
-  tags:
-    - shared
-  only:
-    - master
-  script:
-    - echo "Checking version"
-    - bash ~/update_version.sh zan/odyssey
+# Versioning is currently broken and will be fixed separately.
+#version:
+#  stage: version
+#  tags:
+#    - shared
+#  only:
+#    - master
+#  script:
+#    - echo "Checking version"
+#    - bash ~/update_version.sh zan/odyssey
 
 deploy:
   stage: deploy
@@ -51,6 +53,7 @@ deploy:
     - shared
   only:
     - master
+    - /release-[0-9]+/
   script:
     - echo "Deploying update."
-    - bash ~/dev_update.sh odyssey
+    - bash ~/dev_update.sh $CI_COMMIT_BRANCH
