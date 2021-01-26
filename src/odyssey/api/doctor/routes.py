@@ -88,7 +88,9 @@ class MedBloodPressures(Resource):
         This request gets the users submitted blood pressure if it exists
         '''
         check_client_existence(user_id)
-        bp_info = MedicalBloodPressures.query.filter_by(user_id=user_id).all()
+        bp_info = db.session.query(
+                     MedicalBloodPressures.systolic, MedicalBloodPressures.diastolic, MedicalBloodPressures.created_at.label('timestamp')
+                    ).filter(MedicalBloodPressures.user_id==user_id).all()
 
         payload = {'items': bp_info,
                    'total_items': len(bp_info)}

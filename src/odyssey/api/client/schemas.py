@@ -86,10 +86,13 @@ class ClientInfoPutSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientInfo
         exclude = ('created_at', 'updated_at', 'idx')
-        dump_only = ('modobio_id', 'membersince', 'is_staff', 'is_client', 'user_id')
+        dump_only = ('modobio_id', 'membersince', 'is_staff', 'is_client', 'user_id', 'prinmary_goal', 'race')
+        load_only = ('primary_goal_id',)
 
     primary_goal_id = fields.Integer()
     race_id = fields.Integer()
+    primary_goal = fields.String()
+    race = fields.String()
 
 class ClientAndUserInfoSchema(Schema):
 
