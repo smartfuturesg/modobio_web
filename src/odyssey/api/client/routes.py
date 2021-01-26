@@ -680,7 +680,7 @@ class ClientToken(Resource):
         return '', 200
 
 
-@ns.route('/clinical-care-team/<int:user_id>/')
+@ns.route('/clinical-care-team/members/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class ClinicalCareTeam(Resource):
     """
@@ -845,6 +845,21 @@ class ClinicalCareTeam(Resource):
 
         return response
 
+# @ns.route('/clinical-care-team/resources/<int:user_id>/')
+# @ns.doc(params={'user_id': 'User ID number'})
+# class ClinicalCareTeam(Resource):
+#     """
+#     Create, update, remove, retrieve authorization of resource access for care team members.
+
+#     Clinical care team members must individually be given access to resources. The available options can be found
+#     by using the /lookup/care-team/resources/ (GET) API. 
+#     """
+#     @token_auth.login_required(user_type=('client',))
+#     @accepts(schema=ClientClinicalCareTeamSchema, api=ns)
+#     @responds(schema=ClientClinicalCareTeamSchema, api=ns, status_code=201)
+#     def post(self, user_id):
+
+
 @ns.route('/drinks/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class ClientDrinksApi(Resource):
@@ -898,8 +913,7 @@ class ClientDrinksApi(Resource):
 @ns.doc(params={'user_id': 'User ID number'})
 class ClientMobileSettingsApi(Resource):
     """
-    Create update and remove members of a client's clinical care team
-    only the client themselves may have access to these operations.
+    For the client to change their own mobile settings
     """
     @token_auth.login_required(user_type=('client',))
     @accepts(schema=ClientMobileSettingsSchema, api=ns)

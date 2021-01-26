@@ -29,7 +29,7 @@ def upgrade():
     )
     op.create_table('ClientClinicalCareTeamAuthorizations',
     sa.Column('idx', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=True, server_default=text("clock_timestamp() ")),
+    sa.Column('created_at', sa.DateTime(), nullable=True, server_default=text("clock_timestamp()")),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('team_member_id', sa.Integer(), nullable=False),
