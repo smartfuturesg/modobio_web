@@ -33,6 +33,7 @@ from odyssey.api.client.models import (
     ClientHeightHistory,
     ClientWeightHistory
 )
+<<<<<<< HEAD
 from odyssey.api.doctor.models import (
     MedicalFamilyHistory,
     MedicalGeneralInfo,
@@ -43,6 +44,10 @@ from odyssey.api.doctor.models import (
     MedicalSocialHistory
 )
 from odyssey.api.lookup.models import LookupGoals, LookupDrinks
+=======
+from odyssey.api.doctor.models import MedicalHistory, MedicalPhysicalExam
+from odyssey.api.lookup.models import LookupGoals, LookupDrinks, LookupRaces
+>>>>>>> ad062dcee634375d5cc5a6daf6b9f64d584c3262
 from odyssey.api.physiotherapy.models import PTHistory 
 from odyssey.api.staff.models import StaffRecentClients
 from odyssey.api.trainer.models import FitnessQuestionnaire
@@ -88,11 +93,12 @@ class Client(Resource):
     @responds(schema=ClientAndUserInfoSchema, api=ns)
     def get(self, user_id):
         """returns client info table as a json for the user_id specified"""
+
         client_data = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
         user_data = User.query.filter_by(user_id=user_id).one_or_none()
         if not client_data and not user_data:
             raise UserNotFound(user_id)
-        
+
         #update staff recent clients information
         staff_user_id = token_auth.current_user()[0].user_id
 
@@ -121,7 +127,12 @@ class Client(Resource):
             db.session.refresh(client_data)
         if user_data:
             db.session.refresh(user_data)
-        return {'client_info': client_data, 'user_info': user_data}
+       
+        client_info_payload = client_data.__dict__
+        client_info_payload["primary_goal"] = db.session.query(LookupGoals.goal_name).filter(client_data.primary_goal_id == LookupGoals.goal_id).one_or_none()
+        client_info_payload["race"] = db.session.query(LookupRaces.race_name).filter(client_data.race_id == LookupRaces.race_id).one_or_none()
+
+        return {'client_info': client_info_payload, 'user_info': user_data}
 
     @token_auth.login_required
     @accepts(schema=ClientAndUserInfoSchema, api=ns)
@@ -130,6 +141,7 @@ class Client(Resource):
         """edit client info"""
 
         client_data = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
+        
         user_data = User.query.filter_by(user_id=user_id).one_or_none()
 
         if not client_data or not user_data:
@@ -154,7 +166,12 @@ class Client(Resource):
             user_data.update(request.parsed_obj['user_info'])
 
         db.session.commit()
-        
+
+        # prepare client_info payload  
+        client_info_payload = client_data.__dict__
+        client_info_payload["primary_goal"] = db.session.query(LookupGoals.goal_name).filter(client_data.primary_goal_id == LookupGoals.goal_id).one_or_none()
+        client_info_payload["race"] = db.session.query(LookupRaces.race_name).filter(client_data.race_id == LookupRaces.race_id).one_or_none()
+
         return {'client_info': client_data, 'user_info': user_data}
 
 @ns.route('/summary/<int:user_id>/')
