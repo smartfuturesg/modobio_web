@@ -542,7 +542,7 @@ class UserClinicalCareTeamApi(Resource):
         for client in ClientClinicalCareTeam.query.filter_by(team_member_user_id=user_id).all():
             user = User.query.filter_by(user_id=client.user_id).one_or_none()
             res.append({'client_user_id': user.user_id, 
-                        'client_name': user.firstname + ' ' + user.middlename + ' ' + user.lastname,
+                        'client_name': ''.join(filter(None, (user.firstname, user.middlename ,user.lastname)))
                         'client_email': user.email})
         
         return res
