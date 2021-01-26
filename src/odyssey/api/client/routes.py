@@ -33,7 +33,6 @@ from odyssey.api.client.models import (
     ClientHeightHistory,
     ClientWeightHistory
 )
-<<<<<<< HEAD
 from odyssey.api.doctor.models import (
     MedicalFamilyHistory,
     MedicalGeneralInfo,
@@ -43,11 +42,7 @@ from odyssey.api.doctor.models import (
     MedicalPhysicalExam,               
     MedicalSocialHistory
 )
-from odyssey.api.lookup.models import LookupGoals, LookupDrinks
-=======
-from odyssey.api.doctor.models import MedicalHistory, MedicalPhysicalExam
 from odyssey.api.lookup.models import LookupGoals, LookupDrinks, LookupRaces
->>>>>>> ad062dcee634375d5cc5a6daf6b9f64d584c3262
 from odyssey.api.physiotherapy.models import PTHistory 
 from odyssey.api.staff.models import StaffRecentClients
 from odyssey.api.trainer.models import FitnessQuestionnaire
