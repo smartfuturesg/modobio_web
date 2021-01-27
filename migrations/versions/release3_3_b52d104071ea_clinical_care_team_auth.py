@@ -1,4 +1,4 @@
-"""empty message
+"""Clinical care team resources lookup table, care team authorizations
 
 Revision ID: b52d104071ea
 Revises: 599aa0b1eb85
