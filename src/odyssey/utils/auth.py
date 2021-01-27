@@ -7,6 +7,8 @@ from werkzeug.datastructures import Authorization
 from werkzeug.security import safe_str_cmp, check_password_hash
 
 from odyssey import db
+from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations
+from odyssey.api.lookup.models import LookupClinicalCareTeamResources
 from odyssey.utils.constants import ACCESS_ROLES, DB_SERVER_TIME, USER_TYPES 
 from odyssey.utils.errors import LoginNotAuthorized, StaffNotFound
 from odyssey.api.staff.models import StaffRoles
@@ -20,7 +22,7 @@ class BasicAuth(object):
         self.scheme = scheme
         self.header = header
 
-    def login_required(self, f=None, user_type=('staff','client'), staff_role=None):
+    def login_required(self, f=None, user_type=('staff','client'), staff_role=None, resources = ()):
         ''' The login_required method is the main method that we will be using
             for authenticating both tokens and basic authorizations.
             This method decorates each CRUD request and verifies the person
@@ -68,7 +70,7 @@ class BasicAuth(object):
                 if user_type:
                     # If user_type exists (Staff or Client, etc)
                     # Check user and role access
-                    self.user_role_check(user,user_type=user_type, staff_roles=staff_role, user_context = user_context)                   
+                    self.user_role_check(user,user_type=user_type, staff_roles=staff_role, user_context = user_context, resources=resources)                   
                 
                 g.flask_httpauth_user = (user, user_login) if user else (None,None)
                 return f(*args, **kwargs)
@@ -78,7 +80,7 @@ class BasicAuth(object):
             return login_required_internal(f)
         return login_required_internal
    
-    def user_role_check(self, user, user_type, user_context, staff_roles=None):
+    def user_role_check(self, user, user_type, user_context, staff_roles=None, resources=()):
         ''' user_role_check is to determine if the user accessing the API
             is a Staff member or Client '''
         # Check if logged-in user is authorized by type (staff,client)
@@ -93,10 +95,10 @@ class BasicAuth(object):
                     return
             else:
                 LoginNotAuthorized()
-        # if the user is logged in as a client, follow the clietn authorization routine
+        # if the user is logged in as a client, follow the client authorization routine
         elif user_context == 'client' and 'client' in user_type:
             if user.is_client:
-                self.client_access_check(user)
+                self.client_access_check(user, resources)
             else:
                 raise LoginNotAuthorized()
         elif user_context == 'basic_auth':
@@ -109,18 +111,43 @@ class BasicAuth(object):
         else:
             raise LoginNotAuthorized()
 
-    def client_access_check(self, user):
+    def client_access_check(self, user, resources):
         """
-        Clients should only be able to access their own content
-        this check is in place to ensure that the user_id in the URI 
-        is the same as the logged in user's user_id
+        Clients can access content in one of two scenarios:
+            1. They are attempting to access their own content. 
+            2. Clients may access certain resources belonging to other users
+                who have given authorization as part of their clinical care team.
         """
 
         requested_user_id = request.view_args.get('user_id')
 
         if requested_user_id:
-            if int(requested_user_id) != user.user_id:
-                raise LoginNotAuthorized()
+            # user is attemoting to access their own data
+            if int(requested_user_id) == user.user_id:
+                return
+            # client would like to see another client's data
+            else:
+                # ensure request is GET
+                if request.method != 'GET':
+                    raise LoginNotAuthorized()
+                # resources must be specified for endpoint
+                if len(resources) == 0: 
+                    raise LoginNotAuthorized()
+                # search db for this resource authorization
+                for resource in resources:
+                    is_authorized = db.session.query(
+                            ClientClinicalCareTeamAuthorizations.resource_id, LookupClinicalCareTeamResources.resource_name
+                        ).filter(ClientClinicalCareTeamAuthorizations.team_member_user_id == user.user_id
+                        ).filter(ClientClinicalCareTeamAuthorizations.user_id == requested_user_id
+                        ).filter(ClientClinicalCareTeamAuthorizations.resource_id == LookupClinicalCareTeamResources.resource_id
+                        ).filter(LookupClinicalCareTeamResources.resource_name == resource
+                        ).all()
+                    if len(is_authorized) == 1:
+                        continue
+                    else:
+                        # this user does not have access to this content
+                        raise LoginNotAuthorized()
+        return
 
     def staff_access_check(self, user, user_type, staff_roles=None):
         ''' 
