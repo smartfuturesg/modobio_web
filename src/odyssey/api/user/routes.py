@@ -244,7 +244,7 @@ class NewClientUser(Resource):
                     'subscription_rate': 0.0,
                     'is_staff': False
                 })
-                client_sub = user.user_id
+                client_sub.user_id = user.user_id
                 db.session.add(client_sub)
         else:
             # user account does not yet exist for this email
