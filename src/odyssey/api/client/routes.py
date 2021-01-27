@@ -23,6 +23,7 @@ from odyssey.api.client.models import (
     ClientConsent,
     ClientConsultContract,
     ClientClinicalCareTeam,
+    ClientClinicalCareTeamAuthorizations,
     ClientIndividualContract,
     ClientPolicies,
     ClientRelease,
@@ -34,7 +35,7 @@ from odyssey.api.client.models import (
     ClientWeightHistory
 )
 from odyssey.api.doctor.models import MedicalHistory, MedicalPhysicalExam
-from odyssey.api.lookup.models import LookupGoals, LookupDrinks
+from odyssey.api.lookup.models import LookupClinicalCareTeamResources, LookupGoals, LookupDrinks
 from odyssey.api.physiotherapy.models import PTHistory 
 from odyssey.api.staff.models import StaffRecentClients
 from odyssey.api.trainer.models import FitnessQuestionnaire
@@ -63,6 +64,7 @@ from odyssey.api.client.schemas import(
     ClientHeightSchema,
     ClientWeightSchema,
     ClientTokenRequestSchema,
+    ClinicalCareTeamAuthorizationNestedSchema,
     NewRemoteClientSchema,
     SignAndDateSchema,
     SignedDocumentsSchema
@@ -682,7 +684,7 @@ class ClientToken(Resource):
 
 @ns.route('/clinical-care-team/members/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class ClinicalCareTeam(Resource):
+class ClinicalCareTeamMembers(Resource):
     """
     Create update and remove members of a client's clinical care team
     only the client themselves may have access to these operations.
@@ -714,7 +716,6 @@ class ClinicalCareTeam(Resource):
         """
         
         data = request.parsed_obj
-
 
         user = token_auth.current_user()[0]
 
@@ -845,19 +846,101 @@ class ClinicalCareTeam(Resource):
 
         return response
 
-# @ns.route('/clinical-care-team/resources/<int:user_id>/')
-# @ns.doc(params={'user_id': 'User ID number'})
-# class ClinicalCareTeam(Resource):
-#     """
-#     Create, update, remove, retrieve authorization of resource access for care team members.
+@ns.route('/clinical-care-team/resource-authorization/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class ClinicalCareTeamResourceAuthorization(Resource):
+    """
+    Create, update, remove, retrieve authorization of resource access for care team members.
 
-#     Clinical care team members must individually be given access to resources. The available options can be found
-#     by using the /lookup/care-team/resources/ (GET) API. 
-#     """
-#     @token_auth.login_required(user_type=('client',))
-#     @accepts(schema=ClientClinicalCareTeamSchema, api=ns)
-#     @responds(schema=ClientClinicalCareTeamSchema, api=ns, status_code=201)
-#     def post(self, user_id):
+    Clinical care team members must individually be given access to resources. The available options can be found
+    by using the /lookup/care-team/resources/ (GET) API. 
+    """
+    @token_auth.login_required(user_type=('client',))
+    @accepts(schema=ClinicalCareTeamAuthorizationNestedSchema, api=ns)
+    @responds(schema=ClinicalCareTeamAuthorizationNestedSchema, api=ns, status_code=201)
+    def post(self, user_id):
+        """
+        Add new clinical care team authorizations for the specified user_id 
+        """
+        data = request.parsed_obj
+
+        current_team_ids = db.session.query(ClientClinicalCareTeam.team_member_user_id).filter(ClientClinicalCareTeam.user_id==user_id).all()
+        current_team_ids = [x[0] for x in current_team_ids if x[0] is not None]
+
+        care_team_resources = LookupClinicalCareTeamResources.query.all()
+        care_team_resources_ids = [x.resource_id for x in care_team_resources]
+
+        for authorization in data.get('clinical_care_team_authoriztion'):
+            if authorization.team_member_user_id in current_team_ids and authorization.resource_id in care_team_resources_ids:
+                authorization.user_id = user_id
+                db.session.add(authorization)
+            else:
+                raise InputError(message="team member not in care team or resource_id is invalid", status_code=400)
+        try:
+            db.session.commit()
+        except Exception as e:
+            raise InputError(message=e._message(), status_code=400)
+
+        return 
+
+    @token_auth.login_required(user_type=('client',))
+    @responds(schema=ClinicalCareTeamAuthorizationNestedSchema, api=ns, status_code=200)
+    def get(self, user_id):
+        """
+        Retrieve client's clinical care team authorizations
+        """
+
+        data = db.session.query(
+            ClientClinicalCareTeamAuthorizations.resource_id, 
+            LookupClinicalCareTeamResources.display_name,
+            User.firstname, 
+            User.lastname, 
+            User.email,
+            User.user_id
+            ).filter(
+                ClientClinicalCareTeamAuthorizations.user_id == user_id
+            ).filter(
+                User.user_id == ClientClinicalCareTeamAuthorizations.team_member_user_id
+            ).filter(ClientClinicalCareTeamAuthorizations.resource_id == LookupClinicalCareTeamResources.resource_id
+            ).all()
+        
+        care_team_auths =[]
+        for row in data:
+            tmp = {
+                'resource_id': row[0],
+                'display_name': row[1],
+                'team_member_firstname': row[2],
+                'team_member_lastname': row[3],
+                'team_member_email': row[4],
+                'team_member_user_id': row[5]}
+
+            care_team_auths.append(tmp)
+        
+        payload = {'clinical_care_team_authoriztion': care_team_auths}
+
+        return payload
+
+    @token_auth.login_required(user_type=('client',))
+    @accepts(schema=ClinicalCareTeamAuthorizationNestedSchema, api=ns)
+
+    def delete(self, user_id):
+        """
+        Remove a previously saved authorization. Takes the same payload as the POST method.
+        """
+        data = request.parsed_obj
+
+        for dat in data.get('clinical_care_team_authoriztion'):
+            authorization = ClientClinicalCareTeamAuthorizations.query.filter_by(
+                                                                                resource_id = dat.resource_id,
+                                                                                team_member_user_id = dat.team_member_user_id
+                                                                                ).one_or_none()
+            if authorization:
+                db.session.delete(authorization)
+
+        db.session.commit()
+
+        return {}, 200
+
 
 
 @ns.route('/drinks/<int:user_id>/')

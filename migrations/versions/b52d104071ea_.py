@@ -32,13 +32,17 @@ def upgrade():
     sa.Column('created_at', sa.DateTime(), nullable=True, server_default=text("clock_timestamp()")),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('team_member_id', sa.Integer(), nullable=False),
+    sa.Column('team_member_user_id', sa.Integer(), nullable=False),
     sa.Column('resource_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['resource_id'], ['LookupClinicalCareTeamResources.resource_id'], ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['team_member_id'], ['User.user_id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['team_member_user_id'], ['User.user_id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['user_id'], ['User.user_id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('idx')
     )
+    op.create_unique_constraint('care_team_auth_unique_resource_user_team_member_ids', 
+                                'ClientClinicalCareTeamAuthorizations', 
+                                ['user_id', 'team_member_user_id', 'resource_id'])
+                                
     # ### end Alembic commands ###
 
 

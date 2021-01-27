@@ -12,3 +12,8 @@ DROP TRIGGER IF EXISTS update_lookup_created_at
   ON "LookupClinicalCareTeamResources";
 CREATE TRIGGER update_lookup_created_at BEFORE UPDATE ON "LookupClinicalCareTeamResources"
      FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+
+DROP TRIGGER IF EXISTS update_lookup_created_at
+  ON "ClientClinicalCareTeamAuthorizations";
+CREATE TRIGGER update_lookup_created_at BEFORE UPDATE ON "ClientClinicalCareTeamAuthorizations"
+     FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
