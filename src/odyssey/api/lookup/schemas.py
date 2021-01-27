@@ -3,6 +3,7 @@ from marshmallow import Schema, fields, post_load
 from odyssey import ma
 from odyssey.api.lookup.models import (
     LookupActivityTrackers, 
+    LookupClientBookingWindow,
     LookupDrinks, 
     LookupDrinkIngredients, 
     LookupGoals, 
@@ -12,6 +13,14 @@ from odyssey.api.lookup.models import (
     LookupTelehealthSessionDuration,
     LookupNotifications
 )
+
+class LookupClientBookingWindowSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupClientBookingWindow
+
+class LookupClientBookingWindowOutputSchema(Schema):
+    items = fields.Nested(LookupClientBookingWindowSchema(many=True),missing=[])
+    total_items = fields.Integer()
 
 class LookupTelehealthSessionCostSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

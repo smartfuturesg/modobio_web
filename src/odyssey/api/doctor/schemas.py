@@ -33,7 +33,9 @@ class MedicalBloodPressuresSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = MedicalBloodPressures
         exclude = ('idx', 'created_at')
-
+        dump_only = ('timestamp',)
+        
+    timestamp = fields.DateTime()
     systolic = fields.Float(description='units mmHg',required=True)
     diastolic = fields.Float(description='units mmHg',required=True)
     @post_load
@@ -43,6 +45,7 @@ class MedicalBloodPressuresSchema(ma.SQLAlchemyAutoSchema):
 class MedicalBloodPressuresOutputSchema(Schema):
     items = fields.Nested(MedicalBloodPressuresSchema(many=True), missing=[])
     total_items = fields.Integer()
+
 
 class MedicalLookUpBloodPressureRangesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
