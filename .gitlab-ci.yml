@@ -29,6 +29,7 @@ pages:
     - gitlab-runner
   only:
     - master
+    - next-release
     - /release-[0-9]+/
   script:
     - echo 'Nothing to do...'
@@ -53,6 +54,7 @@ deploy:
     - shared
   only:
     - master
+    - next-release
     - /release-[0-9]+/
   script:
     - echo "Deploying update."
