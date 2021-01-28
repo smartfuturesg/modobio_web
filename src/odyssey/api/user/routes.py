@@ -222,9 +222,8 @@ class NewClientUser(Resource):
         If registering an already existing staff user as a client, 
         the password must match, or be and empty string (ie. "")
         """
-        user_info = request.get_json()     
-
-        #user_info = data.get('user_info')
+        user_info = request.get_json()   
+          
         user = User.query.filter(User.email.ilike(user_info.get('email'))).first()
         if user:
             if user.is_client:
