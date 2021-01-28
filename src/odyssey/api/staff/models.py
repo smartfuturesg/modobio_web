@@ -151,13 +151,6 @@ class StaffRoles(db.Model):
     -data_science
     -doctor
     -nutrition
-    -client_services_internal
-    -physical_therapist_internal
-    -trainer_internal
-    -doctor_internal
-    -nutrition_internal
-
-    Internal roles are intended for staff members who are part of the internal application development team. 
     
     :type: str
     """

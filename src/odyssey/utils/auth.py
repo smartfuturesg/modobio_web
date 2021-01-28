@@ -22,7 +22,7 @@ class BasicAuth(object):
         self.scheme = scheme
         self.header = header
 
-    def login_required(self, f=None, user_type=('staff','client'), staff_role=None, resources = ()):
+    def login_required(self, f=None, user_type=('staff','client'), staff_role=None, internal_required=False, resources = ()):
         ''' The login_required method is the main method that we will be using
             for authenticating both tokens and basic authorizations.
             This method decorates each CRUD request and verifies the person
@@ -31,12 +31,14 @@ class BasicAuth(object):
             user_type, and staff_role are expected to be lists. 
 
             NOTE: Some methods have overrides depending if it is a 
-                  OdyBasicAuth or OdyTokenAuth object
+                  BasicAuth or TokenAuth object
         
                   get_auth()
                   authenticate(auth,pass)
         '''
-        # Validate each entry
+        ###
+        ##  Validate kwargs: user_type, staff_role
+        ###
         if user_type is not None:
             # Check if user type is a list:
             if type(user_type) is not tuple:
@@ -56,22 +58,40 @@ class BasicAuth(object):
         def login_required_internal(f):
             @wraps(f)
             def decorated(*args, **kwargs):
+                """
+                Steps to authentication and authorization
+                1. Pull auth details from headers (basic or bearer token)
+                2. Authenticate credentials and bring up the user and user login details
+                    -user_context either 'basic_auth' (loggin in) or 
+                     pulled from token: 'client' or 'staff' 
+                3. Verify that user meets authorization requirements for the endpoint. These include
+                    - user_type: 'client', 'staff', or 'staff_self' (for staff editing their own personal details)
+                    - staff_role: roles specified in utils/constants
+                    - internal_required: some resources are meant only for 'internal' or 'beta' users
+                    
+                Any issues coming from the above should raise a 401 error with no message. In general, the LoginNotAuthorized error
+                is used. 
+                """
                 auth = self.get_auth()
-                # Flask normally handles OPTIONS requests on its own, but in
-                # the case it is configured to forward those to the
-                # application, we need to ignore authentication headers and
-                # let the request through to avoid unwanted interactions with
-                # CORS.
 
-                user, user_login, user_context = self.authenticate(auth, user_type)
+                # Authenticate and load user and user login details
+                user, user_login, user_context = self.authenticate(auth)
 
                 if user in (False, None):
-                    raise LoginNotAuthorized()
+                    raise LoginNotAuthorized
+
+                # If user_type exists (Staff or Client, etc)
+                # Check user and role access
                 if user_type:
                     # If user_type exists (Staff or Client, etc)
                     # Check user and role access
                     self.user_role_check(user,user_type=user_type, staff_roles=staff_role, user_context = user_context, resources=resources)                   
                 
+                # If necessary, restrict access to internal users
+                if internal_required:
+                    if not user.is_internal:
+                        raise LoginNotAuthorized
+
                 g.flask_httpauth_user = (user, user_login) if user else (None,None)
                 return f(*args, **kwargs)
             return decorated
@@ -220,7 +240,7 @@ class BasicAuth(object):
             scheme, {'username': username.decode('utf-8'),
                      'password': password.decode('utf-8')})
 
-    def authenticate(self, auth, user_type):
+    def authenticate(self, auth):
         ''' authenticate method will use the verify_password_callback method
             to return the person's basic authentication. '''
         if auth:
@@ -245,7 +265,7 @@ class TokenAuth(BasicAuth):
 
         self.verify_token_callback = None
 
-    def verify_token(self, user_type, token):
+    def verify_token(self, token):
         ''' verify_token is a method that is used as a decorator to store 
             the token checking process that is defined in auth.py '''
         
@@ -255,7 +275,7 @@ class TokenAuth(BasicAuth):
             decoded_token = jwt.decode(token, secret, algorithms='HS256')
         except:
             raise LoginNotAuthorized
-        
+
         # ensure token is an access token type
         if decoded_token['ttype'] != 'access':
             raise LoginNotAuthorized()
@@ -268,7 +288,7 @@ class TokenAuth(BasicAuth):
                             UserLogin.user_id == decoded_token['uid']
                         ).one_or_none()
                         
-        return query[0], query[1], decoded_token.get('utype') 
+        return query[0], query[1], decoded_token.get('utype')
 
     def get_auth(self):
         ''' This method is to authorize tokens '''
@@ -300,7 +320,7 @@ class TokenAuth(BasicAuth):
 
         return auth
         
-    def authenticate(self, auth, user_type):
+    def authenticate(self, auth):
         ''' This authenticate method overrides the authenticate method in 
             the OdyBasicAuth authenticate method and returns an object defined
             in verify_token_callback'''
@@ -308,7 +328,7 @@ class TokenAuth(BasicAuth):
             token = auth['token']
         else:
             token = ""
-        return self.verify_token(user_type, token)
+        return self.verify_token(token)
 
 # simple authentication handler allows password authentication and
 # stores a current user for view functions to check against
