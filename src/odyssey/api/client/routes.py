@@ -1,17 +1,14 @@
 import boto3
-from datetime import date, datetime, timedelta
-import jwt
+from datetime import datetime
 
 from flask import request, current_app
 from flask_accepts import accepts, responds
-from flask_restx import Resource, Api
+from flask_restx import Resource
 
 from odyssey.api import api
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.errors import (
     UserNotFound, 
-    ClientAlreadyExists, 
-    ClientNotFound,
     ContentNotFound,
     IllegalSetting, 
     InputError
@@ -42,7 +39,7 @@ from odyssey.api.trainer.models import FitnessQuestionnaire
 from odyssey.api.facility.models import RegisteredFacilities
 from odyssey.api.user.models import User, UserLogin
 from odyssey.utils.pdf import to_pdf, merge_pdfs
-from odyssey.utils.email import send_email_user_registration_portal, send_test_email
+from odyssey.utils.email import send_test_email
 from odyssey.utils.misc import check_client_existence, check_drink_existence
 from odyssey.api.client.schemas import(
     AllClientsDataTier,
@@ -51,7 +48,6 @@ from odyssey.api.client.schemas import(
     ClientConsentSchema,
     ClientConsultContractSchema,
     ClientIndividualContractSchema,
-    ClientInfoSchema,
     ClientClinicalCareTeamSchema,
     ClientMobileSettingsSchema,
     ClientPoliciesContractSchema, 
@@ -65,13 +61,12 @@ from odyssey.api.client.schemas import(
     ClientWeightSchema,
     ClientTokenRequestSchema,
     ClinicalCareTeamAuthorizationNestedSchema,
-    NewRemoteClientSchema,
     SignAndDateSchema,
-    SignedDocumentsSchema
+    SignedDocumentsSchema,
+    UserClinicalCareTeamSchema
 )
 from odyssey.api.staff.schemas import StaffRecentClientsSchema
 from odyssey.api.facility.schemas import ClientSummarySchema
-from odyssey.api.user.schemas import UserSchema
 
 ns = api.namespace('client', description='Operations related to clients')
 
@@ -845,6 +840,31 @@ class ClinicalCareTeamMembers(Resource):
                     "total_items": len(current_team) }
 
         return response
+
+@ns.route('/clinical-care-team/member-of/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class UserClinicalCareTeamApi(Resource):
+    """
+    Clinical care teams the speficied user is part of
+    
+    Endpoint for viewing and managing the list of clients who have the specified user as part of their care team.
+    """
+    @token_auth.login_required
+    @responds(schema=UserClinicalCareTeamSchema(many=True), api=ns, status_code=200)
+    def get(self, user_id):
+        """
+        returns the list of clients whose clinical care team the given user_id
+        is a part of
+        """
+
+        res = []
+        for client in ClientClinicalCareTeam.query.filter_by(team_member_user_id=user_id).all():
+            user = User.query.filter_by(user_id=client.user_id).one_or_none()
+            res.append({'client_user_id': user.user_id, 
+                        'client_name': user.firstname + ' ' + user.middlename + ' ' + user.lastname,
+                        'client_email': user.email})
+        
+        return res
 
 @ns.route('/clinical-care-team/resource-authorization/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})

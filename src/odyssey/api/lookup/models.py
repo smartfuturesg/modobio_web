@@ -412,8 +412,6 @@ class LookupClinicalCareTeamResources(db.Model):
     """
     Stores all the database tables which can be accessed by a clinical care team.
     Table names are given an index in order to be referenced by other tables
-
-
     """
 
     __tablename__ = 'LookupClinicalCareTeamResources'

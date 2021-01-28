@@ -1,4 +1,3 @@
-from datetime import datetime
 from marshmallow import (
     Schema, 
     fields, 
@@ -10,8 +9,6 @@ from marshmallow import (
 )
 
 from odyssey import ma
-from odyssey.api.user.models import User
-from odyssey.api.lookup.models import LookupGoals
 from odyssey.api.client.models import (
     ClientClinicalCareTeamAuthorizations,
     ClientConsent,
@@ -273,6 +270,12 @@ class ClientClinicalCareTeamInternalSchema(Schema):
     team_member_user_id = fields.Integer(description="user_id for clinical care team member", dump_only=True)
     firstname = fields.String(dump_only=True, missing=None)
     lastname = fields.String(dump_only=True, missing=None)
+
+class UserClinicalCareTeamSchema(Schema):
+
+    client_user_id = fields.Integer()
+    client_name = fields.String()
+    client_email = fields.String()
 
 class ClientClinicalCareTeamSchema(Schema):
     """

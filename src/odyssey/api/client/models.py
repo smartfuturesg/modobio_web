@@ -34,7 +34,7 @@ class ClientInfo(db.Model):
     :type: :class:`datetime.datetime`
     """
 
-    updated_at = db.Column(db.DateTime, server_default=text('clock_timestamp() ON UPDATE clock_timestamp()'))
+    updated_at = db.Column(db.DateTime, server_default=text('clock_timestamp()'))
     """
     Last update timestamp of this row in the database.
 
