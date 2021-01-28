@@ -231,7 +231,7 @@ class LookupNotificationsApi(Resource):
 
     @token_auth.login_required
     @responds(schema=LookupNotificationsOutputSchema, api=ns)
-        def get(self):
-            """get contents of notification types lookup table"""
-            res = LookupNotifications.query.all()
-            return {'total_items': len(res), 'items': res}
+    def get(self):
+        """get contents of notification types lookup table"""
+        res = LookupNotifications.query.all()
+        return {'total_items': len(res), 'items': res}
