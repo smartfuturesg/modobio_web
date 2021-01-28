@@ -140,11 +140,11 @@ class NewStaffUser(Resource):
 
                 # add new staff subscription information
                 staff_sub = UserSubscriptionsSchema().load({
-                    'user_id': user.user_id,
                     'subscription_type': 'subscribed',
                     'subscription_rate': 0.0,
                     'is_staff': True
                 })
+                staff_sub.user_id = user.user_id
                 db.session.add(staff_sub)
         else:
             # user account does not yet exist for this email
@@ -169,11 +169,11 @@ class NewStaffUser(Resource):
 
             # add new user subscription information
             staff_sub = UserSubscriptionsSchema().load({
-                'user_id': user.user_id,
                 'subscription_type': 'subscribed',
                 'subscription_rate': 0.0,
                 'is_staff': True
             })
+            staff_sub.user_id = user.user_id
             db.session.add(staff_sub)
             
         # create entries for role assignments 
@@ -241,11 +241,11 @@ class NewClientUser(Resource):
 
                 # add new client subscription information
                 client_sub = UserSubscriptionsSchema().load({
-                    'user_id': user.user_id,
                     'subscription_type': 'unsubscribed',
                     'subscription_rate': 0.0,
                     'is_staff': False
                 })
+                client_sub.user_id = user.user_id
                 db.session.add(client_sub)
         else:
             # user account does not yet exist for this email
@@ -263,11 +263,11 @@ class NewClientUser(Resource):
 
             # add new user subscription information
             client_sub = UserSubscriptionsSchema().load({
-                'user_id': user.user_id,
                 'subscription_type': 'unsubscribed',
                 'subscription_rate': 0.0,
                 'is_staff': False
             })
+            client_sub.user_id = user.user_id
             db.session.add(client_sub)
 
         payload=user.__dict__
@@ -479,9 +479,9 @@ class UserSubscriptionApi(Resource):
             'subscription_type': request.parsed_obj.subscription_type,
             'subscription_rate': request.parsed_obj.subscription_rate,
             'is_staff': request.parsed_obj.is_staff,
-            'user_id': user_id
         }
         new_sub = UserSubscriptionsSchema().load(new_data)
+        new_sub.user_id = user_id
         db.session.add(new_sub)
         db.session.commit()
 

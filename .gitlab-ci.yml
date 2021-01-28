@@ -3,8 +3,7 @@ variables:
 
 stages:
   - test
-  - build
-#  - version
+  - pages
   - deploy
 
 test:
@@ -24,11 +23,12 @@ test:
     - sudo docker rm -f postgres_$CI_BUILD_ID
 
 pages:
-  stage: build
+  stage: pages
   tags:
     - gitlab-runner
   only:
     - master
+    - next-release
     - /release-[0-9]+/
   script:
     - echo 'Nothing to do...'
@@ -36,24 +36,14 @@ pages:
     paths:
       - public
 
-# Versioning is currently broken and will be fixed separately.
-#version:
-#  stage: version
-#  tags:
-#    - shared
-#  only:
-#    - master
-#  script:
-#    - echo "Checking version"
-#    - bash ~/update_version.sh zan/odyssey
-
 deploy:
   stage: deploy
   tags:
     - shared
   only:
     - master
+    - next-release
     - /release-[0-9]+/
   script:
     - echo "Deploying update."
-    - bash ~/dev_update.sh $CI_COMMIT_BRANCH
+    - bash /home/gitlab-runner/dev_update.sh $CI_PROJECT_NAME $CI_COMMIT_BRANCH
