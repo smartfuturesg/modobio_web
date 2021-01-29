@@ -11,8 +11,9 @@ from werkzeug.security import check_password_hash
 from odyssey.api import api
 from odyssey.api.client.schemas import ClientInfoSchema
 from odyssey.api.client.models import ClientClinicalCareTeam
+from odyssey.api.lookup.models import LookupNotifications
 from odyssey.api.staff.schemas import StaffProfileSchema, StaffRolesSchema
-from odyssey.api.user.models import User, UserLogin, UserRemovalRequests, UserSubscriptions, UserTokensBlacklist
+from odyssey.api.user.models import User, UserLogin, UserRemovalRequests, UserSubscriptions, UserTokensBlacklist, UserNotifications
 from odyssey.api.staff.models import StaffRoles
 from odyssey.api.user.schemas import (
     UserSchema, 
@@ -25,7 +26,8 @@ from odyssey.api.user.schemas import (
     UserSubscriptionsSchema,
     UserSubscriptionHistorySchema,
     NewStaffUserSchema,
-    UserClinicalCareTeamSchema
+    UserClinicalCareTeamSchema,
+    UserNotificationsSchema
 ) 
 from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import PASSWORD_RESET_URL, DB_SERVER_TIME
@@ -546,3 +548,38 @@ class UserClinicalCareTeamApi(Resource):
                         'client_email': user.email})
         
         return res
+
+@ns.route('/notifications/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class UserNotificationsApi(Resource):
+
+    @token_auth.login_required
+    @responds(schema=UserNotificationsSchema(many=True), api=ns, status_code=200)
+    def get(self, user_id):
+        """
+        Returns the list of notifications for the given user_id
+        """
+
+        return UserNotifications.query.filter_by(user_id=user_id).all()
+
+@ns.route('/notifications/<int:idx>/')
+@ns.doc(params={'idx': 'Notification idx number'})
+class UserNotificationsPutApi(Resource):
+
+    @token_auth.login_required
+    @accepts(schema=UserNotificationsSchema, api=ns)
+    @responds(schema=UserNotificationsSchema, api=ns, status_code=200)
+    def put(self, idx):
+        """
+        Updates the notification specified by the given idx.
+        """
+
+        notification =  UserNotifications.query.filter_by(idx=idx).one_or_none()
+
+        if not notification:
+            raise InputError(400, 'Invalid notification idx.') 
+
+        notification.update(request.json)
+        db.session.commit()
+
+        return notification
