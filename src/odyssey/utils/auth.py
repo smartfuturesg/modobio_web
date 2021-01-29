@@ -85,7 +85,7 @@ class BasicAuth(object):
                 if user_type:
                     # If user_type exists (Staff or Client, etc)
                     # Check user and role access
-                    self.user_role_check(user,user_type=user_type, staff_roles=staff_role, user_context = user_context, resources=resources)                   
+                    self.user_role_check(user,user_type=user_type, staff_roles=staff_role, user_context = user_context, resources=resources)
                 
                 # If necessary, restrict access to internal users
                 if internal_required:
