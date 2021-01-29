@@ -6,6 +6,126 @@ not to be edited at runtime.
 from odyssey import db
 from odyssey.utils.constants import DB_SERVER_TIME
 
+class LookupClientBookingWindow(db.Model):
+    """ Stored booking windows for the client in database. 
+    """
+
+    __tablename__ = 'LookupClientBookingWindow'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Primary index for 
+
+    :type: int, primary key, autoincrement
+    """
+
+    booking_window = db.Column(db.Integer)
+    """
+    Booking Window
+    from 8 hours to 24 hours in increments of 1 hour
+    
+    :type: int
+    """
+
+class LookupTelehealthSessionCost(db.Model):
+    """ Stored telehealth session costs in database. 
+    """
+
+    __tablename__ = 'LookupTelehealthSessionCost'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Primary index for 
+
+    :type: int, primary key, autoincrement
+    """
+
+    profession_type = db.Column(db.String)
+    """
+    Profession Type 
+    i.e. Medical Doctor etc
+
+    :type: str
+    """
+
+    territory = db.Column(db.String)
+    """
+    Territory
+    i.e. USA, UK, etc
+
+    :type: str
+    """
+
+    session_cost = db.Column(db.Integer)
+    """
+    session cost in that country's currency
+    
+    :type: int
+    """
+
+class LookupTelehealthSessionDuration(db.Model):
+    """ Stored telehealth session durations in database. 
+    """
+
+    __tablename__ = 'LookupTelehealthSessionDuration'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Primary index for 
+
+    :type: int, primary key, autoincrement
+    """
+
+    session_duration = db.Column(db.Integer)
+    """
+    session duration
+    from 10 minutes to 60 minutes in increments of 5 minutes
+    
+    :type: int
+    """
+
 class LookupActivityTrackers(db.Model):
     """ Look up table for activity trackers and their capabilities. """
 
@@ -404,6 +524,60 @@ class LookupRaces(db.Model):
     race_name = db.Column(db.String)
     """
     Name of this race.
+
+    :type: string
+    """
+class LookupSubscriptions(db.Model):
+    """ Static list of subscription plans that a user can choose from. 
+    """
+
+    __tablename__ = 'LookupSubscriptions'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    sub_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Id of this subscription plan.
+
+    :type: integer, primary key, autoincrementing
+    """
+
+    name = db.Column(db.String)
+    """
+    Name of this subscription plan.
+
+    :type: string
+    """
+
+    description = db.Column(db.String)
+    """
+    Description of this subscription plan.
+
+    :type: string
+    """
+
+    cost = db.Column(db.Float)
+    """
+    Cost of this subscription plan in USD.
+
+    :type: float
+    """
+
+    frequency = db.Column(db.String)
+    """
+    Frequency that this subscription plan is paid, must be one of (weekly, monthly, annually)
 
     :type: string
     """

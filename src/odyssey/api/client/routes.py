@@ -40,7 +40,12 @@ from odyssey.api.doctor.models import (
     MedicalPhysicalExam,               
     MedicalSocialHistory
 )
-from odyssey.api.lookup.models import LookupClinicalCareTeamResources, LookupGoals, LookupDrinks, LookupRaces
+from odyssey.api.lookup.models import (
+    LookupClinicalCareTeamResources, 
+    LookupGoals, 
+    LookupDrinks, 
+    LookupRaces
+)
 from odyssey.api.physiotherapy.models import PTHistory 
 from odyssey.api.staff.models import StaffRecentClients
 from odyssey.api.trainer.models import FitnessQuestionnaire

@@ -5,25 +5,93 @@ from odyssey.api import api
 from odyssey.utils.auth import token_auth
 from odyssey.api.lookup.models import (
     LookupActivityTrackers, 
+    LookupClientBookingWindow,
     LookupClinicalCareTeamResources, 
     LookupDrinks, 
     LookupDrinkIngredients,
     LookupGoals, 
-    LookupRaces
+    LookupRaces,
+    LookupSubscriptions,
+    LookupTelehealthSessionCost,
+    LookupTelehealthSessionDuration
 )
 from odyssey.api.lookup.schemas import (
     LookupActivityTrackersOutputSchema, 
-    LookupCareTeamResourcesOutputSchema,
+    LookupClientBookingWindowOutputSchema,
     LookupDrinksOutputSchema, 
     LookupDrinkIngredientsOutputSchema, 
     LookupGoalsOutputSchema,
-    LookupRacesOutputSchema
+    LookupRacesOutputSchema,
+    LookupSubscriptionsOutputSchema,
+    LookupTelehealthSessionCostOutputSchema,
+    LookupTelehealthSessionDurationOutputSchema,
+    LookupCareTeamResourcesOutputSchema
 )
 from odyssey.utils.misc import check_drink_existence
 
 from odyssey import db
 
 ns = api.namespace('lookup', description='Endpoints for lookup tables.')
+
+@ns.route('/business/booking-window/')
+class LookupTelehealthSessionCostResource(Resource):
+    """ Returns stored client booking windows in database by GET request.
+
+    Returns
+    -------
+    dict
+        JSON encoded dict.
+    """
+    @token_auth.login_required
+    @responds(schema=LookupClientBookingWindowOutputSchema,status_code=200, api=ns)
+    def get(self):
+                
+        window = LookupClientBookingWindow.query.all()
+        
+        payload = {'items': window,
+                   'total_items': len(window)}
+
+        return payload
+
+@ns.route('/business/session-cost/')
+class LookupTelehealthSessionCostResource(Resource):
+    """ Returns stored telehealth session cost in database by GET request.
+
+    Returns
+    -------
+    dict
+        JSON encoded dict.
+    """
+    @token_auth.login_required
+    @responds(schema=LookupTelehealthSessionCostOutputSchema,status_code=200, api=ns)
+    def get(self):
+                
+        cost = LookupTelehealthSessionCost.query.all()
+        
+        payload = {'items': cost,
+                   'total_items': len(cost)}
+
+        return payload
+
+@ns.route('/business/session-duration/')
+class LookupTelehealthSessionDurationResource(Resource):
+    """ Returns stored telehealth session duration in database by GET request.
+
+    Returns
+    -------
+    dict
+        JSON encoded dict.
+    """
+    @token_auth.login_required
+    @responds(schema=LookupTelehealthSessionDurationOutputSchema,status_code=200, api=ns)
+    def get(self):
+                
+        durations = LookupTelehealthSessionDuration.query.all()
+        
+        payload = {'items': durations,
+                   'total_items': len(durations)}
+
+        return payload
 
 @ns.route('/activity-trackers/misc/')
 class WearablesLookUpFitbitActivityTrackersResource(Resource):
@@ -158,4 +226,14 @@ class LookupClinicalCareTeamResourcesApi(Resource):
     def get(self):
         """get contents of clinical care team resources lookup table"""
         res = LookupClinicalCareTeamResources.query.all()
+        return {'total_items': len(res), 'items': res}
+        
+@ns.route('/subscriptions/')
+class LookupSubscriptionsApi(Resource):
+
+    @token_auth.login_required
+    @responds(schema=LookupSubscriptionsOutputSchema, api=ns)
+    def get(self):
+        """get contents of subscription plans lookup table"""
+        res = LookupSubscriptions.query.all()
         return {'total_items': len(res), 'items': res}

@@ -4,11 +4,39 @@ from odyssey import ma
 from odyssey.api.lookup.models import (
     LookupActivityTrackers, 
     LookupClinicalCareTeamResources,
+    LookupClientBookingWindow,
     LookupDrinks, 
     LookupDrinkIngredients, 
     LookupGoals, 
-    LookupRaces
+    LookupRaces,
+    LookupSubscriptions,
+    LookupTelehealthSessionCost,
+    LookupTelehealthSessionDuration
 )
+
+class LookupClientBookingWindowSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupClientBookingWindow
+
+class LookupClientBookingWindowOutputSchema(Schema):
+    items = fields.Nested(LookupClientBookingWindowSchema(many=True),missing=[])
+    total_items = fields.Integer()
+
+class LookupTelehealthSessionCostSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupTelehealthSessionCost
+
+class LookupTelehealthSessionCostOutputSchema(Schema):
+    items = fields.Nested(LookupTelehealthSessionCostSchema(many=True),missing=[])
+    total_items = fields.Integer()
+
+class LookupTelehealthSessionDurationSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupTelehealthSessionDuration
+
+class LookupTelehealthSessionDurationOutputSchema(Schema):
+    items = fields.Nested(LookupTelehealthSessionDurationSchema(many=True),missing=[])
+    total_items = fields.Integer()
 
 class LookupActivityTrackersSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -87,3 +115,15 @@ class LookupRacesOutputSchema(Schema):
     items = fields.Nested(LookupRacesSchema(many=True), missing = [])
     total_items = fields.Integer()
 
+class LookupSubscriptionsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupSubscriptions
+        exclude = ('created_at', 'updated_at')
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return LookupSubscriptions(**data)
+
+class LookupSubscriptionsOutputSchema(Schema):
+    items = fields.Nested(LookupSubscriptionsSchema(many=True), missing = [])
+    total_items = fields.Integer()
