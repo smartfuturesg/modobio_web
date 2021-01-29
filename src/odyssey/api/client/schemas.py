@@ -1,4 +1,3 @@
-from datetime import datetime
 from marshmallow import (
     Schema, 
     fields, 
@@ -10,9 +9,8 @@ from marshmallow import (
 )
 
 from odyssey import ma
-from odyssey.api.user.models import User
-from odyssey.api.lookup.models import LookupGoals
 from odyssey.api.client.models import (
+    ClientClinicalCareTeamAuthorizations,
     ClientConsent,
     ClientConsultContract,
     ClientInfo,
@@ -110,31 +108,6 @@ class NewRemoteClientSchema(Schema):
     def make_object(self, data, **kwargs):
         return ClientInfo(**data)
         
-#class ClientRemoteRegistrationPortalSchema(Schema):
-#    """
-#        holds client's access information for remote registration
-#    """
-#    email = fields.Email()
-#    user_id = fields.Integer()
-#    password = fields.String(dump_only=True)
-#    registration_portal_expiration = fields.DateTime(dump_only=True)
-#    registration_portal_id = fields.String(dump_only=True)
-#
-#    @post_load
-#    def make_object(self, data, **kwargs):
-#        remote_client_portal = RemoteRegistration(user_id=data["user_id"], email=data["email"])
-#        remote_client_portal.set_password()
-#        remote_client_portal.get_temp_registration_endpoint()
-#        return remote_client_portal
-
-
-#class RefreshRemoteRegistrationSchema(Schema):
-#    """
-#        refresh the remote registration password and link for the client
-#        with the provided email
-#    """
-#    email = fields.Email(required=True)
-
 class ClientConsentSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientConsent
@@ -281,6 +254,17 @@ class ClientDataTierSchema(Schema):
     stored_bytes = fields.Integer(description="total bytes stored for the client", missing=None)
     tier = fields.String(description="data storage tier. Either Tier 1/2/3", missing=None)
 
+class AllClientsDataTier(Schema):
+
+    items = fields.Nested(ClientDataTierSchema(many=True), missing=ClientDataTierSchema().load({}))
+    total_stored_bytes = fields.Integer(description="Total bytes stored for all clients", missing=0)
+    total_items = fields.Integer(description="number of clients in this payload", missing=0)
+
+
+####
+# Clinical Care team schemas
+####
+
 class ClientClinicalCareTeamInternalSchema(Schema):
     """
     Schema is used for serializing/deserializing clinical care team related payloads
@@ -290,6 +274,12 @@ class ClientClinicalCareTeamInternalSchema(Schema):
     firstname = fields.String(dump_only=True, missing=None)
     lastname = fields.String(dump_only=True, missing=None)
 
+class UserClinicalCareTeamSchema(Schema):
+
+    client_user_id = fields.Integer()
+    client_name = fields.String()
+    client_email = fields.String()
+
 class ClientClinicalCareTeamSchema(Schema):
     """
     Schema is used for nesting ClientClinicalCareTeamInternalSchema 
@@ -298,11 +288,30 @@ class ClientClinicalCareTeamSchema(Schema):
     care_team = fields.Nested(ClientClinicalCareTeamInternalSchema(many=True), missing=[])
     total_items = fields.Integer(dump_only=True)
 
-class AllClientsDataTier(Schema):
+class ClinicalCareTeamAuthorizaitonSchema(Schema):
+    """
+    Schmea for Clinical care team authorization objects. 
 
-    items = fields.Nested(ClientDataTierSchema(many=True), missing=ClientDataTierSchema().load({}))
-    total_stored_bytes = fields.Integer(description="Total bytes stored for all clients", missing=0)
-    total_items = fields.Integer(description="number of clients in this payload", missing=0)
+    Each instance is an entry into the ClientClinicalCareTeamAuthorizations table
+    """
+    user_id = fields.Integer(load_only=True)
+    team_member_user_id = fields.Integer(description="user_id for this clinical care team member")
+    team_member_firstname = fields.String(dump_only=True)
+    team_member_lastname = fields.String(dump_only=True)
+    team_member_email = fields.Email(dump_only=True)
+    resource_id = fields.Integer(description="id for the resource. See lookup table for resource ids")
+    display_name = fields.String(dump_only=True)
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return ClientClinicalCareTeamAuthorizations(**data)
+
+class ClinicalCareTeamAuthorizationNestedSchema(Schema):
+    """
+    Nests clinical care team authorization schema for API
+    """
+    clinical_care_team_authoriztion = fields.Nested(ClinicalCareTeamAuthorizaitonSchema(many=True), missing=[])
+
 
 class ClientMobileSettingsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -354,6 +363,7 @@ class ClientWeightSchema(ma.SQLAlchemyAutoSchema):
     @post_load
     def make_object(self, data, **kwargs):
         return ClientWeightHistory(**data)
+
 class ClientTokenRequestSchema(Schema):
     user_id = fields.Integer()
     firstname = fields.String(required=False, validate=validate.Length(min=1, max= 50), missing=None)

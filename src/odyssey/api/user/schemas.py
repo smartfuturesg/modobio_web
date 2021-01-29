@@ -117,8 +117,3 @@ class UserSubscriptionHistorySchema(Schema):
     client_subscription_history = fields.Nested(UserSubscriptionsSchema, many=True)
     staff_subscription_history = fields.Nested(UserSubscriptionsSchema, many=True)
 
-class UserClinicalCareTeamSchema(Schema):
-
-    client_user_id = fields.Integer()
-    client_name = fields.String()
-    client_email = fields.String()

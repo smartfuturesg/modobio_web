@@ -1,17 +1,14 @@
 import boto3
-from datetime import date, datetime, timedelta
-import jwt
+from datetime import datetime
 
 from flask import request, current_app
 from flask_accepts import accepts, responds
-from flask_restx import Resource, Api
+from flask_restx import Resource
 
 from odyssey.api import api
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.errors import (
     UserNotFound, 
-    ClientAlreadyExists, 
-    ClientNotFound,
     ContentNotFound,
     IllegalSetting, 
     InputError
@@ -23,6 +20,7 @@ from odyssey.api.client.models import (
     ClientConsent,
     ClientConsultContract,
     ClientClinicalCareTeam,
+    ClientClinicalCareTeamAuthorizations,
     ClientIndividualContract,
     ClientPolicies,
     ClientRelease,
@@ -42,14 +40,14 @@ from odyssey.api.doctor.models import (
     MedicalPhysicalExam,               
     MedicalSocialHistory
 )
-from odyssey.api.lookup.models import LookupGoals, LookupDrinks, LookupRaces
+from odyssey.api.lookup.models import LookupClinicalCareTeamResources, LookupGoals, LookupDrinks, LookupRaces
 from odyssey.api.physiotherapy.models import PTHistory 
 from odyssey.api.staff.models import StaffRecentClients
 from odyssey.api.trainer.models import FitnessQuestionnaire
 from odyssey.api.facility.models import RegisteredFacilities
 from odyssey.api.user.models import User, UserLogin
 from odyssey.utils.pdf import to_pdf, merge_pdfs
-from odyssey.utils.email import send_email_user_registration_portal, send_test_email
+from odyssey.utils.email import send_test_email
 from odyssey.utils.misc import check_client_existence, check_drink_existence
 from odyssey.api.client.schemas import(
     AllClientsDataTier,
@@ -58,7 +56,6 @@ from odyssey.api.client.schemas import(
     ClientConsentSchema,
     ClientConsultContractSchema,
     ClientIndividualContractSchema,
-    ClientInfoSchema,
     ClientClinicalCareTeamSchema,
     ClientMobileSettingsSchema,
     ClientPoliciesContractSchema, 
@@ -71,13 +68,13 @@ from odyssey.api.client.schemas import(
     ClientHeightSchema,
     ClientWeightSchema,
     ClientTokenRequestSchema,
-    NewRemoteClientSchema,
+    ClinicalCareTeamAuthorizationNestedSchema,
     SignAndDateSchema,
-    SignedDocumentsSchema
+    SignedDocumentsSchema,
+    UserClinicalCareTeamSchema
 )
 from odyssey.api.staff.schemas import StaffRecentClientsSchema
 from odyssey.api.facility.schemas import ClientSummarySchema
-from odyssey.api.user.schemas import UserSchema
 
 ns = api.namespace('client', description='Operations related to clients')
 
@@ -705,9 +702,9 @@ class ClientToken(Resource):
         return '', 200
 
 
-@ns.route('/clinical-care-team/<int:user_id>/')
+@ns.route('/clinical-care-team/members/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class ClinicalCareTeam(Resource):
+class ClinicalCareTeamMembers(Resource):
     """
     Create update and remove members of a client's clinical care team
     only the client themselves may have access to these operations.
@@ -739,7 +736,6 @@ class ClinicalCareTeam(Resource):
         """
         
         data = request.parsed_obj
-
 
         user = token_auth.current_user()[0]
 
@@ -870,6 +866,127 @@ class ClinicalCareTeam(Resource):
 
         return response
 
+@ns.route('/clinical-care-team/member-of/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class UserClinicalCareTeamApi(Resource):
+    """
+    Clinical care teams the speficied user is part of
+    
+    Endpoint for viewing and managing the list of clients who have the specified user as part of their care team.
+    """
+    @token_auth.login_required
+    @responds(schema=UserClinicalCareTeamSchema(many=True), api=ns, status_code=200)
+    def get(self, user_id):
+        """
+        returns the list of clients whose clinical care team the given user_id
+        is a part of
+        """
+
+        res = []
+        for client in ClientClinicalCareTeam.query.filter_by(team_member_user_id=user_id).all():
+            user = User.query.filter_by(user_id=client.user_id).one_or_none()
+            res.append({'client_user_id': user.user_id, 
+                        'client_name': ' '.join(filter(None, (user.firstname, user.middlename ,user.lastname))),
+                        'client_email': user.email})
+        
+        return res
+
+@ns.route('/clinical-care-team/resource-authorization/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class ClinicalCareTeamResourceAuthorization(Resource):
+    """
+    Create, update, remove, retrieve authorization of resource access for care team members.
+
+    Clinical care team members must individually be given access to resources. The available options can be found
+    by using the /lookup/care-team/resources/ (GET) API. 
+    """
+    @token_auth.login_required(user_type=('client',))
+    @accepts(schema=ClinicalCareTeamAuthorizationNestedSchema, api=ns)
+    @responds(schema=ClinicalCareTeamAuthorizationNestedSchema, api=ns, status_code=201)
+    def post(self, user_id):
+        """
+        Add new clinical care team authorizations for the specified user_id 
+        """
+        data = request.parsed_obj
+
+        current_team_ids = db.session.query(ClientClinicalCareTeam.team_member_user_id).filter(ClientClinicalCareTeam.user_id==user_id).all()
+        current_team_ids = [x[0] for x in current_team_ids if x[0] is not None]
+
+        care_team_resources = LookupClinicalCareTeamResources.query.all()
+        care_team_resources_ids = [x.resource_id for x in care_team_resources]
+
+        for authorization in data.get('clinical_care_team_authoriztion'):
+            if authorization.team_member_user_id in current_team_ids and authorization.resource_id in care_team_resources_ids:
+                authorization.user_id = user_id
+                db.session.add(authorization)
+            else:
+                raise InputError(message="team member not in care team or resource_id is invalid", status_code=400)
+        try:
+            db.session.commit()
+        except Exception as e:
+            raise InputError(message=e._message(), status_code=400)
+
+        return 
+
+    @token_auth.login_required(user_type=('client',))
+    @responds(schema=ClinicalCareTeamAuthorizationNestedSchema, api=ns, status_code=200)
+    def get(self, user_id):
+        """
+        Retrieve client's clinical care team authorizations
+        """
+
+        data = db.session.query(
+            ClientClinicalCareTeamAuthorizations.resource_id, 
+            LookupClinicalCareTeamResources.display_name,
+            User.firstname, 
+            User.lastname, 
+            User.email,
+            User.user_id
+            ).filter(
+                ClientClinicalCareTeamAuthorizations.user_id == user_id
+            ).filter(
+                User.user_id == ClientClinicalCareTeamAuthorizations.team_member_user_id
+            ).filter(ClientClinicalCareTeamAuthorizations.resource_id == LookupClinicalCareTeamResources.resource_id
+            ).all()
+        
+        care_team_auths =[]
+        for row in data:
+            tmp = {
+                'resource_id': row[0],
+                'display_name': row[1],
+                'team_member_firstname': row[2],
+                'team_member_lastname': row[3],
+                'team_member_email': row[4],
+                'team_member_user_id': row[5]}
+
+            care_team_auths.append(tmp)
+        
+        payload = {'clinical_care_team_authoriztion': care_team_auths}
+
+        return payload
+
+    @token_auth.login_required(user_type=('client',))
+    @accepts(schema=ClinicalCareTeamAuthorizationNestedSchema, api=ns)
+
+    def delete(self, user_id):
+        """
+        Remove a previously saved authorization. Takes the same payload as the POST method.
+        """
+        data = request.parsed_obj
+
+        for dat in data.get('clinical_care_team_authoriztion'):
+            authorization = ClientClinicalCareTeamAuthorizations.query.filter_by(
+                                                                                resource_id = dat.resource_id,
+                                                                                team_member_user_id = dat.team_member_user_id
+                                                                                ).one_or_none()
+            if authorization:
+                db.session.delete(authorization)
+
+        db.session.commit()
+
+        return {}, 200
+
+
 @ns.route('/drinks/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class ClientDrinksApi(Resource):
@@ -923,8 +1040,7 @@ class ClientDrinksApi(Resource):
 @ns.doc(params={'user_id': 'User ID number'})
 class ClientMobileSettingsApi(Resource):
     """
-    Create update and remove members of a client's clinical care team
-    only the client themselves may have access to these operations.
+    For the client to change their own mobile settings
     """
     @token_auth.login_required(user_type=('client',))
     @accepts(schema=ClientMobileSettingsSchema, api=ns)

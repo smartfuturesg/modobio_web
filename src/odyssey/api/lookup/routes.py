@@ -3,9 +3,17 @@ from flask_restx import Resource
 
 from odyssey.api import api
 from odyssey.utils.auth import token_auth
-from odyssey.api.lookup.models import LookupActivityTrackers, LookupDrinks, LookupDrinkIngredients, LookupGoals, LookupRaces
+from odyssey.api.lookup.models import (
+    LookupActivityTrackers, 
+    LookupClinicalCareTeamResources, 
+    LookupDrinks, 
+    LookupDrinkIngredients,
+    LookupGoals, 
+    LookupRaces
+)
 from odyssey.api.lookup.schemas import (
     LookupActivityTrackersOutputSchema, 
+    LookupCareTeamResourcesOutputSchema,
     LookupDrinksOutputSchema, 
     LookupDrinkIngredientsOutputSchema, 
     LookupGoalsOutputSchema,
@@ -138,4 +146,16 @@ class LookupRacesApi(Resource):
     def get(self):
         """get contents of races lookup table"""
         res = LookupRaces.query.all()
+        return {'total_items': len(res), 'items': res}
+
+@ns.route('/care-team/resources/')
+class LookupClinicalCareTeamResourcesApi(Resource):
+    """
+    Returns available resources that can be shared within clinical care teams
+    """
+    @token_auth.login_required
+    @responds(schema=LookupCareTeamResourcesOutputSchema, api=ns)
+    def get(self):
+        """get contents of clinical care team resources lookup table"""
+        res = LookupClinicalCareTeamResources.query.all()
         return {'total_items': len(res), 'items': res}
