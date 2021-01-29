@@ -42,7 +42,7 @@ target_metadata = current_app.extensions['migrate'].db.metadata
 current_app.config.from_object(Config())
 
 db_connection_string = current_app.config['SQLALCHEMY_DATABASE_URI']
-db_connection_string = 'postgresql://postgres:password@dev-r3.modobio.com'
+
 print(f"\n***\nUpdating/querying database using the following connection string: \n {db_connection_string}")
 print("continue? [Y,n]")
 answer = input()
