@@ -112,17 +112,18 @@ def _to_pdf(req_ctx, user_id, table, template=None, form=None):
             return
 
         ### Read HTML page
-        cssfile = pathlib.Path(__file__).parent / 'static' / 'style.css'
-        css = CSS(filename=cssfile)
-
         if template:
             session['staff_id'] = 1
             #session['clientname'] = client.fullname
             session['user_id'] = user_id
 
+            cssfile = pathlib.Path(__file__).parent.parent / 'legacy' / 'static' / 'style.css'
+            css = CSS(filename=cssfile)
+
             html = render_template(template, form=form, pdf=True)
         else:
             # TODO: get html of page from React frontend
+            css = CSS(string='')
             html = '<html><head></head><body>Nothing here yet</body></html>'
 
         ### Generate PDF document
