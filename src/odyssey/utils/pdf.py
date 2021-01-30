@@ -156,10 +156,11 @@ def _to_pdf(req_ctx, user_id, table, template=None, form=None):
         doc.pdf_path = pdf_path
         doc.pdf_hash = pdf_hash
         local_session.commit()
-        local_session.remove()
 
         if current_app.config['DEBUG']:
             print('PDF stored at:', pdf_path)
+
+    local_session.remove()
 
 def merge_pdfs(documents: list, user_id: int) -> str:
     """ Merge multiple pdf files into a single pdf.

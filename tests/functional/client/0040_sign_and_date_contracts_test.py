@@ -11,10 +11,6 @@ from .data import (
     clients_subscription_data
 )
 
-#Skipping this test, due to pytest hanging problem
-# import pytest
-# pytest.skip("Checking if this is the culprit", allow_module_level=True)
-
 def test_post_subscription_contract(test_client, init_database, staff_auth_header):
     """
     GIVEN a api end point for signing a contract
