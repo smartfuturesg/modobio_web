@@ -12,8 +12,8 @@ from .data import (
 )
 
 #Skipping this test, due to pytest hanging problem
-import pytest
-pytest.skip("Checking if this is the culprit", allow_module_level=True)
+# import pytest
+# pytest.skip("Checking if this is the culprit", allow_module_level=True)
 
 def test_post_subscription_contract(test_client, init_database, staff_auth_header):
     """

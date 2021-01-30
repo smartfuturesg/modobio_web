@@ -4,8 +4,8 @@ from odyssey.api.user.models import User, UserLogin
 from .data import clients_release_data
 
 #Skipping this test, due to pytest hanging problem
-import pytest
-pytest.skip("Checking if this is the culprit", allow_module_level=True)
+# import pytest
+# pytest.skip("Checking if this is the culprit", allow_module_level=True)
 
 def test_post_client_release(test_client, init_database, staff_auth_header):
     """
