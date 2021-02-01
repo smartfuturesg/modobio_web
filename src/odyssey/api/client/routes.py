@@ -772,7 +772,8 @@ class ClinicalCareTeamMembers(Resource):
         current_team_users = db.session.query(
                                     ClientClinicalCareTeam, User.firstname, User.lastname
                                 ).filter(
-                                    ClientClinicalCareTeam.team_member_user_id == User.user_id
+                                    ClientClinicalCareTeam.user_id == user_id
+                                ).filter(ClientClinicalCareTeam.team_member_user_id == User.user_id
                                 ).all()
         
         for team_member in current_team_users:
@@ -854,9 +855,9 @@ class ClinicalCareTeamMembers(Resource):
         current_team_users = db.session.query(
                                     ClientClinicalCareTeam, User.firstname, User.lastname
                                 ).filter(
-                                    ClientClinicalCareTeam.team_member_user_id == User.user_id
+                                    ClientClinicalCareTeam.user_id == user_id
+                                ).filter(ClientClinicalCareTeam.team_member_user_id == User.user_id
                                 ).all()
-        
         for team_member in current_team_users:
             team_member[0].__dict__.update({'firstname': team_member[1], 'lastname': team_member[2]})
             current_team.append(team_member[0])
