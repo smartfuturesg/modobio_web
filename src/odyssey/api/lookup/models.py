@@ -603,7 +603,7 @@ class LookupNotifications(db.Model):
     :type: :class:`datetime.datetime`
     """
 
-    notification_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    notification_type_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     Id of this notification type.
 

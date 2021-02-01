@@ -568,7 +568,7 @@ class UserNotificationsPutApi(Resource):
 
     @token_auth.login_required
     @accepts(schema=UserNotificationsSchema, api=ns)
-    @responds(schema=UserNotificationsSchema, api=ns, status_code=200)
+    @responds(schema=UserNotificationsSchema, api=ns, status_code=201)
     def put(self, idx):
         """
         Updates the notification specified by the given idx.
