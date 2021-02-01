@@ -3,6 +3,7 @@ from marshmallow import Schema, fields, post_load
 from odyssey import ma
 from odyssey.api.lookup.models import (
     LookupActivityTrackers, 
+    LookupClinicalCareTeamResources,
     LookupClientBookingWindow,
     LookupDrinks, 
     LookupDrinkIngredients, 
@@ -83,6 +84,20 @@ class LookupGoalsSchema(ma.SQLAlchemyAutoSchema):
     @post_load
     def make_object(self, data, **kwargs):
         return LookupGoals(**data)
+
+class LookupCareTeamResourcesSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupClinicalCareTeamResources
+        exclude = ('created_at', 'updated_at', 'resource_name')
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return LookupClinicalCareTeamResources(**data)
+
+
+class LookupCareTeamResourcesOutputSchema(Schema):
+    items = fields.Nested(LookupCareTeamResourcesSchema(many=True), missing = [])
+    total_items = fields.Integer()
 
 class LookupGoalsOutputSchema(Schema):
     items = fields.Nested(LookupGoalsSchema(many=True), missing = [])

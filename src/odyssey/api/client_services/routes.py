@@ -59,11 +59,11 @@ class NewUserClientServices(Resource):
 
         # add new user subscription information
         client_sub = UserSubscriptionsSchema().load({
-            'user_id': user.user_id,
             'subscription_type': 'unsubscribed',
             'subscription_rate': 0.0,
             'is_staff': False
         })
+        client_sub.user_id = user.user_id
         db.session.add(client_sub)
         db.session.commit()
 

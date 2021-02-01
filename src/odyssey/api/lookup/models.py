@@ -527,7 +527,6 @@ class LookupRaces(db.Model):
 
     :type: string
     """
-
 class LookupSubscriptions(db.Model):
     """ Static list of subscription plans that a user can choose from. 
     """
@@ -637,4 +636,47 @@ class LookupNotifications(db.Model):
     Color names are from the list of 140 colors supported by all browsers
     original means do not apply any color to the svg
     See: https://htmlcolorcodes.com/color-names/
+    """
+
+class LookupClinicalCareTeamResources(db.Model):
+    """
+    Stores all the database tables which can be accessed by a clinical care team.
+    Table names are given an index in order to be referenced by other tables
+    """
+
+    __tablename__ = 'LookupClinicalCareTeamResources'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    resource_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    ID for the table. 
+
+    :type: integer, primary key, autoincrementing
+    """
+
+    resource_name = db.Column(db.String)
+    """
+    Table name 
+
+    :type: string
+    """
+
+    display_name = db.Column(db.String)
+    """
+    Name of resource to display to client. We do not want table names getting passed around.
+    
+    :type: string
     """

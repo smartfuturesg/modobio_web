@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta
-import secrets, boto3, pathlib
+import boto3
 import jwt
 
-from flask import current_app, request, url_for, jsonify
+from flask import current_app, request, jsonify
 from flask_accepts import accepts, responds
 from flask_restx import Resource
 from werkzeug.security import check_password_hash
@@ -10,8 +10,11 @@ from werkzeug.security import check_password_hash
 
 from odyssey.api import api
 from odyssey.api.client.schemas import ClientInfoSchema
+<<<<<<< HEAD
 from odyssey.api.client.models import ClientClinicalCareTeam
 from odyssey.api.lookup.models import LookupNotifications
+=======
+>>>>>>> release-4
 from odyssey.api.staff.schemas import StaffProfileSchema, StaffRolesSchema
 from odyssey.api.user.models import User, UserLogin, UserRemovalRequests, UserSubscriptions, UserTokensBlacklist, UserNotifications
 from odyssey.api.staff.models import StaffRoles
@@ -21,17 +24,19 @@ from odyssey.api.user.schemas import (
     UserPasswordRecoveryContactSchema,
     UserPasswordResetSchema,
     UserPasswordUpdateSchema,
-    NewUserSchema,
     UserInfoSchema,
     UserSubscriptionsSchema,
     UserSubscriptionHistorySchema,
     NewStaffUserSchema,
+<<<<<<< HEAD
     UserClinicalCareTeamSchema,
     UserNotificationsSchema
+=======
+>>>>>>> release-4
 ) 
 from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import PASSWORD_RESET_URL, DB_SERVER_TIME
-from odyssey.utils.errors import ContentNotFound, InputError, StaffEmailInUse, ClientEmailInUse, UnauthorizedUser
+from odyssey.utils.errors import InputError, StaffEmailInUse, ClientEmailInUse, UnauthorizedUser
 from odyssey.utils.email import send_email_password_reset, send_email_delete_account
 from odyssey.utils.misc import check_user_existence, check_client_existence, check_staff_existence, verify_jwt
 
@@ -142,11 +147,11 @@ class NewStaffUser(Resource):
 
                 # add new staff subscription information
                 staff_sub = UserSubscriptionsSchema().load({
-                    'user_id': user.user_id,
                     'subscription_type': 'subscribed',
                     'subscription_rate': 0.0,
                     'is_staff': True
                 })
+                staff_sub.user_id = user.user_id
                 db.session.add(staff_sub)
         else:
             # user account does not yet exist for this email
@@ -171,11 +176,11 @@ class NewStaffUser(Resource):
 
             # add new user subscription information
             staff_sub = UserSubscriptionsSchema().load({
-                'user_id': user.user_id,
                 'subscription_type': 'subscribed',
                 'subscription_rate': 0.0,
                 'is_staff': True
             })
+            staff_sub.user_id = user.user_id
             db.session.add(staff_sub)
             
         # create entries for role assignments 
@@ -243,11 +248,11 @@ class NewClientUser(Resource):
 
                 # add new client subscription information
                 client_sub = UserSubscriptionsSchema().load({
-                    'user_id': user.user_id,
                     'subscription_type': 'unsubscribed',
                     'subscription_rate': 0.0,
                     'is_staff': False
                 })
+                client_sub.user_id = user.user_id
                 db.session.add(client_sub)
         else:
             # user account does not yet exist for this email
@@ -265,11 +270,11 @@ class NewClientUser(Resource):
 
             # add new user subscription information
             client_sub = UserSubscriptionsSchema().load({
-                'user_id': user.user_id,
                 'subscription_type': 'unsubscribed',
                 'subscription_rate': 0.0,
                 'is_staff': False
             })
+            client_sub.user_id = user.user_id
             db.session.add(client_sub)
 
         payload=user.__dict__
@@ -481,9 +486,9 @@ class UserSubscriptionApi(Resource):
             'subscription_type': request.parsed_obj.subscription_type,
             'subscription_rate': request.parsed_obj.subscription_rate,
             'is_staff': request.parsed_obj.is_staff,
-            'user_id': user_id
         }
         new_sub = UserSubscriptionsSchema().load(new_data)
+        new_sub.user_id = user_id
         db.session.add(new_sub)
         db.session.commit()
 
@@ -528,17 +533,6 @@ class UserLogoutApi(Resource):
         db.session.commit()
 
         return 200
-@ns.route('/clinical-care-team/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
-class UserClinicalCareTeamApi(Resource):
-
-    @token_auth.login_required
-    @responds(schema=UserClinicalCareTeamSchema(many=True), api=ns, status_code=200)
-    def get(self, user_id):
-        """
-        returns the list of clients whose clinical care team the given user_id
-        is a part of
-        """
 
         res = []
         for client in ClientClinicalCareTeam.query.filter_by(team_member_user_id=user_id).all():
