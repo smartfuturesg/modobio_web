@@ -1,6 +1,6 @@
 delete from "LookupNotifications" 
-			where notification_type >= 1;
-alter sequence "LookupNotifications_notification_type_seq"
+			where notification_type_id >= 1;
+alter sequence "LookupNotifications_notification_type_id_seq"
   restart with 1;
 
 INSERT INTO "LookupNotifications" ("notification_type","icon","background_color","symbol_color") 
