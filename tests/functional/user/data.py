@@ -115,3 +115,11 @@ users_subscription_data = {
   "subscription_rate": 9.99,
   "subscription_type": "subscribed"
 }
+
+users_notifications_data = {
+  'title': "Test2",
+  'content': "Longer Test2",
+  'action': 'https.test2.com',
+  'read': False,
+  'deleted': True
+}
