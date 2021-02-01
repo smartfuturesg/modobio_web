@@ -21,12 +21,12 @@ def upgrade():
     op.create_table('LookupNotifications',
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
-    sa.Column('notification_id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('notification_type_id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('notification_type', sa.String(), nullable=True),
     sa.Column('icon', sa.String(), nullable=True),
     sa.Column('background_color', sa.String(), nullable=True),
     sa.Column('symbol_color', sa.String(), nullable=True),
-    sa.PrimaryKeyConstraint('notification_id')
+    sa.PrimaryKeyConstraint('notification_type_id')
     )
     op.create_table('UserNotifications',
     sa.Column('created_at', sa.DateTime(), nullable=True),
@@ -41,7 +41,7 @@ def upgrade():
     sa.Column('is_staff', sa.Boolean(), nullable=True),
     sa.Column('read', sa.Boolean(), nullable=True),
     sa.Column('deleted', sa.Boolean(), nullable=True),
-    sa.ForeignKeyConstraint(['notification_type_id'], ['LookupNotifications.notification_id'], ),
+    sa.ForeignKeyConstraint(['notification_type_id'], ['LookupNotifications.notification_type_id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['User.user_id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('idx')
     )
