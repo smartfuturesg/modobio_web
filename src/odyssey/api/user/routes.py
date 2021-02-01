@@ -10,11 +10,8 @@ from werkzeug.security import check_password_hash
 
 from odyssey.api import api
 from odyssey.api.client.schemas import ClientInfoSchema
-<<<<<<< HEAD
 from odyssey.api.client.models import ClientClinicalCareTeam
 from odyssey.api.lookup.models import LookupNotifications
-=======
->>>>>>> release-4
 from odyssey.api.staff.schemas import StaffProfileSchema, StaffRolesSchema
 from odyssey.api.user.models import User, UserLogin, UserRemovalRequests, UserSubscriptions, UserTokensBlacklist, UserNotifications
 from odyssey.api.staff.models import StaffRoles
@@ -28,11 +25,8 @@ from odyssey.api.user.schemas import (
     UserSubscriptionsSchema,
     UserSubscriptionHistorySchema,
     NewStaffUserSchema,
-<<<<<<< HEAD
     UserClinicalCareTeamSchema,
     UserNotificationsSchema
-=======
->>>>>>> release-4
 ) 
 from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import PASSWORD_RESET_URL, DB_SERVER_TIME
