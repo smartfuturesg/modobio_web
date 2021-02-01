@@ -4,15 +4,16 @@ from flask_restx import Resource
 from odyssey.api import api
 from odyssey.utils.auth import token_auth
 from odyssey.api.lookup.models import (
-     LookupActivityTrackers,
-     LookupClientBookingWindow,
-     LookupDrinks, 
-     LookupDrinkIngredients, 
-     LookupGoals, 
-     LookupRaces,
-     LookupSubscriptions,
-     LookupTelehealthSessionCost,
-     LookupTelehealthSessionDuration
+    LookupActivityTrackers, 
+    LookupClientBookingWindow,
+    LookupClinicalCareTeamResources, 
+    LookupDrinks, 
+    LookupDrinkIngredients,
+    LookupGoals, 
+    LookupRaces,
+    LookupSubscriptions,
+    LookupTelehealthSessionCost,
+    LookupTelehealthSessionDuration
 )
 from odyssey.api.lookup.schemas import (
     LookupActivityTrackersOutputSchema, 
@@ -23,7 +24,8 @@ from odyssey.api.lookup.schemas import (
     LookupRacesOutputSchema,
     LookupSubscriptionsOutputSchema,
     LookupTelehealthSessionCostOutputSchema,
-    LookupTelehealthSessionDurationOutputSchema
+    LookupTelehealthSessionDurationOutputSchema,
+    LookupCareTeamResourcesOutputSchema
 )
 from odyssey.utils.misc import check_drink_existence
 
@@ -214,6 +216,18 @@ class LookupRacesApi(Resource):
         res = LookupRaces.query.all()
         return {'total_items': len(res), 'items': res}
 
+@ns.route('/care-team/resources/')
+class LookupClinicalCareTeamResourcesApi(Resource):
+    """
+    Returns available resources that can be shared within clinical care teams
+    """
+    @token_auth.login_required
+    @responds(schema=LookupCareTeamResourcesOutputSchema, api=ns)
+    def get(self):
+        """get contents of clinical care team resources lookup table"""
+        res = LookupClinicalCareTeamResources.query.all()
+        return {'total_items': len(res), 'items': res}
+        
 @ns.route('/subscriptions/')
 class LookupSubscriptionsApi(Resource):
 
