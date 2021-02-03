@@ -370,18 +370,18 @@ class UserSubscriptions(db.Model):
     :type: datetime
     """
 
-    subscription_rate = db.Column(db.Float)
+    subscription_status = db.Column(db.String)
     """
-    Monthly cost of the subscription in USD
-
-    :type: float
-    """
-
-    subscription_type = db.Column(db.String)
-    """
-    Type of this subscription. Possible values are: unsubscribed, subscribed, free_trial and sponsored
+    Status of this subscription. Possible values are: unsubscribed, subscribed, free_trial and sponsored
 
     :type: String
+    """
+
+    subscription_type_id = db.Column(db.Integer, db.ForeignKey('LookupSubscriptions.sub_id'))
+    """
+    Id of this subscription plan. Comes from the LookupSubscriptions table.
+
+    :type: int, foreign key('LookupSubscriptions.sub_id')
     """
 
     
