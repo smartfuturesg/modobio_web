@@ -58,7 +58,7 @@ class ApiUser(Resource):
 
         db.session.add(removal_request)
         db.session.flush()
-        breakpoint()
+        
         #Get a list of all tables in database
         tableList = db.session.execute("SELECT distinct(table_name) from information_schema.columns\
                 WHERE column_name='user_id';").fetchall()
