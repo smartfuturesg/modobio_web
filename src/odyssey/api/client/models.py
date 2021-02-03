@@ -10,7 +10,7 @@ import secrets
 
 from datetime import datetime, timedelta
 from hashlib import md5
-from sqlalchemy import text
+from sqlalchemy import text, UniqueConstraint
 from sqlalchemy.orm.query import Query
 from odyssey.utils.constants import DB_SERVER_TIME, ALPHANUMERIC
 from odyssey import db, whooshee
@@ -1340,6 +1340,8 @@ class ClientClinicalCareTeamAuthorizations(db.Model):
 
     __tablename__ = 'ClientClinicalCareTeamAuthorizations'
 
+    __table_args__ = (UniqueConstraint('user_id', 'team_member_user_id', 'resource_id', name='care_team_auth_unique_resource_user_team_member_ids'),)
+
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     Table index.
@@ -1382,4 +1384,3 @@ class ClientClinicalCareTeamAuthorizations(db.Model):
 
     :type: int, foreign key to :attr:`LookupClinicalCareTeamResources.resource_id <odyssey.models.lookup.LookupClinicalCareTeamResources.resource_id>`
     """
-    
