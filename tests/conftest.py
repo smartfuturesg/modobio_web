@@ -75,8 +75,8 @@ def init_database():
     users_client_new_info_data['user_id'] = client_1.user_id
     client_1_info = ClientInfo(**users_client_new_info_data)
     client_1_sub = UserSubscriptionsSchema().load({
-    'subscription_type': 'unsubscribed',
-    'subscription_rate': 0.0,
+    'subscription_type_id': 1,
+    'subscription_status': 'unsubscribed',
     'is_staff': False
     })
     client_1_sub.user_id = client_1.user_id
