@@ -59,8 +59,8 @@ class NewUserClientServices(Resource):
 
         # add new user subscription information
         client_sub = UserSubscriptionsSchema().load({
-            'subscription_type': 'unsubscribed',
-            'subscription_rate': 0.0,
+            'subscription_type_id': 1,
+            'subscription_status': 'unsubscribed',
             'is_staff': False
         })
         client_sub.user_id = user.user_id
