@@ -18,7 +18,7 @@ from PyPDF2 import PdfFileMerger
 from weasyprint import HTML, CSS
 
 from odyssey import db
-from odyssey.api.client.models import *
+from odyssey.api.client.models import ClientInfo
 
 _executor = concurrent.futures.ThreadPoolExecutor(thread_name_prefix='PDF_')
 
@@ -112,17 +112,18 @@ def _to_pdf(req_ctx, user_id, table, template=None, form=None):
             return
 
         ### Read HTML page
-        cssfile = pathlib.Path(__file__).parent / 'static' / 'style.css'
-        css = CSS(filename=cssfile)
-
         if template:
             session['staff_id'] = 1
             #session['clientname'] = client.fullname
             session['user_id'] = user_id
 
+            cssfile = pathlib.Path(__file__).parent.parent / 'legacy' / 'static' / 'style.css'
+            css = CSS(filename=cssfile)
+
             html = render_template(template, form=form, pdf=True)
         else:
             # TODO: get html of page from React frontend
+            css = CSS(string='')
             html = '<html><head></head><body>Nothing here yet</body></html>'
 
         ### Generate PDF document
@@ -155,10 +156,11 @@ def _to_pdf(req_ctx, user_id, table, template=None, form=None):
         doc.pdf_path = pdf_path
         doc.pdf_hash = pdf_hash
         local_session.commit()
-        local_session.remove()
 
         if current_app.config['DEBUG']:
             print('PDF stored at:', pdf_path)
+
+    local_session.remove()
 
 def merge_pdfs(documents: list, user_id: int) -> str:
     """ Merge multiple pdf files into a single pdf.

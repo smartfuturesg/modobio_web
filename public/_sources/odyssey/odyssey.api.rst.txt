@@ -1,24 +1,34 @@
-API
-===
+API endpoints
+=============
 
-.. automodule:: odyssey.api
-   :members:
-   :member-order: bysource
-   :undoc-members:
-   :show-inheritance:
+See the description in :ref:`db_models` for further explanation.
+
+Entities
+--------
 
 .. toctree::
 
-   User <odyssey.api.users>
-   Client <odyssey.api.clients>
-   Staff <odyssey.api.staff>
-   Doctor <odyssey.api.doctor>
-   Physical therapist <odyssey.api.pt>
-   Trainer <odyssey.api.trainer>
-   Remote registration <odyssey.api.remote_clients>
-   Registered facilities <odyssey.api.registered_facilities>
-   Wearable devices <odyssey.api.wearables>
-   Authorization tokens <odyssey.api.tokens>
-   Error messages <odyssey.api.errors>
-   Postman <odyssey.api.postman>
-   Version <odyssey.api.version>
+   User <odyssey.api.user.routes>
+   Client <odyssey.api.client.routes>
+   Staff <odyssey.api.staff.routes>
+
+Roles
+-----
+
+.. toctree::
+
+   Client services <odyssey.api.client_services.routes>
+   Doctor <odyssey.api.doctor.routes>
+   Physical therapist <odyssey.api.physiotherapy.routes>
+   Trainer <odyssey.api.trainer.routes>
+
+Other
+-----
+
+.. toctree::
+
+   Wearable devices <odyssey.api.wearables.routes>
+   Facilities <odyssey.api.facility.routes>
+   Lookup tables <odyssey.api.lookup.routes>
+   Postman <odyssey.api.misc.postman>
+   Version <odyssey.api.version.routes>
