@@ -45,5 +45,7 @@ deploy:
     - next-release
     - /release-[0-9]+/
   script:
+    - echo "Updating version."
+    - bash /home/gitlab-runner/update_version.sh zan/odyssey $CI_COMMIT_BRANCH
     - echo "Deploying update."
     - bash /home/gitlab-runner/dev_update.sh $CI_PROJECT_NAME $CI_COMMIT_BRANCH
