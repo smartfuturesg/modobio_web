@@ -305,11 +305,11 @@ class PasswordResetEmail(Resource):
         password_reset_token = jwt.encode({'exp': datetime.utcnow()+timedelta(minutes = 15), 
                                   'sid': user.user_id}, 
                                   secret, 
-                                  algorithm='HS256').decode("utf-8") 
+                                  algorithm='HS256')
                                   
         send_email_password_reset(user.email, password_reset_token)
 
-        if current_app.env == "development":
+        if current_app.config['LOCAL_CONFIG']:
             return jsonify({"token": password_reset_token,
                             "password_reset_url" : PASSWORD_RESET_URL.format(password_reset_token)})
             

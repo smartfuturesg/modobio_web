@@ -261,7 +261,7 @@ class UserLogin(db.Model):
                             'ttype': token_type
                             }, 
                             secret, 
-                            algorithm='HS256').decode("utf-8")
+                            algorithm='HS256')
 
 class UserRemovalRequests(db.Model):
     """ User removal request table.
