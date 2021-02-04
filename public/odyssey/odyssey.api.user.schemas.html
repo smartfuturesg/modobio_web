@@ -1,0 +1,488 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>odyssey.api.user.schemas &mdash; Odyssey version: 0.1.100 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="odyssey.api.client.schemas" href="odyssey.api.client.schemas.html" />
+    <link rel="prev" title="Validation schemas" href="odyssey.schemas.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Odyssey
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                version: 0.1.100
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="odyssey.config.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.models.html">Database models</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="odyssey.schemas.html">Validation schemas</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">User</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.client.schemas.html">Client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.staff.schemas.html">Staff</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.client_services.schemas.html">Client services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.doctor.schemas.html">Doctor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.physiotherapy.schemas.html">Physical therapist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.trainer.schemas.html">Trainer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.wearables.schemas.html">Wearable devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.facility.schemas.html">Facilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.lookup.schemas.html">Lookup tables</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.api.html">API endpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.utils.html">Utilities</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Odyssey</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="odyssey.schemas.html">Validation schemas</a> &raquo;</li>
+        
+      <li>odyssey.api.user.schemas</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/odyssey/odyssey.api.user.schemas.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-odyssey.api.user.schemas">
+<span id="odyssey-api-user-schemas"></span><h1>odyssey.api.user.schemas<a class="headerlink" href="#module-odyssey.api.user.schemas" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="odyssey.api.user.schemas.UserSchema">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.user.schemas.</code><code class="sig-name descname">UserSchema</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.schemas.UserSchema" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_marshmallow.sqla.SQLAlchemyAutoSchema</span></code></p>
+<dl class="py class">
+<dt id="odyssey.api.user.schemas.UserSchema.Meta">
+<em class="property">class </em><code class="sig-name descname">Meta</code><a class="headerlink" href="#odyssey.api.user.schemas.UserSchema.Meta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py attribute">
+<dt id="odyssey.api.user.schemas.UserSchema.Meta.model">
+<code class="sig-name descname">model</code><a class="headerlink" href="#odyssey.api.user.schemas.UserSchema.Meta.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="odyssey.api.user.models.html#odyssey.api.user.models.User" title="odyssey.api.user.models.User"><code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.api.user.models.User</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.user.schemas.UserSchema.Meta.exclude">
+<code class="sig-name descname">exclude</code><em class="property"> = ('created_at', 'updated_at')</em><a class="headerlink" href="#odyssey.api.user.schemas.UserSchema.Meta.exclude" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.user.schemas.UserSchema.Meta.dump_only">
+<code class="sig-name descname">dump_only</code><em class="property"> = ('password', 'modobio_id')</em><a class="headerlink" href="#odyssey.api.user.schemas.UserSchema.Meta.dump_only" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.user.schemas.UserSchema.Meta.sqla_session">
+<code class="sig-name descname">sqla_session</code><em class="property"> = &lt;flask_marshmallow.sqla.DummySession object&gt;</em><a class="headerlink" href="#odyssey.api.user.schemas.UserSchema.Meta.sqla_session" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.api.user.schemas.UserSchema.make_object">
+<code class="sig-name descname">make_object</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.schemas.UserSchema.make_object" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.user.schemas.UserSchema.opts">
+<code class="sig-name descname">opts</code><em class="property">: SchemaOpts</em><em class="property"> = &lt;flask_marshmallow.sqla.SQLAlchemyAutoSchemaOpts object&gt;</em><a class="headerlink" href="#odyssey.api.user.schemas.UserSchema.opts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.api.user.schemas.UserLoginSchema">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.user.schemas.</code><code class="sig-name descname">UserLoginSchema</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.schemas.UserLoginSchema" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_marshmallow.sqla.SQLAlchemyAutoSchema</span></code></p>
+<dl class="py class">
+<dt id="odyssey.api.user.schemas.UserLoginSchema.Meta">
+<em class="property">class </em><code class="sig-name descname">Meta</code><a class="headerlink" href="#odyssey.api.user.schemas.UserLoginSchema.Meta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py attribute">
+<dt id="odyssey.api.user.schemas.UserLoginSchema.Meta.model">
+<code class="sig-name descname">model</code><a class="headerlink" href="#odyssey.api.user.schemas.UserLoginSchema.Meta.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="odyssey.api.user.models.html#odyssey.api.user.models.UserLogin" title="odyssey.api.user.models.UserLogin"><code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.api.user.models.UserLogin</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.user.schemas.UserLoginSchema.Meta.sqla_session">
+<code class="sig-name descname">sqla_session</code><em class="property"> = &lt;flask_marshmallow.sqla.DummySession object&gt;</em><a class="headerlink" href="#odyssey.api.user.schemas.UserLoginSchema.Meta.sqla_session" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.api.user.schemas.UserLoginSchema.make_object">
+<code class="sig-name descname">make_object</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.schemas.UserLoginSchema.make_object" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.user.schemas.UserLoginSchema.opts">
+<code class="sig-name descname">opts</code><em class="property">: SchemaOpts</em><em class="property"> = &lt;flask_marshmallow.sqla.SQLAlchemyAutoSchemaOpts object&gt;</em><a class="headerlink" href="#odyssey.api.user.schemas.UserLoginSchema.opts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.api.user.schemas.UserInfoSchema">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.user.schemas.</code><code class="sig-name descname">UserInfoSchema</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.schemas.UserInfoSchema" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_marshmallow.sqla.SQLAlchemyAutoSchema</span></code></p>
+<dl class="py class">
+<dt id="odyssey.api.user.schemas.UserInfoSchema.Meta">
+<em class="property">class </em><code class="sig-name descname">Meta</code><a class="headerlink" href="#odyssey.api.user.schemas.UserInfoSchema.Meta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py attribute">
+<dt id="odyssey.api.user.schemas.UserInfoSchema.Meta.model">
+<code class="sig-name descname">model</code><a class="headerlink" href="#odyssey.api.user.schemas.UserInfoSchema.Meta.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="odyssey.api.user.models.html#odyssey.api.user.models.User" title="odyssey.api.user.models.User"><code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.api.user.models.User</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.user.schemas.UserInfoSchema.Meta.exclude">
+<code class="sig-name descname">exclude</code><em class="property"> = ('created_at', 'updated_at')</em><a class="headerlink" href="#odyssey.api.user.schemas.UserInfoSchema.Meta.exclude" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.user.schemas.UserInfoSchema.Meta.load_only">
+<code class="sig-name descname">load_only</code><em class="property"> = 'password'</em><a class="headerlink" href="#odyssey.api.user.schemas.UserInfoSchema.Meta.load_only" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.user.schemas.UserInfoSchema.Meta.dump_only">
+<code class="sig-name descname">dump_only</code><em class="property"> = ('is_staff', 'is_client')</em><a class="headerlink" href="#odyssey.api.user.schemas.UserInfoSchema.Meta.dump_only" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.user.schemas.UserInfoSchema.Meta.sqla_session">
+<code class="sig-name descname">sqla_session</code><em class="property"> = &lt;flask_marshmallow.sqla.DummySession object&gt;</em><a class="headerlink" href="#odyssey.api.user.schemas.UserInfoSchema.Meta.sqla_session" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.user.schemas.UserInfoSchema.opts">
+<code class="sig-name descname">opts</code><em class="property">: SchemaOpts</em><em class="property"> = &lt;flask_marshmallow.sqla.SQLAlchemyAutoSchemaOpts object&gt;</em><a class="headerlink" href="#odyssey.api.user.schemas.UserInfoSchema.opts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.api.user.schemas.NewClientUserSchema">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.user.schemas.</code><code class="sig-name descname">NewClientUserSchema</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span></em>, <em class="sig-param"><span class="n">only</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Union<span class="p">[</span>Sequence<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">, </span>Set<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">exclude</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>Sequence<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">, </span>Set<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em>, <em class="sig-param"><span class="n">many</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">context</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Dict<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">load_only</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>Sequence<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">, </span>Set<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em>, <em class="sig-param"><span class="n">dump_only</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>Sequence<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">, </span>Set<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em>, <em class="sig-param"><span class="n">partial</span><span class="p">:</span> <span class="n">Union<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a><span class="p">, </span>Sequence<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">, </span>Set<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">unknown</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.schemas.NewClientUserSchema" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">marshmallow.schema.Schema</span></code></p>
+<p>Schema for validating payloads from the creation of a new client user</p>
+<dl class="py attribute">
+<dt id="odyssey.api.user.schemas.NewClientUserSchema.opts">
+<code class="sig-name descname">opts</code><em class="property">: SchemaOpts</em><em class="property"> = &lt;marshmallow.schema.SchemaOpts object&gt;</em><a class="headerlink" href="#odyssey.api.user.schemas.NewClientUserSchema.opts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.api.user.schemas.UserInfoPutSchema">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.user.schemas.</code><code class="sig-name descname">UserInfoPutSchema</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.schemas.UserInfoPutSchema" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_marshmallow.sqla.SQLAlchemyAutoSchema</span></code></p>
+<dl class="py class">
+<dt id="odyssey.api.user.schemas.UserInfoPutSchema.Meta">
+<em class="property">class </em><code class="sig-name descname">Meta</code><a class="headerlink" href="#odyssey.api.user.schemas.UserInfoPutSchema.Meta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py attribute">
+<dt id="odyssey.api.user.schemas.UserInfoPutSchema.Meta.model">
+<code class="sig-name descname">model</code><a class="headerlink" href="#odyssey.api.user.schemas.UserInfoPutSchema.Meta.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="odyssey.api.user.models.html#odyssey.api.user.models.User" title="odyssey.api.user.models.User"><code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.api.user.models.User</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.user.schemas.UserInfoPutSchema.Meta.exclude">
+<code class="sig-name descname">exclude</code><em class="property"> = ('created_at', 'updated_at')</em><a class="headerlink" href="#odyssey.api.user.schemas.UserInfoPutSchema.Meta.exclude" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.user.schemas.UserInfoPutSchema.Meta.dump_only">
+<code class="sig-name descname">dump_only</code><em class="property"> = ('is_staff', 'is_client', 'modobio_id', 'user_id')</em><a class="headerlink" href="#odyssey.api.user.schemas.UserInfoPutSchema.Meta.dump_only" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.user.schemas.UserInfoPutSchema.Meta.sqla_session">
+<code class="sig-name descname">sqla_session</code><em class="property"> = &lt;flask_marshmallow.sqla.DummySession object&gt;</em><a class="headerlink" href="#odyssey.api.user.schemas.UserInfoPutSchema.Meta.sqla_session" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.user.schemas.UserInfoPutSchema.opts">
+<code class="sig-name descname">opts</code><em class="property">: SchemaOpts</em><em class="property"> = &lt;flask_marshmallow.sqla.SQLAlchemyAutoSchemaOpts object&gt;</em><a class="headerlink" href="#odyssey.api.user.schemas.UserInfoPutSchema.opts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.api.user.schemas.StaffInfoSchema">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.user.schemas.</code><code class="sig-name descname">StaffInfoSchema</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span></em>, <em class="sig-param"><span class="n">only</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Union<span class="p">[</span>Sequence<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">, </span>Set<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">exclude</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>Sequence<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">, </span>Set<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em>, <em class="sig-param"><span class="n">many</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">context</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Dict<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">load_only</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>Sequence<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">, </span>Set<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em>, <em class="sig-param"><span class="n">dump_only</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>Sequence<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">, </span>Set<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em>, <em class="sig-param"><span class="n">partial</span><span class="p">:</span> <span class="n">Union<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a><span class="p">, </span>Sequence<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">, </span>Set<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">unknown</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.schemas.StaffInfoSchema" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">marshmallow.schema.Schema</span></code></p>
+<p>Staff-user specific creation payload validation
+Currently just holds access_roles</p>
+<dl class="py attribute">
+<dt id="odyssey.api.user.schemas.StaffInfoSchema.opts">
+<code class="sig-name descname">opts</code><em class="property">: SchemaOpts</em><em class="property"> = &lt;marshmallow.schema.SchemaOpts object&gt;</em><a class="headerlink" href="#odyssey.api.user.schemas.StaffInfoSchema.opts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.api.user.schemas.NewUserSchema">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.user.schemas.</code><code class="sig-name descname">NewUserSchema</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span></em>, <em class="sig-param"><span class="n">only</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Union<span class="p">[</span>Sequence<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">, </span>Set<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">exclude</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>Sequence<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">, </span>Set<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em>, <em class="sig-param"><span class="n">many</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">context</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Dict<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">load_only</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>Sequence<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">, </span>Set<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em>, <em class="sig-param"><span class="n">dump_only</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>Sequence<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">, </span>Set<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em>, <em class="sig-param"><span class="n">partial</span><span class="p">:</span> <span class="n">Union<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a><span class="p">, </span>Sequence<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">, </span>Set<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">unknown</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.schemas.NewUserSchema" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">marshmallow.schema.Schema</span></code></p>
+<p>General purpose user creation schema</p>
+<dl class="py attribute">
+<dt id="odyssey.api.user.schemas.NewUserSchema.opts">
+<code class="sig-name descname">opts</code><em class="property">: SchemaOpts</em><em class="property"> = &lt;marshmallow.schema.SchemaOpts object&gt;</em><a class="headerlink" href="#odyssey.api.user.schemas.NewUserSchema.opts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.api.user.schemas.NewStaffUserSchema">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.user.schemas.</code><code class="sig-name descname">NewStaffUserSchema</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.schemas.NewStaffUserSchema" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#odyssey.api.user.schemas.UserInfoSchema" title="odyssey.api.user.schemas.UserInfoSchema"><code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.api.user.schemas.UserInfoSchema</span></code></a></p>
+<p>General purpose user creation schema</p>
+<dl class="py attribute">
+<dt id="odyssey.api.user.schemas.NewStaffUserSchema.opts">
+<code class="sig-name descname">opts</code><em class="property">: SchemaOpts</em><em class="property"> = &lt;flask_marshmallow.sqla.SQLAlchemyAutoSchemaOpts object&gt;</em><a class="headerlink" href="#odyssey.api.user.schemas.NewStaffUserSchema.opts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.user.schemas.NewStaffUserSchema.fields">
+<code class="sig-name descname">fields</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.9)">typing.Dict</a><span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">, </span>ma_fields.Field<span class="p">]</span></em><a class="headerlink" href="#odyssey.api.user.schemas.NewStaffUserSchema.fields" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dictionary mapping field_names -&gt; <code class="xref py py-class docutils literal notranslate"><span class="pre">Field</span></code> objects</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.user.schemas.NewStaffUserSchema.load_fields">
+<code class="sig-name descname">load_fields</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.9)">typing.Dict</a><span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">, </span>ma_fields.Field<span class="p">]</span></em><a class="headerlink" href="#odyssey.api.user.schemas.NewStaffUserSchema.load_fields" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.user.schemas.NewStaffUserSchema.dump_fields">
+<code class="sig-name descname">dump_fields</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.9)">typing.Dict</a><span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">, </span>ma_fields.Field<span class="p">]</span></em><a class="headerlink" href="#odyssey.api.user.schemas.NewStaffUserSchema.dump_fields" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.api.user.schemas.UserPasswordRecoveryContactSchema">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.user.schemas.</code><code class="sig-name descname">UserPasswordRecoveryContactSchema</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span></em>, <em class="sig-param"><span class="n">only</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Union<span class="p">[</span>Sequence<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">, </span>Set<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">exclude</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>Sequence<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">, </span>Set<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em>, <em class="sig-param"><span class="n">many</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">context</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Dict<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">load_only</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>Sequence<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">, </span>Set<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em>, <em class="sig-param"><span class="n">dump_only</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>Sequence<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">, </span>Set<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em>, <em class="sig-param"><span class="n">partial</span><span class="p">:</span> <span class="n">Union<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a><span class="p">, </span>Sequence<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">, </span>Set<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">unknown</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.schemas.UserPasswordRecoveryContactSchema" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">marshmallow.schema.Schema</span></code></p>
+<p>contact methods for password recovery.
+currently just email but may be expanded to include sms</p>
+<dl class="py attribute">
+<dt id="odyssey.api.user.schemas.UserPasswordRecoveryContactSchema.opts">
+<code class="sig-name descname">opts</code><em class="property">: SchemaOpts</em><em class="property"> = &lt;marshmallow.schema.SchemaOpts object&gt;</em><a class="headerlink" href="#odyssey.api.user.schemas.UserPasswordRecoveryContactSchema.opts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.api.user.schemas.UserPasswordResetSchema">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.user.schemas.</code><code class="sig-name descname">UserPasswordResetSchema</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span></em>, <em class="sig-param"><span class="n">only</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Union<span class="p">[</span>Sequence<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">, </span>Set<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">exclude</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>Sequence<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">, </span>Set<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em>, <em class="sig-param"><span class="n">many</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">context</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Dict<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">load_only</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>Sequence<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">, </span>Set<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em>, <em class="sig-param"><span class="n">dump_only</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>Sequence<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">, </span>Set<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em>, <em class="sig-param"><span class="n">partial</span><span class="p">:</span> <span class="n">Union<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a><span class="p">, </span>Sequence<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">, </span>Set<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">unknown</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.schemas.UserPasswordResetSchema" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">marshmallow.schema.Schema</span></code></p>
+<dl class="py attribute">
+<dt id="odyssey.api.user.schemas.UserPasswordResetSchema.opts">
+<code class="sig-name descname">opts</code><em class="property">: SchemaOpts</em><em class="property"> = &lt;marshmallow.schema.SchemaOpts object&gt;</em><a class="headerlink" href="#odyssey.api.user.schemas.UserPasswordResetSchema.opts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.api.user.schemas.UserPasswordUpdateSchema">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.user.schemas.</code><code class="sig-name descname">UserPasswordUpdateSchema</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span></em>, <em class="sig-param"><span class="n">only</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Union<span class="p">[</span>Sequence<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">, </span>Set<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">exclude</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>Sequence<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">, </span>Set<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em>, <em class="sig-param"><span class="n">many</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">context</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Dict<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">load_only</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>Sequence<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">, </span>Set<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em>, <em class="sig-param"><span class="n">dump_only</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>Sequence<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">, </span>Set<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em>, <em class="sig-param"><span class="n">partial</span><span class="p">:</span> <span class="n">Union<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a><span class="p">, </span>Sequence<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">, </span>Set<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">unknown</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.schemas.UserPasswordUpdateSchema" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">marshmallow.schema.Schema</span></code></p>
+<dl class="py attribute">
+<dt id="odyssey.api.user.schemas.UserPasswordUpdateSchema.opts">
+<code class="sig-name descname">opts</code><em class="property">: SchemaOpts</em><em class="property"> = &lt;marshmallow.schema.SchemaOpts object&gt;</em><a class="headerlink" href="#odyssey.api.user.schemas.UserPasswordUpdateSchema.opts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="odyssey.api.client.schemas.html" class="btn btn-neutral float-right" title="odyssey.api.client.schemas" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="odyssey.schemas.html" class="btn btn-neutral float-left" title="Validation schemas" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright Copyright 2019-2020 Atlantic Venture Partners, all rights reserved.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -3,11 +3,11 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Models &mdash; Odyssey version: 0.1.71 documentation</title>
+  <title>Database models &mdash; Odyssey version: 0.1.100 documentation</title>
   
 
   
@@ -16,7 +16,10 @@
 
   
   
+
   
+  
+
   
 
   
@@ -29,7 +32,6 @@
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/language_data.js"></script>
         <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
@@ -37,7 +39,7 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="odyssey.models.user" href="odyssey.models.user.html" />
+    <link rel="next" title="odyssey.api.user.models" href="odyssey.api.user.models.html" />
     <link rel="prev" title="odyssey.defaults" href="odyssey.defaults.html" /> 
 </head>
 
@@ -52,7 +54,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> Odyssey
+            <a href="../index.html" class="icon icon-home"> Odyssey
           
 
           
@@ -62,7 +64,7 @@
             
             
               <div class="version">
-                version: 0.1.71
+                version: 0.1.100
               </div>
             
           
@@ -89,18 +91,20 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="odyssey.config.html">Configuration</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Models</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="odyssey.models.user.html">User</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey.models.client.html">Client</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey.models.staff.html">Staff</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey.models.doctor.html">Doctor</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey.models.pt.html">Physical therapist</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey.models.trainer.html">Trainer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey.models.wearables.html">Wearable devices</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey.models.misc.html">Other</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Database models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.user.models.html">User</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.client.models.html">Client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.staff.models.html">Staff</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.doctor.models.html">Doctor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.physiotherapy.models.html">Physical therapist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.trainer.models.html">Trainer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.wearables.models.html">Wearable devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.facility.models.html">Facilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.lookup.models.html">Lookup tables</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="odyssey.api.html">Endpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.schemas.html">Validation schemas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.api.html">API endpoints</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.utils.html">Utilities</a></li>
 </ul>
 
@@ -142,18 +146,20 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Models</li>
+      <li>Database models</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="../_sources/odyssey/odyssey.models.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -167,21 +173,39 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-odyssey.models">
-<span id="models"></span><h1>Models<a class="headerlink" href="#module-odyssey.models" title="Permalink to this headline">¶</a></h1>
-<p>The classes in these modules are SQLAlchemy declarative classes
-representing tables in the database.</p>
+  <div class="section" id="database-models">
+<span id="db-models"></span><h1>Database models<a class="headerlink" href="#database-models" title="Permalink to this headline">¶</a></h1>
+<p>All <em>entities</em> in the database are of type <strong>User</strong>. A User has a <em>login type</em> <strong>Client</strong> or <strong>Staff</strong> (or both, but only one login type per logged in session). A Staff member has one or more <em>roles</em>: <strong>client services</strong>, <strong>doctor</strong>, <strong>physical therapist</strong>, or <strong>trainer</strong>. At the moment client services does not have a dedicated table in the database.</p>
+<a class="reference internal image-reference" href="../_images/odyssey_db.png"><img alt="../_images/odyssey_db.png" class="align-center" src="../_images/odyssey_db.png" style="width: 450px;" /></a>
+<div class="section" id="entities">
+<h2>Entities<a class="headerlink" href="#entities" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="odyssey.models.user.html">User</a></li>
-<li class="toctree-l1"><a class="reference internal" href="odyssey.models.client.html">Client</a></li>
-<li class="toctree-l1"><a class="reference internal" href="odyssey.models.staff.html">Staff</a></li>
-<li class="toctree-l1"><a class="reference internal" href="odyssey.models.doctor.html">Doctor</a></li>
-<li class="toctree-l1"><a class="reference internal" href="odyssey.models.pt.html">Physical therapist</a></li>
-<li class="toctree-l1"><a class="reference internal" href="odyssey.models.trainer.html">Trainer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="odyssey.models.wearables.html">Wearable devices</a></li>
-<li class="toctree-l1"><a class="reference internal" href="odyssey.models.misc.html">Other</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.api.user.models.html">User</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.api.client.models.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.api.staff.models.html">Staff</a></li>
 </ul>
+</div>
+</div>
+<div class="section" id="roles">
+<h2>Roles<a class="headerlink" href="#roles" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.api.doctor.models.html">Doctor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.api.physiotherapy.models.html">Physical therapist</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.api.trainer.models.html">Trainer</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="other">
+<h2>Other<a class="headerlink" href="#other" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.api.wearables.models.html">Wearable devices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.api.facility.models.html">Facilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.api.lookup.models.html">Lookup tables</a></li>
+</ul>
+</div>
 </div>
 </div>
 
@@ -190,37 +214,29 @@ representing tables in the database.</p>
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="odyssey.models.user.html" class="btn btn-neutral float-right" title="odyssey.models.user" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="odyssey.defaults.html" class="btn btn-neutral float-left" title="odyssey.defaults" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="odyssey.api.user.models.html" class="btn btn-neutral float-right" title="odyssey.api.user.models" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="odyssey.defaults.html" class="btn btn-neutral float-left" title="odyssey.defaults" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright Copyright 2019-2020 Atlantic Venture Partners, all rights reserved
+        &#169; Copyright Copyright 2019-2020 Atlantic Venture Partners, all rights reserved.
 
     </p>
   </div>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 

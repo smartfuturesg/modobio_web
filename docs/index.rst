@@ -14,8 +14,9 @@ Odyssey
    :titlesonly:
 
    Configuration <odyssey/odyssey.config>
-   Models <odyssey/odyssey.models>
-   Endpoints <odyssey/odyssey.api>
+   Database models <odyssey/odyssey.models>
+   Validation schemas <odyssey/odyssey.schemas>
+   API endpoints <odyssey/odyssey.api>
    Utilities <odyssey/odyssey.utils>
 
 Indices and tables
