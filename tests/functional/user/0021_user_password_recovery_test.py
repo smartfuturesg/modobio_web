@@ -23,7 +23,6 @@ def test_password_recovery_link(test_client, init_database, staff_auth_header):
     response = test_client.post('/user/password/forgot-password/recovery-link/',
                                 data=dumps(payload), 
                                 content_type='application/json')
-    
     # some simple checks for validity
     assert response.status_code == 200
     assert response.get_json()["token"]
