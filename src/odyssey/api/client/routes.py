@@ -882,7 +882,6 @@ class UserClinicalCareTeamApi(Resource):
         returns the list of clients whose clinical care team the given user_id
         is a part of
         """
-
         res = []
         for client in ClientClinicalCareTeam.query.filter_by(team_member_user_id=user_id).all():
             user = User.query.filter_by(user_id=client.user_id).one_or_none()
