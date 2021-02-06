@@ -6,6 +6,8 @@ from odyssey.utils.auth import token_auth
 from odyssey.api.lookup.models import (
      LookupActivityTrackers,
      LookupClientBookingWindow,
+     LookupClinicalCareTeamResources, 
+     LookupCountriesOfOperations,     
      LookupDrinks, 
      LookupDrinkIngredients, 
      LookupGoals, 
@@ -17,7 +19,9 @@ from odyssey.api.lookup.models import (
 )
 from odyssey.api.lookup.schemas import (
     LookupActivityTrackersOutputSchema, 
+    LookupCareTeamResourcesOutputSchema,
     LookupClientBookingWindowOutputSchema,
+    LookupCountriesOfOperationsOutputSchema,
     LookupDrinksOutputSchema, 
     LookupDrinkIngredientsOutputSchema, 
     LookupGoalsOutputSchema,
@@ -33,16 +37,14 @@ from odyssey import db
 
 ns = api.namespace('lookup', description='Endpoints for lookup tables.')
 
-@ns.route('/transaction-types/')
+@ns.route('/business/transaction-types/')
 class LookupTransactionTypesResource(Resource):
     """ Returns stored transaction types in database by GET request.
-
     Returns
     -------
     dict
         JSON encoded dict.
     """
-    @token_auth.login_required
     @responds(schema=LookupTransactionTypesOutputSchema,status_code=200, api=ns)
     def get(self):
                 
@@ -53,6 +55,26 @@ class LookupTransactionTypesResource(Resource):
 
         return payload
 
+
+@ns.route('/business/countries-of-operations/')
+class LookupCountryOfOperationResource(Resource):
+    """ Returns stored countries of operations in database by GET request.
+
+    Returns
+    -------
+    dict
+        JSON encoded dict.
+    """
+    @token_auth.login_required
+    @responds(schema=LookupCountriesOfOperationsOutputSchema,status_code=200, api=ns)
+    def get(self):
+                
+        countries = LookupCountriesOfOperations.query.all()
+        
+        payload = {'items': countries,
+                   'total_items': len(countries)}
+
+        return payload
 
 @ns.route('/business/booking-window/')
 class LookupTelehealthSessionCostResource(Resource):
@@ -237,6 +259,18 @@ class LookupRacesApi(Resource):
         res = LookupRaces.query.all()
         return {'total_items': len(res), 'items': res}
 
+@ns.route('/care-team/resources/')
+class LookupClinicalCareTeamResourcesApi(Resource):
+    """
+    Returns available resources that can be shared within clinical care teams
+    """
+    @token_auth.login_required
+    @responds(schema=LookupCareTeamResourcesOutputSchema, api=ns)
+    def get(self):
+        """get contents of clinical care team resources lookup table"""
+        res = LookupClinicalCareTeamResources.query.all()
+        return {'total_items': len(res), 'items': res}
+        
 @ns.route('/subscriptions/')
 class LookupSubscriptionsApi(Resource):
 

@@ -6,52 +6,6 @@ not to be edited at runtime.
 from odyssey import db
 from odyssey.utils.constants import DB_SERVER_TIME
 
-class LookupTransactionTypeIcons(db.Model):
-""" Stored transaction type icons in database. 
-    """
-
-    __tablename__ = 'LookupTransactionTypeIcons'
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Primary index for 
-
-    :type: int, primary key, autoincrement
-    """
-
-    name = db.Column(db.String)
-    """
-    Name
-    The name of the icon image
-    
-    :type: str
-    """
-
-    icon = db.Column(db.Text)
-    """
-    icon
-    Referenced image name for the FE to use
-
-    :type: text
-    """
-
-    mimetype = db.Column(db.Text)
-
-
 class LookupTransactionTypes(db.Model):
     """ Stored transaction types in database. 
     """
@@ -103,6 +57,41 @@ class LookupTransactionTypes(db.Model):
 
     :type: str
     """        
+
+class LookupCountriesOfOperations(db.Model):
+    """ Stored countries of operations in database. 
+    """
+
+    __tablename__ = 'LookupCountriesOfOperations'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Primary index for 
+
+    :type: int, primary key, autoincrement
+    """
+
+    country = db.Column(db.String)
+    """
+    countries of operations
+    
+    :type: str
+    """
+    
 
 class LookupClientBookingWindow(db.Model):
     """ Stored booking windows for the client in database. 
@@ -625,7 +614,6 @@ class LookupRaces(db.Model):
 
     :type: string
     """
-
 class LookupSubscriptions(db.Model):
     """ Static list of subscription plans that a user can choose from. 
     """
@@ -680,3 +668,47 @@ class LookupSubscriptions(db.Model):
 
     :type: string
     """
+
+class LookupClinicalCareTeamResources(db.Model):
+    """
+    Stores all the database tables which can be accessed by a clinical care team.
+    Table names are given an index in order to be referenced by other tables
+    """
+
+    __tablename__ = 'LookupClinicalCareTeamResources'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    resource_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    ID for the table. 
+
+    :type: integer, primary key, autoincrementing
+    """
+
+    resource_name = db.Column(db.String)
+    """
+    Table name 
+
+    :type: string
+    """
+
+    display_name = db.Column(db.String)
+    """
+    Name of resource to display to client. We do not want table names getting passed around.
+    
+    :type: string
+    """
+

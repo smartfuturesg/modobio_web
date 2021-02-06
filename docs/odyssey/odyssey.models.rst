@@ -1,19 +1,37 @@
-Models
-======
+.. _db_models:
 
-.. automodule:: odyssey.models
-   :members:
-   :member-order: bysource
-   :undoc-members:
-   :show-inheritance:
+Database models
+===============
+
+All *entities* in the database are of type **User**. A User has a *login type* **Client** or **Staff** (or both, but only one login type per logged in session). A Staff member has one or more *roles*: **client services**, **doctor**, **physical therapist**, or **trainer**. At the moment client services does not have a dedicated table in the database.
+
+.. image:: ../images/odyssey_db.png
+   :width: 450
+   :align: center
+
+Entities
+--------
 
 .. toctree::
 
-   User <odyssey.models.user>
-   Client <odyssey.models.client>
-   Staff <odyssey.models.staff>
-   Doctor <odyssey.models.doctor>
-   Physical therapist <odyssey.models.pt>
-   Trainer <odyssey.models.trainer>
-   Wearable devices <odyssey.models.wearables>
-   Other <odyssey.models.misc>
+   User <odyssey.api.user.models>
+   Client <odyssey.api.client.models>
+   Staff <odyssey.api.staff.models>
+
+Roles
+-----
+
+.. toctree::
+
+   Doctor <odyssey.api.doctor.models>
+   Physical therapist <odyssey.api.physiotherapy.models>
+   Trainer <odyssey.api.trainer.models>
+
+Other
+-----
+
+.. toctree::
+
+   Wearable devices <odyssey.api.wearables.models>
+   Facilities <odyssey.api.facility.models>
+   Lookup tables <odyssey.api.lookup.models>
