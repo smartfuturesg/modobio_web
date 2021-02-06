@@ -1,0 +1,748 @@
+- table:
+    schema: public
+    name: ClientClinicalCareTeam
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: team_member_user_id
+  - name: userByUserId
+    using:
+      foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: ClientConsent
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: ClientConsultContract
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: ClientFacilities
+  object_relationships:
+  - name: RegisteredFacility
+    using:
+      foreign_key_constraint_on: facility_id
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: ClientIndividualContract
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: ClientInfo
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: ClientPolicies
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: ClientRelease
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+  array_relationships:
+  - name: ClientReleaseContacts
+    using:
+      foreign_key_constraint_on:
+        column: release_contract_id
+        table:
+          schema: public
+          name: ClientReleaseContacts
+- table:
+    schema: public
+    name: ClientReleaseContacts
+  object_relationships:
+  - name: ClientRelease
+    using:
+      foreign_key_constraint_on: release_contract_id
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: ClientRemovalRequests
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: ClientSubscriptionContract
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: LookupDrinkIngredients
+  object_relationships:
+  - name: LookupDrink
+    using:
+      foreign_key_constraint_on: drink_id
+- table:
+    schema: public
+    name: LookupDrinks
+  object_relationships:
+  - name: LookupGoal
+    using:
+      foreign_key_constraint_on: primary_goal_id
+  array_relationships:
+  - name: LookupDrinkIngredients
+    using:
+      foreign_key_constraint_on:
+        column: drink_id
+        table:
+          schema: public
+          name: LookupDrinkIngredients
+- table:
+    schema: public
+    name: LookupGoals
+  array_relationships:
+  - name: LookupDrinks
+    using:
+      foreign_key_constraint_on:
+        column: primary_goal_id
+        table:
+          schema: public
+          name: LookupDrinks
+- table:
+    schema: public
+    name: MedicalBloodTestResultTypes
+  array_relationships:
+  - name: MedicalBloodTestResults
+    using:
+      foreign_key_constraint_on:
+        column: result_id
+        table:
+          schema: public
+          name: MedicalBloodTestResults
+- table:
+    schema: public
+    name: MedicalBloodTestResults
+  object_relationships:
+  - name: MedicalBloodTest
+    using:
+      foreign_key_constraint_on: test_id
+  - name: MedicalBloodTestResultType
+    using:
+      foreign_key_constraint_on: result_id
+- table:
+    schema: public
+    name: MedicalBloodTests
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+  array_relationships:
+  - name: MedicalBloodTestResults
+    using:
+      foreign_key_constraint_on:
+        column: test_id
+        table:
+          schema: public
+          name: MedicalBloodTestResults
+- table:
+    schema: public
+    name: MedicalConditions
+  array_relationships:
+  - name: MedicalFamilyHistories
+    using:
+      foreign_key_constraint_on:
+        column: medical_condition_id
+        table:
+          schema: public
+          name: MedicalFamilyHistory
+- table:
+    schema: public
+    name: MedicalExternalMR
+  object_relationships:
+  - name: MedicalInstitution
+    using:
+      foreign_key_constraint_on: institute_id
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: MedicalFamilyHistory
+  object_relationships:
+  - name: MedicalCondition
+    using:
+      foreign_key_constraint_on: medical_condition_id
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: MedicalGeneralInfo
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: MedicalGeneralInfoMedicationAllergy
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: MedicalGeneralInfoMedications
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: MedicalHistory
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: MedicalImaging
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: MedicalInstitutions
+  array_relationships:
+  - name: MedicalExternalMRs
+    using:
+      foreign_key_constraint_on:
+        column: institute_id
+        table:
+          schema: public
+          name: MedicalExternalMR
+- table:
+    schema: public
+    name: MedicalLookUpSTD
+  array_relationships:
+  - name: MedicalSTDHistories
+    using:
+      foreign_key_constraint_on:
+        column: std_id
+        table:
+          schema: public
+          name: MedicalSTDHistory
+- table:
+    schema: public
+    name: MedicalPhysicalExam
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: MedicalSTDHistory
+  object_relationships:
+  - name: MedicalLookUpSTD
+    using:
+      foreign_key_constraint_on: std_id
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: MedicalSocialHistory
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: MedicalSurgeries
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: client_user_id
+  - name: userByReporterUserId
+    using:
+      foreign_key_constraint_on: reporter_user_id
+- table:
+    schema: public
+    name: MobilityAssessment
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: PTChessboard
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: PTHistory
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: RegisteredFacilities
+  array_relationships:
+  - name: ClientFacilities
+    using:
+      foreign_key_constraint_on:
+        column: facility_id
+        table:
+          schema: public
+          name: ClientFacilities
+- table:
+    schema: public
+    name: StaffProfile
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: StaffRecentClients
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: client_user_id
+  - name: userByStaffUserId
+    using:
+      foreign_key_constraint_on: staff_user_id
+- table:
+    schema: public
+    name: StaffRoles
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: TrainerFitnessQuestionnaire
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: TrainerHeartAssessment
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: TrainerLungAssessment
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: TrainerMovementAssessment
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: TrainerMoxyAssessment
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: TrainerMoxyRipTest
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: TrainerPowerAssessment
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: TrainerStrengthAssessment
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: User
+  object_relationships:
+  - name: UserLogin
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: UserLogin
+        column_mapping:
+          user_id: user_id
+  array_relationships:
+  - name: ClientClinicalCareTeams
+    using:
+      foreign_key_constraint_on:
+        column: team_member_user_id
+        table:
+          schema: public
+          name: ClientClinicalCareTeam
+  - name: ClientConsents
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: ClientConsent
+  - name: ClientConsultContracts
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: ClientConsultContract
+  - name: ClientFacilities
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: ClientFacilities
+  - name: ClientIndividualContracts
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: ClientIndividualContract
+  - name: ClientInfos
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: ClientInfo
+  - name: ClientPolicies
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: ClientPolicies
+  - name: ClientReleaseContacts
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: ClientReleaseContacts
+  - name: ClientReleases
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: ClientRelease
+  - name: ClientRemovalRequests
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: ClientRemovalRequests
+  - name: ClientSubscriptionContracts
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: ClientSubscriptionContract
+  - name: MedicalBloodTests
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: MedicalBloodTests
+  - name: MedicalExternalMRs
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: MedicalExternalMR
+  - name: MedicalFamilyHistories
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: MedicalFamilyHistory
+  - name: MedicalGeneralInfoMedicationAllergies
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: MedicalGeneralInfoMedicationAllergy
+  - name: MedicalGeneralInfoMedications
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: MedicalGeneralInfoMedications
+  - name: MedicalGeneralInfos
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: MedicalGeneralInfo
+  - name: MedicalHistories
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: MedicalHistory
+  - name: MedicalImagings
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: MedicalImaging
+  - name: MedicalPhysicalExams
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: MedicalPhysicalExam
+  - name: MedicalSTDHistories
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: MedicalSTDHistory
+  - name: MedicalSocialHistories
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: MedicalSocialHistory
+  - name: MedicalSurgeries
+    using:
+      foreign_key_constraint_on:
+        column: client_user_id
+        table:
+          schema: public
+          name: MedicalSurgeries
+  - name: MobilityAssessments
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: MobilityAssessment
+  - name: PTChessboards
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: PTChessboard
+  - name: PTHistories
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: PTHistory
+  - name: StaffProfiles
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: StaffProfile
+  - name: StaffRecentClients
+    using:
+      foreign_key_constraint_on:
+        column: client_user_id
+        table:
+          schema: public
+          name: StaffRecentClients
+  - name: StaffRoles
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: StaffRoles
+  - name: TrainerFitnessQuestionnaires
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: TrainerFitnessQuestionnaire
+  - name: TrainerHeartAssessments
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: TrainerHeartAssessment
+  - name: TrainerLungAssessments
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: TrainerLungAssessment
+  - name: TrainerMovementAssessments
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: TrainerMovementAssessment
+  - name: TrainerMoxyAssessments
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: TrainerMoxyAssessment
+  - name: TrainerMoxyRipTests
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: TrainerMoxyRipTest
+  - name: TrainerPowerAssessments
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: TrainerPowerAssessment
+  - name: TrainerStrengthAssessments
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: TrainerStrengthAssessment
+  - name: Wearables
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: Wearables
+  - name: WearablesFreeStyles
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: WearablesFreeStyle
+  - name: WearablesOuras
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: WearablesOura
+  - name: clientClinicalCareTeamsByUserId
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: ClientClinicalCareTeam
+  - name: medicalSurgeriesByReporterUserId
+    using:
+      foreign_key_constraint_on:
+        column: reporter_user_id
+        table:
+          schema: public
+          name: MedicalSurgeries
+  - name: staffRecentClientsByStaffUserId
+    using:
+      foreign_key_constraint_on:
+        column: staff_user_id
+        table:
+          schema: public
+          name: StaffRecentClients
+- table:
+    schema: public
+    name: UserLogin
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: UserTokensBlacklist
+- table:
+    schema: public
+    name: Wearables
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: WearablesFreeStyle
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: WearablesOura
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: client_table_sizes
+- table:
+    schema: public
+    name: data_per_client
