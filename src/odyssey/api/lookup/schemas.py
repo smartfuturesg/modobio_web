@@ -13,7 +13,8 @@ from odyssey.api.lookup.models import (
     LookupSubscriptions,
     LookupTelehealthSessionCost,
     LookupTelehealthSessionDuration,
-    LookupTransactionTypes
+    LookupTransactionTypes,
+    LookupNotifications
 )
 
 class LookupTransactionTypesSchema(ma.SQLAlchemyAutoSchema):
@@ -144,4 +145,17 @@ class LookupSubscriptionsSchema(ma.SQLAlchemyAutoSchema):
 
 class LookupSubscriptionsOutputSchema(Schema):
     items = fields.Nested(LookupSubscriptionsSchema(many=True), missing = [])
+    total_items = fields.Integer()
+
+class LookupNotificationsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupNotifications
+        exclude = ('created_at', 'updated_at')
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return LookupNotifications(**data)
+
+class LookupNotificationsOutputSchema(Schema):
+    items = fields.Nested(LookupNotificationsSchema(many=True), missing = [])
     total_items = fields.Integer()

@@ -1,7 +1,7 @@
 from marshmallow import Schema, fields, post_load, validate
 
 from odyssey import ma
-from odyssey.api.user.models import User, UserLogin, UserSubscriptions
+from odyssey.api.user.models import User, UserLogin, UserSubscriptions, UserNotifications
 from odyssey.utils.constants import ACCESS_ROLES
 
 """
@@ -117,3 +117,18 @@ class UserSubscriptionHistorySchema(Schema):
     client_subscription_history = fields.Nested(UserSubscriptionsSchema, many=True)
     staff_subscription_history = fields.Nested(UserSubscriptionsSchema, many=True)
 
+class UserClinicalCareTeamSchema(Schema):
+
+    client_user_id = fields.Integer()
+    client_name = fields.String()
+    client_email = fields.String()
+
+class UserNotificationsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = UserNotifications
+        exclude = ('created_at', 'updated_at')
+        dump_only = ('idx', 'user_id', 'is_staff', 'time_to_live')
+
+    #comes from LookupNotifications.type
+    notification_type = fields.String(dump_only=True)
+    

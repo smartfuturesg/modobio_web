@@ -3,10 +3,10 @@ from flask.json import dumps
 def test_get_transaction_types(test_client, init_database, client_auth_header):
     """
     GIVEN a api end point for lookup transaction types
-    WHEN the '/lookup/transaction-types/' resource  is requested (GET)
+    WHEN the '/lookup/business/transaction-types/' resource  is requested (GET)
     THEN check the response is valid
     """
-    response = test_client.get('/lookup/transaction-types/',
+    response = test_client.get('/lookup/business/transaction-types/',
                                 headers=client_auth_header, 
                                 content_type='application/json')
     
