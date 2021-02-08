@@ -6,6 +6,41 @@ not to be edited at runtime.
 from odyssey import db
 from odyssey.utils.constants import DB_SERVER_TIME
 
+class LookupCountriesOfOperations(db.Model):
+    """ Stored countries of operations in database. 
+    """
+
+    __tablename__ = 'LookupCountriesOfOperations'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Primary index for 
+
+    :type: int, primary key, autoincrement
+    """
+
+    country = db.Column(db.String)
+    """
+    countries of operations
+    
+    :type: str
+    """
+    
+
 class LookupClientBookingWindow(db.Model):
     """ Stored booking windows for the client in database. 
     """

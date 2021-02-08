@@ -3,11 +3,11 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Odyssey &mdash; Odyssey version: 0.1.71 documentation</title>
+  <title>Odyssey &mdash; Odyssey version: 0.1.100 documentation</title>
   
 
   
@@ -16,7 +16,10 @@
 
   
   
+
   
+  
+
   
 
   
@@ -29,7 +32,6 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
         <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
@@ -51,7 +53,7 @@
           
 
           
-            <a href="#" class="icon icon-home" alt="Documentation Home"> Odyssey
+            <a href="#" class="icon icon-home"> Odyssey
           
 
           
@@ -61,7 +63,7 @@
             
             
               <div class="version">
-                version: 0.1.71
+                version: 0.1.100
               </div>
             
           
@@ -88,8 +90,9 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="odyssey/odyssey.config.html">Configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="odyssey/odyssey.models.html">Models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="odyssey/odyssey.api.html">Endpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey/odyssey.models.html">Database models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey/odyssey.schemas.html">Validation schemas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey/odyssey.api.html">API endpoints</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey/odyssey.utils.html">Utilities</a></li>
 </ul>
 
@@ -131,6 +134,8 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -142,7 +147,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -159,7 +164,9 @@
   <div class="section" id="module-odyssey">
 <span id="odyssey"></span><h1>Odyssey<a class="headerlink" href="#module-odyssey" title="Permalink to this headline">¶</a></h1>
 <p>A staff application for the Modo Bio client journey.</p>
-<p>This is a <a class="reference external" href="https://flask.palletsprojects.com">Flask</a> based app that serves webpages to the <a class="reference external" href="https://modobio.com">ModoBio</a> staff. The pages contain the intake and data gathering forms for the <em>client journey</em>. The <a class="reference external" href="https://en.wikipedia.org/wiki/Odyssey">Odyssey</a> is of course the most famous journey of all time! 🤓</p>
+<p>This is a <a class="reference external" href="https://flask.palletsprojects.com">Flask</a> based app that serves webpages to the <a class="reference external" href="https://modobio.com">ModoBio</a> staff.
+The pages contain the intake and data gathering forms for the <em>client journey</em>. The <a class="reference external" href="https://en.wikipedia.org/wiki/Odyssey">Odyssey</a>
+is of course the most famous journey of all time! 🤓</p>
 <dl class="py function">
 <dt id="odyssey.create_app">
 <code class="sig-prename descclassname">odyssey.</code><code class="sig-name descname">create_app</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.create_app" title="Permalink to this definition">¶</a></dt>
@@ -193,39 +200,52 @@ $ flask run
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="odyssey/odyssey.models.html">Models</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.models.user.html">User</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.models.client.html">Client</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.models.staff.html">Staff</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.models.doctor.html">Doctor</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.models.pt.html">Physical therapist</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.models.trainer.html">Trainer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.models.wearables.html">Wearable devices</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.models.misc.html">Other</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey/odyssey.models.html">Database models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.user.models.html">User</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.client.models.html">Client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.staff.models.html">Staff</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.doctor.models.html">Doctor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.physiotherapy.models.html">Physical therapist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.trainer.models.html">Trainer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.wearables.models.html">Wearable devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.facility.models.html">Facilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.lookup.models.html">Lookup tables</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="odyssey/odyssey.api.html">Endpoints</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.users.html">User</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.clients.html">Client</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.staff.html">Staff</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.doctor.html">Doctor</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.pt.html">Physical therapist</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.trainer.html">Trainer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.remote_clients.html">Remote registration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.registered_facilities.html">Registered facilities</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.wearables.html">Wearable devices</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.tokens.html">Authorization tokens</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.errors.html">Error messages</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.postman.html">Postman</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.version.html">Version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey/odyssey.schemas.html">Validation schemas</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.user.schemas.html">User</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.client.schemas.html">Client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.staff.schemas.html">Staff</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.client_services.schemas.html">Client services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.doctor.schemas.html">Doctor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.physiotherapy.schemas.html">Physical therapist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.trainer.schemas.html">Trainer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.wearables.schemas.html">Wearable devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.facility.schemas.html">Facilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.lookup.schemas.html">Lookup tables</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey/odyssey.api.html">API endpoints</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.user.routes.html">User</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.client.routes.html">Client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.staff.routes.html">Staff</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.client_services.routes.html">Client services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.doctor.routes.html">Doctor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.physiotherapy.routes.html">Physical therapist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.trainer.routes.html">Trainer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.wearables.routes.html">Wearable devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.facility.routes.html">Facilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.lookup.routes.html">Lookup tables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.misc.postman.html">Postman</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.version.routes.html">Version</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey/odyssey.utils.html">Utilities</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.utils.schemas.html">Schemas</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.utils.auth.html">Login</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.constants.html">Constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.utils.constants.html">Constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.utils.errors.html">Errors</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.utils.email.html">Email</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.pdf.html">PDF generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.utils.pdf.html">PDF generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.utils.misc.html">Other</a></li>
 </ul>
 </li>
@@ -246,35 +266,28 @@ $ flask run
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="odyssey/odyssey.config.html" class="btn btn-neutral float-right" title="odyssey.config" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
+        <a href="odyssey/odyssey.config.html" class="btn btn-neutral float-right" title="odyssey.config" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright Copyright 2019-2020 Atlantic Venture Partners, all rights reserved
+        &#169; Copyright Copyright 2019-2020 Atlantic Venture Partners, all rights reserved.
 
     </p>
   </div>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 

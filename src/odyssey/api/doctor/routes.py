@@ -581,34 +581,37 @@ class MedicalSocialHist(Resource):
         """ This request retrieves the social history
         for client ``user_id`` in response to a GET request.
 
-        The example returned payload will look like 
-        {
-            "social_history": {
-                "currently_smoke": bool,
-                "avg_num_cigs": int,
-                "num_years_smoked": int,
-                "last_smoke": int,
-                "last_smoke_time": str,
-                "plan_to_stop": bool,
-                "avg_weekly_drinks": int,
-                "avg_weekly_workouts": int,
-                "job_title": str,
-                "avg_hourly_meditation": int,
-                "sexual_preference": str
+        The example returned payload will look like::
+
+            {
+                "social_history": {
+                    "currently_smoke": bool,
+                    "avg_num_cigs": int,
+                    "num_years_smoked": int,
+                    "last_smoke": int,
+                    "last_smoke_time": str,
+                    "plan_to_stop": bool,
+                    "avg_weekly_drinks": int,
+                    "avg_weekly_workouts": int,
+                    "job_title": str,
+                    "avg_hourly_meditation": int,
+                    "sexual_preference": str
+                }
+                "std_history": [
+                    {"std_id": int},
+                    {"std_id: int}
+                ]
             }
-            "std_history": [
-                {"std_id": int},
-                {"std_id: int}
-            ]
-        }
 
         Parameters
         ----------
+
         user_id : int
             User ID number.
 
         Returns
         -------
+
         dict
             JSON encoded dict.
         """
@@ -626,34 +629,37 @@ class MedicalSocialHist(Resource):
         """ This request submits the social history
         for client ``user_id`` in response to a POST request.
 
-        The example returned payload will look like 
-        {
-            "social_history":{
-                "currently_smoke": bool,
-                "avg_num_cigs": int,
-                "num_years_smoked": int,
-                "last_smoke": int,
-                "last_smoke_time": str,
-                "plan_to_stop": bool,
-                "avg_weekly_drinks": int,
-                "avg_weekly_workouts": int,
-                "job_title": str,
-                "avg_hourly_meditation": int,
-                "sexual_preference": str
+        The example returned payload will look like::
+
+            {
+                "social_history":{
+                    "currently_smoke": bool,
+                    "avg_num_cigs": int,
+                    "num_years_smoked": int,
+                    "last_smoke": int,
+                    "last_smoke_time": str,
+                    "plan_to_stop": bool,
+                    "avg_weekly_drinks": int,
+                    "avg_weekly_workouts": int,
+                    "job_title": str,
+                    "avg_hourly_meditation": int,
+                    "sexual_preference": str
+                }
+                "std_history": [
+                    {"std_id": int},
+                    {"std_id": int}
+                ]
             }
-            "std_history": [
-                {"std_id": int},
-                {"std_id": int}
-            ]
-        }
 
         Parameters
         ----------
+
         user_id : int
             User ID number.
 
         Returns
         -------
+
         dict
             JSON encoded dict.
         """

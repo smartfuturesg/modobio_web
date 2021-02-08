@@ -7,6 +7,7 @@ from odyssey.api.lookup.models import (
      LookupActivityTrackers,
      LookupClientBookingWindow,
      LookupClinicalCareTeamResources,
+     LookupCountriesOfOperations,
      LookupDrinks, 
      LookupDrinkIngredients, 
      LookupGoals, 
@@ -19,6 +20,7 @@ from odyssey.api.lookup.models import (
 from odyssey.api.lookup.schemas import (
     LookupActivityTrackersOutputSchema, 
     LookupClientBookingWindowOutputSchema,
+    LookupCountriesOfOperationsOutputSchema,
     LookupDrinksOutputSchema, 
     LookupDrinkIngredientsOutputSchema, 
     LookupGoalsOutputSchema,
@@ -34,6 +36,27 @@ from odyssey.utils.misc import check_drink_existence
 from odyssey import db
 
 ns = api.namespace('lookup', description='Endpoints for lookup tables.')
+
+
+@ns.route('/business/countries-of-operations/')
+class LookupCountryOfOperationResource(Resource):
+    """ Returns stored countries of operations in database by GET request.
+
+    Returns
+    -------
+    dict
+        JSON encoded dict.
+    """
+    @token_auth.login_required
+    @responds(schema=LookupCountriesOfOperationsOutputSchema,status_code=200, api=ns)
+    def get(self):
+                
+        countries = LookupCountriesOfOperations.query.all()
+        
+        payload = {'items': countries,
+                   'total_items': len(countries)}
+
+        return payload
 
 @ns.route('/business/booking-window/')
 class LookupTelehealthSessionCostResource(Resource):
