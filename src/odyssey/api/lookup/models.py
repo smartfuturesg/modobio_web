@@ -617,6 +617,62 @@ class LookupSubscriptions(db.Model):
     :type: string
     """
 
+class LookupNotifications(db.Model):
+    """ Static list of notifications types that a user can receive. 
+    """
+
+    __tablename__ = 'LookupNotifications'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    notification_type_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Id of this notification type.
+
+    :type: integer, primary key, autoincrementing
+    """
+
+    notification_type = db.Column(db.String)
+    """
+    Name of this notification type.
+
+    :type: string
+    """
+
+    icon = db.Column(db.String)
+    """
+    Icon used for this notification type, denotes a file in an s3 bucket.
+
+    :type: string
+    """
+
+    background_color = db.Column(db.String)
+    """
+    Background color used for this notification type.
+    Color names are from the list of 140 colors supported by all browsers
+    See: https://htmlcolorcodes.com/color-names/
+    """
+
+    symbol_color = db.Column(db.String)
+    """
+    Symbol color used for this notification type.
+    Color names are from the list of 140 colors supported by all browsers
+    original means do not apply any color to the svg
+    See: https://htmlcolorcodes.com/color-names/
+    """
+
 class LookupClinicalCareTeamResources(db.Model):
     """
     Stores all the database tables which can be accessed by a clinical care team.
@@ -659,4 +715,3 @@ class LookupClinicalCareTeamResources(db.Model):
     
     :type: string
     """
-
