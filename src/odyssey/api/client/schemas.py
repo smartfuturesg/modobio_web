@@ -1,4 +1,5 @@
 from datetime import datetime
+from attr import field
 from marshmallow import (
     Schema, 
     fields, 
@@ -8,6 +9,7 @@ from marshmallow import (
     validates, 
     validate
 )
+from marshmallow_sqlalchemy.schema.sqlalchemy_schema import auto_field
 
 from odyssey import ma
 from odyssey.api.user.models import User
@@ -85,12 +87,10 @@ class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
 class ClientInfoPutSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientInfo
-        exclude = ('created_at', 'updated_at', 'idx')
-        dump_only = ('modobio_id', 'membersince', 'is_staff', 'is_client', 'user_id', 'prinmary_goal', 'race')
-        load_only = ('primary_goal_id',)
+        include_fk = True
+        exclude = ('created_at', 'updated_at', 'idx', 'user_id')
+        dump_only = ( 'membersince', 'primary_goal', 'race')
 
-    primary_goal_id = fields.Integer()
-    race_id = fields.Integer()
     primary_goal = fields.String()
     race = fields.String()
 
@@ -110,31 +110,6 @@ class NewRemoteClientSchema(Schema):
     def make_object(self, data, **kwargs):
         return ClientInfo(**data)
         
-#class ClientRemoteRegistrationPortalSchema(Schema):
-#    """
-#        holds client's access information for remote registration
-#    """
-#    email = fields.Email()
-#    user_id = fields.Integer()
-#    password = fields.String(dump_only=True)
-#    registration_portal_expiration = fields.DateTime(dump_only=True)
-#    registration_portal_id = fields.String(dump_only=True)
-#
-#    @post_load
-#    def make_object(self, data, **kwargs):
-#        remote_client_portal = RemoteRegistration(user_id=data["user_id"], email=data["email"])
-#        remote_client_portal.set_password()
-#        remote_client_portal.get_temp_registration_endpoint()
-#        return remote_client_portal
-
-
-#class RefreshRemoteRegistrationSchema(Schema):
-#    """
-#        refresh the remote registration password and link for the client
-#        with the provided email
-#    """
-#    email = fields.Email(required=True)
-
 class ClientConsentSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientConsent
