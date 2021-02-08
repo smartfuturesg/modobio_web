@@ -69,9 +69,9 @@ from odyssey.api.client.schemas import(
     ClientWeightSchema,
     ClientTokenRequestSchema,
     ClinicalCareTeamAuthorizationNestedSchema,
+    ClinicalCareTeamMemberOfSchema,
     SignAndDateSchema,
-    SignedDocumentsSchema,
-    UserClinicalCareTeamSchema
+    SignedDocumentsSchema    
 )
 from odyssey.api.staff.schemas import StaffRecentClientsSchema
 from odyssey.api.facility.schemas import ClientSummarySchema
@@ -876,21 +876,31 @@ class UserClinicalCareTeamApi(Resource):
     Endpoint for viewing and managing the list of clients who have the specified user as part of their care team.
     """
     @token_auth.login_required
-    @responds(schema=UserClinicalCareTeamSchema(many=True), api=ns, status_code=200)
+    @responds(schema=ClinicalCareTeamMemberOfSchema, api=ns, status_code=200)
     def get(self, user_id):
         """
         returns the list of clients whose clinical care team the given user_id
         is a part of
         """
-
         res = []
         for client in ClientClinicalCareTeam.query.filter_by(team_member_user_id=user_id).all():
             user = User.query.filter_by(user_id=client.user_id).one_or_none()
+            authorizations_query = db.session.query(
+                                    ClientClinicalCareTeamAuthorizations.resource_id, 
+                                    LookupClinicalCareTeamResources.display_name
+                                ).filter(
+                                    ClientClinicalCareTeamAuthorizations.team_member_user_id == user_id
+                                ).filter(
+                                    ClientClinicalCareTeamAuthorizations.user_id == client.user_id
+                                ).filter(
+                                    ClientClinicalCareTeamAuthorizations.resource_id == LookupClinicalCareTeamResources.resource_id
+                                ).all()
             res.append({'client_user_id': user.user_id, 
                         'client_name': ' '.join(filter(None, (user.firstname, user.middlename ,user.lastname))),
-                        'client_email': user.email})
+                        'client_email': user.email,
+                        'authorizations': [{'display_name': x[1], 'resource_id': x[0]} for x in authorizations_query]})
         
-        return res
+        return {'member_of_care_teams': res, 'total': len(res)}
 
 @ns.route('/clinical-care-team/resource-authorization/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})

@@ -35,8 +35,9 @@ def test_adding_clinical_care_team(test_client, init_database, client_auth_heade
     response = test_client.get("/client/clinical-care-team/member-of/3/",
                                 headers=staff_auth_header,
                                 content_type='application/json')
+    
     assert response.status_code == 200
-    assert response.json[0]['client_user_id'] == 1
+    assert response.json['member_of_care_teams'][0]['client_user_id'] == 1
 
     ###
     # Attempt to add more than 6 clinical care team members
