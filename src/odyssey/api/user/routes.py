@@ -11,7 +11,7 @@ from werkzeug.security import check_password_hash
 from odyssey.api import api
 from odyssey.api.client.schemas import ClientInfoSchema
 from odyssey.api.client.models import ClientClinicalCareTeam
-from odyssey.api.lookup.models import LookupNotifications
+from odyssey.api.lookup.models import LookupNotifications, LookupSubscriptions
 from odyssey.api.staff.schemas import StaffProfileSchema, StaffRolesSchema
 from odyssey.api.user.models import User, UserLogin, UserRemovalRequests, UserSubscriptions, UserTokensBlacklist, UserNotifications
 from odyssey.api.staff.models import StaffRoles
@@ -61,7 +61,7 @@ class ApiUser(Resource):
 
         db.session.add(removal_request)
         db.session.flush()
-
+        
         #Get a list of all tables in database
         tableList = db.session.execute("SELECT distinct(table_name) from information_schema.columns\
                 WHERE column_name='user_id';").fetchall()
@@ -141,8 +141,8 @@ class NewStaffUser(Resource):
 
                 # add new staff subscription information
                 staff_sub = UserSubscriptionsSchema().load({
-                    'subscription_type': 'subscribed',
-                    'subscription_rate': 0.0,
+                    'subscription_type_id': 2,
+                    'subscription_status': 'subscribed',
                     'is_staff': True
                 })
                 staff_sub.user_id = user.user_id
@@ -170,8 +170,8 @@ class NewStaffUser(Resource):
 
             # add new user subscription information
             staff_sub = UserSubscriptionsSchema().load({
-                'subscription_type': 'subscribed',
-                'subscription_rate': 0.0,
+                'subscription_type_id': 2,
+                'subscription_status': 'subscribed',
                 'is_staff': True
             })
             staff_sub.user_id = user.user_id
@@ -242,8 +242,8 @@ class NewClientUser(Resource):
 
                 # add new client subscription information
                 client_sub = UserSubscriptionsSchema().load({
-                    'subscription_type': 'unsubscribed',
-                    'subscription_rate': 0.0,
+                    'subscription_status': 'unsubscribed',
+                    'subscription_type_id': 1,
                     'is_staff': False
                 })
                 client_sub.user_id = user.user_id
@@ -264,8 +264,8 @@ class NewClientUser(Resource):
 
             # add new user subscription information
             client_sub = UserSubscriptionsSchema().load({
-                'subscription_type': 'unsubscribed',
-                'subscription_rate': 0.0,
+                'subscription_status': 'unsubscribed',
+                'subscription_type_id': 1,
                 'is_staff': False
             })
             client_sub.user_id = user.user_id
@@ -470,6 +470,11 @@ class UserSubscriptionApi(Resource):
         else:
             check_client_existence(user_id)
 
+        new_sub_info =  LookupSubscriptions.query.filter_by(sub_id=request.parsed_obj.subscription_type_id).one_or_none()
+            
+        if not new_sub_info:
+            raise InputError(400, 'Invalid subscription_type_id.')
+
         #update end_date for user's previous subscription
         #NOTE: users always have a subscription, even a brand new account will have an entry
         #      in this table as an 'unsubscribed' subscription
@@ -477,15 +482,18 @@ class UserSubscriptionApi(Resource):
         prev_sub.update({'end_date': DB_SERVER_TIME})
 
         new_data = {
-            'subscription_type': request.parsed_obj.subscription_type,
-            'subscription_rate': request.parsed_obj.subscription_rate,
+            'subscription_status': request.parsed_obj.subscription_status,
+            'subscription_type_id': request.parsed_obj.subscription_type_id,
             'is_staff': request.parsed_obj.is_staff,
         }
+
         new_sub = UserSubscriptionsSchema().load(new_data)
         new_sub.user_id = user_id
+        
         db.session.add(new_sub)
         db.session.commit()
 
+        new_sub.subscription_type_information = new_sub_info
         return new_sub
 
     
@@ -503,9 +511,19 @@ class UserSubscriptionHistoryApi(Resource):
         """
         check_user_existence(user_id)
 
+        client_history = UserSubscriptions.query.filter_by(user_id=user_id).filter_by(is_staff=False).all()
+        staff_history = UserSubscriptions.query.filter_by(user_id=user_id).filter_by(is_staff=True).all()
+
+        for sub in client_history:
+            sub.subscription_type_information = LookupSubscriptions.query.filter_by(sub_id=sub.subscription_type_id).one_or_none()
+
+        for sub in staff_history:
+            sub.subscription_type_information = LookupSubscriptions.query.filter_by(sub_id=sub.subscription_type_id).one_or_none()
+
+
         res = {}
-        res['client_subscription_history'] = UserSubscriptions.query.filter_by(user_id=user_id).filter_by(is_staff=False).all()
-        res['staff_subscription_history'] = UserSubscriptions.query.filter_by(user_id=user_id).filter_by(is_staff=True).all()
+        res['client_subscription_history'] = client_history
+        res['staff_subscription_history'] = staff_history
         return res
 
 @ns.route('/logout/')
