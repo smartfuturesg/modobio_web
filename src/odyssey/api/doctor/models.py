@@ -49,11 +49,11 @@ class MedicalBloodPressures(db.Model):
     :type: float
     """
 
-    datetime_taken = db.Column(db.DateTime)
+    datetime_taken = db.Column(db.String)
     """
     The date and time the blood pressure levels were taken
 
-    :type: :class:`datetime.datetime`
+    :type: :class: str
     """
 
 class MedicalLookUpBloodPressureRange(db.Model):
