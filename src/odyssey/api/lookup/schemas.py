@@ -14,6 +14,7 @@ from odyssey.api.lookup.models import (
     LookupSubscriptions,
     LookupTelehealthSessionCost,
     LookupTelehealthSessionDuration,
+    LookupTransactionTypes,
     LookupNotifications
 )
 
@@ -23,6 +24,14 @@ class LookupProfessionalAppointmentConfirmationWindowSchema(ma.SQLAlchemyAutoSch
 
 class LookupProfessionalAppointmentConfirmationWindowOutputSchema(Schema):
     items = fields.Nested(LookupProfessionalAppointmentConfirmationWindowSchema(many=True),missing=[])
+    total_items = fields.Integer()
+
+class LookupTransactionTypesSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupTransactionTypes
+
+class LookupTransactionTypesOutputSchema(Schema):
+    items = fields.Nested(LookupTransactionTypesSchema(many=True),missing=[])
     total_items = fields.Integer()
 
 class LookupCountriesOfOperationsSchema(ma.SQLAlchemyAutoSchema):

@@ -16,10 +16,12 @@ from odyssey.api.lookup.models import (
      LookupSubscriptions,
      LookupTelehealthSessionCost,
      LookupTelehealthSessionDuration,
+     LookupTransactionTypes,
      LookupNotifications
 )
 from odyssey.api.lookup.schemas import (
     LookupActivityTrackersOutputSchema, 
+    LookupCareTeamResourcesOutputSchema,
     LookupClientBookingWindowOutputSchema,
     LookupCountriesOfOperationsOutputSchema,
     LookupDrinksOutputSchema, 
@@ -30,6 +32,7 @@ from odyssey.api.lookup.schemas import (
     LookupSubscriptionsOutputSchema,
     LookupTelehealthSessionCostOutputSchema,
     LookupTelehealthSessionDurationOutputSchema,
+    LookupTransactionTypesOutputSchema,
     LookupNotificationsOutputSchema,
     LookupCareTeamResourcesOutputSchema
 )
@@ -42,11 +45,10 @@ ns = api.namespace('lookup', description='Endpoints for lookup tables.')
 @ns.route('/business/professional-confirmation-window/')
 class LookupProfessionalConfirmationWindowResource(Resource):
     """ Returns stored confirmation windows for professionals in database by GET request.
-
     Returns
     -------
     dict
-        JSON encoded dict.
+        JSON encoded dict.    
     """
     @token_auth.login_required
     @responds(schema=LookupProfessionalAppointmentConfirmationWindowOutputSchema,status_code=200, api=ns)
@@ -58,6 +60,25 @@ class LookupProfessionalConfirmationWindowResource(Resource):
                    'total_items': len(window)}
 
         return payload
+
+@ns.route('/business/transaction-types/')
+class LookupTransactionTypesResource(Resource):
+    """ Returns stored transaction types in database by GET request.
+    Returns
+    -------
+    dict
+        JSON encoded dict.
+    """
+    @responds(schema=LookupTransactionTypesOutputSchema,status_code=200, api=ns)
+    def get(self):
+                
+        transaction_types = LookupTransactionTypes.query.all()
+        
+        payload = {'items': transaction_types,
+                   'total_items': len(transaction_types)}
+
+        return payload
+
 
 @ns.route('/business/countries-of-operations/')
 class LookupCountryOfOperationResource(Resource):
