@@ -1,15 +1,13 @@
 from marshmallow import Schema, fields, post_load, validate
 
 from odyssey import ma
-from odyssey.api.system.models import (
-    SystemTelehealthSettings
-)
+from odyssey.api.system.models import SystemTelehealthSessionCosts
 
 from odyssey.utils.constants import ACCESS_ROLES
 
 class SystemTeleheathCostSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        model = SystemTelehealthSettings
+        model = SystemTelehealthSessionCosts
 
     profession_type = fields.String(validate=validate.OneOf(ACCESS_ROLES))
 

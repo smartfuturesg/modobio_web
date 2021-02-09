@@ -1,12 +1,12 @@
-from flask_accepts import responds
+from flask_accepts import responds, accepts
 from flask_restx import Resource
 
 from odyssey.api import api
 from odyssey.defaults import TELEHEALTH_BOOKING_NOTICE_WINDOW, TELEHEALTH_SESSION_DURATION
 
 from odyssey.utils.auth import token_auth
-from odyssey.system.models import SystemTelehealthSessionCosts
-from odyssey.system.schemas import SystemTelehealthSettingsSchema
+from odyssey.api.system.models import SystemTelehealthSessionCosts
+from odyssey.api.system.schemas import SystemTelehealthSettingsSchema
 
 from odyssey import db
 
@@ -23,8 +23,8 @@ class SystemTelehealthSettingsApi(Resource):
     def get(self):
         costs = SystemTelehealthSessionCosts.query.all()
         res = {'costs': costs,
-                'session_duration': ,
-                'booking_notice_window': }
+                'session_duration': TELEHEALTH_SESSION_DURATION,
+                'booking_notice_window': TELEHEALTH_BOOKING_NOTICE_WINDOW}
         return res
 
     @token_auth.login_required

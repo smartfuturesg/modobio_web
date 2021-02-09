@@ -6,7 +6,7 @@ not to be edited at runtime.
 from odyssey import db
 from odyssey.utils.constants import DB_SERVER_TIME
 
-class SystemTelehealthSettings(db.Model):
+class SystemTelehealthSessionCosts(db.Model):
     """ Teleheath settings that can be changed by a system administrator
     """
 
@@ -26,14 +26,14 @@ class SystemTelehealthSettings(db.Model):
     :type: :class:`datetime.datetime`
     """
 
-    territory_id = db.Column(db.Integer, db.ForeignKey('LookupCountriesOfOperations.idx'), nullable=False))
+    territory_id = db.Column(db.Integer, db.ForeignKey('LookupCountriesOfOperations.idx'), primary_key=True, nullable=False)
     """
     id of the territory associated with this cost.
 
     :type: int, foreign key('LookupCountriesOfOperations.idx')
     """
 
-    profession_type = db.Column(db.String)
+    profession_type = db.Column(db.String, primary_key=True)
     """
     Name of the profression associated with this cost. Must be one of
 
