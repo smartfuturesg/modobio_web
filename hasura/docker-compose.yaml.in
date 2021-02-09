@@ -1,0 +1,19 @@
+# This is a yaml template file for docker-compose. It will not work
+# in it's current state. Copy this template to another location
+# (outside of git control) and edit it for you purpose.
+# Specifically, replace all [variables] with relevant values.
+# Then use docker-compose to create a docker image and run Hasura.
+version: "3.6"
+services:
+    graphql-engine:
+        image: "hasura/graphql-engine:latest"
+        ports:
+            - "8080:8080"
+        volumes:
+            - "[/path/to]/odyssey/hasura:/hasura-metadata"
+        restart: "always"
+        environment:
+            HASURA_GRAPHQL_DATABASE_URL: "postgres://[user]:[pass]@[host_ip]/[db_name]"
+            HASURA_GRAPHQL_ADMIN_SECRET: "[somesecret]"
+            HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
+            HASURA_GRAPHQL_ENABLE_TELEMETRY: "false"
