@@ -20,7 +20,7 @@ class SystemTelehealthSettingsApi(Resource):
     """ Endpoints related to system telehealth settings.
     """
 
-    #@token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
+    @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
     @responds(schema=SystemTelehealthSettingsSchema,status_code=200, api=ns)
     def get(self):
         costs = SystemTelehealthSessionCosts.query.all()
@@ -33,7 +33,7 @@ class SystemTelehealthSettingsApi(Resource):
                 'confirmation_window': TELEHEALTH_CONFIRMATION_WINDOW}
         return res
 
-    #@token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
+    @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
     @accepts(schema=SystemTelehealthSettingsSchema, api=ns)
     @responds(schema=SystemTelehealthSettingsSchema, status_code=201, api=ns)
     def put(self):
