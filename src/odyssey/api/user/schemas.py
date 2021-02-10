@@ -131,4 +131,5 @@ class UserNotificationsSchema(ma.SQLAlchemyAutoSchema):
 
     #comes from LookupNotifications.type
     notification_type = fields.String(dump_only=True)
+    notification_type_id = fields.Integer(dump_only=True)
     
