@@ -1,7 +1,7 @@
 """add user notifications
 
 Revision ID: a45013f3958d
-Revises: aca7180ebbbb
+Revises: e21ae83791f6
 Create Date: 2021-01-29 16:54:36.542761
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'a45013f3958d'
-down_revision = 'aca7180ebbbb'
+down_revision = 'e21ae83791f6'
 branch_labels = None
 depends_on = None
 
