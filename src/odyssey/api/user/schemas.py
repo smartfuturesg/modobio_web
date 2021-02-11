@@ -100,13 +100,24 @@ class UserPasswordUpdateSchema(Schema):
     current_password = fields.String(required=True,  validate=validate.Length(min=3,max=50), description="current password")
     new_password = fields.String(required=True,  validate=validate.Length(min=3,max=50), description="new password to be used going forward")
 
+class UserSubscriptionTypeSchema(Schema):
+
+    name = fields.String()
+    description = fields.String()
+    cost = fields.Float()
+    frequency = fields.String()
+    
+
 class UserSubscriptionsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = UserSubscriptions
         exclude = ('created_at', 'updated_at', 'idx')
         dump_only = ('start_date', 'end_date', 'user_id')
 
-    subscription_type = fields.String(validate=validate.OneOf(['unsubscribed', 'subscribed', 'free_trial', 'sponsored']))
+    subscription_type_id = fields.Integer(load_only=True, required=True)
+    subscription_status = fields.String(validate=validate.OneOf(['unsubscribed', 'subscribed', 'free trial', 'sponsored']))
+
+    subscription_type_information = fields.Nested(UserSubscriptionTypeSchema, dump_only=True)
     
     @post_load
     def make_object(self, data, **kwargs):

@@ -1384,4 +1384,3 @@ class ClientClinicalCareTeamAuthorizations(db.Model):
 
     :type: int, foreign key to :attr:`LookupClinicalCareTeamResources.resource_id <odyssey.models.lookup.LookupClinicalCareTeamResources.resource_id>`
     """
-    
