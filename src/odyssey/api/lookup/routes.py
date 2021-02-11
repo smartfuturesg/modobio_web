@@ -8,6 +8,7 @@ from odyssey.api.lookup.models import (
      LookupClientBookingWindow,
      LookupClinicalCareTeamResources,
      LookupCountriesOfOperations,
+     LookupDefaultHealthMetrics,
      LookupDrinks, 
      LookupDrinkIngredients, 
      LookupGoals, 
@@ -21,6 +22,7 @@ from odyssey.api.lookup.schemas import (
     LookupActivityTrackersOutputSchema, 
     LookupClientBookingWindowOutputSchema,
     LookupCountriesOfOperationsOutputSchema,
+    LookupDefaultHealthMetricsOutputSchema, 
     LookupDrinksOutputSchema, 
     LookupDrinkIngredientsOutputSchema, 
     LookupGoalsOutputSchema,
@@ -271,4 +273,17 @@ class LookupNotificationsApi(Resource):
     def get(self):
         """get contents of notification types lookup table"""
         res = LookupNotifications.query.all()
+        return {'total_items': len(res), 'items': res}
+
+@ns.route('/default-health-metrics/')
+class LookupDefaultHealthMetricsApi(Resource):
+    """
+    Endpoint for handling requests for all default health metrics
+    """
+
+    @token_auth.login_required
+    @responds(schema=LookupDefaultHealthMetricsOutputSchema, api=ns)
+    def get(self):
+        """get contents of default health metrics types lookup table"""
+        res = LookupDefaultHealthMetrics.query.all()
         return {'total_items': len(res), 'items': res}
