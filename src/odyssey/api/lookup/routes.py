@@ -11,6 +11,7 @@ from odyssey.api.lookup.models import (
      LookupDrinks, 
      LookupDrinkIngredients, 
      LookupGoals, 
+     LookupProfessionalAppointmentConfirmationWindow,
      LookupRaces,
      LookupSubscriptions,
      LookupTelehealthSessionCost,
@@ -26,6 +27,7 @@ from odyssey.api.lookup.schemas import (
     LookupDrinksOutputSchema, 
     LookupDrinkIngredientsOutputSchema, 
     LookupGoalsOutputSchema,
+    LookupProfessionalAppointmentConfirmationWindowOutputSchema,
     LookupRacesOutputSchema,
     LookupSubscriptionsOutputSchema,
     LookupTelehealthSessionCostOutputSchema,
@@ -39,6 +41,25 @@ from odyssey.utils.misc import check_drink_existence
 from odyssey import db
 
 ns = api.namespace('lookup', description='Endpoints for lookup tables.')
+
+@ns.route('/business/professional-confirmation-window/')
+class LookupProfessionalConfirmationWindowResource(Resource):
+    """ Returns stored confirmation windows for professionals in database by GET request.
+    Returns
+    -------
+    dict
+        JSON encoded dict.    
+    """
+    @token_auth.login_required
+    @responds(schema=LookupProfessionalAppointmentConfirmationWindowOutputSchema,status_code=200, api=ns)
+    def get(self):
+                
+        window = LookupProfessionalAppointmentConfirmationWindow.query.all()
+        
+        payload = {'items': window,
+                   'total_items': len(window)}
+
+        return payload
 
 @ns.route('/business/transaction-types/')
 class LookupTransactionTypesResource(Resource):

@@ -6,6 +6,41 @@ not to be edited at runtime.
 from odyssey import db
 from odyssey.utils.constants import DB_SERVER_TIME
 
+class LookupProfessionalAppointmentConfirmationWindow(db.Model):
+    """ Stored appointment confirmation windows for professionals in database. 
+    """
+
+    __tablename__ = 'LookupProfessionalAppointmentConfirmationWindow'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Primary index for 
+
+    :type: int, primary key, autoincrement
+    """
+
+    confirmation_window = db.Column(db.Float)
+    """
+    confirmation windows for 
+    from 1 hour to 24 hours in 30 minute increments
+    
+    :type: float
+    """    
+
 class LookupTransactionTypes(db.Model):
     """ Stored transaction types in database. 
     """
