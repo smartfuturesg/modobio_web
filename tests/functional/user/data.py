@@ -114,4 +114,14 @@ users_subscription_data = {
   "is_staff": False,
   "subscription_status": 'subscribed',
   "subscription_type_id": 2
+  "subscription_rate": 9.99,
+  "subscription_type": "subscribed"
+}
+
+users_notifications_data = {
+  'title': "Test2",
+  'content': "Longer Test2",
+  'action': 'https.test2.com',
+  'read': False,
+  'deleted': True
 }
