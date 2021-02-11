@@ -13,8 +13,17 @@ from odyssey.api.lookup.models import (
     LookupSubscriptions,
     LookupTelehealthSessionCost,
     LookupTelehealthSessionDuration,
+    LookupTransactionTypes,
     LookupNotifications
 )
+
+class LookupTransactionTypesSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupTransactionTypes
+
+class LookupTransactionTypesOutputSchema(Schema):
+    items = fields.Nested(LookupTransactionTypesSchema(many=True),missing=[])
+    total_items = fields.Integer()
 
 class LookupCountriesOfOperationsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
