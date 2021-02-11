@@ -282,7 +282,7 @@ class LookupDefaultHealthMetricsApi(Resource):
     """
 
     @token_auth.login_required
-    @responds(schema=LookupDefaultHealthMetricsOutputSchema, api=ns)
+    @responds(schema=LookupDefaultHealthMetricsOutputSchema, status_code=200, api=ns)
     def get(self):
         """get contents of default health metrics types lookup table"""
         res = LookupDefaultHealthMetrics.query.all()

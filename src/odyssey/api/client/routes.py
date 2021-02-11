@@ -1220,7 +1220,7 @@ class ClientWeightApi(Resource):
             sex = 'f'
         
         if client_info.dob:
-            years_old = round((datetime.now().date()-client_info.dob).days/365)
+            years_old = round((datetime.now().date()-client_info.dob).days/365.25)
         else: # default to 30 years old if not dob is present
             years_old = 30
 

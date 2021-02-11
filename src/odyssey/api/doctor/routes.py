@@ -187,7 +187,6 @@ class MedicalGenInformation(Resource):
 
             payload['gen_info'] = generalInfo
 
-        # breakpoint()
         # Before storing data, delete what exists in the database
         # If the user submits something for medication history, then removes it from the payload, 
         # remove everything for that user in medication history table
