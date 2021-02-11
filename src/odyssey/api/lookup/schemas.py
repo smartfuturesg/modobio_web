@@ -151,7 +151,7 @@ class LookupNotificationsSchema(ma.SQLAlchemyAutoSchema):
 class LookupDefaultHealthMetricsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupDefaultHealthMetrics
-        exclude = ('created_at', 'updated_at')
+        exclude = ('created_at', 'updated_at', 'idx')
 
     @post_load
     def make_object(self, data, **kwargs):

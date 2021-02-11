@@ -1,5 +1,5 @@
 import boto3
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from flask import request, current_app
 from flask_accepts import accepts, responds
@@ -42,6 +42,7 @@ from odyssey.api.doctor.models import (
 )
 from odyssey.api.lookup.models import (
     LookupClinicalCareTeamResources, 
+    LookupDefaultHealthMetrics,
     LookupGoals, 
     LookupDrinks, 
     LookupRaces
@@ -78,6 +79,7 @@ from odyssey.api.client.schemas import(
     SignedDocumentsSchema,
     UserClinicalCareTeamSchema
 )
+from odyssey.api.lookup.schemas import LookupDefaultHealthMetricsSchema
 from odyssey.api.staff.schemas import StaffRecentClientsSchema
 from odyssey.api.facility.schemas import ClientSummarySchema
 
@@ -1191,3 +1193,41 @@ class ClientWeightApi(Resource):
             raise IllegalSetting(message="Requested user_id does not match logged in user_id. Clients can only view weight history for themselves.")
 
         return ClientWeightHistory.query.filter_by(user_id=user_id).all()
+
+
+@ns.route('/default-health-metrics/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class ClientWeightApi(Resource):
+    """
+    Endpoint for returning the recommended health metrics for the client based on age and sex
+    """
+    @token_auth.login_required()
+    @responds(schema=LookupDefaultHealthMetricsSchema, api=ns, status_code=200)
+    def get(self, user_id):
+        """
+        Looks up client's age and sex. One or both are not available, we return our best guess: the health
+        metrics for a 30 year old female.
+        """
+        client_info = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
+        user_info, _ = token_auth.current_user()
+        
+        # get user sex and age info
+        if user_info.biological_sex_male != None:
+            sex = ('m' if user_info.biological_sex_male else 'f')
+        elif client_info.gender in ('m', 'f'): # use gender instead of biological sex
+            sex = client_info.gender
+        else: # default to female
+            sex = 'f'
+        
+        if client_info.dob:
+            years_old = round((datetime.now().date()-client_info.dob).days/365)
+        else: # default to 30 years old if not dob is present
+            years_old = 30
+
+        age_categories = db.session.query(LookupDefaultHealthMetrics.age).filter(LookupDefaultHealthMetrics.sex == 'm').all()
+        age_categories = [x[0] for x in age_categories]
+        age_category = min(age_categories, key=lambda x:abs(x-years_old))
+
+        health_metrics = LookupDefaultHealthMetrics.query.filter_by(age = age_category).filter_by(sex = sex).one_or_none()
+        
+        return health_metrics
