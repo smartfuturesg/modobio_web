@@ -81,7 +81,7 @@ ns = api.namespace('doctor', description='Operations related to doctor')
 @ns.route('/bloodpressure/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedBloodPressures(Resource):
-    @token_auth.login_required
+    @token_auth.login_required(resources=('MedicalBloodPressures',))
     @responds(schema=MedicalBloodPressuresOutputSchema, api=ns)
     def get(self, user_id):
         '''
@@ -112,6 +112,7 @@ class MedBloodPressures(Resource):
         # insert results into the result table
         db.session.commit()
         return data
+
 @ns.route('/lookupbloodpressureranges/')
 class MedicalLookUpBloodPressureResource(Resource):
     """ Returns blood pressure ranges stored in the database in response to a GET request.
@@ -133,7 +134,7 @@ class MedicalLookUpBloodPressureResource(Resource):
 @ns.route('/medicalgeneralinfo/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedicalGenInformation(Resource):
-    @token_auth.login_required
+    @token_auth.login_required(resources=('MedicalGeneralInfoMedications', 'MedicalGeneralInfoMedicationAllergy','MedicalGeneralInfo' ))
     @responds(schema=MedicalGeneralInfoInputSchema(exclude=['medications.idx','allergies.idx']), api=ns)
     def get(self, user_id):
         '''
@@ -252,7 +253,7 @@ class MedicalGenInformation(Resource):
 @ns.route('/medicalinfo/general/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedicalGeneralInformation(Resource):
-    @token_auth.login_required
+    @token_auth.login_required(resources=('MedicalGeneralInfo',))
     @responds(schema=MedicalGeneralInfoSchema, api=ns)
     def get(self, user_id):
         '''
@@ -340,7 +341,7 @@ class MedicalGeneralInformation(Resource):
 @ns.route('/medicalinfo/medications/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedicalMedicationInformation(Resource):
-    @token_auth.login_required
+    @token_auth.login_required(resources=('MedicalGeneralInfoMedications',))
     @responds(schema=MedicalMedicationsInfoInputSchema, api=ns)
     def get(self, user_id):
         '''
@@ -453,7 +454,7 @@ class MedicalMedicationInformation(Resource):
 @ns.route('/medicalinfo/allergies/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedicalAllergiesInformation(Resource):
-    @token_auth.login_required
+    @token_auth.login_required(resources=('MedicalGeneralInfoMedicationAllergy',))
     @responds(schema=MedicalAllergiesInfoInputSchema, api=ns)
     def get(self, user_id):
         '''
@@ -574,40 +575,43 @@ class MedicalLookUpSTDResource(Resource):
 @ns.route('/medicalinfo/social/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedicalSocialHist(Resource):
-    @token_auth.login_required
+    @token_auth.login_required(resources=('MedicalSocialHistory','MedicalSTDHistory'))
     @responds(schema=MedicalSocialHistoryOutputSchema, api=ns)
     def get(self, user_id):
         """ This request retrieves the social history
         for client ``user_id`` in response to a GET request.
 
-        The example returned payload will look like 
-        {
-            "social_history": {
-                "currently_smoke": bool,
-                "avg_num_cigs": int,
-                "num_years_smoked": int,
-                "last_smoke": int,
-                "last_smoke_time": str,
-                "plan_to_stop": bool,
-                "avg_weekly_drinks": int,
-                "avg_weekly_workouts": int,
-                "job_title": str,
-                "avg_hourly_meditation": int,
-                "sexual_preference": str
+        The example returned payload will look like::
+
+            {
+                "social_history": {
+                    "currently_smoke": bool,
+                    "avg_num_cigs": int,
+                    "num_years_smoked": int,
+                    "last_smoke": int,
+                    "last_smoke_time": str,
+                    "plan_to_stop": bool,
+                    "avg_weekly_drinks": int,
+                    "avg_weekly_workouts": int,
+                    "job_title": str,
+                    "avg_hourly_meditation": int,
+                    "sexual_preference": str
+                }
+                "std_history": [
+                    {"std_id": int},
+                    {"std_id: int}
+                ]
             }
-            "std_history": [
-                {"std_id": int},
-                {"std_id: int}
-            ]
-        }
 
         Parameters
         ----------
+
         user_id : int
             User ID number.
 
         Returns
         -------
+
         dict
             JSON encoded dict.
         """
@@ -625,34 +629,37 @@ class MedicalSocialHist(Resource):
         """ This request submits the social history
         for client ``user_id`` in response to a POST request.
 
-        The example returned payload will look like 
-        {
-            "social_history":{
-                "currently_smoke": bool,
-                "avg_num_cigs": int,
-                "num_years_smoked": int,
-                "last_smoke": int,
-                "last_smoke_time": str,
-                "plan_to_stop": bool,
-                "avg_weekly_drinks": int,
-                "avg_weekly_workouts": int,
-                "job_title": str,
-                "avg_hourly_meditation": int,
-                "sexual_preference": str
+        The example returned payload will look like::
+
+            {
+                "social_history":{
+                    "currently_smoke": bool,
+                    "avg_num_cigs": int,
+                    "num_years_smoked": int,
+                    "last_smoke": int,
+                    "last_smoke_time": str,
+                    "plan_to_stop": bool,
+                    "avg_weekly_drinks": int,
+                    "avg_weekly_workouts": int,
+                    "job_title": str,
+                    "avg_hourly_meditation": int,
+                    "sexual_preference": str
+                }
+                "std_history": [
+                    {"std_id": int},
+                    {"std_id": int}
+                ]
             }
-            "std_history": [
-                {"std_id": int},
-                {"std_id": int}
-            ]
-        }
 
         Parameters
         ----------
+
         user_id : int
             User ID number.
 
         Returns
         -------
+
         dict
             JSON encoded dict.
         """
@@ -736,7 +743,7 @@ class MedicalCondition(Resource):
 @ns.route('/familyhistory/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedicalFamilyHist(Resource):
-    @token_auth.login_required
+    @token_auth.login_required(resources=('MedicalFamilyHistory',))
     @responds(schema=MedicalFamilyHistOutputSchema, api=ns)
     def get(self, user_id):
         '''
@@ -809,7 +816,7 @@ class MedicalFamilyHist(Resource):
 @ns.route('/images/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedImaging(Resource):
-    @token_auth.login_required
+    @token_auth.login_required(resources=('MedicalImaging',))
     @responds(schema=MedicalImagingSchema(many=True), api=ns)
     def get(self, user_id):
         """returns a json file of all the medical images in the database for the specified user_id
@@ -969,7 +976,7 @@ class MedBloodTest(Resource):
 @ns.route('/bloodtest/all/<int:user_id>/')
 @ns.doc(params={'user_id': 'Client ID number'})
 class MedBloodTestAll(Resource):
-    @token_auth.login_required
+    @token_auth.login_required(resources=('MedicalBloodTests',))
     @responds(schema=AllMedicalBloodTestSchema, api=ns)
     def get(self, user_id):
         """
@@ -1021,7 +1028,7 @@ class MedBloodTestResults(Resource):
 
     Each test instance may have multiple test results. 
     """
-    @token_auth.login_required
+    @token_auth.login_required(resources=('MedicalBloodTestResults', 'MedicalBloodTests'))
     @responds(schema=MedicalBloodTestResultsOutputSchema, api=ns)
     def get(self, test_id):
         """
@@ -1079,7 +1086,7 @@ class AllMedBloodTestResults(Resource):
     This includes all test submisison details along with the test
     results associated with each test submission. 
     """
-    @token_auth.login_required
+    @token_auth.login_required(resources=('MedicalBloodTestResults', 'MedicalBloodTests'))
     @responds(schema=MedicalBloodTestResultsOutputSchema, api=ns)
     def get(self, user_id):
         # pull up all tests, test results, and the test type names for this client
@@ -1204,7 +1211,7 @@ class MedHistory(Resource):
 @ns.route('/physical/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedPhysical(Resource):
-    @token_auth.login_required
+    @token_auth.login_required(resources=('MedicalPhysicals',))
     @responds(schema=MedicalPhysicalExamSchema(many=True), api=ns)
     def get(self, user_id):
         """returns all client's medical physical exams for the user_id specified"""
@@ -1328,7 +1335,7 @@ class MedicalSurgeriesAPI(Resource):
 
         return request.parsed_obj
 
-    @token_auth.login_required
+    @token_auth.login_required(resources=('MedicalSurgeries',))
     @responds(schema=MedicalSurgeriesSchema(many=True), api=ns)
     def get(self, client_user_id):
         """returns a list of all surgeries for the given client_user_id"""
@@ -1371,21 +1378,3 @@ class MedicalSurgeriesAPI(Resource):
 #     _generate_lut_endpoints(name, lut)
 #
 ##########################
-
-@ns.route('/conditions/')
-class MedicalConditionsEndpoint(Resource):
-    """ Lookup table for supported medical conditions. """
-
-    @token_auth.login_required
-    @responds(status_code=200, api=ns)
-    def get(self):
-        """ Lookup table for supported medical conditions.
-
-        Returns
-        -------
-        dict(dict(...))
-            Nested dict, where the keys are the supported (category of)
-            medical issues. The values are either another dict to specify
-            a subdivision, or ``null`` indicating no further nesting.
-        """
-        return jsonify(MEDICAL_CONDITIONS)

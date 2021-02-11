@@ -6,30 +6,57 @@ from odyssey.utils.auth import token_auth
 from odyssey.api.lookup.models import (
      LookupActivityTrackers,
      LookupClientBookingWindow,
+     LookupClinicalCareTeamResources,
+     LookupCountriesOfOperations,
      LookupDrinks, 
      LookupDrinkIngredients, 
      LookupGoals, 
      LookupRaces,
      LookupSubscriptions,
      LookupTelehealthSessionCost,
-     LookupTelehealthSessionDuration
+     LookupTelehealthSessionDuration,
+     LookupNotifications
 )
 from odyssey.api.lookup.schemas import (
     LookupActivityTrackersOutputSchema, 
     LookupClientBookingWindowOutputSchema,
+    LookupCountriesOfOperationsOutputSchema,
     LookupDrinksOutputSchema, 
     LookupDrinkIngredientsOutputSchema, 
     LookupGoalsOutputSchema,
     LookupRacesOutputSchema,
     LookupSubscriptionsOutputSchema,
     LookupTelehealthSessionCostOutputSchema,
-    LookupTelehealthSessionDurationOutputSchema
+    LookupTelehealthSessionDurationOutputSchema,
+    LookupNotificationsOutputSchema,
+    LookupCareTeamResourcesOutputSchema
 )
 from odyssey.utils.misc import check_drink_existence
 
 from odyssey import db
 
 ns = api.namespace('lookup', description='Endpoints for lookup tables.')
+
+
+@ns.route('/business/countries-of-operations/')
+class LookupCountryOfOperationResource(Resource):
+    """ Returns stored countries of operations in database by GET request.
+
+    Returns
+    -------
+    dict
+        JSON encoded dict.
+    """
+    @token_auth.login_required
+    @responds(schema=LookupCountriesOfOperationsOutputSchema,status_code=200, api=ns)
+    def get(self):
+                
+        countries = LookupCountriesOfOperations.query.all()
+        
+        payload = {'items': countries,
+                   'total_items': len(countries)}
+
+        return payload
 
 @ns.route('/business/booking-window/')
 class LookupTelehealthSessionCostResource(Resource):
@@ -214,6 +241,18 @@ class LookupRacesApi(Resource):
         res = LookupRaces.query.all()
         return {'total_items': len(res), 'items': res}
 
+@ns.route('/care-team/resources/')
+class LookupClinicalCareTeamResourcesApi(Resource):
+    """
+    Returns available resources that can be shared within clinical care teams
+    """
+    @token_auth.login_required
+    @responds(schema=LookupCareTeamResourcesOutputSchema, api=ns)
+    def get(self):
+        """get contents of clinical care team resources lookup table"""
+        res = LookupClinicalCareTeamResources.query.all()
+        return {'total_items': len(res), 'items': res}
+        
 @ns.route('/subscriptions/')
 class LookupSubscriptionsApi(Resource):
 
@@ -222,4 +261,14 @@ class LookupSubscriptionsApi(Resource):
     def get(self):
         """get contents of subscription plans lookup table"""
         res = LookupSubscriptions.query.all()
+        return {'total_items': len(res), 'items': res}
+
+@ns.route('/notifications/')
+class LookupNotificationsApi(Resource):
+
+    @token_auth.login_required
+    @responds(schema=LookupNotificationsOutputSchema, api=ns)
+    def get(self):
+        """get contents of notification types lookup table"""
+        res = LookupNotifications.query.all()
         return {'total_items': len(res), 'items': res}

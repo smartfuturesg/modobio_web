@@ -59,11 +59,11 @@ class NewUserClientServices(Resource):
 
         # add new user subscription information
         client_sub = UserSubscriptionsSchema().load({
-            'user_id': user.user_id,
             'subscription_type': 'unsubscribed',
             'subscription_rate': 0.0,
             'is_staff': False
         })
+        client_sub.user_id = user.user_id
         db.session.add(client_sub)
         db.session.commit()
 
@@ -72,11 +72,11 @@ class NewUserClientServices(Resource):
                                 'utype': user_type,
                                 'uid': user_id},
                                 secret,
-                                algorithm='HS256').decode('utf-8')
+                                algorithm='HS256')
 
         send_email_user_registration_portal(user.email, password, portal_id)
 
-        if current_app.env == 'development':
+        if current_app.config['LOCAL_CONFIG']:
             return {'password':password,
                     'portal_id': portal_id,
                     'registration_portal_url': REGISTRATION_PORTAL_URL.format(portal_id)}
@@ -125,13 +125,13 @@ class RefreshRegistrationPortal(Resource):
                                 'utype': user_type,
                                 'uid': user.user_id},
                                 secret,
-                                algorithm='HS256').decode('utf-8')
+                                algorithm='HS256')
 
         send_email_user_registration_portal(user.email, password, portal_id)
         
         db.session.commit()
         
-        if current_app.env == 'development':
+        if current_app.config['LOCAL_CONFIG']:
             return {'password':password,
                     'portal_id': portal_id,
                     'registration_portal_url': REGISTRATION_PORTAL_URL.format(portal_id)}

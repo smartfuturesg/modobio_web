@@ -3,15 +3,26 @@ from marshmallow import Schema, fields, post_load
 from odyssey import ma
 from odyssey.api.lookup.models import (
     LookupActivityTrackers, 
+    LookupClinicalCareTeamResources,
     LookupClientBookingWindow,
+    LookupCountriesOfOperations,
     LookupDrinks, 
     LookupDrinkIngredients, 
     LookupGoals, 
     LookupRaces,
     LookupSubscriptions,
     LookupTelehealthSessionCost,
-    LookupTelehealthSessionDuration
+    LookupTelehealthSessionDuration,
+    LookupNotifications
 )
+
+class LookupCountriesOfOperationsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupCountriesOfOperations
+
+class LookupCountriesOfOperationsOutputSchema(Schema):
+    items = fields.Nested(LookupCountriesOfOperationsSchema(many=True),missing=[])
+    total_items = fields.Integer()
 
 class LookupClientBookingWindowSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -83,6 +94,20 @@ class LookupGoalsSchema(ma.SQLAlchemyAutoSchema):
     def make_object(self, data, **kwargs):
         return LookupGoals(**data)
 
+class LookupCareTeamResourcesSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupClinicalCareTeamResources
+        exclude = ('created_at', 'updated_at', 'resource_name')
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return LookupClinicalCareTeamResources(**data)
+
+
+class LookupCareTeamResourcesOutputSchema(Schema):
+    items = fields.Nested(LookupCareTeamResourcesSchema(many=True), missing = [])
+    total_items = fields.Integer()
+
 class LookupGoalsOutputSchema(Schema):
     items = fields.Nested(LookupGoalsSchema(many=True), missing = [])
     total_items = fields.Integer()
@@ -111,4 +136,17 @@ class LookupSubscriptionsSchema(ma.SQLAlchemyAutoSchema):
 
 class LookupSubscriptionsOutputSchema(Schema):
     items = fields.Nested(LookupSubscriptionsSchema(many=True), missing = [])
+    total_items = fields.Integer()
+
+class LookupNotificationsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupNotifications
+        exclude = ('created_at', 'updated_at')
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return LookupNotifications(**data)
+
+class LookupNotificationsOutputSchema(Schema):
+    items = fields.Nested(LookupNotificationsSchema(many=True), missing = [])
     total_items = fields.Integer()

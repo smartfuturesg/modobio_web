@@ -6,6 +6,41 @@ not to be edited at runtime.
 from odyssey import db
 from odyssey.utils.constants import DB_SERVER_TIME
 
+class LookupCountriesOfOperations(db.Model):
+    """ Stored countries of operations in database. 
+    """
+
+    __tablename__ = 'LookupCountriesOfOperations'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Primary index for 
+
+    :type: int, primary key, autoincrement
+    """
+
+    country = db.Column(db.String)
+    """
+    countries of operations
+    
+    :type: str
+    """
+    
+
 class LookupClientBookingWindow(db.Model):
     """ Stored booking windows for the client in database. 
     """
@@ -527,7 +562,6 @@ class LookupRaces(db.Model):
 
     :type: string
     """
-
 class LookupSubscriptions(db.Model):
     """ Static list of subscription plans that a user can choose from. 
     """
@@ -583,17 +617,11 @@ class LookupSubscriptions(db.Model):
     :type: string
     """
 
-class LookupDefaultHealthMetrics(db.Model):
-    """
-    Health metric recommendations by sex and age category
-    Most of this data may be obtained from one more more fitness trackers
-
-    The intended use of this table is to show clients the types of goals and associated benchmarks
-    they shoudld strive for. We may also venture to use the data in this table to evaluate where 
-    clients stand among these metrics.  
+class LookupNotifications(db.Model):
+    """ Static list of notifications types that a user can receive. 
     """
 
-    __tablename__ = 'LookupDefaultHealthMetrics'
+    __tablename__ = 'LookupNotifications'
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
@@ -609,318 +637,81 @@ class LookupDefaultHealthMetrics(db.Model):
     :type: :class:`datetime.datetime`
     """
 
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    notification_type_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
-    Index
+    Id of this notification type.
 
     :type: integer, primary key, autoincrementing
     """
 
-    sex = db.Column(db.String(2))
+    notification_type = db.Column(db.String)
     """
-    Biological sex of the client. Many of the following metrics vary on sex.
+    Name of this notification type.
 
     :type: string
     """
 
-    age = db.Column(db.Integer)
+    icon = db.Column(db.String)
     """
-    Age category. For adults, the age spacings are 5 years. Most metrics do not vary at these intervals. 
-
-    :type: integer
-    """
-
-    bmi_underweight = db.Column(db.Float)
-    """
-    BMI below which is considered underweight
-
-    :type: float
-    """
-
-    bmi_normal_min = db.Column(db.Float)
-    """
-    Lower point for normal BMI range
-
-    :type: float
-    """
-
-    bmi_normal_max = db.Column(db.Float)
-    """
-    Higher point for normal BMI range
-
-    :type: float
-    """
-
-    bmi_overweight_min = db.Column(db.Float)
-    """
-    Lower point for overweight BMI range
-
-    :type: float
-    """
-
-    bmi_overweight_max = db.Column(db.Float)
-    """
-    Higher point for normal BMI range
-
-    :type: float
-    """
-
-    bmi_obese = db.Column(db.Float)
-    """
-    BMI above which is considered obese
-
-    :type: float
-    """
-
-    ecg_metric_1 = db.Column(db.String)
-    """
-    Metric to look out for from ECG readings
+    Icon used for this notification type, denotes a file in an s3 bucket.
 
     :type: string
     """
 
-    ecg_metric_2_bpm_min = db.Column(db.Integer)
+    background_color = db.Column(db.String)
     """
-    BPM reading from ECG analysis. Lower point for healthy BPM range.
-
-    :type: integer
-    """
-
-    ecg_metric_2_bpm_max = db.Column(db.Integer)
-    """
-    BPM reading from ECG analysis. Higher point for healthy BPM range.
-
-    :type: integer
+    Background color used for this notification type.
+    Color names are from the list of 140 colors supported by all browsers
+    See: https://htmlcolorcodes.com/color-names/
     """
 
-    sp_o2_spot_check = db.Column(db.Integer)
+    symbol_color = db.Column(db.String)
     """
-    Minimum healthy SpO2 spot check. 
-
-    :type: integer
-    """
-
-    sp_o2_nighttime_avg = db.Column(db.Integer)
-    """
-    Minimum healthy SpO2 nighttime average. 
-
-    :type: integer
+    Symbol color used for this notification type.
+    Color names are from the list of 140 colors supported by all browsers
+    original means do not apply any color to the svg
+    See: https://htmlcolorcodes.com/color-names/
     """
 
-    sleep_total_minutes = db.Column(db.Integer)
+class LookupClinicalCareTeamResources(db.Model):
     """
-    Total minutes of sleep per night recommended
+    Stores all the database tables which can be accessed by a clinical care team.
+    Table names are given an index in order to be referenced by other tables
+    """
 
-    :type: integer
+    __tablename__ = 'LookupClinicalCareTeamResources'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
     """
 
-    sleep_deep_min_minutes = db.Column(db.Integer)
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
     """
-    Total minimum minutes of deep sleep per night recommended
+    Last update timestamp of this row in the database.
 
-    :type: integer
+    :type: :class:`datetime.datetime`
     """
+
+    resource_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    ID for the table. 
+
+    :type: integer, primary key, autoincrementing
+    """
+
+    resource_name = db.Column(db.String)
+    """
+    Table name 
+
+    :type: string
+    """
+
+    display_name = db.Column(db.String)
+    """
+    Name of resource to display to client. We do not want table names getting passed around.
     
-    sleep_deep_max_minutes = db.Column(db.Integer)
-    """
-    Total maximum minutes of deep sleep per night recommended
-
-    :type: integer
-    """
-
-    sleep_rem_min_minutes = db.Column(db.Integer)
-    """
-    Total minimum minutes of rem sleep per night recommended
-
-    :type: integer
-    """
-
-    sleep_rem_max_minutes = db.Column(db.Integer)
-    """
-    Total maximum minutes of rem sleep per night recommended
-
-    :type: integer
-    """
-
-    sleep_quality_min_minutes = db.Column(db.Integer)
-    """
-    Total minimum minutes of quality sleep per night recommended
-
-    :type: integer
-    """
-
-    sleep_quality_max_minutes = db.Column(db.Integer)
-    """
-    Total maximum minutes of quality sleep per night recommended
-
-    :type: integer
-    """
-
-    sleep_light_minutes = db.Column(db.Integer)
-    """
-    Total minutes of light sleep per night recommended
-
-    :type: integer
-    """
-
-    sleep_time_awake_minutes = db.Column(db.Integer)
-    """
-    Total minutes awake per night of sleep recommended
-
-    :type: integer
-    """
-
-    sleep_latency_minutes = db.Column(db.Integer)
-    """
-    Recommended maximum time to get to sleep once at rest
-
-    :type: integer
-    """
-
-    bedtime_consistency_minutes = db.Column(db.Integer)
-    """
-    Recommended maximum variability in bedtimes 
-
-    :type: integer
-    """
-
-    wake_consistency_minutes = db.Column(db.Integer)
-    """
-    Recommended maximum variability in wake time 
-    
-    :type: integer
-    """
-
-    heart_rate_rest_average_min = db.Column(db.Integer)
-    """
-    Lower end of recommended average resting heart rate range
-    
-    :type: integer
-    """
-
-    heart_rate_rest_average_max = db.Column(db.Integer)
-    """
-    Higher end of recommended average resting heart rate range
-    
-    :type: integer
-    """
-
-    heart_rate_rest_lowest_min = db.Column(db.Integer)
-    """
-    Lower end of recommended resting heart rate range upon spot check
-    
-    :type: integer
-    """
-
-    heart_rate_rest_lowest_max = db.Column(db.Integer)
-    """
-    Higher end of recommended resting heart rate range upon spot check
-    
-    :type: integer
-    """
-
-    heart_rate_walking_min = db.Column(db.Integer)
-    """
-    Lower end of recommended walking heart rate range 
-    
-    :type: integer
-    """
-
-    heart_rate_walking_max = db.Column(db.Integer)
-    """
-    Higher end of recommended walking heart rate range 
-    
-    :type: integer
-    """
-
-    heart_rate_average_min = db.Column(db.Integer)
-    """
-    Lower end of recommended overall average heart rate range 
-    
-    :type: integer
-    """
-
-    heart_rate_average_max = db.Column(db.Integer)
-    """
-    Higher end of recommended overall average heart rate range 
-    
-    :type: integer
-    """
-
-    heart_rate_variability_average_milliseconds = db.Column(db.Integer)
-    """
-    Average recommended heart rate variability (HRV) reported in milliseconds 
-    
-    :type: integer
-    """
-
-    heart_rate_variability_highest_milliseconds = db.Column(db.Integer)
-    """
-    Higherst recommended heart rate variability (HRV) reported in milliseconds 
-    
-    :type: integer
-    """
-
-    respiratory_rate_min_per_minute = db.Column(db.Integer)
-    """
-    Minimum respiratory rater (per minute) in recommended range
-    
-    :type: integer
-    """
-
-    respiratory_rate_max_per_minute = db.Column(db.Integer)
-    """
-    Maximum respiratory rater (per minute) in recommended range
-    
-    :type: integer
-    """
-
-    body_temperature_deviation_fahrenheit = db.Column(db.Float)
-    """
-    Recommended body temperature variability reported in degrees fahrenheit
-    
-    :type: float
-    """
-
-    steps_per_day = db.Column(db.Integer)
-    """
-    Steps per day recommended
-    
-    :type: integer
-    """
-
-    steps_walking_equivalency_miles = db.Column(db.Integer)
-    """
-    Walking distance equivalency of recommended steps perday. Average height of US male and female used for all
-    age categories. 
-    
-    :type: integer
-    """
-    calories_total = db.Column(db.Integer)
-    """
-    Total caloreies used by the body over a day. Recommended values are based on the average height and weight 
-    of US males and females accross all age categories. 
-
-    :type: integer
-    """
-
-    calories_active_burn_min = db.Column(db.Integer)
-    """
-    Lower end of active calorie burn recommended per day
-    
-    :type: integer
-    """
-
-    calories_active_burn_max = db.Column(db.Integer)
-    """
-    Higher end of active calorie burn recommended per day
-    
-    :type: integer
-    """
-
-    inactivity_minutes = db.Column(db.Integer)
-    """
-    Maximum minutes of inactivity recommended per day    
-
-    :type: integer
+    :type: string
     """

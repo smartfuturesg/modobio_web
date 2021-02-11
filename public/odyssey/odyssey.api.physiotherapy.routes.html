@@ -1,0 +1,310 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>odyssey.api.physiotherapy.routes &mdash; Odyssey version: 0.1.100 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="odyssey.api.trainer.routes" href="odyssey.api.trainer.routes.html" />
+    <link rel="prev" title="odyssey.api.doctor.routes" href="odyssey.api.doctor.routes.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Odyssey
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                version: 0.1.100
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="odyssey.config.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.models.html">Database models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.schemas.html">Validation schemas</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="odyssey.api.html">API endpoints</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.user.routes.html">User</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.client.routes.html">Client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.staff.routes.html">Staff</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.client_services.routes.html">Client services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.doctor.routes.html">Doctor</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Physical therapist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.trainer.routes.html">Trainer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.wearables.routes.html">Wearable devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.facility.routes.html">Facilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.lookup.routes.html">Lookup tables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.misc.postman.html">Postman</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.version.routes.html">Version</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.utils.html">Utilities</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Odyssey</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="odyssey.api.html">API endpoints</a> &raquo;</li>
+        
+      <li>odyssey.api.physiotherapy.routes</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/odyssey/odyssey.api.physiotherapy.routes.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-odyssey.api.physiotherapy.routes">
+<span id="odyssey-api-physiotherapy-routes"></span><h1>odyssey.api.physiotherapy.routes<a class="headerlink" href="#module-odyssey.api.physiotherapy.routes" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="odyssey.api.physiotherapy.routes.ClientPTHistory">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.physiotherapy.routes.</code><code class="sig-name descname">ClientPTHistory</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.physiotherapy.routes.ClientPTHistory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<p>GET, POST, PUT for pt history data</p>
+<dl class="py method">
+<dt id="odyssey.api.physiotherapy.routes.ClientPTHistory.get">
+<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.physiotherapy.routes.ClientPTHistory.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns most recent pt history</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.api.physiotherapy.routes.ClientPTHistory.post">
+<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.physiotherapy.routes.ClientPTHistory.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>create client’s pt history</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.api.physiotherapy.routes.ClientPTHistory.put">
+<code class="sig-name descname">put</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.physiotherapy.routes.ClientPTHistory.put" title="Permalink to this definition">¶</a></dt>
+<dd><p>edit user’s pt history</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.physiotherapy.routes.ClientPTHistory.endpoint">
+<code class="sig-name descname">endpoint</code><em class="property"> = 'physiotherapy_client_pt_history'</em><a class="headerlink" href="#odyssey.api.physiotherapy.routes.ClientPTHistory.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.api.physiotherapy.routes.ClientPTHistory.mediatypes">
+<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.physiotherapy.routes.ClientPTHistory.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.physiotherapy.routes.ClientPTHistory.methods">
+<code class="sig-name descname">methods</code><em class="property"> = {'GET', 'POST', 'PUT'}</em><a class="headerlink" href="#odyssey.api.physiotherapy.routes.ClientPTHistory.methods" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="odyssey.api.physiotherapy.routes.ClientChessboard">
+<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.physiotherapy.routes.</code><code class="sig-name descname">ClientChessboard</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.physiotherapy.routes.ClientChessboard" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<p>GET, POST for chessboard assesssment data
+note that clients will have multiple entries as they progress through the program
+Trainers may update some or all fields. The backend will store every update as a new row
+fields left blank will be left as null</p>
+<dl class="py method">
+<dt id="odyssey.api.physiotherapy.routes.ClientChessboard.get">
+<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.physiotherapy.routes.ClientChessboard.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns all chessboard entries for the specified client</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.api.physiotherapy.routes.ClientChessboard.post">
+<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.physiotherapy.routes.ClientChessboard.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>create new chessboard entry</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.physiotherapy.routes.ClientChessboard.endpoint">
+<code class="sig-name descname">endpoint</code><em class="property"> = 'physiotherapy_client_chessboard'</em><a class="headerlink" href="#odyssey.api.physiotherapy.routes.ClientChessboard.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="odyssey.api.physiotherapy.routes.ClientChessboard.mediatypes">
+<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.physiotherapy.routes.ClientChessboard.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="odyssey.api.physiotherapy.routes.ClientChessboard.methods">
+<code class="sig-name descname">methods</code><em class="property"> = {'GET', 'POST'}</em><a class="headerlink" href="#odyssey.api.physiotherapy.routes.ClientChessboard.methods" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="odyssey.api.trainer.routes.html" class="btn btn-neutral float-right" title="odyssey.api.trainer.routes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="odyssey.api.doctor.routes.html" class="btn btn-neutral float-left" title="odyssey.api.doctor.routes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright Copyright 2019-2020 Atlantic Venture Partners, all rights reserved.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

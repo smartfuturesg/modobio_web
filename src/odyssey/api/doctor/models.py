@@ -390,10 +390,12 @@ class MedicalConditions(db.Model):
     category = db.Column(db.String)
     """
     Category for the medical condition.
-    Examples:
-        Autoimmune
-        Cancer
-        Cardiovascular
+
+    **Example**
+
+    * Autoimmune
+    * Cancer
+    * Cardiovascular
 
     :type: str
     """
@@ -401,25 +403,33 @@ class MedicalConditions(db.Model):
     subcategory = db.Column(db.String)
     """
     Sub category for medical conditions
-    Examples:
-        Cardiovascular
-            Bleeding disorder
-            Anemia
-            Chest pain
-    
+
+    **Example**
+
+    * Cardiovascular
+
+        * Bleeding disorder
+        * Anemia
+        * Chest pain
+
     :type: str
     """
 
     condition = db.Column(db.String)
     """
     The medical condition.
-    Examples:
-        Cardiovascular:
-            - Heart murmur
-            Anemia
-                - Sickle cell
 
-    :type: Str
+    **Example**
+
+    * Cardiovascular
+
+            * Heart murmur
+
+        * Anemia
+
+            * Sickle cell
+
+    :type: str
     """
 
 class MedicalGeneralInfoMedicationAllergy(db.Model):
@@ -530,6 +540,7 @@ class MedicalGeneralInfoMedications(db.Model):
     """
     Client's medication units
     mL, mg, g
+
     :type: str
     """
 
@@ -547,7 +558,8 @@ class MedicalGeneralInfoMedications(db.Model):
     """
     Client's medication frequency PER unit (hour, day, week)
     0-9 timesper
-    medication_freq time(s) per medication_timesper_freq medication_time_units    
+    medication_freq time(s) per medication_timesper_freq medication_time_units
+
     :type: int
     """
 
@@ -556,9 +568,13 @@ class MedicalGeneralInfoMedications(db.Model):
     Client's medication time units
     (Hour, Day, Week)
     medication_freq time(s) per medication_timesper_freq medication_time_units    
-    Example:
-        1 time(s) per 1 Day
-        2 time(s) per 1 Week
+
+    **Example**
+
+    1 time(s) per 1 Day
+    2 time(s) per 1 Week
+
+    :type: str
     """
 
 
