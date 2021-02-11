@@ -113,7 +113,7 @@ users_staff_passwords_data = {
 users_subscription_data = {
   "is_staff": False,
   "subscription_status": 'subscribed',
-  "subscription_type_id": 2
+  "subscription_type_id": 2,
   "subscription_rate": 9.99,
   "subscription_type": "subscribed"
 }
