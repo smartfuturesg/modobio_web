@@ -29,7 +29,8 @@ from odyssey.api.client.models import (
     ClientMobileSettings,
     ClientAssignedDrinks,
     ClientHeightHistory,
-    ClientWeightHistory
+    ClientWeightHistory,
+    ClientTransactionHistory
 )
 from odyssey.api.doctor.models import (
     MedicalFamilyHistory,
@@ -76,7 +77,8 @@ from odyssey.api.client.schemas import(
     ClinicalCareTeamAuthorizationNestedSchema,
     SignAndDateSchema,
     SignedDocumentsSchema,
-    UserClinicalCareTeamSchema
+    UserClinicalCareTeamSchema,
+    ClientTransactionHistorySchema
 )
 from odyssey.api.staff.schemas import StaffRecentClientsSchema
 from odyssey.api.facility.schemas import ClientSummarySchema
@@ -1191,3 +1193,35 @@ class ClientWeightApi(Resource):
             raise IllegalSetting(message="Requested user_id does not match logged in user_id. Clients can only view weight history for themselves.")
 
         return ClientWeightHistory.query.filter_by(user_id=user_id).all()
+
+@ns.route('/transaction-history/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class ClientTransactionHistoryApi(Resource):
+    """
+    Endpoints related to viewing a client's transaction history.
+    """
+    @token_auth.login_required(user_type=('client','staff'))
+    @responds(schema=ClientTransactionHistorySchema, api=ns, status_code=200)
+    def get(self, user_id):
+        """
+        Submits a new weight for the client.
+        """
+        check_client_existence(user_id)
+
+    @token_auth.login_required()
+
+@ns.route('/transaction/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class ClientWeightApi(Resource):
+    """
+    Endpoints related to submitting client weight and viewing
+    a client's weight history.
+    """
+    @token_auth.login_required(user_type=('client',))
+    @accepts(schema=ClientWeightSchema, api=ns)
+    @responds(schema=ClientWeightSchema, api=ns, status_code=201)
+    def post(self, user_id):
+        """
+        Submits a new weight for the client.
+        """
+        check_client_existence(user_id)
