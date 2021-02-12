@@ -1194,34 +1194,71 @@ class ClientWeightApi(Resource):
 
         return ClientWeightHistory.query.filter_by(user_id=user_id).all()
 
-@ns.route('/transaction-history/<int:user_id>/')
+@ns.route('/transaction/history/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class ClientTransactionHistoryApi(Resource):
     """
     Endpoints related to viewing a client's transaction history.
     """
-    @token_auth.login_required(user_type=('client','staff'))
-    @responds(schema=ClientTransactionHistorySchema, api=ns, status_code=200)
+    @token_auth.login_required(user_type=('client','staff'), staff_role=('client_services',))
+    @responds(schema=ClientTransactionHistorySchema(many=True), api=ns, status_code=200)
     def get(self, user_id):
         """
-        Submits a new weight for the client.
+        Returns a list of all transactions for the given user_id.
         """
         check_client_existence(user_id)
 
-    @token_auth.login_required()
+        return ClientTransactionHistory.query.filter_by(user_id=user_id).all()
 
-@ns.route('/transaction/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
-class ClientWeightApi(Resource):
+@ns.route('/transaction/<int:idx>/')
+@ns.doc(params={'idx': 'User ID number(POST) or transaction ID number(GET/PUT)'})
+class ClientTransactionApi(Resource):
     """
-    Endpoints related to submitting client weight and viewing
-    a client's weight history.
+    Viewing and editing transactions
     """
-    @token_auth.login_required(user_type=('client',))
-    @accepts(schema=ClientWeightSchema, api=ns)
-    @responds(schema=ClientWeightSchema, api=ns, status_code=201)
-    def post(self, user_id):
+
+    @token_auth.login_required(user_type=('client','staff'), staff_role=('client_services',))
+    @responds(schema=ClientTransactionHistorySchema, api=ns, status_code=200)
+    def get(self, idx):
         """
-        Submits a new weight for the client.
+        Returns information about the transaction identified by id
         """
-        check_client_existence(user_id)
+        transaction = ClientTransactionHistory.query.filter_by(idx=idx).one_or_none()
+        if not transaction:
+            raise ContentNotFound
+
+        return transaction
+
+    @token_auth.login_required(user_type=('client','staff'), staff_role=('client_services',))
+    @accepts(schema=ClientTransactionHistorySchema, api=ns)
+    @responds(schema=ClientTransactionHistorySchema, api=ns, status_code=200)
+    def put(self, idx):
+        """
+        Updates the transaction identified by idx.
+        """
+        transaction = ClientTransactionHistory.query.filter_by(idx=idx).one_or_none()
+        if not transaction:
+            raise ContentNotFound
+
+        data = request.parsed_obj.__dict__
+        del data['_sa_instance_state']
+
+        transaction.update(request)
+        db.session.commit()
+
+        return request.parsed_obj
+
+    @token_auth.login_required(user_type=('client','staff'), staff_role=('client_services',))
+    @accepts(schema=ClientTransactionHistorySchema, api=ns)
+    @responds(schema=ClientTransactionHistorySchema, api=ns, status_code=200)
+    def post(self, idx):
+        """
+        Submits a transaction for the client identified by idx.
+        """
+        check_client_existence(idx)
+
+        request.parsed_obj.user_id = idx
+        db.session.add(request.parsed_obj)
+        db.session.commit()
+
+        return request.parsed_obj
