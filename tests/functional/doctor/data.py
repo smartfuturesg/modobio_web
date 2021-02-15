@@ -2,7 +2,8 @@ import pathlib
 
 doctor_blood_pressures_data = {
   "systolic": 120.2,
-  "diastolic": 52.3
+  "diastolic": 52.3,
+  "datetime_taken": "2020-04-05T02:00:00.000"
 }
 
 doctor_all_generalmedicalinfo_post_5_data = {

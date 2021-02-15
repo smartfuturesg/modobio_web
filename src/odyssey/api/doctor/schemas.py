@@ -38,6 +38,7 @@ class MedicalBloodPressuresSchema(ma.SQLAlchemyAutoSchema):
     timestamp = fields.DateTime()
     systolic = fields.Float(description='units mmHg',required=True)
     diastolic = fields.Float(description='units mmHg',required=True)
+    datetime_taken = fields.String(description='Date and time the blood pressure was taken', required=True)
     @post_load
     def make_object(self, data, **kwargs):
         return MedicalBloodPressures(**data)
