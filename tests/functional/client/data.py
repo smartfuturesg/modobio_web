@@ -166,3 +166,20 @@ clients_mobile_settings = {
   "date_format": "%d-%b-%Y",
   "include_timezone": True
 }
+
+clients_transactions = [
+    {
+        "category": "Telehealth",
+        "payment_method": "Visa 0123",
+        "name": "Doctor call",
+        "price": 49.99,
+        "currency": "USD"
+    },
+    {
+        "category": "Telehealth",
+        "payment_method": "Visa 0123",
+        "name": "Diagnosis",
+        "price": 89.99,
+        "currency": "USD"
+    }
+]
