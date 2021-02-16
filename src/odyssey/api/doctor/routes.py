@@ -89,7 +89,7 @@ class MedBloodPressures(Resource):
         '''
         check_client_existence(user_id)
         bp_info = db.session.query(
-                     MedicalBloodPressures.systolic, MedicalBloodPressures.diastolic, MedicalBloodPressures.created_at.label('timestamp')
+                     MedicalBloodPressures.systolic, MedicalBloodPressures.diastolic, MedicalBloodPressures.datetime_taken
                     ).filter(MedicalBloodPressures.user_id==user_id).all()
 
         payload = {'items': bp_info,
@@ -187,7 +187,6 @@ class MedicalGenInformation(Resource):
 
             payload['gen_info'] = generalInfo
 
-        # breakpoint()
         # Before storing data, delete what exists in the database
         # If the user submits something for medication history, then removes it from the payload, 
         # remove everything for that user in medication history table

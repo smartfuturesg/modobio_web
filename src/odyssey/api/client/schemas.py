@@ -275,11 +275,30 @@ class ClientClinicalCareTeamInternalSchema(Schema):
     firstname = fields.String(dump_only=True, missing=None)
     lastname = fields.String(dump_only=True, missing=None)
 
+class ClinicalCareTeamAuthorizationsForSchema(Schema):
+    """
+    This schema is intended to be nested as part of the member-of endpoint
+    it summarizes the authorizations a care team member has been granted 
+    """
+    display_name = fields.String()
+    resource_id = fields.Integer()
+
+
 class UserClinicalCareTeamSchema(Schema):
 
     client_user_id = fields.Integer()
     client_name = fields.String()
     client_email = fields.String()
+    authorizations = fields.Nested(ClinicalCareTeamAuthorizationsForSchema(many=True),missing=[])
+
+
+class ClinicalCareTeamMemberOfSchema(Schema):
+    """
+    Nests the data returned for the member-of endpoint
+    """
+
+    member_of_care_teams = fields.Nested(UserClinicalCareTeamSchema(many=True))
+    total = fields.Integer()
 
 class ClientClinicalCareTeamSchema(Schema):
     """

@@ -46,6 +46,7 @@ from odyssey.api.facility import models, routes
 from odyssey.api.lookup import models, routes
 from odyssey.api.physiotherapy import models, routes
 from odyssey.api.staff import models, routes
+from odyssey.api.system import models, routes
 from odyssey.api.trainer import models, routes
 from odyssey.api.user import models, routes
 from odyssey.api.version import routes

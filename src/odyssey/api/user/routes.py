@@ -28,6 +28,7 @@ from odyssey.api.user.schemas import (
     UserClinicalCareTeamSchema,
     UserNotificationsSchema
 ) 
+from odyssey.api.lookup.models import LookupNotifications
 from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import PASSWORD_RESET_URL, DB_SERVER_TIME
 from odyssey.utils.errors import InputError, StaffEmailInUse, ClientEmailInUse, UnauthorizedUser
@@ -566,7 +567,12 @@ class UserNotificationsApi(Resource):
         Returns the list of notifications for the given user_id
         """
 
-        return UserNotifications.query.filter_by(user_id=user_id).all()
+        notifications = UserNotifications.query.filter_by(user_id=user_id).all()
+
+        for notification in notifications:
+                notification.notification_type = LookupNotifications.query.filter_by(notification_type_id=notification.notification_type_id).one_or_none().notification_type
+
+        return notifications
 
 @ns.route('/notifications/<int:idx>/')
 @ns.doc(params={'idx': 'Notification idx number'})
@@ -587,5 +593,7 @@ class UserNotificationsPutApi(Resource):
 
         notification.update(request.json)
         db.session.commit()
+
+        notification.notification_type = LookupNotifications.query.filter_by(notification_type_id=notification.notification_type_id).one_or_none().notification_type
 
         return notification

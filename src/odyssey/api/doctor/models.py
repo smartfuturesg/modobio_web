@@ -49,6 +49,13 @@ class MedicalBloodPressures(db.Model):
     :type: float
     """
 
+    datetime_taken = db.Column(db.String)
+    """
+    The date and time the blood pressure levels were taken
+
+    :type: :class: str
+    """
+
 class MedicalLookUpBloodPressureRange(db.Model):
     """ Medical Look Up Blood Pressure Ranges
 
