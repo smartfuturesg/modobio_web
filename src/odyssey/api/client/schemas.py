@@ -377,9 +377,9 @@ class ClientTransactionHistorySchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientTransactionHistory
         exclude = ('created_at', 'updated_at')
-        dump_only = ('user_id')
+        dump_only = ('idx')
 
-    user_id = fields.Integer()
+    user_id = fields.Integer(dump_only=True)
 
     @post_load
     def make_object(self, data, **kwargs):
