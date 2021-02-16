@@ -10,7 +10,8 @@ from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.errors import (
     UserNotFound, 
     ContentNotFound,
-    IllegalSetting, 
+    IllegalSetting,
+    TransactionNotFound, 
     InputError
 )
 from odyssey import db
@@ -1225,32 +1226,32 @@ class ClientTransactionApi(Resource):
         """
         transaction = ClientTransactionHistory.query.filter_by(idx=idx).one_or_none()
         if not transaction:
-            raise ContentNotFound
+            raise TransactionNotFound(idx)
 
         return transaction
 
     @token_auth.login_required(user_type=('client','staff'), staff_role=('client_services',))
     @accepts(schema=ClientTransactionHistorySchema, api=ns)
-    @responds(schema=ClientTransactionHistorySchema, api=ns, status_code=200)
+    @responds(schema=ClientTransactionHistorySchema, api=ns, status_code=201)
     def put(self, idx):
         """
         Updates the transaction identified by idx.
         """
         transaction = ClientTransactionHistory.query.filter_by(idx=idx).one_or_none()
         if not transaction:
-            raise ContentNotFound
+            raise TransactionNotFound(idx)
 
         data = request.parsed_obj.__dict__
         del data['_sa_instance_state']
 
-        transaction.update(request)
+        transaction.update(data)
         db.session.commit()
 
         return request.parsed_obj
 
     @token_auth.login_required(user_type=('client','staff'), staff_role=('client_services',))
     @accepts(schema=ClientTransactionHistorySchema, api=ns)
-    @responds(schema=ClientTransactionHistorySchema, api=ns, status_code=200)
+    @responds(schema=ClientTransactionHistorySchema, api=ns, status_code=201)
     def post(self, idx):
         """
         Submits a transaction for the client identified by idx.
