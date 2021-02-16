@@ -1,7 +1,7 @@
 """lookup professional confirmation window
 
 Revision ID: e8cb26a9db4e
-Revises: a45013f3958d
+Revises: c201ba5bf77d
 Create Date: 2021-02-06 03:47:18.789911
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'e8cb26a9db4e'
-down_revision = '758e1ddc5e02'
+down_revision = 'c201ba5bf77d'
 branch_labels = None
 depends_on = None
 

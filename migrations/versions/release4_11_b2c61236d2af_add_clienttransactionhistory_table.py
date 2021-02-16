@@ -1,7 +1,7 @@
 """Add ClientTransactionHistory table
 
 Revision ID: b2c61236d2af
-Revises: e8cb26a9db4e
+Revises: a659b7e8875c
 Create Date: 2021-02-12 15:14:06.842602
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'b2c61236d2af'
-down_revision = 'e8cb26a9db4e'
+down_revision = 'a659b7e8875c'
 branch_labels = None
 depends_on = None
 

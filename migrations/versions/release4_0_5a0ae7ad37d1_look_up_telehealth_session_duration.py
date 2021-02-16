@@ -1,7 +1,7 @@
 """look up telehealth session duration
 
 Revision ID: 5a0ae7ad37d1
-Revises: 599aa0b1eb85
+Revises: 9b86a1a95fdf
 Create Date: 2021-01-05 18:05:14.288685
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '5a0ae7ad37d1'
-down_revision = 'b52d104071ea'
+down_revision = '9b86a1a95fdf'
 branch_labels = None
 depends_on = None
 
