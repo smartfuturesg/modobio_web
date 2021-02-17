@@ -777,14 +777,14 @@ class ClinicalCareTeamMembers(Resource):
         current_team = ClientClinicalCareTeam.query.filter_by(user_id=user_id, team_member_user_id=None).all() # non-users
 
         current_team_users = db.session.query(
-                                    ClientClinicalCareTeam, User.firstname, User.lastname
+                                    ClientClinicalCareTeam, User.firstname, User.lastname, User.modobio_id
                                 ).filter(
                                     ClientClinicalCareTeam.user_id == user_id
                                 ).filter(ClientClinicalCareTeam.team_member_user_id == User.user_id
                                 ).all()
         
         for team_member in current_team_users:
-            team_member[0].__dict__.update({'firstname': team_member[1], 'lastname': team_member[2]})
+            team_member[0].__dict__.update({'firstname': team_member[1], 'lastname': team_member[2], 'modobio_id': team_member[3]})
             current_team.append(team_member[0])
         
         response = {"care_team": current_team,
@@ -860,13 +860,14 @@ class ClinicalCareTeamMembers(Resource):
         
         # prepare response with names for clinical care team members who are also users 
         current_team_users = db.session.query(
-                                    ClientClinicalCareTeam, User.firstname, User.lastname
+                                    ClientClinicalCareTeam, User.firstname, User.lastname, User.modobio_id
                                 ).filter(
                                     ClientClinicalCareTeam.user_id == user_id
                                 ).filter(ClientClinicalCareTeam.team_member_user_id == User.user_id
                                 ).all()
+
         for team_member in current_team_users:
-            team_member[0].__dict__.update({'firstname': team_member[1], 'lastname': team_member[2]})
+            team_member[0].__dict__.update({'firstname': team_member[1], 'lastname': team_member[2], 'modobio_id': team_member[3]})
             current_team.append(team_member[0])
         
         response = {"care_team": current_team,
@@ -905,6 +906,7 @@ class UserClinicalCareTeamApi(Resource):
             res.append({'client_user_id': user.user_id, 
                         'client_name': ' '.join(filter(None, (user.firstname, user.middlename ,user.lastname))),
                         'client_email': user.email,
+                        'client_modobio_id': user.modobio_id,
                         'authorizations': [{'display_name': x[1], 'resource_id': x[0]} for x in authorizations_query]})
         
         return {'member_of_care_teams': res, 'total': len(res)}
@@ -959,7 +961,8 @@ class ClinicalCareTeamResourceAuthorization(Resource):
             User.firstname, 
             User.lastname, 
             User.email,
-            User.user_id
+            User.user_id,
+            User.modobio_id
             ).filter(
                 ClientClinicalCareTeamAuthorizations.user_id == user_id
             ).filter(
@@ -975,7 +978,8 @@ class ClinicalCareTeamResourceAuthorization(Resource):
                 'team_member_firstname': row[2],
                 'team_member_lastname': row[3],
                 'team_member_email': row[4],
-                'team_member_user_id': row[5]}
+                'team_member_user_id': row[5],
+                'team_member_modobio_id': row[6]}
 
             care_team_auths.append(tmp)
         
