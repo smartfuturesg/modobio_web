@@ -13,7 +13,7 @@ from odyssey.api.client.schemas import ClientInfoSchema
 from odyssey.api.client.models import ClientClinicalCareTeam
 from odyssey.api.lookup.models import LookupNotifications, LookupSubscriptions
 from odyssey.api.staff.schemas import StaffProfileSchema, StaffRolesSchema
-from odyssey.api.user.models import User, UserLogin, UserRemovalRequests, UserSubscriptions, UserTokensBlacklist, UserNotifications, UserQueueClientPool
+from odyssey.api.user.models import User, UserLogin, UserRemovalRequests, UserSubscriptions, UserTokensBlacklist, UserNotifications
 from odyssey.api.staff.models import StaffRoles
 from odyssey.api.user.schemas import (
     UserSchema, 
@@ -26,9 +26,7 @@ from odyssey.api.user.schemas import (
     UserSubscriptionHistorySchema,
     NewStaffUserSchema,
     UserClinicalCareTeamSchema,
-    UserNotificationsSchema,
-    UserQueueClientPoolSchema,
-    UserQueueClientPoolOutputSchema
+    UserNotificationsSchema
 ) 
 from odyssey.api.lookup.models import LookupNotifications
 from odyssey.utils.auth import token_auth
@@ -600,74 +598,3 @@ class UserNotificationsPutApi(Resource):
 
         return notification
 
-@ns.route('/queue/client-pool/')
-class UserGetQueueClientPoolApi(Resource):
-    """
-    This API resource is used to get, post, and delete the user's in the queue.
-    """
-    @token_auth.login_required
-    @responds(schema=UserQueueClientPoolOutputSchema, api=ns, status_code=200)
-    def get(self):
-        """
-        Returns the list of notifications for the given user_id
-        """
-        # grab the whole queue
-        queue = UserQueueClientPool.query.order_by(UserQueueClientPool.priority.desc(),UserQueueClientPool.target_date.asc()).all()
-        
-        # sort the queue based on target date and priority
-        payload = {'queue': queue,
-                   'total_queue': len(queue)}
-
-        return payload
-
-@ns.route('/queue/client-pool/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID'})
-class UserQueueClientPoolApi(Resource):
-    """
-    This API resource is used to get, post, and delete the user's in the queue.
-    """
-    @token_auth.login_required
-    @accepts(schema=UserQueueClientPoolSchema, api=ns)
-    def post(self,user_id):
-        """
-            Add a client to the queue
-        """
-        
-        # check_client_existence(user_id)
-        
-        # Client can only have one appointment on one day:
-        # GOOD: Appointment 1 Day 1, Appointment 2 Day 2
-        # BAD: Appointment 1 Day 1, Appointment 2 Day 1
-        appointment_in_queue = UserQueueClientPool.query.filter_by(user_id=user_id,target_date=request.parsed_obj.target_date).one_or_none()
-
-        if not appointment_in_queue:
-            request.parsed_obj.user_id = user_id
-            db.session.add(request.parsed_obj)
-            db.session.commit()
-        else:
-            raise InputError(status_code=405,message='User {} already has an appointment for this date.'.format(user_id))
-
-        return 200
-
-    @token_auth.login_required
-    @accepts(schema=UserQueueClientPoolSchema, api=ns)
-    def put(self,user_id):
-        """
-            Add a client to the queue
-        """
-        
-        # bring up the staff member and reset their password
-        # check_user_existence(user_id)
-        request.parsed_obj.user_id = user_id
-        db.session.add(request.parsed_obj)
-        db.session.commit()
-
-        return 200
-
-    # @token_auth.login_required()
-    # def delete(self, user_id):
-    #     #Search for user by user_id in User table
-    #     check_user_existence(user_id)
-    #     user = User.query.filter_by(user_id=user_id).one_or_none()
-
-    #     return {'message': f'User with id {user_id} has been removed'}

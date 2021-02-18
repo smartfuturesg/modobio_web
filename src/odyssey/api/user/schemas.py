@@ -1,7 +1,7 @@
 from marshmallow import Schema, fields, post_load, validate
 
 from odyssey import ma
-from odyssey.api.user.models import User, UserLogin, UserSubscriptions, UserNotifications, UserQueueClientPool
+from odyssey.api.user.models import User, UserLogin, UserSubscriptions, UserNotifications
 from odyssey.utils.constants import ACCESS_ROLES
 
 """
@@ -143,17 +143,3 @@ class UserNotificationsSchema(ma.SQLAlchemyAutoSchema):
     #comes from LookupNotifications.type
     notification_type = fields.String(dump_only=True)
     notification_type_id = fields.Integer(dump_only=True)
-
-class UserQueueClientPoolSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = UserQueueClientPool
-        exclude = ('created_at', 'updated_at')
-        dump_only = ('idx', 'user_id')
-    
-    @post_load
-    def make_object(self, data, **kwargs):
-        return UserQueueClientPool(**data)    
-
-class UserQueueClientPoolOutputSchema(Schema):
-    queue = fields.Nested(UserQueueClientPoolSchema(many=True),missing=[],description='SORTED queue of client pool')
-    total_queue = fields.Integer()
