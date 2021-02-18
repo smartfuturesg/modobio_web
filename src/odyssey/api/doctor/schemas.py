@@ -32,8 +32,7 @@ from odyssey.utils.constants import MEDICAL_CONDITIONS
 class MedicalBloodPressuresSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = MedicalBloodPressures
-        exclude = ('idx', 'created_at')
-        dump_only = ('timestamp',)
+        exclude = ('created_at',)
         
     timestamp = fields.DateTime()
     systolic = fields.Float(description='units mmHg',required=True)
