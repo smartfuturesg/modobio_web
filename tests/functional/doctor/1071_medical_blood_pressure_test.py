@@ -37,7 +37,6 @@ def test_get_1_blood_pressure_history(test_client, init_database, client_auth_he
         response = test_client.get('/doctor/bloodpressure/1/',
                                     headers=header, 
                                     content_type='application/json')
-        
         assert response.status_code == 200
         assert len(response.json['items']) == 1
         assert response.json['total_items'] == 1
