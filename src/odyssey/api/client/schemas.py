@@ -270,6 +270,7 @@ class ClientClinicalCareTeamInternalSchema(Schema):
     """
     Schema is used for serializing/deserializing clinical care team related payloads
     """
+    modobio_id = fields.String(dump_only=True)
     team_member_email = fields.Email(description="email for clinical care team member")
     team_member_user_id = fields.Integer(description="user_id for clinical care team member", dump_only=True)
     firstname = fields.String(dump_only=True, missing=None)
@@ -287,6 +288,7 @@ class ClinicalCareTeamAuthorizationsForSchema(Schema):
 class UserClinicalCareTeamSchema(Schema):
 
     client_user_id = fields.Integer()
+    client_modobio_id = fields.String()
     client_name = fields.String()
     client_email = fields.String()
     authorizations = fields.Nested(ClinicalCareTeamAuthorizationsForSchema(many=True),missing=[])
@@ -315,6 +317,7 @@ class ClinicalCareTeamAuthorizaitonSchema(Schema):
     Each instance is an entry into the ClientClinicalCareTeamAuthorizations table
     """
     user_id = fields.Integer(load_only=True)
+    team_member_modobio_id = fields.String(dump_only=True)
     team_member_user_id = fields.Integer(description="user_id for this clinical care team member")
     team_member_firstname = fields.String(dump_only=True)
     team_member_lastname = fields.String(dump_only=True)
