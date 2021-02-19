@@ -6,6 +6,7 @@ from odyssey.api.lookup.models import (
     LookupClinicalCareTeamResources,
     LookupClientBookingWindow,
     LookupCountriesOfOperations,
+    LookupDefaultHealthMetrics,
     LookupDrinks, 
     LookupDrinkIngredients, 
     LookupGoals, 
@@ -164,6 +165,19 @@ class LookupNotificationsSchema(ma.SQLAlchemyAutoSchema):
     @post_load
     def make_object(self, data, **kwargs):
         return LookupNotifications(**data)
+
+class LookupDefaultHealthMetricsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupDefaultHealthMetrics
+        exclude = ('created_at', 'updated_at', 'idx')
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return LookupDefaultHealthMetrics(**data)
+
+class LookupDefaultHealthMetricsOutputSchema(Schema):
+    items = fields.Nested(LookupDefaultHealthMetricsSchema(many=True), missing = [])
+    total_items = fields.Integer()
 
 class LookupNotificationsOutputSchema(Schema):
     items = fields.Nested(LookupNotificationsSchema(many=True), missing = [])
