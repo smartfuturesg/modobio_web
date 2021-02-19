@@ -11,7 +11,7 @@ def test_get_system_telehealth_settings(test_client, init_database, staff_auth_h
     """
 
     #test GET method on client user_id = 1
-    response = test_client.get('/system/teleheath-settings/',
+    response = test_client.get('/system/telehealth-settings/',
                                 headers=staff_auth_header,
                                 content_type='application/json')
     
@@ -26,7 +26,7 @@ def test_put_system_telehealth_settings(test_client, init_database, staff_auth_h
     THEN check the notification is udpated
     """
 
-    response = test_client.put('/system/teleheath-settings/',
+    response = test_client.put('/system/telehealth-settings/',
                                 headers=staff_auth_header,
                                 data=dumps(system_telehealth_data), 
                                 content_type='application/json')

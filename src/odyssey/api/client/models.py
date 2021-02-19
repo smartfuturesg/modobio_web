@@ -1384,3 +1384,81 @@ class ClientClinicalCareTeamAuthorizations(db.Model):
 
     :type: int, foreign key to :attr:`LookupClinicalCareTeamResources.resource_id <odyssey.models.lookup.LookupClinicalCareTeamResources.resource_id>`
     """
+    
+class ClientTransactionHistory(db.Model):
+    """ 
+    Stores history of client transactions
+      
+    """
+
+    __tablename__ = 'ClientTransactionHistory'
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
+    """
+    User ID number
+
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
+    """
+
+    date = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Date of this transaction.
+
+    :type: :class:'datetime.datetime'
+    """
+
+    category = db.Column(db.String)
+    """
+    Transaction category, comes from LookupTransactionTypes table.
+
+    :type: string
+    """
+
+    name = db.Column(db.String)
+    """
+    Transaction name, comes from LookupTransactionTypes table.
+
+    :type: string
+    """
+
+    price = db.Column(db.Float)
+    """
+    Price of this transaction, comes from LookupTransactionTypes table.
+
+    :type: float
+    """
+
+    currency = db.Column(db.String)
+    """
+    Name of the currency used for this transaction.
+
+    :type: string
+    """
+
+    payment_method = db.Column(db.String)
+    """
+    Method that the client used to pay for this transaction. Card type (Visa, Mastercard etc.) and last 4 digits.
+
+    :type: string
+    """

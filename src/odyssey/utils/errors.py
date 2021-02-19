@@ -25,6 +25,17 @@ class ExamNotFound(Exception):
 
         self.status_code = 404
 
+class TransactionNotFound(Exception):
+    """in the case a non-existent client is being requested"""
+    def __init__(self, idx, message = None):
+        Exception.__init__(self)
+        if message:
+            self.message = message
+        else:
+            self.message = f'The transaction with id {idx}, does not exist. Please try again.'
+
+        self.status_code = 404
+
 class ContentNotFound(Exception):
     """in the case a non-existent resource is requested"""
     def __init__(self):
@@ -314,6 +325,11 @@ def error_test_not_found(error):
 
 @api.errorhandler(ExamNotFound)
 def error_exam_not_found(error):
+    '''Return a custom message and 400 status code'''
+    return error_response(error.status_code, error.message)
+
+@api.errorhandler(TransactionNotFound)
+def error_transaction_not_found(error):
     '''Return a custom message and 400 status code'''
     return error_response(error.status_code, error.message)
 
