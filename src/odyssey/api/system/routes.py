@@ -15,7 +15,7 @@ from odyssey import db
 ns = api.namespace('system', description='Endpoints for system functions.')
 
 
-@ns.route('/teleheath-settings/')
+@ns.route('/telehealth-settings/')
 class SystemTelehealthSettingsApi(Resource):
     """ Endpoints related to system telehealth settings.
     """
