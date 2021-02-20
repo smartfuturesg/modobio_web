@@ -10,7 +10,7 @@ from .data import (
     telehealth_queue_client_pool_4_post_data,
     telehealth_queue_client_pool_5_post_data,
     telehealth_queue_client_pool_6_post_data,
-    telehealth_queue_client_pool_1_put_data
+    telehealth_queue_client_pool_7_post_data
 )
 
 def test_post_1_client_appointment(test_client, init_database, client_auth_header):
@@ -173,20 +173,34 @@ def test_get_3_client_appointment_queue(test_client, init_database, client_auth_
         assert [response.json['queue'][5]['target_date'],response.json['queue'][5]['priority']] == ['2025-04-05T02:00:00',False]
         assert response.json['total_queue'] == 6
 
-def test_put_1_client_appointment(test_client, init_database, client_auth_header):
+def test_delete_1_client_appointment_queue(test_client, init_database, client_auth_header, staff_auth_header):
     """
     GIVEN a api end point for client appointment queue
-    WHEN the '/telehealth/queue/client-pool/<user_id>' resource  is requested (PUT)
+    WHEN the '/telehealth/queue/client-pool/<user_id>' resource  is requested (DELETE)
     THEN check the response is valid
     """
-   
-    # This Should Fail because the user already has this target_date in the queue
-    response = test_client.put('/telehealth/queue/client-pool/1/',
+
+    payload = telehealth_queue_client_pool_3_post_data
+
+    response = test_client.delete("/telehealth/queue/client-pool/1/",
+                                data=dumps(payload),
                                 headers=client_auth_header, 
-                                data=dumps(telehealth_queue_client_pool_1_put_data), 
                                 content_type='application/json')
 
-    assert response.status_code == 200         
+    assert response.status_code == 200  
+
+def test_post_8_client_appointment(test_client, init_database, client_auth_header):
+    """
+    GIVEN a api end point for client appointment queue
+    WHEN the '/telehealth/queue/client-pool/<user_id>' resource  is requested (POST)
+    THEN check the response is valid
+    """    
+    response = test_client.post('/telehealth/queue/client-pool/1/',
+                                headers=client_auth_header, 
+                                data=dumps(telehealth_queue_client_pool_7_post_data), 
+                                content_type='application/json')
+
+    assert response.status_code == 200        
 
 def test_get_4_client_appointment_queue(test_client, init_database, client_auth_header, staff_auth_header):
     """
@@ -211,7 +225,7 @@ def test_get_4_client_appointment_queue(test_client, init_database, client_auth_
         assert [response.json['queue'][5]['target_date'],response.json['queue'][5]['priority']] == ['2025-04-05T02:00:00',False]
         assert response.json['total_queue'] == 6    
 
-def test_delete_1_client_appointment_queue(test_client, init_database, client_auth_header, staff_auth_header):
+def test_delete_2_client_appointment_queue(test_client, init_database, client_auth_header, staff_auth_header):
     """
     GIVEN a api end point for client appointment queue
     WHEN the '/telehealth/queue/client-pool/<user_id>' resource  is requested (DELETE)

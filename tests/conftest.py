@@ -5,7 +5,7 @@ import pytest
 
 from sqlalchemy import text
 
-from odyssey import create_app, db, migrate, upgrade
+from odyssey import create_app, db
 from odyssey.api.client.models import ClientInfo
 from odyssey.api.facility.models import MedicalInstitutions
 from odyssey.api.staff.models import StaffProfile, StaffRoles
@@ -34,7 +34,6 @@ def test_client():
     """flask application instance (client)"""
     app = create_app()
     db.init_app(app)
-    migrate.init_app(app, db)
     testing_client = app.test_client()
     
     # Establish an application context before running the tests.

@@ -36,7 +36,7 @@ telehealth_queue_client_pool_6_post_data = {
   'priority': True
 }
 # 2/5/2025
-telehealth_queue_client_pool_1_put_data = {
+telehealth_queue_client_pool_7_post_data = {
   'profession_type': 'Medical Doctor',
   'target_date': '2025-02-05T02:00:00.000',
   'priority': True

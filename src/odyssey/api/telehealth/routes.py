@@ -70,31 +70,6 @@ class TelehealthQueueClientPoolApi(Resource):
 
         return 200
 
-    @token_auth.login_required
-    @accepts(schema=TelehealthQueueClientPoolSchema, api=ns)
-    def put(self,user_id):
-        """
-            This PUT request is supposed to be used purely to give the client priority in the queue
-            Before this, priority should be set to false.
-        """
-        
-        # bring up the staff member and reset their password
-        check_client_existence(user_id)
-        
-        # Client can only have one appointment on one day:
-        # GOOD: Appointment 1 Day 1, Appointment 2 Day 2
-        # BAD: Appointment 1 Day 1, Appointment 2 Day 1
-        appointment_in_queue = TelehealthQueueClientPool.query.filter_by(user_id=user_id,target_date=request.parsed_obj.target_date).one_or_none()
-
-        if appointment_in_queue:
-            del request.parsed_obj._sa_instance_state
-            appointment_in_queue.update(request.parsed_obj.__dict__)
-            db.session.commit()
-        else:
-            raise InputError(status_code=405,message='User {} needs to make an appointment first to get priority.'.format(user_id))
-
-        return 200
-
     @token_auth.login_required()
     @accepts(schema=TelehealthQueueClientPoolSchema, api=ns)
     def delete(self, user_id):
