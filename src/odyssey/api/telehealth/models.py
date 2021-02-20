@@ -73,3 +73,10 @@ class TelehealthQueueClientPool(db.Model):
     :type: bool
     """
 
+    timezone = db.Column(db.String)
+    """
+    timezone the client is in
+
+    :type: str
+    """
+
