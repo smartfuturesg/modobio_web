@@ -48,6 +48,21 @@ class TelehealthQueueClientPoolApi(Resource):
     This API resource is used to get, post, and delete the user's in the queue.
     """
     @token_auth.login_required
+    @responds(schema=TelehealthQueueClientPoolOutputSchema, api=ns, status_code=200)
+    def get(self,user_id):
+        """
+        Returns the list of notifications for the given user_id
+        """
+        # grab the whole queue
+        queue = TelehealthQueueClientPool.query.filter_by(user_id=user_id).order_by(TelehealthQueueClientPool.priority.desc(),TelehealthQueueClientPool.target_date.asc()).all()
+        
+        # sort the queue based on target date and priority
+        payload = {'queue': queue,
+                   'total_queue': len(queue)}
+
+        return payload
+
+    @token_auth.login_required
     @accepts(schema=TelehealthQueueClientPoolSchema, api=ns)
     def post(self,user_id):
         """
