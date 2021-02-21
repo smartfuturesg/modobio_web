@@ -15,6 +15,7 @@ from odyssey.api.lookup.models import (
     LookupSubscriptions,
     LookupTelehealthSessionCost,
     LookupTelehealthSessionDuration,
+    LookupTerritoriesofOperation,
     LookupTransactionTypes,
     LookupNotifications
 )
@@ -177,6 +178,20 @@ class LookupDefaultHealthMetricsSchema(ma.SQLAlchemyAutoSchema):
 
 class LookupDefaultHealthMetricsOutputSchema(Schema):
     items = fields.Nested(LookupDefaultHealthMetricsSchema(many=True), missing = [])
+    total_items = fields.Integer()
+
+
+class LookupTerritoriesofOperationSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupTerritoriesofOperation
+        exclude = ('created_at', 'updated_at', 'idx')
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return LookupTerritoriesofOperation(**data)
+
+class LookupTerritoriesofOperationOutputSchema(Schema):
+    items = fields.Nested(LookupTerritoriesofOperationSchema(many=True), missing = [])
     total_items = fields.Integer()
 
 class LookupNotificationsOutputSchema(Schema):

@@ -17,6 +17,7 @@ from odyssey.api.lookup.models import (
      LookupSubscriptions,
      LookupTelehealthSessionCost,
      LookupTelehealthSessionDuration,
+     LookupTerritoriesofOperation,
      LookupTransactionTypes,
      LookupNotifications
 )
@@ -34,6 +35,7 @@ from odyssey.api.lookup.schemas import (
     LookupSubscriptionsOutputSchema,
     LookupTelehealthSessionCostOutputSchema,
     LookupTelehealthSessionDurationOutputSchema,
+    LookupTerritoriesofOperationOutputSchema,
     LookupTransactionTypesOutputSchema,
     LookupNotificationsOutputSchema,
     LookupCareTeamResourcesOutputSchema
@@ -328,4 +330,16 @@ class LookupDefaultHealthMetricsApi(Resource):
     def get(self):
         """get contents of default health metrics types lookup table"""
         res = LookupDefaultHealthMetrics.query.all()
+        return {'total_items': len(res), 'items': res}
+
+@ns.route('/operational-territories/')
+class LookupTerritoriesofOperationApi(Resource):
+    """
+    Endpoint for handling requests for all territories of operation
+    """
+    @token_auth.login_required
+    @responds(schema=LookupTerritoriesofOperationOutputSchema, status_code=200, api=ns)
+    def get(self):
+        """get contents of operational territories lookup table"""
+        res = LookupTerritoriesofOperation.query.all()
         return {'total_items': len(res), 'items': res}
