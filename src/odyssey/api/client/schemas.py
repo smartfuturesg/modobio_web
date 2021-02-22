@@ -7,6 +7,7 @@ from marshmallow import (
     validates, 
     validate
 )
+from marshmallow_sqlalchemy.schema.sqlalchemy_schema import auto_field
 
 from odyssey import ma
 from odyssey.api.client.models import (
@@ -23,7 +24,8 @@ from odyssey.api.client.models import (
     ClientMobileSettings,
     ClientAssignedDrinks,
     ClientHeightHistory,
-    ClientWeightHistory
+    ClientWeightHistory,
+    ClientTransactionHistory
 )
 from odyssey.api.user.schemas import UserInfoPutSchema
 
@@ -83,12 +85,10 @@ class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
 class ClientInfoPutSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientInfo
-        exclude = ('created_at', 'updated_at', 'idx')
-        dump_only = ('modobio_id', 'membersince', 'is_staff', 'is_client', 'user_id', 'prinmary_goal', 'race')
-        load_only = ('primary_goal_id',)
+        include_fk = True
+        exclude = ('created_at', 'updated_at', 'idx', 'user_id')
+        dump_only = ( 'membersince', 'primary_goal', 'race')
 
-    primary_goal_id = fields.Integer()
-    race_id = fields.Integer()
     primary_goal = fields.String()
     race = fields.String()
 
@@ -393,3 +393,15 @@ class ClientTokenRequestSchema(Schema):
     email = fields.Email(required=False, missing=None)   
     token = fields.String()
     refresh_token = fields.String()
+
+class ClientTransactionHistorySchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = ClientTransactionHistory
+        exclude = ('created_at', 'updated_at')
+        dump_only = ('idx')
+
+    user_id = fields.Integer(dump_only=True)
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return ClientTransactionHistory(**data)

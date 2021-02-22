@@ -10,7 +10,8 @@ from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.errors import (
     UserNotFound, 
     ContentNotFound,
-    IllegalSetting, 
+    IllegalSetting,
+    TransactionNotFound, 
     InputError
 )
 from odyssey import db
@@ -29,7 +30,8 @@ from odyssey.api.client.models import (
     ClientMobileSettings,
     ClientAssignedDrinks,
     ClientHeightHistory,
-    ClientWeightHistory
+    ClientWeightHistory,
+    ClientTransactionHistory
 )
 from odyssey.api.doctor.models import (
     MedicalFamilyHistory,
@@ -77,7 +79,9 @@ from odyssey.api.client.schemas import(
     ClinicalCareTeamAuthorizationNestedSchema,
     ClinicalCareTeamMemberOfSchema,
     SignAndDateSchema,
-    SignedDocumentsSchema    
+    SignedDocumentsSchema,
+    UserClinicalCareTeamSchema,
+    ClientTransactionHistorySchema
 )
 from odyssey.api.lookup.schemas import LookupDefaultHealthMetricsSchema
 from odyssey.api.staff.schemas import StaffRecentClientsSchema
@@ -1208,6 +1212,82 @@ class ClientWeightApi(Resource):
 
         return ClientWeightHistory.query.filter_by(user_id=user_id).all()
 
+@ns.route('/transaction/history/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class ClientTransactionHistoryApi(Resource):
+    """
+    Endpoints related to viewing a client's transaction history.
+    """
+    @token_auth.login_required(user_type=('client','staff'), staff_role=('client_services',))
+    @responds(schema=ClientTransactionHistorySchema(many=True), api=ns, status_code=200)
+    def get(self, user_id):
+        """
+        Returns a list of all transactions for the given user_id.
+        """
+        check_client_existence(user_id)
+
+        return ClientTransactionHistory.query.filter_by(user_id=user_id).all()
+
+@ns.route('/transaction/<int:transaction_id>/')
+@ns.doc(params={'transaction_id': 'Transaction ID number'})
+class ClientTransactionApi(Resource):
+    """
+    Viewing and editing transactions
+    """
+
+    @token_auth.login_required(user_type=('client','staff'), staff_role=('client_services',))
+    @responds(schema=ClientTransactionHistorySchema, api=ns, status_code=200)
+    def get(self, transaction_id):
+        """
+        Returns information about the transaction identified by transaction_id.
+        """
+        transaction = ClientTransactionHistory.query.filter_by(idx=transaction_id).one_or_none()
+        if not transaction:
+            raise TransactionNotFound(transaction_id)
+
+        return transaction
+
+
+    @token_auth.login_required(user_type=('client','staff'), staff_role=('client_services',))
+    @accepts(schema=ClientTransactionHistorySchema, api=ns)
+    @responds(schema=ClientTransactionHistorySchema, api=ns, status_code=201)
+    def put(self, transaction_id):
+        """
+        Updates the transaction identified by transaction_id.
+        """
+        transaction = ClientTransactionHistory.query.filter_by(idx=transaction_id).one_or_none()
+        if not transaction:
+            raise TransactionNotFound(transaction_id)
+
+        data = request.parsed_obj.__dict__
+        del data['_sa_instance_state']
+
+        transaction.update(data)
+        db.session.commit()
+
+        return request.parsed_obj
+
+
+@ns.route('/transaction/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class ClientTransactionPutApi(Resource):
+    """
+    Viewing and editing transactions
+    """
+    @token_auth.login_required(user_type=('client','staff'), staff_role=('client_services',))
+    @accepts(schema=ClientTransactionHistorySchema, api=ns)
+    @responds(schema=ClientTransactionHistorySchema, api=ns, status_code=201)
+    def post(self, user_id):
+        """
+        Submits a transaction for the client identified by user_id.
+        """
+        check_client_existence(user_id)
+
+        request.parsed_obj.user_id = user_id
+        db.session.add(request.parsed_obj)
+        db.session.commit()
+
+        return request.parsed_obj
 
 @ns.route('/default-health-metrics/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})

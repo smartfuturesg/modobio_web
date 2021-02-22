@@ -1,7 +1,7 @@
 """add system telehealth settings
 
 Revision ID: c201ba5bf77d
-Revises: a45013f3958d
+Revises: 758e1ddc5e02
 Create Date: 2021-02-09 14:38:05.862952
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'c201ba5bf77d'
-down_revision = 'a45013f3958d'
+down_revision = '758e1ddc5e02'
 branch_labels = None
 depends_on = None
 

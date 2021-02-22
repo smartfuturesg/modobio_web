@@ -25,36 +25,40 @@ import pathlib
 #     "profession": "Chef",
 #     "receive_docs": True
 # }
-# clients_new_user_client_2_data = {
-#   "userinfo": {
-#     "firstname": "Test",
-#     "middlename": "User",
-#     "lastname": "Client",
-#     "email": "test_this_user_client_2@modobio.com",
-#     "phone_number": "1111111111",
-#     "password": "password",
-#     "is_staff": False,
-#     "is_client": True
-#   },
-#   "clientinfo": {
-#     "guardianname": "guardian 1",
-#     "guardianrole": "guardian role",
-#     "street": "3325 S Malibu Dr.",
-#     "city": "Tempe",
-#     "state": "AZ",
-#     "zipcode": "85282",
-#     "country": "US",
-#     "preferred": 0,
-#     "emergency_contact": "Emergency",
-#     "emergency_phone": "6025555555",
-#     "healthcare_contact": "United",
-#     "healthcare_phone": "1800676blue",
-#     "gender": "m",
-#     "dob": "1991-10-14",
-#     "profession": "Chef",
-#     "receive_docs": True
-#   }
-# }
+
+client_info_put_test_data = {
+    "user_info": {
+        "phone_number": "1111111111",
+        "biological_sex_male": True,
+        "firstname": "Tester",
+        "middlename": "Name",
+        "lastname": "Tested",
+    },
+    "client_info": {
+        "dob": "1991-10-14",
+        "zipcode": "85282",
+        "weight": 90029,
+        "height": 189,
+        "city": "Tempe",
+        "receive_docs": True,
+        "primary_pharmacy_name": "Maw and Paw Drugs Co.",
+        "healthcare_contact": "United",
+        "primary_goal_id": 1,
+        "country": "US",
+        "emergency_contact": "Emergency",
+        "race_id": 1,
+        "state": "AZ",
+        "street": "3325 S Malibu Dr.",
+        "gender": "m",
+        "guardianrole": "guardian role",
+        "emergency_phone": "6025555555",
+        "primary_pharmacy_address": "9550 E Main St, Mesa, AZ 85207",
+        "guardianname": "guardian 1",
+        "healthcare_phone": "1800676blue",
+        "preferred": 0,
+        "profession": "Chef"
+    }
+}
 
 # clients_new_remote_registration_data = {
 #     "firstname": "Remote",
@@ -166,3 +170,20 @@ clients_mobile_settings = {
   "date_format": "%d-%b-%Y",
   "include_timezone": True
 }
+
+clients_transactions = [
+    {
+        "category": "Telehealth",
+        "payment_method": "Visa 0123",
+        "name": "Doctor call",
+        "price": 49.99,
+        "currency": "USD"
+    },
+    {
+        "category": "Telehealth",
+        "payment_method": "Visa 0123",
+        "name": "Diagnosis",
+        "price": 89.99,
+        "currency": "USD"
+    }
+]
