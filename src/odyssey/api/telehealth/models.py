@@ -15,6 +15,57 @@ from flask import current_app
 from odyssey import db
 from odyssey.utils.constants import ALPHANUMERIC, DB_SERVER_TIME, TOKEN_LIFETIME, REFRESH_TOKEN_LIFETIME
 
+class TelehealthStaffAvailability(db.Model):
+    """ 
+    Holds all of the clients in a pool for their appointments. 
+    This is used for BEFORE they are accepted and see their medical professional.
+    """
+
+    __tablename__ = 'TelehealthStaffAvailability'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Auto incrementing primary key
+
+    :type: int, primary key
+    """
+
+    staff_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    """
+    staff member id 
+
+    :type: int, foreign key('User.user_id')
+    """
+
+    day_of_week = db.Column(db.String)
+    """
+    Day of the week
+
+    :type: str
+    """
+    
+    start_time = db.Column(db.Time)
+    """ 
+    start time the professional is ready
+
+    :type: datetime.time
+    """
+    
+    end_time = db.Column(db.Time)
+    """ 
+    end time the professional is done
+
+    :type: datetime.time
+    """
+
+
 class TelehealthQueueClientPool(db.Model):
     """ 
     Holds all of the clients in a pool for their appointments. 

@@ -41,3 +41,31 @@ telehealth_queue_client_pool_7_post_data = {
   'target_date': '2025-02-05T02:00:00.000',
   'priority': True
 }
+
+# --------------------------------------------------------------------
+
+telehealth_staff_general_availability_1_post_data = {
+  'availability': [{
+    'day_of_week': 'Monday',
+    'start_time': '11:00:00',
+    'end_time': '12:00:00'
+  }]
+}
+
+telehealth_staff_general_availability_2_post_data = {
+  'availability': [{
+    'day_of_week': 'Monday',
+    'start_time': '8:00:00',
+    'end_time': '9:00:00'
+  },
+  {
+    'day_of_week': 'Tuesday',
+    'start_time': '11:00:00',
+    'end_time': '13:00:00'
+  },
+  {
+    'day_of_week': 'Wednesday',
+    'start_time': '15:00:00',
+    'end_time': '20:00:00'
+  }]
+}

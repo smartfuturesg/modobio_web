@@ -1,7 +1,23 @@
 from marshmallow import Schema, fields, post_load, validate
 
 from odyssey import ma
-from odyssey.api.telehealth.models import TelehealthQueueClientPool
+from odyssey.api.telehealth.models import (
+    TelehealthQueueClientPool,
+    TelehealthStaffAvailability,
+)
+
+class TelehealthStaffAvailabilitySchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = TelehealthStaffAvailability
+        exclude = ('created_at',)
+        dump_only = ('idx', 'staff_id')
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return TelehealthStaffAvailability(**data)  
+
+class TelehealthStaffAvailabilityOutputSchema(Schema):
+    availability = fields.Nested(TelehealthStaffAvailabilitySchema(many=True), missing=[])
 
 class TelehealthQueueClientPoolSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

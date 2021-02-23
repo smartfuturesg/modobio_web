@@ -8,10 +8,14 @@ from flask_restx import Resource
 
 from odyssey.api import api
 
-from odyssey.api.telehealth.models import TelehealthQueueClientPool
+from odyssey.api.telehealth.models import (
+    TelehealthQueueClientPool,
+    TelehealthStaffAvailability,
+)
 from odyssey.api.telehealth.schemas import (
     TelehealthQueueClientPoolSchema,
-    TelehealthQueueClientPoolOutputSchema
+    TelehealthQueueClientPoolOutputSchema,
+    TelehealthStaffAvailabilityOutputSchema
 ) 
 from odyssey.utils.auth import token_auth
 from odyssey.utils.errors import InputError, StaffEmailInUse, ClientEmailInUse, UnauthorizedUser
@@ -20,6 +24,48 @@ from odyssey.utils.misc import check_user_existence, check_client_existence, che
 from odyssey import db
 
 ns = api.namespace('telehealth', description='Endpoints for user accounts.')
+
+@ns.route('/settings/staff/availability/<int:staff_id>/')
+class TelehealthSettingsStaffAvailabilityApi(Resource):
+    """
+    This API resource is used to get, post the staff's general availability
+    """
+    @token_auth.login_required
+    @responds(schema=TelehealthStaffAvailabilityOutputSchema, api=ns, status_code=200)
+    def get(self,staff_id):
+        """
+        Returns the list of notifications for the given user_id
+        """
+        # grab the whole queue
+        # check_staff_existence(staff_id)
+        availability = TelehealthStaffAvailability.query.filter_by(staff_id=staff_id).all()
+        payload = {}
+        payload['availability'] = availability
+        return payload
+
+    @token_auth.login_required
+    @accepts(schema=TelehealthStaffAvailabilityOutputSchema, api=ns)
+    @responds(schema=TelehealthStaffAvailabilityOutputSchema, api=ns, status_code=200)
+    def post(self,staff_id):
+        """
+        Returns the list of notifications for the given user_id
+        """
+        # check_staff_existence(staff_id)
+        availability = TelehealthStaffAvailability.query.filter_by(staff_id=staff_id).all()
+        payload = {}
+        if availability:
+            for time in availability:
+                db.session.delete(time)
+        payload['availability'] = []
+        if request.parsed_obj['availability']:
+            avail = request.parsed_obj['availability']
+            for time in avail:
+                time.staff_id = staff_id
+                db.session.add(time)
+                payload['availability'].append(time)
+        db.session.commit()
+        return payload
+
 
 @ns.route('/queue/client-pool/')
 class TelehealthGetQueueClientPoolApi(Resource):
