@@ -1,7 +1,7 @@
 from marshmallow import Schema, fields, post_load
 
 from odyssey import ma
-from odyssey.api.lookup.models import LookupDrinks, LookupDrinkIngredients, LookupGoals
+from odyssey.api.lookup.models import LookupDrinks, LookupDrinkIngredients, LookupGoals, LookupRaces
 
 class LookupDrinksSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -43,4 +43,17 @@ class LookupGoalsSchema(ma.SQLAlchemyAutoSchema):
 
 class LookupGoalsOutputSchema(Schema):
     items = fields.Nested(LookupGoalsSchema(many=True), missing = [])
+    total_items = fields.Integer()
+
+class LookupRacesSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupRaces
+        exclude = ('created_at', 'updated_at')
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return LookupRaces(**data)
+
+class LookupRacesOutputSchema(Schema):
+    items = fields.Nested(LookupRacesSchema(many=True), missing = [])
     total_items = fields.Integer()

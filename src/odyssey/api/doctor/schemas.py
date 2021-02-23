@@ -169,12 +169,11 @@ class MedicalImagingSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = MedicalImaging
         load_instance = True
-        exclude = ["user_id", "idx"]
+        dump_only = ("user_id", "idx", "image_size", "image_path", "updated_at", "created_at")
+        required = ("image_date", "image_read", "image_type")
 
     possible_image_types = ['CT', 'MRI', 'PET', 'Scopes', 'Special imaging', 'Ultrasound', 'X-ray']
-    image_type = fields.String(validate=validate.OneOf(possible_image_types), required=True)
-    image_date = fields.Date(required=True)
-    image_read = fields.String(required=True)
+    image_type = fields.String(validate=validate.OneOf(possible_image_types))
     reporter_firstname = fields.String(description="first name of reporting physician", dump_only=True)
     reporter_lastname = fields.String(description="last name of reporting physician", dump_only=True)
     reporter_id = fields.Integer(description="id of reporting physician", missing=None)

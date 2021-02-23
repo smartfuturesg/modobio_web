@@ -9,7 +9,7 @@ from flask_restx import Resource
 from odyssey import db
 from odyssey.api import api
 from odyssey.api.client_services.schemas import NewRemoteRegisterUserSchema, NewUserRegistrationPortalSchema
-from odyssey.api.user.schemas import UserLoginSchema, UserSchema
+from odyssey.api.user.schemas import UserLoginSchema, UserSchema, UserSubscriptionsSchema
 from odyssey.api.user.models import User, UserLogin
 from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import REGISTRATION_PORTAL_URL
@@ -57,6 +57,15 @@ class NewUserClientServices(Resource):
 
         user_login = UserLoginSchema().load({'user_id': user_id,  'password':password})
         db.session.add(user_login)
+
+        # add new user subscription information
+        client_sub = UserSubscriptionsSchema().load({
+            'subscription_type': 'unsubscribed',
+            'subscription_rate': 0.0,
+            'is_staff': False
+        })
+        client_sub.user_id = user.user_id
+        db.session.add(client_sub)
         db.session.commit()
 
         secret = current_app.config['SECRET_KEY']

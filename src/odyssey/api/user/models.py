@@ -2,6 +2,7 @@
 Database tables for the user system portion of the Modo Bio Staff application.
 All tables in this module are prefixed with 'User'.
 """
+import enum
 import base64
 from datetime import datetime, timedelta
 import jwt
@@ -253,7 +254,128 @@ class UserLogin(db.Model):
                             secret, 
                             algorithm='HS256')
 
+class UserRemovalRequests(db.Model):
+    """ User removal request table.
 
+    Stores the history of user removal request by all Users.
+    """
+    __tablename__ = 'UserRemovalRequests'
+    
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+    
+    requester_user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    """
+    user_id number, foreign key to User.user_id of the User requesting removal
+
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
+    """
+
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    """
+    user_id number, foreign key to User.user_id of the User to be removed
+
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
+    """
+    
+    timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Timestamp of the removal request.
+
+    :type: :class:`datetime.datetime`, primary key
+    """
+
+class UserSubscriptions(db.Model):
+    """ 
+    Stores details to relating to user account not related to the subscription system
+    """
+
+    __tablename__ = 'UserSubscriptions'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
+    """
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    table index
+
+    :type: integer, primary key, autoincrementing
+    """
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    """
+    Id of the user that this subscription belongs to
+
+    :type: int, foreign key('User.user_id')
+    """
+
+    is_staff = db.Column(db.Boolean)
+    """
+    Denotes if this subscription is for a staff member. Distinguishes between 
+    subscriptions for users with both account types
+
+    :type: bool
+    """
+
+    start_date = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Datetime that this subscription level started
+
+    :type: datetime
+    """
+
+    end_date = db.Column(db.DateTime)
+    """
+    Datetime that this subscription level ended
+
+    :type: datetime
+    """
+
+    subscription_rate = db.Column(db.Float)
+    """
+    Monthly cost of the subscription in USD
+
+    :type: float
+    """
+
+    subscription_type = db.Column(db.String)
+    """
+    Type of this subscription. Possible values are: unsubscribed, subscribed, free_trial and sponsored
+
+    :type: String
+    """
+
+    
 class UserTokensBlacklist(db.Model):
     """ 
     API tokens for either refresh or access which have been revoked either by the 
@@ -291,3 +413,4 @@ class UserTokensBlacklist(db.Model):
 
     :type: str, unique
     """
+

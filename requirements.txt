@@ -16,6 +16,7 @@ PyPDF2
 pytest
 pytest-cov
 pytz
+requests
 requests-oauthlib
 WeasyPrint
 WTForms

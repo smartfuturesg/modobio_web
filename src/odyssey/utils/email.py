@@ -8,7 +8,8 @@ SUBJECTS = {"remote_registration_portal": "Modo Bio User Registration Portal",
             "password_reset": "Modo bio password reset request - temporary link",
             "testing-bounce": "SES TEST EMAIL-BOUNCE",
             "testing-complaint": "SES TEST EMAIL-COMPLAINT",
-            "testing-success": "SES TEST EMAIL"
+            "testing-success": "SES TEST EMAIL",
+            "account_deleted": "Modo Bio Account Deleted"
             }
 
 def send_email_user_registration_portal(recipient, password, portal_id):
@@ -93,6 +94,36 @@ def send_email_password_reset(recipient, reset_token):
 
     send_email_no_reply(subject=SUBJECT, recipient=recipient, body_text=BODY_TEXT, body_html=BODY_HTML)
 
+def send_email_delete_account(recipient, deleted_account):
+    """
+    Email for notifying users of account deletion
+    """
+    
+    SUBJECT = SUBJECTS["account_deleted"]
+    
+    SENDER = "Modo Bio no-reply <no-reply@modobio.com>"
+
+    # route emails to AWS mailbox simulator when in dev environment
+    if current_app.env == "development":
+        recipient = "success@simulator.amazonses.com"
+
+    # The email body for recipients with non-HTML email clients.
+    BODY_TEXT = ("The the account with email: "f"{deleted_account} has been deleted.\n"
+                "If you have not requested to delete your account, please contact your admin."
+                )
+                
+    # The HTML body of the email.
+    BODY_HTML = f"""<html>
+    <head></head>
+    <body>
+    <h1>Account Deleted</h1>
+    <p>The account with email: {deleted_account} has been deleted.
+    <br>If you have not requested to delete your account, please contact your admin.
+    </body>
+    </html>
+    """     
+
+    send_email_no_reply(subject=SUBJECT, recipient=recipient, body_text=BODY_TEXT, body_html=BODY_HTML)
 
 def send_test_email(subject="testing-success", recipient="success@simulator.amazonses.com"):
     """

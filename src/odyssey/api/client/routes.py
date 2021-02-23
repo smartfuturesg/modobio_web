@@ -27,24 +27,32 @@ from odyssey.api.client.models import (
     ClientPolicies,
     ClientRelease,
     ClientSubscriptionContract,
-    ClientFacilities
+    ClientFacilities,
+    ClientMobileSettings,
+    ClientAssignedDrinks,
+    ClientHeightHistory,
+    ClientWeightHistory
 )
 from odyssey.api.doctor.models import MedicalHistory, MedicalPhysicalExam
+from odyssey.api.lookup.models import LookupGoals, LookupDrinks, LookupRaces
 from odyssey.api.physiotherapy.models import PTHistory 
-from odyssey.api.staff.models import ClientRemovalRequests, StaffRecentClients
+from odyssey.api.staff.models import StaffRecentClients
 from odyssey.api.trainer.models import FitnessQuestionnaire
 from odyssey.api.facility.models import RegisteredFacilities
 from odyssey.api.user.models import User, UserLogin
 from odyssey.utils.pdf import to_pdf, merge_pdfs
 from odyssey.utils.email import send_email_user_registration_portal, send_test_email
-from odyssey.utils.misc import check_client_existence
+from odyssey.utils.misc import check_client_existence, check_drink_existence
 from odyssey.api.client.schemas import(
     AllClientsDataTier,
+    ClientAssignedDrinksSchema,
+    ClientAssignedDrinksDeleteSchema,
     ClientConsentSchema,
     ClientConsultContractSchema,
     ClientIndividualContractSchema,
     ClientInfoSchema,
     ClientClinicalCareTeamSchema,
+    ClientMobileSettingsSchema,
     ClientPoliciesContractSchema, 
     ClientRegistrationStatusSchema,
     ClientReleaseSchema,
@@ -52,6 +60,8 @@ from odyssey.api.client.schemas import(
     ClientSearchOutSchema,
     ClientSubscriptionContractSchema,
     ClientAndUserInfoSchema,
+    ClientHeightSchema,
+    ClientWeightSchema,
     ClientTokenRequestSchema,
     NewRemoteClientSchema,
     SignAndDateSchema,
@@ -70,16 +80,17 @@ class Client(Resource):
     @responds(schema=ClientAndUserInfoSchema, api=ns)
     def get(self, user_id):
         """returns client info table as a json for the user_id specified"""
+
         client_data = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
         user_data = User.query.filter_by(user_id=user_id).one_or_none()
         if not client_data and not user_data:
             raise UserNotFound(user_id)
-        
+
         #update staff recent clients information
         staff_user_id = token_auth.current_user()[0].user_id
 
         #check if supplied client is already in staff recent clients
-        client_exists = StaffRecentClients.query.filter_by(staff_user_id=staff_user_id).filter_by(client_user_id=user_id).one_or_none()
+        client_exists = StaffRecentClients.query.filter_by(user_id=staff_user_id).filter_by(client_user_id=user_id).one_or_none()
         if client_exists:
             #update timestamp
             client_exists.timestamp = datetime.now()
@@ -87,12 +98,12 @@ class Client(Resource):
             db.session.commit()
         else:
             #enter new recent client information
-            recent_client_schema = StaffRecentClientsSchema().load({'staff_user_id': staff_user_id, 'client_user_id': user_id})
+            recent_client_schema = StaffRecentClientsSchema().load({'user_id': staff_user_id, 'client_user_id': user_id})
             db.session.add(recent_client_schema)
             db.session.flush()
 
             #check if staff member has more than 10 recent clients
-            staff_recent_searches = StaffRecentClients.query.filter_by(staff_user_id=staff_user_id).order_by(StaffRecentClients.timestamp.asc()).all()
+            staff_recent_searches = StaffRecentClients.query.filter_by(user_id=staff_user_id).order_by(StaffRecentClients.timestamp.asc()).all()
             if len(staff_recent_searches) > 10:
                 #remove the oldest client in the list
                 db.session.delete(staff_recent_searches[0])
@@ -103,7 +114,12 @@ class Client(Resource):
             db.session.refresh(client_data)
         if user_data:
             db.session.refresh(user_data)
-        return {'client_info': client_data, 'user_info': user_data}
+       
+        client_info_payload = client_data.__dict__
+        client_info_payload["primary_goal"] = db.session.query(LookupGoals.goal_name).filter(client_data.primary_goal_id == LookupGoals.goal_id).one_or_none()
+        client_info_payload["race"] = db.session.query(LookupRaces.race_name).filter(client_data.race_id == LookupRaces.race_id).one_or_none()
+
+        return {'client_info': client_info_payload, 'user_info': user_data}
 
     @token_auth.login_required
     @accepts(schema=ClientAndUserInfoSchema, api=ns)
@@ -112,11 +128,24 @@ class Client(Resource):
         """edit client info"""
 
         client_data = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
+        
         user_data = User.query.filter_by(user_id=user_id).one_or_none()
 
         if not client_data or not user_data:
             raise UserNotFound(user_id)
         
+        #validate primary_goal_id if supplied and automatically create drink recommendation
+        if 'primary_goal_id' in request.parsed_obj['client_info'].keys():
+            goal = LookupGoals.query.filter_by(goal_id=request.parsed_obj['client_info']['primary_goal_id']).one_or_none()
+            if not goal:
+                raise InputError(400, 'Invalid primary_goal_id.')
+            
+            #make automatic drink recommendation
+            drink_id = LookupDrinks.query.filter_by(primary_goal_id=request.parsed_obj['client_info']['primary_goal_id']).one_or_none().drink_id
+            recommendation = ClientAssignedDrinksSchema().load({'drink_id': drink_id})
+            recommendation.user_id = user_id
+            db.session.add(recommendation)
+
         #update both tables with request data
         if request.parsed_obj['client_info']:
             client_data.update(request.parsed_obj['client_info'])
@@ -124,40 +153,13 @@ class Client(Resource):
             user_data.update(request.parsed_obj['user_info'])
 
         db.session.commit()
-        
+
+        # prepare client_info payload  
+        client_info_payload = client_data.__dict__
+        client_info_payload["primary_goal"] = db.session.query(LookupGoals.goal_name).filter(client_data.primary_goal_id == LookupGoals.goal_id).one_or_none()
+        client_info_payload["race"] = db.session.query(LookupRaces.race_name).filter(client_data.race_id == LookupRaces.race_id).one_or_none()
+
         return {'client_info': client_data, 'user_info': user_data}
-
-
-#############
-#temporarily disabled until a better user delete system is created
-#############
-
-# @ns.route('/remove/<int:user_id>/')
-# @ns.doc(params={'user_id': 'User ID number'})
-# class RemoveClient(Resource):
-#     @token_auth.login_required
-#     def delete(self, user_id):
-#         """deletes client from database entirely"""
-#         client = User.query.filter_by(user_id=user_id, is_client=True).one_or_none()
-
-#         if not client:
-#             raise ClientNotFound(user_id)
-        
-#         if client.is_staff:
-#             #only delete the client portio
-
-#         # find the staff member requesting client delete
-#         staff = token_auth.current_user()
-#         new_removal_request = ClientRemovalRequests(user_id=staff.user_id)
-        
-#         db.session.add(new_removal_request)
-#         db.session.flush()
-
-#         #TODO: some logic on who gets to delete clients+ email to staff admin
-#         db.session.delete(client)
-#         db.session.commit()
-        
-#         return {'message': f'client with id {user_id} has been removed'}
 
 @ns.route('/summary/<int:user_id>/')
 class ClientSummary(Resource):
@@ -189,7 +191,7 @@ class ClientSummary(Resource):
                 'phone': 'phone number to search',
                 'dob': 'date of birth to search',
                 'record_locator_id': 'record locator id to search'})
-
+                
 #todo - fix to work with new user system
 class Clients(Resource):
     @token_auth.login_required
@@ -228,6 +230,7 @@ class Clients(Resource):
         #         param[key] = ''          
         #     elif key == 'record_locator_id' and param.get(key, None):
         #         tempId = param[key]
+
         #     elif key == 'email' and param.get(key, None):
         #         tempEmail = param[key]
         #         param[key] = param[key].replace("@"," ")
@@ -854,6 +857,202 @@ class ClinicalCareTeam(Resource):
 
         return response
 
+@ns.route('/drinks/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class ClientDrinksApi(Resource):
+    """
+    Endpoints related to nutritional beverages that are assigned to clients.
+    """
+    @token_auth.login_required(user_type=('staff',), staff_role=('doctor', 'nutrition', 'doctor_internal', 'nutrition_internal'))
+    @accepts(schema=ClientAssignedDrinksSchema, api=ns)
+    @responds(schema=ClientAssignedDrinksSchema, api=ns, status_code=201)
+    def post(self, user_id):
+        """
+        Add an assigned drink to the client designated by user_id.
+        """
+        check_client_existence(user_id)
+        check_drink_existence(request.parsed_obj.drink_id)
 
+        request.parsed_obj.user_id = user_id
+        db.session.add(request.parsed_obj)
+        db.session.commit()
 
+        return request.parsed_obj
 
+    @token_auth.login_required
+    @responds(schema=ClientAssignedDrinksSchema(many=True), api=ns, status_code=200)
+    def get(self, user_id):
+        """
+        Returns the list of drinks assigned to the user designated by user_id.
+        """
+        check_client_existence(user_id)
+
+        return ClientAssignedDrinks.query.filter_by(user_id=user_id).all()
+    
+    @token_auth.login_required(user_type=('staff',), staff_role=('doctor', 'nutrition', 'doctor_internal', 'nutrition_internal'))
+    @accepts(schema=ClientAssignedDrinksDeleteSchema, api=ns)
+    @responds(schema=ClientAssignedDrinksSchema, api=ns, status_code=204)
+    def delete(self, user_id):
+        """
+        Delete a drink assignemnt for a user with user_id and drink_id
+        """
+        for drink_id in request.parsed_obj['drink_ids']:
+            drink = ClientAssignedDrinks.query.filter_by(user_id=user_id, drink_id=drink_id).one_or_none()
+
+            if not drink:
+                raise ContentNotFound()
+
+            db.session.delete(drink)
+        
+        db.session.commit()
+
+@ns.route('/mobile-settings/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class ClientMobileSettingsApi(Resource):
+    """
+    Create update and remove members of a client's clinical care team
+    only the client themselves may have access to these operations.
+    """
+    @token_auth.login_required(user_type=('client',))
+    @accepts(schema=ClientMobileSettingsSchema, api=ns)
+    @responds(schema=ClientMobileSettingsSchema, api=ns, status_code=201)
+    def post(self, user_id):
+        """
+        Set a client's mobile settings for the first time
+        """
+
+        check_client_existence(user_id)
+
+        if ClientMobileSettings.query.filter_by(user_id=user_id).one_or_none():
+            raise IllegalSetting(message=f"Mobile settings for user_id {user_id} already exists. Please use PUT method")
+
+        request.parsed_obj.user_id = user_id
+        db.session.add(request.parsed_obj)
+        db.session.commit()
+
+        return request.parsed_obj
+
+    @token_auth.login_required(user_type=('client',))
+    @responds(schema=ClientMobileSettingsSchema, api=ns, status_code=200)
+    def get(self, user_id):
+        """
+        Returns the mobile settings that a client has set.
+        """
+
+        check_client_existence(user_id)
+
+        return ClientMobileSettings.query.filter_by(user_id=user_id).one_or_none()
+
+    @token_auth.login_required(user_type=('client',))
+    @accepts(schema=ClientMobileSettingsSchema, api=ns)
+    @responds(schema=ClientMobileSettingsSchema, api=ns, status_code=201)
+    def put(self, user_id):
+        """
+        Update a client's mobile settings
+        """
+
+        check_client_existence(user_id)
+
+        settings = ClientMobileSettings.query.filter_by(user_id=user_id).one_or_none()
+        if not settings:
+            raise IllegalSetting(message=f"Mobile settings for user_id {user_id} do not exist. Please use POST method")
+
+        data = request.parsed_obj.__dict__
+        del data['_sa_instance_state']
+        settings.update(data)
+        db.session.commit()
+
+        return request.parsed_obj
+        request.parsed_obj.user_id = user_id
+        db.session.add(request.parsed_obj)
+        db.session.commit()
+
+        return request.parsed_obj
+
+@ns.route('/height/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class ClientHeightApi(Resource):
+    """
+    Endpoints related to submitting client height and viewing
+    a client's height history.
+    """
+    @token_auth.login_required(user_type=('client',))
+    @accepts(schema=ClientHeightSchema, api=ns)
+    @responds(schema=ClientHeightSchema, api=ns, status_code=201)
+    def post(self, user_id):
+        """
+        Submits a new height for the client.
+        """
+        check_client_existence(user_id)
+
+        if token_auth.current_user()[0].user_id != user_id:
+            #clients can only submit heights for themselves
+            raise IllegalSetting(message="Requested user_id does not match logged in user_id. Clients can only submit height measurements for themselves.")
+
+        request.parsed_obj.user_id = user_id
+        db.session.add(request.parsed_obj)
+
+        #clientInfo should hold the most recent height given for the client so update here
+        client = ClientInfo.query.filter_by(user_id=user_id)
+        client.update({'height': request.parsed_obj.height})
+
+        db.session.commit()
+        return request.parsed_obj
+
+    @token_auth.login_required(user_type=('client', 'staff'))
+    @responds(schema=ClientHeightSchema(many=True), api=ns, status_code=200)
+    def get(self, user_id):
+        """
+        Returns all heights reported for a client and the dates they were reported.
+        """
+        check_client_existence(user_id)
+
+        if token_auth.current_user()[0].is_client and token_auth.current_user()[0].user_id != user_id:
+            #clients can only view height history for themselves
+            raise IllegalSetting(message="Requested user_id does not match logged in user_id. Clients can only view height history for themselves.")
+
+        return ClientHeightHistory.query.filter_by(user_id=user_id).all()
+
+@ns.route('/weight/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class ClientWeightApi(Resource):
+    """
+    Endpoints related to submitting client weight and viewing
+    a client's weight history.
+    """
+    @token_auth.login_required(user_type=('client',))
+    @accepts(schema=ClientWeightSchema, api=ns)
+    @responds(schema=ClientWeightSchema, api=ns, status_code=201)
+    def post(self, user_id):
+        """
+        Submits a new weight for the client.
+        """
+        check_client_existence(user_id)
+
+        if token_auth.current_user()[0].user_id != user_id:
+            #clients can only submit heights for themselves
+            raise IllegalSetting(message="Requested user_id does not match logged in user_id. Clients can only submit weight measurements for themselves.")
+
+        request.parsed_obj.user_id = user_id
+        db.session.add(request.parsed_obj)
+
+        #clientInfo should hold the most recent height given for the client so update here
+        client = ClientInfo.query.filter_by(user_id=user_id)
+        client.update({'weight': request.parsed_obj.weight})
+
+        db.session.commit()
+        return request.parsed_obj
+
+    @token_auth.login_required(user_type=('client', 'staff'))
+    @responds(schema=ClientWeightSchema(many=True), api=ns, status_code=200)
+    def get(self, user_id):
+        """
+        Returns all weights reported for a client and the dates they were reported.
+        """
+        check_client_existence(user_id)
+
+        if token_auth.current_user()[0].is_client and token_auth.current_user()[0].user_id != user_id:
+            #clients can only view height history for themselves
+            raise IllegalSetting(message="Requested user_id does not match logged in user_id. Clients can only view weight history for themselves.")
+
+        return ClientWeightHistory.query.filter_by(user_id=user_id).all()

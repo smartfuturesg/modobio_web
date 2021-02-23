@@ -11,7 +11,7 @@ from odyssey.utils.constants import ACCESS_ROLES
 
 class StaffRecentClientsSchema(Schema):
     idx = fields.Integer()
-    staff_user_id = fields.Integer()
+    user_id = fields.Integer()
     client_user_id = fields.Integer(required=True)
     timestamp = fields.DateTime()
 

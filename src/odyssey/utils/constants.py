@@ -810,7 +810,7 @@ API access token lifetime in hours.
 :type: int
 """
 
-REFRESH_TOKEN_LIFETIME = 24
+REFRESH_TOKEN_LIFETIME = 168
 """
 Refresh token lifetime in hours. 
 

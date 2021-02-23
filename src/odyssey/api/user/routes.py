@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-import secrets
+import secrets, boto3, pathlib
 import jwt
 
 from flask import current_app, request, url_for, jsonify
@@ -11,29 +11,32 @@ from werkzeug.security import check_password_hash
 from odyssey.api import api
 from odyssey.api.client.schemas import ClientInfoSchema
 from odyssey.api.staff.schemas import StaffProfileSchema, StaffRolesSchema
+from odyssey.api.user.models import User, UserLogin, UserRemovalRequests, UserSubscriptions, UserTokensBlacklist
 from odyssey.api.staff.models import StaffRoles
-from odyssey.api.user.models import User, UserLogin, UserTokensBlacklist
 from odyssey.api.user.schemas import (
     UserSchema, 
-    NewClientUserSchema,
     UserLoginSchema,
     UserPasswordRecoveryContactSchema,
     UserPasswordResetSchema,
     UserPasswordUpdateSchema,
     NewUserSchema,
+    UserInfoSchema,
+    UserSubscriptionsSchema,
+    UserSubscriptionHistorySchema,
     NewStaffUserSchema
 ) 
 from odyssey.utils.auth import token_auth
-from odyssey.utils.constants import PASSWORD_RESET_URL
+from odyssey.utils.constants import PASSWORD_RESET_URL, DB_SERVER_TIME
 from odyssey.utils.errors import ContentNotFound, InputError, StaffEmailInUse, ClientEmailInUse, UnauthorizedUser
-from odyssey.utils.email import send_email_password_reset
-from odyssey.utils.misc import check_user_existence, verify_jwt
+from odyssey.utils.email import send_email_password_reset, send_email_delete_account
+from odyssey.utils.misc import check_user_existence, check_client_existence, check_staff_existence, verify_jwt
 
 from odyssey import db
 
 ns = api.namespace('user', description='Endpoints for user accounts.')
 
 @ns.route('/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
 class ApiUser(Resource):
     
     @token_auth.login_required
@@ -43,6 +46,64 @@ class ApiUser(Resource):
 
         return User.query.filter_by(user_id=user_id).one_or_none()
 
+    @token_auth.login_required()
+    def delete(self, user_id):
+        #Search for user by user_id in User table
+        check_user_existence(user_id)
+        user = User.query.filter_by(user_id=user_id).one_or_none()
+        requester = token_auth.current_user()[0]
+        removal_request = UserRemovalRequests(
+            requester_user_id=requester.user_id, 
+            user_id=user.user_id)
+
+        db.session.add(removal_request)
+        db.session.flush()
+
+        #Get a list of all tables in database
+        tableList = db.session.execute("SELECT distinct(table_name) from information_schema.columns\
+                WHERE column_name='user_id';").fetchall()
+        
+        #Send notification email to user being deleted and user requesting deletion
+        #when FLASK_ENV=production
+        if user.email != requester.email:
+            send_email_delete_account(requester.email, user.email)
+        send_email_delete_account(user.email, user.email)
+
+        if user.is_staff:
+            #keep name, email, modobio id, user id in User table
+            #keep lines in tables where user_id is the reporter_id
+            user.phone_number = None
+        else:#it's client
+            #keep only modobio id, user id in User table
+            user.email = None
+            user.phone_number = None
+            user.firstname = None
+            user.middlename = None
+            user.lastname = None
+            
+        #delete files or images saved in S3 bucket for user_id
+        #when FLASK_DEV=remote
+        if not current_app.config['LOCAL_CONFIG']:
+            s3 = boto3.client('s3')
+
+            bucket_name = current_app.config['S3_BUCKET_NAME']
+            user_directory=f'id{user_id:05d}/'
+
+            response = s3.list_objects_v2(Bucket=bucket_name, Prefix=user_directory)
+            
+            for object in response.get('Contents', []):
+                print('Deleting', object['Key'])
+                s3.delete_object(Bucket=bucket_name, Key=object['Key'])
+        
+        #delete lines with user_id in all other tables except "User" and "UserRemovalRequests"
+        for table in tableList:
+            tblname = table.table_name
+            #added data_per_client table due to issues with the testing database
+            if tblname != "User" and tblname != "UserRemovalRequests" and tblname != "data_per_client":
+                db.session.execute("DELETE FROM \"{}\" WHERE user_id={};".format(tblname, user_id))
+
+        db.session.commit()
+        return {'message': f'User with id {user_id} has been removed'}
 
 @ns.route('/staff/')
 class NewStaffUser(Resource):
@@ -53,7 +114,10 @@ class NewStaffUser(Resource):
         """
         Create a staff user. Payload will require userinfo and staffinfo
         sections. Currently, staffinfo is used to register the staff user with 
-        one or more access_roles. This endpoint expects a password field. 
+        one or more access_roles. 
+
+        If registering an already existing CLIENT user as a STAFF user, 
+        the password must match, or be and empty string (ie. "")
         """
         data = request.get_json()
         
@@ -71,6 +135,15 @@ class NewStaffUser(Resource):
                 user.is_staff = True
                 staff_profile = StaffProfileSchema().load({'user_id': user.user_id})
                 db.session.add(staff_profile)
+
+                # add new staff subscription information
+                staff_sub = UserSubscriptionsSchema().load({
+                    'subscription_type': 'subscribed',
+                    'subscription_rate': 0.0,
+                    'is_staff': True
+                })
+                staff_sub.user_id = user.user_id
+                db.session.add(staff_sub)
         else:
             # user account does not yet exist for this email
             # require password
@@ -91,6 +164,15 @@ class NewStaffUser(Resource):
             staff_profile = StaffProfileSchema().load({"user_id": user.user_id})
             db.session.add(user_login)
             db.session.add(staff_profile)
+
+            # add new user subscription information
+            staff_sub = UserSubscriptionsSchema().load({
+                'subscription_type': 'subscribed',
+                'subscription_rate': 0.0,
+                'is_staff': True
+            })
+            staff_sub.user_id = user.user_id
+            db.session.add(staff_sub)
             
         # create entries for role assignments 
         for role in staff_info.get('access_roles', []):
@@ -132,17 +214,18 @@ class StaffUserInfo(Resource):
 
 @ns.route('/client/')
 class NewClientUser(Resource):
-    @accepts(schema=NewUserSchema, api=ns)
-    @responds(schema=NewClientUserSchema, status_code=201, api=ns)
+    @accepts(schema=UserInfoSchema, api=ns)
+    @responds(schema=UserInfoSchema, status_code=201, api=ns)
     def post(self): 
         """
-        Create a client user. This endpoint requires a payload with just
-        userinfo. Passwords are auto-generated by the API and 
-        returned in the payload. 
+        Create a client user. This endpoint requires a payload with just userinfo.
+        
+        If registering an already existing staff user as a client, 
+        the password must match, or be and empty string (ie. "")
         """
-        data = request.get_json()     
+        user_info = request.get_json()     
 
-        user_info = data.get('user_info')
+        #user_info = data.get('user_info')
         user = User.query.filter(User.email.ilike(user_info.get('email'))).first()
         if user:
             if user.is_client:
@@ -154,14 +237,19 @@ class NewClientUser(Resource):
                 client_info = ClientInfoSchema().load({'user_id': user.user_id})
                 password=""
                 db.session.add(client_info)
+
+                # add new client subscription information
+                client_sub = UserSubscriptionsSchema().load({
+                    'subscription_type': 'unsubscribed',
+                    'subscription_rate': 0.0,
+                    'is_staff': False
+                })
+                client_sub.user_id = user.user_id
+                db.session.add(client_sub)
         else:
             # user account does not yet exist for this email
-            # create a password
             password=user_info.get('password')
-            if not password:
-                password = user_info.get('email')[:2]+secrets.token_hex(4)
-            else:
-                del user_info['password']
+            del user_info['password']
             user_info['is_client'] = True
             user_info['is_staff'] = False
             user = UserSchema().load(user_info)
@@ -171,6 +259,15 @@ class NewClientUser(Resource):
             client_info = ClientInfoSchema().load({"user_id": user.user_id})
             db.session.add(client_info)
             db.session.add(user_login)
+
+            # add new user subscription information
+            client_sub = UserSubscriptionsSchema().load({
+                'subscription_type': 'unsubscribed',
+                'subscription_rate': 0.0,
+                'is_staff': False
+            })
+            client_sub.user_id = user.user_id
+            db.session.add(client_sub)
 
         payload=user.__dict__
         payload['password']=password
@@ -342,3 +439,69 @@ class VerifyPortalId(Resource):
         db.session.commit()
         
         return 200
+
+@ns.route('/subscription/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class UserSubscriptionApi(Resource):
+
+    @token_auth.login_required
+    @responds(schema=UserSubscriptionsSchema(many=True), api=ns, status_code=200)
+    def get(self, user_id):
+        """
+        Returns active subscription information for the given user_id. 
+        Because a user_id can belong to both a client and staff account, both active subscriptions will be returned in this case.
+        """
+        check_user_existence(user_id)
+
+        return UserSubscriptions.query.filter_by(user_id=user_id).filter_by(end_date=None).all()
+
+    @token_auth.login_required
+    @accepts(schema=UserSubscriptionsSchema, api=ns)
+    @responds(schema=UserSubscriptionsSchema, api=ns, status_code=201)
+    def put(self, user_id):
+        """
+        Updates the currently active subscription for the given user_id. 
+        Also sets the end date to the previously active subscription.
+        """
+        if request.parsed_obj.is_staff:
+            check_staff_existence(user_id)
+        else:
+            check_client_existence(user_id)
+
+        #update end_date for user's previous subscription
+        #NOTE: users always have a subscription, even a brand new account will have an entry
+        #      in this table as an 'unsubscribed' subscription
+        prev_sub = UserSubscriptions.query.filter_by(user_id=user_id, end_date=None, is_staff=request.parsed_obj.is_staff).one_or_none()
+        prev_sub.update({'end_date': DB_SERVER_TIME})
+
+        new_data = {
+            'subscription_type': request.parsed_obj.subscription_type,
+            'subscription_rate': request.parsed_obj.subscription_rate,
+            'is_staff': request.parsed_obj.is_staff,
+        }
+        new_sub = UserSubscriptionsSchema().load(new_data)
+        new_sub.user_id = user_id
+        db.session.add(new_sub)
+        db.session.commit()
+
+        return new_sub
+
+    
+
+@ns.route('/subscription/history/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class UserSubscriptionHistoryApi(Resource):
+
+    @token_auth.login_required
+    @responds(schema=UserSubscriptionHistorySchema, api=ns, status_code=200)
+    def get(self, user_id):
+        """
+        Returns the complete subscription history for the given user_id.
+        Because a user_id can belong to both a client and staff account, both subscription histories will be returned in this case.
+        """
+        check_user_existence(user_id)
+
+        res = {}
+        res['client_subscription_history'] = UserSubscriptions.query.filter_by(user_id=user_id).filter_by(is_staff=False).all()
+        res['staff_subscription_history'] = UserSubscriptions.query.filter_by(user_id=user_id).filter_by(is_staff=True).all()
+        return res

@@ -188,7 +188,7 @@ class RecentClients(Resource):
     @responds(schema=StaffRecentClientsSchema(many=True), api=ns)
     def get(self):
         """get the 10 most recent clients a staff member has loaded"""
-        return StaffRecentClients.query.filter_by(staff_user_id=token_auth.current_user()[0].user_id).all()
+        return StaffRecentClients.query.filter_by(user_id=token_auth.current_user()[0].user_id).all()
 
 """ Staff Token Endpoint """
 

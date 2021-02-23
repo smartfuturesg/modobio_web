@@ -3,8 +3,9 @@ from flask_restx import Resource
 
 from odyssey.api import api
 from odyssey.utils.auth import token_auth
-from odyssey.api.lookup.models import LookupDrinks, LookupDrinkIngredients, LookupGoals
-from odyssey.api.lookup.schemas import LookupDrinksOutputSchema, LookupDrinkIngredientsOutputSchema, LookupGoalsOutputSchema
+from odyssey.api.lookup.models import LookupDrinks, LookupDrinkIngredients, LookupGoals, LookupRaces
+from odyssey.api.lookup.schemas import LookupDrinksOutputSchema, LookupDrinkIngredientsOutputSchema, LookupGoalsOutputSchema, LookupRacesOutputSchema
+from odyssey.utils.misc import check_drink_existence
 
 from odyssey import db
 
@@ -32,6 +33,8 @@ class LookupDrinkIngredientsApi(Resource):
     @responds(schema=LookupDrinkIngredientsOutputSchema, api=ns)
     def get(self, drink_id):
         """get recipe of the drink denoted by drink_id"""
+        check_drink_existence(drink_id)
+
         res = LookupDrinkIngredients.query.filter_by(drink_id=drink_id).all()
         return {'total_items': len(res), 'items': res}
 
@@ -43,4 +46,14 @@ class LookupGoalsApi(Resource):
     def get(self):
         """get contents of goals lookup table"""
         res = LookupGoals.query.all()
+        return {'total_items': len(res), 'items': res}
+
+@ns.route('/races/')
+class LookupRacesApi(Resource):
+
+    @token_auth.login_required
+    @responds(schema=LookupRacesOutputSchema, api=ns)
+    def get(self):
+        """get contents of races lookup table"""
+        res = LookupRaces.query.all()
         return {'total_items': len(res), 'items': res}

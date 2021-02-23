@@ -1,7 +1,7 @@
 from marshmallow import Schema, fields, post_load, validate
 
 from odyssey import ma
-from odyssey.api.user.models import User, UserLogin
+from odyssey.api.user.models import User, UserLogin, UserSubscriptions
 from odyssey.utils.constants import ACCESS_ROLES
 
 """
@@ -31,6 +31,7 @@ class UserLoginSchema(ma.SQLAlchemyAutoSchema):
         new_user.set_password(data['password'])
         return new_user
 
+    
 class UserInfoSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
@@ -44,23 +45,8 @@ class UserInfoSchema(ma.SQLAlchemyAutoSchema):
                             validate=validate.Length(min=0,max=50), 
                             required=False)
 
-class NewClientUserSchema(Schema):
-    """
-    Schema for validating payloads from the creation of a new client user
-    """
-    firstname = fields.String()
-    middlename = fields.String()
-    lastname = fields.String()
-    email = fields.Email(validate=validate.Length(min=0,max=50))
-    phone_number = fields.String(validate=validate.Length(min=0,max=50))
-    password = fields.String(validate=validate.Length(min=0,max=50), dump_only=True)
-    modobio_id = fields.String()
-    biological_sex_male = fields.Boolean()
-
-    user_info = fields.Nested(UserInfoSchema, required=True)
 
 
-    
 class UserInfoPutSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
@@ -113,3 +99,20 @@ class UserPasswordUpdateSchema(Schema):
     #TODO Validate password strength
     current_password = fields.String(required=True,  validate=validate.Length(min=3,max=50), description="current password")
     new_password = fields.String(required=True,  validate=validate.Length(min=3,max=50), description="new password to be used going forward")
+
+class UserSubscriptionsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = UserSubscriptions
+        exclude = ('created_at', 'updated_at', 'idx')
+        dump_only = ('start_date', 'end_date', 'user_id')
+
+    subscription_type = fields.String(validate=validate.OneOf(['unsubscribed', 'subscribed', 'free_trial', 'sponsored']))
+    
+    @post_load
+    def make_object(self, data, **kwargs):
+        return UserSubscriptions(**data)
+
+class UserSubscriptionHistorySchema(Schema):
+
+    client_subscription_history = fields.Nested(UserSubscriptionsSchema, many=True)
+    staff_subscription_history = fields.Nested(UserSubscriptionsSchema, many=True)

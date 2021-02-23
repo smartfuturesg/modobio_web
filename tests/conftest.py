@@ -10,6 +10,7 @@ from odyssey.api.client.models import ClientInfo
 from odyssey.api.facility.models import MedicalInstitutions
 from odyssey.api.staff.models import StaffProfile, StaffRoles
 from odyssey.api.user.models import User, UserLogin
+from odyssey.api.user.schemas import UserSubscriptionsSchema
 from odyssey.utils.constants import ACCESS_ROLES
 from tests.functional.user.data import users_staff_member_data, users_client_new_creation_data, users_client_new_info_data
 
@@ -73,8 +74,15 @@ def init_database():
     # 3) Client info
     users_client_new_info_data['user_id'] = client_1.user_id
     client_1_info = ClientInfo(**users_client_new_info_data)
+    client_1_sub = UserSubscriptionsSchema().load({
+    'subscription_type': 'unsubscribed',
+    'subscription_rate': 0.0,
+    'is_staff': False
+    })
+    client_1_sub.user_id = client_1.user_id
     db.session.add(client_1_login)
     db.session.add(client_1_info)
+    db.session.add(client_1_sub)
     db.session.flush()
 
     ####
