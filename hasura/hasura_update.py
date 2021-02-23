@@ -65,7 +65,7 @@ hasura_tables = []
 with hasura_tables_file.open() as fh:
     hasura_tables = yaml.safe_load(fh)
 
-hasura_tablenames = {f'{h["table"]["schema"]}-{h["table]["name"]}': n for h, n in enumerate(hasura_tables)}
+hasura_tablenames = {h["table"]["schema"] + '-' + h["table"]["name"]: n for n, h in enumerate(hasura_tables)}
 
 hasura_no_track = []
 with hasura_no_track_file.open() as fh:
@@ -89,12 +89,12 @@ for schema in inspector.get_schema_names():
                     'name': table,
                     'schema': schema
                 }
-            })
+            }
             
             # Track foreign keys
             for fk in inspector.get_foreign_keys(table, schema=schema):
                 rel = {
-                    'name': fk['referred_table']
+                    'name': fk['referred_table'],
                     'using': {
                         'foreign_key_constraint_on': fk['referred_columns']
                     }
@@ -114,7 +114,8 @@ for schema in inspector.get_schema_names():
 
         # Add custom column names
         for column in inspector.get_columns(table, schema=schema):
-            tracked_table['configuration']['custom_column_names'][column] = snake_to_camel(column)
+            colname = column['name']
+            tracked_table['configuration']['custom_column_names'][colname] = snake_to_camel(colname)
 
 with hasura_tables_file.open(mode='wt') as fh:
     yaml.dump(hasura_tables, stream=fh)
