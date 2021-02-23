@@ -11,6 +11,7 @@ from odyssey.api.client.models import (
     ClientInfo,
     ClientConsent
 )
+from tests.functional.client.data import client_info_put_test_data
 from tests.functional.user.data import users_new_user_client_data, users_new_self_registered_client_data
 
 
@@ -61,6 +62,18 @@ def test_put_client_info(test_client, init_database, staff_auth_header):
     client = ClientInfo.query.filter_by(user_id=1).one_or_none()
     assert response.status_code == 200
     assert client.guardianname == 'Testy'
+
+    # test full payload of updates to client info data
+    response = test_client.put('/client/1/', 
+                            headers=staff_auth_header, 
+                            data=dumps(client_info_put_test_data),  
+                            content_type='application/json')
+    
+    assert response.status_code == 200
+    assert response.json["client_info"]["primary_goal"] == "('Recovery',)"
+    assert response.json["client_info"]["race"] == "('White / Caucasian',)"
+    assert response.json["client_info"]["race_id"] == 1
+    assert response.json["client_info"]["primary_goal_id"] == 1
 
 def test_creating_new_client(test_client, init_database, staff_auth_header):
     """

@@ -53,4 +53,4 @@ def test_delete_client_assigned_drink(test_client, init_database, staff_auth_hea
                                 headers=staff_auth_header, 
                                 content_type='application/json')
     
-    assert response.status_code == 204
+    assert response.status_code == 200
