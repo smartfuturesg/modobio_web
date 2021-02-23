@@ -6,10 +6,8 @@ This script updates Hasura metadata. The following actions are taken:
 1. Track untracked tables in the database.
 2. Set custom column names, displaying snake_case columns as camelCase.
 
-This script should be run after a schema update.
-
-    $ ./column_camel_case.py
-    $ hasura-cli metadata apply
+This script should be run manually by the developer after a schema update. The resulting
+changes to tables.yaml should be included in the merge.
 
 1. Table tracking
 -----------------
