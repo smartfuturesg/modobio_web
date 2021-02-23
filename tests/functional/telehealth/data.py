@@ -64,8 +64,65 @@ telehealth_staff_general_availability_2_post_data = {
     'end_time': '13:00:00'
   },
   {
-    'day_of_week': 'Wednesday',
-    'start_time': '15:00:00',
+    'day_of_week': 'Monday',
+    'start_time': '13:00:00',
     'end_time': '20:00:00'
+  },
+  {
+    'day_of_week': 'Thursday',
+    'start_time': '9:00:00',
+    'end_time': '20:00:00'
+  },
+  {
+    'day_of_week': 'Saturday',
+    'start_time': '13:00:00',
+    'end_time': '20:00:00'
+  },
+  {
+    'day_of_week': 'Friday',
+    'start_time': '13:00:00',
+    'end_time': '20:00:00'
+  },  
+  {
+    'day_of_week': 'Sunday',
+    'start_time': '13:00:00',
+    'end_time': '20:00:00'
+  }
+  ]
+}
+# Invalid inputs:
+telehealth_staff_general_availability_bad_3_post_data = {
+  'availability': [{
+    'day_of_week': 'Monday',
+    'start_time': '25:00:00',
+    'end_time': '12:00:00'
+  }]
+}
+telehealth_staff_general_availability_bad_4_post_data = {
+  'availability': [{
+    'day_of_week': 'Monday',
+    'start_time': '10:70:00',
+    'end_time': '12:00:00'
+  }]
+}
+telehealth_staff_general_availability_bad_5_post_data = {
+  'availability': [{
+    'day_of_week': 'Monday',
+    'start_time': '-10:00:00',
+    'end_time': '12:00:00'
+  }]
+}
+telehealth_staff_general_availability_bad_6_post_data = {
+  'availability': [{
+    'day_of_week': 'Monday',
+    'start_time': '10:-10:00',
+    'end_time': '12:00:00'
+  }]
+}
+telehealth_staff_general_availability_bad_7_post_data = {
+  'availability': [{
+    'day_of_week': 'Monday',
+    'start_time': '10:10:00',
+    'end_time': '09:00:00'
   }]
 }

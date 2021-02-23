@@ -23,7 +23,7 @@ from odyssey.utils.misc import check_user_existence, check_client_existence, che
 
 from odyssey import db
 
-ns = api.namespace('telehealth', description='Endpoints for user accounts.')
+ns = api.namespace('telehealth', description='Endpoint for telehealth requests.')
 
 @ns.route('/settings/staff/availability/<int:staff_id>/')
 class TelehealthSettingsStaffAvailabilityApi(Resource):
@@ -34,13 +34,42 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
     @responds(schema=TelehealthStaffAvailabilityOutputSchema, api=ns, status_code=200)
     def get(self,staff_id):
         """
-        Returns the list of notifications for the given user_id
+        Returns the staff availability
         """
-        # grab the whole queue
-        # check_staff_existence(staff_id)
-        availability = TelehealthStaffAvailability.query.filter_by(staff_id=staff_id).all()
+        # grab staff availability
+        check_staff_existence(staff_id)
+        availability = TelehealthStaffAvailability.query.filter_by(staff_id=staff_id).\
+                        order_by(TelehealthStaffAvailability.day_of_week.asc(), TelehealthStaffAvailability.start_time.asc()).all()
+
+        monArr = []
+        tueArr = [] 
+        wedArr = []
+        thuArr = [] 
+        friArr = [] 
+        satArr = []
+        sunArr = []
+
+        # Reorder to be Monday - Sunday
+        for time in availability:
+            if time.day_of_week == 'Monday':
+                monArr.append(time)
+            elif time.day_of_week == 'Tuesday':
+                tueArr.append(time)
+            elif time.day_of_week == 'Wednesday':
+                wedArr.append(time)
+            elif time.day_of_week == 'Thursday':
+                thuArr.append(time)
+            elif time.day_of_week == 'Friday':
+                friArr.append(time)
+            elif time.day_of_week == 'Saturday':
+                satArr.append(time)
+            elif time.day_of_week == 'Sunday':
+                sunArr.append(time)
+        
+        orderedArr = [*monArr, *tueArr, *wedArr, *thuArr, *friArr, *satArr, *sunArr]
+
         payload = {}
-        payload['availability'] = availability
+        payload['availability'] = orderedArr
         return payload
 
     @token_auth.login_required
@@ -48,18 +77,25 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
     @responds(schema=TelehealthStaffAvailabilityOutputSchema, api=ns, status_code=200)
     def post(self,staff_id):
         """
-        Returns the list of notifications for the given user_id
+        Returns the staff availability
         """
-        # check_staff_existence(staff_id)
+        check_staff_existence(staff_id)
+
         availability = TelehealthStaffAvailability.query.filter_by(staff_id=staff_id).all()
         payload = {}
         if availability:
             for time in availability:
                 db.session.delete(time)
         payload['availability'] = []
+
         if request.parsed_obj['availability']:
             avail = request.parsed_obj['availability']
             for time in avail:
+                # end time must be after start time
+                if time.start_time > time.end_time:
+                    db.session.rollback()
+                    raise InputError(status_code=405,message='Start Time must be before End Time')
+
                 time.staff_id = staff_id
                 db.session.add(time)
                 payload['availability'].append(time)

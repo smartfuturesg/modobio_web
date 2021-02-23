@@ -6,12 +6,16 @@ from odyssey.api.telehealth.models import (
     TelehealthStaffAvailability,
 )
 
+from odyssey.utils.constants import DAY_OF_WEEK
+
+
 class TelehealthStaffAvailabilitySchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = TelehealthStaffAvailability
         exclude = ('created_at',)
         dump_only = ('idx', 'staff_id')
 
+    day_of_week = fields.String(validate=validate.OneOf(DAY_OF_WEEK))
     @post_load
     def make_object(self, data, **kwargs):
         return TelehealthStaffAvailability(**data)  
