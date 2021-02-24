@@ -26,6 +26,7 @@ from odyssey import db
 ns = api.namespace('telehealth', description='Endpoint for telehealth requests.')
 
 @ns.route('/settings/staff/availability/<int:staff_id>/')
+@ns.doc(params={'staff_id': 'User ID for a staff'})
 class TelehealthSettingsStaffAvailabilityApi(Resource):
     """
     This API resource is used to get, post the staff's general availability
@@ -40,7 +41,7 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
         check_staff_existence(staff_id)
         availability = TelehealthStaffAvailability.query.filter_by(staff_id=staff_id).\
                         order_by(TelehealthStaffAvailability.start_time.asc()).all()
-
+        
         monArr = []
         tueArr = [] 
         wedArr = []
