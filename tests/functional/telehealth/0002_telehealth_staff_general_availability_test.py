@@ -25,7 +25,7 @@ def test_post_1_staff_general_availability(test_client, init_database, staff_aut
                                 data=dumps(telehealth_staff_general_availability_1_post_data), 
                                 content_type='application/json')
 
-    assert response.status_code == 200
+    assert response.status_code == 201
     
 
 
@@ -35,12 +35,12 @@ def test_get_1_specific_client_appointment_queue(test_client, init_database, cli
     WHEN the '/telehealth/settings/staff/availability/<user_id>/' resource  is requested (GET)
     THEN check the response is valid
     """
-    for header in (staff_auth_header, client_auth_header):
+    for header in (staff_auth_header, ):
         response = test_client.get('/telehealth/settings/staff/availability/2/',
                                     headers=header, 
                                     content_type='application/json')
         
-        assert response.status_code == 200
+        assert response.status_code == 201
 
 def test_post_2_staff_general_availability(test_client, init_database, staff_auth_header):
     """
@@ -54,7 +54,7 @@ def test_post_2_staff_general_availability(test_client, init_database, staff_aut
                                 data=dumps(telehealth_staff_general_availability_2_post_data), 
                                 content_type='application/json')
 
-    assert response.status_code == 200
+    assert response.status_code == 201
 
 
 def test_get_2_specific_client_appointment_queue(test_client, init_database, client_auth_header, staff_auth_header):
@@ -63,12 +63,12 @@ def test_get_2_specific_client_appointment_queue(test_client, init_database, cli
     WHEN the '/telehealth/settings/staff/availability/<user_id>/' resource  is requested (GET)
     THEN check the response is valid
     """
-    for header in (staff_auth_header, client_auth_header):
+    for header in (staff_auth_header, ):
         response = test_client.get('/telehealth/settings/staff/availability/2/',
                                     headers=header, 
                                     content_type='application/json')
         
-        assert response.status_code == 200
+        assert response.status_code == 201
         assert [response.json['availability'][0]['day_of_week'], response.json['availability'][0]['start_time'], response.json['availability'][0]['end_time']] == ['Monday', '08:00:00', '09:00:00'] 
         assert [response.json['availability'][1]['day_of_week'], response.json['availability'][1]['start_time'], response.json['availability'][1]['end_time']] == ['Monday', '13:00:00', '20:00:00'] 
         assert [response.json['availability'][2]['day_of_week'], response.json['availability'][2]['start_time'], response.json['availability'][2]['end_time']] == ['Tuesday', '11:00:00', '13:00:00'] 
@@ -98,12 +98,12 @@ def test_get_3_specific_client_appointment_queue(test_client, init_database, cli
     WHEN the '/telehealth/settings/staff/availability/<user_id>/' resource  is requested (GET)
     THEN check the response is valid
     """
-    for header in (staff_auth_header, client_auth_header):
+    for header in (staff_auth_header, ):
         response = test_client.get('/telehealth/settings/staff/availability/2/',
                                     headers=header, 
                                     content_type='application/json')
         
-        assert response.status_code == 200
+        assert response.status_code == 201
         assert [response.json['availability'][0]['day_of_week'], response.json['availability'][0]['start_time'], response.json['availability'][0]['end_time']] == ['Monday', '08:00:00', '09:00:00'] 
         assert [response.json['availability'][1]['day_of_week'], response.json['availability'][1]['start_time'], response.json['availability'][1]['end_time']] == ['Monday', '13:00:00', '20:00:00'] 
         assert [response.json['availability'][2]['day_of_week'], response.json['availability'][2]['start_time'], response.json['availability'][2]['end_time']] == ['Tuesday', '11:00:00', '13:00:00'] 
@@ -132,12 +132,12 @@ def test_get_4_specific_client_appointment_queue(test_client, init_database, cli
     WHEN the '/telehealth/settings/staff/availability/<user_id>/' resource  is requested (GET)
     THEN check the response is valid
     """
-    for header in (staff_auth_header, client_auth_header):
+    for header in (staff_auth_header, ):
         response = test_client.get('/telehealth/settings/staff/availability/2/',
                                     headers=header, 
                                     content_type='application/json')
         
-        assert response.status_code == 200
+        assert response.status_code == 201
         assert [response.json['availability'][0]['day_of_week'], response.json['availability'][0]['start_time'], response.json['availability'][0]['end_time']] == ['Monday', '08:00:00', '09:00:00'] 
         assert [response.json['availability'][1]['day_of_week'], response.json['availability'][1]['start_time'], response.json['availability'][1]['end_time']] == ['Monday', '13:00:00', '20:00:00'] 
         assert [response.json['availability'][2]['day_of_week'], response.json['availability'][2]['start_time'], response.json['availability'][2]['end_time']] == ['Tuesday', '11:00:00', '13:00:00'] 
@@ -166,12 +166,12 @@ def test_get_5_specific_client_appointment_queue(test_client, init_database, cli
     WHEN the '/telehealth/settings/staff/availability/<user_id>/' resource  is requested (GET)
     THEN check the response is valid
     """
-    for header in (staff_auth_header, client_auth_header):
+    for header in (staff_auth_header, ):
         response = test_client.get('/telehealth/settings/staff/availability/2/',
                                     headers=header, 
                                     content_type='application/json')
         
-        assert response.status_code == 200        
+        assert response.status_code == 201   
         assert [response.json['availability'][0]['day_of_week'], response.json['availability'][0]['start_time'], response.json['availability'][0]['end_time']] == ['Monday', '08:00:00', '09:00:00'] 
         assert [response.json['availability'][1]['day_of_week'], response.json['availability'][1]['start_time'], response.json['availability'][1]['end_time']] == ['Monday', '13:00:00', '20:00:00'] 
         assert [response.json['availability'][2]['day_of_week'], response.json['availability'][2]['start_time'], response.json['availability'][2]['end_time']] == ['Tuesday', '11:00:00', '13:00:00'] 
@@ -200,12 +200,12 @@ def test_get_6_specific_client_appointment_queue(test_client, init_database, cli
     WHEN the '/telehealth/settings/staff/availability/<user_id>/' resource  is requested (GET)
     THEN check the response is valid
     """
-    for header in (staff_auth_header, client_auth_header):
+    for header in (staff_auth_header, ):
         response = test_client.get('/telehealth/settings/staff/availability/2/',
                                     headers=header, 
                                     content_type='application/json')
         
-        assert response.status_code == 200        
+        assert response.status_code == 201 
         assert [response.json['availability'][0]['day_of_week'], response.json['availability'][0]['start_time'], response.json['availability'][0]['end_time']] == ['Monday', '08:00:00', '09:00:00'] 
         assert [response.json['availability'][1]['day_of_week'], response.json['availability'][1]['start_time'], response.json['availability'][1]['end_time']] == ['Monday', '13:00:00', '20:00:00'] 
         assert [response.json['availability'][2]['day_of_week'], response.json['availability'][2]['start_time'], response.json['availability'][2]['end_time']] == ['Tuesday', '11:00:00', '13:00:00'] 
@@ -234,12 +234,12 @@ def test_get_7_specific_client_appointment_queue(test_client, init_database, cli
     WHEN the '/telehealth/settings/staff/availability/<user_id>/' resource  is requested (GET)
     THEN check the response is valid
     """
-    for header in (staff_auth_header, client_auth_header):
+    for header in (staff_auth_header, ):
         response = test_client.get('/telehealth/settings/staff/availability/2/',
                                     headers=header, 
                                     content_type='application/json')
         
-        assert response.status_code == 200        
+        assert response.status_code == 201   
         assert [response.json['availability'][0]['day_of_week'], response.json['availability'][0]['start_time'], response.json['availability'][0]['end_time']] == ['Monday', '08:00:00', '09:00:00'] 
         assert [response.json['availability'][1]['day_of_week'], response.json['availability'][1]['start_time'], response.json['availability'][1]['end_time']] == ['Monday', '13:00:00', '20:00:00'] 
         assert [response.json['availability'][2]['day_of_week'], response.json['availability'][2]['start_time'], response.json['availability'][2]['end_time']] == ['Tuesday', '11:00:00', '13:00:00'] 

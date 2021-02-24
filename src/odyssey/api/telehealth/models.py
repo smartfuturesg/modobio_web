@@ -37,7 +37,7 @@ class TelehealthStaffAvailability(db.Model):
     :type: int, primary key
     """
 
-    staff_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
     """
     staff member id 
 

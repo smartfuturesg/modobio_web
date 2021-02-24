@@ -25,21 +25,21 @@ from odyssey import db
 
 ns = api.namespace('telehealth', description='Endpoint for telehealth requests.')
 
-@ns.route('/settings/staff/availability/<int:staff_id>/')
-@ns.doc(params={'staff_id': 'User ID for a staff'})
+@ns.route('/settings/staff/availability/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID for a staff'})
 class TelehealthSettingsStaffAvailabilityApi(Resource):
     """
     This API resource is used to get, post the staff's general availability
     """
     @token_auth.login_required
-    @responds(schema=TelehealthStaffAvailabilityOutputSchema, api=ns, status_code=200)
-    def get(self,staff_id):
+    @responds(schema=TelehealthStaffAvailabilityOutputSchema, api=ns, status_code=201)
+    def get(self,user_id):
         """
         Returns the staff availability
         """
         # grab staff availability
-        check_staff_existence(staff_id)
-        availability = TelehealthStaffAvailability.query.filter_by(staff_id=staff_id).\
+        check_staff_existence(user_id)
+        availability = TelehealthStaffAvailability.query.filter_by(user_id=user_id).\
                         order_by(TelehealthStaffAvailability.start_time.asc()).all()
         
         monArr = []
@@ -71,18 +71,19 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
 
         payload = {}
         payload['availability'] = orderedArr
+        
         return payload
 
     @token_auth.login_required
     @accepts(schema=TelehealthStaffAvailabilityOutputSchema, api=ns)
-    @responds(schema=TelehealthStaffAvailabilityOutputSchema, api=ns, status_code=200)
-    def post(self,staff_id):
+    @responds(schema=TelehealthStaffAvailabilityOutputSchema, api=ns, status_code=201)
+    def post(self,user_id):
         """
         Returns the staff availability
         """
-        check_staff_existence(staff_id)
+        check_staff_existence(user_id)
 
-        availability = TelehealthStaffAvailability.query.filter_by(staff_id=staff_id).all()
+        availability = TelehealthStaffAvailability.query.filter_by(user_id=user_id).all()
         payload = {}
         if availability:
             for time in availability:
@@ -97,7 +98,7 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
                     db.session.rollback()
                     raise InputError(status_code=405,message='Start Time must be before End Time')
 
-                time.staff_id = staff_id
+                time.user_id = user_id
                 db.session.add(time)
                 payload['availability'].append(time)
         db.session.commit()

@@ -21,11 +21,11 @@ def upgrade():
     op.create_table('TelehealthStaffAvailability',
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('idx', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('staff_id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('day_of_week', sa.String(), nullable=True),
     sa.Column('start_time', sa.Time(), nullable=True),
     sa.Column('end_time', sa.Time(), nullable=True),
-    sa.ForeignKeyConstraint(['staff_id'], ['User.user_id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['user_id'], ['User.user_id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('idx')
     )
     # ### end Alembic commands ###
