@@ -22,7 +22,7 @@ from sqlalchemy import create_engine, text
 from odyssey.config import database_uri
 
 db_uri = database_uri(docstring=__doc__)
-print(f'Using the following database: {db_uri}}')
+print(f'Using the following database: {db_uri}')
 
 engine = create_engine(db_uri)
 
