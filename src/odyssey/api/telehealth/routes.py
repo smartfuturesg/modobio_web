@@ -39,7 +39,7 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
         # grab staff availability
         check_staff_existence(staff_id)
         availability = TelehealthStaffAvailability.query.filter_by(staff_id=staff_id).\
-                        order_by(TelehealthStaffAvailability.day_of_week.asc(), TelehealthStaffAvailability.start_time.asc()).all()
+                        order_by(TelehealthStaffAvailability.start_time.asc()).all()
 
         monArr = []
         tueArr = [] 
