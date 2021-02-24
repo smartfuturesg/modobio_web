@@ -2,6 +2,7 @@ from marshmallow import (
     Schema, 
     fields, 
     post_load,
+    validate,
 )
 
 from odyssey import ma
@@ -26,6 +27,9 @@ class TelehealthQueueClientPoolSchema(ma.SQLAlchemyAutoSchema):
         exclude = ('created_at', 'updated_at')
         dump_only = ('idx', 'user_id')
     
+    duration = fields.Integer(missing=20)
+    medical_gender = fields.String(validate=validate.OneOf(('Male','Female','None')),metadata={'description': 'Preferred Medical Professional gender'})
+
     @post_load
     def make_object(self, data, **kwargs):
         return TelehealthQueueClientPool(**data)    

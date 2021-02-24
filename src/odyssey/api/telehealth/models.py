@@ -175,6 +175,18 @@ class TelehealthQueueClientPool(db.Model):
     :type: str
     """
 
+    duration = db.Column(db.Integer)
+    """
+    3/3/2021, initially, we will default this to 20 minutes. 
 
-    
+    :type: int
+    """
 
+    medical_gender = db.Column(db.String)
+    """
+    preferred gender of the medical professional
+
+    options: male, female, no-preference
+
+    :type: str
+    """
