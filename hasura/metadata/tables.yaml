@@ -1,6 +1,11 @@
-- table:
-    schema: public
-    name: ClientClinicalCareTeam
+- configuration:
+    custom_column_names:
+      created_at: createdAt
+      idx: idx
+      team_member_email: teamMemberEmail
+      team_member_user_id: teamMemberUserId
+      updated_at: updatedAt
+      user_id: userId
   object_relationships:
   - name: User
     using:
@@ -8,23 +13,53 @@
   - name: userByUserId
     using:
       foreign_key_constraint_on: user_id
-- table:
+  table:
+    name: ClientClinicalCareTeam
     schema: public
+- configuration:
+    custom_column_names:
+      created_at: createdAt
+      idx: idx
+      infectious_disease: infectiousDisease
+      pdf_hash: pdfHash
+      pdf_path: pdfPath
+      revision: revision
+      signature: signature
+      signdate: signdate
+      updated_at: updatedAt
+      user_id: userId
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+  table:
     name: ClientConsent
+    schema: public
+- configuration:
+    custom_column_names:
+      created_at: createdAt
+      idx: idx
+      pdf_hash: pdfHash
+      pdf_path: pdfPath
+      revision: revision
+      signature: signature
+      signdate: signdate
+      updated_at: updatedAt
+      user_id: userId
   object_relationships:
   - name: User
     using:
       foreign_key_constraint_on: user_id
-- table:
-    schema: public
+  table:
     name: ClientConsultContract
-  object_relationships:
-  - name: User
-    using:
-      foreign_key_constraint_on: user_id
-- table:
     schema: public
-    name: ClientFacilities
+- configuration:
+    custom_column_names:
+      created_at: createdAt
+      facility_id: facilityId
+      idx: idx
+      updated_at: updatedAt
+      user_id: userId
   object_relationships:
   - name: RegisteredFacility
     using:
@@ -32,45 +67,124 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
-- table:
+  table:
+    name: ClientFacilities
     schema: public
+- configuration:
+    custom_column_names:
+      created_at: createdAt
+      data: data
+      doctor: doctor
+      drinks: drinks
+      idx: idx
+      pdf_hash: pdfHash
+      pdf_path: pdfPath
+      pt: pt
+      revision: revision
+      signature: signature
+      signdate: signdate
+      updated_at: updatedAt
+      user_id: userId
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+  table:
     name: ClientIndividualContract
+    schema: public
+- configuration:
+    custom_column_names:
+      city: city
+      country: country
+      created_at: createdAt
+      dob: dob
+      emergency_contact: emergencyContact
+      emergency_phone: emergencyPhone
+      gender: gender
+      guardianname: guardianname
+      guardianrole: guardianrole
+      healthcare_contact: healthcareContact
+      healthcare_phone: healthcarePhone
+      idx: idx
+      membersince: membersince
+      preferred: preferred
+      profession: profession
+      receive_docs: receiveDocs
+      record_locator_id: recordLocatorId
+      state: state
+      street: street
+      updated_at: updatedAt
+      user_id: userId
+      zipcode: zipcode
+    custom_root_fields: {}
   object_relationships:
   - name: User
     using:
       foreign_key_constraint_on: user_id
-- table:
-    schema: public
+  table:
     name: ClientInfo
+    schema: public
+- configuration:
+    custom_column_names:
+      created_at: createdAt
+      idx: idx
+      pdf_hash: pdfHash
+      pdf_path: pdfPath
+      revision: revision
+      signature: signature
+      signdate: signdate
+      updated_at: updatedAt
+      user_id: userId
   object_relationships:
   - name: User
     using:
       foreign_key_constraint_on: user_id
-- table:
-    schema: public
+  table:
     name: ClientPolicies
-  object_relationships:
-  - name: User
-    using:
-      foreign_key_constraint_on: user_id
-- table:
     schema: public
-    name: ClientRelease
-  object_relationships:
-  - name: User
-    using:
-      foreign_key_constraint_on: user_id
-  array_relationships:
+- array_relationships:
   - name: ClientReleaseContacts
     using:
       foreign_key_constraint_on:
         column: release_contract_id
         table:
-          schema: public
           name: ClientReleaseContacts
-- table:
+          schema: public
+  configuration:
+    custom_column_names:
+      created_at: createdAt
+      idx: idx
+      pdf_hash: pdfHash
+      pdf_path: pdfPath
+      release_date_from: releaseDateFrom
+      release_date_to: releaseDateTo
+      release_of_all: releaseOfAll
+      release_of_other: releaseOfOther
+      release_purpose: releasePurpose
+      revision: revision
+      signature: signature
+      signdate: signdate
+      updated_at: updatedAt
+      user_id: userId
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+  table:
+    name: ClientRelease
     schema: public
-    name: ClientReleaseContacts
+- configuration:
+    custom_column_names:
+      created_at: createdAt
+      email: email
+      idx: idx
+      name: name
+      phone: phone
+      relationship: relationship
+      release_contract_id: releaseContractId
+      release_direction: releaseDirection
+      updated_at: updatedAt
+      user_id: userId
   object_relationships:
   - name: ClientRelease
     using:
@@ -78,67 +192,130 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
-- table:
+  table:
+    name: ClientReleaseContacts
     schema: public
+- configuration:
+    custom_column_names:
+      created_at: createdAt
+      idx: idx
+      timestamp: timestamp
+      updated_at: updatedAt
+      user_id: userId
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+  table:
     name: ClientRemovalRequests
+    schema: public
+- configuration:
+    custom_column_names:
+      created_at: createdAt
+      idx: idx
+      pdf_hash: pdfHash
+      pdf_path: pdfPath
+      revision: revision
+      signature: signature
+      signdate: signdate
+      updated_at: updatedAt
+      user_id: userId
   object_relationships:
   - name: User
     using:
       foreign_key_constraint_on: user_id
-- table:
-    schema: public
+  table:
     name: ClientSubscriptionContract
-  object_relationships:
-  - name: User
-    using:
-      foreign_key_constraint_on: user_id
-- table:
     schema: public
-    name: LookupDrinkIngredients
+- configuration:
+    custom_column_names:
+      amount: amount
+      created_at: createdAt
+      drink_id: drinkId
+      idx: idx
+      ingredient_name: ingredientName
+      is_key_additive: isKeyAdditive
+      is_primary_ingredient: isPrimaryIngredient
+      unit: unit
+      updated_at: updatedAt
   object_relationships:
   - name: LookupDrink
     using:
       foreign_key_constraint_on: drink_id
-- table:
+  table:
+    name: LookupDrinkIngredients
     schema: public
-    name: LookupDrinks
-  object_relationships:
-  - name: LookupGoal
-    using:
-      foreign_key_constraint_on: primary_goal_id
-  array_relationships:
+- array_relationships:
   - name: LookupDrinkIngredients
     using:
       foreign_key_constraint_on:
         column: drink_id
         table:
-          schema: public
           name: LookupDrinkIngredients
-- table:
+          schema: public
+  configuration:
+    custom_column_names:
+      color: color
+      created_at: createdAt
+      drink_id: drinkId
+      primary_goal_id: primaryGoalId
+      updated_at: updatedAt
+  object_relationships:
+  - name: LookupGoal
+    using:
+      foreign_key_constraint_on: primary_goal_id
+  table:
+    name: LookupDrinks
     schema: public
-    name: LookupGoals
-  array_relationships:
+- array_relationships:
   - name: LookupDrinks
     using:
       foreign_key_constraint_on:
         column: primary_goal_id
         table:
-          schema: public
           name: LookupDrinks
-- table:
+          schema: public
+  configuration:
+    custom_column_names:
+      created_at: createdAt
+      goal_id: goalId
+      goal_name: goalName
+      updated_at: updatedAt
+  table:
+    name: LookupGoals
     schema: public
-    name: MedicalBloodTestResultTypes
-  array_relationships:
+- array_relationships:
   - name: MedicalBloodTestResults
     using:
       foreign_key_constraint_on:
         column: result_id
         table:
-          schema: public
           name: MedicalBloodTestResults
-- table:
+          schema: public
+  configuration:
+    custom_column_names:
+      created_at: createdAt
+      normal_max: normalMax
+      normal_min: normalMin
+      optimal_max: optimalMax
+      optimal_min: optimalMin
+      panel: panel
+      result_id: resultId
+      result_name: resultName
+      unit: unit
+      updated_at: updatedAt
+  table:
+    name: MedicalBloodTestResultTypes
     schema: public
-    name: MedicalBloodTestResults
+- configuration:
+    custom_column_names:
+      created_at: createdAt
+      evaluation: evaluation
+      idx: idx
+      result_id: resultId
+      result_value: resultValue
+      test_id: testId
+      updated_at: updatedAt
   object_relationships:
   - name: MedicalBloodTest
     using:
@@ -146,35 +323,59 @@
   - name: MedicalBloodTestResultType
     using:
       foreign_key_constraint_on: result_id
-- table:
+  table:
+    name: MedicalBloodTestResults
     schema: public
-    name: MedicalBloodTests
-  object_relationships:
-  - name: User
-    using:
-      foreign_key_constraint_on: user_id
-  array_relationships:
+- array_relationships:
   - name: MedicalBloodTestResults
     using:
       foreign_key_constraint_on:
         column: test_id
         table:
-          schema: public
           name: MedicalBloodTestResults
-- table:
+          schema: public
+  configuration:
+    custom_column_names:
+      created_at: createdAt
+      date: date
+      notes: notes
+      panel_type: panelType
+      reporter_id: reporterId
+      test_id: testId
+      updated_at: updatedAt
+      user_id: userId
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+  table:
+    name: MedicalBloodTests
     schema: public
-    name: MedicalConditions
-  array_relationships:
+- array_relationships:
   - name: MedicalFamilyHistories
     using:
       foreign_key_constraint_on:
         column: medical_condition_id
         table:
-          schema: public
           name: MedicalFamilyHistory
-- table:
+          schema: public
+  configuration:
+    custom_column_names:
+      category: category
+      condition: condition
+      medical_condition_id: medicalConditionId
+      subcategory: subcategory
+  table:
+    name: MedicalConditions
     schema: public
-    name: MedicalExternalMR
+- configuration:
+    custom_column_names:
+      created_at: createdAt
+      idx: idx
+      institute_id: instituteId
+      med_record_id: medRecordId
+      updated_at: updatedAt
+      user_id: userId
   object_relationships:
   - name: MedicalInstitution
     using:
@@ -182,9 +383,21 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
-- table:
+  table:
+    name: MedicalExternalMR
     schema: public
-    name: MedicalFamilyHistory
+- configuration:
+    custom_column_names:
+      brother: brother
+      created_at: createdAt
+      father: father
+      idx: idx
+      medical_condition_id: medicalConditionId
+      mother: mother
+      myself: myself
+      sister: sister
+      updated_at: updatedAt
+      user_id: userId
   object_relationships:
   - name: MedicalCondition
     using:
@@ -192,73 +405,187 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
-- table:
+  table:
+    name: MedicalFamilyHistory
     schema: public
+- configuration:
+    custom_column_names:
+      blood_type: bloodType
+      blood_type_positive: bloodTypePositive
+      created_at: createdAt
+      idx: idx
+      primary_doctor_contact_email: primaryDoctorContactEmail
+      primary_doctor_contact_name: primaryDoctorContactName
+      primary_doctor_contact_phone: primaryDoctorContactPhone
+      updated_at: updatedAt
+      user_id: userId
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+  table:
     name: MedicalGeneralInfo
+    schema: public
+- configuration:
+    custom_column_names:
+      allergy_symptoms: allergySymptoms
+      created_at: createdAt
+      idx: idx
+      medication_name: medicationName
+      updated_at: updatedAt
+      user_id: userId
   object_relationships:
   - name: User
     using:
       foreign_key_constraint_on: user_id
-- table:
-    schema: public
+  table:
     name: MedicalGeneralInfoMedicationAllergy
+    schema: public
+- configuration:
+    custom_column_names:
+      created_at: createdAt
+      idx: idx
+      medication_dosage: medicationDosage
+      medication_freq: medicationFreq
+      medication_name: medicationName
+      medication_time_units: medicationTimeUnits
+      medication_times_per_freq: medicationTimesPerFreq
+      medication_units: medicationUnits
+      updated_at: updatedAt
+      user_id: userId
   object_relationships:
   - name: User
     using:
       foreign_key_constraint_on: user_id
-- table:
-    schema: public
+  table:
     name: MedicalGeneralInfoMedications
+    schema: public
+- configuration:
+    custom_column_names:
+      allergies: allergies
+      concerns: concerns
+      created_at: createdAt
+      diagnostic_ctscan: diagnosticCtscan
+      diagnostic_endoscopy: diagnosticEndoscopy
+      diagnostic_mri: diagnosticMri
+      diagnostic_other: diagnosticOther
+      diagnostic_ultrasound: diagnosticUltrasound
+      diagnostic_xray: diagnosticXray
+      family_history: familyHistory
+      goals: goals
+      idx: idx
+      last_examination_date: lastExaminationDate
+      last_examination_reason: lastExaminationReason
+      medication: medication
+      social_history: socialHistory
+      updated_at: updatedAt
+      user_id: userId
   object_relationships:
   - name: User
     using:
       foreign_key_constraint_on: user_id
-- table:
-    schema: public
+  table:
     name: MedicalHistory
+    schema: public
+- configuration:
+    custom_column_names:
+      created_at: createdAt
+      idx: idx
+      image_date: imageDate
+      image_origin_location: imageOriginLocation
+      image_path: imagePath
+      image_read: imageRead
+      image_size: imageSize
+      image_type: imageType
+      reporter_id: reporterId
+      updated_at: updatedAt
+      user_id: userId
   object_relationships:
   - name: User
     using:
       foreign_key_constraint_on: user_id
-- table:
-    schema: public
+  table:
     name: MedicalImaging
-  object_relationships:
-  - name: User
-    using:
-      foreign_key_constraint_on: user_id
-- table:
     schema: public
-    name: MedicalInstitutions
-  array_relationships:
+- array_relationships:
   - name: MedicalExternalMRs
     using:
       foreign_key_constraint_on:
         column: institute_id
         table:
-          schema: public
           name: MedicalExternalMR
-- table:
+          schema: public
+  configuration:
+    custom_column_names:
+      created_at: createdAt
+      institute_id: instituteId
+      institute_name: instituteName
+      updated_at: updatedAt
+  table:
+    name: MedicalInstitutions
     schema: public
-    name: MedicalLookUpSTD
-  array_relationships:
+- array_relationships:
   - name: MedicalSTDHistories
     using:
       foreign_key_constraint_on:
         column: std_id
         table:
-          schema: public
           name: MedicalSTDHistory
-- table:
+          schema: public
+  configuration:
+    custom_column_names:
+      std: std
+      std_id: stdId
+  table:
+    name: MedicalLookUpSTD
     schema: public
-    name: MedicalPhysicalExam
+- configuration:
+    custom_column_names:
+      abdominal_bowel: abdominalBowel
+      abdominal_hard: abdominalHard
+      abdominal_hsm: abdominalHsm
+      abdominal_hsm_info: abdominalHsmInfo
+      abdominal_soft: abdominalSoft
+      cardiac_gallops: cardiacGallops
+      cardiac_murmurs: cardiacMurmurs
+      cardiac_murmurs_info: cardiacMurmursInfo
+      cardiac_rrr: cardiacRrr
+      cardiac_rubs: cardiacRubs
+      cardiac_s1s2: cardiacS1S2
+      created_at: createdAt
+      idx: idx
+      notes: notes
+      pulmonary_clear: pulmonaryClear
+      pulmonary_rales: pulmonaryRales
+      pulmonary_rhonchi: pulmonaryRhonchi
+      pulmonary_wheezing: pulmonaryWheezing
+      pulmonary_wheezing_info: pulmonaryWheezingInfo
+      reporter_id: reporterId
+      timestamp: timestamp
+      updated_at: updatedAt
+      user_id: userId
+      vital_diastolic: vitalDiastolic
+      vital_heartrate: vitalHeartrate
+      vital_height: vitalHeight
+      vital_height_inches: vitalHeightInches
+      vital_respiratoryrate: vitalRespiratoryrate
+      vital_systolic: vitalSystolic
+      vital_temperature: vitalTemperature
+      vital_weight: vitalWeight
   object_relationships:
   - name: User
     using:
       foreign_key_constraint_on: user_id
-- table:
+  table:
+    name: MedicalPhysicalExam
     schema: public
-    name: MedicalSTDHistory
+- configuration:
+    custom_column_names:
+      created_at: createdAt
+      idx: idx
+      std_id: stdId
+      updated_at: updatedAt
+      user_id: userId
   object_relationships:
   - name: MedicalLookUpSTD
     using:
@@ -266,16 +593,47 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
-- table:
+  table:
+    name: MedicalSTDHistory
     schema: public
-    name: MedicalSocialHistory
+- configuration:
+    custom_column_names:
+      avg_hourly_meditation: avgHourlyMeditation
+      avg_num_cigs: avgNumCigs
+      avg_weekly_drinks: avgWeeklyDrinks
+      avg_weekly_workouts: avgWeeklyWorkouts
+      created_at: createdAt
+      currently_smoke: currentlySmoke
+      ever_smoked: everSmoked
+      idx: idx
+      job_title: jobTitle
+      last_smoke: lastSmoke
+      last_smoke_date: lastSmokeDate
+      last_smoke_time: lastSmokeTime
+      num_years_smoked: numYearsSmoked
+      plan_to_stop: planToStop
+      sexual_preference: sexualPreference
+      updated_at: updatedAt
+      user_id: userId
   object_relationships:
   - name: User
     using:
       foreign_key_constraint_on: user_id
-- table:
+  table:
+    name: MedicalSocialHistory
     schema: public
-    name: MedicalSurgeries
+- configuration:
+    custom_column_names:
+      client_user_id: clientUserId
+      created_at: createdAt
+      date: date
+      institution: institution
+      notes: notes
+      reporter_user_id: reporterUserId
+      surgeon: surgeon
+      surgery_category: surgeryCategory
+      surgery_id: surgeryId
+      updated_at: updatedAt
   object_relationships:
   - name: User
     using:
@@ -283,48 +641,159 @@
   - name: userByReporterUserId
     using:
       foreign_key_constraint_on: reporter_user_id
-- table:
+  table:
+    name: MedicalSurgeries
     schema: public
+- configuration:
+    custom_column_names:
+      created_at: createdAt
+      idx: idx
+      isa_dynamic: isaDynamic
+      isa_left: isaLeft
+      isa_right: isaRight
+      left_hip_abd: leftHipAbd
+      left_hip_add: leftHipAdd
+      left_hip_er: leftHipEr
+      left_hip_extension: leftHipExtension
+      left_hip_flexion: leftHipFlexion
+      left_hip_ir: leftHipIr
+      left_shoulder_abd: leftShoulderAbd
+      left_shoulder_add: leftShoulderAdd
+      left_shoulder_er: leftShoulderEr
+      left_shoulder_extension: leftShoulderExtension
+      left_shoulder_flexion: leftShoulderFlexion
+      left_shoulder_ir: leftShoulderIr
+      right_hip_abd: rightHipAbd
+      right_hip_add: rightHipAdd
+      right_hip_er: rightHipEr
+      right_hip_extension: rightHipExtension
+      right_hip_flexion: rightHipFlexion
+      right_hip_ir: rightHipIr
+      right_shoulder_abd: rightShoulderAbd
+      right_shoulder_add: rightShoulderAdd
+      right_shoulder_er: rightShoulderEr
+      right_shoulder_extension: rightShoulderExtension
+      right_shoulder_flexion: rightShoulderFlexion
+      right_shoulder_ir: rightShoulderIr
+      timestamp: timestamp
+      updated_at: updatedAt
+      user_id: userId
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+  table:
     name: MobilityAssessment
+    schema: public
+- configuration:
+    custom_column_names:
+      created_at: createdAt
+      idx: idx
+      isa_movement: isaMovement
+      isa_structure: isaStructure
+      left_hip_abd: leftHipAbd
+      left_hip_add: leftHipAdd
+      left_hip_er: leftHipEr
+      left_hip_extension: leftHipExtension
+      left_hip_flexion: leftHipFlexion
+      left_hip_ir: leftHipIr
+      left_hip_slr: leftHipSlr
+      left_shoulder_abd: leftShoulderAbd
+      left_shoulder_add: leftShoulderAdd
+      left_shoulder_er: leftShoulderEr
+      left_shoulder_extension: leftShoulderExtension
+      left_shoulder_flexion: leftShoulderFlexion
+      left_shoulder_ir: leftShoulderIr
+      notes: notes
+      right_hip_abd: rightHipAbd
+      right_hip_add: rightHipAdd
+      right_hip_er: rightHipEr
+      right_hip_extension: rightHipExtension
+      right_hip_flexion: rightHipFlexion
+      right_hip_ir: rightHipIr
+      right_hip_slr: rightHipSlr
+      right_shoulder_abd: rightShoulderAbd
+      right_shoulder_add: rightShoulderAdd
+      right_shoulder_er: rightShoulderEr
+      right_shoulder_extension: rightShoulderExtension
+      right_shoulder_flexion: rightShoulderFlexion
+      right_shoulder_ir: rightShoulderIr
+      timestamp: timestamp
+      updated_at: updatedAt
+      user_id: userId
   object_relationships:
   - name: User
     using:
       foreign_key_constraint_on: user_id
-- table:
-    schema: public
+  table:
     name: PTChessboard
+    schema: public
+- configuration:
+    custom_column_names:
+      best_pain: bestPain
+      created_at: createdAt
+      current_pain: currentPain
+      exercise: exercise
+      has_acupuncture: hasAcupuncture
+      has_chiro: hasChiro
+      has_massage: hasMassage
+      has_medication: hasMedication
+      has_pt: hasPt
+      has_surgery: hasSurgery
+      idx: idx
+      makes_better: makesBetter
+      makes_worse: makesWorse
+      pain_areas: painAreas
+      updated_at: updatedAt
+      user_id: userId
+      worst_pain: worstPain
   object_relationships:
   - name: User
     using:
       foreign_key_constraint_on: user_id
-- table:
-    schema: public
+  table:
     name: PTHistory
-  object_relationships:
-  - name: User
-    using:
-      foreign_key_constraint_on: user_id
-- table:
     schema: public
-    name: RegisteredFacilities
-  array_relationships:
+- array_relationships:
   - name: ClientFacilities
     using:
       foreign_key_constraint_on:
         column: facility_id
         table:
-          schema: public
           name: ClientFacilities
-- table:
+          schema: public
+  configuration:
+    custom_column_names:
+      created_at: createdAt
+      facility_address: facilityAddress
+      facility_id: facilityId
+      facility_name: facilityName
+      modobio_facility: modobioFacility
+      updated_at: updatedAt
+  table:
+    name: RegisteredFacilities
     schema: public
-    name: StaffProfile
+- configuration:
+    custom_column_names:
+      bio: bio
+      created_at: createdAt
+      idx: idx
+      membersince: membersince
+      updated_at: updatedAt
+      user_id: userId
   object_relationships:
   - name: User
     using:
       foreign_key_constraint_on: user_id
-- table:
+  table:
+    name: StaffProfile
     schema: public
-    name: StaffRecentClients
+- configuration:
+    custom_column_names:
+      client_user_id: clientUserId
+      idx: idx
+      staff_user_id: staffUserId
+      timestamp: timestamp
   object_relationships:
   - name: User
     using:
@@ -332,417 +801,690 @@
   - name: userByStaffUserId
     using:
       foreign_key_constraint_on: staff_user_id
-- table:
+  table:
+    name: StaffRecentClients
     schema: public
+- configuration:
+    custom_column_names:
+      created_at: createdAt
+      idx: idx
+      role: role
+      updated_at: updatedAt
+      user_id: userId
+      verified: verified
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+  table:
     name: StaffRoles
+    schema: public
+- configuration:
+    custom_column_names:
+      created_at: createdAt
+      current_fitness_level: currentFitnessLevel
+      energy_level: energyLevel
+      goal_fitness_level: goalFitnessLevel
+      idx: idx
+      libido_level: libidoLevel
+      lifestyle_goals: lifestyleGoals
+      physical_goals: physicalGoals
+      sleep_hours: sleepHours
+      sleep_quality_level: sleepQualityLevel
+      stress_level: stressLevel
+      stress_sources: stressSources
+      timestamp: timestamp
+      trainer_expectations: trainerExpectations
+      updated_at: updatedAt
+      user_id: userId
   object_relationships:
   - name: User
     using:
       foreign_key_constraint_on: user_id
-- table:
-    schema: public
+  table:
     name: TrainerFitnessQuestionnaire
+    schema: public
+- configuration:
+    custom_column_names:
+      avg_eval_hr: avgEvalHr
+      avg_training_hr: avgTrainingHr
+      co2_tolerance: co2Tolerance
+      created_at: createdAt
+      estimated_vo2_max: estimatedVo2Max
+      idx: idx
+      max_hr: maxHr
+      notes: notes
+      resting_hr: restingHr
+      theoretical_max_hr: theoreticalMaxHr
+      timestamp: timestamp
+      updated_at: updatedAt
+      user_id: userId
   object_relationships:
   - name: User
     using:
       foreign_key_constraint_on: user_id
-- table:
-    schema: public
+  table:
     name: TrainerHeartAssessment
+    schema: public
+- configuration:
+    custom_column_names:
+      bag_size: bagSize
+      breaths_per_minute: breathsPerMinute
+      created_at: createdAt
+      duration: duration
+      idx: idx
+      liters_min_kg: litersMinKg
+      max_minute_volume: maxMinuteVolume
+      notes: notes
+      timestamp: timestamp
+      updated_at: updatedAt
+      user_id: userId
   object_relationships:
   - name: User
     using:
       foreign_key_constraint_on: user_id
-- table:
-    schema: public
+  table:
     name: TrainerLungAssessment
+    schema: public
+- configuration:
+    custom_column_names:
+      created_at: createdAt
+      idx: idx
+      squat_can_breathe: squatCanBreathe
+      squat_can_look_up: squatCanLookUp
+      squat_depth: squatDepth
+      squat_eye_test: squatEyeTest
+      squat_ramp: squatRamp
+      standing_rotation_l_notes: standingRotationLNotes
+      standing_rotation_r_notes: standingRotationRNotes
+      timestamp: timestamp
+      toe_touch_depth: toeTouchDepth
+      toe_touch_notes: toeTouchNotes
+      toe_touch_pelvis_movement: toeTouchPelvisMovement
+      toe_touch_ribcage_movement: toeTouchRibcageMovement
+      updated_at: updatedAt
+      user_id: userId
   object_relationships:
   - name: User
     using:
       foreign_key_constraint_on: user_id
-- table:
-    schema: public
+  table:
     name: TrainerMovementAssessment
+    schema: public
+- configuration:
+    custom_column_names:
+      created_at: createdAt
+      gas_tank_size: gasTankSize
+      idx: idx
+      intervention: intervention
+      limiter: limiter
+      notes: notes
+      performance_baseline: performanceBaseline
+      performance_metric_1: performanceMetric1
+      performance_metric_1_value: performanceMetric1Value
+      performance_metric_2: performanceMetric2
+      performance_metric_2_value: performanceMetric2Value
+      recovery_baseline: recoveryBaseline
+      starting_sm_o2: startingSmO2
+      starting_thb: startingThb
+      timestamp: timestamp
+      updated_at: updatedAt
+      user_id: userId
+      vl_side: vlSide
   object_relationships:
   - name: User
     using:
       foreign_key_constraint_on: user_id
-- table:
-    schema: public
+  table:
     name: TrainerMoxyAssessment
+    schema: public
+- configuration:
+    custom_column_names:
+      avg_interval_time: avgIntervalTime
+      avg_recovery_time: avgRecoveryTime
+      avg_watt_kg: avgWattKg
+      created_at: createdAt
+      idx: idx
+      intervention: intervention
+      limiter: limiter
+      performance_average_power_1: performanceAveragePower1
+      performance_average_power_2: performanceAveragePower2
+      performance_average_power_3: performanceAveragePower3
+      performance_average_power_4: performanceAveragePower4
+      performance_baseline_smo2: performanceBaselineSmo2
+      performance_baseline_thb: performanceBaselineThb
+      performance_hr_max_1: performanceHrMax1
+      performance_hr_max_2: performanceHrMax2
+      performance_hr_max_3: performanceHrMax3
+      performance_hr_max_4: performanceHrMax4
+      performance_smo2_1: performanceSmo21
+      performance_smo2_2: performanceSmo22
+      performance_smo2_3: performanceSmo23
+      performance_smo2_4: performanceSmo24
+      performance_thb_1: performanceThb1
+      performance_thb_2: performanceThb2
+      performance_thb_3: performanceThb3
+      performance_thb_4: performanceThb4
+      recovery_average_power_1: recoveryAveragePower1
+      recovery_average_power_2: recoveryAveragePower2
+      recovery_average_power_3: recoveryAveragePower3
+      recovery_average_power_4: recoveryAveragePower4
+      recovery_baseline_smo2: recoveryBaselineSmo2
+      recovery_baseline_thb: recoveryBaselineThb
+      recovery_hr_min_1: recoveryHrMin1
+      recovery_hr_min_2: recoveryHrMin2
+      recovery_hr_min_3: recoveryHrMin3
+      recovery_hr_min_4: recoveryHrMin4
+      recovery_smo2_1: recoverySmo21
+      recovery_smo2_2: recoverySmo22
+      recovery_smo2_3: recoverySmo23
+      recovery_smo2_4: recoverySmo24
+      recovery_thb_1: recoveryThb1
+      recovery_thb_2: recoveryThb2
+      recovery_thb_3: recoveryThb3
+      recovery_thb_4: recoveryThb4
+      smo2_tank_size: smo2TankSize
+      thb_tank_size: thbTankSize
+      timestamp: timestamp
+      updated_at: updatedAt
+      user_id: userId
+      vl_side: vlSide
   object_relationships:
   - name: User
     using:
       foreign_key_constraint_on: user_id
-- table:
-    schema: public
+  table:
     name: TrainerMoxyRipTest
+    schema: public
+- configuration:
+    custom_column_names:
+      created_at: createdAt
+      idx: idx
+      keiser_lower_bi_attempt_1: keiserLowerBiAttempt1
+      keiser_lower_bi_attempt_2: keiserLowerBiAttempt2
+      keiser_lower_bi_attempt_3: keiserLowerBiAttempt3
+      keiser_lower_bi_weight: keiserLowerBiWeight
+      keiser_lower_l_attempt_1: keiserLowerLAttempt1
+      keiser_lower_l_attempt_2: keiserLowerLAttempt2
+      keiser_lower_l_attempt_3: keiserLowerLAttempt3
+      keiser_lower_l_weight: keiserLowerLWeight
+      keiser_lower_r_attempt_1: keiserLowerRAttempt1
+      keiser_lower_r_attempt_2: keiserLowerRAttempt2
+      keiser_lower_r_attempt_3: keiserLowerRAttempt3
+      keiser_lower_r_weight: keiserLowerRWeight
+      keiser_upper_l_attempt_1: keiserUpperLAttempt1
+      keiser_upper_l_attempt_2: keiserUpperLAttempt2
+      keiser_upper_l_attempt_3: keiserUpperLAttempt3
+      keiser_upper_l_weight: keiserUpperLWeight
+      keiser_upper_r_attempt_1: keiserUpperRAttempt1
+      keiser_upper_r_attempt_2: keiserUpperRAttempt2
+      keiser_upper_r_attempt_3: keiserUpperRAttempt3
+      keiser_upper_r_weight: keiserUpperRWeight
+      lower_watts_per_kg: lowerWattsPerKg
+      timestamp: timestamp
+      updated_at: updatedAt
+      upper_watts_per_kg: upperWattsPerKg
+      user_id: userId
   object_relationships:
   - name: User
     using:
       foreign_key_constraint_on: user_id
-- table:
-    schema: public
+  table:
     name: TrainerPowerAssessment
+    schema: public
+- configuration:
+    custom_column_names:
+      created_at: createdAt
+      idx: idx
+      timestamp: timestamp
+      updated_at: updatedAt
+      upper_pull_bi_attempt_1: upperPullBiAttempt1
+      upper_pull_bi_attempt_2: upperPullBiAttempt2
+      upper_pull_bi_attempt_3: upperPullBiAttempt3
+      upper_pull_bi_estimated_10rm: upperPullBiEstimated10Rm
+      upper_pull_bi_weight: upperPullBiWeight
+      upper_pull_l_attempt_1: upperPullLAttempt1
+      upper_pull_l_attempt_2: upperPullLAttempt2
+      upper_pull_l_attempt_3: upperPullLAttempt3
+      upper_pull_l_estimated_10rm: upperPullLEstimated10Rm
+      upper_pull_l_weight: upperPullLWeight
+      upper_pull_notes: upperPullNotes
+      upper_pull_r_attempt_1: upperPullRAttempt1
+      upper_pull_r_attempt_2: upperPullRAttempt2
+      upper_pull_r_attempt_3: upperPullRAttempt3
+      upper_pull_r_estimated_10rm: upperPullREstimated10Rm
+      upper_pull_r_weight: upperPullRWeight
+      upper_push_bi_attempt_1: upperPushBiAttempt1
+      upper_push_bi_attempt_2: upperPushBiAttempt2
+      upper_push_bi_attempt_3: upperPushBiAttempt3
+      upper_push_bi_estimated_10rm: upperPushBiEstimated10Rm
+      upper_push_bi_weight: upperPushBiWeight
+      upper_push_l_attempt_1: upperPushLAttempt1
+      upper_push_l_attempt_2: upperPushLAttempt2
+      upper_push_l_attempt_3: upperPushLAttempt3
+      upper_push_l_estimated_10rm: upperPushLEstimated10Rm
+      upper_push_l_weight: upperPushLWeight
+      upper_push_notes: upperPushNotes
+      upper_push_r_attempt_1: upperPushRAttempt1
+      upper_push_r_attempt_2: upperPushRAttempt2
+      upper_push_r_attempt_3: upperPushRAttempt3
+      upper_push_r_estimated_10rm: upperPushREstimated10Rm
+      upper_push_r_weight: upperPushRWeight
+      user_id: userId
   object_relationships:
   - name: User
     using:
       foreign_key_constraint_on: user_id
-- table:
-    schema: public
+  table:
     name: TrainerStrengthAssessment
-  object_relationships:
-  - name: User
-    using:
-      foreign_key_constraint_on: user_id
-- table:
     schema: public
-    name: User
-  object_relationships:
-  - name: UserLogin
-    using:
-      manual_configuration:
-        remote_table:
-          schema: public
-          name: UserLogin
-        column_mapping:
-          user_id: user_id
-  array_relationships:
+- array_relationships:
   - name: ClientClinicalCareTeams
     using:
       foreign_key_constraint_on:
         column: team_member_user_id
         table:
-          schema: public
           name: ClientClinicalCareTeam
+          schema: public
   - name: ClientConsents
     using:
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
           name: ClientConsent
+          schema: public
   - name: ClientConsultContracts
     using:
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
           name: ClientConsultContract
+          schema: public
   - name: ClientFacilities
     using:
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
           name: ClientFacilities
+          schema: public
   - name: ClientIndividualContracts
     using:
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
           name: ClientIndividualContract
+          schema: public
   - name: ClientInfos
     using:
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
           name: ClientInfo
+          schema: public
   - name: ClientPolicies
     using:
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
           name: ClientPolicies
+          schema: public
   - name: ClientReleaseContacts
     using:
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
           name: ClientReleaseContacts
+          schema: public
   - name: ClientReleases
     using:
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
           name: ClientRelease
+          schema: public
   - name: ClientRemovalRequests
     using:
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
           name: ClientRemovalRequests
+          schema: public
   - name: ClientSubscriptionContracts
     using:
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
           name: ClientSubscriptionContract
+          schema: public
   - name: MedicalBloodTests
     using:
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
           name: MedicalBloodTests
+          schema: public
   - name: MedicalExternalMRs
     using:
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
           name: MedicalExternalMR
+          schema: public
   - name: MedicalFamilyHistories
     using:
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
           name: MedicalFamilyHistory
+          schema: public
   - name: MedicalGeneralInfoMedicationAllergies
     using:
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
           name: MedicalGeneralInfoMedicationAllergy
+          schema: public
   - name: MedicalGeneralInfoMedications
     using:
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
           name: MedicalGeneralInfoMedications
+          schema: public
   - name: MedicalGeneralInfos
     using:
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
           name: MedicalGeneralInfo
+          schema: public
   - name: MedicalHistories
     using:
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
           name: MedicalHistory
+          schema: public
   - name: MedicalImagings
     using:
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
           name: MedicalImaging
+          schema: public
   - name: MedicalPhysicalExams
     using:
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
           name: MedicalPhysicalExam
+          schema: public
   - name: MedicalSTDHistories
     using:
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
           name: MedicalSTDHistory
+          schema: public
   - name: MedicalSocialHistories
     using:
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
           name: MedicalSocialHistory
+          schema: public
   - name: MedicalSurgeries
     using:
       foreign_key_constraint_on:
         column: client_user_id
         table:
-          schema: public
           name: MedicalSurgeries
+          schema: public
   - name: MobilityAssessments
     using:
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
           name: MobilityAssessment
+          schema: public
   - name: PTChessboards
     using:
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
           name: PTChessboard
+          schema: public
   - name: PTHistories
     using:
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
           name: PTHistory
+          schema: public
   - name: StaffProfiles
     using:
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
           name: StaffProfile
+          schema: public
   - name: StaffRecentClients
     using:
       foreign_key_constraint_on:
         column: client_user_id
         table:
-          schema: public
           name: StaffRecentClients
+          schema: public
   - name: StaffRoles
     using:
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
           name: StaffRoles
+          schema: public
   - name: TrainerFitnessQuestionnaires
     using:
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
           name: TrainerFitnessQuestionnaire
+          schema: public
   - name: TrainerHeartAssessments
     using:
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
           name: TrainerHeartAssessment
+          schema: public
   - name: TrainerLungAssessments
     using:
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
           name: TrainerLungAssessment
+          schema: public
   - name: TrainerMovementAssessments
     using:
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
           name: TrainerMovementAssessment
+          schema: public
   - name: TrainerMoxyAssessments
     using:
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
           name: TrainerMoxyAssessment
+          schema: public
   - name: TrainerMoxyRipTests
     using:
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
           name: TrainerMoxyRipTest
+          schema: public
   - name: TrainerPowerAssessments
     using:
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
           name: TrainerPowerAssessment
+          schema: public
   - name: TrainerStrengthAssessments
     using:
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
           name: TrainerStrengthAssessment
+          schema: public
   - name: Wearables
     using:
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
           name: Wearables
+          schema: public
   - name: WearablesFreeStyles
     using:
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
           name: WearablesFreeStyle
+          schema: public
   - name: WearablesOuras
     using:
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
           name: WearablesOura
+          schema: public
   - name: clientClinicalCareTeamsByUserId
     using:
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
           name: ClientClinicalCareTeam
+          schema: public
   - name: medicalSurgeriesByReporterUserId
     using:
       foreign_key_constraint_on:
         column: reporter_user_id
         table:
-          schema: public
           name: MedicalSurgeries
+          schema: public
   - name: staffRecentClientsByStaffUserId
     using:
       foreign_key_constraint_on:
         column: staff_user_id
         table:
-          schema: public
           name: StaffRecentClients
-- table:
+          schema: public
+  configuration:
+    custom_column_names:
+      biological_sex_male: biologicalSexMale
+      created_at: createdAt
+      email: email
+      firstname: firstname
+      is_client: isClient
+      is_staff: isStaff
+      lastname: lastname
+      middlename: middlename
+      modobio_id: modobioId
+      phone_number: phoneNumber
+      updated_at: updatedAt
+      user_id: userId
+  object_relationships:
+  - name: UserLogin
+    using:
+      manual_configuration:
+        column_mapping:
+          user_id: user_id
+        remote_table:
+          name: UserLogin
+          schema: public
+  table:
+    name: User
     schema: public
+- configuration:
+    custom_column_names:
+      created_at: createdAt
+      idx: idx
+      last_login: lastLogin
+      password: password
+      password_created_at: passwordCreatedAt
+      refresh_token: refreshToken
+      updated_at: updatedAt
+      user_id: userId
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+  table:
     name: UserLogin
-  object_relationships:
-  - name: User
-    using:
-      foreign_key_constraint_on: user_id
-- table:
     schema: public
+- configuration:
+    custom_column_names:
+      created_at: createdAt
+      idx: idx
+      token: token
+      updated_at: updatedAt
+  table:
     name: UserTokensBlacklist
-- table:
     schema: public
+- configuration:
+    custom_column_names:
+      created_at: createdAt
+      has_freestyle: hasFreestyle
+      has_oura: hasOura
+      idx: idx
+      registered_oura: registeredOura
+      updated_at: updatedAt
+      user_id: userId
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+  table:
     name: Wearables
+    schema: public
+- configuration:
+    custom_column_names:
+      activation_timestamp: activationTimestamp
+      created_at: createdAt
+      glucose: glucose
+      idx: idx
+      timestamps: timestamps
+      updated_at: updatedAt
+      user_id: userId
   object_relationships:
   - name: User
     using:
       foreign_key_constraint_on: user_id
-- table:
-    schema: public
+  table:
     name: WearablesFreeStyle
+    schema: public
+- configuration:
+    custom_column_names:
+      access_token: accessToken
+      created_at: createdAt
+      idx: idx
+      last_scrape: lastScrape
+      oauth_state: oauthState
+      refresh_token: refreshToken
+      token_expires: tokenExpires
+      updated_at: updatedAt
+      user_id: userId
   object_relationships:
   - name: User
     using:
       foreign_key_constraint_on: user_id
-- table:
-    schema: public
+  table:
     name: WearablesOura
-  object_relationships:
-  - name: User
-    using:
-      foreign_key_constraint_on: user_id
-- table:
     schema: public
+- table:
     name: client_table_sizes
-- table:
     schema: public
+- table:
     name: data_per_client
+    schema: public
