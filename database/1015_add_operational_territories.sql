@@ -30,7 +30,7 @@ VALUES
 ('USA', 'Tennessee', 'TN'),
 ('USA', 'Utah', 'UT'), 
 ('USA', 'Vermont', 'VT'),
-('USA', 'Washinton', 'WA'),
+('USA', 'Washington', 'WA'),
 ('USA', 'Wisconsin', 'WI'),
 ('USA', 'West Virginia', 'WV'),
 ('USA', 'Wyoming', 'WY')
