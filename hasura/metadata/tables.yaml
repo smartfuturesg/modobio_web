@@ -105,16 +105,22 @@
       guardianrole: guardianrole
       healthcare_contact: healthcareContact
       healthcare_phone: healthcarePhone
+      height: height
       idx: idx
       membersince: membersince
       preferred: preferred
+      primary_goal_id: primaryGoalId
+      primary_pharmacy_address: primaryPharmacyAddress
+      primary_pharmacy_name: primaryPharmacyName
       profession: profession
+      race_id: raceId
       receive_docs: receiveDocs
       record_locator_id: recordLocatorId
       state: state
       street: street
       updated_at: updatedAt
       user_id: userId
+      weight: weight
       zipcode: zipcode
     custom_root_fields: {}
   object_relationships:
@@ -794,6 +800,7 @@
       idx: idx
       staff_user_id: staffUserId
       timestamp: timestamp
+      user_id: userId
   object_relationships:
   - name: User
     using:
@@ -1487,4 +1494,124 @@
     schema: public
 - table:
     name: data_per_client
+    schema: public
+- configuration:
+    custom_column_names:
+      created_at: createdAt
+      end_date: endDate
+      idx: idx
+      is_staff: isStaff
+      start_date: startDate
+      subscription_rate: subscriptionRate
+      subscription_type: subscriptionType
+      updated_at: updatedAt
+      user_id: userId
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on:
+      - user_id
+  table:
+    name: UserSubscriptions
+    schema: public
+- configuration:
+    custom_column_names:
+      created_at: createdAt
+      drink_id: drinkId
+      idx: idx
+      updated_at: updatedAt
+      user_id: userId
+  object_relationships:
+  - name: LookupDrinks
+    using:
+      foreign_key_constraint_on:
+      - drink_id
+  - name: User
+    using:
+      foreign_key_constraint_on:
+      - user_id
+  table:
+    name: ClientAssignedDrinks
+    schema: public
+- configuration:
+    custom_column_names:
+      biometrics_setup: biometricsSetup
+      created_at: createdAt
+      date_format: dateFormat
+      display_middle_name: displayMiddleName
+      enable_push_notifications: enablePushNotifications
+      idx: idx
+      include_timezone: includeTimezone
+      is_right_handed: isRightHanded
+      timezone_tracking: timezoneTracking
+      updated_at: updatedAt
+      use_24_hour_clock: use24HourClock
+      user_id: userId
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on:
+      - user_id
+  table:
+    name: ClientMobileSettings
+    schema: public
+- configuration:
+    custom_column_names:
+      created_at: createdAt
+      idx: idx
+      requester_user_id: requesterUserId
+      timestamp: timestamp
+      updated_at: updatedAt
+      user_id: userId
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on:
+      - user_id
+  - name: User
+    using:
+      foreign_key_constraint_on:
+      - user_id
+  table:
+    name: UserRemovalRequests
+    schema: public
+- configuration:
+    custom_column_names:
+      created_at: createdAt
+      race_id: raceId
+      race_name: raceName
+      updated_at: updatedAt
+  object_relationships: []
+  table:
+    name: LookupRaces
+    schema: public
+- configuration:
+    custom_column_names:
+      created_at: createdAt
+      height: height
+      idx: idx
+      updated_at: updatedAt
+      user_id: userId
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on:
+      - user_id
+  table:
+    name: ClientHeightHistory
+    schema: public
+- configuration:
+    custom_column_names:
+      created_at: createdAt
+      idx: idx
+      updated_at: updatedAt
+      user_id: userId
+      weight: weight
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on:
+      - user_id
+  table:
+    name: ClientWeightHistory
     schema: public
