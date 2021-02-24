@@ -86,7 +86,8 @@ for schema in inspector.get_schema_names():
                 'table': {
                     'name': table,
                     'schema': schema
-                }
+                },
+                'object_relationships': []
             }
             
             # Track foreign keys
