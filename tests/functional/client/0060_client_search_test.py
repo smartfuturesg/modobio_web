@@ -1,71 +1,41 @@
-# from flask.json import dumps
-# from requests.auth import _basic_auth_str
+from flask import current_app
+from odyssey import db, defaults
+from odyssey.api.user.models import User
+from odyssey.api.client.models import ClientInfo
 
-# from odyssey.models.user import User, UserLogin
-# from odyssey.models.client import ClientInfo
 
-# def test_get_client_search(test_client, init_database, staff_auth_header):
-#     """
-#     GIVEN a api end point for retrieving client info
-#     WHEN the '/client/<client id>' resource  is requested (GET)
-#     THEN check the response is valid
-#     """
-#     # get staff authorization to view client data
-#     staff = User.query.filter_by(is_staff=True).first()
-#     staffLogin = UserLogin.query.filter_by(user_id=staff.user_id).one_or_none()
-#     token = staffLogin.get_token()
-#     
+def test_get_client_search(test_client, init_database, staff_auth_header):
+    """
+    GIVEN an api end point for retrieving client info
+    WHEN the '/client/search?<parameters>' resource  is requested (GET)
+    THEN check the response is valid
+    """
+    # Skip test if no url is set for ELASTICSEARCH_URL
+    # Prevents other developers from having to set up ES if they don't need it,
+    # This test will not pass if there's a url set but the service isn't running
+    if not current_app.elasticsearch:
+        return
     
-#     # Order of test search:
-#     # General empty search
-#     # record_locator_id
-#     # firstname
-#     # lastname
-#     # email
-#     # firstname and email
- 
-#     # send get request
-#     response = test_client.get('/client/clientsearch/', headers=staff_auth_header)
-#     assert response.status_code == 200
+    # Simple search request by modobio_id and firstname
+    response = test_client.get('/client/search/', headers=staff_auth_header)
+    assert response.status_code == 200
 
-#     client = ClientInfo.query.filter_by(user_id=1).first()
-#     queryStr = '/client/clientsearch/?record_locator_id=' + client.record_locator_id
+    client = db.session.query(User,ClientInfo).filter_by(is_client=True, deleted=False).join(ClientInfo).first()
+    
+    queryStr = f'/client/search/?modobio_id={client.User.modobio_id}'
 
-#     response = test_client.get(queryStr, headers=staff_auth_header)
-#     assert response.status_code == 200
-#     assert response.json['items'][0]['firstname'] == 'Test'
-#     assert response.json['items'][0]['lastname'] == 'Client'
-#     assert response.json['items'][0]['email'] == 'test_this_client@gmail.com'
-#     assert response.json['items'][0]['record_locator_id'] == client.record_locator_id
+    response = test_client.get(queryStr, headers=staff_auth_header)
+    
+    assert response.status_code == 200
+    assert response.json['items'][0]['firstname'] == client.User.firstname
+    assert response.json['items'][0]['lastname'] == client.User.lastname
+    assert response.json['items'][0]['email'] == client.User.email
+    assert response.json['items'][0]['modobio_id'] == client.User.modobio_id
+    assert response.json['items'][0]['phone_number'] == client.User.phone_number
+    assert response.json['items'][0]['dob'] == str(client.ClientInfo.dob)
 
-#     # send get request for first name (note, the actual first name is testY)
-#     response = test_client.get('/client/clientsearch/?firstname=test', headers=staff_auth_header)
-#     assert response.status_code == 200
-#     assert response.json['items'][0]['firstname'] == 'Test'
-#     assert response.json['items'][0]['lastname'] == 'Client'
-#     assert response.json['items'][0]['email'] == 'test_this_client@gmail.com'
-#     assert response.json['items'][0]['record_locator_id'] == client.record_locator_id
-
-#     # send get request for last name 
-#     response = test_client.get('/client/clientsearch/?lastname=client', headers=staff_auth_header)
-#     assert response.status_code == 200
-#     assert response.json['items'][0]['firstname'] == 'Test'
-#     assert response.json['items'][0]['lastname'] == 'Client'
-#     assert response.json['items'][0]['email'] == 'test_this_client@gmail.com'
-#     assert response.json['items'][0]['record_locator_id'] == client.record_locator_id
-
-#     # send get request for email 
-#     response = test_client.get('/client/clientsearch/?email=test_this_client@gmail.com', headers=staff_auth_header)
-#     assert response.status_code == 200
-#     assert response.json['items'][0]['firstname'] == 'Test'
-#     assert response.json['items'][0]['lastname'] == 'Client'
-#     assert response.json['items'][0]['email'] == 'test_this_client@gmail.com'
-#     assert response.json['items'][0]['record_locator_id'] == client.record_locator_id
-
-#     # send get request for first name 
-#     response = test_client.get('/client/clientsearch/?firstname=test&email=test_this_client@gmail.com', headers=staff_auth_header)
-#     assert response.status_code == 200
-#     assert response.json['items'][0]['firstname'] == 'Test'
-#     assert response.json['items'][0]['lastname'] == 'Client'
-#     assert response.json['items'][0]['email'] == 'test_this_client@gmail.com'
-#     assert response.json['items'][0]['record_locator_id'] == client.record_locator_id
+    # send get request for first name
+    response = test_client.get(f'/client/search/?firstname={client.User.firstname}', headers=staff_auth_header)
+    assert response.status_code == 200
+    assert response.json['items'][0]['firstname'] == client.User.firstname
+    assert response.json['items'][0]['lastname'] == client.User.lastname
