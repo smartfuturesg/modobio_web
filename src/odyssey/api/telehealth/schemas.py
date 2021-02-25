@@ -11,6 +11,8 @@ from odyssey.api.telehealth.models import (
   TelehealthQueueClientPool
 )
 
+from odyssey.utils.constants import GENDERS
+
 class TelehealthMeetingRoomSchema(ma.SQLAlchemyAutoSchema):
     """
     Schema for TelehealthMeeting rooms model
@@ -28,7 +30,7 @@ class TelehealthQueueClientPoolSchema(ma.SQLAlchemyAutoSchema):
         dump_only = ('idx', 'user_id')
     
     duration = fields.Integer(missing=20)
-    medical_gender = fields.String(validate=validate.OneOf(('Male','Female','None')),metadata={'description': 'Preferred Medical Professional gender'})
+    medical_gender = fields.String(validate=validate.OneOf([gender[0] for gender in GENDERS]),metadata={'description': 'Preferred Medical Professional gender'})
 
     @post_load
     def make_object(self, data, **kwargs):
