@@ -597,3 +597,4 @@ class UserNotificationsPutApi(Resource):
         notification.notification_type = LookupNotifications.query.filter_by(notification_type_id=notification.notification_type_id).one_or_none().notification_type
 
         return notification
+

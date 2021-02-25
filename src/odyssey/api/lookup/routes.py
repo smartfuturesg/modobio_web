@@ -1,6 +1,8 @@
 from flask_accepts import responds
 from flask_restx import Resource
 
+import pytz
+
 from odyssey.api import api
 from odyssey.utils.auth import token_auth
 from odyssey.api.lookup.models import (
@@ -36,13 +38,25 @@ from odyssey.api.lookup.schemas import (
     LookupTelehealthSessionDurationOutputSchema,
     LookupTransactionTypesOutputSchema,
     LookupNotificationsOutputSchema,
-    LookupCareTeamResourcesOutputSchema
+    LookupCareTeamResourcesOutputSchema,
+    LookupTimezones
 )
 from odyssey.utils.misc import check_drink_existence
 
 from odyssey import db
 
 ns = api.namespace('lookup', description='Endpoints for lookup tables.')
+
+@ns.route('/timezones/')
+class LookupTimezones(Resource):
+    @token_auth.login_required
+    @responds(schema=LookupTimezones,status_code=200,api=ns)
+    def get(self):
+        varArr = [tz_i for tz_i in pytz.all_timezones if 'US/' in tz_i]
+        payload = {'items': varArr,
+                   'total_items': len(varArr) }
+        return payload
+
 
 @ns.route('/business/professional-confirmation-window/')
 class LookupProfessionalConfirmationWindowResource(Resource):

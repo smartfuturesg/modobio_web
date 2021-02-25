@@ -19,6 +19,10 @@ from odyssey.api.lookup.models import (
     LookupNotifications
 )
 
+class LookupTimezones(Schema):
+    items = fields.List(fields.String,missing = [])
+    total_items = fields.Integer()
+
 class LookupProfessionalAppointmentConfirmationWindowSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupProfessionalAppointmentConfirmationWindow
