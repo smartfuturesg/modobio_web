@@ -256,3 +256,61 @@ class Config:
             return self.ssm.get_parameter(Name=param, WithDecryption=decrypt)['Parameter']['Value']
 
         return getattr(defaults, var, default)
+
+import argparse
+import textwrap
+
+def database_uri(docstring=''):
+    """ Database selection, for use in scripts not under control of Flask.
+
+    Parameters
+    ----------
+    docstring : str
+        Pass in the doctring of the script in which this function is used. The docstring
+        will be prepended to the help text of this function. It will show up on the
+        command line when the calling script is run without parameters.
+
+    Returns
+    -------
+    str
+        URI of the database.
+
+    Notes
+    -----
+    """
+
+    help_text = """
+    Pass the URI of the database with the command line argument `--db_uri`. If no URI is
+    provided, environmental variables will be used to create a URI.
+
+    DB_FLAV: the database "flavour", postgres by default.
+    DB_USER: the database username, empty by default.
+    DB_PASS: the password for the user, empty by default.
+    DB_HOST: the hostname or IP address of the database server, localhost by default.
+    DB_NAME: the name of the database, modobio by default.
+
+    Or specify the entire URI in one string as:
+
+    DB_URI: no default, e.g. postgres://user@password:localhost/modobio
+    """
+    database_uri.__doc__ += help_text
+
+    parser = argparse.ArgumentParser(
+        description=docstring + textwrap.dedent(help_text),
+        formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    parser.add_argument('--db_uri', help="Database URI postgres://<user>:<pass>@<host>/<db>")
+    args = parser.parse_args()
+
+    uri = os.getenv('DB_URI', args.db_uri)
+
+    if not uri:
+        db_user = os.getenv('DB_USER', '')
+        db_pass = os.getenv('DB_PASS', '')
+        db_host = os.getenv('DB_HOST', 'localhost')
+        db_flav = os.getenv('DB_FLAV', 'postgresql')
+        db_name = os.getenv('DB_NAME', 'modobio')
+
+        uri = f'{db_flav}://{db_user}:{db_pass}@{db_host}/{db_name}'
+
+    return uri
