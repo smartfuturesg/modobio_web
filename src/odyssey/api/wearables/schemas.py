@@ -1,12 +1,11 @@
+""" Schemas for the wearables API """
+
 from marshmallow import Schema, fields
 
 from odyssey import ma
 from odyssey.api.user.models import User
-from odyssey.api.wearables.models import Wearables, WearablesOura, WearablesFreeStyle
+from odyssey.api.wearables.models import Wearables, WearablesFreeStyle
 
-"""
-  Schemas for the wearables API
-"""
 
 class WearablesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -16,6 +15,11 @@ class WearablesSchema(ma.SQLAlchemyAutoSchema):
 
 class WearablesOuraAuthSchema(Schema):
     oura_client_id = fields.String()
+    oauth_state = fields.String()
+
+
+class WearablesFitbitAuthSchema(Schema):
+    fitbit_client_id = fields.String()
     oauth_state = fields.String()
 
 
