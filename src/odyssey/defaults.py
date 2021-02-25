@@ -21,11 +21,6 @@ Name of the AWS S3 bucket where files are stored. For ``FLASK_DEV=local`` it is
 set to a temporary directory.
 """
 
-# Whooshee fulltext index, persist location.
-# Defaults to 'whooshee' in local dir
-WHOOSHEE_DIR = None
-""" Directory where whooshee stores persistent index. Defaults to local directory if unset. """
-
 # Database
 DB_FLAV = 'postgresql'
 """ Type of database. """
@@ -54,6 +49,19 @@ OURA_AUTH_URL = 'https://cloud.ouraring.com/oauth/authorize'
 
 OURA_TOKEN_URL = 'https://api.ouraring.com/oauth/token'
 """ Token URL for Oura Ring API. """
+
+# Fitbit OAuth parameters
+FITBIT_CLIENT_ID = ''
+""" Client ID for Fitbit API. """
+
+FITBIT_CLIENT_SECRET = ''
+""" Client secret for Fitbit API. """
+
+FITBIT_AUTH_URL = 'https://www.fitbit.com/oauth2/authorize'
+""" Authorization URL for Fitbit API. """
+
+FITBIT_TOKEN_URL = 'https://api.fitbit.com/oauth2/token'
+""" Token URL for Fitbit API. """
 
 SECRET_KEY = 'dev'
 """

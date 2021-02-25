@@ -14,22 +14,33 @@ from odyssey.utils.errors import (
     MethodNotAllowed,
     UnknownError
 )
+
 from odyssey.api.wearables.models import (
     Wearables,
     WearablesOura,
+    WearablesFitbit,
     WearablesFreeStyle,
 )
+
 from odyssey.api.wearables.schemas import (
     WearablesSchema,
+    WearablesOuraAuthSchema,
+    WearablesFitbitAuthSchema,
     WearablesFreeStyleSchema,
     WearablesFreeStyleActivateSchema,
-    WearablesOuraAuthSchema
 )
-from odyssey.utils.misc import check_client_existence
 
+from odyssey.utils.misc import check_client_existence
 from odyssey import db
 
 ns = api.namespace('wearables', description='Endpoints for registering wearable devices.')
+
+
+###########################################################
+#
+# All wearables
+#
+###########################################################
 
 @ns.route('/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
@@ -122,6 +133,12 @@ class WearablesEndpoint(Resource):
         db.session.commit()
 
 
+###########################################################
+#
+# Oura Ring
+#
+###########################################################
+
 @ns.route('/oura/auth/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class WearablesOuraAuthEndpoint(Resource):
@@ -144,7 +161,7 @@ class WearablesOuraAuthEndpoint(Resource):
         """
         # FLASK_DEV=local has no access to AWS
         if not current_app.config['OURA_CLIENT_ID']:
-            return
+            raise UnknownError(message='This endpoint does not work in local mode.')
 
         wearables = (
             Wearables.query
@@ -200,7 +217,7 @@ class WearablesOuraCallbackEndpoint(Resource):
         if not oura:
             raise UnknownError(
                 message=f'user_id {user_id} not found in WearablesOura table. '
-                         'Connect to /wearables/auth first.'
+                         'Connect to /wearables/oura/auth first.'
             )
 
         oauth_state = request.args.get('state')
@@ -246,6 +263,149 @@ class WearablesOuraCallbackEndpoint(Resource):
 
         db.session.commit()
 
+
+###########################################################
+#
+# Fitbit
+#
+###########################################################
+
+@ns.route('/fitbit/auth/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class WearablesFitbitAuthEndpoint(Resource):
+    @token_auth.login_required
+    @responds(schema=WearablesFitbitAuthSchema, status_code=200, api=ns)
+    def get(self, user_id):
+        """ Fitbit OAuth2 parameters to initialize the access grant process.
+
+        Parameters
+        ----------
+        user_id : int
+            User ID number.
+
+        Returns
+        -------
+        dict
+            JSON encoded dict containing:
+            - fitbit_client_id
+            - oauth_state
+        """
+        # FLASK_DEV=local has no access to AWS
+        if not current_app.config['FITBIT_CLIENT_ID']:
+            raise UnknownError(message='This endpoint does not work in local mode.')
+
+        wearables = (
+            Wearables.query
+            .filter_by(user_id=user_id)
+            .one_or_none()
+        )
+
+        # TODO: Disable this check until frontend has a way of setting has_fitbit
+        #
+        # wearables = Wearables.query.filter_by(user_id=user_id).one_or_none()
+        # if not wearables or not wearables.has_fitbit:
+        #     raise ContentNotFound
+
+        fitbit_id = current_app.config['FITBIT_CLIENT_ID']
+        state = secrets.token_urlsafe(24)
+
+        # Store state in database
+        fitbit = (
+            WearablesFitbit.query
+            .filter_by(user_id=user_id)
+            .one_or_none()
+        )
+
+        if not fitbit:
+            fitbit = WearablesFitbit(user_id=user_id, oauth_state=state)
+            db.session.add(fitbit)
+        else:
+            fitbit.oauth_state = state
+        db.session.commit()
+
+        return {'fitbit_client_id': fitbit_id, 'oauth_state': state}
+
+
+@ns.route('/fitbit/callback/<int:user_id>/')
+@ns.doc(params={
+    'user_id': 'User ID number',
+    'state': 'OAuth2 state token',
+    'code': 'OAuth2 access grant code',
+    'redirect_uri': 'OAuth2 redirect URI',
+    'scope': 'The accepted scope of information: activity, heartrate, location, nutrition, profile, settings, sleep, social, or weight'
+})
+class WearablesFitbitCallbackEndpoint(Resource):
+    @token_auth.login_required
+    @responds(status_code=200, api=ns)
+    def get(self, user_id):
+        """ Fitbit OAuth2 callback URL """
+        # FLASK_DEV=local has no access to AWS
+        if not current_app.config['FITBIT_CLIENT_ID']:
+            raise UnknownError(message='This endpoint does not work in local mode.')
+
+        check_client_existence(user_id)
+
+        fitbit = WearablesFitbit.query.filter_by(user_id=user_id).one_or_none()
+        if not fitbit:
+            raise UnknownError(
+                message=f'user_id {user_id} not found in WearablesFitbit table. '
+                         'Connect to /wearables/fitbit/auth first.'
+            )
+
+        oauth_state = request.args.get('state')
+        oauth_grant_code = request.args.get('code')
+        redirect_uri = request.args.get('redirect_uri')
+        scope = request.args.get('scope', '')
+
+        if oauth_state != fitbit.oauth_state:
+            raise UnknownError(message='OAuth state changed between requests.')
+
+        # Not requiring location, profile, settings, or social
+        minimal_scope = {'activity', 'heartrate', 'nutrition', 'sleep', 'weight'}
+        scope = set(scope.split())
+
+        if scope.intersection(minimal_scope) != minimal_scope:
+            msg = 'You must agree to share at least: {}.'.format(', '.join(minimal_scope))
+            raise UnknownError(message=msg)
+
+        # Exchange access grant code for access token
+        fitbit_id = current_app.config['FITBIT_CLIENT_ID']
+        fitbit_secret = current_app.config['FITBIT_CLIENT_SECRET']
+        token_url = current_app.config['FITBIT_TOKEN_URL']
+
+        oauth_session = OAuth2Session(
+            fitbit_id,
+            state=oauth_state,
+            redirect_uri=redirect_uri
+        )
+        try:
+            oauth_reply = oauth_session.fetch_token(
+                token_url,
+                code=oauth_grant_code,
+                include_client_id=True,
+                client_secret=fitbit_secret
+            )
+        except Exception as e:
+            raise UnknownError(message=f'Error while exchanging grant code for access token: {e}')
+
+        # Everything was successful
+        fitbit.access_token = oauth_reply['access_token']
+        fitbit.refresh_token = oauth_reply['refresh_token']
+        fitbit.token_expires = datetime.utcnow() + timedelta(seconds=oauth_reply['expires_in'])
+        fitbit.oauth_state = None
+
+        # TODO: disable this until frontend has a way of setting wearable devices.
+        # wearables = Wearables.query.filter_by(user_id=fitbit.user_id).first()
+        # wearables.registered_fitbit = True
+
+        db.session.commit()
+
+
+###########################################################
+#
+# FreeStyle Libre CGM
+#
+###########################################################
 
 @ns.route('/freestyle/activate/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})

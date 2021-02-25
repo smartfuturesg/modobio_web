@@ -13,17 +13,18 @@ from hashlib import md5
 from sqlalchemy import text, UniqueConstraint
 from sqlalchemy.orm.query import Query
 from odyssey.utils.constants import DB_SERVER_TIME, ALPHANUMERIC
-from odyssey import db, whooshee
+from odyssey import db
 
 phx_tz = pytz.timezone('America/Phoenix')
 
 
-# @whooshee.register_model('firstname', 'lastname', 'email', 'phone', 'dob', 'record_locator_id')
 class ClientInfo(db.Model):
     """ Client information table
 
     This table stores general information of a client.
     """
+
+    __searchable__ = ['dob']
 
     __tablename__ = 'ClientInfo'
 
@@ -291,6 +292,13 @@ class ClientInfo(db.Model):
             }
         return data, resources
 
+@db.event.listens_for(ClientInfo, "after_update")
+def update_dob(mapper, connection, target):
+    """ 
+    Listens fro any updates to ClientInfo table
+    """
+    from odyssey.utils.search import update_client_dob
+    update_client_dob(target.user_id, target.dob)
 
 class ClientFacilities(db.Model):
     """ A mapping of client ID number to registered facility ID numbers. """
