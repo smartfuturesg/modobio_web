@@ -29,20 +29,12 @@ docker run -d -p 8080:8080 \
     -e HASURA_GRAPHQL_ADMIN_SECRET=[somesecret] \
     -e HASURA_GRAPHQL_ENABLE_CONSOLE=true \
     -e HASURA_GRAPHQL_ENABLE_TELEMETRY=false \
-    -v [/path/to]/odyssey/hasura:/hasura-metadata
+    -v [/path/to]/odyssey/hasura/metadata:/hasura-metadata
     --name hasura \
     hasura/graphql-engine:latest
 ```
 
-where \[username\] is the username of the user who can access the database with password \[password\], \[host_ip\] is `localhost` or a different local IP address depending on your docker setup, \[dbname\] is the name of the database (usually `modobio`), \[somesecret\] is an optional but recommended password for admin login to the console, and \[/path/to\] is the path to this directory in the Odyssey source.
-
-Alternatively, use the following docker image to have migrations automatically applied on server start (replace last line above with the following).
-
-```shell
-    hasura/graphql-engine:latest.cli-migrations-v2
-```
-
-When all is set up, open the Hasura console in a browser at [](http://localhost:8080) (or \[host_ip\]).
+where \[username\] is the username of the user who can access the database with password \[password\], \[host_ip\] is `localhost` or a different local IP address depending on your docker setup, \[dbname\] is the name of the database (usually `modobio`), \[somesecret\] is an optional but recommended password for admin login to the console, and \[/path/to\] is the path to this directory in the Odyssey source. When all is set up, open the Hasura console in a browser at [](http://localhost:8080) (or \[host_ip\]).
 
 ### Hasura CLI
 
@@ -55,20 +47,22 @@ $ sudo chmod +x /usr/local/bin/hasura
 
 Hasura CLI will periodically check for updates and warn you when updates are available. This includes betas and is very annoying, not to mention time consuming. On top of that, Hasura sends anonymous (or so they say) telemetry data back to Hasura HQ. To disable update checks and telemetry, run the hasura command once. This will create a config file `~/.hasura/config.json`. Edit this file and set both `show_update_notification` and `enable_telemetry` to `false`.
 
-#### Export metadata
-
-Before shutting down the Hasura server, export the metadata. Hasura CLI needs to be run from this directory to pick up the configuration in `config.yaml`.
-
-```shell
-$ cd [/path/to/]odyssey/hasura
-$ hasura metadata export
-```
-
-Do **not** edit `config.yaml`.
+Hasura CLI needs to be run from this directory to pick up the configuration in `config.yaml`. Do **not** edit `config.yaml`.
 
 - If Hasura is running at a \[host_ip\] other than `localhost`, add `--endpoint http://[host_ip]:8080` or set `export HASURA_GRAPHQL_ENDPOINT="http://[host_ip]:8080"`.
 - If you set an admin secret, add `--admin-secret [secret]` or set `export HASURA_GRAPHQL_ADMIN_SECRET="[secret]"`.
 
-## TODO
 
-- Set up Hasura so that it exports metadata automatically on shutdown.
+### Workflow
+
+1. Edit the models, create migration scripts, upgrade migration so that the database is at latest version.
+2. In Hasura console > settings (cog wheel) > click Reload metadata, to make the changes visible in the console.
+3. Edit how you want graphql to interact with the database in the console.
+4. If you added tables you do **not** want accessible in graphql, add them to metadata/tables-no-track.yaml.
+5. When done, export metadata from the command line: `$ hasura metadata export`.
+6. Add custom column names: `$ ./hasura_update.py`.
+7. Apply the updated metadata: `$ hasura metadata apply`.
+8. Reload the browser tab with Hasura console to see the custom column names (in camelCase).
+9. Export the metadata once again: `$ hasura metadata export`.
+
+Steps 7 and 9 may seem redundant, but it helps to discover inconsistent metadata created by the script. Hasura also has a specific order in which metadata is exported, which makes the number of changes in git diff smaller.
