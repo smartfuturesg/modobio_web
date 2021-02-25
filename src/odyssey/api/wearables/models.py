@@ -168,6 +168,87 @@ class WearablesOura(_Base):
     """
 
 
+class WearablesFitbit(_Base):
+    """ Fitbit specific information. """
+
+    __tablename__ = 'WearablesFitbit'
+
+    idx = Column(Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
+
+    user_id = Column(
+        Integer,
+        ForeignKey(
+             'User.user_id',
+             ondelete="CASCADE"
+        ),
+        nullable=False
+    )
+    """
+    Client ID number.
+
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
+    """
+
+    created_at = db.Column(db.DateTime, server_default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, server_default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    oauth_state = Column(String(50))
+    """
+    State token for OAuth2 exchange with Fitbit servers.
+
+    This token is a state parameter, it must not change in between the various phases
+    of OAuth2 authorization. It is stored temporarily in the database, but has no meaning
+    after the OAuth2 process is completed. If a token exists in this column, it is a sign
+    that the grant-to-access token exchange did not complete successfully.
+
+    :type: str, max length 50
+    """
+
+    access_token = Column(String(50))
+    """
+    OAuth2 access token to authorize Fitbit access.
+
+    :type: str, max length 50
+    """
+
+    refresh_token = Column(String(50))
+    """
+    OAuth2 refresh token to obtain a new :attr:`access_token` after it expires.
+
+    :type: str, max length 50
+    """
+
+    token_expires = Column(DateTime)
+    """
+    Date and time of :attr:`access_token` expiry.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    last_scrape = Column(DateTime)
+    """
+    Date and time of last access to Fitbit account.
+
+    :type: :class:`datetime.datetime`
+    """
+
+
 class WearablesFreeStyle(_Base):
     """ FreeStyle Libre continuous glucose monitoring wearable specific information. """
 
