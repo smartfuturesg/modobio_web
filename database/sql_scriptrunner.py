@@ -12,49 +12,19 @@ available from the environment at runtime.
 
 All files (.sql and .py combined) will be parsed in lexicographical order. Use a numerical
 prefix to force a certain order.
-
-Pass the URI of the database with the command line argument `--db_uri`. If no URI is
-provided, environmental variables will be used to create a URI.
-
-    DB_FLAV: the database "flavour", postgres by default.
-    DB_USER: the database username, empty by default.
-    DB_PASS: the password for the user, empty by default.
-    DB_HOST: the hostname or IP address of the database server, localhost by default.
-    DB_NAME: the name of the database, modobio by default.
-
-Or, specify the entire URI in one string as
-
-    DB_URI: no default, e.g. postgres://user@password:localhost/modobio
 """
 
-import argparse
 import importlib
-import os
 import pathlib
 
 from sqlalchemy import create_engine, text
 
-parser = argparse.ArgumentParser(
-    description=__doc__,
-    formatter_class=argparse.RawDescriptionHelpFormatter
-)
-parser.add_argument('--db_uri', help="Database URI postgres://<user>:<pass>@<host>/<db>")
-args = parser.parse_args()
+from odyssey.config import database_uri
 
-DB_URI = os.getenv('DB_URI', args.db_uri)
+db_uri = database_uri(docstring=__doc__)
+print(f'Using the following database: {db_uri}')
 
-if not DB_URI:
-    db_user = os.getenv('DB_USER', '')
-    db_pass = os.getenv('DB_PASS', '')
-    db_host = os.getenv('DB_HOST', 'localhost')
-    db_flav = os.getenv('DB_FLAV', 'postgresql')
-    db_name = os.getenv('DB_NAME', 'modobio')
-
-    DB_URI = f'{db_flav}://{db_user}:{db_pass}@{db_host}/{db_name}'
-
-print(f'Using the following database: {DB_URI}')
-
-engine = create_engine(DB_URI)
+engine = create_engine(db_uri)
 
 current_file = pathlib.Path(__file__)
 current_dir = current_file.parent
