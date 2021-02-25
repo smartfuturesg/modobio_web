@@ -27,9 +27,9 @@ def test_creating_new_staff(test_client, init_database, staff_auth_header):
     new_staff_uid = response.json['user_info']['user_id']
     # some simple checks for validity
     assert response.status_code == 201
-    assert response.json['firstname'] == users_staff_new_user_data['user_info']['firstname']
-    assert response.json['is_staff'] == True
-    assert response.json['is_client'] == False
+    assert response.json['user_info']['firstname'] == users_staff_new_user_data['user_info']['firstname']
+    assert response.json['user_info']['is_staff'] == True
+    assert response.json['user_info']['is_client'] == False
 
 def test_get_staff_user_info(test_client, init_database, staff_auth_header):
     """

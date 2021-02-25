@@ -40,60 +40,6 @@ class StaffMembers(Resource):
         # the model.
         return User.query.filter_by(is_staff=True)
 
-        # param = {}
-        # param_keys = ['firstname', 'lastname', 'email', 'user_id']
-        # noMoreSearch = False
-        
-        # if not request.args:
-        #     data = User.query.filter_by(is_staff=True).order_by(Staff.lastname.asc()).all()
-        #     noMoreSearch = True
-        # elif len(request.args) == 1 and request.args.get('user_id'):
-        #     data = [User.query.filter_by(user_id=request.args.get('user_id')).first()]
-        #     if not any(data):
-        #         raise StaffNotFound(request.args.get('user_id'))
-        #     noMoreSearch = True
-        
-        # if not noMoreSearch:
-        #     searchStr = ''
-        #     exactMatch = False
-        #     for key in param_keys:
-        #         param[key] = request.args.get(key, default=None, type=str)
-        #         # Cleans up search query
-        #         if param[key] is None:
-        #             param[key] = ''     
-        #         elif key == 'email' and param.get(key, None):
-        #             tempEmail = param[key]
-        #             param[key] = param[key].replace("@"," ")
-        #         searchStr = searchStr + param[key] + ' '
-            
-        #     data = User.query.whooshee_search(searchStr).all()
-
-        #     # Since email and user_id should be unique, 
-        #     # if the input email or user_id exactly matches 
-        #     # the profile, only display that user
-        #     if param['email']:
-        #         for val in data:
-        #             if val.email.lower() == tempEmail.lower():
-        #                 data = [val]
-        #                 exactMatch = True
-        #                 break
-
-        #     # Assuming staff will most likely remember their 
-        #     # email instead of their staff. If the email is correct
-        #     # no need to search through RLI. 
-        #     #
-        #     # This next check depends on if the whooshee search returns 
-        #     # Relevant staff with the correct ID. It is possible for the
-        #     # search to return different staff members (and NOT the user_id
-        #     # that was a search parameter
-        #     #
-        #     # If BOTH are incorrect, return data as normal.
-        #     if param['user_id'] and not exactMatch:
-        #         for val in data:
-        #             if val.user_id == param['user_id']:
-        #                 data = [val]
-        #                 break
-        # return data 
     
     @token_auth.login_required
     @accepts(schema=StaffProfileSchema, api=ns)

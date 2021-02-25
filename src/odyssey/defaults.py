@@ -21,11 +21,6 @@ Name of the AWS S3 bucket where files are stored. For ``FLASK_DEV=local`` it is
 set to a temporary directory.
 """
 
-# Whooshee fulltext index, persist location.
-# Defaults to 'whooshee' in local dir
-WHOOSHEE_DIR = None
-""" Directory where whooshee stores persistent index. Defaults to local directory if unset. """
-
 # Database
 DB_FLAV = 'postgresql'
 """ Type of database. """

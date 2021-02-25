@@ -36,6 +36,3 @@ venv/
 .coverage
 pytestdebug.log
 
-# whooshee files
-whooshee/*
-tests/functional/whooshee/*
