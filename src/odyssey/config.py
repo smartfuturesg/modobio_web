@@ -173,15 +173,27 @@ class Config:
         # Wearables
         self.OURA_CLIENT_ID = self.getvar(
             'OURA_CLIENT_ID',
-            '/modobio/wearables/plugins/oura/client_id'
+            '/modobio/wearables/oura/client_id'
         )
         self.OURA_CLIENT_SECRET = self.getvar(
             'OURA_CLIENT_SECRET',
-            '/modobio/wearables/plugins/oura/client_secret',
+            '/modobio/wearables/oura/client_secret',
             decrypt=True
         )
         self.OURA_AUTH_URL = self.getvar('OURA_AUTH_URL', None)
         self.OURA_TOKEN_URL = self.getvar('OURA_TOKEN_URL', None)
+
+        self.FITBIT_CLIENT_ID = self.getvar(
+            'FITBIT_CLIENT_ID',
+            '/modobio/wearables/fitbit/client_id'
+        )
+        self.FITBIT_CLIENT_SECRET = self.getvar(
+            'FITBIT_CLIENT_SECRET',
+            '/modobio/wearables/fitbit/client_secret',
+            decrypt=True
+        )
+        self.FITBIT_AUTH_URL = self.getvar('FITBIT_AUTH_URL', None)
+        self.FITBIT_TOKEN_URL = self.getvar('FITBIT_TOKEN_URL', None)
 
         # Other config
         self.SECRET_KEY = self.getvar('SECRET_KEY', '/modobio/odyssey/app_secret')
