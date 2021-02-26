@@ -31,8 +31,14 @@ def upgrade():
     sa.ForeignKeyConstraint(['user_id'], ['User.user_id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('idx')
     )
-    op.add_column('Wearables', sa.Column('has_fitbit', sa.Boolean(), nullable=False))
-    op.add_column('Wearables', sa.Column('registered_fitbit', sa.Boolean(), nullable=False))
+    op.add_column('Wearables', sa.Column('has_fitbit', sa.Boolean(), nullable=True))
+    op.add_column('Wearables', sa.Column('registered_fitbit', sa.Boolean(), nullable=True))
+    op.alter_column('Wearables', 'has_fitbit',
+               existing_type=sa.BOOLEAN(),
+               nullable=False)
+    op.alter_column('Wearables', 'registered_fitbit',
+               existing_type=sa.BOOLEAN(),
+               nullable=False)
     # ### end Alembic commands ###
 
 
