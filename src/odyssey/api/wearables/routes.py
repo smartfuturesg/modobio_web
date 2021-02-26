@@ -161,7 +161,7 @@ class WearablesOuraAuthEndpoint(Resource):
         """
         # FLASK_DEV=local has no access to AWS
         if not current_app.config['OURA_CLIENT_ID']:
-            return
+            raise UnknownError(message='This endpoint does not work in local mode.')
 
         wearables = (
             Wearables.query
@@ -287,12 +287,12 @@ class WearablesFitbitAuthEndpoint(Resource):
         -------
         dict
             JSON encoded dict containing:
-            - oura_client_id
+            - fitbit_client_id
             - oauth_state
         """
         # FLASK_DEV=local has no access to AWS
         if not current_app.config['FITBIT_CLIENT_ID']:
-            return
+            raise UnknownError(message='This endpoint does not work in local mode.')
 
         wearables = (
             Wearables.query
@@ -300,10 +300,10 @@ class WearablesFitbitAuthEndpoint(Resource):
             .one_or_none()
         )
 
-        # TODO: Disable this check until frontend has a way of setting has_oura
+        # TODO: Disable this check until frontend has a way of setting has_fitbit
         #
         # wearables = Wearables.query.filter_by(user_id=user_id).one_or_none()
-        # if not wearables or not wearables.has_oura:
+        # if not wearables or not wearables.has_fitbit:
         #     raise ContentNotFound
 
         fitbit_id = current_app.config['FITBIT_CLIENT_ID']
@@ -318,9 +318,9 @@ class WearablesFitbitAuthEndpoint(Resource):
 
         if not fitbit:
             fitbit = WearablesFitbit(user_id=user_id, oauth_state=state)
-            db.session.add(oura)
+            db.session.add(fitbit)
         else:
-            oura.oauth_state = state
+            fitbit.oauth_state = state
         db.session.commit()
 
         return {'fitbit_client_id': fitbit_id, 'oauth_state': state}
@@ -332,13 +332,14 @@ class WearablesFitbitAuthEndpoint(Resource):
     'state': 'OAuth2 state token',
     'code': 'OAuth2 access grant code',
     'redirect_uri': 'OAuth2 redirect URI',
-    'scope': 'The accepted scope of information: email, personal, and/or daily'
+    'scope': 'The accepted scope of information: activity, heartrate, location, nutrition, profile, settings, sleep, social, or weight'
 })
 class WearablesFitbitCallbackEndpoint(Resource):
     @token_auth.login_required
     @responds(status_code=200, api=ns)
     def get(self, user_id):
         """ Fitbit OAuth2 callback URL """
+        # FLASK_DEV=local has no access to AWS
         if not current_app.config['FITBIT_CLIENT_ID']:
             raise UnknownError(message='This endpoint does not work in local mode.')
 
@@ -354,13 +355,18 @@ class WearablesFitbitCallbackEndpoint(Resource):
         oauth_state = request.args.get('state')
         oauth_grant_code = request.args.get('code')
         redirect_uri = request.args.get('redirect_uri')
-        scope = request.args.get('scope')
+        scope = request.args.get('scope', '')
 
-        if oauth_state != oura.oauth_state:
+        if oauth_state != fitbit.oauth_state:
             raise UnknownError(message='OAuth state changed between requests.')
 
-        if not scope or 'daily' not in scope:
-            raise UnknownError(message='You must agree to share at least the sleep and activity data.')
+        # Not requiring location, profile, settings, or social
+        minimal_scope = {'activity', 'heartrate', 'nutrition', 'sleep', 'weight'}
+        scope = set(scope.split())
+
+        if scope.intersection(minimal_scope) != minimal_scope:
+            msg = 'You must agree to share at least: {}.'.format(', '.join(minimal_scope))
+            raise UnknownError(message=msg)
 
         # Exchange access grant code for access token
         fitbit_id = current_app.config['FITBIT_CLIENT_ID']
@@ -389,8 +395,8 @@ class WearablesFitbitCallbackEndpoint(Resource):
         fitbit.oauth_state = None
 
         # TODO: disable this until frontend has a way of setting wearable devices.
-        # wearables = Wearables.query.filter_by(user_id=oura.user_id).first()
-        # wearables.registered_oura = True
+        # wearables = Wearables.query.filter_by(user_id=fitbit.user_id).first()
+        # wearables.registered_fitbit = True
 
         db.session.commit()
 
