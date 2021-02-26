@@ -124,7 +124,7 @@ class ClientReleaseContactsSchema(ma.SQLAlchemyAutoSchema):
 
     user_id = fields.Integer(missing=0)
     release_contract_id = fields.Integer()
-    release_direction = fields.String(description="Direction must be either 'TO' (release to) or 'FROM' (release from)")
+    release_direction = fields.String(metadata={'description': 'Direction must be either TO (release to) or FROM (release from)'})
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -230,8 +230,8 @@ class ClientIndividualContractSchema(ma.SQLAlchemyAutoSchema):
 class SignedDocumentsSchema(Schema):
     """ Dictionary of all signed documents and the URL to the PDF file. """
     urls = fields.Dict(
-        keys=fields.String(description='Document display name'),
-        values=fields.String(description='URL to PDF file of document.')
+        keys=fields.String(metadata={'description': 'Document display name'}),
+        values=fields.String(metadata={'description': 'URL to PDF file of document.'})
     )
 
 class OutstandingForm(Schema):
@@ -239,8 +239,8 @@ class OutstandingForm(Schema):
         Forms that have not yet been completed
         Display name and URI given
     """
-    name = fields.String(description='name of form')
-    URI = fields.String(description = 'URI for completing form')
+    name = fields.String(metadata={'description': 'name of form'})
+    URI = fields.String(metadata={'description': 'URI for completing form'})
 
 class ClientRegistrationStatusSchema(Schema):
 
@@ -250,15 +250,15 @@ class ClientRegistrationStatusSchema(Schema):
 class ClientDataTierSchema(Schema):
 
     user_id = fields.Integer(missing=None)
-    stored_bytes = fields.Integer(description="total bytes stored for the client", missing=None)
-    tier = fields.String(description="data storage tier. Either Tier 1/2/3", missing=None)
+    stored_bytes = fields.Integer(metadata={'description': 'total bytes stored for the client'}, missing=None)
+    tier = fields.String(metadata={'description': 'data storage tier. Either Tier 1/2/3'}, missing=None)
 
 class ClientClinicalCareTeamInternalSchema(Schema):
     """
     Schema is used for serializing/deserializing clinical care team related payloads
     """
-    team_member_email = fields.Email(description="email for clinical care team member")
-    team_member_user_id = fields.Integer(description="user_id for clinical care team member", dump_only=True)
+    team_member_email = fields.Email(metadata={'description': 'email for clinical care team member'})
+    team_member_user_id = fields.Integer(metadata={'description': 'user_id for clinical care team member'}, dump_only=True)
     firstname = fields.String(dump_only=True, missing=None)
     lastname = fields.String(dump_only=True, missing=None)
 
@@ -273,8 +273,8 @@ class ClientClinicalCareTeamSchema(Schema):
 class AllClientsDataTier(Schema):
 
     items = fields.Nested(ClientDataTierSchema(many=True), missing=ClientDataTierSchema().load({}))
-    total_stored_bytes = fields.Integer(description="Total bytes stored for all clients", missing=0)
-    total_items = fields.Integer(description="number of clients in this payload", missing=0)
+    total_stored_bytes = fields.Integer(metadata={'description': 'Total bytes stored for all clients'}, missing=0)
+    total_items = fields.Integer(metadata={'description': 'number of clients in this payload'}, missing=0)
 
 class ClientMobileSettingsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
