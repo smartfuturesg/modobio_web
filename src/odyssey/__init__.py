@@ -12,7 +12,7 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from elasticsearch import Elasticsearch
-
+from sqlalchemy import exc    
 from odyssey.config import Config
 
 db = SQLAlchemy()
@@ -83,7 +83,11 @@ def create_app():
             with app.app_context():
                 app.elasticsearch.indices.delete('_all')
                 from odyssey.utils import search
-                search.build_ES_indices()
+                try:
+                    search.build_ES_indices()
+                except exc.ProgrammingError as e:
+                    if not e._message.__str__().__contains__('UndefinedTable'):
+                        raise e
     else:
         app.elasticsearch = None
 
