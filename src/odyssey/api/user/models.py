@@ -15,11 +15,11 @@ from flask import current_app
 from odyssey import db
 from odyssey.utils.constants import ALPHANUMERIC, DB_SERVER_TIME, TOKEN_LIFETIME, REFRESH_TOKEN_LIFETIME
 
-#@whooshee.register_model('firstname', 'lastname', 'email', 'phone', 'user_id')
 class User(db.Model):
     """ 
     Stores details to relating to user account not related to the login system
     """
+    __searchable__ = ['modobio_id', 'email', 'phone_number', 'firstname', 'lastname', 'user_id']
 
     __tablename__ = 'User'
 
@@ -116,6 +116,13 @@ class User(db.Model):
 
     :type: boolean, non-null 
     """
+    deleted = db.Column(db.Boolean, nullable=True, default = False)
+    
+    """
+    Flags if the user has been deleted
+
+    :type:boolean
+    """
 
     @staticmethod
     def generate_modobio_id(firstname: str, lastname: str, user_id: int) -> str:
@@ -173,6 +180,38 @@ def add_modobio_id(mapper, connection, target):
                 where user_id = {target.user_id};"""
 
     connection.execute(statement)
+
+    from odyssey.utils.search import update_index
+    user = {
+        'firstname': target.firstname,
+        'lastname': target.lastname,
+        'phone_number': target.phone_number,
+        'email': target.email,
+        'modobio_id': mb_id,
+        'user_id': target.user_id,
+        'is_client': target.is_client,
+        'is_staff': target.is_staff
+    }
+    update_index(user, True)
+
+
+@db.event.listens_for(User, "after_update")
+def update_ES_index(mapper, connection, target):
+    """
+    Listens for any updates to the User table
+    """
+    from odyssey.utils.search import update_index
+    user = {
+        'firstname': target.firstname,
+        'lastname': target.lastname,
+        'phone_number': target.phone_number,
+        'email': target.email,
+        'modobio_id': target.modobio_id,
+        'user_id': target.user_id,
+        'is_client': target.is_client,
+        'is_staff': target.is_staff
+    }
+    update_index(user, False)
 
 class UserLogin(db.Model):
     """ 

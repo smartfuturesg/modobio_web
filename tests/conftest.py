@@ -13,6 +13,7 @@ from odyssey.api.user.models import User, UserLogin
 from odyssey.api.user.schemas import UserSubscriptionsSchema
 from odyssey.utils.constants import ACCESS_ROLES
 from tests.functional.user.data import users_staff_member_data, users_client_new_creation_data, users_client_new_info_data
+from odyssey.utils import search
 
 def clean_db(db):
     for table in reversed(db.metadata.sorted_tables):
@@ -33,8 +34,8 @@ def clean_db(db):
 def test_client():
     """flask application instance (client)"""
     app = create_app()
-    db.init_app(app)
     testing_client = app.test_client()
+    db.init_app(app)
     
     # Establish an application context before running the tests.
     ctx = app.app_context()
@@ -115,7 +116,9 @@ def init_database():
 
     # Commit the changes for the users
     db.session.commit()
-
+    #add elastic search build index
+    search.build_ES_indices()
+    
     yield db  # this is where the testing happens!
     
     # https://stackoverflow.com/questions/26350911/what-to-do-when-a-py-test-hangs-silently

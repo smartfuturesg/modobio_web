@@ -1,5 +1,6 @@
 import boto3
 from datetime import datetime
+import jwt, math, re, json
 
 from flask import request, current_app
 from flask_accepts import accepts, responds
@@ -71,7 +72,8 @@ from odyssey.api.client.schemas import(
     ClinicalCareTeamAuthorizationNestedSchema,
     ClinicalCareTeamMemberOfSchema,
     SignAndDateSchema,
-    SignedDocumentsSchema    
+    SignedDocumentsSchema,
+    ClientSearchItemsSchema
 )
 from odyssey.api.staff.schemas import StaffRecentClientsSchema
 from odyssey.api.facility.schemas import ClientSummarySchema
@@ -187,108 +189,74 @@ class ClientSummary(Resource):
                 "user_id": user.user_id, "dob": client.dob, "membersince": client.membersince, "facilities": facilities}
         return data
 
-@ns.route('/clientsearch/')
-@ns.doc(params={'page': 'request page for paginated clients list',
+@ns.route('/search/')
+class Clients(Resource):
+    @ns.doc(params={'_from': 'starting at result 0, from what result to display',
                 'per_page': 'number of clients per page',
                 'firstname': 'first name to search',
                 'lastname': 'last name to search',
                 'email': 'email to search',
                 'phone': 'phone number to search',
                 'dob': 'date of birth to search',
-                'record_locator_id': 'record locator id to search'})
-                
-#todo - fix to work with new user system
-class Clients(Resource):
+                'modobio_id': 'modobio id to search'})
     @token_auth.login_required
     @responds(schema=ClientSearchOutSchema, api=ns)
-    #@responds(schema=UserSchema(many=True), api=ns)
     def get(self):
-        """returns list of clients given query parameters"""
-        clients = []
-        for user in User.query.filter_by(is_client=True).all():
-            client = {
-                'user_id': user.user_id,
-                'firstname': user.firstname,
-                'lastname': user.lastname,
-                'email': user.email,
-                'phone': user.phone_number,
-                'dob': None,
-                'record_locator_id': None,
-                'modobio_id': user.modobio_id
-            }
-            clients.append(client)
-        response = {'items': clients, '_meta': None, '_links': None}
+        """returns list of clients given query parameters,"""
+        #if ELASTICSEARCH_URL isn't set, the search request will return without doing anything
+        es = current_app.elasticsearch
+        if not es: return
+        
+        #clean up and validate input data
+        startAt = request.args.get('_from', 0, type= int)
+        per_page = min(request.args.get('per_page', 10, type=int), 100)
+
+        if startAt < 0: raise InputError(400, '_from must be greater than or equal to 0')
+        if per_page <= 0: raise InputError(400, 'per_page must be greater than 0')
+
+        param = {}
+        search = ''
+        keys = request.args.keys()
+        for key in keys:
+            param[key] = request.args.get(key, default='')
+            if key == 'phone' and param[key]:
+                param[key] = re.sub("[^0-9]", "", param[key])      
+            if key not in ['_from', 'per_page', 'dob'] and param[key]:
+                search += param[key] + ' '
+
+        #build ES query body
+        if param.get('dob'):
+            body={"query":{"bool":{"must":{"multi_match":{"query": search.strip(), "fuzziness":"AUTO:1,2", "zero_terms_query": "all"}},"filter":{"term":{"dob.keyword":param['dob']}}}},"from":startAt,"size":per_page}
+        else:
+            body={"query":{"multi_match":{"query": search.strip(), "fuzziness": "AUTO:1,2" ,"zero_terms_query": "all"}},"from":startAt,"size":per_page}
+        #query ES index
+        results=es.search(index="clients", body=body)
+
+        #Format return data
+        total_hits = results['hits']['total']['value']
+        items = []
+        for hit in results['hits']['hits']: items.append(ClientSearchItemsSchema().load(hit['_source']))
+        
+        response = {
+            '_meta': {
+                'from_result': startAt,
+                'per_page': per_page,
+                'total_pages': math.ceil(total_hits/per_page),
+                'total_items': total_hits,
+            }, 
+            '_links': {
+                '_self': api.url_for(Clients, _from=startAt, per_page=per_page),
+                '_next': api.url_for(Clients, _from=startAt + per_page, per_page=per_page)
+                if startAt + per_page < total_hits else None,
+                '_prev': api.url_for(Clients, _from= startAt-per_page if startAt-per_page >=0 else 0, per_page=per_page)
+                if startAt != 0 else None,
+            }, 
+            'items': items}
+        
+        #TODO maybe elasticsarch-DSL
+        #This search works by searching the input fields and making a few changes in case of a typo, but
+        #will only return exact matches for input strings of length one or two 
         return response
-
-        # page = request.args.get('page', 1, type=int)
-        # per_page = min(request.args.get('per_page', 10, type=int), 100)                 
-        
-        # # These payload keys should be the same as what's indexed in 
-        # # the model.
-        # param = {}
-        # param_keys = ['firstname', 'lastname', 'email', 'phone', 'dob', 'record_locator_id']
-        # searchStr = ''
-        # for key in param_keys:
-        #     param[key] = request.args.get(key, default=None, type=str)
-        #     # Cleans up search query
-        #     if param[key] is None:
-        #         param[key] = ''          
-        #     elif key == 'record_locator_id' and param.get(key, None):
-        #         tempId = param[key]
-
-        #     elif key == 'email' and param.get(key, None):
-        #         tempEmail = param[key]
-        #         param[key] = param[key].replace("@"," ")
-        #     elif key == 'phone' and param.get(key, None):
-        #         param[key] = param[key].replace("-"," ")
-        #         param[key] = param[key].replace("("," ")
-        #         param[key] = param[key].replace(")"," ")                
-        #     elif key == 'dob' and param.get(key, None):
-        #         param[key] = param[key].replace("-"," ")
-
-        #     searchStr = searchStr + param[key] + ' '        
-        
-        # if(searchStr.isspace()):
-        #     data, resources = ClientInfo.all_clients_dict(ClientInfo.query.order_by(ClientInfo.lastname.asc()),
-        #                                         page=page,per_page=per_page)
-        # else:
-        #     data, resources = ClientInfo.all_clients_dict(ClientInfo.query.whooshee_search(searchStr),
-        #                                         page=page,per_page=per_page)
-
-        # # Since email and record locator idshould be unique, 
-        # # if the input email or rli exactly matches 
-        # # the profile, only display that user
-        # exactMatch = False
-        
-        # if param['email']:
-        #     for val in data['items']:
-        #         if val['email'].lower() == tempEmail.lower():
-        #             data['items'] = [val]
-        #             exactMatch = True
-        #             break
-        
-        # # Assuming client will most likely remember their 
-        # # email instead of their RLI. If the email is correct
-        # # no need to search through RLI. 
-        # #
-        # # If BOTH are incorrect, return data as normal.
-        # if param['record_locator_id'] and not exactMatch:
-        #     for val in data['items']:
-        #         if val['record_locator_id'] is None:
-        #             pass
-        #         elif val['record_locator_id'].lower() == tempId.lower():
-        #             data['items'] = [val]
-        #             break
-
-        # data['_links']= {
-        #     '_self': api.url_for(Clients, page=page, per_page=per_page),
-        #     '_next': api.url_for(Clients, page=page + 1, per_page=per_page)
-        #     if resources.has_next else None,
-        #     '_prev': api.url_for(Clients, page=page - 1, per_page=per_page)
-        #     if resources.has_prev else None,
-        # }
-        
-        # return data
 
 @ns.route('/consent/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})

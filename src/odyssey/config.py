@@ -164,6 +164,12 @@ class Config:
         # Whooshee fulltext index
         self.WHOOSHEE_DIR = self.getvar('WHOOSHEE_DIR', None)
 
+        # Elasticsearch connection URL, sourced from environment variable
+        # ELASTICSEARCH_URL can be set to http://dev-rN.modobio.com:9200/  (N = release being worked on),
+        # or http://localhost:9200 if ES is set up and running locally
+        # If this variable isn't set, searching will not break, but it will return empty
+        self.ELASTICSEARCH_URL = os.getenv('ELASTICSEARCH_URL', None)
+
         # Wearables
         self.OURA_CLIENT_ID = self.getvar(
             'OURA_CLIENT_ID',

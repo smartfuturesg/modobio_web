@@ -33,13 +33,12 @@ class ClientSearchItemsSchema(Schema):
     firstname = fields.String(required=False, validate=validate.Length(min=1, max= 50), missing=None)
     lastname = fields.String(required=False, validate=validate.Length(min=1,max=50), missing=None)
     email = fields.Email(required=False, missing=None)
-    phone = fields.String(required=False, validate=validate.Length(min=0,max=50), missing=None)
-    dob = fields.Date(required=False, missing=None)
-    record_locator_id = fields.String(required=False, validate=validate.Length(min=0,max=10), missing=None)
+    phone_number = fields.String(required=False, validate=validate.Length(min=0,max=50), missing=None)
+    dob = fields.String(required=False, missing=None)
     modobio_id = fields.String(required=False, validate=validate.Length(min=0,max=12), missing=None)
 
 class ClientSearchMetaSchema(Schema):
-    page = fields.Integer(required=False, missing=0)
+    from_result = fields.Integer(required=False, missing=0)
     per_page = fields.Integer(required=False, missing=0)
     total_pages = fields.Integer(required=False, missing=0)
     total_items = fields.Integer(required=False, missing=0)
