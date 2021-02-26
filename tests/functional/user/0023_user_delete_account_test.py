@@ -32,7 +32,7 @@ def test_account_delete_request(test_client, init_database, staff_auth_header):
     client_user = test_client.post('/user/client/', 
             data=dumps(payload), 
             content_type='application/json')
-    client_id = client_user.json['user_id']
+    client_id = client_user.json['user_info']['user_id']
     
     #2. Create staff/cient user
     payload = users_to_delete_data['staff_client_user']
@@ -44,7 +44,7 @@ def test_account_delete_request(test_client, init_database, staff_auth_header):
             data=dumps(payload['user_info']),
             content_type='application/json')
     
-    staff_client_id = staff_client_user.json['user_id']
+    staff_client_id = staff_client_user.json['user_info']['user_id']
 
     #3. Add info for client user, reported by staff/client
     valid_credentials = base64.b64encode(
