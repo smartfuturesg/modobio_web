@@ -43,12 +43,13 @@ current_app.config.from_object(Config())
 
 db_connection_string = current_app.config['SQLALCHEMY_DATABASE_URI']
 
-print(f"\n***\nUpdating/querying database using the following connection string: \n {db_connection_string}")
-print("continue? [Y,n]")
-answer = input()
+if not current_app.config['TESTING']: 
+    print(f"\n***\nUpdating/querying database using the following connection string: \n {db_connection_string}")
+    print("continue? [Y,n]")
+    answer = input()
 
-if answer not in ['y', 'Y']:
-    sys.exit()
+    if answer not in ['y', 'Y']:
+        sys.exit()
 
 config.set_main_option(
     'sqlalchemy.url',
@@ -83,7 +84,7 @@ def run_migrations_online():
     and associate a connection with the context.
 
     """
-
+    
     # this callback is used to prevent an auto-migration from being generated
     # when there are no changes to the schema
     # reference: http://alembic.zzzcomputing.com/en/latest/cookbook.html
@@ -110,8 +111,13 @@ def run_migrations_online():
         )
 
         with context.begin_transaction():
-            context.run_migrations()
-
+            if current_app.config['TESTING']: 
+                try:
+                    context.run_migrations()
+                except:
+                    raise BaseException
+            else:
+                context.run_migrations()
 
 if context.is_offline_mode():
     run_migrations_offline()

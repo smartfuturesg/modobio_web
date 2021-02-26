@@ -1,9 +1,16 @@
-from marshmallow import Schema, fields, post_load, validate
+from marshmallow import (
+    Schema, 
+    fields, 
+    post_load,
+    validate
+)
 
 from odyssey import ma
 from odyssey.api.telehealth.models import (
     TelehealthQueueClientPool,
     TelehealthStaffAvailability,
+    TelehealthMeetingRooms,
+    TelehealthQueueClientPool
 )
 
 from odyssey.utils.constants import DAY_OF_WEEK
@@ -22,6 +29,16 @@ class TelehealthStaffAvailabilitySchema(ma.SQLAlchemyAutoSchema):
 
 class TelehealthStaffAvailabilityOutputSchema(Schema):
     availability = fields.Nested(TelehealthStaffAvailabilitySchema(many=True), missing=[])
+
+class TelehealthMeetingRoomSchema(ma.SQLAlchemyAutoSchema):
+    """
+    Schema for TelehealthMeeting rooms model
+    """    
+    class Meta:
+        model = TelehealthMeetingRooms
+        exclude = ('created_at', 'updated_at', 'staff_access_token', 'client_access_token')
+
+    access_token = fields.String(description='meeting room access token. To be shown only to the owner', required=False)
 
 class TelehealthQueueClientPoolSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

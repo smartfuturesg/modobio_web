@@ -29,18 +29,18 @@ class PTHistorySchema(ma.SQLAlchemyAutoSchema):
 
 
 class ShoulderRotationSchema(Schema):
-    ir = fields.Integer(description="internal rotation", validate=validate.Range(min=0, max=110), missing=None)
-    er = fields.Integer(description="external rotation", validate=validate.Range(min=0, max=130), missing=None)
-    abd = fields.Integer(description="abduction", validate=validate.Range(min=0, max=90), missing=None)
-    add = fields.Integer(description="adduction", validate=validate.Range(min=0, max=150), missing=None)
+    ir = fields.Integer(metadata={'description': 'internal rotation'}, validate=validate.Range(min=0, max=110), missing=None)
+    er = fields.Integer(metadata={'description': 'external rotation'}, validate=validate.Range(min=0, max=130), missing=None)
+    abd = fields.Integer(metadata={'description': 'abduction'}, validate=validate.Range(min=0, max=90), missing=None)
+    add = fields.Integer(metadata={'description': 'adduction'}, validate=validate.Range(min=0, max=150), missing=None)
     flexion  = fields.Integer(validate=validate.Range(min=0, max=190), missing=None)
     extension  = fields.Integer(validate=validate.Range(min=0, max=90), missing=None)
 
 class HipRotationSchema(Schema):
-    ir = fields.Integer(description="internal rotation", validate=validate.Range(min=-20, max=100), missing=None)
-    er = fields.Integer(description="external rotation", validate=validate.Range(min=-20, max=100), missing=None)
-    abd = fields.Integer(description="abduction", validate=validate.Range(min=0, max=90), missing=None)
-    add = fields.Integer(description="adduction",validate=validate.Range(min=0, max=60), missing=None)
+    ir = fields.Integer(metadata={'description': 'internal rotation'}, validate=validate.Range(min=-20, max=100), missing=None)
+    er = fields.Integer(metadata={'description': 'external rotation'}, validate=validate.Range(min=-20, max=100), missing=None)
+    abd = fields.Integer(metadata={'description': 'abduction'}, validate=validate.Range(min=0, max=90), missing=None)
+    add = fields.Integer(metadata={'description': 'adduction'},validate=validate.Range(min=0, max=60), missing=None)
     flexion  = fields.Integer(validate=validate.Range(min=0, max=180), missing=None)
     extension  = fields.Integer(validate=validate.Range(min=0, max=120), missing=None)
     slr  = fields.Integer(validate=validate.Range(min=0, max=180), missing=None)
@@ -59,12 +59,12 @@ class ChessboardSchema(Schema):
 
     user_id = fields.Integer(missing=0)
     timestamp = fields.DateTime()
-    isa_structure = fields.String(description=f"must be one of {isa_structure_list}", missing=None)
-    isa_movement = fields.String(description=f"must be one of {isa_movement_list}", missing=None)
+    isa_structure = fields.String(metadata={'description': f'must be one of {isa_structure_list}'}, missing=None)
+    isa_movement = fields.String(metadata={'description': f'must be one of {isa_movement_list}'}, missing=None)
     co2_tolerance = fields.Integer(validate=validate.Range(min=0, max=120), missing=None)
     shoulder = fields.Nested(ChessBoardShoulderSchema, missing=ChessBoardShoulderSchema().load({}))
     hip = fields.Nested(ChessBoardHipSchema, missing=ChessBoardHipSchema().load({}))
-    notes = fields.String(description="some notes regarding this assessment", missing=None)
+    notes = fields.String(metadata={'description': 'some notes regarding this assessment'}, missing=None)
 
 
     @validates('isa_structure')

@@ -1,7 +1,9 @@
 wearables_data = {
-    "has_freestyle": True,
-    "has_oura": True,
-    "registered_oura": False
+    'has_freestyle': True,
+    'has_fitbit': True,
+    'has_oura': True,
+    'registered_fitbit': False,
+    'registered_oura': False
 }
 
 wearables_freestyle_data = {

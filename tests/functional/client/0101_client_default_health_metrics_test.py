@@ -34,8 +34,12 @@ def test_get_default_health_metrics(test_client, init_database, client_auth_head
     response = test_client.post("/user/client/",
                             data = dumps(new_client),
                             content_type='application/json')
-    new_user_id = response.json['user_id']
+
+    assert response.status_code == 201
+
+    new_user_id = response.json['user_info']['user_id']
     
+
     valid_credentials = base64.b64encode(
         f"{new_client['email']}:{'123'}".encode(
             "utf-8")).decode("utf-8")
@@ -47,7 +51,7 @@ def test_get_default_health_metrics(test_client, init_database, client_auth_head
                             content_type='application/json')
     token = response.json.get('token')
     auth_header = {'Authorization': f'Bearer {token}'}
-
+    
     # request default health metrics
     response = test_client.get(f"/client/default-health-metrics/{new_user_id}/",
                                 headers=auth_header, 

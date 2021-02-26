@@ -1,29 +1,130 @@
-from datetime import datetime, timedelta
-import boto3
-import jwt
 
-from flask import current_app, request, jsonify
+from flask import request
 from flask_accepts import accepts, responds
 from flask_restx import Resource
+from twilio.jwt.access_token import AccessToken
+from twilio.jwt.access_token.grants import VideoGrant
 
+from odyssey import db
 from odyssey.api import api
 
 from odyssey.api.telehealth.models import (
+    TelehealthMeetingRooms, 
     TelehealthQueueClientPool,
     TelehealthStaffAvailability,
 )
 from odyssey.api.telehealth.schemas import (
+    TelehealthMeetingRoomSchema,
     TelehealthQueueClientPoolSchema,
     TelehealthQueueClientPoolOutputSchema,
     TelehealthStaffAvailabilityOutputSchema
 ) 
 from odyssey.utils.auth import token_auth
-from odyssey.utils.errors import InputError, StaffEmailInUse, ClientEmailInUse, UnauthorizedUser
-from odyssey.utils.misc import check_user_existence, check_client_existence, check_staff_existence, verify_jwt
+from odyssey.utils.constants import TWILIO_ACCESS_KEY_TTL
+from odyssey.utils.errors import GenericNotFound, InputError, UnauthorizedUser
+from odyssey.utils.misc import check_client_existence, check_staff_existence, grab_twilio_credentials
 
-from odyssey import db
+ns = api.namespace('telehealth', description='telehealth bookings management API')
 
-ns = api.namespace('telehealth', description='Endpoint for telehealth requests.')
+@ns.route('/meeting-room/new/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class ProvisionMeetingRooms(Resource):
+    @token_auth.login_required(user_type=('staff',))
+    @responds(schema = TelehealthMeetingRoomSchema, status_code=201, api=ns)
+    def post(self, user_id):
+        """
+        Create a new meeting room between the logged-in staff member
+        and the client specified in the url param, user_id
+        """
+        check_client_existence(user_id)
+
+        staff_user, _ = token_auth.current_user()
+
+        meeting_room = TelehealthMeetingRooms(staff_user_id=staff_user.user_id, client_user_id=user_id)
+        meeting_room.generate_meeting_room_name()
+        
+        ##
+        # Query the Twilio APi to provision a new meeting room
+        ##
+        twilio_credentials = grab_twilio_credentials()
+
+        # TODO: configure meeting room
+        # meeting type (group by default), participant limit , callbacks
+
+        # API access for the staff user to specifically access this chat room
+        token = AccessToken(twilio_credentials['account_sid'], twilio_credentials['api_key'], twilio_credentials['api_key_secret'],
+                         identity=staff_user.modobio_id, ttl=TWILIO_ACCESS_KEY_TTL)
+        token.add_grant(VideoGrant(room=meeting_room.room_name))
+        meeting_room.staff_access_token = token.to_jwt()
+        meeting_room.__dict__['access_token'] = meeting_room.staff_access_token
+        db.session.add(meeting_room)
+        db.session.commit() 
+        return meeting_room
+
+@ns.route('/meeting-room/access-token/<int:room_id>/')
+@ns.doc(params={'room_id': 'room ID number'})
+class ProvisionMeetingRooms(Resource):
+    """
+    For generating and retrieving meeting room access tokens
+    """
+    @token_auth.login_required
+    @responds(schema = TelehealthMeetingRoomSchema, status_code=201, api=ns)
+    def post(self, room_id):
+        """
+        Generate a new Twilio access token with a grant for the meeting room id provided
+
+        Users may only be granted access if they are one of the two participants.
+        """
+        client_user, _ = token_auth.current_user()
+
+        meeting_room = TelehealthMeetingRooms.query.filter_by(client_user_id=client_user.user_id, room_id=room_id).one_or_none()
+        if not meeting_room:
+            raise GenericNotFound(message="no meeting room found")
+        elif meeting_room.client_user_id != client_user.user_id:
+            raise UnauthorizedUser(message='user not part of chat room')
+
+        twilio_credentials = grab_twilio_credentials()
+
+        # API access for the staff user to specifically access this chat room
+        token = AccessToken(twilio_credentials['account_sid'], twilio_credentials['api_key'], twilio_credentials['api_key_secret'],
+                         identity=client_user.modobio_id, ttl=TWILIO_ACCESS_KEY_TTL)
+        token.add_grant(VideoGrant(room=meeting_room.room_name))
+        meeting_room.client_access_token = token.to_jwt()
+        meeting_room.__dict__['access_token'] = meeting_room.client_access_token
+        db.session.commit() 
+        return meeting_room
+
+
+
+@ns.route('/meeting-room/status/<int:room_id>/')
+@ns.doc(params={'room_id': 'User ID number'})
+class MeetingRoomStatusAPI(Resource):
+    """
+    Update and check meeting room status
+    """
+    def post(self):
+        """
+        For status callback directly from twilio
+        
+        TODO: 
+            -authorize access to this API from twilio automated callback
+            -check callback reason (we just want the status updated)
+            -update meeting status
+                -open
+                -close
+            -use TelehealthMeetingRooms table
+        """
+    
+    @token_auth.login_required
+    @responds(schema = TelehealthMeetingRoomSchema, status_code=200, api=ns)
+    def get(self, room_id):
+        """
+        Check the meeting status
+
+        should just return vital details on meeting rooms
+        """
+        meeting_room = TelehealthMeetingRooms.query.filter_by(room_id=room_id).one_or_none()
+        return meeting_room
 
 @ns.route('/settings/staff/availability/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID for a staff'})
@@ -103,7 +204,6 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
                 payload['availability'].append(time)
         db.session.commit()
         return payload
-
 
 @ns.route('/queue/client-pool/')
 class TelehealthGetQueueClientPoolApi(Resource):

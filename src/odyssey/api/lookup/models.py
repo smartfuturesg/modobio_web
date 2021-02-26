@@ -127,6 +127,60 @@ class LookupCountriesOfOperations(db.Model):
     :type: str
     """
     
+class LookupTerritoriesofOperation(db.Model):
+    """ 
+    Territories of operaion are organized by country and then sub-territory,
+    where a sub_territory is the highest level of governing region that can have
+    laws which will impact our business practices. 
+
+    In the UNited States, the su_territory will be at the state level.
+
+    Staff members are required to specify which territories they can operate in. 
+    """
+
+    __tablename__ = 'LookupTerritoriesofOperation'
+
+    created_at = db.Column(db.DateTime, server_default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, server_default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Primary index for 
+
+    :type: int, primary key, autoincrement
+    """
+
+    country = db.Column(db.String)
+    """
+    countries of operations
+    
+    :type: str
+    """
+
+    sub_territory = db.Column(db.String)
+    """
+    Sub-territory depends on the country. In the US, this translate to state. 
+    
+    :type: str
+    """
+
+    sub_territory_abbreviation = db.Column(db.String)
+    """
+    Abbreviation of sub_territory. Two characters for US states.
+    
+    :type: str
+    """
 
 class LookupClientBookingWindow(db.Model):
     """ Stored booking windows for the client in database. 
@@ -206,11 +260,18 @@ class LookupTelehealthSessionCost(db.Model):
     :type: str
     """
 
-    session_cost = db.Column(db.Integer)
+    session_min_cost = db.Column(db.Float)
     """
-    session cost in that country's currency
+    Minimum allowed session cost in this country's currency
     
-    :type: int
+    :type: float
+    """
+
+    session_max_cost = db.Column(db.Float)
+    """
+    Maximum allowed session cost in this country's currency
+    
+    :type: float
     """
 
 class LookupTelehealthSessionDuration(db.Model):

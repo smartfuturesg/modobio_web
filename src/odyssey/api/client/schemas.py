@@ -34,13 +34,12 @@ class ClientSearchItemsSchema(Schema):
     firstname = fields.String(required=False, validate=validate.Length(min=1, max= 50), missing=None)
     lastname = fields.String(required=False, validate=validate.Length(min=1,max=50), missing=None)
     email = fields.Email(required=False, missing=None)
-    phone = fields.String(required=False, validate=validate.Length(min=0,max=50), missing=None)
-    dob = fields.Date(required=False, missing=None)
-    record_locator_id = fields.String(required=False, validate=validate.Length(min=0,max=10), missing=None)
+    phone_number = fields.String(required=False, validate=validate.Length(min=0,max=50), missing=None)
+    dob = fields.String(required=False, missing=None)
     modobio_id = fields.String(required=False, validate=validate.Length(min=0,max=12), missing=None)
 
 class ClientSearchMetaSchema(Schema):
-    page = fields.Integer(required=False, missing=0)
+    from_result = fields.Integer(required=False, missing=0)
     per_page = fields.Integer(required=False, missing=0)
     total_pages = fields.Integer(required=False, missing=0)
     total_items = fields.Integer(required=False, missing=0)
@@ -125,7 +124,7 @@ class ClientReleaseContactsSchema(ma.SQLAlchemyAutoSchema):
 
     user_id = fields.Integer(missing=0)
     release_contract_id = fields.Integer()
-    release_direction = fields.String(description="Direction must be either 'TO' (release to) or 'FROM' (release from)")
+    release_direction = fields.String(metadata={'description': 'Direction must be either TO (release to) or FROM (release from)'})
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -231,8 +230,8 @@ class ClientIndividualContractSchema(ma.SQLAlchemyAutoSchema):
 class SignedDocumentsSchema(Schema):
     """ Dictionary of all signed documents and the URL to the PDF file. """
     urls = fields.Dict(
-        keys=fields.String(description='Document display name'),
-        values=fields.String(description='URL to PDF file of document.')
+        keys=fields.String(metadata={'description': 'Document display name'}),
+        values=fields.String(metadata={'description': 'URL to PDF file of document.'})
     )
 
 class OutstandingForm(Schema):
@@ -240,8 +239,8 @@ class OutstandingForm(Schema):
         Forms that have not yet been completed
         Display name and URI given
     """
-    name = fields.String(description='name of form')
-    URI = fields.String(description = 'URI for completing form')
+    name = fields.String(metadata={'description': 'name of form'})
+    URI = fields.String(metadata={'description': 'URI for completing form'})
 
 class ClientRegistrationStatusSchema(Schema):
 
@@ -251,8 +250,8 @@ class ClientRegistrationStatusSchema(Schema):
 class ClientDataTierSchema(Schema):
 
     user_id = fields.Integer(missing=None)
-    stored_bytes = fields.Integer(description="total bytes stored for the client", missing=None)
-    tier = fields.String(description="data storage tier. Either Tier 1/2/3", missing=None)
+    stored_bytes = fields.Integer(metadata={'description': 'total bytes stored for the client'}, missing=None)
+    tier = fields.String(metadata={'description': 'data storage tier. Either Tier 1/2/3'}, missing=None)
 
 class AllClientsDataTier(Schema):
 
@@ -270,8 +269,8 @@ class ClientClinicalCareTeamInternalSchema(Schema):
     Schema is used for serializing/deserializing clinical care team related payloads
     """
     modobio_id = fields.String(dump_only=True)
-    team_member_email = fields.Email(description="email for clinical care team member")
-    team_member_user_id = fields.Integer(description="user_id for clinical care team member", dump_only=True)
+    team_member_email = fields.Email(metadata={'description': 'email for clinical care team member'})
+    team_member_user_id = fields.Integer(metadata={'description': 'user_id for clinical care team member'}, dump_only=True)
     firstname = fields.String(dump_only=True, missing=None)
     lastname = fields.String(dump_only=True, missing=None)
 
@@ -333,7 +332,6 @@ class ClinicalCareTeamAuthorizationNestedSchema(Schema):
     Nests clinical care team authorization schema for API
     """
     clinical_care_team_authoriztion = fields.Nested(ClinicalCareTeamAuthorizaitonSchema(many=True), missing=[])
-
 
 class ClientMobileSettingsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
