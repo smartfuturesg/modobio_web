@@ -79,6 +79,20 @@ class Wearables(_Base):
     :type: bool, default = False
     """
 
+    has_fitbit = Column(Boolean, default=False, nullable=False)
+    """
+    Client has an Fitbit wearable.
+
+    :type: bool, default = False
+    """
+
+    registered_fitbit = Column(Boolean, default=False, nullable=False)
+    """
+    Client granted Modo Bio access to Fitbit data.
+
+    :type: bool, default = False
+    """
+
     has_freestyle = Column(Boolean, default=False, nullable=False)
     """
     Client has an FreeStyle Libre continuous glucose monitoring (CGM) wearable.
