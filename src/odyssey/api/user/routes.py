@@ -21,6 +21,7 @@ from odyssey.api.user.schemas import (
     UserPasswordRecoveryContactSchema,
     UserPasswordResetSchema,
     UserPasswordUpdateSchema,
+    NewClientUserSchema,
     UserInfoSchema,
     UserSubscriptionsSchema,
     UserSubscriptionHistorySchema,
@@ -28,16 +29,16 @@ from odyssey.api.user.schemas import (
     UserClinicalCareTeamSchema,
     UserNotificationsSchema
 ) 
-from odyssey.api.lookup.models import LookupNotifications
-from odyssey.utils.auth import token_auth
+from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.constants import PASSWORD_RESET_URL, DB_SERVER_TIME
 from odyssey.utils.errors import InputError, StaffEmailInUse, ClientEmailInUse, UnauthorizedUser
 from odyssey.utils.email import send_email_password_reset, send_email_delete_account
 from odyssey.utils.misc import check_user_existence, check_client_existence, check_staff_existence, verify_jwt
-
+from odyssey.utils import search
 from odyssey import db
 
 ns = api.namespace('user', description='Endpoints for user accounts.')
+
 
 @ns.route('/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
@@ -50,7 +51,7 @@ class ApiUser(Resource):
 
         return User.query.filter_by(user_id=user_id).one_or_none()
 
-    @token_auth.login_required()
+    @token_auth.login_required
     def delete(self, user_id):
         #Search for user by user_id in User table
         check_user_existence(user_id)
@@ -73,18 +74,18 @@ class ApiUser(Resource):
             send_email_delete_account(requester.email, user.email)
         send_email_delete_account(user.email, user.email)
 
-        if user.is_staff:
-            #keep name, email, modobio id, user id in User table
-            #keep lines in tables where user_id is the reporter_id
-            user.phone_number = None
-        else:#it's client
+        #when user is staff
+        #keep name, email, modobio id, user id in User table
+        #keep lines in tables where user_id is the reporter_id
+        if user.is_client and not user.is_staff:
             #keep only modobio id, user id in User table
             user.email = None
-            user.phone_number = None
             user.firstname = None
             user.middlename = None
             user.lastname = None
-            
+        user.phone_number = None
+        user.deleted = True
+        
         #delete files or images saved in S3 bucket for user_id
         #when FLASK_DEV=remote
         if not current_app.config['LOCAL_CONFIG']:
@@ -107,6 +108,10 @@ class ApiUser(Resource):
                 db.session.execute("DELETE FROM \"{}\" WHERE user_id={};".format(tblname, user_id))
 
         db.session.commit()
+
+        #remove user from elastic search indices (must be done after commit)
+        search.delete_from_index(user.user_id)
+
         return {'message': f'User with id {user_id} has been removed'}
 
 @ns.route('/staff/')
@@ -127,6 +132,8 @@ class NewStaffUser(Resource):
         
         # Check if user exists already
         user_info = data.get('user_info')
+        #input email made to lowercase to prevet future issues with authentication
+        user_info['email'] = user_info.get('email').lower()
         staff_info = data.get('staff_info')
 
         user = User.query.filter(User.email.ilike(user_info.get('email'))).first()
@@ -219,16 +226,16 @@ class StaffUserInfo(Resource):
 @ns.route('/client/')
 class NewClientUser(Resource):
     @accepts(schema=UserInfoSchema, api=ns)
-    @responds(schema=UserInfoSchema, status_code=201, api=ns)
+    @responds(schema=NewClientUserSchema, status_code=201, api=ns)
     def post(self): 
         """
         Create a client user. This endpoint requires a payload with just userinfo.
         
         If registering an already existing staff user as a client, 
-        the password must match, or be and empty string (ie. "")
+        the password provided must match the one already in use by staff account
         """
-        user_info = request.get_json()   
-          
+        user_info = request.get_json()     
+        user_info['email'] = user_info.get('email').lower()
         user = User.query.filter(User.email.ilike(user_info.get('email'))).first()
         if user:
             if user.is_client:
@@ -236,9 +243,15 @@ class NewClientUser(Resource):
                 raise ClientEmailInUse(email=user_info.get('email'))
             else:
                 # user account exists but only the staff portion of the account is defined
+                #verify password matches already existing staff login info before allowing client access
+                password= user_info.get('password')
+                del user_info['password']
+                user, user_login, _ = basic_auth.verify_password(username=user.email, password=password)
+                
+                #Create client account for existing staff member
                 user.is_client = True
                 client_info = ClientInfoSchema().load({'user_id': user.user_id})
-                password=""
+                
                 db.session.add(client_info)
 
                 # add new client subscription information
@@ -251,7 +264,9 @@ class NewClientUser(Resource):
                 db.session.add(client_sub)
         else:
             # user account does not yet exist for this email
-            password=user_info.get('password')
+            password=user_info.get('password', None)
+            if not password:
+                raise InputError(status_code=400,message='password required')
             del user_info['password']
             user_info['is_client'] = True
             user_info['is_staff'] = False
@@ -272,14 +287,19 @@ class NewClientUser(Resource):
             client_sub.user_id = user.user_id
             db.session.add(client_sub)
 
-        payload=user.__dict__
-        payload['password']=password
-        
+            #Authenticate newly created client accnt for immediate login
+            user, user_login, _ = basic_auth.verify_password(username=user.email, password=password)
+
+        #Generate access and refresh tokens
+        access_token = UserLogin.generate_token(user_type='client', user_id=user.user_id, token_type='access')
+        refresh_token = UserLogin.generate_token(user_type='client', user_id=user.user_id, token_type='refresh')
+        #Add refresh token to db
+        user_login.refresh_token = refresh_token
+
         db.session.commit()
 
-        payload['user_info'] = user
-        
-        return user
+        payload = {'user_info': user, 'token':access_token, 'refresh_token':refresh_token}
+        return payload
 
 @ns.route('/password/forgot-password/recovery-link/')
 class PasswordResetEmail(Resource):

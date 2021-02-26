@@ -37,14 +37,13 @@ class UserInfoSchema(ma.SQLAlchemyAutoSchema):
         model = User
         exclude = ('created_at', 'updated_at')
         load_only = ('password')
-        dump_only = ('modobio_id', 'user_id', 'is_internal','is_staff', 'is_client')
+        dump_only = ('modobio_id', 'user_id', 'is_internal','is_staff', 'is_client', 'deleted')
 
-    email = fields.Email(validate=validate.Length(min=0,max=50))
+    email = fields.Email(validate=validate.Length(min=0,max=50), required=True)
     phone_number = fields.String(validate=validate.Length(min=0,max=50))
-    password = fields.String(description="password required when creating a staff member",
+    password = fields.String(metadata={'description': 'password required'},
                             validate=validate.Length(min=0,max=50), 
-                            required=False)
-
+                            load_only=True, required=True)
 
 
 class UserInfoPutSchema(ma.SQLAlchemyAutoSchema):
@@ -63,9 +62,18 @@ class StaffInfoSchema(Schema):
     """
     access_roles = fields.List(
                     fields.String(validate=validate.OneOf(ACCESS_ROLES)), 
-                    description=f"Access roles the new user will have. Options include: {ACCESS_ROLES}"
+                    metadata={'description': f'Access roles the new user will have. Options include: {ACCESS_ROLES}'}
                 )
-class NewUserSchema(Schema):
+class NewClientUserSchema(Schema):
+    """
+    Schema returned when a new client has been created,
+    it includes token and refresh_token to allow login immediately after account creation
+    """
+    user_info = fields.Nested(UserInfoSchema, required=True)
+    token = fields.String()
+    refresh_token = fields.String()
+
+class NewStaffUserSchema(Schema):
     """
     General purpose user creation schema
     """
@@ -73,17 +81,7 @@ class NewUserSchema(Schema):
     user_info = fields.Nested(UserInfoSchema, required=True)
     staff_info = fields.Nested(StaffInfoSchema,
                               missing={}, 
-                              description="used when registering a staff member")
-
-class NewStaffUserSchema(UserInfoSchema):
-    """
-    General purpose user creation schema
-    """
-
-    user_info = fields.Nested(UserInfoSchema, required=True)
-    staff_info = fields.Nested(StaffInfoSchema,
-                              missing={}, 
-                              description="used when registering a staff member")
+                              metadata={'description': 'used when registering a staff member'})
 
 class UserPasswordRecoveryContactSchema(Schema):
     """contact methods for password recovery.
@@ -93,12 +91,12 @@ class UserPasswordRecoveryContactSchema(Schema):
 
 class UserPasswordResetSchema(Schema):
     #TODO Validate password strength
-    password = fields.String(required=True,  validate=validate.Length(min=3,max=50), description="new password to be used going forward")
+    password = fields.String(required=True,  validate=validate.Length(min=3,max=50), metadata={'description': 'new password to be used going forward'})
 
 class UserPasswordUpdateSchema(Schema):
     #TODO Validate password strength
-    current_password = fields.String(required=True,  validate=validate.Length(min=3,max=50), description="current password")
-    new_password = fields.String(required=True,  validate=validate.Length(min=3,max=50), description="new password to be used going forward")
+    current_password = fields.String(required=True,  validate=validate.Length(min=3,max=50), metadata={'description': 'current password'})
+    new_password = fields.String(required=True,  validate=validate.Length(min=3,max=50), metadata={'description': 'new password to be used going forward'})
 
 class UserSubscriptionTypeSchema(Schema):
 

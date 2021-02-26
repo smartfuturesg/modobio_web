@@ -128,7 +128,7 @@ def test_authorize_clinical_care_team(test_client, init_database, client_auth_he
                             headers=client_auth_header,
                             data=dumps(payload), 
                             content_type='application/json')
-
+    
     assert response.status_code == 201
 
     #####
