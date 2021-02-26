@@ -962,7 +962,7 @@ class ClinicalCareTeamResourceAuthorization(Resource):
                 User.user_id == ClientClinicalCareTeamAuthorizations.team_member_user_id
             ).filter(ClientClinicalCareTeamAuthorizations.resource_id == LookupClinicalCareTeamResources.resource_id
             ).all()
-        
+            
         care_team_auths =[]
         for row in data:
             tmp = {

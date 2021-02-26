@@ -332,10 +332,6 @@ class ClinicalCareTeamAuthorizationNestedSchema(Schema):
     """
     clinical_care_team_authoriztion = fields.Nested(ClinicalCareTeamAuthorizaitonSchema(many=True), missing=[])
 
-    items = fields.Nested(ClientDataTierSchema(many=True), missing=ClientDataTierSchema().load({}))
-    total_stored_bytes = fields.Integer(metadata={'description': 'Total bytes stored for all clients'}, missing=0)
-    total_items = fields.Integer(metadata={'description': 'number of clients in this payload'}, missing=0)
-
 class ClientMobileSettingsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientMobileSettings
