@@ -344,7 +344,8 @@ USSTATES = (
 GENDERS = (
     ('f', 'female'),
     ('m', 'male'),
-    ('o', 'other')
+    ('o', 'other'),
+    ('np','no preference')
 )
 """ Genders and a 1-letter abbreviation.
 
