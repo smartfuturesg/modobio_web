@@ -79,14 +79,16 @@ def update_index(user:dict, new_entry:bool):
                 ctx._source.lastname = params.lastname;\
                 ctx._source.phone_number = params.phone_number;\
                 ctx._source.modobio_id = params.modobio_id;\
-                ctx._source.email = params.email",
+                ctx._source.email = params.email;\
+                ctx._source.user_id = params.user_id",
             "lang":"painless", 
             "params":{
                 "firstname": f"{user['firstname']}",
                 "lastname": f"{user['lastname']}",
                 "phone_number": f"{user['phone_number']}",
                 "email": f"{user['email']}",
-                "modobio_id": f"{user['modobio_id']}"}}}
+                "modobio_id": f"{user['modobio_id']}",
+                "user_id": f"{_id}"}}}
     
     if new_entry:
         if client:
