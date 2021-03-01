@@ -183,6 +183,38 @@ class ClientSummary(Resource):
                 "user_id": user.user_id, "dob": client.dob, "membersince": client.membersince, "facilities": facilities}
         return data
 
+#Depricated 
+@ns.route('/clientsearch/')
+@ns.doc(params={'page': 'request page for paginated clients list',
+                'per_page': 'number of clients per page',
+                'firstname': 'first name to search',
+                'lastname': 'last name to search',
+                'email': 'email to search',
+                'phone': 'phone number to search',
+                'dob': 'date of birth to search',
+                'record_locator_id': 'record locator id to search'})
+class ClientsDepricated(Resource):
+    @token_auth.login_required
+    @responds(schema=ClientSearchOutSchema, api=ns)
+    #@responds(schema=UserSchema(many=True), api=ns)
+    def get(self):
+        """returns list of clients given query parameters"""
+        clients = []
+        for user in User.query.filter_by(is_client=True).all():
+            client = {
+                'user_id': user.user_id,
+                'firstname': user.firstname,
+                'lastname': user.lastname,
+                'email': user.email,
+                'phone': user.phone_number,
+                'dob': None,
+                'record_locator_id': None,
+                'modobio_id': user.modobio_id
+            }
+            clients.append(client)
+        response = {'items': clients, '_meta': None, '_links': None}
+        return response
+
 @ns.route('/search/')
 class Clients(Resource):
     @ns.doc(params={'_from': 'starting at result 0, from what result to display',
