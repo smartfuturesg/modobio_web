@@ -5,5 +5,5 @@ alter sequence "LookupTelehealthSessionCost_idx_seq"
 
 INSERT INTO "LookupTelehealthSessionCost" ("profession_type","territory","session_cost") 
 VALUES
-('Medical Doctor', 'USA', 200),
-('Medical Doctor', 'UK', 200);
+('Medical Doctor', 'USA', 50.00, 200.00),
+('Medical Doctor', 'UK', 50.00, 200.00);

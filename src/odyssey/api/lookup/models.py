@@ -260,11 +260,18 @@ class LookupTelehealthSessionCost(db.Model):
     :type: str
     """
 
-    session_cost = db.Column(db.Integer)
+    session_min_cost = db.Column(db.Float)
     """
-    session cost in that country's currency
+    Minimum allowed session cost in this country's currency
     
-    :type: int
+    :type: float
+    """
+
+    session_max_cost = db.Column(db.Float)
+    """
+    Maximum allowed session cost in this country's currency
+    
+    :type: float
     """
 
 class LookupTelehealthSessionDuration(db.Model):
