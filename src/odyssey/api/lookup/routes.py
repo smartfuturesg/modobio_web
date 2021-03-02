@@ -26,22 +26,19 @@ from odyssey.api.lookup.models import (
 from odyssey.api.lookup.schemas import (
     LookupActivityTrackersOutputSchema, 
     LookupCareTeamResourcesOutputSchema,
-    LookupClientBookingWindowOutputSchema,
     LookupCountriesOfOperationsOutputSchema,
     LookupDefaultHealthMetricsOutputSchema, 
     LookupDrinksOutputSchema, 
     LookupDrinkIngredientsOutputSchema, 
     LookupGoalsOutputSchema,
-    LookupProfessionalAppointmentConfirmationWindowOutputSchema,
     LookupRacesOutputSchema,
     LookupSubscriptionsOutputSchema,
-    LookupTelehealthSessionCostOutputSchema,
-    LookupTelehealthSessionDurationOutputSchema,
     LookupTerritoriesofOperationOutputSchema,
     LookupTransactionTypesOutputSchema,
     LookupNotificationsOutputSchema,
     LookupCareTeamResourcesOutputSchema,
-    LookupTimezones
+    LookupTimezones,
+    LookupTelehealthSettingsSchema
 )
 from odyssey.utils.misc import check_drink_existence
 
@@ -57,26 +54,6 @@ class LookupTimezones(Resource):
         varArr = [tz_i for tz_i in pytz.all_timezones if 'US/' in tz_i]
         payload = {'items': varArr,
                    'total_items': len(varArr) }
-        return payload
-
-
-@ns.route('/business/professional-confirmation-window/')
-class LookupProfessionalConfirmationWindowResource(Resource):
-    """ Returns stored confirmation windows for professionals in database by GET request.
-    Returns
-    -------
-    dict
-        JSON encoded dict.    
-    """
-    @token_auth.login_required
-    @responds(schema=LookupProfessionalAppointmentConfirmationWindowOutputSchema,status_code=200, api=ns)
-    def get(self):
-                
-        window = LookupProfessionalAppointmentConfirmationWindow.query.all()
-        
-        payload = {'items': window,
-                   'total_items': len(window)}
-
         return payload
 
 @ns.route('/business/transaction-types/')
@@ -118,65 +95,32 @@ class LookupCountryOfOperationResource(Resource):
 
         return payload
 
-@ns.route('/business/booking-window/')
-class LookupTelehealthSessionCostResource(Resource):
-    """ Returns stored client booking windows in database by GET request.
+@ns.route('/business/telehealth-settings/')
+class LookupTelehealthSettingsApi(Resource):
+    """ Endpoints related to the telehealth lookup tables """
 
-    Returns
-    -------
-    dict
-        JSON encoded dict.
-    """
-    @token_auth.login_required
-    @responds(schema=LookupClientBookingWindowOutputSchema,status_code=200, api=ns)
+    @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
+    @responds(schema=LookupTelehealthSettingsSchema, status_code=200, api=ns)
     def get(self):
-                
-        window = LookupClientBookingWindow.query.all()
         
-        payload = {'items': window,
-                   'total_items': len(window)}
+        durations = {'items': LookupTelehealthSessionDuration.query.all()}
+        durations['total_items'] = len(durations['items'])
 
-        return payload
+        booking_windows = {'items': LookupClientBookingWindow.query.all()}
+        booking_windows['total_items'] = len(booking_windows['items'])
 
-@ns.route('/business/session-cost/')
-class LookupTelehealthSessionCostResource(Resource):
-    """ Returns stored telehealth session cost in database by GET request.
+        confirmation_windows = {'items': LookupProfessionalAppointmentConfirmationWindow.query.all()}
+        confirmation_windows['total_items'] = len(confirmation_windows['items'])
 
-    Returns
-    -------
-    dict
-        JSON encoded dict.
-    """
-    @token_auth.login_required
-    @responds(schema=LookupTelehealthSessionCostOutputSchema,status_code=200, api=ns)
-    def get(self):
-                
-        cost = LookupTelehealthSessionCost.query.all()
-        
-        payload = {'items': cost,
-                   'total_items': len(cost)}
+        costs = {'items': LookupTelehealthSessionCost.query.all()}
+        costs['total_items'] = len(costs['items'])
 
-        return payload
-
-@ns.route('/business/session-duration/')
-class LookupTelehealthSessionDurationResource(Resource):
-    """ Returns stored telehealth session duration in database by GET request.
-
-    Returns
-    -------
-    dict
-        JSON encoded dict.
-    """
-    @token_auth.login_required
-    @responds(schema=LookupTelehealthSessionDurationOutputSchema,status_code=200, api=ns)
-    def get(self):
-                
-        durations = LookupTelehealthSessionDuration.query.all()
-        
-        payload = {'items': durations,
-                   'total_items': len(durations)}
-
-        return payload
+        return {
+            'session_durations': durations,
+            'booking_windows' : booking_windows,
+            'confirmation_windows': confirmation_windows,
+            'costs': costs
+        }
 
 @ns.route('/activity-trackers/misc/')
 class WearablesLookUpFitbitActivityTrackersResource(Resource):
