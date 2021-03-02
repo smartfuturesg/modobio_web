@@ -63,6 +63,9 @@ FITBIT_AUTH_URL = 'https://www.fitbit.com/oauth2/authorize'
 FITBIT_TOKEN_URL = 'https://api.fitbit.com/oauth2/token'
 """ Token URL for Fitbit API. """
 
+FITBIT_SCOPE = 'activity heartrate nutrition sleep weight'
+""" Fitbit resources (scopes) to request permission for. """
+
 SECRET_KEY = 'dev'
 """
 Flask secret key, used to encrypt sessions amongst other things.

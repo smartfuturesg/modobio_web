@@ -194,6 +194,7 @@ class Config:
         )
         self.FITBIT_AUTH_URL = self.getvar('FITBIT_AUTH_URL', None)
         self.FITBIT_TOKEN_URL = self.getvar('FITBIT_TOKEN_URL', None)
+        self.FITBIT_SCOPE = self.getvar('FITBIT_SCOPE', None)
 
         # Other config
         self.SECRET_KEY = self.getvar('SECRET_KEY', '/modobio/odyssey/app_secret')
