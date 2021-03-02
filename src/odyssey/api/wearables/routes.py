@@ -1,3 +1,4 @@
+import base64
 import secrets
 from datetime import datetime, timedelta
 
@@ -289,6 +290,7 @@ class WearablesFitbitAuthEndpoint(Resource):
             JSON encoded dict containing:
             - fitbit_client_id
             - oauth_state
+            - scope
         """
         # FLASK_DEV=local has no access to AWS
         if not current_app.config['FITBIT_CLIENT_ID']:
@@ -323,26 +325,30 @@ class WearablesFitbitAuthEndpoint(Resource):
             fitbit.oauth_state = state
         db.session.commit()
 
-        return {'fitbit_client_id': fitbit_id, 'oauth_state': state}
+        scope = current_app.config['FITBIT_SCOPE']
+
+        return {'fitbit_client_id': fitbit_id, 'oauth_state': state, 'scope': scope}
 
 
-@ns.route('/fitbit/callback/<int:user_id>/')
+# Unlike Oura, Fitbit does not return selected scopes in callback.
+# They are returned with the grant token exchange, below.
+@ns.route('/fitbit/callback/')
 @ns.doc(params={
-    'user_id': 'User ID number',
-    'state': 'OAuth2 state token',
     'code': 'OAuth2 access grant code',
     'redirect_uri': 'OAuth2 redirect URI',
-    'scope': 'The accepted scope of information: activity, heartrate, location, nutrition, profile, settings, sleep, social, or weight'
+    'state': 'OAuth2 state token',
+    'user_id': 'User ID number'
 })
 class WearablesFitbitCallbackEndpoint(Resource):
     @token_auth.login_required
     @responds(status_code=200, api=ns)
-    def get(self, user_id):
+    def get(self):
         """ Fitbit OAuth2 callback URL """
         # FLASK_DEV=local has no access to AWS
         if not current_app.config['FITBIT_CLIENT_ID']:
             raise UnknownError(message='This endpoint does not work in local mode.')
 
+        user_id = request.args.get('user_id')
         check_client_existence(user_id)
 
         fitbit = WearablesFitbit.query.filter_by(user_id=user_id).one_or_none()
@@ -355,23 +361,15 @@ class WearablesFitbitCallbackEndpoint(Resource):
         oauth_state = request.args.get('state')
         oauth_grant_code = request.args.get('code')
         redirect_uri = request.args.get('redirect_uri')
-        scope = request.args.get('scope', '')
 
         if oauth_state != fitbit.oauth_state:
             raise UnknownError(message='OAuth state changed between requests.')
-
-        # Not requiring location, profile, settings, or social
-        minimal_scope = {'activity', 'heartrate', 'nutrition', 'sleep', 'weight'}
-        scope = set(scope.split())
-
-        if scope.intersection(minimal_scope) != minimal_scope:
-            msg = 'You must agree to share at least: {}.'.format(', '.join(minimal_scope))
-            raise UnknownError(message=msg)
 
         # Exchange access grant code for access token
         fitbit_id = current_app.config['FITBIT_CLIENT_ID']
         fitbit_secret = current_app.config['FITBIT_CLIENT_SECRET']
         token_url = current_app.config['FITBIT_TOKEN_URL']
+        auth_str = base64.urlsafe_b64encode(f'{fitbit_id}:{fitbit_secret}'.encode('utf-8')).decode('utf-8')
 
         oauth_session = OAuth2Session(
             fitbit_id,
@@ -383,10 +381,24 @@ class WearablesFitbitCallbackEndpoint(Resource):
                 token_url,
                 code=oauth_grant_code,
                 include_client_id=True,
-                client_secret=fitbit_secret
+                client_secret=fitbit_secret,
+                headers = {'Authorization': f'Basic {auth_str}'}
             )
         except Exception as e:
             raise UnknownError(message=f'Error while exchanging grant code for access token: {e}')
+
+        # Fitbit sends errors in body with a 200 response.
+        if not oauth_reply.get('success', True):
+            msg = oauth_reply['errors'][0]['message']
+            raise UnknownError(message=f'fitbit.com returned error: {msg}')
+
+        # Not requiring location, profile, settings, or social
+        minimal_scope = set(current_app.config['FITBIT_SCOPE'].split())
+        scope = set(oauth_reply.get('scope', []))
+
+        if scope.intersection(minimal_scope) != minimal_scope:
+            msg = 'You must agree to share at least: {}.'.format(', '.join(minimal_scope))
+            raise UnknownError(message=msg)
 
         # Everything was successful
         fitbit.access_token = oauth_reply['access_token']
