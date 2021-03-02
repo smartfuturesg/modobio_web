@@ -40,7 +40,7 @@ class UserInfoSchema(ma.SQLAlchemyAutoSchema):
 
     email = fields.Email(validate=validate.Length(min=0,max=50), required=True)
     phone_number = fields.String(validate=validate.Length(min=0,max=50))
-    password = fields.String(description="password required",
+    password = fields.String(metadata={'description': 'password required'},
                             validate=validate.Length(min=0,max=50), 
                             load_only=True, required=True)
 
@@ -61,7 +61,7 @@ class StaffInfoSchema(Schema):
     """
     access_roles = fields.List(
                     fields.String(validate=validate.OneOf(ACCESS_ROLES)), 
-                    description=f"Access roles the new user will have. Options include: {ACCESS_ROLES}"
+                    metadata={'description': f'Access roles the new user will have. Options include: {ACCESS_ROLES}'}
                 )
 class NewClientUserSchema(Schema):
     """
@@ -80,7 +80,7 @@ class NewStaffUserSchema(Schema):
     user_info = fields.Nested(UserInfoSchema, required=True)
     staff_info = fields.Nested(StaffInfoSchema,
                               missing={}, 
-                              description="used when registering a staff member")
+                              metadata={'description': 'used when registering a staff member'})
 
 class UserPasswordRecoveryContactSchema(Schema):
     """contact methods for password recovery.
@@ -90,12 +90,12 @@ class UserPasswordRecoveryContactSchema(Schema):
 
 class UserPasswordResetSchema(Schema):
     #TODO Validate password strength
-    password = fields.String(required=True,  validate=validate.Length(min=3,max=50), description="new password to be used going forward")
+    password = fields.String(required=True,  validate=validate.Length(min=3,max=50), metadata={'description': 'new password to be used going forward'})
 
 class UserPasswordUpdateSchema(Schema):
     #TODO Validate password strength
-    current_password = fields.String(required=True,  validate=validate.Length(min=3,max=50), description="current password")
-    new_password = fields.String(required=True,  validate=validate.Length(min=3,max=50), description="new password to be used going forward")
+    current_password = fields.String(required=True,  validate=validate.Length(min=3,max=50), metadata={'description': 'current password'})
+    new_password = fields.String(required=True,  validate=validate.Length(min=3,max=50), metadata={'description': 'new password to be used going forward'})
 
 class UserSubscriptionsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -104,7 +104,7 @@ class UserSubscriptionsSchema(ma.SQLAlchemyAutoSchema):
         dump_only = ('start_date', 'end_date', 'user_id')
 
     subscription_type = fields.String(validate=validate.OneOf(['unsubscribed', 'subscribed', 'free_trial', 'sponsored']))
-    
+
     @post_load
     def make_object(self, data, **kwargs):
         return UserSubscriptions(**data)

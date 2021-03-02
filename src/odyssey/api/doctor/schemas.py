@@ -73,7 +73,7 @@ class MedicalSocialHistorySchema(Schema):
 
     possible_date_units = ['','days','months','years']
 
-    last_smoke_time = fields.String(required=False,description="days, months, years",validate=validate.OneOf(possible_date_units),missing=None,allow_none=True)
+    last_smoke_time = fields.String(required=False,metadata={'description': 'days, months, years'},validate=validate.OneOf(possible_date_units),missing=None,allow_none=True)
     num_years_smoked = fields.Integer(missing=0,allow_none=True)
     plan_to_stop = fields.Boolean(missing=None,allow_none=True)
 
@@ -174,9 +174,9 @@ class MedicalImagingSchema(ma.SQLAlchemyAutoSchema):
 
     possible_image_types = ['CT', 'MRI', 'PET', 'Scopes', 'Special imaging', 'Ultrasound', 'X-ray']
     image_type = fields.String(validate=validate.OneOf(possible_image_types))
-    reporter_firstname = fields.String(description="first name of reporting physician", dump_only=True)
-    reporter_lastname = fields.String(description="last name of reporting physician", dump_only=True)
-    reporter_id = fields.Integer(description="id of reporting physician", missing=None)
+    reporter_firstname = fields.String(metadata={'description': 'first name of reporting physician'}, dump_only=True)
+    reporter_lastname = fields.String(metadata={'description': 'last name of reporting physician'}, dump_only=True)
+    reporter_id = fields.Integer(metadata={'description': 'id of reporting physician'}, missing=None)
 
 class MedicalBloodTestSchema(Schema):
     test_id = fields.Integer()
@@ -184,9 +184,9 @@ class MedicalBloodTestSchema(Schema):
     date = fields.Date(required=True)
     panel_type = fields.String(required=False)
     notes = fields.String(required=False)
-    reporter_firstname = fields.String(description="first name of reporting physician", dump_only=True)
-    reporter_lastname = fields.String(description="last name of reporting physician", dump_only=True)
-    reporter_id = fields.Integer(description="id of reporting physician")
+    reporter_firstname = fields.String(metadata={'description': 'first name of reporting physician'}, dump_only=True)
+    reporter_lastname = fields.String(metadata={'description': 'last name of reporting physician'}, dump_only=True)
+    reporter_id = fields.Integer(metadata={'description': 'id of reporting physician'})
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -225,17 +225,17 @@ class BloodTestsByTestID(Schema):
     notes = fields.String()
     panel_type = fields.String()
     date = fields.Date(format="iso")
-    reporter_firstname = fields.String(description="first name of reporting physician", dump_only=True)
-    reporter_lastname = fields.String(description="last name of reporting physician", dump_only=True)
-    reporter_id = fields.Integer(description="id of reporting physician", dump_only=True)
+    reporter_firstname = fields.String(metadata={'description': 'first name of reporting physician'}, dump_only=True)
+    reporter_lastname = fields.String(metadata={'description': 'last name of reporting physician'}, dump_only=True)
+    reporter_id = fields.Integer(metadata={'description': 'id of reporting physician'}, dump_only=True)
 
 class MedicalBloodTestResultsOutputSchema(Schema):
     """
     Schema for outputting a nested json 
     of blood test results. 
     """
-    tests = fields.Integer(description="# of test entry sessions. All each test may have more than one test result")
-    test_results = fields.Integer(description="# of test results")
+    tests = fields.Integer(metadata={'description': '# of test entry sessions. All each test may have more than one test result'})
+    test_results = fields.Integer(metadata={'description': '# of test results'})
     items = fields.Nested(BloodTestsByTestID(many=True), missing = [])
     clientid = fields.Integer()
 
@@ -283,10 +283,10 @@ class MedicalPhysicalExamSchema(ma.SQLAlchemyAutoSchema):
         exclude = ('idx', 'reporter_id')
         
     user_id = fields.Integer(missing=0)
-    vital_height = fields.String(description="Deprecated, use vital_height_inches instead", missing="")
-    reporter_firstname = fields.String(description="first name of reporting physician", dump_only=True)
-    reporter_lastname = fields.String(description="last name of reporting physician", dump_only=True)
-    reporter_id = fields.Integer(description="id of reporting physician", dump_only=True)
+    vital_height = fields.String(metadata={'description': 'Deprecated, use vital_height_inches instead'}, missing="")
+    reporter_firstname = fields.String(metadata={'description': 'first name of reporting physician'}, dump_only=True)
+    reporter_lastname = fields.String(metadata={'description': 'last name of reporting physician'}, dump_only=True)
+    reporter_id = fields.Integer(metadata={'description': 'id of reporting physician'}, dump_only=True)
 
     @post_load
     def make_object(self, data, **kwargs):
