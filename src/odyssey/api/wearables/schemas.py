@@ -19,9 +19,12 @@ class WearablesOuraAuthSchema(Schema):
 
 
 class WearablesFitbitAuthSchema(Schema):
-    fitbit_client_id = fields.String()
-    oauth_state = fields.String()
+    url = fields.String()
+    client_id = fields.String()
+    redirect_uri = fields.String()
+    response_type = fields.String()
     scope = fields.String()
+    state = fields.String()
 
 
 class WearablesFreeStyleSchema(ma.SQLAlchemyAutoSchema):

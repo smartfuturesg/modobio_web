@@ -279,6 +279,11 @@ class WearablesFitbitAuthEndpoint(Resource):
     def get(self, user_id):
         """ Fitbit OAuth2 parameters to initialize the access grant process.
 
+        Use these parameters to initiate the OAuth2 access grant process with
+        Fitbit. You must replace the value for ``redirect_uri`` with a
+        valid redirect URI. The redirect URI must match the URI registered
+        with Fitbit.
+
         Parameters
         ----------
         user_id : int
@@ -288,8 +293,11 @@ class WearablesFitbitAuthEndpoint(Resource):
         -------
         dict
             JSON encoded dict containing:
-            - fitbit_client_id
-            - oauth_state
+            - url
+            - client_id
+            - redirect_uri (must be replaced with actual URI)
+            - response_type (literal word 'code')
+            - state
             - scope
         """
         # FLASK_DEV=local has no access to AWS
