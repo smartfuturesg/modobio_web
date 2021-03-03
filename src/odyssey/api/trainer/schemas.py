@@ -29,18 +29,18 @@ from odyssey.utils.misc import list_average
 """
 
 class PowerAttemptsPushPull(Schema):
-    weight = fields.Integer(description="weight of exercise in PSI", validate=validate.Range(min=0, max=60), missing=None)
-    attempt_1 = fields.Integer(description="", validate=validate.Range(min=0, max=4000), missing=None)
-    attempt_2 = fields.Integer(description="", validate=validate.Range(min=0, max=4000), missing=None)
-    attempt_3 = fields.Integer(description="",validate=validate.Range(min=0, max=4000), missing=None)
-    average = fields.Float(description="",validate=validate.Range(min=0, max=4000), missing=None)
+    weight = fields.Integer(metadata={'description': 'weight of exercise in PSI'}, validate=validate.Range(min=0, max=60), missing=None)
+    attempt_1 = fields.Integer(metadata={'description': ''}, validate=validate.Range(min=0, max=4000), missing=None)
+    attempt_2 = fields.Integer(metadata={'description': ''}, validate=validate.Range(min=0, max=4000), missing=None)
+    attempt_3 = fields.Integer(metadata={'description': ''},validate=validate.Range(min=0, max=4000), missing=None)
+    average = fields.Float(metadata={'description': ''},validate=validate.Range(min=0, max=4000), missing=None)
 
 class PowerAttemptsLegPress(Schema):
-    weight = fields.Integer(description="weight of exercise in PSI", validate=validate.Range(min=0, max=1500),missing=None)
-    attempt_1 = fields.Integer(description="", validate=validate.Range(min=0, max=9999),missing=None)
-    attempt_2 = fields.Integer(description="", validate=validate.Range(min=0, max=9999),missing=None)
-    attempt_3 = fields.Integer(description="",validate=validate.Range(min=0, max=9999),missing=None)
-    average = fields.Float(description="",validate=validate.Range(min=0, max=9999),missing=None)
+    weight = fields.Integer(metadata={'description': 'weight of exercise in PSI'}, validate=validate.Range(min=0, max=1500),missing=None)
+    attempt_1 = fields.Integer(metadata={'description': ''}, validate=validate.Range(min=0, max=9999),missing=None)
+    attempt_2 = fields.Integer(metadata={'description': ''}, validate=validate.Range(min=0, max=9999),missing=None)
+    attempt_3 = fields.Integer(metadata={'description': ''},validate=validate.Range(min=0, max=9999),missing=None)
+    average = fields.Float(metadata={'description': ''},validate=validate.Range(min=0, max=9999),missing=None)
 
 class PowerPushPull(Schema):
     left = fields.Nested(PowerAttemptsPushPull, missing=PowerAttemptsPushPull().load({}))
@@ -56,9 +56,9 @@ class PowerAssessmentSchema(Schema):
     timestamp = fields.DateTime()
     push_pull = fields.Nested(PowerPushPull, missing=PowerPushPull().load({}))
     leg_press = fields.Nested(PowerLegPress, missing=PowerLegPress().load({}))
-    upper_watts_per_kg = fields.Float(description = "watts per kg upper body", validate=validate.Range(min=0, max=120), missing=None)
-    lower_watts_per_kg = fields.Float(description = "watts per kg lower body", validate=validate.Range(min=0, max=300), missing=None)
-    vital_weight = fields.Float(description="weight pulled from doctor physical data", dump_only=True)
+    upper_watts_per_kg = fields.Float(metadata={'description': 'watts per kg upper body'}, validate=validate.Range(min=0, max=120), missing=None)
+    lower_watts_per_kg = fields.Float(metadata={'description': 'watts per kg lower body'}, validate=validate.Range(min=0, max=300), missing=None)
+    vital_weight = fields.Float(metadata={'description': 'weight pulled from doctor physical data'}, dump_only=True)
 
     @post_load
     def unravel(self, data, **kwargs):
@@ -154,11 +154,11 @@ class PowerAssessmentSchema(Schema):
 
 
 class StrengthAttemptsPushPull(Schema):
-    weight = fields.Integer(description="weight of exercise in PSI", validate=validate.Range(min=0, max=350), missing=None)
-    attempt_1 = fields.Integer(description="", validate=validate.Range(min=0, max=50), missing=None)
-    attempt_2 = fields.Integer(description="", validate=validate.Range(min=0, max=50), missing=None)
-    attempt_3 = fields.Integer(description="",validate=validate.Range(min=0, max=50), missing=None)
-    estimated_10rm = fields.Float(description="",validate=validate.Range(min=0, max=350), missing=None)
+    weight = fields.Integer(metadata={'description': 'weight of exercise in PSI'}, validate=validate.Range(min=0, max=350), missing=None)
+    attempt_1 = fields.Integer(metadata={'description': ''}, validate=validate.Range(min=0, max=50), missing=None)
+    attempt_2 = fields.Integer(metadata={'description': ''}, validate=validate.Range(min=0, max=50), missing=None)
+    attempt_3 = fields.Integer(metadata={'description': ''},validate=validate.Range(min=0, max=50), missing=None)
+    estimated_10rm = fields.Float(metadata={'description': ''},validate=validate.Range(min=0, max=350), missing=None)
 
 class StrengthPushPull(Schema):
     notes = fields.String(missing=None)
@@ -282,10 +282,10 @@ class ToeTouchTestSchema(Schema):
                                 'Left Posterior Ribcage High', 'Left Posterior Ribcage Back', 'Even Bilaterally']
     depth = fields.String(missing=None)
     pelvis_movement = fields.List(fields.String,
-                description=f"Descriptors for this assessment must be in the following picklist: {pelvis_movement_test_options}",
+                metadata={'description': f'Descriptors for this assessment must be in the following picklist: {pelvis_movement_test_options}'},
                 missing=[None]) 
     ribcage_movement = fields.List(fields.String,
-                description=f"Descriptors for this assessment must be in the following picklist: {ribcage_movement_test_options}",
+                metadata={'description': f'Descriptors for this assessment must be in the following picklist: {ribcage_movement_test_options}'},
                 missing=[None])
 
     notes = fields.String(missing=None)
@@ -369,7 +369,7 @@ class HeartAssessmentSchema(ma.SQLAlchemyAutoSchema):
         model = HeartAssessment
 
     user_id = fields.Integer(missing=0)
-    vital_heartrate = fields.Float(description="vital_heartrate pulled from doctor physical data", dump_only=True)
+    vital_heartrate = fields.Float(metadata={'description': 'vital_heartrate pulled from doctor physical data'}, dump_only=True)
     
     @post_load
     def make_object(self, data, **kwargs):
@@ -396,18 +396,18 @@ class MoxyAssessmentSchema(ma.SQLAlchemySchema):
     user_id = fields.Integer(missing=0)
     timestamp = ma.auto_field()
     notes = ma.auto_field(missing=None)
-    vl_side = fields.String(description="vl_side must be either 'right' or 'left'", missing=None)
-    performance_baseline = fields.Integer(description="", validate=validate.Range(min=0, max=100), missing=None)
-    recovery_baseline = fields.Integer(description="", validate=validate.Range(min=0, max=100), missing=None)
-    gas_tank_size = fields.Integer(description="", validate=validate.Range(min=0, max=100), missing=None)
-    starting_sm_o2 = fields.Integer(description="", validate=validate.Range(min=0, max=100), missing=None)
-    starting_thb = fields.Float(description="", validate=validate.Range(min=9, max=18), missing=None)
-    limiter = fields.String(description=f"must be one of: {limiter_list}", missing=None)
+    vl_side = fields.String(metadata={'description': 'vl_side must be either right or left'}, missing=None)
+    performance_baseline = fields.Integer(metadata={'description': ''}, validate=validate.Range(min=0, max=100), missing=None)
+    recovery_baseline = fields.Integer(metadata={'description': ''}, validate=validate.Range(min=0, max=100), missing=None)
+    gas_tank_size = fields.Integer(metadata={'description': ''}, validate=validate.Range(min=0, max=100), missing=None)
+    starting_sm_o2 = fields.Integer(metadata={'description': ''}, validate=validate.Range(min=0, max=100), missing=None)
+    starting_thb = fields.Float(metadata={'description': ''}, validate=validate.Range(min=9, max=18), missing=None)
+    limiter = fields.String(metadata={'description': f'must be one of: {limiter_list}'}, missing=None)
     intervention = ma.auto_field(missing=None)
-    performance_metric_1 = fields.String(description=f"must be one of: {performance_metric_list}", missing=None)
-    performance_metric_2 = fields.String(description=f"must be one of: {performance_metric_list}", missing=None)
-    performance_metric_1_value = fields.Integer(description="value in regards to chosen performance metric", validate=validate.Range(min=0, max=1500), missing=None)
-    performance_metric_2_value = fields.Integer(description="value in regards to chosen performance metric", validate=validate.Range(min=0, max=1500), missing=None)
+    performance_metric_1 = fields.String(metadata={'description': f'must be one of: {performance_metric_list}'}, missing=None)
+    performance_metric_2 = fields.String(metadata={'description': f'must be one of: {performance_metric_list}'}, missing=None)
+    performance_metric_1_value = fields.Integer(metadata={'description': 'value in regards to chosen performance metric'}, validate=validate.Range(min=0, max=1500), missing=None)
+    performance_metric_2_value = fields.Integer(metadata={'description': 'value in regards to chosen performance metric'}, validate=validate.Range(min=0, max=1500), missing=None)
 
     @validates('vl_side')
     def validate_vl_side(self,value):
@@ -440,12 +440,12 @@ class LungAssessmentSchema(ma.SQLAlchemySchema):
     user_id = fields.Integer(missing=0)
     timestamp = ma.auto_field()
     notes = ma.auto_field(missing=None)
-    vital_weight = fields.Float(description="weight pulled from doctor physical data", dump_only=True, missing=None)
-    bag_size = fields.Float(description="in liters", validate=validate.Range(min=0, max=12), missing=None)
-    duration = fields.Integer(description="in seconds", validate=validate.Range(min=0, max=400), missing=None)
-    breaths_per_minute = fields.Integer(description="", validate=validate.Range(min=0, max=120), missing=None)
-    max_minute_volume = fields.Float(description="", validate=validate.Range(min=0, max=600), missing=None)
-    liters_min_kg = fields.Float(description="liters per minute per kg", validate=validate.Range(min=0, max=110), missing=None)
+    vital_weight = fields.Float(metadata={'description': 'weight pulled from doctor physical data'}, dump_only=True, missing=None)
+    bag_size = fields.Float(metadata={'description': 'in liters'}, validate=validate.Range(min=0, max=12), missing=None)
+    duration = fields.Integer(metadata={'description': 'in seconds'}, validate=validate.Range(min=0, max=400), missing=None)
+    breaths_per_minute = fields.Integer(metadata={'description': ''}, validate=validate.Range(min=0, max=120), missing=None)
+    max_minute_volume = fields.Float(metadata={'description': ''}, validate=validate.Range(min=0, max=600), missing=None)
+    liters_min_kg = fields.Float(metadata={'description': 'liters per minute per kg'}, validate=validate.Range(min=0, max=110), missing=None)
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -465,10 +465,10 @@ class LungAssessmentSchema(ma.SQLAlchemySchema):
 
 class MoxyRipExaminationSchema(Schema):
 
-    smo2 = fields.Integer(description="", validate=validate.Range(min=0, max=100), missing=None)
-    thb = fields.Float(description="", validate=validate.Range(min=9, max=18), missing=None)
-    avg_power = fields.Integer(description="", validate=validate.Range(min=0, max=1800), missing=None)
-    hr_max_min = fields.Integer(description="", validate=validate.Range(min=0, max=220), missing=None)
+    smo2 = fields.Integer(metadata={'description': ''}, validate=validate.Range(min=0, max=100), missing=None)
+    thb = fields.Float(metadata={'description': ''}, validate=validate.Range(min=9, max=18), missing=None)
+    avg_power = fields.Integer(metadata={'description': ''}, validate=validate.Range(min=0, max=1800), missing=None)
+    hr_max_min = fields.Integer(metadata={'description': ''}, validate=validate.Range(min=0, max=220), missing=None)
 
 class MoxyTries(Schema):
     one = fields.Nested(MoxyRipExaminationSchema, missing = MoxyRipExaminationSchema().load({}))
@@ -481,23 +481,23 @@ class MoxyRipSchema(Schema):
 
     user_id = fields.Integer(missing=0)
     timestamp = fields.DateTime()
-    vl_side = fields.String(description="vl_side must be either 'right' or 'left'", missing=None)
+    vl_side = fields.String(metadata={'description': 'vl_side must be either right or left'}, missing=None)
     performance = fields.Nested(MoxyTries, missing=MoxyTries().load({}))
     recovery = fields.Nested(MoxyTries, missing=MoxyTries().load({}))
-    smo2_tank_size = fields.Integer(description="", validate=validate.Range(min=0, max=110), missing=None)
-    thb_tank_size = fields.Float(description="", validate=validate.Range(min=9, max=18), missing=None)
-    performance_baseline_smo2 = fields.Integer(description="", validate=validate.Range(min=0, max=110), missing=None)
-    performance_baseline_thb = fields.Float(description="", validate=validate.Range(min=9, max=18), missing=None)
-    recovery_baseline_smo2 = fields.Integer(description="", validate=validate.Range(min=0, max=110), missing=None)
-    recovery_baseline_thb = fields.Float(description="", validate=validate.Range(min=9, max=18), missing=None)
-    avg_watt_kg = fields.Float(description="", validate=validate.Range(min=0, max=60), missing=None)
-    avg_interval_time = fields.Integer(description="seconds", validate=validate.Range(min=0, max=400), missing=None)
-    avg_recovery_time = fields.Integer(description="seconds", validate=validate.Range(min=0, max=400), missing=None)
+    smo2_tank_size = fields.Integer(metadata={'description': ''}, validate=validate.Range(min=0, max=110), missing=None)
+    thb_tank_size = fields.Float(metadata={'description': ''}, validate=validate.Range(min=9, max=18), missing=None)
+    performance_baseline_smo2 = fields.Integer(metadata={'description': ''}, validate=validate.Range(min=0, max=110), missing=None)
+    performance_baseline_thb = fields.Float(metadata={'description': ''}, validate=validate.Range(min=9, max=18), missing=None)
+    recovery_baseline_smo2 = fields.Integer(metadata={'description': ''}, validate=validate.Range(min=0, max=110), missing=None)
+    recovery_baseline_thb = fields.Float(metadata={'description': ''}, validate=validate.Range(min=9, max=18), missing=None)
+    avg_watt_kg = fields.Float(metadata={'description': ''}, validate=validate.Range(min=0, max=60), missing=None)
+    avg_interval_time = fields.Integer(metadata={'description': 'seconds'}, validate=validate.Range(min=0, max=400), missing=None)
+    avg_recovery_time = fields.Integer(metadata={'description': 'seconds'}, validate=validate.Range(min=0, max=400), missing=None)
 
-    limiter = fields.String(description=f"must be one of the following choices: {limiter_options}", missing=None)
+    limiter = fields.String(metadata={'description': f'must be one of the following choices: {limiter_options}'}, missing=None)
 
     intervention = fields.String(missing=None)
-    vital_weight = fields.Float(description="weight pulled from doctor physical data", dump_only=True, missing=None)
+    vital_weight = fields.Float(metadata={'description': 'weight pulled from doctor physical data'}, dump_only=True, missing=None)
 
 
     @validates('vl_side')
@@ -666,31 +666,31 @@ class FitnessQuestionnaireSchema(ma.SQLAlchemyAutoSchema):
     sleep_hours_options_list = ['< 4', '4-6','6-8','> 8']
         
     user_id = fields.Integer(missing=0)
-    timestamp = fields.DateTime(description="timestamp of questionnaire. Filled by backend")
+    timestamp = fields.DateTime(metadata={'description': 'timestamp of questionnaire. Filled by backend'})
     physical_goals = fields.List(fields.String,
-            description=f"List of sources of stress. Limit of three from these options: {physical_goals_list}. If other, must specify",
+            metadata={'description': f'List of sources of stress. Limit of three from these options: {physical_goals_list}. If other, must specify'},
             missing=[None]) 
-    current_fitness_level = fields.Integer(description="current fitness level 1-10", validate=validate.Range(min=1, max=10), missing=None)
-    goal_fitness_level = fields.Integer(description="goal fitness level 1-10", validate=validate.Range(min=1, max=10), missing=None)
+    current_fitness_level = fields.Integer(metadata={'description': 'current fitness level 1-10'}, validate=validate.Range(min=1, max=10), missing=None)
+    goal_fitness_level = fields.Integer(metadata={'description': 'goal fitness level 1-10'}, validate=validate.Range(min=1, max=10), missing=None)
     trainer_expectations = fields.List(fields.String,
-        description=f"Client's expectation for their trainer. Choice of: {trainer_goals_list}", 
+        metadata={'description': f'Client\'s expectation for their trainer. Choice of: {trainer_goals_list}'},
         missing=[None])
-    sleep_hours = fields.String(description=f"nightly hours of sleep bucketized by the following options: {sleep_hours_options_list}", missing=None)
-    sleep_quality_level = fields.Integer(description="current sleep quality rating 1-10", validate=validate.Range(min=1, max=10), missing=None)
-    stress_level = fields.Integer(description="current stress rating 1-10", validate=validate.Range(min=1, max=10), missing=None)
+    sleep_hours = fields.String(metadata={'description': f'nightly hours of sleep bucketized by the following options: {sleep_hours_options_list}'}, missing=None)
+    sleep_quality_level = fields.Integer(metadata={'description': 'current sleep quality rating 1-10'}, validate=validate.Range(min=1, max=10), missing=None)
+    stress_level = fields.Integer(metadata={'description': 'current stress rating 1-10'}, validate=validate.Range(min=1, max=10), missing=None)
     stress_sources = fields.List(fields.String,
-            description=f"List of sources of stress. Options: {stressors_list}",
+            metadata={'description': f'List of sources of stress. Options: {stressors_list}'},
             missing=[None]) 
 
     lifestyle_goals = fields.List(fields.String,
-            description=f"List of lifestyle change goals. Limit of three from these options: {lifestyle_goals_list}. If other, must specify",
+            metadata={'description': f'List of lifestyle change goals. Limit of three from these options: {lifestyle_goals_list}. If other, must specify'},
             missing=[None]) 
     physical_goals = fields.List(fields.String,
-            description=f"List of sources of stress. Limit of three from these options: {physical_goals_list}. If other, must specify",
+            metadata={'description': f'List of sources of stress. Limit of three from these options: {physical_goals_list}. If other, must specify'},
             missing=[None]) 
 
-    energy_level = fields.Integer(description="current energy rating 1-10", validate=validate.Range(min=1, max=10), missing=None)
-    libido_level = fields.Integer(description="current libido rating 1-10", validate=validate.Range(min=1, max=10), missing=None)
+    energy_level = fields.Integer(validate=validate.Range(min=1, max=10), missing=None, metadata={"description": "current energy rating 1-10"})
+    libido_level = fields.Integer(metadata={'description': 'current libido rating 1-10'}, validate=validate.Range(min=1, max=10), missing=None)
     
     @post_load
     def make_object(self, data, **kwargs):
