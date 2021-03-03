@@ -201,3 +201,9 @@ class LookupTerritoriesofOperationOutputSchema(Schema):
 class LookupNotificationsOutputSchema(Schema):
     items = fields.Nested(LookupNotificationsSchema(many=True), missing = [])
     total_items = fields.Integer()
+
+class LookupTelehealthSettingsSchema(Schema):
+    session_durations = fields.Nested(LookupTelehealthSessionDurationOutputSchema, missing = [])
+    booking_windows = fields.Nested(LookupClientBookingWindowOutputSchema, missing = [])
+    confirmation_windows = fields.Nested(LookupProfessionalAppointmentConfirmationWindowOutputSchema, missing= [])
+    costs = fields.Nested(LookupTelehealthSessionCostOutputSchema, missing = [])
