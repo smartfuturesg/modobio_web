@@ -1,5 +1,5 @@
 import boto3
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from flask import request, current_app
 from flask_accepts import accepts, responds
