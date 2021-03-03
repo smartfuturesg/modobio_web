@@ -12,7 +12,7 @@ class NewRemoteRegisterUserSchema(Schema):
     lastname = fields.String(required=True)
     email = fields.Email(validate=validate.Length(min=0, max=50), required=True)
     phone_number = fields.String(validate=validate.Length(min=0, max=50))
-    user_type = fields.String(description="The type of user being registered. Must be either 'client' or 'staff'", 
+    user_type = fields.String(metadata={'description': 'The type of user being registered. Must be either client or staff'},
                     validate=(validate.OneOf(('client','staff'))), required=True)
 
 
@@ -22,6 +22,6 @@ class NewUserRegistrationPortalSchema(Schema):
     In practice, only an email will be sent to the new user containing their
     password and registration portal
     """
-    password = fields.String(description='auto-generated password for new user registration')
-    registration_portal_url = fields.String(description='URL with registration portal_id as parameter')
+    password = fields.String(metadata={'description': 'auto-generated password for new user registration'})
+    registration_portal_url = fields.String(metadata={'description': 'URL with registration portal_id as parameter'})
     portal_id = fields.String()
