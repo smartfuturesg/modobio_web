@@ -27,6 +27,12 @@ class WearablesFitbitAuthSchema(Schema):
     state = fields.String()
 
 
+class WearablesFitbitCallbackSchema(Schema):
+    code = fields.String()
+    state = fields.String()
+    redirect_uri = fields.String()
+
+
 class WearablesFreeStyleSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = WearablesFreeStyle
