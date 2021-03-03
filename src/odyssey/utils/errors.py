@@ -296,6 +296,30 @@ class LoginNotAuthorized(Exception):
 
         self.status_code = 401
 
+class GenericNotFound(Exception):
+    """
+    When requesting an item from the database which does not exist
+    """
+    def __init__(self, message = None):
+        Exception.__init__(self)
+        if message:
+            self.message = message
+        else:
+            self.message = 'Not Found'
+
+        self.status_code = 404
+
+class MissingThirdPartyCredentials(Exception):
+    """The server is has not been configured with the necessary credentials to access a third party API"""
+    def __init__(self, message = None):
+        Exception.__init__(self)
+        if message:
+            self.message = message
+        else:
+            self.message = "Credentials for 3rd party service are missing"
+
+        self.status_code = 500
+
 def bad_request(message):
     return error_response(400, message)
 
@@ -436,6 +460,16 @@ def error_drink_id_does_not_exist(error):
 @api.errorhandler(LoginNotAuthorized)
 def error_login_not_authorized(error):
     '''Return a custom message and 400 status code'''
+    return error_response(error.status_code, error.message)
+
+@api.errorhandler(MissingThirdPartyCredentials)
+def error_login_not_authorized(error):
+    '''Return a custom message and 500 status code'''
+    return error_response(error.status_code, error.message)
+
+@api.errorhandler(GenericNotFound)
+def error_login_not_authorized(error):
+    '''Return a custom message and 404 status code'''
     return error_response(error.status_code, error.message)
 
 def register_handlers(app):

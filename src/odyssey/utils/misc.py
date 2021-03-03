@@ -19,6 +19,7 @@ from odyssey.utils.errors import (
     ClientNotFound, 
     FacilityNotFound, 
     MedicalConditionNotFound,
+    MissingThirdPartyCredentials,
     RelationAlreadyExists, 
     ResultTypeNotFound,
     TestNotFound, 
@@ -100,16 +101,21 @@ def check_std_existence(std_id):
     if not std:
         raise STDNotFound(std_id)
 
-#def check_remote_client_portal_validity(portal_id):
-#    """
-#    Ensure portal is valid. If not raise 404 error
-#    """
-#    remote_client = RemoteRegistration().check_portal_id(portal_id)
-#
-#    if not remote_client:
-#        raise UserNotFound(message="Unauthorized. Portal is either expired or never existed")
-#
-#    return remote_client
+def grab_twilio_credentials():
+    """
+    Helper funtion to bring up twilio credentials for API acces.
+    Raises an error if one or more of the credentials are None
+    """
+    twilio_account_sid = current_app.config['TWILIO_ACCOUNT_SID']
+    twilio_api_key_sid = current_app.config['TWILIO_API_KEY_SID']
+    twilio_api_key_secret = current_app.config['TWILIO_API_KEY_SECRET']
+
+    if any(x is None for x in [twilio_account_sid,twilio_api_key_sid,twilio_api_key_secret]):
+        raise MissingThirdPartyCredentials(message="Twilio API credentials have not been configured")
+
+    return {'account_sid':twilio_account_sid,
+            'api_key': twilio_api_key_sid,
+            'api_key_secret': twilio_api_key_secret}
 
 class JSONEncoder(flask.json.JSONEncoder):
     """ Converts :class:`datetime.datetime`, :class:`datetime.date`,

@@ -1,7 +1,24 @@
-from marshmallow import Schema, fields, post_load, validate
+from marshmallow import (
+    Schema, 
+    fields, 
+    post_load,
+)
 
 from odyssey import ma
-from odyssey.api.telehealth.models import TelehealthQueueClientPool
+from odyssey.api.telehealth.models import (
+  TelehealthMeetingRooms,
+  TelehealthQueueClientPool
+)
+
+class TelehealthMeetingRoomSchema(ma.SQLAlchemyAutoSchema):
+    """
+    Schema for TelehealthMeeting rooms model
+    """    
+    class Meta:
+        model = TelehealthMeetingRooms
+        exclude = ('created_at', 'updated_at', 'staff_access_token', 'client_access_token')
+
+    access_token = fields.String(description='meeting room access token. To be shown only to the owner', required=False)
 
 class TelehealthQueueClientPoolSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
