@@ -169,7 +169,6 @@ class TelehealthQueueClientPoolApi(Resource):
         """
             Add a client to the queue
         """
-        
         check_client_existence(user_id)
         
         # Client can only have one appointment on one day:
