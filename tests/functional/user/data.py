@@ -73,8 +73,8 @@ users_to_delete_data = {
   "client_user": {
     "firstname": "Ron",
     "middlename": "Bilius",
-    "lastname": "Wesley",
-    "email": "ronwesley@mail.com",
+    "lastname": "Weasley",
+    "email": "ronweasley@mail.com",
     "password": "password2",
     "phone_number": "1111112222"
   },

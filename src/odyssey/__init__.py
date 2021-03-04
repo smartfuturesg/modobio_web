@@ -11,15 +11,14 @@ from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
-from flask_whooshee import Whooshee
-
+from elasticsearch import Elasticsearch
+from sqlalchemy import exc    
 from odyssey.config import Config
 
 db = SQLAlchemy()
 migrate = Migrate()
 cors = CORS()
 ma = Marshmallow()
-whooshee = Whooshee()
 
 def create_app():
     """ Initialize an instance of the Flask app.
@@ -55,8 +54,6 @@ def create_app():
     migrate.init_app(app, db)
     cors.init_app(app)
     ma.init_app(app)
-    whooshee.init_app(app)
-
     db.Model.update = _update
 
     from odyssey.api import bp, api
@@ -77,17 +74,23 @@ def create_app():
     if app.config['LOCAL_CONFIG']:
         from odyssey.api.misc.postman import bp
         app.register_blueprint(bp, url_prefix='/postman')
+    
+    #Elasticsearch config if ELASTICSEARCH_URL was set as an env variable
+    #Otherwise it will be none and search won't work.
+    if app.config['ELASTICSEARCH_URL']:
+        app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']])
+        if not app.config['TESTING']:
+            with app.app_context():
+                app.elasticsearch.indices.delete('_all')
+                from odyssey.utils import search
+                try:
+                    search.build_ES_indices()
+                except exc.ProgrammingError as e:
+                    if not e._message.__str__().__contains__('UndefinedTable'):
+                        raise e
+    else:
+        app.elasticsearch = None
 
-    # If you want to add another field to search for in the database by whooshee
-    # Example: @whooshee.register_model('firstname')
-    # Add in lastname
-    # @whooshee.register_model('firstname','lastname')
-    # YOU MUST DELETE THE whooshee folder! Same level as src, tests, migrations, etc
-    with app.app_context():
-        try:
-            whooshee.reindex()
-        except:
-            pass
 
     return app
 
