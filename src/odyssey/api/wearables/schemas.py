@@ -18,7 +18,7 @@ class WearablesOuraAuthSchema(Schema):
     oauth_state = fields.String()
 
 
-class WearablesFitbitAuthSchema(Schema):
+class WearablesFitbitGetSchema(Schema):
     url = fields.String()
     client_id = fields.String()
     redirect_uri = fields.String()
@@ -27,7 +27,7 @@ class WearablesFitbitAuthSchema(Schema):
     state = fields.String()
 
 
-class WearablesFitbitCallbackSchema(Schema):
+class WearablesFitbitPostSchema(Schema):
     code = fields.String()
     state = fields.String()
     redirect_uri = fields.String()

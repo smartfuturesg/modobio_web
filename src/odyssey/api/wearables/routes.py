@@ -26,8 +26,8 @@ from odyssey.api.wearables.models import (
 from odyssey.api.wearables.schemas import (
     WearablesSchema,
     WearablesOuraAuthSchema,
-    WearablesFitbitAuthSchema,
-    WearablesFitbitCallbackSchema,
+    WearablesFitbitGetSchema,
+    WearablesFitbitPostSchema,
     WearablesFreeStyleSchema,
     WearablesFreeStyleActivateSchema,
 )
@@ -276,7 +276,7 @@ class WearablesOuraCallbackEndpoint(Resource):
 @ns.doc(params={'user_id': 'User ID number'})
 class WearablesFitbitAuthEndpoint(Resource):
     @token_auth.login_required
-    @responds(schema=WearablesFitbitAuthSchema, status_code=200, api=ns)
+    @responds(schema=WearablesFitbitGetSchema, status_code=200, api=ns)
     def get(self, user_id):
         """ Fitbit OAuth2 parameters to initialize the access grant process.
 
@@ -305,13 +305,12 @@ class WearablesFitbitAuthEndpoint(Resource):
         if not current_app.config['FITBIT_CLIENT_ID']:
             raise UnknownError(message='This endpoint does not work in local mode.')
 
-        wearables = (
-            Wearables.query
-            .filter_by(user_id=user_id)
-            .one_or_none()
-        )
-
         # TODO: Disable this check until frontend has a way of setting has_fitbit
+        # wearables = (
+        #     Wearables.query
+        #     .filter_by(user_id=user_id)
+        #     .one_or_none()
+        # )
         #
         # wearables = Wearables.query.filter_by(user_id=user_id).one_or_none()
         # if not wearables or not wearables.has_fitbit:
@@ -346,18 +345,15 @@ class WearablesFitbitAuthEndpoint(Resource):
             'state': state
         }
 
-
-# Unlike Oura, Fitbit does not return selected scopes in callback.
-# They are returned with the grant token exchange, below.
-@ns.route('/fitbit/callback/<int:user_id>')
-class WearablesFitbitCallbackEndpoint(Resource):
     @token_auth.login_required
-    @accepts(schema=WearablesFitbitCallbackSchema, api=ns)
+    @accepts(schema=WearablesFitbitPostSchema, api=ns)
     @responds(status_code=201, api=ns)
     def post(self, user_id):
-        """ Fitbit OAuth2 callback URL.
+        """ Fitbit OAuth2 access grant code exchange.
 
         Post OAuth2 parameters here after user clicks 'allow' on the Fitbit homepage.
+        This endpoint will reach out to Fitbit for the second part of the OAuth2
+        process, exchanging the grant code for an access token and a refresh token.
 
         Parameters
         ----------
@@ -369,7 +365,7 @@ class WearablesFitbitCallbackEndpoint(Resource):
 
         redirect_uri : str
             The redirect URI used to come back to the frontend app after the user clicked
-            'allow' on the Fitbit homepage.
+            'allow' on the Fitbit homepage. Must be registered with Fitbit.
         """
         # FLASK_DEV=local has no access to AWS
         if not current_app.config['FITBIT_CLIENT_ID']:
@@ -381,7 +377,7 @@ class WearablesFitbitCallbackEndpoint(Resource):
         if not fitbit:
             raise UnknownError(
                 message=f'user_id {user_id} not found in WearablesFitbit table. '
-                         'Connect to /wearables/fitbit/auth first.'
+                         'Connect to GET /wearables/fitbit/auth first.'
             )
 
         if request.parsed_obj['state'] != fitbit.oauth_state:
@@ -428,9 +424,49 @@ class WearablesFitbitCallbackEndpoint(Resource):
         fitbit.token_expires = datetime.utcnow() + timedelta(seconds=oauth_reply['expires_in'])
         fitbit.oauth_state = None
 
-        # TODO: disable this until frontend has a way of setting wearable devices.
-        # wearables = Wearables.query.filter_by(user_id=fitbit.user_id).first()
-        # wearables.registered_fitbit = True
+        wearables = Wearables.query.filter_by(user_id=user_id).one_or_none()
+
+        # TODO: this is a temporary solution until frontend has a way of creating entries in Wearables.
+        if not wearables:
+            wearables = Wearables(
+                user_id=user_id,
+                has_fitbit=True,
+                registered_fitbit=True
+            )
+            db.session.add(wearables)
+        else:
+            wearables.has_fitbit = True
+            wearables.registered_fitbit = True
+
+        db.session.commit()
+
+    @token_auth.login_required
+    @responds(status_code=204, api=ns)
+    def delete(self, user_id):
+        """ Revoke Fitbit OAuth2 data sharing permissions.
+
+        Parameters
+        ----------
+        user_id : str
+            Modo Bio user ID.
+        """
+        fitbit = (
+            WearablesFitbit.query
+            .filter_by(user_id=user_id)
+            .one_or_none()
+        )
+
+        if fitbit:
+            db.session.delete(fitbit)
+
+        wearables = (
+            Wearables.query
+            .filter_by(user_id=user_id)
+            .one_or_none()
+        )
+
+        if wearables:
+            wearables.registered_fitbit = False
 
         db.session.commit()
 
