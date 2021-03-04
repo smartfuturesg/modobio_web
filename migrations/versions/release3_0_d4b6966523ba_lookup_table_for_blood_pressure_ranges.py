@@ -1,7 +1,7 @@
 """lookup table for blood pressure ranges
 
 Revision ID: d4b6966523ba
-Revises: 1bbb031b9213
+Revises: 2aaaf9e33e1a
 Create Date: 2020-12-24 19:43:12.293829
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'd4b6966523ba'
-down_revision = 'f948a2a5e22a'
+down_revision = '2aaaf9e33e1a'
 branch_labels = None
 depends_on = None
 

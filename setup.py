@@ -21,6 +21,7 @@ setup(
     use_scm_version=True,
     install_requires=[
         'boto3',
+        'elasticsearch',
         'Flask',
         'flask-accepts',
         'Flask-Cors',

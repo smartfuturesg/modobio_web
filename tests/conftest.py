@@ -3,6 +3,7 @@ from datetime import datetime
 import os
 import pytest
 
+from flask_migrate import upgrade
 from sqlalchemy import text
 
 from odyssey import create_app, db
@@ -13,6 +14,7 @@ from odyssey.api.user.models import User, UserLogin, UserNotifications
 from odyssey.api.user.schemas import UserSubscriptionsSchema, UserNotificationsSchema
 from odyssey.utils.constants import ACCESS_ROLES
 from tests.functional.user.data import users_staff_member_data, users_client_new_creation_data, users_client_new_info_data
+from odyssey.utils import search
 
 def clean_db(db):
     for table in reversed(db.metadata.sorted_tables):
@@ -20,35 +22,32 @@ def clean_db(db):
             db.session.execute(table.delete())
         except:
             pass
-    #db.session.close()
+    db.session.commit()
     # specifically cascade drop clientinfo table
     try:
         db.session.execute('DROP TABLE "ClientInfo" CASCADE;')
     except:
+        db.session.rollback()
         pass
+
+    try:
+        db.session.execute('DROP TABLE alembic_version;')
+    except Exception as e:
+        pass
+
     db.session.commit()
     db.drop_all()
 
 @pytest.fixture(scope='session')
-def test_client():
-    """flask application instance (client)"""
-    app = create_app()
-    db.init_app(app)
-    testing_client = app.test_client()
-    
-    # Establish an application context before running the tests.
-    ctx = app.app_context()
-    ctx.push()
-    
-    yield testing_client
-
-    ctx.pop()
-
-@pytest.fixture(scope='session')
 def init_database():
     clean_db(db)
-    # Create the database and the database table
-    db.create_all()
+
+    # create db from migrations
+    try:
+        upgrade()
+    except:
+        pytest.exit(msg="migration failed")
+
     # run .sql files to create db procedures and initialize 
     # some tables
     #  read .sql files, remove comments,
@@ -128,13 +127,31 @@ def init_database():
 
     # Commit the changes for the users
     db.session.commit()
-
+    #add elastic search build index
+    search.build_ES_indices()
+    
     yield db  # this is where the testing happens!
     
     # https://stackoverflow.com/questions/26350911/what-to-do-when-a-py-test-hangs-silently
     db.session.close()
     
     clean_db(db)
+
+
+@pytest.fixture(scope='session')
+def test_client():
+    """flask application instance (client)"""
+    app = create_app()
+    db.init_app(app)
+    testing_client = app.test_client()
+    
+    # Establish an application context before running the tests.
+    ctx = app.app_context()
+    ctx.push()
+    
+    yield testing_client
+
+    ctx.pop()
 
 @pytest.fixture(scope='session')
 def staff_auth_header(test_client):
