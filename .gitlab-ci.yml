@@ -35,6 +35,7 @@ pages:
     - /release-[0-9]+/
   script:
     - echo 'Nothing to do...'
+    #-
   artifacts:
     paths:
       - public
