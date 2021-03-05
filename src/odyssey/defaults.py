@@ -83,7 +83,3 @@ WTF_CSRF_ENABLED = True
 Cross Site Request Forgery (CSRF) on forms, disable when testing.
 Not needed on API, to be removed with Flask app removal.
 """
-
-TELEHEALTH_SESSION_DURATION = 30
-TELEHEALTH_BOOKING_NOTICE_WINDOW = 8
-TELEHEALTH_CONFIRMATION_WINDOW = 6
