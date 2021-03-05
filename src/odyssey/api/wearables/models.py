@@ -141,7 +141,7 @@ class WearablesOura(_Base):
     :type: :class:`datetime.datetime`
     """
 
-    oauth_state = Column(String(50))
+    oauth_state = Column(String(512))
     """
     State token for OAuth2 exchange with Oura Cloud.
 
@@ -150,21 +150,21 @@ class WearablesOura(_Base):
     after the OAuth2 process is completed. If a token exists in this column, it is a sign
     that the grant-to-access token exchange did not complete successfully.
 
-    :type: str, max length 50
+    :type: str, max length 512
     """
 
-    access_token = Column(String(50))
+    access_token = Column(String(512))
     """
     OAuth2 access token to authorize Oura Cloud access.
 
-    :type: str, max length 50
+    :type: str, max length 512
     """
 
-    refresh_token = Column(String(50))
+    refresh_token = Column(String(512))
     """
     OAuth2 refresh token to obtain a new :attr:`access_token` after it expires.
 
-    :type: str, max length 50
+    :type: str, max length 512
     """
 
     token_expires = Column(DateTime)
@@ -222,7 +222,7 @@ class WearablesFitbit(_Base):
     :type: :class:`datetime.datetime`
     """
 
-    oauth_state = Column(String(50))
+    oauth_state = Column(String(512))
     """
     State token for OAuth2 exchange with Fitbit servers.
 
@@ -231,21 +231,21 @@ class WearablesFitbit(_Base):
     after the OAuth2 process is completed. If a token exists in this column, it is a sign
     that the grant-to-access token exchange did not complete successfully.
 
-    :type: str, max length 50
+    :type: str, max length 512
     """
 
-    access_token = Column(String(50))
+    access_token = Column(String(512))
     """
     OAuth2 access token to authorize Fitbit access.
 
-    :type: str, max length 50
+    :type: str, max length 512
     """
 
-    refresh_token = Column(String(50))
+    refresh_token = Column(String(512))
     """
     OAuth2 refresh token to obtain a new :attr:`access_token` after it expires.
 
-    :type: str, max length 50
+    :type: str, max length 512
     """
 
     token_expires = Column(DateTime)
