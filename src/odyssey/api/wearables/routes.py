@@ -47,7 +47,7 @@ ns = api.namespace('wearables', description='Endpoints for registering wearable 
 @ns.route('/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class WearablesEndpoint(Resource):
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('client',))
     @responds(schema=WearablesSchema, status_code=200, api=ns)
     def get(self, user_id):
         """ Wearable device information for client ``user_id`` in response to a GET request.
@@ -79,7 +79,7 @@ class WearablesEndpoint(Resource):
 
         return wearables
 
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('client',))
     @accepts(schema=WearablesSchema, api=ns)
     @responds(status_code=201, api=ns)
     def post(self, user_id):
@@ -108,7 +108,7 @@ class WearablesEndpoint(Resource):
         db.session.add(request.parsed_obj)
         db.session.commit()
 
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('client',))
     @accepts(schema=WearablesSchema, api=ns)
     @responds(status_code=204, api=ns)
     def put(self, user_id):
@@ -285,7 +285,7 @@ class WearablesOuraCallbackEndpoint(Resource):
 @ns.route('/oura/auth/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class WearablesOuraAuthEndpoint(Resource):
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('client',))
     @responds(schema=WearablesOAuthGetSchema, status_code=200, api=ns)
     def get(self, user_id):
         """ Oura OAuth2 parameters to initialize the access grant process.
@@ -344,7 +344,7 @@ class WearablesOuraAuthEndpoint(Resource):
             'state': state
         }
 
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('client',))
     @accepts(schema=WearablesOAuthPostSchema, api=ns)
     @responds(status_code=201, api=ns)
     def post(self, user_id):
@@ -373,8 +373,6 @@ class WearablesOuraAuthEndpoint(Resource):
         # FLASK_DEV=local has no access to AWS
         if not current_app.config['OURA_CLIENT_ID']:
             raise UnknownError(message='This endpoint does not work in local mode.')
-
-        check_client_existence(user_id)
 
         oura = WearablesOura.query.filter_by(user_id=user_id).one_or_none()
         if not oura:
@@ -436,7 +434,7 @@ class WearablesOuraAuthEndpoint(Resource):
 
         db.session.commit()
 
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('client',))
     @responds(status_code=204, api=ns)
     def delete(self, user_id):
         """ Revoke Oura OAuth2 data sharing permissions.
@@ -477,7 +475,7 @@ class WearablesOuraAuthEndpoint(Resource):
 @ns.route('/fitbit/auth/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class WearablesFitbitAuthEndpoint(Resource):
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('client',))
     @responds(schema=WearablesOAuthGetSchema, status_code=200, api=ns)
     def get(self, user_id):
         """ Fitbit OAuth2 parameters to initialize the access grant process.
@@ -536,7 +534,7 @@ class WearablesFitbitAuthEndpoint(Resource):
             'state': state
         }
 
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('client',))
     @accepts(schema=WearablesOAuthPostSchema, api=ns)
     @responds(status_code=201, api=ns)
     def post(self, user_id):
@@ -565,8 +563,6 @@ class WearablesFitbitAuthEndpoint(Resource):
         # FLASK_DEV=local has no access to AWS
         if not current_app.config['FITBIT_CLIENT_ID']:
             raise UnknownError(message='This endpoint does not work in local mode.')
-
-        check_client_existence(user_id)
 
         fitbit = WearablesFitbit.query.filter_by(user_id=user_id).one_or_none()
         if not fitbit:
@@ -634,7 +630,7 @@ class WearablesFitbitAuthEndpoint(Resource):
 
         db.session.commit()
 
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('client',))
     @responds(status_code=204, api=ns)
     def delete(self, user_id):
         """ Revoke Fitbit OAuth2 data sharing permissions.
@@ -674,7 +670,7 @@ class WearablesFitbitAuthEndpoint(Resource):
 @ns.route('/freestyle/activate/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class WearablesFreeStyleActivateEndpoint(Resource):
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('client',))
     @responds(schema=WearablesFreeStyleActivateSchema, status_code=200, api=ns)
     def get(self, user_id):
         """ Returns CGM activation timestamp for client ``user_id`` in reponse to a GET request.
@@ -705,7 +701,7 @@ class WearablesFreeStyleActivateEndpoint(Resource):
 
         return cgm
 
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('client',))
     @accepts(schema=WearablesFreeStyleActivateSchema, api=ns)
     @responds(status_code=201, api=ns)
     def post(self, user_id):
@@ -738,7 +734,7 @@ class WearablesFreeStyleActivateEndpoint(Resource):
 @ns.route('/freestyle/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class WearablesFreeStyleEndpoint(Resource):
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('client',))
     @responds(schema=WearablesFreeStyleSchema, status_code=200, api=ns)
     def get(self, user_id):
         """ Return FreeStyle CGM data for client ``user_id`` in reponse to a GET request.
@@ -764,7 +760,7 @@ class WearablesFreeStyleEndpoint(Resource):
 
         return cgm
 
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('client',))
     @accepts(schema=WearablesFreeStyleSchema, api=ns)
     @responds(status_code=201, api=ns)
     def put(self, user_id):
