@@ -252,7 +252,7 @@ class Clients(Resource):
 
         #build ES query body
         if param.get('dob'):
-            body={"query":{"bool":{"must":{"multi_match":{"query": search.strip(), "fuzziness":"AUTO:1,2", "zero_terms_query": "all"}},"filter":{"term":{"dob.keyword":param['dob']}}}},"from":startAt,"size":per_page}
+            body={"query":{"bool":{"must":{"multi_match":{"query": search.strip(), "fuzziness":"AUTO:1,2", "zero_terms_query": "all"}},"filter":{"term":{"dob":param.get('dob')}}}},"from":startAt,"size":per_page}
         else:
             body={"query":{"multi_match":{"query": search.strip(), "fuzziness": "AUTO:1,2" ,"zero_terms_query": "all"}},"from":startAt,"size":per_page}
         #query ES index
