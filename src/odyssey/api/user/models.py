@@ -109,7 +109,15 @@ class User(db.Model):
     :type: boolean
     """
 
+    is_internal = db.Column(db.Boolean, nullable=False, default=False)
+    """
+    Whether or not the user is internal. If True, the user may be able to user features not yet 
+    fully released. 
+
+    :type: boolean, non-null 
+    """
     deleted = db.Column(db.Boolean, nullable=True, default = False)
+    
     """
     Flags if the user has been deleted
 
@@ -289,7 +297,8 @@ class UserLogin(db.Model):
         return jwt.encode({'exp': datetime.utcnow()+timedelta(hours =(TOKEN_LIFETIME if token_type == 'access' else REFRESH_TOKEN_LIFETIME)), 
                             'uid': user_id,
                             'utype': user_type,
-                            'ttype': token_type}, 
+                            'ttype': token_type
+                            }, 
                             secret, 
                             algorithm='HS256')
 

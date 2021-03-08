@@ -50,6 +50,22 @@ OURA_AUTH_URL = 'https://cloud.ouraring.com/oauth/authorize'
 OURA_TOKEN_URL = 'https://api.ouraring.com/oauth/token'
 """ Token URL for Oura Ring API. """
 
+# Fitbit OAuth parameters
+FITBIT_CLIENT_ID = ''
+""" Client ID for Fitbit API. """
+
+FITBIT_CLIENT_SECRET = ''
+""" Client secret for Fitbit API. """
+
+FITBIT_AUTH_URL = 'https://www.fitbit.com/oauth2/authorize'
+""" Authorization URL for Fitbit API. """
+
+FITBIT_TOKEN_URL = 'https://api.fitbit.com/oauth2/token'
+""" Token URL for Fitbit API. """
+
+FITBIT_SCOPE = 'activity heartrate nutrition sleep weight'
+""" Fitbit resources (scopes) to request permission for. """
+
 SECRET_KEY = 'dev'
 """
 Flask secret key, used to encrypt sessions amongst other things.

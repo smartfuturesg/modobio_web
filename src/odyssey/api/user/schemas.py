@@ -36,7 +36,8 @@ class UserInfoSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
         exclude = ('created_at', 'updated_at')
-        dump_only = ('is_staff', 'is_client', 'deleted', 'modobio_id', 'user_id')
+        load_only = ('password')
+        dump_only = ('modobio_id', 'user_id', 'is_internal','is_staff', 'is_client', 'deleted')
 
     email = fields.Email(validate=validate.Length(min=0,max=50), required=True)
     phone_number = fields.String(validate=validate.Length(min=0,max=50))
@@ -113,3 +114,4 @@ class UserSubscriptionHistorySchema(Schema):
 
     client_subscription_history = fields.Nested(UserSubscriptionsSchema, many=True)
     staff_subscription_history = fields.Nested(UserSubscriptionsSchema, many=True)
+

@@ -10,6 +10,7 @@ from odyssey import db
 from odyssey.api.lookup.models import LookupDrinks, LookupGoals
 from odyssey.api.client.schemas import ClientAssignedDrinksSchema
 from odyssey.api.doctor.models import (
+    MedicalLookUpBloodPressureRange,
     MedicalLookUpSTD,
     MedicalFamilyHistory,
     MedicalConditions,
@@ -17,7 +18,8 @@ from odyssey.api.doctor.models import (
     MedicalGeneralInfo,
     MedicalGeneralInfoMedications,
     MedicalGeneralInfoMedicationAllergy,
-    MedicalHistory, 
+    MedicalHistory,
+    MedicalBloodPressures,
     MedicalBloodTests,
     MedicalBloodTestResults,
     MedicalBloodTestResultTypes, 
@@ -42,6 +44,8 @@ from odyssey.utils.misc import check_client_existence, check_staff_existence, ch
 from odyssey.api.doctor.schemas import (
     AllMedicalBloodTestSchema,
     CheckBoxArrayDeleteSchema,
+    MedicalBloodPressuresSchema,
+    MedicalBloodPressuresOutputSchema,
     MedicalFamilyHistSchema,
     MedicalFamilyHistInputSchema,
     MedicalFamilyHistOutputSchema,
@@ -64,6 +68,7 @@ from odyssey.api.doctor.schemas import (
     MedicalExternalMRSchema,
     MedicalSocialHistorySchema,
     MedicalLookUpSTDOutputSchema,
+    MedicalLookUpBloodPressureRangesOutputSchema,
     MedicalSTDHistorySchema,
     MedicalSTDHistoryInputSchema,
     MedicalSocialHistoryOutputSchema,
@@ -73,10 +78,63 @@ from odyssey.utils.constants import MEDICAL_CONDITIONS
 
 ns = api.namespace('doctor', description='Operations related to doctor')
 
+@ns.route('/bloodpressure/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class MedBloodPressures(Resource):
+    @token_auth.login_required(resources=('MedicalBloodPressures',))
+    @responds(schema=MedicalBloodPressuresOutputSchema, api=ns)
+    def get(self, user_id):
+        '''
+        This request gets the users submitted blood pressure if it exists
+        '''
+        check_client_existence(user_id)
+        bp_info = db.session.query(
+                     MedicalBloodPressures.idx,MedicalBloodPressures.systolic, MedicalBloodPressures.diastolic, MedicalBloodPressures.datetime_taken
+                    ).filter(MedicalBloodPressures.user_id==user_id).all()
+
+        payload = {'items': bp_info,
+                   'total_items': len(bp_info)}
+        return payload
+
+    @token_auth.login_required
+    @accepts(schema=MedicalBloodPressuresSchema, api=ns)
+    @responds(schema=MedicalBloodPressuresSchema, status_code=201, api=ns)
+    def post(self, user_id):
+        '''
+        Post request to post the client's blood pressure
+        '''
+        # First check if the client exists
+        check_client_existence(user_id)
+        data = request.parsed_obj
+        data.user_id = user_id
+        db.session.add(data)
+
+        # insert results into the result table
+        db.session.commit()
+        return data
+
+@ns.route('/lookupbloodpressureranges/')
+class MedicalLookUpBloodPressureResource(Resource):
+    """ Returns blood pressure ranges stored in the database in response to a GET request.
+
+    Returns
+    -------
+    dict
+        JSON encoded dict.
+    """
+    @token_auth.login_required
+    @responds(schema=MedicalLookUpBloodPressureRangesOutputSchema,status_code=200, api=ns)
+    def get(self):
+        bp_ranges = MedicalLookUpBloodPressureRange.query.all()
+        payload = {'items': bp_ranges,
+                   'total_items': len(bp_ranges)}
+
+        return payload
+
 @ns.route('/medicalgeneralinfo/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedicalGenInformation(Resource):
-    @token_auth.login_required
+    @token_auth.login_required(resources=('MedicalGeneralInfoMedications', 'MedicalGeneralInfoMedicationAllergy','MedicalGeneralInfo' ))
     @responds(schema=MedicalGeneralInfoInputSchema(exclude=['medications.idx','allergies.idx']), api=ns)
     def get(self, user_id):
         '''
@@ -195,7 +253,7 @@ class MedicalGenInformation(Resource):
 @ns.route('/medicalinfo/general/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedicalGeneralInformation(Resource):
-    @token_auth.login_required
+    @token_auth.login_required(resources=('MedicalGeneralInfo',))
     @responds(schema=MedicalGeneralInfoSchema, api=ns)
     def get(self, user_id):
         '''
@@ -283,7 +341,7 @@ class MedicalGeneralInformation(Resource):
 @ns.route('/medicalinfo/medications/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedicalMedicationInformation(Resource):
-    @token_auth.login_required
+    @token_auth.login_required(resources=('MedicalGeneralInfoMedications',))
     @responds(schema=MedicalMedicationsInfoInputSchema, api=ns)
     def get(self, user_id):
         '''
@@ -396,7 +454,7 @@ class MedicalMedicationInformation(Resource):
 @ns.route('/medicalinfo/allergies/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedicalAllergiesInformation(Resource):
-    @token_auth.login_required
+    @token_auth.login_required(resources=('MedicalGeneralInfoMedicationAllergy',))
     @responds(schema=MedicalAllergiesInfoInputSchema, api=ns)
     def get(self, user_id):
         '''
@@ -517,7 +575,7 @@ class MedicalLookUpSTDResource(Resource):
 @ns.route('/medicalinfo/social/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedicalSocialHist(Resource):
-    @token_auth.login_required
+    @token_auth.login_required(resources=('MedicalSocialHistory','MedicalSTDHistory'))
     @responds(schema=MedicalSocialHistoryOutputSchema, api=ns)
     def get(self, user_id):
         """ This request retrieves the social history
@@ -685,7 +743,7 @@ class MedicalCondition(Resource):
 @ns.route('/familyhistory/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedicalFamilyHist(Resource):
-    @token_auth.login_required
+    @token_auth.login_required(resources=('MedicalFamilyHistory',))
     @responds(schema=MedicalFamilyHistOutputSchema, api=ns)
     def get(self, user_id):
         '''
@@ -758,7 +816,7 @@ class MedicalFamilyHist(Resource):
 @ns.route('/images/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedImaging(Resource):
-    @token_auth.login_required
+    @token_auth.login_required(resources=('MedicalImaging',))
     @responds(schema=MedicalImagingSchema(many=True), api=ns)
     def get(self, user_id):
         """returns a json file of all the medical images in the database for the specified user_id
@@ -918,7 +976,7 @@ class MedBloodTest(Resource):
 @ns.route('/bloodtest/all/<int:user_id>/')
 @ns.doc(params={'user_id': 'Client ID number'})
 class MedBloodTestAll(Resource):
-    @token_auth.login_required
+    @token_auth.login_required(resources=('MedicalBloodTests',))
     @responds(schema=AllMedicalBloodTestSchema, api=ns)
     def get(self, user_id):
         """
@@ -970,7 +1028,7 @@ class MedBloodTestResults(Resource):
 
     Each test instance may have multiple test results. 
     """
-    @token_auth.login_required
+    @token_auth.login_required(resources=('MedicalBloodTestResults', 'MedicalBloodTests'))
     @responds(schema=MedicalBloodTestResultsOutputSchema, api=ns)
     def get(self, test_id):
         """
@@ -1028,7 +1086,7 @@ class AllMedBloodTestResults(Resource):
     This includes all test submisison details along with the test
     results associated with each test submission. 
     """
-    @token_auth.login_required
+    @token_auth.login_required(resources=('MedicalBloodTestResults', 'MedicalBloodTests'))
     @responds(schema=MedicalBloodTestResultsOutputSchema, api=ns)
     def get(self, user_id):
         # pull up all tests, test results, and the test type names for this client
@@ -1153,7 +1211,7 @@ class MedHistory(Resource):
 @ns.route('/physical/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedPhysical(Resource):
-    @token_auth.login_required
+    @token_auth.login_required(resources=('MedicalPhysicals',))
     @responds(schema=MedicalPhysicalExamSchema(many=True), api=ns)
     def get(self, user_id):
         """returns all client's medical physical exams for the user_id specified"""
@@ -1277,7 +1335,7 @@ class MedicalSurgeriesAPI(Resource):
 
         return request.parsed_obj
 
-    @token_auth.login_required
+    @token_auth.login_required(resources=('MedicalSurgeries',))
     @responds(schema=MedicalSurgeriesSchema(many=True), api=ns)
     def get(self, client_user_id):
         """returns a list of all surgeries for the given client_user_id"""
@@ -1320,21 +1378,3 @@ class MedicalSurgeriesAPI(Resource):
 #     _generate_lut_endpoints(name, lut)
 #
 ##########################
-
-@ns.route('/conditions/')
-class MedicalConditionsEndpoint(Resource):
-    """ Lookup table for supported medical conditions. """
-
-    @token_auth.login_required
-    @responds(status_code=200, api=ns)
-    def get(self):
-        """ Lookup table for supported medical conditions.
-
-        Returns
-        -------
-        dict(dict(...))
-            Nested dict, where the keys are the supported (category of)
-            medical issues. The values are either another dict to specify
-            a subdivision, or ``null`` indicating no further nesting.
-        """
-        return jsonify(MEDICAL_CONDITIONS)

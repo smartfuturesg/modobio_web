@@ -7,6 +7,103 @@ from datetime import datetime
 from odyssey.utils.constants import DB_SERVER_TIME, BLOODTEST_EVAL
 from odyssey import db
 
+class MedicalBloodPressures(db.Model):
+    """ Blood Pressure Table
+    
+    This table is used for storing the client's blood pressures.
+    """    
+    __tablename__ = 'MedicalBloodPressures'
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    """
+    User ID number
+
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
+    """
+
+    systolic = db.Column(db.Float)
+    """
+    Systolic value with units mmHg
+
+    :type: float
+    """
+
+    diastolic = db.Column(db.Float)
+    """
+    Diastolic value with units mmHg
+
+    :type: float
+    """
+
+    datetime_taken = db.Column(db.String)
+    """
+    The date and time the blood pressure levels were taken
+
+    :type: :class: str
+    """
+
+class MedicalLookUpBloodPressureRange(db.Model):
+    """ Medical Look Up Blood Pressure Ranges
+
+    This table will store the blood pressure categories
+    and ranges.
+
+    Chart found from heart.org/bplevels
+    """
+
+    __tablename__ = "MedicalLookUpBloodPressureRange"
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Unique ID number identifying the results.
+
+    :type: int, primary key, autoincrement
+    """
+
+    category = db.Column(db.String)
+    """
+    Blood Pressure Category
+
+    :type: str
+    """
+    
+    systolic = db.Column(db.String)
+    """
+    Systolic mmHg is the upper number for the range
+
+    :type: str
+    """
+
+    and_or = db.Column(db.String)
+    """
+    and_or represents the union between systolic and diastolic
+    numbers
+
+    :type: str
+    """
+
+    diastolic = db.Column(db.String)
+    """
+    Diastolic mmHg is the lower number for the range
+
+    :type: str
+    """
+
+
 class MedicalLookUpSTD(db.Model):
     """ Medical Look Up STD
 
@@ -79,6 +176,8 @@ class MedicalSocialHistory(db.Model):
     storing the client's medical social information.
     """    
     __tablename__ = 'MedicalSocialHistory'
+
+    displayname = 'Medical General Info - Social History'
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -207,6 +306,8 @@ class MedicalFamilyHistory(db.Model):
     storing the client's general medical information.
     """    
     __tablename__ = 'MedicalFamilyHistory'
+
+    displayname = 'Medical General Info - Family History'
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -346,6 +447,8 @@ class MedicalGeneralInfoMedicationAllergy(db.Model):
     """    
     __tablename__ = 'MedicalGeneralInfoMedicationAllergy'
 
+    displayname = 'Medical General Info - Medication Allergies'
+
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     Table index.
@@ -395,6 +498,8 @@ class MedicalGeneralInfoMedications(db.Model):
     storing the client's general medical information.
     """    
     __tablename__ = 'MedicalGeneralInfoMedications'
+
+    displayname = 'Medical General Info - Medications'
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -487,6 +592,8 @@ class MedicalGeneralInfo(db.Model):
     storing the client's general medical information.
     """    
     __tablename__ = 'MedicalGeneralInfo'
+
+    displayname = displayname = 'Medical General Info'
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """

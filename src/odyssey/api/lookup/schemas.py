@@ -1,7 +1,22 @@
 from marshmallow import Schema, fields, post_load
 
 from odyssey import ma
-from odyssey.api.lookup.models import LookupDrinks, LookupDrinkIngredients, LookupGoals, LookupRaces
+from odyssey.api.lookup.models import (
+    LookupActivityTrackers, 
+    LookupClinicalCareTeamResources,
+    LookupDrinks, 
+    LookupDrinkIngredients, 
+    LookupGoals, 
+    LookupRaces
+)
+
+class LookupActivityTrackersSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupActivityTrackers
+
+class LookupActivityTrackersOutputSchema(Schema):
+    items = fields.Nested(LookupActivityTrackersSchema(many=True),missing=[])
+    total_items = fields.Integer()
 
 class LookupDrinksSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -41,6 +56,20 @@ class LookupGoalsSchema(ma.SQLAlchemyAutoSchema):
     def make_object(self, data, **kwargs):
         return LookupGoals(**data)
 
+class LookupCareTeamResourcesSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupClinicalCareTeamResources
+        exclude = ('created_at', 'updated_at', 'resource_name')
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return LookupClinicalCareTeamResources(**data)
+
+
+class LookupCareTeamResourcesOutputSchema(Schema):
+    items = fields.Nested(LookupCareTeamResourcesSchema(many=True), missing = [])
+    total_items = fields.Integer()
+
 class LookupGoalsOutputSchema(Schema):
     items = fields.Nested(LookupGoalsSchema(many=True), missing = [])
     total_items = fields.Integer()
@@ -57,3 +86,4 @@ class LookupRacesSchema(ma.SQLAlchemyAutoSchema):
 class LookupRacesOutputSchema(Schema):
     items = fields.Nested(LookupRacesSchema(many=True), missing = [])
     total_items = fields.Integer()
+

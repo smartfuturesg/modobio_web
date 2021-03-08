@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta
-import secrets, boto3, pathlib
+import boto3
 import jwt
 
-from flask import current_app, request, url_for, jsonify
+from flask import current_app, request, jsonify
 from flask_accepts import accepts, responds
 from flask_restx import Resource
 from werkzeug.security import check_password_hash
@@ -24,11 +24,11 @@ from odyssey.api.user.schemas import (
     UserInfoSchema,
     UserSubscriptionsSchema,
     UserSubscriptionHistorySchema,
-    NewStaffUserSchema
+    NewStaffUserSchema,
 ) 
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.constants import PASSWORD_RESET_URL, DB_SERVER_TIME
-from odyssey.utils.errors import ContentNotFound, InputError, StaffEmailInUse, ClientEmailInUse, UnauthorizedUser
+from odyssey.utils.errors import InputError, StaffEmailInUse, ClientEmailInUse, UnauthorizedUser
 from odyssey.utils.email import send_email_password_reset, send_email_delete_account
 from odyssey.utils.misc import check_user_existence, check_client_existence, check_staff_existence, verify_jwt
 from odyssey.utils import search
@@ -525,3 +525,24 @@ class UserSubscriptionHistoryApi(Resource):
         res['client_subscription_history'] = UserSubscriptions.query.filter_by(user_id=user_id).filter_by(is_staff=False).all()
         res['staff_subscription_history'] = UserSubscriptions.query.filter_by(user_id=user_id).filter_by(is_staff=True).all()
         return res
+
+@ns.route('/logout/')
+class UserLogoutApi(Resource):
+
+    @token_auth.login_required
+    def post(self):
+        """
+        Places the user's current set of tokens on the token blacklist.
+        The user will have to login with a username and password to regain access.
+        """
+        refresh_token = token_auth.current_user()[1].refresh_token
+        
+        #remove 'Bearer ' from the front of the access token
+        access_token = request.headers.get('Authorization').split()[1]
+
+        db.session.add(UserTokensBlacklist(token=refresh_token))
+        db.session.add(UserTokensBlacklist(token=access_token))
+        db.session.commit()
+
+        return 200
+

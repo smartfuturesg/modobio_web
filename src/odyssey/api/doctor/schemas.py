@@ -2,6 +2,8 @@ from marshmallow import Schema, fields, post_load, validate, pre_dump, validates
 
 from odyssey import ma
 from odyssey.api.doctor.models import ( 
+    MedicalBloodPressures,
+    MedicalLookUpBloodPressureRange,
     MedicalLookUpSTD,
     MedicalGeneralInfo,
     MedicalGeneralInfoMedications,
@@ -26,6 +28,33 @@ from odyssey.utils.constants import MEDICAL_CONDITIONS
 """
     Schemas for the doctor's API
 """
+
+class MedicalBloodPressuresSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = MedicalBloodPressures
+        exclude = ('created_at',)
+        dump_only = ('timestamp','idx')
+        
+    timestamp = fields.DateTime()
+    systolic = fields.Float(description='units mmHg',required=True)
+    diastolic = fields.Float(description='units mmHg',required=True)
+    datetime_taken = fields.String(description='Date and time the blood pressure was taken', required=True)
+    @post_load
+    def make_object(self, data, **kwargs):
+        return MedicalBloodPressures(**data)
+
+class MedicalBloodPressuresOutputSchema(Schema):
+    items = fields.Nested(MedicalBloodPressuresSchema(many=True), missing=[])
+    total_items = fields.Integer()
+
+
+class MedicalLookUpBloodPressureRangesSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = MedicalLookUpBloodPressureRange
+
+class MedicalLookUpBloodPressureRangesOutputSchema(Schema):
+    items = fields.Nested(MedicalLookUpBloodPressureRangesSchema(many=True),missing=[])
+    total_items = fields.Integer()
 
 class CheckBoxDeleteSchema(Schema):
     idx = fields.Integer()
