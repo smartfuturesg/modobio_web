@@ -35,7 +35,7 @@ class ClientSearchItemsSchema(Schema):
     lastname = fields.String(required=False, validate=validate.Length(min=1,max=50), missing=None)
     email = fields.Email(required=False, missing=None)
     phone_number = fields.String(required=False, validate=validate.Length(min=0,max=50), missing=None)
-    dob = fields.String(required=False, missing=None)
+    dob = fields.Date(required=False, missing=None)
     modobio_id = fields.String(required=False, validate=validate.Length(min=0,max=12), missing=None)
 
 class ClientSearchMetaSchema(Schema):
