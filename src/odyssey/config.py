@@ -182,6 +182,7 @@ class Config:
         )
         self.OURA_AUTH_URL = self.getvar('OURA_AUTH_URL', None)
         self.OURA_TOKEN_URL = self.getvar('OURA_TOKEN_URL', None)
+        self.OURA_SCOPE = self.getvar('OURA_SCOPE', None)
 
         self.FITBIT_CLIENT_ID = self.getvar(
             'FITBIT_CLIENT_ID',
