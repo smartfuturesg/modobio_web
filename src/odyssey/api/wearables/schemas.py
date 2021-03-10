@@ -13,24 +13,27 @@ class WearablesSchema(ma.SQLAlchemyAutoSchema):
         load_instance = True
         exclude = ('idx', 'user_id', 'created_at', 'updated_at')
 
+
+# TODO: delete this schema when oura-old endpoint is removed.
 class WearablesOuraAuthSchema(Schema):
     oura_client_id = fields.String()
     oauth_state = fields.String()
 
 
-class WearablesFitbitGetSchema(Schema):
-    url = fields.String()
-    client_id = fields.String()
-    redirect_uri = fields.String()
-    response_type = fields.String()
+class WearablesOAuthGetSchema(Schema):
+    url = fields.String(required=True)
+    client_id = fields.String(required=True)
+    redirect_uri = fields.String(required=True)
+    response_type = fields.String(required=True)
+    scope = fields.String(required=True)
+    state = fields.String(required=True)
+
+
+class WearablesOAuthPostSchema(Schema):
+    code = fields.String(required=True)
+    state = fields.String(required=True)
+    redirect_uri = fields.String(required=True)
     scope = fields.String()
-    state = fields.String()
-
-
-class WearablesFitbitPostSchema(Schema):
-    code = fields.String()
-    state = fields.String()
-    redirect_uri = fields.String()
 
 
 class WearablesFreeStyleSchema(ma.SQLAlchemyAutoSchema):
