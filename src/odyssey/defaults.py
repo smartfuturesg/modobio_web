@@ -50,6 +50,9 @@ OURA_AUTH_URL = 'https://cloud.ouraring.com/oauth/authorize'
 OURA_TOKEN_URL = 'https://api.ouraring.com/oauth/token'
 """ Token URL for Oura Ring API. """
 
+OURA_SCOPE = 'daily'
+""" Oura resources (scopes) to request permission for. """
+
 # Fitbit OAuth parameters
 FITBIT_CLIENT_ID = ''
 """ Client ID for Fitbit API. """
