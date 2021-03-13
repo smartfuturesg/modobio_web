@@ -7,6 +7,7 @@ from odyssey.api import api
 from odyssey.utils.auth import token_auth
 from odyssey.api.lookup.models import (
      LookupActivityTrackers,
+     LookupBookingTimeIncrements,
      LookupClientBookingWindow,
      LookupClinicalCareTeamResources,
      LookupCountriesOfOperations,
@@ -24,7 +25,8 @@ from odyssey.api.lookup.models import (
      LookupNotifications
 )
 from odyssey.api.lookup.schemas import (
-    LookupActivityTrackersOutputSchema, 
+    LookupActivityTrackersOutputSchema,
+    LookupBookingTimeIncrementsOutputSchema,
     LookupCareTeamResourcesOutputSchema,
     LookupCountriesOfOperationsOutputSchema,
     LookupDefaultHealthMetricsOutputSchema, 
@@ -45,6 +47,24 @@ from odyssey.utils.misc import check_drink_existence
 from odyssey import db
 
 ns = api.namespace('lookup', description='Endpoints for lookup tables.')
+
+@ns.route('/telehealth/booking-increments/')
+class LookupTelehealthBookingIncrements(Resource):
+    """ Returns stored booking increments.
+    Returns
+    -------
+    dict
+        JSON encoded dict.
+    """
+    @responds(schema=LookupBookingTimeIncrementsOutputSchema,status_code=200, api=ns)
+    def get(self):
+                
+        booking_increments = LookupBookingTimeIncrements.query.all()
+        
+        payload = {'items': booking_increments,
+                   'total_items': len(booking_increments)}
+
+        return payload
 
 @ns.route('/timezones/')
 class LookupTimezones(Resource):

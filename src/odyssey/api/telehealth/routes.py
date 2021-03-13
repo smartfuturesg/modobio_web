@@ -4,9 +4,14 @@ from flask_accepts import accepts, responds
 from flask_restx import Resource
 from twilio.jwt.access_token import AccessToken
 from twilio.jwt.access_token.grants import VideoGrant
+import datetime as dt
 
 from odyssey import db
 from odyssey.api import api
+
+from odyssey.api.lookup.models import (
+    LookupBookingTimeIncrements
+)
 
 from odyssey.api.telehealth.models import (
     TelehealthMeetingRooms, 
@@ -17,14 +22,41 @@ from odyssey.api.telehealth.schemas import (
     TelehealthMeetingRoomSchema,
     TelehealthQueueClientPoolSchema,
     TelehealthQueueClientPoolOutputSchema,
+    TelehealthStaffAvailabilitySchema,
     TelehealthStaffAvailabilityOutputSchema
 ) 
 from odyssey.utils.auth import token_auth
-from odyssey.utils.constants import TWILIO_ACCESS_KEY_TTL
+from odyssey.utils.constants import TWILIO_ACCESS_KEY_TTL, DAY_OF_WEEK
 from odyssey.utils.errors import GenericNotFound, InputError, UnauthorizedUser
 from odyssey.utils.misc import check_client_existence, check_staff_existence, grab_twilio_credentials
 
+import numpy as np
+
 ns = api.namespace('telehealth', description='telehealth bookings management API')
+
+@ns.route('/client/time-select/')
+@ns.doc(params={'user_id': 'User ID number'})
+class TelehealthTimeSelectApi(Resource):
+    @token_auth.login_required
+    @responds(status_code=201,api=ns)
+    def get(self):
+
+        # First, grab the queue, and grab the person at the top
+        queue = TelehealthQueueClientPool.query.order_by(TelehealthQueueClientPool.priority.desc(),TelehealthQueueClientPool.target_date.asc()).first()
+        
+        # convert that day from the queue to a day of the week
+        
+        # datetime.weekday() returns:
+        # Monday 0, 6 is Sunday
+        day_of_week_idx = queue.target_date.weekday()
+        day_of_week = DAY_OF_WEEK[day_of_week_idx]
+
+        staff_availability = TelehealthStaffAvailability.query.filter_by(day_of_week=day_of_week).all()
+
+        # breakpoint()
+
+        return 201
+
 
 @ns.route('/meeting-room/new/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
@@ -141,8 +173,9 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
         # grab staff availability
         check_staff_existence(user_id)
         availability = TelehealthStaffAvailability.query.filter_by(user_id=user_id).\
-                        order_by(TelehealthStaffAvailability.start_time.asc()).all()
-        
+                        order_by(TelehealthStaffAvailability.day_of_week.asc(),TelehealthStaffAvailability.booking_window_id.asc()).all()
+        booking_increments = LookupBookingTimeIncrements.query.all()
+
         monArr = []
         tueArr = [] 
         wedArr = []
@@ -151,28 +184,140 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
         satArr = []
         sunArr = []
 
+        monArrIdx = []
+        tueArrIdx = []
+        wedArrIdx = []
+        thuArrIdx = []
+        friArrIdx = []
+        satArrIdx = []
+        sunArrIdx = []                                                
+
         # Reorder to be Monday - Sunday
-        for time in availability:
-            if time.day_of_week == 'Monday':
-                monArr.append(time)
+
+        orderedArr = {}
+        orderedArr['Monday'] = []
+        orderedArr['Tuesday'] = []
+        orderedArr['Wednesday'] = []
+        orderedArr['Thursday'] = []
+        orderedArr['Friday'] = []
+        orderedArr['Saturday'] = []
+        orderedArr['Sunday'] = []
+        daySwitch = 0
+        for idx,time in enumerate(availability):
+            
+            currDay = time.day_of_week
+
+            if daySwitch == 0:
+                refDay = time.day_of_week 
+                daySwitch = 1
+
+            if currDay != refDay:
+                end_time = booking_increments[idx2].end_time
+                orderedArr[refDay].append({'day_of_week':refDay,'start_time': start_time, 'end_time': end_time})
+                daySwitch = 0
+
+            if time.day_of_week == 'Monday':                
+                if len(monArrIdx) == 0:
+                    idx1 = time.booking_window_id
+                    start_time = booking_increments[idx1].start_time
+                else:
+                    idx2 = time.booking_window_id             
+                    if idx2 - idx1 > 1:
+                        end_time = booking_increments[idx1].end_time
+                        orderedArr[time.day_of_week].append({'day_of_week':time.day_of_week, 'start_time': start_time, 'end_time': end_time})
+                        start_time = booking_increments[idx2].start_time
+                    idx1 = idx2
+
+                monArrIdx.append(time.booking_window_id)
             elif time.day_of_week == 'Tuesday':
-                tueArr.append(time)
+                if len(tueArrIdx) == 0:
+                    idx1 = time.booking_window_id
+                    start_time = booking_increments[idx1].start_time
+                else:
+                    idx2 = time.booking_window_id
+                    if idx2 - idx1 > 1:
+                        end_time = booking_increments[idx1].end_time
+                        orderedArr[time.day_of_week].append({'day_of_week':time.day_of_week, 'start_time': start_time, 'end_time': end_time})
+                        start_time = booking_increments[idx2].start_time
+                    idx1 = idx2
+                tueArrIdx.append(time.booking_window_id)
             elif time.day_of_week == 'Wednesday':
-                wedArr.append(time)
+                if len(wedArrIdx) == 0:
+                    idx1 = time.booking_window_id
+                    start_time = booking_increments[idx1].start_time
+                else:
+                    idx2 = time.booking_window_id
+                    if idx2 - idx1 > 1:
+                        end_time = booking_increments[idx1].end_time
+                        orderedArr[time.day_of_week].append({'day_of_week':time.day_of_week, 'start_time': start_time, 'end_time': end_time})
+                        start_time = booking_increments[idx2].start_time
+                    idx1 = idx2
+                wedArrIdx.append(time.booking_window_id)
             elif time.day_of_week == 'Thursday':
-                thuArr.append(time)
+                if len(thuArrIdx) == 0:
+                    idx1 = time.booking_window_id
+                    start_time = booking_increments[idx1].start_time
+                else:
+                    idx2 = time.booking_window_id
+                    if idx2 - idx1 > 1:
+                        end_time = booking_increments[idx1].end_time
+                        orderedArr[time.day_of_week].append({'day_of_week':time.day_of_week, 'start_time': start_time, 'end_time': end_time})
+                        start_time = booking_increments[idx2].start_time
+                    idx1 = idx2
+                thuArrIdx.append(time.booking_window_id)
             elif time.day_of_week == 'Friday':
-                friArr.append(time)
+                if len(friArrIdx) == 0:
+                    idx1 = time.booking_window_id
+                    start_time = booking_increments[idx1].start_time
+                else:
+                    idx2 = time.booking_window_id
+                    if idx2 - idx1 > 1:
+                        end_time = booking_increments[idx1].end_time
+                        orderedArr[time.day_of_week].append({'day_of_week':time.day_of_week, 'start_time': start_time, 'end_time': end_time})
+                        start_time = booking_increments[idx2].start_time
+                    idx1 = idx2
+                friArrIdx.append(time.booking_window_id)
             elif time.day_of_week == 'Saturday':
-                satArr.append(time)
+                if len(satArrIdx) == 0:
+                    idx1 = time.booking_window_id
+                    start_time = booking_increments[idx1].start_time
+                else:
+                    idx2 = time.booking_window_id
+                    if idx2 - idx1 > 1:
+                        end_time = booking_increments[idx1].end_time
+                        orderedArr[time.day_of_week].append({'day_of_week':time.day_of_week, 'start_time': start_time, 'end_time': end_time})
+                        start_time = booking_increments[idx2].start_time
+                    idx1 = idx2
+                satArrIdx.append(time.booking_window_id)
             elif time.day_of_week == 'Sunday':
-                sunArr.append(time)
+                if len(sunArrIdx) == 0:
+                    idx1 = time.booking_window_id
+                    start_time = booking_increments[idx1].start_time
+                else:
+                    idx2 = time.booking_window_id
+                    if idx2 - idx1 > 1:
+                        end_time = booking_increments[idx1].end_time
+                        orderedArr[time.day_of_week].append({'day_of_week':time.day_of_week, 'start_time': start_time, 'end_time': end_time})
+                        start_time = booking_increments[idx2].start_time
+                    idx1 = idx2
+                sunArrIdx.append(time.booking_window_id)
+
+        end_time = booking_increments[idx2].end_time
+        orderedArr[refDay].append({'day_of_week':refDay,'start_time': start_time, 'end_time': end_time})            
+
+        monArr = orderedArr['Monday']
+        tueArr = orderedArr['Tuesday']
+        wedArr = orderedArr['Wednesday']
+        thuArr = orderedArr['Thursday']
+        friArr = orderedArr['Friday']
+        satArr = orderedArr['Saturday']
+        sunArr = orderedArr['Sunday']
         
-        orderedArr = [*monArr, *tueArr, *wedArr, *thuArr, *friArr, *satArr, *sunArr]
+        orderedArray = []
+        orderedArray = [*monArr, *tueArr, *wedArr, *thuArr, *friArr, *satArr, *sunArr]
 
         payload = {}
-        payload['availability'] = orderedArr
-        
+        payload['availability'] = orderedArray
         return payload
 
     @token_auth.login_required
@@ -183,25 +328,56 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
         Returns the staff availability
         """
         check_staff_existence(user_id)
-
+        booking_increments = LookupBookingTimeIncrements.query.all()
         availability = TelehealthStaffAvailability.query.filter_by(user_id=user_id).all()
         payload = {}
         if availability:
             for time in availability:
                 db.session.delete(time)
         payload['availability'] = []
+        availabilityIdxArr = {}
+        availabilityIdxArr['Monday'] = []
+        availabilityIdxArr['Tuesday'] = []
+        availabilityIdxArr['Wednesday'] = []
+        availabilityIdxArr['Thursday'] = []
+        availabilityIdxArr['Friday'] = []
+        availabilityIdxArr['Saturday'] = []
+        availabilityIdxArr['Sunday'] = []
+
 
         if request.parsed_obj['availability']:
             avail = request.parsed_obj['availability']
+            data = {}
             for time in avail:
                 # end time must be after start time
-                if time.start_time > time.end_time:
+                startIdx = None
+                endIdx = None
+                if time['start_time'] > time['end_time']:
                     db.session.rollback()
                     raise InputError(status_code=405,message='Start Time must be before End Time')
+                for inc in booking_increments:
+                    if time['start_time'] == inc.start_time:
+                        # notice, booking_increment idx starts at 1, so python indices should be 
+                        # 1 less.
+                        startIdx = inc.idx - 1
+                    elif(time['end_time'] == inc.end_time):
+                        endIdx = inc.idx - 1
+                    
+                    if startIdx is not None and \
+                        endIdx is not None:
+                        break
+                for idx in range(startIdx,endIdx+1):
+                    if idx not in availabilityIdxArr[time['day_of_week']]:
+                        availabilityIdxArr[time['day_of_week']].append(idx)
+                        data['user_id'] = user_id
+                        data['booking_window_id'] = idx
+                        data['day_of_week'] = time['day_of_week']
+                        data_in = TelehealthStaffAvailabilitySchema().load(data)
+                        db.session.add(data_in)
+                        payload['availability'].append(time)
+                    else:
+                        continue
 
-                time.user_id = user_id
-                db.session.add(time)
-                payload['availability'].append(time)
         db.session.commit()
         return payload
 
