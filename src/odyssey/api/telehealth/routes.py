@@ -326,15 +326,42 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
     def post(self,user_id):
         """
         Returns the staff availability
+
+        The input schema is supposed to look like: 
+
+        availability: [{'day_of_week': str, 'start_time': Time, 'end_time': Time}]
+        Note, availability is an array of json objects.
+
+        However, we store this information in the database as user_id, day_of_week, booking_window_id
+        where booking_window_id is in increments of 5 minutes. 
+
+        AKA, we have to convert availability to booking_window_id
+
+        Example:
+        user_id, day_of_week, booking_window_id
+        1, 'Monday', 2
+        1, 'Monday', 3
+        1, 'Monday', 4
+        1, 'Monday', 5
+        1, 'Monday', 10
+        1, 'Monday', 11
+        1, 'Monday', 12
         """
+        # Detect if the staff exists
         check_staff_existence(user_id)
+        # grab the static list of booking window id's
         booking_increments = LookupBookingTimeIncrements.query.all()
+        # Get the staff's availability
         availability = TelehealthStaffAvailability.query.filter_by(user_id=user_id).all()
-        payload = {}
+        # If the staff already has information in it, delete it, and take the new payload as
+        # truth. (This was requested by FE)
         if availability:
             for time in availability:
                 db.session.delete(time)
+
+        payload = {}        
         payload['availability'] = []
+        # Create an idx dictionary array
         availabilityIdxArr = {}
         availabilityIdxArr['Monday'] = []
         availabilityIdxArr['Tuesday'] = []
@@ -348,13 +375,18 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
         if request.parsed_obj['availability']:
             avail = request.parsed_obj['availability']
             data = {}
+            # Loop through the input payload of start_time and end_times
             for time in avail:
                 # end time must be after start time
-                startIdx = None
-                endIdx = None
                 if time['start_time'] > time['end_time']:
                     db.session.rollback()
                     raise InputError(status_code=405,message='Start Time must be before End Time')
+                
+                # This for loop loops through the booking increments to find where the 
+                # start_time input value is equal to booking increment start time index
+                # And same with ending idx.
+                startIdx = None
+                endIdx = None
                 for inc in booking_increments:
                     if time['start_time'] == inc.start_time:
                         # notice, booking_increment idx starts at 1, so python indices should be 
@@ -362,10 +394,12 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
                         startIdx = inc.idx - 1
                     elif(time['end_time'] == inc.end_time):
                         endIdx = inc.idx - 1
-                    
+                    # Break out of the for loop when startIdx and endIdx are no longer None
                     if startIdx is not None and \
                         endIdx is not None:
                         break
+                # Now, you loop through to store the booking window id in to TelehealthStaffAvailability
+                # table.
                 for idx in range(startIdx,endIdx+1):
                     if idx not in availabilityIdxArr[time['day_of_week']]:
                         availabilityIdxArr[time['day_of_week']].append(idx)
