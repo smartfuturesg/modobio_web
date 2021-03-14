@@ -7,14 +7,14 @@ from flask_restx import Resource
 
 from odyssey import db
 from odyssey.api import api
-from odyssey.api.staff.models import StaffProfile, StaffRoles, StaffRecentClients
+from odyssey.api.staff.models import StaffOperationalTerritories, StaffProfile, StaffRoles, StaffRecentClients
 from odyssey.api.user.models import User, UserLogin
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.errors import UnauthorizedUser, StaffEmailInUse, StaffNotFound, ClientNotFound
 from odyssey.api.user.schemas import UserSchema, StaffInfoSchema
 from odyssey.api.staff.schemas import (
+    StaffOperationalTerritoriesNestedSchema,
     StaffProfileSchema, 
-    StaffSearchItemsSchema,
     StaffRolesSchema,
     StaffRecentClientsSchema,
     StaffTokenRequestSchema
@@ -122,9 +122,101 @@ class UpdateRoles(Resource):
         """
         staff_user, _ = token_auth.current_user()
        
-        staff_roles = db.session.query(StaffRoles.role).filter(StaffRoles.user_id==user_id).all()
+        staff_roles = StaffRoles.query.filter_by(user_id = user_id)
 
         return staff_roles
+
+@ns.route('/operational-territories/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class OperationalTerritories(Resource):
+    """
+    View and update operational territories for staff member with a given user_id
+    """
+    @token_auth.login_required(user_type=('staff_self',))
+    @accepts(schema=StaffOperationalTerritoriesNestedSchema, api=ns)
+    @responds(schema = StaffOperationalTerritoriesNestedSchema, status_code=201, api=ns)   
+    def post(self, user_id):
+        staff_user, _ = token_auth.current_user()
+
+        # staff are only allowed to edit their own info
+        if staff_user.user_id != user_id:
+            raise UnauthorizedUser(message="")
+        data = request.parsed_obj
+        # current operational territories
+        current_territories = db.session.query(
+                        StaffOperationalTerritories.role_id, StaffOperationalTerritories.operational_territory_id
+                        ).filter(
+                            StaffOperationalTerritories.user_id==user_id
+                        ).all()
+
+        # ids of current roles held by staff member             
+        current_role_ids = db.session.query(
+                        StaffRoles.idx
+                        ).filter(
+                            StaffRoles.user_id == user_id
+                        ).all()
+        current_role_ids = [x[0] for x in current_role_ids]
+
+        for territory in data["operational_territories"]:
+            # check if role-territory combination already exists. if so, skip it
+            if not (territory.role_id, territory.operational_territory_id) in current_territories:
+                # ensure role_id is assigned to this staff member
+                if territory.role_id in current_role_ids:
+                    territory.user_id = user_id
+                    db.session.add(territory)
+                else:
+                    db.session.rollback()
+                    raise UnauthorizedUser(message="the staff member does not have this role")
+
+        db.session.commit()
+        
+        # current operational territories
+        current_territories = db.session.query(
+                        StaffOperationalTerritories.role_id, StaffOperationalTerritories.operational_territory_id
+                        ).filter(
+                            StaffOperationalTerritories.user_id==user_id
+                        ).all()
+
+        return {"operational_territories": current_territories}
+
+    @token_auth.login_required
+    @responds(schema = StaffOperationalTerritoriesNestedSchema, status_code=200, api=ns)   
+    def get(self, user_id):
+        """
+        Responds with current operational territories for each role a staff user
+        has assumed
+        """
+        # current operational territories
+        current_territories = db.session.query(
+                        StaffOperationalTerritories.role_id, StaffOperationalTerritories.operational_territory_id
+                        ).filter(
+                            StaffOperationalTerritories.user_id==user_id
+                        ).all()
+        return {"operational_territories": current_territories}
+
+    @token_auth.login_required(user_type=('staff_self',))
+    @accepts(schema=StaffOperationalTerritoriesNestedSchema, api=ns)
+    @responds(schema = StaffOperationalTerritoriesNestedSchema, status_code=204, api=ns)   
+    def delete(self, user_id):
+        """
+        Uses the same payload as the POST request on this endpoint to delete 
+        entries to the operational territories database.
+        """
+        data = request.parsed_obj
+
+        for territory in data["operational_territories"]:
+            StaffOperationalTerritories.query.filter_by(
+                                                    user_id=user_id
+                                                ).filter_by(
+                                                    operational_territory_id = territory.operational_territory_id
+                                                ).filter_by(
+                                                    role_id = territory.role_id
+                                                ).delete()
+        
+        db.session.commit()
+
+        return 
+    
 
 @ns.route('/recentclients/')
 class RecentClients(Resource):

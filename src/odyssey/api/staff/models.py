@@ -102,9 +102,7 @@ class StaffRoles(db.Model):
 
     Roles must be verified either by a manual or automatic internal review process.
     Some roles will be location based where verification is required for each locality
-    (state, country etc.)
-
-    Each user_id, role, and locality (state, country) will have a unique entry in this table.
+    (state, country etc.). 
     """
     __tablename__ = 'StaffRoles'
     
@@ -163,3 +161,57 @@ class StaffRoles(db.Model):
     """
 
 
+class StaffOperationalTerritories(db.Model):
+    """ 
+    Locations where staff members operate. Each entry is tied to a role in the StaffRoles table. 
+    Depending on the profession, the role-territory paid must be verified with an active identification number
+    or some other internal process. Verifications will be stored in another table. 
+
+    """
+    __tablename__ = 'StaffOperationalTerritories'
+    
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    operational_territory_id = db.Column(db.Integer, db.ForeignKey('LookupTerritoriesofOperation.idx'))
+    """
+    Operational subterritory from the operational territories lookup table.
+
+    There will be an entry in this table for each role-operational_territory pair. For some professions, we will
+    store verification IDs which may differ by sub_territory (e.g. medical doctors must have a different license to practice
+    in each state).
+
+    :type: int, foreign key to :attr:`LookupTerritoriesofOperation.idx <odyssey.models.lookup.LookupTerritoriesofOperation.idx>`
+    """
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    """
+    Staff member user_id number, foreign key to User.user_id
+
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
+    """
+
+    role_id = db.Column(db.Integer, db.ForeignKey('StaffRoles.idx', ondelete="CASCADE"), nullable=False)
+    """
+    Role from the StaffRoles table. 
+
+    :type: int, foreign key to :attr:`StaffRoles.idx <odyssey.models.staff.StaffRoles.idx>`
+    """
