@@ -169,11 +169,32 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
     def get(self,user_id):
         """
         Returns the staff availability
+
+        This should be for FE usage. 
+
+        Opposite of the POST request, the table stores this table as:
+        user_id, day_of_week, booking_window_id
+        1, 'Monday', 2
+        1, 'Monday', 3
+        1, 'Monday', 4
+        1, 'Monday', 5
+        1, 'Monday', 10
+        1, 'Monday', 11
+        1, 'Monday', 12
+
+        So, now we have to convert booking_window_id back to human understandable time
+        and return the payload:
+
+        availability: [{'day_of_week': str, 'start_time': Time, 'end_time': Time}]        
+
         """
         # grab staff availability
         check_staff_existence(user_id)
+        # Grab the staff's availability and sorted by booking_window_id AND day_of_week
+        # Both of the sorts are necessary for this conversion
         availability = TelehealthStaffAvailability.query.filter_by(user_id=user_id).\
                         order_by(TelehealthStaffAvailability.day_of_week.asc(),TelehealthStaffAvailability.booking_window_id.asc()).all()
+        # pull the static booking window ids
         booking_increments = LookupBookingTimeIncrements.query.all()
 
         monArr = []
@@ -203,29 +224,46 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
         orderedArr['Saturday'] = []
         orderedArr['Sunday'] = []
         daySwitch = 0
-        for idx,time in enumerate(availability):
-            
+
+        for time in availability:
+            # Get the current day we are iterating through
             currDay = time.day_of_week
 
+            # Day switch and reference day are necessary to know when the day switches.
             if daySwitch == 0:
                 refDay = time.day_of_week 
                 daySwitch = 1
-
+            # If the day switches, then that indicates to store the last index for the day
+            # Then it updates the refDay
             if currDay != refDay:
                 end_time = booking_increments[idx2].end_time
                 orderedArr[refDay].append({'day_of_week':refDay,'start_time': start_time, 'end_time': end_time})
                 daySwitch = 0
 
+            # This next block of code is copy paste for Monday - Sunday.
             if time.day_of_week == 'Monday':                
+                # If this is the first time entering this day, then the first index will be used
+                # to store the start_time
                 if len(monArrIdx) == 0:
                     idx1 = time.booking_window_id
                     start_time = booking_increments[idx1].start_time
                 else:
-                    idx2 = time.booking_window_id             
+                    # This is the 2+ iteration through this block
+                    # now, idx2 should be greater than idx1 because idx1 was stored in the 
+                    # previous iteration
+                    idx2 = time.booking_window_id
+                    # If idx2 - idx1 > 1, then that indicates a gap in time.
+                    # If a gap exists, then we store the end_time, and update the start_time.
+                    # EXAMPLE: 
+                    # Monday Availability ID's: 1,2,3,4,5,6,7,8,9,10,11,12,   24,25,26,27,28
+                    # So it will look like:
+                    # [{'day_of_week':'Monday, 'start_time': id1.start_time, 'end_time': id12.end_time},
+                    # {'day_of_week':'Monday, 'start_time': id24.start_time, 'end_time': id28.end_time}]
                     if idx2 - idx1 > 1:
                         end_time = booking_increments[idx1].end_time
                         orderedArr[time.day_of_week].append({'day_of_week':time.day_of_week, 'start_time': start_time, 'end_time': end_time})
                         start_time = booking_increments[idx2].start_time
+                    # We "slide" idx1 up to where idx2 is, so idx1 should always lag idx2
                     idx1 = idx2
 
                 monArrIdx.append(time.booking_window_id)
@@ -302,9 +340,11 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
                     idx1 = idx2
                 sunArrIdx.append(time.booking_window_id)
 
+        # This is take the very last day and set the final end_time
         end_time = booking_increments[idx2].end_time
         orderedArr[refDay].append({'day_of_week':refDay,'start_time': start_time, 'end_time': end_time})            
 
+        # Store info in to respective days
         monArr = orderedArr['Monday']
         tueArr = orderedArr['Tuesday']
         wedArr = orderedArr['Wednesday']
@@ -314,6 +354,7 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
         sunArr = orderedArr['Sunday']
         
         orderedArray = []
+        # Unload ordered array in to a super array
         orderedArray = [*monArr, *tueArr, *wedArr, *thuArr, *friArr, *satArr, *sunArr]
 
         payload = {}
@@ -325,7 +366,7 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
     @responds(schema=TelehealthStaffAvailabilityOutputSchema, api=ns, status_code=201)
     def post(self,user_id):
         """
-        Returns the staff availability
+        Posts the staff availability
 
         The input schema is supposed to look like: 
 
