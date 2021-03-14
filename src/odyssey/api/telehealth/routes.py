@@ -30,8 +30,6 @@ from odyssey.utils.constants import TWILIO_ACCESS_KEY_TTL, DAY_OF_WEEK
 from odyssey.utils.errors import GenericNotFound, InputError, UnauthorizedUser
 from odyssey.utils.misc import check_client_existence, check_staff_existence, grab_twilio_credentials
 
-import numpy as np
-
 ns = api.namespace('telehealth', description='telehealth bookings management API')
 
 @ns.route('/client/time-select/')
