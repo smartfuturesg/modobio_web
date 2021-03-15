@@ -1,7 +1,7 @@
 """add telehealth booking increments
 
 Revision ID: 342bfe80cc99
-Revises: 1cda89151944
+Revises: 0a355c29b670
 Create Date: 2021-03-12 12:15:19.289430
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '342bfe80cc99'
-down_revision = '1cda89151944'
+down_revision = '0a355c29b670'
 branch_labels = None
 depends_on = None
 
