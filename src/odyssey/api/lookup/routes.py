@@ -22,7 +22,8 @@ from odyssey.api.lookup.models import (
      LookupTelehealthSessionDuration,
      LookupTerritoriesofOperation,
      LookupTransactionTypes,
-     LookupNotifications
+     LookupNotifications,
+     LookupEmergencyNumbers
 )
 from odyssey.api.lookup.schemas import (
     LookupActivityTrackersOutputSchema,
@@ -40,7 +41,8 @@ from odyssey.api.lookup.schemas import (
     LookupNotificationsOutputSchema,
     LookupCareTeamResourcesOutputSchema,
     LookupTimezones,
-    LookupTelehealthSettingsSchema
+    LookupTelehealthSettingsSchema,
+    LookupEmergencyNumbersOutputSchema
 )
 from odyssey.utils.misc import check_drink_existence
 
@@ -320,4 +322,16 @@ class LookupTerritoriesofOperationApi(Resource):
     def get(self):
         """get contents of operational territories lookup table"""
         res = LookupTerritoriesofOperation.query.all()
+        return {'total_items': len(res), 'items': res}
+
+@ns.route('/emergency-numbers/')
+class LookupEmergencyNumbersApi(Resource):
+    """
+    Endpoint that returns emergency phone number for the Ambulance service
+    """
+    @token_auth.login_required
+    @responds(schema=LookupEmergencyNumbersOutputSchema, status_code=200, api=ns)
+    def get(self):
+        """GET request for the list of emergency numbers"""
+        res = LookupEmergencyNumbers.query.filter_by(service='Ambulance').all()
         return {'total_items': len(res), 'items': res}
