@@ -43,7 +43,7 @@ class TelehealthMeetingRoomSchema(ma.SQLAlchemyAutoSchema):
         model = TelehealthMeetingRooms
         exclude = ('created_at', 'updated_at', 'staff_access_token', 'client_access_token')
 
-    access_token = fields.String(description='meeting room access token. To be shown only to the owner', required=False)
+    access_token = fields.String(metadata={'description':'meeting room access token. To be shown only to the owner'}, required=False)
 
 class TelehealthQueueClientPoolSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -59,5 +59,5 @@ class TelehealthQueueClientPoolSchema(ma.SQLAlchemyAutoSchema):
         return TelehealthQueueClientPool(**data)    
 
 class TelehealthQueueClientPoolOutputSchema(Schema):
-    queue = fields.Nested(TelehealthQueueClientPoolSchema(many=True),missing=[],description='SORTED queue of client pool')
+    queue = fields.Nested(TelehealthQueueClientPoolSchema(many=True),missing=[],metadata={'description':'SORTED queue of client pool'})
     total_queue = fields.Integer()
