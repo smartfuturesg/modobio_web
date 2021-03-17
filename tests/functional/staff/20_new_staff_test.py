@@ -1,10 +1,11 @@
 import base64
+import random
 
 from flask.json import dumps
-from requests.auth import _basic_auth_str
 
-from odyssey.api.user.models import User, UserLogin
-from odyssey.api.staff.models import StaffProfile, StaffRoles
+from odyssey.api.lookup.models import LookupTerritoriesofOperation
+from odyssey.api.user.models import User
+from odyssey.api.staff.models import StaffOperationalTerritories, StaffRoles
 from odyssey.utils.constants import ACCESS_ROLES
 from .data import users_staff_new_user_data
 
@@ -46,7 +47,6 @@ def test_get_staff_user_info(test_client, init_database, staff_auth_header):
     assert response.json['user_info']
 
                 
-
 def test_staff_login(test_client, init_database, staff_auth_header):
     """
     GIVEN a api fr requesting an API access token
@@ -129,3 +129,88 @@ def test_check_staff_roles(test_client, init_database, staff_auth_header):
     assert response.status_code == 200
     assert sorted(staff_roles) == sorted(ACCESS_ROLES)
 
+def test_add_staff_operational_territory(test_client, init_database, staff_auth_header):
+    """
+    GIVEN a api end point for adding operational territories to a staff member's account
+    WHEN the '/staff/operational-territories/<user_id>/' resource  is requested to be created
+    THEN check the response is valid
+    """
+    # pull up staff member and their current roles
+    staff = User.query.filter_by(is_staff=True).first()
+    staff_roles = StaffRoles.query.filter_by(user_id = staff.user_id).all()
+
+    possible_territories = init_database.session.query(LookupTerritoriesofOperation.idx).all()
+    possible_territories = [x[0] for x in possible_territories]
+    payload  = {'operational_territories' : []}
+
+    # for each doctor, trainer, nutritionist, physical_therapist role randomly add a few territories of operation
+    for role in staff_roles:
+        if role.role in ('doctor', 'nutrition', 'trainer', 'physical_therapist'):
+            add_territories = random.sample(possible_territories, k=random.randint(1, len(possible_territories)))
+            for territory in add_territories:
+                payload['operational_territories'].append({'role_id': role.idx, 
+                                                           'operational_territory_id': territory})
+
+    
+        
+    response = test_client.post(f'/staff/operational-territories/{staff.user_id}/',
+                                headers=staff_auth_header, 
+                                data=dumps(payload), 
+                                content_type='application/json')
+    
+    # bring up territories
+    staff_territories = StaffOperationalTerritories.query.filter_by(user_id = staff.user_id).all()
+    
+    # some simple checks for validity
+    assert response.status_code == 201
+    assert len(staff_territories) == len(payload['operational_territories'])
+
+def test_check_staff_operational_territories(test_client, init_database, staff_auth_header):
+    """
+    GIVEN a api end point for checking a staff member's operational territories 
+    WHEN the '/staff/operational-territories/<user_id>/' resource  is requested GET
+    THEN check the response is valid
+    """
+
+    # get staff authorization to view client data
+    staff = User.query.filter_by(is_staff=True).first()
+    response = test_client.get(f'/staff/operational-territories/{staff.user_id}/',
+                                headers=staff_auth_header, 
+                                content_type='application/json')
+    # bring up territories
+    staff_territories = StaffOperationalTerritories.query.filter_by(user_id = staff.user_id).all()
+    
+    # some simple checks for validity
+    assert response.status_code == 200
+    assert len(staff_territories) == len(response.json['operational_territories'])
+
+def test_delete_staff_operational_territories(test_client, init_database, staff_auth_header):
+    """
+    GIVEN a api end point for deleting a staff member's operational territories 
+    WHEN the '/staff/operational-territories/<user_id>/' resource  is requested GET
+    THEN check the response is valid
+    """
+
+    # pull up staff member and current operational territories
+    staff = User.query.filter_by(is_staff=True).first()
+    staff_territories = StaffOperationalTerritories.query.filter_by(user_id = staff.user_id).all()
+
+
+    delete_territories = random.sample(staff_territories, k=random.randint(1, len(staff_territories)))
+
+    # build up payload of territories to delete from database
+    payload  = {'operational_territories' : []}
+    for territory in delete_territories:
+        payload['operational_territories'].append({'role_id': territory.role_id, 
+                                                   'operational_territory_id': territory.operational_territory_id})
+
+    response = test_client.delete(f'/staff/operational-territories/{staff.user_id}/',
+                                headers=staff_auth_header, 
+                                data=dumps(payload),
+                                content_type='application/json')
+
+    # bring up territories again
+    staff_territories_refresh = StaffOperationalTerritories.query.filter_by(user_id = staff.user_id).all()
+    # some simple checks for validity
+    assert response.status_code == 204
+    assert len(staff_territories_refresh) == len(staff_territories)-len(delete_territories)
