@@ -239,6 +239,10 @@ class Clients(Resource):
         es = current_app.elasticsearch
         if not es: return
         
+        if not es.indices.exists('clients'):
+            print('Oops! No Clients Exist Yet')
+            raise ContentNotFound()
+        
         #clean up and validate input data
         startAt = request.args.get('_from', 0, type= int)
         per_page = min(request.args.get('per_page', 10, type=int), 100)
