@@ -1,6 +1,8 @@
 
 from flask.json import dumps
 
+from odyssey.api.client.models import ClientMobileSettings
+
 from tests.functional.client.data import clients_mobile_settings
 
 def test_post_client_mobile_settings(test_client, init_database, client_auth_header):
@@ -14,7 +16,6 @@ def test_post_client_mobile_settings(test_client, init_database, client_auth_hea
                                 headers=client_auth_header, 
                                 data=dumps(clients_mobile_settings), 
                                 content_type='application/json')
-
     
     assert response.status_code == 201
     assert response.json.get('date_format') == clients_mobile_settings['date_format']
@@ -45,8 +46,12 @@ def test_put_client_mobile_settings(test_client, init_database, client_auth_head
                                 headers=client_auth_header, 
                                 content_type='application/json')
     
+    
+    client_settings  = ClientMobileSettings.query.filter_by(user_id = 1).one_or_none()
+    
     assert response.status_code == 201
     assert response.json.get('is_right_handed') == False
+    assert client_settings.is_right_handed == False
 
     #test request with invalid date format
     clients_mobile_settings['date_format'] = 'notadateformat'

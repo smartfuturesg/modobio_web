@@ -1106,22 +1106,16 @@ class ClientMobileSettingsApi(Resource):
         """
 
         check_client_existence(user_id)
-
         settings = ClientMobileSettings.query.filter_by(user_id=user_id).one_or_none()
         if not settings:
             raise IllegalSetting(message=f"Mobile settings for user_id {user_id} do not exist. Please use POST method")
 
-        data = request.parsed_obj.__dict__
-        del data['_sa_instance_state']
+        data = request.json
         settings.update(data)
         db.session.commit()
 
         return request.parsed_obj
-        request.parsed_obj.user_id = user_id
-        db.session.add(request.parsed_obj)
-        db.session.commit()
 
-        return request.parsed_obj
 
 @ns.route('/height/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
@@ -1258,8 +1252,7 @@ class ClientTransactionApi(Resource):
         if not transaction:
             raise TransactionNotFound(transaction_id)
 
-        data = request.parsed_obj.__dict__
-        del data['_sa_instance_state']
+        data = request.json
 
         transaction.update(data)
         db.session.commit()

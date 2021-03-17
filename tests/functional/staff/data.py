@@ -13,4 +13,3 @@ users_staff_new_user_data = {
   ]
   }
 }
-
