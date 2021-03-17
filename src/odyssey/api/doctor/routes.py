@@ -187,7 +187,6 @@ class MedicalGenInformation(Resource):
 
             payload['gen_info'] = generalInfo
 
-        # breakpoint()
         # Before storing data, delete what exists in the database
         # If the user submits something for medication history, then removes it from the payload, 
         # remove everything for that user in medication history table
@@ -314,25 +313,25 @@ class MedicalGeneralInformation(Resource):
         '''
         check_client_existence(user_id)
 
-        generalInfo = request.parsed_obj
+        generalInfo = request.json
         if generalInfo:
-            del generalInfo.__dict__['_sa_instance_state']
-            if generalInfo.primary_doctor_contact_name:
+            # del generalInfo.__dict__['_sa_instance_state']
+            if generalInfo.get('primary_doctor_contact_name'):
                 # If the client has a primary care doctor, we need either the 
                 # phone number or email
-                if not generalInfo.primary_doctor_contact_phone and \
-                    not generalInfo.primary_doctor_contact_email:
+                if not generalInfo.get('primary_doctor_contact_phone') and \
+                    not generalInfo.get('primary_doctor_contact_email'):
                     raise InputError(status_code = 405,message='If a primary doctor name is given, the client must also\
                                         provide the doctors phone number or email')      
-            if generalInfo.blood_type or generalInfo.blood_type_positive:
+            if generalInfo.get('blood_type') or generalInfo.get('blood_type_positive'):
                 # if the client starts by indication which blood type they have or the sign
                 # they also need the other.
-                if generalInfo.blood_type is None or generalInfo.blood_type_positive is None:
+                if generalInfo.get('blood_type') is None or generalInfo.get('blood_type_positive') is None:
                     raise InputError(status_code = 405,message='If bloodtype or sign is given, client must provide both.')
                 else:
-                    generalInfo.__dict__['user_id'] = user_id
+                    generalInfo['user_id'] = user_id
             genInfo = MedicalGeneralInfo.query.filter_by(user_id=user_id).one_or_none()
-            genInfo.update(generalInfo.__dict__)
+            genInfo.update(generalInfo)
         
         # insert results into the result table
         db.session.commit()
@@ -795,14 +794,12 @@ class MedicalFamilyHist(Resource):
         # the data expected for the backend is:
         # parameter: user_id 
         # payload: medical_condition_id, myself, father, mother, brother, sister
-
         for result in request.parsed_obj['conditions']:
             check_medical_condition_existence(result.medical_condition_id)
             user_and_medcon = MedicalFamilyHistory.query.filter_by(user_id=user_id).filter_by(medical_condition_id=result.medical_condition_id).one_or_none()
             
             if user_and_medcon:
                 # raise ContentNotFound()
-                del result.__dict__['_sa_instance_state']
                 user_and_medcon.update(result.__dict__)
             else:
                 result.user_id = user_id

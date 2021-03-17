@@ -1,4 +1,5 @@
 from marshmallow import Schema, fields, post_load, validate, pre_dump, validates, ValidationError
+from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, auto_field
 
 from odyssey import ma
 from odyssey.api.doctor.models import ( 
@@ -175,7 +176,7 @@ class MedicalConditionsOutputSchema(Schema):
     items = fields.Nested(MedicalConditionsSchema(many=True), missing = [])
     total_items = fields.Integer()
 
-class MedicalFamilyHistSchema(ma.SQLAlchemyAutoSchema):
+class MedicalFamilyHistSchema(SQLAlchemyAutoSchema):
     class Meta:
         model = MedicalFamilyHistory
         exclude = ('idx', 'created_at', 'updated_at')
