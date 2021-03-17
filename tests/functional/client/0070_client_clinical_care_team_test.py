@@ -185,16 +185,23 @@ def test_clinical_care_team_access(test_client, init_database, client_auth_heade
                             headers=headers, 
                             content_type='application/json')
     token = response.json.get('token')
+    team_member_user_id = response.json.get('user_id')
 
     auth_header = {'Authorization': f'Bearer {token}'}
     
     #####
-    # Try to grab the blood tests this client has submitted
+    # Try to grab the blood tests and social history this client has submitted
     #####
     response = test_client.get(f"/doctor/bloodtest/all/{1}/",
                                 headers=auth_header,
                                 content_type='application/json')
-    
+
     assert response.status_code == 204 # no content submitted yet but, sucessful request
+    
+    response = test_client.get(f"/doctor/medicalinfo/social/{1}/",
+                                headers=auth_header,
+                                content_type='application/json')
+
+    assert response.status_code == 200
     
 

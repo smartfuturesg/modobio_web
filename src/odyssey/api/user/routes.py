@@ -196,7 +196,9 @@ class NewStaffUser(Resource):
         db.session.commit()
         db.session.refresh(user)
         payload = user.__dict__
-        payload["staff_info"] = {"access_roles": staff_info.get('access_roles', []) }
+        payload["staff_info"] = {"access_roles": staff_info.get('access_roles', []), 
+                                "access_roles_v2": StaffRoles.query.filter_by(user_id = user.user_id)}
+    
         payload["user_info"] =  user
         return payload
 
@@ -208,7 +210,7 @@ class StaffUserInfo(Resource):
     @responds(schema=NewStaffUserSchema, status_code=200, api=ns)
     def get(self, user_id):
         user = User.query.filter_by(user_id=user_id).one_or_none()
-        staff_roles = db.session.query(StaffRoles.role).filter(StaffRoles.user_id==user_id).all()
+        staff_roles = StaffRoles.query.filter_by(user_id = user.user_id)
 
         access_roles = []
         for role in staff_roles:
@@ -217,7 +219,8 @@ class StaffUserInfo(Resource):
         payload = {
                     "staff_info": 
                         {
-                            "access_roles": access_roles
+                            "access_roles": access_roles,
+                            "access_roles_v2": staff_roles
                         },
                     "user_info": 
                         user}

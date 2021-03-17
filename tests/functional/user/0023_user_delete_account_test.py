@@ -77,7 +77,7 @@ def test_account_delete_request(test_client, init_database, staff_auth_header):
     for table in tableList:
         exists = db.session.execute("SELECT EXISTS(SELECT * from \"{}\" WHERE user_id={});".format(table.table_name, staff_client_id))
         result = exists.fetchall().pop()
-        assert result.values()[0] == False
+        assert result[0] == False
     assert tableList
 
     #   -Check info reported by staff user on client user is still in db

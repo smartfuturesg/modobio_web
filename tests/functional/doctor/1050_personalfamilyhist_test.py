@@ -4,7 +4,7 @@ import time
 from flask.json import dumps
 
 from odyssey.api.user.models import User, UserLogin
-from odyssey.api.doctor.models import MedicalHistory 
+from odyssey.api.doctor.models import MedicalHistory, MedicalFamilyHistory
 from .data import doctor_personalfamilyhist_post_data, doctor_personalfamilyhist_put_data
 
 
@@ -24,10 +24,13 @@ def test_post_personalfamily_medical_history(test_client, init_database, client_
                                 headers=client_auth_header, 
                                 data=dumps(payload), 
                                 content_type='application/json')
-    
+                                
+    client_data = MedicalFamilyHistory.query.filter_by(user_id=1).all()
+
     assert response.status_code == 201
     assert response.json['total_items'] == 2
-    assert len(response.json['items']) == 2           
+    assert len(response.json['items']) == 2
+    assert len(client_data) == 2           
 
 def test_put_personalfamily_medical_history(test_client, init_database, client_auth_header):
     """
@@ -42,7 +45,7 @@ def test_put_personalfamily_medical_history(test_client, init_database, client_a
                                 headers=client_auth_header, 
                                 data=dumps(payload), 
                                 content_type='application/json')
-
+    
     assert response.status_code == 201
     assert response.json['total_items'] == 2
     assert len(response.json['items']) == 2

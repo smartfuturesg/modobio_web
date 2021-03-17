@@ -4,7 +4,7 @@ import time
 from flask.json import dumps
 
 from odyssey.api.user.models import User, UserLogin
-from odyssey.api.doctor.models import MedicalHistory 
+from odyssey.api.doctor.models import MedicalHistory, MedicalGeneralInfo 
 from .data import (
     doctor_medicalgeneralinfo_post_data,
     doctor_medicalgeneralinfo_put_data,
@@ -50,8 +50,11 @@ def test_put_general_medical_history(test_client, init_database, client_auth_hea
                                 data=dumps(payload), 
                                 content_type='application/json')
 
+    client_data = MedicalGeneralInfo.query.filter_by(user_id = 1).one_or_none()
+    
     assert response.status_code == 201
     assert response.json['primary_doctor_contact_name'] == 'Dr Steve'
+    assert client_data.primary_doctor_contact_name == 'Dr Steve'
 
 def test_get_general_medical_history(test_client, init_database, client_auth_header, staff_auth_header):
     """

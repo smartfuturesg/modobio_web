@@ -142,17 +142,22 @@ class BasicAuth(object):
         requested_user_id = request.view_args.get('user_id')
 
         if requested_user_id:
-            # user is attemoting to access their own data
+            # user is attempting to access their own data
             if int(requested_user_id) == user.user_id:
                 return
             # client would like to see another client's data
+            # through the clinical care team system
             else:
                 # ensure request is GET
                 if request.method != 'GET':
                     raise LoginNotAuthorized()
-                # resources must be specified for endpoint
+                # resources must be specified for endpoint designated by table name
+                # e.g. @token_auth.login_required(resources=('MedicalSocialHistory','MedicalSTDHistory'))
                 if len(resources) == 0: 
                     raise LoginNotAuthorized()
+                # set the context and successful authorizations list in the g object
+                g.clinical_care_context = True 
+                g.clinical_care_authorized_resources = []
                 # search db for this resource authorization
                 for resource in resources:
                     is_authorized = db.session.query(
@@ -163,10 +168,11 @@ class BasicAuth(object):
                         ).filter(LookupClinicalCareTeamResources.resource_name == resource
                         ).all()
                     if len(is_authorized) == 1:
+                        g.clinical_care_authorized_resources.append(resource)
                         continue
-                    else:
-                        # this user does not have access to this content
-                        raise LoginNotAuthorized()
+                if len(g.clinical_care_authorized_resources) == 0:
+                    # this user does not have access to this content
+                    raise LoginNotAuthorized()
         return
 
     def staff_access_check(self, user, user_type, staff_roles=None):
