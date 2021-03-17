@@ -2,7 +2,7 @@ import os, boto3, secrets, pathlib
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
-from flask import request, current_app, jsonify
+from flask import request, current_app, g
 from flask_accepts import accepts, responds
 from flask_restx import Resource, Api
 
@@ -313,25 +313,25 @@ class MedicalGeneralInformation(Resource):
         '''
         check_client_existence(user_id)
 
-        generalInfo = request.parsed_obj
+        generalInfo = request.json
         if generalInfo:
-            del generalInfo.__dict__['_sa_instance_state']
-            if generalInfo.primary_doctor_contact_name:
+            # del generalInfo.__dict__['_sa_instance_state']
+            if generalInfo.get('primary_doctor_contact_name'):
                 # If the client has a primary care doctor, we need either the 
                 # phone number or email
-                if not generalInfo.primary_doctor_contact_phone and \
-                    not generalInfo.primary_doctor_contact_email:
+                if not generalInfo.get('primary_doctor_contact_phone') and \
+                    not generalInfo.get('primary_doctor_contact_email'):
                     raise InputError(status_code = 405,message='If a primary doctor name is given, the client must also\
                                         provide the doctors phone number or email')      
-            if generalInfo.blood_type or generalInfo.blood_type_positive:
+            if generalInfo.get('blood_type') or generalInfo.get('blood_type_positive'):
                 # if the client starts by indication which blood type they have or the sign
                 # they also need the other.
-                if generalInfo.blood_type is None or generalInfo.blood_type_positive is None:
+                if generalInfo.get('blood_type') is None or generalInfo.get('blood_type_positive') is None:
                     raise InputError(status_code = 405,message='If bloodtype or sign is given, client must provide both.')
                 else:
-                    generalInfo.__dict__['user_id'] = user_id
+                    generalInfo['user_id'] = user_id
             genInfo = MedicalGeneralInfo.query.filter_by(user_id=user_id).one_or_none()
-            genInfo.update(generalInfo.__dict__)
+            genInfo.update(generalInfo)
         
         # insert results into the result table
         db.session.commit()
@@ -617,6 +617,14 @@ class MedicalSocialHist(Resource):
         check_client_existence(user_id)
         social_hist = MedicalSocialHistory.query.filter_by(user_id=user_id).one_or_none()
         std_hist = MedicalSTDHistory.query.filter_by(user_id=user_id).all()
+
+        # this endpoint resturns two resources which can be accessed through the clinical care team system
+        # here we check if just one of the resources is authorzied. if so, remove the resource not authorized.
+        if g.get('clinical_care_context'):
+            if 'MedicalSTDHistory' not in g.clinical_care_authorized_resources:
+                std_hist = []
+            if 'MedicalSocialHistory' not in g.clinical_care_authorized_resources:
+                social_hist = {}
         payload = {'social_history': social_hist,
                    'std_history': std_hist}
         return payload
@@ -794,14 +802,12 @@ class MedicalFamilyHist(Resource):
         # the data expected for the backend is:
         # parameter: user_id 
         # payload: medical_condition_id, myself, father, mother, brother, sister
-
         for result in request.parsed_obj['conditions']:
             check_medical_condition_existence(result.medical_condition_id)
             user_and_medcon = MedicalFamilyHistory.query.filter_by(user_id=user_id).filter_by(medical_condition_id=result.medical_condition_id).one_or_none()
             
             if user_and_medcon:
                 # raise ContentNotFound()
-                del result.__dict__['_sa_instance_state']
                 user_and_medcon.update(result.__dict__)
             else:
                 result.user_id = user_id
