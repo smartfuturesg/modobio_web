@@ -22,7 +22,7 @@ class SystemTelehealthSettingsSchema(Schema):
     
     costs = fields.Nested(SystemTeleheathCostSchema(many=True),
                             missing={},
-                            description="Used when changing session costs for professions/territories")
+                            metadata={'description':"Used when changing session costs for professions/territories"})
     session_duration = fields.Integer(validate=validate.Range(min=10, max=60))
     booking_notice_window = fields.Integer(validate=validate.Range(min=8, max=24))
     confirmation_window = fields.Float(validate=validate.Range(min=1.0, max=24.0))

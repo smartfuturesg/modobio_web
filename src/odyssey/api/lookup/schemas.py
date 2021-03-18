@@ -17,7 +17,8 @@ from odyssey.api.lookup.models import (
     LookupTelehealthSessionDuration,
     LookupTerritoriesofOperation,
     LookupTransactionTypes,
-    LookupNotifications
+    LookupNotifications,
+    LookupEmergencyNumbers
 )
 
 class LookupTimezones(Schema):
@@ -207,3 +208,12 @@ class LookupTelehealthSettingsSchema(Schema):
     booking_windows = fields.Nested(LookupClientBookingWindowOutputSchema, missing = [])
     confirmation_windows = fields.Nested(LookupProfessionalAppointmentConfirmationWindowOutputSchema, missing= [])
     costs = fields.Nested(LookupTelehealthSessionCostOutputSchema, missing = [])
+
+class LookupEmergencyNumbersSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupEmergencyNumbers
+        exclude = ('created_at', 'updated_at', 'idx')
+
+class LookupEmergencyNumbersOutputSchema(Schema):
+    items = fields.Nested(LookupEmergencyNumbersSchema(many=True), missing=[])
+    total_items = fields.Integer()
