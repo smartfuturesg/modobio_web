@@ -1,7 +1,7 @@
 """telehealth staff availability
 
 Revision ID: c4c5c968b777
-Revises: f0af8b55bfbb
+Revises: 73f1c4845245
 Create Date: 2021-02-21 22:25:06.384768
 
 """
