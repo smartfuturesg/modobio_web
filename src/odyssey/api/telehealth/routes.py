@@ -44,7 +44,7 @@ class TelehealthQueueClientPoolApi(Resource):
         # grab the whole queue
         # Need to grab this for to grab the closest target_date / priority date
         client_in_queue = TelehealthQueueClientPool.query.filter_by(user_id=user_id).order_by(TelehealthQueueClientPool.priority.desc(),TelehealthQueueClientPool.target_date.asc()).first()
-
+        duration = client_in_queue.duration
         # convert client's target date to day_of_week
         target_date = client_in_queue.target_date
         
@@ -55,6 +55,13 @@ class TelehealthQueueClientPoolApi(Resource):
 
         # This should return ALL staff available on that given day.
         breakpoint()
+        # Duration is taken from the client queue.
+        # we divide it by 5 because our look up tables are in increments of 5 mintues
+        # so, this represents the number of time blocks we will need to look at.
+        idx_delta = duration/5
+        # TODO will need to incorporate timezone information
+        for availability in staff_availability:
+            pass
 
         
         # sort the queue based on target date and priority

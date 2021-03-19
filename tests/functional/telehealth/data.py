@@ -77,7 +77,7 @@ telehealth_staff_general_availability_2_post_data = {
     'end_time': '20:00:00'
   },
   {
-    'day_of_week': 'Thursday',
+    'day_of_week': 'Wednesday',
     'start_time': '9:00:00',
     'end_time': '20:00:00'
   },
