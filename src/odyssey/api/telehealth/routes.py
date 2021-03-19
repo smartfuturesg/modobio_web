@@ -168,6 +168,8 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
         # Both of the sorts are necessary for this conversion
         availability = TelehealthStaffAvailability.query.filter_by(user_id=user_id).\
                         order_by(TelehealthStaffAvailability.day_of_week.asc(),TelehealthStaffAvailability.booking_window_id.asc()).all()
+        if not availability:
+            return 201
         # pull the static booking window ids
         booking_increments = LookupBookingTimeIncrements.query.all()
 
@@ -374,8 +376,6 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
             for time in availability:
                 db.session.delete(time)
 
-        payload = {}        
-        payload['availability'] = []
         # Create an idx dictionary array
         availabilityIdxArr = {}
         availabilityIdxArr['Monday'] = []
@@ -423,12 +423,11 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
                         data['day_of_week'] = time['day_of_week']
                         data_in = TelehealthStaffAvailabilitySchema().load(data)
                         db.session.add(data_in)
-                        payload['availability'].append(time)
                     else:
                         continue
 
         db.session.commit()
-        return payload
+        return 201
 
 @ns.route('/queue/client-pool/')
 class TelehealthGetQueueClientPoolApi(Resource):
