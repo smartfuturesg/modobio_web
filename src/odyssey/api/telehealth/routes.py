@@ -20,11 +20,48 @@ from odyssey.api.telehealth.schemas import (
     TelehealthStaffAvailabilityOutputSchema
 ) 
 from odyssey.utils.auth import token_auth
-from odyssey.utils.constants import TWILIO_ACCESS_KEY_TTL
+from odyssey.utils.constants import TWILIO_ACCESS_KEY_TTL, DAY_OF_WEEK
 from odyssey.utils.errors import GenericNotFound, InputError, UnauthorizedUser
 from odyssey.utils.misc import check_client_existence, check_staff_existence, grab_twilio_credentials
 
 ns = api.namespace('telehealth', description='telehealth bookings management API')
+
+@ns.route('/client/time-select/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID'})
+class TelehealthQueueClientPoolApi(Resource):
+    """
+    This API resource is used to get, post, and delete the user's in the queue.
+    """
+    @token_auth.login_required
+    @responds(api=ns, status_code=200)
+    def get(self,user_id):
+        """
+        Returns the list of notifications for the given user_id
+        """
+        # Check if the client exists
+        check_client_existence(user_id)
+
+        # grab the whole queue
+        # Need to grab this for to grab the closest target_date / priority date
+        client_in_queue = TelehealthQueueClientPool.query.filter_by(user_id=user_id).order_by(TelehealthQueueClientPool.priority.desc(),TelehealthQueueClientPool.target_date.asc()).first()
+
+        # convert client's target date to day_of_week
+        target_date = client_in_queue.target_date
+        
+        # 0 is Monday, 6 is Sunday
+        weekday_id = target_date.weekday()
+        weekday_str = DAY_OF_WEEK[weekday_id]
+        staff_availability = TelehealthStaffAvailability.query.filter_by(day_of_week=weekday_str).all() 
+
+        # This should return ALL staff available on that given day.
+        breakpoint()
+
+        
+        # sort the queue based on target date and priority
+        payload = {'queue': queue,
+                   'total_queue': len(queue)}
+
+        return payload
 
 @ns.route('/meeting-room/new/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
