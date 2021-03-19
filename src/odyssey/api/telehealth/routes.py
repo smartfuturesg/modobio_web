@@ -32,30 +32,6 @@ from odyssey.utils.misc import check_client_existence, check_staff_existence, gr
 
 ns = api.namespace('telehealth', description='telehealth bookings management API')
 
-@ns.route('/client/time-select/')
-@ns.doc(params={'user_id': 'User ID number'})
-class TelehealthTimeSelectApi(Resource):
-    @token_auth.login_required
-    @responds(status_code=201,api=ns)
-    def get(self):
-
-        # First, grab the queue, and grab the person at the top
-        queue = TelehealthQueueClientPool.query.order_by(TelehealthQueueClientPool.priority.desc(),TelehealthQueueClientPool.target_date.asc()).first()
-        
-        # convert that day from the queue to a day of the week
-        
-        # datetime.weekday() returns:
-        # Monday 0, 6 is Sunday
-        day_of_week_idx = queue.target_date.weekday()
-        day_of_week = DAY_OF_WEEK[day_of_week_idx]
-
-        staff_availability = TelehealthStaffAvailability.query.filter_by(day_of_week=day_of_week).all()
-
-        # breakpoint()
-
-        return 201
-
-
 @ns.route('/meeting-room/new/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class ProvisionMeetingRooms(Resource):
