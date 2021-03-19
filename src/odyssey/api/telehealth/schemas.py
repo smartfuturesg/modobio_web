@@ -15,11 +15,18 @@ from odyssey.api.telehealth.models import (
 )
 from odyssey.utils.constants import DAY_OF_WEEK, GENDERS
 
-class TelehealthStaffClientBookingsSchema(ma.SQLAlchemyAutoSchema):
+class TelehealthClientStaffBookingsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = TelehealthClientStaffBookings
         dump_only = ('idx', 'client_user_id','staff_user_id',)
 
+    @post_load
+    def make_object(self, data, **kwargs):
+        return TelehealthClientStaffBookings(**data)
+
+class TelehealthClientStaffBookingsOutputSchema(Schema):
+    bookings = fields.Nested(TelehealthClientStaffBookingsSchema(many=True),missing=[])
+    all_bookings = fields.Integer()  
 
 class TelehealthStaffAvailabilitySchema(ma.SQLAlchemyAutoSchema):
     class Meta:
