@@ -54,13 +54,14 @@ class TelehealthQueueClientPoolApi(Resource):
         staff_availability = TelehealthStaffAvailability.query.filter_by(day_of_week=weekday_str).all() 
 
         # This should return ALL staff available on that given day.
-        breakpoint()
         # Duration is taken from the client queue.
         # we divide it by 5 because our look up tables are in increments of 5 mintues
         # so, this represents the number of time blocks we will need to look at.
         idx_delta = duration/5
+
         # TODO will need to incorporate timezone information
         for availability in staff_availability:
+            breakpoint()
             pass
 
         
