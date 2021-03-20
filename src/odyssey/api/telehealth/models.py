@@ -146,20 +146,12 @@ class TelehealthStaffAvailability(db.Model):
     :type: str
     """
     
-    start_time = db.Column(db.Time)
-    """ 
-    start time the professional is ready
-
-    :type: datetime.time
+    booking_window_id = db.Column(db.Integer, db.ForeignKey('LookupBookingTimeIncrements.idx', ondelete="CASCADE"), nullable=False)
     """
-    
-    end_time = db.Column(db.Time)
-    """ 
-    end time the professional is done
+    booking window id
 
-    :type: datetime.time
+    :type: int, foreign key('LookupBookingTimeIncrements.idx')
     """
-
 
 class TelehealthQueueClientPool(db.Model):
     """ 
