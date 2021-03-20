@@ -169,7 +169,7 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
         availability = TelehealthStaffAvailability.query.filter_by(user_id=user_id).\
                         order_by(TelehealthStaffAvailability.day_of_week.asc(),TelehealthStaffAvailability.booking_window_id.asc()).all()
         if not availability:
-            return 201
+            return 204
         # pull the static booking window ids
         booking_increments = LookupBookingTimeIncrements.query.all()
 
