@@ -20,6 +20,9 @@ class TelehealthClientStaffBookingsSchema(ma.SQLAlchemyAutoSchema):
         model = TelehealthClientStaffBookings
         dump_only = ('idx', 'client_user_id','staff_user_id',)
 
+    booking_window_id_start_time = fields.Integer()
+    booking_window_id_end_time = fields.Integer()
+
     @post_load
     def make_object(self, data, **kwargs):
         return TelehealthClientStaffBookings(**data)
@@ -32,15 +35,29 @@ class TelehealthStaffAvailabilitySchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = TelehealthStaffAvailability
         exclude = ('created_at',)
-        dump_only = ('idx', 'staff_id')
+        dump_only = ('idx', )    
 
-    day_of_week = fields.String(validate=validate.OneOf(DAY_OF_WEEK))
+    user_id = fields.Integer()
+    booking_window_id = fields.Integer()    
     @post_load
     def make_object(self, data, **kwargs):
         return TelehealthStaffAvailability(**data)  
 
+class TelehealthStaffAvailabilityInputSchema(Schema):
+    # class Meta:
+    #     model = TelehealthStaffAvailability
+    #     exclude = ('created_at',)
+    #     dump_only = ('idx', 'user_id','booking_window_id')
+
+    day_of_week = fields.String(validate=validate.OneOf(DAY_OF_WEEK))
+    start_time = fields.Time()
+    end_time = fields.Time()
+    # @post_load
+    # def make_object(self, data, **kwargs):
+    #     return TelehealthStaffAvailability(**data)  
+
 class TelehealthStaffAvailabilityOutputSchema(Schema):
-    availability = fields.Nested(TelehealthStaffAvailabilitySchema(many=True), missing=[])
+    availability = fields.Nested(TelehealthStaffAvailabilityInputSchema(many=True), missing=[])
 
 class TelehealthMeetingRoomSchema(ma.SQLAlchemyAutoSchema):
     """
