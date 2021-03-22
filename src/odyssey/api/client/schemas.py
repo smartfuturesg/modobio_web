@@ -346,7 +346,7 @@ class ClientGeneralMobileSettingsSchema(ma.SQLAlchemyAutoSchema):
         return ClientMobileSettings(**data)
 
 class ClientMobileSettingsSchema(Schema):
-    general_settings = Fields.Nested(ClientGeneralMobileSettingsSchema)
+    general_settings = fields.Nested(ClientGeneralMobileSettingsSchema)
     push_notification_type_ids = fields.Integer(many=True, missing=[])
         
 class ClientAssignedDrinksSchema(ma.SQLAlchemyAutoSchema):

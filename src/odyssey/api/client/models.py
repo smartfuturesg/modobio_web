@@ -1478,7 +1478,7 @@ class ClientPushNotifications(db.Model):
     type of notification enabled.
     """
 
-     __tablename__ = 'ClientPushNotifications'
+    __tablename__ = 'ClientPushNotifications'
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
