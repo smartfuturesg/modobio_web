@@ -143,16 +143,18 @@ telehealth_staff_general_availability_bad_7_post_data = {
 #                     Telehealth Client Staff Bookings
 # --------------------------------------------------------------------
 
+# NOTE: The id delta should be 3
+# It works out that: booking_window_id_end_time.end_time - booking_window_id_start_time.start_time = 20 minutes
 telehealth_client_staff_bookings_post_1_data = {
   'target_date': '2025-02-07',
   'booking_window_id_start_time': 100,
-  'booking_window_id_end_time': 104,
+  'booking_window_id_end_time': 103,
   'status': 'Accepted'
 }
 telehealth_client_staff_bookings_post_2_data = {
   'target_date': '2025-02-07',
   'booking_window_id_start_time': 95,
-  'booking_window_id_end_time': 99,
+  'booking_window_id_end_time': 98,
   'status': 'Accepted'
 }
 # This should break

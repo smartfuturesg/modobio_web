@@ -14,14 +14,14 @@ from odyssey.api.lookup.models import (
 )
 
 from odyssey.api.telehealth.models import (
-    TelehealthClientStaffBookings,
+    TelehealthBookings,
     TelehealthMeetingRooms, 
     TelehealthQueueClientPool,
     TelehealthStaffAvailability,
 )
 from odyssey.api.telehealth.schemas import (
-    TelehealthClientStaffBookingsSchema,
-    TelehealthClientStaffBookingsOutputSchema,
+    TelehealthBookingsSchema,
+    TelehealthBookingsOutputSchema,
     TelehealthMeetingRoomSchema,
     TelehealthQueueClientPoolSchema,
     TelehealthQueueClientPoolOutputSchema,
@@ -35,63 +35,64 @@ from odyssey.utils.misc import check_client_existence, check_staff_existence, gr
 
 ns = api.namespace('telehealth', description='telehealth bookings management API')
 
-@ns.route('/bookings/staff/<int:staff_user_id>/')
-class TelehealthGetStaffBookingsApi(Resource):
-    """
-    This API resource is used to get the staff bookings.
-    """
-    @token_auth.login_required
-    @responds(schema=TelehealthClientStaffBookingsOutputSchema, api=ns, status_code=201)
-    def get(self,staff_user_id):
-        """
-        Returns the list of bookings for staff
-        """
-        # Check staff existence
-        check_staff_existence(staff_user_id)        
-        # grab the whole queue
-        booking = TelehealthClientStaffBookings.query.filter_by(staff_user_id=staff_user_id).order_by(TelehealthClientStaffBookings.target_date.asc()).all()
-        
-        # sort the queue based on target date and priority
-        payload = {'bookings': booking,
-                   'all_bookings': len(booking)}
-
-        return payload
-
-@ns.route('/bookings/client/<int:client_user_id>/')
-class TelehealthGetClientBookingsApi(Resource):
-    """
-    This API resource is used to get the client bookings.
-    """
-    @token_auth.login_required
-    @responds(schema=TelehealthClientStaffBookingsOutputSchema, api=ns, status_code=201)
-    def get(self,client_user_id):
-        """
-        Returns the list of bookings for clients
-        """
-       # Check client existence
-        check_client_existence(client_user_id)        
-        # grab the whole queue
-        booking = TelehealthClientStaffBookings.query.filter_by(client_user_id=client_user_id).order_by(TelehealthClientStaffBookings.target_date.asc()).all()
-        
-        # sort the queue based on target date and priority
-        payload = {'bookings': booking,
-                   'all_bookings': len(booking)}
-
-        return payload
-@ns.route('/bookings/<int:client_user_id>/<int:staff_user_id>/')
+@ns.route('/bookings/')
 @ns.doc(params={'client_user_id': 'Client User ID',
-                'staff_user_id' : 'Staff User ID'})
+                'staff_user_id' : 'Staff User ID'})                
 class TelehealthPostClientStaffBookingsApi(Resource):
     """
     This API resource is used to get, post, and delete the user's in the queue.
     """
     @token_auth.login_required
-    @accepts(schema=TelehealthClientStaffBookingsSchema, api=ns)
+    @responds(schema=TelehealthBookingsOutputSchema, api=ns, status_code=201)
+    def get(self):
+        """
+        Returns the list of bookings for clients and/or staff
+        """
+
+        client_user_id = request.args.get('client_user_id', type=int)
+
+        staff_user_id = request.args.get('staff_user_id', type=int)
+
+        if client_user_id and staff_user_id:
+            # Check client existence
+            check_client_existence(client_user_id)  
+            check_staff_existence(staff_user_id)      
+            # grab the whole queue
+            booking = TelehealthBookings.query.filter_by(client_user_id=client_user_id,staff_user_id=staff_user_id).order_by(TelehealthBookings.target_date.asc()).all()
+        elif client_user_id and not staff_user_id:
+            # Check client existence
+            check_client_existence(client_user_id)        
+            # grab the whole queue
+            booking = TelehealthBookings.query.filter_by(client_user_id=client_user_id).order_by(TelehealthBookings.target_date.asc()).all()
+        elif staff_user_id and not client_user_id:
+            # Check staff existence
+            check_staff_existence(staff_user_id)        
+            # grab the whole queue
+            booking = TelehealthBookings.query.filter_by(staff_user_id=staff_user_id).order_by(TelehealthBookings.target_date.asc()).all()
+                                
+        # sort the queue based on target date and priority
+        payload = {'bookings': booking,
+                   'all_bookings': len(booking)}
+
+    @token_auth.login_required
+    @accepts(schema=TelehealthBookingsSchema, api=ns)
     @responds(status_code=201,api=ns)
-    def post(self,client_user_id,staff_user_id):
+    def post(self):
         """
-            Add client and staff to a TelehealthClientStaffBookings table.
+            Add client and staff to a TelehealthBookings table.
         """
+        if request.parsed_obj.booking_window_id_start_time >= request.parsed_obj.booking_window_id_end_time:
+            raise InputError(status_code=405,message='Start time must be before end time.')
+        client_user_id = request.args.get('client_user_id', type=int)
+        
+        if not client_user_id:
+            raise InputError(status_code=405,message='Missing Client ID')
+
+        staff_user_id = request.args.get('staff_user_id', type=int)
+        
+        if not staff_user_id:
+            raise InputError(status_code=405,message='Missing Staff ID')        
+        
         # Check client existence
         check_client_existence(client_user_id)
         
@@ -99,11 +100,8 @@ class TelehealthPostClientStaffBookingsApi(Resource):
         check_staff_existence(staff_user_id)
 
         # Check if staff and client have those times open
-        client_bookings = TelehealthClientStaffBookings.query.filter_by(client_user_id=client_user_id,target_date=request.parsed_obj.target_date).all()
-        staff_bookings = TelehealthClientStaffBookings.query.filter_by(staff_user_id=staff_user_id,target_date=request.parsed_obj.target_date).all()
-        
-        if request.parsed_obj.booking_window_id_start_time >= request.parsed_obj.booking_window_id_end_time:
-            raise InputError(status_code=405,message='Start time must be before end time.')
+        client_bookings = TelehealthBookings.query.filter_by(client_user_id=client_user_id,target_date=request.parsed_obj.target_date).all()
+        staff_bookings = TelehealthBookings.query.filter_by(staff_user_id=staff_user_id,target_date=request.parsed_obj.target_date).all()
         
         # This checks if the input slots have already been taken.
         if client_bookings:

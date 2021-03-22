@@ -12,12 +12,12 @@ Database models for all things telehealth. These tables will be used to keep tra
 meeting rooms, and other data related to telehealth meetings
 """
 
-class TelehealthClientStaffBookings(db.Model):
+class TelehealthBookings(db.Model):
     """ 
     Holds all of the client and Staff bookings 
     """
 
-    __tablename__ = 'TelehealthClientStaffBookings'
+    __tablename__ = 'TelehealthBookings'
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
