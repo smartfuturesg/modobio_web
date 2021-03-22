@@ -25,7 +25,8 @@ from odyssey.api.client.models import (
     ClientAssignedDrinks,
     ClientHeightHistory,
     ClientWeightHistory,
-    ClientTransactionHistory
+    ClientTransactionHistory,
+    ClientPushNotifications
 )
 from odyssey.api.user.schemas import UserInfoPutSchema
 
@@ -345,9 +346,12 @@ class ClientGeneralMobileSettingsSchema(ma.SQLAlchemyAutoSchema):
     def make_object(self, data, **kwargs):
         return ClientMobileSettings(**data)
 
+class ClientMobilePushNotificationsSchema(Schema):
+    notification_type_id = fields.Integer()
+
 class ClientMobileSettingsSchema(Schema):
     general_settings = fields.Nested(ClientGeneralMobileSettingsSchema)
-    push_notification_type_ids = fields.Integer(many=True, missing=[])
+    push_notification_type_ids = fields.Nested(ClientMobilePushNotificationsSchema(many=True), missing=[])
         
 class ClientAssignedDrinksSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
