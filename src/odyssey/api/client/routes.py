@@ -1080,8 +1080,14 @@ class ClientMobileSettingsApi(Resource):
         if ClientMobileSettings.query.filter_by(user_id=user_id).one_or_none():
             raise IllegalSetting(message=f"Mobile settings for user_id {user_id} already exists. Please use PUT method")
 
-        request.parsed_obj.user_id = user_id
-        db.session.add(request.parsed_obj)
+        gen_settings = request.parsed_obj.general_settings
+        gen_settings.user_id = user_id
+        db.session.add(gen_settings)
+
+        for push_id in push_notification_type_ids:
+            push_notfication = ClientPushNotifications(**{'user_id': user_id, 'notification_type_id': push_id})
+            db.session.add(push_notfication)
+
         db.session.commit()
 
         return request.parsed_obj
@@ -1110,8 +1116,24 @@ class ClientMobileSettingsApi(Resource):
         if not settings:
             raise IllegalSetting(message=f"Mobile settings for user_id {user_id} do not exist. Please use POST method")
 
-        data = request.json
-        settings.update(data)
+        gen_settings = request.parsed_obj.general_settings.parsed_obj.json
+        settings.update(gen)
+
+        client_push_notifications = ClientPushNotifications.query.filter_by(user_id=user_id).all()
+        client_new_notifications = request.parsed_obj.push_notification_type_ids
+        for notification in client_push_notifications:
+            if notification.notification_type_id not in client_new_notifications:
+                #if an id type is not in the arguments, the user has disabled this type of notification
+                db.session.delete(notification)
+            else:
+                #if a notification type with this id is already in the db, remove from the list
+                #of new types to be added for the user
+                client_new_notifications.remove(notification.notification_type_id)
+
+        for notification_type_id in client_new_notifications:
+            push_notification = ClientPushNotifications(**{'user_id': user_id, 'notification_type_id': notification_type_id})
+            db.session.add(push_notification)
+
         db.session.commit()
 
         return request.parsed_obj

@@ -333,7 +333,7 @@ class ClinicalCareTeamAuthorizationNestedSchema(Schema):
     """
     clinical_care_team_authoriztion = fields.Nested(ClinicalCareTeamAuthorizaitonSchema(many=True), missing=[])
 
-class ClientMobileSettingsSchema(ma.SQLAlchemyAutoSchema):
+class ClientGeneralMobileSettingsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientMobileSettings
         exclude = ('created_at', 'updated_at', 'idx')
@@ -344,6 +344,10 @@ class ClientMobileSettingsSchema(ma.SQLAlchemyAutoSchema):
     @post_load
     def make_object(self, data, **kwargs):
         return ClientMobileSettings(**data)
+
+class ClientMobileSettingsSchema(Schema):
+    general_settings = Fields.Nested(ClientGeneralMobileSettingsSchema)
+    push_notification_type_ids = fields.Integer(many=True, missing=[])
         
 class ClientAssignedDrinksSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
