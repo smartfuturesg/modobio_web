@@ -6,6 +6,41 @@ not to be edited at runtime.
 from odyssey import db
 from odyssey.utils.constants import DB_SERVER_TIME
 
+class LookupBookingTimeIncrements(db.Model):
+    """ 
+    Holds all time increment from 00:00 to 23:55 in increments of 5 minutes
+    """
+
+    __tablename__ = 'LookupBookingTimeIncrements'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Auto incrementing primary key
+
+    :type: int, primary key
+    """
+    
+    start_time = db.Column(db.Time)
+    """ 
+    start time
+
+    :type: datetime.time
+    """
+    
+    end_time = db.Column(db.Time)
+    """ 
+    end time 
+
+    :type: datetime.time
+    """
+
 class LookupProfessionalAppointmentConfirmationWindow(db.Model):
     """ Stored appointment confirmation windows for professionals in database. 
     """
