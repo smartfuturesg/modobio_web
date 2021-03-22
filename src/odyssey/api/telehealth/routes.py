@@ -57,19 +57,45 @@ class TelehealthQueueClientPoolApi(Resource):
         # 0 is Monday, 6 is Sunday
         weekday_id = target_date.weekday()
         weekday_str = DAY_OF_WEEK[weekday_id]
-        staff_availability = TelehealthStaffAvailability.query.filter_by(day_of_week=weekday_str).all() 
+        staff_availability = TelehealthStaffAvailability.query.filter_by(day_of_week=weekday_str).order_by(TelehealthStaffAvailability.user_id.asc()).all() 
 
         # This should return ALL staff available on that given day.
         # Duration is taken from the client queue.
         # we divide it by 5 because our look up tables are in increments of 5 mintues
         # so, this represents the number of time blocks we will need to look at.
-        idx_delta = duration/5
-
+        idx_delta = int(duration/5)
+ 
         # TODO will need to incorporate timezone information
+        available = {}
+        user_id_arr = []
         for availability in staff_availability:
-            breakpoint()
+            user_id = availability.user_id
+            if user_id not in user_id_arr:
+                booking_id_arr = []
+                user_id_arr.append(user_id)
+                available[user_id] = []
+                idx1 = availability.booking_window_id+1
+                booking_id_arr.append(idx1)
+            else:
+                idx2 = availability.booking_window_id+1          
+                if idx2 - idx1 > 1:
+                    # time gap detected
+                    booking_id_arr.append(idx1)
+                    available[user_id].append(booking_id_arr)
+                    booking_id_arr = []
+                    booking_id_arr.append(idx2)
+                idx1 = idx2
+        booking_id_arr.append(idx2)
+        available[user_id].append(booking_id_arr)
+
+        # TODO simulate client staff bookings, delete this
+        # TODO Must call client and staff bookings individually 
+        getStaffClientBookings = [{'booking_window_id_start_time': 100, 'booking_window_id_end_time':103},{'booking_window_id_start_time': 95, 'booking_window_id_end_time':98}]
+
+        for bookings in getStaffClientBookings:
             pass
 
+        breakpoint()            
         
         # sort the queue based on target date and priority
         payload = {'queue': queue,
@@ -550,3 +576,4 @@ class TelehealthQueueClientPoolApi(Resource):
             raise InputError(status_code=405,message='User {} does not have that date to delete'.format(user_id))
 
         return 200
+

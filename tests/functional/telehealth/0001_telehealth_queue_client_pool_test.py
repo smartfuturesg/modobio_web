@@ -98,7 +98,7 @@ def test_get_1_client_appointment_queue(test_client, init_database, client_auth_
         assert [response.json['queue'][0]['target_date'],response.json['queue'][0]['priority']] == ['2025-01-02T02:00:00',False]
         assert [response.json['queue'][1]['target_date'],response.json['queue'][1]['priority']] == ['2025-01-05T02:00:00',False]
         assert [response.json['queue'][2]['target_date'],response.json['queue'][2]['priority']] == ['2025-02-05T02:00:00',False]
-        assert [response.json['queue'][3]['target_date'],response.json['queue'][3]['priority']] == ['2025-03-05T02:00:00',False]
+        assert [response.json['queue'][3]['target_date'],response.json['queue'][3]['priority']] == ['2025-03-03T02:00:00',False]
         assert [response.json['queue'][4]['target_date'],response.json['queue'][4]['priority']] == ['2025-04-05T02:00:00',False]
         assert response.json['total_queue'] == 5
 
@@ -133,7 +133,7 @@ def test_get_2_client_appointment_queue(test_client, init_database, client_auth_
         assert [response.json['queue'][1]['target_date'],response.json['queue'][1]['priority']] == ['2025-01-02T02:00:00',False]
         assert [response.json['queue'][2]['target_date'],response.json['queue'][2]['priority']] == ['2025-01-05T02:00:00',False]
         assert [response.json['queue'][3]['target_date'],response.json['queue'][3]['priority']] == ['2025-02-05T02:00:00',False]
-        assert [response.json['queue'][4]['target_date'],response.json['queue'][4]['priority']] == ['2025-03-05T02:00:00',False]
+        assert [response.json['queue'][4]['target_date'],response.json['queue'][4]['priority']] == ['2025-03-03T02:00:00',False]
         assert [response.json['queue'][5]['target_date'],response.json['queue'][5]['priority']] == ['2025-04-05T02:00:00',False]
         assert response.json['total_queue'] == 6
 
@@ -169,7 +169,7 @@ def test_get_3_client_appointment_queue(test_client, init_database, client_auth_
         assert [response.json['queue'][1]['target_date'],response.json['queue'][1]['priority']] == ['2025-01-02T02:00:00',False]
         assert [response.json['queue'][2]['target_date'],response.json['queue'][2]['priority']] == ['2025-01-05T02:00:00',False]
         assert [response.json['queue'][3]['target_date'],response.json['queue'][3]['priority']] == ['2025-02-05T02:00:00',False]
-        assert [response.json['queue'][4]['target_date'],response.json['queue'][4]['priority']] == ['2025-03-05T02:00:00',False]
+        assert [response.json['queue'][4]['target_date'],response.json['queue'][4]['priority']] == ['2025-03-03T02:00:00',False]
         assert [response.json['queue'][5]['target_date'],response.json['queue'][5]['priority']] == ['2025-04-05T02:00:00',False]
         assert response.json['total_queue'] == 6
 
@@ -221,7 +221,7 @@ def test_get_4_client_appointment_queue(test_client, init_database, client_auth_
         assert [response.json['queue'][1]['target_date'],response.json['queue'][1]['priority']] == ['2025-02-07T02:00:00',True]
         assert [response.json['queue'][2]['target_date'],response.json['queue'][2]['priority']] == ['2025-01-02T02:00:00',False]
         assert [response.json['queue'][3]['target_date'],response.json['queue'][3]['priority']] == ['2025-01-05T02:00:00',False]
-        assert [response.json['queue'][4]['target_date'],response.json['queue'][4]['priority']] == ['2025-03-05T02:00:00',False]
+        assert [response.json['queue'][4]['target_date'],response.json['queue'][4]['priority']] == ['2025-03-03T02:00:00',False]
         assert [response.json['queue'][5]['target_date'],response.json['queue'][5]['priority']] == ['2025-04-05T02:00:00',False]
         assert response.json['total_queue'] == 6    
 
@@ -258,7 +258,7 @@ def test_get_5_client_appointment_queue(test_client, init_database, client_auth_
         assert [response.json['queue'][0]['target_date'],response.json['queue'][0]['priority']] == ['2025-02-05T02:00:00',True]
         assert [response.json['queue'][1]['target_date'],response.json['queue'][1]['priority']] == ['2025-02-07T02:00:00',True]
         assert [response.json['queue'][2]['target_date'],response.json['queue'][2]['priority']] == ['2025-01-05T02:00:00',False]
-        assert [response.json['queue'][3]['target_date'],response.json['queue'][3]['priority']] == ['2025-03-05T02:00:00',False]
+        assert [response.json['queue'][3]['target_date'],response.json['queue'][3]['priority']] == ['2025-03-03T02:00:00',False]
         assert [response.json['queue'][4]['target_date'],response.json['queue'][4]['priority']] == ['2025-04-05T02:00:00',False]
         assert response.json['total_queue'] == 5
 
@@ -279,7 +279,7 @@ def test_get_1_specific_client_appointment_queue(test_client, init_database, cli
         assert [response.json['queue'][0]['target_date'],response.json['queue'][0]['priority']] == ['2025-02-05T02:00:00',True]
         assert [response.json['queue'][1]['target_date'],response.json['queue'][1]['priority']] == ['2025-02-07T02:00:00',True]
         assert [response.json['queue'][2]['target_date'],response.json['queue'][2]['priority']] == ['2025-01-05T02:00:00',False]
-        assert [response.json['queue'][3]['target_date'],response.json['queue'][3]['priority']] == ['2025-03-05T02:00:00',False]
+        assert [response.json['queue'][3]['target_date'],response.json['queue'][3]['priority']] == ['2025-03-03T02:00:00',False]
         assert [response.json['queue'][4]['target_date'],response.json['queue'][4]['priority']] == ['2025-04-05T02:00:00',False]
         assert response.json['queue'][0]['duration'] == 30
         assert response.json['queue'][0]['medical_gender'] == 'f'
