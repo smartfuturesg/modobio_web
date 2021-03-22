@@ -32,7 +32,8 @@ from odyssey.api.client.models import (
     ClientAssignedDrinks,
     ClientHeightHistory,
     ClientWeightHistory,
-    ClientTransactionHistory
+    ClientTransactionHistory,
+    ClientPushNotifications
 )
 from odyssey.api.doctor.models import (
     MedicalFamilyHistory,
@@ -1080,12 +1081,12 @@ class ClientMobileSettingsApi(Resource):
         if ClientMobileSettings.query.filter_by(user_id=user_id).one_or_none():
             raise IllegalSetting(message=f"Mobile settings for user_id {user_id} already exists. Please use PUT method")
 
-        gen_settings = request.parsed_obj.general_settings
+        gen_settings = request.parsed_obj['general_settings']
         gen_settings.user_id = user_id
         db.session.add(gen_settings)
 
-        for push_id in push_notification_type_ids:
-            push_notfication = ClientPushNotifications(**{'user_id': user_id, 'notification_type_id': push_id})
+        for notification in request.parsed_obj['push_notification_type_ids']:
+            push_notfication = ClientPushNotifications(**{'user_id': user_id, 'notification_type_id': notification['notification_type_id']})
             db.session.add(push_notfication)
 
         db.session.commit()
@@ -1101,7 +1102,11 @@ class ClientMobileSettingsApi(Resource):
 
         check_client_existence(user_id)
 
-        return ClientMobileSettings.query.filter_by(user_id=user_id).one_or_none()
+        gen_settings = ClientMobileSettings.query.filter_by(user_id=user_id).one_or_none()
+
+        notification_types = ClientPushNotifications.query.filter_by(user_id=user_id).all()
+
+        return {'general_settings': gen_settings, 'push_notification_type_ids': notification_types}
 
     @token_auth.login_required(user_type=('client',))
     @accepts(schema=ClientMobileSettingsSchema, api=ns)
@@ -1116,11 +1121,15 @@ class ClientMobileSettingsApi(Resource):
         if not settings:
             raise IllegalSetting(message=f"Mobile settings for user_id {user_id} do not exist. Please use POST method")
 
-        gen_settings = request.parsed_obj.general_settings.parsed_obj.json
-        settings.update(gen)
+        gen_settings = request.parsed_obj['general_settings'].__dict__
+        del gen_settings['_sa_instance_state']
+        settings.update(gen_settings)
 
         client_push_notifications = ClientPushNotifications.query.filter_by(user_id=user_id).all()
-        client_new_notifications = request.parsed_obj.push_notification_type_ids
+        client_new_notifications = []
+        for notification in request.parsed_obj['push_notification_type_ids']:
+            client_new_notifications.append(notification['notification_type_id'])
+            
         for notification in client_push_notifications:
             if notification.notification_type_id not in client_new_notifications:
                 #if an id type is not in the arguments, the user has disabled this type of notification
