@@ -18,7 +18,7 @@ def test_post_client_mobile_settings(test_client, init_database, client_auth_hea
                                 content_type='application/json')
     
     assert response.status_code == 201
-    assert response.json.get('date_format') == clients_mobile_settings['date_format']
+    assert response.json.get('general_settings')['date_format'] == clients_mobile_settings['general_settings']['date_format']
 
 def test_get_client_mobile_settings(test_client, init_database, client_auth_header):
     """
@@ -39,7 +39,7 @@ def test_put_client_mobile_settings(test_client, init_database, client_auth_head
     WHEN the '/client/drinks/<client id>' resource  is requested to be removed (DELETE)
     THEN the response will be 200
     """
-    clients_mobile_settings['is_right_handed'] = False
+    clients_mobile_settings['general_settings']['is_right_handed'] = False
 
     response = test_client.put("/client/mobile-settings/1/",
                                 data=dumps(clients_mobile_settings),
@@ -50,11 +50,10 @@ def test_put_client_mobile_settings(test_client, init_database, client_auth_head
     client_settings  = ClientMobileSettings.query.filter_by(user_id = 1).one_or_none()
     
     assert response.status_code == 201
-    assert response.json.get('is_right_handed') == False
-    assert client_settings.is_right_handed == False
+    assert response.json.get('general_settings')['date_format'] == clients_mobile_settings['general_settings']['date_format']
 
     #test request with invalid date format
-    clients_mobile_settings['date_format'] = 'notadateformat'
+    clients_mobile_settings['general_settings']['date_format'] = 'notadateformat'
 
     response = test_client.put("/client/mobile-settings/1/",
                                 data=dumps(clients_mobile_settings),
