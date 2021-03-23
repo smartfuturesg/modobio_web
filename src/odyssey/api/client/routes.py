@@ -1144,6 +1144,7 @@ class ClientMobileSettingsApi(Resource):
             db.session.add(push_notification)
 
         db.session.commit()
+        return request.parsed_obj
 
 
 
