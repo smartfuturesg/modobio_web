@@ -1145,7 +1145,6 @@ class ClientMobileSettingsApi(Resource):
 
         db.session.commit()
 
-        return request.parsed_obj
 
 
 @ns.route('/height/<int:user_id>/')

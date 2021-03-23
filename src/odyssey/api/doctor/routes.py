@@ -331,10 +331,7 @@ class MedicalGeneralInformation(Resource):
                 else:
                     generalInfo['user_id'] = user_id
             genInfo = MedicalGeneralInfo.query.filter_by(user_id=user_id).one_or_none()
-            if genInfo:
-                genInfo.update(generalInfo)
-            else:
-                raise ContentNotFound
+            genInfo.update(generalInfo)
         
         # insert results into the result table
         db.session.commit()
