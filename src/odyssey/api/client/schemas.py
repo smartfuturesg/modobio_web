@@ -348,6 +348,11 @@ class ClientGeneralMobileSettingsSchema(ma.SQLAlchemyAutoSchema):
 
 class ClientMobilePushNotificationsSchema(Schema):
     notification_type_id = fields.Integer()
+    user_id = fields.Integer(dump_only=True)
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return ClientPushNotifications(**data)
 
 class ClientMobileSettingsSchema(Schema):
     general_settings = fields.Nested(ClientGeneralMobileSettingsSchema)

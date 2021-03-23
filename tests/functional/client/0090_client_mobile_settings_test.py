@@ -46,9 +46,9 @@ def test_put_client_mobile_settings(test_client, init_database, client_auth_head
                                 headers=client_auth_header, 
                                 content_type='application/json')
     
-    
     client_settings  = ClientMobileSettings.query.filter_by(user_id = 1).one_or_none()
-    
+
+
     assert response.status_code == 200
     assert response.json.get('general_settings')['date_format'] == clients_mobile_settings['general_settings']['date_format']
 

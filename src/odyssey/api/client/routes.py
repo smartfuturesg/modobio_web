@@ -68,6 +68,7 @@ from odyssey.api.client.schemas import(
     ClientIndividualContractSchema,
     ClientClinicalCareTeamSchema,
     ClientMobileSettingsSchema,
+    ClientMobilePushNotificationsSchema,
     ClientPoliciesContractSchema, 
     ClientRegistrationStatusSchema,
     ClientReleaseSchema,
@@ -1086,7 +1087,8 @@ class ClientMobileSettingsApi(Resource):
         db.session.add(gen_settings)
 
         for notification in request.parsed_obj['push_notification_type_ids']:
-            push_notfication = ClientPushNotifications(**{'user_id': user_id, 'notification_type_id': notification['notification_type_id']})
+            push_notfication = ClientMobilePushNotificationsSchema().load({'notification_type_id': notification.notification_type_id})
+            push_notfication.user_id = user_id
             db.session.add(push_notfication)
 
         db.session.commit()
@@ -1128,7 +1130,7 @@ class ClientMobileSettingsApi(Resource):
         client_push_notifications = ClientPushNotifications.query.filter_by(user_id=user_id).all()
         client_new_notifications = []
         for notification in request.parsed_obj['push_notification_type_ids']:
-            client_new_notifications.append(notification['notification_type_id'])
+            client_new_notifications.append(notification.notification_type_id)
             
         for notification in client_push_notifications:
             if notification.notification_type_id not in client_new_notifications:
@@ -1140,13 +1142,12 @@ class ClientMobileSettingsApi(Resource):
                 client_new_notifications.remove(notification.notification_type_id)
 
         for notification_type_id in client_new_notifications:
-            push_notification = ClientPushNotifications(**{'user_id': user_id, 'notification_type_id': notification_type_id})
+            push_notification = ClientMobilePushNotificationsSchema().load({'notification_type_id': notification_type_id})
+            push_notification.user_id = user_id
             db.session.add(push_notification)
 
         db.session.commit()
-        return request.parsed_obj
-
-
+        return(request.json)
 
 @ns.route('/height/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
