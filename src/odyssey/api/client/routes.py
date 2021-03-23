@@ -1110,7 +1110,7 @@ class ClientMobileSettingsApi(Resource):
 
     @token_auth.login_required(user_type=('client',))
     @accepts(schema=ClientMobileSettingsSchema, api=ns)
-    @responds(schema=ClientMobileSettingsSchema, api=ns, status_code=201)
+    @responds(schema=ClientMobileSettingsSchema, api=ns, status_code=200)
     def put(self, user_id):
         """
         Update a client's mobile settings
