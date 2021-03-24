@@ -13,7 +13,8 @@ from odyssey.utils.errors import (
     ContentNotFound,
     IllegalSetting,
     TransactionNotFound, 
-    InputError
+    InputError,
+    GenericNotFound
 )
 from odyssey import db
 from odyssey.utils.constants import TABLE_TO_URI
@@ -49,7 +50,8 @@ from odyssey.api.lookup.models import (
     LookupDefaultHealthMetrics,
     LookupGoals, 
     LookupDrinks, 
-    LookupRaces
+    LookupRaces,
+    LookupNotifications
 )
 from odyssey.api.physiotherapy.models import PTHistory 
 from odyssey.api.staff.models import StaffRecentClients
@@ -1087,13 +1089,17 @@ class ClientMobileSettingsApi(Resource):
         db.session.add(gen_settings)
 
         for notification in request.parsed_obj['push_notification_type_ids']:
+            exists = LookupNotifications.query.filter_by(notification_type_id=notification.notification_type_id).one_or_none()
+            if not exists:
+                raise GenericNotFound(message="Invalid notification type id: " + str(notification.notification_type_id))
+           
             push_notfication = ClientMobilePushNotificationsSchema().load({'notification_type_id': notification.notification_type_id})
             push_notfication.user_id = user_id
             db.session.add(push_notfication)
 
         db.session.commit()
 
-        return request.parsed_obj
+        return request.json
 
     @token_auth.login_required(user_type=('client',))
     @responds(schema=ClientMobileSettingsSchema, api=ns, status_code=200)
@@ -1130,6 +1136,10 @@ class ClientMobileSettingsApi(Resource):
         client_push_notifications = ClientPushNotifications.query.filter_by(user_id=user_id).all()
         client_new_notifications = []
         for notification in request.parsed_obj['push_notification_type_ids']:
+            exists = LookupNotifications.query.filter_by(notification_type_id=notification.notification_type_id).one_or_none()
+            if not exists:
+                raise GenericNotFound(message="Invalid notification type id: " + str(notification.notification_type_id))
+            
             client_new_notifications.append(notification.notification_type_id)
             
         for notification in client_push_notifications:
@@ -1147,7 +1157,7 @@ class ClientMobileSettingsApi(Resource):
             db.session.add(push_notification)
 
         db.session.commit()
-        return(request.json)
+        return request.json
 
 @ns.route('/height/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
