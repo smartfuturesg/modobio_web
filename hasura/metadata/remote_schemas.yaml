@@ -1,1 +1,8 @@
-[]
+- name: WearablesData
+  definition:
+    url_from_env: HASURA_APPSYNC_URL
+    timeout_seconds: 60
+    headers:
+    - name: X-Api-Key
+      value_from_env: HASURA_APPSYNC_KEY
+    forward_client_headers: true
