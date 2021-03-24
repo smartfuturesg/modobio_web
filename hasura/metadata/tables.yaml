@@ -37,6 +37,28 @@
       foreign_key_constraint_on: team_member_user_id
 - table:
     schema: public
+    name: ClientClinicalCareTeamAuthorizations
+  configuration:
+    custom_root_fields: {}
+    custom_column_names:
+      team_member_user_id: teamMemberUserId
+      updated_at: updatedAt
+      created_at: createdAt
+      idx: idx
+      resource_id: resourceId
+      user_id: userId
+  object_relationships:
+  - name: LookupClinicalCareTeamResource
+    using:
+      foreign_key_constraint_on: resource_id
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+  - name: userByTeamMemberUserId
+    using:
+      foreign_key_constraint_on: team_member_user_id
+- table:
+    schema: public
     name: ClientConsent
   configuration:
     custom_root_fields: {}
@@ -305,6 +327,62 @@
       foreign_key_constraint_on: user_id
 - table:
     schema: public
+    name: LookupActivityTrackers
+  configuration:
+    custom_root_fields: {}
+    custom_column_names:
+      deep_sleep: deepSleep
+      walking_equivalency: walkingEquivalency
+      hr_walking: hrWalking
+      ecg_metric_1: ecgMetric1
+      active_calories: activeCalories
+      hrv_highest: hrvHighest
+      bedtime_consistency: bedtimeConsistency
+      inactivity: inactivity
+      sleep_latency: sleepLatency
+      sp_o2_nighttime_avg: spO2NighttimeAvg
+      series: series
+      hrv_avg: hrvAvg
+      respiratory_rate: respiratoryRate
+      brand: brand
+      hr_24hr_avg: hr24HrAvg
+      total_calories: totalCalories
+      rhr_lowest: rhrLowest
+      steps: steps
+      rhr_avg: rhrAvg
+      ecg_metric_2: ecgMetric2
+      model: model
+      sp_o2_spot_check: spO2SpotCheck
+      rem_sleep: remSleep
+      sleep_total: sleepTotal
+      created_at: createdAt
+      idx: idx
+      quality_sleep: qualitySleep
+      body_temperature: bodyTemperature
+      light_sleep: lightSleep
+      awake: awake
+      wake_consistency: wakeConsistency
+- table:
+    schema: public
+    name: LookupClinicalCareTeamResources
+  configuration:
+    custom_root_fields: {}
+    custom_column_names:
+      display_name: displayName
+      updated_at: updatedAt
+      resource_name: resourceName
+      created_at: createdAt
+      resource_id: resourceId
+  array_relationships:
+  - name: ClientClinicalCareTeamAuthorizations
+    using:
+      foreign_key_constraint_on:
+        column: resource_id
+        table:
+          schema: public
+          name: ClientClinicalCareTeamAuthorizations
+- table:
+    schema: public
     name: LookupDrinkIngredients
   configuration:
     custom_root_fields: {}
@@ -395,6 +473,22 @@
         table:
           schema: public
           name: ClientInfo
+- table:
+    schema: public
+    name: MedicalBloodPressures
+  configuration:
+    custom_root_fields: {}
+    custom_column_names:
+      datetime_taken: datetimeTaken
+      systolic: systolic
+      diastolic: diastolic
+      created_at: createdAt
+      idx: idx
+      user_id: userId
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
 - table:
     schema: public
     name: MedicalBloodTestResultTypes
@@ -647,6 +741,17 @@
         table:
           schema: public
           name: MedicalExternalMR
+- table:
+    schema: public
+    name: MedicalLookUpBloodPressureRange
+  configuration:
+    custom_root_fields: {}
+    custom_column_names:
+      category: category
+      systolic: systolic
+      diastolic: diastolic
+      idx: idx
+      and_or: andOr
 - table:
     schema: public
     name: MedicalLookUpSTD
@@ -1229,6 +1334,7 @@
     custom_column_names:
       email: email
       modobio_id: modobioId
+      is_internal: isInternal
       middlename: middlename
       lastname: lastname
       phone_number: phoneNumber
@@ -1237,6 +1343,7 @@
       updated_at: updatedAt
       created_at: createdAt
       firstname: firstname
+      deleted: deleted
       is_staff: isStaff
       user_id: userId
   object_relationships:
@@ -1256,6 +1363,13 @@
         table:
           schema: public
           name: ClientAssignedDrinks
+  - name: ClientClinicalCareTeamAuthorizations
+    using:
+      foreign_key_constraint_on:
+        column: team_member_user_id
+        table:
+          schema: public
+          name: ClientClinicalCareTeamAuthorizations
   - name: ClientClinicalCareTeams
     using:
       foreign_key_constraint_on:
@@ -1347,6 +1461,13 @@
         table:
           schema: public
           name: ClientWeightHistory
+  - name: MedicalBloodPressures
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: MedicalBloodPressures
   - name: MedicalBloodTests
     using:
       foreign_key_constraint_on:
@@ -1550,6 +1671,13 @@
         table:
           schema: public
           name: Wearables
+  - name: WearablesFitbits
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: WearablesFitbit
   - name: WearablesFreeStyles
     using:
       foreign_key_constraint_on:
@@ -1564,6 +1692,13 @@
         table:
           schema: public
           name: WearablesOura
+  - name: clientClinicalCareTeamAuthorizationsByUserId
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: ClientClinicalCareTeamAuthorizations
   - name: clientClinicalCareTeamsByUserId
     using:
       foreign_key_constraint_on:
@@ -1665,12 +1800,33 @@
     custom_root_fields: {}
     custom_column_names:
       has_oura: hasOura
+      registered_fitbit: registeredFitbit
       has_freestyle: hasFreestyle
+      has_fitbit: hasFitbit
       updated_at: updatedAt
       created_at: createdAt
       idx: idx
       user_id: userId
       registered_oura: registeredOura
+  object_relationships:
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+- table:
+    schema: public
+    name: WearablesFitbit
+  configuration:
+    custom_root_fields: {}
+    custom_column_names:
+      token_expires: tokenExpires
+      access_token: accessToken
+      refresh_token: refreshToken
+      updated_at: updatedAt
+      oauth_state: oauthState
+      created_at: createdAt
+      idx: idx
+      last_scrape: lastScrape
+      user_id: userId
   object_relationships:
   - name: User
     using:
