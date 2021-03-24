@@ -1,5 +1,4 @@
-INSERT INTO "User" ("email", "firstname", "lastname", "is_staff", "is_client", "is_internal") VALUES
-("sys@modobio.com", "Sys", "User", true, false, true),
+INSERT INTO "User" ("email", "firstname", "lastname", "is_staff", "is_client", "is_internal") VALUES ("sys@modobio.com", "Sys", "User", true, false, true),
 ("doc@modobio.com", "Doc", "User", true, false, true),
 ("docext@modobio.com", "DocExt", "User", true, false, false),
 ("physio@modobio.com", "Physio", "User", true, false, true),
@@ -21,8 +20,7 @@ INSERT INTO "User" ("email", "firstname", "lastname", "is_staff", "is_client", "
 ("sebastian.brostl@sde.cz", "Sebastian", "Brostl", true, false, true),
 ("lukas.krajci@sde.cz", "Lukas", "Krajci", true, false, true);
 
-INSERT INTO "UserLogin" ("user_id", "password") VALUES
-(1, "pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1"), 
+INSERT INTO "UserLogin" ("user_id", "password") VALUES (1, "pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1"), 
 (2, "pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1"), 
 (3, "pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1"), 
 (4, "pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1"), 
@@ -44,8 +42,7 @@ INSERT INTO "UserLogin" ("user_id", "password") VALUES
 (20, "pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1"), 
 (21, "pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1");
 
-INSERT INTO "StaffRoles" ("user_id", "role", "verified") VALUES
-(1, "system_admin", false), 
+INSERT INTO "StaffRoles" ("user_id", "role", "verified") VALUES (1, "system_admin", false), 
 (2, "doctor", false), 
 (3, "doctor", false), 
 (4, "physical_therapist", false), 
