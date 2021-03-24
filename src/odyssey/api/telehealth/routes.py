@@ -14,11 +14,14 @@ from odyssey.api.lookup.models import (
 )
 
 from odyssey.api.telehealth.models import (
+    TelehealthBookings,
     TelehealthMeetingRooms, 
     TelehealthQueueClientPool,
     TelehealthStaffAvailability,
 )
 from odyssey.api.telehealth.schemas import (
+    TelehealthBookingsSchema,
+    TelehealthBookingsOutputSchema,
     TelehealthMeetingRoomSchema,
     TelehealthQueueClientPoolSchema,
     TelehealthQueueClientPoolOutputSchema,
@@ -31,6 +34,101 @@ from odyssey.utils.errors import GenericNotFound, InputError, UnauthorizedUser
 from odyssey.utils.misc import check_client_existence, check_staff_existence, grab_twilio_credentials
 
 ns = api.namespace('telehealth', description='telehealth bookings management API')
+
+@ns.route('/bookings/')
+@ns.doc(params={'client_user_id': 'Client User ID',
+                'staff_user_id' : 'Staff User ID'})                
+class TelehealthPostClientStaffBookingsApi(Resource):
+    """
+    This API resource is used to get, post, and delete the user's in the queue.
+    """
+    @token_auth.login_required
+    @responds(schema=TelehealthBookingsOutputSchema, api=ns, status_code=201)
+    def get(self):
+        """
+        Returns the list of bookings for clients and/or staff
+        """
+
+        client_user_id = request.args.get('client_user_id', type=int)
+
+        staff_user_id = request.args.get('staff_user_id', type=int)
+
+        if client_user_id and staff_user_id:
+            # Check client existence
+            check_client_existence(client_user_id)  
+            check_staff_existence(staff_user_id)      
+            # grab the whole queue
+            booking = TelehealthBookings.query.filter_by(client_user_id=client_user_id,staff_user_id=staff_user_id).order_by(TelehealthBookings.target_date.asc()).all()
+        elif client_user_id and not staff_user_id:
+            # Check client existence
+            check_client_existence(client_user_id)        
+            # grab the whole queue
+            booking = TelehealthBookings.query.filter_by(client_user_id=client_user_id).order_by(TelehealthBookings.target_date.asc()).all()
+        elif staff_user_id and not client_user_id:
+            # Check staff existence
+            check_staff_existence(staff_user_id)        
+            # grab the whole queue
+            booking = TelehealthBookings.query.filter_by(staff_user_id=staff_user_id).order_by(TelehealthBookings.target_date.asc()).all()
+                                
+        # sort the queue based on target date and priority
+        payload = {'bookings': booking,
+                   'all_bookings': len(booking)}
+
+    @token_auth.login_required
+    @accepts(schema=TelehealthBookingsSchema, api=ns)
+    @responds(status_code=201,api=ns)
+    def post(self):
+        """
+            Add client and staff to a TelehealthBookings table.
+        """
+        if request.parsed_obj.booking_window_id_start_time >= request.parsed_obj.booking_window_id_end_time:
+            raise InputError(status_code=405,message='Start time must be before end time.')
+        client_user_id = request.args.get('client_user_id', type=int)
+        
+        if not client_user_id:
+            raise InputError(status_code=405,message='Missing Client ID')
+
+        staff_user_id = request.args.get('staff_user_id', type=int)
+        
+        if not staff_user_id:
+            raise InputError(status_code=405,message='Missing Staff ID')        
+        
+        # Check client existence
+        check_client_existence(client_user_id)
+        
+        # Check staff existence
+        check_staff_existence(staff_user_id)
+
+        # Check if staff and client have those times open
+        client_bookings = TelehealthBookings.query.filter_by(client_user_id=client_user_id,target_date=request.parsed_obj.target_date).all()
+        staff_bookings = TelehealthBookings.query.filter_by(staff_user_id=staff_user_id,target_date=request.parsed_obj.target_date).all()
+        
+        # This checks if the input slots have already been taken.
+        if client_bookings:
+            for booking in client_bookings:
+                if request.parsed_obj.booking_window_id_start_time >= booking.booking_window_id_start_time and\
+                    request.parsed_obj.booking_window_id_start_time < booking.booking_window_id_end_time:
+                    raise InputError(status_code=405,message='Client {} already has an appointment for this time.'.format(client_user_id))
+                elif request.parsed_obj.booking_window_id_end_time > booking.booking_window_id_start_time and\
+                    request.parsed_obj.booking_window_id_end_time < booking.booking_window_id_end_time:
+                    raise InputError(status_code=405,message='Client {} already has an appointment for this time.'.format(client_user_id))
+
+        if staff_bookings:
+            for booking in staff_bookings:
+                if request.parsed_obj.booking_window_id_start_time >= booking.booking_window_id_start_time and\
+                    request.parsed_obj.booking_window_id_start_time < booking.booking_window_id_end_time:
+                    raise InputError(status_code=405,message='Staff {} already has an appointment for this time.'.format(staff_user_id))
+                elif request.parsed_obj.booking_window_id_end_time > booking.booking_window_id_start_time and\
+                    request.parsed_obj.booking_window_id_end_time < booking.booking_window_id_end_time:
+                    raise InputError(status_code=405,message='Staff {} already has an appointment for this time.'.format(staff_user_id))        
+
+        request.parsed_obj.client_user_id = client_user_id
+        request.parsed_obj.staff_user_id = staff_user_id
+        db.session.add(request.parsed_obj)
+        db.session.commit()
+        return 201
+
+
 
 @ns.route('/meeting-room/new/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
