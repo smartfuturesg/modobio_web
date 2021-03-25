@@ -9,5 +9,4 @@ def test_get_1_client_time_select(test_client, init_database, staff_auth_header)
     response = test_client.get('/telehealth/client/time-select/1/', headers=staff_auth_header)
 
 
-    breakpoint()
     assert response.status_code == 201
