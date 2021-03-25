@@ -7,12 +7,30 @@ from marshmallow import (
 
 from odyssey import ma
 from odyssey.api.telehealth.models import (
+    TelehealthBookings,
     TelehealthQueueClientPool,
     TelehealthStaffAvailability,
     TelehealthMeetingRooms,
     TelehealthQueueClientPool
 )
 from odyssey.utils.constants import DAY_OF_WEEK, GENDERS
+
+class TelehealthBookingsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = TelehealthBookings
+        dump_only = ('idx', 'client_user_id','staff_user_id',)
+        include_fk = True
+
+    # booking_window_id_start_time = fields.Integer()
+    # booking_window_id_end_time = fields.Integer()
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return TelehealthBookings(**data)
+
+class TelehealthBookingsOutputSchema(Schema):
+    bookings = fields.Nested(TelehealthBookingsSchema(many=True),missing=[])
+    all_bookings = fields.Integer()  
 
 class TelehealthStaffAvailabilitySchema(ma.SQLAlchemyAutoSchema):
     class Meta:
