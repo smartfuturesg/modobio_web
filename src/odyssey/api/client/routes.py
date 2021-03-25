@@ -13,7 +13,8 @@ from odyssey.utils.errors import (
     ContentNotFound,
     IllegalSetting,
     TransactionNotFound, 
-    InputError
+    InputError,
+    GenericNotFound
 )
 from odyssey import db
 from odyssey.utils.constants import TABLE_TO_URI
@@ -32,7 +33,8 @@ from odyssey.api.client.models import (
     ClientAssignedDrinks,
     ClientHeightHistory,
     ClientWeightHistory,
-    ClientTransactionHistory
+    ClientTransactionHistory,
+    ClientPushNotifications
 )
 from odyssey.api.doctor.models import (
     MedicalFamilyHistory,
@@ -48,7 +50,8 @@ from odyssey.api.lookup.models import (
     LookupDefaultHealthMetrics,
     LookupGoals, 
     LookupDrinks, 
-    LookupRaces
+    LookupRaces,
+    LookupNotifications
 )
 from odyssey.api.physiotherapy.models import PTHistory 
 from odyssey.api.staff.models import StaffRecentClients
@@ -67,6 +70,7 @@ from odyssey.api.client.schemas import(
     ClientIndividualContractSchema,
     ClientClinicalCareTeamSchema,
     ClientMobileSettingsSchema,
+    ClientMobilePushNotificationsSchema,
     ClientPoliciesContractSchema, 
     ClientRegistrationStatusSchema,
     ClientReleaseSchema,
@@ -248,10 +252,6 @@ class Clients(Resource):
         #if ELASTICSEARCH_URL isn't set, the search request will return without doing anything
         es = current_app.elasticsearch
         if not es: return
-        
-        if not es.indices.exists('clients'):
-            print('Oops! No Clients Exist Yet')
-            raise ContentNotFound()
         
         #clean up and validate input data
         startAt = request.args.get('_from', 0, type= int)
@@ -1084,11 +1084,22 @@ class ClientMobileSettingsApi(Resource):
         if ClientMobileSettings.query.filter_by(user_id=user_id).one_or_none():
             raise IllegalSetting(message=f"Mobile settings for user_id {user_id} already exists. Please use PUT method")
 
-        request.parsed_obj.user_id = user_id
-        db.session.add(request.parsed_obj)
+        gen_settings = request.parsed_obj['general_settings']
+        gen_settings.user_id = user_id
+        db.session.add(gen_settings)
+
+        for notification in request.parsed_obj['push_notification_type_ids']:
+            exists = LookupNotifications.query.filter_by(notification_type_id=notification.notification_type_id).one_or_none()
+            if not exists:
+                raise GenericNotFound(message="Invalid notification type id: " + str(notification.notification_type_id))
+           
+            push_notfication = ClientMobilePushNotificationsSchema().load({'notification_type_id': notification.notification_type_id})
+            push_notfication.user_id = user_id
+            db.session.add(push_notfication)
+
         db.session.commit()
 
-        return request.parsed_obj
+        return request.json
 
     @token_auth.login_required(user_type=('client',))
     @responds(schema=ClientMobileSettingsSchema, api=ns, status_code=200)
@@ -1099,11 +1110,15 @@ class ClientMobileSettingsApi(Resource):
 
         check_client_existence(user_id)
 
-        return ClientMobileSettings.query.filter_by(user_id=user_id).one_or_none()
+        gen_settings = ClientMobileSettings.query.filter_by(user_id=user_id).one_or_none()
+
+        notification_types = ClientPushNotifications.query.filter_by(user_id=user_id).all()
+
+        return {'general_settings': gen_settings, 'push_notification_type_ids': notification_types}
 
     @token_auth.login_required(user_type=('client',))
     @accepts(schema=ClientMobileSettingsSchema, api=ns)
-    @responds(schema=ClientMobileSettingsSchema, api=ns, status_code=201)
+    @responds(schema=ClientMobileSettingsSchema, api=ns, status_code=200)
     def put(self, user_id):
         """
         Update a client's mobile settings
@@ -1114,12 +1129,35 @@ class ClientMobileSettingsApi(Resource):
         if not settings:
             raise IllegalSetting(message=f"Mobile settings for user_id {user_id} do not exist. Please use POST method")
 
-        data = request.json
-        settings.update(data)
+        gen_settings = request.parsed_obj['general_settings'].__dict__
+        del gen_settings['_sa_instance_state']
+        settings.update(gen_settings)
+
+        client_push_notifications = ClientPushNotifications.query.filter_by(user_id=user_id).all()
+        client_new_notifications = []
+        for notification in request.parsed_obj['push_notification_type_ids']:
+            exists = LookupNotifications.query.filter_by(notification_type_id=notification.notification_type_id).one_or_none()
+            if not exists:
+                raise GenericNotFound(message="Invalid notification type id: " + str(notification.notification_type_id))
+            
+            client_new_notifications.append(notification.notification_type_id)
+            
+        for notification in client_push_notifications:
+            if notification.notification_type_id not in client_new_notifications:
+                #if an id type is not in the arguments, the user has disabled this type of notification
+                db.session.delete(notification)
+            else:
+                #if a notification type with this id is already in the db, remove from the list
+                #of new types to be added for the user
+                client_new_notifications.remove(notification.notification_type_id)
+
+        for notification_type_id in client_new_notifications:
+            push_notification = ClientMobilePushNotificationsSchema().load({'notification_type_id': notification_type_id})
+            push_notification.user_id = user_id
+            db.session.add(push_notification)
+
         db.session.commit()
-
-        return request.parsed_obj
-
+        return request.json
 
 @ns.route('/height/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})

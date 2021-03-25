@@ -25,7 +25,8 @@ from odyssey.api.client.models import (
     ClientAssignedDrinks,
     ClientHeightHistory,
     ClientWeightHistory,
-    ClientTransactionHistory
+    ClientTransactionHistory,
+    ClientPushNotifications
 )
 from odyssey.api.user.schemas import UserInfoPutSchema
 
@@ -35,7 +36,7 @@ class ClientSearchItemsSchema(Schema):
     lastname = fields.String(required=False, validate=validate.Length(min=1,max=50), missing=None)
     email = fields.Email(required=False, missing=None)
     phone_number = fields.String(required=False, validate=validate.Length(min=0,max=50), missing=None)
-    dob = fields.String(required=False, missing=None)
+    dob = fields.Date(required=False, missing=None)
     modobio_id = fields.String(required=False, validate=validate.Length(min=0,max=12), missing=None)
 
 class ClientSearchMetaSchema(Schema):
@@ -256,8 +257,8 @@ class ClientDataTierSchema(Schema):
 class AllClientsDataTier(Schema):
 
     items = fields.Nested(ClientDataTierSchema(many=True), missing=ClientDataTierSchema().load({}))
-    total_stored_bytes = fields.Integer(metadata={'description': "Total bytes stored for all clients"}, missing=0)
-    total_items = fields.Integer(metadata={'description': "number of clients in this payload"}, missing=0)
+    total_stored_bytes = fields.Integer(description="Total bytes stored for all clients", missing=0)
+    total_items = fields.Integer(description="number of clients in this payload", missing=0)
 
 
 ####
@@ -316,11 +317,11 @@ class ClinicalCareTeamAuthorizaitonSchema(Schema):
     """
     user_id = fields.Integer(load_only=True)
     team_member_modobio_id = fields.String(dump_only=True)
-    team_member_user_id = fields.Integer(metadata={'description':"user_id for this clinical care team member"})
+    team_member_user_id = fields.Integer(description="user_id for this clinical care team member")
     team_member_firstname = fields.String(dump_only=True)
     team_member_lastname = fields.String(dump_only=True)
     team_member_email = fields.Email(dump_only=True)
-    resource_id = fields.Integer(metadata={'description':"id for the resource. See lookup table for resource ids"})
+    resource_id = fields.Integer(description="id for the resource. See lookup table for resource ids")
     display_name = fields.String(dump_only=True)
 
     @post_load
@@ -333,7 +334,7 @@ class ClinicalCareTeamAuthorizationNestedSchema(Schema):
     """
     clinical_care_team_authoriztion = fields.Nested(ClinicalCareTeamAuthorizaitonSchema(many=True), missing=[])
 
-class ClientMobileSettingsSchema(ma.SQLAlchemyAutoSchema):
+class ClientGeneralMobileSettingsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientMobileSettings
         exclude = ('created_at', 'updated_at', 'idx')
@@ -344,6 +345,18 @@ class ClientMobileSettingsSchema(ma.SQLAlchemyAutoSchema):
     @post_load
     def make_object(self, data, **kwargs):
         return ClientMobileSettings(**data)
+
+class ClientMobilePushNotificationsSchema(Schema):
+    notification_type_id = fields.Integer()
+    user_id = fields.Integer(dump_only=True)
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return ClientPushNotifications(**data)
+
+class ClientMobileSettingsSchema(Schema):
+    general_settings = fields.Nested(ClientGeneralMobileSettingsSchema)
+    push_notification_type_ids = fields.Nested(ClientMobilePushNotificationsSchema(many=True), missing=[])
         
 class ClientAssignedDrinksSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
