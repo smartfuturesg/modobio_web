@@ -12,6 +12,68 @@ Database models for all things telehealth. These tables will be used to keep tra
 meeting rooms, and other data related to telehealth meetings
 """
 
+class TelehealthBookings(db.Model):
+    """ 
+    Holds all of the client and Staff bookings 
+    """
+
+    __tablename__ = 'TelehealthBookings'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Auto incrementing primary key
+
+    :type: int, primary key
+    """
+
+    client_user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    """
+    staff member id 
+
+    :type: int, foreign key('User.user_id')
+    """
+
+    staff_user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    """
+    staff member id 
+
+    :type: int, foreign key('User.user_id')
+    """
+
+    target_date = db.Column(db.Date)
+    """
+    target date is the date of the appointment
+
+    :type: datetime
+    """
+
+    booking_window_id_start_time = db.Column(db.Integer, db.ForeignKey('LookupBookingTimeIncrements.idx', ondelete="CASCADE"), nullable=False)
+    """ 
+    start time booking_window_id
+
+    :type: int, foreign key('LookupBookingTimeIncrements.idx')
+    """
+    
+    booking_window_id_end_time = db.Column(db.Integer, db.ForeignKey('LookupBookingTimeIncrements.idx', ondelete="CASCADE"), nullable=False)
+    """ 
+    end time booking_window_id
+    :type: int, foreign key('LookupBookingTimeIncrements.idx')
+    """
+
+    status = db.Column(db.String)
+    """
+    Status of the booking
+
+    :type: str
+    """    
+
 class TelehealthMeetingRooms(db.Model):
     """ 
     Meeting room details for one-on-one meetings between clients and medical professionals.

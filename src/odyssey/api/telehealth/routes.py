@@ -14,16 +14,20 @@ from odyssey.api.lookup.models import (
 )
 
 from odyssey.api.telehealth.models import (
+    TelehealthBookings,
     TelehealthMeetingRooms, 
     TelehealthQueueClientPool,
     TelehealthStaffAvailability,
 )
 from odyssey.api.telehealth.schemas import (
+    TelehealthBookingsSchema,
+    TelehealthBookingsOutputSchema,
     TelehealthMeetingRoomSchema,
     TelehealthQueueClientPoolSchema,
     TelehealthQueueClientPoolOutputSchema,
     TelehealthStaffAvailabilitySchema,
-    TelehealthStaffAvailabilityOutputSchema
+    TelehealthStaffAvailabilityOutputSchema,
+    TelehealthTimeSelectOutputSchema
 ) 
 from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import TWILIO_ACCESS_KEY_TTL, DAY_OF_WEEK
@@ -32,14 +36,14 @@ from odyssey.utils.misc import check_client_existence, check_staff_existence, gr
 
 ns = api.namespace('telehealth', description='telehealth bookings management API')
 
+
+
 @ns.route('/client/time-select/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID'})
-class TelehealthQueueClientPoolApi(Resource):
-    """
-    This API resource is used to get, post, and delete the user's in the queue.
-    """
+class TelehealthClientTimeSelectApi(Resource):                               
+    
     @token_auth.login_required
-    @responds(api=ns, status_code=200)
+    @responds(schema=TelehealthTimeSelectOutputSchema,api=ns, status_code=201)
     def get(self,user_id):
         """
         Returns the list of notifications for the given user_id
@@ -47,33 +51,42 @@ class TelehealthQueueClientPoolApi(Resource):
         # Check if the client exists
         check_client_existence(user_id)
 
-        # grab the whole queue
+        # grab the client at the top of the queue?
         # Need to grab this for to grab the closest target_date / priority date
         client_in_queue = TelehealthQueueClientPool.query.filter_by(user_id=user_id).order_by(TelehealthQueueClientPool.priority.desc(),TelehealthQueueClientPool.target_date.asc()).first()
         duration = client_in_queue.duration
         # convert client's target date to day_of_week
-        target_date = client_in_queue.target_date
+        target_date = client_in_queue.target_date.date()
         
         # 0 is Monday, 6 is Sunday
         weekday_id = target_date.weekday()
         weekday_str = DAY_OF_WEEK[weekday_id]
+        
+        # This should return ALL staff available on that given day.
+        # TODO, MUST INCLUDE PROFESSION TYPE FILTER, perhaps delete down low
         staff_availability = TelehealthStaffAvailability.query.filter_by(day_of_week=weekday_str).order_by(TelehealthStaffAvailability.user_id.asc()).all() 
 
-        # This should return ALL staff available on that given day.
         # Duration is taken from the client queue.
         # we divide it by 5 because our look up tables are in increments of 5 mintues
         # so, this represents the number of time blocks we will need to look at.
-        idx_delta = int(duration/5)
+        # The subtract 1 is due to the indices having start_time and end_times, so 100 - 103 is 100.start_time to 103.end_time which is
+        # the 20 minute duration
+        idx_delta = int(duration/5) - 1
  
         # TODO will need to incorporate timezone information
         available = {}
         user_id_arr = []
+        # Loop through all staff that have indicated they are available on that day of the week
+        #
+        # The expected output is the first and last index of their time blocks, AKA:
+        # availability[staff_user_id] = [[100, 120], [145, 160]]
+        #
         for availability in staff_availability:
-            user_id = availability.user_id
-            if user_id not in user_id_arr:
+            staff_user_id = availability.user_id
+            if staff_user_id not in user_id_arr:
                 booking_id_arr = []
-                user_id_arr.append(user_id)
-                available[user_id] = []
+                user_id_arr.append(staff_user_id)
+                available[staff_user_id] = []
                 idx1 = availability.booking_window_id+1
                 booking_id_arr.append(idx1)
             else:
@@ -81,27 +94,185 @@ class TelehealthQueueClientPoolApi(Resource):
                 if idx2 - idx1 > 1:
                     # time gap detected
                     booking_id_arr.append(idx1)
-                    available[user_id].append(booking_id_arr)
+                    available[staff_user_id].append(booking_id_arr)
                     booking_id_arr = []
                     booking_id_arr.append(idx2)
                 idx1 = idx2
         booking_id_arr.append(idx2)
-        available[user_id].append(booking_id_arr)
+        available[staff_user_id].append(booking_id_arr)
 
         # TODO simulate client staff bookings, delete this
         # TODO Must call client and staff bookings individually 
-        getStaffClientBookings = [{'booking_window_id_start_time': 100, 'booking_window_id_end_time':103},{'booking_window_id_start_time': 95, 'booking_window_id_end_time':98}]
 
-        for bookings in getStaffClientBookings:
-            pass
+        # Now, grab all of the bookings for that client and all staff on the given target date
+        # This is necessary to subtract from the staff_availability above.
+        bookings = TelehealthBookings.query.filter_by(client_user_id=user_id,target_date=target_date).all()
 
-        breakpoint()            
+        # Now, subtract booking times from staff availability and generate the actual times a staff member is free
+        actual_open_time = {}
+        for booking in bookings:
+            staff_id = booking.staff_user_id
+            if staff_id in available:
+                if staff_id not in actual_open_time:
+                    actual_open_time[staff_id] = []
+                idx = 0
+                # This while loop with a dynamic available is needed because as we subtract times from 
+                # Staff availability, we need to split up the new time available windows.
+                while idx < len(available[staff_id]):
+                    # if the available time window is already less than session duration, skip this block of time
+                    popped = False
+                    avail = available[staff_id][idx]
+                    if avail[1] - avail[0] < idx_delta:
+                        continue
+                    if booking.booking_window_id_start_time > avail[0] and\
+                        booking.booking_window_id_end_time < avail[1]:
+                        
+                        block_end = booking.booking_window_id_start_time - 1
+                        block_start = booking.booking_window_id_end_time + 1
+                        # if the available time window is already less than session duration, skip this block of time
+                        if block_end - avail[0] >= idx_delta:
+                            if not popped:
+                                available[staff_id].pop(idx)
+                                popped = True 
+                            available[staff_id].append([avail[0],block_end])
+                            actual_open_time[staff_id].append([avail[0],block_end])
+                        if avail[1] - block_start >= idx_delta:
+                            if not popped:
+                                available[staff_id].pop(idx)
+                                popped = True
+                            available[staff_id].append([block_start,avail[1]])                            
+                            actual_open_time[staff_id].append([block_start,avail[1]])
+
+                    idx+=1
+            else:
+                # This staff_user_id should not have availability on this day
+                continue
+
+        # convert time IDs to actual times for clients to select
+        time_inc = LookupBookingTimeIncrements.query.all()
+        times = []
+
+        # NOTE: It might be a good idea to shuffle user_id_arr and only select up to 10 (?) staff members 
+        # to reduce the time complexity
+        for staff_id in user_id_arr:
+            # times[staff_id] = []
+            for time_ids in available[staff_id]:
+                idx = time_ids[0]
+                # This moving index is used to offer times in 5 minute increments.
+                # For a 20 minute session, you can technically offer:
+                # 1:00 - 1:20, 1:05 - 1:25, 1:10 - 1:30 etc
+                while idx + idx_delta < time_ids[1]:
+                    if time_inc[idx].start_time.minute%15 == 0:
+                        times.append({'staff_user_id': staff_id,
+                                    'start_time': time_inc[idx].start_time, 
+                                    'end_time': time_inc[idx+idx_delta].end_time})
+                    idx+=1
         
         # sort the queue based on target date and priority
-        payload = {'queue': queue,
-                   'total_queue': len(queue)}
+        payload = {'appointment_times': times,
+                   'total_options': len(times)}
 
         return payload
+
+@ns.route('/bookings/')
+@ns.doc(params={'client_user_id': 'Client User ID',
+                'staff_user_id' : 'Staff User ID'}) 
+class TelehealthBookingsApi(Resource):
+    """
+    This API resource is used to get, post, and delete the user's in the queue.
+    """        
+    @responds(schema=TelehealthBookingsOutputSchema, api=ns, status_code=201)
+    def get(self):
+        """
+        Returns the list of bookings for clients and/or staff
+        """
+
+        client_user_id = request.args.get('client_user_id', type=int)
+
+        staff_user_id = request.args.get('staff_user_id', type=int)
+
+        if not client_user_id and not staff_user_id:
+            raise InputError(status_code=405,message='Must include at least one staff or client ID.')
+
+        if client_user_id and staff_user_id:
+            # Check client existence
+            check_client_existence(client_user_id)  
+            check_staff_existence(staff_user_id)      
+            # grab the whole queue
+            booking = TelehealthBookings.query.filter_by(client_user_id=client_user_id,staff_user_id=staff_user_id).order_by(TelehealthBookings.target_date.asc()).all()
+        elif client_user_id and not staff_user_id:
+            # Check client existence
+            check_client_existence(client_user_id)        
+            # grab the whole queue
+            booking = TelehealthBookings.query.filter_by(client_user_id=client_user_id).order_by(TelehealthBookings.target_date.asc()).all()
+        elif staff_user_id and not client_user_id:
+            # Check staff existence
+            check_staff_existence(staff_user_id)        
+            # grab the whole queue
+            booking = TelehealthBookings.query.filter_by(staff_user_id=staff_user_id).order_by(TelehealthBookings.target_date.asc()).all()
+        
+        
+        # sort the queue based on target date and priority
+        payload = {'bookings': booking,
+                   'all_bookings': len(booking)}
+
+        return payload
+
+    @token_auth.login_required
+    @accepts(schema=TelehealthBookingsSchema, api=ns)
+    @responds(status_code=201,api=ns)
+    def post(self):
+        """
+            Add client and staff to a TelehealthBookings table.
+        """
+        if request.parsed_obj.booking_window_id_start_time >= request.parsed_obj.booking_window_id_end_time:
+            raise InputError(status_code=405,message='Start time must be before end time.')
+        client_user_id = request.args.get('client_user_id', type=int)
+        
+        if not client_user_id:
+            raise InputError(status_code=405,message='Missing Client ID')
+
+        staff_user_id = request.args.get('staff_user_id', type=int)
+        
+        if not staff_user_id:
+            raise InputError(status_code=405,message='Missing Staff ID')        
+        
+        # Check client existence
+        check_client_existence(client_user_id)
+        
+        # Check staff existence
+        check_staff_existence(staff_user_id)
+
+        # Check if staff and client have those times open
+        client_bookings = TelehealthBookings.query.filter_by(client_user_id=client_user_id,target_date=request.parsed_obj.target_date).all()
+        staff_bookings = TelehealthBookings.query.filter_by(staff_user_id=staff_user_id,target_date=request.parsed_obj.target_date).all()
+        
+        # This checks if the input slots have already been taken.
+        if client_bookings:
+            for booking in client_bookings:
+                if request.parsed_obj.booking_window_id_start_time >= booking.booking_window_id_start_time and\
+                    request.parsed_obj.booking_window_id_start_time < booking.booking_window_id_end_time:
+                    raise InputError(status_code=405,message='Client {} already has an appointment for this time.'.format(client_user_id))
+                elif request.parsed_obj.booking_window_id_end_time > booking.booking_window_id_start_time and\
+                    request.parsed_obj.booking_window_id_end_time < booking.booking_window_id_end_time:
+                    raise InputError(status_code=405,message='Client {} already has an appointment for this time.'.format(client_user_id))
+
+        if staff_bookings:
+            for booking in staff_bookings:
+                if request.parsed_obj.booking_window_id_start_time >= booking.booking_window_id_start_time and\
+                    request.parsed_obj.booking_window_id_start_time < booking.booking_window_id_end_time:
+                    raise InputError(status_code=405,message='Staff {} already has an appointment for this time.'.format(staff_user_id))
+                elif request.parsed_obj.booking_window_id_end_time > booking.booking_window_id_start_time and\
+                    request.parsed_obj.booking_window_id_end_time < booking.booking_window_id_end_time:
+                    raise InputError(status_code=405,message='Staff {} already has an appointment for this time.'.format(staff_user_id))        
+
+        request.parsed_obj.client_user_id = client_user_id
+        request.parsed_obj.staff_user_id = staff_user_id
+        db.session.add(request.parsed_obj)
+        db.session.commit()
+        return 201
+
+
 
 @ns.route('/meeting-room/new/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
