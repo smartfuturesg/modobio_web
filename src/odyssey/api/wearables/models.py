@@ -100,6 +100,20 @@ class Wearables(_Base):
     :type: bool, default = False
     """
 
+    has_applewatch = Column(Boolean, default=False, nullable=False)
+    """
+    Client has an Apple Watch wearable.
+
+    :type: bool, default = False
+    """
+
+    registered_applewatch = Column(Boolean, default=False, nullable=False)
+    """
+    Client granted Modo Bio access to Apple Watch data.
+
+    :type: bool, default = False
+    """
+
 
 class WearablesOura(_Base):
     """ Oura Ring specific information. """
