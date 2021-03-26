@@ -53,16 +53,12 @@ Hasura CLI needs to be run from this directory to pick up the configuration in `
 - If you set an admin secret, add `--admin-secret [secret]` or set `export HASURA_GRAPHQL_ADMIN_SECRET="[secret]"`.
 
 
-### Workflow
+### Autotracking
 
-1. Edit the models, create migration scripts, upgrade migration so that the database is at latest version.
-2. In Hasura console > settings (cog wheel) > click Reload metadata, to make the changes visible in the console.
-3. Edit how you want graphql to interact with the database in the console.
-4. If you added tables you do **not** want accessible in graphql, add them to metadata/tables-no-track.yaml.
-5. When done, export metadata from the command line: `$ hasura metadata export`.
-6. Add custom column names: `$ ./hasura_update.py`.
-7. Apply the updated metadata: `$ hasura metadata apply`.
-8. Reload the browser tab with Hasura console to see the custom column names (in camelCase).
-9. Export the metadata once again: `$ hasura metadata export`.
+Tables added to the database are not automatically tracked (made visible) by Hasura. The `hasura_update.py` script was written to automatically track all tables and foreign keys in the table. It should be run once immediately after Hasura startup. The script will populate the `metadata/tables.yaml` file.
 
-Steps 7 and 9 may seem redundant, but it helps to discover inconsistent metadata created by the script. Hasura also has a specific order in which metadata is exported, which makes the number of changes in git diff smaller.
+1. Add any tables that should **not** be tracked to `metadata/tables-no-track.yaml`.
+2. Start the Hasura server.
+3. Run `$ ./hasura_update.py`. The script needs access to the database. If the database is not accessible on localhost on the normal port, provide a database URI by setting `DB_URI=...` in the environment.
+4. Run `$ hasura-cli metadata apply`.
+
