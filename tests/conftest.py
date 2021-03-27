@@ -56,6 +56,8 @@ def init_database():
     #  execute, raw sql on database
     sql_scripts = ['database/'+f for f in os.listdir('database/') if f.endswith(".sql")]
     for sql_script in sql_scripts:
+        if 'seed_users' in sql_script:
+            continue
         with open (sql_script, "r") as f:
             data=f.readlines()
 
