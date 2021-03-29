@@ -1,16 +1,74 @@
 
-from enum import unique
-import random
-
-from datetime import datetime
 from sqlalchemy import text
-from odyssey.utils.constants import ALPHANUMERIC, DB_SERVER_TIME
+from odyssey.utils.constants import DB_SERVER_TIME
 from odyssey import db
 
 """
 Database models for all things telehealth. These tables will be used to keep track of bookings,
 meeting rooms, and other data related to telehealth meetings
 """
+
+class TelehealthBookings(db.Model):
+    """ 
+    Holds all of the client and Staff bookings 
+    """
+
+    __tablename__ = 'TelehealthBookings'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Auto incrementing primary key
+
+    :type: int, primary key
+    """
+
+    client_user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    """
+    staff member id 
+
+    :type: int, foreign key('User.user_id')
+    """
+
+    staff_user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    """
+    staff member id 
+
+    :type: int, foreign key('User.user_id')
+    """
+
+    target_date = db.Column(db.Date)
+    """
+    target date is the date of the appointment
+
+    :type: datetime
+    """
+
+    booking_window_id_start_time = db.Column(db.Integer, db.ForeignKey('LookupBookingTimeIncrements.idx', ondelete="CASCADE"), nullable=False)
+    """ 
+    start time booking_window_id
+
+    :type: int, foreign key('LookupBookingTimeIncrements.idx')
+    """
+    
+    booking_window_id_end_time = db.Column(db.Integer, db.ForeignKey('LookupBookingTimeIncrements.idx', ondelete="CASCADE"), nullable=False)
+    """ 
+    end time booking_window_id
+    :type: int, foreign key('LookupBookingTimeIncrements.idx')
+    """
+
+    status = db.Column(db.String)
+    """
+    Status of the booking
+
+    :type: str
+    """    
 
 class TelehealthMeetingRooms(db.Model):
     """ 
@@ -37,21 +95,24 @@ class TelehealthMeetingRooms(db.Model):
 
     room_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
-    autoincrementing primary key representing the internal id of the room
+    autoincrementing primary key representing the internal id of the chat room. This is 
+    seperate from the IDs that are assigned by twilio. 
 
     :type: int, primary key, autoincrement
     """
 
     room_name = db.Column(db.String)
     """
-    Name of room assigned internally and given to Twilio API.
+    Name of room assigned internally and given to Twilio API. When interacting with twilio, this name
+    will be under the attribute `friendly_name`. We will use this in order to call up the room 
+    from twilio for access grants and webhooks. 
 
     :type: str
     """
 
     room_status = db.Column(db.String)
     """
-    Status of meeting room to be updated by Twilio
+    Status of meeting room to be updated by Twilio.
 
     :type: str
     """
@@ -69,7 +130,7 @@ class TelehealthMeetingRooms(db.Model):
 
     :type: int
     """
-
+    
     client_access_token = db.Column(db.String)
     """
     Token provied by Twilio which grants access to the chat room
@@ -82,33 +143,50 @@ class TelehealthMeetingRooms(db.Model):
     Token provied by Twilio which grants access to the chat room
     """
 
-    def generate_meeting_room_name(self, meeting_type = 'TELEHEALTH'):
-        """ Generate the user's mdobio_id.
 
-        The modo bio identifier is used as a public user id, it
-        can also be exported to other healthcare providers (clients only).
-        It is made up of the firstname and lastname initials and 10 random alphanumeric
-        characters.
 
-        Parameters
-        ----------
-        firstname : str
-            Client first name.
+class TelehealthStaffAvailability(db.Model):
+    """ 
+    Holds all of the clients in a pool for their appointments. 
+    This is used for BEFORE they are accepted and see their medical professional.
+    """
 
-        lastname : str
-            Client last name.
+    __tablename__ = 'TelehealthStaffAvailability'
 
-        user_id : int
-            User ID number.
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
 
-        Returns
-        -------
-        str
-            Medical record ID
-        """
-        _hash = "".join([random.choice(ALPHANUMERIC) for i in range(15)])
-        self.room_name = (meeting_type+'_'+_hash).upper()
-        return 
+    :type: datetime
+    """
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Auto incrementing primary key
+
+    :type: int, primary key
+    """
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    """
+    staff member id 
+
+    :type: int, foreign key('User.user_id')
+    """
+
+    day_of_week = db.Column(db.String)
+    """
+    Day of the week
+
+    :type: str
+    """
+    
+    booking_window_id = db.Column(db.Integer, db.ForeignKey('LookupBookingTimeIncrements.idx', ondelete="CASCADE"), nullable=False)
+    """
+    booking window id
+
+    :type: int, foreign key('LookupBookingTimeIncrements.idx')
+    """
 
 class TelehealthQueueClientPool(db.Model):
     """ 
@@ -189,4 +267,72 @@ class TelehealthQueueClientPool(db.Model):
     options: male, female, no-preference
 
     :type: str
+    """
+
+class TelehealthChatRooms(db.Model):
+    """ 
+    Table stores details on chat rooms created through the Twiliio Conversations API.
+    
+    Unlike TelehealthMeetingRooms, there will be only one unique room created per
+    client-staff pair. We do this so that chat threads persist through subsequent client and
+    staff interactions. 
+
+    """
+
+    __tablename__ = 'TelehealthChatRooms'
+
+    created_at = db.Column(db.DateTime, server_default=text('clock_timestamp()'))
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, server_default=text('clock_timestamp()'))
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    room_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    autoincrementing primary key representing the internal id of the room
+
+    :type: int, primary key, autoincrement
+    """
+
+    conversation_sid = db.Column(db.String)
+    """
+    Conversation SID form Twilio API. Format: CHXXX
+
+    :type: str
+    """
+
+    room_name = db.Column(db.String)
+    """
+    Name of room assigned internally and given to Twilio API.
+
+    :type: str
+    """
+
+    room_status = db.Column(db.String)
+    """
+    Status of chat room to be updated by Twilio.
+
+    :type: str
+    """
+
+    client_user_id  = db.Column(db.Integer, db.ForeignKey('User.user_id'), nullable=False)
+    """
+    user_id of the client participant
+
+    :type: int
+    """
+
+    staff_user_id  = db.Column(db.Integer, db.ForeignKey('User.user_id'), nullable=False)
+    """
+    user_id of the staff participant
+
+    :type: int
     """

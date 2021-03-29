@@ -7,6 +7,7 @@ from odyssey.api import api
 from odyssey.utils.auth import token_auth
 from odyssey.api.lookup.models import (
      LookupActivityTrackers,
+     LookupBookingTimeIncrements,
      LookupClientBookingWindow,
      LookupClinicalCareTeamResources,
      LookupCountriesOfOperations,
@@ -21,10 +22,12 @@ from odyssey.api.lookup.models import (
      LookupTelehealthSessionDuration,
      LookupTerritoriesofOperation,
      LookupTransactionTypes,
-     LookupNotifications
+     LookupNotifications,
+     LookupEmergencyNumbers
 )
 from odyssey.api.lookup.schemas import (
-    LookupActivityTrackersOutputSchema, 
+    LookupActivityTrackersOutputSchema,
+    LookupBookingTimeIncrementsOutputSchema,
     LookupCareTeamResourcesOutputSchema,
     LookupCountriesOfOperationsOutputSchema,
     LookupDefaultHealthMetricsOutputSchema, 
@@ -38,13 +41,32 @@ from odyssey.api.lookup.schemas import (
     LookupNotificationsOutputSchema,
     LookupCareTeamResourcesOutputSchema,
     LookupTimezones,
-    LookupTelehealthSettingsSchema
+    LookupTelehealthSettingsSchema,
+    LookupEmergencyNumbersOutputSchema
 )
 from odyssey.utils.misc import check_drink_existence
 
 from odyssey import db
 
 ns = api.namespace('lookup', description='Endpoints for lookup tables.')
+
+@ns.route('/telehealth/booking-increments/')
+class LookupTelehealthBookingIncrements(Resource):
+    """ Returns stored booking increments.
+    Returns
+    -------
+    dict
+        JSON encoded dict.
+    """
+    @responds(schema=LookupBookingTimeIncrementsOutputSchema,status_code=200, api=ns)
+    def get(self):
+                
+        booking_increments = LookupBookingTimeIncrements.query.all()
+        
+        payload = {'items': booking_increments,
+                   'total_items': len(booking_increments)}
+
+        return payload
 
 @ns.route('/timezones/')
 class LookupTimezones(Resource):
@@ -300,4 +322,16 @@ class LookupTerritoriesofOperationApi(Resource):
     def get(self):
         """get contents of operational territories lookup table"""
         res = LookupTerritoriesofOperation.query.all()
+        return {'total_items': len(res), 'items': res}
+
+@ns.route('/emergency-numbers/')
+class LookupEmergencyNumbersApi(Resource):
+    """
+    Endpoint that returns emergency phone number for the Ambulance service
+    """
+    @token_auth.login_required
+    @responds(schema=LookupEmergencyNumbersOutputSchema, status_code=200, api=ns)
+    def get(self):
+        """GET request for the list of emergency numbers"""
+        res = LookupEmergencyNumbers.query.filter_by(service='Ambulance').all()
         return {'total_items': len(res), 'items': res}

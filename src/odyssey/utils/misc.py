@@ -2,23 +2,30 @@
 
 from datetime import datetime, date, time
 import jwt
+import random
 import re
 import statistics
 import uuid
 
 from flask import current_app
 import flask.json
+from sqlalchemy import select
+from twilio.base.exceptions import TwilioRestException
+from twilio.rest import Client
 
+from odyssey import db
 from odyssey.api.lookup.models import LookupDrinks
 from odyssey.api.client.models import ClientInfo, ClientFacilities
 from odyssey.api.doctor.models import MedicalBloodTests, MedicalBloodTestResultTypes, MedicalConditions, MedicalLookUpSTD
-from odyssey.api.user.models import User
-from odyssey.api.staff.models import StaffProfile
 from odyssey.api.facility.models import RegisteredFacilities
+from odyssey.api.staff.models import StaffProfile
+from odyssey.api.telehealth.models import TelehealthChatRooms
+from odyssey.api.user.models import User
+from odyssey.utils.constants import ALPHANUMERIC
 from odyssey.utils.errors import (
     ClientNotFound, 
     FacilityNotFound, 
-    MedicalConditionNotFound,
+    MedicalConditionNotFound, MethodNotAllowed,
     MissingThirdPartyCredentials,
     RelationAlreadyExists, 
     ResultTypeNotFound,
@@ -29,7 +36,6 @@ from odyssey.utils.errors import (
     DrinkNotFound,
     STDNotFound
 )
-
 
 _uuid_rx = re.compile(r'[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}', flags=re.IGNORECASE)
 
@@ -116,6 +122,70 @@ def grab_twilio_credentials():
     return {'account_sid':twilio_account_sid,
             'api_key': twilio_api_key_sid,
             'api_key_secret': twilio_api_key_secret}
+
+def generate_meeting_room_name(meeting_type = 'TELEHEALTH'):
+    """ Generates unique, internally used names for meeting rooms.
+
+    Parameters
+    ----------
+    meeting_type : str
+        Meeting types will be either TELEHEALTH or CHATROOM
+    """
+    _hash = "".join([random.choice(ALPHANUMERIC) for i in range(15)])
+
+    return (meeting_type+'_'+_hash).upper()
+
+def get_chatroom(staff_user_id, client_user_id, participant_modobio_id, create_new=True):
+    """
+    Retrieves twilio chat room by searcing db for the user ids provided.
+    If none exist creates a new room with provided.
+    """
+    # bring up twilio client
+    twilio_credentials = grab_twilio_credentials()
+    client = Client(twilio_credentials['api_key'], 
+                    twilio_credentials['api_key_secret'],
+                    twilio_credentials['account_sid'])
+
+    # bring up chat room, if a chat between the client and staff users 
+    # does not exist, create a new chat room
+    chat_room = db.session.execute(
+        select(TelehealthChatRooms
+        ).where(
+            TelehealthChatRooms.staff_user_id == staff_user_id,
+            TelehealthChatRooms.client_user_id == client_user_id
+        )).one_or_none()
+    
+    if chat_room:
+        # pull down the conversation from Twilio, add user
+        room_name = chat_room[0].room_name
+        conversation = client.conversations.conversations(chat_room[0].conversation_sid).fetch()
+    elif create_new:
+        # if no chat room exists yet, create a new one
+        room_name = generate_meeting_room_name(meeting_type='CHATROOM')
+
+        conversation = client.conversations.conversations.create(
+            friendly_name=room_name)
+
+        # create chatroom entry into DB
+        new_chat_room = TelehealthChatRooms(
+            staff_user_id=staff_user_id,
+            client_user_id=client_user_id,
+            room_name = room_name,
+            conversation_sid = conversation.sid)
+        db.session.add(new_chat_room)
+    else:
+        # no chat room exists and a new one will not be created
+        raise MethodNotAllowed(message="no chat room exists. Please create one.")
+    # Add participant to chat room using their modobio_id
+    try:
+        conversation.participants.create(identity=participant_modobio_id)
+    except TwilioRestException as exc:
+        # do not error if the user is already in the conversation
+        if exc.status != 409:
+            raise
+    
+    db.session.commit()
+    return conversation
 
 class JSONEncoder(flask.json.JSONEncoder):
     """ Converts :class:`datetime.datetime`, :class:`datetime.date`,
