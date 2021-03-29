@@ -4,6 +4,8 @@ from marshmallow import (
     post_load,
     validate
 )
+from twilio.jwt import access_token
+from twilio.rest.conversations.v1 import conversation
 
 from odyssey import ma
 from odyssey.api.telehealth.models import (
@@ -69,7 +71,8 @@ class TelehealthMeetingRoomSchema(ma.SQLAlchemyAutoSchema):
         exclude = ('created_at', 'updated_at', 'staff_access_token', 'client_access_token')
 
     access_token = fields.String(metadata={'description':'meeting room access token. To be shown only to the owner'}, required=False)
-
+    conversation_sid = fields.String(metadata={'description':'chat room sid'}, required=False)
+    
 class TelehealthQueueClientPoolSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = TelehealthQueueClientPool
@@ -86,3 +89,11 @@ class TelehealthQueueClientPoolSchema(ma.SQLAlchemyAutoSchema):
 class TelehealthQueueClientPoolOutputSchema(Schema):
     queue = fields.Nested(TelehealthQueueClientPoolSchema(many=True),missing=[],metadata={'description':'SORTED queue of client pool'})
     total_queue = fields.Integer()
+
+class TelehealthChatRoomAccessSchema(Schema):
+    """
+    Validates response for telehealth chat room access request
+    """
+
+    access_token = fields.String()
+    conversation_sid = fields.String()
