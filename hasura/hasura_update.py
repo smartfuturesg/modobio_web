@@ -43,6 +43,7 @@ import yaml
 from sqlalchemy import create_engine, inspect
 
 from odyssey.config import database_uri
+from odyssey.utils.constants import ACCESS_ROLES
 
 # File locations
 here = pathlib.Path(__file__).parent
@@ -137,7 +138,6 @@ for schema in sorted(inspector.get_schema_names()):
         # Don't track these tables
         if tablename in hasura_no_track:
             continue
-
         # Start tracking table by adding it to metadata
         table = {
             'table': {
@@ -156,6 +156,27 @@ for schema in sorted(inspector.get_schema_names()):
             colname = column['name']
             table['configuration']['custom_column_names'][colname] = camel(colname)
 
+        
+        if 'Lookup' in tablename:
+            # add select, update, and insert permissions for lookup tables
+            permissible_columns_select = [col['name'] for col in inspector.get_columns(tablename, schema=schema)] # list of
+            permissible_columns_update = [col['name'] for col in inspector.get_columns(tablename, schema=schema) 
+                                                if 'user_id' not in col ]
+            select_permission_client = {
+                'role': 'client', 
+                'permission': {
+                    'columns': permissible_columns_select,
+                    'filter': {}
+                } 
+            }
+            select_permission_staff = {
+                'role': 'staff', 
+                'permission': {
+                    'columns': permissible_columns_select,
+                    'filter': {}
+                } 
+            }
+            table['select_permissions'] = [select_permission_client, select_permission_staff]
         hasura_tables.append(table)
         hasura_tables_idx[f'{schema}-{tablename}'] = len(hasura_tables) - 1
 
