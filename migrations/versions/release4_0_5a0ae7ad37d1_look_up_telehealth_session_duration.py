@@ -1,7 +1,7 @@
 """look up telehealth session duration
 
 Revision ID: 5a0ae7ad37d1
-Revises: a5868270b3cd
+Revises: 86e0a19b9cf0
 Create Date: 2021-01-05 18:05:14.288685
 
 """
