@@ -44,6 +44,7 @@ INSERT INTO "UserLogin" ("user_id", "password") VALUES
 (19, 'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1'), 
 (20, 'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1'), 
 (21, 'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1');
+(22, 'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1');
 
 INSERT INTO "StaffRoles" ("user_id", "role", "verified") VALUES 
 (1, 'system_admin', false), 
