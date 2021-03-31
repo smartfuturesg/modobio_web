@@ -6,3 +6,6 @@ alter sequence "LookupCountriesOfOperations_idx_seq"
 INSERT INTO "LookupCountriesOfOperations" ("country") 
 VALUES
 ('United States (USA)');
+INSERT INTO "LookupCountriesOfOperations" ("country") 
+VALUES
+('United Kingdom (UK)');

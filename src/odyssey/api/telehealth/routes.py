@@ -2,9 +2,9 @@
 from flask import request
 from flask_accepts import accepts, responds
 from flask_restx import Resource
+from sqlalchemy import select
 from twilio.jwt.access_token import AccessToken
-from twilio.jwt.access_token.grants import VideoGrant
-import datetime as dt
+from twilio.jwt.access_token.grants import ChatGrant, VideoGrant
 
 from odyssey import db
 from odyssey.api import api
@@ -22,6 +22,7 @@ from odyssey.api.telehealth.models import (
 from odyssey.api.telehealth.schemas import (
     TelehealthBookingsSchema,
     TelehealthBookingsOutputSchema,
+    TelehealthChatRoomAccessSchema, 
     TelehealthMeetingRoomSchema,
     TelehealthQueueClientPoolSchema,
     TelehealthQueueClientPoolOutputSchema,
@@ -31,8 +32,13 @@ from odyssey.api.telehealth.schemas import (
 from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import TWILIO_ACCESS_KEY_TTL, DAY_OF_WEEK
 from odyssey.utils.errors import GenericNotFound, InputError, UnauthorizedUser
-from odyssey.utils.misc import check_client_existence, check_staff_existence, grab_twilio_credentials
-
+from odyssey.utils.misc import (
+    check_client_existence, 
+    check_staff_existence, 
+    generate_meeting_room_name,
+    get_chatroom,
+    grab_twilio_credentials
+)
 ns = api.namespace('telehealth', description='telehealth bookings management API')
 
 @ns.route('/bookings/')
@@ -144,30 +150,53 @@ class ProvisionMeetingRooms(Resource):
 
         staff_user, _ = token_auth.current_user()
 
+        # Create telehealth meeting room entry
+        # each telehealth session is given a unique meeting room
         meeting_room = TelehealthMeetingRooms(staff_user_id=staff_user.user_id, client_user_id=user_id)
-        meeting_room.generate_meeting_room_name()
+        meeting_room.room_name = generate_meeting_room_name()
         
-        ##
-        # Query the Twilio APi to provision a new meeting room
-        ##
+
+        # Bring up chat room session. Chat rooms are intended to be between a client and staff
+        # member and persist through all telehealth interactions between the two. 
+        # only one chat room will exist between each client-staff pair
+        # If this is the first telehealth interaction between 
+        # the client and staff member, a room will be provisioned. 
+
         twilio_credentials = grab_twilio_credentials()
 
+        # get_chatroom helper function will take care of creating or bringing forward 
+        # previously created chat room and add user as a participant using their modobio_id
+        conversation = get_chatroom(staff_user_id = staff_user.user_id,
+                            client_user_id = user_id,
+                            participant_modobio_id = staff_user.modobio_id)
+
+
+        # Create access token for users to access the Twilio API
+        # Add grant for video room access using meeting room name just created
+        # Twilio will automatically create a new room by this name.
         # TODO: configure meeting room
         # meeting type (group by default), participant limit , callbacks
-
-        # API access for the staff user to specifically access this chat room
-        token = AccessToken(twilio_credentials['account_sid'], twilio_credentials['api_key'], twilio_credentials['api_key_secret'],
-                         identity=staff_user.modobio_id, ttl=TWILIO_ACCESS_KEY_TTL)
+        
+        token = AccessToken(twilio_credentials['account_sid'], 
+                            twilio_credentials['api_key'], 
+                            twilio_credentials['api_key_secret'],
+                            identity=staff_user.modobio_id, 
+                            ttl=TWILIO_ACCESS_KEY_TTL)
+        
         token.add_grant(VideoGrant(room=meeting_room.room_name))
+        token.add_grant(ChatGrant(service_sid=conversation.chat_service_sid))
+        
         meeting_room.staff_access_token = token.to_jwt()
         meeting_room.__dict__['access_token'] = meeting_room.staff_access_token
+        meeting_room.__dict__['conversation_sid'] = conversation.sid
+
         db.session.add(meeting_room)
         db.session.commit() 
         return meeting_room
 
 @ns.route('/meeting-room/access-token/<int:room_id>/')
 @ns.doc(params={'room_id': 'room ID number'})
-class ProvisionMeetingRooms(Resource):
+class GrantMeetingRoomAccess(Resource):
     """
     For generating and retrieving meeting room access tokens
     """
@@ -175,7 +204,9 @@ class ProvisionMeetingRooms(Resource):
     @responds(schema = TelehealthMeetingRoomSchema, status_code=201, api=ns)
     def post(self, room_id):
         """
-        Generate a new Twilio access token with a grant for the meeting room id provided
+        Generate a new Twilio access token with a grant for the meeting room id provided.
+        Tokens also have a grant for the chat room between the two participants in 
+        the chat room. 
 
         Users may only be granted access if they are one of the two participants.
         """
@@ -189,16 +220,24 @@ class ProvisionMeetingRooms(Resource):
 
         twilio_credentials = grab_twilio_credentials()
 
+        # get_chatroom helper function will take care of creating or bringing forward 
+        # previously created chat room and add user as a participant using their modobio_id
+        conversation = get_chatroom(staff_user_id = meeting_room.staff_user_id,
+                                    client_user_id = client_user.user_id,
+                                    participant_modobio_id = client_user.modobio_id)
+
         # API access for the staff user to specifically access this chat room
         token = AccessToken(twilio_credentials['account_sid'], twilio_credentials['api_key'], twilio_credentials['api_key_secret'],
                          identity=client_user.modobio_id, ttl=TWILIO_ACCESS_KEY_TTL)
         token.add_grant(VideoGrant(room=meeting_room.room_name))
+        token.add_grant(ChatGrant(service_sid=conversation.chat_service_sid))
+
         meeting_room.client_access_token = token.to_jwt()
         meeting_room.__dict__['access_token'] = meeting_room.client_access_token
+        meeting_room.__dict__['conversation_sid'] = conversation.sid
         db.session.commit() 
+        
         return meeting_room
-
-
 
 @ns.route('/meeting-room/status/<int:room_id>/')
 @ns.doc(params={'room_id': 'User ID number'})
@@ -603,3 +642,62 @@ class TelehealthQueueClientPoolApi(Resource):
             raise InputError(status_code=405,message='User {} does not have that date to delete'.format(user_id))
 
         return 200
+
+@ns.route('/chat-room/access-token')
+@ns.doc(params={'client_user_id': 'Required. user_id of client participant.',
+               'staff_user_id': 'Required. user_id of staff participant'})
+class TelehealthChatRoomApi(Resource):
+    """
+    Creates an access token for the chat room between one staff and one client user.
+    Chat rooms persist through the full history of the two users so the chat history (transcript)
+    will be preserved by Twilio.  
+    """
+    @token_auth.login_required()
+    @responds(schema=TelehealthChatRoomAccessSchema, status_code=201, api=ns)
+    def post(self):
+        """
+        Creates access token for already provisioned chat rooms. If no chat room exists, 
+        one will not be created.
+
+        Parameters
+        ----------
+        client_user_id : int
+            user_id of the client participant of the chat room.
+
+        staff_user_id : int
+            user_id of the staff participant of the chat room.
+   
+        """
+        staff_user_id = request.args.get('staff_user_id', type=int)
+        client_user_id = request.args.get('client_user_id', type=int)
+
+        # check that logged in user is part of the chat room
+        user, _ = token_auth.current_user()
+
+        if not staff_user_id or not client_user_id:
+            raise InputError(message="missing either staff or client user_id", status_code=400)
+        
+        if user.user_id not in (staff_user_id, client_user_id):
+            raise UnauthorizedUser(message="user not permitted to access conversation")
+
+        # get_chatroom helper function will take care of creating or bringing forward 
+        # previously created chat room and add user as a participant using their modobio_id
+        # create_new=False so that a new chatroom is not provisioned. This may change in the future.
+        conversation = get_chatroom(staff_user_id = staff_user_id,
+                                    client_user_id = client_user_id,
+                                    participant_modobio_id = user.modobio_id,
+                                    create_new=False)
+
+        # API access for the user to specifically access this chat room
+        twilio_credentials = grab_twilio_credentials()
+        token = AccessToken(twilio_credentials['account_sid'], 
+                            twilio_credentials['api_key'], 
+                            twilio_credentials['api_key_secret'],
+                            identity=user.modobio_id, 
+                            ttl=TWILIO_ACCESS_KEY_TTL)
+        token.add_grant(ChatGrant(service_sid=conversation.chat_service_sid))
+
+        payload = {'access_token': token.to_jwt(),
+                   'conversation_sid': conversation.sid}
+
+        return payload
