@@ -36,9 +36,7 @@ from odyssey.utils.misc import check_client_existence, check_staff_existence, gr
 
 ns = api.namespace('telehealth', description='telehealth bookings management API')
 
-
-
-@ns.route('/client/time-select/<int:user_id>/')
+@ns.route('/client/time-select2/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID'})
 class TelehealthClientTimeSelectApi(Resource):                               
     
@@ -53,6 +51,12 @@ class TelehealthClientTimeSelectApi(Resource):
 
         # grab the client at the top of the queue?
         # Need to grab this for to grab the closest target_date / priority date
+        # --------------------------------------------------------------------------
+        # TODO: client_in_queue, is a list where we are supposed to grab from the top.
+        # What if that client does not select a time, how do we move to the next person in the queue
+        # client_in_queue MUST be the user_id
+        # 
+        # --------------------------------------------------------------------------
         client_in_queue = TelehealthQueueClientPool.query.filter_by(user_id=user_id).order_by(TelehealthQueueClientPool.priority.desc(),TelehealthQueueClientPool.target_date.asc()).first()
         duration = client_in_queue.duration
         # convert client's target date to day_of_week
@@ -75,6 +79,7 @@ class TelehealthClientTimeSelectApi(Resource):
  
         # TODO will need to incorporate timezone information
         available = {}
+        # TODO user_id_arr is staff_user_id_arr
         user_id_arr = []
         # Loop through all staff that have indicated they are available on that day of the week
         #
@@ -83,6 +88,114 @@ class TelehealthClientTimeSelectApi(Resource):
         #
         for availability in staff_availability:
             staff_user_id = availability.user_id
+            if staff_user_id not in available:
+                available[staff_user_id] = []
+                user_id_arr.append(staff_user_id)
+            available[staff_user_id].append(availability.booking_window_id)
+        # TODO simulate client staff bookings, delete this
+        # TODO Must call client and staff bookings individually 
+
+        # Now, grab all of the bookings for that client and all staff on the given target date
+        # This is necessary to subtract from the staff_availability above.
+        bookings = TelehealthBookings.query.filter_by(target_date=target_date).all()
+        # Now, subtract booking times from staff availability and generate the actual times a staff member is free
+        actual_open_time = {}
+        for booking in bookings:
+            staff_id = booking.staff_user_id
+            if staff_id in available:
+                for num in range(booking.booking_window_id_start_time,booking.booking_window_id_end_time+1):
+                    if num in available[staff_id]:
+                        available[staff_id].remove(num)
+            else:
+                # This staff_user_id should not have availability on this day
+                continue
+        # convert time IDs to actual times for clients to select
+        time_inc = LookupBookingTimeIncrements.query.all()
+        times = []
+
+        # NOTE: It might be a good idea to shuffle user_id_arr and only select up to 10 (?) staff members 
+        # to reduce the time complexity
+        # user_id_arr = [1,2,3,4,5]
+        # user_id_arr.random() -> [3,5,2,1,4]
+        # user_id_arr[0:3]
+        for staff_id in user_id_arr:
+            # times[staff_id] = []
+            for idx,time_id in enumerate(available[staff_id]):
+                if idx + 1 < len(available[staff_id]):
+                    if available[staff_id][idx+1] - time_id < idx_delta and time_id + idx_delta < available[staff_id][-1]:
+                        if time_inc[time_id].start_time.minute%15 == 0:
+                            times.append({'staff_user_id': staff_id,
+                                        'start_time': time_inc[time_id].start_time, 
+                                        'end_time': time_inc[time_id+idx_delta].end_time})                        
+                    else:
+                        continue
+                else:
+                    continue
+
+        # sort the queue based on target date and priority
+        payload = {'appointment_times': times,
+                   'total_options': len(times)}
+        breakpoint()
+        return payload
+
+
+@ns.route('/client/time-select/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID'})
+class TelehealthClientTimeSelectApi(Resource):                               
+    
+    @token_auth.login_required
+    @responds(schema=TelehealthTimeSelectOutputSchema,api=ns, status_code=201)
+    def get(self,user_id):
+        """
+        Returns the list of notifications for the given user_id
+        """
+        # Check if the client exists
+        check_client_existence(user_id)
+
+        # grab the client at the top of the queue?
+        # Need to grab this for to grab the closest target_date / priority date
+        # --------------------------------------------------------------------------
+        # TODO: client_in_queue, is a list where we are supposed to grab from the top.
+        # What if that client does not select a time, how do we move to the next person in the queue
+        # client_in_queue MUST be the user_id
+        # 
+        # --------------------------------------------------------------------------
+        client_in_queue = TelehealthQueueClientPool.query.filter_by(user_id=user_id).order_by(TelehealthQueueClientPool.priority.desc(),TelehealthQueueClientPool.target_date.asc()).first()
+        duration = client_in_queue.duration
+        # convert client's target date to day_of_week
+        target_date = client_in_queue.target_date.date()
+        
+        # 0 is Monday, 6 is Sunday
+        weekday_id = target_date.weekday()
+        weekday_str = DAY_OF_WEEK[weekday_id]
+        
+        # This should return ALL staff available on that given day.
+        # TODO, MUST INCLUDE PROFESSION TYPE FILTER, perhaps delete down low
+        staff_availability = TelehealthStaffAvailability.query.filter_by(day_of_week=weekday_str).order_by(TelehealthStaffAvailability.user_id.asc()).all() 
+
+        # Duration is taken from the client queue.
+        # we divide it by 5 because our look up tables are in increments of 5 mintues
+        # so, this represents the number of time blocks we will need to look at.
+        # The subtract 1 is due to the indices having start_time and end_times, so 100 - 103 is 100.start_time to 103.end_time which is
+        # the 20 minute duration
+        idx_delta = int(duration/5) - 1
+ 
+        # TODO will need to incorporate timezone information
+        available = {}
+        # TODO user_id_arr is staff_user_id_arr
+        user_id_arr = []
+        # Loop through all staff that have indicated they are available on that day of the week
+        #
+        # The expected output is the first and last index of their time blocks, AKA:
+        # availability[staff_user_id] = [[100, 120], [145, 160]]
+        #
+        for availability in staff_availability:
+            staff_user_id = availability.user_id
+            # if userSwitch == 0:
+            #     refUser = availabilty.user_id
+            #     userSwitch = 1
+            # if staff_user_id != refUser:
+
             if staff_user_id not in user_id_arr:
                 booking_id_arr = []
                 user_id_arr.append(staff_user_id)
@@ -100,14 +213,13 @@ class TelehealthClientTimeSelectApi(Resource):
                 idx1 = idx2
         booking_id_arr.append(idx2)
         available[staff_user_id].append(booking_id_arr)
-
+        # breakpoint()
         # TODO simulate client staff bookings, delete this
         # TODO Must call client and staff bookings individually 
 
         # Now, grab all of the bookings for that client and all staff on the given target date
         # This is necessary to subtract from the staff_availability above.
         bookings = TelehealthBookings.query.filter_by(client_user_id=user_id,target_date=target_date).all()
-
         # Now, subtract booking times from staff availability and generate the actual times a staff member is free
         actual_open_time = {}
         for booking in bookings:
@@ -147,13 +259,15 @@ class TelehealthClientTimeSelectApi(Resource):
             else:
                 # This staff_user_id should not have availability on this day
                 continue
-
         # convert time IDs to actual times for clients to select
         time_inc = LookupBookingTimeIncrements.query.all()
         times = []
 
         # NOTE: It might be a good idea to shuffle user_id_arr and only select up to 10 (?) staff members 
         # to reduce the time complexity
+        # user_id_arr = [1,2,3,4,5]
+        # user_id_arr.random() -> [3,5,2,1,4]
+        # user_id_arr[0:3]
         for staff_id in user_id_arr:
             # times[staff_id] = []
             for time_ids in available[staff_id]:
@@ -171,7 +285,7 @@ class TelehealthClientTimeSelectApi(Resource):
         # sort the queue based on target date and priority
         payload = {'appointment_times': times,
                    'total_options': len(times)}
-
+        # breakpoint()
         return payload
 
 @ns.route('/bookings/')
