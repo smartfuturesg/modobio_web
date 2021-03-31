@@ -5,6 +5,7 @@ from flask_restx import Resource
 from twilio.jwt.access_token import AccessToken
 from twilio.jwt.access_token.grants import VideoGrant
 import datetime as dt
+import random
 
 from odyssey import db
 from odyssey.api import api
@@ -12,6 +13,8 @@ from odyssey.api import api
 from odyssey.api.lookup.models import (
     LookupBookingTimeIncrements
 )
+
+from odyssey.api.staff.models import StaffRoles
 
 from odyssey.api.telehealth.models import (
     TelehealthBookings,
@@ -68,8 +71,13 @@ class TelehealthClientTimeSelectApi(Resource):
         
         # This should return ALL staff available on that given day.
         # TODO, MUST INCLUDE PROFESSION TYPE FILTER, perhaps delete down low
+        # TODO if no staff availability do something
+        # staff_availability = TelehealthStaffAvailability.query.filter_by(day_of_week=weekday_str).order_by(TelehealthStaffAvailability.user_id.asc()).all() 
         staff_availability = TelehealthStaffAvailability.query.filter_by(day_of_week=weekday_str).order_by(TelehealthStaffAvailability.user_id.asc()).all() 
 
+        # staff_availability = db.session.query(TelehealthStaffAvailability, StaffRoles).filter(TelehealthStaffAvailability.day_of_week==weekday_str).filter(StaffRoles.role=='doctor').all()        
+        if not staff_availability:
+            raise InputError(status_code=405,message='No staff available')
         # Duration is taken from the client queue.
         # we divide it by 5 because our look up tables are in increments of 5 mintues
         # so, this represents the number of time blocks we will need to look at.
@@ -79,8 +87,8 @@ class TelehealthClientTimeSelectApi(Resource):
  
         # TODO will need to incorporate timezone information
         available = {}
-        # TODO user_id_arr is staff_user_id_arr
-        user_id_arr = []
+
+        staff_user_id_arr = []
         # Loop through all staff that have indicated they are available on that day of the week
         #
         # The expected output is the first and last index of their time blocks, AKA:
@@ -90,7 +98,7 @@ class TelehealthClientTimeSelectApi(Resource):
             staff_user_id = availability.user_id
             if staff_user_id not in available:
                 available[staff_user_id] = []
-                user_id_arr.append(staff_user_id)
+                staff_user_id_arr.append(staff_user_id)
             available[staff_user_id].append(availability.booking_window_id)
         # TODO simulate client staff bookings, delete this
         # TODO Must call client and staff bookings individually 
@@ -99,40 +107,66 @@ class TelehealthClientTimeSelectApi(Resource):
         # This is necessary to subtract from the staff_availability above.
         bookings = TelehealthBookings.query.filter_by(target_date=target_date).all()
         # Now, subtract booking times from staff availability and generate the actual times a staff member is free
-        actual_open_time = {}
+        removedNum = {}
         for booking in bookings:
             staff_id = booking.staff_user_id
             if staff_id in available:
+                if staff_id not in removedNum:
+                    removedNum[staff_id] = []                
                 for num in range(booking.booking_window_id_start_time,booking.booking_window_id_end_time+1):
                     if num in available[staff_id]:
                         available[staff_id].remove(num)
+                        removedNum[staff_id].append(num)
             else:
                 # This staff_user_id should not have availability on this day
                 continue
         # convert time IDs to actual times for clients to select
         time_inc = LookupBookingTimeIncrements.query.all()
-        times = []
-
         # NOTE: It might be a good idea to shuffle user_id_arr and only select up to 10 (?) staff members 
         # to reduce the time complexity
         # user_id_arr = [1,2,3,4,5]
         # user_id_arr.random() -> [3,5,2,1,4]
         # user_id_arr[0:3]
-        for staff_id in user_id_arr:
-            # times[staff_id] = []
+        timeArr = {}
+        test = []
+        for staff_id in staff_user_id_arr:
+            if staff_id not in removedNum:
+                removedNum[staff_id] = []             
             for idx,time_id in enumerate(available[staff_id]):
                 if idx + 1 < len(available[staff_id]):
                     if available[staff_id][idx+1] - time_id < idx_delta and time_id + idx_delta < available[staff_id][-1]:
                         if time_inc[time_id].start_time.minute%15 == 0:
-                            times.append({'staff_user_id': staff_id,
-                                        'start_time': time_inc[time_id].start_time, 
-                                        'end_time': time_inc[time_id+idx_delta].end_time})                        
+                            if time_inc[time_id] not in timeArr:
+                                timeArr[time_inc[time_id]] = []
+                            if time_id+idx_delta in removedNum[staff_id]:
+                                continue
+                            else:
+                                timeArr[time_inc[time_id]].append(staff_id)
+                                test.append({ 'time_id': time_id,
+                                            'staff_user_id': staff_id,
+                                            'start_time': time_inc[time_id].start_time,
+                                            'end_time':time_inc[time_id+idx_delta].end_time})
+                    
                     else:
                         continue
                 else:
                     continue
 
-        # sort the queue based on target date and priority
+        times = []
+
+        for time in timeArr:
+            if len(timeArr[time]) > 1:
+                random.shuffle(timeArr[time])
+                times.append({'staff_user_id': timeArr[time][0],
+                            'start_time': time.start_time, 
+                            'end_time': time_inc[time.idx+idx_delta].end_time})
+            else:
+                times.append({'staff_user_id': timeArr[time][0],
+                            'start_time': time.start_time, 
+                            'end_time': time_inc[time.idx+idx_delta].end_time})                
+
+        times.sort(key=sortStartTime)
+
         payload = {'appointment_times': times,
                    'total_options': len(times)}
         breakpoint()
@@ -862,3 +896,5 @@ class TelehealthQueueClientPoolApi(Resource):
 
         return 200
 
+def sortStartTime(val):
+    return val['start_time']
