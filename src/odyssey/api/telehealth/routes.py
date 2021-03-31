@@ -89,7 +89,7 @@ class TelehealthClientTimeSelectApi2(Resource):
         ####   test1 - test with weekday_str when we have 0 availabilities (check if staff_availability is empty)
         
         # TODO if no staff availability do something
-        breakpoint()
+        # breakpoint()
         if not staff_availability:
             raise InputError(status_code=405,message='No staff available')
         # Duration is taken from the client queue.
