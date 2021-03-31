@@ -184,7 +184,7 @@ class TelehealthClientTimeSelectApi2(Resource):
 
         payload = {'appointment_times': times,
                    'total_options': len(times)}
-        breakpoint()
+
         return payload
 
 
