@@ -5,6 +5,7 @@ from flask_restx import Resource
 from odyssey.api import api
 
 from odyssey.utils.auth import token_auth
+from odyssey.utils.errors import GenericNotFound
 from odyssey.api.system.models import SystemTelehealthSessionCosts, SystemVariables
 from odyssey.api.system.schemas import SystemTelehealthSettingsSchema
 from odyssey.api.lookup.models import LookupCountriesOfOperations
@@ -41,15 +42,14 @@ class SystemTelehealthSettingsApi(Resource):
     @responds(schema=SystemTelehealthSettingsSchema, status_code=201, api=ns)
     def put(self):
         for cost in request.parsed_obj['costs']:
-            #check if this profession/territory combination already exists
-            #if yes, update. if no, add
-            exists = SystemTelehealthSessionCosts.query.filter_by(profession_type=cost.profession_type, territory_id=cost.territory_id).one_or_none()
+            #if a cost for this country/profession combination does not exist, it is invalid
+            exists = SystemTelehealthSessionCosts.query.filter_by(profession_type=cost.profession_type, country=cost.country).one_or_none()
             if exists:
                 data = cost.__dict__
                 del data['_sa_instance_state']
                 exists.update(data)
             else:
-                db.session.add(cost)
+                raise GenericNotFound('No cost exists for ' + cost.country + ' ' + cost.profession_type)
                 
         #update session variables
         if 'session_duration' in request.parsed_obj:

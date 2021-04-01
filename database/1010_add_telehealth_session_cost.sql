@@ -1,9 +1,11 @@
-delete from "LookupTelehealthSessionCost" 
+delete from "SystemTelehealthSessionCosts" 
 			where idx >= 1;
-alter sequence "LookupTelehealthSessionCost_idx_seq"
+alter sequence "SystemTelehealthSessionCosts_idx_seq"
   restart with 1;
 
-INSERT INTO "LookupTelehealthSessionCost" ("profession_type","territory","session_min_cost","session_max_cost") 
+INSERT INTO "SystemTelehealthSessionCosts" ("profession_type","country","session_cost","session_min_cost","session_max_cost") 
 VALUES
-('Medical Doctor', 'USA', 50.00, 200.00),
-('Medical Doctor', 'UK', 50.00, 200.00);
+('doctor', 'USA', 100.00, 50.00, 200.00),
+('nutrition', 'USA', 100.00, 50.00, 200.00),
+('physical_therapist', 'USA', 100.00, 50.00, 200.00),
+('trainer', 'USA', 100.00, 50.00, 200.00);
