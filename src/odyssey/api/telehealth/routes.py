@@ -115,7 +115,6 @@ class TelehealthClientTimeSelectApi2(Resource):
                 staff_user_id_arr.append(staff_user_id)
             available[staff_user_id].append(availability.booking_window_id)
 
-        # TODO simulate client staff bookings, delete this
         # TODO Must call client and staff bookings individually 
 
         # Now, grab all of the bookings for that client and all staff on the given target date

@@ -26,44 +26,45 @@ def test_generate_staff_availability(test_client, init_database, generate_users,
     """
 
     # GENERATE STAFF AVAILABILITY
-    response = test_client.post('/telehealth/settings/staff/availability/4/',
+    response = test_client.post('/telehealth/settings/staff/availability/9/',
                                 headers=staff_auth_header, 
                                 data=dumps(telehealth_staff_4_general_availability_post_data), 
                                 content_type='application/json')
-    response = test_client.post('/telehealth/settings/staff/availability/6/',
+    response = test_client.post('/telehealth/settings/staff/availability/11/',
                                 headers=staff_auth_header, 
                                 data=dumps(telehealth_staff_6_general_availability_post_data), 
                                 content_type='application/json')
-    response = test_client.post('/telehealth/settings/staff/availability/8/',
+    response = test_client.post('/telehealth/settings/staff/availability/13/',
                                 headers=staff_auth_header, 
                                 data=dumps(telehealth_staff_8_general_availability_post_data), 
                                 content_type='application/json')
-    response = test_client.post('/telehealth/settings/staff/availability/10/',
+    response = test_client.post('/telehealth/settings/staff/availability/15/',
                                 headers=staff_auth_header, 
                                 data=dumps(telehealth_staff_10_general_availability_post_data), 
                                 content_type='application/json')
-    response = test_client.post('/telehealth/settings/staff/availability/12/',
+    response = test_client.post('/telehealth/settings/staff/availability/17/',
                                 headers=staff_auth_header, 
                                 data=dumps(telehealth_staff_12_general_availability_post_data), 
                                 content_type='application/json')
-    response = test_client.post('/telehealth/settings/staff/availability/14/',
+    response = test_client.post('/telehealth/settings/staff/availability/19/',
                                 headers=staff_auth_header, 
                                 data=dumps(telehealth_staff_14_general_availability_post_data), 
-                                content_type='application/json')                                                                                                                                                                
+                                content_type='application/json')    
+
     assert response.status_code == 201
 
 def test_generate_bookings(test_client, init_database, staff_auth_header):
-    response = test_client.post('/telehealth/bookings/?client_user_id={}&staff_user_id={}'.format(1,4),
+    response = test_client.post('/telehealth/bookings/?client_user_id={}&staff_user_id={}'.format(1,9),
                                 headers=staff_auth_header, 
                                 data=dumps(telehealth_bookings_staff_4_client_1_data), 
                                 content_type='application/json')
 
-    response = test_client.post('/telehealth/bookings/?client_user_id={}&staff_user_id={}'.format(1,4),
+    response = test_client.post('/telehealth/bookings/?client_user_id={}&staff_user_id={}'.format(1,9),
                                 headers=staff_auth_header, 
                                 data=dumps(telehealth_bookings_staff_4_client_3_data), 
                                 content_type='application/json')
 
-    response = test_client.post('/telehealth/bookings/?client_user_id={}&staff_user_id={}'.format(5,8),
+    response = test_client.post('/telehealth/bookings/?client_user_id={}&staff_user_id={}'.format(4,13),
                                 headers=staff_auth_header, 
                                 data=dumps(telehealth_bookings_staff_8_client_5_data), 
                                 content_type='application/json')
