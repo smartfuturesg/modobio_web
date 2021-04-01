@@ -12,6 +12,8 @@ from odyssey.api import api
 from odyssey.api.lookup.models import (
     LookupBookingTimeIncrements
 )
+from odyssey.api.staff.models import StaffRoles
+from odyssey.api.user.models import User
 
 from odyssey.api.telehealth.models import (
     TelehealthBookings,
@@ -38,7 +40,7 @@ ns = api.namespace('telehealth', description='telehealth bookings management API
 
 @ns.route('/client/time-select2/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID'})
-class TelehealthClientTimeSelectApi(Resource):                               
+class TelehealthClientTimeSelectApi2(Resource):                               
     
     @token_auth.login_required
     @responds(schema=TelehealthTimeSelectOutputSchema,api=ns, status_code=201)
@@ -47,6 +49,12 @@ class TelehealthClientTimeSelectApi(Resource):
         Returns the list of notifications for the given user_id
         """
         # Check if the client exists
+
+        #### TESTING NOTES:
+        ####   test1 - call with non-existent user_id
+        ####   test2 - call with deleted user (user_id exists, but user shouldn't have access to anything)
+        ####   test3 - call with staff user_id
+        ####   test4 - call with valid client user_id
         check_client_existence(user_id)
 
         # grab the client at the top of the queue?
@@ -57,6 +65,9 @@ class TelehealthClientTimeSelectApi(Resource):
         # client_in_queue MUST be the user_id
         # 
         # --------------------------------------------------------------------------
+        #### TESTING NOTES:
+        ####   test1 - call existent user_id but not in queue, (code needs an extra check to raise an error when client_in_queue== None) 
+        ####   test2 - call with client user_id that might be found in queue
         client_in_queue = TelehealthQueueClientPool.query.filter_by(user_id=user_id).order_by(TelehealthQueueClientPool.priority.desc(),TelehealthQueueClientPool.target_date.asc()).first()
         duration = client_in_queue.duration
         # convert client's target date to day_of_week
@@ -68,8 +79,14 @@ class TelehealthClientTimeSelectApi(Resource):
         
         # This should return ALL staff available on that given day.
         # TODO, MUST INCLUDE PROFESSION TYPE FILTER, perhaps delete down low
-        staff_availability = TelehealthStaffAvailability.query.filter_by(day_of_week=weekday_str).order_by(TelehealthStaffAvailability.user_id.asc()).all() 
-
+        #### TESTING NOTES:
+        ####   Review message on teams
+        staff_availability = db.session.query(TelehealthStaffAvailability, StaffRoles)\
+            .join(StaffRoles, StaffRoles.user_id==TelehealthStaffAvailability.user_id)\
+                .filter(TelehealthStaffAvailability.day_of_week==weekday_str, StaffRoles.role==client_in_queue.profession_type).all()
+        #### TESTING NOTES:
+        ####   test1 - test with weekday_str when we have 0 availabilities (check if staff_availability is empty)
+        
         # Duration is taken from the client queue.
         # we divide it by 5 because our look up tables are in increments of 5 mintues
         # so, this represents the number of time blocks we will need to look at.
@@ -86,12 +103,13 @@ class TelehealthClientTimeSelectApi(Resource):
         # The expected output is the first and last index of their time blocks, AKA:
         # availability[staff_user_id] = [[100, 120], [145, 160]]
         #
-        for availability in staff_availability:
+        for availability, _ in staff_availability:
             staff_user_id = availability.user_id
             if staff_user_id not in available:
                 available[staff_user_id] = []
                 user_id_arr.append(staff_user_id)
             available[staff_user_id].append(availability.booking_window_id)
+
         # TODO simulate client staff bookings, delete this
         # TODO Must call client and staff bookings individually 
 
@@ -150,6 +168,7 @@ class TelehealthClientTimeSelectApi(Resource):
         Returns the list of notifications for the given user_id
         """
         # Check if the client exists
+        
         check_client_existence(user_id)
 
         # grab the client at the top of the queue?

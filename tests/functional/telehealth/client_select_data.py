@@ -140,7 +140,7 @@ telehealth_bookings_staff_8_client_5_data = {
 # client queue
 # ------------
 telehealth_queue_client_3_data = {
-  'profession_type': 'Medical Doctor',
+  'profession_type': 'doctor',
   'target_date': '2022-04-04T02:00:00.000',
   'priority': True,
   'medical_gender': 'np'
