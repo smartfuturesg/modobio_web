@@ -2,6 +2,7 @@ import base64
 from datetime import datetime
 import os
 import pytest
+import copy
 
 from flask_migrate import upgrade
 from sqlalchemy import text
@@ -40,6 +41,9 @@ def generate_users():
     '''
     numUsers=10
     # 1) Create User instance. modobio_id populated automatically
+    origClientEmail = copy.deepcopy(users_client_new_creation_data['email'])
+    origStaffEmail = copy.deepcopy(users_staff_member_data['email'])
+
     for i in range(numUsers):
         # Change the email
         
@@ -111,6 +115,8 @@ def generate_users():
         notification = UserNotifications(**notification_data)
         db.session.add(notification)
         db.session.flush()
+        users_client_new_creation_data['email'] = origClientEmail
+        users_staff_member_data['email'] = origStaffEmail
     db.session.commit()
 
 

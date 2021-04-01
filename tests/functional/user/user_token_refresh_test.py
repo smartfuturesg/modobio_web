@@ -13,7 +13,6 @@ def test_staff_token_refresh(test_client, init_database):
     
     user = User.query.filter_by(email=users_staff_member_data['email']).one_or_none()
     user_login_details = UserLogin.query.filter_by(user_id=user.user_id).one_or_none()
-
     refresh_token = user_login_details.refresh_token
     # send post request for creating a new set of access tokens
     response = test_client.post(f'/user/token/refresh?refresh_token={refresh_token}',
