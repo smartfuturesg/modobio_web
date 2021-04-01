@@ -17,6 +17,21 @@ from tests.functional.user.data import users_staff_member_data, users_client_new
 from odyssey.utils import search
 
 @pytest.fixture(scope='session')
+def delete_users():
+    ''' Delete users that were generated for telehealth
+    '''
+    all_users = User.query.all()
+    skipEmails = ['new_client_1','new_staff_1']
+    for user in all_users:
+        tmpEmail = user.email
+        tmpEmailArr = tmpEmail.split('@')
+        if tmpEmailArr[0] in skipEmails:
+            continue
+        if tmpEmailArr[0][-1].isnumeric():
+            db.session.delete(user)
+    db.session.commit()
+
+@pytest.fixture(scope='session')
 def generate_users():
     ''' This function is used to generate an equal number of clients and
         staff

@@ -3,6 +3,7 @@ import jwt
 
 from flask import current_app, request, make_response, g
 from functools import wraps
+from sqlalchemy import select
 from werkzeug.datastructures import Authorization
 from werkzeug.security import safe_str_cmp, check_password_hash
 
@@ -286,14 +287,12 @@ class TokenAuth(BasicAuth):
         if decoded_token['ttype'] != 'access':
             raise LoginNotAuthorized()
 
-        query = db.session.query(
-                            User, UserLogin
-                        ).filter(
-                            User.user_id==decoded_token['uid']
-                        ).filter(
-                            UserLogin.user_id == decoded_token['uid']
-                        ).one_or_none()
-                        
+        query = db.session.execute(
+            select(User, UserLogin
+                    ).join(
+                        UserLogin, User.user_id == UserLogin.user_id
+                    ).where(User.user_id == decoded_token['uid'])).one_or_none()    
+                           
         return query[0], query[1], decoded_token.get('utype')
 
     def get_auth(self):

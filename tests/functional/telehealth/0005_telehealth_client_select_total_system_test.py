@@ -93,3 +93,6 @@ def test_client_time_select(test_client, init_database, staff_auth_header):
     response = test_client.get('/telehealth/client/time-select2/1/', headers=staff_auth_header)
 
     assert response.status_code == 201
+
+def test_delete_generated_users(test_client, init_database, delete_users):
+    assert 1 == 1
