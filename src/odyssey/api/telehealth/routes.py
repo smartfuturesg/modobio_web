@@ -105,7 +105,6 @@ class TelehealthClientTimeSelectApi2(Resource):
         # The subtract 1 is due to the indices having start_time and end_times, so 100 - 103 is 100.start_time to 103.end_time which is
         # the 20 minute duration
         idx_delta = int(duration/5) - 1
- 
         # TODO will need to incorporate timezone information
         available = {}
 
@@ -126,7 +125,7 @@ class TelehealthClientTimeSelectApi2(Resource):
 
         # Now, grab all of the bookings for that client and all staff on the given target date
         # This is necessary to subtract from the staff_availability above.
-        bookings = TelehealthBookings.query.filter_by(target_date=target_date).all()
+        bookings = TelehealthBookings.query.filter_by(client_user_id=user_id,target_date=target_date).all()
         # Now, subtract booking times from staff availability and generate the actual times a staff member is free
         removedNum = {}
         for booking in bookings:
@@ -180,11 +179,11 @@ class TelehealthClientTimeSelectApi2(Resource):
                 random.shuffle(timeArr[time])
                 times.append({'staff_user_id': timeArr[time][0],
                             'start_time': time.start_time, 
-                            'end_time': time_inc[time.idx+idx_delta].end_time})
+                            'end_time': time_inc[time.idx+idx_delta-1].end_time})
             else:
                 times.append({'staff_user_id': timeArr[time][0],
                             'start_time': time.start_time, 
-                            'end_time': time_inc[time.idx+idx_delta].end_time})                
+                            'end_time': time_inc[time.idx+idx_delta-1].end_time})                
 
         times.sort(key=sortStartTime)
 
