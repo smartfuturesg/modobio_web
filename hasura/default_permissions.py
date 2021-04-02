@@ -132,7 +132,7 @@ def staff_default_select_permission(columns, filtered=False):
         }
      } 
     if filtered and 'user_id' in columns:
-        permission['permission'].update({'filter': {'user_id' : { "_eq": "X-Hasura-User-Id"}}})
+        permission['permission'].update({'filter': {'user_id' : { '_eq': 'X-Hasura-User-Id'}}})
     
     return permission
 
@@ -167,8 +167,7 @@ def default_unfiltered_select_permission(columns, user_type):
     permission =  {
         'role': user_type, 
         'permission': {
-            'columns': columns,
-            'filter': {}
+            'columns': columns
         }
      } 
 
