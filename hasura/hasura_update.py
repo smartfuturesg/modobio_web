@@ -42,6 +42,7 @@ import yaml
 
 from sqlalchemy import create_engine, inspect
 
+from .default_permissions import client_default_permission
 from odyssey.config import database_uri
 from odyssey.utils.constants import ACCESS_ROLES
 
@@ -156,27 +157,48 @@ for schema in sorted(inspector.get_schema_names()):
             colname = column['name']
             table['configuration']['custom_column_names'][colname] = camel(colname)
 
-        
-        if 'Lookup' in tablename:
+
+                
+        if True:  # 'Lookup' in tablename:
             # add select, update, and insert permissions for lookup tables
-            permissible_columns_select = [col['name'] for col in inspector.get_columns(tablename, schema=schema)] # list of
-            permissible_columns_update = [col['name'] for col in inspector.get_columns(tablename, schema=schema) 
-                                                if 'user_id' not in col ]
-            select_permission_client = {
-                'role': 'client', 
-                'permission': {
-                    'columns': permissible_columns_select,
-                    'filter': {}
-                } 
-            }
-            select_permission_staff = {
-                'role': 'staff', 
-                'permission': {
-                    'columns': permissible_columns_select,
-                    'filter': {}
-                } 
-            }
-            table['select_permissions'] = [select_permission_client, select_permission_staff]
+            permissible_columns_select = [
+                col['name'] for col in inspector.get_columns(tablename, schema=schema)
+            ]  
+            permissible_columns_update = [
+                col['name']
+                for col in inspector.get_columns(tablename, schema=schema)
+                if 'user_id' not in col
+            ]
+
+            # is the table data linked to a user?
+            client_user_specific = (
+                True
+                if (
+                    any(col in permissible_columns_select for col in ['user_id'])
+                    and any(prefix in tablename for prefix in ['Client', 'Medical', 'User', 'PT', 'Trainer', 'Telehealth', 'Wearables'])
+                ) 
+                else False
+            )
+
+
+            if client_user_specific:
+                print(tablename)
+
+            select_permission_client = client_default_permission(columns=permissible_columns_select)
+            insert_permission_client = client_default_permission(columns=permissible_columns_update)
+            # select_permission_staff = {
+            #     'role': 'staff',
+            #     'permission': {'columns': permissible_columns_select, 'filter': {}},
+            # }
+
+            # # clients may view, insert, update their own data
+
+            # if client_user_specific:
+            #     select_permission_client['permission']['filter'] = {"user_id": {"_eq": "X-Hasura-User-Id"}}
+            
+            
+            # table['select_permissions'] = [select_permission_client, select_permission_staff]
+
         hasura_tables.append(table)
         hasura_tables_idx[f'{schema}-{tablename}'] = len(hasura_tables) - 1
 
@@ -345,5 +367,5 @@ for table in hasura_tables:
             if not table['configuration']:
                 table.pop('configuration')
 
-with hasura_tables_file.open(mode='wt') as fh:
-    yaml.dump(hasura_tables, stream=fh, sort_keys=False, default_flow_style=False)
+# with hasura_tables_file.open(mode='wt') as fh:
+#     yaml.dump(hasura_tables, stream=fh, sort_keys=False, default_flow_style=False)

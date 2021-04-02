@@ -15,6 +15,20 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id001
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - drink_id
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id001
+      filter: {}
 - table:
     schema: public
     name: ClientClinicalCareTeam
@@ -33,6 +47,21 @@
   - name: userByTeamMemberUserId
     using:
       foreign_key_constraint_on: team_member_user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id002
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - team_member_email
+      - team_member_user_id
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id002
+      filter: {}
 - table:
     schema: public
     name: ClientClinicalCareTeamAuthorizations
@@ -54,6 +83,21 @@
   - name: userByTeamMemberUserId
     using:
       foreign_key_constraint_on: team_member_user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id003
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - team_member_user_id
+      - resource_id
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id003
+      filter: {}
 - table:
     schema: public
     name: ClientConsent
@@ -73,6 +117,25 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id004
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - infectious_disease
+      - signdate
+      - signature
+      - revision
+      - pdf_path
+      - pdf_hash
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id004
+      filter: {}
 - table:
     schema: public
     name: ClientConsultContract
@@ -91,6 +154,24 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id005
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - signdate
+      - signature
+      - revision
+      - pdf_path
+      - pdf_hash
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id005
+      filter: {}
 - table:
     schema: public
     name: ClientFacilities
@@ -108,6 +189,20 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id006
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - facility_id
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id006
+      filter: {}
 - table:
     schema: public
     name: ClientHeightHistory
@@ -122,6 +217,20 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id007
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - height
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id007
+      filter: {}
 - table:
     schema: public
     name: ClientIndividualContract
@@ -144,6 +253,28 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id008
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - doctor
+      - pt
+      - data
+      - drinks
+      - signdate
+      - signature
+      - revision
+      - pdf_path
+      - pdf_hash
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id008
+      filter: {}
 - table:
     schema: public
     name: ClientInfo
@@ -186,6 +317,42 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id009
+      - created_at
+      - updated_at
+      - idx
+      - user_id
+      - membersince
+      - guardianname
+      - guardianrole
+      - street
+      - city
+      - state
+      - zipcode
+      - country
+      - preferred
+      - emergency_contact
+      - emergency_phone
+      - healthcare_contact
+      - healthcare_phone
+      - gender
+      - dob
+      - profession
+      - receive_docs
+      - height
+      - primary_goal_id
+      - primary_pharmacy_address
+      - primary_pharmacy_name
+      - race_id
+      - weight
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id009
+      filter: {}
 - table:
     schema: public
     name: ClientMobileSettings
@@ -207,6 +374,27 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id010
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - use_24_hour_clock
+      - date_format
+      - include_timezone
+      - biometrics_setup
+      - timezone_tracking
+      - is_right_handed
+      - display_middle_name
+      - enable_push_notifications
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id010
+      filter: {}
 - table:
     schema: public
     name: ClientPolicies
@@ -225,6 +413,24 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id011
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - signdate
+      - signature
+      - revision
+      - pdf_path
+      - pdf_hash
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id011
+      filter: {}
 - table:
     schema: public
     name: ClientRelease
@@ -256,6 +462,29 @@
         table:
           schema: public
           name: ClientReleaseContacts
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id012
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - release_of_all
+      - release_of_other
+      - release_date_from
+      - release_date_to
+      - release_purpose
+      - signdate
+      - signature
+      - revision
+      - pdf_path
+      - pdf_hash
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id012
+      filter: {}
 - table:
     schema: public
     name: ClientReleaseContacts
@@ -278,6 +507,25 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id013
+      - idx
+      - created_at
+      - updated_at
+      - release_contract_id
+      - user_id
+      - release_direction
+      - name
+      - email
+      - phone
+      - relationship
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id013
+      filter: {}
 - table:
     schema: public
     name: ClientSubscriptionContract
@@ -296,6 +544,24 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id014
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - signdate
+      - signature
+      - revision
+      - pdf_path
+      - pdf_hash
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id014
+      filter: {}
 - table:
     schema: public
     name: ClientTransactionHistory
@@ -315,6 +581,25 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id015
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - date
+      - category
+      - name
+      - price
+      - currency
+      - payment_method
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id015
+      filter: {}
 - table:
     schema: public
     name: ClientWeightHistory
@@ -329,6 +614,20 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id016
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - weight
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id016
+      filter: {}
 - table:
     schema: public
     name: LookupActivityTrackers
@@ -368,7 +667,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id001
+      columns: &id017
       - idx
       - created_at
       - brand
@@ -403,7 +702,7 @@
       filter: {}
   - role: staff
     permission:
-      columns: *id001
+      columns: *id017
       filter: {}
 - table:
     schema: public
@@ -439,7 +738,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id002
+      columns: &id018
       - created_at
       - idx
       - start_time
@@ -447,7 +746,7 @@
       filter: {}
   - role: staff
     permission:
-      columns: *id002
+      columns: *id018
       filter: {}
 - table:
     schema: public
@@ -461,7 +760,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id003
+      columns: &id019
       - created_at
       - updated_at
       - idx
@@ -469,7 +768,7 @@
       filter: {}
   - role: staff
     permission:
-      columns: *id003
+      columns: *id019
       filter: {}
 - table:
     schema: public
@@ -492,7 +791,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id004
+      columns: &id020
       - created_at
       - updated_at
       - resource_id
@@ -501,7 +800,7 @@
       filter: {}
   - role: staff
     permission:
-      columns: *id004
+      columns: *id020
       filter: {}
 - table:
     schema: public
@@ -523,7 +822,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id005
+      columns: &id021
       - created_at
       - updated_at
       - idx
@@ -531,7 +830,7 @@
       filter: {}
   - role: staff
     permission:
-      columns: *id005
+      columns: *id021
       filter: {}
 - table:
     schema: public
@@ -588,7 +887,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id006
+      columns: &id022
       - created_at
       - updated_at
       - idx
@@ -639,7 +938,7 @@
       filter: {}
   - role: staff
     permission:
-      columns: *id006
+      columns: *id022
       filter: {}
 - table:
     schema: public
@@ -662,7 +961,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id007
+      columns: &id023
       - created_at
       - updated_at
       - idx
@@ -675,7 +974,7 @@
       filter: {}
   - role: staff
     permission:
-      columns: *id007
+      columns: *id023
       filter: {}
 - table:
     schema: public
@@ -709,7 +1008,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id008
+      columns: &id024
       - created_at
       - updated_at
       - drink_id
@@ -718,7 +1017,7 @@
       filter: {}
   - role: staff
     permission:
-      columns: *id008
+      columns: *id024
       filter: {}
 - table:
     schema: public
@@ -736,7 +1035,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id009
+      columns: &id025
       - idx
       - created_at
       - updated_at
@@ -748,7 +1047,7 @@
       filter: {}
   - role: staff
     permission:
-      columns: *id009
+      columns: *id025
       filter: {}
 - table:
     schema: public
@@ -777,7 +1076,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id010
+      columns: &id026
       - created_at
       - updated_at
       - goal_id
@@ -785,7 +1084,7 @@
       filter: {}
   - role: staff
     permission:
-      columns: *id010
+      columns: *id026
       filter: {}
 - table:
     schema: public
@@ -810,7 +1109,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id011
+      columns: &id027
       - created_at
       - updated_at
       - notification_type_id
@@ -821,7 +1120,7 @@
       filter: {}
   - role: staff
     permission:
-      columns: *id011
+      columns: *id027
       filter: {}
 - table:
     schema: public
@@ -835,7 +1134,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id012
+      columns: &id028
       - created_at
       - updated_at
       - idx
@@ -843,7 +1142,7 @@
       filter: {}
   - role: staff
     permission:
-      columns: *id012
+      columns: *id028
       filter: {}
 - table:
     schema: public
@@ -865,7 +1164,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id013
+      columns: &id029
       - created_at
       - updated_at
       - race_id
@@ -873,7 +1172,7 @@
       filter: {}
   - role: staff
     permission:
-      columns: *id013
+      columns: *id029
       filter: {}
 - table:
     schema: public
@@ -898,7 +1197,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id014
+      columns: &id030
       - created_at
       - updated_at
       - sub_id
@@ -909,7 +1208,7 @@
       filter: {}
   - role: staff
     permission:
-      columns: *id014
+      columns: *id030
       filter: {}
 - table:
     schema: public
@@ -926,7 +1225,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id015
+      columns: &id031
       - created_at
       - updated_at
       - idx
@@ -937,7 +1236,7 @@
       filter: {}
   - role: staff
     permission:
-      columns: *id015
+      columns: *id031
       filter: {}
 - table:
     schema: public
@@ -951,7 +1250,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id016
+      columns: &id032
       - created_at
       - updated_at
       - idx
@@ -959,7 +1258,7 @@
       filter: {}
   - role: staff
     permission:
-      columns: *id016
+      columns: *id032
       filter: {}
 - table:
     schema: public
@@ -983,7 +1282,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id017
+      columns: &id033
       - created_at
       - updated_at
       - idx
@@ -993,7 +1292,7 @@
       filter: {}
   - role: staff
     permission:
-      columns: *id017
+      columns: *id033
       filter: {}
 - table:
     schema: public
@@ -1009,7 +1308,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id018
+      columns: &id034
       - created_at
       - updated_at
       - idx
@@ -1019,7 +1318,7 @@
       filter: {}
   - role: staff
     permission:
-      columns: *id018
+      columns: *id034
       filter: {}
 - table:
     schema: public
@@ -1036,6 +1335,21 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id035
+      - idx
+      - created_at
+      - user_id
+      - systolic
+      - diastolic
+      - datetime_taken
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id035
+      filter: {}
 - table:
     schema: public
     name: MedicalBloodTestResultTypes
@@ -1059,6 +1373,25 @@
         table:
           schema: public
           name: MedicalBloodTestResults
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id036
+      - result_id
+      - created_at
+      - updated_at
+      - result_name
+      - normal_min
+      - normal_max
+      - optimal_min
+      - optimal_max
+      - unit
+      - panel
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id036
+      filter: {}
 - table:
     schema: public
     name: MedicalBloodTestResults
@@ -1078,6 +1411,22 @@
   - name: MedicalBloodTestResultType
     using:
       foreign_key_constraint_on: result_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id037
+      - idx
+      - created_at
+      - updated_at
+      - test_id
+      - result_id
+      - result_value
+      - evaluation
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id037
+      filter: {}
 - table:
     schema: public
     name: MedicalBloodTests
@@ -1103,6 +1452,23 @@
         table:
           schema: public
           name: MedicalBloodTestResults
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id038
+      - test_id
+      - created_at
+      - updated_at
+      - user_id
+      - reporter_id
+      - date
+      - panel_type
+      - notes
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id038
+      filter: {}
 - table:
     schema: public
     name: MedicalConditions
@@ -1120,6 +1486,19 @@
         table:
           schema: public
           name: MedicalFamilyHistory
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id039
+      - medical_condition_id
+      - category
+      - subcategory
+      - condition
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id039
+      filter: {}
 - table:
     schema: public
     name: MedicalExternalMR
@@ -1138,6 +1517,21 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id040
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - med_record_id
+      - institute_id
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id040
+      filter: {}
 - table:
     schema: public
     name: MedicalFamilyHistory
@@ -1160,6 +1554,25 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id041
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - medical_condition_id
+      - myself
+      - father
+      - mother
+      - sister
+      - brother
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id041
+      filter: {}
 - table:
     schema: public
     name: MedicalGeneralInfo
@@ -1178,6 +1591,24 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id042
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - primary_doctor_contact_name
+      - primary_doctor_contact_phone
+      - primary_doctor_contact_email
+      - blood_type
+      - blood_type_positive
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id042
+      filter: {}
 - table:
     schema: public
     name: MedicalGeneralInfoMedicationAllergy
@@ -1193,6 +1624,21 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id043
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - medication_name
+      - allergy_symptoms
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id043
+      filter: {}
 - table:
     schema: public
     name: MedicalGeneralInfoMedications
@@ -1212,6 +1658,25 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id044
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - medication_name
+      - medication_dosage
+      - medication_units
+      - medication_freq
+      - medication_times_per_freq
+      - medication_time_units
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id044
+      filter: {}
 - table:
     schema: public
     name: MedicalHistory
@@ -1239,6 +1704,33 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id045
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - last_examination_date
+      - last_examination_reason
+      - goals
+      - concerns
+      - family_history
+      - social_history
+      - allergies
+      - medication
+      - diagnostic_xray
+      - diagnostic_ctscan
+      - diagnostic_endoscopy
+      - diagnostic_mri
+      - diagnostic_ultrasound
+      - diagnostic_other
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id045
+      filter: {}
 - table:
     schema: public
     name: MedicalImaging
@@ -1259,6 +1751,26 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id046
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - reporter_id
+      - image_date
+      - image_type
+      - image_read
+      - image_origin_location
+      - image_path
+      - image_size
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id046
+      filter: {}
 - table:
     schema: public
     name: MedicalInstitutions
@@ -1276,6 +1788,19 @@
         table:
           schema: public
           name: MedicalExternalMR
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id047
+      - created_at
+      - updated_at
+      - institute_id
+      - institute_name
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id047
+      filter: {}
 - table:
     schema: public
     name: MedicalLookUpBloodPressureRange
@@ -1286,6 +1811,20 @@
       systolic: systolic
       and_or: andOr
       diastolic: diastolic
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id048
+      - idx
+      - category
+      - systolic
+      - and_or
+      - diastolic
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id048
+      filter: {}
 - table:
     schema: public
     name: MedicalLookUpSTD
@@ -1301,6 +1840,17 @@
         table:
           schema: public
           name: MedicalSTDHistory
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id049
+      - std_id
+      - std
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id049
+      filter: {}
 - table:
     schema: public
     name: MedicalPhysicalExam
@@ -1341,6 +1891,46 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id050
+      - idx
+      - user_id
+      - reporter_id
+      - created_at
+      - updated_at
+      - timestamp
+      - vital_heartrate
+      - vital_respiratoryrate
+      - vital_systolic
+      - vital_diastolic
+      - vital_temperature
+      - vital_weight
+      - vital_height
+      - vital_height_inches
+      - cardiac_rrr
+      - cardiac_s1s2
+      - cardiac_murmurs
+      - cardiac_murmurs_info
+      - cardiac_rubs
+      - cardiac_gallops
+      - pulmonary_clear
+      - pulmonary_wheezing
+      - pulmonary_wheezing_info
+      - pulmonary_rales
+      - pulmonary_rhonchi
+      - abdominal_soft
+      - abdominal_hard
+      - abdominal_bowel
+      - abdominal_hsm
+      - abdominal_hsm_info
+      - notes
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id050
+      filter: {}
 - table:
     schema: public
     name: MedicalSTDHistory
@@ -1358,6 +1948,20 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id051
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - std_id
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id051
+      filter: {}
 - table:
     schema: public
     name: MedicalSocialHistory
@@ -1384,6 +1988,32 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id052
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - ever_smoked
+      - currently_smoke
+      - last_smoke_date
+      - last_smoke
+      - last_smoke_time
+      - avg_num_cigs
+      - num_years_smoked
+      - plan_to_stop
+      - avg_weekly_drinks
+      - avg_weekly_workouts
+      - job_title
+      - avg_hourly_meditation
+      - sexual_preference
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id052
+      filter: {}
 - table:
     schema: public
     name: MedicalSurgeries
@@ -1406,6 +2036,25 @@
   - name: userByReporterUserId
     using:
       foreign_key_constraint_on: reporter_user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id053
+      - created_at
+      - updated_at
+      - surgery_id
+      - client_user_id
+      - reporter_user_id
+      - surgery_category
+      - date
+      - surgeon
+      - institution
+      - notes
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id053
+      filter: {}
 - table:
     schema: public
     name: MobilityAssessment
@@ -1447,6 +2096,47 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id054
+      - user_id
+      - idx
+      - timestamp
+      - created_at
+      - updated_at
+      - isa_left
+      - isa_right
+      - isa_dynamic
+      - left_shoulder_er
+      - left_shoulder_ir
+      - left_shoulder_abd
+      - left_shoulder_add
+      - left_shoulder_flexion
+      - left_shoulder_extension
+      - right_shoulder_er
+      - right_shoulder_ir
+      - right_shoulder_abd
+      - right_shoulder_add
+      - right_shoulder_flexion
+      - right_shoulder_extension
+      - left_hip_er
+      - left_hip_ir
+      - left_hip_abd
+      - left_hip_add
+      - left_hip_flexion
+      - left_hip_extension
+      - right_hip_er
+      - right_hip_ir
+      - right_hip_abd
+      - right_hip_add
+      - right_hip_flexion
+      - right_hip_extension
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id054
+      filter: {}
 - table:
     schema: public
     name: PTChessboard
@@ -1490,6 +2180,49 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id055
+      - idx
+      - user_id
+      - timestamp
+      - created_at
+      - updated_at
+      - isa_structure
+      - isa_movement
+      - left_shoulder_er
+      - left_shoulder_ir
+      - left_shoulder_abd
+      - left_shoulder_add
+      - left_shoulder_flexion
+      - left_shoulder_extension
+      - right_shoulder_er
+      - right_shoulder_ir
+      - right_shoulder_abd
+      - right_shoulder_add
+      - right_shoulder_flexion
+      - right_shoulder_extension
+      - left_hip_er
+      - left_hip_ir
+      - left_hip_abd
+      - left_hip_add
+      - left_hip_flexion
+      - left_hip_extension
+      - left_hip_slr
+      - right_hip_er
+      - right_hip_ir
+      - right_hip_abd
+      - right_hip_add
+      - right_hip_flexion
+      - right_hip_extension
+      - right_hip_slr
+      - notes
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id055
+      filter: {}
 - table:
     schema: public
     name: PTHistory
@@ -1516,6 +2249,32 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id056
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - exercise
+      - has_pt
+      - has_chiro
+      - has_massage
+      - has_surgery
+      - has_medication
+      - has_acupuncture
+      - pain_areas
+      - best_pain
+      - worst_pain
+      - current_pain
+      - makes_worse
+      - makes_better
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id056
+      filter: {}
 - table:
     schema: public
     name: RegisteredFacilities
@@ -1535,6 +2294,21 @@
         table:
           schema: public
           name: ClientFacilities
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id057
+      - created_at
+      - updated_at
+      - facility_id
+      - facility_name
+      - facility_address
+      - modobio_facility
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id057
+      filter: {}
 - table:
     schema: public
     name: StaffOperationalTerritories
@@ -1556,6 +2330,21 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id058
+      - idx
+      - created_at
+      - updated_at
+      - operational_territory_id
+      - user_id
+      - role_id
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id058
+      filter: {}
 - table:
     schema: public
     name: StaffProfile
@@ -1571,6 +2360,21 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id059
+      - created_at
+      - updated_at
+      - idx
+      - user_id
+      - membersince
+      - bio
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id059
+      filter: {}
 - table:
     schema: public
     name: StaffRecentClients
@@ -1587,6 +2391,19 @@
   - name: userByUserId
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id060
+      - idx
+      - client_user_id
+      - timestamp
+      - user_id
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id060
+      filter: {}
 - table:
     schema: public
     name: StaffRoles
@@ -1610,6 +2427,21 @@
         table:
           schema: public
           name: StaffOperationalTerritories
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id061
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - role
+      - verified
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id061
+      filter: {}
 - table:
     schema: public
     name: SystemTelehealthSessionCosts
@@ -1624,6 +2456,20 @@
   - name: LookupCountriesOfOperation
     using:
       foreign_key_constraint_on: territory_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id062
+      - created_at
+      - updated_at
+      - territory_id
+      - profession_type
+      - session_cost
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id062
+      filter: {}
 - table:
     schema: public
     name: SystemVariables
@@ -1634,6 +2480,20 @@
       var_id: varId
       var_name: varName
       var_value: varValue
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id063
+      - created_at
+      - updated_at
+      - var_id
+      - var_name
+      - var_value
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id063
+      filter: {}
 - table:
     schema: public
     name: TelehealthBookings
@@ -1660,6 +2520,23 @@
   - name: userByStaffUserId
     using:
       foreign_key_constraint_on: staff_user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id064
+      - created_at
+      - idx
+      - client_user_id
+      - staff_user_id
+      - target_date
+      - booking_window_id_start_time
+      - booking_window_id_end_time
+      - status
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id064
+      filter: {}
 - table:
     schema: public
     name: TelehealthChatRooms
@@ -1680,6 +2557,23 @@
   - name: userByStaffUserId
     using:
       foreign_key_constraint_on: staff_user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id065
+      - created_at
+      - updated_at
+      - room_id
+      - room_name
+      - conversation_sid
+      - room_status
+      - client_user_id
+      - staff_user_id
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id065
+      filter: {}
 - table:
     schema: public
     name: TelehealthMeetingRooms
@@ -1701,6 +2595,24 @@
   - name: userByStaffUserId
     using:
       foreign_key_constraint_on: staff_user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id066
+      - created_at
+      - updated_at
+      - room_id
+      - room_name
+      - client_user_id
+      - staff_user_id
+      - client_access_token
+      - staff_access_token
+      - room_status
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id066
+      filter: {}
 - table:
     schema: public
     name: TelehealthQueueClientPool
@@ -1720,6 +2632,25 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id067
+      - created_at
+      - updated_at
+      - idx
+      - user_id
+      - profession_type
+      - target_date
+      - priority
+      - timezone
+      - duration
+      - medical_gender
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id067
+      filter: {}
 - table:
     schema: public
     name: TelehealthStaffAvailability
@@ -1737,6 +2668,20 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id068
+      - created_at
+      - idx
+      - user_id
+      - day_of_week
+      - booking_window_id
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id068
+      filter: {}
 - table:
     schema: public
     name: TrainerFitnessQuestionnaire
@@ -1762,6 +2707,31 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id069
+      - idx
+      - user_id
+      - timestamp
+      - created_at
+      - updated_at
+      - physical_goals
+      - current_fitness_level
+      - goal_fitness_level
+      - trainer_expectations
+      - lifestyle_goals
+      - sleep_hours
+      - sleep_quality_level
+      - stress_level
+      - stress_sources
+      - energy_level
+      - libido_level
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id069
+      filter: {}
 - table:
     schema: public
     name: TrainerHeartAssessment
@@ -1784,6 +2754,28 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id070
+      - idx
+      - timestamp
+      - created_at
+      - updated_at
+      - user_id
+      - resting_hr
+      - max_hr
+      - theoretical_max_hr
+      - avg_eval_hr
+      - avg_training_hr
+      - estimated_vo2_max
+      - co2_tolerance
+      - notes
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id070
+      filter: {}
 - table:
     schema: public
     name: TrainerLungAssessment
@@ -1804,6 +2796,26 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id071
+      - idx
+      - timestamp
+      - created_at
+      - updated_at
+      - user_id
+      - notes
+      - bag_size
+      - duration
+      - breaths_per_minute
+      - max_minute_volume
+      - liters_min_kg
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id071
+      filter: {}
 - table:
     schema: public
     name: TrainerMovementAssessment
@@ -1829,6 +2841,31 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id072
+      - idx
+      - timestamp
+      - created_at
+      - updated_at
+      - user_id
+      - squat_depth
+      - squat_ramp
+      - squat_eye_test
+      - squat_can_breathe
+      - squat_can_look_up
+      - toe_touch_depth
+      - toe_touch_pelvis_movement
+      - toe_touch_ribcage_movement
+      - toe_touch_notes
+      - standing_rotation_r_notes
+      - standing_rotation_l_notes
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id072
+      filter: {}
 - table:
     schema: public
     name: TrainerMoxyAssessment
@@ -1856,6 +2893,33 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id073
+      - idx
+      - timestamp
+      - created_at
+      - updated_at
+      - user_id
+      - vl_side
+      - notes
+      - recovery_baseline
+      - performance_baseline
+      - gas_tank_size
+      - starting_sm_o2
+      - starting_thb
+      - limiter
+      - intervention
+      - performance_metric_1
+      - performance_metric_1_value
+      - performance_metric_2
+      - performance_metric_2_value
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id073
+      filter: {}
 - table:
     schema: public
     name: TrainerMoxyRipTest
@@ -1914,6 +2978,64 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id074
+      - idx
+      - timestamp
+      - created_at
+      - updated_at
+      - user_id
+      - vl_side
+      - performance_smo2_1
+      - performance_thb_1
+      - performance_average_power_1
+      - performance_hr_max_1
+      - performance_smo2_2
+      - performance_thb_2
+      - performance_average_power_2
+      - performance_hr_max_2
+      - performance_smo2_3
+      - performance_thb_3
+      - performance_average_power_3
+      - performance_hr_max_3
+      - performance_smo2_4
+      - performance_thb_4
+      - performance_average_power_4
+      - performance_hr_max_4
+      - recovery_smo2_1
+      - recovery_thb_1
+      - recovery_average_power_1
+      - recovery_hr_min_1
+      - recovery_smo2_2
+      - recovery_thb_2
+      - recovery_average_power_2
+      - recovery_hr_min_2
+      - recovery_smo2_3
+      - recovery_thb_3
+      - recovery_average_power_3
+      - recovery_hr_min_3
+      - recovery_smo2_4
+      - recovery_thb_4
+      - recovery_average_power_4
+      - recovery_hr_min_4
+      - smo2_tank_size
+      - thb_tank_size
+      - performance_baseline_smo2
+      - performance_baseline_thb
+      - recovery_baseline_smo2
+      - recovery_baseline_thb
+      - avg_watt_kg
+      - avg_interval_time
+      - avg_recovery_time
+      - limiter
+      - intervention
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id074
+      filter: {}
 - table:
     schema: public
     name: TrainerPowerAssessment
@@ -1950,6 +3072,42 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id075
+      - idx
+      - timestamp
+      - created_at
+      - updated_at
+      - user_id
+      - keiser_upper_r_weight
+      - keiser_upper_r_attempt_1
+      - keiser_upper_r_attempt_2
+      - keiser_upper_r_attempt_3
+      - keiser_upper_l_weight
+      - keiser_upper_l_attempt_1
+      - keiser_upper_l_attempt_2
+      - keiser_upper_l_attempt_3
+      - keiser_lower_bi_weight
+      - keiser_lower_bi_attempt_1
+      - keiser_lower_bi_attempt_2
+      - keiser_lower_bi_attempt_3
+      - keiser_lower_r_weight
+      - keiser_lower_r_attempt_1
+      - keiser_lower_r_attempt_2
+      - keiser_lower_r_attempt_3
+      - keiser_lower_l_weight
+      - keiser_lower_l_attempt_1
+      - keiser_lower_l_attempt_2
+      - keiser_lower_l_attempt_3
+      - upper_watts_per_kg
+      - lower_watts_per_kg
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id075
+      filter: {}
 - table:
     schema: public
     name: TrainerStrengthAssessment
@@ -1996,6 +3154,52 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id076
+      - idx
+      - timestamp
+      - created_at
+      - updated_at
+      - user_id
+      - upper_push_notes
+      - upper_pull_notes
+      - upper_push_l_weight
+      - upper_push_l_attempt_1
+      - upper_push_l_attempt_2
+      - upper_push_l_attempt_3
+      - upper_push_l_estimated_10rm
+      - upper_push_r_weight
+      - upper_push_r_attempt_1
+      - upper_push_r_attempt_2
+      - upper_push_r_attempt_3
+      - upper_push_r_estimated_10rm
+      - upper_push_bi_weight
+      - upper_push_bi_attempt_1
+      - upper_push_bi_attempt_2
+      - upper_push_bi_attempt_3
+      - upper_push_bi_estimated_10rm
+      - upper_pull_l_weight
+      - upper_pull_l_attempt_1
+      - upper_pull_l_attempt_2
+      - upper_pull_l_attempt_3
+      - upper_pull_l_estimated_10rm
+      - upper_pull_r_weight
+      - upper_pull_r_attempt_1
+      - upper_pull_r_attempt_2
+      - upper_pull_r_attempt_3
+      - upper_pull_r_estimated_10rm
+      - upper_pull_bi_weight
+      - upper_pull_bi_attempt_1
+      - upper_pull_bi_attempt_2
+      - upper_pull_bi_attempt_3
+      - upper_pull_bi_estimated_10rm
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id076
+      filter: {}
 - table:
     schema: public
     name: User
@@ -2473,6 +3677,29 @@
         table:
           schema: public
           name: UserRemovalRequests
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id077
+      - created_at
+      - updated_at
+      - user_id
+      - modobio_id
+      - email
+      - phone_number
+      - firstname
+      - middlename
+      - lastname
+      - is_staff
+      - is_client
+      - biological_sex_male
+      - deleted
+      - is_internal
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id077
+      filter: {}
 - table:
     schema: public
     name: UserLogin
@@ -2490,6 +3717,23 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id078
+      - created_at
+      - updated_at
+      - idx
+      - user_id
+      - password
+      - password_created_at
+      - last_login
+      - refresh_token
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id078
+      filter: {}
 - table:
     schema: public
     name: UserNotifications
@@ -2514,6 +3758,27 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id079
+      - created_at
+      - updated_at
+      - idx
+      - user_id
+      - notification_type_id
+      - title
+      - content
+      - action
+      - time_to_live
+      - is_staff
+      - read
+      - deleted
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id079
+      filter: {}
 - table:
     schema: public
     name: UserRemovalRequests
@@ -2532,6 +3797,21 @@
   - name: userByUserId
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id080
+      - idx
+      - created_at
+      - updated_at
+      - requester_user_id
+      - user_id
+      - timestamp
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id080
+      filter: {}
 - table:
     schema: public
     name: UserSubscriptions
@@ -2553,6 +3833,24 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id081
+      - created_at
+      - updated_at
+      - idx
+      - user_id
+      - is_staff
+      - start_date
+      - end_date
+      - subscription_status
+      - subscription_type_id
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id081
+      filter: {}
 - table:
     schema: public
     name: UserTokensBlacklist
@@ -2562,6 +3860,19 @@
       updated_at: updatedAt
       idx: idx
       token: token
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id082
+      - created_at
+      - updated_at
+      - idx
+      - token
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id082
+      filter: {}
 - table:
     schema: public
     name: Wearables
@@ -2580,6 +3891,24 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id083
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - has_oura
+      - registered_oura
+      - has_freestyle
+      - has_fitbit
+      - registered_fitbit
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id083
+      filter: {}
 - table:
     schema: public
     name: WearablesFitbit
@@ -2598,6 +3927,24 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id084
+      - idx
+      - user_id
+      - created_at
+      - updated_at
+      - oauth_state
+      - access_token
+      - refresh_token
+      - token_expires
+      - last_scrape
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id084
+      filter: {}
 - table:
     schema: public
     name: WearablesFreeStyle
@@ -2614,6 +3961,22 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id085
+      - idx
+      - user_id
+      - created_at
+      - updated_at
+      - timestamps
+      - glucose
+      - activation_timestamp
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id085
+      filter: {}
 - table:
     schema: public
     name: WearablesOura
@@ -2632,6 +3995,24 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id086
+      - idx
+      - user_id
+      - created_at
+      - updated_at
+      - oauth_state
+      - access_token
+      - refresh_token
+      - token_expires
+      - last_scrape
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id086
+      filter: {}
 - table:
     schema: public
     name: client_table_sizes
@@ -2642,6 +4023,20 @@
       total_size: totalSize
       row_count: rowCount
       bytes_per_row: bytesPerRow
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id087
+      - table_schema
+      - table_name
+      - total_size
+      - row_count
+      - bytes_per_row
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id087
+      filter: {}
 - table:
     schema: public
     name: data_per_client
@@ -2650,3 +4045,15 @@
       user_id: userId
       total_bytes: totalBytes
       data_usage_tier: dataUsageTier
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id088
+      - user_id
+      - total_bytes
+      - data_usage_tier
+      filter: {}
+  - role: staff
+    permission:
+      columns: *id088
+      filter: {}
