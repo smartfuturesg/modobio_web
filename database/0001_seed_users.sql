@@ -20,7 +20,7 @@ INSERT INTO "User" ("email", "firstname", "lastname", "is_staff", "is_client", "
 ('matej.kubinec@sde.cz', 'Matej', 'Kubinec', true, false, true, 'JAF04LYTZN9W'),
 ('sebastian.brostl@sde.cz', 'Sebastian', 'Brostl', true, false, true, 'VLCZG2Z2ZL5H'),
 ('lukas.krajci@sde.cz', 'Lukas', 'Krajci', true, false, true, 'VS071YRSQ98Z'),
-('client@modobio.com', 'Test', 'Client', false, true, false, 'TC12JASDFF18')
+('client@modobio.com', 'Test', 'Client', false, true, false, 'TC12JASDFF18');
 
 INSERT INTO "UserLogin" ("user_id", "password") VALUES 
 (1, 'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1'), 
@@ -43,11 +43,11 @@ INSERT INTO "UserLogin" ("user_id", "password") VALUES
 (18, 'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1'), 
 (19, 'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1'), 
 (20, 'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1'), 
-(21, 'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1');
+(21, 'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1'),
 (22, 'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1');
 
 INSERT INTO "ClientInfo" ("user_id") VALUES
-(22)
+(22);
 
 INSERT INTO "StaffRoles" ("user_id", "role", "verified") VALUES 
 (1, 'system_admin', false), 
