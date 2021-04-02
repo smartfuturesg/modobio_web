@@ -42,7 +42,14 @@ import yaml
 
 from sqlalchemy import create_engine, inspect
 
-from .default_permissions import client_default_permission
+from default_permissions import (
+    client_default_select_permission, 
+    client_default_update_permission, 
+    default_unfiltered_select_permission, 
+    SKIP_PERMISSIONS,
+    staff_default_select_permission,
+    staff_default_update_permission
+)
 from odyssey.config import database_uri
 from odyssey.utils.constants import ACCESS_ROLES
 
@@ -127,7 +134,7 @@ with hasura_no_track_file.open() as fh:
 hasura_tables = []
 hasura_tables_idx = {}
 
-# First pass: track tables.
+# First pass: track tables, add permissions
 for schema in sorted(inspector.get_schema_names()):
     if schema in ('hdb_catalog', 'hdb_views', 'information_schema'):
         continue
@@ -158,47 +165,59 @@ for schema in sorted(inspector.get_schema_names()):
             table['configuration']['custom_column_names'][colname] = camel(colname)
 
 
-                
-        if True:  # 'Lookup' in tablename:
-            # add select, update, and insert permissions for lookup tables
-            permissible_columns_select = [
+        # Add table permissions here  
+        #      
+        select_permission_client = None
+        insert_permission_client = None
+        select_permission_staff = None
+        insert_permission_staff = None
+        if tablename not in SKIP_PERMISSIONS:
+            # add select, update (insert) columns
+            # We do not allow API users to change user_id columns but, they may be viewed
+            permissible_columns = [
                 col['name'] for col in inspector.get_columns(tablename, schema=schema)
             ]  
-            permissible_columns_update = [
+            permissible_columns_no_user_id = [
                 col['name']
                 for col in inspector.get_columns(tablename, schema=schema)
                 if 'user_id' not in col
             ]
 
-            # is the table data linked to a user?
-            client_user_specific = (
-                True
-                if (
-                    any(col in permissible_columns_select for col in ['user_id'])
+            table_type = False
+            # Tables which hold client-specific user data
+            if (
+                    any(col in permissible_columns for col in ['user_id'])
                     and any(prefix in tablename for prefix in ['Client', 'Medical', 'User', 'PT', 'Trainer', 'Telehealth', 'Wearables'])
-                ) 
-                else False
-            )
+                ):
+                select_permission_client = client_default_select_permission(columns=permissible_columns)
+                insert_permission_client = client_default_update_permission(columns=permissible_columns_no_user_id)
 
+                select_permission_staff = staff_default_select_permission(columns=permissible_columns)
+                insert_permission_staff = staff_default_update_permission(columns=permissible_columns)
 
-            if client_user_specific:
+            # Lookup tables
+            elif (
+                    not any(col in permissible_columns for col in ['user_id', 'client_user_id', 'staff_user_id'])
+                    and any(prefix in tablename for prefix in ['Lookup', 'Medical'])
+                ):
+                select_permission_client = default_unfiltered_select_permission(
+                    columns=permissible_columns, user_type = 'client')
+            
+                select_permission_staff = default_unfiltered_select_permission(
+                    columns=permissible_columns, user_type = 'staff')
+               
+            # staff specific data
+            elif any(prefix in tablename for prefix in ['Staff', 'System']):
+                select_permission_client = client_default_select_permission(columns=permissible_columns)
+
+                select_permission_staff = staff_default_select_permission(columns=permissible_columns, filtered=True)
+                insert_permission_staff = staff_default_update_permission(columns=permissible_columns)
+                
+            else:
                 print(tablename)
-
-            select_permission_client = client_default_permission(columns=permissible_columns_select)
-            insert_permission_client = client_default_permission(columns=permissible_columns_update)
-            # select_permission_staff = {
-            #     'role': 'staff',
-            #     'permission': {'columns': permissible_columns_select, 'filter': {}},
-            # }
-
-            # # clients may view, insert, update their own data
-
-            # if client_user_specific:
-            #     select_permission_client['permission']['filter'] = {"user_id": {"_eq": "X-Hasura-User-Id"}}
-            
-            
-            # table['select_permissions'] = [select_permission_client, select_permission_staff]
-
+            table['select_permissions'] = [permission for permission in [select_permission_client, select_permission_staff] if permission]
+            table['insert_permissions'] = [permission for permission in [insert_permission_client,insert_permission_staff] if permission] 
+        
         hasura_tables.append(table)
         hasura_tables_idx[f'{schema}-{tablename}'] = len(hasura_tables) - 1
 
@@ -367,5 +386,5 @@ for table in hasura_tables:
             if not table['configuration']:
                 table.pop('configuration')
 
-# with hasura_tables_file.open(mode='wt') as fh:
-#     yaml.dump(hasura_tables, stream=fh, sort_keys=False, default_flow_style=False)
+with hasura_tables_file.open(mode='wt') as fh:
+    yaml.dump(hasura_tables, stream=fh, sort_keys=False, default_flow_style=False)

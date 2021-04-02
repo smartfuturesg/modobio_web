@@ -24,11 +24,30 @@
       - updated_at
       - user_id
       - drink_id
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
       columns: *id001
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - drink_id
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id001
 - table:
     schema: public
     name: ClientClinicalCareTeam
@@ -57,11 +76,31 @@
       - user_id
       - team_member_email
       - team_member_user_id
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
       columns: *id002
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - team_member_email
+      - team_member_user_id
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id002
 - table:
     schema: public
     name: ClientClinicalCareTeamAuthorizations
@@ -93,11 +132,31 @@
       - user_id
       - team_member_user_id
       - resource_id
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
       columns: *id003
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - team_member_user_id
+      - resource_id
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id003
 - table:
     schema: public
     name: ClientConsent
@@ -131,11 +190,35 @@
       - revision
       - pdf_path
       - pdf_hash
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
       columns: *id004
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - infectious_disease
+      - signdate
+      - signature
+      - revision
+      - pdf_path
+      - pdf_hash
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id004
 - table:
     schema: public
     name: ClientConsultContract
@@ -167,11 +250,34 @@
       - revision
       - pdf_path
       - pdf_hash
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
       columns: *id005
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - signdate
+      - signature
+      - revision
+      - pdf_path
+      - pdf_hash
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id005
 - table:
     schema: public
     name: ClientFacilities
@@ -198,11 +304,30 @@
       - updated_at
       - user_id
       - facility_id
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
       columns: *id006
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - facility_id
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id006
 - table:
     schema: public
     name: ClientHeightHistory
@@ -226,11 +351,30 @@
       - updated_at
       - user_id
       - height
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
       columns: *id007
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - height
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id007
 - table:
     schema: public
     name: ClientIndividualContract
@@ -270,11 +414,38 @@
       - revision
       - pdf_path
       - pdf_hash
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
       columns: *id008
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - doctor
+      - pt
+      - data
+      - drinks
+      - signdate
+      - signature
+      - revision
+      - pdf_path
+      - pdf_hash
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id008
 - table:
     schema: public
     name: ClientInfo
@@ -348,11 +519,52 @@
       - primary_pharmacy_name
       - race_id
       - weight
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
       columns: *id009
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - created_at
+      - updated_at
+      - idx
+      - user_id
+      - membersince
+      - guardianname
+      - guardianrole
+      - street
+      - city
+      - state
+      - zipcode
+      - country
+      - preferred
+      - emergency_contact
+      - emergency_phone
+      - healthcare_contact
+      - healthcare_phone
+      - gender
+      - dob
+      - profession
+      - receive_docs
+      - height
+      - primary_goal_id
+      - primary_pharmacy_address
+      - primary_pharmacy_name
+      - race_id
+      - weight
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id009
 - table:
     schema: public
     name: ClientMobileSettings
@@ -390,11 +602,37 @@
       - is_right_handed
       - display_middle_name
       - enable_push_notifications
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
       columns: *id010
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - use_24_hour_clock
+      - date_format
+      - include_timezone
+      - biometrics_setup
+      - timezone_tracking
+      - is_right_handed
+      - display_middle_name
+      - enable_push_notifications
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id010
 - table:
     schema: public
     name: ClientPolicies
@@ -426,11 +664,34 @@
       - revision
       - pdf_path
       - pdf_hash
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
       columns: *id011
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - signdate
+      - signature
+      - revision
+      - pdf_path
+      - pdf_hash
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id011
 - table:
     schema: public
     name: ClientRelease
@@ -480,11 +741,39 @@
       - revision
       - pdf_path
       - pdf_hash
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
       columns: *id012
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - release_of_all
+      - release_of_other
+      - release_date_from
+      - release_date_to
+      - release_purpose
+      - signdate
+      - signature
+      - revision
+      - pdf_path
+      - pdf_hash
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id012
 - table:
     schema: public
     name: ClientReleaseContacts
@@ -521,11 +810,35 @@
       - email
       - phone
       - relationship
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
       columns: *id013
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - created_at
+      - updated_at
+      - release_contract_id
+      - user_id
+      - release_direction
+      - name
+      - email
+      - phone
+      - relationship
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id013
 - table:
     schema: public
     name: ClientSubscriptionContract
@@ -557,11 +870,34 @@
       - revision
       - pdf_path
       - pdf_hash
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
       columns: *id014
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - signdate
+      - signature
+      - revision
+      - pdf_path
+      - pdf_hash
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id014
 - table:
     schema: public
     name: ClientTransactionHistory
@@ -595,11 +931,35 @@
       - price
       - currency
       - payment_method
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
       columns: *id015
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - date
+      - category
+      - name
+      - price
+      - currency
+      - payment_method
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id015
 - table:
     schema: public
     name: ClientWeightHistory
@@ -623,11 +983,30 @@
       - updated_at
       - user_id
       - weight
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
       columns: *id016
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - weight
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id016
 - table:
     schema: public
     name: LookupActivityTrackers
@@ -704,6 +1083,7 @@
     permission:
       columns: *id017
       filter: {}
+  insert_permissions: []
 - table:
     schema: public
     name: LookupBookingTimeIncrements
@@ -748,6 +1128,7 @@
     permission:
       columns: *id018
       filter: {}
+  insert_permissions: []
 - table:
     schema: public
     name: LookupClientBookingWindow
@@ -770,6 +1151,7 @@
     permission:
       columns: *id019
       filter: {}
+  insert_permissions: []
 - table:
     schema: public
     name: LookupClinicalCareTeamResources
@@ -802,6 +1184,7 @@
     permission:
       columns: *id020
       filter: {}
+  insert_permissions: []
 - table:
     schema: public
     name: LookupCountriesOfOperations
@@ -832,6 +1215,7 @@
     permission:
       columns: *id021
       filter: {}
+  insert_permissions: []
 - table:
     schema: public
     name: LookupDefaultHealthMetrics
@@ -940,6 +1324,7 @@
     permission:
       columns: *id022
       filter: {}
+  insert_permissions: []
 - table:
     schema: public
     name: LookupDrinkIngredients
@@ -976,6 +1361,7 @@
     permission:
       columns: *id023
       filter: {}
+  insert_permissions: []
 - table:
     schema: public
     name: LookupDrinks
@@ -1019,6 +1405,7 @@
     permission:
       columns: *id024
       filter: {}
+  insert_permissions: []
 - table:
     schema: public
     name: LookupEmergencyNumbers
@@ -1049,6 +1436,7 @@
     permission:
       columns: *id025
       filter: {}
+  insert_permissions: []
 - table:
     schema: public
     name: LookupGoals
@@ -1086,6 +1474,7 @@
     permission:
       columns: *id026
       filter: {}
+  insert_permissions: []
 - table:
     schema: public
     name: LookupNotifications
@@ -1122,6 +1511,7 @@
     permission:
       columns: *id027
       filter: {}
+  insert_permissions: []
 - table:
     schema: public
     name: LookupProfessionalAppointmentConfirmationWindow
@@ -1144,6 +1534,7 @@
     permission:
       columns: *id028
       filter: {}
+  insert_permissions: []
 - table:
     schema: public
     name: LookupRaces
@@ -1174,6 +1565,7 @@
     permission:
       columns: *id029
       filter: {}
+  insert_permissions: []
 - table:
     schema: public
     name: LookupSubscriptions
@@ -1210,6 +1602,7 @@
     permission:
       columns: *id030
       filter: {}
+  insert_permissions: []
 - table:
     schema: public
     name: LookupTelehealthSessionCost
@@ -1238,6 +1631,7 @@
     permission:
       columns: *id031
       filter: {}
+  insert_permissions: []
 - table:
     schema: public
     name: LookupTelehealthSessionDuration
@@ -1260,6 +1654,7 @@
     permission:
       columns: *id032
       filter: {}
+  insert_permissions: []
 - table:
     schema: public
     name: LookupTerritoriesofOperation
@@ -1294,6 +1689,7 @@
     permission:
       columns: *id033
       filter: {}
+  insert_permissions: []
 - table:
     schema: public
     name: LookupTransactionTypes
@@ -1320,6 +1716,7 @@
     permission:
       columns: *id034
       filter: {}
+  insert_permissions: []
 - table:
     schema: public
     name: MedicalBloodPressures
@@ -1345,11 +1742,31 @@
       - systolic
       - diastolic
       - datetime_taken
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
       columns: *id035
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - created_at
+      - user_id
+      - systolic
+      - diastolic
+      - datetime_taken
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id035
 - table:
     schema: public
     name: MedicalBloodTestResultTypes
@@ -1392,6 +1809,7 @@
     permission:
       columns: *id036
       filter: {}
+  insert_permissions: []
 - table:
     schema: public
     name: MedicalBloodTestResults
@@ -1427,6 +1845,7 @@
     permission:
       columns: *id037
       filter: {}
+  insert_permissions: []
 - table:
     schema: public
     name: MedicalBloodTests
@@ -1464,11 +1883,36 @@
       - date
       - panel_type
       - notes
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
       columns: *id038
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - test_id
+      - created_at
+      - updated_at
+      - user_id
+      - reporter_id
+      - date
+      - panel_type
+      - notes
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+        reporter_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id038
+      set:
+        reporter_id: X-Hasura-User-Id
 - table:
     schema: public
     name: MedicalConditions
@@ -1499,6 +1943,7 @@
     permission:
       columns: *id039
       filter: {}
+  insert_permissions: []
 - table:
     schema: public
     name: MedicalExternalMR
@@ -1527,11 +1972,31 @@
       - user_id
       - med_record_id
       - institute_id
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
       columns: *id040
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - med_record_id
+      - institute_id
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id040
 - table:
     schema: public
     name: MedicalFamilyHistory
@@ -1568,11 +2033,35 @@
       - mother
       - sister
       - brother
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
       columns: *id041
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - medical_condition_id
+      - myself
+      - father
+      - mother
+      - sister
+      - brother
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id041
 - table:
     schema: public
     name: MedicalGeneralInfo
@@ -1604,11 +2093,34 @@
       - primary_doctor_contact_email
       - blood_type
       - blood_type_positive
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
       columns: *id042
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - primary_doctor_contact_name
+      - primary_doctor_contact_phone
+      - primary_doctor_contact_email
+      - blood_type
+      - blood_type_positive
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id042
 - table:
     schema: public
     name: MedicalGeneralInfoMedicationAllergy
@@ -1634,11 +2146,31 @@
       - user_id
       - medication_name
       - allergy_symptoms
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
       columns: *id043
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - medication_name
+      - allergy_symptoms
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id043
 - table:
     schema: public
     name: MedicalGeneralInfoMedications
@@ -1672,11 +2204,35 @@
       - medication_freq
       - medication_times_per_freq
       - medication_time_units
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
       columns: *id044
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - medication_name
+      - medication_dosage
+      - medication_units
+      - medication_freq
+      - medication_times_per_freq
+      - medication_time_units
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id044
 - table:
     schema: public
     name: MedicalHistory
@@ -1726,11 +2282,43 @@
       - diagnostic_mri
       - diagnostic_ultrasound
       - diagnostic_other
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
       columns: *id045
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - last_examination_date
+      - last_examination_reason
+      - goals
+      - concerns
+      - family_history
+      - social_history
+      - allergies
+      - medication
+      - diagnostic_xray
+      - diagnostic_ctscan
+      - diagnostic_endoscopy
+      - diagnostic_mri
+      - diagnostic_ultrasound
+      - diagnostic_other
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id045
 - table:
     schema: public
     name: MedicalImaging
@@ -1766,11 +2354,39 @@
       - image_origin_location
       - image_path
       - image_size
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
       columns: *id046
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - reporter_id
+      - image_date
+      - image_type
+      - image_read
+      - image_origin_location
+      - image_path
+      - image_size
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+        reporter_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id046
+      set:
+        reporter_id: X-Hasura-User-Id
 - table:
     schema: public
     name: MedicalInstitutions
@@ -1801,6 +2417,7 @@
     permission:
       columns: *id047
       filter: {}
+  insert_permissions: []
 - table:
     schema: public
     name: MedicalLookUpBloodPressureRange
@@ -1825,6 +2442,7 @@
     permission:
       columns: *id048
       filter: {}
+  insert_permissions: []
 - table:
     schema: public
     name: MedicalLookUpSTD
@@ -1851,6 +2469,7 @@
     permission:
       columns: *id049
       filter: {}
+  insert_permissions: []
 - table:
     schema: public
     name: MedicalPhysicalExam
@@ -1926,11 +2545,59 @@
       - abdominal_hsm
       - abdominal_hsm_info
       - notes
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
       columns: *id050
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - user_id
+      - reporter_id
+      - created_at
+      - updated_at
+      - timestamp
+      - vital_heartrate
+      - vital_respiratoryrate
+      - vital_systolic
+      - vital_diastolic
+      - vital_temperature
+      - vital_weight
+      - vital_height
+      - vital_height_inches
+      - cardiac_rrr
+      - cardiac_s1s2
+      - cardiac_murmurs
+      - cardiac_murmurs_info
+      - cardiac_rubs
+      - cardiac_gallops
+      - pulmonary_clear
+      - pulmonary_wheezing
+      - pulmonary_wheezing_info
+      - pulmonary_rales
+      - pulmonary_rhonchi
+      - abdominal_soft
+      - abdominal_hard
+      - abdominal_bowel
+      - abdominal_hsm
+      - abdominal_hsm_info
+      - notes
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+        reporter_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id050
+      set:
+        reporter_id: X-Hasura-User-Id
 - table:
     schema: public
     name: MedicalSTDHistory
@@ -1957,11 +2624,30 @@
       - updated_at
       - user_id
       - std_id
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
       columns: *id051
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - std_id
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id051
 - table:
     schema: public
     name: MedicalSocialHistory
@@ -2009,11 +2695,42 @@
       - job_title
       - avg_hourly_meditation
       - sexual_preference
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
       columns: *id052
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - ever_smoked
+      - currently_smoke
+      - last_smoke_date
+      - last_smoke
+      - last_smoke_time
+      - avg_num_cigs
+      - num_years_smoked
+      - plan_to_stop
+      - avg_weekly_drinks
+      - avg_weekly_workouts
+      - job_title
+      - avg_hourly_meditation
+      - sexual_preference
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id052
 - table:
     schema: public
     name: MedicalSurgeries
@@ -2036,25 +2753,8 @@
   - name: userByReporterUserId
     using:
       foreign_key_constraint_on: reporter_user_id
-  select_permissions:
-  - role: client
-    permission:
-      columns: &id053
-      - created_at
-      - updated_at
-      - surgery_id
-      - client_user_id
-      - reporter_user_id
-      - surgery_category
-      - date
-      - surgeon
-      - institution
-      - notes
-      filter: {}
-  - role: staff
-    permission:
-      columns: *id053
-      filter: {}
+  select_permissions: []
+  insert_permissions: []
 - table:
     schema: public
     name: MobilityAssessment
@@ -2096,47 +2796,8 @@
   - name: User
     using:
       foreign_key_constraint_on: user_id
-  select_permissions:
-  - role: client
-    permission:
-      columns: &id054
-      - user_id
-      - idx
-      - timestamp
-      - created_at
-      - updated_at
-      - isa_left
-      - isa_right
-      - isa_dynamic
-      - left_shoulder_er
-      - left_shoulder_ir
-      - left_shoulder_abd
-      - left_shoulder_add
-      - left_shoulder_flexion
-      - left_shoulder_extension
-      - right_shoulder_er
-      - right_shoulder_ir
-      - right_shoulder_abd
-      - right_shoulder_add
-      - right_shoulder_flexion
-      - right_shoulder_extension
-      - left_hip_er
-      - left_hip_ir
-      - left_hip_abd
-      - left_hip_add
-      - left_hip_flexion
-      - left_hip_extension
-      - right_hip_er
-      - right_hip_ir
-      - right_hip_abd
-      - right_hip_add
-      - right_hip_flexion
-      - right_hip_extension
-      filter: {}
-  - role: staff
-    permission:
-      columns: *id054
-      filter: {}
+  select_permissions: []
+  insert_permissions: []
 - table:
     schema: public
     name: PTChessboard
@@ -2183,7 +2844,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id055
+      columns: &id053
       - idx
       - user_id
       - timestamp
@@ -2218,11 +2879,59 @@
       - right_hip_extension
       - right_hip_slr
       - notes
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id055
+      columns: *id053
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - user_id
+      - timestamp
+      - created_at
+      - updated_at
+      - isa_structure
+      - isa_movement
+      - left_shoulder_er
+      - left_shoulder_ir
+      - left_shoulder_abd
+      - left_shoulder_add
+      - left_shoulder_flexion
+      - left_shoulder_extension
+      - right_shoulder_er
+      - right_shoulder_ir
+      - right_shoulder_abd
+      - right_shoulder_add
+      - right_shoulder_flexion
+      - right_shoulder_extension
+      - left_hip_er
+      - left_hip_ir
+      - left_hip_abd
+      - left_hip_add
+      - left_hip_flexion
+      - left_hip_extension
+      - left_hip_slr
+      - right_hip_er
+      - right_hip_ir
+      - right_hip_abd
+      - right_hip_add
+      - right_hip_flexion
+      - right_hip_extension
+      - right_hip_slr
+      - notes
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id053
 - table:
     schema: public
     name: PTHistory
@@ -2252,7 +2961,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id056
+      columns: &id054
       - idx
       - created_at
       - updated_at
@@ -2270,11 +2979,42 @@
       - current_pain
       - makes_worse
       - makes_better
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id056
+      columns: *id054
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - exercise
+      - has_pt
+      - has_chiro
+      - has_massage
+      - has_surgery
+      - has_medication
+      - has_acupuncture
+      - pain_areas
+      - best_pain
+      - worst_pain
+      - current_pain
+      - makes_worse
+      - makes_better
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id054
 - table:
     schema: public
     name: RegisteredFacilities
@@ -2294,21 +3034,8 @@
         table:
           schema: public
           name: ClientFacilities
-  select_permissions:
-  - role: client
-    permission:
-      columns: &id057
-      - created_at
-      - updated_at
-      - facility_id
-      - facility_name
-      - facility_address
-      - modobio_facility
-      filter: {}
-  - role: staff
-    permission:
-      columns: *id057
-      filter: {}
+  select_permissions: []
+  insert_permissions: []
 - table:
     schema: public
     name: StaffOperationalTerritories
@@ -2333,18 +3060,26 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id058
+      columns: &id055
       - idx
       - created_at
       - updated_at
       - operational_territory_id
       - user_id
       - role_id
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id058
-      filter: {}
+      columns: *id055
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
+  insert_permissions:
+  - role: staff
+    permission:
+      columns: *id055
 - table:
     schema: public
     name: StaffProfile
@@ -2363,18 +3098,26 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id059
+      columns: &id056
       - created_at
       - updated_at
       - idx
       - user_id
       - membersince
       - bio
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id059
-      filter: {}
+      columns: *id056
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
+  insert_permissions:
+  - role: staff
+    permission:
+      columns: *id056
 - table:
     schema: public
     name: StaffRecentClients
@@ -2391,19 +3134,6 @@
   - name: userByUserId
     using:
       foreign_key_constraint_on: user_id
-  select_permissions:
-  - role: client
-    permission:
-      columns: &id060
-      - idx
-      - client_user_id
-      - timestamp
-      - user_id
-      filter: {}
-  - role: staff
-    permission:
-      columns: *id060
-      filter: {}
 - table:
     schema: public
     name: StaffRoles
@@ -2430,18 +3160,26 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id061
+      columns: &id057
       - idx
       - created_at
       - updated_at
       - user_id
       - role
       - verified
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id061
-      filter: {}
+      columns: *id057
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
+  insert_permissions:
+  - role: staff
+    permission:
+      columns: *id057
 - table:
     schema: public
     name: SystemTelehealthSessionCosts
@@ -2459,17 +3197,23 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id062
+      columns: &id058
       - created_at
       - updated_at
       - territory_id
       - profession_type
       - session_cost
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id062
+      columns: *id058
       filter: {}
+  insert_permissions:
+  - role: staff
+    permission:
+      columns: *id058
 - table:
     schema: public
     name: SystemVariables
@@ -2483,17 +3227,23 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id063
+      columns: &id059
       - created_at
       - updated_at
       - var_id
       - var_name
       - var_value
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id063
+      columns: *id059
       filter: {}
+  insert_permissions:
+  - role: staff
+    permission:
+      columns: *id059
 - table:
     schema: public
     name: TelehealthBookings
@@ -2520,23 +3270,8 @@
   - name: userByStaffUserId
     using:
       foreign_key_constraint_on: staff_user_id
-  select_permissions:
-  - role: client
-    permission:
-      columns: &id064
-      - created_at
-      - idx
-      - client_user_id
-      - staff_user_id
-      - target_date
-      - booking_window_id_start_time
-      - booking_window_id_end_time
-      - status
-      filter: {}
-  - role: staff
-    permission:
-      columns: *id064
-      filter: {}
+  select_permissions: []
+  insert_permissions: []
 - table:
     schema: public
     name: TelehealthChatRooms
@@ -2557,23 +3292,8 @@
   - name: userByStaffUserId
     using:
       foreign_key_constraint_on: staff_user_id
-  select_permissions:
-  - role: client
-    permission:
-      columns: &id065
-      - created_at
-      - updated_at
-      - room_id
-      - room_name
-      - conversation_sid
-      - room_status
-      - client_user_id
-      - staff_user_id
-      filter: {}
-  - role: staff
-    permission:
-      columns: *id065
-      filter: {}
+  select_permissions: []
+  insert_permissions: []
 - table:
     schema: public
     name: TelehealthMeetingRooms
@@ -2595,24 +3315,8 @@
   - name: userByStaffUserId
     using:
       foreign_key_constraint_on: staff_user_id
-  select_permissions:
-  - role: client
-    permission:
-      columns: &id066
-      - created_at
-      - updated_at
-      - room_id
-      - room_name
-      - client_user_id
-      - staff_user_id
-      - client_access_token
-      - staff_access_token
-      - room_status
-      filter: {}
-  - role: staff
-    permission:
-      columns: *id066
-      filter: {}
+  select_permissions: []
+  insert_permissions: []
 - table:
     schema: public
     name: TelehealthQueueClientPool
@@ -2635,7 +3339,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id067
+      columns: &id060
       - created_at
       - updated_at
       - idx
@@ -2646,11 +3350,35 @@
       - timezone
       - duration
       - medical_gender
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id067
+      columns: *id060
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - created_at
+      - updated_at
+      - idx
+      - user_id
+      - profession_type
+      - target_date
+      - priority
+      - timezone
+      - duration
+      - medical_gender
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id060
 - table:
     schema: public
     name: TelehealthStaffAvailability
@@ -2671,17 +3399,36 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id068
+      columns: &id061
       - created_at
       - idx
       - user_id
       - day_of_week
       - booking_window_id
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id068
+      columns: *id061
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - created_at
+      - idx
+      - user_id
+      - day_of_week
+      - booking_window_id
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id061
 - table:
     schema: public
     name: TrainerFitnessQuestionnaire
@@ -2710,7 +3457,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id069
+      columns: &id062
       - idx
       - user_id
       - timestamp
@@ -2727,11 +3474,41 @@
       - stress_sources
       - energy_level
       - libido_level
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id069
+      columns: *id062
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - user_id
+      - timestamp
+      - created_at
+      - updated_at
+      - physical_goals
+      - current_fitness_level
+      - goal_fitness_level
+      - trainer_expectations
+      - lifestyle_goals
+      - sleep_hours
+      - sleep_quality_level
+      - stress_level
+      - stress_sources
+      - energy_level
+      - libido_level
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id062
 - table:
     schema: public
     name: TrainerHeartAssessment
@@ -2757,7 +3534,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id070
+      columns: &id063
       - idx
       - timestamp
       - created_at
@@ -2771,11 +3548,38 @@
       - estimated_vo2_max
       - co2_tolerance
       - notes
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id070
+      columns: *id063
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - timestamp
+      - created_at
+      - updated_at
+      - user_id
+      - resting_hr
+      - max_hr
+      - theoretical_max_hr
+      - avg_eval_hr
+      - avg_training_hr
+      - estimated_vo2_max
+      - co2_tolerance
+      - notes
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id063
 - table:
     schema: public
     name: TrainerLungAssessment
@@ -2799,7 +3603,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id071
+      columns: &id064
       - idx
       - timestamp
       - created_at
@@ -2811,11 +3615,36 @@
       - breaths_per_minute
       - max_minute_volume
       - liters_min_kg
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id071
+      columns: *id064
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - timestamp
+      - created_at
+      - updated_at
+      - user_id
+      - notes
+      - bag_size
+      - duration
+      - breaths_per_minute
+      - max_minute_volume
+      - liters_min_kg
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id064
 - table:
     schema: public
     name: TrainerMovementAssessment
@@ -2844,7 +3673,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id072
+      columns: &id065
       - idx
       - timestamp
       - created_at
@@ -2861,11 +3690,41 @@
       - toe_touch_notes
       - standing_rotation_r_notes
       - standing_rotation_l_notes
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id072
+      columns: *id065
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - timestamp
+      - created_at
+      - updated_at
+      - user_id
+      - squat_depth
+      - squat_ramp
+      - squat_eye_test
+      - squat_can_breathe
+      - squat_can_look_up
+      - toe_touch_depth
+      - toe_touch_pelvis_movement
+      - toe_touch_ribcage_movement
+      - toe_touch_notes
+      - standing_rotation_r_notes
+      - standing_rotation_l_notes
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id065
 - table:
     schema: public
     name: TrainerMoxyAssessment
@@ -2896,7 +3755,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id073
+      columns: &id066
       - idx
       - timestamp
       - created_at
@@ -2915,11 +3774,43 @@
       - performance_metric_1_value
       - performance_metric_2
       - performance_metric_2_value
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id073
+      columns: *id066
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - timestamp
+      - created_at
+      - updated_at
+      - user_id
+      - vl_side
+      - notes
+      - recovery_baseline
+      - performance_baseline
+      - gas_tank_size
+      - starting_sm_o2
+      - starting_thb
+      - limiter
+      - intervention
+      - performance_metric_1
+      - performance_metric_1_value
+      - performance_metric_2
+      - performance_metric_2_value
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id066
 - table:
     schema: public
     name: TrainerMoxyRipTest
@@ -2981,7 +3872,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id074
+      columns: &id067
       - idx
       - timestamp
       - created_at
@@ -3031,11 +3922,74 @@
       - avg_recovery_time
       - limiter
       - intervention
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id074
+      columns: *id067
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - timestamp
+      - created_at
+      - updated_at
+      - user_id
+      - vl_side
+      - performance_smo2_1
+      - performance_thb_1
+      - performance_average_power_1
+      - performance_hr_max_1
+      - performance_smo2_2
+      - performance_thb_2
+      - performance_average_power_2
+      - performance_hr_max_2
+      - performance_smo2_3
+      - performance_thb_3
+      - performance_average_power_3
+      - performance_hr_max_3
+      - performance_smo2_4
+      - performance_thb_4
+      - performance_average_power_4
+      - performance_hr_max_4
+      - recovery_smo2_1
+      - recovery_thb_1
+      - recovery_average_power_1
+      - recovery_hr_min_1
+      - recovery_smo2_2
+      - recovery_thb_2
+      - recovery_average_power_2
+      - recovery_hr_min_2
+      - recovery_smo2_3
+      - recovery_thb_3
+      - recovery_average_power_3
+      - recovery_hr_min_3
+      - recovery_smo2_4
+      - recovery_thb_4
+      - recovery_average_power_4
+      - recovery_hr_min_4
+      - smo2_tank_size
+      - thb_tank_size
+      - performance_baseline_smo2
+      - performance_baseline_thb
+      - recovery_baseline_smo2
+      - recovery_baseline_thb
+      - avg_watt_kg
+      - avg_interval_time
+      - avg_recovery_time
+      - limiter
+      - intervention
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id067
 - table:
     schema: public
     name: TrainerPowerAssessment
@@ -3075,7 +4029,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id075
+      columns: &id068
       - idx
       - timestamp
       - created_at
@@ -3103,11 +4057,52 @@
       - keiser_lower_l_attempt_3
       - upper_watts_per_kg
       - lower_watts_per_kg
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id075
+      columns: *id068
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - timestamp
+      - created_at
+      - updated_at
+      - user_id
+      - keiser_upper_r_weight
+      - keiser_upper_r_attempt_1
+      - keiser_upper_r_attempt_2
+      - keiser_upper_r_attempt_3
+      - keiser_upper_l_weight
+      - keiser_upper_l_attempt_1
+      - keiser_upper_l_attempt_2
+      - keiser_upper_l_attempt_3
+      - keiser_lower_bi_weight
+      - keiser_lower_bi_attempt_1
+      - keiser_lower_bi_attempt_2
+      - keiser_lower_bi_attempt_3
+      - keiser_lower_r_weight
+      - keiser_lower_r_attempt_1
+      - keiser_lower_r_attempt_2
+      - keiser_lower_r_attempt_3
+      - keiser_lower_l_weight
+      - keiser_lower_l_attempt_1
+      - keiser_lower_l_attempt_2
+      - keiser_lower_l_attempt_3
+      - upper_watts_per_kg
+      - lower_watts_per_kg
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id068
 - table:
     schema: public
     name: TrainerStrengthAssessment
@@ -3157,7 +4152,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id076
+      columns: &id069
       - idx
       - timestamp
       - created_at
@@ -3195,11 +4190,62 @@
       - upper_pull_bi_attempt_2
       - upper_pull_bi_attempt_3
       - upper_pull_bi_estimated_10rm
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id076
+      columns: *id069
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - timestamp
+      - created_at
+      - updated_at
+      - user_id
+      - upper_push_notes
+      - upper_pull_notes
+      - upper_push_l_weight
+      - upper_push_l_attempt_1
+      - upper_push_l_attempt_2
+      - upper_push_l_attempt_3
+      - upper_push_l_estimated_10rm
+      - upper_push_r_weight
+      - upper_push_r_attempt_1
+      - upper_push_r_attempt_2
+      - upper_push_r_attempt_3
+      - upper_push_r_estimated_10rm
+      - upper_push_bi_weight
+      - upper_push_bi_attempt_1
+      - upper_push_bi_attempt_2
+      - upper_push_bi_attempt_3
+      - upper_push_bi_estimated_10rm
+      - upper_pull_l_weight
+      - upper_pull_l_attempt_1
+      - upper_pull_l_attempt_2
+      - upper_pull_l_attempt_3
+      - upper_pull_l_estimated_10rm
+      - upper_pull_r_weight
+      - upper_pull_r_attempt_1
+      - upper_pull_r_attempt_2
+      - upper_pull_r_attempt_3
+      - upper_pull_r_estimated_10rm
+      - upper_pull_bi_weight
+      - upper_pull_bi_attempt_1
+      - upper_pull_bi_attempt_2
+      - upper_pull_bi_attempt_3
+      - upper_pull_bi_estimated_10rm
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id069
 - table:
     schema: public
     name: User
@@ -3680,7 +4726,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id077
+      columns: &id070
       - created_at
       - updated_at
       - user_id
@@ -3695,11 +4741,39 @@
       - biological_sex_male
       - deleted
       - is_internal
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id077
+      columns: *id070
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - created_at
+      - updated_at
+      - user_id
+      - modobio_id
+      - email
+      - phone_number
+      - firstname
+      - middlename
+      - lastname
+      - is_staff
+      - is_client
+      - biological_sex_male
+      - deleted
+      - is_internal
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id070
 - table:
     schema: public
     name: UserLogin
@@ -3720,7 +4794,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id078
+      columns: &id071
       - created_at
       - updated_at
       - idx
@@ -3729,11 +4803,33 @@
       - password_created_at
       - last_login
       - refresh_token
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id078
+      columns: *id071
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - created_at
+      - updated_at
+      - idx
+      - user_id
+      - password
+      - password_created_at
+      - last_login
+      - refresh_token
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id071
 - table:
     schema: public
     name: UserNotifications
@@ -3761,7 +4857,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id079
+      columns: &id072
       - created_at
       - updated_at
       - idx
@@ -3774,11 +4870,37 @@
       - is_staff
       - read
       - deleted
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id079
+      columns: *id072
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - created_at
+      - updated_at
+      - idx
+      - user_id
+      - notification_type_id
+      - title
+      - content
+      - action
+      - time_to_live
+      - is_staff
+      - read
+      - deleted
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id072
 - table:
     schema: public
     name: UserRemovalRequests
@@ -3800,18 +4922,38 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id080
+      columns: &id073
       - idx
       - created_at
       - updated_at
       - requester_user_id
       - user_id
       - timestamp
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id080
+      columns: *id073
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - created_at
+      - updated_at
+      - requester_user_id
+      - user_id
+      - timestamp
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id073
 - table:
     schema: public
     name: UserSubscriptions
@@ -3836,7 +4978,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id081
+      columns: &id074
       - created_at
       - updated_at
       - idx
@@ -3846,11 +4988,34 @@
       - end_date
       - subscription_status
       - subscription_type_id
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id081
+      columns: *id074
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - created_at
+      - updated_at
+      - idx
+      - user_id
+      - is_staff
+      - start_date
+      - end_date
+      - subscription_status
+      - subscription_type_id
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id074
 - table:
     schema: public
     name: UserTokensBlacklist
@@ -3860,19 +5025,6 @@
       updated_at: updatedAt
       idx: idx
       token: token
-  select_permissions:
-  - role: client
-    permission:
-      columns: &id082
-      - created_at
-      - updated_at
-      - idx
-      - token
-      filter: {}
-  - role: staff
-    permission:
-      columns: *id082
-      filter: {}
 - table:
     schema: public
     name: Wearables
@@ -3894,7 +5046,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id083
+      columns: &id075
       - idx
       - created_at
       - updated_at
@@ -3904,11 +5056,34 @@
       - has_freestyle
       - has_fitbit
       - registered_fitbit
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id083
+      columns: *id075
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - created_at
+      - updated_at
+      - user_id
+      - has_oura
+      - registered_oura
+      - has_freestyle
+      - has_fitbit
+      - registered_fitbit
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id075
 - table:
     schema: public
     name: WearablesFitbit
@@ -3930,7 +5105,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id084
+      columns: &id076
       - idx
       - user_id
       - created_at
@@ -3940,11 +5115,34 @@
       - refresh_token
       - token_expires
       - last_scrape
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id084
+      columns: *id076
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - user_id
+      - created_at
+      - updated_at
+      - oauth_state
+      - access_token
+      - refresh_token
+      - token_expires
+      - last_scrape
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id076
 - table:
     schema: public
     name: WearablesFreeStyle
@@ -3964,7 +5162,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id085
+      columns: &id077
       - idx
       - user_id
       - created_at
@@ -3972,11 +5170,32 @@
       - timestamps
       - glucose
       - activation_timestamp
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id085
+      columns: *id077
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - user_id
+      - created_at
+      - updated_at
+      - timestamps
+      - glucose
+      - activation_timestamp
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id077
 - table:
     schema: public
     name: WearablesOura
@@ -3998,7 +5217,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id086
+      columns: &id078
       - idx
       - user_id
       - created_at
@@ -4008,11 +5227,34 @@
       - refresh_token
       - token_expires
       - last_scrape
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id086
+      columns: *id078
       filter: {}
+  insert_permissions:
+  - role: client
+    permission:
+      columns:
+      - idx
+      - user_id
+      - created_at
+      - updated_at
+      - oauth_state
+      - access_token
+      - refresh_token
+      - token_expires
+      - last_scrape
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      set:
+        user_id: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id078
 - table:
     schema: public
     name: client_table_sizes
@@ -4023,20 +5265,8 @@
       total_size: totalSize
       row_count: rowCount
       bytes_per_row: bytesPerRow
-  select_permissions:
-  - role: client
-    permission:
-      columns: &id087
-      - table_schema
-      - table_name
-      - total_size
-      - row_count
-      - bytes_per_row
-      filter: {}
-  - role: staff
-    permission:
-      columns: *id087
-      filter: {}
+  select_permissions: []
+  insert_permissions: []
 - table:
     schema: public
     name: data_per_client
@@ -4045,15 +5275,5 @@
       user_id: userId
       total_bytes: totalBytes
       data_usage_tier: dataUsageTier
-  select_permissions:
-  - role: client
-    permission:
-      columns: &id088
-      - user_id
-      - total_bytes
-      - data_usage_tier
-      filter: {}
-  - role: staff
-    permission:
-      columns: *id088
-      filter: {}
+  select_permissions: []
+  insert_permissions: []

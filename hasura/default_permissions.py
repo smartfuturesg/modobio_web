@@ -49,16 +49,18 @@ Broken down here
         - columns: which columns are accessible
         - filter: controls the rows that are returned. If none of the filter requirements are met, no data is returned.
 
-""""
-
+"""
+# These tables should remain inaccessible in Hasura
+SKIP_PERMISSIONS = ('StaffRecentClients', 'UserTokensBlacklist')
 
 ##
-# Clients accessing their own data
+# Clients accessing their own data or accessing staff profile data
 # user_id and client_user_id may be present in these tables
 # All 'Client' tables
+# TODO: permission for clinical care team members
 ##
 
-def client_default_select_permission(columns, insert, filter_by_id_column='user_id'):
+def client_default_select_permission(columns):
     """
     Covers select permisisons for most tables prefixed with
     'Client', 'Medical', 'User', 'PT', 'Trainer', 'Telehealth', 'Wearables'
@@ -69,7 +71,7 @@ def client_default_select_permission(columns, insert, filter_by_id_column='user_
         'permission': {
             'columns': columns,
             'filter': {
-                filter_by_id_column : { "_eq": "X-Hasura-User-Id"}
+                'user_id' : { "_eq": "X-Hasura-User-Id"}
             }
         }
      } 
@@ -77,14 +79,14 @@ def client_default_select_permission(columns, insert, filter_by_id_column='user_
     #TODO add clinical care team scenario
 
     return permission
-    
-def client_default_update_permission(columns, insert, filter_by_id_column='user_id'):
+
+def client_default_update_permission(columns):
     """
     Covers insert and update permisisons for most tables prefixed with
     'Client', 'Medical', 'User', 'PT', 'Trainer', 'Telehealth', 'Wearables'
     and accessed from a client context.
 
-    user_id is automatically set to user_id
+    user_id is automatically set to uid (a.k.a 'X-Hasura-User-Id') found in the payload of the access token
     """
 
     permission =  {
@@ -108,17 +110,71 @@ def client_default_update_permission(columns, insert, filter_by_id_column='user_
     return permission
 
 
-            
+
+##
+# Staff accessing their own data or client's data
+# user_id and client_user_id may be present in these tables
+##
+
+def staff_default_select_permission(columns, filtered=False):
+    """
+    Covers select permisisons for most tables prefixed with
+    'Client', 'Medical', 'User', 'PT', 'Trainer', 'Telehealth', 'Wearables'
+    and accessed from a staff context
+    
+    Staff may view all client data but may only view their own staff accounts.
+
+    when filtered = True, the permission sets the filter to allow only rows where the user_id is 
+    equal to the user_id of the request (found from JWT)
+    """
+    permission =  {
+        'role': 'staff', 
+        'permission': {
+            'columns': columns,
+            'filter': ({'user_id' : { "_eq": "X-Hasura-User-Id"}} if (filtered and 'user_id' in columns) else {})
+        }
+     } 
+
+    return permission
+
+def staff_default_update_permission(columns):
+    """
+    Covers insert and update permisisons for most tables prefixed with
+    'Client', 'Medical', 'User', 'PT', 'Trainer', 'Telehealth', 'Wearables'
+    and accessed from a staff context.
+
+    user_id must be submitted 
+
+    TODO (4.1.21): we have not yet worked out which tables can be editied by staff on behalf of clients
+    When we do have this in order, these permissions must be updated    
+    """
+    permission =  {
+        'role': 'staff', 
+        'permission': {
+            'columns': columns
+        }
+     }
+
+    if 'reporter_id' in columns:
+        permission['permission'].update({'set': {'reporter_id':  'X-Hasura-User-Id'}}) 
+    
+    return permission
 
 
+def default_unfiltered_select_permission(columns, user_type):
+    """
+    Both client and staff permissions for accessing lookup tables
+    """
+    permission =  {
+        'role': user_type, 
+        'permission': {
+            'columns': columns,
+            'filter': {}
+        }
+     } 
+
+    return permission
 
 
-# Select permissions
-
-
-# insert permissions
-
-
-
-
+    
 
