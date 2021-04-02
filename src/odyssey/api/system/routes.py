@@ -61,15 +61,15 @@ class SystemTelehealthSettingsApi(Resource):
         if 'session_duration' in request.parsed_obj:
             ses_dur = SystemVariables.query.filter_by(var_name='Session Duration').one_or_none()
             ses_dur.update({'var_value': str(request.parsed_obj['session_duration'])})
-            res['session_duration'] = ses_dur
+            res['session_duration'] = ses_dur.var_value
         if 'booking_notice_window' in request.parsed_obj:
             book_window = SystemVariables.query.filter_by(var_name='Booking Notice Window').one_or_none()
             book_window.update({'var_value': str(request.parsed_obj['booking_notice_window'])})
-            res['booking_notice_window'] = book_window
+            res['booking_notice_window'] = book_window.var_value
         if 'confirmation_window' in request.parsed_obj:
             con_window = SystemVariables.query.filter_by(var_name='Confirmation Window').one_or_none()
             con_window.update({'var_value': str(request.parsed_obj['confirmation_window'])})
-            res['confirmation_winow'] = con_window
+            res['confirmation_winow'] = con_window.var_value
 
         db.session.commit()
         return res
