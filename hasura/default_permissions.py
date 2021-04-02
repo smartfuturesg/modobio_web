@@ -105,11 +105,9 @@ def client_default_update_permission(columns):
      }
 
     if 'reporter_id' in columns:
-        permission['permission']['set']['reporter_id'] =  'X-Hasura-User-Id' 
-
+        permission['permission']['set'].update({'reporter_id': 'X-Hasura-User-Id'}) 
+        breakpoint()
     return permission
-
-
 
 ##
 # Staff accessing their own data or client's data
@@ -131,10 +129,11 @@ def staff_default_select_permission(columns, filtered=False):
         'role': 'staff', 
         'permission': {
             'columns': columns,
-            'filter': ({'user_id' : { "_eq": "X-Hasura-User-Id"}} if (filtered and 'user_id' in columns) else {})
         }
      } 
-
+    if filtered and 'user_id' in columns:
+        permission['permission'].update({'filter': {'user_id' : { "_eq": "X-Hasura-User-Id"}}})
+        breakpoint()
     return permission
 
 def staff_default_update_permission(columns):
