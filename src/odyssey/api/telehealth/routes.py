@@ -114,14 +114,14 @@ class TelehealthClientTimeSelectApi2(Resource):
         # The expected output is the first and last index of their time blocks, AKA:
         # availability[staff_user_id] = [[100, 120], [145, 160]]
         #
+
         for availability, _ in staff_availability:
             staff_user_id = availability.user_id
             if staff_user_id not in available:
                 available[staff_user_id] = []
                 staff_user_id_arr.append(staff_user_id)
+            # NOTE booking_window_id is the actual booking_window_id (starting at 1 NOT 0)
             available[staff_user_id].append(availability.booking_window_id)
-
-        # TODO Must call client and staff bookings individually 
 
         # Now, grab all of the bookings for that client and all staff on the given target date
         # This is necessary to subtract from the staff_availability above.
@@ -148,7 +148,6 @@ class TelehealthClientTimeSelectApi2(Resource):
         # user_id_arr.random() -> [3,5,2,1,4]
         # user_id_arr[0:3]
         timeArr = {}
-        test = []
         for staff_id in staff_user_id_arr:
             if staff_id not in removedNum:
                 removedNum[staff_id] = []             
@@ -162,10 +161,6 @@ class TelehealthClientTimeSelectApi2(Resource):
                                 continue
                             else:
                                 timeArr[time_inc[time_id]].append(staff_id)
-                                test.append({ 'time_id': time_id,
-                                            'staff_user_id': staff_id,
-                                            'start_time': time_inc[time_id].start_time,
-                                            'end_time':time_inc[time_id+idx_delta].end_time})
                     
                     else:
                         continue
@@ -173,17 +168,17 @@ class TelehealthClientTimeSelectApi2(Resource):
                     continue
 
         times = []
-
+        # note, time.idx NEEDS a -1 in the append, 
+        # BECAUSE we are accessing the array where index starts at 0
         for time in timeArr:
             if len(timeArr[time]) > 1:
                 random.shuffle(timeArr[time])
-                times.append({'staff_user_id': timeArr[time][0],
-                            'start_time': time.start_time, 
-                            'end_time': time_inc[time.idx+idx_delta-1].end_time})
-            else:
-                times.append({'staff_user_id': timeArr[time][0],
-                            'start_time': time.start_time, 
-                            'end_time': time_inc[time.idx+idx_delta-1].end_time})                
+
+            times.append({'staff_user_id': timeArr[time][0],
+                        'start_time': time.start_time, 
+                        'end_time': time_inc[time.idx+idx_delta-1].end_time,
+                        'start_id': time.idx,
+                        'end_id': time.idx+idx_delta})                
 
         times.sort(key=sortStartTime)
 
