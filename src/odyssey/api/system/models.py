@@ -13,7 +13,7 @@ class SystemTelehealthSessionCosts(db.Model):
 
     __tablename__ = 'SystemTelehealthSessionCosts'
 
-    __table_args__ = (UniqueConstraint(country, profession_type))
+    __table_args__ = (UniqueConstraint('country', 'profession_type', name='telehealth_costs_unique_resource_country_profession'),)
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
@@ -36,39 +36,39 @@ class SystemTelehealthSessionCosts(db.Model):
     :type: integer, primary key, autoincrementing
     """
 
-    country = db.Column(db.String)
+    country = db.Column(db.String, nullable=False)
     """
     The country associated with this cost. Must be present in at least one entry in LookupTerritoriesOfOperation.country
 
     :type: string
     """
 
-    profession_type = db.Column(db.String)
+    profession_type = db.Column(db.String, nullable=False)
     """
     Name of the profression associated with this cost. Must be one of the ACCESS_ROLES.
 
     :type: string
     """
 
-    session_cost = db.Column(db.Float)
+    session_cost = db.Column(db.Numeric(10,2), nullable=False)
     """
     Cost of this teleheatlh session in this country's currency.
 
-    :type: float
+    :type: Numeric
     """
 
-    session_min_cost = db.Column(db.Float)
+    session_min_cost = db.Column(db.Numeric(10,2), nullable=False)
     """
     Minimum cost allowed of this teleheatlh session in this country's currency.
 
-    :type: float
+    :type: Numeric
     """
     
-    session_max_cost = db.Column(db.Float)
+    session_max_cost = db.Column(db.Numeric(10,2), nullable=False)
     """
     Maximum cost allowed of this teleheatlh session in this country's currency.
 
-    :type: float
+    :type: Numeric
     """
 
 class SystemVariables(db.Model):
