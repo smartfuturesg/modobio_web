@@ -13,7 +13,8 @@ from odyssey.api.telehealth.models import (
     TelehealthQueueClientPool,
     TelehealthStaffAvailability,
     TelehealthMeetingRooms,
-    TelehealthQueueClientPool
+    TelehealthQueueClientPool,
+    TelehealthBookingDetails
 )
 from odyssey.utils.constants import DAY_OF_WEEK, GENDERS
 
@@ -90,6 +91,12 @@ class TelehealthQueueClientPoolOutputSchema(Schema):
     queue = fields.Nested(TelehealthQueueClientPoolSchema(many=True),missing=[],metadata={'description':'SORTED queue of client pool'})
     total_queue = fields.Integer()
 
+class TelehealthBookingDetailsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = TelehealthBookingDetails
+        exclude = ('created_at', 'updated_at')
+        include_fk = True
+    
 class TelehealthChatRoomAccessSchema(Schema):
     """
     Validates response for telehealth chat room access request
