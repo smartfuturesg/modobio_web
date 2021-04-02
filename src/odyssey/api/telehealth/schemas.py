@@ -21,6 +21,9 @@ class TelehealthTimeSelectSchema(Schema):
     staff_user_id = fields.Integer()
     start_time = fields.Time()
     end_time = fields.Time()
+    booking_window_id_start_time = fields.Integer()
+    booking_window_id_end_time = fields.Integer()
+    target_date = fields.Date()
 
 class TelehealthTimeSelectOutputSchema(Schema):
     appointment_times = fields.Nested(TelehealthTimeSelectSchema(many=True),missing=[])

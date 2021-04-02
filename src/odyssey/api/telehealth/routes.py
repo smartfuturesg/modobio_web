@@ -177,8 +177,9 @@ class TelehealthClientTimeSelectApi2(Resource):
             times.append({'staff_user_id': timeArr[time][0],
                         'start_time': time.start_time, 
                         'end_time': time_inc[time.idx+idx_delta-1].end_time,
-                        'start_id': time.idx,
-                        'end_id': time.idx+idx_delta})                
+                        'booking_window_id_start_time': time.idx,
+                        'booking_window_id_end_time': time.idx+idx_delta,
+                        'target_date': target_date})                
 
         times.sort(key=sortStartTime)
 
