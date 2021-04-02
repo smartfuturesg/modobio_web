@@ -366,7 +366,8 @@ class MedicalSurgeriesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = MedicalSurgeries
         exclude = ('created_at', 'updated_at')
-        dump_only = ('surgery_id', 'client_user_id', 'reporter_user_id')
+        dump_only = ('surgery_id', 'user_id', 'reporter_user_id')
+        include_fk = True
 
     surgery_category = fields.String(validate=validate.OneOf(MEDICAL_CONDITIONS['Surgery'].keys()))
 
