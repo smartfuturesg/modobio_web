@@ -68,6 +68,7 @@ def test_generate_bookings(test_client, init_database, staff_auth_header):
                                 headers=staff_auth_header, 
                                 data=dumps(telehealth_bookings_staff_8_client_5_data), 
                                 content_type='application/json')
+
     assert response.status_code == 201            
 
 def test_generate_client_queue(test_client,init_database, client_auth_header,staff_auth_header):
@@ -93,7 +94,7 @@ def test_client_time_select(test_client, init_database, staff_auth_header):
     response = test_client.get('/telehealth/client/time-select/1/', headers=staff_auth_header)
 
     assert response.status_code == 201
-    assert response.json['total_options'] == 59
+    assert response.json['total_options'] == 55
     
 
 def test_delete_generated_users(test_client, init_database, delete_users):

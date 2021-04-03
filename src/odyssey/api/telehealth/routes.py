@@ -51,14 +51,14 @@ from odyssey.utils.misc import (
 ns = api.namespace('telehealth', description='telehealth bookings management API')
 
 @ns.route('/client/time-select/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID'})
-class TelehealthClientTimeSelectApi2(Resource):                               
+@ns.doc(params={'user_id': 'Client user ID'})
+class TelehealthClientTimeSelectApi(Resource):                               
     
     @token_auth.login_required
     @responds(schema=TelehealthTimeSelectOutputSchema,api=ns, status_code=201)
     def get(self,user_id):
         """
-        Returns the list of notifications for the given user_id
+        Returns the list of available times a staff member is available
         """
         # Check if the client exists
 
@@ -81,6 +81,8 @@ class TelehealthClientTimeSelectApi2(Resource):
         ####   test1 - call existent user_id but not in queue, (code needs an extra check to raise an error when client_in_queue== None) 
         ####   test2 - call with client user_id that might be found in queue
         client_in_queue = TelehealthQueueClientPool.query.filter_by(user_id=user_id).order_by(TelehealthQueueClientPool.priority.desc(),TelehealthQueueClientPool.target_date.asc()).first()
+        if not client_in_queue:
+            raise InputError(status_code=405,message='Client is not in the queue yet.')
         duration = client_in_queue.duration
         # convert client's target date to day_of_week
         target_date = client_in_queue.target_date.date()
@@ -127,11 +129,14 @@ class TelehealthClientTimeSelectApi2(Resource):
 
         # Now, grab all of the bookings for that client and all staff on the given target date
         # This is necessary to subtract from the staff_availability above.
-        bookings = TelehealthBookings.query.filter_by(client_user_id=user_id,target_date=target_date).all()
+        bookings = TelehealthBookings.query.filter_by(target_date=target_date).all()
         # Now, subtract booking times from staff availability and generate the actual times a staff member is free
         removedNum = {}
+        clientBookingID = []
+
         for booking in bookings:
             staff_id = booking.staff_user_id
+            client_id = booking.client_user_id
             if staff_id in available:
                 if staff_id not in removedNum:
                     removedNum[staff_id] = []                
@@ -139,9 +144,22 @@ class TelehealthClientTimeSelectApi2(Resource):
                     if num in available[staff_id]:
                         available[staff_id].remove(num)
                         removedNum[staff_id].append(num)
+                    if client_id == user_id:
+                        clientBookingID.append(num)         
             else:
                 # This staff_user_id should not have availability on this day
                 continue
+
+        # This for loop is necessary because if Client 1 already has an appointment:
+        # 3pm - 4pm, then NO other staff should offer them a time 3pm - 4pm
+        for staff_id in available:
+            if staff_id not in removedNum:
+                removedNum[staff_id] = []              
+            for num in clientBookingID:
+                if num in available[staff_id]:
+                    available[staff_id].remove(num)
+                    removedNum[staff_id].append(num)
+
         # convert time IDs to actual times for clients to select
         time_inc = LookupBookingTimeIncrements.query.all()
         # NOTE: It might be a good idea to shuffle user_id_arr and only select up to 10 (?) staff members 
@@ -168,7 +186,6 @@ class TelehealthClientTimeSelectApi2(Resource):
                         continue
                 else:
                     continue
-
         times = []
         # note, time.idx NEEDS a -1 in the append, 
         # BECAUSE we are accessing the array where index starts at 0
@@ -187,7 +204,6 @@ class TelehealthClientTimeSelectApi2(Resource):
 
         payload = {'appointment_times': times,
                    'total_options': len(times)}
-
         return payload
 
 
@@ -196,8 +212,9 @@ class TelehealthClientTimeSelectApi2(Resource):
                 'staff_user_id' : 'Staff User ID'}) 
 class TelehealthBookingsApi(Resource):
     """
-    This API resource is used to get, post, and delete the user's in the queue.
-    """        
+    This API resource is used to get and post client and staff bookings.
+    """     
+    @token_auth.login_required
     @responds(schema=TelehealthBookingsOutputSchema, api=ns, status_code=201)
     def get(self):
         """
@@ -233,8 +250,6 @@ class TelehealthBookingsApi(Resource):
         payload = {'bookings': booking,
                    'all_bookings': len(booking)}
         
-        return payload
-
         return payload
 
     @token_auth.login_required
