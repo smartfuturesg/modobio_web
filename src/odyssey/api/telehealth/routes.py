@@ -1,12 +1,12 @@
 
-from flask import request
+from flask import request, current_app
 from flask_accepts import accepts, responds
 from flask_restx import Resource
 from sqlalchemy import select
 from twilio.jwt.access_token import AccessToken
 from twilio.jwt.access_token.grants import VideoGrant, ChatGrant
-import datetime as dt
 import random
+from werkzeug.datastructures import FileStorage
 
 from odyssey import db
 from odyssey.api import api
@@ -24,6 +24,7 @@ from odyssey.api.telehealth.models import (
     TelehealthMeetingRooms, 
     TelehealthQueueClientPool,
     TelehealthStaffAvailability,
+    TelehealthBookingDetails
 )
 from odyssey.api.telehealth.schemas import (
     TelehealthBookingsSchema,
@@ -33,12 +34,13 @@ from odyssey.api.telehealth.schemas import (
     TelehealthQueueClientPoolSchema,
     TelehealthQueueClientPoolOutputSchema,
     TelehealthStaffAvailabilitySchema,
+    TelehealthTimeSelectOutputSchema,
     TelehealthStaffAvailabilityOutputSchema,
-    TelehealthTimeSelectOutputSchema
+    TelehealthBookingDetailsSchema,
 ) 
 from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import TWILIO_ACCESS_KEY_TTL, DAY_OF_WEEK
-from odyssey.utils.errors import GenericNotFound, InputError, UnauthorizedUser
+from odyssey.utils.errors import GenericNotFound, InputError, UnauthorizedUser, ContentNotFound
 from odyssey.utils.misc import (
     check_client_existence, 
     check_staff_existence, 
@@ -230,6 +232,8 @@ class TelehealthBookingsApi(Resource):
         # sort the queue based on target date and priority
         payload = {'bookings': booking,
                    'all_bookings': len(booking)}
+        
+        return payload
 
         return payload
 
@@ -795,6 +799,154 @@ class TelehealthQueueClientPoolApi(Resource):
             raise InputError(status_code=405,message='User {} does not have that date to delete'.format(user_id))
 
         return 200
+
+@ns.route('/bookings/details/<int:booking_id>')
+class TelehealthBookingDetailsApi(Resource):
+    """
+    This API resource is used to get, post, and delete additional details about a telehealth boooking.
+    Details may include a text description, images or voice recordings
+    """
+    @token_auth.login_required
+    @responds(schema=TelehealthBookingDetailsSchema(many=True), api=ns, status_code=200)
+    def get(self, booking_id):
+        """
+        Returns a list of details about the specified booking_id
+        """
+        #Check booking_id exists
+        accessing_user = token_auth.current_user()[0]
+        booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
+        if booking is None:
+            raise ContentNotFound
+        #verify user trying to access details is the client or staff involved in scheulded booking
+        if booking.client_user_id != accessing_user.user_id and booking.staff_user_id != accessing_user.user_id:
+            raise UnauthorizedUser(message='Not part of booking')
+        
+        #if there aren't any details saved for the booking_id, GET will return empty
+        details = TelehealthBookingDetails.query.filter_by(booking_id = booking_id).all()
+        #TODO implement getting presinged link from s3 bucket for each file
+        
+        return details
+    
+    @token_auth.login_required()
+    @responds(schema=TelehealthBookingDetailsSchema, api=ns, status_code=200)
+    def put(self, booking_id):
+        """
+        Updates telehealth booking details for a specific db entry, filtered by idx
+        Edits one file for another, or can edit text details
+
+        Expects form_data: (will ignore anything else)
+            idx:(required) int : TelehealthBookingDetails idx
+            media(optional) : file**
+            **(It will not break if multiple files are sent, but only one will be handled)
+            details(optional) : str
+        """
+        #Validate index is an int and not a zero
+        idx = request.form.get('idx', default=0)
+        try: idx = int(idx)
+        except ValueError: idx = 0
+
+        if idx <= 0:
+            raise InputError(204, 'Invalid index')
+
+        #verify the editor of details is the client or staff from schedulded booking
+        editor = token_auth.current_user()[0]
+        booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
+        if not booking:
+            raise ContentNotFound
+        if booking.client_user_id != editor.user_id and booking.staff_user_id != editor.user_id:
+            raise UnauthorizedUser(message='Not part of booking')
+        
+        #verify the booking_id and idx combination return a query result
+        query = TelehealthBookingDetails.query.filter_by(booking_id=booking_id, idx=idx).one_or_none()
+        if not query:
+            raise ContentNotFound
+
+        #if 'details' is present in form, details will be updated to new string value of details
+        #if 'details' is not present, details will not be affected
+        if type(request.form.get('details')) == str :
+            details = request.form.get('details')
+            query.details = details
+
+        #if 'media' is not present, no changes will be made to the current media file
+        #if 'media' is present, but empty, the current media file will be removed
+        #TODO implement editing file in s3 bucket
+        if request.files:
+            media_file = request.files.get('media')
+            query.media = media_file.filename
+
+        db.session.commit()
+        return query
+
+
+    @token_auth.login_required
+    @responds(schema=TelehealthBookingDetailsSchema(many=True), api=ns, status_code=201)
+    def post(self, booking_id):
+        """
+        Adds details to a booking_id
+        Accepts multiple image or voice recording files
+
+        Expects form-data (will ignore anything else)
+            media : file(s)
+            details : str
+        """
+        files = request.files
+        form = request.form
+        reporter = token_auth.current_user()[0]
+        #Check booking_id exists
+        booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
+        if not booking:
+            raise ContentNotFound
+
+        #verify the reporter of details is the client or staff from scheulded booking
+        if booking.client_user_id != reporter.user_id and booking.staff_user_id != reporter.user_id:
+            raise UnauthorizedUser(message='Not part of booking')
+        
+        #verify there's something to submit, if nothing, raise input error
+        if (not form or not form.get('details')) and (not files or not files.get('media')):
+            raise InputError(400, message='Nothing to submit')
+        
+        payload = []
+        data = TelehealthBookingDetails()
+        #When no files (image or recording) are sent but we get written details add one entry to db 
+        if not files or not files.get('media'):
+            data.details = form.get('details')
+            data.booking_id = booking_id
+            payload.append(data)
+
+        #Saving one media file per entry into db
+        else:
+            media = files.getlist('media')
+            for media_file in media:
+                #bucket_name = current_app.config['S3_BUCKET_NAME']
+                #TODO upload media files to S3 bucket
+                data = TelehealthBookingDetails()
+                data.details = form.get('details')
+                data.booking_id = booking_id
+                data.media = media_file.filename
+                payload.append(data)
+
+        db.session.add_all(payload)
+        db.session.commit()
+        return payload
+
+    @token_auth.login_required
+    def delete(self, booking_id):
+        """
+        Deletes all booking details entries from db
+        """
+        #verify the editor of details is the client or staff from scheulded booking
+        editor = token_auth.current_user()[0]
+        booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
+        if booking is not None and booking.client_user_id != editor.user_id and booking.staff_user_id != editor.user_id:
+            raise UnauthorizedUser(message='Not part of booking')
+        
+        #TODO delete files from S3 bucket
+        details = TelehealthBookingDetails.query.filter_by(booking_id=booking_id).all()
+        for entry in details:
+            db.session.delete(entry)
+        db.session.commit()
+        return f'Deleted all details for booking_id {booking_id}', 200
+
 
 @ns.route('/chat-room/access-token')
 @ns.doc(params={'client_user_id': 'Required. user_id of client participant.',
