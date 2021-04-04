@@ -119,6 +119,7 @@ class TelehealthClientTimeSelectApi(Resource):
             # So the client updates or wants to check for appointments on Tuesday
             # Without this delete, the Monday day will still be "first" in the client_in_queue query above
             db.session.delete(client_in_queue)
+            db.session.commit()
             raise InputError(status_code=405,message='No staff available')
         # Duration is taken from the client queue.
         # we divide it by 5 because our look up tables are in increments of 5 mintues
@@ -219,7 +220,7 @@ class TelehealthClientTimeSelectApi(Resource):
                         'booking_window_id_end_time': time.idx+idx_delta,
                         'target_date': target_date})                
 
-        times.sort(key=sortStartTime)
+        times.sort(key=lambda t: t['start_time'])
 
         payload = {'appointment_times': times,
                    'total_options': len(times)}
@@ -264,10 +265,22 @@ class TelehealthBookingsApi(Resource):
             # grab the whole queue
             booking = TelehealthBookings.query.filter_by(staff_user_id=staff_user_id).order_by(TelehealthBookings.target_date.asc()).all()
         
-        
-        # sort the queue based on target date and priority
-        payload = {'bookings': booking,
-                   'all_bookings': len(booking)}
+        time_inc = LookupBookingTimeIncrements.query.all()
+        bookings = []
+        for book in booking:
+            bookings.append({
+                'staff_user_id': book.staff_user_id,
+                'client_user_id': book.client_user_id,
+                'start_time': time_inc[book.booking_window_id_start_time+1].start_time,
+                'end_time': time_inc[book.booking_window_id_end_time+1].end_time,
+                'target_date': book.target_date
+            })
+        # Sort bookings by time then sort by date
+        bookings.sort(key=lambda t: t['start_time'])
+        bookings.sort(key=lambda t: t['target_date'])
+
+        payload = {'bookings': bookings,
+                   'all_bookings': len(bookings)}
         
         return payload
 

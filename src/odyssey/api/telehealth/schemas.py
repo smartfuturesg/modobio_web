@@ -38,6 +38,8 @@ class TelehealthBookingsSchema(ma.SQLAlchemyAutoSchema):
 
     # booking_window_id_start_time = fields.Integer()
     # booking_window_id_end_time = fields.Integer()
+    start_time = fields.Time(dump_only=True)
+    end_time = fields.Time(dump_only=True)
 
     @post_load
     def make_object(self, data, **kwargs):
