@@ -93,15 +93,32 @@ class TelehealthClientTimeSelectApi(Resource):
         
         # This should return ALL staff available on that given day.
         # TODO, MUST INCLUDE PROFESSION TYPE FILTER, perhaps delete down low
-        staff_availability = db.session.query(TelehealthStaffAvailability, StaffRoles)\
-            .join(StaffRoles, StaffRoles.user_id==TelehealthStaffAvailability.user_id)\
-                .filter(TelehealthStaffAvailability.day_of_week==weekday_str, StaffRoles.role==client_in_queue.profession_type).all()
+
+        if client_in_queue.medical_gender == 'm':
+            genderFlag = True
+        elif client_in_queue.medical_gender == 'f':
+            genderFlag = False
+
+        if client_in_queue.medical_gender == 'np':
+            staff_availability = db.session.query(TelehealthStaffAvailability)\
+                .join(StaffRoles, StaffRoles.user_id==TelehealthStaffAvailability.user_id)\
+                    .filter(TelehealthStaffAvailability.day_of_week==weekday_str, StaffRoles.role==client_in_queue.profession_type).all()
+        else:
+            staff_availability = db.session.query(TelehealthStaffAvailability)\
+                .join(StaffRoles, StaffRoles.user_id==TelehealthStaffAvailability.user_id)\
+                    .join(User, User.user_id==TelehealthStaffAvailability.user_id)\
+                    .filter(TelehealthStaffAvailability.day_of_week==weekday_str, StaffRoles.role==client_in_queue.profession_type,User.biological_sex_male==genderFlag).all()
+
         #### TESTING NOTES:
         ####   test1 - test with weekday_str when we have 0 availabilities (check if staff_availability is empty)
         
         # TODO if no staff availability do something
         # breakpoint()
         if not staff_availability:
+            # If a client makes an appointment for Monday, and no staff are available,
+            # So the client updates or wants to check for appointments on Tuesday
+            # Without this delete, the Monday day will still be "first" in the client_in_queue query above
+            db.session.delete(client_in_queue)
             raise InputError(status_code=405,message='No staff available')
         # Duration is taken from the client queue.
         # we divide it by 5 because our look up tables are in increments of 5 mintues
@@ -119,7 +136,7 @@ class TelehealthClientTimeSelectApi(Resource):
         # availability[staff_user_id] = [[100, 120], [145, 160]]
         #
 
-        for availability, _ in staff_availability:
+        for availability in staff_availability:
             staff_user_id = availability.user_id
             if staff_user_id not in available:
                 available[staff_user_id] = []
@@ -154,11 +171,13 @@ class TelehealthClientTimeSelectApi(Resource):
         # 3pm - 4pm, then NO other staff should offer them a time 3pm - 4pm
         for staff_id in available:
             if staff_id not in removedNum:
-                removedNum[staff_id] = []              
-            for num in clientBookingID:
-                if num in available[staff_id]:
-                    available[staff_id].remove(num)
-                    removedNum[staff_id].append(num)
+                removedNum[staff_id] = []
+            available[staff_id] = list(set(available[staff_id]) - set(clientBookingID))
+            removedNum[staff_id]+=clientBookingID            
+            # for num in clientBookingID:
+            #     if num in available[staff_id]:
+            #         available[staff_id].remove(num)
+            #         removedNum[staff_id].append(num)
 
         # convert time IDs to actual times for clients to select
         time_inc = LookupBookingTimeIncrements.query.all()
