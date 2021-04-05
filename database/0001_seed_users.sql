@@ -19,7 +19,7 @@ INSERT INTO "User" ("email", "firstname", "lastname", "is_staff", "is_client", "
 ('jakub.freywald@sde.cz', 'Jakub', 'Freywald', true, false, true, 'UJPH98Q8KPG6', false),
 ('matej.kubinec@sde.cz', 'Matej', 'Kubinec', true, false, true, 'JAF04LYTZN9W', false),
 ('sebastian.brostl@sde.cz', 'Sebastian', 'Brostl', true, false, true, 'VLCZG2Z2ZL5H', false),
-('lukas.krajci@sde.cz', 'Lukas', 'Krajci', true, false, true, 'VS071YRSQ98Z', false);
+('lukas.krajci@sde.cz', 'Lukas', 'Krajci', true, false, true, 'VS071YRSQ98Z', false),
 ('client@modobio.com', 'Test', 'Client', false, true, false, 'TC12JASDFF18', false);
 
 INSERT INTO "UserLogin" ("user_id", "password") VALUES 
