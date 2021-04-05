@@ -13,7 +13,6 @@ from odyssey.api.lookup.models import (
     LookupProfessionalAppointmentConfirmationWindow,
     LookupRaces,
     LookupSubscriptions,
-    LookupTelehealthSessionCost,
     LookupTelehealthSessionDuration,
     LookupTerritoriesofOperation,
     LookupTransactionTypes,
@@ -54,14 +53,6 @@ class LookupClientBookingWindowSchema(ma.SQLAlchemyAutoSchema):
 
 class LookupClientBookingWindowOutputSchema(Schema):
     items = fields.Nested(LookupClientBookingWindowSchema(many=True),missing=[])
-    total_items = fields.Integer()
-
-class LookupTelehealthSessionCostSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = LookupTelehealthSessionCost
-
-class LookupTelehealthSessionCostOutputSchema(Schema):
-    items = fields.Nested(LookupTelehealthSessionCostSchema(many=True),missing=[])
     total_items = fields.Integer()
 
 class LookupTelehealthSessionDurationSchema(ma.SQLAlchemyAutoSchema):
@@ -206,4 +197,3 @@ class LookupTelehealthSettingsSchema(Schema):
     session_durations = fields.Nested(LookupTelehealthSessionDurationOutputSchema, missing = [])
     booking_windows = fields.Nested(LookupClientBookingWindowOutputSchema, missing = [])
     confirmation_windows = fields.Nested(LookupProfessionalAppointmentConfirmationWindowOutputSchema, missing= [])
-    costs = fields.Nested(LookupTelehealthSessionCostOutputSchema, missing = [])
