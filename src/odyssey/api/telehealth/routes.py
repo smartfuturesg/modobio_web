@@ -17,8 +17,6 @@ from odyssey.api.lookup.models import (
 from odyssey.api.staff.models import StaffRoles
 from odyssey.api.user.models import User
 
-from odyssey.api.staff.models import StaffRoles
-
 from odyssey.api.telehealth.models import (
     TelehealthBookings,
     TelehealthMeetingRooms, 
