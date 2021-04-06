@@ -70,17 +70,38 @@ def client_default_select_permission(columns):
         'role': 'client', 
         'permission': {
             'columns': columns,
-            'filter': {
-                'user_id' : { "_eq": "X-Hasura-User-Id"}
-            }
+            'filter': {}
         }
      } 
 
     #TODO add clinical care team scenario
+    if 'user_id' in columns:
+        permission['permission'].update({'filter': {'user_id' : { '_eq': 'X-Hasura-User-Id'}}})
 
     return permission
 
 def client_default_update_permission(columns):
+    """
+    Covers update permisisons for most tables prefixed with
+    'Client', 'Medical', 'User', 'PT', 'Trainer', 'Telehealth', 'Wearables'
+    and accessed from a client context.
+
+    users may not alter user_id columns
+    """
+    permission =  {
+        'role': 'client', 
+        'permission': {
+            'columns': [column for column in columns if column not in ['user_id', 'created_at', 'updated_at']],
+            'filter': {}
+        }
+    } 
+
+    if 'user_id' in columns:
+        permission['permission']['filter'].update({'user_id' : { '_eq': 'X-Hasura-User-Id'}})
+
+    return permission
+
+def client_default_insert_permission(columns):
     """
     Covers insert and update permisisons for most tables prefixed with
     'Client', 'Medical', 'User', 'PT', 'Trainer', 'Telehealth', 'Wearables'
@@ -92,21 +113,18 @@ def client_default_update_permission(columns):
     permission =  {
         'role': 'client', 
         'permission': {
-            'columns': columns,
-            'check': {
-              'user_id': {
-                '_eq': 'X-Hasura-User-Id'
-              }
-            },
-            'set': {
-              'user_id': 'X-Hasura-User-Id'
-            }
+            'columns': [column for column in columns if column not in ['user_id', 'created_at', 'updated_at']],
+            'check': {},
+            'set': {}
         }
-     }
-
+    }
+     
     if 'reporter_id' in columns:
         permission['permission']['set'].update({'reporter_id': 'X-Hasura-User-Id'}) 
    
+    if 'user_id' in columns:
+        permission['permission']['check'].update({'user_id': {'_eq': 'X-Hasura-User-Id'}})
+        permission['permission']['set'].update({'user_id': 'X-Hasura-User-Id'})
     return permission
 
 ##
@@ -129,6 +147,7 @@ def staff_default_select_permission(columns, filtered=False):
         'role': 'staff', 
         'permission': {
             'columns': columns,
+            'filter': {}
         }
      } 
     if filtered and 'user_id' in columns:
@@ -136,7 +155,34 @@ def staff_default_select_permission(columns, filtered=False):
     
     return permission
 
-def staff_default_update_permission(columns):
+def staff_default_update_permission(columns, filtered=False):
+    """
+    Covers update permisisons for most tables prefixed with
+    'Client', 'Medical', 'User', 'PT', 'Trainer', 'Telehealth', 'Wearables', 'Staff', 'System'
+    and accessed from a staff context
+    
+    Staff may view all client data but may only view their own staff accounts.
+
+    when filtered = True, the permission sets the filter to allow only rows where the user_id is 
+    equal to the user_id of the request (found from JWT)
+    """
+    permission =  {
+        'role': 'staff', 
+        'permission': {
+            'columns': [column for column in columns if column not in ['created_at', 'updated_at']],
+            'filter': {}
+        }
+    } 
+
+    if filtered and 'user_id' in columns:
+        permission['permission'].update({'filter': {'user_id' : { '_eq': 'X-Hasura-User-Id'}}})
+    
+    if 'reporter_id' in columns:
+        permission['permission'].update({'set' : {'reporter_id': 'X-Hasura-User-Id'}}) 
+    
+    return permission
+
+def staff_default_insert_permission(columns, filtered=False):
     """
     Covers insert and update permisisons for most tables prefixed with
     'Client', 'Medical', 'User', 'PT', 'Trainer', 'Telehealth', 'Wearables'
@@ -150,15 +196,22 @@ def staff_default_update_permission(columns):
     permission =  {
         'role': 'staff', 
         'permission': {
-            'columns': columns
+            'columns': [column for column in columns if column not in ['created_at', 'updated_at']],
+            'check': {}
         }
      }
 
     if 'reporter_id' in columns:
         permission['permission'].update({'set': {'reporter_id':  'X-Hasura-User-Id'}}) 
     
+    if filtered and 'user_id' in columns:
+        permission['permission'].update({'check': {'user_id': {'_eq': 'X-Hasura-User-Id'}}})
+
     return permission
 
+##
+# Unfiltered select access for lookup and system variable tables
+##
 
 def default_unfiltered_select_permission(columns, user_type):
     """
@@ -167,7 +220,8 @@ def default_unfiltered_select_permission(columns, user_type):
     permission =  {
         'role': user_type, 
         'permission': {
-            'columns': columns
+            'columns': columns,
+            'filter': {}
         }
      } 
 
