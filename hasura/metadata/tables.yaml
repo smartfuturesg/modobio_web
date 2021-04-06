@@ -4274,8 +4274,28 @@
       filter:
         user_id:
           _eq: X-Hasura-User-Id
-  insert_permissions: []
-  update_permissions: []
+  insert_permissions:
+  - role: staff
+    permission:
+      columns:
+      - idx
+      - operational_territory_id
+      - user_id
+      - role_id
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+  update_permissions:
+  - role: staff
+    permission:
+      columns:
+      - idx
+      - operational_territory_id
+      - user_id
+      - role_id
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
 - table:
     schema: public
     name: StaffProfile
@@ -4310,8 +4330,28 @@
       filter:
         user_id:
           _eq: X-Hasura-User-Id
-  insert_permissions: []
-  update_permissions: []
+  insert_permissions:
+  - role: staff
+    permission:
+      columns:
+      - idx
+      - user_id
+      - membersince
+      - bio
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+  update_permissions:
+  - role: staff
+    permission:
+      columns:
+      - idx
+      - user_id
+      - membersince
+      - bio
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
 - table:
     schema: public
     name: StaffRecentClients
@@ -4370,8 +4410,28 @@
       filter:
         user_id:
           _eq: X-Hasura-User-Id
-  insert_permissions: []
-  update_permissions: []
+  insert_permissions:
+  - role: staff
+    permission:
+      columns:
+      - idx
+      - user_id
+      - role
+      - verified
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+  update_permissions:
+  - role: staff
+    permission:
+      columns:
+      - idx
+      - user_id
+      - role
+      - verified
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
 - table:
     schema: public
     name: SystemTelehealthSessionCosts
@@ -4400,8 +4460,22 @@
     permission:
       columns: *id059
       filter: {}
-  insert_permissions: []
-  update_permissions: []
+  insert_permissions:
+  - role: staff
+    permission:
+      columns:
+      - territory_id
+      - profession_type
+      - session_cost
+      check: {}
+  update_permissions:
+  - role: staff
+    permission:
+      columns:
+      - territory_id
+      - profession_type
+      - session_cost
+      filter: {}
 - table:
     schema: public
     name: SystemVariables
@@ -4426,8 +4500,22 @@
     permission:
       columns: *id060
       filter: {}
-  insert_permissions: []
-  update_permissions: []
+  insert_permissions:
+  - role: staff
+    permission:
+      columns:
+      - var_id
+      - var_name
+      - var_value
+      check: {}
+  update_permissions:
+  - role: staff
+    permission:
+      columns:
+      - var_id
+      - var_name
+      - var_value
+      filter: {}
 - table:
     schema: public
     name: TelehealthBookings

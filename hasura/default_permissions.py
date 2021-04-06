@@ -38,7 +38,6 @@ In yaml format, these permissions look like:
           }
 
 Broken down here
-
     - the type of request. Must be one of:
         - select_permissions
         - insert_permissions

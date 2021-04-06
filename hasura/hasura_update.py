@@ -166,9 +166,9 @@ for schema in sorted(inspector.get_schema_names()):
             colname = column['name']
             table['configuration']['custom_column_names'][colname] = camel(colname)
 
-
+        ##
         # Add table permissions here  
-        #      
+        ##
         select_permission_client = None
         insert_permission_client = None
         update_permission_client = None
@@ -177,16 +177,11 @@ for schema in sorted(inspector.get_schema_names()):
         update_permission_staff = None
 
         if tablename not in SKIP_PERMISSIONS:
-            # add select, update (insert) columns
-            # We do not allow API users to change user_id columns but, they may be viewed
+            # columns which may be selected or changed (update/insert)
+            # filtering of columns is done in functions found in hasura/default_permissions.py
             permissible_columns = [
                 col['name'] for col in inspector.get_columns(tablename, schema=schema)
             ]  
-            # permissible_update_insert_columns = [
-            #     col['name']
-            #     for col in inspector.get_columns(tablename, schema=schema)
-            #     if all(field not in col['name'] for field in ['user_id', 'created_at', 'updated_at']) 
-            # ]
 
             # Tables which hold client-specific user data
             # Clients can view all columns, update all columns except user_id fields. (*rows must be owned by the requesting user)
@@ -204,7 +199,7 @@ for schema in sorted(inspector.get_schema_names()):
                 update_permission_staff = staff_default_update_permission(columns=permissible_columns)
 
             # Lookup tables
-            # all users may fiew all columns in lookup tables
+            # all users may view all columns in lookup tables
             # we still have a few medical lookup tables so the Medical prefix is included here 
             elif (
                     not any(col in permissible_columns for col in ['user_id', 'client_user_id', 'staff_user_id'])
@@ -223,8 +218,8 @@ for schema in sorted(inspector.get_schema_names()):
                 select_permission_client = client_default_select_permission(columns=permissible_columns)
 
                 select_permission_staff = staff_default_select_permission(columns=permissible_columns, filtered=True)
-                # insert_permission_staff = staff_default_insert_permission(columns=permissible_update_insert_columns, filtered=True)
-                # update_permission_staff = staff_default_update_permission(columns=permissible_update_insert_columns, filtered=True)
+                insert_permission_staff = staff_default_insert_permission(columns=permissible_columns, filtered=True)
+                update_permission_staff = staff_default_update_permission(columns=permissible_columns, filtered=True)
                 
             table['select_permissions'] = [permission for permission in [select_permission_client, select_permission_staff] if permission]
             table['insert_permissions'] = [permission for permission in [insert_permission_client,insert_permission_staff] if permission] 
