@@ -17,8 +17,6 @@ from odyssey.api.lookup.models import (
 from odyssey.api.staff.models import StaffRoles
 from odyssey.api.user.models import User
 
-from odyssey.api.staff.models import StaffRoles
-
 from odyssey.api.telehealth.models import (
     TelehealthBookings,
     TelehealthMeetingRooms, 
@@ -119,6 +117,7 @@ class TelehealthClientTimeSelectApi(Resource):
             # So the client updates or wants to check for appointments on Tuesday
             # Without this delete, the Monday day will still be "first" in the client_in_queue query above
             db.session.delete(client_in_queue)
+            db.session.commit()
             raise InputError(status_code=405,message='No staff available')
         # Duration is taken from the client queue.
         # we divide it by 5 because our look up tables are in increments of 5 mintues
