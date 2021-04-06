@@ -1,2 +1,3 @@
 # List tables that should NOT be tracked here in a single list.
 - alembic_version
+- UserTokensBlacklist
