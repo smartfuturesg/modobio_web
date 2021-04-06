@@ -1,22 +1,22 @@
-# --------------------------------------------------------------------
-#                     Telehealth Client Queue
-# --------------------------------------------------------------------
 # For readability
 # 1/5/2025
+# Sunday
 telehealth_queue_client_pool_1_post_data = {
   'profession_type': 'Medical Doctor',
   'target_date': '2025-01-05T02:00:00.000',
   'priority': False,
   'medical_gender': 'f'
 }
-# 3/5/2025
+# 3/3/2025
+# Monday
 telehealth_queue_client_pool_2_post_data = {
   'profession_type': 'Medical Doctor',
-  'target_date': '2025-03-05T02:00:00.000',
+  'target_date': '2025-03-03T02:00:00.000',
   'priority': False,
   'medical_gender': 'np'
 }
 # 2/5/2025
+# Wednesday
 telehealth_queue_client_pool_3_post_data = {
   'profession_type': 'Medical Doctor',
   'target_date': '2025-02-05T02:00:00.000',
@@ -24,6 +24,7 @@ telehealth_queue_client_pool_3_post_data = {
   'medical_gender': 'f'
 }
 # 1/2/2025
+# Thursday
 telehealth_queue_client_pool_4_post_data = {
   'profession_type': 'Medical Doctor',
   'target_date': '2025-01-02T02:00:00.000',
@@ -31,6 +32,7 @@ telehealth_queue_client_pool_4_post_data = {
   'medical_gender': 'm'
 }
 # 4/5/2025
+# Friday
 telehealth_queue_client_pool_5_post_data = {
   'profession_type': 'Medical Doctor',
   'target_date': '2025-04-05T02:00:00.000',
@@ -38,6 +40,7 @@ telehealth_queue_client_pool_5_post_data = {
   'medical_gender': 'np'
 }
 # 2/7/2025
+# Friday
 telehealth_queue_client_pool_6_post_data = {
   'profession_type': 'Medical Doctor',
   'target_date': '2025-02-07T02:00:00.000',
@@ -45,6 +48,7 @@ telehealth_queue_client_pool_6_post_data = {
   'medical_gender': 'm'
 }
 # 2/5/2025
+# Wednesday
 telehealth_queue_client_pool_7_post_data = {
   'profession_type': 'Medical Doctor',
   'target_date': '2025-02-05T02:00:00.000',
@@ -81,7 +85,7 @@ telehealth_staff_general_availability_2_post_data = {
     'end_time': '20:00:00'
   },
   {
-    'day_of_week': 'Thursday',
+    'day_of_week': 'Wednesday',
     'start_time': '9:00:00',
     'end_time': '20:00:00'
   },
@@ -140,17 +144,86 @@ telehealth_staff_general_availability_bad_7_post_data = {
 }
 
 # --------------------------------------------------------------------
+#                            FOR TESTING, DELETE AFTER
+# --------------------------------------------------------------------
+
+
+# # For readability
+# # 1/5/2025
+# # Sunday
+# telehealth_queue_client_pool_1_post_data = {
+#   'profession_type': 'Medical Doctor',
+#   'target_date': '2025-01-05T02:00:00.000',
+#   'priority': False,
+#   'medical_gender': 'f'
+# }
+# # 3/3/2025
+# # Monday
+# telehealth_queue_client_pool_2_post_data = {
+#   'profession_type': 'Medical Doctor',
+#   'target_date': '2025-03-03T02:00:00.000',
+#   'priority': True,
+#   'medical_gender': 'np'
+# }
+# # 2/5/2025
+# # Wednesday
+# telehealth_queue_client_pool_3_post_data = {
+#   'profession_type': 'Medical Doctor',
+#   'target_date': '2025-02-05T02:00:00.000',
+#   'priority': False,
+#   'medical_gender': 'f'
+# }
+# # 1/2/2025
+# # Thursday
+# telehealth_queue_client_pool_4_post_data = {
+#   'profession_type': 'Medical Doctor',
+#   'target_date': '2025-01-02T02:00:00.000',
+#   'priority': False,
+#   'medical_gender': 'm'
+# }
+# # 4/5/2025
+# # Friday
+# telehealth_queue_client_pool_5_post_data = {
+#   'profession_type': 'Medical Doctor',
+#   'target_date': '2025-04-05T02:00:00.000',
+#   'priority': False,
+#   'medical_gender': 'np'
+# }
+# # 2/7/2025
+# # Friday
+# telehealth_queue_client_pool_6_post_data = {
+#   'profession_type': 'Medical Doctor',
+#   'target_date': '2025-02-07T02:00:00.000',
+#   'priority': False,
+#   'medical_gender': 'm'
+# }
+# # 2/5/2025
+# # Wednesday
+# telehealth_queue_client_pool_7_post_data = {
+#   'profession_type': 'Medical Doctor',
+#   'target_date': '2025-02-05T02:00:00.000',
+#   'priority': False,
+#   'medical_gender': 'f',
+#   'duration': 30
+# }
+# --------------------------------------------------------------------
 #                     Telehealth Client Staff Bookings
 # --------------------------------------------------------------------
 
 # NOTE: The id delta should be 3
 # It works out that: booking_window_id_end_time.end_time - booking_window_id_start_time.start_time = 20 minutes
 telehealth_client_staff_bookings_post_1_data = {
-  'target_date': '2025-02-07',
+  'target_date': '2025-03-03',
   'booking_window_id_start_time': 100,
   'booking_window_id_end_time': 103,
   'status': 'Accepted'
 }
+# telehealth_client_staff_bookings_post_2_data = {
+#   'target_date': '2025-03-03',
+#   'booking_window_id_start_time': 160,
+#   'booking_window_id_end_time': 163,
+#   'status': 'Accepted'
+# }
 telehealth_client_staff_bookings_post_2_data = {
   'target_date': '2025-02-07',
   'booking_window_id_start_time': 95,
@@ -158,6 +231,12 @@ telehealth_client_staff_bookings_post_2_data = {
   'status': 'Accepted'
 }
 # This should break
+# telehealth_client_staff_bookings_post_3_data = {
+#   'target_date': '2025-03-03',
+#   'booking_window_id_start_time': 201,
+#   'booking_window_id_end_time': 204,
+#   'status': 'Accepted'
+# }
 telehealth_client_staff_bookings_post_3_data = {
   'target_date': '2025-02-07',
   'booking_window_id_start_time': 95,
