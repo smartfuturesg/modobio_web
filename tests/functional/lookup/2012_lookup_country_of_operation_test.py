@@ -11,5 +11,5 @@ def test_get_countries_of_operation(test_client, init_database, client_auth_head
                                 content_type='application/json')
     
     assert response.status_code == 200
-    assert response.json['total_items'] == 1
+    assert response.json['total_items'] == 2
     assert response.json['items'][0]['country'] == 'United States (USA)'

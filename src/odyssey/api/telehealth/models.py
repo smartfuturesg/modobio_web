@@ -269,6 +269,53 @@ class TelehealthQueueClientPool(db.Model):
     :type: str
     """
 
+class TelehealthBookingDetails(db.Model):
+    """ 
+    Table holding text, images or sound recording details about a booking
+    """
+
+    __tablename__ = 'TelehealthBookingDetails'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
+    """
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Auto incrementing primary key
+
+    :type: int, primary key
+    """
+
+    booking_id = db.Column(db.Integer, db.ForeignKey('TelehealthBookings.idx', ondelete="CASCADE"), nullable=False)
+    """
+    booking_id is the idx of the booking from TelehealthBookings
+
+    :type: int, foreign key('TelehealthBookings.idx')
+    """
+
+    details = db.Column(db.String)
+    """
+    client details about a booked teleheath call
+    :type: str
+    """
+
+    media = db.Column(db.String)
+    """
+    aws url link to media saved in S3 bucket (image or recording)
+    :type: str
+    """
+
 class TelehealthChatRooms(db.Model):
     """ 
     Table stores details on chat rooms created through the Twiliio Conversations API.
