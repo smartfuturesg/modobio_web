@@ -2,6 +2,7 @@ import base64
 from datetime import datetime
 import os
 import pytest
+import copy
 
 from flask_migrate import upgrade
 from sqlalchemy import text
@@ -15,6 +16,109 @@ from odyssey.api.user.schemas import UserSubscriptionsSchema, UserNotificationsS
 from odyssey.utils.constants import ACCESS_ROLES
 from tests.functional.user.data import users_staff_member_data, users_client_new_creation_data, users_client_new_info_data
 from odyssey.utils import search
+
+@pytest.fixture(scope='session')
+def delete_users():
+    ''' Delete users that were generated for telehealth
+    '''
+    all_users = User.query.all()
+    skipEmails = ['new_client_1','new_staff_1']
+    for user in all_users:
+        tmpEmail = user.email
+        tmpEmailArr = tmpEmail.split('@')
+        if tmpEmailArr[0] in skipEmails:
+            continue
+        if tmpEmailArr[0][-1].isnumeric():
+            db.session.delete(user)
+    db.session.commit()
+
+@pytest.fixture(scope='session')
+def generate_users():
+    ''' This function is used to generate an equal number of clients and
+        staff
+        numUsers = 10 
+        this will create 10 clients and 10 staff
+    '''
+    numUsers=10
+    # 1) Create User instance. modobio_id populated automatically
+    origClientEmail = copy.deepcopy(users_client_new_creation_data['email'])
+    origStaffEmail = copy.deepcopy(users_staff_member_data['email'])
+
+    for i in range(numUsers):
+        # Change the email
+        
+        tmpEmail = users_client_new_creation_data['email'].split('@')
+        tmpEmail[0]+=str(i)
+        users_client_new_creation_data['email'] = tmpEmail[0] + '@' + tmpEmail[1]
+        # change the number
+        users_client_new_creation_data['phone_number'] = str(10 + i)
+        client_1 = User(**users_client_new_creation_data)
+        db.session.add(client_1)
+        db.session.flush()
+        # 2) User login
+        client_1_login = UserLogin(**{'user_id': client_1.user_id})
+        client_1_login.set_password('password')
+        
+        # 3) Client info
+        users_client_new_info_data['user_id'] = client_1.user_id
+        client_1_info = ClientInfo(**users_client_new_info_data)
+        client_1_sub = UserSubscriptionsSchema().load({
+        'subscription_type_id': 1,
+        'subscription_status': 'unsubscribed',
+        'is_staff': False
+        })
+        client_1_sub.user_id = client_1.user_id
+        db.session.add(client_1_login)
+        db.session.add(client_1_info)
+        db.session.add(client_1_sub)
+        db.session.flush()
+
+        ####
+        # initialize a test staff member
+        ####
+        tmpEmailStaff = users_staff_member_data['email'].split('@')
+        tmpEmailStaff[0]+=str(i)
+        users_staff_member_data['email'] = tmpEmailStaff[0] + '@' + tmpEmailStaff[1]
+        users_staff_member_data['phone_number'] = str(30 + i)
+        # 1) Create User where is_staff is True
+        staff_1 = User(**users_staff_member_data)
+        db.session.add(staff_1)
+        db.session.flush()
+
+        # 2) Enter login details for this staff memebr
+        staff_1_login = UserLogin(**{"user_id": staff_1.user_id})
+        staff_1_login.set_password('password')
+        db.session.add(staff_1_login)
+
+        # 3) give staff member all roles
+        
+        if i < 5:
+            db.session.add(StaffRoles(user_id=staff_1.user_id, role='doctor', verified=True))
+        else:
+            for idx,role in enumerate(ACCESS_ROLES):
+                db.session.add(StaffRoles(user_id=staff_1.user_id, role=role, verified=True))
+
+        # 4) Staff Profile
+        staff_profile = StaffProfile(**{"user_id": staff_1.user_id})
+        db.session.add(staff_profile)
+        #initialize a notification for testing
+        notification_data = {
+            'title': "Test",
+            'content': "Longer Test",
+            'action': 'https.test.com',
+            'read': False,
+            'deleted': True,
+            'user_id': staff_1.user_id,
+            'notification_type_id': 1,
+            'is_staff': True
+        }
+        notification = UserNotifications(**notification_data)
+        db.session.add(notification)
+        db.session.flush()
+        users_client_new_creation_data['email'] = origClientEmail
+        users_staff_member_data['email'] = origStaffEmail
+    db.session.commit()
+
 
 def clean_db(db):
     for table in reversed(db.metadata.sorted_tables):
@@ -108,6 +212,8 @@ def init_database():
     db.session.add(staff_profile)
     db.session.flush()
 
+    # generate_users(10)
+
     #initialize Medical institutes table
     med_institute1 = MedicalInstitutions(institute_name='Mercy Gilbert Medical Center')
     med_institute2 = MedicalInstitutions(institute_name='Mercy Tempe Medical Center')
@@ -126,6 +232,7 @@ def init_database():
     notification = UserNotifications(**notification_data)
 
     db.session.add_all([med_institute1, med_institute2, notification])
+    # db.session.add_all([med_institute1, med_institute2])
 
     # Commit the changes for the users
     db.session.commit()
