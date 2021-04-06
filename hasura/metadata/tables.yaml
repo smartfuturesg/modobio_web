@@ -4368,6 +4368,25 @@
   - name: userByUserId
     using:
       foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: client
+    permission:
+      columns: &id058
+      - idx
+      - client_user_id
+      - timestamp
+      - user_id
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
+  - role: staff
+    permission:
+      columns: *id058
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
+  insert_permissions: []
+  update_permissions: []
 - table:
     schema: public
     name: StaffRoles
@@ -4394,7 +4413,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id058
+      columns: &id059
       - idx
       - created_at
       - updated_at
@@ -4406,7 +4425,7 @@
           _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id058
+      columns: *id059
       filter:
         user_id:
           _eq: X-Hasura-User-Id
@@ -4449,7 +4468,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id059
+      columns: &id060
       - created_at
       - updated_at
       - territory_id
@@ -4458,7 +4477,7 @@
       filter: {}
   - role: staff
     permission:
-      columns: *id059
+      columns: *id060
       filter: {}
   insert_permissions:
   - role: staff
@@ -4489,7 +4508,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id060
+      columns: &id061
       - created_at
       - updated_at
       - var_id
@@ -4498,7 +4517,7 @@
       filter: {}
   - role: staff
     permission:
-      columns: *id060
+      columns: *id061
       filter: {}
   insert_permissions:
   - role: staff
@@ -4614,7 +4633,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id061
+      columns: &id062
       - created_at
       - updated_at
       - idx
@@ -4630,7 +4649,7 @@
           _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id061
+      columns: *id062
       filter: {}
   insert_permissions:
   - role: client
@@ -4706,7 +4725,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id062
+      columns: &id063
       - created_at
       - idx
       - user_id
@@ -4717,7 +4736,7 @@
           _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id062
+      columns: *id063
       filter: {}
   insert_permissions:
   - role: client
@@ -4785,7 +4804,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id063
+      columns: &id064
       - idx
       - user_id
       - timestamp
@@ -4807,7 +4826,7 @@
           _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id063
+      columns: *id064
       filter: {}
   insert_permissions:
   - role: client
@@ -4912,7 +4931,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id064
+      columns: &id065
       - idx
       - timestamp
       - created_at
@@ -4931,7 +4950,7 @@
           _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id064
+      columns: *id065
       filter: {}
   insert_permissions:
   - role: client
@@ -5022,7 +5041,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id065
+      columns: &id066
       - idx
       - timestamp
       - created_at
@@ -5039,7 +5058,7 @@
           _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id065
+      columns: *id066
       filter: {}
   insert_permissions:
   - role: client
@@ -5127,7 +5146,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id066
+      columns: &id067
       - idx
       - timestamp
       - created_at
@@ -5149,7 +5168,7 @@
           _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id066
+      columns: *id067
       filter: {}
   insert_permissions:
   - role: client
@@ -5259,7 +5278,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id067
+      columns: &id068
       - idx
       - timestamp
       - created_at
@@ -5283,7 +5302,7 @@
           _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id067
+      columns: *id068
       filter: {}
   insert_permissions:
   - role: client
@@ -5432,7 +5451,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id068
+      columns: &id069
       - idx
       - timestamp
       - created_at
@@ -5487,7 +5506,7 @@
           _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id068
+      columns: *id069
       filter: {}
   insert_permissions:
   - role: client
@@ -5738,7 +5757,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id069
+      columns: &id070
       - idx
       - timestamp
       - created_at
@@ -5771,7 +5790,7 @@
           _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id069
+      columns: *id070
       filter: {}
   insert_permissions:
   - role: client
@@ -5944,7 +5963,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id070
+      columns: &id071
       - idx
       - timestamp
       - created_at
@@ -5987,7 +6006,7 @@
           _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id070
+      columns: *id071
       filter: {}
   insert_permissions:
   - role: client
@@ -6631,7 +6650,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id071
+      columns: &id072
       - created_at
       - updated_at
       - user_id
@@ -6651,7 +6670,7 @@
           _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id071
+      columns: *id072
       filter: {}
   insert_permissions:
   - role: client
@@ -6743,7 +6762,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id072
+      columns: &id073
       - created_at
       - updated_at
       - idx
@@ -6757,7 +6776,7 @@
           _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id072
+      columns: *id073
       filter: {}
   insert_permissions:
   - role: client
@@ -6832,7 +6851,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id073
+      columns: &id074
       - created_at
       - updated_at
       - idx
@@ -6850,7 +6869,7 @@
           _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id073
+      columns: *id074
       filter: {}
   insert_permissions:
   - role: client
@@ -6935,7 +6954,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id074
+      columns: &id075
       - idx
       - created_at
       - updated_at
@@ -6947,7 +6966,7 @@
           _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id074
+      columns: *id075
       filter: {}
   insert_permissions:
   - role: client
@@ -7011,7 +7030,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id075
+      columns: &id076
       - created_at
       - updated_at
       - idx
@@ -7026,7 +7045,7 @@
           _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id075
+      columns: *id076
       filter: {}
   insert_permissions:
   - role: client
@@ -7087,6 +7106,9 @@
       updated_at: updatedAt
       idx: idx
       token: token
+  select_permissions: []
+  insert_permissions: []
+  update_permissions: []
 - table:
     schema: public
     name: Wearables
@@ -7108,7 +7130,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id076
+      columns: &id077
       - idx
       - created_at
       - updated_at
@@ -7123,7 +7145,7 @@
           _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id076
+      columns: *id077
       filter: {}
   insert_permissions:
   - role: client
@@ -7196,7 +7218,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id077
+      columns: &id078
       - idx
       - user_id
       - created_at
@@ -7211,7 +7233,7 @@
           _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id077
+      columns: *id078
       filter: {}
   insert_permissions:
   - role: client
@@ -7282,7 +7304,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id078
+      columns: &id079
       - idx
       - user_id
       - created_at
@@ -7295,7 +7317,7 @@
           _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id078
+      columns: *id079
       filter: {}
   insert_permissions:
   - role: client
@@ -7360,7 +7382,7 @@
   select_permissions:
   - role: client
     permission:
-      columns: &id079
+      columns: &id080
       - idx
       - user_id
       - created_at
@@ -7375,7 +7397,7 @@
           _eq: X-Hasura-User-Id
   - role: staff
     permission:
-      columns: *id079
+      columns: *id080
       filter: {}
   insert_permissions:
   - role: client

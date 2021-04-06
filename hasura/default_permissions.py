@@ -50,7 +50,7 @@ Broken down here
 
 """
 # These tables should remain inaccessible in Hasura
-SKIP_PERMISSIONS = ('StaffRecentClients', 'UserTokensBlacklist')
+SELECT_ONLY = ('StaffRecentClients')
 
 ##
 # Clients accessing their own data or accessing staff profile data
