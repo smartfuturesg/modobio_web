@@ -269,8 +269,8 @@ class TelehealthBookingsApi(Resource):
             bookings.append({
                 'staff_user_id': book.staff_user_id,
                 'client_user_id': book.client_user_id,
-                'start_time': time_inc[book.booking_window_id_start_time+1].start_time,
-                'end_time': time_inc[book.booking_window_id_end_time+1].end_time,
+                'start_time': time_inc[book.booking_window_id_start_time-1].start_time,
+                'end_time': time_inc[book.booking_window_id_end_time-1].end_time,
                 'target_date': book.target_date
             })
         # Sort bookings by time then sort by date
