@@ -9,7 +9,7 @@ from werkzeug.security import check_password_hash
 
 
 from odyssey.api import api
-from odyssey.api.client.schemas import ClientInfoSchema
+from odyssey.api.client.schemas import ClientInfoSchema, ClientGeneralMobileSettingsSchema
 from odyssey.api.client.models import ClientClinicalCareTeam
 from odyssey.api.lookup.models import LookupNotifications, LookupSubscriptions
 from odyssey.api.staff.schemas import StaffProfileSchema, StaffRolesSchema
@@ -267,18 +267,15 @@ class NewClientUser(Resource):
                 db.session.add(client_sub)
 
                 # add default client mobile settings
-                client_mobile_settings = ClientMobileSettings().load({
-                    "general_settings": 
-                        {"include_timezone": true,
-                        "display_middle_name": false,
-                        "use_24_hour_clock": false,
-                        "is_right_handed": true,
-                        "enable_push_notifications": false,
-                        "timezone_tracking": false,
-                        "biometrics_setup": false,
-                        "date_format": "string"
-                        }
-                    "push_notification_type_ids": {}
+                client_mobile_settings = ClientGeneralMobileSettingsSchema().load({
+                    "include_timezone": True,
+                    "display_middle_name": False,
+                    "use_24_hour_clock": False,
+                    "is_right_handed": True,
+                    "enable_push_notifications": False,
+                    "timezone_tracking": False,
+                    "biometrics_setup": True,
+                    "date_format": "%d-%b-%Y"
                 })
                 client_mobile_settings.user_id = user.user_id
                 db.session.add(client_mobile_settings)
@@ -308,18 +305,15 @@ class NewClientUser(Resource):
             db.session.add(client_sub)
 
             # add default client mobile settings
-            client_mobile_settings = ClientMobileSettings().load({
-                "general_settings": 
-                    {"include_timezone": true,
-                    "display_middle_name": false,
-                    "use_24_hour_clock": false,
-                    "is_right_handed": true,
-                    "enable_push_notifications": false,
-                    "timezone_tracking": false,
-                    "biometrics_setup": false,
-                    "date_format": "string"
-                    }
-                "push_notification_type_ids": {}
+            client_mobile_settings = ClientGeneralMobileSettingsSchema().load({
+                "include_timezone": True,
+                "display_middle_name": False,
+                "use_24_hour_clock": False,
+                "is_right_handed": True,
+                "enable_push_notifications": False,
+                "timezone_tracking": False,
+                "biometrics_setup": True,
+                "date_format": "%d-%b-%Y"
             })
             client_mobile_settings.user_id = user.user_id
             db.session.add(client_mobile_settings)
