@@ -265,6 +265,23 @@ class NewClientUser(Resource):
                 })
                 client_sub.user_id = user.user_id
                 db.session.add(client_sub)
+
+                # add default client mobile settings
+                client_mobile_settings = ClientMobileSettings().load({
+                    "general_settings": 
+                        {"include_timezone": true,
+                        "display_middle_name": false,
+                        "use_24_hour_clock": false,
+                        "is_right_handed": true,
+                        "enable_push_notifications": false,
+                        "timezone_tracking": false,
+                        "biometrics_setup": false,
+                        "date_format": "string"
+                        }
+                    "push_notification_type_ids": {}
+                })
+                client_mobile_settings.user_id = user.user_id
+                db.session.add(client_mobile_settings)
         else:
             # user account does not yet exist for this email
             password=user_info.get('password', None)
@@ -289,6 +306,23 @@ class NewClientUser(Resource):
             })
             client_sub.user_id = user.user_id
             db.session.add(client_sub)
+
+            # add default client mobile settings
+            client_mobile_settings = ClientMobileSettings().load({
+                "general_settings": 
+                    {"include_timezone": true,
+                    "display_middle_name": false,
+                    "use_24_hour_clock": false,
+                    "is_right_handed": true,
+                    "enable_push_notifications": false,
+                    "timezone_tracking": false,
+                    "biometrics_setup": false,
+                    "date_format": "string"
+                    }
+                "push_notification_type_ids": {}
+            })
+            client_mobile_settings.user_id = user.user_id
+            db.session.add(client_mobile_settings)
 
             #Authenticate newly created client accnt for immediate login
             user, user_login, _ = basic_auth.verify_password(username=user.email, password=password)
