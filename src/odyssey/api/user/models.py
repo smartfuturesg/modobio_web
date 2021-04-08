@@ -293,7 +293,7 @@ class UserLogin(db.Model):
             raise ValueError
         
         secret = current_app.config['SECRET_KEY']
-
+        breakpoint()
         return jwt.encode({'exp': datetime.utcnow()+timedelta(hours =(TOKEN_LIFETIME if token_type == 'access' else REFRESH_TOKEN_LIFETIME)), 
                             'uid': user_id,
                             'utype': user_type,
