@@ -293,10 +293,12 @@ class UserLogin(db.Model):
             raise ValueError
         
         secret = current_app.config['SECRET_KEY']
-
+        
         return jwt.encode({'exp': datetime.utcnow()+timedelta(hours =(TOKEN_LIFETIME if token_type == 'access' else REFRESH_TOKEN_LIFETIME)), 
                             'uid': user_id,
                             'utype': user_type,
+                            'x-hasura-allowed-roles': [user_type],
+                            'x-hasura-user-id': str(user_id),
                             'ttype': token_type
                             }, 
                             secret, 

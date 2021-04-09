@@ -17,3 +17,4 @@ services:
             HASURA_GRAPHQL_ADMIN_SECRET: "[somesecret]"
             HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
             HASURA_GRAPHQL_ENABLE_TELEMETRY: "false"
+            HASURA_GRAPHQL_JWT_SECRET: '{"type":"HS256","key":"<SECRET_KEY>","claims_map":{"x-hasura-allowed-roles": {"path":"$.x-hasura-allowed-roles"},"x-hasura-default-role": {"path":"$.utype"},"x-hasura-user-id":{"path":"$.x-hasura-user-id"}}}'
