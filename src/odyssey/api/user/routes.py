@@ -9,7 +9,7 @@ from werkzeug.security import check_password_hash
 
 
 from odyssey.api import api
-from odyssey.api.client.schemas import ClientInfoSchema
+from odyssey.api.client.schemas import ClientInfoSchema, ClientGeneralMobileSettingsSchema
 from odyssey.api.client.models import ClientClinicalCareTeam
 from odyssey.api.lookup.models import LookupNotifications, LookupSubscriptions
 from odyssey.api.staff.schemas import StaffProfileSchema, StaffRolesSchema
@@ -265,6 +265,20 @@ class NewClientUser(Resource):
                 })
                 client_sub.user_id = user.user_id
                 db.session.add(client_sub)
+
+                # add default client mobile settings
+                client_mobile_settings = ClientGeneralMobileSettingsSchema().load({
+                    "include_timezone": True,
+                    "display_middle_name": False,
+                    "use_24_hour_clock": False,
+                    "is_right_handed": True,
+                    "enable_push_notifications": False,
+                    "timezone_tracking": False,
+                    "biometrics_setup": True,
+                    "date_format": "%d-%b-%Y"
+                })
+                client_mobile_settings.user_id = user.user_id
+                db.session.add(client_mobile_settings)
         else:
             # user account does not yet exist for this email
             password=user_info.get('password', None)
@@ -289,6 +303,20 @@ class NewClientUser(Resource):
             })
             client_sub.user_id = user.user_id
             db.session.add(client_sub)
+
+            # add default client mobile settings
+            client_mobile_settings = ClientGeneralMobileSettingsSchema().load({
+                "include_timezone": True,
+                "display_middle_name": False,
+                "use_24_hour_clock": False,
+                "is_right_handed": True,
+                "enable_push_notifications": False,
+                "timezone_tracking": False,
+                "biometrics_setup": True,
+                "date_format": "%d-%b-%Y"
+            })
+            client_mobile_settings.user_id = user.user_id
+            db.session.add(client_mobile_settings)
 
             #Authenticate newly created client accnt for immediate login
             user, user_login, _ = basic_auth.verify_password(username=user.email, password=password)
