@@ -181,6 +181,13 @@ class ClientInfo(db.Model):
     :type: int
     """
 
+    waist_size = db.Column(db.Integer)
+    """
+    Most recently reported waist size in cm.
+
+    :type: int
+    """
+
     race_id = db.Column(db.Integer, db.ForeignKey('LookupRaces.race_id'))
     """
     Client race_id as defined in LookupRaces
