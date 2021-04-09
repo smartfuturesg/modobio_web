@@ -33,6 +33,7 @@ from odyssey.api.client.models import (
     ClientAssignedDrinks,
     ClientHeightHistory,
     ClientWeightHistory,
+    ClientWaistSizeHistory,
     ClientTransactionHistory,
     ClientPushNotifications
 )
@@ -80,6 +81,7 @@ from odyssey.api.client.schemas import(
     ClientAndUserInfoSchema,
     ClientHeightSchema,
     ClientWeightSchema,
+    ClientWaistSizeSchema,
     ClientTokenRequestSchema,
     ClinicalCareTeamAuthorizationNestedSchema,
     ClinicalCareTeamMemberOfSchema,
@@ -1175,10 +1177,6 @@ class ClientHeightApi(Resource):
         """
         check_client_existence(user_id)
 
-        if token_auth.current_user()[0].user_id != user_id:
-            #clients can only submit heights for themselves
-            raise IllegalSetting(message="Requested user_id does not match logged in user_id. Clients can only submit height measurements for themselves.")
-
         request.parsed_obj.user_id = user_id
         db.session.add(request.parsed_obj)
 
@@ -1196,10 +1194,6 @@ class ClientHeightApi(Resource):
         Returns all heights reported for a client and the dates they were reported.
         """
         check_client_existence(user_id)
-
-        if token_auth.current_user()[0].is_client and token_auth.current_user()[0].user_id != user_id:
-            #clients can only view height history for themselves
-            raise IllegalSetting(message="Requested user_id does not match logged in user_id. Clients can only view height history for themselves.")
 
         return ClientHeightHistory.query.filter_by(user_id=user_id).all()
 
@@ -1219,10 +1213,6 @@ class ClientWeightApi(Resource):
         """
         check_client_existence(user_id)
 
-        if token_auth.current_user()[0].user_id != user_id:
-            #clients can only submit heights for themselves
-            raise IllegalSetting(message="Requested user_id does not match logged in user_id. Clients can only submit weight measurements for themselves.")
-
         request.parsed_obj.user_id = user_id
         db.session.add(request.parsed_obj)
 
@@ -1241,11 +1231,43 @@ class ClientWeightApi(Resource):
         """
         check_client_existence(user_id)
 
-        if token_auth.current_user()[0].is_client and token_auth.current_user()[0].user_id != user_id:
-            #clients can only view height history for themselves
-            raise IllegalSetting(message="Requested user_id does not match logged in user_id. Clients can only view weight history for themselves.")
-
         return ClientWeightHistory.query.filter_by(user_id=user_id).all()
+
+@ns.route('/waist-size/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class ClientWaistSizeApi(Resource):
+    """
+    Endpoints related to submitting client waist size and viewing
+    a client's waist size history.
+    """
+    @token_auth.login_required(user_type=('client',))
+    @accepts(schema=ClientWaistSizeSchema, api=ns)
+    @responds(schema=ClientWaistSizeSchema, api=ns, status_code=201)
+    def post(self, user_id):
+        """
+        Submits a new waist size for the client.
+        """
+        check_client_existence(user_id)
+
+        request.parsed_obj.user_id = user_id
+        db.session.add(request.parsed_obj)
+
+        #clientInfo should hold the most recent waist size given for the client so update here
+        client = ClientInfo.query.filter_by(user_id=user_id)
+        client.update({'waist_size': request.parsed_obj.waist_size})
+
+        db.session.commit()
+        return request.parsed_obj
+
+    @token_auth.login_required(user_type=('client', 'staff'))
+    @responds(schema=ClientWeightSchema(many=True), api=ns, status_code=200)
+    def get(self, user_id):
+        """
+        Returns all waist sizes reported for a client and the dates they were reported.
+        """
+        check_client_existence(user_id)
+
+        return ClientWaistSizeHistory.query.filter_by(user_id=user_id).all()
 
 @ns.route('/transaction/history/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
