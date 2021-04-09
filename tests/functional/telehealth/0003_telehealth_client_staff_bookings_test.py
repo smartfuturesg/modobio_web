@@ -124,7 +124,7 @@ def test_get_3_staff_client_bookings(test_client, init_database, staff_auth_head
                                 headers=staff_auth_header, 
                                 content_type='application/json')
     assert response.status_code == 201
-    assert response.json['bookings'][0]['status'] == 'Accepted'
+    assert response.json['bookings'][0]['status'] == 'Pending Staff Acceptance'
 
 def test_put_1_client_staff_bookings(test_client, init_database, staff_auth_header):
     """

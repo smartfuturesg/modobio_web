@@ -149,41 +149,41 @@ telehealth_client_staff_bookings_post_1_data = {
   'target_date': '2025-03-03',
   'booking_window_id_start_time': 100,
   'booking_window_id_end_time': 103,
-  'status': 'Accepted'
+  'profession_type': 'doctor'
 }
 
 telehealth_client_staff_bookings_post_2_data = {
   'target_date': '2025-02-07',
   'booking_window_id_start_time': 95,
   'booking_window_id_end_time': 98,
-  'status': 'Accepted'
+  'profession_type': 'doctor'
 }
 telehealth_client_staff_bookings_post_3_data = {
   'target_date': '2025-02-07',
   'booking_window_id_start_time': 95,
   'booking_window_id_end_time': 99,
-  'status': 'Accepted'
+  'profession_type': 'doctor'
 }
 # This should break
 telehealth_client_staff_bookings_post_4_data = {
   'target_date': '2025-02-07',
   'booking_window_id_start_time': 97,
   'booking_window_id_end_time': 99,
-  'status': 'Accepted'
+  'profession_type': 'doctor'
 }
 # This should break
 telehealth_client_staff_bookings_post_5_data = {
   'target_date': '2025-02-07',
   'booking_window_id_start_time': 80,
   'booking_window_id_end_time': 97,
-  'status': 'Accepted'
+  'profession_type': 'doctor'
 }
 # This should break
 telehealth_client_staff_bookings_post_6_data = {
   'target_date': '2025-02-07',
   'booking_window_id_start_time': 90,
   'booking_window_id_end_time': 85,
-  'status': 'Accepted'
+  'profession_type': 'doctor'
 }
 
 telehealth_client_staff_bookings_put_1_data = {

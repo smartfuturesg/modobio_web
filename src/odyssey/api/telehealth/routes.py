@@ -276,7 +276,8 @@ class TelehealthBookingsApi(Resource):
                 'start_time': time_inc[book.booking_window_id_start_time-1].start_time,
                 'end_time': time_inc[book.booking_window_id_end_time-1].end_time,
                 'target_date': book.target_date,
-                'status': book.status
+                'status': book.status,
+                'profession_type': book.profession_type
             })
         # Sort bookings by time then sort by date
         bookings.sort(key=lambda t: t['start_time'])
@@ -334,6 +335,16 @@ class TelehealthBookingsApi(Resource):
                 elif request.parsed_obj.booking_window_id_end_time > booking.booking_window_id_start_time and\
                     request.parsed_obj.booking_window_id_end_time < booking.booking_window_id_end_time:
                     raise InputError(status_code=405,message='Staff {} already has an appointment for this time.'.format(staff_user_id))        
+
+        # TODO: we need to add the concept of staff auto accept or not. When we do, we can do a query 
+        # to check the staff's auto accept setting. Right now, default it to true.
+        staffAutoAccept = False
+        if staffAutoAccept:
+            request.parsed_obj.status = 'Accepted'
+        else:
+            request.parsed_obj.status = 'Pending Staff Acceptance'
+            # TODO: here, we need to send some sort of notification to the staff member letting
+            # them know they have a booking request.
 
         request.parsed_obj.client_user_id = client_user_id
         request.parsed_obj.staff_user_id = staff_user_id
