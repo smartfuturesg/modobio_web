@@ -16,7 +16,7 @@ from odyssey.api.telehealth.models import (
     TelehealthQueueClientPool,
     TelehealthBookingDetails
 )
-from odyssey.utils.constants import DAY_OF_WEEK, GENDERS
+from odyssey.utils.constants import DAY_OF_WEEK, GENDERS, BOOKINGS_STATUS
 
 class TelehealthTimeSelectSchema(Schema):
     staff_user_id = fields.Integer()
@@ -38,8 +38,10 @@ class TelehealthBookingsSchema(ma.SQLAlchemyAutoSchema):
 
     # booking_window_id_start_time = fields.Integer()
     # booking_window_id_end_time = fields.Integer()
+    booking_id = fields.Integer(dump_only=True)
     start_time = fields.Time(dump_only=True)
     end_time = fields.Time(dump_only=True)
+    status = fields.String(validate=validate.OneOf(BOOKINGS_STATUS))
 
     @post_load
     def make_object(self, data, **kwargs):

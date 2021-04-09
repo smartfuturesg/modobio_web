@@ -121,7 +121,7 @@ telehealth_bookings_staff_4_client_1_data = {
   'target_date': '2022-04-04',
   'booking_window_id_start_time': 109,
   'booking_window_id_end_time': 112,
-  'status': 'Accepted'
+  'status': 'Pending Staff Acceptance'
 }
 telehealth_bookings_staff_4_client_3_data = {
   'target_date': '2022-04-04',
