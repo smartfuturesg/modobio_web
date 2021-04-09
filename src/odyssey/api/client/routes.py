@@ -163,11 +163,11 @@ class Client(Resource):
             if not goal:
                 raise InputError(400, 'Invalid primary_goal_id.')
             
-            #make automatic drink recommendation
-            drink_id = LookupDrinks.query.filter_by(primary_goal_id=request.parsed_obj['client_info']['primary_goal_id']).one_or_none().drink_id
-            recommendation = ClientAssignedDrinksSchema().load({'drink_id': drink_id})
-            recommendation.user_id = user_id
-            db.session.add(recommendation)
+        #make automatic drink recommendation
+        drink_id = LookupDrinks.query.filter_by(primary_goal_id=request.parsed_obj['client_info']['primary_goal_id']).one_or_none().drink_id
+        recommendation = ClientAssignedDrinksSchema().load({'drink_id': drink_id})
+        recommendation.user_id = user_id
+        db.session.add(recommendation)
 
         #update both tables with request data
         if request.parsed_obj['client_info']:
@@ -1260,7 +1260,7 @@ class ClientWaistSizeApi(Resource):
         return request.parsed_obj
 
     @token_auth.login_required(user_type=('client', 'staff'))
-    @responds(schema=ClientWeightSchema(many=True), api=ns, status_code=200)
+    @responds(schema=ClientWaistSizeSchema(many=True), api=ns, status_code=200)
     def get(self, user_id):
         """
         Returns all waist sizes reported for a client and the dates they were reported.
