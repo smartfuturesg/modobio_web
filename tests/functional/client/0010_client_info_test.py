@@ -46,7 +46,6 @@ def test_put_client_info(test_client, init_database, staff_auth_header):
     # send get request for client info on user_id = 1 
     response = test_client.put('/client/1/', headers=staff_auth_header, data=dumps(data),  content_type='application/json')
 
-    print(response.data)
     assert response.status_code == 400
 
     # test attempting to change the guardian name
@@ -58,7 +57,6 @@ def test_put_client_info(test_client, init_database, staff_auth_header):
                                 content_type='application/json')
     
     #load the client from the database
-
     client = ClientInfo.query.filter_by(user_id=1).one_or_none()
     assert response.status_code == 200
     assert client.guardianname == 'Testy'
