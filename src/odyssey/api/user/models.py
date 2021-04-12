@@ -277,7 +277,7 @@ class UserLogin(db.Model):
     refresh_token = db.Column(db.String, unique=True)
     """
     **Deprecated 4.12.21 refresh tokens stored in UserTokenHistory**
-    
+
     API refresh authentication token. Used to generate new access and refresh tokens
     We keep track of the current refresh tokens so we may blacklist tokens as needed.
 
@@ -592,7 +592,7 @@ class UserTokenHistory(db.Model):
     :type: int, primary key
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False, unique=True)
+    user_id = db.Column(db.Integer, nullable=True)
     """
     User ID number, foreign key to User.user_id
 
@@ -608,7 +608,7 @@ class UserTokenHistory(db.Model):
     :type: str
     """
 
-    refresh_token = db.Column(db.String, unique=True)
+    refresh_token = db.Column(db.String)
     """
     API refresh authentication token. Used to generate new access and refresh tokens
     We keep track of the current refresh tokens so we may blacklist tokens as needed.

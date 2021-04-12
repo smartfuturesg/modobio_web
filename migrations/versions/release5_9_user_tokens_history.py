@@ -22,13 +22,11 @@ def upgrade():
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.Column('idx', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('event', sa.String(), nullable=True),
     sa.Column('refresh_token', sa.String(), nullable=True),
     sa.Column('ua_string', sa.String(), nullable=True),
-    sa.ForeignKeyConstraint(['user_id'], ['User.user_id'], ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('idx'),
-    sa.UniqueConstraint('refresh_token')
+    sa.PrimaryKeyConstraint('idx')
     )
     # ### end Alembic commands ###
 

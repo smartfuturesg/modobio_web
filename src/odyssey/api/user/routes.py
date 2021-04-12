@@ -412,7 +412,7 @@ class RefreshToken(Resource):
             raise InputError(message="invalid token", status_code=401)
 
         # check that the token is valid
-        decoded_token = verify_jwt(refresh_token)
+        decoded_token = verify_jwt(refresh_token, refresh=True)
         
         # if valid, create a new access token, return it in the payload
         access_token = UserLogin.generate_token(user_id=decoded_token['uid'], user_type=decoded_token['utype'], token_type='access')

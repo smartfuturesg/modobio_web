@@ -18,7 +18,6 @@ pytz
 requests
 requests-oauthlib
 twilio
-ua-parser
 PyJWT>=2.0.0
 WeasyPrint
 WTForms

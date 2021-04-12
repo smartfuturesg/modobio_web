@@ -110,7 +110,6 @@ class TelehealthClientTimeSelectApi(Resource):
         ####   test1 - test with weekday_str when we have 0 availabilities (check if staff_availability is empty)
         
         # TODO if no staff availability do something
-        # breakpoint()
         if not staff_availability:
             # If a client makes an appointment for Monday, and no staff are available,
             # So the client updates or wants to check for appointments on Tuesday
