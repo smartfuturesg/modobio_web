@@ -1,6 +1,6 @@
 import boto3
 from datetime import datetime
-import jwt, math, re, json
+import math, re
 
 from flask import request, current_app
 from flask_accepts import accepts, responds
@@ -54,7 +54,7 @@ from odyssey.api.physiotherapy.models import PTHistory
 from odyssey.api.staff.models import StaffRecentClients
 from odyssey.api.trainer.models import FitnessQuestionnaire
 from odyssey.api.facility.models import RegisteredFacilities
-from odyssey.api.user.models import User, UserLogin
+from odyssey.api.user.models import User, UserLogin, UserTokenHistory
 from odyssey.utils.pdf import to_pdf, merge_pdfs
 from odyssey.utils.email import send_test_email
 from odyssey.utils.misc import check_client_existence, check_drink_existence
@@ -696,7 +696,10 @@ class ClientToken(Resource):
         access_token = UserLogin.generate_token(user_type='client', user_id=user.user_id, token_type='access')
         refresh_token = UserLogin.generate_token(user_type='client', user_id=user.user_id, token_type='refresh')
 
-        user_login.refresh_token = refresh_token
+        db.session.add(UserTokenHistory(user_id=user.user_id, 
+                                        refresh_token=refresh_token,
+                                        event='login',
+                                        ua_string = request.headers.get('User-Agent')))
         db.session.commit()
 
         return {'email': user.email, 

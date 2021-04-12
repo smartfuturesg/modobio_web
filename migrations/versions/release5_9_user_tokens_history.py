@@ -1,4 +1,4 @@
-"""UserTokensHistory tabls
+"""UserTokensHistory table
 
 Revision ID: 60a0292ebacb
 Revises: 641cf1ecd7cf
@@ -25,11 +25,10 @@ def upgrade():
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('event', sa.String(), nullable=True),
     sa.Column('refresh_token', sa.String(), nullable=True),
-    sa.Column('us_string', sa.String(), nullable=True),
+    sa.Column('ua_string', sa.String(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['User.user_id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('idx'),
-    sa.UniqueConstraint('refresh_token'),
-    sa.UniqueConstraint('user_id')
+    sa.UniqueConstraint('refresh_token')
     )
     # ### end Alembic commands ###
 

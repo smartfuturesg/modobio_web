@@ -13,7 +13,7 @@ from odyssey.api.client.schemas import ClientInfoSchema
 from odyssey.api.client.models import ClientClinicalCareTeam
 from odyssey.api.lookup.models import LookupNotifications, LookupSubscriptions
 from odyssey.api.staff.schemas import StaffProfileSchema, StaffRolesSchema
-from odyssey.api.user.models import User, UserLogin, UserRemovalRequests, UserSubscriptions, UserTokensBlacklist, UserNotifications
+from odyssey.api.user.models import User, UserLogin, UserRemovalRequests, UserSubscriptions, UserTokenHistory, UserTokensBlacklist, UserNotifications
 from odyssey.api.staff.models import StaffRoles
 from odyssey.api.user.schemas import (
     UserSchema, 
@@ -418,9 +418,12 @@ class RefreshToken(Resource):
         access_token = UserLogin.generate_token(user_id=decoded_token['uid'], user_type=decoded_token['utype'], token_type='access')
         new_refresh_token = UserLogin.generate_token(user_id=decoded_token['uid'], user_type=decoded_token['utype'], token_type='refresh')  
         
-        # update user login details with latest refresh token
-        user_login_details = UserLogin.query.filter_by(user_id = decoded_token['uid']).one_or_none()
-        user_login_details.refresh_token = new_refresh_token
+        # add refresh details to UserTokenHistory table
+        db.session.add(UserTokenHistory(user_id=decoded_token['uid'], 
+                                        refresh_token=new_refresh_token,
+                                        event='refresh',
+                                        ua_string = request.headers.get('User-Agent')))
+
 
         # add old refresh token to blacklist
         db.session.add(UserTokensBlacklist(token=refresh_token))

@@ -267,6 +267,8 @@ class UserLogin(db.Model):
 
     last_login = db.Column(db.DateTime)
     """
+    **Deprecated 4.12.21 use UserTokensHistory to find last login**
+
     Time the user last logged in
 
     :type: datetime
@@ -274,6 +276,8 @@ class UserLogin(db.Model):
 
     refresh_token = db.Column(db.String, unique=True)
     """
+    **Deprecated 4.12.21 refresh tokens stored in UserTokenHistory**
+    
     API refresh authentication token. Used to generate new access and refresh tokens
     We keep track of the current refresh tokens so we may blacklist tokens as needed.
 
@@ -612,7 +616,7 @@ class UserTokenHistory(db.Model):
     :type: str, unique
     """
 
-    us_string = db.Column(db.String)
+    ua_string = db.Column(db.String)
     """
     Stores contents of user-agent string
 
