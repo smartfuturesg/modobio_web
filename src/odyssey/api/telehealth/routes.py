@@ -106,7 +106,6 @@ class TelehealthClientTimeSelectApi(Resource):
                 .join(StaffRoles, StaffRoles.user_id==TelehealthStaffAvailability.user_id)\
                     .join(User, User.user_id==TelehealthStaffAvailability.user_id)\
                     .filter(TelehealthStaffAvailability.day_of_week==weekday_str, StaffRoles.role==client_in_queue.profession_type,User.biological_sex_male==genderFlag).all()
-
         #### TESTING NOTES:
         ####   test1 - test with weekday_str when we have 0 availabilities (check if staff_availability is empty)
         
