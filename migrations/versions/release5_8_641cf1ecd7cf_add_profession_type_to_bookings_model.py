@@ -1,7 +1,7 @@
 """add profession_type to bookings model
 
 Revision ID: 641cf1ecd7cf
-Revises: 37f095432926
+Revises: 9e0726f03478
 Create Date: 2021-04-09 12:09:08.572797
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '641cf1ecd7cf'
-down_revision = '37f095432926'
+down_revision = '9e0726f03478'
 branch_labels = None
 depends_on = None
 
