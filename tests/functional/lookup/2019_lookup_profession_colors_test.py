@@ -1,9 +1,9 @@
 from flask.json import dumps
 
-def test_get_timezones(test_client, init_database, client_auth_header):
+def test_get_profession_colors(test_client, init_database, client_auth_header):
     """
-    GIVEN a api end point for lookup booking increments
-    WHEN the '/lookup/telehealth/booking-increments/' resource  is requested (GET)
+    GIVEN a api end point for lookup profession colors and icons
+    WHEN the '/lookup/profession-colors/' resource  is requested (GET)
     THEN check the response is valid
     """
     response = test_client.get('/lookup/profession-colors/',
