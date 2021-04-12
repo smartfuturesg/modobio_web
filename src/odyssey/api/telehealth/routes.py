@@ -106,7 +106,6 @@ class TelehealthClientTimeSelectApi(Resource):
                 .join(StaffRoles, StaffRoles.user_id==TelehealthStaffAvailability.user_id)\
                     .join(User, User.user_id==TelehealthStaffAvailability.user_id)\
                     .filter(TelehealthStaffAvailability.day_of_week==weekday_str, StaffRoles.role==client_in_queue.profession_type,User.biological_sex_male==genderFlag).all()
-
         #### TESTING NOTES:
         ####   test1 - test with weekday_str when we have 0 availabilities (check if staff_availability is empty)
         
@@ -145,7 +144,10 @@ class TelehealthClientTimeSelectApi(Resource):
 
         # Now, grab all of the bookings for that client and all staff on the given target date
         # This is necessary to subtract from the staff_availability above.
-        bookings = TelehealthBookings.query.filter_by(target_date=target_date).all()
+        # If a client or staff cancels, then that time slot is now available
+        bookings = TelehealthBookings.query.filter(TelehealthBookings.target_date==target_date,\
+                                                   TelehealthBookings.status!='Client Canceled',\
+                                                   TelehealthBookings.status!='Staff Canceled').all()
         # Now, subtract booking times from staff availability and generate the actual times a staff member is free
         removedNum = {}
         clientBookingID = []
@@ -267,11 +269,14 @@ class TelehealthBookingsApi(Resource):
         bookings = []
         for book in booking:
             bookings.append({
+                'booking_id': book.idx,
                 'staff_user_id': book.staff_user_id,
                 'client_user_id': book.client_user_id,
                 'start_time': time_inc[book.booking_window_id_start_time-1].start_time,
                 'end_time': time_inc[book.booking_window_id_end_time-1].end_time,
-                'target_date': book.target_date
+                'target_date': book.target_date,
+                'status': book.status,
+                'profession_type': book.profession_type
             })
         # Sort bookings by time then sort by date
         bookings.sort(key=lambda t: t['start_time'])
@@ -330,13 +335,102 @@ class TelehealthBookingsApi(Resource):
                     request.parsed_obj.booking_window_id_end_time < booking.booking_window_id_end_time:
                     raise InputError(status_code=405,message='Staff {} already has an appointment for this time.'.format(staff_user_id))        
 
+        # TODO: we need to add the concept of staff auto accept or not. When we do, we can do a query 
+        # to check the staff's auto accept setting. Right now, default it to true.
+        staffAutoAccept = False
+        if staffAutoAccept:
+            request.parsed_obj.status = 'Accepted'
+        else:
+            request.parsed_obj.status = 'Pending Staff Acceptance'
+            # TODO: here, we need to send some sort of notification to the staff member letting
+            # them know they have a booking request.
+
         request.parsed_obj.client_user_id = client_user_id
         request.parsed_obj.staff_user_id = staff_user_id
         db.session.add(request.parsed_obj)
         db.session.commit()
         return 201
 
+    @token_auth.login_required
+    @accepts(schema=TelehealthBookingsSchema, api=ns)
+    @responds(status_code=201,api=ns)
+    def put(self):
+        """
+            PUT request should be used purely to update the booking STATUS.
+        """
+        if request.parsed_obj.booking_window_id_start_time >= request.parsed_obj.booking_window_id_end_time:
+            raise InputError(status_code=405,message='Start time must be before end time.')
+        client_user_id = request.args.get('client_user_id', type=int)
+        
+        if not client_user_id:
+            raise InputError(status_code=405,message='Missing Client ID')
 
+        staff_user_id = request.args.get('staff_user_id', type=int)
+        
+        if not staff_user_id:
+            raise InputError(status_code=405,message='Missing Staff ID')        
+        
+        # Check client existence
+        check_client_existence(client_user_id)
+        
+        # Check staff existence
+        check_staff_existence(staff_user_id)
+
+        # Check if staff and client have those times open
+        bookings = TelehealthBookings.query.filter_by(client_user_id=client_user_id,\
+                                                        staff_user_id=staff_user_id,\
+                                                        target_date=request.parsed_obj.target_date,\
+                                                        booking_window_id_start_time=request.parsed_obj.booking_window_id_start_time).one_or_none()
+
+        if not bookings:
+            raise InputError(status_code=405,message='Could not find booking for Client {} and Staff {}.'.format(client_user_id, staff_user_id))
+
+        data = request.get_json()
+
+        bookings.update(data)
+        
+        db.session.commit()
+        return 201
+
+    @token_auth.login_required()
+    @accepts(schema=TelehealthBookingsSchema, api=ns)
+    @responds(status_code=201,api=ns)
+    def delete(self, user_id):
+        '''
+            This DELETE request is used to delete bookings. However, this table should also serve as a 
+            a log of bookings, so it is up to the Backened team to use this with caution.
+        '''
+        if request.parsed_obj.booking_window_id_start_time >= request.parsed_obj.booking_window_id_end_time:
+            raise InputError(status_code=405,message='Start time must be before end time.')
+        client_user_id = request.args.get('client_user_id', type=int)
+        
+        if not client_user_id:
+            raise InputError(status_code=405,message='Missing Client ID')
+
+        staff_user_id = request.args.get('staff_user_id', type=int)
+        
+        if not staff_user_id:
+            raise InputError(status_code=405,message='Missing Staff ID')        
+        
+        # Check client existence
+        check_client_existence(client_user_id)
+        
+        # Check staff existence
+        check_staff_existence(staff_user_id)
+
+        # Check if staff and client have those times open
+        bookings = TelehealthBookings.query.filter_by(client_user_id=client_user_id,\
+                                                        staff_user_id=staff_user_id,\
+                                                        target_date=request.parsed_obj.target_date,\
+                                                        booking_window_id_start_time=request.parsed_obj.booking_window_id_start_time).one_or_none()
+        
+        if not bookings:
+            raise InputError(status_code=405,message='Could not find booking for Client {} and Staff {}.'.format(client_user_id, staff_user_id))
+
+        db.session.delete(bookings)
+        db.session.commit()
+
+        return 201
 
 @ns.route('/meeting-room/new/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
@@ -820,14 +914,14 @@ class TelehealthQueueClientPoolApi(Resource):
         # Client can only have one appointment on one day:
         # GOOD: Appointment 1 Day 1, Appointment 2 Day 2
         # BAD: Appointment 1 Day 1, Appointment 2 Day 1
-        appointment_in_queue = TelehealthQueueClientPool.query.filter_by(user_id=user_id,target_date=request.parsed_obj.target_date).one_or_none()
+        appointment_in_queue = TelehealthQueueClientPool.query.filter_by(user_id=user_id,target_date=request.parsed_obj.target_date,profession_type=request.parsed_obj.profession_type).one_or_none()
 
         if not appointment_in_queue:
             request.parsed_obj.user_id = user_id
             db.session.add(request.parsed_obj)
             db.session.commit()
         else:
-            raise InputError(status_code=405,message='User {} already has an appointment for this date.'.format(user_id))
+            raise InputError(status_code=405,message='User {} already has an appointment for this date with this profession type.'.format(user_id))
 
         return 200
 
@@ -836,7 +930,7 @@ class TelehealthQueueClientPoolApi(Resource):
     def delete(self, user_id):
         #Search for user by user_id in User table
         check_client_existence(user_id)
-        appointment_in_queue = TelehealthQueueClientPool.query.filter_by(user_id=user_id,target_date=request.parsed_obj.target_date).one_or_none()
+        appointment_in_queue = TelehealthQueueClientPool.query.filter_by(user_id=user_id,target_date=request.parsed_obj.target_date,profession_type=request.parsed_obj.profession_type).one_or_none()
         if appointment_in_queue:
             db.session.delete(appointment_in_queue)
             db.session.commit()

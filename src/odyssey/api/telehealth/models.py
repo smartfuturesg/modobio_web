@@ -43,6 +43,13 @@ class TelehealthBookings(db.Model):
     :type: int, foreign key('User.user_id')
     """
 
+    profession_type = db.Column(db.String)
+    """
+    Profession type, IE: doctor, trainer, nutritionist, etc
+
+    :type: str:
+    """
+
     target_date = db.Column(db.Date)
     """
     target date is the date of the appointment
