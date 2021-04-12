@@ -42,6 +42,16 @@ import yaml
 
 from sqlalchemy import create_engine, inspect
 
+from default_permissions import (
+    client_default_select_permission, 
+    client_default_insert_permission, 
+    client_default_update_permission, 
+    default_unfiltered_select_permission, 
+    SELECT_ONLY,
+    staff_default_select_permission,
+    staff_default_insert_permission,
+    staff_default_update_permission
+)
 from odyssey.config import database_uri
 
 # File locations
@@ -125,7 +135,7 @@ with hasura_no_track_file.open() as fh:
 hasura_tables = []
 hasura_tables_idx = {}
 
-# First pass: track tables.
+# First pass: track tables, add permissions
 for schema in sorted(inspector.get_schema_names()):
     if schema in ('hdb_catalog', 'hdb_views', 'information_schema'):
         continue
@@ -137,7 +147,6 @@ for schema in sorted(inspector.get_schema_names()):
         # Don't track these tables
         if tablename in hasura_no_track:
             continue
-
         # Start tracking table by adding it to metadata
         table = {
             'table': {
@@ -155,6 +164,66 @@ for schema in sorted(inspector.get_schema_names()):
         for column in inspector.get_columns(tablename, schema=schema):
             colname = column['name']
             table['configuration']['custom_column_names'][colname] = camel(colname)
+
+        ##
+        # Add table permissions here  
+        ##
+        select_permission_client = None
+        insert_permission_client = None
+        update_permission_client = None
+        select_permission_staff = None
+        insert_permission_staff = None
+        update_permission_staff = None
+
+        # columns which may be selected or changed (update/insert)
+        # filtering of columns is done in functions found in hasura/default_permissions.py
+        permissible_columns = [
+            col['name'] for col in inspector.get_columns(tablename, schema=schema)
+        ]  
+
+        # Tables which hold client-specific user data
+        # Clients can view all columns, update all columns except user_id fields. (*rows must be owned by the requesting user)
+        # Staff has the same permissions except they currently have access to all clients
+        if (
+                any(col in permissible_columns for col in ['user_id'])
+                and any(tablename.startswith(prefix) for prefix in ['Client', 'Medical', 'User', 'PT', 'Trainer', 'Telehealth', 'Wearables'])
+            ):
+            select_permission_client = client_default_select_permission(columns=permissible_columns)
+            insert_permission_client = client_default_insert_permission(columns=permissible_columns)
+            update_permission_client = client_default_update_permission(columns=permissible_columns)
+
+            select_permission_staff = staff_default_select_permission(columns=permissible_columns)
+            insert_permission_staff = staff_default_insert_permission(columns=permissible_columns)
+            update_permission_staff = staff_default_update_permission(columns=permissible_columns)
+
+        # Lookup tables
+        # all users may view all columns in lookup tables
+        # we still have a few medical lookup tables so the Medical prefix is included here 
+        elif (
+                not any(col in permissible_columns for col in ['user_id', 'client_user_id', 'staff_user_id'])
+                and any(tablename.startswith(prefix) for prefix in ['Lookup', 'Medical'])
+            ):
+            select_permission_client = default_unfiltered_select_permission(
+                columns=permissible_columns, user_type = 'client')
+        
+            select_permission_staff = default_unfiltered_select_permission(
+                columns=permissible_columns, user_type = 'staff')
+            
+        # staff specific data
+        # Clients may only view these tables
+        # Staff may update their own data if a user_id field exists in the table
+        elif any(tablename.startswith(prefix) for prefix in ['Staff', 'System']):
+            select_permission_client = client_default_select_permission(columns=permissible_columns)
+
+            select_permission_staff = staff_default_select_permission(columns=permissible_columns, filtered=True)
+            if tablename not in SELECT_ONLY:
+                insert_permission_staff = staff_default_insert_permission(columns=permissible_columns, filtered=True)
+                update_permission_staff = staff_default_update_permission(columns=permissible_columns, filtered=True)
+            
+        table['select_permissions'] = [permission for permission in [select_permission_client, select_permission_staff] if permission]
+        table['insert_permissions'] = [permission for permission in [insert_permission_client,insert_permission_staff] if permission] 
+        table['update_permissions'] = [permission for permission in [update_permission_client,update_permission_staff] if permission] 
+
 
         hasura_tables.append(table)
         hasura_tables_idx[f'{schema}-{tablename}'] = len(hasura_tables) - 1
