@@ -449,33 +449,6 @@ This constant lists all possible staff roles.
 :type: tuple
 """
 
-PROFESSION_ICONS_AND_COLORS = {
-    'doctor': {
-        'icon': 'doctor.svg',
-        'color': '#d71e3e '
-    },
-    'physical_therapist': {
-        'icon': 'physiotherapist.svg',
-        'color': '#fec619'
-    },
-    'nutrition': {
-        'icon': 'nutritionist - 1.svg',
-        'color': '#4661af'
-    },
-    'trainer': {
-        'icon': 'physical-training.svg',
-        'color': '#aef2ea'
-    }
-}
-"""
-Lookup table for supported medical issues.
-
-Implemented as nested dicts, where the keys are the profession types.
-The values are a dict containing the relevant icon and color.
-
-:type: dict(dict(...))
-"""
-
 MEDICAL_CONDITIONS = {
     'Autoimmune': {
         'Diabetes type 1': None,
