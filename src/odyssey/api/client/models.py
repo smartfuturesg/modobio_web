@@ -1381,7 +1381,7 @@ class ClientWaistSizeHistory(db.Model):
 
     waist_size = db.Column(db.Integer)
     """
-    Value for this weight reading in g.
+    Value for this waist size measurement in cm.
 
     :type: int
     """
