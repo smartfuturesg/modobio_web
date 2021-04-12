@@ -555,3 +555,66 @@ class UserNotifications(db.Model):
 
     :type: boolean
     """
+
+class UserTokenHistory(db.Model):
+    """ 
+    Stores details of user token generation events. This includes logging in through basic authorization
+    and when users request a new access token using a refresh token 
+
+    The primary index of this table is the
+    :attr:`user_id` number.
+    """
+
+    __tablename__ = 'UserTokenHistory'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
+    """
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Auto incrementing primary key
+
+    :type: int, primary key
+    """
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False, unique=True)
+    """
+    User ID number, foreign key to User.user_id
+
+    :type: int, foreign key
+    """
+
+    event = db.Column(db.String)
+    """
+    Used to specify the token issueance type. Options are
+    - 'login'
+    - 'refresh'
+
+    :type: str
+    """
+
+    refresh_token = db.Column(db.String, unique=True)
+    """
+    API refresh authentication token. Used to generate new access and refresh tokens
+    We keep track of the current refresh tokens so we may blacklist tokens as needed.
+
+    :type: str, unique
+    """
+
+    us_string = db.Column(db.String)
+    """
+    Stores contents of user-agent string
+
+    :type: str
+    """
