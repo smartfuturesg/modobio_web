@@ -18,7 +18,6 @@ from odyssey.api.lookup.models import (
      LookupProfessionalAppointmentConfirmationWindow,
      LookupRaces,
      LookupSubscriptions,
-     LookupTelehealthSessionCost,
      LookupTelehealthSessionDuration,
      LookupTerritoriesofOperation,
      LookupTransactionTypes,
@@ -134,14 +133,10 @@ class LookupTelehealthSettingsApi(Resource):
         confirmation_windows = {'items': LookupProfessionalAppointmentConfirmationWindow.query.all()}
         confirmation_windows['total_items'] = len(confirmation_windows['items'])
 
-        costs = {'items': LookupTelehealthSessionCost.query.all()}
-        costs['total_items'] = len(costs['items'])
-
         return {
             'session_durations': durations,
             'booking_windows' : booking_windows,
             'confirmation_windows': confirmation_windows,
-            'costs': costs
         }
 
 @ns.route('/activity-trackers/misc/')
