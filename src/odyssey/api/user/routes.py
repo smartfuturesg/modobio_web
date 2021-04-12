@@ -274,7 +274,7 @@ class NewClientUser(Resource):
                     "is_right_handed": True,
                     "enable_push_notifications": False,
                     "timezone_tracking": False,
-                    "biometrics_setup": True,
+                    "biometrics_setup": False,
                     "date_format": "%d-%b-%Y"
                 })
                 client_mobile_settings.user_id = user.user_id
@@ -312,7 +312,7 @@ class NewClientUser(Resource):
                 "is_right_handed": True,
                 "enable_push_notifications": False,
                 "timezone_tracking": False,
-                "biometrics_setup": True,
+                "biometrics_setup": False,
                 "date_format": "%d-%b-%Y"
             })
             client_mobile_settings.user_id = user.user_id
