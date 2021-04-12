@@ -44,7 +44,7 @@ from odyssey.api.lookup.schemas import (
     LookupTimezones,
     LookupTelehealthSettingsSchema,
     LookupEmergencyNumbersOutputSchema,
-    LookupProfessionColorsSchema
+    LookupProfessionColorsOutputSchema
 )
 from odyssey.utils.misc import check_drink_existence
 
@@ -344,8 +344,8 @@ class LookupProfessionColorsApi(Resource):
     Endpoint that returns the colors and icons associated with professions.
     """
     @token_auth.login_required
-    @responds(schema=LookupProfessionColorsSchema, status_code=200, api=ns)
+    @responds(schema=LookupProfessionColorsOutputSchema, status_code=200, api=ns)
     def get(self):
         """get contents of profession colors lookup table"""
         res = LookupProfessionColors.query.all()
-        return {'total_items': len(ren), 'items': res}
+        return {'total_items': len(res), 'items': res}

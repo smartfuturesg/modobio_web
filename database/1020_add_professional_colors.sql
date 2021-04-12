@@ -1,9 +1,9 @@
-delete from "LookupProfessionalColors" 
+delete from "LookupProfessionColors" 
 			where idx >= 1;
-alter sequence "LookupProfessionalColors_idx_seq"
+alter sequence "LookupProfessionColors_idx_seq"
   restart with 1;
 
-INSERT INTO "LookupProfessionalColors" ("created_at", "updated_at","profession_type","icon","color") 
+INSERT INTO "LookupProfessionColors" ("created_at", "updated_at","profession_type","icon","color") 
 VALUES
 ('NOW()','NOW()','doctor','doctor.svg','#d71e3e'),
 ('NOW()','NOW()','physical_therapist','physiotherapist.svg','#fec619'),
