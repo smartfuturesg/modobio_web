@@ -409,6 +409,12 @@ class RefreshToken(Resource):
         
         # ensure refresh token is not on blacklist
         if UserTokensBlacklist.query.filter_by(token=refresh_token).one_or_none():
+            # log failed refresh attempt
+            token_payload = jwt.decode(refresh_token, options={'verify_signature': False})
+            db.session.add(UserTokenHistory(user_id=token_payload.get('uid'), 
+                                        event='refresh',
+                                        ua_string = request.headers.get('User-Agent')))
+            db.session.commit()
             raise InputError(message="invalid token", status_code=401)
 
         # check that the token is valid
