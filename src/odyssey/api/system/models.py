@@ -2,15 +2,18 @@
 Database tables for supporting lookup tables. These tables should be static tables only used for reference,
 not to be edited at runtime. 
 """
+from sqlalchemy import UniqueConstraint
 
 from odyssey import db
 from odyssey.utils.constants import DB_SERVER_TIME
 
 class SystemTelehealthSessionCosts(db.Model):
-    """ Teleheath settings that can be changed by a system administrator
+    """ Teleheath session costs that can be changed by a system administrator
     """
 
     __tablename__ = 'SystemTelehealthSessionCosts'
+
+    __table_args__ = (UniqueConstraint('country', 'profession_type', name='telehealth_costs_unique_resource_country_profession'),)
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
@@ -26,25 +29,46 @@ class SystemTelehealthSessionCosts(db.Model):
     :type: :class:`datetime.datetime`
     """
 
-    territory_id = db.Column(db.Integer, db.ForeignKey('LookupCountriesOfOperations.idx'), primary_key=True, nullable=False)
+    cost_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
-    id of the territory associated with this cost.
+    This id of this cost.
 
-    :type: int, foreign key('LookupCountriesOfOperations.idx')
+    :type: integer, primary key, autoincrementing
     """
 
-    profession_type = db.Column(db.String, primary_key=True)
+    country = db.Column(db.String, nullable=False)
     """
-    Name of the profression associated with this cost. Must be one of
+    The country associated with this cost. Must be present in at least one entry in LookupTerritoriesOfOperation.country
 
     :type: string
     """
 
-    session_cost = db.Column(db.Float)
+    profession_type = db.Column(db.String, nullable=False)
     """
-    Cost of this teleheatlh session in USD. Must be between 0 and 500.
+    Name of the profression associated with this cost. Must be one of the ACCESS_ROLES.
 
-    :type: float
+    :type: string
+    """
+
+    session_cost = db.Column(db.Numeric(10,2), nullable=False)
+    """
+    Cost of this teleheatlh session in this country's currency.
+
+    :type: Numeric
+    """
+
+    session_min_cost = db.Column(db.Numeric(10,2), nullable=False)
+    """
+    Minimum cost allowed of this teleheatlh session in this country's currency.
+
+    :type: Numeric
+    """
+    
+    session_max_cost = db.Column(db.Numeric(10,2), nullable=False)
+    """
+    Maximum cost allowed of this teleheatlh session in this country's currency.
+
+    :type: Numeric
     """
 
 class SystemVariables(db.Model):

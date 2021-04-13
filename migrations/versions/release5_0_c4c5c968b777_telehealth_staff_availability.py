@@ -1,7 +1,7 @@
 """telehealth staff availability
 
 Revision ID: c4c5c968b777
-Revises: 73f1c4845245
+Revises: e1758adc8839
 Create Date: 2021-02-21 22:25:06.384768
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'c4c5c968b777'
-down_revision = '73f1c4845245'
+down_revision = 'e1758adc8839'
 branch_labels = None
 depends_on = None
 
