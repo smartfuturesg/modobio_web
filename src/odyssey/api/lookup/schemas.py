@@ -3,6 +3,7 @@ from marshmallow import Schema, fields, post_load
 from odyssey import ma
 from odyssey.api.lookup.models import (
     LookupActivityTrackers, 
+    LookupBookingTimeIncrements,
     LookupClinicalCareTeamResources,
     LookupClientBookingWindow,
     LookupCountriesOfOperations,
@@ -16,8 +17,17 @@ from odyssey.api.lookup.models import (
     LookupTelehealthSessionDuration,
     LookupTerritoriesofOperation,
     LookupTransactionTypes,
-    LookupNotifications
+    LookupNotifications,
+    LookupEmergencyNumbers
 )
+
+class LookupBookingTimeIncrementsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupBookingTimeIncrements
+
+class LookupBookingTimeIncrementsOutputSchema(Schema):
+    items = fields.Nested(LookupBookingTimeIncrementsSchema(many=True),missing=[])
+    total_items = fields.Integer()
 
 class LookupTimezones(Schema):
     items = fields.List(fields.String,missing = [])
@@ -197,3 +207,13 @@ class LookupTelehealthSettingsSchema(Schema):
     session_durations = fields.Nested(LookupTelehealthSessionDurationOutputSchema, missing = [])
     booking_windows = fields.Nested(LookupClientBookingWindowOutputSchema, missing = [])
     confirmation_windows = fields.Nested(LookupProfessionalAppointmentConfirmationWindowOutputSchema, missing= [])
+    costs = fields.Nested(LookupTelehealthSessionCostOutputSchema, missing = [])
+
+class LookupEmergencyNumbersSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupEmergencyNumbers
+        exclude = ('created_at', 'updated_at', 'idx')
+
+class LookupEmergencyNumbersOutputSchema(Schema):
+    items = fields.Nested(LookupEmergencyNumbersSchema(many=True), missing=[])
+    total_items = fields.Integer()

@@ -493,7 +493,7 @@ class UserSubscriptionApi(Resource):
             check_staff_existence(user_id)
         else:
             check_client_existence(user_id)
-
+        
         new_sub_info =  LookupSubscriptions.query.filter_by(sub_id=request.parsed_obj.subscription_type_id).one_or_none()
             
         if not new_sub_info:

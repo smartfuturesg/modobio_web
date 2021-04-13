@@ -331,7 +331,10 @@ class MedicalGeneralInformation(Resource):
                 else:
                     generalInfo['user_id'] = user_id
             genInfo = MedicalGeneralInfo.query.filter_by(user_id=user_id).one_or_none()
-            genInfo.update(generalInfo)
+            if genInfo:
+                genInfo.update(generalInfo)
+            else:
+                raise ContentNotFound
         
         # insert results into the result table
         db.session.commit()
@@ -422,6 +425,9 @@ class MedicalMedicationInformation(Resource):
                     if medicationInDB:
                         del medication.__dict__['_sa_instance_state']
                         medicationInDB.update(medication.__dict__)
+                    
+                    else: 
+                        raise ContentNotFound
                     
                     payload['medications'].append(medication)
         
@@ -1333,7 +1339,7 @@ class MedicalSurgeriesAPI(Resource):
         check_client_existence(client_user_id)
 
         #add request data to db
-        request.parsed_obj.client_user_id = client_user_id
+        request.parsed_obj.user_id = client_user_id
         request.parsed_obj.reporter_user_id = token_auth.current_user()[0].user_id
         db.session.add(request.parsed_obj)
         db.session.commit()
@@ -1345,7 +1351,7 @@ class MedicalSurgeriesAPI(Resource):
     def get(self, client_user_id):
         """returns a list of all surgeries for the given client_user_id"""
         check_client_existence(client_user_id)
-        return MedicalSurgeries.query.filter_by(client_user_id=client_user_id).all()
+        return MedicalSurgeries.query.filter_by(user_id=client_user_id).all()
 
 ##########################
 # This code became obsolete, because the medical lookup tables is now

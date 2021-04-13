@@ -6,6 +6,41 @@ not to be edited at runtime.
 from odyssey import db
 from odyssey.utils.constants import DB_SERVER_TIME
 
+class LookupBookingTimeIncrements(db.Model):
+    """ 
+    Holds all time increment from 00:00 to 23:55 in increments of 5 minutes
+    """
+
+    __tablename__ = 'LookupBookingTimeIncrements'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Auto incrementing primary key
+
+    :type: int, primary key
+    """
+    
+    start_time = db.Column(db.Time)
+    """ 
+    start time
+
+    :type: datetime.time
+    """
+    
+    end_time = db.Column(db.Time)
+    """ 
+    end time 
+
+    :type: datetime.time
+    """
+
 class LookupProfessionalAppointmentConfirmationWindow(db.Model):
     """ Stored appointment confirmation windows for professionals in database. 
     """
@@ -1146,4 +1181,65 @@ class LookupDefaultHealthMetrics(db.Model):
     Maximum minutes of inactivity recommended per day    
 
     :type: integer
+    """
+
+class LookupEmergencyNumbers(db.Model):
+    """ Static list of emergency contact phone numbers """
+
+    __tablename__ = 'LookupEmergencyNumbers'
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Index
+
+    :type: integer, primary key, autoincrementing
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+    
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    continent = db.Column(db.String)
+    """
+    Continent for the emergency phone number
+
+    :type: string
+    """
+
+    country = db.Column(db.String)
+    """
+    Country for the emergency phone number
+
+    :type: string
+    """
+
+    code = db.Column(db.String, primary_key=True)
+    """
+    Country ISO aplha-2 code, a two letter code for the country
+
+    :type: string
+    """
+
+    service = db.Column(db.String)
+    """
+    Service name for the emergency phone number (Ambulance, Police or Fire)
+
+    :type: string
+    """
+
+    phone_number = db.Column(db.String)
+    """
+    Emergency phone number
+
+    :type: string
     """

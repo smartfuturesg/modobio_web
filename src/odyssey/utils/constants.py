@@ -823,4 +823,6 @@ REGISTRATION_PORTAL_URL = "www.modobio.com/user/registration-portal?portal_id={}
 
 PASSWORD_RESET_URL = " www.modobio.com/password/reset?reset_token={}"
 
+DAY_OF_WEEK = ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday')
+
 TWILIO_ACCESS_KEY_TTL = 14400

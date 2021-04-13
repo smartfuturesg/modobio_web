@@ -37,9 +37,9 @@ class MedicalBloodPressuresSchema(ma.SQLAlchemyAutoSchema):
         dump_only = ('timestamp','idx')
         
     timestamp = fields.DateTime()
-    systolic = fields.Float(description='units mmHg',required=True)
-    diastolic = fields.Float(description='units mmHg',required=True)
-    datetime_taken = fields.String(description='Date and time the blood pressure was taken', required=True)
+    systolic = fields.Float(metadata={'description':'units mmHg'},required=True)
+    diastolic = fields.Float(metadata={'description':'units mmHg'},required=True)
+    datetime_taken = fields.String(metadata={'description':'Date and time the blood pressure was taken'}, required=True)
     @post_load
     def make_object(self, data, **kwargs):
         return MedicalBloodPressures(**data)
@@ -366,7 +366,8 @@ class MedicalSurgeriesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = MedicalSurgeries
         exclude = ('created_at', 'updated_at')
-        dump_only = ('surgery_id', 'client_user_id', 'reporter_user_id')
+        dump_only = ('surgery_id', 'user_id', 'reporter_user_id')
+        include_fk = True
 
     surgery_category = fields.String(validate=validate.OneOf(MEDICAL_CONDITIONS['Surgery'].keys()))
 
