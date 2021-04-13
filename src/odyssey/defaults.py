@@ -69,10 +69,14 @@ FITBIT_TOKEN_URL = 'https://api.fitbit.com/oauth2/token'
 FITBIT_SCOPE = 'activity heartrate nutrition sleep weight'
 """ Fitbit resources (scopes) to request permission for. """
 
-SECRET_KEY = 'dev'
+SECRET_KEY = 'abcdefghijklmnopqrstuvwxyz0123456789'
 """
 Flask secret key, used to encrypt sessions amongst other things.
 See https://stackoverflow.com/questions/22463939/demystify-flask-app-secret-key
+
+This secret key is also used to sign JWTs. JWTs signed with the HS256 algorith (the default),
+must have a key of at least 32 characters long. The same key must also be passed to Hasura
+as part of the ``HASURA_GRAPHQL_JWT_SECRET`` variable. See ``hasura/README.md``.
 """
 
 SQLALCHEMY_TRACK_MODIFICATIONS = False
