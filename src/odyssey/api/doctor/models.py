@@ -1405,7 +1405,7 @@ class MedicalSurgeries(db.Model):
     :type: int, primary key, autoincrementing
     """
 
-    client_user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
     """
     User id of the client that received this surgery
 
