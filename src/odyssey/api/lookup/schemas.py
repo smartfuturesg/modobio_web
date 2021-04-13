@@ -19,7 +19,8 @@ from odyssey.api.lookup.models import (
     LookupTerritoriesofOperation,
     LookupTransactionTypes,
     LookupNotifications,
-    LookupEmergencyNumbers
+    LookupEmergencyNumbers,
+    LookupProfessionColors
 )
 
 class LookupBookingTimeIncrementsSchema(ma.SQLAlchemyAutoSchema):
@@ -225,4 +226,13 @@ class LookupEmergencyNumbersSchema(ma.SQLAlchemyAutoSchema):
 
 class LookupEmergencyNumbersOutputSchema(Schema):
     items = fields.Nested(LookupEmergencyNumbersSchema(many=True), missing=[])
+    total_items = fields.Integer()
+
+class LookupProfessionColorsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupProfessionColors
+        exclude = ('created_at', 'updated_at', 'idx')
+
+class LookupProfessionColorsOutputSchema(Schema):
+    items = fields.Nested(LookupProfessionColorsSchema(many=True), missing=[])
     total_items = fields.Integer()
