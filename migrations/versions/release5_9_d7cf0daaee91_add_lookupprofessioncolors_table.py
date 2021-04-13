@@ -1,7 +1,7 @@
 """add LookupProfessionColors table
 
 Revision ID: d7cf0daaee91
-Revises: 37f095432926
+Revises: 641cf1ecd7cf
 Create Date: 2021-04-09 15:21:44.741758
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'd7cf0daaee91'
-down_revision = '37f095432926'
+down_revision = '641cf1ecd7cf'
 branch_labels = None
 depends_on = None
 
