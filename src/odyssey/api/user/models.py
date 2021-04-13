@@ -2,15 +2,13 @@
 Database tables for the user system portion of the Modo Bio Staff application.
 All tables in this module are prefixed with 'User'.
 """
-import enum
-import base64
 from datetime import datetime, timedelta
 import jwt
-import os
 import random
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import generate_password_hash
 
 from flask import current_app
+from sqlalchemy import text
 
 from odyssey import db
 from odyssey.utils.constants import ALPHANUMERIC, DB_SERVER_TIME, TOKEN_LIFETIME, REFRESH_TOKEN_LIFETIME
@@ -179,7 +177,7 @@ def add_modobio_id(mapper, connection, target):
                 set modobio_id = '{mb_id}'
                 where user_id = {target.user_id};"""
 
-    connection.execute(statement)
+    connection.execute(text(statement))
 
     from odyssey.utils.search import update_index
     user = {

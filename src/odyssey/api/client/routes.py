@@ -5,6 +5,7 @@ import math, re
 from flask import request, current_app
 from flask_accepts import accepts, responds
 from flask_restx import Resource
+from sqlalchemy import text
 
 from odyssey.api import api
 from odyssey.utils.auth import token_auth, basic_auth
@@ -669,7 +670,7 @@ class ClientDataStorageTiers(Resource):
     def get(self):
         """Returns the total data storage for each client along with their data storage tier"""
 
-        data = db.session.execute("SELECT * FROM public.data_per_client;").fetchall()
+        data = db.session.execute(text("SELECT * FROM public.data_per_client;")).fetchall()
         results = {'total_items': len(data), 'items' : []}
         total_bytes = 0
         for row in data:
