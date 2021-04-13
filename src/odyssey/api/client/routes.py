@@ -11,7 +11,8 @@ from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.errors import (
     UserNotFound, 
     ContentNotFound,
-    IllegalSetting, 
+    IllegalSetting,
+    TransactionNotFound, 
     InputError
 )
 from odyssey import db
@@ -30,7 +31,8 @@ from odyssey.api.client.models import (
     ClientMobileSettings,
     ClientAssignedDrinks,
     ClientHeightHistory,
-    ClientWeightHistory
+    ClientWeightHistory,
+    ClientTransactionHistory
 )
 from odyssey.api.doctor.models import (
     MedicalFamilyHistory,
@@ -41,7 +43,13 @@ from odyssey.api.doctor.models import (
     MedicalPhysicalExam,               
     MedicalSocialHistory
 )
-from odyssey.api.lookup.models import LookupClinicalCareTeamResources, LookupGoals, LookupDrinks, LookupRaces
+from odyssey.api.lookup.models import (
+    LookupClinicalCareTeamResources, 
+    LookupDefaultHealthMetrics,
+    LookupGoals, 
+    LookupDrinks, 
+    LookupRaces
+)
 from odyssey.api.physiotherapy.models import PTHistory 
 from odyssey.api.staff.models import StaffRecentClients
 from odyssey.api.trainer.models import FitnessQuestionnaire
@@ -73,8 +81,10 @@ from odyssey.api.client.schemas import(
     ClinicalCareTeamMemberOfSchema,
     SignAndDateSchema,
     SignedDocumentsSchema,
+    ClientTransactionHistorySchema,
     ClientSearchItemsSchema
 )
+from odyssey.api.lookup.schemas import LookupDefaultHealthMetricsSchema
 from odyssey.api.staff.schemas import StaffRecentClientsSchema
 from odyssey.api.facility.schemas import ClientSummarySchema
 
@@ -1198,3 +1208,116 @@ class ClientWeightApi(Resource):
             raise IllegalSetting(message="Requested user_id does not match logged in user_id. Clients can only view weight history for themselves.")
 
         return ClientWeightHistory.query.filter_by(user_id=user_id).all()
+
+@ns.route('/transaction/history/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class ClientTransactionHistoryApi(Resource):
+    """
+    Endpoints related to viewing a client's transaction history.
+    """
+    @token_auth.login_required(user_type=('client','staff'), staff_role=('client_services',))
+    @responds(schema=ClientTransactionHistorySchema(many=True), api=ns, status_code=200)
+    def get(self, user_id):
+        """
+        Returns a list of all transactions for the given user_id.
+        """
+        check_client_existence(user_id)
+
+        return ClientTransactionHistory.query.filter_by(user_id=user_id).all()
+
+@ns.route('/transaction/<int:transaction_id>/')
+@ns.doc(params={'transaction_id': 'Transaction ID number'})
+class ClientTransactionApi(Resource):
+    """
+    Viewing and editing transactions
+    """
+
+    @token_auth.login_required(user_type=('client','staff'), staff_role=('client_services',))
+    @responds(schema=ClientTransactionHistorySchema, api=ns, status_code=200)
+    def get(self, transaction_id):
+        """
+        Returns information about the transaction identified by transaction_id.
+        """
+        transaction = ClientTransactionHistory.query.filter_by(idx=transaction_id).one_or_none()
+        if not transaction:
+            raise TransactionNotFound(transaction_id)
+
+        return transaction
+
+
+    @token_auth.login_required(user_type=('client','staff'), staff_role=('client_services',))
+    @accepts(schema=ClientTransactionHistorySchema, api=ns)
+    @responds(schema=ClientTransactionHistorySchema, api=ns, status_code=201)
+    def put(self, transaction_id):
+        """
+        Updates the transaction identified by transaction_id.
+        """
+        transaction = ClientTransactionHistory.query.filter_by(idx=transaction_id).one_or_none()
+        if not transaction:
+            raise TransactionNotFound(transaction_id)
+
+        data = request.json
+
+        transaction.update(data)
+        db.session.commit()
+
+        return request.parsed_obj
+
+
+@ns.route('/transaction/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class ClientTransactionPutApi(Resource):
+    """
+    Viewing and editing transactions
+    """
+    @token_auth.login_required(user_type=('client','staff'), staff_role=('client_services',))
+    @accepts(schema=ClientTransactionHistorySchema, api=ns)
+    @responds(schema=ClientTransactionHistorySchema, api=ns, status_code=201)
+    def post(self, user_id):
+        """
+        Submits a transaction for the client identified by user_id.
+        """
+        check_client_existence(user_id)
+
+        request.parsed_obj.user_id = user_id
+        db.session.add(request.parsed_obj)
+        db.session.commit()
+
+        return request.parsed_obj
+
+@ns.route('/default-health-metrics/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class ClientWeightApi(Resource):
+    """
+    Endpoint for returning the recommended health metrics for the client based on age and sex
+    """
+    @token_auth.login_required()
+    @responds(schema=LookupDefaultHealthMetricsSchema, api=ns, status_code=200)
+    def get(self, user_id):
+        """
+        Looks up client's age and sex. One or both are not available, we return our best guess: the health
+        metrics for a 30 year old female.
+        """
+        client_info = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
+        user_info, _ = token_auth.current_user()
+        
+        # get user sex and age info
+        if user_info.biological_sex_male != None:
+            sex = ('m' if user_info.biological_sex_male else 'f')
+        elif client_info.gender in ('m', 'f'): # use gender instead of biological sex
+            sex = client_info.gender
+        else: # default to female
+            sex = 'f'
+        
+        if client_info.dob:
+            years_old = round((datetime.now().date()-client_info.dob).days/365.25)
+        else: # default to 30 years old if not dob is present
+            years_old = 30
+
+        age_categories = db.session.query(LookupDefaultHealthMetrics.age).filter(LookupDefaultHealthMetrics.sex == 'm').all()
+        age_categories = [x[0] for x in age_categories]
+        age_category = min(age_categories, key=lambda x:abs(x-years_old))
+
+        health_metrics = LookupDefaultHealthMetrics.query.filter_by(age = age_category).filter_by(sex = sex).one_or_none()
+        
+        return health_metrics

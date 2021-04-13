@@ -3,14 +3,15 @@ from datetime import datetime
 import os
 import pytest
 
+from flask_migrate import upgrade
 from sqlalchemy import text
 
 from odyssey import create_app, db
 from odyssey.api.client.models import ClientInfo
 from odyssey.api.facility.models import MedicalInstitutions
 from odyssey.api.staff.models import StaffProfile, StaffRoles
-from odyssey.api.user.models import User, UserLogin
-from odyssey.api.user.schemas import UserSubscriptionsSchema
+from odyssey.api.user.models import User, UserLogin, UserNotifications
+from odyssey.api.user.schemas import UserSubscriptionsSchema, UserNotificationsSchema
 from odyssey.utils.constants import ACCESS_ROLES
 from tests.functional.user.data import users_staff_member_data, users_client_new_creation_data, users_client_new_info_data
 from odyssey.utils import search
@@ -21,35 +22,32 @@ def clean_db(db):
             db.session.execute(table.delete())
         except:
             pass
-    #db.session.close()
+    db.session.commit()
     # specifically cascade drop clientinfo table
     try:
         db.session.execute('DROP TABLE "ClientInfo" CASCADE;')
     except:
+        db.session.rollback()
         pass
+
+    try:
+        db.session.execute('DROP TABLE alembic_version;')
+    except Exception as e:
+        pass
+
     db.session.commit()
     db.drop_all()
 
 @pytest.fixture(scope='session')
-def test_client():
-    """flask application instance (client)"""
-    app = create_app()
-    testing_client = app.test_client()
-    db.init_app(app)
-    
-    # Establish an application context before running the tests.
-    ctx = app.app_context()
-    ctx.push()
-    
-    yield testing_client
-
-    ctx.pop()
-
-@pytest.fixture(scope='session')
 def init_database():
     clean_db(db)
-    # Create the database and the database table
-    db.create_all()
+
+    # create db from migrations
+    try:
+        upgrade()
+    except:
+        pytest.exit(msg="migration failed")
+
     # run .sql files to create db procedures and initialize 
     # some tables
     #  read .sql files, remove comments,
@@ -78,8 +76,8 @@ def init_database():
     users_client_new_info_data['user_id'] = client_1.user_id
     client_1_info = ClientInfo(**users_client_new_info_data)
     client_1_sub = UserSubscriptionsSchema().load({
-    'subscription_type': 'unsubscribed',
-    'subscription_rate': 0.0,
+    'subscription_type_id': 1,
+    'subscription_status': 'unsubscribed',
     'is_staff': False
     })
     client_1_sub.user_id = client_1.user_id
@@ -114,7 +112,20 @@ def init_database():
     med_institute1 = MedicalInstitutions(institute_name='Mercy Gilbert Medical Center')
     med_institute2 = MedicalInstitutions(institute_name='Mercy Tempe Medical Center')
 
-    db.session.add_all([med_institute1, med_institute2])
+    #initialize a notification for testing
+    notification_data = {
+        'title': "Test",
+        'content': "Longer Test",
+        'action': 'https.test.com',
+        'read': False,
+        'deleted': True,
+        'user_id': staff_1.user_id,
+        'notification_type_id': 1,
+        'is_staff': True
+    }
+    notification = UserNotifications(**notification_data)
+
+    db.session.add_all([med_institute1, med_institute2, notification])
 
     # Commit the changes for the users
     db.session.commit()
@@ -127,6 +138,22 @@ def init_database():
     db.session.close()
     
     clean_db(db)
+
+
+@pytest.fixture(scope='session')
+def test_client():
+    """flask application instance (client)"""
+    app = create_app()
+    db.init_app(app)
+    testing_client = app.test_client()
+    
+    # Establish an application context before running the tests.
+    ctx = app.app_context()
+    ctx.push()
+    
+    yield testing_client
+
+    ctx.pop()
 
 @pytest.fixture(scope='session')
 def staff_auth_header(test_client):

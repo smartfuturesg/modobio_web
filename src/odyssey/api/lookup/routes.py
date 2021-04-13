@@ -1,29 +1,121 @@
 from flask_accepts import responds
 from flask_restx import Resource
 
+import pytz
+
 from odyssey.api import api
 from odyssey.utils.auth import token_auth
 from odyssey.api.lookup.models import (
-    LookupActivityTrackers, 
-    LookupClinicalCareTeamResources, 
-    LookupDrinks, 
-    LookupDrinkIngredients,
-    LookupGoals, 
-    LookupRaces
+     LookupActivityTrackers,
+     LookupClientBookingWindow,
+     LookupClinicalCareTeamResources,
+     LookupCountriesOfOperations,
+     LookupDefaultHealthMetrics,
+     LookupDrinks, 
+     LookupDrinkIngredients, 
+     LookupGoals, 
+     LookupProfessionalAppointmentConfirmationWindow,
+     LookupRaces,
+     LookupSubscriptions,
+     LookupTelehealthSessionDuration,
+     LookupTerritoriesofOperation,
+     LookupTransactionTypes,
+     LookupNotifications
 )
 from odyssey.api.lookup.schemas import (
     LookupActivityTrackersOutputSchema, 
     LookupCareTeamResourcesOutputSchema,
+    LookupCountriesOfOperationsOutputSchema,
+    LookupDefaultHealthMetricsOutputSchema, 
     LookupDrinksOutputSchema, 
     LookupDrinkIngredientsOutputSchema, 
     LookupGoalsOutputSchema,
-    LookupRacesOutputSchema
+    LookupRacesOutputSchema,
+    LookupSubscriptionsOutputSchema,
+    LookupTerritoriesofOperationOutputSchema,
+    LookupTransactionTypesOutputSchema,
+    LookupNotificationsOutputSchema,
+    LookupCareTeamResourcesOutputSchema,
+    LookupTimezones,
+    LookupTelehealthSettingsSchema
 )
 from odyssey.utils.misc import check_drink_existence
 
 from odyssey import db
 
 ns = api.namespace('lookup', description='Endpoints for lookup tables.')
+
+@ns.route('/timezones/')
+class LookupTimezones(Resource):
+    @token_auth.login_required
+    @responds(schema=LookupTimezones,status_code=200,api=ns)
+    def get(self):
+        varArr = [tz_i for tz_i in pytz.all_timezones if 'US/' in tz_i]
+        payload = {'items': varArr,
+                   'total_items': len(varArr) }
+        return payload
+
+@ns.route('/business/transaction-types/')
+class LookupTransactionTypesResource(Resource):
+    """ Returns stored transaction types in database by GET request.
+    Returns
+    -------
+    dict
+        JSON encoded dict.
+    """
+    @responds(schema=LookupTransactionTypesOutputSchema,status_code=200, api=ns)
+    def get(self):
+                
+        transaction_types = LookupTransactionTypes.query.all()
+        
+        payload = {'items': transaction_types,
+                   'total_items': len(transaction_types)}
+
+        return payload
+
+
+@ns.route('/business/countries-of-operations/')
+class LookupCountryOfOperationResource(Resource):
+    """ Returns stored countries of operations in database by GET request.
+
+    Returns
+    -------
+    dict
+        JSON encoded dict.
+    """
+    @token_auth.login_required
+    @responds(schema=LookupCountriesOfOperationsOutputSchema,status_code=200, api=ns)
+    def get(self):
+                
+        countries = LookupCountriesOfOperations.query.all()
+        
+        payload = {'items': countries,
+                   'total_items': len(countries)}
+
+        return payload
+
+@ns.route('/business/telehealth-settings/')
+class LookupTelehealthSettingsApi(Resource):
+    """ Endpoints related to the telehealth lookup tables """
+
+    @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
+    @responds(schema=LookupTelehealthSettingsSchema, status_code=200, api=ns)
+    def get(self):
+        
+        durations = {'items': LookupTelehealthSessionDuration.query.all()}
+        durations['total_items'] = len(durations['items'])
+
+        booking_windows = {'items': LookupClientBookingWindow.query.all()}
+        booking_windows['total_items'] = len(booking_windows['items'])
+
+        confirmation_windows = {'items': LookupProfessionalAppointmentConfirmationWindow.query.all()}
+        confirmation_windows['total_items'] = len(confirmation_windows['items'])
+
+        return {
+            'session_durations': durations,
+            'booking_windows' : booking_windows,
+            'confirmation_windows': confirmation_windows,
+        }
 
 @ns.route('/activity-trackers/misc/')
 class WearablesLookUpFitbitActivityTrackersResource(Resource):
@@ -158,4 +250,49 @@ class LookupClinicalCareTeamResourcesApi(Resource):
     def get(self):
         """get contents of clinical care team resources lookup table"""
         res = LookupClinicalCareTeamResources.query.all()
+        return {'total_items': len(res), 'items': res}
+        
+@ns.route('/subscriptions/')
+class LookupSubscriptionsApi(Resource):
+
+    @token_auth.login_required
+    @responds(schema=LookupSubscriptionsOutputSchema, api=ns)
+    def get(self):
+        """get contents of subscription plans lookup table"""
+        res = LookupSubscriptions.query.all()
+        return {'total_items': len(res), 'items': res}
+
+@ns.route('/notifications/')
+class LookupNotificationsApi(Resource):
+
+    @token_auth.login_required
+    @responds(schema=LookupNotificationsOutputSchema, api=ns)
+    def get(self):
+        """get contents of notification types lookup table"""
+        res = LookupNotifications.query.all()
+        return {'total_items': len(res), 'items': res}
+
+@ns.route('/default-health-metrics/')
+class LookupDefaultHealthMetricsApi(Resource):
+    """
+    Endpoint for handling requests for all default health metrics
+    """
+
+    @token_auth.login_required
+    @responds(schema=LookupDefaultHealthMetricsOutputSchema, status_code=200, api=ns)
+    def get(self):
+        """get contents of default health metrics types lookup table"""
+        res = LookupDefaultHealthMetrics.query.all()
+        return {'total_items': len(res), 'items': res}
+
+@ns.route('/operational-territories/')
+class LookupTerritoriesofOperationApi(Resource):
+    """
+    Endpoint for handling requests for all territories of operation
+    """
+    @token_auth.login_required
+    @responds(schema=LookupTerritoriesofOperationOutputSchema, status_code=200, api=ns)
+    def get(self):
+        """get contents of operational territories lookup table"""
+        res = LookupTerritoriesofOperation.query.all()
         return {'total_items': len(res), 'items': res}

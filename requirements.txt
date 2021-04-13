@@ -11,12 +11,13 @@ Flask_WTF
 marshmallow
 marshmallow-sqlalchemy
 psycopg2
-PyJWT
 PyPDF2
 pytest
 pytest-cov
 pytz
 requests
 requests-oauthlib
+twilio
+PyJWT>=2.0.0
 WeasyPrint
 WTForms

@@ -24,7 +24,8 @@ from odyssey.api.client.models import (
     ClientMobileSettings,
     ClientAssignedDrinks,
     ClientHeightHistory,
-    ClientWeightHistory
+    ClientWeightHistory,
+    ClientTransactionHistory
 )
 from odyssey.api.user.schemas import UserInfoPutSchema
 
@@ -390,3 +391,15 @@ class ClientTokenRequestSchema(Schema):
     email = fields.Email(required=False, missing=None)   
     token = fields.String()
     refresh_token = fields.String()
+
+class ClientTransactionHistorySchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = ClientTransactionHistory
+        exclude = ('created_at', 'updated_at')
+        dump_only = ('idx')
+
+    user_id = fields.Integer(dump_only=True)
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return ClientTransactionHistory(**data)

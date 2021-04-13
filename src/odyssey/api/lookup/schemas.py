@@ -4,11 +4,64 @@ from odyssey import ma
 from odyssey.api.lookup.models import (
     LookupActivityTrackers, 
     LookupClinicalCareTeamResources,
+    LookupClientBookingWindow,
+    LookupCountriesOfOperations,
+    LookupDefaultHealthMetrics,
     LookupDrinks, 
     LookupDrinkIngredients, 
     LookupGoals, 
-    LookupRaces
+    LookupProfessionalAppointmentConfirmationWindow,
+    LookupRaces,
+    LookupSubscriptions,
+    LookupTelehealthSessionDuration,
+    LookupTerritoriesofOperation,
+    LookupTransactionTypes,
+    LookupNotifications
 )
+
+class LookupTimezones(Schema):
+    items = fields.List(fields.String,missing = [])
+    total_items = fields.Integer()
+
+class LookupProfessionalAppointmentConfirmationWindowSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupProfessionalAppointmentConfirmationWindow
+
+class LookupProfessionalAppointmentConfirmationWindowOutputSchema(Schema):
+    items = fields.Nested(LookupProfessionalAppointmentConfirmationWindowSchema(many=True),missing=[])
+    total_items = fields.Integer()
+
+class LookupTransactionTypesSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupTransactionTypes
+
+class LookupTransactionTypesOutputSchema(Schema):
+    items = fields.Nested(LookupTransactionTypesSchema(many=True),missing=[])
+    total_items = fields.Integer()
+
+class LookupCountriesOfOperationsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupCountriesOfOperations
+
+class LookupCountriesOfOperationsOutputSchema(Schema):
+    items = fields.Nested(LookupCountriesOfOperationsSchema(many=True),missing=[])
+    total_items = fields.Integer()
+
+class LookupClientBookingWindowSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupClientBookingWindow
+
+class LookupClientBookingWindowOutputSchema(Schema):
+    items = fields.Nested(LookupClientBookingWindowSchema(many=True),missing=[])
+    total_items = fields.Integer()
+
+class LookupTelehealthSessionDurationSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupTelehealthSessionDuration
+
+class LookupTelehealthSessionDurationOutputSchema(Schema):
+    items = fields.Nested(LookupTelehealthSessionDurationSchema(many=True),missing=[])
+    total_items = fields.Integer()
 
 class LookupActivityTrackersSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -87,3 +140,60 @@ class LookupRacesOutputSchema(Schema):
     items = fields.Nested(LookupRacesSchema(many=True), missing = [])
     total_items = fields.Integer()
 
+class LookupSubscriptionsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupSubscriptions
+        exclude = ('created_at', 'updated_at')
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return LookupSubscriptions(**data)
+
+class LookupSubscriptionsOutputSchema(Schema):
+    items = fields.Nested(LookupSubscriptionsSchema(many=True), missing = [])
+    total_items = fields.Integer()
+
+class LookupNotificationsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupNotifications
+        exclude = ('created_at', 'updated_at')
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return LookupNotifications(**data)
+
+class LookupDefaultHealthMetricsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupDefaultHealthMetrics
+        exclude = ('created_at', 'updated_at', 'idx')
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return LookupDefaultHealthMetrics(**data)
+
+class LookupDefaultHealthMetricsOutputSchema(Schema):
+    items = fields.Nested(LookupDefaultHealthMetricsSchema(many=True), missing = [])
+    total_items = fields.Integer()
+
+
+class LookupTerritoriesofOperationSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupTerritoriesofOperation
+        exclude = ('created_at', 'updated_at', 'idx')
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return LookupTerritoriesofOperation(**data)
+
+class LookupTerritoriesofOperationOutputSchema(Schema):
+    items = fields.Nested(LookupTerritoriesofOperationSchema(many=True), missing = [])
+    total_items = fields.Integer()
+
+class LookupNotificationsOutputSchema(Schema):
+    items = fields.Nested(LookupNotificationsSchema(many=True), missing = [])
+    total_items = fields.Integer()
+
+class LookupTelehealthSettingsSchema(Schema):
+    session_durations = fields.Nested(LookupTelehealthSessionDurationOutputSchema, missing = [])
+    booking_windows = fields.Nested(LookupClientBookingWindowOutputSchema, missing = [])
+    confirmation_windows = fields.Nested(LookupProfessionalAppointmentConfirmationWindowOutputSchema, missing= [])

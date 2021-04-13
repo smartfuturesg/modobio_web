@@ -1,7 +1,9 @@
 from marshmallow import Schema, fields, post_load, validate
+from sqlalchemy.orm import load_only
 
 from odyssey import ma
-from odyssey.api.user.models import User, UserLogin, UserSubscriptions
+from odyssey.api.staff.schemas import StaffRolesSchema
+from odyssey.api.user.models import User, UserLogin, UserSubscriptions, UserNotifications
 from odyssey.utils.constants import ACCESS_ROLES
 
 """
@@ -17,7 +19,6 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
     def make_object(self, data, **kwargs):
         new_user = User(**data)
         return new_user
-    
 
 class UserLoginSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -55,6 +56,7 @@ class UserInfoPutSchema(ma.SQLAlchemyAutoSchema):
     email = fields.Email(validate=validate.Length(min=0,max=50))
     phone_number = fields.String(validate=validate.Length(min=0,max=50))
 
+
 class StaffInfoSchema(Schema):
     """
     Staff-user specific creation payload validation
@@ -64,6 +66,12 @@ class StaffInfoSchema(Schema):
                     fields.String(validate=validate.OneOf(ACCESS_ROLES)), 
                     metadata={'description': f'Access roles the new user will have. Options include: {ACCESS_ROLES}'}
                 )
+
+    access_roles_v2 = fields.Nested(
+                    StaffRolesSchema(many=True),
+                    metadata={'description': f'v2 of this field now returns the internal id for the role. \
+                        Access roles the new user will have. Options include: {ACCESS_ROLES}'})
+
 class NewClientUserSchema(Schema):
     """
     Schema returned when a new client has been created,
@@ -98,14 +106,25 @@ class UserPasswordUpdateSchema(Schema):
     current_password = fields.String(required=True,  validate=validate.Length(min=3,max=50), metadata={'description': 'current password'})
     new_password = fields.String(required=True,  validate=validate.Length(min=3,max=50), metadata={'description': 'new password to be used going forward'})
 
+class UserSubscriptionTypeSchema(Schema):
+
+    name = fields.String()
+    description = fields.String()
+    cost = fields.Float()
+    frequency = fields.String()
+    
+
 class UserSubscriptionsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = UserSubscriptions
         exclude = ('created_at', 'updated_at', 'idx')
         dump_only = ('start_date', 'end_date', 'user_id')
 
-    subscription_type = fields.String(validate=validate.OneOf(['unsubscribed', 'subscribed', 'free_trial', 'sponsored']))
+    subscription_type_id = fields.Integer(required=True)
+    subscription_status = fields.String(validate=validate.OneOf(['unsubscribed', 'subscribed', 'free trial', 'sponsored']))
 
+    subscription_type_information = fields.Nested(UserSubscriptionTypeSchema, dump_only=True)
+    
     @post_load
     def make_object(self, data, **kwargs):
         return UserSubscriptions(**data)
@@ -115,3 +134,18 @@ class UserSubscriptionHistorySchema(Schema):
     client_subscription_history = fields.Nested(UserSubscriptionsSchema, many=True)
     staff_subscription_history = fields.Nested(UserSubscriptionsSchema, many=True)
 
+class UserClinicalCareTeamSchema(Schema):
+
+    client_user_id = fields.Integer()
+    client_name = fields.String()
+    client_email = fields.String()
+
+class UserNotificationsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = UserNotifications
+        exclude = ('created_at', 'updated_at')
+        dump_only = ('idx', 'user_id', 'is_staff', 'time_to_live')
+
+    #comes from LookupNotifications.type
+    notification_type = fields.String(dump_only=True)
+    notification_type_id = fields.Integer(dump_only=True)

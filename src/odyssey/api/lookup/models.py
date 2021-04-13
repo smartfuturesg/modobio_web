@@ -6,6 +6,252 @@ not to be edited at runtime.
 from odyssey import db
 from odyssey.utils.constants import DB_SERVER_TIME
 
+class LookupProfessionalAppointmentConfirmationWindow(db.Model):
+    """ Stored appointment confirmation windows for professionals in database. 
+    """
+
+    __tablename__ = 'LookupProfessionalAppointmentConfirmationWindow'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Primary index for 
+
+    :type: int, primary key, autoincrement
+    """
+
+    confirmation_window = db.Column(db.Float)
+    """
+    confirmation windows for 
+    from 1 hour to 24 hours in 30 minute increments
+    
+    :type: float
+    """    
+
+class LookupTransactionTypes(db.Model):
+    """ Stored transaction types in database. 
+    """
+
+    __tablename__ = 'LookupTransactionTypes'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Primary index for 
+
+    :type: int, primary key, autoincrement
+    """
+
+    category = db.Column(db.String)
+    """
+    Category
+    The overall category of the transaction type.
+    
+    :type: str
+    """
+
+    name = db.Column(db.String)
+    """
+    Name
+    The name or subcategory further describing the 
+    transaction type if any.
+    
+    :type: str
+    """
+
+    icon = db.Column(db.String)
+    """
+    icon
+    Referenced image name for the FE to use
+
+    :type: str
+    """        
+
+class LookupCountriesOfOperations(db.Model):
+    """ Stored countries of operations in database. 
+    """
+
+    __tablename__ = 'LookupCountriesOfOperations'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Primary index for 
+
+    :type: int, primary key, autoincrement
+    """
+
+    country = db.Column(db.String)
+    """
+    countries of operations
+    
+    :type: str
+    """
+    
+class LookupTerritoriesofOperation(db.Model):
+    """ 
+    Territories of operaion are organized by country and then sub-territory,
+    where a sub_territory is the highest level of governing region that can have
+    laws which will impact our business practices. 
+
+    In the UNited States, the su_territory will be at the state level.
+
+    Staff members are required to specify which territories they can operate in. 
+    """
+
+    __tablename__ = 'LookupTerritoriesofOperation'
+
+    created_at = db.Column(db.DateTime, server_default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, server_default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Primary index for 
+
+    :type: int, primary key, autoincrement
+    """
+
+    country = db.Column(db.String)
+    """
+    countries of operations
+    
+    :type: str
+    """
+
+    sub_territory = db.Column(db.String)
+    """
+    Sub-territory depends on the country. In the US, this translate to state. 
+    
+    :type: str
+    """
+
+    sub_territory_abbreviation = db.Column(db.String)
+    """
+    Abbreviation of sub_territory. Two characters for US states.
+    
+    :type: str
+    """
+
+class LookupClientBookingWindow(db.Model):
+    """ Stored booking windows for the client in database. 
+    """
+
+    __tablename__ = 'LookupClientBookingWindow'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Primary index for 
+
+    :type: int, primary key, autoincrement
+    """
+
+    booking_window = db.Column(db.Integer)
+    """
+    Booking Window
+    from 8 hours to 24 hours in increments of 1 hour
+    
+    :type: int
+    """
+
+class LookupTelehealthSessionDuration(db.Model):
+    """ Stored telehealth session durations in database. 
+    """
+
+    __tablename__ = 'LookupTelehealthSessionDuration'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Primary index for 
+
+    :type: int, primary key, autoincrement
+    """
+
+    session_duration = db.Column(db.Integer)
+    """
+    session duration
+    from 10 minutes to 60 minutes in increments of 5 minutes
+    
+    :type: int
+    """
+
 class LookupActivityTrackers(db.Model):
     """ Look up table for activity trackers and their capabilities. """
 
@@ -407,6 +653,116 @@ class LookupRaces(db.Model):
 
     :type: string
     """
+class LookupSubscriptions(db.Model):
+    """ Static list of subscription plans that a user can choose from. 
+    """
+
+    __tablename__ = 'LookupSubscriptions'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    sub_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Id of this subscription plan.
+
+    :type: integer, primary key, autoincrementing
+    """
+
+    name = db.Column(db.String)
+    """
+    Name of this subscription plan.
+
+    :type: string
+    """
+
+    description = db.Column(db.String)
+    """
+    Description of this subscription plan.
+
+    :type: string
+    """
+
+    cost = db.Column(db.Float)
+    """
+    Cost of this subscription plan in USD.
+
+    :type: float
+    """
+
+    frequency = db.Column(db.String)
+    """
+    Frequency that this subscription plan is paid, must be one of (weekly, monthly, annually)
+
+    :type: string
+    """
+
+class LookupNotifications(db.Model):
+    """ Static list of notifications types that a user can receive. 
+    """
+
+    __tablename__ = 'LookupNotifications'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    notification_type_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Id of this notification type.
+
+    :type: integer, primary key, autoincrementing
+    """
+
+    notification_type = db.Column(db.String)
+    """
+    Name of this notification type.
+
+    :type: string
+    """
+
+    icon = db.Column(db.String)
+    """
+    Icon used for this notification type, denotes a file in an s3 bucket.
+
+    :type: string
+    """
+
+    background_color = db.Column(db.String)
+    """
+    Background color used for this notification type.
+    Color names are from the list of 140 colors supported by all browsers
+    See: https://htmlcolorcodes.com/color-names/
+    """
+
+    symbol_color = db.Column(db.String)
+    """
+    Symbol color used for this notification type.
+    Color names are from the list of 140 colors supported by all browsers
+    original means do not apply any color to the svg
+    See: https://htmlcolorcodes.com/color-names/
+    """
 
 class LookupClinicalCareTeamResources(db.Model):
     """
@@ -450,4 +806,344 @@ class LookupClinicalCareTeamResources(db.Model):
     
     :type: string
     """
+class LookupDefaultHealthMetrics(db.Model):
+    """
+    Health metric recommendations by sex and age category
+    Most of this data may be obtained from one more more fitness trackers
 
+    The intended use of this table is to show clients the types of goals and associated benchmarks
+    they shoudld strive for. We may also venture to use the data in this table to evaluate where 
+    clients stand among these metrics.  
+    """
+
+    __tablename__ = 'LookupDefaultHealthMetrics'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Index
+
+    :type: integer, primary key, autoincrementing
+    """
+
+    sex = db.Column(db.String(2))
+    """
+    Biological sex of the client. Many of the following metrics vary on sex.
+
+    :type: string
+    """
+
+    age = db.Column(db.Integer)
+    """
+    Age category. For adults, the age spacings are 5 years. Most metrics do not vary at these intervals. 
+
+    :type: integer
+    """
+
+    bmi_underweight = db.Column(db.Float)
+    """
+    BMI below which is considered underweight
+
+    :type: float
+    """
+
+    bmi_normal_min = db.Column(db.Float)
+    """
+    Lower point for normal BMI range
+
+    :type: float
+    """
+
+    bmi_normal_max = db.Column(db.Float)
+    """
+    Higher point for normal BMI range
+
+    :type: float
+    """
+
+    bmi_overweight_min = db.Column(db.Float)
+    """
+    Lower point for overweight BMI range
+
+    :type: float
+    """
+
+    bmi_overweight_max = db.Column(db.Float)
+    """
+    Higher point for normal BMI range
+
+    :type: float
+    """
+
+    bmi_obese = db.Column(db.Float)
+    """
+    BMI above which is considered obese
+
+    :type: float
+    """
+
+    ecg_metric_1 = db.Column(db.String)
+    """
+    Metric to look out for from ECG readings
+
+    :type: string
+    """
+
+    ecg_metric_2_bpm_min = db.Column(db.Integer)
+    """
+    BPM reading from ECG analysis. Lower point for healthy BPM range.
+
+    :type: integer
+    """
+
+    ecg_metric_2_bpm_max = db.Column(db.Integer)
+    """
+    BPM reading from ECG analysis. Higher point for healthy BPM range.
+
+    :type: integer
+    """
+
+    sp_o2_spot_check = db.Column(db.Integer)
+    """
+    Minimum healthy SpO2 spot check. 
+
+    :type: integer
+    """
+
+    sp_o2_nighttime_avg = db.Column(db.Integer)
+    """
+    Minimum healthy SpO2 nighttime average. 
+
+    :type: integer
+    """
+
+    sleep_total_minutes = db.Column(db.Integer)
+    """
+    Total minutes of sleep per night recommended
+
+    :type: integer
+    """
+
+    sleep_deep_min_minutes = db.Column(db.Integer)
+    """
+    Total minimum minutes of deep sleep per night recommended
+
+    :type: integer
+    """
+    
+    sleep_deep_max_minutes = db.Column(db.Integer)
+    """
+    Total maximum minutes of deep sleep per night recommended
+
+    :type: integer
+    """
+
+    sleep_rem_min_minutes = db.Column(db.Integer)
+    """
+    Total minimum minutes of rem sleep per night recommended
+
+    :type: integer
+    """
+
+    sleep_rem_max_minutes = db.Column(db.Integer)
+    """
+    Total maximum minutes of rem sleep per night recommended
+
+    :type: integer
+    """
+
+    sleep_quality_min_minutes = db.Column(db.Integer)
+    """
+    Total minimum minutes of quality sleep per night recommended
+
+    :type: integer
+    """
+
+    sleep_quality_max_minutes = db.Column(db.Integer)
+    """
+    Total maximum minutes of quality sleep per night recommended
+
+    :type: integer
+    """
+
+    sleep_light_minutes = db.Column(db.Integer)
+    """
+    Total minutes of light sleep per night recommended
+
+    :type: integer
+    """
+
+    sleep_time_awake_minutes = db.Column(db.Integer)
+    """
+    Total minutes awake per night of sleep recommended
+
+    :type: integer
+    """
+
+    sleep_latency_minutes = db.Column(db.Integer)
+    """
+    Recommended maximum time to get to sleep once at rest
+
+    :type: integer
+    """
+
+    bedtime_consistency_minutes = db.Column(db.Integer)
+    """
+    Recommended maximum variability in bedtimes 
+
+    :type: integer
+    """
+
+    wake_consistency_minutes = db.Column(db.Integer)
+    """
+    Recommended maximum variability in wake time 
+    
+    :type: integer
+    """
+
+    heart_rate_rest_average_min = db.Column(db.Integer)
+    """
+    Lower end of recommended average resting heart rate range
+    
+    :type: integer
+    """
+
+    heart_rate_rest_average_max = db.Column(db.Integer)
+    """
+    Higher end of recommended average resting heart rate range
+    
+    :type: integer
+    """
+
+    heart_rate_rest_lowest_min = db.Column(db.Integer)
+    """
+    Lower end of recommended resting heart rate range upon spot check
+    
+    :type: integer
+    """
+
+    heart_rate_rest_lowest_max = db.Column(db.Integer)
+    """
+    Higher end of recommended resting heart rate range upon spot check
+    
+    :type: integer
+    """
+
+    heart_rate_walking_min = db.Column(db.Integer)
+    """
+    Lower end of recommended walking heart rate range 
+    
+    :type: integer
+    """
+
+    heart_rate_walking_max = db.Column(db.Integer)
+    """
+    Higher end of recommended walking heart rate range 
+    
+    :type: integer
+    """
+
+    heart_rate_average_min = db.Column(db.Integer)
+    """
+    Lower end of recommended overall average heart rate range 
+    
+    :type: integer
+    """
+
+    heart_rate_average_max = db.Column(db.Integer)
+    """
+    Higher end of recommended overall average heart rate range 
+    
+    :type: integer
+    """
+
+    heart_rate_variability_average_milliseconds = db.Column(db.Integer)
+    """
+    Average recommended heart rate variability (HRV) reported in milliseconds 
+    
+    :type: integer
+    """
+
+    heart_rate_variability_highest_milliseconds = db.Column(db.Integer)
+    """
+    Higherst recommended heart rate variability (HRV) reported in milliseconds 
+    
+    :type: integer
+    """
+
+    respiratory_rate_min_per_minute = db.Column(db.Integer)
+    """
+    Minimum respiratory rater (per minute) in recommended range
+    
+    :type: integer
+    """
+
+    respiratory_rate_max_per_minute = db.Column(db.Integer)
+    """
+    Maximum respiratory rater (per minute) in recommended range
+    
+    :type: integer
+    """
+
+    body_temperature_deviation_fahrenheit = db.Column(db.Float)
+    """
+    Recommended body temperature variability reported in degrees fahrenheit
+    
+    :type: float
+    """
+
+    steps_per_day = db.Column(db.Integer)
+    """
+    Steps per day recommended
+    
+    :type: integer
+    """
+
+    steps_walking_equivalency_miles = db.Column(db.Integer)
+    """
+    Walking distance equivalency of recommended steps perday. Average height of US male and female used for all
+    age categories. 
+    
+    :type: integer
+    """
+    calories_total = db.Column(db.Integer)
+    """
+    Total caloreies used by the body over a day. Recommended values are based on the average height and weight 
+    of US males and females accross all age categories. 
+
+    :type: integer
+    """
+
+    calories_active_burn_min = db.Column(db.Integer)
+    """
+    Lower end of active calorie burn recommended per day
+    
+    :type: integer
+    """
+
+    calories_active_burn_max = db.Column(db.Integer)
+    """
+    Higher end of active calorie burn recommended per day
+    
+    :type: integer
+    """
+
+    inactivity_minutes = db.Column(db.Integer)
+    """
+    Maximum minutes of inactivity recommended per day    
+
+    :type: integer
+    """

@@ -1,8 +1,9 @@
 from marshmallow import Schema, fields, post_load, validate
+from sqlalchemy.orm import load_only
 
 from odyssey import ma
 from odyssey.api.user.models import User
-from odyssey.api.staff.models import StaffProfile, StaffRoles, StaffRecentClients
+from odyssey.api.staff.models import StaffOperationalTerritories, StaffProfile, StaffRoles, StaffRecentClients
 from odyssey.utils.constants import ACCESS_ROLES
 
 """
@@ -37,15 +38,13 @@ class StaffProfileSchema(ma.SQLAlchemyAutoSchema):
     def make_object(self, data, **kwargs):
         return StaffProfile(**data)
 
-class StaffRolesSchema(Schema):
-    """
-    Schema loads data into a StaffRoles object
-    """
-    
-    user_id = fields.Integer()
-    role = fields.String()
-    # TDOD: default to false once verification process is created
-    verified = fields.Boolean(default=True) 
+class StaffRolesSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = StaffRoles
+        exclude = ('created_at', 'updated_at', 'idx', 'verified')
+        include_fk = True
+        load_only = ('user_id',)
+    role_id = fields.Integer(attribute="idx", dump_only=True)
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -59,4 +58,18 @@ class StaffTokenRequestSchema(Schema):
     token = fields.String()
     refresh_token = fields.String()
     access_roles = fields.List(fields.String)
-    
+     
+class StaffOperationalTerritoriesSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = StaffOperationalTerritories
+        exclude = ('created_at', 'updated_at', 'idx')
+        include_fk = True
+
+    user_id = fields.Integer(missing=None)
+    @post_load
+    def make_object(self, data, **kwargs):
+        return StaffOperationalTerritories(**data)
+
+class StaffOperationalTerritoriesNestedSchema(Schema):
+
+    operational_territories = fields.Nested(StaffOperationalTerritoriesSchema(many=True))
