@@ -267,11 +267,19 @@ class TelehealthBookingsApi(Resource):
         
         time_inc = LookupBookingTimeIncrements.query.all()
         bookings = []
+        staff = User.query.filter_by(user_id=staff_user_id).one_or_none()
+        client = User.query.filter_by(user_id=client_user_id).one_or_none()
         for book in booking:
             bookings.append({
                 'booking_id': book.idx,
                 'staff_user_id': book.staff_user_id,
                 'client_user_id': book.client_user_id,
+                'staff_first_name': staff.firstname,
+                'staff_middle_name': staff.middlename,
+                'staff_last_name': staff.lastname,
+                'client_first_name': client.firstname,
+                'client_middle_name': client.middlename,
+                'client_last_name': client.lastname,                
                 'start_time': time_inc[book.booking_window_id_start_time-1].start_time,
                 'end_time': time_inc[book.booking_window_id_end_time-1].end_time,
                 'target_date': book.target_date,
