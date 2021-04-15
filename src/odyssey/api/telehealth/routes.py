@@ -247,7 +247,8 @@ class TelehealthBookingsApi(Resource):
 
         if not client_user_id and not staff_user_id:
             raise InputError(status_code=405,message='Must include at least one staff or client ID.')
-
+        staffOnly = False
+        clientOnly = False
         if client_user_id and staff_user_id:
             # Check client existence
             check_client_existence(client_user_id)  
@@ -257,35 +258,82 @@ class TelehealthBookingsApi(Resource):
         elif client_user_id and not staff_user_id:
             # Check client existence
             check_client_existence(client_user_id)        
-            # grab the whole queue
-            booking = TelehealthBookings.query.filter_by(client_user_id=client_user_id).order_by(TelehealthBookings.target_date.asc()).all()
+            # grab this client's bookings
+            booking = db.session.query(TelehealthBookings,User)\
+                .join(User, User.user_id == TelehealthBookings.staff_user_id)\
+                    .filter(TelehealthBookings.client_user_id == client_user_id)\
+                        .all()   
+            clientOnly = True     
         elif staff_user_id and not client_user_id:
             # Check staff existence
             check_staff_existence(staff_user_id)        
-            # grab the whole queue
-            booking = TelehealthBookings.query.filter_by(staff_user_id=staff_user_id).order_by(TelehealthBookings.target_date.asc()).all()
-        
+            # grab this staff member's bookings
+            booking = db.session.query(TelehealthBookings,User,User)\
+                .join(User, User.user_id == TelehealthBookings.client_user_id)\
+                    .filter(TelehealthBookings.staff_user_id == staff_user_id)\
+                        .all()
+            staffOnly = True
         time_inc = LookupBookingTimeIncrements.query.all()
         bookings = []
-        staff = User.query.filter_by(user_id=staff_user_id).one_or_none()
-        client = User.query.filter_by(user_id=client_user_id).one_or_none()
-        for book in booking:
-            bookings.append({
-                'booking_id': book.idx,
-                'staff_user_id': book.staff_user_id,
-                'client_user_id': book.client_user_id,
-                'staff_first_name': staff.firstname,
-                'staff_middle_name': staff.middlename,
-                'staff_last_name': staff.lastname,
-                'client_first_name': client.firstname,
-                'client_middle_name': client.middlename,
-                'client_last_name': client.lastname,                
-                'start_time': time_inc[book.booking_window_id_start_time-1].start_time,
-                'end_time': time_inc[book.booking_window_id_end_time-1].end_time,
-                'target_date': book.target_date,
-                'status': book.status,
-                'profession_type': book.profession_type
-            })
+
+        if staffOnly:
+            staff = User.query.filter_by(user_id=staff_user_id).one_or_none()
+            for book in booking:
+                bookings.append({
+                    'booking_id': book[0].idx,
+                    'staff_user_id': book[0].staff_user_id,
+                    'client_user_id': book[0].client_user_id,
+                    'staff_first_name': staff.firstname,
+                    'staff_middle_name': staff.middlename,
+                    'staff_last_name': staff.lastname,
+                    'client_first_name': book[1].firstname,
+                    'client_middle_name': book[1].middlename,
+                    'client_last_name': book[1].lastname,                
+                    'start_time': time_inc[book[0].booking_window_id_start_time-1].start_time,
+                    'end_time': time_inc[book[0].booking_window_id_end_time-1].end_time,
+                    'target_date': book[0].target_date,
+                    'status': book[0].status,
+                    'profession_type': book[0].profession_type
+                })
+        elif clientOnly:
+            client = User.query.filter_by(user_id=client_user_id).one_or_none()
+            for book in booking:
+                bookings.append({
+                    'booking_id': book[0].idx,
+                    'staff_user_id': book[0].staff_user_id,
+                    'client_user_id': book[0].client_user_id,
+                    'staff_first_name': book[1].firstname,
+                    'staff_middle_name': book[1].middlename,
+                    'staff_last_name': book[1].lastname,
+                    'client_first_name': client.firstname,
+                    'client_middle_name': client.middlename,
+                    'client_last_name': client.lastname,                
+                    'start_time': time_inc[book[0].booking_window_id_start_time-1].start_time,
+                    'end_time': time_inc[book[0].booking_window_id_end_time-1].end_time,
+                    'target_date': book[0].target_date,
+                    'status': book[0].status,
+                    'profession_type': book[0].profession_type
+                })
+        else:
+            staff = User.query.filter_by(user_id=staff_user_id).one_or_none()
+            client = User.query.filter_by(user_id=client_user_id).one_or_none()
+            for book in booking:
+                bookings.append({
+                    'booking_id': book.idx,
+                    'staff_user_id': book.staff_user_id,
+                    'client_user_id': book.client_user_id,
+                    'staff_first_name': staff.firstname,
+                    'staff_middle_name': staff.middlename,
+                    'staff_last_name': staff.lastname,
+                    'client_first_name': client.firstname,
+                    'client_middle_name': client.middlename,
+                    'client_last_name': client.lastname,                
+                    'start_time': time_inc[book.booking_window_id_start_time-1].start_time,
+                    'end_time': time_inc[book.booking_window_id_end_time-1].end_time,
+                    'target_date': book.target_date,
+                    'status': book.status,
+                    'profession_type': book.profession_type
+                })             
         # Sort bookings by time then sort by date
         bookings.sort(key=lambda t: t['start_time'])
         bookings.sort(key=lambda t: t['target_date'])
@@ -345,7 +393,7 @@ class TelehealthBookingsApi(Resource):
 
         # TODO: we need to add the concept of staff auto accept or not. When we do, we can do a query 
         # to check the staff's auto accept setting. Right now, default it to true.
-        staffAutoAccept = False
+        staffAutoAccept = True
         if staffAutoAccept:
             request.parsed_obj.status = 'Accepted'
         else:
