@@ -3,7 +3,7 @@ from sqlalchemy.orm import load_only
 
 from odyssey import ma
 from odyssey.api.staff.schemas import StaffRolesSchema
-from odyssey.api.user.models import User, UserLogin, UserSubscriptions, UserNotifications
+from odyssey.api.user.models import User, UserLogin, UserSubscriptions, UserNotifications, UserPendingEmailVerifications
 from odyssey.utils.constants import ACCESS_ROLES
 
 """
@@ -149,3 +149,15 @@ class UserNotificationsSchema(ma.SQLAlchemyAutoSchema):
     #comes from LookupNotifications.type
     notification_type = fields.String(dump_only=True)
     notification_type_id = fields.Integer(dump_only=True)
+
+class UserPendingEmailVerificationsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = UserPendingEmailVerifications
+        exclude = ('created_at', 'updated_at')
+        dump_only = ('idx')
+    
+    user_id = fields.Integer()
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return UserPendingEmailVerifications(**data)

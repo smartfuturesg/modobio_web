@@ -13,7 +13,15 @@ from odyssey.api.client.schemas import ClientInfoSchema, ClientGeneralMobileSett
 from odyssey.api.client.models import ClientClinicalCareTeam
 from odyssey.api.lookup.models import LookupNotifications, LookupSubscriptions
 from odyssey.api.staff.schemas import StaffProfileSchema, StaffRolesSchema
-from odyssey.api.user.models import User, UserLogin, UserRemovalRequests, UserSubscriptions, UserTokensBlacklist, UserNotifications
+from odyssey.api.user.models import (
+    User,
+    UserLogin,
+    UserRemovalRequests,
+    UserSubscriptions,
+    UserTokensBlacklist,
+    UserNotifications,
+    UserPendingEmailVerifications
+)
 from odyssey.api.staff.models import StaffRoles
 from odyssey.api.user.schemas import (
     UserSchema, 
@@ -27,7 +35,8 @@ from odyssey.api.user.schemas import (
     UserSubscriptionHistorySchema,
     NewStaffUserSchema,
     UserClinicalCareTeamSchema,
-    UserNotificationsSchema
+    UserNotificationsSchema,
+    UserPendingEmailVerificationsSchema
 ) 
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.constants import PASSWORD_RESET_URL, DB_SERVER_TIME
@@ -649,3 +658,28 @@ class UserNotificationsPutApi(Resource):
 
         return notification
 
+@ns.route('/email-verification/<int:user_id>')
+@ns.doc(params={'user_id': 'User ID number'})
+class UserPendingEmailVerificationsApi(Resource):
+    
+    @responds(schema=UserPendingEmailVerificationsSchema, api=ns)
+    def post(self, user_id):
+        """
+        Generate token and 4 digit code for user email verification.
+        Store both of these until the email is verified.
+        """
+
+        token = UserPendingEmailVerifications.generate_token(user_id)
+        code = UserPendingEmailVerifications.generate_code()
+
+        data = {
+            'user_id': user_id,
+            'token': token,
+            'code': code
+        }
+
+        verification = UserPendingEmailVerificationsSchema().load(data)
+        db.session.add(verification)
+        db.session.commit()
+
+        return verification
