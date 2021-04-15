@@ -1,11 +1,10 @@
 """
-Database tables for the wearable devices section of the Modo Bio Staff application.
+Database tables for the wearable devices section of the Modo Bio API.
 All tables in this module are prefixed with 'Wearables'.
 """
 
-import sys
-
 from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Integer, String
+from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import ARRAY
 
 from odyssey import db
@@ -101,6 +100,27 @@ class Wearables(db.Model):
     :type: bool, default = False
     """
 
+    oura = relationship('WearablesOura', uselist=False, back_populates='wearable')
+    """
+    WearablesOura instance holding Oura specific data.
+
+    :type: :class:`WearablesOura` instance
+    """
+
+    fitbit = relationship('WearablesFitbit', uselist=False, back_populates='wearable')
+    """
+    WearablesFitbit instance holding Fitbit specific data.
+
+    :type: :class:`WearablesFitbit` instance
+    """
+
+    freestyle = relationship('WearablesFreeStyle', uselist=False, back_populates='wearable')
+    """
+    WearablesFreeStyle instance holding FreeStyle specific data.
+
+    :type: :class:`WearablesFreeStyle` instance
+    """
+
 
 class WearablesOura(db.Model):
     """ Oura Ring specific information. """
@@ -181,6 +201,28 @@ class WearablesOura(db.Model):
     Date and time of last access to Oura Cloud.
 
     :type: :class:`datetime.datetime`
+    """
+
+    wearable_id = Column(
+        Integer,
+        ForeignKey(
+            'Wearables.idx',
+            ondelete='CASCADE'
+        ),
+        nullable=False,
+        unique=True
+    )
+    """
+    Wearable index this WearablesOura instance is linked to.
+
+    :type: int, unique, foreign key to :attr:`Wearables.idx`
+    """
+
+    wearable = relationship('Wearables', uselist=False, back_populates='oura')
+    """
+    Wearable instance this WearablesOura instance is linked to.
+
+    :type: :class:`Wearables`
     """
 
 
@@ -265,6 +307,28 @@ class WearablesFitbit(db.Model):
     :type: :class:`datetime.datetime`
     """
 
+    wearable_id = Column(
+        Integer,
+        ForeignKey(
+            'Wearables.idx',
+            ondelete='CASCADE'
+        ),
+        nullable=False,
+        unique=True
+    )
+    """
+    Wearable index this WearablesFitbit instance is linked to.
+
+    :type: int, unique, foreign key to :attr:`Wearables.idx`
+    """
+
+    wearable = relationship('Wearables', uselist=False, back_populates='fitbit')
+    """
+    Wearable instance this WearablesFitbit instance is linked to.
+
+    :type: :class:`Wearables`
+    """
+
 
 class WearablesFreeStyle(db.Model):
     """ FreeStyle Libre continuous glucose monitoring wearable specific information. """
@@ -284,7 +348,8 @@ class WearablesFreeStyle(db.Model):
              'User.user_id',
              ondelete="CASCADE"
         ),
-        nullable=False
+        nullable=False,
+        unique=True
     )
     """
     Client ID number.
@@ -329,4 +394,26 @@ class WearablesFreeStyle(db.Model):
     This timestamp can be used to calculate the timestamp for each data point.
 
     :type: :class:`datetime.datetime`
+    """
+
+    wearable_id = Column(
+        Integer,
+        ForeignKey(
+            'Wearables.idx',
+            ondelete='CASCADE'
+        ),
+        nullable=False,
+        unique=True
+    )
+    """
+    Wearable index this WearablesFreeStyle instance is linked to.
+
+    :type: int, unique, foreign key to :attr:`Wearables.idx`
+    """
+
+    wearable = relationship('Wearables', uselist=False, back_populates='freestyle')
+    """
+    Wearable instance this WearablesFreeStyle instance is linked to.
+
+    :type: :class:`Wearables`
     """
