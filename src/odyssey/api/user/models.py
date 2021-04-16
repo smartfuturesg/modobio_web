@@ -116,12 +116,21 @@ class User(db.Model):
 
     :type: boolean, non-null 
     """
+
     deleted = db.Column(db.Boolean, nullable=True, default = False)
     
     """
     Flags if the user has been deleted
 
-    :type:boolean
+    :type: boolean
+    """
+
+    email_verified = db.Column(db.Boolean, nullable=False, default=False)
+
+    """
+    Flags if the user has verified their email
+
+    :type: boolean
     """
 
     @staticmethod
