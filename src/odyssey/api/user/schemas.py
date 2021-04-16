@@ -13,7 +13,7 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
         exclude = ('created_at', 'updated_at')
-        dump_only = ('password', 'modobio_id')
+        dump_only = ('password', 'modobio_id', 'email_verified')
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -38,7 +38,7 @@ class UserInfoSchema(ma.SQLAlchemyAutoSchema):
         model = User
         exclude = ('created_at', 'updated_at')
         load_only = ('password')
-        dump_only = ('modobio_id', 'user_id', 'is_internal','is_staff', 'is_client', 'deleted')
+        dump_only = ('modobio_id', 'user_id', 'is_internal','is_staff', 'is_client', 'deleted', 'email_verified')
 
     email = fields.Email(validate=validate.Length(min=0,max=50), required=True)
     phone_number = fields.String(validate=validate.Length(min=0,max=50))
@@ -149,15 +149,3 @@ class UserNotificationsSchema(ma.SQLAlchemyAutoSchema):
     #comes from LookupNotifications.type
     notification_type = fields.String(dump_only=True)
     notification_type_id = fields.Integer(dump_only=True)
-
-class UserPendingEmailVerificationsSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = UserPendingEmailVerifications
-        exclude = ('created_at', 'updated_at')
-        dump_only = ('idx')
-    
-    user_id = fields.Integer()
-
-    @post_load
-    def make_object(self, data, **kwargs):
-        return UserPendingEmailVerifications(**data)
