@@ -157,7 +157,7 @@ class TelehealthClientTimeSelectApi(Resource):
             client_id = booking.client_user_id
             if staff_id in available:
                 if staff_id not in removedNum:
-                    removedNum[staff_id] = []                
+                    removedNum[staff_id] = []
                 for num in range(booking.booking_window_id_start_time,booking.booking_window_id_end_time+1):
                     if num in available[staff_id]:
                         available[staff_id].remove(num)
@@ -190,17 +190,19 @@ class TelehealthClientTimeSelectApi(Resource):
         timeArr = {}
         for staff_id in staff_user_id_arr:
             if staff_id not in removedNum:
-                removedNum[staff_id] = []             
-            for idx,time_id in enumerate(available[staff_id]):
+                removedNum[staff_id] = []            
+            for idx,time_id in enumerate(available[staff_id]):                 
                 if idx + 1 < len(available[staff_id]):
                     if available[staff_id][idx+1] - time_id < idx_delta and time_id + idx_delta < available[staff_id][-1]:
-                        if time_inc[time_id].start_time.minute%15 == 0:
-                            if time_inc[time_id] not in timeArr:
-                                timeArr[time_inc[time_id]] = []
+                        # since we are accessing an array, we need to -1 because recall time_id is the ACTUAL time increment idx
+                        # and arrays are 0 indexed in python
+                        if time_inc[time_id-1].start_time.minute%15 == 0:
+                            if time_inc[time_id-1] not in timeArr:
+                                timeArr[time_inc[time_id-1]] = []
                             if time_id+idx_delta in removedNum[staff_id]:
                                 continue
                             else:
-                                timeArr[time_inc[time_id]].append(staff_id)
+                                timeArr[time_inc[time_id-1]].append(staff_id)
                     
                     else:
                         continue
@@ -210,15 +212,17 @@ class TelehealthClientTimeSelectApi(Resource):
         # note, time.idx NEEDS a -1 in the append, 
         # BECAUSE we are accessing the array where index starts at 0
         for time in timeArr:
+            if not timeArr[time]:
+                continue
             if len(timeArr[time]) > 1:
                 random.shuffle(timeArr[time])
-
+            
             times.append({'staff_user_id': timeArr[time][0],
                         'start_time': time.start_time, 
                         'end_time': time_inc[time.idx+idx_delta-1].end_time,
                         'booking_window_id_start_time': time.idx,
                         'booking_window_id_end_time': time.idx+idx_delta,
-                        'target_date': target_date})                
+                        'target_date': target_date})             
 
         times.sort(key=lambda t: t['start_time'])
 
@@ -247,7 +251,8 @@ class TelehealthBookingsApi(Resource):
 
         if not client_user_id and not staff_user_id:
             raise InputError(status_code=405,message='Must include at least one staff or client ID.')
-
+        staffOnly = False
+        clientOnly = False
         if client_user_id and staff_user_id:
             # Check client existence
             check_client_existence(client_user_id)  
@@ -257,27 +262,82 @@ class TelehealthBookingsApi(Resource):
         elif client_user_id and not staff_user_id:
             # Check client existence
             check_client_existence(client_user_id)        
-            # grab the whole queue
-            booking = TelehealthBookings.query.filter_by(client_user_id=client_user_id).order_by(TelehealthBookings.target_date.asc()).all()
+            # grab this client's bookings
+            booking = db.session.query(TelehealthBookings,User)\
+                .join(User, User.user_id == TelehealthBookings.staff_user_id)\
+                    .filter(TelehealthBookings.client_user_id == client_user_id)\
+                        .all()   
+            clientOnly = True     
         elif staff_user_id and not client_user_id:
             # Check staff existence
             check_staff_existence(staff_user_id)        
-            # grab the whole queue
-            booking = TelehealthBookings.query.filter_by(staff_user_id=staff_user_id).order_by(TelehealthBookings.target_date.asc()).all()
-        
+            # grab this staff member's bookings
+            booking = db.session.query(TelehealthBookings,User)\
+                .join(User, User.user_id == TelehealthBookings.client_user_id)\
+                    .filter(TelehealthBookings.staff_user_id == staff_user_id)\
+                        .all()
+            staffOnly = True
         time_inc = LookupBookingTimeIncrements.query.all()
         bookings = []
-        for book in booking:
-            bookings.append({
-                'booking_id': book.idx,
-                'staff_user_id': book.staff_user_id,
-                'client_user_id': book.client_user_id,
-                'start_time': time_inc[book.booking_window_id_start_time-1].start_time,
-                'end_time': time_inc[book.booking_window_id_end_time-1].end_time,
-                'target_date': book.target_date,
-                'status': book.status,
-                'profession_type': book.profession_type
-            })
+
+        if staffOnly:
+            staff = User.query.filter_by(user_id=staff_user_id).one_or_none()
+            for book in booking:
+                bookings.append({
+                    'booking_id': book[0].idx,
+                    'staff_user_id': book[0].staff_user_id,
+                    'client_user_id': book[0].client_user_id,
+                    'staff_first_name': staff.firstname,
+                    'staff_middle_name': staff.middlename,
+                    'staff_last_name': staff.lastname,
+                    'client_first_name': book[1].firstname,
+                    'client_middle_name': book[1].middlename,
+                    'client_last_name': book[1].lastname,                
+                    'start_time': time_inc[book[0].booking_window_id_start_time-1].start_time,
+                    'end_time': time_inc[book[0].booking_window_id_end_time-1].end_time,
+                    'target_date': book[0].target_date,
+                    'status': book[0].status,
+                    'profession_type': book[0].profession_type
+                })
+        elif clientOnly:
+            client = User.query.filter_by(user_id=client_user_id).one_or_none()
+            for book in booking:
+                bookings.append({
+                    'booking_id': book[0].idx,
+                    'staff_user_id': book[0].staff_user_id,
+                    'client_user_id': book[0].client_user_id,
+                    'staff_first_name': book[1].firstname,
+                    'staff_middle_name': book[1].middlename,
+                    'staff_last_name': book[1].lastname,
+                    'client_first_name': client.firstname,
+                    'client_middle_name': client.middlename,
+                    'client_last_name': client.lastname,                
+                    'start_time': time_inc[book[0].booking_window_id_start_time-1].start_time,
+                    'end_time': time_inc[book[0].booking_window_id_end_time-1].end_time,
+                    'target_date': book[0].target_date,
+                    'status': book[0].status,
+                    'profession_type': book[0].profession_type
+                })
+        else:
+            staff = User.query.filter_by(user_id=staff_user_id).one_or_none()
+            client = User.query.filter_by(user_id=client_user_id).one_or_none()
+            for book in booking:
+                bookings.append({
+                    'booking_id': book.idx,
+                    'staff_user_id': book.staff_user_id,
+                    'client_user_id': book.client_user_id,
+                    'staff_first_name': staff.firstname,
+                    'staff_middle_name': staff.middlename,
+                    'staff_last_name': staff.lastname,
+                    'client_first_name': client.firstname,
+                    'client_middle_name': client.middlename,
+                    'client_last_name': client.lastname,                
+                    'start_time': time_inc[book.booking_window_id_start_time-1].start_time,
+                    'end_time': time_inc[book.booking_window_id_end_time-1].end_time,
+                    'target_date': book.target_date,
+                    'status': book.status,
+                    'profession_type': book.profession_type
+                })             
         # Sort bookings by time then sort by date
         bookings.sort(key=lambda t: t['start_time'])
         bookings.sort(key=lambda t: t['target_date'])
@@ -337,7 +397,7 @@ class TelehealthBookingsApi(Resource):
 
         # TODO: we need to add the concept of staff auto accept or not. When we do, we can do a query 
         # to check the staff's auto accept setting. Right now, default it to true.
-        staffAutoAccept = False
+        staffAutoAccept = True
         if staffAutoAccept:
             request.parsed_obj.status = 'Accepted'
         else:
@@ -654,13 +714,13 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
                 # If this is the first time entering this day, then the first index will be used
                 # to store the start_time
                 if len(monArrIdx) == 0:
-                    idx1 = time.booking_window_id
+                    idx1 = time.booking_window_id - 1
                     start_time = booking_increments[idx1].start_time
                 else:
                     # This is the 2+ iteration through this block
                     # now, idx2 should be greater than idx1 because idx1 was stored in the 
                     # previous iteration
-                    idx2 = time.booking_window_id
+                    idx2 = time.booking_window_id - 1
                     # If idx2 - idx1 > 1, then that indicates a gap in time.
                     # If a gap exists, then we store the end_time, and update the start_time.
                     # EXAMPLE: 
@@ -678,10 +738,10 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
                 monArrIdx.append(time.booking_window_id)
             elif time.day_of_week == 'Tuesday':
                 if len(tueArrIdx) == 0:
-                    idx1 = time.booking_window_id
+                    idx1 = time.booking_window_id - 1
                     start_time = booking_increments[idx1].start_time
                 else:
-                    idx2 = time.booking_window_id
+                    idx2 = time.booking_window_id - 1
                     if idx2 - idx1 > 1:
                         end_time = booking_increments[idx1].end_time
                         orderedArr[time.day_of_week].append({'day_of_week':time.day_of_week, 'start_time': start_time, 'end_time': end_time})
@@ -690,10 +750,10 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
                 tueArrIdx.append(time.booking_window_id)
             elif time.day_of_week == 'Wednesday':
                 if len(wedArrIdx) == 0:
-                    idx1 = time.booking_window_id
+                    idx1 = time.booking_window_id - 1
                     start_time = booking_increments[idx1].start_time
                 else:
-                    idx2 = time.booking_window_id
+                    idx2 = time.booking_window_id - 1
                     if idx2 - idx1 > 1:
                         end_time = booking_increments[idx1].end_time
                         orderedArr[time.day_of_week].append({'day_of_week':time.day_of_week, 'start_time': start_time, 'end_time': end_time})
@@ -702,10 +762,10 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
                 wedArrIdx.append(time.booking_window_id)
             elif time.day_of_week == 'Thursday':
                 if len(thuArrIdx) == 0:
-                    idx1 = time.booking_window_id
+                    idx1 = time.booking_window_id - 1
                     start_time = booking_increments[idx1].start_time
                 else:
-                    idx2 = time.booking_window_id
+                    idx2 = time.booking_window_id - 1
                     if idx2 - idx1 > 1:
                         end_time = booking_increments[idx1].end_time
                         orderedArr[time.day_of_week].append({'day_of_week':time.day_of_week, 'start_time': start_time, 'end_time': end_time})
@@ -714,10 +774,10 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
                 thuArrIdx.append(time.booking_window_id)
             elif time.day_of_week == 'Friday':
                 if len(friArrIdx) == 0:
-                    idx1 = time.booking_window_id
+                    idx1 = time.booking_window_id  - 1
                     start_time = booking_increments[idx1].start_time
                 else:
-                    idx2 = time.booking_window_id
+                    idx2 = time.booking_window_id - 1
                     if idx2 - idx1 > 1:
                         end_time = booking_increments[idx1].end_time
                         orderedArr[time.day_of_week].append({'day_of_week':time.day_of_week, 'start_time': start_time, 'end_time': end_time})
@@ -726,10 +786,10 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
                 friArrIdx.append(time.booking_window_id)
             elif time.day_of_week == 'Saturday':
                 if len(satArrIdx) == 0:
-                    idx1 = time.booking_window_id
+                    idx1 = time.booking_window_id - 1
                     start_time = booking_increments[idx1].start_time
                 else:
-                    idx2 = time.booking_window_id
+                    idx2 = time.booking_window_id - 1
                     if idx2 - idx1 > 1:
                         end_time = booking_increments[idx1].end_time
                         orderedArr[time.day_of_week].append({'day_of_week':time.day_of_week, 'start_time': start_time, 'end_time': end_time})
@@ -738,10 +798,10 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
                 satArrIdx.append(time.booking_window_id)
             elif time.day_of_week == 'Sunday':
                 if len(sunArrIdx) == 0:
-                    idx1 = time.booking_window_id
+                    idx1 = time.booking_window_id - 1
                     start_time = booking_increments[idx1].start_time
                 else:
-                    idx2 = time.booking_window_id
+                    idx2 = time.booking_window_id - 1
                     if idx2 - idx1 > 1:
                         end_time = booking_increments[idx1].end_time
                         orderedArr[time.day_of_week].append({'day_of_week':time.day_of_week, 'start_time': start_time, 'end_time': end_time})
@@ -819,7 +879,6 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
         availabilityIdxArr['Saturday'] = []
         availabilityIdxArr['Sunday'] = []
 
-
         if request.parsed_obj['availability']:
             avail = request.parsed_obj['availability']
             data = {}
@@ -839,9 +898,10 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
                     if time['start_time'] == inc.start_time:
                         # notice, booking_increment idx starts at 1, so python indices should be 
                         # 1 less.
-                        startIdx = inc.idx - 1
+                        # startIdx = inc.idx - 1
+                        startIdx = inc.idx
                     elif(time['end_time'] == inc.end_time):
-                        endIdx = inc.idx - 1
+                        endIdx = inc.idx
                     # Break out of the for loop when startIdx and endIdx are no longer None
                     if startIdx is not None and \
                         endIdx is not None:
