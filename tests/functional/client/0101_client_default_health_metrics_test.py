@@ -1,5 +1,6 @@
 import base64
 
+from odyssey.api.user.models import UserPendingEmailVerifications
 from flask.json import dumps
 
 
@@ -39,6 +40,12 @@ def test_get_default_health_metrics(test_client, init_database, client_auth_head
 
     new_user_id = response.json['user_info']['user_id']
     
+    # Register the client's email address (token)
+    verification = UserPendingEmailVerifications.query.filter_by(user_id=new_user_id).one_or_none()
+    token = verification.token
+
+    response = test_client.post('/user/email-verification/token/' + token + '/')
+    assert response.status_code == 200
 
     valid_credentials = base64.b64encode(
         f"{new_client['email']}:{'123'}".encode(

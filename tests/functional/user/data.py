@@ -5,7 +5,8 @@ users_client_new_creation_data = {
     "email": "test_remote_registration@gmail.com",
     "phone_number": "1111111111",
     "is_staff": False,
-    "is_client": True
+    "is_client": True,
+    "email_verified": True
 }
 
 users_new_user_client_data = {
@@ -15,7 +16,7 @@ users_new_user_client_data = {
     "lastname": "Client",
     "email": "test_this_user_client@modobio.com",
     "phone_number": "1111111121",
-    "password": "password",
+    "password": "password"
   },
   "client_info": {
     "guardianname": "guardian 1",
@@ -101,7 +102,8 @@ users_staff_member_data = {
     "email": "staff_member@modobio.com",
     "phone_number": "1111111113",
     "is_staff": True,
-    "is_client": False
+    "is_client": False,
+    "email_verified": True
 }
 
 users_staff_passwords_data = {
