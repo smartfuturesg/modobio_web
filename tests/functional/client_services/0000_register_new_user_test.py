@@ -2,6 +2,8 @@ import base64
 
 from flask.json import dumps
 
+from odyssey.api.user.models import UserPendingEmailVerifications
+
 from tests.functional.client_services.data import client_services_register_user_client, client_services_register_user_staff
 
 def test_new_client_user(test_client, init_database, staff_auth_header):
@@ -35,6 +37,13 @@ def test_new_client_user(test_client, init_database, staff_auth_header):
     ####
     # Log in to ensure client has made it into the database
     ####
+
+    #verify newly created client's email
+    verification = UserPendingEmailVerifications.query.filter_by(user_id=response.json['user_id']).one_or_none()
+    token = verification.token
+
+    response = test_client.post('/user/email-verification/token/' + token + '/')
+    assert response.status_code == 200
 
     valid_credentials = base64.b64encode(
             f"{client_services_register_user_client['email']}:{password}".encode("utf-8")).decode("utf-8")
