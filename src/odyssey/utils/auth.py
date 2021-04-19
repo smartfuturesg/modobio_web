@@ -11,7 +11,7 @@ from odyssey import db
 from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations
 from odyssey.api.lookup.models import LookupClinicalCareTeamResources
 from odyssey.utils.constants import ACCESS_ROLES, DB_SERVER_TIME, USER_TYPES 
-from odyssey.utils.errors import LoginNotAuthorized, StaffNotFound
+from odyssey.utils.errors import LoginNotAuthorized, StaffNotFound, EmailNotVerified
 from odyssey.api.staff.models import StaffRoles
 from odyssey.api.user.models import User, UserLogin
 
@@ -80,6 +80,9 @@ class BasicAuth(object):
 
                 if user in (False, None):
                     raise LoginNotAuthorized
+
+                if not user.email_verified:
+                    raise EmailNotVerified
 
                 # If user_type exists (Staff or Client, etc)
                 # Check user and role access

@@ -296,6 +296,14 @@ class LoginNotAuthorized(Exception):
 
         self.status_code = 401
 
+class EmailNotVerified(Exception):
+    """Used for auth.py if a user has not yet verified their email."""
+    def __init__(self):
+        Exception.__init__(self)
+        self.message = "User email address has not yet been verified"
+
+        self.status_code = 401
+
 class GenericNotFound(Exception):
     """
     When requesting an item from the database which does not exist
@@ -473,7 +481,12 @@ def error_drink_id_does_not_exist(error):
 
 @api.errorhandler(LoginNotAuthorized)
 def error_login_not_authorized(error):
-    '''Return a custom message and 400 status code'''
+    '''Return a custom message and 401 status code'''
+    return error_response(error.status_code, error.message)
+
+@api.errorhandler(EmailNotVerified)
+def error_email_not_verified(error):
+    '''Return email not verified error message and 401 status code'''
     return error_response(error.status_code, error.message)
 
 @api.errorhandler(MissingThirdPartyCredentials)
