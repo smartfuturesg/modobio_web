@@ -749,3 +749,31 @@ class UserPendingEmailVerificationsCodeApi(Resource):
         user.update({'email_verified': True})
 
         db.session.commit()
+
+@ns.route('/email-verification/resend/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class UserPendingEmailVerificationsResendApi(Resource):
+    """
+    If a user waited too long to verify their email and their token/code have expired,
+    they can use this endpoint to create another token/code and send another email. This 
+    can also be used if the user never received an email.
+    """
+
+    @responds(status_code=200)
+    def post(self, user_id):
+        verification = UserPendingEmailVerifications.query.filter_by(user_id=user_id).one_or_none()
+            
+        if not verification:
+            raise GenericNotFound("There is no pending email verification for user ID " + str(user_id))
+
+        # create a new token and code for this user
+        verification.update(
+            {
+                'token': UserPendingEmailVerifications.generate_token(user_id),
+                'code': UserPendingEmailVerifications.generate_code()
+            }
+        )
+
+        db.session.commit()
+
+        #TODO: send an email with the new token and code
