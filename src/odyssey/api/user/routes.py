@@ -721,7 +721,7 @@ class UserPendingEmailVerificationsTokenApi(Resource):
 
 @ns.route('/email-verification/code/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number','code': 'Email verification code'})
-class UserPendingEmailVerificationsTokenApi(Resource):
+class UserPendingEmailVerificationsCodeApi(Resource):
 
     @responds(status_code=200)
     def post(self, user_id):
