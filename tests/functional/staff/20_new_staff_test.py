@@ -4,9 +4,10 @@ import random
 from flask.json import dumps
 
 from odyssey.api.lookup.models import LookupTerritoriesofOperation
-from odyssey.api.user.models import User
+from odyssey.api.user.models import User, UserPendingEmailVerifications
 from odyssey.api.staff.models import StaffOperationalTerritories, StaffRoles
 from odyssey.utils.constants import ACCESS_ROLES
+from odyssey import db
 from .data import users_staff_new_user_data
 
 
@@ -31,6 +32,18 @@ def test_creating_new_staff(test_client, init_database, staff_auth_header):
     assert response.json['user_info']['firstname'] == users_staff_new_user_data['user_info']['firstname']
     assert response.json['user_info']['is_staff'] == True
     assert response.json['user_info']['is_client'] == False
+    assert response.json['user_info']['email_verified'] == False
+
+    # Register the staff's email address (code)
+    verification = UserPendingEmailVerifications.query.filter_by(user_id=new_staff_uid).one_or_none()
+    code = verification.code
+
+    response = test_client.post('/user/email-verification/code/' + str(new_staff_uid) + '/?code=' + str(code))
+    assert response.status_code == 200
+
+    # Fetch staff user and ensure email is now verified
+    user = User.query.filter_by(user_id=new_staff_uid).one_or_none()
+    assert user.email_verified == True
 
 def test_get_staff_user_info(test_client, init_database, staff_auth_header):
     """
