@@ -66,7 +66,7 @@ FITBIT_AUTH_URL = 'https://www.fitbit.com/oauth2/authorize'
 FITBIT_TOKEN_URL = 'https://api.fitbit.com/oauth2/token'
 """ Token URL for Fitbit API. """
 
-FITBIT_SCOPE = 'activity heartrate nutrition sleep weight'
+FITBIT_SCOPE = 'activity heartrate nutrition profile sleep weight'
 """ Fitbit resources (scopes) to request permission for. """
 
 SECRET_KEY = 'abcdefghijklmnopqrstuvwxyz0123456789'

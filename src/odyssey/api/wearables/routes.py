@@ -579,7 +579,7 @@ class WearablesFitbitAuthEndpoint(Resource):
             msg = oauth_reply['errors'][0]['message']
             raise UnknownError(message=f'fitbit.com returned error: {msg}')
 
-        # Not requiring location, profile, settings, or social
+        # Not requiring location, settings, or social
         minimal_scope = set(current_app.config['FITBIT_SCOPE'].split())
         scope = set(oauth_reply.get('scope', []))
 
