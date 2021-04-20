@@ -53,8 +53,8 @@ def generate_users():
         # change the number
         users_client_new_creation_data['phone_number'] = str(10 + i)
         client_1 = User(**users_client_new_creation_data)
-        client_1.email_verified = True
         db.session.add(client_1)
+        client_1.update({'email_verified': True})
         db.session.flush()
         # 2) User login
         client_1_login = UserLogin(**{'user_id': client_1.user_id})
@@ -171,8 +171,8 @@ def init_database():
 
     # 1) Create User instance. modobio_id populated automatically
     client_1 = User(**users_client_new_creation_data)
-    client_1.email_verified = True
     db.session.add(client_1)
+    client_1.update({'email_verified': True})
     db.session.flush()
 
     # 2) User login
