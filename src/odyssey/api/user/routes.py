@@ -527,7 +527,9 @@ class VerifyPortalId(Resource):
             db.session.add(client_info)
         elif decoded_token['utype'] == 'staff':
             user.is_staff = True
-        
+
+        # mark user email as verified        
+        user.email_verified = True
         db.session.commit()
         
         return 200
