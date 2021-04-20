@@ -6,7 +6,7 @@ from datetime import datetime
 from flask.json import dumps
 from requests.auth import _basic_auth_str
 
-from odyssey.api.user.models import User, UserLogin, UserRemovalRequests
+from odyssey.api.user.models import User, UserLogin, UserRemovalRequests, UserPendingEmailVerifications
 from odyssey.api.doctor.models import MedicalImaging
 from odyssey.api.client.models import (
     ClientInfo,
@@ -46,6 +46,12 @@ def test_account_delete_request(test_client, init_database, staff_auth_header):
     
     staff_client_id = staff_client_user.json['user_info']['user_id']
 
+    #verify newly created staff member's email
+    token = UserPendingEmailVerifications.query.filter_by(user_id=staff_client_id).first().token
+    request = test_client.post(f'/user/email-verification/token/{token}/')
+    token = UserPendingEmailVerifications.query.filter_by(user_id=staff_client_id).first().token
+    request = test_client.post(f'/user/email-verification/token/{token}/')
+
     #3. Add info for client user, reported by staff/client
     valid_credentials = base64.b64encode(
             f"{payload['user_info']['email']}:{'password3'}".encode("utf-8")).decode("utf-8")
@@ -66,7 +72,7 @@ def test_account_delete_request(test_client, init_database, staff_auth_header):
     #4. Delete staff/client
     deleting_staff_client = test_client.delete(f'/user/{staff_client_id}/',
             headers=staff_user_auth_header)
-    
+
     assert deleting_staff_client.status_code == 200
     assert deleting_staff_client.json['message'] == f"User with id {staff_client_id} has been removed"
     
