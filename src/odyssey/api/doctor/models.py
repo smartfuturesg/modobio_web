@@ -2,7 +2,7 @@
 Database tables for the doctor's portion of the Modo Bio Staff application.
 All tables in this module are prefixed with ``Medical``.
 """
-from datetime import datetime
+from sqlalchemy import text
 
 from odyssey.utils.constants import DB_SERVER_TIME, BLOODTEST_EVAL
 from odyssey import db
@@ -1375,7 +1375,7 @@ def add_rest_result_eval(mapper, connection, target):
     target : :class:`sqlalchemy.schema.Table`
         Target SQLAlchemy table, fixed to :class:`MedicalBloodTestResults` by decorator.
     """
-    connection.execute(BLOODTEST_EVAL.format(target.idx, target.result_id, target.result_value))
+    connection.execute(text(BLOODTEST_EVAL.format(target.idx, target.result_id, target.result_value)))
 
 class MedicalSurgeries(db.Model):
     """ History of client surgeries.

@@ -123,19 +123,19 @@ def generate_users():
 def clean_db(db):
     for table in reversed(db.metadata.sorted_tables):
         try:
-            db.session.execute(table.delete())
+            db.session.execute(text(table.delete()))
         except:
             pass
     db.session.commit()
     # specifically cascade drop clientinfo table
     try:
-        db.session.execute('DROP TABLE "ClientInfo" CASCADE;')
+        db.session.execute(text("DROP TABLE \"ClientInfo\" CASCADE;"))
     except:
         db.session.rollback()
         pass
 
     try:
-        db.session.execute('DROP TABLE alembic_version;')
+        db.session.execute(text("DROP TABLE alembic_version;"))
     except Exception as e:
         pass
 
