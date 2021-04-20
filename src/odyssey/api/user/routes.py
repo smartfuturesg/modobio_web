@@ -296,8 +296,12 @@ class NewClientUser(Resource):
         #Generate access and refresh tokens
         access_token = UserLogin.generate_token(user_type='client', user_id=user.user_id, token_type='access')
         refresh_token = UserLogin.generate_token(user_type='client', user_id=user.user_id, token_type='refresh')
+        
         #Add refresh token to db
-        user_login.refresh_token = refresh_token
+        db.session.add(UserTokenHistory(user_id=user.user_id, 
+                                        refresh_token=refresh_token,
+                                        event='login',
+                                        ua_string = request.headers.get('User-Agent')))
 
         db.session.commit()
 
