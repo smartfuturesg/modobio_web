@@ -199,6 +199,18 @@ class NewStaffUser(Resource):
             })
             staff_sub.user_id = user.user_id
             db.session.add(staff_sub)
+
+            #create pending email verification
+            email_verification_data = {
+                'user_id': user.user_id,
+                'token': UserPendingEmailVerifications.generate_token(user.user_id),
+                'code': UserPendingEmailVerifications.generate_code()
+            }
+
+            verification = UserPendingEmailVerifications(**email_verification_data)
+            db.session.add(verification)
+        
+            #TODO send email containing link with token and 4 digit code
             
         # create entries for role assignments 
         for role in staff_info.get('access_roles', []):
@@ -206,18 +218,6 @@ class NewStaffUser(Resource):
                                             {'user_id': user.user_id,
                                              'role': role}
                                             ))
-            
-        #create pending email verification
-        email_verification_data = {
-            'user_id': user.user_id,
-            'token': UserPendingEmailVerifications.generate_token(user.user_id),
-            'code': UserPendingEmailVerifications.generate_code()
-        }
-
-        verification = UserPendingEmailVerifications(**email_verification_data)
-        db.session.add(verification)
-        
-        #TODO send email containing link with token and 4 digit code
 
         db.session.commit()
         db.session.refresh(user)
@@ -344,6 +344,18 @@ class NewClientUser(Resource):
             client_mobile_settings.user_id = user.user_id
             db.session.add(client_mobile_settings)
 
+            #create pending email verification
+            email_verification_data = {
+                'user_id': user.user_id,
+                'token': UserPendingEmailVerifications.generate_token(user.user_id),
+                'code': UserPendingEmailVerifications.generate_code()
+            }
+
+            verification = UserPendingEmailVerifications(**email_verification_data)
+            db.session.add(verification)
+
+            #TODO send email containing link with token and 4 digit code
+
             #Authenticate newly created client accnt for immediate login
             user, user_login, _ = basic_auth.verify_password(username=user.email, password=password)
 
@@ -352,18 +364,6 @@ class NewClientUser(Resource):
         refresh_token = UserLogin.generate_token(user_type='client', user_id=user.user_id, token_type='refresh')
         #Add refresh token to db
         user_login.refresh_token = refresh_token
-
-        #create pending email verification
-        email_verification_data = {
-            'user_id': user.user_id,
-            'token': UserPendingEmailVerifications.generate_token(user.user_id),
-            'code': UserPendingEmailVerifications.generate_code()
-        }
-
-        verification = UserPendingEmailVerifications(**email_verification_data)
-        db.session.add(verification)
-
-        #TODO send email containing link with token and 4 digit code
 
         db.session.commit()
 

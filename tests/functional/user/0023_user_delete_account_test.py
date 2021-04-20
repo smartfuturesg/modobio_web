@@ -33,6 +33,10 @@ def test_account_delete_request(test_client, init_database, staff_auth_header):
             data=dumps(payload), 
             content_type='application/json')
     client_id = client_user.json['user_info']['user_id']
+
+    #verify newly created client's email
+    token = UserPendingEmailVerifications.query.filter_by(user_id=client_id).first().token
+    request = test_client.post(f'/user/email-verification/token/{token}/')
     
     #2. Create staff/cient user
     payload = users_to_delete_data['staff_client_user']
@@ -47,8 +51,6 @@ def test_account_delete_request(test_client, init_database, staff_auth_header):
     staff_client_id = staff_client_user.json['user_info']['user_id']
 
     #verify newly created staff member's email
-    token = UserPendingEmailVerifications.query.filter_by(user_id=staff_client_id).first().token
-    request = test_client.post(f'/user/email-verification/token/{token}/')
     token = UserPendingEmailVerifications.query.filter_by(user_id=staff_client_id).first().token
     request = test_client.post(f'/user/email-verification/token/{token}/')
 
@@ -67,6 +69,7 @@ def test_account_delete_request(test_client, init_database, staff_auth_header):
     response = test_client.post(f'/doctor/images/{client_id}/',
             headers=staff_user_auth_header,
             data = payload)
+    print(response.data)
     assert response.status_code == 201
     
     #4. Delete staff/client
