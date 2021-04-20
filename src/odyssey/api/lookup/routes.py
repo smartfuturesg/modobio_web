@@ -18,12 +18,12 @@ from odyssey.api.lookup.models import (
      LookupProfessionalAppointmentConfirmationWindow,
      LookupRaces,
      LookupSubscriptions,
-     LookupTelehealthSessionCost,
      LookupTelehealthSessionDuration,
      LookupTerritoriesofOperation,
      LookupTransactionTypes,
      LookupNotifications,
-     LookupEmergencyNumbers
+     LookupEmergencyNumbers,
+     LookupProfessionColors
 )
 from odyssey.api.lookup.schemas import (
     LookupActivityTrackersOutputSchema,
@@ -42,7 +42,8 @@ from odyssey.api.lookup.schemas import (
     LookupCareTeamResourcesOutputSchema,
     LookupTimezones,
     LookupTelehealthSettingsSchema,
-    LookupEmergencyNumbersOutputSchema
+    LookupEmergencyNumbersOutputSchema,
+    LookupProfessionColorsOutputSchema
 )
 from odyssey.utils.misc import check_drink_existence
 
@@ -134,14 +135,10 @@ class LookupTelehealthSettingsApi(Resource):
         confirmation_windows = {'items': LookupProfessionalAppointmentConfirmationWindow.query.all()}
         confirmation_windows['total_items'] = len(confirmation_windows['items'])
 
-        costs = {'items': LookupTelehealthSessionCost.query.all()}
-        costs['total_items'] = len(costs['items'])
-
         return {
             'session_durations': durations,
             'booking_windows' : booking_windows,
             'confirmation_windows': confirmation_windows,
-            'costs': costs
         }
 
 @ns.route('/activity-trackers/misc/')
@@ -334,4 +331,16 @@ class LookupEmergencyNumbersApi(Resource):
     def get(self):
         """GET request for the list of emergency numbers"""
         res = LookupEmergencyNumbers.query.filter_by(service='Ambulance').all()
+        return {'total_items': len(res), 'items': res}
+
+@ns.route('/profession-colors/')
+class LookupProfessionColorsApi(Resource):
+    """
+    Endpoint that returns the colors and icons associated with professions.
+    """
+    @token_auth.login_required
+    @responds(schema=LookupProfessionColorsOutputSchema, status_code=200, api=ns)
+    def get(self):
+        """get contents of profession colors lookup table"""
+        res = LookupProfessionColors.query.all()
         return {'total_items': len(res), 'items': res}

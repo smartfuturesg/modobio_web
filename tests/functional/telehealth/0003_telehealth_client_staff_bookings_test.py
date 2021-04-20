@@ -111,7 +111,6 @@ def test_get_2_client_bookings(test_client, init_database, staff_auth_header):
     response = test_client.get('/telehealth/bookings/?client_user_id={}'.format(1),
                                 headers=staff_auth_header, 
                                 content_type='application/json')
-                                
     assert response.status_code == 201
 
 def test_get_3_staff_client_bookings(test_client, init_database, staff_auth_header):
@@ -124,7 +123,7 @@ def test_get_3_staff_client_bookings(test_client, init_database, staff_auth_head
                                 headers=staff_auth_header, 
                                 content_type='application/json')
     assert response.status_code == 201
-    assert response.json['bookings'][0]['status'] == 'Pending Staff Acceptance'
+    assert response.json['bookings'][0]['status'] == 'Accepted'
 
 def test_put_1_client_staff_bookings(test_client, init_database, staff_auth_header):
     """

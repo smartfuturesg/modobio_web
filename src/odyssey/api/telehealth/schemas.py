@@ -42,6 +42,12 @@ class TelehealthBookingsSchema(ma.SQLAlchemyAutoSchema):
     start_time = fields.Time(dump_only=True)
     end_time = fields.Time(dump_only=True)
     status = fields.String(required=False,validate=validate.OneOf(BOOKINGS_STATUS))
+    client_first_name = fields.String(dump_only=True)
+    client_middle_name = fields.String(dump_only=True)
+    client_last_name = fields.String(dump_only=True)
+    staff_first_name = fields.String(dump_only=True)
+    staff_middle_name = fields.String(dump_only=True)
+    staff_last_name = fields.String(dump_only=True)
 
     @post_load
     def make_object(self, data, **kwargs):

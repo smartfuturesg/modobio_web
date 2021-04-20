@@ -67,7 +67,13 @@ telehealth_staff_general_availability_1_post_data = {
     'end_time': '12:00:00'
   }]
 }
-
+telehealth_staff_general_availability_3_post_data = {
+  'availability': [{
+    'day_of_week': 'Monday',
+    'start_time': '00:00:00',
+    'end_time': '12:00:00'
+  }]
+}
 telehealth_staff_general_availability_2_post_data = {
   'availability': [{
     'day_of_week': 'Monday',
@@ -142,7 +148,6 @@ telehealth_staff_general_availability_bad_7_post_data = {
     'end_time': '09:00:00'
   }]
 }
-
 # NOTE: The id delta should be 3
 # It works out that: booking_window_id_end_time.end_time - booking_window_id_start_time.start_time = 20 minutes
 telehealth_client_staff_bookings_post_1_data = {
