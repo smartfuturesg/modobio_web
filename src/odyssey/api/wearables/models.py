@@ -279,11 +279,13 @@ class WearablesFitbit(db.Model):
     :type: str, max length 512
     """
 
-    access_token = Column(String(512))
+    access_token = Column(String(1048))
     """
-    OAuth2 access token to authorize Fitbit access.
+    OAuth2 access token to authorize Fitbit access. Fitbit uses JWT for access token, which
+    may be up to 1024 bytes in size.
+    https://dev.fitbit.com/build/reference/web-api/oauth2/#fitbit-api-notes
 
-    :type: str, max length 512
+    :type: str, max length 1024
     """
 
     refresh_token = Column(String(512))
