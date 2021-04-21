@@ -2,9 +2,10 @@ import base64
 import random
 
 from flask.json import dumps
+from sqlalchemy import select
 
 from odyssey.api.lookup.models import LookupTerritoriesofOperation
-from odyssey.api.user.models import User
+from odyssey.api.user.models import User, UserTokenHistory
 from odyssey.api.staff.models import StaffOperationalTerritories, StaffRoles
 from odyssey.utils.constants import ACCESS_ROLES
 from .data import users_staff_new_user_data
@@ -69,9 +70,17 @@ def test_staff_login(test_client, init_database, staff_auth_header):
     # ensure access roles are correctly returned
     roles = response.get_json()['access_roles']
 
+    # pull up login attempts by this client a new failed attempt should be in the database
+    token_history = init_database.session.execute(
+            select(UserTokenHistory). \
+            where(UserTokenHistory.user_id==response.json['user_id']). \
+            order_by(UserTokenHistory.created_at.desc())
+        ).all()
+
     assert response.status_code == 201
     assert roles.sort() == users_staff_new_user_data['staff_info']['access_roles'].sort()
-
+    assert response.json['refresh_token'] == token_history[0][0].refresh_token
+    assert token_history[0][0].event == 'login'
 
 def test_creating_new_staff_same_email(test_client, init_database, staff_auth_header):
     """
