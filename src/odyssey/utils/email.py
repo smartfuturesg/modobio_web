@@ -68,11 +68,6 @@ def send_email_verify_email(recipient, token, code):
 
     SUBJECT = SUBJECTS["email-verification"]
 
-    # route emails to AWS mailbox simulator when in dev environment
-    if current_app.config['LOCAL_CONFIG'] and not recipient.email.endswith('sde.cz'):
-        recipient.email = "success@simulator.amazonses.com"
-        recipient.firstname = 'Success'
-
     # The email body for recipients with non-HTML email clients.
     BODY_TEXT = (f'Hello {recipient.firstname},\r\n'
                 'We are delighted to welcome you to Modo Bio.\n'
@@ -91,8 +86,11 @@ def send_email_verify_email(recipient, token, code):
     BODY_HTML.replace('[verification-link]', f'https://www.modobio.com/user/email-verification/token/{token}/')
     BODY_HTML.replace('XXXX', str(code))
 
-    send_email(subject=SUBJECT, recipient=recipient.email, body_text=BODY_TEXT, body_html=BODY_HTML, sender="verify@modobio.com")
-
+    # route emails to AWS mailbox simulator when in dev environment
+    if current_app.config['LOCAL_CONFIG'] and not recipient.email.endswith('sde.cz'):
+        send_email(subject=SUBJECT, recipient="success@simulator.amazonses.com", body_text=BODY_TEXT, body_html=BODY_HTML, sender="verify@modobio.com")
+    else:
+        send_email(subject=SUBJECT, recipient=recipient.email, body_text=BODY_TEXT, body_html=BODY_HTML, sender="verify@modobio.com")
     
 
 def send_email_password_reset(recipient, reset_token):
