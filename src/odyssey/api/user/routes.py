@@ -788,4 +788,6 @@ class UserPendingEmailVerificationsResendApi(Resource):
 
         db.session.commit()
 
-        #TODO: send an email with the new token and code
+        recipient = User.query.filter_by(user_id=user_id).one_or_none()
+
+        send_email_verify_email(recipient, token, code)
