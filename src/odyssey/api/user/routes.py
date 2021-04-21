@@ -47,7 +47,7 @@ from odyssey.utils.errors import (
     GenericNotFound,
     InvalidVerificationCode
 )
-from odyssey.utils.email import send_email_password_reset, send_email_delete_account
+from odyssey.utils.email import send_email_password_reset, send_email_delete_account, send_email_verify_email
 from odyssey.utils.misc import check_user_existence, check_client_existence, check_staff_existence, verify_jwt
 from odyssey.utils import search
 from odyssey import db
@@ -200,18 +200,23 @@ class NewStaffUser(Resource):
             staff_sub.user_id = user.user_id
             db.session.add(staff_sub)
 
-            #create pending email verification
+            # generate token and code for email verifciation
+            token = UserPendingEmailVerifications.generate_token(user.user_id)
+            code = UserPendingEmailVerifications.generate_code()
+
+            # create pending email verification in db
             email_verification_data = {
                 'user_id': user.user_id,
-                'token': UserPendingEmailVerifications.generate_token(user.user_id),
-                'code': UserPendingEmailVerifications.generate_code()
+                'token': token,
+                'code': code
             }
 
             verification = UserPendingEmailVerifications(**email_verification_data)
             db.session.add(verification)
+
+            # send email to the user
+            send_email_verify_email(user, token, code)
         
-            #TODO send email containing link with token and 4 digit code
-            
         # create entries for role assignments 
         for role in staff_info.get('access_roles', []):
             db.session.add(StaffRolesSchema().load(
@@ -344,17 +349,22 @@ class NewClientUser(Resource):
             client_mobile_settings.user_id = user.user_id
             db.session.add(client_mobile_settings)
 
-            #create pending email verification
+            # generate token and code for email verification
+            token = UserPendingEmailVerifications.generate_token(user.user_id)
+            code = UserPendingEmailVerifications.generate_code()
+
+            # create pending email verification in db
             email_verification_data = {
                 'user_id': user.user_id,
-                'token': UserPendingEmailVerifications.generate_token(user.user_id),
-                'code': UserPendingEmailVerifications.generate_code()
+                'token': token,
+                'code': code
             }
 
             verification = UserPendingEmailVerifications(**email_verification_data)
             db.session.add(verification)
 
-            #TODO send email containing link with token and 4 digit code
+            # send email to the user
+            send_email_verify_email(user, token, code)
 
             #Authenticate newly created client accnt for immediate login
             user, user_login, _ = basic_auth.verify_password(username=user.email, password=password)

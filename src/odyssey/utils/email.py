@@ -1,4 +1,6 @@
 import boto3
+import codecs
+import os
 from botocore.exceptions import ClientError
 from flask import current_app
 
@@ -9,7 +11,8 @@ SUBJECTS = {"remote_registration_portal": "Modo Bio User Registration Portal",
             "testing-bounce": "SES TEST EMAIL-BOUNCE",
             "testing-complaint": "SES TEST EMAIL-COMPLAINT",
             "testing-success": "SES TEST EMAIL",
-            "account_deleted": "Modo Bio Account Deleted"
+            "account_deleted": "Modo Bio Account Deleted",
+            "email-verification": "Verify Your Modo Bio Email"
             }
 
 def send_email_user_registration_portal(recipient, password, portal_id):
@@ -56,7 +59,41 @@ def send_email_user_registration_portal(recipient, password, portal_id):
     </html>
     """     
 
-    send_email_no_reply(subject=SUBJECT, recipient=recipient, body_text=BODY_TEXT, body_html=BODY_HTML)
+    send_email(subject=SUBJECT, recipient=recipient, body_text=BODY_TEXT, body_html=BODY_HTML)
+
+def send_email_verify_email(recipient, token, code):
+    """
+    Email sent to verifiy a user's email address.
+    """
+
+    SUBJECT = SUBJECTS["email-verification"]
+
+    # route emails to AWS mailbox simulator when in dev environment
+    if current_app.config['LOCAL_CONFIG'] and not recipient.email.endswith('sde.cz'):
+        recipient.email = "success@simulator.amazonses.com"
+        recipient.firstname = 'Success'
+
+    # The email body for recipients with non-HTML email clients.
+    BODY_TEXT = (f'Hello {recipient.firstname},\r\n'
+                'We are delighted to welcome you to Modo Bio.\n'
+                'Email Verification\n'
+                'For security purposes, we need to confirm your email address for your Modo Bio account. Please click the following link to verify your address:\n'
+                f'https://www.modobio.com/user/email-verification/token/{token}/\n'
+                'Or alternatively, enter the following 4 digit code on your mobile application:\n'
+                f'{code}\n'
+                'Please check that this email was sent from verify@modobio.com'
+                )
+
+    # Get HTML from file and insert recipient information
+    HTML_FILE = codecs.open(os.getcwd() + r'/src/odyssey/utils/email-verify.html', "r", encoding='utf-8')
+    BODY_HTML = HTML_FILE.read()
+    BODY_HTML.replace('[user-first-name]', recipient.firstname)
+    BODY_HTML.replace('[verification-link]', f'https://www.modobio.com/user/email-verification/token/{token}/')
+    BODY_HTML.replace('XXXX', str(code))
+
+    send_email(subject=SUBJECT, recipient=recipient.email, body_text=BODY_TEXT, body_html=BODY_HTML, sender="verify@modobio.com")
+
+    
 
 def send_email_password_reset(recipient, reset_token):
     """
@@ -92,7 +129,7 @@ def send_email_password_reset(recipient, reset_token):
     </html>
     """     
 
-    send_email_no_reply(subject=SUBJECT, recipient=recipient, body_text=BODY_TEXT, body_html=BODY_HTML)
+    send_email(subject=SUBJECT, recipient=recipient, body_text=BODY_TEXT, body_html=BODY_HTML)
 
 def send_email_delete_account(recipient, deleted_account):
     """
@@ -123,7 +160,7 @@ def send_email_delete_account(recipient, deleted_account):
     </html>
     """     
 
-    send_email_no_reply(subject=SUBJECT, recipient=recipient, body_text=BODY_TEXT, body_html=BODY_HTML)
+    send_email(subject=SUBJECT, recipient=recipient, body_text=BODY_TEXT, body_html=BODY_HTML)
 
 def send_test_email(subject="testing-success", recipient="success@simulator.amazonses.com"):
     """
@@ -165,10 +202,10 @@ def send_test_email(subject="testing-success", recipient="success@simulator.amaz
     </body>
     </html>
     """          
-    send_email_no_reply(subject=SUBJECT,recipient=RECIPIENT, body_text=BODY_TEXT, body_html=BODY_HTML)
+    send_email(subject=SUBJECT,recipient=RECIPIENT, body_text=BODY_TEXT, body_html=BODY_HTML)
 
 
-def send_email_no_reply(subject=None, recipient="success@simulator.amazonses.com", body_text=None, body_html=None):
+def send_email(subject=None, recipient="success@simulator.amazonses.com", body_text=None, body_html=None, sender="no-reply@modobio.com"):
 
     # The character encoding for the email.
     CHARSET = "UTF-8"
