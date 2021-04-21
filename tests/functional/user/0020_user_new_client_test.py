@@ -1,12 +1,10 @@
 import base64
-import pathlib
-import time
 from datetime import datetime
 
 from flask.json import dumps
-from requests.auth import _basic_auth_str
+from sqlalchemy import select
 
-from odyssey.api.user.models import User, UserLogin, UserPendingEmailVerifications
+from odyssey.api.user.models import User, UserLogin, UserPendingEmailVerifications, UserTokenHistory
 from tests.functional.user.data import users_new_self_registered_client_data
 from odyssey import db
 
@@ -45,7 +43,10 @@ def test_self_registered_new_client(test_client, init_database):
     db.session.refresh(user)
     assert user.email_verified == True
 
-    #Test token generation
+    ####
+    #Test token generation and login history
+    ####
+    
     password = payload['password']
     valid_credentials = base64.b64encode(
             f"{users_new_self_registered_client_data['email']}:{password}".encode("utf-8")).decode("utf-8")
@@ -55,9 +56,17 @@ def test_self_registered_new_client(test_client, init_database):
                             headers=headers, 
                             content_type='application/json')
 
+    # pull up login attempts by this client 
+    token_history = init_database.session.execute(
+            select(UserTokenHistory). \
+            where(UserTokenHistory.user_id==user.user_id). \
+            order_by(UserTokenHistory.created_at.desc())
+        ).all()
+    
     assert response.status_code == 201
     assert response.json['email'] == users_new_self_registered_client_data['email']
-
+    assert response.json['refresh_token'] == token_history[0][0].refresh_token
+    assert token_history[0][0].event == 'login'
 
     #Test using wrong password
     password = 'thewrongpassword?'
@@ -68,5 +77,14 @@ def test_self_registered_new_client(test_client, init_database):
     response = test_client.post('/client/token/',
                             headers=headers, 
                             content_type='application/json')
+
+    # pull up login attempts by this client. Ensure failed loginwas recorded 
+    token_history = init_database.session.execute(
+            select(UserTokenHistory). \
+            where(UserTokenHistory.user_id==user.user_id). \
+            order_by(UserTokenHistory.created_at.desc())
+        ).all()
     
     assert response.status_code == 401
+    assert token_history[0][0].event == 'login'
+    assert token_history[0][0].refresh_token == None

@@ -7,7 +7,7 @@ import re
 import statistics
 import uuid
 
-from flask import current_app
+from flask import current_app, request
 import flask.json
 from sqlalchemy import select
 from twilio.base.exceptions import TwilioRestException
@@ -20,7 +20,7 @@ from odyssey.api.doctor.models import MedicalBloodTests, MedicalBloodTestResultT
 from odyssey.api.facility.models import RegisteredFacilities
 from odyssey.api.staff.models import StaffProfile
 from odyssey.api.telehealth.models import TelehealthChatRooms
-from odyssey.api.user.models import User
+from odyssey.api.user.models import User, UserTokenHistory
 from odyssey.utils.constants import ALPHANUMERIC
 from odyssey.utils.errors import (
     ClientNotFound, 
@@ -306,7 +306,7 @@ class JSONDecoder(flask.json.JSONDecoder):
         return jsonobj
 
 
-def verify_jwt(token, error_message=""):
+def verify_jwt(token, error_message="", refresh=False):
     """
     Ensure token is signed correctly and is not yet expired
     Returns the token's payload
@@ -314,7 +314,15 @@ def verify_jwt(token, error_message=""):
     secret = current_app.config['SECRET_KEY']
     try:
         decoded_token = jwt.decode(token, secret, algorithms='HS256')
-    except jwt.ExpiredSignatureError:
+    except:
+        # log the refresh attempt
+        if refresh:
+            token_payload = jwt.decode(token, options={'verify_signature': False})
+            db.session.add(UserTokenHistory(user_id=token_payload.get('uid'), 
+                                        event='refresh',
+                                        ua_string = request.headers.get('User-Agent')))
+            db.session.commit()
+            
         raise UnauthorizedUser(message=error_message)
 
     return decoded_token

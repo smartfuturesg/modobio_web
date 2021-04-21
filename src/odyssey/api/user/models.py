@@ -2,15 +2,13 @@
 Database tables for the user system portion of the Modo Bio Staff application.
 All tables in this module are prefixed with 'User'.
 """
-import enum
-import base64
 from datetime import datetime, timedelta
 import jwt
-import os
 import random
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import generate_password_hash
 
 from flask import current_app
+from sqlalchemy import text
 
 from odyssey import db
 from odyssey.utils.constants import ALPHANUMERIC, DB_SERVER_TIME, TOKEN_LIFETIME, REFRESH_TOKEN_LIFETIME, EMAIL_TOKEN_LIFETIME
@@ -188,7 +186,7 @@ def add_modobio_id(mapper, connection, target):
                 set modobio_id = '{mb_id}'
                 where user_id = {target.user_id};"""
 
-    connection.execute(statement)
+    connection.execute(text(statement))
 
     from odyssey.utils.search import update_index
     user = {
@@ -276,6 +274,8 @@ class UserLogin(db.Model):
 
     last_login = db.Column(db.DateTime)
     """
+    **Deprecated 4.12.21 use UserTokensHistory to find last login**
+
     Time the user last logged in
 
     :type: datetime
@@ -283,6 +283,8 @@ class UserLogin(db.Model):
 
     refresh_token = db.Column(db.String, unique=True)
     """
+    **Deprecated 4.12.21 refresh tokens stored in UserTokenHistory**
+
     API refresh authentication token. Used to generate new access and refresh tokens
     We keep track of the current refresh tokens so we may blacklist tokens as needed.
 
@@ -572,27 +574,6 @@ class UserPendingEmailVerifications(db.Model):
 
     __tablename__ = 'UserPendingEmailVerifications'
 
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    timestamp for when object was created. DB server time is used. 
-
-    :type: datetime
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    timestamp for when object was updated. DB server time is used. 
-
-    :type: datetime
-    """
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Auto incrementing primary key
-
-    :type: int, primary key
-    """
-
     user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
     """
     Id of the user that this pending verification belongs to.
@@ -640,3 +621,66 @@ class UserPendingEmailVerifications(db.Model):
             code = "0" + code
 
         return code
+
+class UserTokenHistory(db.Model):
+    """ 
+    Stores details of user token generation events. This includes logging in through basic authorization
+    and when users request a new access token using a refresh token 
+
+    The primary index of this table is the
+    :attr:`user_id` number.
+    """
+
+    __tablename__ = 'UserTokenHistory'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
+    """
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Auto incrementing primary key
+
+    :type: int, primary key
+    """
+
+    user_id = db.Column(db.Integer, nullable=True)
+    """
+    User ID number, foreign key to User.user_id
+
+    :type: int, foreign key
+    """
+
+    event = db.Column(db.String)
+    """
+    Used to specify the token issueance type. Options are
+    - 'login'
+    - 'refresh'
+
+    :type: str
+    """
+
+    refresh_token = db.Column(db.String)
+    """
+    API refresh authentication token. Used to generate new access and refresh tokens
+    We keep track of the current refresh tokens so we may blacklist tokens as needed.
+
+    :type: str, unique
+    """
+
+    ua_string = db.Column(db.String)
+    """
+    Stores contents of user-agent string
+
+    :type: str
+    """
