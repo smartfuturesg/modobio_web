@@ -3,6 +3,7 @@ wearables_data = {
     'has_fitbit': True,
     'has_oura': True,
     'has_applewatch': True,
+    'registered_freestyle': False,
     'registered_fitbit': False,
     'registered_oura': False,
     'registered_applewatch': False
