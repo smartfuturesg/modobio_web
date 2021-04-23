@@ -31,6 +31,16 @@ def upgrade():
     op.create_unique_constraint(None, 'WearablesOura', ['user_id'])
     op.create_unique_constraint(None, 'WearablesOura', ['wearable_id'])
     op.create_foreign_key(None, 'WearablesOura', 'Wearables', ['wearable_id'], ['idx'], ondelete='CASCADE')
+    op.add_column('Wearables', sa.Column(
+        'registered_freestyle',
+        sa.Boolean(),
+        server_default='f',
+        nullable=True
+    ))
+    op.alter_column('Wearables', 'registered_freestyle',
+        existing_type=sa.BOOLEAN(),
+        nullable=False
+    )
     # ### end Alembic commands ###
 
 

@@ -86,6 +86,13 @@ class Wearables(db.Model):
     :type: bool, default = False
     """
 
+    registered_freestyle = Column(Boolean, default=False, nullable=False)
+    """
+    Client has activated the FreeStyle Libre continuous glucose monitoring (CGM) wearable.
+
+    :type: bool, default = False
+    """
+
     has_applewatch = Column(Boolean, default=False, nullable=False)
     """
     Client has an Apple Watch wearable.

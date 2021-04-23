@@ -682,10 +682,18 @@ class WearablesFreeStyleActivateEndpoint(Resource):
         )
 
         if not cgm:
-            cgm = WearablesFreeStyle(user_id=user_id)
+            info = Wearables.query.filter_by(user_id=user_id).one_or_none()
+            if not info:
+                info = Wearables(user_id=user_id)
+                db.session.add(info)
+                db.session.flush()
+
+            cgm = WearablesFreeStyle(user_id=user_id, wearable_id=info.idx, wearable=info)
             db.session.add(cgm)
 
         cgm.activation_timestamp = request.parsed_obj.activation_timestamp
+        cgm.wearable.has_freestyle = True
+        cgm.wearable.registered_freestyle = True
         db.session.commit()
 
 
