@@ -728,9 +728,9 @@ class WearablesFreeStyleEndpoint(Resource):
 
     @token_auth.login_required(user_type=('client',))
     @accepts(schema=WearablesFreeStyleSchema, api=ns)
-    @responds(status_code=201, api=ns)
-    def put(self, user_id):
-        """ Add CGM data for client ``user_id`` in reponse to a PUT request.
+    @responds(status_code=204, api=ns)
+    def patch(self, user_id):
+        """ Add CGM data for client ``user_id`` in reponse to a PATCH request.
 
         Parameters
         ----------
