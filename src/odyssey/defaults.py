@@ -90,3 +90,17 @@ WTF_CSRF_ENABLED = True
 Cross Site Request Forgery (CSRF) on forms, disable when testing.
 Not needed on API, to be removed with Flask app removal.
 """
+
+FLASK_SKIP_DOTENV = True
+"""
+If :module:`python-dotenv` is installed, Flask will by default use it to find .env files and
+use the contents of those files as environmental variables. It uses :func:`dotenv.find_dotenv`,
+which keeps searching up the directory tree until it finds a .env file.
+
+Unfortunately, flask also makes the idiotic assumption that when a .env file is found, it must
+be in the root of the project and will change the working directory to that. As a consequence,
+``flask db ...`` will look for ``migrations/alembic.ini`` in wherever the .env file is located,
+which may not be correct at all.
+
+This setting prevents such stupid behaviour.
+"""

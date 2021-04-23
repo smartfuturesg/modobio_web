@@ -200,6 +200,7 @@ class Config:
         # Other config
         self.SECRET_KEY = self.getvar('SECRET_KEY', '/modobio/odyssey/app_secret')
         self.SQLALCHEMY_TRACK_MODIFICATIONS = self.getvar('SQLALCHEMY_TRACK_MODIFICATIONS', None, default=False)
+        self.FLASK_SKIP_DOTENV = self.getvar('FLASK_SKIP_DOTENV', None)
 
         # No swagger in production
         self.SWAGGER_DOC = flask_env != 'production'
