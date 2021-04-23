@@ -6,6 +6,8 @@ import copy
 
 from flask_migrate import upgrade
 from sqlalchemy import text
+from sqlalchemy.sql.expression import select
+from twilio.rest import Client, TwilioException
 
 from odyssey import create_app, db
 from odyssey.api.client.models import ClientInfo
@@ -14,6 +16,7 @@ from odyssey.api.staff.models import StaffProfile, StaffRoles
 from odyssey.api.user.models import User, UserLogin, UserNotifications
 from odyssey.api.user.schemas import UserSubscriptionsSchema, UserNotificationsSchema
 from odyssey.utils.constants import ACCESS_ROLES
+from odyssey.utils.misc import grab_twilio_credentials
 from tests.functional.user.data import users_staff_member_data, users_client_new_creation_data, users_client_new_info_data
 from odyssey.utils import search
 
@@ -23,14 +26,18 @@ def delete_users():
     '''
     all_users = User.query.all()
     skipEmails = ['new_client_1','new_staff_1']
+    modo_ids = []
     for user in all_users:
         tmpEmail = user.email
         tmpEmailArr = tmpEmail.split('@')
         if tmpEmailArr[0] in skipEmails:
             continue
         if tmpEmailArr[0][-1].isnumeric():
-            db.session.delete(user)
-    db.session.commit()
+            modo_ids.append(user.modobio_id)
+            # db.session.delete(user)
+    # remove modo_ids from twilio        
+    clear_twilio(modobio_ids=modo_ids)
+    # db.session.commit()
 
 @pytest.fixture(scope='session')
 def generate_users():
@@ -46,7 +53,6 @@ def generate_users():
 
     for i in range(numUsers):
         # Change the email
-        
         tmpEmail = users_client_new_creation_data['email'].split('@')
         tmpEmail[0]+=str(i)
         users_client_new_creation_data['email'] = tmpEmail[0] + '@' + tmpEmail[1]
@@ -141,6 +147,24 @@ def clean_db(db):
 
     db.session.commit()
     db.drop_all()
+
+def clear_twilio(db=None, modobio_ids=None):
+    # bring up users
+    if not modobio_ids:
+        modobio_ids = db.session.execute(
+            select(User.modobio_id)
+        ).scalars().all()
+    
+    twilio_credentials = grab_twilio_credentials()
+    client = Client(twilio_credentials['api_key'], 
+                    twilio_credentials['api_key_secret'],
+                    twilio_credentials['account_sid'])
+    for modo_id in modobio_ids:
+        try:
+            client.conversations.users(modo_id).delete()
+        except TwilioException as e:
+            # error will arise from user not being in twilio
+            continue
 
 @pytest.fixture(scope='session')
 def init_database():
@@ -243,6 +267,8 @@ def init_database():
     
     # https://stackoverflow.com/questions/26350911/what-to-do-when-a-py-test-hangs-silently
     db.session.close()
+    
+    clear_twilio(db)
     
     clean_db(db)
 
