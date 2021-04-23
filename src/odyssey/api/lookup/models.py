@@ -6,6 +6,34 @@ not to be edited at runtime.
 from odyssey import db
 from odyssey.utils.constants import DB_SERVER_TIME
 
+class LookupTermsAndConditions(db.Model):
+    """ 
+        Holds the documententation for the terms and conditions
+    """
+
+    __tablename__ = 'LookupTermsAndConditions'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Auto incrementing primary key
+
+    :type: int, primary key
+    """
+    
+    terms_and_conditions = db.Column(db.String)
+    """ 
+    Terms and Conditions
+
+    :type: str
+    """    
+
 class LookupBookingTimeIncrements(db.Model):
     """ 
     Holds all time increment from 00:00 to 23:55 in increments of 5 minutes
