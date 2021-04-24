@@ -42,6 +42,7 @@ class TelehealthBookingsSchema(ma.SQLAlchemyAutoSchema):
     start_time = fields.Time(dump_only=True)
     end_time = fields.Time(dump_only=True)
     status = fields.String(required=False,validate=validate.OneOf(BOOKINGS_STATUS))
+    conversation_sid = fields.String(dump_only=True)
     client_first_name = fields.String(dump_only=True)
     client_middle_name = fields.String(dump_only=True)
     client_last_name = fields.String(dump_only=True)
@@ -56,6 +57,7 @@ class TelehealthBookingsSchema(ma.SQLAlchemyAutoSchema):
 class TelehealthBookingsOutputSchema(Schema):
     bookings = fields.Nested(TelehealthBookingsSchema(many=True),missing=[])
     all_bookings = fields.Integer()  
+    twilio_token = fields.String()
 
 class TelehealthStaffAvailabilitySchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -126,3 +128,17 @@ class TelehealthChatRoomAccessSchema(Schema):
 
     access_token = fields.String()
     conversation_sid = fields.String()
+
+
+class TelehealthConversationsSchema(Schema):
+    conversation_sid = fields.String()
+    booking_id = fields.Integer()
+    staff_user_id = fields.Integer()
+    staff_fullname = fields.String()
+    client_user_id = fields.Integer()
+    client_fullname = fields.String()
+
+class TelehealthConversationsNestedSchema(Schema):
+
+    conversations = fields.Nested(TelehealthConversationsSchema(many=True))
+    twilio_token = fields.String()
