@@ -314,14 +314,10 @@ class TelehealthBookingDetails(db.Model):
     details = db.Column(db.String)
     """
     client details about a booked teleheath call
+    
     :type: str
     """
 
-    media = db.Column(db.String)
-    """
-    aws url link to media saved in S3 bucket (image or recording)
-    :type: str
-    """
 
 class TelehealthChatRooms(db.Model):
     """ 
