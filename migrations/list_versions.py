@@ -45,11 +45,12 @@ nodes = {}
 nodelist = Node()
 
 for path in paths:
-    current_hash = path.name.split('_')[0]
-
+    current_hash = None
     previous_hash = None
     with open(path, mode='rt') as fh:
         for line in fh:
+            if line.startswith('revision'):
+                current_hash = line.split('=')[1].strip().strip("'")
             if line.startswith('down_revision'):
                 previous_hash = line.split('=')[1].strip().strip("'")
                 break
