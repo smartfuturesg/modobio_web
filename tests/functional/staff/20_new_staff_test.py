@@ -40,7 +40,7 @@ def test_creating_new_staff(test_client, init_database, staff_auth_header):
     code = verification.code
 
     response = test_client.post(f'/user/email-verification/code/{new_staff_uid}/',
-                                    data=dumps({'code' + code}))
+                                    data=dumps({'code': code}))
     assert response.status_code == 200
 
     # Fetch staff user and ensure email is now verified
