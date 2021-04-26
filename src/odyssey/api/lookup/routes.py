@@ -19,6 +19,7 @@ from odyssey.api.lookup.models import (
      LookupRaces,
      LookupSubscriptions,
      LookupTelehealthSessionDuration,
+     LookupTermsAndConditions,
      LookupTerritoriesofOperation,
      LookupTransactionTypes,
      LookupNotifications,
@@ -37,6 +38,7 @@ from odyssey.api.lookup.schemas import (
     LookupRacesOutputSchema,
     LookupSubscriptionsOutputSchema,
     LookupTerritoriesofOperationOutputSchema,
+    LookupTermsAndConditionsOutputSchema,
     LookupTransactionTypesOutputSchema,
     LookupNotificationsOutputSchema,
     LookupCareTeamResourcesOutputSchema,
@@ -50,6 +52,20 @@ from odyssey.utils.misc import check_drink_existence
 from odyssey import db
 
 ns = api.namespace('lookup', description='Endpoints for lookup tables.')
+
+@ns.route('/terms-and-conditions/')
+class LookupTermsAndConditionResource(Resource):
+    """ Returns the Terms and Conditions
+    """
+    @responds(schema=LookupTermsAndConditionsOutputSchema,status_code=200,api=ns)
+    def get(self):
+        lookup_ts = LookupTermsAndConditions.query.one_or_none()
+        payload = {}
+        if lookup_ts:
+            payload['terms_and_conditions'] = lookup_ts.terms_and_conditions
+        else:
+            payload['terms_and_conditions'] = 'Terms and Conditions'
+        return payload
 
 @ns.route('/telehealth/booking-increments/')
 class LookupTelehealthBookingIncrements(Resource):

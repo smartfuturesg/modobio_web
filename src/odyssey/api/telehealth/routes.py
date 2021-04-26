@@ -1,5 +1,5 @@
 
-from flask import request, current_app
+from flask import request, current_app, g
 from flask_accepts import accepts, responds
 from flask_restx import Resource
 from sqlalchemy import select
@@ -19,6 +19,7 @@ from odyssey.api.user.models import User
 
 from odyssey.api.telehealth.models import (
     TelehealthBookings,
+    TelehealthChatRooms,
     TelehealthMeetingRooms, 
     TelehealthQueueClientPool,
     TelehealthStaffAvailability,
@@ -27,7 +28,8 @@ from odyssey.api.telehealth.models import (
 from odyssey.api.telehealth.schemas import (
     TelehealthBookingsSchema,
     TelehealthBookingsOutputSchema,
-    TelehealthChatRoomAccessSchema, 
+    TelehealthChatRoomAccessSchema,
+    TelehealthConversationsNestedSchema, 
     TelehealthMeetingRoomSchema,
     TelehealthQueueClientPoolSchema,
     TelehealthQueueClientPoolOutputSchema,
@@ -38,10 +40,11 @@ from odyssey.api.telehealth.schemas import (
 ) 
 from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import TWILIO_ACCESS_KEY_TTL, DAY_OF_WEEK
-from odyssey.utils.errors import GenericNotFound, InputError, UnauthorizedUser, ContentNotFound
+from odyssey.utils.errors import GenericNotFound, InputError, LoginNotAuthorized, UnauthorizedUser, ContentNotFound
 from odyssey.utils.misc import (
     check_client_existence, 
-    check_staff_existence, 
+    check_staff_existence,
+    create_conversation, 
     generate_meeting_room_name,
     get_chatroom,
     grab_twilio_credentials
@@ -53,7 +56,7 @@ ns = api.namespace('telehealth', description='telehealth bookings management API
 class TelehealthClientTimeSelectApi(Resource):                               
     
     @token_auth.login_required
-    @responds(schema=TelehealthTimeSelectOutputSchema,api=ns, status_code=201)
+    @responds(schema=TelehealthTimeSelectOutputSchema,api=ns, status_code=200)
     def get(self,user_id):
         """
         Returns the list of available times a staff member is available
@@ -238,123 +241,149 @@ class TelehealthBookingsApi(Resource):
     This API resource is used to get and post client and staff bookings.
     """     
     @token_auth.login_required
-    @responds(schema=TelehealthBookingsOutputSchema, api=ns, status_code=201)
+    @responds(schema=TelehealthBookingsOutputSchema, api=ns, status_code=200)
     def get(self):
         """
         Returns the list of bookings for clients and/or staff
         """
+        current_user, _ = token_auth.current_user()
 
         client_user_id = request.args.get('client_user_id', type=int)
 
         staff_user_id = request.args.get('staff_user_id', type=int)
 
+        # make sure the requester is one of the participants
+        if not any(current_user.user_id == uid for uid in [client_user_id, staff_user_id]):
+            raise InputError(status_code=403, message='logged in user must be a booking participant')
+        
         if not client_user_id and not staff_user_id:
             raise InputError(status_code=405,message='Must include at least one staff or client ID.')
-        staffOnly = False
-        clientOnly = False
+
+        ###
+        # There are a few cases. In all the logged-in user must be one of the requested user_ids:
+        # 1. Both staff and client IDs part of search. 
+        # 2. Only client_id requested, logged-in user has same _user_id and context
+        # 3. Only staff_id is requested, logged-in user has same _user_id and context
+        # 4. Logged-in user does not fit requested context
+        ###
+        client_user=None
+        staff_user=None
         if client_user_id and staff_user_id:
             # Check client existence
-            check_client_existence(client_user_id)  
-            check_staff_existence(staff_user_id)      
+            client_user = check_client_existence(client_user_id)  
+            staff_user = check_staff_existence(staff_user_id)
+
             # grab the whole queue
-            booking = TelehealthBookings.query.filter_by(client_user_id=client_user_id,staff_user_id=staff_user_id).order_by(TelehealthBookings.target_date.asc()).all()
-        elif client_user_id and not staff_user_id:
-            # Check client existence
-            check_client_existence(client_user_id)        
-            # grab this client's bookings
-            booking = db.session.query(TelehealthBookings,User)\
-                .join(User, User.user_id == TelehealthBookings.staff_user_id)\
-                    .filter(TelehealthBookings.client_user_id == client_user_id)\
-                        .all()   
-            clientOnly = True     
-        elif staff_user_id and not client_user_id:
-            # Check staff existence
-            check_staff_existence(staff_user_id)        
-            # grab this staff member's bookings
-            booking = db.session.query(TelehealthBookings,User)\
-                .join(User, User.user_id == TelehealthBookings.client_user_id)\
-                    .filter(TelehealthBookings.staff_user_id == staff_user_id)\
-                        .all()
-            staffOnly = True
-        time_inc = LookupBookingTimeIncrements.query.all()
-        bookings = []
-
-        if staffOnly:
-            staff = User.query.filter_by(user_id=staff_user_id).one_or_none()
-            for book in booking:
-                bookings.append({
-                    'booking_id': book[0].idx,
-                    'staff_user_id': book[0].staff_user_id,
-                    'client_user_id': book[0].client_user_id,
-                    'staff_first_name': staff.firstname,
-                    'staff_middle_name': staff.middlename,
-                    'staff_last_name': staff.lastname,
-                    'client_first_name': book[1].firstname,
-                    'client_middle_name': book[1].middlename,
-                    'client_last_name': book[1].lastname,                
-                    'start_time': time_inc[book[0].booking_window_id_start_time-1].start_time,
-                    'end_time': time_inc[book[0].booking_window_id_end_time-1].end_time,
-                    'target_date': book[0].target_date,
-                    'status': book[0].status,
-                    'profession_type': book[0].profession_type
-                })
-        elif clientOnly:
-            client = User.query.filter_by(user_id=client_user_id).one_or_none()
-            for book in booking:
-                bookings.append({
-                    'booking_id': book[0].idx,
-                    'staff_user_id': book[0].staff_user_id,
-                    'client_user_id': book[0].client_user_id,
-                    'staff_first_name': book[1].firstname,
-                    'staff_middle_name': book[1].middlename,
-                    'staff_last_name': book[1].lastname,
-                    'client_first_name': client.firstname,
-                    'client_middle_name': client.middlename,
-                    'client_last_name': client.lastname,                
-                    'start_time': time_inc[book[0].booking_window_id_start_time-1].start_time,
-                    'end_time': time_inc[book[0].booking_window_id_end_time-1].end_time,
-                    'target_date': book[0].target_date,
-                    'status': book[0].status,
-                    'profession_type': book[0].profession_type
-                })
-        else:
-            staff = User.query.filter_by(user_id=staff_user_id).one_or_none()
-            client = User.query.filter_by(user_id=client_user_id).one_or_none()
-            for book in booking:
-                bookings.append({
-                    'booking_id': book.idx,
-                    'staff_user_id': book.staff_user_id,
-                    'client_user_id': book.client_user_id,
-                    'staff_first_name': staff.firstname,
-                    'staff_middle_name': staff.middlename,
-                    'staff_last_name': staff.lastname,
-                    'client_first_name': client.firstname,
-                    'client_middle_name': client.middlename,
-                    'client_last_name': client.lastname,                
-                    'start_time': time_inc[book.booking_window_id_start_time-1].start_time,
-                    'end_time': time_inc[book.booking_window_id_end_time-1].end_time,
-                    'target_date': book.target_date,
-                    'status': book.status,
-                    'profession_type': book.profession_type
-                })             
-        # Sort bookings by time then sort by date
-        bookings.sort(key=lambda t: t['start_time'])
-        bookings.sort(key=lambda t: t['target_date'])
-
-        payload = {'bookings': bookings,
-                   'all_bookings': len(bookings)}
+            query = db.session.execute(
+                select(TelehealthBookings, TelehealthChatRooms.conversation_sid).
+                join(TelehealthChatRooms, TelehealthBookings.idx == TelehealthChatRooms.booking_id).
+                where(
+                    TelehealthBookings.client_user_id == client_user_id,
+                    TelehealthBookings.staff_user_id == staff_user_id
+                    ).
+                order_by(TelehealthBookings.target_date.asc())
+            ).all()
         
+            bookings = [dict(zip(('booking','conversation_sid'), dat)) for dat in query]
+
+        # requesting to view client bookings. Must be logged in as the client
+        elif current_user.user_id == client_user_id and g.get('user_type') == 'client':
+            # grab this client's bookings
+            client_user = current_user
+            # bring up booking, set the results in a dictionary
+            query = db.session.execute(
+                select(TelehealthBookings, TelehealthChatRooms.conversation_sid, User).
+                join(TelehealthChatRooms, TelehealthBookings.idx == TelehealthChatRooms.booking_id).
+                join(User, User.user_id == TelehealthBookings.staff_user_id).
+                where(
+                    TelehealthBookings.client_user_id == client_user_id,
+                    ).
+                order_by(TelehealthBookings.target_date.asc())
+            ).all()
+
+            bookings = [dict(zip(('booking','conversation_sid', 'staff_user'), dat)) for dat in query] 
+        
+        # requesting to view staff bookings. Must be logged in as the staff
+        elif current_user.user_id == staff_user_id and g.get('user_type') == 'staff':
+            # grab this client's bookings
+            staff_user = current_user
+            # bring up booking, set the results in a dictionary
+            query = db.session.execute(
+                select(TelehealthBookings, TelehealthChatRooms.conversation_sid, User).
+                join(TelehealthChatRooms, TelehealthBookings.idx == TelehealthChatRooms.booking_id).
+                join(User, User.user_id == TelehealthBookings.client_user_id).
+                where(
+                    TelehealthBookings.staff_user_id == staff_user_id
+                    ).
+                order_by(TelehealthBookings.target_date.asc())
+            ).all()
+
+            bookings = [dict(zip(('booking','conversation_sid', 'client_user'), dat)) for dat in query] 
+
+        else:
+            raise InputError(status_code=403, message='logged in user must be a booking participant')
+
+        time_inc = LookupBookingTimeIncrements.query.all()
+        
+        bookings_payload = []
+
+        for booking in bookings:
+            staff = booking.get('staff_user', staff_user)
+            client = booking.get('client_user', client_user)
+            book = booking.get('booking')
+            bookings_payload.append({
+                'booking_id': book.idx,
+                'staff_user_id': staff.user_id,
+                'client_user_id': client.user_id,
+                'staff_first_name': staff.firstname,
+                'staff_middle_name': staff.middlename,
+                'staff_last_name': staff.lastname,
+                'client_first_name': client.firstname,
+                'client_middle_name': client.middlename,
+                'client_last_name': client.lastname,                
+                'start_time': time_inc[book.booking_window_id_start_time-1].start_time,
+                'end_time': time_inc[book.booking_window_id_end_time-1].end_time,
+                'target_date': book.target_date,
+                'status': book.status,
+                'profession_type': book.profession_type,
+                'conversation_sid': booking.get('conversation_sid')
+            })
+
+        # Sort bookings by time then sort by date
+        bookings_payload.sort(key=lambda t: t['start_time'])
+        bookings_payload.sort(key=lambda t: t['target_date'])
+
+        # create twilio access token with chat grant 
+        twilio_credentials = grab_twilio_credentials()
+        token = AccessToken(twilio_credentials['account_sid'], 
+                    twilio_credentials['api_key'], 
+                    twilio_credentials['api_key_secret'],
+                    identity=current_user.modobio_id, 
+                    ttl=TWILIO_ACCESS_KEY_TTL)
+        
+        token.add_grant(ChatGrant(service_sid=current_app.config['CONVERSATION_SERVICE_SID']))
+        
+        payload = {
+            'all_bookings': len(bookings_payload),
+            'bookings': bookings_payload,
+            'twilio_token': token.to_jwt()            
+        }
         return payload
 
-    @token_auth.login_required
+    @token_auth.login_required()
     @accepts(schema=TelehealthBookingsSchema, api=ns)
-    @responds(status_code=201,api=ns)
+    @responds(schema=TelehealthBookingsOutputSchema, api=ns, status_code=201)
     def post(self):
         """
-            Add client and staff to a TelehealthBookings table.
+        Add client and staff to a TelehealthBookings table.
+
+        Responds with successful booking and conversation_id 
         """
+        current_user, _ = token_auth.current_user()
+
         if request.parsed_obj.booking_window_id_start_time >= request.parsed_obj.booking_window_id_end_time:
             raise InputError(status_code=405,message='Start time must be before end time.')
+        
         client_user_id = request.args.get('client_user_id', type=int)
         
         if not client_user_id:
@@ -364,6 +393,10 @@ class TelehealthBookingsApi(Resource):
         
         if not staff_user_id:
             raise InputError(status_code=405,message='Missing Staff ID')        
+        
+        # make sure the requester is one of the participants
+        if not any(current_user.user_id == uid for uid in [client_user_id, staff_user_id]):
+            raise InputError(status_code=405, message='logged in user must be a booking participant')
         
         # Check client existence
         check_client_existence(client_user_id)
@@ -407,8 +440,34 @@ class TelehealthBookingsApi(Resource):
         request.parsed_obj.client_user_id = client_user_id
         request.parsed_obj.staff_user_id = staff_user_id
         db.session.add(request.parsed_obj)
+        db.session.flush()
+
+        # create Twilio conversation and store details in TelehealthChatrooms table
+        conversation = create_conversation(staff_user_id = staff_user_id,
+                            client_user_id = client_user_id,
+                            booking_id=request.parsed_obj.idx)
+
+        # create access token with chat grant for newly provisioned room
+        twilio_credentials = grab_twilio_credentials()
+        token = AccessToken(twilio_credentials['account_sid'], 
+                    twilio_credentials['api_key'], 
+                    twilio_credentials['api_key_secret'],
+                    identity=current_user.modobio_id, 
+                    ttl=TWILIO_ACCESS_KEY_TTL)
+
+        token.add_grant(ChatGrant(service_sid=current_app.config['CONVERSATION_SERVICE_SID']))
+        
         db.session.commit()
-        return 201
+
+        request.parsed_obj.conversation_sid = conversation.sid
+        
+        payload = {
+            'all_bookings': 1,
+            'twilio_token': token.to_jwt(),
+            'bookings':[request.parsed_obj] 
+        }
+
+        return payload
 
     @token_auth.login_required
     @accepts(schema=TelehealthBookingsSchema, api=ns)
@@ -498,6 +557,8 @@ class ProvisionMeetingRooms(Resource):
     @responds(schema = TelehealthMeetingRoomSchema, status_code=201, api=ns)
     def post(self, user_id):
         """
+        Deprecated 4.15.21
+
         Create a new meeting room between the logged-in staff member
         and the client specified in the url param, user_id
         """
@@ -539,7 +600,7 @@ class ProvisionMeetingRooms(Resource):
                             ttl=TWILIO_ACCESS_KEY_TTL)
         
         token.add_grant(VideoGrant(room=meeting_room.room_name))
-        token.add_grant(ChatGrant(service_sid=conversation.chat_service_sid))
+        token.add_grant(ChatGrant(service_sid=current_app.config['CONVERSATION_SERVICE_SID']))
         
         meeting_room.staff_access_token = token.to_jwt()
         meeting_room.__dict__['access_token'] = meeting_room.staff_access_token
@@ -595,7 +656,7 @@ class GrantMeetingRoomAccess(Resource):
         return meeting_room
 
 @ns.route('/meeting-room/status/<int:room_id>/')
-@ns.doc(params={'room_id': 'User ID number'})
+@ns.doc(params={'room_id': 'Room ID number'})
 class MeetingRoomStatusAPI(Resource):
     """
     Update and check meeting room status
@@ -631,7 +692,7 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
     This API resource is used to get, post the staff's general availability
     """
     @token_auth.login_required
-    @responds(schema=TelehealthStaffAvailabilityOutputSchema, api=ns, status_code=201)
+    @responds(schema=TelehealthStaffAvailabilityOutputSchema, api=ns, status_code=200)
     def get(self,user_id):
         """
         Returns the staff availability
@@ -964,6 +1025,7 @@ class TelehealthQueueClientPoolApi(Resource):
 
     @token_auth.login_required
     @accepts(schema=TelehealthQueueClientPoolSchema, api=ns)
+    @responds(api=ns, status_code=201)
     def post(self,user_id):
         """
             Add a client to the queue
@@ -1145,7 +1207,6 @@ class TelehealthBookingDetailsApi(Resource):
         db.session.commit()
         return f'Deleted all details for booking_id {booking_id}', 200
 
-
 @ns.route('/chat-room/access-token')
 @ns.doc(params={'client_user_id': 'Required. user_id of client participant.',
                'staff_user_id': 'Required. user_id of staff participant'})
@@ -1198,6 +1259,7 @@ class TelehealthChatRoomApi(Resource):
                             twilio_credentials['api_key_secret'],
                             identity=user.modobio_id, 
                             ttl=TWILIO_ACCESS_KEY_TTL)
+                            
         token.add_grant(ChatGrant(service_sid=conversation.chat_service_sid))
 
         payload = {'access_token': token.to_jwt(),
@@ -1205,5 +1267,71 @@ class TelehealthChatRoomApi(Resource):
 
         return payload
 
-def sortStartTime(val):
-    return val['start_time']
+@ns.route('/chat-room/access-token/all/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class TelehealthAllChatRoomApi(Resource):
+    """
+    Endpoint for dealing with all conversations a user is a participant to within a certain context (staff or client)
+
+    """
+    @token_auth.login_required
+    @responds(api=ns, schema = TelehealthConversationsNestedSchema, status_code=200)
+    def get(self, user_id):
+        """
+        Returns all conversations for the user along with a token to access all chat transcripts.
+
+        Conversations will only be displayed for one context or another. Meaning if the user is logged in as staff,
+        they will only be returned all conversations in which they are a staff participant of. 
+        """
+        #check context of log in from token
+        user_type = g.get('user_type')
+        
+        user = g.get('flask_httpauth_user')[0]
+
+        # user requested must be the logged-in user
+        if user.user_id != user_id:
+            raise InputError(403, message='user requested must be logged in user')
+
+        if user_type == 'client':
+            stmt = select(TelehealthChatRooms, User). \
+                join(User, User.user_id == TelehealthChatRooms.staff_user_id).\
+                where(TelehealthChatRooms.client_user_id==user_id)
+            query = db.session.execute(stmt).all()
+            conversations = [dict(zip(('conversation','staff_user'), dat)) for dat in query ]
+        elif user_type == 'staff':
+            stmt = select(TelehealthChatRooms, User). \
+                join(User, User.user_id == TelehealthChatRooms.client_user_id).\
+                where(TelehealthChatRooms.staff_user_id==user_id)
+            query = db.session.execute(stmt).all()
+            conversations = [dict(zip(('conversation','client_user'), dat)) for dat in query]
+        else:
+            raise InputError(403, message='user not authorized')
+        
+
+        # add chat grants to a new twilio access token
+        twilio_credentials = grab_twilio_credentials()
+        token = AccessToken(twilio_credentials['account_sid'], 
+                    twilio_credentials['api_key'], 
+                    twilio_credentials['api_key_secret'],
+                    identity=user.modobio_id, 
+                    ttl=TWILIO_ACCESS_KEY_TTL)
+        token.add_grant(ChatGrant(service_sid=current_app.config['CONVERSATION_SERVICE_SID']))
+
+        # loop through conversations to create payload
+        conversations_payload = []
+        for conversation in conversations:
+            staff_user = conversation.get('staff_user', user)
+            client_user = conversation.get('client_user', user)
+            conversations_payload.append({
+                'conversation_sid': conversation['conversation'].conversation_sid,
+                'booking_id': conversation['conversation'].booking_id,
+                'staff_user_id': staff_user.user_id,
+                'staff_fullname': staff_user.firstname+' '+staff_user.lastname,
+                'client_user_id': client_user.user_id,
+                'client_fullname': client_user.firstname+' '+client_user.lastname,
+            })
+
+        payload = {'conversations' : conversations_payload,
+                   'twilio_token': token.to_jwt()}
+            
+        return payload

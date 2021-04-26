@@ -1,7 +1,7 @@
 from base64 import b64decode
 import jwt
 
-from flask import current_app, request, make_response, g
+from flask import current_app, request, g
 from functools import wraps
 from sqlalchemy import select
 from werkzeug.datastructures import Authorization
@@ -313,7 +313,8 @@ class TokenAuth(BasicAuth):
                     ).join(
                         UserLogin, User.user_id == UserLogin.user_id
                     ).where(User.user_id == decoded_token['uid'])).one_or_none()    
-                           
+        # breakpoint()
+        g.user_type = decoded_token.get('utype')
         return query[0], query[1], decoded_token.get('utype')
 
     def get_auth(self):

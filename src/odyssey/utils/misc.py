@@ -54,12 +54,14 @@ def check_client_existence(user_id):
     client = User.query.filter_by(user_id=user_id, is_client=True, deleted=False).one_or_none()
     if not client:
         raise ClientNotFound(user_id)
+    return client
 
 def check_staff_existence(user_id):
     """Check that the user is in the database and is a staff member"""
     staff = User.query.filter_by(user_id=user_id, is_staff=True, deleted=False).one_or_none()
     if not staff:
         raise StaffNotFound(user_id)
+    return staff
 
 def check_user_existence(user_id):
     """Check that the user is in the database
@@ -67,6 +69,7 @@ def check_user_existence(user_id):
     user = User.query.filter_by(user_id=user_id, deleted=False).one_or_none()
     if not user:
         raise UserNotFound(user_id)
+    return user
 
 def check_blood_test_existence(test_id):
     """Check that the blood test is in the database"""
@@ -135,8 +138,47 @@ def generate_meeting_room_name(meeting_type = 'TELEHEALTH'):
 
     return (meeting_type+'_'+_hash).upper()
 
-def get_chatroom(staff_user_id, client_user_id, participant_modobio_id, create_new=True):
+def create_conversation(staff_user_id, client_user_id, booking_id):
     """
+    Provision a Twilio conversation between the staff and client users
+    """
+    # bring up twilio client
+    twilio_credentials = grab_twilio_credentials()
+    client = Client(twilio_credentials['api_key'], 
+                    twilio_credentials['api_key_secret'],
+                    twilio_credentials['account_sid'])
+
+    room_name = generate_meeting_room_name(meeting_type='CHATROOM')
+    # create conversation through twilio api, add participants by modobio_id
+    conversation = client.conversations.conversations.create(
+        friendly_name=room_name
+    )
+
+    users = db.session.execute(
+        select(User.modobio_id).
+        where(User.user_id.in_([staff_user_id, client_user_id]))
+    ).scalars().all()
+
+    for modobio_id in users:
+        conversation.participants.create(identity=modobio_id)
+
+    # create chatroom entry into DB
+    new_chat_room = TelehealthChatRooms(
+        staff_user_id=staff_user_id,
+        client_user_id=client_user_id,
+        room_name = room_name,
+        conversation_sid = conversation.sid,
+        booking_id = booking_id)
+    
+    db.session.add(new_chat_room)
+
+    return conversation
+    
+
+def get_chatroom(staff_user_id, client_user_id, participant_modobio_id, create_new=False):
+    """
+    Deprecated 4.15.21
+    
     Retrieves twilio chat room by searcing db for the user ids provided.
     If none exist creates a new room with provided.
     """
@@ -146,14 +188,16 @@ def get_chatroom(staff_user_id, client_user_id, participant_modobio_id, create_n
                     twilio_credentials['api_key_secret'],
                     twilio_credentials['account_sid'])
 
-    # bring up chat room, if a chat between the client and staff users 
+    # bring up the FIRST chat room, this is a small patch until we fully deprecate this function on the front end
+    # if a chat between the client and staff users 
     # does not exist, create a new chat room
+
     chat_room = db.session.execute(
         select(TelehealthChatRooms
         ).where(
             TelehealthChatRooms.staff_user_id == staff_user_id,
             TelehealthChatRooms.client_user_id == client_user_id
-        )).one_or_none()
+        )).first()
     
     if chat_room:
         # pull down the conversation from Twilio, add user

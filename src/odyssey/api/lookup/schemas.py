@@ -15,12 +15,19 @@ from odyssey.api.lookup.models import (
     LookupRaces,
     LookupSubscriptions,
     LookupTelehealthSessionDuration,
+    LookupTermsAndConditions,
     LookupTerritoriesofOperation,
     LookupTransactionTypes,
     LookupNotifications,
     LookupEmergencyNumbers,
     LookupProfessionColors
 )
+
+class LookupTermsAndConditionsOutputSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupTermsAndConditions
+        exclude = ('idx','created_at')
+    terms_and_conditions = fields.String(dump_only=True)
 
 class LookupBookingTimeIncrementsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
