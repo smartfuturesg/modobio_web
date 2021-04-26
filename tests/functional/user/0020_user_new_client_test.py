@@ -36,7 +36,7 @@ def test_self_registered_new_client(test_client, init_database):
     verification = UserPendingEmailVerifications.query.filter_by(user_id=user.user_id).one_or_none()
     token = verification.token
 
-    response = test_client.post('/user/email-verification/token/' + token + '/')
+    response = test_client.get('/user/email-verification/token/' + token + '/')
     assert response.status_code == 200
 
     # Refresh user and ensure email is now verified

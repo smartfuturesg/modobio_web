@@ -91,7 +91,7 @@ def test_creating_new_client(test_client, init_database, staff_auth_header):
                                 content_type='application/json')
 
     user = User.query.filter_by(email=users_new_user_client_data['user_info']['email']).first()
-    print(response.data)
+
     assert response.status_code == 201
     assert user.email == users_new_user_client_data['user_info']['email']
     assert response.json['user_info']['modobio_id']
@@ -100,7 +100,7 @@ def test_creating_new_client(test_client, init_database, staff_auth_header):
     verification = UserPendingEmailVerifications.query.filter_by(user_id=user.user_id).one_or_none()
     token = verification.token
 
-    response = test_client.post('/user/email-verification/token/' + token + '/')
+    response = test_client.get('/user/email-verification/token/' + token + '/')
     assert response.status_code == 200
 
     ###############
