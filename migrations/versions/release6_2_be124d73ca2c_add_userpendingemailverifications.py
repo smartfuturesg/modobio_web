@@ -1,7 +1,7 @@
 """Add UserPendingEmailVerifications
 
 Revision ID: be124d73ca2c
-Revises: f56c6155f65c
+Revises: ffe564869f0d
 Create Date: 2021-04-16 16:05:04.893385
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'be124d73ca2c'
-down_revision = 'f56c6155f65c'
+down_revision = 'ffe564869f0d'
 branch_labels = None
 depends_on = None
 
