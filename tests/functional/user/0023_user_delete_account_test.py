@@ -26,7 +26,7 @@ def test_account_delete_request(test_client, init_database, staff_auth_header):
 
     #verify newly created client's email
     token = UserPendingEmailVerifications.query.filter_by(user_id=client_id).first().token
-    request = test_client.post(f'/user/email-verification/token/{token}/')
+    request = test_client.get(f'/user/email-verification/token/{token}/')
     
     #2. Create staff/cient user
     payload = users_to_delete_data['staff_client_user']
@@ -42,7 +42,7 @@ def test_account_delete_request(test_client, init_database, staff_auth_header):
 
     #verify newly created staff member's email
     token = UserPendingEmailVerifications.query.filter_by(user_id=staff_client_id).first().token
-    request = test_client.post(f'/user/email-verification/token/{token}/')
+    request = test_client.get(f'/user/email-verification/token/{token}/')
 
     #3. Add info for client user, reported by staff/client
     valid_credentials = base64.b64encode(

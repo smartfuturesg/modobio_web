@@ -39,7 +39,8 @@ def test_creating_new_staff(test_client, init_database, staff_auth_header):
     verification = UserPendingEmailVerifications.query.filter_by(user_id=new_staff_uid).one_or_none()
     code = verification.code
 
-    response = test_client.get('/user/email-verification/code/' + str(new_staff_uid) + '/?code=' + str(code))
+    response = test_client.post(f'/user/email-verification/code/{new_staff_uid}/',
+                                    data=dumps({'code' + code}))
     assert response.status_code == 200
 
     # Fetch staff user and ensure email is now verified
