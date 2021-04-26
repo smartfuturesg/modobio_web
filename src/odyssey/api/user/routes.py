@@ -718,7 +718,7 @@ class UserNotificationsPutApi(Resource):
 class UserPendingEmailVerificationsTokenApi(Resource):
 
     @responds(status_code=200)
-    def post(self, token):
+    def get(self, token):
         """
         Checks if token has not expired and exists in db.
         If true, removes pending verification object and returns 200.
@@ -793,10 +793,13 @@ class UserPendingEmailVerificationsResendApi(Resource):
             raise GenericNotFound("There is no pending email verification for user ID " + str(user_id))
 
         # create a new token and code for this user
+        token = UserPendingEmailVerifications.generate_token(user_id)
+        code = UserPendingEmailVerifications.generate_code()
+
         verification.update(
             {
-                'token': UserPendingEmailVerifications.generate_token(user_id),
-                'code': UserPendingEmailVerifications.generate_code()
+                'token': token,
+                'code': code
             }
         )
 

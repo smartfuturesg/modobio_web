@@ -127,7 +127,6 @@ class BasicAuth(object):
             if user.is_client:
                 self.client_access_check(user, resources)
             else:
-                breakpint()
                 raise LoginNotAuthorized()
         elif user_context == 'basic_auth':
             if 'staff' in user_type and user.is_staff:

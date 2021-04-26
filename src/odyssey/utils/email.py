@@ -4,6 +4,7 @@ import os
 from botocore.exceptions import ClientError
 from flask import current_app
 
+from odyssey.api import api
 from odyssey.utils.constants import PASSWORD_RESET_URL, REGISTRATION_PORTAL_URL
 
 SUBJECTS = {"remote_registration_portal": "Modo Bio User Registration Portal", 
@@ -73,7 +74,7 @@ def send_email_verify_email(recipient, token, code):
                 'We are delighted to welcome you to Modo Bio.\n'
                 'Email Verification\n'
                 'For security purposes, we need to confirm your email address for your Modo Bio account. Please click the following link to verify your address:\n'
-                f'https://www.modobio.com/user/email-verification/token/{token}/\n'
+                f'{api.base_url}/user/email-verification/token/{token}/\n'
                 'Or alternatively, enter the following 4 digit code on your mobile application:\n'
                 f'{code}\n'
                 'Please check that this email was sent from verify@modobio.com'
@@ -82,9 +83,9 @@ def send_email_verify_email(recipient, token, code):
     # Get HTML from file and insert recipient information
     HTML_FILE = codecs.open(os.getcwd() + r'/src/odyssey/utils/email-verify.html', "r", encoding='utf-8')
     BODY_HTML = HTML_FILE.read()
-    BODY_HTML.replace('[user-first-name]', recipient.firstname)
-    BODY_HTML.replace('[verification-link]', f'https://www.modobio.com/user/email-verification/token/{token}/')
-    BODY_HTML.replace('XXXX', str(code))
+    BODY_HTML = BODY_HTML.replace('[user-first-name]', recipient.firstname)
+    BODY_HTML = BODY_HTML.replace('[verification-link]', f'{api.base_url}/user/email-verification/token/{token}/')
+    BODY_HTML = BODY_HTML.replace('XXXX', str(code))
 
     # route emails to AWS mailbox simulator when in dev environment
     if current_app.config['LOCAL_CONFIG'] and not recipient.email.endswith('sde.cz'):
