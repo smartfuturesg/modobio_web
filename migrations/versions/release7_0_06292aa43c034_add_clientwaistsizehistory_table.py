@@ -1,7 +1,7 @@
 """add ClientWaistSizeHistory table
 
 Revision ID: 6292aa43c034
-Revises: f56c6155f65c
+Revises: ffe564869f0d
 Create Date: 2021-04-09 08:59:41.025324
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '6292aa43c034'
-down_revision = 'f56c6155f65c'
+down_revision = 'ffe564869f0d'
 branch_labels = None
 depends_on = None
 
