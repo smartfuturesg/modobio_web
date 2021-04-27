@@ -1,16 +1,14 @@
-from datetime import datetime, timedelta
-import jwt
 
-from flask import current_app, request
+from flask import request
 from flask_accepts import accepts, responds
 from flask_restx import Resource
 
 from odyssey import db
 from odyssey.api import api
-from odyssey.api.staff.models import StaffOperationalTerritories, StaffProfile, StaffRoles, StaffRecentClients
-from odyssey.api.user.models import User, UserLogin
+from odyssey.api.staff.models import StaffOperationalTerritories, StaffRoles, StaffRecentClients
+from odyssey.api.user.models import User, UserLogin, UserTokenHistory
 from odyssey.utils.auth import token_auth, basic_auth
-from odyssey.utils.errors import UnauthorizedUser, StaffEmailInUse, StaffNotFound, ClientNotFound
+from odyssey.utils.errors import UnauthorizedUser, StaffEmailInUse
 from odyssey.api.user.schemas import UserSchema, StaffInfoSchema
 from odyssey.api.staff.schemas import (
     StaffOperationalTerritoriesNestedSchema,
@@ -19,7 +17,6 @@ from odyssey.api.staff.schemas import (
     StaffRecentClientsSchema,
     StaffTokenRequestSchema
 )
-from odyssey.utils.misc import check_client_existence
 
 ns = api.namespace('staff', description='Operations related to staff members')
 
@@ -251,7 +248,10 @@ class StaffToken(Resource):
         access_token = UserLogin.generate_token(user_type='staff', user_id=user.user_id, token_type='access')
         refresh_token = UserLogin.generate_token(user_type='staff', user_id=user.user_id, token_type='refresh')
 
-        user_login.refresh_token = refresh_token
+        db.session.add(UserTokenHistory(user_id=user.user_id, 
+                                        refresh_token=refresh_token,
+                                        event='login',
+                                        ua_string = request.headers.get('User-Agent')))
         db.session.commit()
 
         return {'email': user.email, 

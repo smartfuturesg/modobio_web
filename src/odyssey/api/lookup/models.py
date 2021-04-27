@@ -252,63 +252,6 @@ class LookupClientBookingWindow(db.Model):
     :type: int
     """
 
-class LookupTelehealthSessionCost(db.Model):
-    """ Stored telehealth session costs in database. 
-    """
-
-    __tablename__ = 'LookupTelehealthSessionCost'
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Primary index for 
-
-    :type: int, primary key, autoincrement
-    """
-
-    profession_type = db.Column(db.String)
-    """
-    Profession Type 
-    i.e. Medical Doctor etc
-
-    :type: str
-    """
-
-    territory = db.Column(db.String)
-    """
-    Territory
-    i.e. USA, UK, etc
-
-    :type: str
-    """
-
-    session_min_cost = db.Column(db.Float)
-    """
-    Minimum allowed session cost in this country's currency
-    
-    :type: float
-    """
-
-    session_max_cost = db.Column(db.Float)
-    """
-    Maximum allowed session cost in this country's currency
-    
-    :type: float
-    """
-
 class LookupTelehealthSessionDuration(db.Model):
     """ Stored telehealth session durations in database. 
     """
@@ -1297,6 +1240,53 @@ class LookupEmergencyNumbers(db.Model):
     phone_number = db.Column(db.String)
     """
     Emergency phone number
+
+    :type: string
+    """
+
+class LookupProfessionColors(db.Model):
+    """ Static list of colors and icons associated with professions """
+
+    __tablename__ = 'LookupProfessionColors'
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Index
+
+    :type: integer, primary key, autoincrementing
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+    
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    profession_type = db.Column(db.String)
+    """
+    Name of this profession.
+
+    :type: string
+    """
+
+    icon = db.Column(db.String)
+    """
+    Icon for this profession type
+
+    :type: string
+    """
+
+    color = db.Column(db.String)
+    """
+    Color associated with this profession type and icon
 
     :type: string
     """

@@ -14,12 +14,12 @@ from odyssey.api.lookup.models import (
     LookupProfessionalAppointmentConfirmationWindow,
     LookupRaces,
     LookupSubscriptions,
-    LookupTelehealthSessionCost,
     LookupTelehealthSessionDuration,
     LookupTerritoriesofOperation,
     LookupTransactionTypes,
     LookupNotifications,
-    LookupEmergencyNumbers
+    LookupEmergencyNumbers,
+    LookupProfessionColors
 )
 
 class LookupBookingTimeIncrementsSchema(ma.SQLAlchemyAutoSchema):
@@ -64,14 +64,6 @@ class LookupClientBookingWindowSchema(ma.SQLAlchemyAutoSchema):
 
 class LookupClientBookingWindowOutputSchema(Schema):
     items = fields.Nested(LookupClientBookingWindowSchema(many=True),missing=[])
-    total_items = fields.Integer()
-
-class LookupTelehealthSessionCostSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = LookupTelehealthSessionCost
-
-class LookupTelehealthSessionCostOutputSchema(Schema):
-    items = fields.Nested(LookupTelehealthSessionCostSchema(many=True),missing=[])
     total_items = fields.Integer()
 
 class LookupTelehealthSessionDurationSchema(ma.SQLAlchemyAutoSchema):
@@ -216,7 +208,6 @@ class LookupTelehealthSettingsSchema(Schema):
     session_durations = fields.Nested(LookupTelehealthSessionDurationOutputSchema, missing = [])
     booking_windows = fields.Nested(LookupClientBookingWindowOutputSchema, missing = [])
     confirmation_windows = fields.Nested(LookupProfessionalAppointmentConfirmationWindowOutputSchema, missing= [])
-    costs = fields.Nested(LookupTelehealthSessionCostOutputSchema, missing = [])
 
 class LookupEmergencyNumbersSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -225,4 +216,13 @@ class LookupEmergencyNumbersSchema(ma.SQLAlchemyAutoSchema):
 
 class LookupEmergencyNumbersOutputSchema(Schema):
     items = fields.Nested(LookupEmergencyNumbersSchema(many=True), missing=[])
+    total_items = fields.Integer()
+
+class LookupProfessionColorsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupProfessionColors
+        exclude = ('created_at', 'updated_at', 'idx')
+
+class LookupProfessionColorsOutputSchema(Schema):
+    items = fields.Nested(LookupProfessionColorsSchema(many=True), missing=[])
     total_items = fields.Integer()

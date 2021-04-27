@@ -16,7 +16,19 @@ from odyssey.api.telehealth.models import (
     TelehealthQueueClientPool,
     TelehealthBookingDetails
 )
-from odyssey.utils.constants import DAY_OF_WEEK, GENDERS
+from odyssey.utils.constants import DAY_OF_WEEK, GENDERS, BOOKINGS_STATUS
+
+class TelehealthTimeSelectSchema(Schema):
+    staff_user_id = fields.Integer()
+    start_time = fields.Time()
+    end_time = fields.Time()
+    booking_window_id_start_time = fields.Integer()
+    booking_window_id_end_time = fields.Integer()
+    target_date = fields.Date()
+
+class TelehealthTimeSelectOutputSchema(Schema):
+    appointment_times = fields.Nested(TelehealthTimeSelectSchema(many=True),missing=[])
+    total_options = fields.Integer()
 
 class TelehealthBookingsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -26,6 +38,17 @@ class TelehealthBookingsSchema(ma.SQLAlchemyAutoSchema):
 
     # booking_window_id_start_time = fields.Integer()
     # booking_window_id_end_time = fields.Integer()
+    booking_id = fields.Integer(dump_only=True)
+    start_time = fields.Time(dump_only=True)
+    end_time = fields.Time(dump_only=True)
+    status = fields.String(required=False,validate=validate.OneOf(BOOKINGS_STATUS))
+    conversation_sid = fields.String(dump_only=True)
+    client_first_name = fields.String(dump_only=True)
+    client_middle_name = fields.String(dump_only=True)
+    client_last_name = fields.String(dump_only=True)
+    staff_first_name = fields.String(dump_only=True)
+    staff_middle_name = fields.String(dump_only=True)
+    staff_last_name = fields.String(dump_only=True)
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -34,6 +57,7 @@ class TelehealthBookingsSchema(ma.SQLAlchemyAutoSchema):
 class TelehealthBookingsOutputSchema(Schema):
     bookings = fields.Nested(TelehealthBookingsSchema(many=True),missing=[])
     all_bookings = fields.Integer()  
+    twilio_token = fields.String()
 
 class TelehealthStaffAvailabilitySchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -104,3 +128,17 @@ class TelehealthChatRoomAccessSchema(Schema):
 
     access_token = fields.String()
     conversation_sid = fields.String()
+
+
+class TelehealthConversationsSchema(Schema):
+    conversation_sid = fields.String()
+    booking_id = fields.Integer()
+    staff_user_id = fields.Integer()
+    staff_fullname = fields.String()
+    client_user_id = fields.Integer()
+    client_fullname = fields.String()
+
+class TelehealthConversationsNestedSchema(Schema):
+
+    conversations = fields.Nested(TelehealthConversationsSchema(many=True))
+    twilio_token = fields.String()

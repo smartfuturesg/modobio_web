@@ -1,7 +1,7 @@
 from base64 import b64decode
 import jwt
 
-from flask import current_app, request, make_response, g
+from flask import current_app, request, g
 from functools import wraps
 from sqlalchemy import select
 from werkzeug.datastructures import Authorization
@@ -13,7 +13,7 @@ from odyssey.api.lookup.models import LookupClinicalCareTeamResources
 from odyssey.utils.constants import ACCESS_ROLES, DB_SERVER_TIME, USER_TYPES 
 from odyssey.utils.errors import LoginNotAuthorized, StaffNotFound
 from odyssey.api.staff.models import StaffRoles
-from odyssey.api.user.models import User, UserLogin
+from odyssey.api.user.models import User, UserLogin, UserTokenHistory
 
 class BasicAuth(object):
     ''' BasicAuth class is the main authentication class for 
@@ -212,22 +212,28 @@ class BasicAuth(object):
             the basic authorization password check
             that is defined in auth.py """
     
-        user = User.query.filter_by(email=username.lower()).one_or_none()
-        # if staff member is not found in db, raise error
-        if not user:
-            raise LoginNotAuthorized
+        user_details = db.session.execute(
+            select(User, UserLogin).
+            join(UserLogin, User.user_id==UserLogin.user_id).
+            where(User.email==username.lower())
+        ).one_or_none()
             
-        user_login  = UserLogin.query.filter_by(user_id = user.user_id).one_or_none()
-            
-        # make sure staff login details exist, check password
-        if not user_login:
+        # make sure login details exist, check password
+        if not user_details:
+            db.session.add(UserTokenHistory(event='login', ua_string=request.headers.get('User-Agent')))
+            db.session.commit()
             raise LoginNotAuthorized
-        elif check_password_hash(user_login.password, password):
+
+        user, user_login = user_details
+
+        if check_password_hash(user_login.password, password):
             user_login.last_login = DB_SERVER_TIME
             db.session.commit()
             db.session.refresh(user_login)
             return user, user_login, 'basic_auth'
         else:
+            db.session.add(UserTokenHistory(event='login', user_id=user.user_id, ua_string=request.headers.get('User-Agent')))
+            db.session.commit()
             raise LoginNotAuthorized         
 
     def get_auth(self):
@@ -292,7 +298,8 @@ class TokenAuth(BasicAuth):
                     ).join(
                         UserLogin, User.user_id == UserLogin.user_id
                     ).where(User.user_id == decoded_token['uid'])).one_or_none()    
-                           
+        # breakpoint()
+        g.user_type = decoded_token.get('utype')
         return query[0], query[1], decoded_token.get('utype')
 
     def get_auth(self):

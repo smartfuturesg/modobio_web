@@ -44,13 +44,13 @@ with engine.connect() as conn:
                 conn.execute(text(fh.read()))
                 # In some situations with comments in the text, there is no
                 # commit issued. Do it now. Multiple commits doesn't hurt.
-                conn.execute('commit;')
+                conn.execute(text('commit;'))
             print('done')
         elif f.suffix == '.py':
             modname = f.stem
             mod = importlib.import_module(modname)
             conn.execute(text(mod.sql))
-            conn.execute('commit;')
+            conn.execute(text('commit;'))
             print('done')
         else:
             print('skipped')

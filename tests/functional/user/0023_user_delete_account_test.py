@@ -1,21 +1,11 @@
 import base64
-import pathlib
-import time
-from datetime import datetime
 
 from flask.json import dumps
-from requests.auth import _basic_auth_str
+from sqlalchemy import text
 
-from odyssey.api.user.models import User, UserLogin, UserRemovalRequests
+from odyssey.api.user.models import User, UserRemovalRequests
 from odyssey.api.doctor.models import MedicalImaging
-from odyssey.api.client.models import (
-    ClientInfo,
-    ClientConsent
-)
-from tests.functional.user.data import (
-        users_to_delete_data, 
-        users_new_self_registered_client_data
-)
+from tests.functional.user.data import users_to_delete_data 
 from tests.functional.doctor.data import doctor_medical_imaging_data
 from odyssey import db
 
@@ -71,11 +61,11 @@ def test_account_delete_request(test_client, init_database, staff_auth_header):
     assert deleting_staff_client.json['message'] == f"User with id {staff_client_id} has been removed"
     
     #Check no info for user_id is in staff tables
-    tableList = db.session.execute("SELECT distinct(table_name) from information_schema.columns\
-                WHERE table_name like 'Staff%';").fetchall()
+    tableList = db.session.execute(text("SELECT distinct(table_name) from information_schema.columns\
+                WHERE table_name like 'Staff%';")).fetchall()
                 
     for table in tableList:
-        exists = db.session.execute("SELECT EXISTS(SELECT * from \"{}\" WHERE user_id={});".format(table.table_name, staff_client_id))
+        exists = db.session.execute(text("SELECT EXISTS(SELECT * from \"{}\" WHERE user_id={});".format(table.table_name, staff_client_id)))
         result = exists.fetchall().pop()
         assert result[0] == False
     assert tableList

@@ -43,6 +43,13 @@ class TelehealthBookings(db.Model):
     :type: int, foreign key('User.user_id')
     """
 
+    profession_type = db.Column(db.String)
+    """
+    Profession type, IE: doctor, trainer, nutritionist, etc
+
+    :type: str:
+    """
+
     target_date = db.Column(db.Date)
     """
     target date is the date of the appointment
@@ -347,6 +354,13 @@ class TelehealthChatRooms(db.Model):
     autoincrementing primary key representing the internal id of the room
 
     :type: int, primary key, autoincrement
+    """
+
+    booking_id = db.Column(db.Integer, db.ForeignKey('TelehealthBookings.idx', ondelete="CASCADE"), nullable=False)
+    """
+    booking_id is the idx of the booking from TelehealthBookings
+
+    :type: int, foreign key('TelehealthBookings.idx')
     """
 
     conversation_sid = db.Column(db.String)
