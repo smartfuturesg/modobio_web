@@ -45,7 +45,7 @@ def create_app():
         --------
         odyssey.config and odyssey.defaults
     """
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder="static") 
 
     app.config.from_object(Config())
     app.config['APPLICATION_ROOT'] = '/api'

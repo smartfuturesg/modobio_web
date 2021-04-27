@@ -1,6 +1,7 @@
 import boto3
 import codecs
 import os
+import pathlib
 from botocore.exceptions import ClientError
 from flask import current_app
 
@@ -81,11 +82,12 @@ def send_email_verify_email(recipient, token, code):
                 )
 
     # Get HTML from file and insert recipient information
-    HTML_FILE = codecs.open(os.getcwd() + r'/src/odyssey/utils/email-verify.html', "r", encoding='utf-8')
-    BODY_HTML = HTML_FILE.read()
-    BODY_HTML = BODY_HTML.replace('[user-first-name]', recipient.firstname)
-    BODY_HTML = BODY_HTML.replace('[verification-link]', f'{api.base_url}/user/email-verification/token/{token}/')
-    BODY_HTML = BODY_HTML.replace('XXXX', str(code))
+    HTML_FILE = pathlib.Path(current_app.static_folder) / 'email-verify.html'
+    with open(HTML_FILE) as fh:
+        BODY_HTML = fh.read()
+        BODY_HTML = BODY_HTML.replace('[user-first-name]', recipient.firstname)
+        BODY_HTML = BODY_HTML.replace('[verification-link]', f'{api.base_url}/user/email-verification/token/{token}/')
+        BODY_HTML = BODY_HTML.replace('XXXX', str(code))
 
     # route emails to AWS mailbox simulator when in dev environment
     if current_app.config['LOCAL_CONFIG'] and not recipient.email.endswith('sde.cz'):

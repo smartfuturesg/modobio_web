@@ -116,7 +116,6 @@ class User(db.Model):
     """
 
     deleted = db.Column(db.Boolean, nullable=True, default = False)
-    
     """
     Flags if the user has been deleted
 
@@ -124,7 +123,6 @@ class User(db.Model):
     """
 
     email_verified = db.Column(db.Boolean, nullable=False, default=False)
-
     """
     Flags if the user has verified their email
 
@@ -636,12 +634,8 @@ class UserPendingEmailVerifications(db.Model):
         """
         Generate a 4 digit code
         """
-        code = str(random.randrange(9999))
 
-        while len(code) < 4:
-            code = "0" + code
-
-        return code
+        return str(random.randrange(1000, 9999))
 
 class UserTokenHistory(db.Model):
     """ 
