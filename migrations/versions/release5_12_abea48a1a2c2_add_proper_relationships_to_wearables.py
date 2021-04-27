@@ -1,7 +1,7 @@
 """Add proper relationships to Wearables.
 
 Revision ID: abea48a1a2c2
-Revises: 60a0292ebacb
+Revises: 02793bda3302
 Create Date: 2021-04-26 11:00:38.133487
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'abea48a1a2c2'
-down_revision = '60a0292ebacb'
+down_revision = '02793bda3302'
 branch_labels = None
 depends_on = None
 
