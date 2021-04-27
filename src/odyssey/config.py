@@ -227,7 +227,7 @@ class Config:
         self.TWILIO_API_KEY_SECRET = self.getvar('TWILIO_API_KEY_SECRET','/modobio/odyssey/twilio/dev/api_key_secret', default=None)
         self.CONVERSATION_SERVICE_SID = self.getvar('CONVERSATION_SERVICE_SID', '/modobio/odyssey/twilio/dev/conversation_service_sid', default=None)
 
-    def getvar(self, var: str, param: str, decrypt: bool=False, default: Any='') -> Any:
+    def getvar(self, var: str, param: str, decrypt: bool=True, default: Any='') -> Any:
         """ Get a configuration setting.
 
         Order of lookup:
