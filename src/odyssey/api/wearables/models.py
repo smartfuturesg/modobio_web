@@ -43,8 +43,7 @@ class Wearables(db.Model):
              ondelete="CASCADE"
         ),
         nullable=False,
-        unique=True
-    )
+        unique=True)
     """
     User ID number.
 
@@ -148,8 +147,7 @@ class WearablesOura(db.Model):
              ondelete="CASCADE"
         ),
         nullable=False,
-        unique=True
-    )
+        unique=True)
     """
     Client ID number.
 
@@ -217,8 +215,7 @@ class WearablesOura(db.Model):
             ondelete='CASCADE'
         ),
         nullable=False,
-        unique=True
-    )
+        unique=True)
     """
     Wearable index this WearablesOura instance is linked to.
 
@@ -252,8 +249,7 @@ class WearablesFitbit(db.Model):
              ondelete="CASCADE"
         ),
         nullable=False,
-        unique=True
-    )
+        unique=True)
     """
     Client ID number.
 
@@ -323,8 +319,7 @@ class WearablesFitbit(db.Model):
             ondelete='CASCADE'
         ),
         nullable=False,
-        unique=True
-    )
+        unique=True)
     """
     Wearable index this WearablesFitbit instance is linked to.
 
@@ -358,8 +353,7 @@ class WearablesFreeStyle(db.Model):
              ondelete="CASCADE"
         ),
         nullable=False,
-        unique=True
-    )
+        unique=True)
     """
     Client ID number.
 
@@ -412,8 +406,7 @@ class WearablesFreeStyle(db.Model):
             ondelete='CASCADE'
         ),
         nullable=False,
-        unique=True
-    )
+        unique=True)
     """
     Wearable index this WearablesFreeStyle instance is linked to.
 

@@ -248,15 +248,13 @@ class WearablesOuraCallbackEndpoint(Resource):
         oauth_session = OAuth2Session(
             oura_id,
             state=oauth_state,
-            redirect_uri=redirect_uri
-        )
+            redirect_uri=redirect_uri)
         try:
             oauth_reply = oauth_session.fetch_token(
                 token_url,
                 code=oauth_grant_code,
                 include_client_id=True,
-                client_secret=oura_secret
-            )
+                client_secret=oura_secret)
         except Exception as e:
             raise UnknownError(message=f'Error while exchanging grant code for access token: {e}')
 
@@ -489,8 +487,7 @@ class WearablesFitbitAuthEndpoint(Resource):
         fitbit = (
             WearablesFitbit.query
             .filter_by(user_id=user_id)
-            .one_or_none()
-        )
+            .one_or_none())
 
         if not fitbit:
             fitbit = WearablesFitbit(user_id=user_id, oauth_state=state, wearable_id=info.idx)
@@ -509,8 +506,7 @@ class WearablesFitbitAuthEndpoint(Resource):
             'redirect_uri': 'replace-this',
             'response_type': 'code',
             'scope': scope,
-            'state': state
-        }
+            'state': state}
 
     @token_auth.login_required(user_type=('client',))
     @accepts(schema=WearablesOAuthPostSchema, api=ns)
@@ -546,8 +542,7 @@ class WearablesFitbitAuthEndpoint(Resource):
         if not fitbit:
             raise UnknownError(
                 message=f'user_id {user_id} not found in WearablesFitbit table. '
-                         'Connect to GET /wearables/fitbit/auth first.'
-            )
+                         'Connect to GET /wearables/fitbit/auth first.')
 
         if request.parsed_obj['state'] != fitbit.oauth_state:
             raise UnknownError(message='OAuth state changed between requests.')
@@ -651,8 +646,7 @@ class WearablesFreeStyleActivateEndpoint(Resource):
         cgm = (
             WearablesFreeStyle.query
             .filter_by(user_id=user_id)
-            .one_or_none()
-        )
+            .one_or_none())
 
         if not cgm:
             raise ContentNotFound
@@ -678,8 +672,7 @@ class WearablesFreeStyleActivateEndpoint(Resource):
         cgm = (
             WearablesFreeStyle.query
             .filter_by(user_id=user_id)
-            .one_or_none()
-        )
+            .one_or_none())
 
         if not cgm:
             info = Wearables.query.filter_by(user_id=user_id).one_or_none()
@@ -718,8 +711,7 @@ class WearablesFreeStyleEndpoint(Resource):
         cgm = (
             WearablesFreeStyle.query
             .filter_by(user_id=user_id)
-            .one_or_none()
-        )
+            .one_or_none())
 
         if not cgm:
             raise ContentNotFound
@@ -740,8 +732,7 @@ class WearablesFreeStyleEndpoint(Resource):
         cgm = (
             WearablesFreeStyle.query
             .filter_by(user_id=user_id)
-            .one_or_none()
-        )
+            .one_or_none())
 
         if not cgm:
             msg =  f'FreeStyle Libre for client {user_id} has not yet been activated. '
@@ -796,7 +787,6 @@ class WearablesFreeStyleEndpoint(Resource):
         ''').bindparams(
             gluc=glucose[n:],
             tstamps=tstamps[n:],
-            cid=user_id
-        )
+            cid=user_id)
         db.session.execute(stmt)
         db.session.commit()
