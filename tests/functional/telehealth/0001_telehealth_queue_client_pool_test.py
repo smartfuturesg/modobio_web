@@ -135,21 +135,7 @@ def test_get_2_client_appointment_queue(test_client, init_database, client_auth_
         assert [response.json['queue'][3]['target_date'],response.json['queue'][3]['priority']] == ['2025-02-05T02:00:00',False]
         assert [response.json['queue'][4]['target_date'],response.json['queue'][4]['priority']] == ['2025-03-03T02:00:00',False]
         assert [response.json['queue'][5]['target_date'],response.json['queue'][5]['priority']] == ['2025-04-05T02:00:00',False]
-        assert response.json['total_queue'] == 6
-
-def test_post_7_client_appointment(test_client, init_database, client_auth_header):
-    """
-    GIVEN a api end point for client appointment queue
-    WHEN the '/telehealth/queue/client-pool/<user_id>' resource  is requested (POST)
-    THEN check the response is valid
-    """
-    # This Should Fail because the user already has this target_date in the queue
-    response = test_client.post('/telehealth/queue/client-pool/1/',
-                                headers=client_auth_header, 
-                                data=dumps(telehealth_queue_client_pool_5_post_data), 
-                                content_type='application/json')
-
-    assert response.status_code == 405          
+        assert response.json['total_queue'] == 6         
 
 def test_get_3_client_appointment_queue(test_client, init_database, client_auth_header, staff_auth_header):
     """

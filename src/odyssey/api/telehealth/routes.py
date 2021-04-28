@@ -407,7 +407,7 @@ class TelehealthBookingsApi(Resource):
         # Check if staff and client have those times open
         client_bookings = TelehealthBookings.query.filter_by(client_user_id=client_user_id,target_date=request.parsed_obj.target_date).all()
         staff_bookings = TelehealthBookings.query.filter_by(staff_user_id=staff_user_id,target_date=request.parsed_obj.target_date).all()
-        # breakpoint()
+
         # This checks if the input slots have already been taken.
         if client_bookings:
             for booking in client_bookings:
@@ -426,7 +426,7 @@ class TelehealthBookingsApi(Resource):
                 elif request.parsed_obj.booking_window_id_end_time > booking.booking_window_id_start_time and\
                     request.parsed_obj.booking_window_id_end_time < booking.booking_window_id_end_time:
                     raise InputError(status_code=405,message='Staff {} already has an appointment for this time.'.format(staff_user_id))        
-        # breakpoint()
+
         # TODO: we need to add the concept of staff auto accept or not. When we do, we can do a query 
         # to check the staff's auto accept setting. Right now, default it to true.
         staffAutoAccept = True
@@ -441,12 +441,12 @@ class TelehealthBookingsApi(Resource):
         request.parsed_obj.staff_user_id = staff_user_id
         db.session.add(request.parsed_obj)
         db.session.flush()
-        # breakpoint()
+
         # create Twilio conversation and store details in TelehealthChatrooms table
         conversation = create_conversation(staff_user_id = staff_user_id,
                             client_user_id = client_user_id,
                             booking_id=request.parsed_obj.idx)
-        # breakpoint()
+
         # create access token with chat grant for newly provisioned room
         twilio_credentials = grab_twilio_credentials()
         token = AccessToken(twilio_credentials['account_sid'], 
@@ -1037,19 +1037,13 @@ class TelehealthQueueClientPoolApi(Resource):
         # BAD: Appointment 1 Day 1, Appointment 2 Day 1
         appointment_in_queue = TelehealthQueueClientPool.query.filter_by(user_id=user_id,target_date=request.parsed_obj.target_date,profession_type=request.parsed_obj.profession_type).one_or_none()
 
-        # if appointment_in_queue:
-        #     db.session.delete(appointment_in_queue)
+        if appointment_in_queue:
+            db.session.delete(appointment_in_queue)
+            db.session.flush()
 
-        # request.parsed_obj.user_id = user_id
-        # db.session.add(request.parsed_obj)
-        # db.session.commit()
-        
-        if not appointment_in_queue:
-            request.parsed_obj.user_id = user_id
-            db.session.add(request.parsed_obj)
-            db.session.commit()
-        else:
-            raise InputError(status_code=405,message='stuff')          
+        request.parsed_obj.user_id = user_id
+        db.session.add(request.parsed_obj)
+        db.session.commit()   
 
         return 200
 
