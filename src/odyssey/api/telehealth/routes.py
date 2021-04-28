@@ -397,7 +397,7 @@ class TelehealthBookingsApi(Resource):
         # make sure the requester is one of the participants
         if not any(current_user.user_id == uid for uid in [client_user_id, staff_user_id]):
             raise InputError(status_code=405, message='logged in user must be a booking participant')
-        
+
         # Check client existence
         check_client_existence(client_user_id)
         
@@ -407,7 +407,7 @@ class TelehealthBookingsApi(Resource):
         # Check if staff and client have those times open
         client_bookings = TelehealthBookings.query.filter_by(client_user_id=client_user_id,target_date=request.parsed_obj.target_date).all()
         staff_bookings = TelehealthBookings.query.filter_by(staff_user_id=staff_user_id,target_date=request.parsed_obj.target_date).all()
-        
+
         # This checks if the input slots have already been taken.
         if client_bookings:
             for booking in client_bookings:
@@ -1037,12 +1037,13 @@ class TelehealthQueueClientPoolApi(Resource):
         # BAD: Appointment 1 Day 1, Appointment 2 Day 1
         appointment_in_queue = TelehealthQueueClientPool.query.filter_by(user_id=user_id,target_date=request.parsed_obj.target_date,profession_type=request.parsed_obj.profession_type).one_or_none()
 
-        if not appointment_in_queue:
-            request.parsed_obj.user_id = user_id
-            db.session.add(request.parsed_obj)
-            db.session.commit()
-        else:
-            raise InputError(status_code=405,message='User {} already has an appointment for this date with this profession type.'.format(user_id))
+        if appointment_in_queue:
+            db.session.delete(appointment_in_queue)
+            db.session.flush()
+
+        request.parsed_obj.user_id = user_id
+        db.session.add(request.parsed_obj)
+        db.session.commit()   
 
         return 200
 
