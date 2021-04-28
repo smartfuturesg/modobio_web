@@ -745,7 +745,7 @@ class UserPendingEmailVerificationsTokenApi(Resource):
         
 
 @ns.route('/email-verification/code/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number','code': 'Email verification code'})
+@ns.doc(params={'code': 'Email verification code'})
 class UserPendingEmailVerificationsCodeApi(Resource):
 
     @responds(status_code=200)
