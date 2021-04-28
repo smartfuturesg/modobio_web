@@ -11,7 +11,7 @@ from odyssey import db
 from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations
 from odyssey.api.lookup.models import LookupClinicalCareTeamResources
 from odyssey.utils.constants import ACCESS_ROLES, DB_SERVER_TIME, USER_TYPES 
-from odyssey.utils.errors import LoginNotAuthorized, StaffNotFound
+from odyssey.utils.errors import LoginNotAuthorized, StaffNotFound, EmailNotVerified
 from odyssey.api.staff.models import StaffRoles
 from odyssey.api.user.models import User, UserLogin, UserTokenHistory
 
@@ -79,7 +79,11 @@ class BasicAuth(object):
                 user, user_login, user_context = self.authenticate(auth)
 
                 if user in (False, None):
+                    
                     raise LoginNotAuthorized
+
+                if not user.email_verified:
+                    raise EmailNotVerified
 
                 # If user_type exists (Staff or Client, etc)
                 # Check user and role access
@@ -91,6 +95,7 @@ class BasicAuth(object):
                 # If necessary, restrict access to internal users
                 if internal_required:
                     if not user.is_internal:
+                        
                         raise LoginNotAuthorized
 
                 g.flask_httpauth_user = (user, user_login) if user else (None,None)
@@ -115,6 +120,7 @@ class BasicAuth(object):
                 else:
                     return
             else:
+                
                 LoginNotAuthorized()
         # if the user is logged in as a client, follow the client authorization routine
         elif user_context == 'client' and 'client' in user_type:
@@ -128,8 +134,10 @@ class BasicAuth(object):
             elif 'client' in user_type and user.is_client:
                 return
             else:
+                
                 raise LoginNotAuthorized()
         else:
+            
             raise LoginNotAuthorized()
 
     def client_access_check(self, user, resources):
@@ -151,10 +159,12 @@ class BasicAuth(object):
             else:
                 # ensure request is GET
                 if request.method != 'GET':
+                    
                     raise LoginNotAuthorized()
                 # resources must be specified for endpoint designated by table name
                 # e.g. @token_auth.login_required(resources=('MedicalSocialHistory','MedicalSTDHistory'))
                 if len(resources) == 0: 
+                    
                     raise LoginNotAuthorized()
                 # set the context and successful authorizations list in the g object
                 g.clinical_care_context = True 
@@ -173,6 +183,7 @@ class BasicAuth(object):
                         continue
                 if len(g.clinical_care_authorized_resources) == 0:
                     # this user does not have access to this content
+                    
                     raise LoginNotAuthorized()
         return
 
@@ -193,11 +204,13 @@ class BasicAuth(object):
         
         if 'staff_self' in user_type:
             if request.view_args.get('user_id') != user.user_id:
+                
                 raise LoginNotAuthorized
         if staff_roles is None or any(role in staff_user_roles for role in staff_roles):
             # Staff member's role matches the Role Requirement in the API
             return None
         else:
+            
             raise LoginNotAuthorized
 
     def validate_roles(self, roles, constants):
@@ -211,7 +224,7 @@ class BasicAuth(object):
         """ This method is used as a decorator and to store 
             the basic authorization password check
             that is defined in auth.py """
-    
+            
         user_details = db.session.execute(
             select(User, UserLogin).
             join(UserLogin, User.user_id==UserLogin.user_id).
@@ -287,10 +300,12 @@ class TokenAuth(BasicAuth):
         try:
             decoded_token = jwt.decode(token, secret, algorithms='HS256')
         except:
+            
             raise LoginNotAuthorized
 
         # ensure token is an access token type
         if decoded_token['ttype'] != 'access':
+            
             raise LoginNotAuthorized()
 
         query = db.session.execute(

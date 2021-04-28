@@ -3,7 +3,7 @@ from sqlalchemy.orm import load_only
 
 from odyssey import ma
 from odyssey.api.staff.schemas import StaffRolesSchema
-from odyssey.api.user.models import User, UserLogin, UserSubscriptions, UserNotifications
+from odyssey.api.user.models import User, UserLogin, UserSubscriptions, UserNotifications, UserPendingEmailVerifications
 from odyssey.utils.constants import ACCESS_ROLES
 
 """
@@ -13,7 +13,7 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
         exclude = ('created_at', 'updated_at')
-        dump_only = ('password', 'modobio_id')
+        dump_only = ('password', 'modobio_id', 'email_verified')
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -38,7 +38,7 @@ class UserInfoSchema(ma.SQLAlchemyAutoSchema):
         model = User
         exclude = ('created_at', 'updated_at')
         load_only = ('password')
-        dump_only = ('modobio_id', 'user_id', 'is_internal','is_staff', 'is_client', 'deleted')
+        dump_only = ('modobio_id', 'user_id', 'is_internal','is_staff', 'is_client', 'deleted', 'email_verified')
 
     email = fields.Email(validate=validate.Length(min=0,max=50), required=True)
     phone_number = fields.String(validate=validate.Length(min=0,max=50))
