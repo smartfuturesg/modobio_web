@@ -456,7 +456,14 @@ class TelehealthBookingsApi(Resource):
                     ttl=TWILIO_ACCESS_KEY_TTL)
 
         token.add_grant(ChatGrant(service_sid=current_app.config['CONVERSATION_SERVICE_SID']))
-        
+
+        # Once the booking has been successful, delete the client from the queue
+        client_in_queue = TelehealthQueueClientPool.query.filter_by(user_id=client_user_id).one_or_none()
+
+        if client_in_queue:
+            db.session.delete(client_in_queue)
+            db.session.flush()
+
         db.session.commit()
 
         request.parsed_obj.conversation_sid = conversation.sid
