@@ -686,7 +686,7 @@ class ClientDataStorageTiers(Resource):
 class ClientToken(Resource):
     """create and revoke tokens"""
     @ns.doc(security='password')
-    @basic_auth.login_required(user_type=('client',))
+    @basic_auth.login_required(user_type=('client',), email_required=False)
     @responds(schema=ClientTokenRequestSchema, status_code=201, api=ns)
     def post(self):
         """generates a token for the 'current_user' immediately after password authentication"""
