@@ -23,7 +23,7 @@ class BasicAuth(object):
         self.scheme = scheme
         self.header = header
 
-    def login_required(self, f=None, user_type=('staff','client'), staff_role=None, internal_required=False, resources = ()):
+    def login_required(self, f=None, user_type=('staff','client'), staff_role=None, internal_required=False, email_required=True, resources = ()):
         ''' The login_required method is the main method that we will be using
             for authenticating both tokens and basic authorizations.
             This method decorates each CRUD request and verifies the person
@@ -82,7 +82,7 @@ class BasicAuth(object):
                     
                     raise LoginNotAuthorized
 
-                if not user.email_verified:
+                if email_required and not user.email_verified:
                     raise EmailNotVerified
 
                 # If user_type exists (Staff or Client, etc)

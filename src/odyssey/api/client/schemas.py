@@ -404,6 +404,7 @@ class ClientTokenRequestSchema(Schema):
     email = fields.Email(required=False, missing=None)   
     token = fields.String()
     refresh_token = fields.String()
+    email_verified = fields.Boolean()
 
 class ClientTransactionHistorySchema(ma.SQLAlchemyAutoSchema):
     class Meta:
