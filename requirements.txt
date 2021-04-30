@@ -1,4 +1,5 @@
 boto3
+celery
 elasticsearch
 Flask
 flask-accepts
@@ -15,6 +16,7 @@ PyPDF2
 pytest
 pytest-cov
 pytz
+redis
 requests
 requests-oauthlib
 twilio
