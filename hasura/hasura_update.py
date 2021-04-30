@@ -47,7 +47,7 @@ from default_permissions import (
     client_default_insert_permission, 
     client_default_update_permission, 
     default_unfiltered_select_permission, 
-    SELECT_ONLY,
+    STAFF_SELECT_ONLY,
     staff_default_select_permission,
     staff_default_insert_permission,
     staff_default_update_permission
@@ -181,9 +181,12 @@ for schema in sorted(inspector.get_schema_names()):
             col['name'] for col in inspector.get_columns(tablename, schema=schema)
         ]  
 
+        # staff may only be able to modify tables which are not in STAFF_SELECT_ONLY 
+        staff_modify_filter = (True if tablename in STAFF_SELECT_ONLY else False)
+
         # Tables which hold client-specific user data
         # Clients can view all columns, update all columns except user_id fields. (*rows must be owned by the requesting user)
-        # Staff has the same permissions except they currently have access to all clients
+        # Staff may only view data from other clients
         if (
                 any(col in permissible_columns for col in ['user_id'])
                 and any(tablename.startswith(prefix) for prefix in ['Client', 'Medical', 'User', 'PT', 'Trainer', 'Telehealth', 'Wearables'])
@@ -192,9 +195,9 @@ for schema in sorted(inspector.get_schema_names()):
             insert_permission_client = client_default_insert_permission(columns=permissible_columns)
             update_permission_client = client_default_update_permission(columns=permissible_columns)
 
-            select_permission_staff = staff_default_select_permission(columns=permissible_columns)
-            insert_permission_staff = staff_default_insert_permission(columns=permissible_columns)
-            update_permission_staff = staff_default_update_permission(columns=permissible_columns)
+            select_permission_staff = staff_default_select_permission(columns=permissible_columns, filtered=False)
+            insert_permission_staff = staff_default_insert_permission(columns=permissible_columns, filtered=staff_modify_filter)
+            update_permission_staff = staff_default_update_permission(columns=permissible_columns, filtered=staff_modify_filter)
 
         # Lookup tables
         # all users may view all columns in lookup tables
@@ -214,9 +217,9 @@ for schema in sorted(inspector.get_schema_names()):
         # Staff may update their own data if a user_id field exists in the table
         elif any(tablename.startswith(prefix) for prefix in ['Staff', 'System']):
             select_permission_client = client_default_select_permission(columns=permissible_columns)
-
             select_permission_staff = staff_default_select_permission(columns=permissible_columns, filtered=True)
-            if tablename not in SELECT_ONLY:
+            
+            if tablename not in STAFF_SELECT_ONLY:
                 insert_permission_staff = staff_default_insert_permission(columns=permissible_columns, filtered=True)
                 update_permission_staff = staff_default_update_permission(columns=permissible_columns, filtered=True)
             
