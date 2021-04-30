@@ -6,19 +6,22 @@ is of course the most famous journey of all time! 🤓
 """
 import os
 
+from celery import Celery
+from elasticsearch import Elasticsearch
 from flask import Flask
 from flask_cors import CORS
+from flask_marshmallow import Marshmallow
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
-from flask_marshmallow import Marshmallow
-from elasticsearch import Elasticsearch
-from sqlalchemy import exc    
+from sqlalchemy import exc
+
 from odyssey.config import Config
 
 db = SQLAlchemy()
 migrate = Migrate()
 cors = CORS()
 ma = Marshmallow()
+celery = Celery()
 
 def create_app():
     """ Initialize an instance of the Flask app.
@@ -55,7 +58,7 @@ def create_app():
     cors.init_app(app)
     ma.init_app(app)
     db.Model.update = _update
-
+    init_celery(app)
     from odyssey.api import bp, api
 
     # api._doc or Api(doc=...) is not True/False,
@@ -105,3 +108,21 @@ import wtforms
 class DateInput(wtforms.widgets.Input):
     input_type = 'date'
 
+
+def init_celery(app=None):
+    """
+    Function to prepare a celery instance. Requires the flask app instance
+
+    This is called from both create_app and celery_app 
+    """
+    app = app or create_app()
+    celery.config_from_object(Config())
+    
+    class ContextTask(celery.Task):
+        """Make celery tasks work with Flask app context"""
+        def __call__(self, *args, **kwargs):
+            with app.app_context():
+                return self.run(*args, **kwargs)
+
+    celery.Task = ContextTask
+    return celery
