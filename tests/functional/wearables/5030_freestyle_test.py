@@ -54,24 +54,24 @@ def test_wearables_freestyle_activate_get(test_client, init_database, client_aut
     orig = datetime.fromisoformat(wearables_freestyle_data['activation_timestamp'])
     assert ret == orig
 
-def test_wearables_freestyle_put(test_client, init_database, client_auth_header):
+def test_wearables_freestyle_patch(test_client, init_database, client_auth_header):
     """
     GIVEN an API end point for the FreeStyle Libre CGM
-    WHEN the '/wearables/freestyle/<user_id>' resource is requested (PUT)
+    WHEN the '/wearables/freestyle/<user_id>' resource is requested (PATCH)
     THEN check the response is valid
     """
 
     tss = [datetime.fromisoformat(d) for d in wearables_freestyle_data['timestamps']]
 
     ### Add data
-    response = test_client.put(
+    response = test_client.patch(
         '/wearables/freestyle/1/',
         headers=client_auth_header,
         data=dumps(wearables_freestyle_data),
         content_type='application/json'
     )
 
-    assert response.status_code == 201
+    assert response.status_code == 204
 
     data = WearablesFreeStyle.query.filter_by(user_id=1).first()
 
@@ -83,14 +83,14 @@ def test_wearables_freestyle_put(test_client, init_database, client_auth_header)
     # Afterwards, data should look like wearables_freestyle_data_combo
     cur_len = len(data.timestamps)
 
-    response = test_client.put(
+    response = test_client.patch(
         '/wearables/freestyle/1/',
         headers=client_auth_header,
         data=dumps(wearables_freestyle_more_data),
         content_type='application/json'
     )
 
-    assert response.status_code == 201
+    assert response.status_code == 204
     
     init_database.session.commit()
     assert len(data.timestamps) == len(wearables_freestyle_combo_data['timestamps'])
@@ -102,20 +102,20 @@ def test_wearables_freestyle_put(test_client, init_database, client_auth_header)
     ### Add empty data set
     cur_len = len(data.timestamps)
 
-    response = test_client.put(
+    response = test_client.patch(
         '/wearables/freestyle/1/',
         headers=client_auth_header,
         data=dumps(wearables_freestyle_empty_data),
         content_type='application/json'
     )
 
-    assert response.status_code == 201
+    assert response.status_code == 204
 
     init_database.session.commit()
     assert len(data.timestamps) == cur_len
 
     ### Add data with unequal lengths
-    response = test_client.put(
+    response = test_client.patch(
         '/wearables/freestyle/1/',
         headers=client_auth_header,
         data=dumps(wearables_freestyle_unequal_data),
@@ -128,7 +128,7 @@ def test_wearables_freestyle_put(test_client, init_database, client_auth_header)
     assert len(data.timestamps) == cur_len
 
     ### Add data with duplicate dates
-    response = test_client.put(
+    response = test_client.patch(
         '/wearables/freestyle/1/',
         headers=client_auth_header,
         data=dumps(wearables_freestyle_duplicate_data),
