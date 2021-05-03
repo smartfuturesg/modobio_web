@@ -227,6 +227,12 @@ class Config:
         self.TWILIO_API_KEY_SID = self.getvar('TWILIO_API_KEY_SID','/modobio/odyssey/twilio/dev/api_key_sid', default=None)
         self.TWILIO_API_KEY_SECRET = self.getvar('TWILIO_API_KEY_SECRET','/modobio/odyssey/twilio/dev/api_key_secret', default=None)
         self.CONVERSATION_SERVICE_SID = self.getvar('CONVERSATION_SERVICE_SID', '/modobio/odyssey/twilio/dev/conversation_service_sid', default=None)
+        
+        # celery config
+        self.broker_url = self.getvar('CELERY_BROKER_URL', None, default=None)
+        self.result_backend  = self.getvar('CELERY_BROKER_URL', None, default=None)
+        self.enable_utc = False
+        self.timezone = 'America/Phoenix'
 
     def getvar(self, var: str, param: str, decrypt: bool=True, default: Any='') -> Any:
         """ Get a configuration setting.

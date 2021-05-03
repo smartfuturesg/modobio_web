@@ -14,6 +14,7 @@ from odyssey.api.client.models import (
     ClientClinicalCareTeamAuthorizations,
     ClientConsent,
     ClientConsultContract,
+    ClientDataStorage,
     ClientInfo,
     ClientIndividualContract, 
     ClientPolicies,
@@ -247,12 +248,12 @@ class ClientRegistrationStatusSchema(Schema):
     outstanding = fields.Nested(OutstandingForm(many=True))
 
 
-class ClientDataTierSchema(Schema):
+class ClientDataTierSchema(ma.SQLAlchemyAutoSchema):
 
-    user_id = fields.Integer(missing=None)
-    stored_bytes = fields.Integer(metadata={'description': 'total bytes stored for the client'}, missing=None)
-    tier = fields.String(metadata={'description': 'data storage tier. Either Tier 1/2/3'}, missing=None)
-
+    class Meta():
+        model = ClientDataStorage
+        exclude = ('idx', 'created_at')
+        
 class AllClientsDataTier(Schema):
 
     items = fields.Nested(ClientDataTierSchema(many=True), missing=ClientDataTierSchema().load({}))

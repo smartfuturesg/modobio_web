@@ -50,7 +50,9 @@ Broken down here
 
 """
 # These tables should remain inaccessible in Hasura
-SELECT_ONLY = ('StaffRecentClients')
+STAFF_SELECT_ONLY = ('StaffRecentClients', 'User', 'ClientInfo', 'StaffRoles', 'StaffOperationalTerriories')
+NO_UPDATE_FIELDS = ['user_id', 'created_at', 'updated_at', 'is_staff', 'is_client', 'role', 'idx', 'modobioId']
+NO_INSERT_FIELDS = [item for item in NO_UPDATE_FIELDS if item not in ['user_id']] 
 
 ##
 # Clients accessing their own data or accessing staff profile data
@@ -90,7 +92,7 @@ def client_default_update_permission(columns):
     permission =  {
         'role': 'client', 
         'permission': {
-            'columns': [column for column in columns if column not in ['user_id', 'created_at', 'updated_at']],
+            'columns': [column for column in columns if column not in NO_UPDATE_FIELDS],
             'filter': {}
         }
     } 
@@ -112,7 +114,7 @@ def client_default_insert_permission(columns):
     permission =  {
         'role': 'client', 
         'permission': {
-            'columns': [column for column in columns if column not in ['user_id', 'created_at', 'updated_at']],
+            'columns': [column for column in columns if column not in NO_UPDATE_FIELDS],
             'check': {},
             'set': {}
         }
@@ -131,7 +133,7 @@ def client_default_insert_permission(columns):
 # user_id and client_user_id may be present in these tables
 ##
 
-def staff_default_select_permission(columns, filtered=False):
+def staff_default_select_permission(columns, filtered=True):
     """
     Covers select permisisons for most tables prefixed with
     'Client', 'Medical', 'User', 'PT', 'Trainer', 'Telehealth', 'Wearables'
@@ -154,7 +156,7 @@ def staff_default_select_permission(columns, filtered=False):
     
     return permission
 
-def staff_default_update_permission(columns, filtered=False):
+def staff_default_update_permission(columns, filtered=True):
     """
     Covers update permisisons for most tables prefixed with
     'Client', 'Medical', 'User', 'PT', 'Trainer', 'Telehealth', 'Wearables', 'Staff', 'System'
@@ -168,7 +170,7 @@ def staff_default_update_permission(columns, filtered=False):
     permission =  {
         'role': 'staff', 
         'permission': {
-            'columns': [column for column in columns if column not in ['created_at', 'updated_at']],
+            'columns': [column for column in columns if column not in NO_UPDATE_FIELDS],
             'filter': {}
         }
     } 
@@ -181,7 +183,7 @@ def staff_default_update_permission(columns, filtered=False):
     
     return permission
 
-def staff_default_insert_permission(columns, filtered=False):
+def staff_default_insert_permission(columns, filtered=True):
     """
     Covers insert and update permisisons for most tables prefixed with
     'Client', 'Medical', 'User', 'PT', 'Trainer', 'Telehealth', 'Wearables'
@@ -195,7 +197,7 @@ def staff_default_insert_permission(columns, filtered=False):
     permission =  {
         'role': 'staff', 
         'permission': {
-            'columns': [column for column in columns if column not in ['created_at', 'updated_at']],
+            'columns': [column for column in columns if column not in NO_INSERT_FIELDS],
             'check': {}
         }
      }
