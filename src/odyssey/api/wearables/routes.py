@@ -13,15 +13,13 @@ from odyssey.utils.auth import token_auth
 from odyssey.utils.errors import (
     ContentNotFound,
     MethodNotAllowed,
-    UnknownError
-)
+    UnknownError)
 
 from odyssey.api.wearables.models import (
     Wearables,
     WearablesOura,
     WearablesFitbit,
-    WearablesFreeStyle,
-)
+    WearablesFreeStyle)
 
 from odyssey.api.wearables.schemas import (
     WearablesSchema,
@@ -29,8 +27,7 @@ from odyssey.api.wearables.schemas import (
     WearablesOAuthGetSchema,
     WearablesOAuthPostSchema,
     WearablesFreeStyleSchema,
-    WearablesFreeStyleActivateSchema,
-)
+    WearablesFreeStyleActivateSchema)
 
 from odyssey.utils.misc import check_client_existence
 from odyssey import db
@@ -71,8 +68,7 @@ class WearablesEndpoint(Resource):
         wearables = (
             Wearables.query
             .filter_by(user_id=user_id)
-            .one_or_none()
-        )
+            .one_or_none())
 
         if not wearables:
             raise ContentNotFound
@@ -98,8 +94,7 @@ class WearablesEndpoint(Resource):
         wearables = (
             Wearables.query
             .filter_by(user_id=user_id)
-            .one_or_none()
-        )
+            .one_or_none())
 
         if wearables:
             raise MethodNotAllowed
@@ -175,8 +170,7 @@ class WearablesOuraOldAuthEndpoint(Resource):
         wearables = (
             Wearables.query
             .filter_by(user_id=user_id)
-            .one_or_none()
-        )
+            .one_or_none())
 
         # TODO: Disable this check until frontend has a way of setting has_oura
         #
@@ -191,8 +185,7 @@ class WearablesOuraOldAuthEndpoint(Resource):
         oura = (
             WearablesOura.query
             .filter_by(user_id=user_id)
-            .one_or_none()
-        )
+            .one_or_none())
 
         if not oura:
             oura = WearablesOura(user_id=user_id, oauth_state=state)
@@ -234,8 +227,7 @@ class WearablesOuraCallbackEndpoint(Resource):
         if not oura:
             raise UnknownError(
                 message=f'user_id {user_id} not found in WearablesOura table. '
-                         'Connect to /wearables/oura/auth first.'
-            )
+                         'Connect to /wearables/oura/auth first.')
 
         oauth_state = request.args.get('state')
         oauth_grant_code = request.args.get('code')
@@ -256,15 +248,13 @@ class WearablesOuraCallbackEndpoint(Resource):
         oauth_session = OAuth2Session(
             oura_id,
             state=oauth_state,
-            redirect_uri=redirect_uri
-        )
+            redirect_uri=redirect_uri)
         try:
             oauth_reply = oauth_session.fetch_token(
                 token_url,
                 code=oauth_grant_code,
                 include_client_id=True,
-                client_secret=oura_secret
-            )
+                client_secret=oura_secret)
         except Exception as e:
             raise UnknownError(message=f'Error while exchanging grant code for access token: {e}')
 
@@ -315,17 +305,22 @@ class WearablesOuraAuthEndpoint(Resource):
         if not current_app.config['OURA_CLIENT_ID']:
             raise UnknownError(message='This endpoint does not work in local mode.')
 
+        info = Wearables.query.filter_by(user_id=user_id).one_or_none()
+        if not info:
+            raise UnknownError(
+                message=f'user_id {user_id} not found in Wearables table. '
+                         'Connect to POST /wearables first.')
+
         state = secrets.token_urlsafe(24)
 
         # Store state in database
         oura = (
             WearablesOura.query
             .filter_by(user_id=user_id)
-            .one_or_none()
-        )
+            .one_or_none())
 
         if not oura:
-            oura = WearablesOura(user_id=user_id, oauth_state=state)
+            oura = WearablesOura(user_id=user_id, oauth_state=state, wearable_id=info.idx)
             db.session.add(oura)
         else:
             oura.oauth_state = state
@@ -341,8 +336,7 @@ class WearablesOuraAuthEndpoint(Resource):
             'redirect_uri': 'replace-this',
             'response_type': 'code',
             'scope': scope,
-            'state': state
-        }
+            'state': state}
 
     @token_auth.login_required(user_type=('client',))
     @accepts(schema=WearablesOAuthPostSchema, api=ns)
@@ -378,8 +372,7 @@ class WearablesOuraAuthEndpoint(Resource):
         if not oura:
             raise UnknownError(
                 message=f'user_id {user_id} not found in WearablesOura table. '
-                         'Connect to GET /wearables/oura/auth first.'
-            )
+                         'Connect to GET /wearables/oura/auth first.')
 
         if request.parsed_obj['state'] != oura.oauth_state:
             raise UnknownError(message='OAuth state changed between requests.')
@@ -401,15 +394,13 @@ class WearablesOuraAuthEndpoint(Resource):
         oauth_session = OAuth2Session(
             client_id,
             state=request.parsed_obj['state'],
-            redirect_uri=request.parsed_obj['redirect_uri']
-        )
+            redirect_uri=request.parsed_obj['redirect_uri'])
         try:
             oauth_reply = oauth_session.fetch_token(
                 token_url,
                 code=request.parsed_obj['code'],
                 include_client_id=True,
-                client_secret=client_secret,
-            )
+                client_secret=client_secret)
         except Exception as e:
             raise UnknownError(message=f'Error while exchanging grant code for access token: {e}')
 
@@ -418,19 +409,8 @@ class WearablesOuraAuthEndpoint(Resource):
         oura.refresh_token = oauth_reply['refresh_token']
         oura.token_expires = datetime.utcnow() + timedelta(seconds=oauth_reply['expires_in'])
         oura.oauth_state = None
-
-        wearables = Wearables.query.filter_by(user_id=user_id).one_or_none()
-
-        if not wearables:
-            wearables = Wearables(
-                user_id=user_id,
-                has_oura=True,
-                registered_oura=True
-            )
-            db.session.add(wearables)
-        else:
-            wearables.has_oura = True
-            wearables.registered_oura = True
+        oura.wearable.has_oura = True
+        oura.wearable.registered_oura = True
 
         db.session.commit()
 
@@ -447,23 +427,13 @@ class WearablesOuraAuthEndpoint(Resource):
         oura = (
             WearablesOura.query
             .filter_by(user_id=user_id)
-            .one_or_none()
-        )
+            .one_or_none())
 
         if oura:
-            db.session.delete(oura)
-
-        wearables = (
-            Wearables.query
-            .filter_by(user_id=user_id)
-            .one_or_none()
-        )
-
-        if wearables:
-            wearables.registered_oura = False
-
-        db.session.commit()
-
+            oura.access_token = None
+            oura.refresh_token = None
+            oura.wearable.registered_oura = False
+            db.session.commit()
 
 
 ###########################################################
@@ -505,17 +475,22 @@ class WearablesFitbitAuthEndpoint(Resource):
         if not current_app.config['FITBIT_CLIENT_ID']:
             raise UnknownError(message='This endpoint does not work in local mode.')
 
+        info = Wearables.query.filter_by(user_id=user_id).one_or_none()
+        if not info:
+            raise UnknownError(
+                message=f'user_id {user_id} not found in Wearables table. '
+                         'Connect to POST /wearables first.')
+
         state = secrets.token_urlsafe(24)
 
         # Store state in database
         fitbit = (
             WearablesFitbit.query
             .filter_by(user_id=user_id)
-            .one_or_none()
-        )
+            .one_or_none())
 
         if not fitbit:
-            fitbit = WearablesFitbit(user_id=user_id, oauth_state=state)
+            fitbit = WearablesFitbit(user_id=user_id, oauth_state=state, wearable_id=info.idx)
             db.session.add(fitbit)
         else:
             fitbit.oauth_state = state
@@ -531,8 +506,7 @@ class WearablesFitbitAuthEndpoint(Resource):
             'redirect_uri': 'replace-this',
             'response_type': 'code',
             'scope': scope,
-            'state': state
-        }
+            'state': state}
 
     @token_auth.login_required(user_type=('client',))
     @accepts(schema=WearablesOAuthPostSchema, api=ns)
@@ -568,8 +542,7 @@ class WearablesFitbitAuthEndpoint(Resource):
         if not fitbit:
             raise UnknownError(
                 message=f'user_id {user_id} not found in WearablesFitbit table. '
-                         'Connect to GET /wearables/fitbit/auth first.'
-            )
+                         'Connect to GET /wearables/fitbit/auth first.')
 
         if request.parsed_obj['state'] != fitbit.oauth_state:
             raise UnknownError(message='OAuth state changed between requests.')
@@ -578,21 +551,21 @@ class WearablesFitbitAuthEndpoint(Resource):
         client_id = current_app.config['FITBIT_CLIENT_ID']
         client_secret = current_app.config['FITBIT_CLIENT_SECRET']
         token_url = current_app.config['FITBIT_TOKEN_URL']
+
+        # Fitbit requires client ID and client secret as basic auth in header.
         auth_str = base64.urlsafe_b64encode(f'{client_id}:{client_secret}'.encode('utf-8')).decode('utf-8')
 
         oauth_session = OAuth2Session(
             client_id,
             state=request.parsed_obj['state'],
-            redirect_uri=request.parsed_obj['redirect_uri']
-        )
+            redirect_uri=request.parsed_obj['redirect_uri'])
         try:
             oauth_reply = oauth_session.fetch_token(
                 token_url,
                 code=request.parsed_obj['code'],
                 include_client_id=True,
                 client_secret=client_secret,
-                headers = {'Authorization': f'Basic {auth_str}'}
-            )
+                headers = {'Authorization': f'Basic {auth_str}'})
         except Exception as e:
             raise UnknownError(message=f'Error while exchanging grant code for access token: {e}')
 
@@ -601,7 +574,7 @@ class WearablesFitbitAuthEndpoint(Resource):
             msg = oauth_reply['errors'][0]['message']
             raise UnknownError(message=f'fitbit.com returned error: {msg}')
 
-        # Not requiring location, profile, settings, or social
+        # Not requiring location, settings, or social
         minimal_scope = set(current_app.config['FITBIT_SCOPE'].split())
         scope = set(oauth_reply.get('scope', []))
 
@@ -614,19 +587,8 @@ class WearablesFitbitAuthEndpoint(Resource):
         fitbit.refresh_token = oauth_reply['refresh_token']
         fitbit.token_expires = datetime.utcnow() + timedelta(seconds=oauth_reply['expires_in'])
         fitbit.oauth_state = None
-
-        wearables = Wearables.query.filter_by(user_id=user_id).one_or_none()
-
-        if not wearables:
-            wearables = Wearables(
-                user_id=user_id,
-                has_fitbit=True,
-                registered_fitbit=True
-            )
-            db.session.add(wearables)
-        else:
-            wearables.has_fitbit = True
-            wearables.registered_fitbit = True
+        fitbit.wearable.has_fitbit = True
+        fitbit.wearable.registered_fitbit = True
 
         db.session.commit()
 
@@ -643,22 +605,13 @@ class WearablesFitbitAuthEndpoint(Resource):
         fitbit = (
             WearablesFitbit.query
             .filter_by(user_id=user_id)
-            .one_or_none()
-        )
+            .one_or_none())
 
         if fitbit:
-            db.session.delete(fitbit)
-
-        wearables = (
-            Wearables.query
-            .filter_by(user_id=user_id)
-            .one_or_none()
-        )
-
-        if wearables:
-            wearables.registered_fitbit = False
-
-        db.session.commit()
+            fitbit.access_token = None
+            fitbit.refresh_token = None
+            fitbit.wearable.registered_fitbit = False
+            db.session.commit()
 
 
 ###########################################################
@@ -693,8 +646,7 @@ class WearablesFreeStyleActivateEndpoint(Resource):
         cgm = (
             WearablesFreeStyle.query
             .filter_by(user_id=user_id)
-            .one_or_none()
-        )
+            .one_or_none())
 
         if not cgm:
             raise ContentNotFound
@@ -720,14 +672,21 @@ class WearablesFreeStyleActivateEndpoint(Resource):
         cgm = (
             WearablesFreeStyle.query
             .filter_by(user_id=user_id)
-            .one_or_none()
-        )
+            .one_or_none())
 
         if not cgm:
-            cgm = WearablesFreeStyle(user_id=user_id)
+            info = Wearables.query.filter_by(user_id=user_id).one_or_none()
+            if not info:
+                info = Wearables(user_id=user_id)
+                db.session.add(info)
+                db.session.flush()
+
+            cgm = WearablesFreeStyle(user_id=user_id, wearable_id=info.idx, wearable=info)
             db.session.add(cgm)
 
         cgm.activation_timestamp = request.parsed_obj.activation_timestamp
+        cgm.wearable.has_freestyle = True
+        cgm.wearable.registered_freestyle = True
         db.session.commit()
 
 
@@ -752,8 +711,7 @@ class WearablesFreeStyleEndpoint(Resource):
         cgm = (
             WearablesFreeStyle.query
             .filter_by(user_id=user_id)
-            .one_or_none()
-        )
+            .one_or_none())
 
         if not cgm:
             raise ContentNotFound
@@ -762,9 +720,9 @@ class WearablesFreeStyleEndpoint(Resource):
 
     @token_auth.login_required(user_type=('client',))
     @accepts(schema=WearablesFreeStyleSchema, api=ns)
-    @responds(status_code=201, api=ns)
-    def put(self, user_id):
-        """ Add CGM data for client ``user_id`` in reponse to a PUT request.
+    @responds(status_code=204, api=ns)
+    def patch(self, user_id):
+        """ Add CGM data for client ``user_id`` in reponse to a PATCH request.
 
         Parameters
         ----------
@@ -774,8 +732,7 @@ class WearablesFreeStyleEndpoint(Resource):
         cgm = (
             WearablesFreeStyle.query
             .filter_by(user_id=user_id)
-            .one_or_none()
-        )
+            .one_or_none())
 
         if not cgm:
             msg =  f'FreeStyle Libre for client {user_id} has not yet been activated. '
@@ -830,7 +787,6 @@ class WearablesFreeStyleEndpoint(Resource):
         ''').bindparams(
             gluc=glucose[n:],
             tstamps=tstamps[n:],
-            cid=user_id
-        )
+            cid=user_id)
         db.session.execute(stmt)
         db.session.commit()

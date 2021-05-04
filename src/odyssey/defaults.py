@@ -66,13 +66,17 @@ FITBIT_AUTH_URL = 'https://www.fitbit.com/oauth2/authorize'
 FITBIT_TOKEN_URL = 'https://api.fitbit.com/oauth2/token'
 """ Token URL for Fitbit API. """
 
-FITBIT_SCOPE = 'activity heartrate nutrition sleep weight'
+FITBIT_SCOPE = 'activity heartrate nutrition profile sleep weight'
 """ Fitbit resources (scopes) to request permission for. """
 
-SECRET_KEY = 'dev'
+SECRET_KEY = 'abcdefghijklmnopqrstuvwxyz0123456789'
 """
 Flask secret key, used to encrypt sessions amongst other things.
 See https://stackoverflow.com/questions/22463939/demystify-flask-app-secret-key
+
+This secret key is also used to sign JWTs. JWTs signed with the HS256 algorith (the default),
+must have a key of at least 32 characters long. The same key must also be passed to Hasura
+as part of the ``HASURA_GRAPHQL_JWT_SECRET`` variable. See ``hasura/README.md``.
 """
 
 SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -85,4 +89,18 @@ WTF_CSRF_ENABLED = True
 """
 Cross Site Request Forgery (CSRF) on forms, disable when testing.
 Not needed on API, to be removed with Flask app removal.
+"""
+
+FLASK_SKIP_DOTENV = True
+"""
+If :module:`python-dotenv` is installed, Flask will by default use it to find .env files and
+use the contents of those files as environmental variables. It uses :func:`dotenv.find_dotenv`,
+which keeps searching up the directory tree until it finds a .env file.
+
+Unfortunately, flask also makes the idiotic assumption that when a .env file is found, it must
+be in the root of the project and will change the working directory to that. As a consequence,
+``flask db ...`` will look for ``migrations/alembic.ini`` in wherever the .env file is located,
+which may not be correct at all.
+
+This setting prevents such stupid behaviour.
 """

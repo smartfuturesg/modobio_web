@@ -29,8 +29,22 @@ docker run -d -p 8080:8080 \
     -e HASURA_GRAPHQL_ADMIN_SECRET=[somesecret] \
     -e HASURA_GRAPHQL_ENABLE_CONSOLE=true \
     -e HASURA_GRAPHQL_ENABLE_TELEMETRY=false \
-    -e HASURA_GRAPHQL_JWT_SECRET='{"type":"HS256","key":"[SECRET_KEY]", "claims_map":{"x-hasura-allowed-roles": {"path":"$.x-hasura-allowed-roles"},"x-hasura-default-role": {"path":"$.utype"},"x-hasura-user-id":{"path":"$.x-hasura-user-id"}}}'
-    -v [/path/to]/odyssey/hasura/metadata:/hasura-metadata
+    -e HASURA_GRAPHQL_JWT_SECRET='{ \
+        "type": "HS256", \
+        "key": "[SECRET_KEY]", \
+        "claims_map": { \
+            "x-hasura-allowed-roles": { \
+                "path": "$.x-hasura-allowed-roles" \
+            }, \
+            "x-hasura-default-role": { \
+                "path":"$.utype" \
+            }, \
+            "x-hasura-user-id": { \
+                "path":"$.x-hasura-user-id" \
+            } \
+        } \
+    }'
+    -v [/path/to]/odyssey/hasura/metadata:/hasura-metadata \
     --name hasura \
     hasura/graphql-engine:latest
 ```
@@ -39,7 +53,7 @@ where \[username\] is the username of the user who can access the database with 
 
 For preparing hasura to expect JWTs for authentication, we must pass the `HASURA_GRAPHQL_JWT_SECRET` environment variable. In hasura we use the same authentication tokens as the ones we use for our API. This environment variable uses a json-style format to provide details on how to decode and extract data from the JWT payload. 
 
-`type` and `key` are the type of JWT encryption algorithm we use and the key used to sign the token; both are required. The `claims_map` is used to help hasura navigate our JWT payload to extract some details required by the hasura authentication system. Only `x-hasura-allowed-roles` and `x-hasura-default-role` are required by hasura. Additionally, we use the `x-hasura-user-id` field as part of our own custom authentication scheme. For more details on hasura authentication visit the documentation on [authenticating with JWTs](https://hasura.io/docs/latest/graphql/core/auth/authentication/jwt.html)
+`type` and `key` are the type of JWT encryption algorithm we use and the key used to sign the token; both are required. `key` must be the same as the `SECRET_KEY` config variable used in Flask config. It must also be at least 32 characters long when used with the HS256 algorithm. The `claims_map` is used to help hasura navigate our JWT payload to extract some details required by the hasura authentication system. Only `x-hasura-allowed-roles` and `x-hasura-default-role` are required by hasura. Additionally, we use the `x-hasura-user-id` field as part of our own custom authentication scheme. For more details on hasura authentication visit the documentation on [authenticating with JWTs](https://hasura.io/docs/latest/graphql/core/auth/authentication/jwt.html)
 
 ### Hasura CLI
 
