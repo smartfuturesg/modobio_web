@@ -12,9 +12,10 @@ from twilio.rest import Client, TwilioException
 from odyssey import create_app, db
 from odyssey.api.client.models import ClientInfo
 from odyssey.api.facility.models import MedicalInstitutions
+from odyssey.api.notifications.models import Notifications
 from odyssey.api.staff.models import StaffProfile, StaffRoles
-from odyssey.api.user.models import User, UserLogin, UserNotifications
-from odyssey.api.user.schemas import UserSubscriptionsSchema, UserNotificationsSchema
+from odyssey.api.user.models import User, UserLogin
+from odyssey.api.user.schemas import UserSubscriptionsSchema
 from odyssey.utils.constants import ACCESS_ROLES
 from odyssey.utils.misc import grab_twilio_credentials
 from tests.functional.user.data import users_staff_member_data, users_client_new_creation_data, users_client_new_info_data
@@ -118,7 +119,7 @@ def generate_users():
             'notification_type_id': 1,
             'is_staff': True
         }
-        notification = UserNotifications(**notification_data)
+        notification = Notifications(**notification_data)
         db.session.add(notification)
         db.session.flush()
         users_client_new_creation_data['email'] = origClientEmail
@@ -253,7 +254,7 @@ def init_database():
         'notification_type_id': 1,
         'is_staff': True
     }
-    notification = UserNotifications(**notification_data)
+    notification = Notifications(**notification_data)
 
     db.session.add_all([med_institute1, med_institute2, notification])
     # db.session.add_all([med_institute1, med_institute2])
