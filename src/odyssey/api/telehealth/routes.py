@@ -28,6 +28,7 @@ from odyssey.api.telehealth.models import (
 from odyssey.api.telehealth.schemas import (
     TelehealthBookingsSchema,
     TelehealthBookingsOutputSchema,
+    TelehealthBookingMeetingRoomsTokensSchema,
     TelehealthChatRoomAccessSchema,
     TelehealthConversationsNestedSchema, 
     TelehealthMeetingRoomSchema,
@@ -50,6 +51,77 @@ from odyssey.utils.misc import (
     grab_twilio_credentials
 )
 ns = api.namespace('telehealth', description='telehealth bookings management API')
+
+@ns.route('/bookings/meeting-room/access-token/<int:booking_id>/')
+@ns.doc(params={'booking_id':'booking ID'})
+class TelehealthBookingsRoomAccessTokenApi(Resource):
+    @token_auth.login_required
+    @responds(schema=TelehealthBookingMeetingRoomsTokensSchema,api=ns,status_code=200)
+    def get(self,booking_id):
+        # Get the current user
+        current_user, _ = token_auth.current_user()
+        
+        booking,chatroom = db.session.execute(
+            select(TelehealthBookings,TelehealthChatRooms).
+            join(TelehealthChatRooms,TelehealthBookings.idx==TelehealthChatRooms.booking_id).
+            where(
+                TelehealthBookings.idx == booking_id,
+                )).one_or_none()
+
+        if not booking:
+            raise InputError(status_code=405,message='Meeting does not exist yet.')
+
+        # make sure the requester is one of the participants
+        if not any(current_user.user_id == uid for uid in [booking.client_user_id, booking.staff_user_id]):
+            raise InputError(status_code=405, message='logged in user must be a booking participant')
+
+        # Create telehealth meeting room entry
+        # each telehealth session is given a unique meeting room
+        meeting_room = db.session.execute(
+            select(TelehealthMeetingRooms).
+            where(
+                TelehealthMeetingRooms.booking_id == booking_id,
+                )).scalar()
+
+        if not meeting_room:
+            meeting_room = TelehealthMeetingRooms(booking_id=booking_id,staff_user_id=booking.staff_user_id, client_user_id=booking.client_user_id)
+            meeting_room.room_name = generate_meeting_room_name()
+        
+        # Bring up chat room session. Chat rooms are intended to be between a client and staff
+        # member and persist through all telehealth interactions between the two. 
+        # only one chat room will exist between each client-staff pair
+        # If this is the first telehealth interaction between 
+        # the client and staff member, a room will be provisioned. 
+
+        twilio_credentials = grab_twilio_credentials()
+
+        # get_chatroom helper function will take care of creating or bringing forward 
+        # previously created chat room and add user as a participant using their modobio_id
+
+        # Create access token for users to access the Twilio API
+        # Add grant for video room access using meeting room name just created
+        # Twilio will automatically create a new room by this name.
+        # TODO: configure meeting room
+        # meeting type (group by default), participant limit , callbacks
+        
+        token = AccessToken(twilio_credentials['account_sid'], 
+                            twilio_credentials['api_key'], 
+                            twilio_credentials['api_key_secret'],
+                            identity=current_user.modobio_id, 
+                            ttl=TWILIO_ACCESS_KEY_TTL)
+        
+        token.add_grant(VideoGrant(room=meeting_room.room_name))
+        token.add_grant(ChatGrant(service_sid=current_app.config['CONVERSATION_SERVICE_SID']))
+        token_jwt = token.to_jwt()
+        if g.user_type == 'staff':
+            meeting_room.staff_access_token = token_jwt
+        elif g.user_type == 'client':
+            meeting_room.client_access_token = token_jwt
+
+        db.session.add(meeting_room)
+        db.session.commit() 
+        return {'twilio_token': token_jwt,
+                'conversation_sid': chatroom.conversation_sid}
 
 @ns.route('/client/time-select/<int:user_id>/')
 @ns.doc(params={'user_id': 'Client user ID'})

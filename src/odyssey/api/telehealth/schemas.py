@@ -18,6 +18,10 @@ from odyssey.api.telehealth.models import (
 )
 from odyssey.utils.constants import DAY_OF_WEEK, GENDERS, BOOKINGS_STATUS
 
+class TelehealthBookingMeetingRoomsTokensSchema(Schema):
+    twilio_token = fields.String()
+    conversation_sid = fields.String()
+
 class TelehealthTimeSelectSchema(Schema):
     staff_user_id = fields.Integer()
     start_time = fields.Time()
