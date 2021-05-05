@@ -25,6 +25,7 @@ from odyssey.api.client.models import (
     ClientAssignedDrinks,
     ClientHeightHistory,
     ClientWeightHistory,
+    ClientWaistSizeHistory,
     ClientTransactionHistory,
     ClientPushNotifications
 )
@@ -396,6 +397,18 @@ class ClientWeightSchema(ma.SQLAlchemyAutoSchema):
     @post_load
     def make_object(self, data, **kwargs):
         return ClientWeightHistory(**data)
+
+class ClientWaistSizeSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = ClientWaistSizeHistory
+        exclude = ('created_at', 'idx')
+        dump_only = ('updated_at', 'user_id')
+
+    user_id = fields.Integer()
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return ClientWaistSizeHistory(**data)
 
 class ClientTokenRequestSchema(Schema):
     user_id = fields.Integer()

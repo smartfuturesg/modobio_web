@@ -181,6 +181,13 @@ class ClientInfo(db.Model):
     :type: int
     """
 
+    waist_size = db.Column(db.Integer)
+    """
+    Most recently reported waist size in cm.
+
+    :type: int
+    """
+
     race_id = db.Column(db.Integer, db.ForeignKey('LookupRaces.race_id'))
     """
     Client race_id as defined in LookupRaces
@@ -1255,7 +1262,7 @@ class ClientAssignedDrinks(db.Model):
 
 class ClientHeightHistory(db.Model):
     """
-    Stores historical height readings of client.
+    Stores historical height measurements of clients.
     """
 
     __tablename__ = "ClientHeightHistory"
@@ -1283,21 +1290,21 @@ class ClientHeightHistory(db.Model):
 
     user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
     """
-    Id of the user for this height reading.
+    Id of the user for this height measurement.
 
     :type: int, foreign key('User.user_id')
     """
 
     height = db.Column(db.Integer)
     """
-    Value for this height reading in cm.
+    Value for this height measurement in cm.
 
     :type: int
     """
 
 class ClientWeightHistory(db.Model):
     """
-    Stores historical weight readings of client.
+    Stores historical weight measurements of clients.
     """
 
     __tablename__ = "ClientWeightHistory"
@@ -1325,18 +1332,59 @@ class ClientWeightHistory(db.Model):
 
     user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
     """
-    Id of the user for this height reading.
+    Id of the user for this weight measurement.
 
     :type: int, foreign key('User.user_id')
     """
 
     weight = db.Column(db.Integer)
     """
-    Value for this weight reading in g.
+    Value for this weight measurement in g.
 
     :type: int
     """
 
+class ClientWaistSizeHistory(db.Model):
+    """
+    Stores historical waist size measurements of clients.
+    """
+
+    __tablename__ = "ClientWaistSizeHistory"
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    """
+    Id of the user for this waist size measurement.
+
+    :type: int, foreign key('User.user_id')
+    """
+
+    waist_size = db.Column(db.Integer)
+    """
+    Value for this waist size measurement in cm.
+
+    :type: int
+    """
     
 class ClientClinicalCareTeamAuthorizations(db.Model):
     """ 

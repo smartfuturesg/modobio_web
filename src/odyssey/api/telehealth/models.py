@@ -352,6 +352,13 @@ class TelehealthChatRooms(db.Model):
     :type: int, primary key, autoincrement
     """
 
+    booking_id = db.Column(db.Integer, db.ForeignKey('TelehealthBookings.idx', ondelete="CASCADE"), nullable=False)
+    """
+    booking_id is the idx of the booking from TelehealthBookings
+
+    :type: int, foreign key('TelehealthBookings.idx')
+    """
+
     conversation_sid = db.Column(db.String)
     """
     Conversation SID form Twilio API. Format: CHXXX

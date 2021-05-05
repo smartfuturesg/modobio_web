@@ -1,12 +1,10 @@
-import time
-from flask_accepts.decorators.decorators import responds 
-
+import pytest
 from sqlalchemy import select
 
 from odyssey.api.user.models import User
 from odyssey.api.telehealth.models import TelehealthChatRooms,TelehealthMeetingRooms
 
-
+@pytest.mark.skip('This endpoint should no longer be used.')
 def test_post_create_new_meeting(test_client, init_database, staff_auth_header):
     """
     GIVEN a api end point for provisioning a meeting room
@@ -24,7 +22,7 @@ def test_post_create_new_meeting(test_client, init_database, staff_auth_header):
                                 headers=staff_auth_header, 
                                 content_type='application/json')
 
-    meeting_room_id = response.json.get('room_id',None)
+    meeting_room_id = response.json.get('room_id', None)
 
     # bring up the meeting room and chat room so we are certain they are populated in the DB
     meeting_room = TelehealthMeetingRooms.query.filter_by(room_id = meeting_room_id).one_or_none()
@@ -41,6 +39,7 @@ def test_post_create_new_meeting(test_client, init_database, staff_auth_header):
     assert meeting_room.staff_access_token == response.json['access_token']
     assert response.json['conversation_sid'] == chat_room[0].conversation_sid
 
+@pytest.mark.skip('This endpoint should no longer be used.')
 def test_access_meeting_as_client(test_client, init_database, client_auth_header):
     """
     GIVEN a api end point for provisioning a meeting room access token as a client
@@ -66,6 +65,7 @@ def test_access_meeting_as_client(test_client, init_database, client_auth_header
     assert meeting_room.client_access_token == response.json['access_token']
     assert response.json['conversation_sid'] == chat_room[0].conversation_sid
 
+@pytest.mark.skip('This endpoint should no longer be used.')
 def test_meeting_room_status(test_client, init_database, client_auth_header):
     """
     GIVEN a api end point for checking meeting room status
@@ -79,6 +79,7 @@ def test_meeting_room_status(test_client, init_database, client_auth_header):
 
     assert response.status_code == 200
 
+@pytest.mark.skip('This endpoint should no longer be used.')
 def test_getting_access_to_chat_room(test_client, init_database, client_auth_header, staff_auth_header):
     """
     GIVEN a api end point for getting access to a chat room

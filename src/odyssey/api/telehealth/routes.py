@@ -397,7 +397,7 @@ class TelehealthBookingsApi(Resource):
         # make sure the requester is one of the participants
         if not any(current_user.user_id == uid for uid in [client_user_id, staff_user_id]):
             raise InputError(status_code=405, message='logged in user must be a booking participant')
-
+        
         # Check client existence
         check_client_existence(client_user_id)
         
