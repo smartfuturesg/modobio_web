@@ -370,4 +370,3 @@ def verify_jwt(token, error_message="", refresh=False):
         raise UnauthorizedUser(message=error_message)
 
     return decoded_token
-

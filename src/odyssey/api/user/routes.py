@@ -13,7 +13,16 @@ from odyssey.api.client.schemas import ClientInfoSchema, ClientGeneralMobileSett
 from odyssey.api.client.models import ClientClinicalCareTeam
 from odyssey.api.lookup.models import LookupNotifications, LookupSubscriptions
 from odyssey.api.staff.schemas import StaffProfileSchema, StaffRolesSchema
-from odyssey.api.user.models import User, UserLogin, UserRemovalRequests, UserSubscriptions, UserTokenHistory, UserTokensBlacklist, UserNotifications
+from odyssey.api.user.models import (
+    User,
+    UserLogin,
+    UserRemovalRequests,
+    UserSubscriptions,
+    UserTokenHistory,
+    UserTokensBlacklist,
+    UserNotifications,
+    UserPendingEmailVerifications
+)
 from odyssey.api.staff.models import StaffRoles
 from odyssey.api.user.schemas import (
     UserSchema, 
@@ -31,8 +40,15 @@ from odyssey.api.user.schemas import (
 ) 
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.constants import PASSWORD_RESET_URL, DB_SERVER_TIME
-from odyssey.utils.errors import InputError, StaffEmailInUse, ClientEmailInUse, UnauthorizedUser
-from odyssey.utils.email import send_email_password_reset, send_email_delete_account
+from odyssey.utils.errors import (
+    InputError,
+    StaffEmailInUse,
+    ClientEmailInUse,
+    UnauthorizedUser,
+    GenericNotFound,
+    InvalidVerificationCode
+)
+from odyssey.utils.email import send_email_password_reset, send_email_delete_account, send_email_verify_email
 from odyssey.utils.misc import check_user_existence, check_client_existence, check_staff_existence, verify_jwt
 from odyssey.utils import search
 from odyssey import db
@@ -184,14 +200,30 @@ class NewStaffUser(Resource):
             })
             staff_sub.user_id = user.user_id
             db.session.add(staff_sub)
-            
+
+            # generate token and code for email verifciation
+            token = UserPendingEmailVerifications.generate_token(user.user_id)
+            code = UserPendingEmailVerifications.generate_code()
+
+            # create pending email verification in db
+            email_verification_data = {
+                'user_id': user.user_id,
+                'token': token,
+                'code': code
+            }
+
+            verification = UserPendingEmailVerifications(**email_verification_data)
+            db.session.add(verification)
+
+            # send email to the user
+            send_email_verify_email(user, token, code)
+        
         # create entries for role assignments 
         for role in staff_info.get('access_roles', []):
             db.session.add(StaffRolesSchema().load(
                                             {'user_id': user.user_id,
                                              'role': role}
                                             ))
-            
 
         db.session.commit()
         db.session.refresh(user)
@@ -317,6 +349,23 @@ class NewClientUser(Resource):
             })
             client_mobile_settings.user_id = user.user_id
             db.session.add(client_mobile_settings)
+
+            # generate token and code for email verification
+            token = UserPendingEmailVerifications.generate_token(user.user_id)
+            code = UserPendingEmailVerifications.generate_code()
+
+            # create pending email verification in db
+            email_verification_data = {
+                'user_id': user.user_id,
+                'token': token,
+                'code': code
+            }
+
+            verification = UserPendingEmailVerifications(**email_verification_data)
+            db.session.add(verification)
+
+            # send email to the user
+            send_email_verify_email(user, token, code)
 
             #Authenticate newly created client accnt for immediate login
             user, user_login, _ = basic_auth.verify_password(username=user.email, password=password)
@@ -502,7 +551,9 @@ class VerifyPortalId(Resource):
             db.session.add(client_info)
         elif decoded_token['utype'] == 'staff':
             user.is_staff = True
-        
+
+        # mark user email as verified        
+        user.email_verified = True
         db.session.commit()
         
         return 200
@@ -662,3 +713,97 @@ class UserNotificationsPutApi(Resource):
 
         return notification
 
+@ns.route('/email-verification/token/<string:token>/')
+@ns.doc(params={'token': 'Email verification token'})
+class UserPendingEmailVerificationsTokenApi(Resource):
+
+    @responds(status_code=200)
+    def get(self, token):
+        """
+        Checks if token has not expired and exists in db.
+        If true, removes pending verification object and returns 200.
+        """
+        # decode and validate token 
+        secret = current_app.config['SECRET_KEY']
+
+        try:
+            decoded_token = jwt.decode(token, secret, algorithms='HS256')
+        except jwt.ExpiredSignatureError:
+            raise UnauthorizedUser(message="Token authorization expired")
+
+        verification = UserPendingEmailVerifications.query.filter_by(token=token).one_or_none()
+
+        if not verification:
+            raise UnauthorizedUser(message="Invalid email verification token authorization")
+
+        #token was valid, remove the pending request, update user account and return 200
+        user = User.query.filter_by(user_id=verification.user_id).one_or_none()
+        user.update({'email_verified': True})
+        
+        db.session.delete(verification)
+        db.session.commit()
+        
+
+@ns.route('/email-verification/code/<int:user_id>/')
+@ns.doc(params={'code': 'Email verification code'})
+class UserPendingEmailVerificationsCodeApi(Resource):
+
+    @responds(status_code=200)
+    def post(self, user_id):
+
+        verification = UserPendingEmailVerifications.query.filter_by(user_id=user_id).one_or_none()
+
+        if not verification:
+            raise GenericNotFound("There is no pending email verification for user ID " + str(user_id))
+
+        if verification.code != request.args.get('code'):
+            raise InvalidVerificationCode
+
+        # Decode and validate token. Code should expire the same time the token does.
+        secret = current_app.config['SECRET_KEY']
+
+        try:
+            decoded_token = jwt.decode(verification.token, secret, algorithms='HS256')
+        except jwt.ExpiredSignatureError:
+            raise UnauthorizedUser(message="Code has expired")
+
+        #code was valid, remove the pending request, update user account and return 200
+        db.session.delete(verification)
+
+        user = User.query.filter_by(user_id=user_id).one_or_none()
+        user.update({'email_verified': True})
+
+        db.session.commit()
+
+@ns.route('/email-verification/resend/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class UserPendingEmailVerificationsResendApi(Resource):
+    """
+    If a user waited too long to verify their email and their token/code have expired,
+    they can use this endpoint to create another token/code and send another email. This 
+    can also be used if the user never received an email.
+    """
+
+    @responds(status_code=200)
+    def post(self, user_id):
+        verification = UserPendingEmailVerifications.query.filter_by(user_id=user_id).one_or_none()
+            
+        if not verification:
+            raise GenericNotFound("There is no pending email verification for user ID " + str(user_id))
+
+        # create a new token and code for this user
+        token = UserPendingEmailVerifications.generate_token(user_id)
+        code = UserPendingEmailVerifications.generate_code()
+
+        verification.update(
+            {
+                'token': token,
+                'code': code
+            }
+        )
+
+        db.session.commit()
+
+        recipient = User.query.filter_by(user_id=user_id).one_or_none()
+
+        send_email_verify_email(recipient, token, code)

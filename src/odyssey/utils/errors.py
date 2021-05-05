@@ -296,6 +296,14 @@ class LoginNotAuthorized(Exception):
 
         self.status_code = 401
 
+class EmailNotVerified(Exception):
+    """Used for auth.py if a user has not yet verified their email."""
+    def __init__(self):
+        Exception.__init__(self)
+        self.message = "User email address has not yet been verified"
+
+        self.status_code = 401
+
 class GenericNotFound(Exception):
     """
     When requesting an item from the database which does not exist
@@ -319,6 +327,20 @@ class MissingThirdPartyCredentials(Exception):
             self.message = "Credentials for 3rd party service are missing"
 
         self.status_code = 500
+
+class InvalidVerificationCode(Exception):
+    """
+    In the case that an email verification is requested but the wrong code is
+    given or the code's lifetime has expired
+    """
+    def __init__(self, message = None):
+        Exception.__init__(self)
+        if message:
+            self.message = message
+        else:
+            self.message = "Invalid email verification code."
+
+        self.status_code = 403
 
 def bad_request(message):
     return error_response(400, message)
@@ -459,7 +481,12 @@ def error_drink_id_does_not_exist(error):
 
 @api.errorhandler(LoginNotAuthorized)
 def error_login_not_authorized(error):
-    '''Return a custom message and 400 status code'''
+    '''Return a custom message and 401 status code'''
+    return error_response(error.status_code, error.message)
+
+@api.errorhandler(EmailNotVerified)
+def error_email_not_verified(error):
+    '''Return email not verified error message and 401 status code'''
     return error_response(error.status_code, error.message)
 
 @api.errorhandler(MissingThirdPartyCredentials)
@@ -483,3 +510,8 @@ def register_handlers(app):
     def api_default_error_handler(error):
         '''Default error handler for api'''
         return  error_response(getattr(error, 'code', 500), str(error)) 
+
+@api.errorhandler(InvalidVerificationCode)
+def error_invalid_verification_code(error):
+    '''Return a custom message and 403 status code'''
+    return error_response(error.status_code, error.message)

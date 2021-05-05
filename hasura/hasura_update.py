@@ -47,7 +47,7 @@ from default_permissions import (
     client_default_insert_permission, 
     client_default_update_permission, 
     default_unfiltered_select_permission, 
-    SELECT_ONLY,
+    STAFF_SELECT_ONLY,
     staff_default_select_permission,
     staff_default_insert_permission,
     staff_default_update_permission
@@ -181,23 +181,30 @@ for schema in sorted(inspector.get_schema_names()):
             col['name'] for col in inspector.get_columns(tablename, schema=schema)
         ]  
 
+        # TODO: 5.3.21 Staff and clients may only select tables for the logged-in user. 
+        # further permissions are currently commented out and may be updated or removed in the future
         # Tables which hold client-specific user data
-        # Clients can view all columns, update all columns except user_id fields. (*rows must be owned by the requesting user)
-        # Staff has the same permissions except they currently have access to all clients
         if (
-                any(col in permissible_columns for col in ['user_id'])
-                and any(tablename.startswith(prefix) for prefix in ['Client', 'Medical', 'User', 'PT', 'Trainer', 'Telehealth', 'Wearables'])
+                any(col in permissible_columns for col in ['user_id', 'client_user_id', 'staff_user_id'])
+                and any(tablename.startswith(prefix) for prefix in ['Client', 'Medical', 'User', 'PT', 'Trainer'])
             ):
             select_permission_client = client_default_select_permission(columns=permissible_columns)
-            insert_permission_client = client_default_insert_permission(columns=permissible_columns)
-            update_permission_client = client_default_update_permission(columns=permissible_columns)
+            # insert_permission_client = client_default_insert_permission(columns=permissible_columns)
+            # update_permission_client = client_default_update_permission(columns=permissible_columns)
 
-            select_permission_staff = staff_default_select_permission(columns=permissible_columns)
-            insert_permission_staff = staff_default_insert_permission(columns=permissible_columns)
-            update_permission_staff = staff_default_update_permission(columns=permissible_columns)
+            select_permission_staff = staff_default_select_permission(columns=permissible_columns, filtered=True)
+            # insert_permission_staff = staff_default_insert_permission(columns=permissible_columns)
+            # update_permission_staff = staff_default_update_permission(columns=permissible_columns)
+
+        # Tables here require API in order to for the FE to work with. We will allow select access only for the following.
+        elif (
+                any(col in permissible_columns for col in ['user_id','client_user_id', 'staff_user_id'])
+                and any(tablename.startswith(prefix) for prefix in ['Telehealth', 'Wearables'])
+            ):
+            select_permission_client = client_default_select_permission(columns=permissible_columns)
+            select_permission_staff = staff_default_select_permission(columns=permissible_columns, filtered=True)
 
         # Lookup tables
-        # all users may view all columns in lookup tables
         # we still have a few medical lookup tables so the Medical prefix is included here 
         elif (
                 not any(col in permissible_columns for col in ['user_id', 'client_user_id', 'staff_user_id'])
@@ -210,15 +217,9 @@ for schema in sorted(inspector.get_schema_names()):
                 columns=permissible_columns, user_type = 'staff')
             
         # staff specific data
-        # Clients may only view these tables
-        # Staff may update their own data if a user_id field exists in the table
         elif any(tablename.startswith(prefix) for prefix in ['Staff', 'System']):
             select_permission_client = client_default_select_permission(columns=permissible_columns)
-
             select_permission_staff = staff_default_select_permission(columns=permissible_columns, filtered=True)
-            if tablename not in SELECT_ONLY:
-                insert_permission_staff = staff_default_insert_permission(columns=permissible_columns, filtered=True)
-                update_permission_staff = staff_default_update_permission(columns=permissible_columns, filtered=True)
             
         table['select_permissions'] = [permission for permission in [select_permission_client, select_permission_staff] if permission]
         table['insert_permissions'] = [permission for permission in [insert_permission_client,insert_permission_staff] if permission] 

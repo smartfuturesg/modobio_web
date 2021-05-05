@@ -59,6 +59,7 @@ def generate_users():
         # change the number
         users_client_new_creation_data['phone_number'] = str(10 + i)
         client_1 = User(**users_client_new_creation_data)
+        client_1.email_verified = True
         db.session.add(client_1)
         db.session.flush()
         # 2) User login
@@ -79,6 +80,7 @@ def generate_users():
         db.session.add(client_1_sub)
         db.session.flush()
 
+
         ####
         # initialize a test staff member
         ####
@@ -88,6 +90,7 @@ def generate_users():
         users_staff_member_data['phone_number'] = str(30 + i)
         # 1) Create User where is_staff is True
         staff_1 = User(**users_staff_member_data)
+        staff_1.email_verified = True
         db.session.add(staff_1)
         db.session.flush()
 
@@ -193,6 +196,7 @@ def init_database():
 
     # 1) Create User instance. modobio_id populated automatically
     client_1 = User(**users_client_new_creation_data)
+    client_1.email_verified = True
     db.session.add(client_1)
     db.session.flush()
 
@@ -219,6 +223,7 @@ def init_database():
     ####
     # 1) Create User where is_staff is True
     staff_1 = User(**users_staff_member_data)
+    staff_1.email_verified = True
     db.session.add(staff_1)
     db.session.flush()
 

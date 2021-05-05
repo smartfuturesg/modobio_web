@@ -818,6 +818,13 @@ Refresh token lifetime in hours.
 :type: int
 """
 
+EMAIL_TOKEN_LIFETIME = 24
+"""
+Email verifications token lifetime in hours.
+
+:type: int
+"""
+
 
 REGISTRATION_PORTAL_URL = "www.modobio.com/user/registration-portal?portal_id={}"
 

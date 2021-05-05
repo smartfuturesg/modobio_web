@@ -91,7 +91,7 @@ inner join information_schema.columns as c
 		and t.table_schema = c.table_schema 
 where t.table_schema = 'public'
 	and t.table_type = 'BASE TABLE'
-	and c.column_name = 'user_id';
+	and (c.column_name = 'user_id');
 ---------------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------------
 
