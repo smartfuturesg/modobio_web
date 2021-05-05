@@ -231,7 +231,7 @@ class RecentClients(Resource):
 class StaffToken(Resource):
     """create and revoke tokens"""
     @ns.doc(security='password')
-    @basic_auth.login_required(user_type=('staff',))
+    @basic_auth.login_required(user_type=('staff',), email_required=False)
     @responds(schema=StaffTokenRequestSchema, status_code=201, api=ns)
     def post(self):
         """generates a token for the 'current_user' immediately after password authentication"""
@@ -260,7 +260,8 @@ class StaffToken(Resource):
                 'token': access_token,
                 'refresh_token': refresh_token,
                 'user_id': user.user_id,
-                'access_roles': [item[0] for item in access_roles]}
+                'access_roles': [item[0] for item in access_roles],
+                'email_verified': user.email_verified}
 
 
     @ns.doc(security='password')

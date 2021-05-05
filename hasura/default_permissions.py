@@ -1,4 +1,8 @@
 """
+TODO:
+***5.3.21 UPDATE**
+    All users may only access their own data. No mutation permissions are currently assigned. 
+
 Hasura gives us flexibility to authorize user access through special claims embedded in our JWTs. 
 These claims should summarize a user’s level of access when requesting a resource from our database. 
 Currently we use a combination of a 4 interworking resource access systems:
@@ -50,7 +54,9 @@ Broken down here
 
 """
 # These tables should remain inaccessible in Hasura
-SELECT_ONLY = ('StaffRecentClients')
+STAFF_SELECT_ONLY = ('StaffRecentClients', 'User', 'ClientInfo', 'StaffRoles', 'StaffOperationalTerriories')
+NO_UPDATE_FIELDS = ['user_id', 'created_at', 'updated_at', 'is_staff', 'is_client', 'role', 'idx', 'modobioId']
+NO_INSERT_FIELDS = [item for item in NO_UPDATE_FIELDS if item not in ['user_id']] 
 
 ##
 # Clients accessing their own data or accessing staff profile data
@@ -76,6 +82,8 @@ def client_default_select_permission(columns):
     #TODO add clinical care team scenario
     if 'user_id' in columns:
         permission['permission'].update({'filter': {'user_id' : { '_eq': 'X-Hasura-User-Id'}}})
+    elif 'client_user_id' in columns:
+        permission['permission'].update({'filter': {'client_user_id' : { '_eq': 'X-Hasura-User-Id'}}})
 
     return permission
 
@@ -90,14 +98,16 @@ def client_default_update_permission(columns):
     permission =  {
         'role': 'client', 
         'permission': {
-            'columns': [column for column in columns if column not in ['user_id', 'created_at', 'updated_at']],
+            'columns': [column for column in columns if column not in NO_UPDATE_FIELDS],
             'filter': {}
         }
     } 
 
     if 'user_id' in columns:
         permission['permission']['filter'].update({'user_id' : { '_eq': 'X-Hasura-User-Id'}})
-
+    elif 'client_user_id' in columns:
+        permission['permission']['filter'].update({'client_user_id' : { '_eq': 'X-Hasura-User-Id'}})
+    
     return permission
 
 def client_default_insert_permission(columns):
@@ -112,7 +122,7 @@ def client_default_insert_permission(columns):
     permission =  {
         'role': 'client', 
         'permission': {
-            'columns': [column for column in columns if column not in ['user_id', 'created_at', 'updated_at']],
+            'columns': [column for column in columns if column not in NO_UPDATE_FIELDS],
             'check': {},
             'set': {}
         }
@@ -124,6 +134,10 @@ def client_default_insert_permission(columns):
     if 'user_id' in columns:
         permission['permission']['check'].update({'user_id': {'_eq': 'X-Hasura-User-Id'}})
         permission['permission']['set'].update({'user_id': 'X-Hasura-User-Id'})
+    elif 'user_id' in columns:
+        permission['permission']['check'].update({'client_user_id': {'_eq': 'X-Hasura-User-Id'}})
+        permission['permission']['set'].update({'client_user_id': 'X-Hasura-User-Id'})
+    
     return permission
 
 ##
@@ -131,7 +145,7 @@ def client_default_insert_permission(columns):
 # user_id and client_user_id may be present in these tables
 ##
 
-def staff_default_select_permission(columns, filtered=False):
+def staff_default_select_permission(columns, filtered=True):
     """
     Covers select permisisons for most tables prefixed with
     'Client', 'Medical', 'User', 'PT', 'Trainer', 'Telehealth', 'Wearables'
@@ -152,9 +166,12 @@ def staff_default_select_permission(columns, filtered=False):
     if filtered and 'user_id' in columns:
         permission['permission'].update({'filter': {'user_id' : { '_eq': 'X-Hasura-User-Id'}}})
     
+    elif filtered and 'staff_user_id' in columns:
+        permission['permission'].update({'filter': {'staff_user_id' : { '_eq': 'X-Hasura-User-Id'}}})
+    
     return permission
 
-def staff_default_update_permission(columns, filtered=False):
+def staff_default_update_permission(columns, filtered=True):
     """
     Covers update permisisons for most tables prefixed with
     'Client', 'Medical', 'User', 'PT', 'Trainer', 'Telehealth', 'Wearables', 'Staff', 'System'
@@ -168,7 +185,7 @@ def staff_default_update_permission(columns, filtered=False):
     permission =  {
         'role': 'staff', 
         'permission': {
-            'columns': [column for column in columns if column not in ['created_at', 'updated_at']],
+            'columns': [column for column in columns if column not in NO_UPDATE_FIELDS],
             'filter': {}
         }
     } 
@@ -181,7 +198,7 @@ def staff_default_update_permission(columns, filtered=False):
     
     return permission
 
-def staff_default_insert_permission(columns, filtered=False):
+def staff_default_insert_permission(columns, filtered=True):
     """
     Covers insert and update permisisons for most tables prefixed with
     'Client', 'Medical', 'User', 'PT', 'Trainer', 'Telehealth', 'Wearables'
@@ -195,7 +212,7 @@ def staff_default_insert_permission(columns, filtered=False):
     permission =  {
         'role': 'staff', 
         'permission': {
-            'columns': [column for column in columns if column not in ['created_at', 'updated_at']],
+            'columns': [column for column in columns if column not in NO_INSERT_FIELDS],
             'check': {}
         }
      }

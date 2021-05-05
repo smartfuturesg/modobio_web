@@ -58,6 +58,7 @@ class StaffTokenRequestSchema(Schema):
     token = fields.String()
     refresh_token = fields.String()
     access_roles = fields.List(fields.String)
+    email_required = fields.Boolean()
      
 class StaffOperationalTerritoriesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

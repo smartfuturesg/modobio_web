@@ -878,7 +878,7 @@ class MedImaging(Resource):
     @responds(status_code=201, api=ns)
     def post(self, user_id):
         """For adding one or many medical images to the database for the specified user_id
-
+    
         Expects form-data
 
         "image": (file_path , open(file_path, mode='rb'), 'Mime type')

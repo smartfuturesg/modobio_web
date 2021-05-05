@@ -1,0 +1,70 @@
+/* Graphviz graph
+*
+*  to create png, run: dot -Tpng -o <name>.png <name>.gv
+*/
+
+digraph {
+    /* bgcolor = "transparent"; */
+    dpi = 150;
+    ranksep = 1.15;
+    splines=line;
+
+    subgraph labels_l {
+        node [
+            shape = none,
+            fontname = "Latin Modern Roman Demi"];
+
+        identity_l [label="identity"];
+        persona_l [label="persona"];
+        group_l [label="group"];
+        role_l [label="role"];
+
+        identity_l -> persona_l -> group_l -> role_l [arrowhead = none];
+    }
+
+    subgraph main {
+        node [
+            shape = rectangle,
+            width = 1.2,
+            height = 0.7,
+            fontname = "Latin Modern Roman"
+        ];
+
+        user -> client [label = "mobile app"];
+        user -> professional [label = "web portal"];
+        client -> {self, "care\nteam"};
+        professional -> {practitioner, staff};
+        practitioner -> {
+            dietitian,
+            doctor,
+            "health\ncoach",
+            nurse,
+            "nurse\npractitioner",
+            nutritionist,
+            "physical\ntherapist",
+            therapist,
+            trainer};
+        staff -> {
+            "system\nadmin",
+            "staff\nadmin",
+            "community\nmanager",
+            "client\nservices",
+            "data\n scientist"};
+
+        {rank = same; client, professional};
+        {rank = same; self, "care\nteam", "system\nadmin", doctor};
+    }
+
+    subgraph labels_r {
+        node [
+            shape = none,
+            fontname = "Latin Modern Roman Demi"];
+
+        identity_r [label="identity"];
+        persona_r [label="persona"];
+        group_r [label="group"];
+        role_r [label="role"];
+
+        identity_r -> persona_r -> group_r -> role_r [arrowhead = none];
+    }
+}

@@ -2,3 +2,4 @@
 - alembic_version
 - UserTokensBlacklist
 - UserTokenHistory
+- UserLogin

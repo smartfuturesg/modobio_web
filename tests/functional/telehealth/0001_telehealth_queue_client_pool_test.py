@@ -95,12 +95,8 @@ def test_get_1_client_appointment_queue(test_client, init_database, client_auth_
         
         # queue order should be 4, 1, 3, 2, 5
         assert response.status_code == 200
-        assert [response.json['queue'][0]['target_date'],response.json['queue'][0]['priority']] == ['2025-01-02T02:00:00',False]
-        assert [response.json['queue'][1]['target_date'],response.json['queue'][1]['priority']] == ['2025-01-05T02:00:00',False]
-        assert [response.json['queue'][2]['target_date'],response.json['queue'][2]['priority']] == ['2025-02-05T02:00:00',False]
-        assert [response.json['queue'][3]['target_date'],response.json['queue'][3]['priority']] == ['2025-03-03T02:00:00',False]
-        assert [response.json['queue'][4]['target_date'],response.json['queue'][4]['priority']] == ['2025-04-05T02:00:00',False]
-        assert response.json['total_queue'] == 5
+        assert [response.json['queue'][0]['target_date'],response.json['queue'][0]['priority']] == ['2025-04-05T02:00:00',False]
+        assert response.json['total_queue'] == 1
 
 def test_post_6_client_appointment(test_client, init_database, client_auth_header):
     """
@@ -130,26 +126,7 @@ def test_get_2_client_appointment_queue(test_client, init_database, client_auth_
         # queue order should be 6, 4, 1, 3, 2, 5
         assert response.status_code == 200
         assert [response.json['queue'][0]['target_date'],response.json['queue'][0]['priority']] == ['2025-02-07T02:00:00',True]
-        assert [response.json['queue'][1]['target_date'],response.json['queue'][1]['priority']] == ['2025-01-02T02:00:00',False]
-        assert [response.json['queue'][2]['target_date'],response.json['queue'][2]['priority']] == ['2025-01-05T02:00:00',False]
-        assert [response.json['queue'][3]['target_date'],response.json['queue'][3]['priority']] == ['2025-02-05T02:00:00',False]
-        assert [response.json['queue'][4]['target_date'],response.json['queue'][4]['priority']] == ['2025-03-03T02:00:00',False]
-        assert [response.json['queue'][5]['target_date'],response.json['queue'][5]['priority']] == ['2025-04-05T02:00:00',False]
-        assert response.json['total_queue'] == 6
-
-def test_post_7_client_appointment(test_client, init_database, client_auth_header):
-    """
-    GIVEN a api end point for client appointment queue
-    WHEN the '/telehealth/queue/client-pool/<user_id>' resource  is requested (POST)
-    THEN check the response is valid
-    """
-    # This Should Fail because the user already has this target_date in the queue
-    response = test_client.post('/telehealth/queue/client-pool/1/',
-                                headers=client_auth_header, 
-                                data=dumps(telehealth_queue_client_pool_5_post_data), 
-                                content_type='application/json')
-
-    assert response.status_code == 405          
+        assert response.json['total_queue'] == 1        
 
 def test_get_3_client_appointment_queue(test_client, init_database, client_auth_header, staff_auth_header):
     """
@@ -166,12 +143,7 @@ def test_get_3_client_appointment_queue(test_client, init_database, client_auth_
         # This should be the same as test_get_2
         assert response.status_code == 200
         assert [response.json['queue'][0]['target_date'],response.json['queue'][0]['priority']] == ['2025-02-07T02:00:00',True]
-        assert [response.json['queue'][1]['target_date'],response.json['queue'][1]['priority']] == ['2025-01-02T02:00:00',False]
-        assert [response.json['queue'][2]['target_date'],response.json['queue'][2]['priority']] == ['2025-01-05T02:00:00',False]
-        assert [response.json['queue'][3]['target_date'],response.json['queue'][3]['priority']] == ['2025-02-05T02:00:00',False]
-        assert [response.json['queue'][4]['target_date'],response.json['queue'][4]['priority']] == ['2025-03-03T02:00:00',False]
-        assert [response.json['queue'][5]['target_date'],response.json['queue'][5]['priority']] == ['2025-04-05T02:00:00',False]
-        assert response.json['total_queue'] == 6
+        assert response.json['total_queue'] == 1
 
 def test_delete_1_client_appointment_queue(test_client, init_database, client_auth_header, staff_auth_header):
     """
@@ -187,7 +159,8 @@ def test_delete_1_client_appointment_queue(test_client, init_database, client_au
                                 headers=client_auth_header, 
                                 content_type='application/json')
 
-    assert response.status_code == 200  
+    # 405 because client 1 is no longer in the queue
+    assert response.status_code == 405
 
 def test_post_8_client_appointment(test_client, init_database, client_auth_header):
     """
@@ -218,12 +191,7 @@ def test_get_4_client_appointment_queue(test_client, init_database, client_auth_
         # This should be the same as test_get_2
         assert response.status_code == 200
         assert [response.json['queue'][0]['target_date'],response.json['queue'][0]['priority']] == ['2025-02-05T02:00:00',True]
-        assert [response.json['queue'][1]['target_date'],response.json['queue'][1]['priority']] == ['2025-02-07T02:00:00',True]
-        assert [response.json['queue'][2]['target_date'],response.json['queue'][2]['priority']] == ['2025-01-02T02:00:00',False]
-        assert [response.json['queue'][3]['target_date'],response.json['queue'][3]['priority']] == ['2025-01-05T02:00:00',False]
-        assert [response.json['queue'][4]['target_date'],response.json['queue'][4]['priority']] == ['2025-03-03T02:00:00',False]
-        assert [response.json['queue'][5]['target_date'],response.json['queue'][5]['priority']] == ['2025-04-05T02:00:00',False]
-        assert response.json['total_queue'] == 6    
+        assert response.json['total_queue'] == 1 
 
 def test_delete_2_client_appointment_queue(test_client, init_database, client_auth_header, staff_auth_header):
     """
@@ -238,8 +206,8 @@ def test_delete_2_client_appointment_queue(test_client, init_database, client_au
                                 data=dumps(payload),
                                 headers=client_auth_header, 
                                 content_type='application/json')
-
-    assert response.status_code == 200  
+    # The client with that payload does not exist in the table
+    assert response.status_code == 405 
 
 def test_get_5_client_appointment_queue(test_client, init_database, client_auth_header, staff_auth_header):
     """
@@ -256,11 +224,7 @@ def test_get_5_client_appointment_queue(test_client, init_database, client_auth_
         # This should be the same as test_get_2
         assert response.status_code == 200
         assert [response.json['queue'][0]['target_date'],response.json['queue'][0]['priority']] == ['2025-02-05T02:00:00',True]
-        assert [response.json['queue'][1]['target_date'],response.json['queue'][1]['priority']] == ['2025-02-07T02:00:00',True]
-        assert [response.json['queue'][2]['target_date'],response.json['queue'][2]['priority']] == ['2025-01-05T02:00:00',False]
-        assert [response.json['queue'][3]['target_date'],response.json['queue'][3]['priority']] == ['2025-03-03T02:00:00',False]
-        assert [response.json['queue'][4]['target_date'],response.json['queue'][4]['priority']] == ['2025-04-05T02:00:00',False]
-        assert response.json['total_queue'] == 5
+        assert response.json['total_queue'] == 1
 
 def test_get_1_specific_client_appointment_queue(test_client, init_database, client_auth_header, staff_auth_header):
     """
@@ -277,13 +241,5 @@ def test_get_1_specific_client_appointment_queue(test_client, init_database, cli
         # This should be the same as test_get_5
         assert response.status_code == 200
         assert [response.json['queue'][0]['target_date'],response.json['queue'][0]['priority']] == ['2025-02-05T02:00:00',True]
-        assert [response.json['queue'][1]['target_date'],response.json['queue'][1]['priority']] == ['2025-02-07T02:00:00',True]
-        assert [response.json['queue'][2]['target_date'],response.json['queue'][2]['priority']] == ['2025-01-05T02:00:00',False]
-        assert [response.json['queue'][3]['target_date'],response.json['queue'][3]['priority']] == ['2025-03-03T02:00:00',False]
-        assert [response.json['queue'][4]['target_date'],response.json['queue'][4]['priority']] == ['2025-04-05T02:00:00',False]
         assert response.json['queue'][0]['duration'] == 30
-        assert response.json['queue'][0]['medical_gender'] == 'f'
-        assert response.json['queue'][1]['duration'] == 20
-        assert response.json['queue'][1]['medical_gender'] == 'm'
-        assert response.json['queue'][3]['medical_gender'] == 'np'
-        assert response.json['total_queue'] == 5        
+        assert response.json['total_queue'] == 1

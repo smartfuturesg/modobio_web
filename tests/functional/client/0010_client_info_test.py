@@ -6,7 +6,7 @@ from datetime import datetime
 from flask.json import dumps
 from requests.auth import _basic_auth_str
 
-from odyssey.api.user.models import User, UserLogin
+from odyssey.api.user.models import User, UserLogin, UserPendingEmailVerifications
 from odyssey.api.client.models import (
     ClientInfo,
     ClientConsent
@@ -89,10 +89,17 @@ def test_creating_new_client(test_client, init_database, staff_auth_header):
                                 content_type='application/json')
 
     user = User.query.filter_by(email=users_new_user_client_data['user_info']['email']).first()
-    
+
     assert response.status_code == 201
     assert user.email == users_new_user_client_data['user_info']['email']
     assert response.json['user_info']['modobio_id']
+
+    # Register the client's email address (token)
+    verification = UserPendingEmailVerifications.query.filter_by(user_id=user.user_id).one_or_none()
+    token = verification.token
+
+    response = test_client.get('/user/email-verification/token/' + token + '/')
+    assert response.status_code == 200
 
     ###############
     # Use generated password to test token generation
