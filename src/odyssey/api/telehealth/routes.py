@@ -29,6 +29,7 @@ from odyssey.api.telehealth.schemas import (
     TelehealthBookingsSchema,
     TelehealthBookingsOutputSchema,
     TelehealthBookingMeetingRoomsTokensSchema,
+    TelehealthBookingsPUTSchema,
     TelehealthChatRoomAccessSchema,
     TelehealthConversationsNestedSchema, 
     TelehealthMeetingRoomSchema,
@@ -55,6 +56,12 @@ ns = api.namespace('telehealth', description='telehealth bookings management API
 @ns.route('/bookings/meeting-room/access-token/<int:booking_id>/')
 @ns.doc(params={'booking_id':'booking ID'})
 class TelehealthBookingsRoomAccessTokenApi(Resource):
+    """
+    This endpoint is used to GET the staff and client's TWILIO access tokens so they can
+    access their chats and videos.
+
+    Here, we create the Booking Meeting Room.
+    """
     @token_auth.login_required
     @responds(schema=TelehealthBookingMeetingRoomsTokensSchema,api=ns,status_code=200)
     def get(self,booking_id):
@@ -95,8 +102,6 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
 
         twilio_credentials = grab_twilio_credentials()
 
-        # get_chatroom helper function will take care of creating or bringing forward 
-        # previously created chat room and add user as a participant using their modobio_id
 
         # Create access token for users to access the Twilio API
         # Add grant for video room access using meeting room name just created
@@ -307,7 +312,8 @@ class TelehealthClientTimeSelectApi(Resource):
 
 @ns.route('/bookings/')
 @ns.doc(params={'client_user_id': 'Client User ID',
-                'staff_user_id' : 'Staff User ID'}) 
+                'staff_user_id' : 'Staff User ID',
+                'booking_id': 'booking_id'}) 
 class TelehealthBookingsApi(Resource):
     """
     This API resource is used to get and post client and staff bookings.
@@ -549,38 +555,19 @@ class TelehealthBookingsApi(Resource):
         return payload
 
     @token_auth.login_required
-    @accepts(schema=TelehealthBookingsSchema, api=ns)
     @responds(status_code=201,api=ns)
     def put(self):
         """
             PUT request should be used purely to update the booking STATUS.
         """
-        if request.parsed_obj.booking_window_id_start_time >= request.parsed_obj.booking_window_id_end_time:
-            raise InputError(status_code=405,message='Start time must be before end time.')
-        client_user_id = request.args.get('client_user_id', type=int)
         
-        if not client_user_id:
-            raise InputError(status_code=405,message='Missing Client ID')
-
-        staff_user_id = request.args.get('staff_user_id', type=int)
+        booking_id = request.args.get('booking_id', type=int)
         
-        if not staff_user_id:
-            raise InputError(status_code=405,message='Missing Staff ID')        
-        
-        # Check client existence
-        check_client_existence(client_user_id)
-        
-        # Check staff existence
-        check_staff_existence(staff_user_id)
-
         # Check if staff and client have those times open
-        bookings = TelehealthBookings.query.filter_by(client_user_id=client_user_id,\
-                                                        staff_user_id=staff_user_id,\
-                                                        target_date=request.parsed_obj.target_date,\
-                                                        booking_window_id_start_time=request.parsed_obj.booking_window_id_start_time).one_or_none()
+        bookings = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
 
         if not bookings:
-            raise InputError(status_code=405,message='Could not find booking for Client {} and Staff {}.'.format(client_user_id, staff_user_id))
+            raise InputError(status_code=405,message='Could not find booking.')
 
         data = request.get_json()
 

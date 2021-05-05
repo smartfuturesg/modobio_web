@@ -34,6 +34,9 @@ class TelehealthTimeSelectOutputSchema(Schema):
     appointment_times = fields.Nested(TelehealthTimeSelectSchema(many=True),missing=[])
     total_options = fields.Integer()
 
+class TelehealthBookingsPUTSchema(Schema):
+    booking_id = fields.Integer()
+
 class TelehealthBookingsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = TelehealthBookings
