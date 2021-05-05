@@ -555,12 +555,17 @@ class TelehealthBookingsApi(Resource):
         return payload
 
     @token_auth.login_required
+    @accepts(schema=TelehealthBookingsSchema, api=ns)
     @responds(status_code=201,api=ns)
     def put(self):
         """
             PUT request should be used purely to update the booking STATUS.
         """
         
+        if request.parsed_obj.booking_window_id_start_time >= request.parsed_obj.booking_window_id_end_time:
+            raise InputError(status_code=405,message='Start time must be before end time.')
+
+
         booking_id = request.args.get('booking_id', type=int)
         
         # Check if staff and client have those times open
