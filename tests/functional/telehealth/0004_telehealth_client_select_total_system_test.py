@@ -158,5 +158,30 @@ def test_client_time_select(test_client, init_database, client_auth_header):
     assert response.json['total_options'] == 53
     
 
+def test_bookings_meeting_room_access(test_client,init_database,client_auth_header, staff_auth_header):
+    user_id_arr = (1,2)
+    for user_id in user_id_arr:
+        user = init_database.session.execute(
+            select(User).where(User.user_id == user_id)
+        ).one_or_none()[0]
+        # sign in as staff user 
+        valid_credentials = base64.b64encode(
+            f"{user.email}:{'password'}".encode(
+                "utf-8")).decode("utf-8")
+        
+        headers = {'Authorization': f'Basic {valid_credentials}'}
+        if user_id == 2:
+            response = test_client.post('/staff/token/',
+                                    headers=headers, 
+                                    content_type='application/json')
+        else:
+            response = test_client.post('/client/token/',
+                                    headers=headers, 
+                                    content_type='application/json')            
+        token = response.json.get('token')
+        auth_header = {'Authorization': f'Bearer {token}'}
+        response = test_client.get('/telehealth/bookings/meeting-room/access-token/1/', headers=auth_header)
+        assert response.status_code == 200
+
 def test_delete_generated_users(test_client, init_database, delete_users):
     assert 1 == 1

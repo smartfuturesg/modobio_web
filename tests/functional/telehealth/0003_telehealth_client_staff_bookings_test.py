@@ -150,7 +150,7 @@ def test_put_1_client_staff_bookings(test_client, init_database, staff_auth_head
     THEN check the response is valid
     """
    
-    response = test_client.put('/telehealth/bookings/?client_user_id={}&staff_user_id={}'.format(1,2),
+    response = test_client.put('/telehealth/bookings/?booking_id={}'.format(1),
                                 headers=staff_auth_header, 
                                 data=dumps(telehealth_client_staff_bookings_put_1_data), 
                                 content_type='application/json')
