@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 import boto3
 import jwt
 
-from flask import current_app, request, jsonify
+from flask import current_app, request, jsonify, redirect
 from flask_accepts import accepts, responds
 from flask_restx import Resource
 from werkzeug.security import check_password_hash
@@ -11,9 +11,16 @@ from werkzeug.security import check_password_hash
 from odyssey.api import api
 from odyssey.api.client.schemas import ClientInfoSchema
 from odyssey.api.client.models import ClientClinicalCareTeam
-from odyssey.api.lookup.models import LookupNotifications, LookupSubscriptions
+from odyssey.api.lookup.models import LookupSubscriptions
 from odyssey.api.staff.schemas import StaffProfileSchema, StaffRolesSchema
-from odyssey.api.user.models import User, UserLogin, UserRemovalRequests, UserSubscriptions, UserTokenHistory, UserTokensBlacklist, UserNotifications
+from odyssey.api.user.models import (
+    User,
+    UserLogin,
+    UserRemovalRequests,
+    UserSubscriptions,
+    UserTokenHistory,
+    UserTokensBlacklist)
+
 from odyssey.api.staff.models import StaffRoles
 from odyssey.api.user.schemas import (
     UserSchema, 
@@ -26,9 +33,8 @@ from odyssey.api.user.schemas import (
     UserSubscriptionsSchema,
     UserSubscriptionHistorySchema,
     NewStaffUserSchema,
-    UserClinicalCareTeamSchema,
-    UserNotificationsSchema
-) 
+    UserClinicalCareTeamSchema)
+
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.constants import PASSWORD_RESET_URL, DB_SERVER_TIME
 from odyssey.utils.errors import InputError, StaffEmailInUse, ClientEmailInUse, UnauthorizedUser
@@ -592,45 +598,33 @@ class UserLogoutApi(Resource):
         
         return res
 
+
+# TODO: remove these redirects once fixed on frontend
+
+from odyssey.api.notifications.schemas import NotificationSchema
+
 @ns.route('/notifications/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class UserNotificationsApi(Resource):
-
     @token_auth.login_required
-    @responds(schema=UserNotificationsSchema(many=True), api=ns, status_code=200)
+    @responds(
+        api=ns,
+        status_code=308,
+        description='Permanently moved to GET /notifications/<user_id>/')
     def get(self, user_id):
-        """
-        Returns the list of notifications for the given user_id
-        """
+        """ [DEPRECATED] Moved to GET `/notifications/<user_id>/`. """
+        return redirect(f'/notifications/{user_id}/', code=308)
 
-        notifications = UserNotifications.query.filter_by(user_id=user_id).all()
-
-        for notification in notifications:
-                notification.notification_type = LookupNotifications.query.filter_by(notification_type_id=notification.notification_type_id).one_or_none().notification_type
-
-        return notifications
 
 @ns.route('/notifications/<int:idx>/')
 @ns.doc(params={'idx': 'Notification idx number'})
 class UserNotificationsPutApi(Resource):
-
     @token_auth.login_required
-    @accepts(schema=UserNotificationsSchema, api=ns)
-    @responds(schema=UserNotificationsSchema, api=ns, status_code=201)
+    @accepts(schema=NotificationSchema, api=ns)
+    @responds(
+        api=ns,
+        status_code=308,
+        description='Permanently moved to PUT /notifications/<notification_id>/')
     def put(self, idx):
-        """
-        Updates the notification specified by the given idx.
-        """
-
-        notification =  UserNotifications.query.filter_by(idx=idx).one_or_none()
-
-        if not notification:
-            raise InputError(400, 'Invalid notification idx.') 
-
-        notification.update(request.json)
-        db.session.commit()
-
-        notification.notification_type = LookupNotifications.query.filter_by(notification_type_id=notification.notification_type_id).one_or_none().notification_type
-
-        return notification
-
+        """ [DEPRECATED] Moved to PUT `/notifications/<notification_id>/`. """
+        return redirect(f'/notifications/{idx}/', code=308)
