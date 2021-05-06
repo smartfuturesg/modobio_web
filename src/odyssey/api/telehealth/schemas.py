@@ -123,6 +123,8 @@ class TelehealthBookingDetailsSchema(ma.SQLAlchemyAutoSchema):
 
 class TelehealthBookingDetailsGetSchema(Schema):
     details = fields.Nested(TelehealthBookingDetailsSchema)
+    location_id = fields.Integer()
+    location_name = fields.String()
     images = fields.String(many=True)
     voice = fields.String()
     
