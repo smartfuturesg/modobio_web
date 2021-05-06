@@ -321,11 +321,11 @@ class TelehealthBookingDetails(db.Model):
     :type: str
     """
     
-    location_id = db.Column(db.Integer, db.ForeignKey('LookupTerritoriesofOperations'), nullable=False)
+    location_id = db.Column(db.Integer, db.ForeignKey('LookupTerritoriesofOperation.idx'), nullable=False)
     """
     client location id for this booking
 
-    :type: int, foreign key(LookupTerritoriesofOperations)
+    :type: int, foreign key(LookupTerritoriesofOperation.idx)
     """
 
 
