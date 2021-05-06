@@ -1,3 +1,4 @@
+import os, boto3, secrets, pathlib
 
 from flask import request, current_app, g
 from flask_accepts import accepts, responds
@@ -37,6 +38,7 @@ from odyssey.api.telehealth.schemas import (
     TelehealthTimeSelectOutputSchema,
     TelehealthStaffAvailabilityOutputSchema,
     TelehealthBookingDetailsSchema,
+    TelehealthBookingDetailsGetSchema
 ) 
 from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import TWILIO_ACCESS_KEY_TTL, DAY_OF_WEEK
@@ -1068,7 +1070,7 @@ class TelehealthBookingDetailsApi(Resource):
     Details may include a text description, images or voice recordings
     """
     @token_auth.login_required
-    @responds(schema=TelehealthBookingDetailsSchema(many=True), api=ns, status_code=200)
+    @responds(schema=TelehealthBookingDetailsGetSchema, api=ns, status_code=200)
     def get(self, booking_id):
         """
         Returns a list of details about the specified booking_id
@@ -1081,16 +1083,34 @@ class TelehealthBookingDetailsApi(Resource):
         #verify user trying to access details is the client or staff involved in scheulded booking
         if booking.client_user_id != accessing_user.user_id and booking.staff_user_id != accessing_user.user_id:
             raise UnauthorizedUser(message='Not part of booking')
+
+        res = {'details': None,
+                'images': [],
+                'voice': None}
         
         #if there aren't any details saved for the booking_id, GET will return empty
-        details = TelehealthBookingDetails.query.filter_by(booking_id = booking_id).all()
+        res['details'] = TelehealthBookingDetails.query.filter_by(booking_id = booking_id).first()
         
         #retrieve all files associated with this booking id
-        s3key = f'meeting_files/id{booking_id:05d}/{mi_data.image_type}_{date}_{hex_token}_{i}{img_extension}'
+        bucket_name = current_app.config['S3_BUCKET_NAME']
+        s3prefix = f'meeting_files/id{booking_id:05d}/'
         s3 = boto3.resource('s3')
-        s3.Bucket(bucket_name).put_object(Key= s3key, Body=img.stream)           
+        bucket = s3.Bucket(bucket_name)
+
+        params = {
+            'Bucket' : bucket_name,
+            'Key' : None
+        }
+
+        for media in bucket.objects.filter(Prefix=s3prefix):
+            params['Key'] = media.key
+            url = boto3.client('s3').generate_presigned_url('get_object', Params=params, ExpiresIn=3600)
+            if 'voice' in media.key:
+                res['voice'] = url
+            else:
+                res['images'] = res['images'] + [url]
         
-        return details
+        return res
     
     @token_auth.login_required()
     @responds(schema=TelehealthBookingDetailsSchema, api=ns, status_code=200)
@@ -1101,10 +1121,9 @@ class TelehealthBookingDetailsApi(Resource):
 
         Expects form_data: (will ignore anything else)
             idx:(required) int : TelehealthBookingDetails idx
-            media(optional) : {
-                image: [files] (list of image files, up to 3 can be sent)
-                voice: file (one sound file can be sent)
-            }
+            image: [files] (list of image files, up to 3 can be sent)
+            voice: file (one sound file can be sent)
+
             (optional) : str
         """
         #Validate index is an int and not a zero
@@ -1136,43 +1155,76 @@ class TelehealthBookingDetailsApi(Resource):
             details = request.form.get('details')
             query.details = details
 
-        #if 'media' is not present, no changes will be made to the current media file
-        #if 'media' is present, but empty, the current media file will be removed
+        #if 'images' and 'voice' are both not present, no changes will be made to the current media file
+        #if 'images' or 'voice' are present, but empty, the current media file(s) for that category will be removed
         files = request.files #ImmutableMultiDict of key : FileStorage object
-        MAX_bytes = 524288000 #500 mb
-        data_list = []
-        hex_token = secrets.token_hex(4)
-        
-        for i, img in enumerate(files.getlist('image')):
-            #Verifying image size is within a safe threashold (MAX = 500 mb)
-            img.seek(0, os.SEEK_END)
-            img_size = img.tell()
-            if img_size > MAX_bytes:
-                raise InputError(413, 'File too large')
 
-            #Rename image (format: imageType_Y-M-d_4digitRandomHex_index.img_extension) AND Save=>S3 
-            img_extension = pathlib.Path(img.filename).suffix
-            img.seek(0)
+        if files:
+            MAX_bytes = 524288000 #500 mb
+            data_list = []
+            hex_token = secrets.token_hex(4)
+            
+            #if images key is present but no files exist, delete existing images for this meeting
+            if len(files.getList('images')) < 1:
+                s3 = boto3.resource('s3')
+                bucket = s3.Bucket(bucket_name)
 
-            s3key = f'meeting_files/id{booking_id:05d}/{mi_data.image_type}_{date}_{hex_token}_{i}{img_extension}'
-            s3 = boto3.resource('s3')
-            s3.Bucket(bucket_name).put_object(Key= s3key, Body=img.stream)           
+                params = {
+                    'Bucket' : bucket_name,
+                    'Key' : None
+                }
 
-        #upload voice file to S3
-        for recording in enumerate(files.getlist('voice')):
-            #Verifying recording size is within a safe threashold (MAX = 500 mb)
-            recording.seek(0, os.SEEK_END)
-            recording_size = recording.tell()
-            if recording_size > MAX_bytes:
-                raise InputError(413, 'File too large')
+                for media in bucket.objects.filter(Prefix=s3prefix):
+                    if 'voice' not in media.key:
+                        params['Key'] = media.key
+                        s3.Object(bucket_name, media.key).delete()
 
-            #Rename voice (format: imageType_Y-M-d_4digitRandomHex_index.img_extension) AND Save=>S3 
-            recording_extension = pathlib.Path(recording.filename).suffix
-            recording.seek(0)
+            #add each image supplied to s3 bucket for this meeting
+            for i, img in enumerate(files.getlist('images')):
+                #Verifying image size is within a safe threashold (MAX = 500 mb)
+                img.seek(0, os.SEEK_END)
+                img_size = img.tell()
+                if img_size > MAX_bytes:
+                    raise InputError(413, 'File too large')
 
-            s3key = f'meeting_files/id{booking_id:05d}/voice_{date}_{hex_token}_{recording_extension}'
-            s3 = boto3.resource('s3')
-            s3.Bucket(bucket_name).put_object(Key= s3key, Body=img.stream)   
+                #Rename image (format: 4digitRandomHex_index.img_extension) AND Save=>S3 
+                img_extension = pathlib.Path(img.filename).suffix
+                img.seek(0)
+
+                s3key = f'meeting_files/id{booking_id:05d}/{hex_token}_{i}{img_extension}'
+                s3 = boto3.resource('s3')
+                s3.Bucket(bucket_name).put_object(Key= s3key, Body=img.stream)
+
+            #if voice key is present but no files exist, delete existing voice recording for this meeting
+            if len(files.getList('voice')) < 1:
+                s3 = boto3.resource('s3')
+                bucket = s3.Bucket(bucket_name)
+
+                params = {
+                    'Bucket' : bucket_name,
+                    'Key' : None
+                }
+
+                for media in bucket.objects.filter(Prefix=s3prefix):
+                    if 'voice' in media.key:
+                        params['Key'] = media.key
+                        s3.Object(bucket_name, media.key).delete()
+
+            #upload voice file to S3
+            for recording in enumerate(files.getlist('voice')):
+                #Verifying recording size is within a safe threashold (MAX = 500 mb)
+                recording.seek(0, os.SEEK_END)
+                recording_size = recording.tell()
+                if recording_size > MAX_bytes:
+                    raise InputError(413, 'File too large')
+
+                #Rename voice (format: voice_4digitRandomHex_index.img_extension) AND Save=>S3 
+                recording_extension = pathlib.Path(recording.filename).suffix
+                recording.seek(0)
+
+                s3key = f'meeting_files/id{booking_id:05d}/voice_{hex_token}_{recording_extension}'
+                s3 = boto3.resource('s3')
+                s3.Bucket(bucket_name).put_object(Key= s3key, Body=img.stream)   
 
         db.session.commit()
         return query
@@ -1186,12 +1238,14 @@ class TelehealthBookingDetailsApi(Resource):
         Accepts multiple image or voice recording files
 
         Expects form-data (will ignore anything else)
-            media : file(s)
+            images : file(s) list of image files, up to 3
+            voice : file
             details : str
         """
         files = request.files
         form = request.form
         reporter = token_auth.current_user()[0]
+        bucket_name = current_app.config['S3_BUCKET_NAME']
         #Check booking_id exists
         booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
         if not booking:
@@ -1208,7 +1262,7 @@ class TelehealthBookingDetailsApi(Resource):
         payload = []
         data = TelehealthBookingDetails()
         #When no files (image or recording) are sent but we get written details add one entry to db 
-        if not files or not files.get('media'):
+        if not files:
             data.details = form.get('details')
             data.booking_id = booking_id
             payload.append(data)
@@ -1220,27 +1274,20 @@ class TelehealthBookingDetailsApi(Resource):
             data_list = []
             hex_token = secrets.token_hex(4)
             
-            for i, img in enumerate(files.getlist('image')):
+            for i, img in enumerate(files.getlist('images')):
                 #Verifying image size is within a safe threashold (MAX = 500 mb)
                 img.seek(0, os.SEEK_END)
                 img_size = img.tell()
                 if img_size > MAX_bytes:
                     raise InputError(413, 'File too large')
 
-                #Rename image (format: imageType_Y-M-d_4digitRandomHex_index.img_extension) AND Save=>S3 
+                #Rename image (format: 4digitRandomHex_index.img_extension) AND Save=>S3 
                 img_extension = pathlib.Path(img.filename).suffix
                 img.seek(0)
 
-                if current_app.config['LOCAL_CONFIG']:
-                    path = pathlib.Path(bucket_name) / f'id{booking_id:05d}' / 'meeting_files'
-                    path.mkdir(parents=True, exist_ok=True)
-                    s3key = f'{mi_data.image_type}_{date}_{hex_token}_{i}{img_extension}'
-                    file_name = (path / s3key).as_posix()
-                    img.save(file_name)
-                else:
-                    s3key = f'id{booking_id:05d}/meeting_files/{mi_data.image_type}_{date}_{hex_token}_{i}{img_extension}'
-                    s3 = boto3.resource('s3')
-                    s3.Bucket(bucket_name).put_object(Key= s3key, Body=img.stream)           
+                s3key = f'meeting_files/id{booking_id:05d}/{hex_token}_{i}{img_extension}'
+                s3 = boto3.resource('s3')
+                s3.Bucket(bucket_name).put_object(Key= s3key, Body=img.stream)           
 
             #upload voice file to S3
             for i, recording in enumerate(files.getlist('voice')):
@@ -1249,6 +1296,14 @@ class TelehealthBookingDetailsApi(Resource):
                 recording_size = recording.tell()
                 if recording_size > MAX_bytes:
                     raise InputError(413, 'File too large')
+
+                #Rename voice (format: voice_4digitRandomHex_index.img_extension) AND Save=>S3 
+                recording_extension = pathlib.Path(recording.filename).suffix
+                recording.seek(0)
+
+                s3key = f'meeting_files/id{booking_id:05d}/{hex_token}_{recording_extension}'
+                s3 = boto3.resource('s3')
+                s3.Bucket(bucket_name).put_object(Key= s3key, Body=recording.stream)    
 
         db.session.add_all(payload)
         db.session.commit()
