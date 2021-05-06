@@ -80,6 +80,7 @@ def test_put_booking_details(test_client, init_database, staff_auth_header):
     
     #Remove image and recording from booking details
     response = test_client.put(f'/telehealth/bookings/details/{booking_id}', headers=staff_auth_header, data=payload1)
+    print(response.data)
     assert response.status_code == 200
     #Change image file and recording file from booking details
     response = test_client.put(f'/telehealth/bookings/details/{booking_id}', headers=staff_auth_header, data=payload2)

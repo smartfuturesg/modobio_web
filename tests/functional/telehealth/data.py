@@ -215,14 +215,15 @@ telehealth_post_booking_details = {
 
 telehealth_put_booking_details = {
   'remove_img_rec':{
-    'media': FileStorage(filename=''),
+    'images': FileStorage(filename=''),
+    'voice': FileStorage(filename=''),
     'details': 'Removed image and recording, kept description',
     'location_id': 1,
     'idx': 1
   },
   'swap_img_rec':{
-    'media': (img_file.as_posix() , open(img_file, mode='rb'), 'image/jpg'),
-    'media':(rec_file.as_posix() , open(rec_file, mode='rb'), 'audio/mp4a-latm'),
+    'images': (img_file.as_posix() , open(img_file, mode='rb'), 'image/jpg'),
+    'voice':(rec_file.as_posix() , open(rec_file, mode='rb'), 'audio/mp4a-latm'),
     'details': 'Swapped files, recording is image and image is recording.',
     'location_id': 1,
     'idx': 1
@@ -237,7 +238,7 @@ telehealth_put_booking_details = {
     'idx': 1
   },
   'empty_booking_details':{
-    'media': FileStorage(filename=''),
+    'images': FileStorage(filename=''),
     'details': '',
     'location_id': 1,
     'idx': 1
