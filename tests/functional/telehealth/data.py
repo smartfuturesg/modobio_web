@@ -209,31 +209,37 @@ img_file = pathlib.Path(__file__).parent / 'test_img_weirdmole.jpg'
 telehealth_post_booking_details = {
   'media': (img_file.as_posix() , open(img_file, mode='rb'), 'image/jpg'), 
   'media': (rec_file.as_posix() , open(rec_file, mode='rb'), 'audio/mp4a-latm'),
-  'details': 'Testing booking details'
+  'details': 'Testing booking details',
+  'location_id': 1
 }
 
 telehealth_put_booking_details = {
   'remove_img_rec':{
     'media': FileStorage(filename=''),
     'details': 'Removed image and recording, kept description',
+    'location_id': 1,
     'idx': 1
   },
   'swap_img_rec':{
     'media': (img_file.as_posix() , open(img_file, mode='rb'), 'image/jpg'),
     'media':(rec_file.as_posix() , open(rec_file, mode='rb'), 'audio/mp4a-latm'),
     'details': 'Swapped files, recording is image and image is recording.',
+    'location_id': 1,
     'idx': 1
   },
   'change_text_only':{
     'details': 'Only changed text details',
+    'location_id': 1,
     'idx': 1
   },
   'nothing_to_change':{
-
+    'location_id': 1,
+    'idx': 1
   },
   'empty_booking_details':{
     'media': FileStorage(filename=''),
     'details': '',
+    'location_id': 1,
     'idx': 1
   }
 }

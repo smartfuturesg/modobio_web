@@ -1276,42 +1276,41 @@ class TelehealthBookingDetailsApi(Resource):
         payload.append(data)
 
         #Saving media files into s3
-        else:
-            files = request.files #ImmutableMultiDict of key : FileStorage object
-            MAX_bytes = 524288000 #500 mb
-            data_list = []
-            hex_token = secrets.token_hex(4)
-            
-            for i, img in enumerate(files.getlist('images')):
-                #Verifying image size is within a safe threashold (MAX = 500 mb)
-                img.seek(0, os.SEEK_END)
-                img_size = img.tell()
-                if img_size > MAX_bytes:
-                    raise InputError(413, 'File too large')
+        files = request.files #ImmutableMultiDict of key : FileStorage object
+        MAX_bytes = 524288000 #500 mb
+        data_list = []
+        hex_token = secrets.token_hex(4)
+        
+        for i, img in enumerate(files.getlist('images')):
+            #Verifying image size is within a safe threashold (MAX = 500 mb)
+            img.seek(0, os.SEEK_END)
+            img_size = img.tell()
+            if img_size > MAX_bytes:
+                raise InputError(413, 'File too large')
 
-                #Rename image (format: 4digitRandomHex_index.img_extension) AND Save=>S3 
-                img_extension = pathlib.Path(img.filename).suffix
-                img.seek(0)
+            #Rename image (format: 4digitRandomHex_index.img_extension) AND Save=>S3 
+            img_extension = pathlib.Path(img.filename).suffix
+            img.seek(0)
 
-                s3key = f'meeting_files/id{booking_id:05d}/{hex_token}_{i}{img_extension}'
-                s3 = boto3.resource('s3')
-                s3.Bucket(bucket_name).put_object(Key= s3key, Body=img.stream)           
+            s3key = f'meeting_files/id{booking_id:05d}/{hex_token}_{i}{img_extension}'
+            s3 = boto3.resource('s3')
+            s3.Bucket(bucket_name).put_object(Key= s3key, Body=img.stream)           
 
-            #upload voice file to S3
-            for i, recording in enumerate(files.getlist('voice')):
-                #Verifying recording size is within a safe threashold (MAX = 500 mb)
-                recording.seek(0, os.SEEK_END)
-                recording_size = recording.tell()
-                if recording_size > MAX_bytes:
-                    raise InputError(413, 'File too large')
+        #upload voice file to S3
+        for i, recording in enumerate(files.getlist('voice')):
+            #Verifying recording size is within a safe threashold (MAX = 500 mb)
+            recording.seek(0, os.SEEK_END)
+            recording_size = recording.tell()
+            if recording_size > MAX_bytes:
+                raise InputError(413, 'File too large')
 
-                #Rename voice (format: voice_4digitRandomHex_index.img_extension) AND Save=>S3 
-                recording_extension = pathlib.Path(recording.filename).suffix
-                recording.seek(0)
+            #Rename voice (format: voice_4digitRandomHex_index.img_extension) AND Save=>S3 
+            recording_extension = pathlib.Path(recording.filename).suffix
+            recording.seek(0)
 
-                s3key = f'meeting_files/id{booking_id:05d}/{hex_token}_{recording_extension}'
-                s3 = boto3.resource('s3')
-                s3.Bucket(bucket_name).put_object(Key= s3key, Body=recording.stream)    
+            s3key = f'meeting_files/id{booking_id:05d}/{hex_token}_{recording_extension}'
+            s3 = boto3.resource('s3')
+            s3.Bucket(bucket_name).put_object(Key= s3key, Body=recording.stream)    
 
         db.session.add_all(payload)
         db.session.commit()
