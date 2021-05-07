@@ -1,8 +1,8 @@
 """Split out notifications, add push notifications registration.
 
-Revision ID: e7774fb15083
+Revision ID: 157f291f1ac8
 Revises: bc573b9813c6
-Create Date: 2021-05-06 15:22:30.123658
+Create Date: 2021-05-07 06:06:12.683183
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = 'e7774fb15083'
+revision = '157f291f1ac8'
 down_revision = 'bc573b9813c6'
 branch_labels = None
 depends_on = None
@@ -40,11 +40,13 @@ def upgrade():
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('device_token', sa.String(length=1024), nullable=True),
     sa.Column('device_id', sa.String(length=1024), nullable=True),
+    sa.Column('device_description', sa.String(length=1024), nullable=True),
+    sa.Column('provider', sa.String(length=25), nullable=True),
+    sa.Column('arn', sa.String(length=256), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['User.user_id'], ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('idx'),
-    sa.UniqueConstraint('device_id'),
-    sa.UniqueConstraint('device_id')
+    sa.PrimaryKeyConstraint('idx')
     )
     op.drop_table('UserNotifications')
     # ### end Alembic commands ###
