@@ -1,4 +1,5 @@
 import boto3
+
 from botocore.exceptions import ClientError
 from flask import current_app
 
@@ -212,3 +213,105 @@ def send_email_no_reply(subject=None, recipient="success@simulator.amazonses.com
     else:
         print("Email sent! Message ID:"),
         print(response['MessageId'])
+
+
+def push_notification(user_id: int, topic: str, message: str):
+    """ Send a push notification to the user. """
+    pass
+
+push_providers = {
+    'apple': ('APNS', 'APNS_VOIP'),
+    'android': ('FCM',)}
+
+def register_device(
+    device_token: str,
+    device_description: str,
+    provider: str,
+    current_endpoint: str=None
+) -> str:
+    """ Register a device for push notifications.
+
+    Parameters
+    ----------
+    device_token : str
+        The device token (called registration ID on Android) obtained from the OS to allow
+        push notifications.
+
+    device_description : str
+        Additional data stored with the device_token in the AWS SNS endpoint. Max length 2048.
+
+    provider : str
+        Which provider to register with. Select 'APNS' for one of Apple, 'APNS_VOIP' for
+        Apple video call start, or 'FCM' for Android OS.
+
+    current_endpoint : str
+        Current endpoint ARN, which may or may not be active.
+
+    Returns
+    -------
+    str
+        Endpoint ARN registered for this device.
+
+    Raises
+    ------
+    ValueError
+        On incorrect provider or device_description too long.
+    """
+    # Some info and explanation:
+    #
+    # https://docs.aws.amazon.com/sns/latest/dg/mobile-push-send.html
+    #
+    # ARN = string representation of resources on AWS
+    # Platform Application = endpoint for a single provider channel.
+    #   AP_ARN: arn:aws:sns:us-west-1:393511634479:endpoint/APNS_SANDBOX/ApplePushNotification-Dev
+    # Endpoint = endpoint for a single device within a channel.
+    #   EP_ARN: AP_ARN/147a664a-2ca9-3109-91e6-1986d3f0d52a
+
+    if len(device_description) > 2048:
+        raise ValueError('device_description must be less than 2048 characters long.')
+
+    iam = boto3.resource('iam')
+    account = iam.CurrentUser().arn.split(':')[4]
+    region = boto3.DEFAULT_SESSION.region_name
+
+    sns = boto3.resource('sns')
+    try:
+        apps = list(sns.platform_applications.all())
+    except ClientError as err:
+        if ('Error' in err.response
+            and 'Message' in err.response['Error']
+            and 'not supported in this region' in err.response['Error']['Message']):
+            # SNS Push notifications are not available in current region.
+            # Hardcode one that works
+            region = 'us-west-1'
+            sns = boto3.resource('sns', region_name=region)
+            apps = list(sns.platform_applications.all())
+        else:
+            # Some other error
+            raise err
+
+    if current_endpoint:
+        # Check if current endpoint is still good, delete if not.
+        endpoint = sns.PlatformEndpoint(arn=current_endpoint)
+        try:
+            endpoint.load()
+        except (NotFoundException, InvalidParameterException):
+            # Endpoint was deleted or has different parameters.
+            endpoint.delete()
+        else:
+            if endpoint.attributes['Enabled'] == 'false':
+                # Endpoint was disabled, delete.
+                endpoint.delete()
+            else:
+                # Current endpoint still good
+                return current_endpoint
+
+    for app in apps:
+        # Find matching platform
+        # TODO: currently only sandboxed endpoints
+        if f'{provider}_SANDBOX' in app.arn:
+            endpoint = app.create_platform_endpoint(
+                Token=device_token,
+                CustomUserData=device_description)
+
+    return endpoint.arn
