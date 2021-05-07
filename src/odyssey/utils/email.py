@@ -285,9 +285,7 @@ def register_device(
 
     try:
         apps = list(sns.platform_applications.all())
-    # except ClientError as err:
-    except Exception as err:
-        print('BBBBBBBBBBBBBBBBBB', err)
+    except ClientError as err:
         if ('Error' in err.response
             and 'Message' in err.response['Error']
             and 'not supported in this region' in err.response['Error']['Message']):
@@ -297,7 +295,6 @@ def register_device(
             apps = list(sns.platform_applications.all())
         else:
             # Some other error
-            print('CCCCCCCCCCCCCCCCCC')
             raise err
 
     if current_endpoint:
