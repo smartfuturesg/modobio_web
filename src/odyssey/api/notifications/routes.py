@@ -14,7 +14,7 @@ from odyssey.api.notifications.schemas import (
     PushRegistrationPostSchema)
 from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import DB_SERVER_TIME
-from odyssey.utils.email import push_providers, register_device
+from odyssey.utils.email import push_providers, register_device, unregister_device
 from odyssey.utils.errors import InputError, UnknownError
 
 ns = api.namespace('notifications', description='Endpoints for all types of notifications.')
@@ -107,9 +107,6 @@ class PushRegistrationEndpoint(Resource):
 
         providers = push_providers[device_os]
 
-        msg = register_device(device_token, device_str, providers[0])
-        raise UnknownError(message=msg)
-
         for prov in providers:
             # Check if combination of device_token/device_id/provider already exists.
             device = (
@@ -154,7 +151,16 @@ class PushRegistrationEndpoint(Resource):
     @accepts(schema=PushRegistrationDeleteSchema, api=ns)
     @responds(status_code=204, api=ns)
     def delete(self, user_id):
-        """ Delete device token (subtractive). """
+        """ Delete device token.
+
+        Unregisters device token, not entire device, from the AWS SNS service
+        for all topics. Then deletes device token entries from database.
+
+        Parameters
+        ----------
+        device_token : str
+            Device token to unregister and delete.
+        """
         device = (
             NotificationsPushRegistration
             .query
@@ -164,5 +170,6 @@ class PushRegistrationEndpoint(Resource):
             .all())
         if device:
             for dev in device:
+                unregister_device(dev.arn)
                 db.session.delete(dev)
             db.session.commit()

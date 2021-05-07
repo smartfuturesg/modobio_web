@@ -215,15 +215,53 @@ def send_email_no_reply(subject=None, recipient="success@simulator.amazonses.com
         print(response['MessageId'])
 
 
-def push_notification(user_id: int, topic: str, message: str):
-    """ Send a push notification to the user. """
-    pass
+##############################################################
+#
+# Push notifications
+#
 
 push_providers = {
     'apple': ('APNS', 'APNS_VOIP'),
     'android': ('FCM',)}
 
 _providers = tuple(p for q in push_providers.values() for p in q)
+
+def _load_sns():
+    """ Loads the AWS Simple Notification Service (SNS).
+
+    Loads the boto3 SNS resource with some guards against being in
+    an unsupported region.
+
+    Returns
+    -------
+    sns : boto3.resources.factory.sns.ServiceResource
+        The loaded boto3 resource.
+
+    apps : list
+        A list of all platform applications available in this region.
+
+    Raises
+    ------
+    ClientError
+        In case of boto3 load failure.
+    """
+    sns = boto3.resource('sns')
+
+    try:
+        apps = list(sns.platform_applications.all())
+    except ClientError as err:
+        if ('Error' in err.response
+            and 'Message' in err.response['Error']
+            and 'not supported in this region' in err.response['Error']['Message']):
+            # SNS Push notifications are not available in current region.
+            region = current_app.config['AWS_SNS_REGION']
+            sns = boto3.resource('sns', region_name=region)
+            apps = list(sns.platform_applications.all())
+        else:
+            # Some other error
+            raise err
+
+    return sns, apps
 
 def register_device(
     device_token: str,
@@ -275,29 +313,7 @@ def register_device(
     if len(device_description) > 2048:
         raise ValueError('device_description must be less than 2048 characters long.')
 
-    s3 = boto3.resource('s3')
-    return 'BBBBBBBBBBBBBBBB {}|{}|{}'.format(boto3.DEFAULT_SESSION.region_name, boto3.DEFAULT_SESSION.get_credentials().access_key, os.environ)
-
-    region = current_app.config['AWS_SNS_REGION']
-    try:
-        sns = boto3.resource('sns') #, region_name=region)
-    except Exception as err:
-        print('AAAAAAAAAAAAAAAAA', err)
-        raise
-
-    try:
-        apps = list(sns.platform_applications.all())
-    except ClientError as err:
-        if ('Error' in err.response
-            and 'Message' in err.response['Error']
-            and 'not supported in this region' in err.response['Error']['Message']):
-            # SNS Push notifications are not available in current region.
-            # Hardcode one that works
-            sns = boto3.resource('sns', region_name='us-west-1')
-            apps = list(sns.platform_applications.all())
-        else:
-            # Some other error
-            raise err
+    sns, apps = _load_sns()
 
     if current_endpoint:
         # Check if current endpoint is still good, delete if not.
@@ -324,3 +340,21 @@ def register_device(
                 CustomUserData=device_description)
 
     return endpoint.arn
+
+def unregister_device(endpoint_arn: str):
+    """ Delete endpoint.
+
+    Parameters
+    ----------
+    endpoint_arn : str
+        ARN of the endpoint to be deleted.
+    """
+    sns, _ = _load_sns()
+
+    # Won't fail if endpoints don't exist.
+    endpoint = sns.PlatformEndpoint(arn=endpoint_arn)
+    endpoint.delete()
+
+def push_notification(user_id: int, topic: str, message: str):
+    """ Send a push notification to the user. """
+    pass
