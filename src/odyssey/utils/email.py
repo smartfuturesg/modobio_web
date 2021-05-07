@@ -223,6 +223,8 @@ push_providers = {
     'apple': ('APNS', 'APNS_VOIP'),
     'android': ('FCM',)}
 
+_providers = tuple(p for q in push_providers.values() for p in q)
+
 def register_device(
     device_token: str,
     device_description: str,
@@ -267,12 +269,11 @@ def register_device(
     # Endpoint = endpoint for a single device within a channel.
     #   EP_ARN: AP_ARN/147a664a-2ca9-3109-91e6-1986d3f0d52a
 
+    if provider not in _providers:
+        raise ValueError('provider must be one of: {}'.format(_providers))
+
     if len(device_description) > 2048:
         raise ValueError('device_description must be less than 2048 characters long.')
-
-    iam = boto3.resource('iam')
-    account = iam.CurrentUser().arn.split(':')[4]
-    region = boto3.DEFAULT_SESSION.region_name
 
     sns = boto3.resource('sns')
     try:
@@ -283,8 +284,7 @@ def register_device(
             and 'not supported in this region' in err.response['Error']['Message']):
             # SNS Push notifications are not available in current region.
             # Hardcode one that works
-            region = 'us-west-1'
-            sns = boto3.resource('sns', region_name=region)
+            sns = boto3.resource('sns', region_name='us-west-1')
             apps = list(sns.platform_applications.all())
         else:
             # Some other error
