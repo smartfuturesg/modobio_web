@@ -137,7 +137,7 @@ def clean_db(db):
 
 def clear_twilio(db=None, modobio_ids=None):
     # XXX: temporary fix for failing Twilio tests
-    return
+    # return
     # bring up users
     if not modobio_ids:
         modobio_ids = db.session.execute(
