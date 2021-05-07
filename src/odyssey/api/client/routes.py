@@ -5,7 +5,7 @@ import math, re
 from flask import request, current_app
 from flask_accepts import accepts, responds
 from flask_restx import Resource
-from sqlalchemy import text
+from sqlalchemy import select
 
 from odyssey.api import api
 from odyssey.utils.auth import token_auth, basic_auth
@@ -20,6 +20,7 @@ from odyssey.utils.errors import (
 from odyssey import db
 from odyssey.utils.constants import TABLE_TO_URI
 from odyssey.api.client.models import (
+    ClientDataStorage,
     ClientInfo,
     ClientConsent,
     ClientConsultContract,
@@ -671,24 +672,22 @@ class ClientDataStorageTiers(Resource):
     @responds(schema=AllClientsDataTier, api=ns)
     def get(self):
         """Returns the total data storage for each client along with their data storage tier"""
+        query = db.session.execute(
+            select(ClientDataStorage)
+        ).scalars().all()
 
-        data = db.session.execute(text("SELECT * FROM public.data_per_client;")).fetchall()
-        results = {'total_items': len(data), 'items' : []}
-        total_bytes = 0
-        for row in data:
-            bytes_as_int = row[1].__int__()
-            results['items'].append({'user_id': row[0], 'stored_bytes': bytes_as_int, 'tier': row[2]})
-            total_bytes += bytes_as_int
+        total_bytes = sum(dat.total_bytes for dat in query)
+        total_items = len(query)
 
-        results['total_stored_bytes'] = total_bytes 
-        
-        return results
-    
+        payload = {'total_stored_bytes': total_bytes, 'total_items': total_items, 'items': query}
+
+        return payload
+
 @ns.route('/token/')
 class ClientToken(Resource):
     """create and revoke tokens"""
     @ns.doc(security='password')
-    @basic_auth.login_required(user_type=('client',))
+    @basic_auth.login_required(user_type=('client',), email_required=False)
     @responds(schema=ClientTokenRequestSchema, status_code=201, api=ns)
     def post(self):
         """generates a token for the 'current_user' immediately after password authentication"""
@@ -710,7 +709,8 @@ class ClientToken(Resource):
                 'lastname': user.lastname, 
                 'token': access_token,
                 'refresh_token': refresh_token,
-                'user_id': user.user_id}
+                'user_id': user.user_id,
+                'email_verified': user.email_verified}
 
     @ns.doc(security='password')
     @token_auth.login_required(user_type=('client',))

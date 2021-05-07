@@ -15,7 +15,7 @@ users_new_user_client_data = {
     "lastname": "Client",
     "email": "test_this_user_client@modobio.com",
     "phone_number": "1111111121",
-    "password": "password",
+    "password": "password"
   },
   "client_info": {
     "guardianname": "guardian 1",

@@ -11,7 +11,7 @@ from flask import current_app
 from sqlalchemy import text
 
 from odyssey import db
-from odyssey.utils.constants import ALPHANUMERIC, DB_SERVER_TIME, TOKEN_LIFETIME, REFRESH_TOKEN_LIFETIME
+from odyssey.utils.constants import ALPHANUMERIC, DB_SERVER_TIME, TOKEN_LIFETIME, REFRESH_TOKEN_LIFETIME, EMAIL_TOKEN_LIFETIME
 
 class User(db.Model):
     """ 
@@ -114,12 +114,19 @@ class User(db.Model):
 
     :type: boolean, non-null 
     """
+
     deleted = db.Column(db.Boolean, nullable=True, default = False)
-    
     """
     Flags if the user has been deleted
 
-    :type:boolean
+    :type: boolean
+    """
+
+    email_verified = db.Column(db.Boolean, nullable=False, default=False)
+    """
+    Flags if the user has verified their email
+
+    :type: boolean
     """
 
     @staticmethod
@@ -557,6 +564,78 @@ class UserNotifications(db.Model):
 
     :type: boolean
     """
+
+class UserPendingEmailVerifications(db.Model):
+    """ 
+    Holds information about user's who have not yet verified their email.
+    """
+
+    __tablename__ = 'UserPendingEmailVerifications'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
+    """
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Auto incrementing primary key
+
+    :type: int, primary key
+    """
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    """
+    Id of the user that this pending verification belongs to.
+
+    :type: int, foreign key('User.user_id')
+    """
+
+    token = db.Column(db.String)
+    """
+    JWT token that will verify this user's email when the link is clicked.
+
+    :type: string
+    """
+
+    code = db.Column(db.String(4))
+    """
+    4 digit code that can be used in place of the token in case of problems with the token.
+
+    :type: string
+    """
+
+    @staticmethod
+    def generate_token(user_id):
+        """
+        Generate a JWT with the appropriate user type and user_id
+        """
+        
+        secret = current_app.config['SECRET_KEY']
+        
+        return jwt.encode({'exp': datetime.utcnow()+timedelta(hours=EMAIL_TOKEN_LIFETIME),
+                            'uid': user_id,
+                            'ttype': 'email_verification'
+                            }, 
+                            secret, 
+                            algorithm='HS256')
+
+    @staticmethod
+    def generate_code():
+        """
+        Generate a 4 digit code
+        """
+
+        return str(random.randrange(1000, 9999))
 
 class UserTokenHistory(db.Model):
     """ 

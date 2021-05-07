@@ -402,7 +402,7 @@ class TelehealthBookingsApi(Resource):
         # make sure the requester is one of the participants
         if not any(current_user.user_id == uid for uid in [client_user_id, staff_user_id]):
             raise InputError(status_code=405, message='logged in user must be a booking participant')
-        
+
         # Check client existence
         check_client_existence(client_user_id)
         
@@ -461,7 +461,14 @@ class TelehealthBookingsApi(Resource):
                     ttl=TWILIO_ACCESS_KEY_TTL)
 
         token.add_grant(ChatGrant(service_sid=current_app.config['CONVERSATION_SERVICE_SID']))
-        
+
+        # Once the booking has been successful, delete the client from the queue
+        client_in_queue = TelehealthQueueClientPool.query.filter_by(user_id=client_user_id).one_or_none()
+
+        if client_in_queue:
+            db.session.delete(client_in_queue)
+            db.session.flush()
+
         db.session.commit()
 
         request.parsed_obj.conversation_sid = conversation.sid
@@ -1040,7 +1047,7 @@ class TelehealthQueueClientPoolApi(Resource):
         # Client can only have one appointment on one day:
         # GOOD: Appointment 1 Day 1, Appointment 2 Day 2
         # BAD: Appointment 1 Day 1, Appointment 2 Day 1
-        appointment_in_queue = TelehealthQueueClientPool.query.filter_by(user_id=user_id,target_date=request.parsed_obj.target_date,profession_type=request.parsed_obj.profession_type).one_or_none()
+        appointment_in_queue = TelehealthQueueClientPool.query.filter_by(user_id=user_id).one_or_none()
 
         if appointment_in_queue:
             db.session.delete(appointment_in_queue)
