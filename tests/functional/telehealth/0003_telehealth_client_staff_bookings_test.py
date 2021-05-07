@@ -17,8 +17,8 @@ from .data import (
 )
 
 # XXX: temporary fix for failing Twilio tests
-import pytest
-pytest.skip('Out of TwiliCoin.', allow_module_level=True)
+# import pytest
+# pytest.skip('Out of TwiliCoin.', allow_module_level=True)
 
 def test_post_1_client_staff_bookings(test_client, init_database, staff_auth_header):
     """

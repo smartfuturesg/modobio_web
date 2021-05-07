@@ -13,8 +13,8 @@ from tests.functional.telehealth.data import (
 )
 
 # XXX: temporary fix for failing Twilio tests
-import pytest
-pytest.skip('Out of TwiliCoin.', allow_module_level=True)
+# import pytest
+# pytest.skip('Out of TwiliCoin.', allow_module_level=True)
 
 #Process for adding telehealth booking details:
 #1. create client, create staff
