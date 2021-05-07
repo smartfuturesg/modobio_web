@@ -13,8 +13,8 @@ from odyssey import create_app, db
 from odyssey.api.client.models import ClientInfo
 from odyssey.api.facility.models import MedicalInstitutions
 from odyssey.api.staff.models import StaffProfile, StaffRoles
-from odyssey.api.user.models import User, UserLogin, UserNotifications
-from odyssey.api.user.schemas import UserSubscriptionsSchema, UserNotificationsSchema
+from odyssey.api.user.models import User, UserLogin
+from odyssey.api.user.schemas import UserSubscriptionsSchema
 from odyssey.utils.constants import ACCESS_ROLES
 from odyssey.utils.misc import grab_twilio_credentials
 from tests.functional.user.data import users_staff_member_data, users_client_new_creation_data, users_client_new_info_data
@@ -107,19 +107,6 @@ def generate_users():
         # 4) Staff Profile
         staff_profile = StaffProfile(**{"user_id": staff_1.user_id})
         db.session.add(staff_profile)
-        #initialize a notification for testing
-        notification_data = {
-            'title': "Test",
-            'content': "Longer Test",
-            'action': 'https.test.com',
-            'read': False,
-            'deleted': True,
-            'user_id': staff_1.user_id,
-            'notification_type_id': 1,
-            'is_staff': True
-        }
-        notification = UserNotifications(**notification_data)
-        db.session.add(notification)
         db.session.flush()
         users_client_new_creation_data['email'] = origClientEmail
         users_staff_member_data['email'] = origStaffEmail
@@ -149,6 +136,8 @@ def clean_db(db):
     db.drop_all()
 
 def clear_twilio(db=None, modobio_ids=None):
+    # XXX: temporary fix for failing Twilio tests
+    # return
     # bring up users
     if not modobio_ids:
         modobio_ids = db.session.execute(
@@ -242,20 +231,7 @@ def init_database():
     med_institute1 = MedicalInstitutions(institute_name='Mercy Gilbert Medical Center')
     med_institute2 = MedicalInstitutions(institute_name='Mercy Tempe Medical Center')
 
-    #initialize a notification for testing
-    notification_data = {
-        'title': "Test",
-        'content': "Longer Test",
-        'action': 'https.test.com',
-        'read': False,
-        'deleted': True,
-        'user_id': staff_1.user_id,
-        'notification_type_id': 1,
-        'is_staff': True
-    }
-    notification = UserNotifications(**notification_data)
-
-    db.session.add_all([med_institute1, med_institute2, notification])
+    db.session.add_all([med_institute1, med_institute2])
     # db.session.add_all([med_institute1, med_institute2])
 
     # Commit the changes for the users
