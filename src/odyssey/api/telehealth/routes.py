@@ -45,7 +45,7 @@ from odyssey.api.lookup.models import (
 )
 from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import TWILIO_ACCESS_KEY_TTL, DAY_OF_WEEK
-from odyssey.utils.errors import GenericNotFound, InputError, LoginNotAuthorized, UnauthorizedUser, ContentNotFound
+from odyssey.utils.errors import GenericNotFound, InputError, LoginNotAuthorized, UnauthorizedUser, ContentNotFound, IllegalSetting
 from odyssey.utils.misc import (
     check_client_existence, 
     check_staff_existence,
@@ -1093,6 +1093,9 @@ class TelehealthBookingDetailsApi(Resource):
         
         #if there aren't any details saved for the booking_id, GET will return empty
         booking = TelehealthBookingDetails.query.filter_by(booking_id = booking_id).first()
+        if not booking:
+            raise GenericNotFound(f"No booking details exist for the booking with id {booking_id}")
+
         res['details'] = booking.details
         res['location_id'] = booking.location_id
         location = LookupTerritoriesofOperation.query.filter_by(idx=booking.location_id).first()
@@ -1148,7 +1151,11 @@ class TelehealthBookingDetailsApi(Resource):
         if not query:
             raise ContentNotFound
 
-        bucket_name = current_app.config['S3_BUCKET_NAME']
+        files = request.files #ImmutableMultiDict of key : FileStorage object
+
+        #verify there's something to submit, if nothing, raise input error
+        if (not request.form.get('details') and len(files) == 0 and not request.form.get('location_id')):
+            raise InputError(204, message='Nothing to submit')
 
         #if 'details' is present in form, details will be updated to new string value of details
         #if 'details' is not present, details will not be affected
@@ -1161,10 +1168,9 @@ class TelehealthBookingDetailsApi(Resource):
             query.location_id = request.form.get('location_id')
 
         #if 'images' and 'voice' are both not present, no changes will be made to the current media file
-        #if 'images' or 'voice' are present, but empty, the current media file(s) for that category will be removed
-        files = request.files #ImmutableMultiDict of key : FileStorage object
-        
+        #if 'images' or 'voice' are present, but empty, the current media file(s) for that category will be removed        
         if files:
+            bucket_name = current_app.config['S3_BUCKET_NAME']
             s3 = boto3.resource('s3')
             bucket = s3.Bucket(bucket_name)
 
@@ -1245,13 +1251,17 @@ class TelehealthBookingDetailsApi(Resource):
         if not booking:
             raise ContentNotFound
 
+        details = TelehealthBookingDetails.query.filter_by(booking_id=booking_id).one_or_none()
+        if details:
+            raise IllegalSetting(message=f"Details for booking_id {booking_id} already exists. Please use PUT method")
+
         #verify the reporter of details is the client or staff from scheulded booking
         if booking.client_user_id != reporter.user_id and booking.staff_user_id != reporter.user_id:
             raise UnauthorizedUser(message='Not part of booking')
-        
+
         #verify there's something to submit, if nothing, raise input error
-        if (not form.get('details') and not files):
-            raise InputError(400, message='Nothing to submit')
+        if (not form.get('details') and not form.get('location_id') and not files):
+            raise InputError(204, message='Nothing to submit')
         
         payload = []
         data = TelehealthBookingDetails()
@@ -1307,6 +1317,7 @@ class TelehealthBookingDetailsApi(Resource):
         return payload
 
     @token_auth.login_required
+    @responds(status_code=204)
     def delete(self, booking_id):
         """
         Deletes all booking details entries from db
@@ -1317,12 +1328,28 @@ class TelehealthBookingDetailsApi(Resource):
         if booking is not None and booking.client_user_id != editor.user_id and booking.staff_user_id != editor.user_id:
             raise UnauthorizedUser(message='Not part of booking')
         
-        #TODO delete files from S3 bucket
-        details = TelehealthBookingDetails.query.filter_by(booking_id=booking_id).all()
-        for entry in details:
-            db.session.delete(entry)
+        details = TelehealthBookingDetails.query.filter_by(booking_id=booking_id).one_or_none()
+        if not details:
+            raise GenericNotFound(f"No booking details exist for booking id {booking_id}")
+
+        db.session.delete(details)
         db.session.commit()
-        return f'Deleted all details for booking_id {booking_id}', 200
+
+        bucket_name = current_app.config['S3_BUCKET_NAME']
+        s3 = boto3.resource('s3')
+        bucket = s3.Bucket(bucket_name)
+
+        #used to locate and remove existing files is necessary
+        params = {
+            'Bucket': bucket_name,
+            'Key': None
+        }
+    
+        #if images key is present, delete existing images
+        s3prefix = f'meeting_files/id{booking_id:05d}/'
+        for media in bucket.objects.filter(Prefix=s3prefix):
+            params['Key'] = media.key
+            s3.Object(bucket_name, media.key).delete()
 
 @ns.route('/chat-room/access-token')
 @ns.doc(params={'client_user_id': 'Required. user_id of client participant.',

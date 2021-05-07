@@ -234,11 +234,11 @@ telehealth_put_booking_details = {
     'idx': 1
   },
   'nothing_to_change':{
-    'location_id': 1,
     'idx': 1
   },
   'empty_booking_details':{
     'images': FileStorage(filename=''),
+    'voice': FileStorage(filename=''),
     'details': '',
     'location_id': 1,
     'idx': 1

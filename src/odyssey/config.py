@@ -157,7 +157,6 @@ class Config:
         else:
             # Don't use getvar, must fail if not set in environment
             self.S3_BUCKET_NAME = os.getenv('S3_BUCKET_NAME')
-
             if not self.S3_BUCKET_NAME:
                 raise ValueError('S3_BUCKET_NAME not defined')
 
