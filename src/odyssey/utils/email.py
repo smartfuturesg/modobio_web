@@ -274,7 +274,8 @@ def register_device(
 
     if len(device_description) > 2048:
         raise ValueError('device_description must be less than 2048 characters long.')
-
+    
+    print('AAAAAAAAAAAAAAAAA')
     sns = boto3.resource('sns')
     try:
         apps = list(sns.platform_applications.all())
@@ -289,7 +290,7 @@ def register_device(
         else:
             # Some other error
             raise err
-
+    print('BBBBBBBBBBBBBBBBBB')
     if current_endpoint:
         # Check if current endpoint is still good, delete if not.
         endpoint = sns.PlatformEndpoint(arn=current_endpoint)
@@ -306,6 +307,7 @@ def register_device(
                 # Current endpoint still good
                 return current_endpoint
 
+    print('CCCCCCCCCCCCCCCCCC')
     for app in apps:
         # Find matching platform
         # TODO: currently only sandboxed endpoints
@@ -313,5 +315,5 @@ def register_device(
             endpoint = app.create_platform_endpoint(
                 Token=device_token,
                 CustomUserData=device_description)
-
+    print('DDDDDDDDDDDDDDDDDD')
     return endpoint.arn
