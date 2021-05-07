@@ -1,21 +1,26 @@
-from marshmallow import Schema, fields
+from marshmallow import Schema, fields, post_dump
 
 from odyssey import ma
-from odyssey.api.notifications.models import Notifications, NotificationsPush
+from odyssey.api.notifications.models import Notifications, NotificationsPushRegistration
 
 class NotificationSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Notifications
+        include_fk = True
         load_instance = True
         exclude = ('created_at', 'updated_at')
-        dump_only = ('idx', 'user_id', 'is_staff', 'time_to_live')
+        dump_only = ('notification_id', 'user_id')
 
-    #comes from LookupNotifications.type
-    notification_type = fields.String(dump_only=True)
-    notification_type_id = fields.Integer(dump_only=True)
+    # Remove these if not needed by frontend. I don't think they use this information at all.
+    @post_dump(pass_original=True)
+    def make_object(self, notification_dict, notification_obj, **kwargs):
+        notification_dict['notification_type'] = notification_obj.notification_type_obj.notification_type
+        notification_dict['is_staff'] = notification_obj.user.is_staff
+        return notification_dict
 
-class PushNotificationSchema(ma.SQLAlchemyAutoSchema):
+
+class PushRegistrationSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        model = NotificationsPush
+        model = NotificationsPushRegistration
         load_instance = True
         fields = ('device_id',)
