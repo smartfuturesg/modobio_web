@@ -1,7 +1,7 @@
 """Split out notifications, add push notifications registration.
 
 Revision ID: e7774fb15083
-Revises: abea48a1a2c2
+Revises: bc573b9813c6
 Create Date: 2021-05-06 15:22:30.123658
 
 """
@@ -11,7 +11,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = 'e7774fb15083'
-down_revision = 'abea48a1a2c2'
+down_revision = 'bc573b9813c6'
 branch_labels = None
 depends_on = None
 
