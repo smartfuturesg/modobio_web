@@ -203,13 +203,42 @@ class NotificationsPushRegistration(db.Model):
     :type: :class:`User <odyssey.api.user.models.User>` instance
     """
 
-    device_id = db.Column(db.String(1024), unique=True)
+    device_token = db.Column(db.String(1024))
     """
-    Device ID number, the unique string that identifies the device
-    for which push notifications are enabled.
+    Device token (registration ID on Android) provided by the OS to enable
+    push notifications.
 
-    :type: str, unique, max length 1024
+    :type: str, max length 1024
     """
 
-    # channel_maybe = db.Column(db.String(1024))
-    # os_maybe = db.Column(db.String(1024))
+    device_id = db.Column(db.String(1024))
+    """
+    Unique identifier that identifies a device and persists across installations
+    of the app. Needed to distighuish changing device tokens on one device from
+    having multiple devices.
+
+    :type: str, max length 1024
+    """
+
+    device_description = db.Column(db.String(1024))
+    """
+    Description of device (phone name, os version, etc.).
+
+    :type: str, max length 1024
+    """
+
+    provider = db.Column(db.String(25))
+    """
+    Name of the provider of the push notification service. Currently
+    'APNS' for Apple Push Notification Service, 'APNS_VOIP' for Apple
+    video call start, or 'FCM' for Firebase/Google Cloud Messaging.
+
+    :type: str, max length 25
+    """
+
+    arn = db.Column(db.String(256))
+    """
+    The AWS Resource Number (ARN) of the AWS SNS endpoint.
+
+    :type: str, max length 256
+    """

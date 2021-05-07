@@ -1,7 +1,9 @@
-from marshmallow import Schema, fields, post_dump
+from marshmallow import Schema, fields, post_dump, validate
 
 from odyssey import ma
 from odyssey.api.notifications.models import Notifications, NotificationsPushRegistration
+from odyssey.utils.email import push_providers
+
 
 class NotificationSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -23,4 +25,15 @@ class PushRegistrationSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = NotificationsPushRegistration
         load_instance = True
-        fields = ('device_id',)
+        exclude = ('idx', 'created_at', 'updated_at')
+
+
+class PushRegistrationPostSchema(Schema):
+    device_token = fields.String(required=True)
+    device_id = fields.String(required=True)
+    device_description = fields.String(required=True)
+    device_os = fields.String(validate=validate.OneOf(['apple', 'android']), required=True)
+
+
+class PushRegistrationDeleteSchema(Schema):
+    device_token = fields.String(required=True)
