@@ -1090,6 +1090,7 @@ class TelehealthBookingDetailsApi(Resource):
         booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
         if booking is None:
             raise ContentNotFound
+            
         #verify user trying to access details is the client or staff involved in scheulded booking
         if booking.client_user_id != accessing_user.user_id and booking.staff_user_id != accessing_user.user_id:
             raise UnauthorizedUser(message='Not part of booking')
@@ -1110,13 +1111,12 @@ class TelehealthBookingDetailsApi(Resource):
 
         
         #retrieve all files associated with this booking id
-        bucket_name = current_app.config['S3_BUCKET_NAME']
         s3prefix = f'meeting_files/id{booking_id:05d}/'
         s3 = boto3.resource('s3')
-        bucket = s3.Bucket(bucket_name)
+        bucket = s3.Bucket(current_app.config['S3_BUCKET_NAME'])
 
         params = {
-            'Bucket' : bucket_name,
+            'Bucket' : current_app.config['S3_BUCKET_NAME'],
             'Key' : None
         }
 
@@ -1177,13 +1177,12 @@ class TelehealthBookingDetailsApi(Resource):
         #if 'images' and 'voice' are both not present, no changes will be made to the current media file
         #if 'images' or 'voice' are present, but empty, the current media file(s) for that category will be removed        
         if files:
-            bucket_name = current_app.config['S3_BUCKET_NAME']
             s3 = boto3.resource('s3')
-            bucket = s3.Bucket(bucket_name)
+            bucket = s3.Bucket(current_app.config['S3_BUCKET_NAME'])
 
             #used to locate and remove existing files is necessary
             params = {
-                'Bucket': bucket_name,
+                'Bucket': current_app.config['S3_BUCKET_NAME'],
                 'Key': None
             }
        
@@ -1342,13 +1341,12 @@ class TelehealthBookingDetailsApi(Resource):
         db.session.delete(details)
         db.session.commit()
 
-        bucket_name = current_app.config['S3_BUCKET_NAME']
         s3 = boto3.resource('s3')
-        bucket = s3.Bucket(bucket_name)
+        bucket = s3.Bucket(current_app.config['S3_BUCKET_NAME'])
 
         #used to locate and remove existing files is necessary
         params = {
-            'Bucket': bucket_name,
+            'Bucket': current_app.config['S3_BUCKET_NAME'],
             'Key': None
         }
     
