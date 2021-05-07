@@ -274,9 +274,13 @@ def register_device(
 
     if len(device_description) > 2048:
         raise ValueError('device_description must be less than 2048 characters long.')
-    
-    sns = boto3.resource('sns')
-    print('AAAAAAAAAAAAAAAAA')
+
+    try:
+        sns = boto3.resource('sns')
+    except Exception as err:
+        print('AAAAAAAAAAAAAAAAA', err)
+        raise
+
     try:
         apps = list(sns.platform_applications.all())
     # except ClientError as err:
