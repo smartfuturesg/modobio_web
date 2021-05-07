@@ -2,10 +2,6 @@ from flask.json import dumps
 
 from .data import device_token
 
-# XXX: disable for now
-import pytest
-pytest.skip('Disabled for now', allow_module_level=True)
-
 def test_device_registration_post(test_client, init_database, client_auth_header):
         """
         GIVEN an API endpoint for creating notifications,
