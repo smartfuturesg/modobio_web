@@ -1,6 +1,7 @@
 from flask.json import dumps
 
 from .data import device_token
+import os
 
 def test_device_registration_post(test_client, init_database, client_auth_header):
         """
@@ -16,6 +17,7 @@ def test_device_registration_post(test_client, init_database, client_auth_header
             content_type='application/json')
 
         print(response.data)
+        print(os.environ)
         assert response.status_code == 201
 
         # POSTing the same device_id twice should not fail.
