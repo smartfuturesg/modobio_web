@@ -1,4 +1,8 @@
 """
+TODO:
+***5.3.21 UPDATE**
+    All users may only access their own data. No mutation permissions are currently assigned. 
+
 Hasura gives us flexibility to authorize user access through special claims embedded in our JWTs. 
 These claims should summarize a user’s level of access when requesting a resource from our database. 
 Currently we use a combination of a 4 interworking resource access systems:
@@ -78,6 +82,8 @@ def client_default_select_permission(columns):
     #TODO add clinical care team scenario
     if 'user_id' in columns:
         permission['permission'].update({'filter': {'user_id' : { '_eq': 'X-Hasura-User-Id'}}})
+    elif 'client_user_id' in columns:
+        permission['permission'].update({'filter': {'client_user_id' : { '_eq': 'X-Hasura-User-Id'}}})
 
     return permission
 
@@ -99,7 +105,9 @@ def client_default_update_permission(columns):
 
     if 'user_id' in columns:
         permission['permission']['filter'].update({'user_id' : { '_eq': 'X-Hasura-User-Id'}})
-
+    elif 'client_user_id' in columns:
+        permission['permission']['filter'].update({'client_user_id' : { '_eq': 'X-Hasura-User-Id'}})
+    
     return permission
 
 def client_default_insert_permission(columns):
@@ -126,6 +134,10 @@ def client_default_insert_permission(columns):
     if 'user_id' in columns:
         permission['permission']['check'].update({'user_id': {'_eq': 'X-Hasura-User-Id'}})
         permission['permission']['set'].update({'user_id': 'X-Hasura-User-Id'})
+    elif 'user_id' in columns:
+        permission['permission']['check'].update({'client_user_id': {'_eq': 'X-Hasura-User-Id'}})
+        permission['permission']['set'].update({'client_user_id': 'X-Hasura-User-Id'})
+    
     return permission
 
 ##
@@ -153,6 +165,9 @@ def staff_default_select_permission(columns, filtered=True):
      } 
     if filtered and 'user_id' in columns:
         permission['permission'].update({'filter': {'user_id' : { '_eq': 'X-Hasura-User-Id'}}})
+    
+    elif filtered and 'staff_user_id' in columns:
+        permission['permission'].update({'filter': {'staff_user_id' : { '_eq': 'X-Hasura-User-Id'}}})
     
     return permission
 
