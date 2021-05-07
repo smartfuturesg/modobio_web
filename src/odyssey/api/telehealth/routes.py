@@ -40,6 +40,9 @@ from odyssey.api.telehealth.schemas import (
     TelehealthBookingDetailsSchema,
     TelehealthBookingDetailsGetSchema
 ) 
+from odyssey.api.lookup.models import (
+    LookupTerritoriesofOperation
+)
 from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import TWILIO_ACCESS_KEY_TTL, DAY_OF_WEEK
 from odyssey.utils.errors import GenericNotFound, InputError, LoginNotAuthorized, UnauthorizedUser, ContentNotFound
@@ -1092,7 +1095,7 @@ class TelehealthBookingDetailsApi(Resource):
         booking = TelehealthBookingDetails.query.filter_by(booking_id = booking_id).first()
         res['details'] = booking.details
         res['location_id'] = booking.location_id
-        location = LookupTerritoriesofOperations.query.filter_by(idx=booking.location_id).first()
+        location = LookupTerritoriesofOperation.query.filter_by(idx=booking.location_id).first()
         res['location_name'] = location.country + " " + location.sub_territory
 
         
