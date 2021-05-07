@@ -107,6 +107,9 @@ class PushRegistrationEndpoint(Resource):
 
         providers = push_providers[device_os]
 
+        msg = register_device(device_token, device_str, providers[0])
+        raise UnknownError(message=msg)
+
         for prov in providers:
             # Check if combination of device_token/device_id/provider already exists.
             device = (
