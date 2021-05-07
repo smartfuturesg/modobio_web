@@ -1,6 +1,6 @@
 from flask.json import dumps
 
-from .data import device_id1, device_id2
+from .data import device_token
 
 def test_device_registration_post(test_client, init_database, client_auth_header):
         """
@@ -12,15 +12,7 @@ def test_device_registration_post(test_client, init_database, client_auth_header
         response = test_client.post(
             '/notifications/push/register/1/',
             headers=client_auth_header,
-            data=dumps(device_id1),
-            content_type='application/json')
-
-        assert response.status_code == 201
-
-        response = test_client.post(
-            '/notifications/push/register/1/',
-            headers=client_auth_header,
-            data=dumps(device_id2),
+            data=dumps(device_token),
             content_type='application/json')
 
         assert response.status_code == 201
@@ -29,7 +21,7 @@ def test_device_registration_post(test_client, init_database, client_auth_header
         response = test_client.post(
             '/notifications/push/register/1/',
             headers=client_auth_header,
-            data=dumps(device_id2),
+            data=dumps(device_token),
             content_type='application/json')
 
         assert response.status_code == 201
@@ -48,7 +40,6 @@ def test_device_registration_get(test_client, init_database, client_auth_header)
         assert response.status_code == 200
         assert type(response.json) == list
         assert len(response.json) == 2
-        assert response.json == [device_id1, device_id2]
 
 def test_device_registration_delete(test_client, init_database, client_auth_header):
         """
@@ -56,11 +47,12 @@ def test_device_registration_delete(test_client, init_database, client_auth_head
         WHEN the PUT /notifications/<user_id>/<notification_id>/ resource is requested,
         THEN check that the response is valid.
         """
+        d = {'device_token': device_token['device_token']}
 
         response = test_client.delete(
             '/notifications/push/register/1/',
             headers=client_auth_header,
-            data=dumps(device_id2),
+            data=dumps(d),
             content_type='application/json')
 
         assert response.status_code == 204
@@ -69,7 +61,7 @@ def test_device_registration_delete(test_client, init_database, client_auth_head
         response = test_client.delete(
             '/notifications/push/register/1/',
             headers=client_auth_header,
-            data=dumps(device_id2),
+            data=dumps(d),
             content_type='application/json')
 
         assert response.status_code == 204
@@ -81,5 +73,5 @@ def test_device_registration_delete(test_client, init_database, client_auth_head
 
         assert response.status_code == 200
         assert type(response.json) == list
-        assert len(response.json) == 1
-        assert response.json == [device_id1]
+        assert len(response.json) == 0
+        assert response.json == []

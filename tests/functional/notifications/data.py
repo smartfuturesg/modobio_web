@@ -15,5 +15,8 @@ notification_update = {
   'notification_type_id': 1
 }
 
-device_id1 = {'device_id': 'IDontKnowProbablySomeLongString'}
-device_id2 = {'device_id': 'IDontKnowProbablySomeOtherLongString'}
+device_token = {
+    'device_id': '123456',
+    'device_token': 'abcdef123',
+    'device_description': 'macOS/11.3',
+    'device_os': 'apple'}
