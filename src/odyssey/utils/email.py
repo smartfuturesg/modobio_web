@@ -275,8 +275,10 @@ def register_device(
     if len(device_description) > 2048:
         raise ValueError('device_description must be less than 2048 characters long.')
 
+    region = current_app.config['AWS_SNS_REGION']
+
     try:
-        sns = boto3.resource('sns')
+        sns = boto3.resource('sns', region_name=region)
     except Exception as err:
         print('AAAAAAAAAAAAAAAAA', err)
         raise
