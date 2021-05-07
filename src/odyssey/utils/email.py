@@ -1,4 +1,4 @@
-import boto3, os
+import boto3
 
 from botocore.exceptions import ClientError
 from flask import current_app
