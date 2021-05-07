@@ -79,15 +79,16 @@ class PushRegistrationEndpoint(Resource):
     def post(self, user_id):
         """ Register a new device ID (additive).
 
-        New devices are added to the user, existing devices are not overwritten. Trying to
-        add an existing device is silently ignored.
+        New devices are added, existing devices are not overwritten.
+        Trying to add an existing device is silently ignored.
         """
         request.parsed_obj.user_id = user_id
         db.session.add(request.parsed_obj)
         try:
             db.session.commit()
         except IntegrityError:
-            pass
+            db.session.rollback()
+            db.session.commit()
 
     @token_auth.login_required
     @accepts(schema=PushRegistrationSchema, api=ns)
