@@ -16,7 +16,7 @@ def test_device_registration_post(test_client, init_database, client_auth_header
             content_type='application/json')
 
         # assert response.status_code == 201
-        if reponse.status_code == 500:
+        if response.status_code == 500:
             print(response.__dict__)
 
         # POSTing the same device_id twice should not fail.
