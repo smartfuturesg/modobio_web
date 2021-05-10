@@ -3,7 +3,7 @@ from sqlalchemy.orm import load_only
 
 from odyssey import ma
 from odyssey.api.staff.schemas import StaffRolesSchema
-from odyssey.api.user.models import User, UserLogin, UserSubscriptions, UserNotifications, UserPendingEmailVerifications
+from odyssey.api.user.models import User, UserLogin, UserSubscriptions, UserPendingEmailVerifications
 from odyssey.utils.constants import ACCESS_ROLES
 
 """
