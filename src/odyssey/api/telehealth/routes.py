@@ -1173,7 +1173,7 @@ class TelehealthBookingDetailsApi(Resource):
         location = LookupTerritoriesofOperation.query.filter_by(idx=booking.location_id).first()
         res['location_name'] = location.country + " " + location.sub_territory
 
-        if os.getenv('FLASK_DEV') != 'local':
+        if not current_app.config['LOCAL_CONFIG']:
             #retrieve all files associated with this booking id
             s3prefix = f'meeting_files/id{booking_id:05d}/'
             s3 = boto3.resource('s3')
@@ -1238,7 +1238,7 @@ class TelehealthBookingDetailsApi(Resource):
         if request.form.get('location_id'):
             query.location_id = request.form.get('location_id')
 
-        if os.getenv('FLASK_DEV') != 'local':
+        if not current_app.config['LOCAL_CONFIG']:
             #if 'images' and 'voice' are both not present, no changes will be made to the current media file
             #if 'images' or 'voice' are present, but empty, the current media file(s) for that category will be removed        
             if files:
@@ -1346,7 +1346,7 @@ class TelehealthBookingDetailsApi(Resource):
         data.location_id = form.get('location_id')
         payload.append(data)
 
-        if os.getenv('FLASK_DEV') != 'local':
+        if not current_app.config['LOCAL_CONFIG']:
             #Saving media files into s3
             if files:
                 MAX_bytes = 524288000 #500 mb
@@ -1409,7 +1409,7 @@ class TelehealthBookingDetailsApi(Resource):
         db.session.delete(details)
         db.session.commit()
 
-        if os.getenv('FLASK_DEV') != 'local':
+        if not current_app.config['LOCAL_CONFIG']:
             #delete s3 resources for this booking id
             s3 = boto3.resource('s3')
             bucket = s3.Bucket(current_app.config['S3_BUCKET_NAME'])
