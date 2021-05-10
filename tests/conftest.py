@@ -13,8 +13,8 @@ from odyssey import create_app, db
 from odyssey.api.client.models import ClientInfo
 from odyssey.api.facility.models import MedicalInstitutions
 from odyssey.api.staff.models import StaffProfile, StaffRoles
-from odyssey.api.user.models import User, UserLogin, UserNotifications
-from odyssey.api.user.schemas import UserSubscriptionsSchema, UserNotificationsSchema
+from odyssey.api.user.models import User, UserLogin
+from odyssey.api.user.schemas import UserSubscriptionsSchema
 from odyssey.utils.constants import ACCESS_ROLES
 from odyssey.utils.misc import grab_twilio_credentials
 from tests.functional.user.data import users_staff_member_data, users_client_new_creation_data, users_client_new_info_data
@@ -50,18 +50,22 @@ def generate_users():
     # 1) Create User instance. modobio_id populated automatically
     origClientEmail = copy.deepcopy(users_client_new_creation_data['email'])
     origStaffEmail = copy.deepcopy(users_staff_member_data['email'])
-
+    base_modo_id_client = 'KW99TSVWP88'
+    base_modo_id_staff = 'ZW99TSVWP88'
     for i in range(numUsers):
         # Change the email
         tmpEmail = users_client_new_creation_data['email'].split('@')
         tmpEmail[0]+=str(i)
+        client_modobio_id = base_modo_id_client+str(i)
         users_client_new_creation_data['email'] = tmpEmail[0] + '@' + tmpEmail[1]
-        # change the number
-        users_client_new_creation_data['phone_number'] = str(10 + i)
+        users_client_new_creation_data['phone_number'] = str(90 + i)
         client_1 = User(**users_client_new_creation_data)
         client_1.email_verified = True
         db.session.add(client_1)
         db.session.flush()
+
+        client_1.modobio_id = client_modobio_id
+        db.session.add(client_1)
         # 2) User login
         client_1_login = UserLogin(**{'user_id': client_1.user_id})
         client_1_login.set_password('password')
@@ -86,6 +90,7 @@ def generate_users():
         ####
         tmpEmailStaff = users_staff_member_data['email'].split('@')
         tmpEmailStaff[0]+=str(i)
+        staff_modobio_id = base_modo_id_staff+str(i)
         users_staff_member_data['email'] = tmpEmailStaff[0] + '@' + tmpEmailStaff[1]
         users_staff_member_data['phone_number'] = str(30 + i)
         # 1) Create User where is_staff is True
@@ -94,6 +99,8 @@ def generate_users():
         db.session.add(staff_1)
         db.session.flush()
 
+        staff_1.modobio_id = staff_modobio_id
+        db.session.add(staff_1)
         # 2) Enter login details for this staff memebr
         staff_1_login = UserLogin(**{"user_id": staff_1.user_id})
         staff_1_login.set_password('password')
@@ -110,19 +117,6 @@ def generate_users():
         # 4) Staff Profile
         staff_profile = StaffProfile(**{"user_id": staff_1.user_id})
         db.session.add(staff_profile)
-        #initialize a notification for testing
-        notification_data = {
-            'title': "Test",
-            'content': "Longer Test",
-            'action': 'https.test.com',
-            'read': False,
-            'deleted': True,
-            'user_id': staff_1.user_id,
-            'notification_type_id': 1,
-            'is_staff': True
-        }
-        notification = UserNotifications(**notification_data)
-        db.session.add(notification)
         db.session.flush()
         users_client_new_creation_data['email'] = origClientEmail
         users_staff_member_data['email'] = origStaffEmail
@@ -152,6 +146,8 @@ def clean_db(db):
     db.drop_all()
 
 def clear_twilio(db=None, modobio_ids=None):
+    # XXX: temporary fix for failing Twilio tests
+    # return
     # bring up users
     if not modobio_ids:
         modobio_ids = db.session.execute(
@@ -194,26 +190,23 @@ def init_database():
     
         db.session.execute(text(''.join(dat)))
 
-    # 1) Create User instance. modobio_id populated automatically
-    client_1 = User(**users_client_new_creation_data)
-    client_1.email_verified = True
-    db.session.add(client_1)
-    db.session.flush()
+    # seed test users
+    with open ("tests/seed_test_users.sql", "r") as f:
+            data=f.readlines()
 
-    # 2) User login
-    client_1_login = UserLogin(**{'user_id': client_1.user_id})
-    client_1_login.set_password('password')
+    dat = [x for x in data if not x.startswith('--')]
     
-    # 3) Client info
-    users_client_new_info_data['user_id'] = client_1.user_id
+    db.session.execute(text(''.join(dat)))
+
+    # 4) Add Client info and subscription date
+    users_client_new_info_data['user_id'] = 1
     client_1_info = ClientInfo(**users_client_new_info_data)
     client_1_sub = UserSubscriptionsSchema().load({
     'subscription_type_id': 1,
     'subscription_status': 'unsubscribed',
     'is_staff': False
     })
-    client_1_sub.user_id = client_1.user_id
-    db.session.add(client_1_login)
+    client_1_sub.user_id = 1
     db.session.add(client_1_info)
     db.session.add(client_1_sub)
     db.session.flush()
@@ -221,46 +214,21 @@ def init_database():
     ####
     # initialize a test staff member
     ####
-    # 1) Create User where is_staff is True
-    staff_1 = User(**users_staff_member_data)
-    staff_1.email_verified = True
-    db.session.add(staff_1)
-    db.session.flush()
 
-    # 2) Enter login details for this staff memebr
-    staff_1_login = UserLogin(**{"user_id": staff_1.user_id})
-    staff_1_login.set_password('password')
-    db.session.add(staff_1_login)
-
-    # 3) give staff member all roles
+    #  give staff member all roles
     for role in ACCESS_ROLES:
-        db.session.add(StaffRoles(user_id=staff_1.user_id, role=role, verified=True))
+        db.session.add(StaffRoles(user_id=2, role=role, verified=True))
         
-    # 4) Staff Profile
-    staff_profile = StaffProfile(**{"user_id": staff_1.user_id})
+    # Add Staff Profile
+    staff_profile = StaffProfile(**{"user_id": 2})
     db.session.add(staff_profile)
     db.session.flush()
-
-    # generate_users(10)
 
     #initialize Medical institutes table
     med_institute1 = MedicalInstitutions(institute_name='Mercy Gilbert Medical Center')
     med_institute2 = MedicalInstitutions(institute_name='Mercy Tempe Medical Center')
 
-    #initialize a notification for testing
-    notification_data = {
-        'title': "Test",
-        'content': "Longer Test",
-        'action': 'https.test.com',
-        'read': False,
-        'deleted': True,
-        'user_id': staff_1.user_id,
-        'notification_type_id': 1,
-        'is_staff': True
-    }
-    notification = UserNotifications(**notification_data)
-
-    db.session.add_all([med_institute1, med_institute2, notification])
+    db.session.add_all([med_institute1, med_institute2])
     # db.session.add_all([med_institute1, med_institute2])
 
     # Commit the changes for the users
