@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 import boto3
 import jwt
 
-from flask import current_app, request, jsonify
+from flask import current_app, request, jsonify, redirect
 from flask_accepts import accepts, responds
 from flask_restx import Resource
 from werkzeug.security import check_password_hash
@@ -11,7 +11,7 @@ from werkzeug.security import check_password_hash
 from odyssey.api import api
 from odyssey.api.client.schemas import ClientInfoSchema, ClientGeneralMobileSettingsSchema
 from odyssey.api.client.models import ClientClinicalCareTeam
-from odyssey.api.lookup.models import LookupNotifications, LookupSubscriptions
+from odyssey.api.lookup.models import LookupSubscriptions
 from odyssey.api.staff.schemas import StaffProfileSchema, StaffRolesSchema
 from odyssey.api.user.models import (
     User,
@@ -20,7 +20,6 @@ from odyssey.api.user.models import (
     UserSubscriptions,
     UserTokenHistory,
     UserTokensBlacklist,
-    UserNotifications,
     UserPendingEmailVerifications
 )
 from odyssey.api.staff.models import StaffRoles
@@ -34,10 +33,9 @@ from odyssey.api.user.schemas import (
     UserInfoSchema,
     UserSubscriptionsSchema,
     UserSubscriptionHistorySchema,
-    NewStaffUserSchema,
-    UserClinicalCareTeamSchema,
-    UserNotificationsSchema
-) 
+    NewStaffUserSchema
+)
+
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.constants import PASSWORD_RESET_URL, DB_SERVER_TIME
 from odyssey.utils.errors import (
@@ -671,47 +669,37 @@ class UserLogoutApi(Resource):
         
         return res
 
+
+# TODO: remove these redirects once fixed on frontend
+
+from odyssey.api.notifications.schemas import NotificationSchema
+
 @ns.route('/notifications/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class UserNotificationsApi(Resource):
-
     @token_auth.login_required
-    @responds(schema=UserNotificationsSchema(many=True), api=ns, status_code=200)
+    @responds(
+        api=ns,
+        status_code=308,
+        description='Permanently moved to GET /notifications/<user_id>/')
     def get(self, user_id):
-        """
-        Returns the list of notifications for the given user_id
-        """
+        """ [DEPRECATED] Moved to GET `/notifications/<user_id>/`. """
+        return redirect(f'/notifications/{user_id}/', code=308)
 
-        notifications = UserNotifications.query.filter_by(user_id=user_id).all()
-
-        for notification in notifications:
-                notification.notification_type = LookupNotifications.query.filter_by(notification_type_id=notification.notification_type_id).one_or_none().notification_type
-
-        return notifications
 
 @ns.route('/notifications/<int:idx>/')
 @ns.doc(params={'idx': 'Notification idx number'})
 class UserNotificationsPutApi(Resource):
-
     @token_auth.login_required
-    @accepts(schema=UserNotificationsSchema, api=ns)
-    @responds(schema=UserNotificationsSchema, api=ns, status_code=201)
+    @accepts(schema=NotificationSchema, api=ns)
+    @responds(
+        api=ns,
+        status_code=308,
+        description='Permanently moved to PUT /notifications/<notification_id>/')
     def put(self, idx):
-        """
-        Updates the notification specified by the given idx.
-        """
+        """ [DEPRECATED] Moved to PUT `/notifications/<notification_id>/`. """
+        return redirect(f'/notifications/{idx}/', code=308)
 
-        notification =  UserNotifications.query.filter_by(idx=idx).one_or_none()
-
-        if not notification:
-            raise InputError(400, 'Invalid notification idx.') 
-
-        notification.update(request.json)
-        db.session.commit()
-
-        notification.notification_type = LookupNotifications.query.filter_by(notification_type_id=notification.notification_type_id).one_or_none().notification_type
-
-        return notification
 
 @ns.route('/email-verification/token/<string:token>/')
 @ns.doc(params={'token': 'Email verification token'})
@@ -807,3 +795,99 @@ class UserPendingEmailVerificationsResendApi(Resource):
         recipient = User.query.filter_by(user_id=user_id).one_or_none()
 
         send_email_verify_email(recipient, token, code)
+
+@ns.route('/email-verification/token/<string:token>/')
+@ns.doc(params={'token': 'Email verification token'})
+class UserPendingEmailVerificationsTokenApi(Resource):
+
+    @responds(status_code=200)
+    def get(self, token):
+        """
+        Checks if token has not expired and exists in db.
+        If true, removes pending verification object and returns 200.
+        """
+        # decode and validate token 
+        secret = current_app.config['SECRET_KEY']
+
+        try:
+            decoded_token = jwt.decode(token, secret, algorithms='HS256')
+        except jwt.ExpiredSignatureError:
+            raise UnauthorizedUser(message="Token authorization expired")
+
+        verification = UserPendingEmailVerifications.query.filter_by(token=token).one_or_none()
+
+        if not verification:
+            raise UnauthorizedUser(message="Invalid email verification token authorization")
+
+        #token was valid, remove the pending request, update user account and return 200
+        user = User.query.filter_by(user_id=verification.user_id).one_or_none()
+        user.update({'email_verified': True})
+        
+        db.session.delete(verification)
+        db.session.commit()
+        
+
+@ns.route('/email-verification/code/<int:user_id>/')
+@ns.doc(params={'code': 'Email verification code'})
+class UserPendingEmailVerificationsCodeApi(Resource):
+
+    @responds(status_code=200)
+    def post(self, user_id):
+
+        verification = UserPendingEmailVerifications.query.filter_by(user_id=user_id).one_or_none()
+
+        if not verification:
+            raise GenericNotFound("There is no pending email verification for user ID " + str(user_id))
+
+        if verification.code != request.args.get('code'):
+            raise InvalidVerificationCode
+
+        # Decode and validate token. Code should expire the same time the token does.
+        secret = current_app.config['SECRET_KEY']
+
+        try:
+            decoded_token = jwt.decode(verification.token, secret, algorithms='HS256')
+        except jwt.ExpiredSignatureError:
+            raise UnauthorizedUser(message="Code has expired")
+
+        #code was valid, remove the pending request, update user account and return 200
+        db.session.delete(verification)
+
+        user = User.query.filter_by(user_id=user_id).one_or_none()
+        user.update({'email_verified': True})
+
+        db.session.commit()
+
+@ns.route('/email-verification/resend/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class UserPendingEmailVerificationsResendApi(Resource):
+    """
+    If a user waited too long to verify their email and their token/code have expired,
+    they can use this endpoint to create another token/code and send another email. This 
+    can also be used if the user never received an email.
+    """
+
+    @responds(status_code=200)
+    def post(self, user_id):
+        verification = UserPendingEmailVerifications.query.filter_by(user_id=user_id).one_or_none()
+            
+        if not verification:
+            raise GenericNotFound("There is no pending email verification for user ID " + str(user_id))
+
+        # create a new token and code for this user
+        token = UserPendingEmailVerifications.generate_token(user_id)
+        code = UserPendingEmailVerifications.generate_code()
+
+        verification.update(
+            {
+                'token': token,
+                'code': code
+            }
+        )
+
+        db.session.commit()
+
+        recipient = User.query.filter_by(user_id=user_id).one_or_none()
+
+        send_email_verify_email(recipient, token, code)
+        

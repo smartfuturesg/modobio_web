@@ -3,7 +3,7 @@ from sqlalchemy.orm import load_only
 
 from odyssey import ma
 from odyssey.api.staff.schemas import StaffRolesSchema
-from odyssey.api.user.models import User, UserLogin, UserSubscriptions, UserNotifications, UserPendingEmailVerifications
+from odyssey.api.user.models import User, UserLogin, UserSubscriptions
 from odyssey.utils.constants import ACCESS_ROLES
 
 """
@@ -139,13 +139,3 @@ class UserClinicalCareTeamSchema(Schema):
     client_user_id = fields.Integer()
     client_name = fields.String()
     client_email = fields.String()
-
-class UserNotificationsSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = UserNotifications
-        exclude = ('created_at', 'updated_at')
-        dump_only = ('idx', 'user_id', 'is_staff', 'time_to_live')
-
-    #comes from LookupNotifications.type
-    notification_type = fields.String(dump_only=True)
-    notification_type_id = fields.Integer(dump_only=True)
