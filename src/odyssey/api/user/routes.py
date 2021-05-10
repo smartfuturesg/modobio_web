@@ -794,4 +794,97 @@ class UserPendingEmailVerificationsResendApi(Resource):
 
         recipient = User.query.filter_by(user_id=user_id).one_or_none()
 
+@ns.route('/email-verification/token/<string:token>/')
+@ns.doc(params={'token': 'Email verification token'})
+class UserPendingEmailVerificationsTokenApi(Resource):
+
+    @responds(status_code=200)
+    def get(self, token):
+        """
+        Checks if token has not expired and exists in db.
+        If true, removes pending verification object and returns 200.
+        """
+        # decode and validate token 
+        secret = current_app.config['SECRET_KEY']
+
+        try:
+            decoded_token = jwt.decode(token, secret, algorithms='HS256')
+        except jwt.ExpiredSignatureError:
+            raise UnauthorizedUser(message="Token authorization expired")
+
+        verification = UserPendingEmailVerifications.query.filter_by(token=token).one_or_none()
+
+        if not verification:
+            raise UnauthorizedUser(message="Invalid email verification token authorization")
+
+        #token was valid, remove the pending request, update user account and return 200
+        user = User.query.filter_by(user_id=verification.user_id).one_or_none()
+        user.update({'email_verified': True})
+        
+        db.session.delete(verification)
+        db.session.commit()
+        
+
+@ns.route('/email-verification/code/<int:user_id>/')
+@ns.doc(params={'code': 'Email verification code'})
+class UserPendingEmailVerificationsCodeApi(Resource):
+
+    @responds(status_code=200)
+    def post(self, user_id):
+
+        verification = UserPendingEmailVerifications.query.filter_by(user_id=user_id).one_or_none()
+
+        if not verification:
+            raise GenericNotFound("There is no pending email verification for user ID " + str(user_id))
+
+        if verification.code != request.args.get('code'):
+            raise InvalidVerificationCode
+
+        # Decode and validate token. Code should expire the same time the token does.
+        secret = current_app.config['SECRET_KEY']
+
+        try:
+            decoded_token = jwt.decode(verification.token, secret, algorithms='HS256')
+        except jwt.ExpiredSignatureError:
+            raise UnauthorizedUser(message="Code has expired")
+
+        #code was valid, remove the pending request, update user account and return 200
+        db.session.delete(verification)
+
+        user = User.query.filter_by(user_id=user_id).one_or_none()
+        user.update({'email_verified': True})
+
+        db.session.commit()
+
+@ns.route('/email-verification/resend/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class UserPendingEmailVerificationsResendApi(Resource):
+    """
+    If a user waited too long to verify their email and their token/code have expired,
+    they can use this endpoint to create another token/code and send another email. This 
+    can also be used if the user never received an email.
+    """
+
+    @responds(status_code=200)
+    def post(self, user_id):
+        verification = UserPendingEmailVerifications.query.filter_by(user_id=user_id).one_or_none()
+            
+        if not verification:
+            raise GenericNotFound("There is no pending email verification for user ID " + str(user_id))
+
+        # create a new token and code for this user
+        token = UserPendingEmailVerifications.generate_token(user_id)
+        code = UserPendingEmailVerifications.generate_code()
+
+        verification.update(
+            {
+                'token': token,
+                'code': code
+            }
+        )
+
+        db.session.commit()
+
+        recipient = User.query.filter_by(user_id=user_id).one_or_none()
+
         send_email_verify_email(recipient, token, code)

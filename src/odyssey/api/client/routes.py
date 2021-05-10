@@ -685,7 +685,7 @@ class ClientDataStorageTiers(Resource):
 class ClientToken(Resource):
     """create and revoke tokens"""
     @ns.doc(security='password')
-    @basic_auth.login_required(user_type=('client',))
+    @basic_auth.login_required(user_type=('client',), email_required=False)
     @responds(schema=ClientTokenRequestSchema, status_code=201, api=ns)
     def post(self):
         """generates a token for the 'current_user' immediately after password authentication"""
@@ -707,7 +707,8 @@ class ClientToken(Resource):
                 'lastname': user.lastname, 
                 'token': access_token,
                 'refresh_token': refresh_token,
-                'user_id': user.user_id}
+                'user_id': user.user_id,
+                'email_verified': user.email_verified}
 
     @ns.doc(security='password')
     @token_auth.login_required(user_type=('client',))
