@@ -14,8 +14,7 @@ from odyssey.utils.errors import (
     ContentNotFound,
     IllegalSetting,
     TransactionNotFound, 
-    InputError,
-    GenericNotFound
+    InputError
 )
 from odyssey import db
 from odyssey.utils.constants import TABLE_TO_URI
@@ -35,9 +34,7 @@ from odyssey.api.client.models import (
     ClientAssignedDrinks,
     ClientHeightHistory,
     ClientWeightHistory,
-    ClientWaistSizeHistory,
-    ClientTransactionHistory,
-    ClientPushNotifications
+    ClientTransactionHistory
 )
 from odyssey.api.doctor.models import (
     MedicalFamilyHistory,
@@ -53,8 +50,7 @@ from odyssey.api.lookup.models import (
     LookupDefaultHealthMetrics,
     LookupGoals, 
     LookupDrinks, 
-    LookupRaces,
-    LookupNotifications
+    LookupRaces
 )
 from odyssey.api.physiotherapy.models import PTHistory 
 from odyssey.api.staff.models import StaffRecentClients
@@ -73,7 +69,6 @@ from odyssey.api.client.schemas import(
     ClientIndividualContractSchema,
     ClientClinicalCareTeamSchema,
     ClientMobileSettingsSchema,
-    ClientMobilePushNotificationsSchema,
     ClientPoliciesContractSchema, 
     ClientRegistrationStatusSchema,
     ClientReleaseSchema,
@@ -83,7 +78,6 @@ from odyssey.api.client.schemas import(
     ClientAndUserInfoSchema,
     ClientHeightSchema,
     ClientWeightSchema,
-    ClientWaistSizeSchema,
     ClientTokenRequestSchema,
     ClinicalCareTeamAuthorizationNestedSchema,
     ClinicalCareTeamMemberOfSchema,
@@ -256,6 +250,10 @@ class Clients(Resource):
         #if ELASTICSEARCH_URL isn't set, the search request will return without doing anything
         es = current_app.elasticsearch
         if not es: return
+        
+        if not es.indices.exists('clients'):
+            print('Oops! No Clients Exist Yet')
+            raise ContentNotFound()
         
         #clean up and validate input data
         startAt = request.args.get('_from', 0, type= int)
@@ -687,7 +685,7 @@ class ClientDataStorageTiers(Resource):
 class ClientToken(Resource):
     """create and revoke tokens"""
     @ns.doc(security='password')
-    @basic_auth.login_required(user_type=('client',), email_required=False)
+    @basic_auth.login_required(user_type=('client',))
     @responds(schema=ClientTokenRequestSchema, status_code=201, api=ns)
     def post(self):
         """generates a token for the 'current_user' immediately after password authentication"""
@@ -709,8 +707,7 @@ class ClientToken(Resource):
                 'lastname': user.lastname, 
                 'token': access_token,
                 'refresh_token': refresh_token,
-                'user_id': user.user_id,
-                'email_verified': user.email_verified}
+                'user_id': user.user_id}
 
     @ns.doc(security='password')
     @token_auth.login_required(user_type=('client',))
@@ -1090,22 +1087,11 @@ class ClientMobileSettingsApi(Resource):
         if ClientMobileSettings.query.filter_by(user_id=user_id).one_or_none():
             raise IllegalSetting(message=f"Mobile settings for user_id {user_id} already exists. Please use PUT method")
 
-        gen_settings = request.parsed_obj['general_settings']
-        gen_settings.user_id = user_id
-        db.session.add(gen_settings)
-
-        for notification in request.parsed_obj['push_notification_type_ids']:
-            exists = LookupNotifications.query.filter_by(notification_type_id=notification.notification_type_id).one_or_none()
-            if not exists:
-                raise GenericNotFound(message="Invalid notification type id: " + str(notification.notification_type_id))
-           
-            push_notfication = ClientMobilePushNotificationsSchema().load({'notification_type_id': notification.notification_type_id})
-            push_notfication.user_id = user_id
-            db.session.add(push_notfication)
-
+        request.parsed_obj.user_id = user_id
+        db.session.add(request.parsed_obj)
         db.session.commit()
 
-        return request.json
+        return request.parsed_obj
 
     @token_auth.login_required(user_type=('client',))
     @responds(schema=ClientMobileSettingsSchema, api=ns, status_code=200)
@@ -1116,15 +1102,11 @@ class ClientMobileSettingsApi(Resource):
 
         check_client_existence(user_id)
 
-        gen_settings = ClientMobileSettings.query.filter_by(user_id=user_id).one_or_none()
-
-        notification_types = ClientPushNotifications.query.filter_by(user_id=user_id).all()
-
-        return {'general_settings': gen_settings, 'push_notification_type_ids': notification_types}
+        return ClientMobileSettings.query.filter_by(user_id=user_id).one_or_none()
 
     @token_auth.login_required(user_type=('client',))
     @accepts(schema=ClientMobileSettingsSchema, api=ns)
-    @responds(schema=ClientMobileSettingsSchema, api=ns, status_code=200)
+    @responds(schema=ClientMobileSettingsSchema, api=ns, status_code=201)
     def put(self, user_id):
         """
         Update a client's mobile settings
@@ -1135,35 +1117,12 @@ class ClientMobileSettingsApi(Resource):
         if not settings:
             raise IllegalSetting(message=f"Mobile settings for user_id {user_id} do not exist. Please use POST method")
 
-        gen_settings = request.parsed_obj['general_settings'].__dict__
-        del gen_settings['_sa_instance_state']
-        settings.update(gen_settings)
-
-        client_push_notifications = ClientPushNotifications.query.filter_by(user_id=user_id).all()
-        client_new_notifications = []
-        for notification in request.parsed_obj['push_notification_type_ids']:
-            exists = LookupNotifications.query.filter_by(notification_type_id=notification.notification_type_id).one_or_none()
-            if not exists:
-                raise GenericNotFound(message="Invalid notification type id: " + str(notification.notification_type_id))
-            
-            client_new_notifications.append(notification.notification_type_id)
-            
-        for notification in client_push_notifications:
-            if notification.notification_type_id not in client_new_notifications:
-                #if an id type is not in the arguments, the user has disabled this type of notification
-                db.session.delete(notification)
-            else:
-                #if a notification type with this id is already in the db, remove from the list
-                #of new types to be added for the user
-                client_new_notifications.remove(notification.notification_type_id)
-
-        for notification_type_id in client_new_notifications:
-            push_notification = ClientMobilePushNotificationsSchema().load({'notification_type_id': notification_type_id})
-            push_notification.user_id = user_id
-            db.session.add(push_notification)
-
+        data = request.json
+        settings.update(data)
         db.session.commit()
-        return request.json
+
+        return request.parsed_obj
+
 
 @ns.route('/height/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
@@ -1180,6 +1139,10 @@ class ClientHeightApi(Resource):
         Submits a new height for the client.
         """
         check_client_existence(user_id)
+
+        if token_auth.current_user()[0].user_id != user_id:
+            #clients can only submit heights for themselves
+            raise IllegalSetting(message="Requested user_id does not match logged in user_id. Clients can only submit height measurements for themselves.")
 
         request.parsed_obj.user_id = user_id
         db.session.add(request.parsed_obj)
@@ -1199,6 +1162,10 @@ class ClientHeightApi(Resource):
         """
         check_client_existence(user_id)
 
+        if token_auth.current_user()[0].is_client and token_auth.current_user()[0].user_id != user_id:
+            #clients can only view height history for themselves
+            raise IllegalSetting(message="Requested user_id does not match logged in user_id. Clients can only view height history for themselves.")
+
         return ClientHeightHistory.query.filter_by(user_id=user_id).all()
 
 @ns.route('/weight/<int:user_id>/')
@@ -1216,6 +1183,10 @@ class ClientWeightApi(Resource):
         Submits a new weight for the client.
         """
         check_client_existence(user_id)
+
+        if token_auth.current_user()[0].user_id != user_id:
+            #clients can only submit heights for themselves
+            raise IllegalSetting(message="Requested user_id does not match logged in user_id. Clients can only submit weight measurements for themselves.")
 
         request.parsed_obj.user_id = user_id
         db.session.add(request.parsed_obj)
@@ -1235,43 +1206,11 @@ class ClientWeightApi(Resource):
         """
         check_client_existence(user_id)
 
+        if token_auth.current_user()[0].is_client and token_auth.current_user()[0].user_id != user_id:
+            #clients can only view height history for themselves
+            raise IllegalSetting(message="Requested user_id does not match logged in user_id. Clients can only view weight history for themselves.")
+
         return ClientWeightHistory.query.filter_by(user_id=user_id).all()
-
-@ns.route('/waist-size/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
-class ClientWaistSizeApi(Resource):
-    """
-    Endpoints related to submitting client waist size and viewing
-    a client's waist size history.
-    """
-    @token_auth.login_required(user_type=('client',))
-    @accepts(schema=ClientWaistSizeSchema, api=ns)
-    @responds(schema=ClientWaistSizeSchema, api=ns, status_code=201)
-    def post(self, user_id):
-        """
-        Submits a new waist size for the client.
-        """
-        check_client_existence(user_id)
-
-        request.parsed_obj.user_id = user_id
-        db.session.add(request.parsed_obj)
-
-        #clientInfo should hold the most recent waist size given for the client so update here
-        client = ClientInfo.query.filter_by(user_id=user_id)
-        client.update({'waist_size': request.parsed_obj.waist_size})
-
-        db.session.commit()
-        return request.parsed_obj
-
-    @token_auth.login_required(user_type=('client', 'staff'))
-    @responds(schema=ClientWaistSizeSchema(many=True), api=ns, status_code=200)
-    def get(self, user_id):
-        """
-        Returns all waist sizes reported for a client and the dates they were reported.
-        """
-        check_client_existence(user_id)
-
-        return ClientWaistSizeHistory.query.filter_by(user_id=user_id).all()
 
 @ns.route('/transaction/history/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
