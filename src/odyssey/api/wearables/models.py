@@ -3,9 +3,7 @@ Database tables for the wearable devices section of the Modo Bio API.
 All tables in this module are prefixed with 'Wearables'.
 """
 
-from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Integer, String
-from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy import ARRAY
 
 from odyssey import db
 from odyssey.utils.constants import DB_SERVER_TIME
@@ -15,7 +13,7 @@ class Wearables(db.Model):
 
     __tablename__ = 'Wearables'
 
-    idx = Column(Integer, primary_key=True, autoincrement=True)
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     Table index.
 
@@ -36,9 +34,9 @@ class Wearables(db.Model):
     :type: :class:`datetime.datetime`
     """
 
-    user_id = Column(
-        Integer,
-        ForeignKey(
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey(
              'User.user_id',
              ondelete="CASCADE"
         ),
@@ -50,77 +48,77 @@ class Wearables(db.Model):
     :type: int, unique, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
-    has_oura = Column(Boolean, default=False, nullable=False)
+    has_oura = db.Column(db.Boolean, default=False, nullable=False)
     """
     Client has an Oura Ring wearable.
 
     :type: bool, default = False
     """
 
-    registered_oura = Column(Boolean, default=False, nullable=False)
+    registered_oura = db.Column(db.Boolean, default=False, nullable=False)
     """
     Client granted Modo Bio access to Oura Cloud.
 
     :type: bool, default = False
     """
 
-    has_fitbit = Column(Boolean, default=False, nullable=False)
+    has_fitbit = db.Column(db.Boolean, default=False, nullable=False)
     """
     Client has an Fitbit wearable.
 
     :type: bool, default = False
     """
 
-    registered_fitbit = Column(Boolean, default=False, nullable=False)
+    registered_fitbit = db.Column(db.Boolean, default=False, nullable=False)
     """
     Client granted Modo Bio access to Fitbit data.
 
     :type: bool, default = False
     """
 
-    has_freestyle = Column(Boolean, default=False, nullable=False)
+    has_freestyle = db.Column(db.Boolean, default=False, nullable=False)
     """
     Client has an FreeStyle Libre continuous glucose monitoring (CGM) wearable.
 
     :type: bool, default = False
     """
 
-    registered_freestyle = Column(Boolean, default=False, nullable=False)
+    registered_freestyle = db.Column(db.Boolean, default=False, nullable=False)
     """
     Client has activated the FreeStyle Libre continuous glucose monitoring (CGM) wearable.
 
     :type: bool, default = False
     """
 
-    has_applewatch = Column(Boolean, default=False, nullable=False)
+    has_applewatch = db.Column(db.Boolean, default=False, nullable=False)
     """
     Client has an Apple Watch wearable.
 
     :type: bool, default = False
     """
 
-    registered_applewatch = Column(Boolean, default=False, nullable=False)
+    registered_applewatch = db.Column(db.Boolean, default=False, nullable=False)
     """
     Client granted Modo Bio access to Apple Watch data.
 
     :type: bool, default = False
     """
 
-    oura = relationship('WearablesOura', uselist=False, back_populates='wearable')
+    oura = db.relationship('WearablesOura', uselist=False, back_populates='wearable')
     """
     WearablesOura instance holding Oura specific data.
 
     :type: :class:`WearablesOura` instance
     """
 
-    fitbit = relationship('WearablesFitbit', uselist=False, back_populates='wearable')
+    fitbit = db.relationship('WearablesFitbit', uselist=False, back_populates='wearable')
     """
     WearablesFitbit instance holding Fitbit specific data.
 
     :type: :class:`WearablesFitbit` instance
     """
 
-    freestyle = relationship('WearablesFreeStyle', uselist=False, back_populates='wearable')
+    freestyle = db.relationship('WearablesFreeStyle', uselist=False, back_populates='wearable')
     """
     WearablesFreeStyle instance holding FreeStyle specific data.
 
@@ -133,16 +131,16 @@ class WearablesOura(db.Model):
 
     __tablename__ = 'WearablesOura'
 
-    idx = Column(Integer, primary_key=True, autoincrement=True)
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     Table index.
 
     :type: int, primary key, autoincrement
     """
 
-    user_id = Column(
-        Integer,
-        ForeignKey(
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey(
              'User.user_id',
              ondelete="CASCADE"
         ),
@@ -168,7 +166,7 @@ class WearablesOura(db.Model):
     :type: :class:`datetime.datetime`
     """
 
-    oauth_state = Column(String(512))
+    oauth_state = db.Column(db.String(512))
     """
     State token for OAuth2 exchange with Oura Cloud.
 
@@ -180,37 +178,37 @@ class WearablesOura(db.Model):
     :type: str, max length 512
     """
 
-    access_token = Column(String(512))
+    access_token = db.Column(db.String(512))
     """
     OAuth2 access token to authorize Oura Cloud access.
 
     :type: str, max length 512
     """
 
-    refresh_token = Column(String(512))
+    refresh_token = db.Column(db.String(512))
     """
     OAuth2 refresh token to obtain a new :attr:`access_token` after it expires.
 
     :type: str, max length 512
     """
 
-    token_expires = Column(DateTime)
+    token_expires = db.Column(db.DateTime)
     """
     Date and time of :attr:`access_token` expiry.
 
     :type: :class:`datetime.datetime`
     """
 
-    last_scrape = Column(DateTime)
+    last_scrape = db.Column(db.DateTime)
     """
     Date and time of last access to Oura Cloud.
 
     :type: :class:`datetime.datetime`
     """
 
-    wearable_id = Column(
-        Integer,
-        ForeignKey(
+    wearable_id = db.Column(
+        db.Integer,
+        db.ForeignKey(
             'Wearables.idx',
             ondelete='CASCADE'
         ),
@@ -222,7 +220,7 @@ class WearablesOura(db.Model):
     :type: int, unique, foreign key to :attr:`Wearables.idx`
     """
 
-    wearable = relationship('Wearables', uselist=False, back_populates='oura')
+    wearable = db.relationship('Wearables', uselist=False, back_populates='oura')
     """
     Wearable instance this WearablesOura instance is linked to.
 
@@ -235,16 +233,16 @@ class WearablesFitbit(db.Model):
 
     __tablename__ = 'WearablesFitbit'
 
-    idx = Column(Integer, primary_key=True, autoincrement=True)
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     Table index.
 
     :type: int, primary key, autoincrement
     """
 
-    user_id = Column(
-        Integer,
-        ForeignKey(
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey(
              'User.user_id',
              ondelete="CASCADE"
         ),
@@ -270,7 +268,7 @@ class WearablesFitbit(db.Model):
     :type: :class:`datetime.datetime`
     """
 
-    oauth_state = Column(String(512))
+    oauth_state = db.Column(db.String(512))
     """
     State token for OAuth2 exchange with Fitbit servers.
 
@@ -282,7 +280,7 @@ class WearablesFitbit(db.Model):
     :type: str, max length 512
     """
 
-    access_token = Column(String(1048))
+    access_token = db.Column(db.String(1048))
     """
     OAuth2 access token to authorize Fitbit access. Fitbit uses JWT for access token, which
     may be up to 1024 bytes in size.
@@ -291,30 +289,30 @@ class WearablesFitbit(db.Model):
     :type: str, max length 1024
     """
 
-    refresh_token = Column(String(512))
+    refresh_token = db.Column(db.String(512))
     """
     OAuth2 refresh token to obtain a new :attr:`access_token` after it expires.
 
     :type: str, max length 512
     """
 
-    token_expires = Column(DateTime)
+    token_expires = db.Column(db.DateTime)
     """
     Date and time of :attr:`access_token` expiry.
 
     :type: :class:`datetime.datetime`
     """
 
-    last_scrape = Column(DateTime)
+    last_scrape = db.Column(db.DateTime)
     """
     Date and time of last access to Fitbit account.
 
     :type: :class:`datetime.datetime`
     """
 
-    wearable_id = Column(
-        Integer,
-        ForeignKey(
+    wearable_id = db.Column(
+        db.Integer,
+        db.ForeignKey(
             'Wearables.idx',
             ondelete='CASCADE'
         ),
@@ -326,7 +324,7 @@ class WearablesFitbit(db.Model):
     :type: int, unique, foreign key to :attr:`Wearables.idx`
     """
 
-    wearable = relationship('Wearables', uselist=False, back_populates='fitbit')
+    wearable = db.relationship('Wearables', uselist=False, back_populates='fitbit')
     """
     Wearable instance this WearablesFitbit instance is linked to.
 
@@ -339,16 +337,16 @@ class WearablesFreeStyle(db.Model):
 
     __tablename__ = 'WearablesFreeStyle'
 
-    idx = Column(Integer, primary_key=True, autoincrement=True)
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     Table index.
 
     :type: int, primary key, autoincrement
     """
 
-    user_id = Column(
-        Integer,
-        ForeignKey(
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey(
              'User.user_id',
              ondelete="CASCADE"
         ),
@@ -374,21 +372,21 @@ class WearablesFreeStyle(db.Model):
     :type: :class:`datetime.datetime`
     """
 
-    timestamps = Column(ARRAY(DateTime, dimensions=1))
+    timestamps = db.Column(ARRAY(db.DateTime, dimensions=1))
     """
     Timestamps for the glucose data.
 
     :type: list(datetime.datatime)
     """
 
-    glucose = Column(ARRAY(Float, dimensions=1))
+    glucose = db.Column(ARRAY(db.Float, dimensions=1))
     """
     Glucose data from the GCM.
 
     :type: list(float)
     """
 
-    activation_timestamp = Column(DateTime)
+    activation_timestamp = db.Column(db.DateTime)
     """
     Timestamp when last CGM was activated.
 
@@ -399,9 +397,9 @@ class WearablesFreeStyle(db.Model):
     :type: :class:`datetime.datetime`
     """
 
-    wearable_id = Column(
-        Integer,
-        ForeignKey(
+    wearable_id = db.Column(
+        db.Integer,
+        db.ForeignKey(
             'Wearables.idx',
             ondelete='CASCADE'
         ),
@@ -413,7 +411,7 @@ class WearablesFreeStyle(db.Model):
     :type: int, unique, foreign key to :attr:`Wearables.idx`
     """
 
-    wearable = relationship('Wearables', uselist=False, back_populates='freestyle')
+    wearable = db.relationship('Wearables', uselist=False, back_populates='freestyle')
     """
     Wearable instance this WearablesFreeStyle instance is linked to.
 

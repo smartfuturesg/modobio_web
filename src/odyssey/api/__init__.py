@@ -44,6 +44,7 @@ from odyssey.api.client import models, routes
 from odyssey.api.doctor import models, routes
 from odyssey.api.facility import models, routes
 from odyssey.api.lookup import models, routes
+from odyssey.api.notifications import models, routes
 from odyssey.api.physiotherapy import models, routes
 from odyssey.api.staff import models, routes
 from odyssey.api.system import models, routes
@@ -52,4 +53,3 @@ from odyssey.api.trainer import models, routes
 from odyssey.api.user import models, routes
 from odyssey.api.version import routes
 from odyssey.api.wearables import models, routes
-from odyssey.api.telehealth import models, routes
