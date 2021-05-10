@@ -1,4 +1,4 @@
-INSERT INTO "User" ("email", "firstname", "lastname", "is_staff", "is_client", "is_internal", "modobio_id", "deleted", "email_verified") VALUES 
+INSERT INTO "User" ("email", "firstname", "lastname", "is_staff", "is_client", "is_internal", "modobio_id", "deleted", "biological_sex_male") VALUES 
 ('sys@modobio.com', 'Sys', 'User', true, false, true,'VFRGH3YSM4JQ', false, true),
 ('doc@modobio.com', 'Doc', 'User', true, false, true, 'KW99TSVWP884', false, true),
 ('docext@modobio.com', 'DocExt', 'User', true, false, false, 'PUR27NVP3083', false, true),

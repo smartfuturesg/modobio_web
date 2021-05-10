@@ -104,3 +104,9 @@ which may not be correct at all.
 
 This setting prevents such stupid behaviour.
 """
+
+AWS_SNS_REGION = 'us-west-1'
+"""
+Our default AWS region is "us-east-2", but SNS is not available in that region. It is now set
+up in this alternate region.
+"""

@@ -115,12 +115,3 @@ users_subscription_data = {
   "subscription_type_id": 1,
   "subscription_status": "subscribed"
 }
-
-
-users_notifications_data = {
-  'title': "Test2",
-  'content': "Longer Test2",
-  'action': 'https.test2.com',
-  'read': False,
-  'deleted': True
-}

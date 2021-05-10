@@ -151,7 +151,7 @@ class Config:
 
         self.SQLALCHEMY_DATABASE_URI = f'{db_flav}://{db_user}:{db_pass}@{db_host}/{db_name}'
 
-        # S3 bucket
+        # AWS settings
         if self.LOCAL_CONFIG:
             self.S3_BUCKET_NAME = defaults.S3_BUCKET_NAME
         else:
@@ -159,6 +159,8 @@ class Config:
             self.S3_BUCKET_NAME = os.getenv('S3_BUCKET_NAME')
             if not self.S3_BUCKET_NAME:
                 raise ValueError('S3_BUCKET_NAME not defined')
+
+        self.AWS_SNS_REGION = self.getvar('AWS_SNS_REGION', None)
 
         # Whooshee fulltext index
         self.WHOOSHEE_DIR = self.getvar('WHOOSHEE_DIR', None)

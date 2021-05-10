@@ -108,6 +108,12 @@ class TelehealthMeetingRooms(db.Model):
     :type: int, primary key, autoincrement
     """
 
+    booking_id = db.Column(db.Integer, db.ForeignKey('TelehealthBookings.idx', ondelete="CASCADE"), nullable=False)
+    """
+    booking_id is the idx of the booking from TelehealthBookings
+
+    :type: int, foreign key('TelehealthBookings.idx')
+    """
     room_name = db.Column(db.String)
     """
     Name of room assigned internally and given to Twilio API. When interacting with twilio, this name

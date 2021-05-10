@@ -37,7 +37,7 @@ def test_staff_token_refresh(test_client, init_database):
 
     # try agian with the same refresh token. It should now be revoked
     # send post request for creating a new set of access tokens
-    response = test_client.post(f'/user/token/refresh?refresh_token={refresh_tokens[-1]}',
+    response = test_client.post(f'/user/token/refresh?refresh_token={refresh_tokens[1]}',
                                 content_type='application/json')
 
     # pull up login attempts by this client a new failed attempt should be in the database
@@ -77,7 +77,7 @@ def test_client_token_refresh(test_client, init_database, client_auth_header):
 
     # try agian with the same refresh token. It should now be revoked
     # send post request for creating a new set of access tokens
-    response = test_client.post(f'/user/token/refresh?refresh_token={refresh_tokens[-1]}',
+    response = test_client.post(f'/user/token/refresh?refresh_token={refresh_tokens[1]}',
                                 content_type='application/json')
 
     # pull up login attempts by this client a new failed attempt should be in the database

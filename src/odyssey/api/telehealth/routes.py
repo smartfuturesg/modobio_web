@@ -29,6 +29,8 @@ from odyssey.api.telehealth.models import (
 from odyssey.api.telehealth.schemas import (
     TelehealthBookingsSchema,
     TelehealthBookingsOutputSchema,
+    TelehealthBookingMeetingRoomsTokensSchema,
+    TelehealthBookingsPUTSchema,
     TelehealthChatRoomAccessSchema,
     TelehealthConversationsNestedSchema, 
     TelehealthMeetingRoomSchema,
@@ -55,6 +57,81 @@ from odyssey.utils.misc import (
     grab_twilio_credentials
 )
 ns = api.namespace('telehealth', description='telehealth bookings management API')
+
+@ns.route('/bookings/meeting-room/access-token/<int:booking_id>/')
+@ns.doc(params={'booking_id':'booking ID'})
+class TelehealthBookingsRoomAccessTokenApi(Resource):
+    """
+    This endpoint is used to GET the staff and client's TWILIO access tokens so they can
+    access their chats and videos.
+
+    Here, we create the Booking Meeting Room.
+    """
+    @token_auth.login_required
+    @responds(schema=TelehealthBookingMeetingRoomsTokensSchema,api=ns,status_code=200)
+    def get(self,booking_id):
+        # Get the current user
+        current_user, _ = token_auth.current_user()
+        
+        booking,chatroom = db.session.execute(
+            select(TelehealthBookings,TelehealthChatRooms).
+            join(TelehealthChatRooms,TelehealthBookings.idx==TelehealthChatRooms.booking_id).
+            where(
+                TelehealthBookings.idx == booking_id,
+                )).one_or_none()
+
+        if not booking:
+            raise InputError(status_code=405,message='Meeting does not exist yet.')
+
+        # make sure the requester is one of the participants
+        if not any(current_user.user_id == uid for uid in [booking.client_user_id, booking.staff_user_id]):
+            raise InputError(status_code=405, message='logged in user must be a booking participant')
+
+        # Create telehealth meeting room entry
+        # each telehealth session is given a unique meeting room
+        meeting_room = db.session.execute(
+            select(TelehealthMeetingRooms).
+            where(
+                TelehealthMeetingRooms.booking_id == booking_id,
+                )).scalar()
+
+        if not meeting_room:
+            meeting_room = TelehealthMeetingRooms(booking_id=booking_id,staff_user_id=booking.staff_user_id, client_user_id=booking.client_user_id)
+            meeting_room.room_name = generate_meeting_room_name()
+        
+        # Bring up chat room session. Chat rooms are intended to be between a client and staff
+        # member and persist through all telehealth interactions between the two. 
+        # only one chat room will exist between each client-staff pair
+        # If this is the first telehealth interaction between 
+        # the client and staff member, a room will be provisioned. 
+
+        twilio_credentials = grab_twilio_credentials()
+
+
+        # Create access token for users to access the Twilio API
+        # Add grant for video room access using meeting room name just created
+        # Twilio will automatically create a new room by this name.
+        # TODO: configure meeting room
+        # meeting type (group by default), participant limit , callbacks
+        
+        token = AccessToken(twilio_credentials['account_sid'], 
+                            twilio_credentials['api_key'], 
+                            twilio_credentials['api_key_secret'],
+                            identity=current_user.modobio_id, 
+                            ttl=TWILIO_ACCESS_KEY_TTL)
+        
+        token.add_grant(VideoGrant(room=meeting_room.room_name))
+        token.add_grant(ChatGrant(service_sid=current_app.config['CONVERSATION_SERVICE_SID']))
+        token_jwt = token.to_jwt()
+        if g.user_type == 'staff':
+            meeting_room.staff_access_token = token_jwt
+        elif g.user_type == 'client':
+            meeting_room.client_access_token = token_jwt
+
+        db.session.add(meeting_room)
+        db.session.commit() 
+        return {'twilio_token': token_jwt,
+                'conversation_sid': chatroom.conversation_sid}
 
 @ns.route('/client/time-select/<int:user_id>/')
 @ns.doc(params={'user_id': 'Client user ID'})
@@ -240,7 +317,8 @@ class TelehealthClientTimeSelectApi(Resource):
 
 @ns.route('/bookings/')
 @ns.doc(params={'client_user_id': 'Client User ID',
-                'staff_user_id' : 'Staff User ID'}) 
+                'staff_user_id' : 'Staff User ID',
+                'booking_id': 'booking_id'}) 
 class TelehealthBookingsApi(Resource):
     """
     This API resource is used to get and post client and staff bookings.
@@ -488,32 +566,18 @@ class TelehealthBookingsApi(Resource):
         """
             PUT request should be used purely to update the booking STATUS.
         """
+        
         if request.parsed_obj.booking_window_id_start_time >= request.parsed_obj.booking_window_id_end_time:
             raise InputError(status_code=405,message='Start time must be before end time.')
-        client_user_id = request.args.get('client_user_id', type=int)
-        
-        if not client_user_id:
-            raise InputError(status_code=405,message='Missing Client ID')
 
-        staff_user_id = request.args.get('staff_user_id', type=int)
-        
-        if not staff_user_id:
-            raise InputError(status_code=405,message='Missing Staff ID')        
-        
-        # Check client existence
-        check_client_existence(client_user_id)
-        
-        # Check staff existence
-        check_staff_existence(staff_user_id)
 
+        booking_id = request.args.get('booking_id', type=int)
+        
         # Check if staff and client have those times open
-        bookings = TelehealthBookings.query.filter_by(client_user_id=client_user_id,\
-                                                        staff_user_id=staff_user_id,\
-                                                        target_date=request.parsed_obj.target_date,\
-                                                        booking_window_id_start_time=request.parsed_obj.booking_window_id_start_time).one_or_none()
+        bookings = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
 
         if not bookings:
-            raise InputError(status_code=405,message='Could not find booking for Client {} and Staff {}.'.format(client_user_id, staff_user_id))
+            raise InputError(status_code=405,message='Could not find booking.')
 
         data = request.get_json()
 

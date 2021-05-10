@@ -250,3 +250,148 @@ def send_email(subject=None, recipient="success@simulator.amazonses.com", body_t
     else:
         print("Email sent! Message ID:"),
         print(response['MessageId'])
+
+
+##############################################################
+#
+# Push notifications
+#
+
+push_providers = {
+    'apple': ('APNS', 'APNS_VOIP'),
+    'android': ('FCM',)}
+
+_providers = tuple(p for q in push_providers.values() for p in q)
+
+def _load_sns():
+    """ Loads the AWS Simple Notification Service (SNS).
+
+    Loads the boto3 SNS resource with some guards against being in
+    an unsupported region.
+
+    Returns
+    -------
+    sns : boto3.resources.factory.sns.ServiceResource
+        The loaded boto3 resource.
+
+    apps : list
+        A list of all platform applications available in this region.
+
+    Raises
+    ------
+    ClientError
+        In case of boto3 load failure.
+    """
+    sns = boto3.resource('sns')
+
+    try:
+        apps = list(sns.platform_applications.all())
+    except ClientError as err:
+        if ('Error' in err.response
+            and 'Message' in err.response['Error']
+            and 'not supported in this region' in err.response['Error']['Message']):
+            # SNS Push notifications are not available in current region.
+            region = current_app.config['AWS_SNS_REGION']
+            sns = boto3.resource('sns', region_name=region)
+            apps = list(sns.platform_applications.all())
+        else:
+            # Some other error
+            raise err
+
+    return sns, apps
+
+def register_device(
+    device_token: str,
+    device_description: str,
+    provider: str,
+    current_endpoint: str=None
+) -> str:
+    """ Register a device for push notifications.
+
+    Parameters
+    ----------
+    device_token : str
+        The device token (called registration ID on Android) obtained from the OS to allow
+        push notifications.
+
+    device_description : str
+        Additional data stored with the device_token in the AWS SNS endpoint. Max length 2048.
+
+    provider : str
+        Which provider to register with. Select 'APNS' for one of Apple, 'APNS_VOIP' for
+        Apple video call start, or 'FCM' for Android OS.
+
+    current_endpoint : str
+        Current endpoint ARN, which may or may not be active.
+
+    Returns
+    -------
+    str
+        Endpoint ARN registered for this device.
+
+    Raises
+    ------
+    ValueError
+        On incorrect provider or device_description too long.
+    """
+    # Some info and explanation:
+    #
+    # https://docs.aws.amazon.com/sns/latest/dg/mobile-push-send.html
+    #
+    # ARN = string representation of resources on AWS
+    # Platform Application = endpoint for a single provider channel.
+    #   AP_ARN: arn:aws:sns:us-west-1:393511634479:endpoint/APNS_SANDBOX/ApplePushNotification-Dev
+    # Endpoint = endpoint for a single device within a channel.
+    #   EP_ARN: AP_ARN/147a664a-2ca9-3109-91e6-1986d3f0d52a
+
+    if provider not in _providers:
+        raise ValueError('provider must be one of: {}'.format(_providers))
+
+    if len(device_description) > 2048:
+        raise ValueError('device_description must be less than 2048 characters long.')
+
+    sns, apps = _load_sns()
+
+    if current_endpoint:
+        # Check if current endpoint is still good, delete if not.
+        endpoint = sns.PlatformEndpoint(arn=current_endpoint)
+        try:
+            endpoint.load()
+        except (NotFoundException, InvalidParameterException):
+            # Endpoint was deleted or has different parameters.
+            endpoint.delete()
+        else:
+            if endpoint.attributes['Enabled'] == 'false':
+                # Endpoint was disabled, delete.
+                endpoint.delete()
+            else:
+                # Current endpoint still good
+                return current_endpoint
+
+    for app in apps:
+        # Find matching platform
+        # TODO: currently only sandboxed endpoints
+        if f'{provider}_SANDBOX' in app.arn:
+            endpoint = app.create_platform_endpoint(
+                Token=device_token,
+                CustomUserData=device_description)
+
+    return endpoint.arn
+
+def unregister_device(endpoint_arn: str):
+    """ Delete endpoint.
+
+    Parameters
+    ----------
+    endpoint_arn : str
+        ARN of the endpoint to be deleted.
+    """
+    sns, _ = _load_sns()
+
+    # Won't fail if endpoints don't exist.
+    endpoint = sns.PlatformEndpoint(arn=endpoint_arn)
+    endpoint.delete()
+
+def push_notification(user_id: int, topic: str, message: str):
+    """ Send a push notification to the user. """
+    pass
