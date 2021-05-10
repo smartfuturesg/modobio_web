@@ -129,7 +129,6 @@ def test_get_booking_details(test_client, init_database, staff_auth_header):
     assert response.json['details'] == {}
     assert response.json['location_id'] == 1
     assert response.json['images']
-    assert response.json['voice']
 
     #Try getting booking details for booking_id that doens't exist
     invalid_booking_id = 500

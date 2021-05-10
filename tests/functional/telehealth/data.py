@@ -207,8 +207,8 @@ from werkzeug.datastructures import FileStorage
 rec_file = pathlib.Path(__file__).parent / 'test_m4a_recording.m4a'
 img_file = pathlib.Path(__file__).parent / 'test_img_weirdmole.jpg'
 telehealth_post_booking_details = {
-  'media': (img_file.as_posix() , open(img_file, mode='rb'), 'image/jpg'), 
-  'media': (rec_file.as_posix() , open(rec_file, mode='rb'), 'audio/mp4a-latm'),
+  'images': (img_file.as_posix() , open(img_file, mode='rb'), 'image/jpg'), 
+  'voice': (rec_file.as_posix() , open(rec_file, mode='rb'), 'audio/mp4a-latm'),
   'details': 'Testing booking details',
   'location_id': 1
 }
