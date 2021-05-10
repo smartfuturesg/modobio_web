@@ -3,7 +3,7 @@ Database tables for the wearable devices section of the Modo Bio API.
 All tables in this module are prefixed with 'Wearables'.
 """
 
-from sqlalchemy import ARRAY
+from sqlalchemy.dialects.postgresql import ARRAY
 
 from odyssey import db
 from odyssey.utils.constants import DB_SERVER_TIME
