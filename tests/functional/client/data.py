@@ -161,21 +161,14 @@ clients_assigned_drinks = {
 }
 
 clients_mobile_settings = {
-    "general_settings": {
-        "is_right_handed": True,
-        "enable_push_notifications": True,
-        "display_middle_name": True,
-        "biometrics_setup": True,
-        "timezone_tracking": True,
-        "use_24_hour_clock": True,
-        "date_format": "%d-%b-%Y",
-        "include_timezone": True
-    },
-    "push_notification_type_ids": [
-        {"notification_type_id": 3},
-        {"notification_type_id": 16},
-        {"notification_type_id": 11}
-  ]
+  "is_right_handed": True,
+  "enable_push_notifications": True,
+  "display_middle_name": True,
+  "biometrics_setup": True,
+  "timezone_tracking": True,
+  "use_24_hour_clock": True,
+  "date_format": "%d-%b-%Y",
+  "include_timezone": True
 }
 
 clients_transactions = [

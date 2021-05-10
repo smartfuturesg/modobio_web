@@ -1,7 +1,7 @@
 """Add ClientPushNotifications table
 
 Revision ID: f56c6155f65c
-Revises: 02793bda3302
+Revises: 157f291f1ac8
 Create Date: 2021-03-22 08:22:14.511241
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'f56c6155f65c'
-down_revision = 'abea48a1a2c2'
+down_revision = '157f291f1ac8'
 branch_labels = None
 depends_on = None
 

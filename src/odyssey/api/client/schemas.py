@@ -27,8 +27,7 @@ from odyssey.api.client.models import (
     ClientHeightHistory,
     ClientWeightHistory,
     ClientWaistSizeHistory,
-    ClientTransactionHistory,
-    ClientPushNotifications
+    ClientTransactionHistory
 )
 from odyssey.api.user.schemas import UserInfoPutSchema
 
@@ -336,7 +335,7 @@ class ClinicalCareTeamAuthorizationNestedSchema(Schema):
     """
     clinical_care_team_authoriztion = fields.Nested(ClinicalCareTeamAuthorizaitonSchema(many=True), missing=[])
 
-class ClientGeneralMobileSettingsSchema(ma.SQLAlchemyAutoSchema):
+class ClientMobileSettingsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientMobileSettings
         exclude = ('created_at', 'updated_at', 'idx')
@@ -348,18 +347,6 @@ class ClientGeneralMobileSettingsSchema(ma.SQLAlchemyAutoSchema):
     def make_object(self, data, **kwargs):
         return ClientMobileSettings(**data)
 
-class ClientMobilePushNotificationsSchema(Schema):
-    notification_type_id = fields.Integer()
-    user_id = fields.Integer(dump_only=True)
-
-    @post_load
-    def make_object(self, data, **kwargs):
-        return ClientPushNotifications(**data)
-
-class ClientMobileSettingsSchema(Schema):
-    general_settings = fields.Nested(ClientGeneralMobileSettingsSchema)
-    push_notification_type_ids = fields.Nested(ClientMobilePushNotificationsSchema(many=True), missing=[])
-        
 class ClientAssignedDrinksSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientAssignedDrinks
