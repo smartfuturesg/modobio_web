@@ -765,7 +765,7 @@ class WearablesFreeStyleEndpoint(Resource):
             for t, g in temp:
                 tstamps.append(t)
                 glucose.append(g)
-
+                
         # Find index where new data starts
         n = 0
         if cgm.timestamps:
