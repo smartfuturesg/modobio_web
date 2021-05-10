@@ -673,10 +673,6 @@ class UserNotificationsPutApi(Resource):
         """ [DEPRECATED] Moved to PUT `/notifications/<notification_id>/`. """
         return redirect(f'/notifications/{idx}/', code=308)
 
-<<<<<<< HEAD
-=======
-
->>>>>>> release-0.7
 @ns.route('/email-verification/token/<string:token>/')
 @ns.doc(params={'token': 'Email verification token'})
 class UserPendingEmailVerificationsTokenApi(Resource):
