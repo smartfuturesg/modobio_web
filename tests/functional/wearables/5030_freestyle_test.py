@@ -89,7 +89,7 @@ def test_wearables_freestyle_patch(test_client, init_database, client_auth_heade
         data=dumps(wearables_freestyle_more_data),
         content_type='application/json'
     )
-
+    
     assert response.status_code == 204
     
     init_database.session.commit()

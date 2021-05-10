@@ -1,7 +1,6 @@
 import boto3
-import codecs
-import os
 import pathlib
+
 from botocore.exceptions import ClientError
 from flask import current_app
 

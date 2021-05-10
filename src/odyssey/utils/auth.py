@@ -313,7 +313,7 @@ class TokenAuth(BasicAuth):
                     ).join(
                         UserLogin, User.user_id == UserLogin.user_id
                     ).where(User.user_id == decoded_token['uid'])).one_or_none()    
-        # breakpoint()
+                    
         g.user_type = decoded_token.get('utype')
         return query[0], query[1], decoded_token.get('utype')
 

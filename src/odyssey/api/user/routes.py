@@ -33,8 +33,8 @@ from odyssey.api.user.schemas import (
     UserInfoSchema,
     UserSubscriptionsSchema,
     UserSubscriptionHistorySchema,
-    NewStaffUserSchema,
-    UserClinicalCareTeamSchema)
+    NewStaffUserSchema
+)
 
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.constants import PASSWORD_RESET_URL, DB_SERVER_TIME
@@ -673,6 +673,10 @@ class UserNotificationsPutApi(Resource):
         """ [DEPRECATED] Moved to PUT `/notifications/<notification_id>/`. """
         return redirect(f'/notifications/{idx}/', code=308)
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> release-0.7
 @ns.route('/email-verification/token/<string:token>/')
 @ns.doc(params={'token': 'Email verification token'})
 class UserPendingEmailVerificationsTokenApi(Resource):
@@ -765,6 +769,8 @@ class UserPendingEmailVerificationsResendApi(Resource):
         db.session.commit()
 
         recipient = User.query.filter_by(user_id=user_id).one_or_none()
+
+        send_email_verify_email(recipient, token, code)
 
 @ns.route('/email-verification/token/<string:token>/')
 @ns.doc(params={'token': 'Email verification token'})
@@ -860,3 +866,4 @@ class UserPendingEmailVerificationsResendApi(Resource):
         recipient = User.query.filter_by(user_id=user_id).one_or_none()
 
         send_email_verify_email(recipient, token, code)
+        
