@@ -772,8 +772,7 @@ class LookupSubscriptions(db.Model):
     """
 
 class LookupNotifications(db.Model):
-    """ Static list of notifications types that a user can receive. 
-    """
+    """ Static list of notifications types that a user can receive. """
 
     __tablename__ = 'LookupNotifications'
 
@@ -795,37 +794,42 @@ class LookupNotifications(db.Model):
     """
     Id of this notification type.
 
-    :type: integer, primary key, autoincrementing
+    :type: int, primary key, autoincrementing
     """
 
-    notification_type = db.Column(db.String)
+    notification_type = db.Column(db.String(50))
     """
     Name of this notification type.
 
-    :type: string
+    :type: str, max length 50
     """
 
-    icon = db.Column(db.String)
+    icon = db.Column(db.String(50))
     """
     Icon used for this notification type, denotes a file in an s3 bucket.
 
-    :type: string
+    :type: str, max length 50
     """
 
-    background_color = db.Column(db.String)
+    background_color = db.Column(db.String(50))
     """
     Background color used for this notification type.
-    Color names are from the list of 140 colors supported by all browsers
+    Color names are from the list of 140 colors supported by all browsers.
     See: https://htmlcolorcodes.com/color-names/
+
+    :type: str, max length 50
     """
 
-    symbol_color = db.Column(db.String)
+    symbol_color = db.Column(db.String(50))
     """
     Symbol color used for this notification type.
-    Color names are from the list of 140 colors supported by all browsers
-    original means do not apply any color to the svg
+    Color names are from the list of 140 colors supported by all browsers.
+    `original` means do not apply any color to the svg.
     See: https://htmlcolorcodes.com/color-names/
+
+    :type: str, max length 50
     """
+
 
 class LookupClinicalCareTeamResources(db.Model):
     """
