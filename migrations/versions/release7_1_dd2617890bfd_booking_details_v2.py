@@ -22,7 +22,6 @@ def upgrade():
     op.create_unique_constraint(None, 'TelehealthBookingDetails', ['booking_id'])
     op.create_foreign_key(None, 'TelehealthBookingDetails', 'LookupTerritoriesofOperation', ['location_id'], ['idx'])
     op.drop_column('TelehealthBookingDetails', 'media')
-    op.drop_table('ClientPushNotifications')
     # ### end Alembic commands ###
 
 
@@ -32,14 +31,4 @@ def downgrade():
     op.drop_constraint(None, 'TelehealthBookingDetails', type_='foreignkey')
     op.drop_constraint(None, 'TelehealthBookingDetails', type_='unique')
     op.drop_column('TelehealthBookingDetails', 'location_id')
-    op.create_table('ClientPushNotifications',
-    sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.Column('updated_at', sa.DateTime(), nullable=True),
-    sa.Column('idx', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('notification_type_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['notification_type_id'], ['LookupNotifications.notification_type_id'], ),
-    sa.ForeignKeyConstraint(['user_id'], ['User.user_id'], ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('idx')
-    )
     # ### end Alembic commands ###

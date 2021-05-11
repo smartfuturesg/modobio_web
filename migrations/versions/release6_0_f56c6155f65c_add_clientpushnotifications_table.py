@@ -24,7 +24,7 @@ def upgrade():
     sa.Column('idx', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('notification_type_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['notification_type_id'], ['LookupNotifications.notification_type_id'], ),
+    sa.ForeignKeyConstraint(['notification_type_id'], ['LookupNotifications.notification_type_id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['user_id'], ['User.user_id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('idx')
     )

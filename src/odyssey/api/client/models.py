@@ -1519,6 +1519,50 @@ class ClientTransactionHistory(db.Model):
     :type: string
     """
 
+class ClientPushNotifications(db.Model):
+    """
+    This table holds the categories of push notifications that a user has enabled.
+    If a notification type appears in this table for a user id, it means that user has this
+    type of notification enabled.
+    """
+
+    __tablename__ = 'ClientPushNotifications'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
+    """
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Auto incrementing primary key
+
+    :type: int, primary key
+    """
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    """
+    Id of the user that this notification belongs to
+
+    :type: int, foreign key('User.user_id')
+    """
+
+    notification_type_id = db.Column(db.Integer, db.ForeignKey('LookupNotifications.notification_type_id', ondelete="CASCADE"), nullable=False)
+    """
+    Denotes what type of notification this is as defined in the LookupNotifications table.
+
+    :type: int, foreign key('LookupNotifications.notification_id')
+    """
+
 class ClientDataStorage(db.Model):
     """ 
     Details on how much data storage each client is using
