@@ -22,4 +22,5 @@ requests-oauthlib
 twilio
 PyJWT>=2.0.0
 WeasyPrint
+werkzeug==1.0.1
 WTForms
