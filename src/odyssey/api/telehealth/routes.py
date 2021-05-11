@@ -1238,6 +1238,10 @@ class TelehealthBookingDetailsApi(Resource):
         #if 'location_id' is not present, location_id will not be affected
         location_id = request.form.get('location_id')
         if location_id:
+            if location_id == None:
+                #if location_id key was provided with no data, throw an error
+                raise GenericNotFound("Location id cannot be None")
+
             location = LookupTerritoriesofOperation.query.filter_by(idx=location_id).one_or_none()
             if not location:
                 raise GenericNotFound(f"No location exists with id {location_id}")
@@ -1355,6 +1359,9 @@ class TelehealthBookingDetailsApi(Resource):
 
         data.booking_id = booking_id
         data.location_id = form.get('location_id')
+        if not data.location_id or data.location_id == None:
+            raise InputError("Location id must be provided")
+
         location = LookupTerritoriesofOperation.query.filter_by(idx=data.location_id).one_or_none()
         if not location:
             raise GenericNotFound(f"No location exists with id {data.location_id}")
