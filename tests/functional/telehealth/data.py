@@ -219,28 +219,23 @@ telehealth_put_booking_details = {
     'voice': FileStorage(filename=''),
     'details': 'Removed image and recording, kept description',
     'location_id': 1,
-    'idx': 1
   },
   'swap_img_rec':{
     'images': (img_file.as_posix() , open(img_file, mode='rb'), 'image/jpg'),
     'voice':(rec_file.as_posix() , open(rec_file, mode='rb'), 'audio/mp4a-latm'),
     'details': 'Swapped files, recording is image and image is recording.',
     'location_id': 1,
-    'idx': 1
   },
   'change_text_only':{
     'details': 'Only changed text details',
     'location_id': 1,
-    'idx': 1
   },
   'nothing_to_change':{
-    'idx': 1
   },
   'empty_booking_details':{
     'images': FileStorage(filename=''),
     'voice': FileStorage(filename=''),
     'details': '',
     'location_id': 1,
-    'idx': 1
   }
 }

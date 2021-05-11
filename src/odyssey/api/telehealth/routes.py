@@ -1215,7 +1215,7 @@ class TelehealthBookingDetailsApi(Resource):
         booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
 
         #only the client involved with the booking should be allowed to edit details
-        if booking.client_user_id != token_auth.current_user()[0].user_id:
+        if not booking or booking.client_user_id != token_auth.current_user()[0].user_id:
             raise UnauthorizedUser(message='Only the client of this booking is allowed to edit details')
         
         #verify the booking_id returns a query result

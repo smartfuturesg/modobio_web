@@ -105,11 +105,7 @@ def test_put_booking_details(test_client, init_database, client_auth_header):
     #bad booking_id
     invalid_booking_id = 500
     response = test_client.put(f'/telehealth/bookings/details/{invalid_booking_id}', headers=client_auth_header, data=payload2)
-    assert response.status_code == 204
-    #bad idx
-    payload3['idx'] = 0
-    response = test_client.put(f'/telehealth/bookings/details/{booking_id}', headers=client_auth_header, data=payload3)
-    assert response.status_code == 204
+    assert response.status_code == 401
 
 def test_get_booking_details(test_client, init_database, client_auth_header):
     """
