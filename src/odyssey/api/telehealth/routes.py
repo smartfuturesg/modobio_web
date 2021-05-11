@@ -337,7 +337,7 @@ class TelehealthBookingsApi(Resource):
 
         # make sure the requester is one of the participants
         if not any(current_user.user_id == uid for uid in [client_user_id, staff_user_id]):
-            raise InputError(status_code=403, message='logged in user must be a booking participant')
+            raise InputError(status_code=403, message='Logged in user must be a booking participant')
         
         if not client_user_id and not staff_user_id:
             raise InputError(status_code=405,message='Must include at least one staff or client ID.')
@@ -404,7 +404,7 @@ class TelehealthBookingsApi(Resource):
             bookings = [dict(zip(('booking','conversation_sid', 'client_user'), dat)) for dat in query] 
 
         else:
-            raise InputError(status_code=403, message='logged in user must be a booking participant')
+            raise InputError(status_code=403, message='Logged in user must be a booking participant')
 
         time_inc = LookupBookingTimeIncrements.query.all()
         
@@ -1238,9 +1238,9 @@ class TelehealthBookingDetailsApi(Resource):
         #if 'location_id' is not present, location_id will not be affected
         location_id = request.form.get('location_id')
         if location_id:
-            if location_id == None:
+            if location_id == None or not isinstance(location_id, int):
                 #if location_id key was provided with no data, throw an error
-                raise GenericNotFound("Location id cannot be None")
+                raise InputError(422, "Location id must be an integer")
 
             location = LookupTerritoriesofOperation.query.filter_by(idx=location_id).one_or_none()
             if not location:
@@ -1358,13 +1358,18 @@ class TelehealthBookingDetailsApi(Resource):
             data.details = form.get('details')
 
         data.booking_id = booking_id
-        data.location_id = form.get('location_id')
-        if not data.location_id or data.location_id == None:
-            raise InputError("Location id must be provided")
+        location_id = form.get('location_id')
+        if not location_id or location_id == None:
+            raise InputError(422, "Location id must be provided")
 
-        location = LookupTerritoriesofOperation.query.filter_by(idx=data.location_id).one_or_none()
+        if not isinstance(location_id, int):
+            raise InputError(422, "Location id must be an integer")
+
+        location = LookupTerritoriesofOperation.query.filter_by(idx=location_id).one_or_none()
         if not location:
-            raise GenericNotFound(f"No location exists with id {data.location_id}")
+            raise GenericNotFound(f"No location exists with id {location_id}")
+
+        data.location_id = location_id
         
         payload.append(data)
 
