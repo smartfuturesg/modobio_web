@@ -1171,7 +1171,9 @@ class TelehealthBookingDetailsApi(Resource):
 
         res['details'] = booking.details
         res['location_id'] = booking.location_id
-        location = LookupTerritoriesofOperation.query.filter_by(idx=booking.location_id).first()
+        location = LookupTerritoriesofOperation.query.filter_by(idx=booking.location_id).one_or_none()
+        if not location:
+            raise GenericNotFound(f"No location exists with id {location_id}")
         res['location_name'] = location.country + " " + location.sub_territory
 
         if not current_app.config['LOCAL_CONFIG']:
@@ -1238,6 +1240,9 @@ class TelehealthBookingDetailsApi(Resource):
         #if 'location_id' is present in form, location_id will be updated to new value
         #if 'location_id' is not present, location_id will not be affected
         if request.form.get('location_id'):
+            location = LookupTerritoriesofOperation.query.filter_by(idx=booking.location_id).one_or_none()
+            if not location:
+                raise GenericNotFound(f"No location exists with id {location_id}")
             query.location_id = request.form.get('location_id')
 
         if not current_app.config['LOCAL_CONFIG']:
@@ -1351,6 +1356,9 @@ class TelehealthBookingDetailsApi(Resource):
             data.details = form.get('details')
 
         data.booking_id = booking_id
+        location = LookupTerritoriesofOperation.query.filter_by(idx=booking.location_id).one_or_none()
+        if not location:
+            raise GenericNotFound(f"No location exists with id {location_id}")
         data.location_id = form.get('location_id')
         payload.append(data)
 
