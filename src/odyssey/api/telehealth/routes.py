@@ -1239,11 +1239,12 @@ class TelehealthBookingDetailsApi(Resource):
 
         #if 'location_id' is present in form, location_id will be updated to new value
         #if 'location_id' is not present, location_id will not be affected
-        if request.form.get('location_id'):
-            location = LookupTerritoriesofOperation.query.filter_by(idx=booking.location_id).one_or_none()
+        location_id = request.form.get('location_id')
+        if location_id:
+            location = LookupTerritoriesofOperation.query.filter_by(idx=location_id).one_or_none()
             if not location:
                 raise GenericNotFound(f"No location exists with id {location_id}")
-            query.location_id = request.form.get('location_id')
+            query.location_id = location_id
 
         if not current_app.config['LOCAL_CONFIG']:
             #if 'images' and 'voice' are both not present, no changes will be made to the current media file
@@ -1356,10 +1357,11 @@ class TelehealthBookingDetailsApi(Resource):
             data.details = form.get('details')
 
         data.booking_id = booking_id
-        location = LookupTerritoriesofOperation.query.filter_by(idx=booking.location_id).one_or_none()
-        if not location:
-            raise GenericNotFound(f"No location exists with id {location_id}")
         data.location_id = form.get('location_id')
+        location = LookupTerritoriesofOperation.query.filter_by(idx=data.location_id).one_or_none()
+        if not location:
+            raise GenericNotFound(f"No location exists with id {data.location_id}")
+        
         payload.append(data)
 
         if not current_app.config['LOCAL_CONFIG']:
