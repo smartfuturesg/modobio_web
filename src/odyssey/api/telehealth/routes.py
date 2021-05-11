@@ -1167,7 +1167,7 @@ class TelehealthBookingDetailsApi(Resource):
         #if there aren't any details saved for the booking_id, GET will return empty
         booking = TelehealthBookingDetails.query.filter_by(booking_id = booking_id).first()
         if not booking:
-            raise GenericNotFound(f"No booking details exist for the booking with id {booking_id}")
+            raise InputError(204, message=f'No details exist for booking id {booking_id}')
 
         res['details'] = booking.details
         res['location_id'] = booking.location_id

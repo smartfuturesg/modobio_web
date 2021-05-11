@@ -144,7 +144,7 @@ def test_delete_booking_details(test_client, init_database, client_auth_header):
     
     #check that details are now deleted
     response = test_client.get(f'/telehealth/bookings/details/{booking_id}', headers=client_auth_header)
-    assert response.status_code == 404
+    assert response.status_code == 204
 
     #try to delete already deleted details
     response = test_client.delete(f'/telehealth/bookings/details/{booking_id}', headers=client_auth_header)
