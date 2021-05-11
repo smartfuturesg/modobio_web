@@ -42,8 +42,6 @@ def test_post_1_client_staff_bookings(test_client, init_database, staff_auth_hea
     assert conversation.staff_user_id == 2
     assert conversation.client_user_id == 1
     assert conversation.booking_id == 1
-    assert response.json['bookings'][0]['conversation_sid'] == conversation.conversation_sid
-    assert response.json['twilio_token']
 
 def test_post_2_client_staff_bookings(test_client, init_database, staff_auth_header):
     """
@@ -121,7 +119,6 @@ def test_get_1_staff_bookings(test_client, init_database, staff_auth_header):
                                 content_type='application/json')
 
     assert response.status_code == 200
-    assert response.json['twilio_token']
     
 def test_get_2_client_bookings(test_client, init_database, client_auth_header):
     """
@@ -172,16 +169,3 @@ def test_get_4_staff_client_bookings(test_client, init_database, staff_auth_head
     assert response.status_code == 200
     assert response.json['bookings'][1]['status'] == 'Completed' 
 
-def test_return_all_conversations(test_client, init_database, client_auth_header):
-    """
-    GIVEN a api end point for client bookings
-    WHEN the '/telehealth/chat-room/access-token/all/<user_id>' resource  is requested (GET)
-    THEN check the response is valid
-    """
-    response = test_client.get(f'/telehealth/chat-room/access-token/all/{1}/',
-                                headers=client_auth_header, 
-                                content_type='application/json')
-
-    assert response.status_code == 200
-    assert len(response.json['conversations']) == 2
-    assert response.json['twilio_token']
