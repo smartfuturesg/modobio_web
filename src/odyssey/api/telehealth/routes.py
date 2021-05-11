@@ -1205,24 +1205,21 @@ class TelehealthBookingDetailsApi(Resource):
         Edits one file for another, or can edit text details
 
         Expects form_data: (will ignore anything else)
-            idx:(required) int : TelehealthBookingDetails idx
             image: [files] (list of image files, up to 3 can be sent)
             voice: file (one sound file can be sent)
+            details: string
 
             (optional) : str
         """
         #verify the editor of details is the client or staff from schedulded booking
         booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
-        idx = request.form.get('idx')
-        if not booking or not idx:
-            raise ContentNotFound
 
         #only the client involved with the booking should be allowed to edit details
         if booking.client_user_id != token_auth.current_user()[0].user_id:
             raise UnauthorizedUser(message='Only the client of this booking is allowed to edit details')
         
-        #verify the booking_id and idx combination return a query result
-        query = TelehealthBookingDetails.query.filter_by(booking_id=booking_id, idx=idx).one_or_none()
+        #verify the booking_id returns a query result
+        query = TelehealthBookingDetails.query.filter_by(booking_id=booking_id).one_or_none()
         if not query:
             raise ContentNotFound
 
