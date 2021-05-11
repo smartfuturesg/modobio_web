@@ -1,6 +1,7 @@
 
 import base64
 from flask.json import dumps
+import pytest
 from sqlalchemy.sql.expression import select
 
 # from tests.conftest import generate_users
@@ -98,7 +99,7 @@ def test_generate_bookings(test_client, init_database, staff_auth_header):
                                 headers=auth_header, 
                                 data=dumps(telehealth_bookings_staff_4_client_1_data), 
                                 content_type='application/json')
-    
+                                
     assert response.status_code == 201            
     
     response = test_client.post('/telehealth/bookings/?client_user_id={}&staff_user_id={}'.format(1,staff_users[0].user_id),
@@ -161,7 +162,7 @@ def test_client_time_select(test_client, init_database, client_auth_header):
     assert response.status_code == 200
     assert response.json['total_options'] == 53
     
-
+@pytest.mark.skip('This endpoint should no longer be used.')
 def test_bookings_meeting_room_access(test_client,init_database,client_auth_header, staff_auth_header):
     user_id_arr = (1,2)
     for user_id in user_id_arr:

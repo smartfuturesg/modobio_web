@@ -30,7 +30,10 @@ def test_post_personalfamily_medical_history(test_client, init_database, client_
     assert response.status_code == 201
     assert response.json['total_items'] == 2
     assert len(response.json['items']) == 2
-    assert len(client_data) == 2           
+    assert len(client_data) == 2
+
+    test = MedicalFamilyHistory.query.filter_by(user_id=1,medical_condition_id=1).one_or_none()
+    assert test.myself == True
 
 def test_put_personalfamily_medical_history(test_client, init_database, client_auth_header):
     """
@@ -45,11 +48,12 @@ def test_put_personalfamily_medical_history(test_client, init_database, client_a
                                 headers=client_auth_header, 
                                 data=dumps(payload), 
                                 content_type='application/json')
-    
+                                    
     assert response.status_code == 201
     assert response.json['total_items'] == 2
     assert len(response.json['items']) == 2
-
+    test = MedicalFamilyHistory.query.filter_by(user_id=1,medical_condition_id=1).one_or_none()
+    assert test.myself == False
 
 def test_get_personalfamily_medical_history(test_client, init_database, client_auth_header, staff_auth_header):
     """

@@ -51,7 +51,8 @@ from odyssey.utils.errors import GenericNotFound, InputError, LoginNotAuthorized
 from odyssey.utils.misc import (
     check_client_existence, 
     check_staff_existence,
-    create_conversation, 
+    create_conversation,
+    create_twilio_access_token,
     generate_meeting_room_name,
     get_chatroom,
     grab_twilio_credentials
@@ -99,14 +100,6 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
             meeting_room = TelehealthMeetingRooms(booking_id=booking_id,staff_user_id=booking.staff_user_id, client_user_id=booking.client_user_id)
             meeting_room.room_name = generate_meeting_room_name()
         
-        # Bring up chat room session. Chat rooms are intended to be between a client and staff
-        # member and persist through all telehealth interactions between the two. 
-        # only one chat room will exist between each client-staff pair
-        # If this is the first telehealth interaction between 
-        # the client and staff member, a room will be provisioned. 
-
-        twilio_credentials = grab_twilio_credentials()
-
 
         # Create access token for users to access the Twilio API
         # Add grant for video room access using meeting room name just created
@@ -114,23 +107,16 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
         # TODO: configure meeting room
         # meeting type (group by default), participant limit , callbacks
         
-        token = AccessToken(twilio_credentials['account_sid'], 
-                            twilio_credentials['api_key'], 
-                            twilio_credentials['api_key_secret'],
-                            identity=current_user.modobio_id, 
-                            ttl=TWILIO_ACCESS_KEY_TTL)
-        
-        token.add_grant(VideoGrant(room=meeting_room.room_name))
-        token.add_grant(ChatGrant(service_sid=current_app.config['CONVERSATION_SERVICE_SID']))
-        token_jwt = token.to_jwt()
+        token = create_twilio_access_token(current_user.modobio_id, meeting_room_name=meeting_room.room_name)
+
         if g.user_type == 'staff':
-            meeting_room.staff_access_token = token_jwt
+            meeting_room.staff_access_token = token
         elif g.user_type == 'client':
-            meeting_room.client_access_token = token_jwt
+            meeting_room.client_access_token = token
 
         db.session.add(meeting_room)
         db.session.commit() 
-        return {'twilio_token': token_jwt,
+        return {'twilio_token': token,
                 'conversation_sid': chatroom.conversation_sid}
 
 @ns.route('/client/time-select/<int:user_id>/')
@@ -435,21 +421,14 @@ class TelehealthBookingsApi(Resource):
         # Sort bookings by time then sort by date
         bookings_payload.sort(key=lambda t: t['start_time'])
         bookings_payload.sort(key=lambda t: t['target_date'])
-
-        # create twilio access token with chat grant 
-        twilio_credentials = grab_twilio_credentials()
-        token = AccessToken(twilio_credentials['account_sid'], 
-                    twilio_credentials['api_key'], 
-                    twilio_credentials['api_key_secret'],
-                    identity=current_user.modobio_id, 
-                    ttl=TWILIO_ACCESS_KEY_TTL)
         
-        token.add_grant(ChatGrant(service_sid=current_app.config['CONVERSATION_SERVICE_SID']))
+        # create twilio access token with chat grant 
+        token = create_twilio_access_token(current_user.modobio_id)
         
         payload = {
             'all_bookings': len(bookings_payload),
             'bookings': bookings_payload,
-            'twilio_token': token.to_jwt()            
+            'twilio_token': token            
         }
         return payload
 
@@ -526,19 +505,12 @@ class TelehealthBookingsApi(Resource):
         db.session.flush()
 
         # create Twilio conversation and store details in TelehealthChatrooms table
-        conversation = create_conversation(staff_user_id = staff_user_id,
+        conversation_sid = create_conversation(staff_user_id = staff_user_id,
                             client_user_id = client_user_id,
                             booking_id=request.parsed_obj.idx)
 
         # create access token with chat grant for newly provisioned room
-        twilio_credentials = grab_twilio_credentials()
-        token = AccessToken(twilio_credentials['account_sid'], 
-                    twilio_credentials['api_key'], 
-                    twilio_credentials['api_key_secret'],
-                    identity=current_user.modobio_id, 
-                    ttl=TWILIO_ACCESS_KEY_TTL)
-
-        token.add_grant(ChatGrant(service_sid=current_app.config['CONVERSATION_SERVICE_SID']))
+        token = create_twilio_access_token(current_user.modobio_id)
 
         # Once the booking has been successful, delete the client from the queue
         client_in_queue = TelehealthQueueClientPool.query.filter_by(user_id=client_user_id).one_or_none()
@@ -549,11 +521,11 @@ class TelehealthBookingsApi(Resource):
 
         db.session.commit()
 
-        request.parsed_obj.conversation_sid = conversation.sid
+        request.parsed_obj.conversation_sid = conversation_sid
         
         payload = {
             'all_bookings': 1,
-            'twilio_token': token.to_jwt(),
+            'twilio_token': token,
             'bookings':[request.parsed_obj] 
         }
 
@@ -1478,6 +1450,8 @@ class TelehealthBookingDetailsApi(Resource):
                'staff_user_id': 'Required. user_id of staff participant'})
 class TelehealthChatRoomApi(Resource):
     """
+    DEPRECATED 5.10.21
+
     Creates an access token for the chat room between one staff and one client user.
     Chat rooms persist through the full history of the two users so the chat history (transcript)
     will be preserved by Twilio.  
@@ -1537,8 +1511,9 @@ class TelehealthChatRoomApi(Resource):
 @ns.doc(params={'user_id': 'User ID number'})
 class TelehealthAllChatRoomApi(Resource):
     """
-    Endpoint for dealing with all conversations a user is a participant to within a certain context (staff or client)
+    DEPRECATED 5.10.21
 
+    Endpoint for dealing with all conversations a user is a participant to within a certain context (staff or client)
     """
     @token_auth.login_required
     @responds(api=ns, schema = TelehealthConversationsNestedSchema, status_code=200)
