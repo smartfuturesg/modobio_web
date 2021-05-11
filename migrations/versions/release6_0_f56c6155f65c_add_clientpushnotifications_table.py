@@ -1,7 +1,7 @@
 """Add ClientPushNotifications table
 
 Revision ID: f56c6155f65c
-Revises: 02793bda3302
+Revises: 157f291f1ac8
 Create Date: 2021-03-22 08:22:14.511241
 
 """
@@ -24,7 +24,7 @@ def upgrade():
     sa.Column('idx', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('notification_type_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['notification_type_id'], ['LookupNotifications.notification_type_id'], ),
+    sa.ForeignKeyConstraint(['notification_type_id'], ['LookupNotifications.notification_type_id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['user_id'], ['User.user_id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('idx')
     )

@@ -289,6 +289,9 @@ class TelehealthBookingDetails(db.Model):
 
     __tablename__ = 'TelehealthBookingDetails'
 
+    __table_args__ = (
+        db.UniqueConstraint('booking_id', ),)
+
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     timestamp for when object was created. DB server time is used. 
@@ -320,14 +323,17 @@ class TelehealthBookingDetails(db.Model):
     details = db.Column(db.String)
     """
     client details about a booked teleheath call
+    
     :type: str
+    """
+    
+    location_id = db.Column(db.Integer, db.ForeignKey('LookupTerritoriesofOperation.idx'), nullable=False)
+    """
+    client location id for this booking
+
+    :type: int, foreign key(LookupTerritoriesofOperation.idx)
     """
 
-    media = db.Column(db.String)
-    """
-    aws url link to media saved in S3 bucket (image or recording)
-    :type: str
-    """
 
 class TelehealthChatRooms(db.Model):
     """ 

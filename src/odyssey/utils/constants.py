@@ -835,3 +835,9 @@ DAY_OF_WEEK = ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday
 TWILIO_ACCESS_KEY_TTL = 14400
 
 BOOKINGS_STATUS = ('Completed','On-Going','Accepted','Pending Staff Acceptance','Client Canceled','Staff Canceled' )
+
+#image types allowed for upload
+ALLOWED_IMAGE_TYPES = ('.png', '.jpg', '.jpeg', '.bmp', '.gif', '.webp', '.psd', '.pdf')
+
+#audio types allowed for upload
+ALLOWED_AUDIO_TYPES = ('.m4a', '.caf')

@@ -207,33 +207,35 @@ from werkzeug.datastructures import FileStorage
 rec_file = pathlib.Path(__file__).parent / 'test_m4a_recording.m4a'
 img_file = pathlib.Path(__file__).parent / 'test_img_weirdmole.jpg'
 telehealth_post_booking_details = {
-  'media': (img_file.as_posix() , open(img_file, mode='rb'), 'image/jpg'), 
-  'media': (rec_file.as_posix() , open(rec_file, mode='rb'), 'audio/mp4a-latm'),
-  'details': 'Testing booking details'
+  'images': (img_file.as_posix() , open(img_file, mode='rb'), 'image/jpg'), 
+  'voice': (rec_file.as_posix() , open(rec_file, mode='rb'), 'audio/mp4a-latm'),
+  'details': 'Testing booking details',
+  'location_id': 1
 }
 
 telehealth_put_booking_details = {
   'remove_img_rec':{
-    'media': FileStorage(filename=''),
+    'images': FileStorage(filename=''),
+    'voice': FileStorage(filename=''),
     'details': 'Removed image and recording, kept description',
-    'idx': 1
+    'location_id': 1,
   },
   'swap_img_rec':{
-    'media': (img_file.as_posix() , open(img_file, mode='rb'), 'image/jpg'),
-    'media':(rec_file.as_posix() , open(rec_file, mode='rb'), 'audio/mp4a-latm'),
+    'images': (img_file.as_posix() , open(img_file, mode='rb'), 'image/jpg'),
+    'voice':(rec_file.as_posix() , open(rec_file, mode='rb'), 'audio/mp4a-latm'),
     'details': 'Swapped files, recording is image and image is recording.',
-    'idx': 1
+    'location_id': 1,
   },
   'change_text_only':{
     'details': 'Only changed text details',
-    'idx': 1
+    'location_id': 1,
   },
   'nothing_to_change':{
-
   },
   'empty_booking_details':{
-    'media': FileStorage(filename=''),
+    'images': FileStorage(filename=''),
+    'voice': FileStorage(filename=''),
     'details': '',
-    'idx': 1
+    'location_id': 1,
   }
 }

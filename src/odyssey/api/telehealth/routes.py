@@ -1,3 +1,4 @@
+import os, boto3, secrets, pathlib, io
 
 from flask import request, current_app, g
 from flask_accepts import accepts, responds
@@ -39,14 +40,19 @@ from odyssey.api.telehealth.schemas import (
     TelehealthTimeSelectOutputSchema,
     TelehealthStaffAvailabilityOutputSchema,
     TelehealthBookingDetailsSchema,
+    TelehealthBookingDetailsGetSchema
 ) 
+from odyssey.api.lookup.models import (
+    LookupTerritoriesofOperation
+)
 from odyssey.utils.auth import token_auth
-from odyssey.utils.constants import TWILIO_ACCESS_KEY_TTL, DAY_OF_WEEK
-from odyssey.utils.errors import GenericNotFound, InputError, LoginNotAuthorized, UnauthorizedUser, ContentNotFound
+from odyssey.utils.constants import TWILIO_ACCESS_KEY_TTL, DAY_OF_WEEK, ALLOWED_AUDIO_TYPES, ALLOWED_IMAGE_TYPES
+from odyssey.utils.errors import GenericNotFound, InputError, LoginNotAuthorized, UnauthorizedUser, ContentNotFound, IllegalSetting
 from odyssey.utils.misc import (
     check_client_existence, 
     check_staff_existence,
-    create_conversation, 
+    create_conversation,
+    create_twilio_access_token,
     generate_meeting_room_name,
     get_chatroom,
     grab_twilio_credentials
@@ -94,14 +100,6 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
             meeting_room = TelehealthMeetingRooms(booking_id=booking_id,staff_user_id=booking.staff_user_id, client_user_id=booking.client_user_id)
             meeting_room.room_name = generate_meeting_room_name()
         
-        # Bring up chat room session. Chat rooms are intended to be between a client and staff
-        # member and persist through all telehealth interactions between the two. 
-        # only one chat room will exist between each client-staff pair
-        # If this is the first telehealth interaction between 
-        # the client and staff member, a room will be provisioned. 
-
-        twilio_credentials = grab_twilio_credentials()
-
 
         # Create access token for users to access the Twilio API
         # Add grant for video room access using meeting room name just created
@@ -109,23 +107,16 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
         # TODO: configure meeting room
         # meeting type (group by default), participant limit , callbacks
         
-        token = AccessToken(twilio_credentials['account_sid'], 
-                            twilio_credentials['api_key'], 
-                            twilio_credentials['api_key_secret'],
-                            identity=current_user.modobio_id, 
-                            ttl=TWILIO_ACCESS_KEY_TTL)
-        
-        token.add_grant(VideoGrant(room=meeting_room.room_name))
-        token.add_grant(ChatGrant(service_sid=current_app.config['CONVERSATION_SERVICE_SID']))
-        token_jwt = token.to_jwt()
+        token = create_twilio_access_token(current_user.modobio_id, meeting_room_name=meeting_room.room_name)
+
         if g.user_type == 'staff':
-            meeting_room.staff_access_token = token_jwt
+            meeting_room.staff_access_token = token
         elif g.user_type == 'client':
-            meeting_room.client_access_token = token_jwt
+            meeting_room.client_access_token = token
 
         db.session.add(meeting_room)
         db.session.commit() 
-        return {'twilio_token': token_jwt,
+        return {'twilio_token': token,
                 'conversation_sid': chatroom.conversation_sid}
 
 @ns.route('/client/time-select/<int:user_id>/')
@@ -332,7 +323,7 @@ class TelehealthBookingsApi(Resource):
 
         # make sure the requester is one of the participants
         if not any(current_user.user_id == uid for uid in [client_user_id, staff_user_id]):
-            raise InputError(status_code=403, message='logged in user must be a booking participant')
+            raise InputError(status_code=403, message='Logged in user must be a booking participant')
         
         if not client_user_id and not staff_user_id:
             raise InputError(status_code=405,message='Must include at least one staff or client ID.')
@@ -399,7 +390,7 @@ class TelehealthBookingsApi(Resource):
             bookings = [dict(zip(('booking','conversation_sid', 'client_user'), dat)) for dat in query] 
 
         else:
-            raise InputError(status_code=403, message='logged in user must be a booking participant')
+            raise InputError(status_code=403, message='Logged in user must be a booking participant')
 
         time_inc = LookupBookingTimeIncrements.query.all()
         
@@ -430,21 +421,14 @@ class TelehealthBookingsApi(Resource):
         # Sort bookings by time then sort by date
         bookings_payload.sort(key=lambda t: t['start_time'])
         bookings_payload.sort(key=lambda t: t['target_date'])
-
-        # create twilio access token with chat grant 
-        twilio_credentials = grab_twilio_credentials()
-        token = AccessToken(twilio_credentials['account_sid'], 
-                    twilio_credentials['api_key'], 
-                    twilio_credentials['api_key_secret'],
-                    identity=current_user.modobio_id, 
-                    ttl=TWILIO_ACCESS_KEY_TTL)
         
-        token.add_grant(ChatGrant(service_sid=current_app.config['CONVERSATION_SERVICE_SID']))
+        # create twilio access token with chat grant 
+        token = create_twilio_access_token(current_user.modobio_id)
         
         payload = {
             'all_bookings': len(bookings_payload),
             'bookings': bookings_payload,
-            'twilio_token': token.to_jwt()            
+            'twilio_token': token            
         }
         return payload
 
@@ -521,19 +505,12 @@ class TelehealthBookingsApi(Resource):
         db.session.flush()
 
         # create Twilio conversation and store details in TelehealthChatrooms table
-        conversation = create_conversation(staff_user_id = staff_user_id,
+        conversation_sid = create_conversation(staff_user_id = staff_user_id,
                             client_user_id = client_user_id,
                             booking_id=request.parsed_obj.idx)
 
         # create access token with chat grant for newly provisioned room
-        twilio_credentials = grab_twilio_credentials()
-        token = AccessToken(twilio_credentials['account_sid'], 
-                    twilio_credentials['api_key'], 
-                    twilio_credentials['api_key_secret'],
-                    identity=current_user.modobio_id, 
-                    ttl=TWILIO_ACCESS_KEY_TTL)
-
-        token.add_grant(ChatGrant(service_sid=current_app.config['CONVERSATION_SERVICE_SID']))
+        token = create_twilio_access_token(current_user.modobio_id)
 
         # Once the booking has been successful, delete the client from the queue
         client_in_queue = TelehealthQueueClientPool.query.filter_by(user_id=client_user_id).one_or_none()
@@ -544,11 +521,11 @@ class TelehealthBookingsApi(Resource):
 
         db.session.commit()
 
-        request.parsed_obj.conversation_sid = conversation.sid
+        request.parsed_obj.conversation_sid = conversation_sid
         
         payload = {
             'all_bookings': 1,
-            'twilio_token': token.to_jwt(),
+            'twilio_token': token,
             'bookings':[request.parsed_obj] 
         }
 
@@ -1139,25 +1116,58 @@ class TelehealthBookingDetailsApi(Resource):
     Details may include a text description, images or voice recordings
     """
     @token_auth.login_required
-    @responds(schema=TelehealthBookingDetailsSchema(many=True), api=ns, status_code=200)
+    @responds(schema=TelehealthBookingDetailsGetSchema, api=ns, status_code=200)
     def get(self, booking_id):
         """
         Returns a list of details about the specified booking_id
         """
         #Check booking_id exists
-        accessing_user = token_auth.current_user()[0]
         booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
         if booking is None:
             raise ContentNotFound
+            
         #verify user trying to access details is the client or staff involved in scheulded booking
-        if booking.client_user_id != accessing_user.user_id and booking.staff_user_id != accessing_user.user_id:
-            raise UnauthorizedUser(message='Not part of booking')
+        if booking.client_user_id != token_auth.current_user()[0].user_id \
+            and booking.staff_user_id != token_auth.current_user()[0].user_id:
+
+            raise UnauthorizedUser(message='Only the client or staff member that belong to this booking can view its details')
+
+        res = {'details': None,
+                'images': [],
+                'voice': None}
         
         #if there aren't any details saved for the booking_id, GET will return empty
-        details = TelehealthBookingDetails.query.filter_by(booking_id = booking_id).all()
-        #TODO implement getting presinged link from s3 bucket for each file
+        booking = TelehealthBookingDetails.query.filter_by(booking_id = booking_id).first()
+        if not booking:
+            raise InputError(204, message=f'No details exist for booking id {booking_id}')
+
+        res['details'] = booking.details
+        res['location_id'] = booking.location_id
+        location = LookupTerritoriesofOperation.query.filter_by(idx=booking.location_id).one_or_none()
+        if not location:
+            raise GenericNotFound(f"No location exists with id {location_id}")
+        res['location_name'] = location.country + " " + location.sub_territory
+
+        if not current_app.config['LOCAL_CONFIG']:
+            #retrieve all files associated with this booking id
+            s3prefix = f'meeting_files/id{booking_id:05d}/'
+            s3 = boto3.resource('s3')
+            bucket = s3.Bucket(current_app.config['S3_BUCKET_NAME'])
+
+            params = {
+                'Bucket' : current_app.config['S3_BUCKET_NAME'],
+                'Key' : None
+            }
+
+            for media in bucket.objects.filter(Prefix=s3prefix):
+                params['Key'] = media.key
+                url = boto3.client('s3').generate_presigned_url('get_object', Params=params, ExpiresIn=3600)
+                if 'voice' in media.key:
+                    res['voice'] = url
+                else:
+                    res['images'] = res['images'] + [url]
         
-        return details
+        return res
     
     @token_auth.login_required()
     @responds(schema=TelehealthBookingDetailsSchema, api=ns, status_code=200)
@@ -1167,44 +1177,124 @@ class TelehealthBookingDetailsApi(Resource):
         Edits one file for another, or can edit text details
 
         Expects form_data: (will ignore anything else)
-            idx:(required) int : TelehealthBookingDetails idx
-            media(optional) : file**
-            **(It will not break if multiple files are sent, but only one will be handled)
-            details(optional) : str
+            image: [files] (list of image files, up to 3 can be sent)
+            voice: file (one sound file can be sent)
+            details: string
+
+            (optional) : str
         """
-        #Validate index is an int and not a zero
-        idx = request.form.get('idx', default=0)
-        try: idx = int(idx)
-        except ValueError: idx = 0
-
-        if idx <= 0:
-            raise InputError(204, 'Invalid index')
-
         #verify the editor of details is the client or staff from schedulded booking
-        editor = token_auth.current_user()[0]
         booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
-        if not booking:
-            raise ContentNotFound
-        if booking.client_user_id != editor.user_id and booking.staff_user_id != editor.user_id:
-            raise UnauthorizedUser(message='Not part of booking')
+
+        #only the client involved with the booking should be allowed to edit details
+        if not booking or booking.client_user_id != token_auth.current_user()[0].user_id:
+            raise UnauthorizedUser(message='Only the client of this booking is allowed to edit details')
         
-        #verify the booking_id and idx combination return a query result
-        query = TelehealthBookingDetails.query.filter_by(booking_id=booking_id, idx=idx).one_or_none()
+        #verify the booking_id returns a query result
+        query = TelehealthBookingDetails.query.filter_by(booking_id=booking_id).one_or_none()
         if not query:
             raise ContentNotFound
 
+        files = request.files #ImmutableMultiDict of key : FileStorage object
+
+        #verify there's something to submit, if nothing, raise input error
+        if (not request.form.get('details') and len(files) == 0 and not request.form.get('location_id')):
+            raise InputError(204, message='Nothing to submit')
+
         #if 'details' is present in form, details will be updated to new string value of details
         #if 'details' is not present, details will not be affected
-        if type(request.form.get('details')) == str :
-            details = request.form.get('details')
-            query.details = details
+        if request.form.get('details'):
+            query.details = request.form.get('details')
 
-        #if 'media' is not present, no changes will be made to the current media file
-        #if 'media' is present, but empty, the current media file will be removed
-        #TODO implement editing file in s3 bucket
-        if request.files:
-            media_file = request.files.get('media')
-            query.media = media_file.filename
+        #if 'location_id' is present in form, location_id will be updated to new value
+        #if 'location_id' is not present, location_id will not be affected
+        location_id = request.form.get('location_id')
+        if location_id:
+            #verify that location id is an int
+            #it is provided as a string, so we try to cast as an int to verify
+            try:
+                int(location_id)
+            except:
+                raise InputError(422, "Location id must be an integer")
+
+            location = LookupTerritoriesofOperation.query.filter_by(idx=location_id).one_or_none()
+            if not location:
+                raise GenericNotFound(f"No location exists with id {location_id}")
+            query.location_id = location_id
+
+        if not current_app.config['LOCAL_CONFIG']:
+            #if 'images' and 'voice' are both not present, no changes will be made to the current media file
+            #if 'images' or 'voice' are present, but empty, the current media file(s) for that category will be removed        
+            if files:
+                s3 = boto3.resource('s3')
+                bucket = s3.Bucket(current_app.config['S3_BUCKET_NAME'])
+
+                #used to locate and remove existing files is necessary
+                params = {
+                    'Bucket': current_app.config['S3_BUCKET_NAME'],
+                    'Key': None
+                }
+        
+                #if images key is present, delete existing images
+                if 'images' in files:
+                    bucket.objects.filter(Prefix=f'meeting_files/id{booking_id:05d}/image').delete()
+
+                #if voice key is present, delete existing recording
+                if 'voice' in files:
+                    bucket.objects.filter(Prefix=f'meeting_files/id{booking_id:05d}/voice').delete()                     
+
+                MAX_bytes = 524288000 #500 mb
+                hex_token = secrets.token_hex(4)
+
+                #add each image supplied to s3 bucket for this meeting
+                for i, img in enumerate(files.getlist('images')):
+                    #Verifying image size is within a safe threashold (MAX = 500 mb)
+                    img.seek(0, os.SEEK_END)
+                    img_size = img.tell()
+                    if img_size > MAX_bytes:
+                        raise InputError(413, 'File too large')
+
+                    #ensure this is not an empty file
+                    if img_size > 0:
+                        #Rename image (format: 4digitRandomHex_index.img_extension) AND Save=>S3 
+                        img_extension = pathlib.Path(img.filename).suffix
+                        if img_extension not in ALLOWED_IMAGE_TYPES:
+                            raise InputError(422, f'{img_extension} is not an allowed file type. Allowed types are {ALLOWED_IMAGE_TYPES}')
+
+                        img.seek(0)
+
+                        s3key = f'meeting_files/id{booking_id:05d}/image_{hex_token}_{i}{img_extension}'
+                        bucket.put_object(Key= s3key, Body=img.stream)
+
+                    #exit loop if this is the 4th picture, as that is the max allowed
+                    #setup this way to allow us to easily change the allowed number in the future
+                    if i >= 3:
+                        break
+
+                #upload new voice file to S3
+                for i, recording in enumerate(files.getlist('voice')):
+                    #Verifying recording size is within a safe threashold (MAX = 500 mb)
+                    recording.seek(0, os.SEEK_END)
+                    recording_size = recording.tell()
+                    if recording_size > MAX_bytes:
+                        raise InputError(413, 'File too large')
+
+                    #ensure this is not an empty file
+                    if recording_size > 0:
+                        #Rename voice (format: voice_4digitRandomHex_index.img_extension) AND Save=>S3 
+                        recording_extension = pathlib.Path(recording.filename).suffix
+                        if recording_extension not in ALLOWED_AUDIO_TYPES:
+                            raise InputError(422, f'{recording_extension} is not an allowed file type. Allowed types are {ALLOWED_AUDIO_TYPES}')
+
+                        recording.seek(0)
+
+                        s3key = f'meeting_files/id{booking_id:05d}/voice_{hex_token}_{i}{recording_extension}'
+                        bucket.put_object(Key= s3key, Body=recording.stream) 
+
+                    #exit loop if this is the 1st recording, as that is the max allowed
+                    #setup this way to allow us to easily change the allowed number in the future
+                    if i >= 3:
+                        break  
 
         db.session.commit()
         return query
@@ -1218,72 +1308,150 @@ class TelehealthBookingDetailsApi(Resource):
         Accepts multiple image or voice recording files
 
         Expects form-data (will ignore anything else)
-            media : file(s)
+            images : file(s) list of image files, up to 4
+            voice : file
             details : str
+            location_id (required) : id of the location the client is in
         """
-        files = request.files
         form = request.form
-        reporter = token_auth.current_user()[0]
+        files = request.files
+
         #Check booking_id exists
         booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
         if not booking:
             raise ContentNotFound
 
-        #verify the reporter of details is the client or staff from scheulded booking
-        if booking.client_user_id != reporter.user_id and booking.staff_user_id != reporter.user_id:
-            raise UnauthorizedUser(message='Not part of booking')
-        
+        details = TelehealthBookingDetails.query.filter_by(booking_id=booking_id).one_or_none()
+        if details:
+            raise IllegalSetting(message=f"Details for booking_id {booking_id} already exists. Please use PUT method")
+
+        #only the client involved with the booking should be allowed to edit details
+        if booking.client_user_id != token_auth.current_user()[0].user_id:
+            raise UnauthorizedUser(message='Only the client of this booking is allowed to edit details')
+
         #verify there's something to submit, if nothing, raise input error
-        if (not form or not form.get('details')) and (not files or not files.get('media')):
-            raise InputError(400, message='Nothing to submit')
+        if (not form.get('details') and not form.get('location_id') and not files):
+            raise InputError(204, message='Nothing to submit')
         
         payload = []
         data = TelehealthBookingDetails()
-        #When no files (image or recording) are sent but we get written details add one entry to db 
-        if not files or not files.get('media'):
-            data.details = form.get('details')
-            data.booking_id = booking_id
-            payload.append(data)
 
-        #Saving one media file per entry into db
-        else:
-            media = files.getlist('media')
-            for media_file in media:
-                #bucket_name = current_app.config['S3_BUCKET_NAME']
-                #TODO upload media files to S3 bucket
-                data = TelehealthBookingDetails()
-                data.details = form.get('details')
-                data.booking_id = booking_id
-                data.media = media_file.filename
-                payload.append(data)
+        if form.get('details'):
+            data.details = form.get('details')
+
+        data.booking_id = booking_id
+
+        #verify that location id is an int
+        #it is provided as a string, so we try to cast as an int to verify
+        location_id = form.get('location_id')
+        try:
+            int(location_id)
+        except:
+            raise InputError(422, "Location id must be an integer")
+
+        location = LookupTerritoriesofOperation.query.filter_by(idx=location_id).one_or_none()
+        if not location:
+            raise GenericNotFound(f"No location exists with id {location_id}")
+
+        data.location_id = location_id
+        
+        payload.append(data)
+
+        if not current_app.config['LOCAL_CONFIG']:
+            #Saving media files into s3
+            if files:
+                MAX_bytes = 524288000 #500 mb
+                data_list = []
+                hex_token = secrets.token_hex(4)
+
+                s3 = boto3.resource('s3')
+                bucket = s3.Bucket(current_app.config['S3_BUCKET_NAME'])
+            
+                #upload images from request to s3
+                for i, img in enumerate(files.getlist('images')):
+                    #Verifying image size is within a safe threashold (MAX = 500 mb)
+                    img.seek(0, os.SEEK_END)
+                    img_size = img.tell()
+                    if img_size > MAX_bytes:
+                        raise InputError(413, 'File too large')
+
+                    #ensure this is not an empty file
+                    if img_size > 0:
+                        #Rename image (format: 4digitRandomHex_index.img_extension) AND Save=>S3 
+                        img_extension = pathlib.Path(img.filename).suffix
+                        if img_extension not in ALLOWED_IMAGE_TYPES:
+                            raise InputError(422, f'{img_extension} is not an allowed file type. Allowed types are {ALLOWED_IMAGE_TYPES}')
+
+                        img.seek(0)
+
+                        s3key = f'meeting_files/id{booking_id:05d}/image_{hex_token}_{i}{img_extension}'
+                        bucket.put_object(Key= s3key, Body=img.stream)
+
+                    #exit loop if this is the 4th picture, as that is the max allowed
+                    #setup this way to allow us to easily change the allowed number in the future
+                    if i >= 3:
+                        break
+
+                #upload voice recording from request to S3
+                for i, recording in enumerate(files.getlist('voice')):
+                    #Verifying recording size is within a safe threashold (MAX = 500 mb)
+                    recording.seek(0, os.SEEK_END)
+                    recording_size = recording.tell()
+                    if recording_size > MAX_bytes:
+                        raise InputError(413, 'File too large')
+
+                    #ensure this is not an empty file
+                    if recording_size > 0:
+                        #Rename voice (format: voice_4digitRandomHex_index.img_extension) AND Save=>S3 
+                        recording_extension = pathlib.Path(recording.filename).suffix
+                        if recording_extension not in ALLOWED_AUDIO_TYPES:
+                            raise InputError(422, f'{recording_extension} is not an allowed file type. Allowed types are {ALLOWED_AUDIO_TYPES}')
+
+                        recording.seek(0)
+
+                        s3key = f'meeting_files/id{booking_id:05d}/voice_{hex_token}_{i}{recording_extension}'
+                        bucket.put_object(Key= s3key, Body=recording.stream)
+
+                    #exit loop if this is the 1st recording, as that is the max allowed
+                    #setup this way to allow us to easily change the allowed number in the future
+                    if i >= 1:
+                        break 
 
         db.session.add_all(payload)
         db.session.commit()
         return payload
 
     @token_auth.login_required
+    @responds(status_code=204)
     def delete(self, booking_id):
         """
         Deletes all booking details entries from db
         """
-        #verify the editor of details is the client or staff from scheulded booking
-        editor = token_auth.current_user()[0]
+        #only the client involved with the booking should be allowed to edit details
         booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
-        if booking is not None and booking.client_user_id != editor.user_id and booking.staff_user_id != editor.user_id:
-            raise UnauthorizedUser(message='Not part of booking')
+        if booking is not None and booking.client_user_id != token_auth.current_user()[0].user_id:
+            raise UnauthorizedUser(message='Only the client of this booking is allowed to edit details')
         
-        #TODO delete files from S3 bucket
-        details = TelehealthBookingDetails.query.filter_by(booking_id=booking_id).all()
-        for entry in details:
-            db.session.delete(entry)
+        details = TelehealthBookingDetails.query.filter_by(booking_id=booking_id).one_or_none()
+        if not details:
+            raise GenericNotFound(f"No booking details exist for booking id {booking_id}")
+
+        db.session.delete(details)
         db.session.commit()
-        return f'Deleted all details for booking_id {booking_id}', 200
+
+        if not current_app.config['LOCAL_CONFIG']:
+            #delete s3 resources for this booking id
+            s3 = boto3.resource('s3')
+            bucket = s3.Bucket(current_app.config['S3_BUCKET_NAME'])
+            bucket.objects.filter(Prefix=f'meeting_files/id{booking_id:05d}/').delete()
 
 @ns.route('/chat-room/access-token')
 @ns.doc(params={'client_user_id': 'Required. user_id of client participant.',
                'staff_user_id': 'Required. user_id of staff participant'})
 class TelehealthChatRoomApi(Resource):
     """
+    DEPRECATED 5.10.21
+
     Creates an access token for the chat room between one staff and one client user.
     Chat rooms persist through the full history of the two users so the chat history (transcript)
     will be preserved by Twilio.  
@@ -1343,8 +1511,9 @@ class TelehealthChatRoomApi(Resource):
 @ns.doc(params={'user_id': 'User ID number'})
 class TelehealthAllChatRoomApi(Resource):
     """
-    Endpoint for dealing with all conversations a user is a participant to within a certain context (staff or client)
+    DEPRECATED 5.10.21
 
+    Endpoint for dealing with all conversations a user is a participant to within a certain context (staff or client)
     """
     @token_auth.login_required
     @responds(api=ns, schema = TelehealthConversationsNestedSchema, status_code=200)
