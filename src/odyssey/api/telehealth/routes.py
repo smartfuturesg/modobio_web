@@ -1150,14 +1150,15 @@ class TelehealthBookingDetailsApi(Resource):
         Returns a list of details about the specified booking_id
         """
         #Check booking_id exists
-        accessing_user = token_auth.current_user()[0]
         booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
         if booking is None:
             raise ContentNotFound
             
         #verify user trying to access details is the client or staff involved in scheulded booking
-        if booking.client_user_id != accessing_user.user_id and booking.staff_user_id != accessing_user.user_id:
-            raise UnauthorizedUser(message='Not part of booking')
+        if booking.client_user_id != token_auth.current_user()[0].user_id \
+            and booking.staff_user_id != token_auth.current_user()[0].user_id:
+
+            raise UnauthorizedUser(message='Only the client or staff member that belong to this booking can view its details')
 
         res = {'details': None,
                 'images': [],
@@ -1209,13 +1210,14 @@ class TelehealthBookingDetailsApi(Resource):
             (optional) : str
         """
         #verify the editor of details is the client or staff from schedulded booking
-        editor = token_auth.current_user()[0]
         booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
         idx = request.form.get('idx')
         if not booking or not idx:
             raise ContentNotFound
-        if booking.client_user_id != editor.user_id and booking.staff_user_id != editor.user_id:
-            raise UnauthorizedUser(message='Not part of booking')
+
+        #only the client involved with the booking should be allowed to edit details
+        if booking.client_user_id != token_auth.current_user()[0].user_id:
+            raise UnauthorizedUser(message='Only the client of this booking is allowed to edit details')
         
         #verify the booking_id and idx combination return a query result
         query = TelehealthBookingDetails.query.filter_by(booking_id=booking_id, idx=idx).one_or_none()
@@ -1270,16 +1272,19 @@ class TelehealthBookingDetailsApi(Resource):
                     if img_size > MAX_bytes:
                         raise InputError(413, 'File too large')
 
+                    #ensure this is not an empty file
                     if img_size > 0:
-                        #when user is trying to remove files (images key is present but no files are),
-                        #we have to check and skip the rest of the loop to avoid a 0 byte file upload
-
                         #Rename image (format: 4digitRandomHex_index.img_extension) AND Save=>S3 
                         img_extension = pathlib.Path(img.filename).suffix
                         img.seek(0)
 
                         s3key = f'meeting_files/id{booking_id:05d}/image_{hex_token}_{i}{img_extension}'
                         bucket.put_object(Key= s3key, Body=img.stream)
+
+                    #exit loop if this is the 4th picture, as that is the max allowed
+                    #setup this way to allow us to easily change the allowed number in the future
+                    if i >= 3:
+                        break
 
                 #upload new voice file to S3
                 for i, recording in enumerate(files.getlist('voice')):
@@ -1289,16 +1294,19 @@ class TelehealthBookingDetailsApi(Resource):
                     if recording_size > MAX_bytes:
                         raise InputError(413, 'File too large')
 
+                    #ensure this is not an empty file
                     if recording_size > 0:
-                        #when user is trying to remove files (images key is present but no files are),
-                        #we have to check and skip the rest of the loop to avoid a 0 byte file upload
-
                         #Rename voice (format: voice_4digitRandomHex_index.img_extension) AND Save=>S3 
                         recording_extension = pathlib.Path(recording.filename).suffix
                         recording.seek(0)
 
-                        s3key = f'meeting_files/id{booking_id:05d}/voice_{hex_token}_{recording_extension}'
-                        bucket.put_object(Key= s3key, Body=recording.stream)   
+                        s3key = f'meeting_files/id{booking_id:05d}/voice_{hex_token}_{i}{recording_extension}'
+                        bucket.put_object(Key= s3key, Body=recording.stream) 
+
+                    #exit loop if this is the 1st recording, as that is the max allowed
+                    #setup this way to allow us to easily change the allowed number in the future
+                    if i >= 3:
+                        break  
 
         db.session.commit()
         return query
@@ -1318,7 +1326,7 @@ class TelehealthBookingDetailsApi(Resource):
         """
         form = request.form
         files = request.files
-        reporter = token_auth.current_user()[0]
+
         #Check booking_id exists
         booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
         if not booking:
@@ -1328,9 +1336,9 @@ class TelehealthBookingDetailsApi(Resource):
         if details:
             raise IllegalSetting(message=f"Details for booking_id {booking_id} already exists. Please use PUT method")
 
-        #verify the reporter of details is the client or staff from scheulded booking
-        if booking.client_user_id != reporter.user_id and booking.staff_user_id != reporter.user_id:
-            raise UnauthorizedUser(message='Not part of booking')
+        #only the client involved with the booking should be allowed to edit details
+        if booking.client_user_id != token_auth.current_user()[0].user_id:
+            raise UnauthorizedUser(message='Only the client of this booking is allowed to edit details')
 
         #verify there's something to submit, if nothing, raise input error
         if (not form.get('details') and not form.get('location_id') and not files):
@@ -1364,12 +1372,19 @@ class TelehealthBookingDetailsApi(Resource):
                     if img_size > MAX_bytes:
                         raise InputError(413, 'File too large')
 
-                    #Rename image (format: 4digitRandomHex_index.img_extension) AND Save=>S3 
-                    img_extension = pathlib.Path(img.filename).suffix
-                    img.seek(0)
+                    #ensure this is not an empty file
+                    if img_size > 0:
+                        #Rename image (format: 4digitRandomHex_index.img_extension) AND Save=>S3 
+                        img_extension = pathlib.Path(img.filename).suffix
+                        img.seek(0)
 
-                    s3key = f'meeting_files/id{booking_id:05d}/image_{hex_token}_{i}{img_extension}'
-                    bucket.put_object(Key= s3key, Body=img.stream)           
+                        s3key = f'meeting_files/id{booking_id:05d}/image_{hex_token}_{i}{img_extension}'
+                        bucket.put_object(Key= s3key, Body=img.stream)
+
+                    #exit loop if this is the 4th picture, as that is the max allowed
+                    #setup this way to allow us to easily change the allowed number in the future
+                    if i >= 3:
+                        break
 
                 #upload voice recording from request to S3
                 for i, recording in enumerate(files.getlist('voice')):
@@ -1379,12 +1394,19 @@ class TelehealthBookingDetailsApi(Resource):
                     if recording_size > MAX_bytes:
                         raise InputError(413, 'File too large')
 
-                    #Rename voice (format: voice_4digitRandomHex_index.img_extension) AND Save=>S3 
-                    recording_extension = pathlib.Path(recording.filename).suffix
-                    recording.seek(0)
+                    #ensure this is not an empty file
+                    if recording_size > 0:
+                        #Rename voice (format: voice_4digitRandomHex_index.img_extension) AND Save=>S3 
+                        recording_extension = pathlib.Path(recording.filename).suffix
+                        recording.seek(0)
 
-                    s3key = f'meeting_files/id{booking_id:05d}/voice_{hex_token}{recording_extension}'
-                    bucket.put_object(Key= s3key, Body=recording.stream)    
+                        s3key = f'meeting_files/id{booking_id:05d}/voice_{hex_token}_{i}{recording_extension}'
+                        bucket.put_object(Key= s3key, Body=recording.stream)
+
+                    #exit loop if this is the 1st recording, as that is the max allowed
+                    #setup this way to allow us to easily change the allowed number in the future
+                    if i >= 1:
+                        break 
 
         db.session.add_all(payload)
         db.session.commit()
@@ -1396,11 +1418,10 @@ class TelehealthBookingDetailsApi(Resource):
         """
         Deletes all booking details entries from db
         """
-        #verify the editor of details is the client or staff from scheulded booking
-        editor = token_auth.current_user()[0]
+        #only the client involved with the booking should be allowed to edit details
         booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
-        if booking is not None and booking.client_user_id != editor.user_id and booking.staff_user_id != editor.user_id:
-            raise UnauthorizedUser(message='Not part of booking')
+        if booking is not None and booking.client_user_id != token_auth.current_user()[0].user_id:
+            raise UnauthorizedUser(message='Only the client of this booking is allowed to edit details')
         
         details = TelehealthBookingDetails.query.filter_by(booking_id=booking_id).one_or_none()
         if not details:
