@@ -46,7 +46,7 @@ from odyssey.api.lookup.models import (
     LookupTerritoriesofOperation
 )
 from odyssey.utils.auth import token_auth
-from odyssey.utils.constants import TWILIO_ACCESS_KEY_TTL, DAY_OF_WEEK
+from odyssey.utils.constants import TWILIO_ACCESS_KEY_TTL, DAY_OF_WEEK, ALLOWED_AUDIO_TYPES, ALLOWED_IMAGE_TYPES
 from odyssey.utils.errors import GenericNotFound, InputError, LoginNotAuthorized, UnauthorizedUser, ContentNotFound, IllegalSetting
 from odyssey.utils.misc import (
     check_client_existence, 
@@ -1286,6 +1286,9 @@ class TelehealthBookingDetailsApi(Resource):
                     if img_size > 0:
                         #Rename image (format: 4digitRandomHex_index.img_extension) AND Save=>S3 
                         img_extension = pathlib.Path(img.filename).suffix
+                        if img_extension not in ALLOWED_IMAGE_TYPES:
+                            raise InputError(422, f'{img_extension} is not an allowed file type. Allowed types are {ALLOWED_IMAGE_TYPES}')
+
                         img.seek(0)
 
                         s3key = f'meeting_files/id{booking_id:05d}/image_{hex_token}_{i}{img_extension}'
@@ -1308,6 +1311,9 @@ class TelehealthBookingDetailsApi(Resource):
                     if recording_size > 0:
                         #Rename voice (format: voice_4digitRandomHex_index.img_extension) AND Save=>S3 
                         recording_extension = pathlib.Path(recording.filename).suffix
+                        if recording_extension not in ALLOWED_AUDIO_TYPES:
+                            raise InputError(422, f'{recording_extension} is not an allowed file type. Allowed types are {ALLOWED_AUDIO_TYPES}')
+
                         recording.seek(0)
 
                         s3key = f'meeting_files/id{booking_id:05d}/voice_{hex_token}_{i}{recording_extension}'
@@ -1330,9 +1336,10 @@ class TelehealthBookingDetailsApi(Resource):
         Accepts multiple image or voice recording files
 
         Expects form-data (will ignore anything else)
-            images : file(s) list of image files, up to 3
+            images : file(s) list of image files, up to 4
             voice : file
             details : str
+            location_id (required) : id of the location the client is in
         """
         form = request.form
         files = request.files
@@ -1400,6 +1407,9 @@ class TelehealthBookingDetailsApi(Resource):
                     if img_size > 0:
                         #Rename image (format: 4digitRandomHex_index.img_extension) AND Save=>S3 
                         img_extension = pathlib.Path(img.filename).suffix
+                        if img_extension not in ALLOWED_IMAGE_TYPES:
+                            raise InputError(422, f'{img_extension} is not an allowed file type. Allowed types are {ALLOWED_IMAGE_TYPES}')
+
                         img.seek(0)
 
                         s3key = f'meeting_files/id{booking_id:05d}/image_{hex_token}_{i}{img_extension}'
@@ -1422,6 +1432,9 @@ class TelehealthBookingDetailsApi(Resource):
                     if recording_size > 0:
                         #Rename voice (format: voice_4digitRandomHex_index.img_extension) AND Save=>S3 
                         recording_extension = pathlib.Path(recording.filename).suffix
+                        if recording_extension not in ALLOWED_AUDIO_TYPES:
+                            raise InputError(422, f'{recording_extension} is not an allowed file type. Allowed types are {ALLOWED_AUDIO_TYPES}')
+
                         recording.seek(0)
 
                         s3key = f'meeting_files/id{booking_id:05d}/voice_{hex_token}_{i}{recording_extension}'
