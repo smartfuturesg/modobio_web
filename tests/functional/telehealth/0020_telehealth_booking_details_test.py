@@ -45,7 +45,7 @@ def test_post_booking_details(test_client, init_database, client_auth_header):
     booking_id = booking.idx
     payload = telehealth_post_booking_details
     
-    #add booking details as staff to existing booking_id
+    #add booking details as to existing booking_id
     response = test_client.post(f'/telehealth/bookings/details/{booking_id}', headers=client_auth_header,  data=payload)
     assert response.status_code == 201
 

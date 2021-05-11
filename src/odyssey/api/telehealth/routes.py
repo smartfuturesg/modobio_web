@@ -1238,8 +1238,11 @@ class TelehealthBookingDetailsApi(Resource):
         #if 'location_id' is not present, location_id will not be affected
         location_id = request.form.get('location_id')
         if location_id:
-            if location_id == None or not isinstance(location_id, int):
-                #if location_id key was provided with no data, throw an error
+            #verify that location id is an int
+            #it is provided as a string, so we try to cast as an int to verify
+            try:
+                int(location_id)
+            except:
                 raise InputError(422, "Location id must be an integer")
 
             location = LookupTerritoriesofOperation.query.filter_by(idx=location_id).one_or_none()
@@ -1358,11 +1361,13 @@ class TelehealthBookingDetailsApi(Resource):
             data.details = form.get('details')
 
         data.booking_id = booking_id
-        location_id = form.get('location_id')
-        if not location_id or location_id == None:
-            raise InputError(422, "Location id must be provided")
 
-        if not isinstance(location_id, int):
+        #verify that location id is an int
+        #it is provided as a string, so we try to cast as an int to verify
+        location_id = form.get('location_id')
+        try:
+            int(location_id)
+        except:
             raise InputError(422, "Location id must be an integer")
 
         location = LookupTerritoriesofOperation.query.filter_by(idx=location_id).one_or_none()

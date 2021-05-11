@@ -85,7 +85,7 @@ class InputError(Exception):
         status_code -- Common status code for specific error
         message -- explanation of the error
     """
-    def __init__(self, status_code, message):
+    def __init__(self, status_code=None, message=None):
         super().__init__()
         if message:
             self.message = message
