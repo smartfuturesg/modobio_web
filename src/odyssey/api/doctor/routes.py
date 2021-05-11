@@ -808,13 +808,12 @@ class MedicalFamilyHist(Resource):
         # the data expected for the backend is:
         # parameter: user_id 
         # payload: medical_condition_id, myself, father, mother, brother, sister
-        for result in request.parsed_obj['conditions']:
+        for idx,result in enumerate(request.parsed_obj['conditions']):
             check_medical_condition_existence(result.medical_condition_id)
             user_and_medcon = MedicalFamilyHistory.query.filter_by(user_id=user_id).filter_by(medical_condition_id=result.medical_condition_id).one_or_none()
-            
             if user_and_medcon:
                 # raise ContentNotFound()
-                user_and_medcon.update(result.__dict__)
+                user_and_medcon.update(request.json['conditions'][idx])
             else:
                 result.user_id = user_id
                 db.session.add(result)

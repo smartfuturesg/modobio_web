@@ -12,6 +12,8 @@ import flask.json
 from sqlalchemy import select
 from twilio.base.exceptions import TwilioRestException
 from twilio.rest import Client
+from twilio.jwt.access_token import AccessToken
+from twilio.jwt.access_token.grants import ChatGrant, VideoGrant
 
 from odyssey import db
 from odyssey.api.lookup.models import LookupDrinks
@@ -21,7 +23,7 @@ from odyssey.api.facility.models import RegisteredFacilities
 from odyssey.api.staff.models import StaffProfile
 from odyssey.api.telehealth.models import TelehealthChatRooms
 from odyssey.api.user.models import User, UserTokenHistory
-from odyssey.utils.constants import ALPHANUMERIC
+from odyssey.utils.constants import ALPHANUMERIC, TWILIO_ACCESS_KEY_TTL
 from odyssey.utils.errors import (
     ClientNotFound, 
     FacilityNotFound, 
@@ -142,6 +144,15 @@ def create_conversation(staff_user_id, client_user_id, booking_id):
     """
     Provision a Twilio conversation between the staff and client users
     """
+    new_chat_room = TelehealthChatRooms(
+        staff_user_id=staff_user_id,
+        client_user_id=client_user_id,
+        booking_id = booking_id)
+
+    # skip twilio in testing
+    if current_app.config['TESTING']:
+        db.session.add(new_chat_room)
+        return None
     # bring up twilio client
     twilio_credentials = grab_twilio_credentials()
     client = Client(twilio_credentials['api_key'], 
@@ -163,16 +174,10 @@ def create_conversation(staff_user_id, client_user_id, booking_id):
         conversation.participants.create(identity=modobio_id)
 
     # create chatroom entry into DB
-    new_chat_room = TelehealthChatRooms(
-        staff_user_id=staff_user_id,
-        client_user_id=client_user_id,
-        room_name = room_name,
-        conversation_sid = conversation.sid,
-        booking_id = booking_id)
-    
+    new_chat_room.conversation_sid = conversation.sid
     db.session.add(new_chat_room)
 
-    return conversation
+    return conversation.sid
     
 
 def get_chatroom(staff_user_id, client_user_id, participant_modobio_id, create_new=False):
@@ -230,6 +235,26 @@ def get_chatroom(staff_user_id, client_user_id, participant_modobio_id, create_n
     
     db.session.commit()
     return conversation
+
+def create_twilio_access_token(modobio_id, meeting_room_name=None):
+    """
+    Generate a twilio access token for the provided modobio_id
+    """
+    if not current_app.config['TESTING']:
+        twilio_credentials = grab_twilio_credentials()
+        token = AccessToken(twilio_credentials['account_sid'], 
+                        twilio_credentials['api_key'], 
+                        twilio_credentials['api_key_secret'],
+                        identity=modobio_id, 
+                        ttl=TWILIO_ACCESS_KEY_TTL)
+
+        token.add_grant(ChatGrant(service_sid=current_app.config['CONVERSATION_SERVICE_SID']))
+        if meeting_room_name:
+            token.add_grant(VideoGrant(room=meeting_room_name))
+    else:
+        return None
+
+    return token.to_jwt()
 
 class JSONEncoder(flask.json.JSONEncoder):
     """ Converts :class:`datetime.datetime`, :class:`datetime.date`,
