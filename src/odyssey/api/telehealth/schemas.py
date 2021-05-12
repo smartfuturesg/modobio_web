@@ -129,7 +129,7 @@ class TelehealthBookingDetailsSchema(ma.SQLAlchemyAutoSchema):
         include_fk = True
 
 class TelehealthBookingDetailsGetSchema(Schema):
-    details = fields.Nested(TelehealthBookingDetailsSchema)
+    details = fields.String()
     location_id = fields.Integer()
     location_name = fields.String()
     images = fields.String(many=True)
