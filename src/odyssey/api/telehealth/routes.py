@@ -1140,7 +1140,6 @@ class TelehealthBookingDetailsApi(Resource):
         booking = TelehealthBookingDetails.query.filter_by(booking_id = booking_id).first()
         if not booking:
             raise InputError(204, message=f'No details exist for booking id {booking_id}')
-
         res['details'] = booking.details
         res['location_id'] = booking.location_id
         location = LookupTerritoriesofOperation.query.filter_by(idx=booking.location_id).one_or_none()
