@@ -64,6 +64,13 @@ class StaffProfile(db.Model):
     :type: string
     """
 
+    profile_picture = db.Column(db.String)
+    """
+    Profile picture for this staff member. Stored as an aws s3 key which can be retrieved when needed.
+
+    :type: string
+    """
+
 class StaffRecentClients(db.Model):
     """this table stores the last 10 clients that a staff member has loaded"""
 

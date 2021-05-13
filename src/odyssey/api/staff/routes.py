@@ -1,3 +1,4 @@
+import os, boto3, secrets, pathlib
 
 from flask import request
 from flask_accepts import accepts, responds
@@ -9,6 +10,8 @@ from odyssey.api.staff.models import StaffOperationalTerritories, StaffRoles, St
 from odyssey.api.user.models import User, UserLogin, UserTokenHistory
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.errors import UnauthorizedUser, StaffEmailInUse
+from odyssey.utils.misc import check_staff_existence
+from odyssey.utils.constants import ALLOWED_IMAGE_TYPES
 from odyssey.api.user.schemas import UserSchema, StaffInfoSchema
 from odyssey.api.staff.schemas import (
     StaffOperationalTerritoriesNestedSchema,
@@ -272,3 +275,134 @@ class StaffToken(Resource):
         """
         return '', 200
 
+@ns.route('/profile/<int:user_id>/')
+class StaffProfilePage(Resource):
+    """endpoint related staff members' profile pages"""
+
+    @token_auth.login_required
+    def get(self, user_id):
+        """get details for a staff member's profile page"""
+
+        #ensure this user id is for a valid staff member
+        check_staff_existence(user_id)
+
+        user = User.query.filter_by(user_id=user_id).one_or_none()
+
+        res = {
+            'firstname': user.firstname,
+            'middlename': user.middlename,
+            'lastname': user.lastname,
+            'biological_sex_male': user.biological_sex_male
+        }
+
+        #as long as a staff member exists(checked above), they have a profile 
+        #because it is made for them when the staff user is created
+        profile = StaffProfile.query.filter_by(user_id=user_id).one_or_none()
+
+        res['bio'] = profile.bio
+
+        #get presigned link to this user's profile picture
+        if not current_app.config['LOCAL_CONFIG']:
+            s3key = profile.profile_picture
+            s3 = boto3.resource('s3')
+            params = {
+                'Bucket' : current_app.config['S3_BUCKET_NAME'],
+                'Key' : s3key
+            }
+
+            url = boto3.client('s3').generate_presigned_url('get_object', Params=params, ExpiresIn=3600)
+            
+            res['profile_picture'] = url
+
+        return res
+
+    @token_auth.login_required(user_type=('staff_self',))
+    def put(self, user_id):
+        """Edit details for a staff member's profile page. 
+        
+        Expects form data
+
+        "firstname": "string"
+        "middlename": "string",
+        "lastname": "string",
+        "biological_sex_male": "boolean",
+        "bio": "string",
+        "profile_picture": file (allowed types are '.png', '.jpg', '.jpeg', '.bmp', '.gif', '.webp', '.psd', '.pdf')
+        """
+
+        #ensure this user id is for a valid staff member
+        check_staff_existence(user_id)
+
+        user = User.query.filter_by(user_id=user_id).one_or_none()
+        profile = StaffProfile.query.filter_by(user_id=user_id).one_or_none()
+
+        user_update = {}
+
+        for key in request.form:
+            if key == 'bio':
+                profile.bio = request.form.get('bio')
+            else:
+                data = request.form.get(key)
+                if key == 'biological_sex_male':
+                    try:
+                        #check that this value can be cast to a bool, if not, raise an error
+                        data = bool(data)
+                    except:
+                        raise InputError(422, f'{key} must be a boolean')
+
+                user_update[key] = data
+
+        #get profile picture and store in s3
+        if not current_app.config['LOCAL_CONFIG']:
+            if 'profile_picture' in request.files:
+                s3 = boto3.resource('s3')
+                bucket = s3.Bucket(current_app.config['S3_BUCKET_NAME'])
+
+                #will delete anything starting with this prefix if it exists
+                #if nothing matches the prefix, nothing will happen
+                bucket.objects.filter(Prefix=f'profile_files/id{user_id:05d}/profile_picture').delete()
+
+                #implemented as a loop to allow for multiple pictures if needed in the future
+                for i, img in enumerate(request.files.get('profile_picture')):
+                    #Verifying image size is within a safe threashold (MAX = 500 mb)
+                    img.seek(0, os.SEEK_END)
+                    img_size = img.tell()
+                    if img_size > MAX_bytes:
+                        raise InputError(413, 'File too large')
+
+                    #make sure this is not an empty file
+                    if img_size > 0:
+                        #check that file type is one of the allowed image types
+                        img_extension = pathlib.Path(img.filename).suffix
+                        if img_extension not in ALLOWED_IMAGE_TYPES:
+                            raise InputError(422, f'{img_extension} is not an allowed file type. Allowed types are {ALLOWED_IMAGE_TYPES}')
+
+                        #Rename image (format: profile_files/id{user_id:05d}/profile_picture_4digitRandomHex.img_extension) AND Save=>S3
+                        img.seek(0)
+                        s3key = f'profile_files/id{user_id:05d}/profile_picture_{hex_token}{img_extension}'
+                        bucket.put_object(Key= s3key, Body=img.stream)
+
+                        profile.profile_picture = s3key
+
+                        #get presigned url to return in response
+                        params = {
+                            'Bucket' : current_app.config['S3_BUCKET_NAME'],
+                            'Key' : s3key
+                        }
+
+                        url = boto3.client('s3').generate_presigned_url('get_object', Params=params, ExpiresIn=3600)
+
+                    #exit loop if more than allowed number of images were given
+                    if i >= 0:
+                        break
+
+        #update date
+        user.update(user_update)
+        db.session.commit()
+
+        #add profile keys to user_update to match @returns
+        user_update['biological_sex_male'] = profile.biological_sex_male
+        if url:
+            user_update['profile_picture'] = url
+
+        return user_update
