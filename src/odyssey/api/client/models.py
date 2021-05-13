@@ -1556,7 +1556,7 @@ class ClientPushNotifications(db.Model):
     :type: int, foreign key('User.user_id')
     """
 
-    notification_type_id = db.Column(db.Integer, db.ForeignKey('LookupNotifications.notification_type_id'), nullable=False)
+    notification_type_id = db.Column(db.Integer, db.ForeignKey('LookupNotifications.notification_type_id', ondelete="CASCADE"), nullable=False)
     """
     Denotes what type of notification this is as defined in the LookupNotifications table.
 

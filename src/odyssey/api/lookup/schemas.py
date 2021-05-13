@@ -197,7 +197,7 @@ class LookupDefaultHealthMetricsOutputSchema(Schema):
 class LookupTerritoriesofOperationSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupTerritoriesofOperation
-        exclude = ('created_at', 'updated_at', 'idx')
+        exclude = ('created_at', 'updated_at')
 
     @post_load
     def make_object(self, data, **kwargs):

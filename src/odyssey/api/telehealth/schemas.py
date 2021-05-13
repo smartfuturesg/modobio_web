@@ -127,6 +127,13 @@ class TelehealthBookingDetailsSchema(ma.SQLAlchemyAutoSchema):
         model = TelehealthBookingDetails
         exclude = ('created_at', 'updated_at')
         include_fk = True
+
+class TelehealthBookingDetailsGetSchema(Schema):
+    details = fields.String()
+    location_id = fields.Integer()
+    location_name = fields.String()
+    images = fields.String(many=True)
+    voice = fields.String()
     
 class TelehealthChatRoomAccessSchema(Schema):
     """
