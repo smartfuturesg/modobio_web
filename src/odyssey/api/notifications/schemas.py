@@ -1,8 +1,18 @@
-from marshmallow import Schema, fields, post_dump, validate
+from marshmallow import (
+    fields,
+    INCLUDE,
+    EXCLUDE,
+    pre_dump,
+    pre_load,
+    post_dump,
+    post_load,
+    Schema,
+    validate,
+    ValidationError)
 
 from odyssey import ma
 from odyssey.api.notifications.models import Notifications, NotificationsPushRegistration
-from odyssey.utils.email import push_providers
+from odyssey.utils.email import push_providers, push_notification, NotificationType, NotificationProvider
 
 
 class NotificationSchema(ma.SQLAlchemyAutoSchema):
@@ -37,3 +47,64 @@ class PushRegistrationPostSchema(Schema):
 
 class PushRegistrationDeleteSchema(Schema):
     device_token = fields.String(required=True)
+
+
+class ApplePushNotificationBaseSchema(Schema):
+    @pre_dump
+    def skip_none(self, data: dict, many: bool=False) -> dict:
+        if isinstance(data, dict):
+            newdata = {k: self.skip_none(v) for k, v in data.items() if v is not None}
+            if newdata:
+                return newdata
+        elif isinstance(data, (list, tuple)):
+            newdata = [self.skip_none(i) for i in data]
+            if newdata:
+                return newdata
+        return data
+
+    def hyphenate(self, string: str) -> str:
+        return string.replace('_', '-')
+
+    def on_bind_field(self, field_name, field_obj):
+        field_obj.data_key = self.hyphenate(field_obj.data_key or field_name)
+
+
+class ApplePushNotificationAlertSchema(ApplePushNotificationBaseSchema):
+    title = fields.String(required=True, validate=validate.Length(1, 5))
+    body = fields.String(required=True, validate=validate.Length(1, 3800))
+    title_loc_key = fields.String()
+    title_loc_args = fields.List(fields.String())
+    action_loc_key = fields.String()
+    loc_key = fields.String()
+    loc_args = fields.List(fields.String())
+    launch_image = fields.String()
+
+
+class ApplePushNotificationContentSchema(ApplePushNotificationBaseSchema):
+    alert = fields.Nested(ApplePushNotificationAlertSchema)
+    badge = fields.Integer()
+    sound = fields.String()
+    content_available = fields.Integer(validate=validate.Equal(1))
+    category = fields.String()
+    thread_id = fields.String()
+
+
+class ApplePushNotificationSchema(ApplePushNotificationBaseSchema):
+    # See https://developer.apple.com/library/archive/documentation/NetworkingInternet/Conceptual/
+    # RemoteNotificationsPG/PayloadKeyReference.html#//apple_ref/doc/uid/TP40008194-CH17-SW1
+    class Meta:
+        unknown = INCLUDE
+
+    # Input
+    type = fields.String(
+        required=True,
+        load_only=True,
+        validate=validate.OneOf([x.name for x in NotificationType]))
+    provider = fields.String(
+        required=True,
+        load_only=True,
+        validate=validate.OneOf([x.name for x in NotificationProvider]))
+    contents = fields.Dict(load_only=True)
+
+    # Output
+    aps = fields.Nested(ApplePushNotificationContentSchema, dump_only=True)

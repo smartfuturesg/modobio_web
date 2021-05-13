@@ -1,4 +1,4 @@
-from flask import request
+from flask import request, current_app
 from flask_accepts import accepts, responds
 from flask_restx import Resource
 from sqlalchemy.exc import IntegrityError
@@ -9,6 +9,7 @@ from odyssey.api.lookup.models import LookupNotifications
 from odyssey.api.notifications.models import Notifications, NotificationsPushRegistration
 from odyssey.api.notifications.schemas import (
     NotificationSchema,
+    ApplePushNotificationSchema,
     PushRegistrationSchema,
     PushRegistrationDeleteSchema,
     PushRegistrationPostSchema)
@@ -173,3 +174,51 @@ class PushRegistrationEndpoint(Resource):
                 unregister_device(dev.arn)
                 db.session.delete(dev)
             db.session.commit()
+
+
+import os
+if os.getenv('FLASK_ENV') != 'production':
+    from odyssey.utils.email import push_notification, NotificationType, NotificationProvider
+    from marshmallow import INCLUDE
+
+    ntype_doc = '\n'.join([f'                - {x.name}: {x.value}' for x in NotificationType])
+    nprov_doc = '\n'.join([f'                - {x.name}' for x in NotificationProvider])
+
+    @ns.route('/push/test/<int:user_id>/')
+    @ns.doc(security=None)
+    class PushTestEndpoint(Resource):
+
+        # @token_auth.login_required
+        @accepts(schema=ApplePushNotificationSchema, api=ns)
+        @responds(schema=ApplePushNotificationSchema, status_code=201, api=ns)
+        def post(self, user_id):
+            """ Send notification to user.
+
+            This endpoint is only available in **dev** environments.
+
+            Parameters
+            ----------
+
+            type : str
+                What type of notification to send, one of:
+{ntype_doc}
+
+            provider : str
+                Send push notificaton through this service, one of:
+{nprov_doc}
+
+            kwargs
+                All other parameters are used in the message. Depends on type of message.
+
+            Returns
+            -------
+            str
+                The json encoded message as send to the service.
+            """
+            ntype = request.json['type']
+            prov = request.json['provider']
+            contents = request.json.get('contents', {})
+            out = push_notification(user_id, ntype, prov, **contents)
+            return out
+
+        post.__doc__ = post.__doc__.format(ntype_doc=ntype_doc, nprov_doc=nprov_doc)
