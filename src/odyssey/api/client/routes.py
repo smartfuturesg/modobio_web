@@ -710,6 +710,7 @@ class ClientToken(Resource):
                 'user_id': user.user_id}
 
     @ns.doc(security='password')
+    @ns.deprecated
     @token_auth.login_required(user_type=('client',))
     def delete(self):
         """

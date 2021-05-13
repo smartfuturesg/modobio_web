@@ -137,6 +137,7 @@ class WearablesEndpoint(Resource):
 ###########################################################
 
 @ns.route('/oura-old/auth/<int:user_id>/')
+@ns.deprecated
 @ns.doc(params={'user_id': 'User ID number'})
 class WearablesOuraOldAuthEndpoint(Resource):
     @token_auth.login_required
@@ -198,6 +199,7 @@ class WearablesOuraOldAuthEndpoint(Resource):
 
 
 @ns.route('/oura-old/callback/<int:user_id>/')
+@ns.deprecated
 @ns.doc(params={
     'user_id': 'User ID number',
     'state': 'OAuth2 state token',
