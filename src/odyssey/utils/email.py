@@ -1,8 +1,12 @@
+import enum
+
 import boto3
 
 from botocore.exceptions import ClientError
 from flask import current_app
+from flask.json import dumps
 
+# from odyssey.api.notifications.schemas import ApplePushNotificationSchema
 from odyssey.utils.constants import PASSWORD_RESET_URL, REGISTRATION_PORTAL_URL
 
 SUBJECTS = {"remote_registration_portal": "Modo Bio User Registration Portal", 
@@ -355,6 +359,77 @@ def unregister_device(endpoint_arn: str):
     endpoint = sns.PlatformEndpoint(arn=endpoint_arn)
     endpoint.delete()
 
-def push_notification(user_id: int, topic: str, message: str):
-    """ Send a push notification to the user. """
-    pass
+
+apple_voip_tmpl = {
+    "type": "incoming-call",
+    "data": {
+        "roomId": 0,
+        "staffId": 0,
+        "staffFirstName": "string",
+        "staffMiddleName": "string",
+        "staffLastName": "string",
+        "bookingDescription": "string"
+    }
+}
+
+apple_msg_tmpl = {
+    'alert': {
+        'title': None,
+        'body': None,
+        'title-loc-key': None,
+        'title-loc-args': None,
+        'action-loc-key': None,
+        'loc-key': None,
+        'loc-args': None,
+        'launch-image': None},
+    'badge': None,
+    'sound': None,
+    'content-available': None,
+    'category': None,
+    'thread-id': None}
+
+class NotificationType(enum.Enum):
+    alert = 'A standard notification with a title and a body.'
+    background = 'Trigger the app to reload data in the background.'
+    badge = 'Set the app badge to the specified number.'
+    voip = 'A notification that will trigger a VoIP call.'
+
+
+class NotificationProvider(enum.Enum):
+    apple = {
+        NotificationType.alert: 'APNS',
+        NotificationType.background: 'APNS',
+        NotificationType.badge: 'APNS',
+        NotificationType.voip: 'APNS_VOIP'}
+    android = {
+        NotificationType.alert: 'FCM',
+        NotificationType.background: 'FCM',
+        NotificationType.badge: 'FCM',
+        NotificationType.voip: 'FCM'}
+
+
+def push_notification(user_id: int, ntype: NotificationType, provider: NotificationProvider, **kwargs):
+    """ Send a push notification to the user.
+
+    Parameters
+    ----------
+    user_id : int
+        User ID of User to send message to. Message will be send to all
+        registered devices for this user.
+
+    ntype : NotificationType(Enum)
+        What type of message to send, limited to Message types.
+    """
+    if ntype == NotificationType.alert.name:
+        title = kwargs.get('title')
+        body = kwargs.get('body')
+        return {'aps': {'alert': {**kwargs}}}
+
+    elif ntype == NotificationType.badge.name:
+        return {'aps': {'badge': kwargs.get('badge')}, **kwargs}
+
+    elif ntype == NotificationType.background.name:
+        return {'aps': {'content_avaliable': 1}, **kwargs}
+
+    elif ntype == NotificationType.voip.name:
+        return kwargs
