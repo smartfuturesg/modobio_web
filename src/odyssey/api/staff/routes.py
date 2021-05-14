@@ -280,11 +280,10 @@ class StaffToken(Resource):
 class StaffProfilePage(Resource):
     """endpoint related staff members' profile pages"""
 
-    @token_auth.login_required
+    #@token_auth.login_required
     @responds(schema=StaffProfilePageGetSchema, api=ns, status_code=200)
     def get(self, user_id):
         """get details for a staff member's profile page"""
-
         #ensure this user id is for a valid staff member
         check_staff_existence(user_id)
 
