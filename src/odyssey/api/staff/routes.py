@@ -9,7 +9,7 @@ from odyssey.api import api
 from odyssey.api.staff.models import StaffOperationalTerritories, StaffRoles, StaffRecentClients, StaffProfile
 from odyssey.api.user.models import User, UserLogin, UserTokenHistory
 from odyssey.utils.auth import token_auth, basic_auth
-from odyssey.utils.errors import UnauthorizedUser, StaffEmailInUse
+from odyssey.utils.errors import UnauthorizedUser, StaffEmailInUse, InputError
 from odyssey.utils.misc import check_staff_existence
 from odyssey.utils.constants import ALLOWED_IMAGE_TYPES
 from odyssey.api.user.schemas import UserSchema, StaffInfoSchema
@@ -355,14 +355,14 @@ class StaffProfilePage(Resource):
             else:
                 data = request.form.get(key)
                 if key == 'biological_sex_male':
-                    try:
-                        #check that this value can be cast to a bool, if not, raise an error
-                        data = bool(data)
-                    except:
-                        raise InputError(422, f'{key} must be a boolean')
-
-                user_update[key] = data
-
+                    #check that this value can be interpretted as a bool
+                    if data in ('true', 'True', '1'):
+                        user_update['biological_sex_male'] = True
+                    elif data in ('false', 'False', '0'):
+                        user_update['biological_sex_male'] = False
+                    else:
+                        raise InputError(422, f'{key} must be a boolean. Acceptable values are \'true\', \'false\', \'True\', \'False\', \'1\', and \'0\'')
+                        
         url = None
         
         #get profile picture and store in s3
@@ -373,7 +373,7 @@ class StaffProfilePage(Resource):
 
                 #will delete anything starting with this prefix if it exists
                 #if nothing matches the prefix, nothing will happen
-                bucket.objects.filter(Prefix=f'profile_files/id{user_id:05d}/profile_picture').delete()
+                bucket.objects.filter(Prefix=f'id{user_id:05d}/profile_picture').delete()
 
                 #implemented as a loop to allow for multiple pictures if needed in the future
                 for i, img in enumerate(request.files.getlist('profile_picture')):
@@ -393,7 +393,7 @@ class StaffProfilePage(Resource):
                         #Rename image (format: profile_files/id{user_id:05d}/profile_picture_4digitRandomHex.img_extension) AND Save=>S3
                         img.seek(0)
                         hex_token = secrets.token_hex(4)
-                        s3key = f'profile_files/id{user_id:05d}/profile_picture_{hex_token}{img_extension}'
+                        s3key = f'id{user_id:05d}/profile_picture_{hex_token}{img_extension}'
                         bucket.put_object(Key= s3key, Body=img.stream)
 
                         profile.profile_picture = s3key
