@@ -24,7 +24,7 @@ staff_profile_data = {
     'firstname': 'Mario',
     'middlename': 'The',
     'lastname': 'Plumber',
-    'biological_sex_male': True,
+    'biological_sex_male': 'True',
     'bio': 'It\'s a me, Mario!',
     'profile_picture': (img_file.as_posix() , open(img_file, mode='rb'), 'image/png')
   },
