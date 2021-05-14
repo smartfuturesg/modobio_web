@@ -477,8 +477,9 @@ doctor_blood_tests_data = {
 }
 
 img_file = pathlib.Path(__file__).parent / 'test_jpg_image.jpg'
+
 doctor_medical_imaging_data = {
-  'image': (img_file.as_posix() , open(img_file, mode='rb'), 'image/jpg'),
+  'image': (img_file.open(mode='rb'), img_file.as_posix()),
   'image_date': '2020-09-29',
   'image_origin_location': 'testing clinic',
   'image_type': 'X-ray',
