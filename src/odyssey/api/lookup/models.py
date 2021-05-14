@@ -1322,3 +1322,92 @@ class LookupProfessionColors(db.Model):
 
     :type: string
     """
+
+class LookupRoles(db.Model):
+
+    __tablename__ = 'LookupRoles'
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Index
+
+    :type: integer, primary key, autoincrementing
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+    
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    role_name = db.Column(db.String)
+    """
+    Internal name of this role that is used throughout the code.
+
+    :type: string
+    """
+
+    display_name = db.Column(db.String)
+    """
+    Display name of this role that should be presented in user-facing applications.
+
+    :type: string
+    """
+
+    alt_role_name = db.Column(db.String)
+    """
+    List of alternate user-facing names that may be utilized in the future.
+
+    :type: string
+    """
+
+    is_practitioner = db.Column(db.Boolean)
+    """
+    Denotes if this role is a practioner or not.
+
+    :type: boolean
+    """
+
+    color = db.Column(db.String)
+    """
+    Hex color code that denotes what color should be used to color certain UI assets for this role
+
+    :type: string
+    """
+
+    icon = db.Column(db.String)
+    """
+    Icon that should be used for this profession type
+
+    :type: string
+    """
+
+    has_client_data_access = db.Column(db.Boolean)
+    """
+    Denotes if this role has access to client data
+
+    :type: boolean
+    """
+
+    active = db.Column(db.Boolean)
+    """
+    Denotes whether a role type is currently used in the system.
+    Roles will be activated in further versions when needed.
+
+    :type: boolean
+    """
+
+    notes = db.Column(db.String)
+    """
+    Notes about this role.
+
+    :type: string
+    """
