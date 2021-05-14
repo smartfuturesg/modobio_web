@@ -357,12 +357,13 @@ class StaffProfilePage(Resource):
                 if key == 'biological_sex_male':
                     #check that this value can be interpretted as a bool
                     if data in ('true', 'True', '1'):
-                        user_update['biological_sex_male'] = True
+                        data = True
                     elif data in ('false', 'False', '0'):
-                        user_update['biological_sex_male'] = False
+                        data = False
                     else:
                         raise InputError(422, f'{key} must be a boolean. Acceptable values are \'true\', \'false\', \'True\', \'False\', \'1\', and \'0\'')
-                        
+                user_update[key] = data
+
         url = None
         
         #get profile picture and store in s3
