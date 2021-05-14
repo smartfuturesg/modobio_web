@@ -49,6 +49,29 @@ INSERT INTO "UserLogin" ("user_id", "password") VALUES
 INSERT INTO "ClientInfo" ("user_id") VALUES
 (22);
 
+INSERT INTO "StaffProfile" ("user_id") VALUES
+(1),
+(2),
+(3),
+(4),
+(5),
+(6),
+(7),
+(8),
+(9),
+(10),
+(11),
+(12),
+(13),
+(14),
+(15),
+(16),
+(17),
+(18),
+(19),
+(20),
+(21);
+
 INSERT INTO "StaffRoles" ("user_id", "role", "verified") VALUES 
 (1, 'system_admin', false), 
 (2, 'doctor', false), 

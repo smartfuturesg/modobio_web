@@ -1,21 +1,25 @@
+import os, boto3, secrets, pathlib
 
-from flask import request
+from flask import request, current_app, Response
 from flask_accepts import accepts, responds
 from flask_restx import Resource
 
 from odyssey import db
 from odyssey.api import api
-from odyssey.api.staff.models import StaffOperationalTerritories, StaffRoles, StaffRecentClients
+from odyssey.api.staff.models import StaffOperationalTerritories, StaffRoles, StaffRecentClients, StaffProfile
 from odyssey.api.user.models import User, UserLogin, UserTokenHistory
 from odyssey.utils.auth import token_auth, basic_auth
-from odyssey.utils.errors import UnauthorizedUser, StaffEmailInUse
+from odyssey.utils.errors import UnauthorizedUser, StaffEmailInUse, InputError
+from odyssey.utils.misc import check_staff_existence
+from odyssey.utils.constants import ALLOWED_IMAGE_TYPES
 from odyssey.api.user.schemas import UserSchema, StaffInfoSchema
 from odyssey.api.staff.schemas import (
     StaffOperationalTerritoriesNestedSchema,
     StaffProfileSchema, 
     StaffRolesSchema,
     StaffRecentClientsSchema,
-    StaffTokenRequestSchema
+    StaffTokenRequestSchema,
+    StaffProfilePageGetSchema
 )
 
 ns = api.namespace('staff', description='Operations related to staff members')
@@ -272,3 +276,157 @@ class StaffToken(Resource):
         """
         return '', 200
 
+@ns.route('/profile/<int:user_id>/')
+class StaffProfilePage(Resource):
+    """endpoint related staff members' profile pages"""
+
+    #@token_auth.login_required
+    @responds(schema=StaffProfilePageGetSchema, api=ns, status_code=200)
+    def get(self, user_id):
+        """get details for a staff member's profile page"""
+        #ensure this user id is for a valid staff member
+        check_staff_existence(user_id)
+
+        user = User.query.filter_by(user_id=user_id).one_or_none()
+
+        res = {
+            'firstname': user.firstname,
+            'middlename': user.middlename,
+            'lastname': user.lastname,
+            'biological_sex_male': user.biological_sex_male
+        }
+
+        #as long as a staff member exists(checked above), they have a profile 
+        #because it is made for them when the staff user is created
+        profile = StaffProfile.query.filter_by(user_id=user_id).one_or_none()
+
+        res['bio'] = profile.bio
+
+        #get presigned link to this user's profile picture
+        if not current_app.config['LOCAL_CONFIG']:
+            s3key = profile.profile_picture
+            if s3key != None:
+                s3 = boto3.resource('s3')
+                params = {
+                    'Bucket' : current_app.config['S3_BUCKET_NAME'],
+                    'Key' : s3key
+                }
+
+                url = boto3.client('s3').generate_presigned_url('get_object', Params=params, ExpiresIn=3600)
+                
+                res['profile_picture'] = url
+            else:
+                res['profile_picture'] = None
+
+        return res
+
+    @token_auth.login_required(user_type=('staff_self',))
+    @responds(schema=StaffProfilePageGetSchema, api=ns, status_code=200)
+    def put(self, user_id):
+        """Edit details for a staff member's profile page. 
+        
+        Expects form data
+
+        "firstname": "string"
+        "middlename": "string",
+        "lastname": "string",
+        "biological_sex_male": "boolean",
+        "bio": "string",
+        "profile_picture": file (allowed types are '.png', '.jpg', '.jpeg', '.bmp', '.gif', '.webp', '.psd', '.pdf')
+        """
+
+        #ensure this user id is for a valid staff member
+        check_staff_existence(user_id)
+
+        user = User.query.filter_by(user_id=user_id).one_or_none()
+        profile = StaffProfile.query.filter_by(user_id=user_id).one_or_none()
+
+        user_update = {}
+
+        #stored here so we know if bio should be returned with the payload
+        #we don't want it returned in the key wasn't provided in the request
+        bio = None
+
+        for key in request.form:
+            if key == 'bio':
+                bio = request.form.get('bio')
+                profile.bio = bio
+            else:
+                data = request.form.get(key)
+                if key == 'biological_sex_male':
+                    #check that this value can be interpretted as a bool
+                    if data in ('true', 'True', '1'):
+                        data = True
+                    elif data in ('false', 'False', '0'):
+                        data = False
+                    else:
+                        raise InputError(422, f'{key} must be a boolean. Acceptable values are \'true\', \'false\', \'True\', \'False\', \'1\', and \'0\'')
+                user_update[key] = data
+
+        url = None
+        
+        #get profile picture and store in s3
+        if not current_app.config['LOCAL_CONFIG']:
+            if 'profile_picture' in request.files:
+                s3 = boto3.resource('s3')
+                bucket = s3.Bucket(current_app.config['S3_BUCKET_NAME'])
+
+                #will delete anything starting with this prefix if it exists
+                #if nothing matches the prefix, nothing will happen
+                bucket.objects.filter(Prefix=f'id{user_id:05d}/profile_picture').delete()
+
+                #implemented as a loop to allow for multiple pictures if needed in the future
+                for i, img in enumerate(request.files.getlist('profile_picture')):
+                    #Verifying image size is within a safe threashold (MAX = 500 mb)
+                    img.seek(0, os.SEEK_END)
+                    img_size = img.tell()
+                    if img_size > 524288000:
+                        raise InputError(413, 'File too large')
+
+                    #make sure this is not an empty file
+                    if img_size > 0:
+                        #check that file type is one of the allowed image types
+                        img_extension = pathlib.Path(img.filename).suffix
+                        if img_extension not in ALLOWED_IMAGE_TYPES:
+                            raise InputError(422, f'{img_extension} is not an allowed file type. Allowed types are {ALLOWED_IMAGE_TYPES}')
+
+                        #Rename image (format: profile_files/id{user_id:05d}/profile_picture_4digitRandomHex.img_extension) AND Save=>S3
+                        img.seek(0)
+                        hex_token = secrets.token_hex(4)
+                        s3key = f'id{user_id:05d}/profile_picture_{hex_token}{img_extension}'
+                        bucket.put_object(Key= s3key, Body=img.stream)
+
+                        profile.profile_picture = s3key
+
+                        #get presigned url to return in response
+                        params = {
+                            'Bucket' : current_app.config['S3_BUCKET_NAME'],
+                            'Key' : s3key
+                        }
+
+                        url = boto3.client('s3').generate_presigned_url('get_object', Params=params, ExpiresIn=3600)
+
+                    #exit loop if more than allowed number of images were given
+                    if i >= 0:
+                        break
+
+        #update user in db
+        user.update(user_update)
+        
+        #add profile keys to user_update to match @responds
+        if bio:
+            user_update['bio'] = profile.bio
+        if url:
+            user_update['profile_picture'] = url
+        else:
+            #profile_picture key was provided with no file. Since this means profile picture was
+            #deleted from s3, remove the reference to it from db.
+            profile.profile_picture = None
+
+        db.session.commit()
+
+        if len(user_update.keys()) == 0:
+            #request was successful but there is no body to return
+            return Response(status=204)
+        else:
+            return user_update

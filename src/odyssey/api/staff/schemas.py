@@ -38,6 +38,14 @@ class StaffProfileSchema(ma.SQLAlchemyAutoSchema):
     def make_object(self, data, **kwargs):
         return StaffProfile(**data)
 
+class StaffProfilePageGetSchema(Schema):
+    firstname = fields.String()
+    middlename = fields.String()
+    lastname = fields.String()
+    biological_sex_male = fields.Boolean()
+    profile_picture = fields.String()
+    bio = fields.String(validate=validate.Length(min=1, max= 50))
+
 class StaffRolesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = StaffRoles

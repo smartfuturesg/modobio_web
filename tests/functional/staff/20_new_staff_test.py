@@ -117,7 +117,7 @@ def test_add_roles_to_staff(test_client, init_database, staff_auth_header):
     THEN check the response is valid
     """
     # get staff authorization to view client data
-    staff = User.query.filter_by(is_staff=True).first()
+    staff = User.query.filter_by(email='staff_member@modobio.com').first()
     payload = {'access_roles': ACCESS_ROLES}
     response = test_client.post(f'/staff/roles/{staff.user_id}/',
                                 headers=staff_auth_header, 
@@ -139,7 +139,7 @@ def test_check_staff_roles(test_client, init_database, staff_auth_header):
     """
 
     # get staff authorization to view client data
-    staff = User.query.filter_by(is_staff=True).first()
+    staff = User.query.filter_by(email='staff_member@modobio.com').first()
     response = test_client.get(f'/staff/roles/{staff.user_id}/',
                                 headers=staff_auth_header, 
                                 content_type='application/json')
@@ -158,7 +158,7 @@ def test_add_staff_operational_territory(test_client, init_database, staff_auth_
     THEN check the response is valid
     """
     # pull up staff member and their current roles
-    staff = User.query.filter_by(is_staff=True).first()
+    staff = User.query.filter_by(email='staff_member@modobio.com').first()
     staff_roles = StaffRoles.query.filter_by(user_id = staff.user_id).all()
 
     possible_territories = init_database.session.query(LookupTerritoriesofOperation.idx).all()
@@ -174,12 +174,11 @@ def test_add_staff_operational_territory(test_client, init_database, staff_auth_
                                                            'operational_territory_id': territory})
 
     
-        
     response = test_client.post(f'/staff/operational-territories/{staff.user_id}/',
                                 headers=staff_auth_header, 
                                 data=dumps(payload), 
                                 content_type='application/json')
-    
+
     # bring up territories
     staff_territories = StaffOperationalTerritories.query.filter_by(user_id = staff.user_id).all()
     
@@ -214,7 +213,7 @@ def test_delete_staff_operational_territories(test_client, init_database, staff_
     """
 
     # pull up staff member and current operational territories
-    staff = User.query.filter_by(is_staff=True).first()
+    staff = User.query.filter_by(email='staff_member@modobio.com').first()
     staff_territories = StaffOperationalTerritories.query.filter_by(user_id = staff.user_id).all()
 
 
