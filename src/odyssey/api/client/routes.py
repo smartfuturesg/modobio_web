@@ -201,8 +201,8 @@ class ClientSummary(Resource):
                 "user_id": user.user_id, "dob": client.dob, "membersince": client.membersince, "facilities": facilities}
         return data
 
-#Depricated 
 @ns.route('/clientsearch/')
+@ns.deprecated
 @ns.doc(params={'page': 'request page for paginated clients list',
                 'per_page': 'number of clients per page',
                 'firstname': 'first name to search',
@@ -216,7 +216,7 @@ class ClientsDepricated(Resource):
     @responds(schema=ClientSearchOutSchema, api=ns)
     #@responds(schema=UserSchema(many=True), api=ns)
     def get(self):
-        """returns list of clients given query parameters"""
+        """[DEPRECATED] returns list of clients given query parameters"""
         clients = []
         for user in User.query.filter_by(is_client=True).all():
             client = {
@@ -710,6 +710,7 @@ class ClientToken(Resource):
                 'user_id': user.user_id}
 
     @ns.doc(security='password')
+    @ns.deprecated
     @token_auth.login_required(user_type=('client',))
     def delete(self):
         """

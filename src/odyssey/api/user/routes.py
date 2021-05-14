@@ -604,6 +604,7 @@ class UserLogoutApi(Resource):
 from odyssey.api.notifications.schemas import NotificationSchema
 
 @ns.route('/notifications/<int:user_id>/')
+@ns.deprecated
 @ns.doc(params={'user_id': 'User ID number'})
 class UserNotificationsApi(Resource):
     @token_auth.login_required
@@ -617,6 +618,7 @@ class UserNotificationsApi(Resource):
 
 
 @ns.route('/notifications/<int:idx>/')
+@ns.deprecated
 @ns.doc(params={'idx': 'Notification idx number'})
 class UserNotificationsPutApi(Resource):
     @token_auth.login_required

@@ -594,6 +594,7 @@ class TelehealthBookingsApi(Resource):
         return 201
 
 @ns.route('/meeting-room/new/<int:user_id>/')
+@ns.deprecated
 @ns.doc(params={'user_id': 'User ID number'})
 class ProvisionMeetingRooms(Resource):
     @token_auth.login_required(user_type=('staff',))
@@ -1252,6 +1253,7 @@ class TelehealthBookingDetailsApi(Resource):
         return f'Deleted all details for booking_id {booking_id}', 200
 
 @ns.route('/chat-room/access-token')
+@ns.deprecated
 @ns.doc(params={'client_user_id': 'Required. user_id of client participant.',
                'staff_user_id': 'Required. user_id of staff participant'})
 class TelehealthChatRoomApi(Resource):
@@ -1314,6 +1316,7 @@ class TelehealthChatRoomApi(Resource):
         return payload
 
 @ns.route('/chat-room/access-token/all/<int:user_id>/')
+@ns.deprecated
 @ns.doc(params={'user_id': 'User ID number'})
 class TelehealthAllChatRoomApi(Resource):
     """
