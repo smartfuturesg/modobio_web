@@ -265,6 +265,7 @@ class StaffToken(Resource):
 
 
     @ns.doc(security='password')
+    @ns.deprecated
     @token_auth.login_required(user_type=('staff',))
     def delete(self):
         """

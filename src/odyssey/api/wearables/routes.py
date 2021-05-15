@@ -44,7 +44,7 @@ ns = api.namespace('wearables', description='Endpoints for registering wearable 
 @ns.route('/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class WearablesEndpoint(Resource):
-    @token_auth.login_required(user_type=('client',))
+    @token_auth.login_required
     @responds(schema=WearablesSchema, status_code=200, api=ns)
     def get(self, user_id):
         """ Wearable device information for client ``user_id`` in response to a GET request.
@@ -137,6 +137,7 @@ class WearablesEndpoint(Resource):
 ###########################################################
 
 @ns.route('/oura-old/auth/<int:user_id>/')
+@ns.deprecated
 @ns.doc(params={'user_id': 'User ID number'})
 class WearablesOuraOldAuthEndpoint(Resource):
     @token_auth.login_required
@@ -198,6 +199,7 @@ class WearablesOuraOldAuthEndpoint(Resource):
 
 
 @ns.route('/oura-old/callback/<int:user_id>/')
+@ns.deprecated
 @ns.doc(params={
     'user_id': 'User ID number',
     'state': 'OAuth2 state token',
