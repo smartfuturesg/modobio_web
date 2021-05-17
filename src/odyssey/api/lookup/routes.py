@@ -24,7 +24,7 @@ from odyssey.api.lookup.models import (
      LookupTransactionTypes,
      LookupNotifications,
      LookupEmergencyNumbers,
-     LookupProfessionColors
+     LookupRoles
 )
 from odyssey.api.lookup.schemas import (
     LookupActivityTrackersOutputSchema,
@@ -45,7 +45,7 @@ from odyssey.api.lookup.schemas import (
     LookupTimezones,
     LookupTelehealthSettingsSchema,
     LookupEmergencyNumbersOutputSchema,
-    LookupProfessionColorsOutputSchema
+    LookupRolesOutputSchema
 )
 from odyssey.utils.misc import check_drink_existence
 
@@ -349,14 +349,14 @@ class LookupEmergencyNumbersApi(Resource):
         res = LookupEmergencyNumbers.query.filter_by(service='Ambulance').all()
         return {'total_items': len(res), 'items': res}
 
-@ns.route('/profession-colors/')
-class LookupProfessionColorsApi(Resource):
+@ns.route('/roles/')
+class LookupRolesApi(Resource):
     """
-    Endpoint that returns the colors and icons associated with professions.
+    Endpoint that returns the roles that exist for users.
     """
     @token_auth.login_required
-    @responds(schema=LookupProfessionColorsOutputSchema, status_code=200, api=ns)
+    @responds(schema=LookupRolesOutputSchema, status_code=200, api=ns)
     def get(self):
-        """get contents of profession colors lookup table"""
-        res = LookupProfessionColors.query.all()
+        """get contents of roles lookup table"""
+        res = LookupRoles.query.all()
         return {'total_items': len(res), 'items': res}
