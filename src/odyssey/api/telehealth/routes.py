@@ -438,8 +438,9 @@ class TelehealthBookingsApi(Resource):
         """
         current_user, _ = token_auth.current_user()
 
-        if request.parsed_obj.booking_window_id_start_time >= request.parsed_obj.booking_window_id_end_time:
-            raise InputError(status_code=405,message='Start time must be before end time.')
+        # Allow bookings between days
+        # if request.parsed_obj.booking_window_id_start_time >= request.parsed_obj.booking_window_id_end_time:
+        #     raise InputError(status_code=405,message='Start time must be before end time.')
         
         client_user_id = request.args.get('client_user_id', type=int)
         
@@ -534,10 +535,6 @@ class TelehealthBookingsApi(Resource):
             PUT request should be used purely to update the booking STATUS.
         """
         
-        if request.parsed_obj.booking_window_id_start_time >= request.parsed_obj.booking_window_id_end_time:
-            raise InputError(status_code=405,message='Start time must be before end time.')
-
-
         booking_id = request.args.get('booking_id', type=int)
         
         # Check if staff and client have those times open
@@ -561,8 +558,7 @@ class TelehealthBookingsApi(Resource):
             This DELETE request is used to delete bookings. However, this table should also serve as a 
             a log of bookings, so it is up to the Backened team to use this with caution.
         '''
-        if request.parsed_obj.booking_window_id_start_time >= request.parsed_obj.booking_window_id_end_time:
-            raise InputError(status_code=405,message='Start time must be before end time.')
+
         client_user_id = request.args.get('client_user_id', type=int)
         
         if not client_user_id:
@@ -991,6 +987,7 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
                 # end time must be after start time
                 if time['start_time'] > time['end_time']:
                     db.session.rollback()
+                    #TODO: allow availabilities between days 
                     raise InputError(status_code=405,message='Start Time must be before End Time')
                 
                 # This for loop loops through the booking increments to find where the 

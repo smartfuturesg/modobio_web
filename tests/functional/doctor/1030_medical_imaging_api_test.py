@@ -6,10 +6,6 @@ from odyssey.api.user.models import User, UserLogin
 from odyssey.api.doctor.models import MedicalImaging
 from .data import doctor_medical_imaging_data
 
-# XXX: temporary fix for failing image upload test, due to updated werkzeug 2.0.0.
-import pytest
-pytest.skip('Temporary skip until file upload is fixed.', allow_module_level=True)
-
 def test_post_medical_imaging(test_client, init_database, staff_auth_header):
     """
     GIVEN an api end point for image upload

@@ -146,3 +146,108 @@ telehealth_queue_client_3_data = {
   'medical_gender': 'np'
 }
 
+#-------
+# Book meetings within a scanning window for upcoming bookings
+#--------
+
+# add a new availability for staff member
+telehealth_staff_full_avilability ={
+  'availability': [{
+    'day_of_week': 'Monday',
+    'start_time': '00:00:00',
+    'end_time': '00:00:00'
+  },
+  { 
+    'day_of_week': 'Tuesday',
+    'start_time': '00:00:00',
+    'end_time': '00:00:00'
+  },
+  {
+    'day_of_week': 'Wednesday',
+    'start_time': '00:00:00',
+    'end_time': '00:00:00'
+  },  
+  {
+    'day_of_week': 'Thursday',
+    'start_time': '00:00:00',
+    'end_time': '00:00:00'
+  },
+  {
+    'day_of_week': 'Friday',
+    'start_time': '00:00:00',
+    'end_time': '00:00:00'
+  }  
+  ]
+}
+
+
+telehealth_bookings_data_full_day = [
+  {
+  'target_date': '2022-04-04',
+  'booking_window_id_start_time': 10,
+  'booking_window_id_end_time': 13,
+  'profession_type': 'doctor'
+},
+{
+  'target_date': '2022-04-04',
+  'booking_window_id_start_time': 27,
+  'booking_window_id_end_time': 30,
+  'profession_type': 'doctor'
+},
+{
+  'target_date': '2022-04-04',
+  'booking_window_id_start_time': 40,
+  'booking_window_id_end_time': 43,
+  'profession_type': 'doctor'
+},
+{
+  'target_date': '2022-04-04',
+  'booking_window_id_start_time': 50,
+  'booking_window_id_end_time': 53,
+  'profession_type': 'doctor'
+},
+{
+  'target_date': '2022-04-04',
+  'booking_window_id_start_time': 96,
+  'booking_window_id_end_time': 99,
+  'profession_type': 'doctor'
+},
+{
+  'target_date': '2022-04-04',
+  'booking_window_id_start_time': 121,
+  'booking_window_id_end_time': 124,
+  'profession_type': 'doctor'
+},
+{
+  'target_date': '2022-04-04',
+  'booking_window_id_start_time': 145,
+  'booking_window_id_end_time': 148,
+  'profession_type': 'doctor'
+},
+# from 18:00-02:00
+{
+  'target_date': '2022-04-04',
+  'booking_window_id_start_time': 217,
+  'booking_window_id_end_time': 220,
+  'profession_type': 'doctor'
+},
+{
+  'target_date': '2022-04-04',
+  'booking_window_id_start_time': 250,
+  'booking_window_id_end_time': 253,
+  'profession_type': 'doctor'
+},
+{
+  'target_date': '2022-04-04',
+  'booking_window_id_start_time': 287,
+  'booking_window_id_end_time': 1,
+  'profession_type': 'doctor'
+},
+{
+  'target_date': '2022-04-05',
+  'booking_window_id_start_time': 5,
+  'booking_window_id_end_time': 8,
+  'profession_type': 'doctor'
+}
+]
+
