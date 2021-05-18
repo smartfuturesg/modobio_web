@@ -43,7 +43,7 @@ def upgrade():
     sa.Column('device_token', sa.String(length=1024), nullable=True),
     sa.Column('device_id', sa.String(length=1024), nullable=True),
     sa.Column('device_description', sa.String(length=1024), nullable=True),
-    sa.Column('provider', sa.String(length=25), nullable=True),
+    sa.Column('channel', sa.String(length=25), nullable=True),
     sa.Column('arn', sa.String(length=256), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['User.user_id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('idx')
