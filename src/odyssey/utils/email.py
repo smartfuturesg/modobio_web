@@ -360,19 +360,7 @@ def unregister_device(endpoint_arn: str):
     endpoint.delete()
 
 
-apple_voip_tmpl = {
-    "type": "incoming-call",
-    "data": {
-        "roomId": 0,
-        "staffId": 0,
-        "staffFirstName": "string",
-        "staffMiddleName": "string",
-        "staffLastName": "string",
-        "bookingDescription": "string"
-    }
-}
-
-apple_msg_tmpl = {
+apple_alert_tmpl = {
     'alert': {
         'title': None,
         'body': None,
@@ -381,12 +369,21 @@ apple_msg_tmpl = {
         'action-loc-key': None,
         'loc-key': None,
         'loc-args': None,
-        'launch-image': None},
-    'badge': None,
+        'launch-image': None}.
     'sound': None,
-    'content-available': None,
     'category': None,
     'thread-id': None}
+apple_badge_tmpl = {'badge': None}
+apple_background_tmpl = {'content-available': None}
+apple_voip_tmpl = {
+    'type': 'incoming-call'
+    'data': {
+        'room_id': None,
+        'staff_id': None,
+        'staff_first_name': None,
+        'staff_middle_name': None
+        'staff_last_name': None
+        'booking_description': None}}
 
 class NotificationType(enum.Enum):
     alert = 'A standard notification with a title and a body.'
@@ -397,10 +394,18 @@ class NotificationType(enum.Enum):
 
 class NotificationProvider(enum.Enum):
     apple = {
-        NotificationType.alert: 'APNS',
-        NotificationType.background: 'APNS',
-        NotificationType.badge: 'APNS',
-        NotificationType.voip: 'APNS_VOIP'}
+        NotificationType.alert: {
+            'channel': 'APNS',
+            'template': apple_alert_template},
+        NotificationType.background: {
+            'channel': 'APNS',
+            'template': apple_background_tmpl}
+        NotificationType.badge: {
+            'channel': 'APNS',
+            'template': apple_badge_tmpl}
+        NotificationType.voip: {
+            'channel': 'APNS_VOIP',
+            'template': apple_voip_tmpl}}
     android = {
         NotificationType.alert: 'FCM',
         NotificationType.background: 'FCM',
@@ -408,28 +413,40 @@ class NotificationProvider(enum.Enum):
         NotificationType.voip: 'FCM'}
 
 
-def push_notification(user_id: int, ntype: NotificationType, provider: NotificationProvider, **kwargs):
+def push_notification(user_id: int, ntype: NotificationType, provider: NotificationProvider, content: dict):
     """ Send a push notification to the user.
 
     Parameters
     ----------
     user_id : int
-        User ID of User to send message to. Message will be send to all
+        User ID of User to send message to. Notification will be send to all
         registered devices for this user.
 
     ntype : NotificationType(Enum)
-        What type of message to send, limited to Message types.
+        What type of notification (alert, background, badge, voip) to send.
+
+    provider : NotificationProvider(Enum)
+        Which service (apple or android) to send the notification to.
     """
-    if ntype == NotificationType.alert.name:
-        title = kwargs.get('title')
-        body = kwargs.get('body')
-        return {'aps': {'alert': {**kwargs}}}
+    ntype = NotificationType[ntype]
+    provider = NotificationProvider[provider]
+    channel = provider.value[ntype]['channel']
 
-    elif ntype == NotificationType.badge.name:
-        return {'aps': {'badge': kwargs.get('badge')}, **kwargs}
+    registered = (
+        NotificationsPushRegistration
+        .query
+        .filter_by(
+            user_id=user_id,
+            channel=channel)
+        .all())
 
-    elif ntype == NotificationType.background.name:
-        return {'aps': {'content_avaliable': 1}, **kwargs}
-
-    elif ntype == NotificationType.voip.name:
-        return kwargs
+    sns, app = _load_sns()
+    for device in registered:
+        endpoint = sns.PlatformEndpoint(device.arn)
+        # Set message attributes
+        # https://docs.aws.amazon.com/sns/latest/dg/sns-send-custom-platform-specific-payloads-mobile-devices.html
+        # Figure out SANDBOX
+        # messgae = {APNS: contents}
+        reponse = endpoint.publish(TargetArn=device.arn, Message=dumps(contents))
+        if 'messageId' not in response:
+            raise Error
