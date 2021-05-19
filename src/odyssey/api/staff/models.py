@@ -152,7 +152,7 @@ class StaffRoles(db.Model):
     -client_services
     -physical_therapist
     -trainer
-    -data_science
+    -data_scientist
     -doctor
     -nutrition
     
