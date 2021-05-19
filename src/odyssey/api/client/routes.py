@@ -37,7 +37,8 @@ from odyssey.api.client.models import (
     ClientWeightHistory,
     ClientWaistSizeHistory,
     ClientTransactionHistory,
-    ClientPushNotifications
+    ClientPushNotifications,
+    ClientRaceAndEthnicity
 )
 from odyssey.api.doctor.models import (
     MedicalFamilyHistory,
@@ -90,7 +91,9 @@ from odyssey.api.client.schemas import(
     SignAndDateSchema,
     SignedDocumentsSchema,
     ClientTransactionHistorySchema,
-    ClientSearchItemsSchema
+    ClientSearchItemsSchema,
+    ClientRaceAndEthnicitySchema,
+    ClientRaceAndEthnicityEditSchema
 )
 from odyssey.api.lookup.schemas import LookupDefaultHealthMetricsSchema
 from odyssey.api.staff.schemas import StaffRecentClientsSchema
@@ -142,7 +145,7 @@ class Client(Resource):
        
         client_info_payload = client_data.__dict__
         client_info_payload["primary_goal"] = db.session.query(LookupGoals.goal_name).filter(client_data.primary_goal_id == LookupGoals.goal_id).one_or_none()
-        client_info_payload["race"] = db.session.query(LookupRaces.race_name).filter(client_data.race_id == LookupRaces.race_id).one_or_none()
+        client_info_payload["race_information"] = ClientRaceAndEthnicity.query.filter_by(user_id=user_id).all()
 
         return {'client_info': client_info_payload, 'user_info': user_data}
 
@@ -1385,3 +1388,66 @@ class ClientWeightApi(Resource):
         health_metrics = LookupDefaultHealthMetrics.query.filter_by(age = age_category).filter_by(sex = sex).one_or_none()
         
         return health_metrics
+
+@ns.route('/race-and-ethnicity/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class ClientRaceAndEthnicityApi(Resource):
+    """
+    Endpoint for returning viewing and editing informations about a client's race and ethnicity
+    information.
+    """
+    @token_auth.login_required()
+    @responds(schema=ClientRaceAndEthnicitySchema(many=True), api=ns, status_code=200)
+    def get(self, user_id):
+        check_client_existence(user_id)
+
+        return ClientRaceAndEthnicity.query.filter_by(user_id=user_id).all()
+
+    @token_auth.login_required()
+    @accepts(schema=ClientRaceAndEthnicityEditSchema, api=ns)
+    @responds(schema=ClientRaceAndEthnicitySchema(many=True), api=ns, status_code=201)
+    def post(self, user_id):
+        check_client_existence(user_id)
+
+        if ClientRaceAndEthnicity.query.filter_by(user_id=user_id).first():
+            raise IllegalSetting(message=f"Race and ethnicity information for user_id {user_id} already exists. Please use PUT method")
+
+        for data in request.parsed_obj['data']:
+            if not LookupRaces.query.filter_by(race_id=data.race_id).one_or_none():
+                raise InputError(400, 'Invalid race_id.')
+
+            model = ClientRaceAndEthnicitySchema().load({
+                'race_id': data.race_id,
+                'is_client_mother': data.is_client_mother
+            })
+            model.user_id = user_id
+            db.session.add(model)
+        db.session.commit()
+        
+        return ClientRaceAndEthnicity.query.filter_by(user_id=user_id).all()
+
+    @token_auth.login_required()
+    @accepts(schema=ClientRaceAndEthnicityEditSchema, api=ns)
+    @responds(schema=ClientRaceAndEthnicitySchema(many=True), api=ns, status_code=201)
+    def put(self, user_id):
+
+        check_client_existence(user_id)
+        
+        #remove existing race/ethnicity info
+        for data in ClientRaceAndEthnicity.query.filter_by(user_id=user_id).all():
+            db.session.delete(data)
+        db.session.commit()
+
+        #add incoming data from request
+        for data in request.parsed_obj['data']:
+            if not LookupRaces.query.filter_by(race_id=data.race_id).one_or_none():
+                raise InputError(400, 'Invalid race_id.')
+
+            model = ClientRaceAndEthnicitySchema().load({
+                'race_id': data.race_id,
+                'is_client_mother': data.is_client_mother
+            })
+            model.user_id = user_id
+            db.session.add(model)
+        db.session.commit()
+        return ClientRaceAndEthnicity.query.filter_by(user_id=user_id).all()

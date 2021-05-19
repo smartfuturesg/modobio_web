@@ -28,7 +28,8 @@ from odyssey.api.client.models import (
     ClientWeightHistory,
     ClientWaistSizeHistory,
     ClientTransactionHistory,
-    ClientPushNotifications
+    ClientPushNotifications,
+    ClientRaceAndEthnicity
 )
 from odyssey.api.user.schemas import UserInfoPutSchema
 
@@ -70,6 +71,22 @@ class ClientFacilitiesSchema(Schema):
     def make_object(self, data, **kwargs):
         return ClientFacilities(**data)
 
+class ClientRaceAndEthnicitySchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = ClientRaceAndEthnicity
+        exclude = ('created_at', 'updated_at', 'idx')
+
+    user_id = fields.Integer(dump_only=True)
+    race_id = fields.Integer()
+    race_name = fields.String(dump_only=True)
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return ClientRaceAndEthnicity(**data)
+
+class ClientRaceAndEthnicityEditSchema(Schema):
+    data = fields.Nested(ClientRaceAndEthnicitySchema(many=True), missing=[])
+
 class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientInfo
@@ -78,7 +95,7 @@ class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
 
     user_id = fields.Integer()
     primary_goal_id = fields.Integer()
-    race_id = fields.Integer()
+    race_information = fields.Nested(ClientRaceAndEthnicitySchema(many=True), missing=[])
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -89,10 +106,9 @@ class ClientInfoPutSchema(ma.SQLAlchemyAutoSchema):
         model = ClientInfo
         include_fk = True
         exclude = ('created_at', 'updated_at', 'idx', 'user_id')
-        dump_only = ( 'membersince', 'primary_goal', 'race')
+        dump_only = ( 'membersince', 'primary_goal')
 
     primary_goal = fields.String()
-    race = fields.String()
 
 class ClientAndUserInfoSchema(Schema):
 

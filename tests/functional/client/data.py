@@ -194,3 +194,30 @@ clients_transactions = [
         "currency": "USD"
     }
 ]
+
+clients_race_and_ethnicities = {
+    'normal data':
+    {
+        'data': 
+        [        
+            {
+                'race_id': 1,
+                'is_client_mother': False
+            },
+            {
+                'race_id': 2,
+                'is_client_mother': True
+            }
+        ]
+    },
+    'invalid race_id':
+    {
+        'data':
+        [
+            {
+                'race_id': 999,
+                'is_client_mother':
+            }
+        ]
+    }
+}
