@@ -5,6 +5,6 @@ alter sequence "LookupTransactionTypes_idx_seq"
 
 INSERT INTO "LookupTransactionTypes" ("category","name","icon") 
 VALUES
-('Telehealth', 'Medical', 'medical_doctor.svg'),
+('Telehealth', 'Medical', 'doctor.svg'),
 ('Subscription', 'Wellness Plan', 'history.svg'),
 ('Product', 'Supplements', 'supplementations.svg');

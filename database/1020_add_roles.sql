@@ -18,5 +18,5 @@ VALUES
 ('NOW()','NOW()','physician_assistant','Physicians Assistant',NULL,True,'#000000',NULL,True,False),
 ('NOW()','NOW()','system_admin','System Admin',NULL,False,'#000000',NULL,False,True),
 ('NOW()','NOW()','client_services','Client Services',NULL,False,'#000000',NULL,True,True),
-('NOW()','NOW()','medical_doctor','Medical medical_doctor','physician',True,'#d71e3e','medical_doctor.svg',True,True),
+('NOW()','NOW()','medical_doctor','Medical medical_doctor','physician',True,'#d71e3e','doctor.svg',True,True),
 ('NOW()','NOW()','trainer',	'Trainer','physical_trainer, personal_trainer',True,'#aef2ea','physical-training.svg',True,True);
