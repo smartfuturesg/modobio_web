@@ -106,9 +106,10 @@ class ClientInfoPutSchema(ma.SQLAlchemyAutoSchema):
         model = ClientInfo
         include_fk = True
         exclude = ('created_at', 'updated_at', 'idx', 'user_id')
-        dump_only = ( 'membersince', 'primary_goal')
+        dump_only = ( 'membersince', 'primary_goal', 'race_information')
 
     primary_goal = fields.String()
+    race_information = fields.Nested(ClientRaceAndEthnicitySchema(many=True), missing=[])
 
 class ClientAndUserInfoSchema(Schema):
 

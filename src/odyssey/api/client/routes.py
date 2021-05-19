@@ -145,7 +145,12 @@ class Client(Resource):
        
         client_info_payload = client_data.__dict__
         client_info_payload["primary_goal"] = db.session.query(LookupGoals.goal_name).filter(client_data.primary_goal_id == LookupGoals.goal_id).one_or_none()
-        client_info_payload["race_information"] = ClientRaceAndEthnicity.query.filter_by(user_id=user_id).all()
+        
+        race_info = ClientRaceAndEthnicity.query.filter_by(user_id=user_id).all()
+        for info in race_info:
+            info.race_name = LookupRaces.query.filter_by(race_id=info.race_id).one_or_none().race_name
+
+        client_info_payload["race_information"] = race_info
 
         return {'client_info': client_info_payload, 'user_info': user_data}
 
@@ -185,7 +190,12 @@ class Client(Resource):
         # prepare client_info payload  
         client_info_payload = client_data.__dict__
         client_info_payload["primary_goal"] = db.session.query(LookupGoals.goal_name).filter(client_data.primary_goal_id == LookupGoals.goal_id).one_or_none()
-        client_info_payload["race"] = db.session.query(LookupRaces.race_name).filter(client_data.race_id == LookupRaces.race_id).one_or_none()
+        
+        race_info = ClientRaceAndEthnicity.query.filter_by(user_id=user_id).all()
+        for info in race_info:
+            info.race_name = LookupRaces.query.filter_by(race_id=info.race_id).one_or_none().race_name
+
+        client_info_payload["race_information"] = race_info
 
         return {'client_info': client_data, 'user_info': user_data}
 
@@ -1401,7 +1411,11 @@ class ClientRaceAndEthnicityApi(Resource):
     def get(self, user_id):
         check_client_existence(user_id)
 
-        return ClientRaceAndEthnicity.query.filter_by(user_id=user_id).all()
+        res = ClientRaceAndEthnicity.query.filter_by(user_id=user_id).all()
+        for info in res:
+            info.race_name = LookupRaces.query.filter_by(race_id=info.race_id).one_or_none().race_name
+
+        return res
 
     @token_auth.login_required()
     @accepts(schema=ClientRaceAndEthnicityEditSchema, api=ns)
@@ -1424,7 +1438,11 @@ class ClientRaceAndEthnicityApi(Resource):
             db.session.add(model)
         db.session.commit()
         
-        return ClientRaceAndEthnicity.query.filter_by(user_id=user_id).all()
+        res = ClientRaceAndEthnicity.query.filter_by(user_id=user_id).all()
+        for info in res:
+            info.race_name = LookupRaces.query.filter_by(race_id=info.race_id).one_or_none().race_name
+
+        return res
 
     @token_auth.login_required()
     @accepts(schema=ClientRaceAndEthnicityEditSchema, api=ns)
@@ -1450,4 +1468,9 @@ class ClientRaceAndEthnicityApi(Resource):
             model.user_id = user_id
             db.session.add(model)
         db.session.commit()
-        return ClientRaceAndEthnicity.query.filter_by(user_id=user_id).all()
+
+        res = ClientRaceAndEthnicity.query.filter_by(user_id=user_id).all()
+        for info in res:
+            info.race_name = LookupRaces.query.filter_by(race_id=info.race_id).one_or_none().race_name
+
+        return res
