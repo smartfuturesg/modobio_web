@@ -165,9 +165,9 @@ def test_add_staff_operational_territory(test_client, init_database, staff_auth_
     possible_territories = [x[0] for x in possible_territories]
     payload  = {'operational_territories' : []}
 
-    # for each doctor, trainer, nutritionist, physical_therapist role randomly add a few territories of operation
+    # for each medical_doctor, trainer, nutritionist, physical_therapist role randomly add a few territories of operation
     for role in staff_roles:
-        if role.role in ('doctor', 'nutrition', 'trainer', 'physical_therapist'):
+        if role.role in ('medical_doctor', 'nutritionist', 'trainer', 'physical_therapist'):
             add_territories = random.sample(possible_territories, k=random.randint(1, len(possible_territories)))
             for territory in add_territories:
                 payload['operational_territories'].append({'role_id': role.idx, 

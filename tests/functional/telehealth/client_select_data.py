@@ -121,26 +121,26 @@ telehealth_bookings_staff_4_client_1_data = {
   'target_date': '2022-04-04',
   'booking_window_id_start_time': 109,
   'booking_window_id_end_time': 112,
-  'profession_type': 'doctor'
+  'profession_type': 'medical_doctor'
 }
 telehealth_bookings_staff_4_client_3_data = {
   'target_date': '2022-04-04',
   'booking_window_id_start_time': 187,
   'booking_window_id_end_time': 190,
-  'profession_type': 'doctor'
+  'profession_type': 'medical_doctor'
 }
 telehealth_bookings_staff_8_client_5_data = {
   'target_date': '2022-04-04',
   'booking_window_id_start_time': 117,
   'booking_window_id_end_time': 120,
-  'profession_type': 'doctor'
+  'profession_type': 'medical_doctor'
 }
 
 # ------------
 # client queue
 # ------------
 telehealth_queue_client_3_data = {
-  'profession_type': 'doctor',
+  'profession_type': 'medical_doctor',
   'target_date': '2022-04-04T02:00:00.000',
   'priority': True,
   'medical_gender': 'np'

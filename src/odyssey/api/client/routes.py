@@ -1028,7 +1028,7 @@ class ClientDrinksApi(Resource):
     """
     Endpoints related to nutritional beverages that are assigned to clients.
     """
-    @token_auth.login_required(user_type=('staff',), staff_role=('doctor', 'nutrition'))
+    @token_auth.login_required(user_type=('staff',), staff_role=('doctor', 'nutritionist'))
     @accepts(schema=ClientAssignedDrinksSchema, api=ns)
     @responds(schema=ClientAssignedDrinksSchema, api=ns, status_code=201)
     def post(self, user_id):
@@ -1054,7 +1054,7 @@ class ClientDrinksApi(Resource):
 
         return ClientAssignedDrinks.query.filter_by(user_id=user_id).all()
     
-    @token_auth.login_required(user_type=('staff',), staff_role=('doctor', 'nutrition'))
+    @token_auth.login_required(user_type=('staff',), staff_role=('doctor', 'nutritionist'))
     @accepts(schema=ClientAssignedDrinksDeleteSchema, api=ns)
     @responds(schema=ClientAssignedDrinksSchema, api=ns, status_code=204)
     def delete(self, user_id):

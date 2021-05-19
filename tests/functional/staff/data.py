@@ -12,7 +12,7 @@ users_staff_new_user_data = {
   },
   "staff_info": {
     "access_roles" : [
-            "doctor"
+            "medical_doctor"
   ]
   }
 }

@@ -136,7 +136,7 @@ clients_subscription_data = {
 }
 
 clients_individual_data = {
-    'doctor': True,
+    'medical_doctor': True,
     'pt': True,
     'data': False,
     'drinks': True,

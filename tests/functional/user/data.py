@@ -89,7 +89,7 @@ users_to_delete_data = {
     },
     "staff_info":{
       "access_roles" : [
-            "doctor",
+            "medical_doctor",
             "staff_admin"]
     }
   }
