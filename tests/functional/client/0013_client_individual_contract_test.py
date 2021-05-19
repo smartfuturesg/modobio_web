@@ -19,7 +19,7 @@ def test_post_client_individual_contract(test_client, init_database, staff_auth_
                                 data=dumps(payload), 
                                 content_type='application/json')
     assert response.status_code == 201
-    assert response.json['doctor'] == clients_individual_data['doctor']
+    assert response.json['medical_doctor'] == clients_individual_data['doctor']
 
 def test_get_client_individual_contract(test_client, init_database, staff_auth_header):
     """
@@ -36,5 +36,5 @@ def test_get_client_individual_contract(test_client, init_database, staff_auth_h
                                 content_type='application/json')
                                 
     assert response.status_code == 200
-    assert response.json['doctor'] == True
+    assert response.json['medical_doctor'] == True
     
