@@ -95,7 +95,6 @@ class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
 
     user_id = fields.Integer()
     primary_goal_id = fields.Integer()
-    race_information = fields.Nested(ClientRaceAndEthnicitySchema(many=True), missing=[])
 
     @post_load
     def make_object(self, data, **kwargs):

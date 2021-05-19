@@ -69,8 +69,6 @@ def test_put_client_info(test_client, init_database, staff_auth_header):
     
     assert response.status_code == 200
     assert response.json["client_info"]["primary_goal"] == "('Recovery',)"
-    assert response.json["client_info"]["race"] == "('White / Caucasian',)"
-    assert response.json["client_info"]["race_id"] == 1
     assert response.json["client_info"]["primary_goal_id"] == 1
 
 def test_creating_new_client(test_client, init_database, staff_auth_header):
@@ -89,7 +87,6 @@ def test_creating_new_client(test_client, init_database, staff_auth_header):
                                 content_type='application/json')
 
     user = User.query.filter_by(email=users_new_user_client_data['user_info']['email']).first()
-
     assert response.status_code == 201
     assert user.email == users_new_user_client_data['user_info']['email']
     assert response.json['user_info']['modobio_id']
