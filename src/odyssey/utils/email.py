@@ -400,61 +400,106 @@ def unregister_device(endpoint_arn: str):
     endpoint = sns.PlatformEndpoint(arn=endpoint_arn)
     endpoint.delete()
 
+apple_tmpl = {
+    'aps': {
+        'alert': {
+            'title': None,
+            'body': None,
+            'title-loc-key': None,
+            'title-loc-args': None,
+            'action-loc-key': None,
+            'loc-key': None,
+            'loc-args': None,
+            'launch-image': None},
+        'sound': None,
+        'category': None,
+        'thread-id': None,
+        'badge': None,
+        'content-available': None}}
+"""
+Template for Apple Push Notifications.
 
-apple_alert_tmpl = {
-    'alert': {
-        'title': None,
-        'body': None,
-        'title-loc-key': None,
-        'title-loc-args': None,
-        'action-loc-key': None,
-        'loc-key': None,
-        'loc-args': None,
-        'launch-image': None}.
-    'sound': None,
-    'category': None,
-    'thread-id': None}
-apple_badge_tmpl = {'badge': None}
-apple_background_tmpl = {'content-available': None}
+This template can be used for all types of push notifications to the Apple channel,
+_except_ VoIP notification. See :attr:`apple_voip_tmpl` for that.
+
+To use this template, simply import this template, set any keys you want to use, and
+submit it as the `content` parameter of :func:`push_notification`. Any key set to
+``None`` (the default), will be removed from the template before sending.
+
+Custom keys can be added anywhere in the dict, but typically the ``aps`` root key and
+all its nested keys are defined by Apple. Most likely you'll want to add custom keys
+to the root of the template, at the same level as ``aps``.
+
+For more information on Apple specific keys, see
+https://developer.apple.com/library/archive/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/PayloadKeyReference.html#//apple_ref/doc/uid/TP40008194-CH17-SW1
+
+- aps (dict): root key of Apple specific payload keys.
+    - alert (dict): keys for a standard user alert message.
+        * title (str): [required] title of the message.
+        * body (str): [required] the actual message.
+        * title-loc-key (str): a key that looks up the translation (localization) of the title in Localizable.strings.
+        * title-loc-args (list(str)): a list of strings that replace formatting specifiers in the translated title.
+        * action-loc-key (str): a key that looks up the translation or alternate text of the "View" button.
+        * loc-key (str): a key that looks up the translation (localization) of the body in Localizable.strings.
+        * loc-args (list(str)): a list of strings that replace formatting specifiers in the translated body.
+        * launch-image (str): filename of image to show while app is loading from background.
+    - badge (int): set app badge to this number; 0 removes badge.
+    - sound (str): filename of custom sound to play when push notification arrives.
+- custom key (any): add any custom keys to the root of this template.
+
+Title and body are required **only if** alert is included. If you want to only set a badge, or only
+include custom keys, then do _not_ set alert. If alert if included, then title and body must also
+be set.
+
+Not included in this template are:
+- content-available: this will be set by choosing NotificationType.background.
+- thread-id (str): app-specific identifier for grouping notifications (not used at the moment).
+- category (str): custom actions directly from notification center (not used at the moment), see https://developer.apple.com/library/archive/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/SupportingNotificationsinYourApp.html#//apple_ref/doc/uid/TP40008194-CH4-SW26
+"""
+
 apple_voip_tmpl = {
-    'type': 'incoming-call'
+    'type': 'incoming-call',
     'data': {
         'room_id': None,
         'staff_id': None,
         'staff_first_name': None,
-        'staff_middle_name': None
-        'staff_last_name': None
+        'staff_middle_name': None,
+        'staff_last_name': None,
         'booking_description': None}}
+"""
+Template for Apple Push Notification to initiate a VoIP call.
+
+Apple VoIP push notifications are sent through a different channel than regular push
+notifications. This special channel sends notifications straight to the app for
+processing without the user needing to interact with the notification first. VoIP
+push notifications also have higher priority and an incoming VoIP push notification
+will launch the app even if in the background or not running at all.
+
+To use this template, simply import this template, set any keys you want to use, and
+submit it as the `content` parameter of :func:`push_notification`. Any key set to
+``None`` (the default), will be removed from the template before sending.
+
+The contents of this template are not dictated by Apple, only our app.
+
+- type (str): do **not** change this, it must be the literal string "incoming-call".
+- data (dict): VoIP specific information.
+    * room_id (int): ID of the Twilio video call room.
+    * staff_id (int): staff member who is initiating the call.
+    * staff_first_name (str): first name of the staff member.
+    * staff_middle_name (str): middle name of the staff member.
+    * staff_last_name (str): last name of the staff member.
+    * booking_description (str): reason for the call.
+"""
+
 
 class NotificationType(enum.Enum):
     alert = 'A standard notification with a title and a body.'
     background = 'Trigger the app to reload data in the background.'
-    badge = 'Set the app badge to the specified number.'
+    badge = 'ONLY set the app badge to the specified number, no alert.'
     voip = 'A notification that will trigger a VoIP call.'
 
 
-class NotificationProvider(enum.Enum):
-    apple = {
-        NotificationType.alert: {
-            'channel': 'APNS',
-            'template': apple_alert_template},
-        NotificationType.background: {
-            'channel': 'APNS',
-            'template': apple_background_tmpl}
-        NotificationType.badge: {
-            'channel': 'APNS',
-            'template': apple_badge_tmpl}
-        NotificationType.voip: {
-            'channel': 'APNS_VOIP',
-            'template': apple_voip_tmpl}}
-    android = {
-        NotificationType.alert: 'FCM',
-        NotificationType.background: 'FCM',
-        NotificationType.badge: 'FCM',
-        NotificationType.voip: 'FCM'}
-
-
-def push_notification(user_id: int, ntype: NotificationType, provider: NotificationProvider, content: dict):
+def push_notification(user_id: int, notification_type: NotificationType, content: dict):
     """ Send a push notification to the user.
 
     Parameters
@@ -463,31 +508,91 @@ def push_notification(user_id: int, ntype: NotificationType, provider: Notificat
         User ID of User to send message to. Notification will be send to all
         registered devices for this user.
 
-    ntype : NotificationType(Enum)
+    notification_type : str or NotificationType(Enum)
         What type of notification (alert, background, badge, voip) to send.
 
-    provider : NotificationProvider(Enum)
-        Which service (apple or android) to send the notification to.
+    content : dict
+        Content of the push notification. See the ``apple_tmpl`` and ``apple_voip_tmpl``
+        notification templates for a place to start.
     """
-    ntype = NotificationType[ntype]
-    provider = NotificationProvider[provider]
-    channel = provider.value[ntype]['channel']
+    if isinstance(notification_type, str):
+        notification_type = NotificationType[notification_type]
 
     registered = (
         NotificationsPushRegistration
         .query
-        .filter_by(
-            user_id=user_id,
-            channel=channel)
+        .filter_by(user_id=user_id)
         .all())
 
-    sns, app = _load_sns()
     for device in registered:
-        endpoint = sns.PlatformEndpoint(device.arn)
-        # Set message attributes
-        # https://docs.aws.amazon.com/sns/latest/dg/sns-send-custom-platform-specific-payloads-mobile-devices.html
-        # Figure out SANDBOX
-        # messgae = {APNS: contents}
-        reponse = endpoint.publish(TargetArn=device.arn, Message=dumps(contents))
-        if 'messageId' not in response:
-            raise Error
+        channel = device.arn.split('/')[1]
+        if channel.startswith('APSN'):
+            msg = _apple_push_notification(device.arn, notification_type, content)
+        elif channel == 'FCM':
+            msg = _android_push_notificaton(device.arn, notification_type, content)
+        elif channel == 'LOG':
+            msg = _debug_push_notification(notification_type, content)
+        else:
+            raise UnknownError(f'Unknown push notification channel {channel} for user {user_id}')
+
+    return msg
+
+def _apple_push_notification(arn: str, notification_type: NotificationType, content: dict):
+    """ Send a push notification to an Apple device.
+
+    Do not call this function directly, use :func:`push_notification` instead.
+    """
+    # Check content. Don't error, just set defaults.
+    if notification_type == NotificationType.alert:
+        if 'aps' not in content:
+            content['aps'] = {}
+        if 'alert' not in content['aps']:
+            content['aps']['alert']
+        if 'title' not in content['aps']['alert']:
+            content['aps']['alert']['title'] = 'Modo Bio'
+        if 'body' not in content['aps']['alert']:
+            content['aps']['alert']['body'] = 'A message from Modo Bio.'
+    elif notification_type == NotificationType.background:
+        if 'aps' in content:
+            sound = content['aps'].get('sound', None)
+        content['aps'] = {
+            'content-available': 1,
+            'sound': sound}
+    elif notification_type == NotificationType.badge:
+        if 'aps' not in content:
+            content['aps'] = {}
+        if 'badge' not in content['aps']:
+            content['aps']['badge'] = 0
+        content['aps'].pop('alert', None)
+    else:
+        content.pop('aps', None)
+        content['type'] = 'incoming-call'
+
+    channel = 'APSN'
+    if notification_type == NotificationType.voip:
+        channel = 'APSN_VOIP'
+        arn.replace('APSN', 'APSN_VOIP')
+
+    message = dumps({channel: content})
+
+    sns, _ = _load_sns()
+    endpoint = sns.PlatformEndpoint(arn)
+    reponse = endpoint.publish(TargetArn=arn, Message=message)
+
+    #TODO: do something based on response.
+    return message
+
+def _android_push_notification(arn: str, notification_type: NotificationType, content: dict):
+    """ Send a push notification to an Android device.
+
+    Do not call this function directly, use :func:`push_notification` instead.
+    """
+    pass
+
+def _debug_push_notification(notification_type: NotificationType, content: dict):
+    """ Send a push notification to a debug log.
+
+    Do not call this function directly, use :func:`push_notification` instead.
+    """
+    print(content)
+    return content
