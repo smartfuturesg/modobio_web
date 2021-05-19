@@ -6,7 +6,7 @@ from botocore.exceptions import ClientError
 from flask import current_app
 from flask.json import dumps
 
-# from odyssey.api.notifications.schemas import ApplePushNotificationSchema
+from odyssey.api.notifications.models import NotificationsPushRegistration
 from odyssey.utils.constants import PASSWORD_RESET_URL, REGISTRATION_PORTAL_URL
 
 SUBJECTS = {"remote_registration_portal": "Modo Bio User Registration Portal", 
@@ -224,12 +224,6 @@ def send_email_no_reply(subject=None, recipient="success@simulator.amazonses.com
 # Push notifications
 #
 
-push_providers = {
-    'apple': ('APNS', 'APNS_VOIP'),
-    'android': ('FCM',)}
-
-_providers = tuple(p for q in push_providers.values() for p in q)
-
 def _load_sns():
     """ Loads the AWS Simple Notification Service (SNS).
 
@@ -241,8 +235,10 @@ def _load_sns():
     sns : boto3.resources.factory.sns.ServiceResource
         The loaded boto3 resource.
 
-    apps : list
-        A list of all platform applications available in this region.
+    channel_app : dict
+        A dict mapping the channel names to the platform applications, e.g.
+        {'APNS': sns.PlatformApplication(arn='arn:aws:.../APNS/...'),
+         'APNS_VOIP': sns.PlatformApplication(arn='arn:aws:.../APNS_VOIP/...')}
 
     Raises
     ------
@@ -265,12 +261,19 @@ def _load_sns():
             # Some other error
             raise err
 
-    return sns, apps
+    channel_app = {app.arn.split('/')[1]: app for app in apps}
+
+    return sns, channel_app
+
+push_platforms = {
+    'apple': 'APNS',
+    'android': 'FCM',
+    'debug': 'DEBUG/LOG'}
 
 def register_device(
     device_token: str,
+    device_os: str,
     device_description: str,
-    provider: str,
     current_endpoint: str=None
 ) -> str:
     """ Register a device for push notifications.
@@ -281,12 +284,11 @@ def register_device(
         The device token (called registration ID on Android) obtained from the OS to allow
         push notifications.
 
+    device_os : str
+        Which platform to register with. Currently supported: "apple", "android", or "debug".
+
     device_description : str
         Additional data stored with the device_token in the AWS SNS endpoint. Max length 2048.
-
-    provider : str
-        Which provider to register with. Select 'APNS' for one of Apple, 'APNS_VOIP' for
-        Apple video call start, or 'FCM' for Android OS.
 
     current_endpoint : str
         Current endpoint ARN, which may or may not be active.
@@ -299,25 +301,32 @@ def register_device(
     Raises
     ------
     ValueError
-        On incorrect provider or device_description too long.
+        On incorrect platform or device_description too long.
     """
     # Some info and explanation:
     #
     # https://docs.aws.amazon.com/sns/latest/dg/mobile-push-send.html
     #
     # ARN = string representation of resources on AWS
-    # Platform Application = endpoint for a single provider channel.
-    #   AP_ARN: arn:aws:sns:us-west-1:393511634479:endpoint/APNS_SANDBOX/ApplePushNotification-Dev
+    # Platform Application = endpoint for a single platform channel.
+    #   example arn:aws:sns:us-west-1:393511634479:app/APNS_SANDBOX/ApplePushNotification-Dev
     # Endpoint = endpoint for a single device within a channel.
-    #   EP_ARN: AP_ARN/147a664a-2ca9-3109-91e6-1986d3f0d52a
+    #   example arn:aws:sns:us-west-1:393511634479:endpoint/APNS_SANDBOX/
+    #           ApplePushNotification-Dev/147a664a-2ca9-3109-91e6-1986d3f0d52a
+    #
+    # TODO: make use of endpoint params UserID and ChannelID
 
-    if provider not in _providers:
-        raise ValueError('provider must be one of: {}'.format(_providers))
+    if device_os not in push_platforms:
+        raise ValueError('Device OS must be one of: {}'.format(', '.join(push_platforms.keys())))
 
     if len(device_description) > 2048:
-        raise ValueError('device_description must be less than 2048 characters long.')
+        raise ValueError('Device description must be less than 2048 characters long.')
 
-    sns, apps = _load_sns()
+    # Not a real endpoint
+    if device_os == 'debug':
+        return push_platforms[device_os]
+
+    sns, channel_app = _load_sns()
 
     if current_endpoint:
         # Check if current endpoint is still good, delete if not.
@@ -335,13 +344,27 @@ def register_device(
                 # Current endpoint still good
                 return current_endpoint
 
-    for app in apps:
-        # Find matching platform
-        # TODO: currently only sandboxed endpoints
-        if f'{provider}_SANDBOX' in app.arn:
-            endpoint = app.create_platform_endpoint(
+    channel = push_platforms[device_os]
+
+    if device_os == 'apple':
+        # Apple has a separate channel for VoIP notifications.
+        voip_channel = 'APNS_VOIP'
+
+        # Apple also has separate channels for development.
+        # TODO: fix this after ticket NRV-1838 is done.
+        if current_app.env == 'development':
+            channel += '_SANDBOX'
+            voip_channel += '_SANDBOX'
+
+        voip_app = channel_app[voip_channel]
+        voip_endpoint = voip_app.create_platform_endpoint(
                 Token=device_token,
                 CustomUserData=device_description)
+
+    app = channel_app[channel]
+    endpoint = app.create_platform_endpoint(
+            Token=device_token,
+            CustomUserData=device_description)
 
     return endpoint.arn
 
@@ -353,7 +376,25 @@ def unregister_device(endpoint_arn: str):
     endpoint_arn : str
         ARN of the endpoint to be deleted.
     """
-    sns, _ = _load_sns()
+    sns, channel_app = _load_sns()
+
+    channel = endpoint_arn.split('/')[1]
+    if channel.startswith('APNS'):
+        # Apple has a separate channel for VoIP notifications.
+        voip_channel = 'APNS_VOIP'
+
+        # Apple also has separate channels for development.
+        if channel.endswith('_SANDBOX'):
+            voip_channel += '_SANDBOX'
+
+        # There must be a better way to get an endpoint
+        # given an platform application and a channel name.
+        voip_app = channel_app[voip_channel]
+        uuid = endpoint_arn.split('/')[-1]
+        voip_arn = f'{voip_app.arn}/{uuid}'.replace('app', 'endpoint')
+
+        endpoint = sns.PlatformEndpoint(arn=voip_arn)
+        endpoint.delete()
 
     # Won't fail if endpoints don't exist.
     endpoint = sns.PlatformEndpoint(arn=endpoint_arn)

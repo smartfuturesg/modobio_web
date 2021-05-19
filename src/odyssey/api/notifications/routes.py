@@ -15,7 +15,7 @@ from odyssey.api.notifications.schemas import (
     PushRegistrationPostSchema)
 from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import DB_SERVER_TIME
-from odyssey.utils.email import push_providers, register_device, unregister_device
+from odyssey.utils.email import push_platforms, register_device, unregister_device
 from odyssey.utils.errors import InputError, UnknownError
 
 ns = api.namespace('notifications', description='Endpoints for all types of notifications.')
@@ -97,54 +97,40 @@ class PushRegistrationEndpoint(Resource):
         device_description : str
             A description of the device, perhaps device name + OS name and version.
 
-        device_os : str, one of: apple, android
+        device_os : str, one of: apple, android, debug.
             Main OS of the device. Only apple and android are supported at the moment.
+            If set to debug, this endpoint will insert an entry into the database, but
+            not create and actual AWS SNS notification endpoint. Instead, messages will
+            be sent to a debug log.
         """
         device_token = request.json['device_token']
         device_id = request.json['device_id']
         device_description = request.json['device_description']
         device_os = request.json['device_os']
-        device_str = f'{device_id}/{device_description}'
+        device_str = f'user: {user_id}, device: {device_id}, description: {device_description}'
 
-        providers = push_providers[device_os]
+        device = (
+            NotificationsPushRegistration
+            .query
+            .filter_by(
+                user_id=user_id,
+                device_id=device_id)
+            .one_or_none())
 
-        for prov in providers:
-            # Check if combination of device_token/device_id/provider already exists.
-            device = (
-                NotificationsPushRegistration
-                .query
-                .filter_by(
-                    user_id=user_id,
-                    device_token=device_token,
-                    device_id=device_id,
-                    provider=prov)
-                .one_or_none())
-
-            if device:
-                continue
-
-            # Check if device_id (with different token) already exists.
-            device = (
-                NotificationsPushRegistration
-                .query
-                .filter_by(
-                    user_id=user_id,
-                    device_id=device_id,
-                    provider=prov)
-                .one_or_none())
-
-            if device:
-                device.arn = register_device(device_token, device_str, prov, current_endpoint=device.arn)
-                device.device_token = device_token
-                device.device_description = device_description
-            else:
-                device = NotificationsPushRegistration(user_id=user_id)
-                device.arn = register_device(device_token, device_str, prov)
-                device.device_token = device_token
-                device.device_id = device_id
-                device.device_description = device_description
-                device.provider = prov
-                db.session.add(device)
+        if device:
+            # Re-register a device, token may have changed. Even if token is the same,
+            # the endpoint may have been disables or settings may have changed.
+            # Re-registering will fix that.
+            device.arn = register_device(device_token, device_os, device_str, current_endpoint=device.arn)
+            device.device_token = device_token
+            device.device_description = device_description
+        else:
+            device = NotificationsPushRegistration(user_id=user_id)
+            device.arn = register_device(device_token, device_os, device_str)
+            device.device_token = device_token
+            device.device_id = device_id
+            device.device_description = device_description
+            db.session.add(device)
 
         db.session.commit()
 
@@ -168,27 +154,26 @@ class PushRegistrationEndpoint(Resource):
             .filter_by(
                 user_id=user_id,
                 device_token=request.json['device_token'])
-            .all())
+            .one_or_none())
         if device:
-            for dev in device:
-                unregister_device(dev.arn)
-                db.session.delete(dev)
+            unregister_device(device.arn)
+            db.session.delete(device)
             db.session.commit()
 
 
 import os
+# TODO: fix this after ticket NRV-1838 is done.
 if os.getenv('FLASK_ENV') != 'production':
-    from odyssey.utils.email import push_notification, NotificationType, NotificationProvider
+    from odyssey.utils.email import push_notification, NotificationType
     from marshmallow import INCLUDE
 
-    ntype_doc = '\n'.join([f'                - {x.name}: {x.value}' for x in NotificationType])
-    nprov_doc = '\n'.join([f'                - {x.name}' for x in NotificationProvider])
+    _doc = '\n'.join([f'                - {x.name}: {x.value}' for x in NotificationType])
 
     @ns.route('/push/test/<int:user_id>/')
-    @ns.doc(security=None)
+    @ns.doc(params={'user_id': 'User ID number'})
     class PushTestEndpoint(Resource):
 
-        # @token_auth.login_required
+        @token_auth.login_required
         @accepts(schema=ApplePushNotificationSchema, api=ns)
         @responds(schema=ApplePushNotificationSchema, status_code=201, api=ns)
         def post(self, user_id):
@@ -199,26 +184,20 @@ if os.getenv('FLASK_ENV') != 'production':
             Parameters
             ----------
 
-            type : str
+            notification_type : str
                 What type of notification to send, one of:
-{ntype_doc}
+{_doc}
 
-            provider : str
-                Send push notificaton through this service, one of:
-{nprov_doc}
-
-            kwargs
-                All other parameters are used in the message. Depends on type of message.
+            contents : dict
+                The contents of the message.
 
             Returns
             -------
             str
                 The json encoded message as send to the service.
             """
-            ntype = request.json['type']
-            prov = request.json['provider']
+            notification_type = request.json['notification_type']
             contents = request.json.get('contents', {})
-            out = push_notification(user_id, ntype, prov, **contents)
-            return out
+            return push_notification(user_id, notification_type, contents)
 
-        post.__doc__ = post.__doc__.format(ntype_doc=ntype_doc, nprov_doc=nprov_doc)
+        post.__doc__ = post.__doc__.format(_doc=_doc)
