@@ -12,10 +12,6 @@ from tests.functional.telehealth.data import (
     telehealth_put_booking_details
 )
 
-# XXX: temporary fix for failing image upload test, due to updated werkzeug 2.0.0.
-import pytest
-pytest.skip('Temporary skip until file upload is fixed.', allow_module_level=True)
-
 #Process for adding telehealth booking details:
 #1. create client, create staff
 #2. staff adds availability
@@ -127,7 +123,7 @@ def test_get_booking_details(test_client, init_database, staff_auth_header):
     assert response.json[0]['idx'] == 1
     assert response.json[0]['booking_id'] == booking_id
     assert response.json[0]['details'] == ''
-    assert response.json[0]['media'] == ''
+    assert not response.json[0]['media']
 
     #Try getting booking details for booking_id that doens't exist
     invalid_booking_id = 500
