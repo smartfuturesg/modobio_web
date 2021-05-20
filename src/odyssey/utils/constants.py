@@ -431,16 +431,21 @@ fit under.
 
 :type: tuple
 """
-
 ACCESS_ROLES = (
     'staff_admin',
+    'data_scientist',
+    'community_manager',
+    'physical_therapist',
+    'dietitian',
+    'nutritionist',
+    'therapist',
+    'nurse_practitioner',
+    'nurse',
+    'physician_assistant',
     'system_admin',
     'client_services',
-    'physical_therapist',
+    'medical_doctor',
     'trainer',
-    'data_science',
-    'doctor',
-    'nutrition'
 )
 """
 Staff members are assigned roles, see :class:`odyssey.models.staff.StaffRoles`.

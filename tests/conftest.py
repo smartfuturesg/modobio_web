@@ -110,7 +110,7 @@ def generate_users():
         # 3) give staff member all roles
         
         if i < 5:
-            db.session.add(StaffRoles(user_id=staff_1.user_id, role='doctor', verified=True))
+            db.session.add(StaffRoles(user_id=staff_1.user_id, role='medical_doctor', verified=True))
         else:
             for idx,role in enumerate(ACCESS_ROLES):
                 db.session.add(StaffRoles(user_id=staff_1.user_id, role=role, verified=True))
