@@ -1,3 +1,5 @@
+import pathlib
+
 # For readability
 # 1/5/2025
 # Sunday
@@ -201,41 +203,32 @@ telehealth_client_staff_bookings_put_1_data = {
 # --------------------------------------------------------------------
 #                     Telehealth Booking Details
 # --------------------------------------------------------------------
-import pathlib
-from werkzeug.datastructures import FileStorage
 
 rec_file = pathlib.Path(__file__).parent / 'test_m4a_recording.m4a'
 img_file = pathlib.Path(__file__).parent / 'test_img_weirdmole.jpg'
 telehealth_post_booking_details = {
-  'images': (img_file.as_posix() , open(img_file, mode='rb'), 'image/jpg'), 
-  'voice': (rec_file.as_posix() , open(rec_file, mode='rb'), 'audio/mp4a-latm'),
-  'details': 'Testing booking details',
-  'location_id': 1
-}
+    'images': (img_file.as_posix(), 'image/jpeg'),
+    'voice': (rec_file.as_posix(), 'audio/mp4'),
+    'details': 'Testing booking details',
+    'location_id': 1}
 
 telehealth_put_booking_details = {
-  'remove_img_rec':{
-    'images': FileStorage(filename=''),
-    'voice': FileStorage(filename=''),
-    'details': 'Removed image and recording, kept description',
-    'location_id': 1,
-  },
-  'swap_img_rec':{
-    'images': (img_file.as_posix() , open(img_file, mode='rb'), 'image/jpg'),
-    'voice':(rec_file.as_posix() , open(rec_file, mode='rb'), 'audio/mp4a-latm'),
-    'details': 'Swapped files, recording is image and image is recording.',
-    'location_id': 1,
-  },
-  'change_text_only':{
-    'details': 'Only changed text details',
-    'location_id': 1,
-  },
-  'nothing_to_change':{
-  },
-  'empty_booking_details':{
-    'images': FileStorage(filename=''),
-    'voice': FileStorage(filename=''),
-    'details': '',
-    'location_id': 1,
-  }
-}
+    'remove_img_rec': {
+        'images': None,
+        'voice': None,
+        'details': 'Removed image and recording, kept description',
+        'location_id': 1},
+    'swap_img_rec': {
+        'images': (img_file.as_posix(), 'image/jpeg'),
+        'voice': (rec_file.as_posix(), 'audio/mp4'),
+        'details': 'Swapped files, recording is image and image is recording.',
+        'location_id': 1},
+    'change_text_only': {
+        'details': 'Only changed text details',
+        'location_id': 1},
+    'nothing_to_change': {},
+    'empty_booking_details': {
+        'images': None,
+        'voice': None,
+        'details': '',
+        'location_id': 1}}

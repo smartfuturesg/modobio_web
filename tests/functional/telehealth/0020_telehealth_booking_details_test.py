@@ -12,10 +12,6 @@ from tests.functional.telehealth.data import (
     telehealth_put_booking_details
 )
 
-# XXX: temporary fix for failing Twilio tests
-# import pytest
-# pytest.skip('Out of TwiliCoin.', allow_module_level=True)
-
 #Process for adding telehealth booking details:
 #1. create client, create staff
 #2. staff adds availability
@@ -127,7 +123,9 @@ def test_get_booking_details(test_client, init_database, client_auth_header):
 
     #Try getting booking details for booking_id that doens't exist
     invalid_booking_id = 500
-    response = test_client.get(f'/telehealth/bookings/details/{invalid_booking_id}', headers=client_auth_header)
+    response = test_client.get(
+        f'/telehealth/bookings/details/{invalid_booking_id}',
+        headers=client_auth_header)
     assert response.status_code == 204
 
 def test_delete_booking_details(test_client, init_database, client_auth_header):
@@ -151,5 +149,8 @@ def test_delete_booking_details(test_client, init_database, client_auth_header):
     assert response.status_code == 404
 
     invalid_booking_id = 500
-    response = test_client.delete(f'/telehealth/bookings/details/{invalid_booking_id}', headers=client_auth_header)
+
+    response = test_client.delete(
+        f'/telehealth/bookings/details/{invalid_booking_id}',
+        headers=client_auth_header)
     assert response.status_code == 404

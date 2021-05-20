@@ -132,7 +132,7 @@ class TelehealthBookingDetailsGetSchema(Schema):
     details = fields.String()
     location_id = fields.Integer()
     location_name = fields.String()
-    images = fields.String(many=True)
+    images = fields.String()
     voice = fields.String()
     
 class TelehealthChatRoomAccessSchema(Schema):
