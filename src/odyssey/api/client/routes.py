@@ -117,25 +117,27 @@ class Client(Resource):
         #update staff recent clients information
         staff_user_id = token_auth.current_user()[0].user_id
 
-        #check if supplied client is already in staff recent clients
-        client_exists = StaffRecentClients.query.filter_by(user_id=staff_user_id).filter_by(client_user_id=user_id).one_or_none()
-        if client_exists:
-            #update timestamp
-            client_exists.timestamp = datetime.now()
-            db.session.add(client_exists)
-            db.session.commit()
-        else:
-            #enter new recent client information
-            recent_client_schema = StaffRecentClientsSchema().load({'user_id': staff_user_id, 'client_user_id': user_id})
-            db.session.add(recent_client_schema)
-            db.session.flush()
+        #if this request was made by a staff member, update their recent clients list
+        if staff_user_id != user_id:
+            #check if supplied client is already in staff recent clients
+            client_exists = StaffRecentClients.query.filter_by(user_id=staff_user_id).filter_by(client_user_id=user_id).one_or_none()
+            if client_exists:
+                #update timestamp
+                client_exists.timestamp = datetime.now()
+                db.session.add(client_exists)
+                db.session.commit()
+            else:
+                #enter new recent client information
+                recent_client_schema = StaffRecentClientsSchema().load({'user_id': staff_user_id, 'client_user_id': user_id})
+                db.session.add(recent_client_schema)
+                db.session.flush()
 
-            #check if staff member has more than 10 recent clients
-            staff_recent_searches = StaffRecentClients.query.filter_by(user_id=staff_user_id).order_by(StaffRecentClients.timestamp.asc()).all()
-            if len(staff_recent_searches) > 10:
-                #remove the oldest client in the list
-                db.session.delete(staff_recent_searches[0])
-            db.session.commit()
+                #check if staff member has more than 10 recent clients
+                staff_recent_searches = StaffRecentClients.query.filter_by(user_id=staff_user_id).order_by(StaffRecentClients.timestamp.asc()).all()
+                if len(staff_recent_searches) > 10:
+                    #remove the oldest client in the list
+                    db.session.delete(staff_recent_searches[0])
+                db.session.commit()
 
         #data must be refreshed because of db changes
         if client_data:
@@ -145,10 +147,10 @@ class Client(Resource):
        
         client_info_payload = client_data.__dict__
         client_info_payload["primary_goal"] = db.session.query(LookupGoals.goal_name).filter(client_data.primary_goal_id == LookupGoals.goal_id).one_or_none()
-        
-        race_info = ClientRaceAndEthnicity.query.filter_by(user_id=user_id).all()
-        for info in race_info:
-            info.race_name = LookupRaces.query.filter_by(race_id=info.race_id).one_or_none().race_name
+
+        race_info = db.session.query(ClientRaceAndEthnicity.is_client_mother, LookupRaces.race_id, LookupRaces.race_name) \
+            .join(LookupRaces, LookupRaces.race_id == ClientRaceAndEthnicity.race_id) \
+            .filter(ClientRaceAndEthnicity.user_id == user_id).all()
 
         client_info_payload["race_information"] = race_info
 
@@ -1411,10 +1413,10 @@ class ClientRaceAndEthnicityApi(Resource):
     def get(self, user_id):
         check_client_existence(user_id)
 
-        res = ClientRaceAndEthnicity.query.filter_by(user_id=user_id).all()
-        for info in res:
-            info.race_name = LookupRaces.query.filter_by(race_id=info.race_id).one_or_none().race_name
-
+        res = db.session.query(ClientRaceAndEthnicity.is_client_mother, LookupRaces.race_id, LookupRaces.race_name) \
+            .join(LookupRaces, LookupRaces.race_id == ClientRaceAndEthnicity.race_id) \
+            .filter(ClientRaceAndEthnicity.user_id == user_id).all()
+        
         return res
 
     @token_auth.login_required()
@@ -1438,9 +1440,9 @@ class ClientRaceAndEthnicityApi(Resource):
             db.session.add(model)
         db.session.commit()
         
-        res = ClientRaceAndEthnicity.query.filter_by(user_id=user_id).all()
-        for info in res:
-            info.race_name = LookupRaces.query.filter_by(race_id=info.race_id).one_or_none().race_name
+        res = db.session.query(ClientRaceAndEthnicity.is_client_mother, LookupRaces.race_id, LookupRaces.race_name) \
+            .join(LookupRaces, LookupRaces.race_id == ClientRaceAndEthnicity.race_id) \
+            .filter(ClientRaceAndEthnicity.user_id == user_id).all()
 
         return res
 
@@ -1469,8 +1471,8 @@ class ClientRaceAndEthnicityApi(Resource):
             db.session.add(model)
         db.session.commit()
 
-        res = ClientRaceAndEthnicity.query.filter_by(user_id=user_id).all()
-        for info in res:
-            info.race_name = LookupRaces.query.filter_by(race_id=info.race_id).one_or_none().race_name
+        res = db.session.query(ClientRaceAndEthnicity.is_client_mother, LookupRaces.race_id, LookupRaces.race_name) \
+            .join(LookupRaces, LookupRaces.race_id == ClientRaceAndEthnicity.race_id) \
+            .filter(ClientRaceAndEthnicity.user_id == user_id).all()
 
         return res
