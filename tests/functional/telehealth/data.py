@@ -207,22 +207,20 @@ telehealth_client_staff_bookings_put_1_data = {
 rec_file = pathlib.Path(__file__).parent / 'test_m4a_recording.m4a'
 img_file = pathlib.Path(__file__).parent / 'test_img_weirdmole.jpg'
 telehealth_post_booking_details = {
-    # TODO: fix
-    'images': (img_file.as_posix() , open(img_file, mode='rb'), 'image/jpg'), 
-    'voice': (rec_file.as_posix() , open(rec_file, mode='rb'), 'audio/mp4a-latm'),
+    'images': (img_file.as_posix(), 'image/jpeg'),
+    'voice': (rec_file.as_posix(), 'audio/mp4'),
     'details': 'Testing booking details',
     'location_id': 1}
 
 telehealth_put_booking_details = {
     'remove_img_rec': {
-        'images': ''
-        'voice': '',
+        'images': None,
+        'voice': None,
         'details': 'Removed image and recording, kept description',
         'location_id': 1},
     'swap_img_rec': {
-        # TODO fix
-        'images': (img_file.as_posix() , open(img_file, mode='rb'), 'image/jpg'),
-        'voice':(rec_file.as_posix() , open(rec_file, mode='rb'), 'audio/mp4a-latm'),
+        'images': (img_file.as_posix(), 'image/jpeg'),
+        'voice': (rec_file.as_posix(), 'audio/mp4'),
         'details': 'Swapped files, recording is image and image is recording.',
         'location_id': 1},
     'change_text_only': {
@@ -230,9 +228,7 @@ telehealth_put_booking_details = {
         'location_id': 1},
     'nothing_to_change': {},
     'empty_booking_details': {
-        'images': '',
-        'voice': '',
+        'images': None,
+        'voice': None,
         'details': '',
-        'location_id': 1,
-    }
-}
+        'location_id': 1}}
