@@ -46,7 +46,6 @@ client_info_put_test_data = {
         "primary_goal_id": 1,
         "country": "US",
         "emergency_contact": "Emergency",
-        "race_id": 1,
         "state": "AZ",
         "street": "3325 S Malibu Dr.",
         "gender": "m",
@@ -194,3 +193,30 @@ clients_transactions = [
         "currency": "USD"
     }
 ]
+
+clients_race_and_ethnicities = {
+    'normal data':
+    {
+        'data': 
+        [        
+            {
+                'race_id': 1,
+                'is_client_mother': False
+            },
+            {
+                'race_id': 2,
+                'is_client_mother': True
+            }
+        ]
+    },
+    'invalid race_id':
+    {
+        'data':
+        [
+            {
+                'race_id': 999,
+                'is_client_mother': True
+            }
+        ]
+    }
+}

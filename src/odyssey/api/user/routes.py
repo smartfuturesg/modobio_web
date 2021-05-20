@@ -267,6 +267,7 @@ class NewClientUser(Resource):
         If registering an already existing staff user as a client, 
         the password provided must match the one already in use by staff account
         """
+
         user_info = request.get_json()     
         user_info['email'] = user_info.get('email').lower()
         user = User.query.filter(User.email.ilike(user_info.get('email'))).first()
