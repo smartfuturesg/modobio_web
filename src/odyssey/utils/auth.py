@@ -115,7 +115,7 @@ class BasicAuth(object):
         # if the user is logged in as staff member, follow staff authorization routine
         if user_context == 'staff' and ('staff' in user_type or 'staff_self' in user_type):
             if user.is_staff:
-                if staff_roles: # role-based authorization 
+                if staff_roles or 'staff_self' in user_type: # role-based authorization 
                     self.staff_access_check(user, user_type, staff_roles=staff_roles)
                 else:
                     return
@@ -206,12 +206,14 @@ class BasicAuth(object):
             if request.view_args.get('user_id') != user.user_id:
                 
                 raise LoginNotAuthorized
-        if staff_roles is None or any(role in staff_user_roles for role in staff_roles):
-            # Staff member's role matches the Role Requirement in the API
-            return None
-        else:
-            
-            raise LoginNotAuthorized
+        if staff_roles is not None:
+            if any(role in staff_user_roles for role in staff_roles):
+                # Staff member's role matches the Role Requirement in the API
+                return None
+            else:
+                raise LoginNotAuthorized
+
+        return
 
     def validate_roles(self, roles, constants):
         # Validate 

@@ -215,3 +215,126 @@ class StaffOperationalTerritories(db.Model):
 
     :type: int, foreign key to :attr:`StaffRoles.idx <odyssey.models.staff.StaffRoles.idx>`
     """
+
+class StaffCalendarEvents(db.Model):
+    """ 
+    Model for events to be saved to the professional's calendar 
+
+    """
+    __tablename__ = 'StaffCalendarEvents'
+    
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    """
+    Staff member user_id number, foreign key to User.user_id.
+
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
+    """
+
+    start_date = db.Column(db.Date, nullable=False)
+    """
+    If recurring, this is the recurrence start date,
+    if not, this is the event start date
+
+    :type: :class:`datetime.date`
+    """
+
+    end_date = db.Column(db.Date, nullable=True)
+    """
+    If event is recurring, this is the recurrence end date,
+    if not, this is the event end date
+
+    :type: :class:`datetime.date`
+    """
+
+    start_time = db.Column(db.Time, nullable=False)
+    """
+    Event start time
+
+    :type: :class:'datetime.time'
+    """
+
+    end_time = db.Column(db.Time, nullable=False)
+    """
+    Event end time
+
+    :type: :class:'datetime.time'
+    """
+
+    timezone = db.Column(db.String, nullable=True)
+    """
+    Local time zone name, saved at event creation
+
+    :type: str
+    """
+
+    duration = db.Column(db.Interval, nullable=True)
+    """
+    Event duration, only important for recurring events
+
+    :type: datetime.timedelta
+    """
+
+    all_day = db.Column(db.Boolean, nullable=False)
+    """
+    Flag if event lasts all day or not
+
+    :type: bool
+    """
+
+    recurring = db.Column(db.Boolean, nullable=False)
+    """
+    Flag to determine if this event is recurring
+
+    :type: bool
+    """
+
+    recurrence_type = db.Column(db.String, nullable=True)
+    """
+    Type of recurrence for the event. Must be one of RECURRENCE_TYPE = ('Daily', 'Weekly', 'Monthly', 'Yearly')
+
+    :type: str
+    """
+
+    location = db.Column(db.String(100), nullable=True)
+    """
+    Event's location
+    
+    :type: str
+    """
+
+    description = db.Column(db.Text, nullable=True)
+    """
+    Event's description
+
+    :type: str
+    """
+
+    availability_status = db.Column(db.String, nullable=False)
+    """
+    Professional's availabilit status through the event
+    Currently, only options are in constants.py -> EVENT_AVAILABILITY = ('Busy', 'Available')
+
+    :type: str
+    """
+
