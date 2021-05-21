@@ -63,3 +63,10 @@ def test_put_client_race_and_ethnicity(test_client, init_database, client_auth_h
                             data=dumps(clients_race_and_ethnicities['duplicates']), 
                             content_type='application/json')
     assert response.status_code == 201
+
+    #test with list containing an invalid data type
+    response = test_client.put("/client/race-and-ethnicity/1/",
+                            headers=client_auth_header, 
+                            data=dumps(clients_race_and_ethnicities['non-numeric']), 
+                            content_type='application/json')
+    assert response.status_code == 400

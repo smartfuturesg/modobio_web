@@ -224,5 +224,10 @@ clients_race_and_ethnicities = {
     {
         'mother': [1,1,1,1,1],
         'father': [2,2,2,4,6]
+    },
+    'non-numeric':
+    {
+        'mother': [9,10],
+        'father': ['White, Caucasian']
     }
 }
