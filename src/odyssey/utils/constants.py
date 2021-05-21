@@ -835,3 +835,10 @@ DAY_OF_WEEK = ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday
 TWILIO_ACCESS_KEY_TTL = 14400
 
 BOOKINGS_STATUS = ('Completed','On-Going','Accepted','Pending Staff Acceptance','Client Canceled','Staff Canceled' )
+
+### Event's Calendar constants ###
+EVENT_AVAILABILITY = ('Busy', 'Available')
+""" Availability labels for an event added to professional's calendar """
+
+RECURRENCE_TYPE = ('Daily', 'Weekly', 'Monthly', 'Yearly')
+""" Types of recurrence that may be chosen for a recurring event """
