@@ -9,7 +9,7 @@ from werkzeug.security import check_password_hash
 
 
 from odyssey.api import api
-from odyssey.api.client.schemas import ClientInfoSchema, ClientGeneralMobileSettingsSchema
+from odyssey.api.client.schemas import ClientInfoSchema, ClientGeneralMobileSettingsSchema, ClientRaceAndEthnicitySchema
 from odyssey.api.client.models import ClientClinicalCareTeam
 from odyssey.api.lookup.models import LookupSubscriptions
 from odyssey.api.staff.schemas import StaffProfileSchema, StaffRolesSchema
@@ -287,29 +287,6 @@ class NewClientUser(Resource):
                 client_info = ClientInfoSchema().load({'user_id': user.user_id})
                 
                 db.session.add(client_info)
-
-                # add new client subscription information
-                client_sub = UserSubscriptionsSchema().load({
-                    'subscription_status': 'unsubscribed',
-                    'subscription_type_id': 1,
-                    'is_staff': False
-                })
-                client_sub.user_id = user.user_id
-                db.session.add(client_sub)
-
-                # add default client mobile settings
-                client_mobile_settings = ClientGeneralMobileSettingsSchema().load({
-                    "include_timezone": True,
-                    "display_middle_name": False,
-                    "use_24_hour_clock": False,
-                    "is_right_handed": True,
-                    "enable_push_notifications": False,
-                    "timezone_tracking": False,
-                    "biometrics_setup": False,
-                    "date_format": "%d-%b-%Y"
-                })
-                client_mobile_settings.user_id = user.user_id
-                db.session.add(client_mobile_settings)
         else:
             # user account does not yet exist for this email
             password=user_info.get('password', None)
@@ -325,29 +302,6 @@ class NewClientUser(Resource):
             client_info = ClientInfoSchema().load({"user_id": user.user_id})
             db.session.add(client_info)
             db.session.add(user_login)
-
-            # add new user subscription information
-            client_sub = UserSubscriptionsSchema().load({
-                'subscription_status': 'unsubscribed',
-                'subscription_type_id': 1,
-                'is_staff': False
-            })
-            client_sub.user_id = user.user_id
-            db.session.add(client_sub)
-
-            # add default client mobile settings
-            client_mobile_settings = ClientGeneralMobileSettingsSchema().load({
-                "include_timezone": True,
-                "display_middle_name": False,
-                "use_24_hour_clock": False,
-                "is_right_handed": True,
-                "enable_push_notifications": False,
-                "timezone_tracking": False,
-                "biometrics_setup": False,
-                "date_format": "%d-%b-%Y"
-            })
-            client_mobile_settings.user_id = user.user_id
-            db.session.add(client_mobile_settings)
 
             # generate token and code for email verification
             token = UserPendingEmailVerifications.generate_token(user.user_id)
@@ -368,6 +322,37 @@ class NewClientUser(Resource):
 
             #Authenticate newly created client accnt for immediate login
             user, user_login, _ = basic_auth.verify_password(username=user.email, password=password)
+
+        # add new client subscription information
+        client_sub = UserSubscriptionsSchema().load({
+            'subscription_status': 'unsubscribed',
+            'subscription_type_id': 1,
+            'is_staff': False
+        })
+        client_sub.user_id = user.user_id
+        db.session.add(client_sub)
+
+        # add default client mobile settings
+        client_mobile_settings = ClientGeneralMobileSettingsSchema().load({
+            "include_timezone": True,
+            "display_middle_name": False,
+            "use_24_hour_clock": False,
+            "is_right_handed": True,
+            "enable_push_notifications": False,
+            "timezone_tracking": False,
+            "biometrics_setup": False,
+            "date_format": "%d-%b-%Y"
+        })
+        client_mobile_settings.user_id = user.user_id
+        db.session.add(client_mobile_settings)
+
+        # add default client race and ethnicity settings
+        client_mother_race_info = ClientRaceAndEthnicitySchema().load({'is_client_mother': True, 'race_id': 1})
+        client_mother_race_info.user_id = user.user_id
+        client_father_race_info = ClientRaceAndEthnicitySchema().load({'is_client_mother': False, 'race_id': 1})
+        client_father_race_info.user_id = user.user_id
+        db.session.add(client_mother_race_info)
+        db.session.add(client_father_race_info)     
 
         #Generate access and refresh tokens
         access_token = UserLogin.generate_token(user_type='client', user_id=user.user_id, token_type='access')
