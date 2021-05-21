@@ -38,7 +38,7 @@ from odyssey.api.user.schemas import (
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.constants import PASSWORD_RESET_URL, DB_SERVER_TIME
 from odyssey.utils.errors import InputError, StaffEmailInUse, ClientEmailInUse, UnauthorizedUser
-from odyssey.utils.email import send_email_password_reset, send_email_delete_account
+from odyssey.utils.message import send_email_password_reset, send_email_delete_account
 from odyssey.utils.misc import check_user_existence, check_client_existence, check_staff_existence, verify_jwt
 from odyssey.utils import search
 from odyssey import db

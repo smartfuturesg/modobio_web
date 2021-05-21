@@ -12,7 +12,7 @@ from marshmallow import (
 
 from odyssey import ma
 from odyssey.api.notifications.models import Notifications, NotificationsPushRegistration
-from odyssey.utils.email import NotificationType, push_platforms
+from odyssey.utils.message import NotificationType, push_platforms
 
 
 class NotificationSchema(ma.SQLAlchemyAutoSchema):

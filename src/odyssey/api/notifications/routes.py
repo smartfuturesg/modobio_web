@@ -15,7 +15,7 @@ from odyssey.api.notifications.schemas import (
     PushRegistrationPostSchema)
 from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import DB_SERVER_TIME
-from odyssey.utils.email import push_platforms, register_device, unregister_device
+from odyssey.utils.message import push_platforms, register_device, unregister_device
 from odyssey.utils.errors import InputError, UnknownError
 
 ns = api.namespace('notifications', description='Endpoints for all types of notifications.')
@@ -164,8 +164,7 @@ class PushRegistrationEndpoint(Resource):
 import os
 # TODO: fix this after ticket NRV-1838 is done.
 if os.getenv('FLASK_ENV') != 'production':
-    from odyssey.utils.email import push_notification, NotificationType
-    from marshmallow import INCLUDE
+    from odyssey.utils.message import push_notification, NotificationType
 
     _doc = '\n'.join([f'                - {x.name}: {x.value}' for x in NotificationType])
 

@@ -58,7 +58,7 @@ from odyssey.api.trainer.models import FitnessQuestionnaire
 from odyssey.api.facility.models import RegisteredFacilities
 from odyssey.api.user.models import User, UserLogin, UserTokenHistory
 from odyssey.utils.pdf import to_pdf, merge_pdfs
-from odyssey.utils.email import send_test_email
+from odyssey.utils.message import send_test_email
 from odyssey.utils.misc import check_client_existence, check_drink_existence
 from odyssey.api.client.schemas import(
     AllClientsDataTier,
