@@ -197,26 +197,32 @@ clients_transactions = [
 clients_race_and_ethnicities = {
     'normal data':
     {
-        'data': 
-        [        
-            {
-                'race_id': 1,
-                'is_client_mother': False
-            },
-            {
-                'race_id': 2,
-                'is_client_mother': True
-            }
-        ]
+        'mother': [2,3,4],
+        'father': [3,5]
     },
     'invalid race_id':
     {
-        'data':
-        [
-            {
-                'race_id': 999,
-                'is_client_mother': True
-            }
-        ]
+        'mother': [2,4],
+        'father': [999]
+    },
+    'unknown':
+    {
+        'mother': [],
+        'father': [6,7]
+    },
+    'invalid combination':
+    {
+        'mother': [1,2],
+        'father': [7,8,9,10]
+    },
+    'all ids':
+    {
+        'mother': [2,3,4,5,6,7,8,9,10,11,12],
+        'father': [2,3,4,5,6,7,8,9,10,11,12]
+    },
+    'duplicates':
+    {
+        'mother': [1,1,1,1,1],
+        'father': [2,2,2,4,6]
     }
 }
