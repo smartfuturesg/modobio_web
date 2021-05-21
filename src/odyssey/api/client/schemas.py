@@ -85,7 +85,8 @@ class ClientRaceAndEthnicitySchema(ma.SQLAlchemyAutoSchema):
         return ClientRaceAndEthnicity(**data)
 
 class ClientRaceAndEthnicityEditSchema(Schema):
-    data = fields.Nested(ClientRaceAndEthnicitySchema(many=True), missing=[])
+    mother = fields.List(fields.Integer())
+    father = fields.List(fields.Integer())
 
 class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
