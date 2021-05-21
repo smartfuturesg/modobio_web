@@ -7,6 +7,8 @@ from twilio.jwt.access_token import AccessToken
 from twilio.jwt.access_token.grants import VideoGrant, ChatGrant
 import random
 from werkzeug.datastructures import FileStorage
+from datetime import timedelta
+from dateutil import tz
 
 from odyssey import db
 from odyssey.api import api
@@ -14,7 +16,7 @@ from odyssey.api import api
 from odyssey.api.lookup.models import (
     LookupBookingTimeIncrements
 )
-from odyssey.api.staff.models import StaffRoles
+from odyssey.api.staff.models import StaffRoles, StaffCalendarEvents
 from odyssey.api.user.models import User
 
 from odyssey.api.telehealth.models import (
@@ -41,7 +43,7 @@ from odyssey.api.telehealth.schemas import (
     TelehealthBookingDetailsSchema,
 ) 
 from odyssey.utils.auth import token_auth
-from odyssey.utils.constants import TWILIO_ACCESS_KEY_TTL, DAY_OF_WEEK
+from odyssey.utils.constants import BOOKINGS_STATUS, TWILIO_ACCESS_KEY_TTL, DAY_OF_WEEK
 from odyssey.utils.errors import GenericNotFound, InputError, LoginNotAuthorized, UnauthorizedUser, ContentNotFound
 from odyssey.utils.misc import (
     check_client_existence, 
@@ -515,6 +517,30 @@ class TelehealthBookingsApi(Resource):
             db.session.delete(client_in_queue)
             db.session.flush()
 
+        # Same day appointment
+        if request.parsed_obj.booking_window_id_start_time < request.parsed_obj.booking_window_id_end_time:
+            end_date = request.parsed_obj.target_date
+        else:
+            # Appointment spills over to the next day
+            # 11:30pm - 12:15am
+            end_date = request.parsed_obj.target_date + timedelta(days=1)
+        lookup_times = LookupBookingTimeIncrements.query.all()
+
+        add_to_calendar = StaffCalendarEvents(user_id=request.parsed_obj.staff_user_id,
+                                              start_date=request.parsed_obj.target_date,
+                                              end_date=end_date,
+                                              start_time=lookup_times[request.parsed_obj.booking_window_id_start_time-1].start_time,
+                                              end_time=lookup_times[request.parsed_obj.booking_window_id_start_time-1].end_time,
+                                              timezone=lookup_times[request.parsed_obj.booking_window_id_start_time-1].start_time.replace(tzinfo=tz.tzlocal()).tzname(), # TODO: Update this
+                                              recurring=False,
+                                              availability_status='Busy',
+                                              location='Telehealth_'+str(request.parsed_obj.idx),
+                                              description='',
+                                              all_day=False
+                                              )
+
+        db.session.add(add_to_calendar)
+
         db.session.commit()
 
         request.parsed_obj.conversation_sid = conversation_sid
@@ -544,10 +570,17 @@ class TelehealthBookingsApi(Resource):
             raise InputError(status_code=405,message='Could not find booking.')
 
         data = request.get_json()
-
         bookings.update(data)
+        # NOTE: status array should be referenced to BOOKINGS_STATUS in constants.py
+        status = ('Client Canceled', 'Staff Canceled')
+        # If the booking gets updated for cancelation, then delete it in the Staff's calendar
+        if data['status'] in status:
+            staff_event = StaffCalendarEvents.query.filter_by(location='Telehealth_{}'.format(booking_id)).one_or_none()
+            if staff_event:
+                db.session.delete(staff_event)
         
         db.session.commit()
+
         return 201
 
     @token_auth.login_required()
