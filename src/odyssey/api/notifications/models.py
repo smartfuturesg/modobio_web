@@ -227,6 +227,16 @@ class NotificationsPushRegistration(db.Model):
     :type: str, max length 1024
     """
 
+    channel = db.Column(db.String(25))
+    """
+    Name of the channel of the push notification service. AWS calls
+    this the "platform application". Currently 'APNS' for Apple Push
+    Notification Service, 'APNS_VOIP' for Apple video call start, or
+    'FCM' for Firebase/Google Cloud Messaging.
+
+    :type: str, max length 25
+    """
+
     arn = db.Column(db.String(256))
     """
     The AWS Resource Name (ARN) of the notification channel (AWS SNS
