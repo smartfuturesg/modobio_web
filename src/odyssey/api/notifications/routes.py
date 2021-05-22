@@ -9,7 +9,6 @@ from odyssey.api.lookup.models import LookupNotifications
 from odyssey.api.notifications.models import Notifications, NotificationsPushRegistration
 from odyssey.api.notifications.schemas import (
     NotificationSchema,
-    ApplePushNotificationSchema,
     PushRegistrationSchema,
     PushRegistrationDeleteSchema,
     PushRegistrationPostSchema)
@@ -83,7 +82,7 @@ class PushRegistrationEndpoint(Resource):
     @accepts(schema=PushRegistrationPostSchema, api=ns)
     @responds(status_code=201, api=ns)
     def post(self, user_id):
-        """ Register a new device token.
+        """ Register a new device.
 
         Parameters
         ----------
@@ -165,38 +164,118 @@ import os
 # TODO: fix this after ticket NRV-1838 is done.
 if os.getenv('FLASK_ENV') != 'production':
     from odyssey.utils.message import push_notification, NotificationType
+    from odyssey.api.notifications.schemas import (
+        ApplePushNotificationAlertTestSchema,
+        ApplePushNotificationBackgroundTestSchema,
+        ApplePushNotificationBadgeTestSchema,
+        ApplePushNotificationVoipTestSchema)
 
-    _doc = '\n'.join([f'                - {x.name}: {x.value}' for x in NotificationType])
-
-    @ns.route('/push/test/<int:user_id>/')
+    @ns.route('/push/test/alert/<int:user_id>/')
     @ns.doc(params={'user_id': 'User ID number'})
-    class PushTestEndpoint(Resource):
+    class PushTestAlertEndpoint(Resource):
 
         @token_auth.login_required
-        @accepts(schema=ApplePushNotificationSchema, api=ns)
-        @responds(schema=ApplePushNotificationSchema, status_code=201, api=ns)
+        @accepts(schema=ApplePushNotificationAlertTestSchema, api=ns)
+        @responds(schema=ApplePushNotificationAlertTestSchema, status_code=201, api=ns)
         def post(self, user_id):
-            """ Send notification to user.
+            """ [DEV ONLY] Send an alert notification to the user.
 
-            This endpoint is only available in **dev** environments.
+            Note
+            ----
+            **This endpoint is only available in DEV environments.**
 
             Parameters
             ----------
-
-            notification_type : str
-                What type of notification to send, one of:
-{_doc}
-
-            contents : dict
+            content : dict
                 The contents of the message.
 
             Returns
             -------
-            str
+            dict
                 The json encoded message as send to the service.
             """
-            notification_type = request.json['notification_type']
-            contents = request.json.get('contents', {})
-            return push_notification(user_id, notification_type, contents)
+            msg = push_notification(user_id, 'alert', request.json.get('content', {}))
+            return {'message': msg}
 
-        post.__doc__ = post.__doc__.format(_doc=_doc)
+
+    @ns.route('/push/test/background/<int:user_id>/')
+    @ns.doc(params={'user_id': 'User ID number'})
+    class PushTestBackgroundEndpoint(Resource):
+
+        @token_auth.login_required
+        @accepts(schema=ApplePushNotificationBackgroundTestSchema, api=ns)
+        @responds(schema=ApplePushNotificationBackgroundTestSchema, status_code=201, api=ns)
+        def post(self, user_id):
+            """ [DEV ONLY] Send a background update notification to the user.
+
+            Note
+            ----
+            **This endpoint is only available in DEV environments.**
+
+            Parameters
+            ----------
+            content : dict
+                The contents of the message.
+
+            Returns
+            -------
+            dict
+                The json encoded message as send to the service.
+            """
+            msg = push_notification(user_id, 'background', request.json.get('content', {}))
+            return {'message': msg}
+
+
+    @ns.route('/push/test/badge/<int:user_id>/')
+    @ns.doc(params={'user_id': 'User ID number'})
+    class PushTestBadgeEndpoint(Resource):
+
+        @token_auth.login_required
+        @accepts(schema=ApplePushNotificationBadgeTestSchema, api=ns)
+        @responds(schema=ApplePushNotificationBadgeTestSchema, status_code=201, api=ns)
+        def post(self, user_id):
+            """ [DEV ONLY] Send a badge update notification to the user.
+
+            Note
+            ----
+            **This endpoint is only available in DEV environments.**
+
+            Parameters
+            ----------
+            content : dict
+                The contents of the message.
+
+            Returns
+            -------
+            dict
+                The json encoded message as send to the service.
+            """
+            msg = push_notification(user_id, 'badge', request.json.get('content', {}))
+            return {'message': msg}
+
+    @ns.route('/push/test/voip/<int:user_id>/')
+    @ns.doc(params={'user_id': 'User ID number'})
+    class PushTestVoipEndpoint(Resource):
+
+        @token_auth.login_required
+        @accepts(schema=ApplePushNotificationVoipTestSchema, api=ns)
+        @responds(schema=ApplePushNotificationVoipTestSchema, status_code=201, api=ns)
+        def post(self, user_id):
+            """ [DEV ONLY] Send a voip initiation notification to the user.
+
+            Note
+            ----
+            **This endpoint is only available in DEV environments.**
+
+            Parameters
+            ----------
+            content : dict
+                The contents of the message.
+
+            Returns
+            -------
+            dict
+                The json encoded message as send to the service.
+            """
+            msg = push_notification(user_id, 'voip', request.json.get('content', {}))
+            return {'message': msg}

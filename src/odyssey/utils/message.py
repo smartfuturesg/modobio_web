@@ -5,9 +5,16 @@ import boto3
 from botocore.exceptions import ClientError
 from flask import current_app
 from flask.json import dumps
+from marshmallow import ValidationError
 
 from odyssey.api.notifications.models import NotificationsPushRegistration
+from odyssey.api.notifications.schemas import (
+    ApplePushNotificationAlertSchema,
+    ApplePushNotificationBackgroundSchema,
+    ApplePushNotificationBadgeSchema,
+    ApplePushNotificationVoipSchema)
 from odyssey.utils.constants import PASSWORD_RESET_URL, REGISTRATION_PORTAL_URL
+from odyssey.utils.errors import UnknownError
 
 SUBJECTS = {"remote_registration_portal": "Modo Bio User Registration Portal", 
             "password_reset": "Modo bio password reset request - temporary link",
@@ -499,7 +506,7 @@ class NotificationType(enum.Enum):
     voip = 'A notification that will trigger a VoIP call.'
 
 
-def push_notification(user_id: int, notification_type: NotificationType, content: dict):
+def push_notification(user_id: int, notification_type: NotificationType, content: dict) -> dict:
     """ Send a push notification to the user.
 
     Parameters
@@ -514,6 +521,18 @@ def push_notification(user_id: int, notification_type: NotificationType, content
     content : dict
         Content of the push notification. See the ``apple_tmpl`` and ``apple_voip_tmpl``
         notification templates for a place to start.
+
+    Returns
+    -------
+    dict
+        A dict with the channel name as key and the JSON encoded string of the message
+        as it was sent to the registrered device(s) as value.
+
+    Raises
+    ------
+    UnknownError
+        If the user has no registered devices or if the device is registered with an
+        unknown channel.
     """
     if isinstance(notification_type, str):
         notification_type = NotificationType[notification_type]
@@ -524,9 +543,14 @@ def push_notification(user_id: int, notification_type: NotificationType, content
         .filter_by(user_id=user_id)
         .all())
 
+    if not registered:
+        raise UnknownError(
+            message=f'User {user_id} does not have any registered devices.'
+                     'Connect with POST /notifications/push/register/{user_id}/ first.')
+
     for device in registered:
         channel = device.arn.split('/')[1]
-        if channel.startswith('APSN'):
+        if channel.startswith('APNS'):
             msg = _apple_push_notification(device.arn, notification_type, content)
         elif channel == 'FCM':
             msg = _android_push_notificaton(device.arn, notification_type, content)
@@ -537,59 +561,56 @@ def push_notification(user_id: int, notification_type: NotificationType, content
 
     return msg
 
-def _apple_push_notification(arn: str, notification_type: NotificationType, content: dict):
+def _apple_push_notification(arn: str, notification_type: NotificationType, content: dict) -> dict:
     """ Send a push notification to an Apple device.
 
     Do not call this function directly, use :func:`push_notification` instead.
     """
     # Check content. Don't error, just set defaults.
     if notification_type == NotificationType.alert:
-        if 'aps' not in content:
-            content['aps'] = {}
-        if 'alert' not in content['aps']:
-            content['aps']['alert']
-        if 'title' not in content['aps']['alert']:
-            content['aps']['alert']['title'] = 'Modo Bio'
-        if 'body' not in content['aps']['alert']:
-            content['aps']['alert']['body'] = 'A message from Modo Bio.'
+        schema = ApplePushNotificationAlertSchema
     elif notification_type == NotificationType.background:
-        if 'aps' in content:
-            sound = content['aps'].get('sound', None)
-        content['aps'] = {
-            'content-available': 1,
-            'sound': sound}
+        schema = ApplePushNotificationBackgroundSchema
     elif notification_type == NotificationType.badge:
-        if 'aps' not in content:
-            content['aps'] = {}
-        if 'badge' not in content['aps']:
-            content['aps']['badge'] = 0
-        content['aps'].pop('alert', None)
+        schema = ApplePushNotificationBadgeSchema
     else:
-        content.pop('aps', None)
-        content['type'] = 'incoming-call'
+        schema = ApplePushNotificationVoipSchema
 
-    channel = 'APSN'
+    try:
+        processed = schema().dumps(content)
+    except ValidationError as err:
+        raise UnknownError(message='\n'.join(err.messages))
+
+    sns, channel_app = _load_sns()
+
+    channel = arn.split('/')[1]
+    uuid = arn.split('/')[-1]
+
     if notification_type == NotificationType.voip:
-        channel = 'APSN_VOIP'
-        arn.replace('APSN', 'APSN_VOIP')
+        if channel == 'APNS':
+            channel = 'APNS_VOIP'
+        elif channel == 'APNS_SANDBOX':
+            channel = 'APNS_VOIP_SANDBOX'
 
-    message = dumps({channel: content})
+    app = channel_app[channel]
+    correct_arn = f'{app.arn}/{uuid}'.replace('app', 'endpoint')
 
-    sns, _ = _load_sns()
-    endpoint = sns.PlatformEndpoint(arn)
-    reponse = endpoint.publish(TargetArn=arn, Message=message)
+    message = {channel: processed}
 
-    #TODO: do something based on response.
+    endpoint = sns.PlatformEndpoint(arn=correct_arn)
+    # Yes, the message got dumped twice in one day. Ouch!
+    response = endpoint.publish(TargetArn=correct_arn, Message=dumps(message))
+
     return message
 
-def _android_push_notification(arn: str, notification_type: NotificationType, content: dict):
+def _android_push_notification(arn: str, notification_type: NotificationType, content: dict) -> dict:
     """ Send a push notification to an Android device.
 
     Do not call this function directly, use :func:`push_notification` instead.
     """
     pass
 
-def _debug_push_notification(notification_type: NotificationType, content: dict):
+def _debug_push_notification(notification_type: NotificationType, content: dict) -> dict:
     """ Send a push notification to a debug log.
 
     Do not call this function directly, use :func:`push_notification` instead.
