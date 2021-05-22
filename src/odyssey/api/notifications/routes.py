@@ -14,7 +14,7 @@ from odyssey.api.notifications.schemas import (
     PushRegistrationPostSchema)
 from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import DB_SERVER_TIME
-from odyssey.utils.message import push_platforms, register_device, unregister_device
+from odyssey.utils.message import PushNotification
 from odyssey.utils.errors import InputError, UnknownError
 
 ns = api.namespace('notifications', description='Endpoints for all types of notifications.')
@@ -108,6 +108,8 @@ class PushRegistrationEndpoint(Resource):
         device_os = request.json['device_os']
         device_str = f'user: {user_id}, device: {device_id}, description: {device_description}'
 
+        pn = PushNotification()
+
         device = (
             NotificationsPushRegistration
             .query
@@ -120,12 +122,12 @@ class PushRegistrationEndpoint(Resource):
             # Re-register a device, token may have changed. Even if token is the same,
             # the endpoint may have been disables or settings may have changed.
             # Re-registering will fix that.
-            device.arn = register_device(device_token, device_os, device_str, current_endpoint=device.arn)
+            device.arn = pn.register_device(device_token, device_os, device_str, current_endpoint=device.arn)
             device.device_token = device_token
             device.device_description = device_description
         else:
             device = NotificationsPushRegistration(user_id=user_id)
-            device.arn = register_device(device_token, device_os, device_str)
+            device.arn = pn.register_device(device_token, device_os, device_str)
             device.device_token = device_token
             device.device_id = device_id
             device.device_description = device_description
@@ -155,7 +157,8 @@ class PushRegistrationEndpoint(Resource):
                 device_token=request.json['device_token'])
             .one_or_none())
         if device:
-            unregister_device(device.arn)
+            pn = PushNotification()
+            pn.unregister_device(device.arn)
             db.session.delete(device)
             db.session.commit()
 
@@ -163,7 +166,6 @@ class PushRegistrationEndpoint(Resource):
 import os
 # TODO: fix this after ticket NRV-1838 is done.
 if os.getenv('FLASK_ENV') != 'production':
-    from odyssey.utils.message import push_notification, NotificationType
     from odyssey.api.notifications.schemas import (
         ApplePushNotificationAlertTestSchema,
         ApplePushNotificationBackgroundTestSchema,
@@ -172,7 +174,7 @@ if os.getenv('FLASK_ENV') != 'production':
 
     @ns.route('/push/test/alert/<int:user_id>/')
     @ns.doc(params={'user_id': 'User ID number'})
-    class PushTestAlertEndpoint(Resource):
+    class ApplePushNotificationAlertTestEndpoint(Resource):
 
         @token_auth.login_required
         @accepts(schema=ApplePushNotificationAlertTestSchema, api=ns)
@@ -194,13 +196,14 @@ if os.getenv('FLASK_ENV') != 'production':
             dict
                 The json encoded message as send to the service.
             """
-            msg = push_notification(user_id, 'alert', request.json.get('content', {}))
+            pn = PushNotification()
+            msg = pn.send(user_id, 'alert', request.json.get('content', {}))
             return {'message': msg}
 
 
     @ns.route('/push/test/background/<int:user_id>/')
     @ns.doc(params={'user_id': 'User ID number'})
-    class PushTestBackgroundEndpoint(Resource):
+    class ApplePushNotificationBackgroundTestEndpoint(Resource):
 
         @token_auth.login_required
         @accepts(schema=ApplePushNotificationBackgroundTestSchema, api=ns)
@@ -222,13 +225,14 @@ if os.getenv('FLASK_ENV') != 'production':
             dict
                 The json encoded message as send to the service.
             """
-            msg = push_notification(user_id, 'background', request.json.get('content', {}))
+            pn = PushNotification()
+            msg = pn.send(user_id, 'background', request.json.get('content', {}))
             return {'message': msg}
 
 
     @ns.route('/push/test/badge/<int:user_id>/')
     @ns.doc(params={'user_id': 'User ID number'})
-    class PushTestBadgeEndpoint(Resource):
+    class ApplePushNotificationBadgeTestEndpoint(Resource):
 
         @token_auth.login_required
         @accepts(schema=ApplePushNotificationBadgeTestSchema, api=ns)
@@ -250,12 +254,14 @@ if os.getenv('FLASK_ENV') != 'production':
             dict
                 The json encoded message as send to the service.
             """
-            msg = push_notification(user_id, 'badge', request.json.get('content', {}))
+            pn = PushNotification()
+            msg = pn.send(user_id, 'badge', request.json.get('content', {}))
             return {'message': msg}
+
 
     @ns.route('/push/test/voip/<int:user_id>/')
     @ns.doc(params={'user_id': 'User ID number'})
-    class PushTestVoipEndpoint(Resource):
+    class ApplePushNotificationVoipTestEndpoint(Resource):
 
         @token_auth.login_required
         @accepts(schema=ApplePushNotificationVoipTestSchema, api=ns)
@@ -277,5 +283,6 @@ if os.getenv('FLASK_ENV') != 'production':
             dict
                 The json encoded message as send to the service.
             """
-            msg = push_notification(user_id, 'voip', request.json.get('content', {}))
+            pn = PushNotification()
+            msg = pn.send(user_id, 'voip', request.json.get('content', {}))
             return {'message': msg}
