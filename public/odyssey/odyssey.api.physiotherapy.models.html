@@ -4,15 +4,18 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>odyssey.api.physiotherapy.models &mdash; Odyssey version: 0.1.100 documentation</title>
+  <title>odyssey.api.physiotherapy.models &mdash; Odyssey version: 0.5.45 documentation</title>
   
 
   
   <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
 
   
   
@@ -29,10 +32,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -64,7 +67,7 @@
             
             
               <div class="version">
-                version: 0.1.100
+                version: 0.5.45
               </div>
             
           
@@ -99,12 +102,16 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Physical therapist</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.trainer.models.html">Trainer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.wearables.models.html">Wearable devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.notifications.models.html">Notifications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.telehealth.models.html">Telehealth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.system.models.html">System config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.facility.models.html">Facilities</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.lookup.models.html">Lookup tables</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.schemas.html">Validation schemas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.api.html">API endpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.tasks.html">Tasks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.utils.html">Utilities</a></li>
 </ul>
 
@@ -175,25 +182,25 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-odyssey.api.physiotherapy.models">
+  <section id="module-odyssey.api.physiotherapy.models">
 <span id="odyssey-api-physiotherapy-models"></span><h1>odyssey.api.physiotherapy.models<a class="headerlink" href="#module-odyssey.api.physiotherapy.models" title="Permalink to this headline">¶</a></h1>
 <p>Database tables for the physical therapist’s portion of the Modo Bio Staff application.
 All tables in this module are prefixed with <code class="docutils literal notranslate"><span class="pre">PT</span></code>.</p>
 <dl class="py class">
-<dt id="odyssey.api.physiotherapy.models.PTHistory">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.physiotherapy.models.</code><code class="sig-name descname">PTHistory</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.PTHistory">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.physiotherapy.models.</span></span><span class="sig-name descname"><span class="pre">PTHistory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
 <p>Physical therapy history table.</p>
 <p>This table stores the physical therapy history of a client. The information
 is taken only once, during the initial consult.</p>
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.PTHistory.displayname">
-<code class="sig-name descname">displayname</code><em class="property"> = 'Physical therapy history'</em><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.displayname" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.PTHistory.displayname">
+<span class="sig-name descname"><span class="pre">displayname</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'Physical</span> <span class="pre">therapy</span> <span class="pre">history'</span></em><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.displayname" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.PTHistory.idx">
-<code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.idx" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.PTHistory.idx">
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.idx" title="Permalink to this definition">¶</a></dt>
 <dd><p>Table index.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -203,8 +210,8 @@ is taken only once, during the initial consult.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.PTHistory.created_at">
-<code class="sig-name descname">created_at</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.created_at" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.PTHistory.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.created_at" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creation timestamp of this row in the database.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -214,8 +221,8 @@ is taken only once, during the initial consult.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.PTHistory.updated_at">
-<code class="sig-name descname">updated_at</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.updated_at" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.PTHistory.updated_at">
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.updated_at" title="Permalink to this definition">¶</a></dt>
 <dd><p>Last update timestamp of this row in the database.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -225,8 +232,8 @@ is taken only once, during the initial consult.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.PTHistory.user_id">
-<code class="sig-name descname">user_id</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.user_id" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.PTHistory.user_id">
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.user_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>User ID number</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -236,8 +243,8 @@ is taken only once, during the initial consult.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.PTHistory.exercise">
-<code class="sig-name descname">exercise</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.exercise" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.PTHistory.exercise">
+<span class="sig-name descname"><span class="pre">exercise</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.exercise" title="Permalink to this definition">¶</a></dt>
 <dd><p>Description of the client’s current exercise schedule.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -247,8 +254,8 @@ is taken only once, during the initial consult.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.PTHistory.has_pt">
-<code class="sig-name descname">has_pt</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.has_pt" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.PTHistory.has_pt">
+<span class="sig-name descname"><span class="pre">has_pt</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.has_pt" title="Permalink to this definition">¶</a></dt>
 <dd><p>Indicates whether or not client has had physical therapy in the past.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -258,8 +265,8 @@ is taken only once, during the initial consult.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.PTHistory.has_chiro">
-<code class="sig-name descname">has_chiro</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.has_chiro" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.PTHistory.has_chiro">
+<span class="sig-name descname"><span class="pre">has_chiro</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.has_chiro" title="Permalink to this definition">¶</a></dt>
 <dd><p>Indicates whether or not client has had chiropractor therapy in the past.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -269,8 +276,8 @@ is taken only once, during the initial consult.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.PTHistory.has_massage">
-<code class="sig-name descname">has_massage</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.has_massage" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.PTHistory.has_massage">
+<span class="sig-name descname"><span class="pre">has_massage</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.has_massage" title="Permalink to this definition">¶</a></dt>
 <dd><p>Indicates whether or not client has had massage therapy in the past.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -280,8 +287,8 @@ is taken only once, during the initial consult.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.PTHistory.has_surgery">
-<code class="sig-name descname">has_surgery</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.has_surgery" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.PTHistory.has_surgery">
+<span class="sig-name descname"><span class="pre">has_surgery</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.has_surgery" title="Permalink to this definition">¶</a></dt>
 <dd><p>Indicates whether or not client has had surgery in the past.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -291,8 +298,8 @@ is taken only once, during the initial consult.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.PTHistory.has_medication">
-<code class="sig-name descname">has_medication</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.has_medication" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.PTHistory.has_medication">
+<span class="sig-name descname"><span class="pre">has_medication</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.has_medication" title="Permalink to this definition">¶</a></dt>
 <dd><p>Indicates whether or not client uses any type of medication.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -302,8 +309,8 @@ is taken only once, during the initial consult.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.PTHistory.has_acupuncture">
-<code class="sig-name descname">has_acupuncture</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.has_acupuncture" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.PTHistory.has_acupuncture">
+<span class="sig-name descname"><span class="pre">has_acupuncture</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.has_acupuncture" title="Permalink to this definition">¶</a></dt>
 <dd><p>Indicates whether or not client has had acupuncture in the past.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -313,8 +320,8 @@ is taken only once, during the initial consult.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.PTHistory.pain_areas">
-<code class="sig-name descname">pain_areas</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.pain_areas" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.PTHistory.pain_areas">
+<span class="sig-name descname"><span class="pre">pain_areas</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.pain_areas" title="Permalink to this definition">¶</a></dt>
 <dd><p>Describes pain areas in the client’s body.</p>
 <p>The client or staff member indicates pain areas by drawing on the silhouette
 of a human (front and back) and circling the pain areas. The drawings are
@@ -328,8 +335,8 @@ JSON dictionary.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.PTHistory.best_pain">
-<code class="sig-name descname">best_pain</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.best_pain" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.PTHistory.best_pain">
+<span class="sig-name descname"><span class="pre">best_pain</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.best_pain" title="Permalink to this definition">¶</a></dt>
 <dd><p>Numerical score of client’s best pain level.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -339,8 +346,8 @@ JSON dictionary.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.PTHistory.worst_pain">
-<code class="sig-name descname">worst_pain</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.worst_pain" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.PTHistory.worst_pain">
+<span class="sig-name descname"><span class="pre">worst_pain</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.worst_pain" title="Permalink to this definition">¶</a></dt>
 <dd><p>Numerical score of client’s worst pain level.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -350,8 +357,8 @@ JSON dictionary.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.PTHistory.current_pain">
-<code class="sig-name descname">current_pain</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.current_pain" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.PTHistory.current_pain">
+<span class="sig-name descname"><span class="pre">current_pain</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.current_pain" title="Permalink to this definition">¶</a></dt>
 <dd><p>Numerical score of client’s current pain level.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -361,8 +368,8 @@ JSON dictionary.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.PTHistory.makes_worse">
-<code class="sig-name descname">makes_worse</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.makes_worse" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.PTHistory.makes_worse">
+<span class="sig-name descname"><span class="pre">makes_worse</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.makes_worse" title="Permalink to this definition">¶</a></dt>
 <dd><p>Description of factors that make client’s pain worse.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -372,8 +379,8 @@ JSON dictionary.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.PTHistory.makes_better">
-<code class="sig-name descname">makes_better</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.makes_better" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.PTHistory.makes_better">
+<span class="sig-name descname"><span class="pre">makes_better</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.makes_better" title="Permalink to this definition">¶</a></dt>
 <dd><p>Description of factors that make client’s pain better.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -385,16 +392,16 @@ JSON dictionary.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt id="odyssey.api.physiotherapy.models.Chessboard">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.physiotherapy.models.</code><code class="sig-name descname">Chessboard</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.physiotherapy.models.</span></span><span class="sig-name descname"><span class="pre">Chessboard</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
 <p>Mobility assessment table a.k.a the chessboard.</p>
 <p>This table stores the repeated mobility assessment measurements. The measurements
 are indexed by <a class="reference internal" href="#odyssey.api.physiotherapy.models.Chessboard.user_id" title="odyssey.api.physiotherapy.models.Chessboard.user_id"><code class="xref py py-attr docutils literal notranslate"><span class="pre">user_id</span></code></a> and assessment <a class="reference internal" href="#odyssey.api.physiotherapy.models.Chessboard.timestamp" title="odyssey.api.physiotherapy.models.Chessboard.timestamp"><code class="xref py py-attr docutils literal notranslate"><span class="pre">timestamp</span></code></a>. All values in
 this table, with the exception of <code class="xref py py-attr docutils literal notranslate"><span class="pre">isa_dynamic</span></code>, are angles in degrees.</p>
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.Chessboard.idx">
-<code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.idx" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.idx">
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.idx" title="Permalink to this definition">¶</a></dt>
 <dd><p>Table index.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -404,8 +411,8 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.Chessboard.user_id">
-<code class="sig-name descname">user_id</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.user_id" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.user_id">
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.user_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>Client ID number.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -415,8 +422,8 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.Chessboard.timestamp">
-<code class="sig-name descname">timestamp</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.timestamp" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.timestamp">
+<span class="sig-name descname"><span class="pre">timestamp</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.timestamp" title="Permalink to this definition">¶</a></dt>
 <dd><p>Timestamp of the assessment.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -426,8 +433,8 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.Chessboard.created_at">
-<code class="sig-name descname">created_at</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.created_at" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.created_at" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creation timestamp of this row in the database.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -437,8 +444,8 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.Chessboard.updated_at">
-<code class="sig-name descname">updated_at</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.updated_at" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.updated_at">
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.updated_at" title="Permalink to this definition">¶</a></dt>
 <dd><p>Last update timestamp of this row in the database.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -448,8 +455,8 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.Chessboard.isa_structure">
-<code class="sig-name descname">isa_structure</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.isa_structure" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.isa_structure">
+<span class="sig-name descname"><span class="pre">isa_structure</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.isa_structure" title="Permalink to this definition">¶</a></dt>
 <dd><p>Structure of the Infrasternal Angle (ISA). Allowed values are:</p>
 <ul class="simple">
 <li><p>inhaled</p></li>
@@ -465,8 +472,8 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.Chessboard.isa_movement">
-<code class="sig-name descname">isa_movement</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.isa_movement" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.isa_movement">
+<span class="sig-name descname"><span class="pre">isa_movement</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.isa_movement" title="Permalink to this definition">¶</a></dt>
 <dd><p>Movement of the Infrasternal Angle (ISA). Allowed values are:</p>
 <ul class="simple">
 <li><p>static</p></li>
@@ -482,8 +489,8 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.Chessboard.left_shoulder_er">
-<code class="sig-name descname">left_shoulder_er</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_shoulder_er" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.left_shoulder_er">
+<span class="sig-name descname"><span class="pre">left_shoulder_er</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_shoulder_er" title="Permalink to this definition">¶</a></dt>
 <dd><p>Left shoulder external rotation angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -496,8 +503,8 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.Chessboard.left_shoulder_ir">
-<code class="sig-name descname">left_shoulder_ir</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_shoulder_ir" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.left_shoulder_ir">
+<span class="sig-name descname"><span class="pre">left_shoulder_ir</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_shoulder_ir" title="Permalink to this definition">¶</a></dt>
 <dd><p>Left shoulder internal rotation angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -510,8 +517,8 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.Chessboard.left_shoulder_abd">
-<code class="sig-name descname">left_shoulder_abd</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_shoulder_abd" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.left_shoulder_abd">
+<span class="sig-name descname"><span class="pre">left_shoulder_abd</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_shoulder_abd" title="Permalink to this definition">¶</a></dt>
 <dd><p>Left shoulder abduction angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -524,8 +531,8 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.Chessboard.left_shoulder_add">
-<code class="sig-name descname">left_shoulder_add</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_shoulder_add" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.left_shoulder_add">
+<span class="sig-name descname"><span class="pre">left_shoulder_add</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_shoulder_add" title="Permalink to this definition">¶</a></dt>
 <dd><p>Left shoulder adduction angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -538,8 +545,8 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.Chessboard.left_shoulder_flexion">
-<code class="sig-name descname">left_shoulder_flexion</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_shoulder_flexion" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.left_shoulder_flexion">
+<span class="sig-name descname"><span class="pre">left_shoulder_flexion</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_shoulder_flexion" title="Permalink to this definition">¶</a></dt>
 <dd><p>Left shoulder flexion angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -552,8 +559,8 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.Chessboard.left_shoulder_extension">
-<code class="sig-name descname">left_shoulder_extension</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_shoulder_extension" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.left_shoulder_extension">
+<span class="sig-name descname"><span class="pre">left_shoulder_extension</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_shoulder_extension" title="Permalink to this definition">¶</a></dt>
 <dd><p>Left shoulder extension angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -566,8 +573,8 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.Chessboard.right_shoulder_er">
-<code class="sig-name descname">right_shoulder_er</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_shoulder_er" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.right_shoulder_er">
+<span class="sig-name descname"><span class="pre">right_shoulder_er</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_shoulder_er" title="Permalink to this definition">¶</a></dt>
 <dd><p>Right shoulder external rotation angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -580,8 +587,8 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.Chessboard.right_shoulder_ir">
-<code class="sig-name descname">right_shoulder_ir</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_shoulder_ir" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.right_shoulder_ir">
+<span class="sig-name descname"><span class="pre">right_shoulder_ir</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_shoulder_ir" title="Permalink to this definition">¶</a></dt>
 <dd><p>Right shoulder internal rotation angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -594,8 +601,8 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.Chessboard.right_shoulder_abd">
-<code class="sig-name descname">right_shoulder_abd</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_shoulder_abd" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.right_shoulder_abd">
+<span class="sig-name descname"><span class="pre">right_shoulder_abd</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_shoulder_abd" title="Permalink to this definition">¶</a></dt>
 <dd><p>Right shoulder abduction angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -608,8 +615,8 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.Chessboard.right_shoulder_add">
-<code class="sig-name descname">right_shoulder_add</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_shoulder_add" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.right_shoulder_add">
+<span class="sig-name descname"><span class="pre">right_shoulder_add</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_shoulder_add" title="Permalink to this definition">¶</a></dt>
 <dd><p>Right shoulder adduction angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -622,8 +629,8 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.Chessboard.right_shoulder_flexion">
-<code class="sig-name descname">right_shoulder_flexion</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_shoulder_flexion" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.right_shoulder_flexion">
+<span class="sig-name descname"><span class="pre">right_shoulder_flexion</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_shoulder_flexion" title="Permalink to this definition">¶</a></dt>
 <dd><p>Right shoulder flexion angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -636,8 +643,8 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.Chessboard.right_shoulder_extension">
-<code class="sig-name descname">right_shoulder_extension</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_shoulder_extension" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.right_shoulder_extension">
+<span class="sig-name descname"><span class="pre">right_shoulder_extension</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_shoulder_extension" title="Permalink to this definition">¶</a></dt>
 <dd><p>Right shoulder extension angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -650,8 +657,8 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.Chessboard.left_hip_er">
-<code class="sig-name descname">left_hip_er</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_hip_er" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.left_hip_er">
+<span class="sig-name descname"><span class="pre">left_hip_er</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_hip_er" title="Permalink to this definition">¶</a></dt>
 <dd><p>Left hip external rotation angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -664,8 +671,8 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.Chessboard.left_hip_ir">
-<code class="sig-name descname">left_hip_ir</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_hip_ir" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.left_hip_ir">
+<span class="sig-name descname"><span class="pre">left_hip_ir</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_hip_ir" title="Permalink to this definition">¶</a></dt>
 <dd><p>Left hip internal rotation angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -678,8 +685,8 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.Chessboard.left_hip_abd">
-<code class="sig-name descname">left_hip_abd</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_hip_abd" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.left_hip_abd">
+<span class="sig-name descname"><span class="pre">left_hip_abd</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_hip_abd" title="Permalink to this definition">¶</a></dt>
 <dd><p>Left hip abduction angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -692,8 +699,8 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.Chessboard.left_hip_add">
-<code class="sig-name descname">left_hip_add</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_hip_add" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.left_hip_add">
+<span class="sig-name descname"><span class="pre">left_hip_add</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_hip_add" title="Permalink to this definition">¶</a></dt>
 <dd><p>Left hip adduction angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -706,8 +713,8 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.Chessboard.left_hip_flexion">
-<code class="sig-name descname">left_hip_flexion</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_hip_flexion" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.left_hip_flexion">
+<span class="sig-name descname"><span class="pre">left_hip_flexion</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_hip_flexion" title="Permalink to this definition">¶</a></dt>
 <dd><p>Left hip flexion angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -720,8 +727,8 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.Chessboard.left_hip_extension">
-<code class="sig-name descname">left_hip_extension</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_hip_extension" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.left_hip_extension">
+<span class="sig-name descname"><span class="pre">left_hip_extension</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_hip_extension" title="Permalink to this definition">¶</a></dt>
 <dd><p>Left hip extension angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -734,8 +741,8 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.Chessboard.left_hip_slr">
-<code class="sig-name descname">left_hip_slr</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_hip_slr" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.left_hip_slr">
+<span class="sig-name descname"><span class="pre">left_hip_slr</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_hip_slr" title="Permalink to this definition">¶</a></dt>
 <dd><p>Left hip straight leg raise angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -748,8 +755,8 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.Chessboard.right_hip_er">
-<code class="sig-name descname">right_hip_er</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_hip_er" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.right_hip_er">
+<span class="sig-name descname"><span class="pre">right_hip_er</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_hip_er" title="Permalink to this definition">¶</a></dt>
 <dd><p>Right hip external rotation angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -762,8 +769,8 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.Chessboard.right_hip_ir">
-<code class="sig-name descname">right_hip_ir</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_hip_ir" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.right_hip_ir">
+<span class="sig-name descname"><span class="pre">right_hip_ir</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_hip_ir" title="Permalink to this definition">¶</a></dt>
 <dd><p>Right hip internal rotation angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -776,8 +783,8 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.Chessboard.right_hip_abd">
-<code class="sig-name descname">right_hip_abd</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_hip_abd" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.right_hip_abd">
+<span class="sig-name descname"><span class="pre">right_hip_abd</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_hip_abd" title="Permalink to this definition">¶</a></dt>
 <dd><p>Right hip abduction angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -790,8 +797,8 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.Chessboard.right_hip_add">
-<code class="sig-name descname">right_hip_add</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_hip_add" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.right_hip_add">
+<span class="sig-name descname"><span class="pre">right_hip_add</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_hip_add" title="Permalink to this definition">¶</a></dt>
 <dd><p>Right hip adduction angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -804,8 +811,8 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.Chessboard.right_hip_flexion">
-<code class="sig-name descname">right_hip_flexion</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_hip_flexion" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.right_hip_flexion">
+<span class="sig-name descname"><span class="pre">right_hip_flexion</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_hip_flexion" title="Permalink to this definition">¶</a></dt>
 <dd><p>Right hip flexion angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -818,8 +825,8 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.Chessboard.right_hip_extension">
-<code class="sig-name descname">right_hip_extension</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_hip_extension" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.right_hip_extension">
+<span class="sig-name descname"><span class="pre">right_hip_extension</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_hip_extension" title="Permalink to this definition">¶</a></dt>
 <dd><p>Right hip extension angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -832,8 +839,8 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.Chessboard.right_hip_slr">
-<code class="sig-name descname">right_hip_slr</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_hip_slr" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.right_hip_slr">
+<span class="sig-name descname"><span class="pre">right_hip_slr</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_hip_slr" title="Permalink to this definition">¶</a></dt>
 <dd><p>Right hip straight leg raise angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -846,8 +853,8 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.Chessboard.notes">
-<code class="sig-name descname">notes</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.notes" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.notes">
+<span class="sig-name descname"><span class="pre">notes</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.notes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Assessment notes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -859,9 +866,9 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 </dd></dl>
 
 <dl class="py class">
-<dt id="odyssey.api.physiotherapy.models.MobilityAssessment">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.physiotherapy.models.</code><code class="sig-name descname">MobilityAssessment</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.physiotherapy.models.</span></span><span class="sig-name descname"><span class="pre">MobilityAssessment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
 <p>Mobility assessment table.</p>
 <p>The previous version of the mobility assessment table.
 Superceded by <a class="reference internal" href="#odyssey.api.physiotherapy.models.Chessboard" title="odyssey.api.physiotherapy.models.Chessboard"><code class="xref py py-class docutils literal notranslate"><span class="pre">Chessboard</span></code></a>.</p>
@@ -876,8 +883,8 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 <p><a class="reference internal" href="#odyssey.api.physiotherapy.models.Chessboard" title="odyssey.api.physiotherapy.models.Chessboard"><code class="xref py py-class docutils literal notranslate"><span class="pre">Chessboard</span></code></a></p>
 </div>
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.MobilityAssessment.user_id">
-<code class="sig-name descname">user_id</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.user_id" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.user_id">
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.user_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>User ID number</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -887,8 +894,8 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.MobilityAssessment.idx">
-<code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.idx" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.idx">
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.idx" title="Permalink to this definition">¶</a></dt>
 <dd><p>Table index.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -898,8 +905,8 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.MobilityAssessment.timestamp">
-<code class="sig-name descname">timestamp</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.timestamp" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.timestamp">
+<span class="sig-name descname"><span class="pre">timestamp</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.timestamp" title="Permalink to this definition">¶</a></dt>
 <dd><p>Timestamp of the assessment.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -909,8 +916,8 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.MobilityAssessment.created_at">
-<code class="sig-name descname">created_at</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.created_at" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.created_at" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creation timestamp of this row in the database.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -920,8 +927,8 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.MobilityAssessment.updated_at">
-<code class="sig-name descname">updated_at</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.updated_at" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.updated_at">
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.updated_at" title="Permalink to this definition">¶</a></dt>
 <dd><p>Last update timestamp of this row in the database.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -931,8 +938,8 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.MobilityAssessment.isa_left">
-<code class="sig-name descname">isa_left</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.isa_left" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.isa_left">
+<span class="sig-name descname"><span class="pre">isa_left</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.isa_left" title="Permalink to this definition">¶</a></dt>
 <dd><p>Infasternal angle (ISA) left.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -945,8 +952,8 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.MobilityAssessment.isa_right">
-<code class="sig-name descname">isa_right</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.isa_right" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.isa_right">
+<span class="sig-name descname"><span class="pre">isa_right</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.isa_right" title="Permalink to this definition">¶</a></dt>
 <dd><p>Infasternal angle (ISA) right.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -959,8 +966,8 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.MobilityAssessment.isa_dynamic">
-<code class="sig-name descname">isa_dynamic</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.isa_dynamic" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.isa_dynamic">
+<span class="sig-name descname"><span class="pre">isa_dynamic</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.isa_dynamic" title="Permalink to this definition">¶</a></dt>
 <dd><p>Indicates whether or not the Infasternal angle (ISA) is dynamic.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -970,8 +977,8 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_er">
-<code class="sig-name descname">left_shoulder_er</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_er" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_er">
+<span class="sig-name descname"><span class="pre">left_shoulder_er</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_er" title="Permalink to this definition">¶</a></dt>
 <dd><p>Left shoulder external rotation angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -984,8 +991,8 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_ir">
-<code class="sig-name descname">left_shoulder_ir</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_ir" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_ir">
+<span class="sig-name descname"><span class="pre">left_shoulder_ir</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_ir" title="Permalink to this definition">¶</a></dt>
 <dd><p>Left shoulder internal rotation angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -998,8 +1005,8 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_abd">
-<code class="sig-name descname">left_shoulder_abd</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_abd" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_abd">
+<span class="sig-name descname"><span class="pre">left_shoulder_abd</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_abd" title="Permalink to this definition">¶</a></dt>
 <dd><p>Left shoulder abduction angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -1012,8 +1019,8 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_add">
-<code class="sig-name descname">left_shoulder_add</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_add" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_add">
+<span class="sig-name descname"><span class="pre">left_shoulder_add</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_add" title="Permalink to this definition">¶</a></dt>
 <dd><p>Left shoulder adduction angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -1026,8 +1033,8 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_flexion">
-<code class="sig-name descname">left_shoulder_flexion</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_flexion" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_flexion">
+<span class="sig-name descname"><span class="pre">left_shoulder_flexion</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_flexion" title="Permalink to this definition">¶</a></dt>
 <dd><p>Left shoulder flexion angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -1040,8 +1047,8 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_extension">
-<code class="sig-name descname">left_shoulder_extension</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_extension" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_extension">
+<span class="sig-name descname"><span class="pre">left_shoulder_extension</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_extension" title="Permalink to this definition">¶</a></dt>
 <dd><p>Left shoulder extension angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -1054,8 +1061,8 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_er">
-<code class="sig-name descname">right_shoulder_er</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_er" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_er">
+<span class="sig-name descname"><span class="pre">right_shoulder_er</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_er" title="Permalink to this definition">¶</a></dt>
 <dd><p>Right shoulder external rotation angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -1068,8 +1075,8 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_ir">
-<code class="sig-name descname">right_shoulder_ir</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_ir" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_ir">
+<span class="sig-name descname"><span class="pre">right_shoulder_ir</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_ir" title="Permalink to this definition">¶</a></dt>
 <dd><p>Right shoulder internal rotation angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -1082,8 +1089,8 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_abd">
-<code class="sig-name descname">right_shoulder_abd</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_abd" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_abd">
+<span class="sig-name descname"><span class="pre">right_shoulder_abd</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_abd" title="Permalink to this definition">¶</a></dt>
 <dd><p>Right shoulder abduction angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -1096,8 +1103,8 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_add">
-<code class="sig-name descname">right_shoulder_add</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_add" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_add">
+<span class="sig-name descname"><span class="pre">right_shoulder_add</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_add" title="Permalink to this definition">¶</a></dt>
 <dd><p>Right shoulder adduction angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -1110,8 +1117,8 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_flexion">
-<code class="sig-name descname">right_shoulder_flexion</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_flexion" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_flexion">
+<span class="sig-name descname"><span class="pre">right_shoulder_flexion</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_flexion" title="Permalink to this definition">¶</a></dt>
 <dd><p>Right shoulder flexion angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -1124,8 +1131,8 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_extension">
-<code class="sig-name descname">right_shoulder_extension</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_extension" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_extension">
+<span class="sig-name descname"><span class="pre">right_shoulder_extension</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_extension" title="Permalink to this definition">¶</a></dt>
 <dd><p>Right shoulder extension angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -1138,8 +1145,8 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_er">
-<code class="sig-name descname">left_hip_er</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_er" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_er">
+<span class="sig-name descname"><span class="pre">left_hip_er</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_er" title="Permalink to this definition">¶</a></dt>
 <dd><p>Left hip external rotation angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -1152,8 +1159,8 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_ir">
-<code class="sig-name descname">left_hip_ir</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_ir" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_ir">
+<span class="sig-name descname"><span class="pre">left_hip_ir</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_ir" title="Permalink to this definition">¶</a></dt>
 <dd><p>Left hip internal rotation angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -1166,8 +1173,8 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_abd">
-<code class="sig-name descname">left_hip_abd</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_abd" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_abd">
+<span class="sig-name descname"><span class="pre">left_hip_abd</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_abd" title="Permalink to this definition">¶</a></dt>
 <dd><p>Left hip abduction angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -1180,8 +1187,8 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_add">
-<code class="sig-name descname">left_hip_add</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_add" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_add">
+<span class="sig-name descname"><span class="pre">left_hip_add</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_add" title="Permalink to this definition">¶</a></dt>
 <dd><p>Left hip adduction angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -1194,8 +1201,8 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_flexion">
-<code class="sig-name descname">left_hip_flexion</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_flexion" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_flexion">
+<span class="sig-name descname"><span class="pre">left_hip_flexion</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_flexion" title="Permalink to this definition">¶</a></dt>
 <dd><p>Left hip flexion angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -1208,8 +1215,8 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_extension">
-<code class="sig-name descname">left_hip_extension</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_extension" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_extension">
+<span class="sig-name descname"><span class="pre">left_hip_extension</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_extension" title="Permalink to this definition">¶</a></dt>
 <dd><p>Left hip extension angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -1222,8 +1229,8 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_er">
-<code class="sig-name descname">right_hip_er</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_er" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_er">
+<span class="sig-name descname"><span class="pre">right_hip_er</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_er" title="Permalink to this definition">¶</a></dt>
 <dd><p>Right hip external rotation angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -1236,8 +1243,8 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_ir">
-<code class="sig-name descname">right_hip_ir</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_ir" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_ir">
+<span class="sig-name descname"><span class="pre">right_hip_ir</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_ir" title="Permalink to this definition">¶</a></dt>
 <dd><p>Right hip internal rotation angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -1250,8 +1257,8 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_abd">
-<code class="sig-name descname">right_hip_abd</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_abd" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_abd">
+<span class="sig-name descname"><span class="pre">right_hip_abd</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_abd" title="Permalink to this definition">¶</a></dt>
 <dd><p>Right hip abduction angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -1264,8 +1271,8 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_add">
-<code class="sig-name descname">right_hip_add</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_add" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_add">
+<span class="sig-name descname"><span class="pre">right_hip_add</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_add" title="Permalink to this definition">¶</a></dt>
 <dd><p>Right hip adduction angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -1278,8 +1285,8 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_flexion">
-<code class="sig-name descname">right_hip_flexion</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_flexion" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_flexion">
+<span class="sig-name descname"><span class="pre">right_hip_flexion</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_flexion" title="Permalink to this definition">¶</a></dt>
 <dd><p>Right hip flexion angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -1292,8 +1299,8 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_extension">
-<code class="sig-name descname">right_hip_extension</code><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_extension" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_extension">
+<span class="sig-name descname"><span class="pre">right_hip_extension</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_extension" title="Permalink to this definition">¶</a></dt>
 <dd><p>Right hip extension angle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -1307,7 +1314,7 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>

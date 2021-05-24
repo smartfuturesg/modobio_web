@@ -3,9 +3,9 @@
 Database models
 ===============
 
-All *entities* in the database are of type **User**. A User has a *login type* **Client** or **Staff** (or both, but only one login type per logged in session). A Staff member has one or more *roles*: **client services**, **doctor**, **physical therapist**, or **trainer**. At the moment client services does not have a dedicated table in the database.
+All *identities* in the database are of type **User**. A User has a *persona* **Client** or **Professional** (or both, but only one persona can be logged in per session). A professional persona belong to a *group*, **Staff** or **Practitioner**. Within a *group*, a professional has one or more *roles*:
 
-.. image:: ../images/odyssey_db.png
+.. image:: ../images/user_roles.png
    :width: 450
    :align: center
 
@@ -33,5 +33,8 @@ Other
 .. toctree::
 
    Wearable devices <odyssey.api.wearables.models>
+   Notifications <odyssey.api.notifications.models>
+   Telehealth <odyssey.api.telehealth.models>
+   System config <odyssey.api.system.models>
    Facilities <odyssey.api.facility.models>
    Lookup tables <odyssey.api.lookup.models>

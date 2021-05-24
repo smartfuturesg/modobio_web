@@ -29,9 +29,9 @@ def send_email_user_registration_portal(recipient, password, portal_id):
     Email for sending users their registration link and login details
     That were createrd by a client services staff member
     """
-    
+
     SUBJECT = SUBJECTS["remote_registration_portal"]
-    
+
     SENDER = "Modo Bio no-reply <no-reply@modobio.com>"
 
     remote_registration_url = REGISTRATION_PORTAL_URL.format(portal_id)
@@ -49,7 +49,7 @@ def send_email_user_registration_portal(recipient, password, portal_id):
                 f"\t password: {password}\n\n"
                 "If you have any issues, please contact client services."
                 )
-                
+
     # The HTML body of the email.
     BODY_HTML = f"""<html>
     <head></head>
@@ -57,8 +57,8 @@ def send_email_user_registration_portal(recipient, password, portal_id):
     <h1>Welcome to Modo Bio!</h1>
     <p>Please visit your unique portal to complete your user registration:
     <br>1) Click on this link to be directed to your registration portal <a href={remote_registration_url}></a>
-    <br> or copy and paste this portal link into your browser {remote_registration_url} 
-    <br>2) Enter your email and password to login: 
+    <br> or copy and paste this portal link into your browser {remote_registration_url}
+    <br>2) Enter your email and password to login:
     <br>     email: {recipient}
     <br>     password: {password}
     <br>
@@ -66,7 +66,7 @@ def send_email_user_registration_portal(recipient, password, portal_id):
     <br>If you have any issues, please contact client services.
     </body>
     </html>
-    """     
+    """
 
     send_email_no_reply(subject=SUBJECT, recipient=recipient, body_text=BODY_TEXT, body_html=BODY_HTML)
 
@@ -258,7 +258,6 @@ class PushNotification:
     For more information on Apple specific keys, see
     https://developer.apple.com/library/archive/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/PayloadKeyReference.html#//apple_ref/doc/uid/TP40008194-CH17-SW1
 
-
     Attributes
     ----------
     platforms : dict
@@ -267,6 +266,7 @@ class PushNotification:
 
     apple_alert_tmpl : dict
         This template can be used to send alert messages to Apple devices.
+
         - aps (dict): root key of Apple specific payload keys.
             - alert (dict): keys for a standard user alert message.
                 - title (str): [required] title of the message.
@@ -285,6 +285,7 @@ class PushNotification:
 
     apple_background_tmpl : dict
         This template can be used to trigger a background update in the app.
+
         - aps (dict): root key of Apple specific payload keys.
             - content-available (int): [required] must be set to 1.
             - badge (int): set app badge to this number; 0 removes badge.
@@ -293,6 +294,7 @@ class PushNotification:
 
     apple_badge_tmpl : dict
         This template can be used to set the app badge to a specific number.
+
         - aps (dict): root key of Apple specific payload keys.
             - badge (int): [required] set app badge to this number; 0 removes badge.
             - sound (str): filename of custom sound to play when push notification arrives.
@@ -301,6 +303,7 @@ class PushNotification:
     apple_voip_tmpl : dict
         This template can be used to initiate a VoIP call. The contents of this template
         are not dictated by Apple, it does not use the ``aps`` root key.
+
         - type (str): do **not** change this, it must be the literal string "incoming-call".
         - data (dict): VoIP specific information.
             - room_id (int): ID of the Twilio video call room.

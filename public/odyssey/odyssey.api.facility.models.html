@@ -4,15 +4,18 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>odyssey.api.facility.models &mdash; Odyssey version: 0.1.100 documentation</title>
+  <title>odyssey.api.facility.models &mdash; Odyssey version: 0.5.45 documentation</title>
   
 
   
   <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
 
   
   
@@ -29,10 +32,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -40,7 +43,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="odyssey.api.lookup.models" href="odyssey.api.lookup.models.html" />
-    <link rel="prev" title="odyssey.api.wearables.models" href="odyssey.api.wearables.models.html" /> 
+    <link rel="prev" title="odyssey.api.system.models module" href="odyssey.api.system.models.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -64,7 +67,7 @@
             
             
               <div class="version">
-                version: 0.1.100
+                version: 0.5.45
               </div>
             
           
@@ -99,12 +102,16 @@
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.physiotherapy.models.html">Physical therapist</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.trainer.models.html">Trainer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.wearables.models.html">Wearable devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.notifications.models.html">Notifications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.telehealth.models.html">Telehealth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.system.models.html">System config</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Facilities</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.lookup.models.html">Lookup tables</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.schemas.html">Validation schemas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.api.html">API endpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.tasks.html">Tasks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.utils.html">Utilities</a></li>
 </ul>
 
@@ -175,17 +182,17 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-odyssey.api.facility.models">
+  <section id="module-odyssey.api.facility.models">
 <span id="odyssey-api-facility-models"></span><h1>odyssey.api.facility.models<a class="headerlink" href="#module-odyssey.api.facility.models" title="Permalink to this headline">¶</a></h1>
 <p>Database tables for supporting miscellaneous functionality.</p>
 <dl class="py class">
-<dt id="odyssey.api.facility.models.MedicalInstitutions">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.facility.models.</code><code class="sig-name descname">MedicalInstitutions</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.facility.models.MedicalInstitutions" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<dt class="sig sig-object py" id="odyssey.api.facility.models.MedicalInstitutions">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.facility.models.</span></span><span class="sig-name descname"><span class="pre">MedicalInstitutions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.facility.models.MedicalInstitutions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
 <p>Medical institutions associated with client external medical records.</p>
 <dl class="py attribute">
-<dt id="odyssey.api.facility.models.MedicalInstitutions.created_at">
-<code class="sig-name descname">created_at</code><a class="headerlink" href="#odyssey.api.facility.models.MedicalInstitutions.created_at" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.facility.models.MedicalInstitutions.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.facility.models.MedicalInstitutions.created_at" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creation timestamp of this row in the database.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -195,8 +202,8 @@
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.facility.models.MedicalInstitutions.updated_at">
-<code class="sig-name descname">updated_at</code><a class="headerlink" href="#odyssey.api.facility.models.MedicalInstitutions.updated_at" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.facility.models.MedicalInstitutions.updated_at">
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.facility.models.MedicalInstitutions.updated_at" title="Permalink to this definition">¶</a></dt>
 <dd><p>Last update timestamp of this row in the database.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -206,8 +213,8 @@
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.facility.models.MedicalInstitutions.institute_id">
-<code class="sig-name descname">institute_id</code><a class="headerlink" href="#odyssey.api.facility.models.MedicalInstitutions.institute_id" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.facility.models.MedicalInstitutions.institute_id">
+<span class="sig-name descname"><span class="pre">institute_id</span></span><a class="headerlink" href="#odyssey.api.facility.models.MedicalInstitutions.institute_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>medical institute id</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -217,8 +224,8 @@
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.facility.models.MedicalInstitutions.institute_name">
-<code class="sig-name descname">institute_name</code><a class="headerlink" href="#odyssey.api.facility.models.MedicalInstitutions.institute_name" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.facility.models.MedicalInstitutions.institute_name">
+<span class="sig-name descname"><span class="pre">institute_name</span></span><a class="headerlink" href="#odyssey.api.facility.models.MedicalInstitutions.institute_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>medical institution name</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -230,14 +237,14 @@
 </dd></dl>
 
 <dl class="py class">
-<dt id="odyssey.api.facility.models.RegisteredFacilities">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.facility.models.</code><code class="sig-name descname">RegisteredFacilities</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.facility.models.RegisteredFacilities" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<dt class="sig sig-object py" id="odyssey.api.facility.models.RegisteredFacilities">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.facility.models.</span></span><span class="sig-name descname"><span class="pre">RegisteredFacilities</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.facility.models.RegisteredFacilities" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
 <p>Facilities registered in the modobio system. These can be internal(Modobio facilities)
 or external(doctor’s offices, hospitals, etc.)</p>
 <dl class="py attribute">
-<dt id="odyssey.api.facility.models.RegisteredFacilities.created_at">
-<code class="sig-name descname">created_at</code><a class="headerlink" href="#odyssey.api.facility.models.RegisteredFacilities.created_at" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.facility.models.RegisteredFacilities.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.facility.models.RegisteredFacilities.created_at" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creation timestamp of this row in the database.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -247,8 +254,8 @@ or external(doctor’s offices, hospitals, etc.)</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.facility.models.RegisteredFacilities.updated_at">
-<code class="sig-name descname">updated_at</code><a class="headerlink" href="#odyssey.api.facility.models.RegisteredFacilities.updated_at" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.facility.models.RegisteredFacilities.updated_at">
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.facility.models.RegisteredFacilities.updated_at" title="Permalink to this definition">¶</a></dt>
 <dd><p>Last update timestamp of this row in the database.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -258,8 +265,8 @@ or external(doctor’s offices, hospitals, etc.)</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.facility.models.RegisteredFacilities.facility_id">
-<code class="sig-name descname">facility_id</code><a class="headerlink" href="#odyssey.api.facility.models.RegisteredFacilities.facility_id" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.facility.models.RegisteredFacilities.facility_id">
+<span class="sig-name descname"><span class="pre">facility_id</span></span><a class="headerlink" href="#odyssey.api.facility.models.RegisteredFacilities.facility_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>facility id</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -269,8 +276,8 @@ or external(doctor’s offices, hospitals, etc.)</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.facility.models.RegisteredFacilities.facility_name">
-<code class="sig-name descname">facility_name</code><a class="headerlink" href="#odyssey.api.facility.models.RegisteredFacilities.facility_name" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.facility.models.RegisteredFacilities.facility_name">
+<span class="sig-name descname"><span class="pre">facility_name</span></span><a class="headerlink" href="#odyssey.api.facility.models.RegisteredFacilities.facility_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>facility name</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -280,8 +287,8 @@ or external(doctor’s offices, hospitals, etc.)</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.facility.models.RegisteredFacilities.facility_address">
-<code class="sig-name descname">facility_address</code><a class="headerlink" href="#odyssey.api.facility.models.RegisteredFacilities.facility_address" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.facility.models.RegisteredFacilities.facility_address">
+<span class="sig-name descname"><span class="pre">facility_address</span></span><a class="headerlink" href="#odyssey.api.facility.models.RegisteredFacilities.facility_address" title="Permalink to this definition">¶</a></dt>
 <dd><p>facility full address</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -291,8 +298,8 @@ or external(doctor’s offices, hospitals, etc.)</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.facility.models.RegisteredFacilities.modobio_facility">
-<code class="sig-name descname">modobio_facility</code><a class="headerlink" href="#odyssey.api.facility.models.RegisteredFacilities.modobio_facility" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.facility.models.RegisteredFacilities.modobio_facility">
+<span class="sig-name descname"><span class="pre">modobio_facility</span></span><a class="headerlink" href="#odyssey.api.facility.models.RegisteredFacilities.modobio_facility" title="Permalink to this definition">¶</a></dt>
 <dd><p>denotes if facility is a modobio(internal) facility</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -303,7 +310,7 @@ or external(doctor’s offices, hospitals, etc.)</p>
 
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>
@@ -312,7 +319,7 @@ or external(doctor’s offices, hospitals, etc.)</p>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="odyssey.api.lookup.models.html" class="btn btn-neutral float-right" title="odyssey.api.lookup.models" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="odyssey.api.wearables.models.html" class="btn btn-neutral float-left" title="odyssey.api.wearables.models" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="odyssey.api.system.models.html" class="btn btn-neutral float-left" title="odyssey.api.system.models module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
