@@ -281,7 +281,7 @@ class StaffCalendarEvents(db.Model):
     :type: :class:'datetime.time'
     """
 
-    timezone = db.Column(db.String, nullable=True)
+    timezone = db.Column(db.String, nullable=False)
     """
     Local time zone name, saved at event creation
 
