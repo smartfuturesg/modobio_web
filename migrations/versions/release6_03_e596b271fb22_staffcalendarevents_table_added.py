@@ -27,7 +27,7 @@ def upgrade():
     sa.Column('end_date', sa.Date(), nullable=True),
     sa.Column('start_time', sa.Time(), nullable=False),
     sa.Column('end_time', sa.Time(), nullable=False),
-    sa.Column('timezone', sa.String(), nullable=False),
+    sa.Column('timezone', sa.String(), nullable=True),
     sa.Column('duration', sa.Interval(), nullable=True),
     sa.Column('all_day', sa.Boolean(), nullable=False),
     sa.Column('recurring', sa.Boolean(), nullable=False),
