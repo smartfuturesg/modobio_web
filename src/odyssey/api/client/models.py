@@ -188,13 +188,6 @@ class ClientInfo(db.Model):
     :type: int
     """
 
-    race_id = db.Column(db.Integer, db.ForeignKey('LookupRaces.race_id'))
-    """
-    Client race_id as defined in LookupRaces
-
-    :type: int, foreign key(LookupRaces.race_id)
-    """
-
     profession = db.Column(db.String(100))
     """
     Client profession.
@@ -306,6 +299,53 @@ def update_dob(mapper, connection, target):
     """
     from odyssey.utils.search import update_client_dob
     update_client_dob(target.user_id, target.dob)
+
+class ClientRaceAndEthnicity(db.Model):
+    """ Holds information about the race and ethnicity of a client's parents """
+
+    __tablename__ = 'ClientRaceAndEthnicity'
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    user_id = db.Column(db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable = False)
+    """
+    Foreign key from User table
+
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
+    """
+
+    is_client_mother = db.Column(db.Boolean, nullable=False)
+    """
+    Denotes if this information pertains to the user's mother or father
+
+    :type: boolean
+    """
+
+    race_id = db.Column(db.ForeignKey('LookupRaces.race_id', ondelete="CASCADE"), nullable=False)
+    """
+    Foreign key from LookupRaces table.
+
+    :type: int, foreign key to :attr:'LookupRaces.race_id <odyssey.models.lookup.LookupRaces.race_id>'
+    """
 
 class ClientFacilities(db.Model):
     """ A mapping of client ID number to registered facility ID numbers. """

@@ -37,7 +37,8 @@ from odyssey.api.client.models import (
     ClientWeightHistory,
     ClientWaistSizeHistory,
     ClientTransactionHistory,
-    ClientPushNotifications
+    ClientPushNotifications,
+    ClientRaceAndEthnicity
 )
 from odyssey.api.doctor.models import (
     MedicalFamilyHistory,
@@ -90,7 +91,9 @@ from odyssey.api.client.schemas import(
     SignAndDateSchema,
     SignedDocumentsSchema,
     ClientTransactionHistorySchema,
-    ClientSearchItemsSchema
+    ClientSearchItemsSchema,
+    ClientRaceAndEthnicitySchema,
+    ClientRaceAndEthnicityEditSchema
 )
 from odyssey.api.lookup.schemas import LookupDefaultHealthMetricsSchema
 from odyssey.api.staff.schemas import StaffRecentClientsSchema
@@ -114,25 +117,27 @@ class Client(Resource):
         #update staff recent clients information
         staff_user_id = token_auth.current_user()[0].user_id
 
-        #check if supplied client is already in staff recent clients
-        client_exists = StaffRecentClients.query.filter_by(user_id=staff_user_id).filter_by(client_user_id=user_id).one_or_none()
-        if client_exists:
-            #update timestamp
-            client_exists.timestamp = datetime.now()
-            db.session.add(client_exists)
-            db.session.commit()
-        else:
-            #enter new recent client information
-            recent_client_schema = StaffRecentClientsSchema().load({'user_id': staff_user_id, 'client_user_id': user_id})
-            db.session.add(recent_client_schema)
-            db.session.flush()
+        #if this request was made by a staff member, update their recent clients list
+        if staff_user_id != user_id:
+            #check if supplied client is already in staff recent clients
+            client_exists = StaffRecentClients.query.filter_by(user_id=staff_user_id).filter_by(client_user_id=user_id).one_or_none()
+            if client_exists:
+                #update timestamp
+                client_exists.timestamp = datetime.now()
+                db.session.add(client_exists)
+                db.session.commit()
+            else:
+                #enter new recent client information
+                recent_client_schema = StaffRecentClientsSchema().load({'user_id': staff_user_id, 'client_user_id': user_id})
+                db.session.add(recent_client_schema)
+                db.session.flush()
 
-            #check if staff member has more than 10 recent clients
-            staff_recent_searches = StaffRecentClients.query.filter_by(user_id=staff_user_id).order_by(StaffRecentClients.timestamp.asc()).all()
-            if len(staff_recent_searches) > 10:
-                #remove the oldest client in the list
-                db.session.delete(staff_recent_searches[0])
-            db.session.commit()
+                #check if staff member has more than 10 recent clients
+                staff_recent_searches = StaffRecentClients.query.filter_by(user_id=staff_user_id).order_by(StaffRecentClients.timestamp.asc()).all()
+                if len(staff_recent_searches) > 10:
+                    #remove the oldest client in the list
+                    db.session.delete(staff_recent_searches[0])
+                db.session.commit()
 
         #data must be refreshed because of db changes
         if client_data:
@@ -142,7 +147,10 @@ class Client(Resource):
        
         client_info_payload = client_data.__dict__
         client_info_payload["primary_goal"] = db.session.query(LookupGoals.goal_name).filter(client_data.primary_goal_id == LookupGoals.goal_id).one_or_none()
-        client_info_payload["race"] = db.session.query(LookupRaces.race_name).filter(client_data.race_id == LookupRaces.race_id).one_or_none()
+
+        client_info_payload["race_information"] = db.session.query(ClientRaceAndEthnicity.is_client_mother, LookupRaces.race_id, LookupRaces.race_name) \
+            .join(LookupRaces, LookupRaces.race_id == ClientRaceAndEthnicity.race_id) \
+            .filter(ClientRaceAndEthnicity.user_id == user_id).all()
 
         return {'client_info': client_info_payload, 'user_info': user_data}
 
@@ -182,7 +190,10 @@ class Client(Resource):
         # prepare client_info payload  
         client_info_payload = client_data.__dict__
         client_info_payload["primary_goal"] = db.session.query(LookupGoals.goal_name).filter(client_data.primary_goal_id == LookupGoals.goal_id).one_or_none()
-        client_info_payload["race"] = db.session.query(LookupRaces.race_name).filter(client_data.race_id == LookupRaces.race_id).one_or_none()
+        
+        client_info_payload["race_information"] = db.session.query(ClientRaceAndEthnicity.is_client_mother, LookupRaces.race_id, LookupRaces.race_name) \
+            .join(LookupRaces, LookupRaces.race_id == ClientRaceAndEthnicity.race_id) \
+            .filter(ClientRaceAndEthnicity.user_id == user_id).all()
 
         return {'client_info': client_data, 'user_info': user_data}
 
@@ -207,8 +218,8 @@ class ClientSummary(Resource):
                 "user_id": user.user_id, "dob": client.dob, "membersince": client.membersince, "facilities": facilities}
         return data
 
-#Depricated 
 @ns.route('/clientsearch/')
+@ns.deprecated
 @ns.doc(params={'page': 'request page for paginated clients list',
                 'per_page': 'number of clients per page',
                 'firstname': 'first name to search',
@@ -222,7 +233,7 @@ class ClientsDepricated(Resource):
     @responds(schema=ClientSearchOutSchema, api=ns)
     #@responds(schema=UserSchema(many=True), api=ns)
     def get(self):
-        """returns list of clients given query parameters"""
+        """[DEPRECATED] returns list of clients given query parameters"""
         clients = []
         for user in User.query.filter_by(is_client=True).all():
             client = {
@@ -713,6 +724,7 @@ class ClientToken(Resource):
                 'email_verified': user.email_verified}
 
     @ns.doc(security='password')
+    @ns.deprecated
     @token_auth.login_required(user_type=('client',))
     def delete(self):
         """
@@ -1028,7 +1040,7 @@ class ClientDrinksApi(Resource):
     """
     Endpoints related to nutritional beverages that are assigned to clients.
     """
-    @token_auth.login_required(user_type=('staff',), staff_role=('doctor', 'nutrition'))
+    @token_auth.login_required(user_type=('staff',), staff_role=('medical_doctor', 'nutritionist'))
     @accepts(schema=ClientAssignedDrinksSchema, api=ns)
     @responds(schema=ClientAssignedDrinksSchema, api=ns, status_code=201)
     def post(self, user_id):
@@ -1054,7 +1066,7 @@ class ClientDrinksApi(Resource):
 
         return ClientAssignedDrinks.query.filter_by(user_id=user_id).all()
     
-    @token_auth.login_required(user_type=('staff',), staff_role=('doctor', 'nutrition'))
+    @token_auth.login_required(user_type=('staff',), staff_role=('medical_doctor', 'nutritionist'))
     @accepts(schema=ClientAssignedDrinksDeleteSchema, api=ns)
     @responds(schema=ClientAssignedDrinksSchema, api=ns, status_code=204)
     def delete(self, user_id):
@@ -1385,3 +1397,93 @@ class ClientWeightApi(Resource):
         health_metrics = LookupDefaultHealthMetrics.query.filter_by(age = age_category).filter_by(sex = sex).one_or_none()
         
         return health_metrics
+
+@ns.route('/race-and-ethnicity/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class ClientRaceAndEthnicityApi(Resource):
+    """
+    Endpoint for returning viewing and editing informations about a client's race and ethnicity
+    information.
+    """
+    @token_auth.login_required()
+    @responds(schema=ClientRaceAndEthnicitySchema(many=True), api=ns, status_code=200)
+    def get(self, user_id):
+        check_client_existence(user_id)
+
+        res = db.session.query(ClientRaceAndEthnicity.is_client_mother, LookupRaces.race_id, LookupRaces.race_name) \
+            .join(LookupRaces, LookupRaces.race_id == ClientRaceAndEthnicity.race_id) \
+            .filter(ClientRaceAndEthnicity.user_id == user_id).all()
+        
+        return res
+
+    @token_auth.login_required()
+    @accepts(schema=ClientRaceAndEthnicityEditSchema, api=ns)
+    @responds(schema=ClientRaceAndEthnicitySchema(many=True), api=ns, status_code=201)
+    def put(self, user_id):
+
+        def format_list(ids):
+            """
+            removes duplicate ids if present,
+            checks race_id 1 is exclusive if present
+            checks that all ids are valid
+            """
+
+            #removes duplicate ids if they were submitted
+            formatted_list = list(set(ids))
+
+            #race_id 1 (unknown) must be exclusive, a user cannot submit 'unknown' and
+            #other race(s) for a single parent
+            if 1 in formatted_list and len(formatted_list) > 1:
+                raise InputError(400, 'Race_id 1 (unknown) must be exclusive. It cannot be submitted in a list with other race ids.')
+
+            for race_id in formatted_list:
+                if not LookupRaces.query.filter_by(race_id=race_id).one_or_none():
+                    raise InputError(400, f'Invalid race_id: {race_id}')
+
+            return formatted_list
+
+        check_client_existence(user_id)
+
+        #remove existing race/ethnicity info
+        for data in ClientRaceAndEthnicity.query.filter_by(user_id=user_id).all():
+            db.session.delete(data)
+        db.session.commit()
+
+        #add incoming data from request
+        if not request.parsed_obj['mother']:
+            #if a blank array is passed, mark as 'unknown'
+            model = ClientRaceAndEthnicitySchema().load({'is_client_mother': True, 'race_id': 1})
+            model.user_id = user_id
+            db.session.add(model)
+        else:
+            formatted_list = format_list(request.parsed_obj['mother'])
+            for race_id in formatted_list:
+                model = ClientRaceAndEthnicitySchema().load({
+                    'race_id': race_id,
+                    'is_client_mother': True
+                })
+                model.user_id = user_id
+                db.session.add(model)
+
+        if not request.parsed_obj['father']:
+            #if a blank array is passed, mark as 'unknown'
+            model = ClientRaceAndEthnicitySchema().load({'is_client_mother': False, 'race_id': 1})
+            model.user_id = user_id
+            db.session.add(model)
+        else:
+            formatted_list = format_list(request.parsed_obj['father'])
+            for race_id in formatted_list:
+                model = ClientRaceAndEthnicitySchema().load({
+                    'race_id': race_id,
+                    'is_client_mother': False
+                })
+                model.user_id = user_id
+                db.session.add(model)
+
+        db.session.commit()
+
+        res = db.session.query(ClientRaceAndEthnicity.is_client_mother, LookupRaces.race_id, LookupRaces.race_name) \
+            .join(LookupRaces, LookupRaces.race_id == ClientRaceAndEthnicity.race_id) \
+            .filter(ClientRaceAndEthnicity.user_id == user_id).all()
+
+        return res

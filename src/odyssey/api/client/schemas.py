@@ -28,7 +28,8 @@ from odyssey.api.client.models import (
     ClientWeightHistory,
     ClientWaistSizeHistory,
     ClientTransactionHistory,
-    ClientPushNotifications
+    ClientPushNotifications,
+    ClientRaceAndEthnicity
 )
 from odyssey.api.user.schemas import UserInfoPutSchema
 
@@ -70,6 +71,23 @@ class ClientFacilitiesSchema(Schema):
     def make_object(self, data, **kwargs):
         return ClientFacilities(**data)
 
+class ClientRaceAndEthnicitySchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = ClientRaceAndEthnicity
+        exclude = ('created_at', 'updated_at', 'idx')
+
+    user_id = fields.Integer(dump_only=True)
+    race_id = fields.Integer()
+    race_name = fields.String(dump_only=True)
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return ClientRaceAndEthnicity(**data)
+
+class ClientRaceAndEthnicityEditSchema(Schema):
+    mother = fields.List(fields.Integer())
+    father = fields.List(fields.Integer())
+
 class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientInfo
@@ -78,7 +96,6 @@ class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
 
     user_id = fields.Integer()
     primary_goal_id = fields.Integer()
-    race_id = fields.Integer()
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -89,10 +106,10 @@ class ClientInfoPutSchema(ma.SQLAlchemyAutoSchema):
         model = ClientInfo
         include_fk = True
         exclude = ('created_at', 'updated_at', 'idx', 'user_id')
-        dump_only = ( 'membersince', 'primary_goal', 'race')
+        dump_only = ( 'membersince', 'primary_goal', 'race_information')
 
     primary_goal = fields.String()
-    race = fields.String()
+    race_information = fields.Nested(ClientRaceAndEthnicitySchema(many=True), missing=[])
 
 class ClientAndUserInfoSchema(Schema):
 
@@ -259,8 +276,12 @@ class ClientDataTierSchema(ma.SQLAlchemyAutoSchema):
 class AllClientsDataTier(Schema):
 
     items = fields.Nested(ClientDataTierSchema(many=True), missing=ClientDataTierSchema().load({}))
-    total_stored_bytes = fields.Integer(description="Total bytes stored for all clients", missing=0)
-    total_items = fields.Integer(description="number of clients in this payload", missing=0)
+    total_stored_bytes = fields.Integer(
+        missing=0,
+        metadata={'description': 'Total bytes stored for all clients'})
+    total_items = fields.Integer(
+        missing=0,
+        metadata={'description': 'number of clients in this payload'})
 
 
 ####
@@ -319,11 +340,13 @@ class ClinicalCareTeamAuthorizaitonSchema(Schema):
     """
     user_id = fields.Integer(load_only=True)
     team_member_modobio_id = fields.String(dump_only=True)
-    team_member_user_id = fields.Integer(description="user_id for this clinical care team member")
+    team_member_user_id = fields.Integer(
+        metadata={'description': 'user_id for this clinical care team member'})
     team_member_firstname = fields.String(dump_only=True)
     team_member_lastname = fields.String(dump_only=True)
     team_member_email = fields.Email(dump_only=True)
-    resource_id = fields.Integer(description="id for the resource. See lookup table for resource ids")
+    resource_id = fields.Integer(
+        metadata={'description': 'id for the resource. See lookup table for resource ids'})
     display_name = fields.String(dump_only=True)
 
     @post_load

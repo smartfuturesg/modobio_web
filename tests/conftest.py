@@ -17,6 +17,7 @@ from odyssey.api.user.models import User, UserLogin
 from odyssey.api.user.schemas import UserSubscriptionsSchema
 from odyssey.utils.constants import ACCESS_ROLES
 from odyssey.utils.misc import grab_twilio_credentials
+from odyssey.utils.errors import MissingThirdPartyCredentials
 from tests.functional.user.data import users_staff_member_data, users_client_new_creation_data, users_client_new_info_data
 from odyssey.utils import search
 
@@ -109,7 +110,7 @@ def generate_users():
         # 3) give staff member all roles
         
         if i < 5:
-            db.session.add(StaffRoles(user_id=staff_1.user_id, role='doctor', verified=True))
+            db.session.add(StaffRoles(user_id=staff_1.user_id, role='medical_doctor', verified=True))
         else:
             for idx,role in enumerate(ACCESS_ROLES):
                 db.session.add(StaffRoles(user_id=staff_1.user_id, role=role, verified=True))
@@ -146,15 +147,17 @@ def clean_db(db):
     db.drop_all()
 
 def clear_twilio(db=None, modobio_ids=None):
-    # XXX: temporary fix for failing Twilio tests
-    # return
     # bring up users
     if not modobio_ids:
         modobio_ids = db.session.execute(
             select(User.modobio_id)
         ).scalars().all()
-    
-    twilio_credentials = grab_twilio_credentials()
+
+    try:
+        twilio_credentials = grab_twilio_credentials()
+    except MissingThirdPartyCredentials:
+        return
+
     client = Client(twilio_credentials['api_key'], 
                     twilio_credentials['api_key_secret'],
                     twilio_credentials['account_sid'])
