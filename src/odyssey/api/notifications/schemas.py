@@ -252,12 +252,12 @@ class ApplePushNotificationBadgeTestSchema(SkipNoneSchema, HyphenSchema):
 
 # The next three schemas are not dictated by Apple, but by the frontend.
 class ApplePushNotificationVoipDataSchema(SkipNoneSchema):
-    room_id = fields.Integer(required=True)
+    booking_id = fields.Integer(required=True)
+    booking_description = fields.String(missing=None)
     staff_id = fields.Integer(required=True)
     staff_first_name = fields.String(required=True)
     staff_middle_name = fields.String(missing=None)
     staff_last_name = fields.String(required=True)
-    booking_description = fields.String(missing=None)
 
 
 class ApplePushNotificationVoipSchema(Schema):

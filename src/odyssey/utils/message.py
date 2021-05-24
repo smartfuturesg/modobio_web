@@ -306,12 +306,12 @@ class PushNotification:
 
         - type (str): do **not** change this, it must be the literal string "incoming-call".
         - data (dict): VoIP specific information.
-            - room_id (int): ID of the Twilio video call room.
+            - booking_id (int): ID of the Twilio video call room.
+            - booking_description (str): reason for the call.
             - staff_id (int): staff member who is initiating the call.
             - staff_first_name (str): first name of the staff member.
             - staff_middle_name (str): middle name of the staff member.
             - staff_last_name (str): last name of the staff member.
-            - booking_description (str): reason for the call.
     """
 
     platforms = {
@@ -349,12 +349,12 @@ class PushNotification:
     apple_voip_tmpl = {
         'type': 'incoming-call',
         'data': {
-            'room_id': None,
+            'booking_id': None,
+            'booking_description': None,
             'staff_id': None,
             'staff_first_name': None,
             'staff_middle_name': None,
-            'staff_last_name': None,
-            'booking_description': None}}
+            'staff_last_name': None}}
 
     def __init__(self):
         """ Initiate the push notification system.
