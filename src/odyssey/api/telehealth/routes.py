@@ -531,7 +531,6 @@ class TelehealthBookingsApi(Resource):
                                               end_date=end_date,
                                               start_time=lookup_times[request.parsed_obj.booking_window_id_start_time-1].start_time,
                                               end_time=lookup_times[request.parsed_obj.booking_window_id_start_time-1].end_time,
-                                              timezone=lookup_times[request.parsed_obj.booking_window_id_start_time-1].start_time.replace(tzinfo=tz.tzlocal()).tzname(), # TODO: Update this
                                               recurring=False,
                                               availability_status='Busy',
                                               location='Telehealth_'+str(request.parsed_obj.idx),
