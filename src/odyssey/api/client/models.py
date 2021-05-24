@@ -1158,15 +1158,6 @@ class ClientClinicalCareTeam(db.Model):
     :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
-    is_temporary = db.Column(db.Boolean, nullable=False)
-    """
-    Denotes if this team member has temporary access. This is used to give professionals access for
-    a limited time prior to a scheduled telehealth appointment. Temporary team members will not count
-    towards a client's maximum allowed.
-
-    :type: bool
-    """
-
 class ClientMobileSettings(db.Model):
     """
     Holds the values for mobile settings that users have enabled or disabled
