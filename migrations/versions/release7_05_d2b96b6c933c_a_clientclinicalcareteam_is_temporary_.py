@@ -1,7 +1,7 @@
 """a ClientClinicalCareTeam is_temporary field
 
 Revision ID: d2b96b6c933c
-Revises: e29540378366
+Revises: 02d7ab692d7d
 Create Date: 2021-05-25 15:24:35.686999
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'd2b96b6c933c'
-down_revision = 'e29540378366'
+down_revision = '02d7ab692d7d'
 branch_labels = None
 depends_on = None
 
