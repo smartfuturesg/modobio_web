@@ -40,7 +40,7 @@ def test_adding_clinical_care_team(test_client, init_database, client_auth_heade
     assert response.json['member_of_care_teams'][0]['client_user_id'] == 1
 
     ###
-    # Attempt to add more than 6 clinical care team members
+    # Attempt to add more than 20 clinical care team members
     ###
 
     clients_clinical_care_team['care_team'].extend([
@@ -55,6 +55,51 @@ def test_adding_clinical_care_team(test_client, init_database, client_auth_heade
         },
         {
             'team_member_email': 'email3@modo.com'
+        },
+        {
+            'team_member_email': 'email42@modo.com'
+        },
+        {
+            'team_member_email': 'email6@modo.com'
+        },
+        {
+            'team_member_email': 'email7@modo.com'
+        },
+        {
+            'team_member_email': 'email8@modo.com'
+        },
+        {
+            'team_member_email': 'email9@modo.com'
+        },
+        {
+            'team_member_email': 'email10@modo.com'
+        },
+        {
+            'team_member_email': 'email11@modo.com'
+        },
+        {
+            'team_member_email': 'email12@modo.com'
+        },
+        {
+            'team_member_email': 'email13@modo.com'
+        },
+        {
+            'team_member_email': 'email14@modo.com'
+        },
+        {
+            'team_member_email': 'email15@modo.com'
+        },
+        {
+            'team_member_email': 'email16@modo.com'
+        },
+        {
+            'team_member_email': 'email17@modo.com'
+        },
+        {
+            'team_member_email': 'email18@modo.com'
+        },
+        {
+            'team_member_email': 'email19@modo.com'
         }
     ]
     )
