@@ -364,8 +364,9 @@ class StaffProfilePage(Resource):
                         raise InputError(422, f'{key} must be a boolean. Acceptable values are \'true\', \'false\', \'True\', \'False\', \'1\', and \'0\'')
                 user_update[key] = data
 
+
         url = None
-        
+
         #get profile picture and store in s3
         if not current_app.config['LOCAL_CONFIG']:
             if 'profile_picture' in request.files:
@@ -375,6 +376,7 @@ class StaffProfilePage(Resource):
                 #will delete anything starting with this prefix if it exists
                 #if nothing matches the prefix, nothing will happen
                 bucket.objects.filter(Prefix=f'id{user_id:05d}/profile_picture').delete()
+                url = "delete"
 
                 #implemented as a loop to allow for multiple pictures if needed in the future
                 for i, img in enumerate(request.files.getlist('profile_picture')):
@@ -418,11 +420,12 @@ class StaffProfilePage(Resource):
         if bio:
             user_update['bio'] = profile.bio
         if url:
-            user_update['profile_picture'] = url
-        else:
-            #profile_picture key was provided with no file. Since this means profile picture was
-            #deleted from s3, remove the reference to it from db.
-            profile.profile_picture = None
+            if url != "delete":
+                user_update['profile_picture'] = url
+            else:
+                #profile_picture key was provided with no file. Since this means profile picture was
+                #deleted from s3, remove the reference to it from db.
+                profile.profile_picture = None
 
         db.session.commit()
 

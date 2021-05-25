@@ -95,7 +95,8 @@ class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
         dump_only = ('modobio_id', 'membersince', 'height', 'weight')
 
     user_id = fields.Integer()
-    primary_goal_id = fields.Integer()
+    primary_goal = fields.String()
+    race_information = fields.Nested(ClientRaceAndEthnicitySchema(many=True))
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -106,12 +107,17 @@ class ClientInfoPutSchema(ma.SQLAlchemyAutoSchema):
         model = ClientInfo
         include_fk = True
         exclude = ('created_at', 'updated_at', 'idx', 'user_id')
-        dump_only = ( 'membersince', 'primary_goal', 'race_information')
+        dump_only = ( 'membersince', 'membersince', 'height', 'weight')
 
     primary_goal = fields.String()
-    race_information = fields.Nested(ClientRaceAndEthnicitySchema(many=True), missing=[])
+    race_information = fields.Nested(ClientRaceAndEthnicityEditSchema)
 
 class ClientAndUserInfoSchema(Schema):
+
+    client_info = fields.Nested(ClientInfoSchema, required=False, missing={})
+    user_info = fields.Nested(UserInfoPutSchema, required=False, missing={})
+
+class ClientAndUserInfoPutSchema(Schema):
 
     client_info = fields.Nested(ClientInfoPutSchema, required=False, missing={})
     user_info = fields.Nested(UserInfoPutSchema, required=False, missing={})
