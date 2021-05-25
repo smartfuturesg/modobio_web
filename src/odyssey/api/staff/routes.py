@@ -23,8 +23,7 @@ from odyssey.api.staff.schemas import (
     StaffRecentClientsSchema,
     StaffTokenRequestSchema,
     StaffCalendarEventsSchema,
-    StaffCalendarEventsUpdateSchema,
-    StaffCalendarEventsGetSchema
+    StaffCalendarEventsUpdateSchema
 )
 from odyssey.utils.misc import check_staff_existence
 
@@ -466,7 +465,9 @@ class StaffCalendarEventsRoute(Resource):
 
 
     @token_auth.login_required(user_type=('staff_self',))
-    @accepts(schema=StaffCalendarEventsGetSchema, api=ns)
+    @ns.doc(params={'year': 'int',
+                'month': 'int: 1 - 12',
+                'day': 'int: 1 - 31'})
     @responds(schema=StaffCalendarEventsSchema(many=True), status_code=200, api=ns)
     def get(self, user_id):
         """
@@ -477,12 +478,20 @@ class StaffCalendarEventsRoute(Resource):
         Ignores all inputs other than ints for args
         """
         #If no year provided, the year deafults to current year
-        year = request.parsed_obj.get('year', datetime.now().year)
-        month = request.parsed_obj.get('month')
-        day = request.parsed_obj.get('day')
+        #startAt = request.args.get('_from', 0, type= int)
+        year = request.args.get('year', datetime.now().year, type=int)
+        month = request.args.get('month', type=int)
+        day = request.args.get('day', type=int)
+
+        if month:
+            if month < 1 or month > 12:
+                raise InputError(422, "Invalid Month")
         
         #if the resquest inludes a day but not a month, the month defaults to current month
         if day:
+            if day < 1 or day > 31:
+                raise InputError(422, "Invalid Day")
+
             if not month:
                 month = datetime.now().month
             #verify full date is a valid date
@@ -502,7 +511,7 @@ class StaffCalendarEventsRoute(Resource):
                 elif event.end_date and event.end_date.year < year:
                     new_query.discard(event)
             else:
-                if event.start_date.year != year and not event.end_date.year <= year:
+                if year < event.start_date.year or year > event.end_date.year:
                     new_query.discard(event)
         
         query_set = new_query.copy()
