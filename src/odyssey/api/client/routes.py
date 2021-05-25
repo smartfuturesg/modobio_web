@@ -735,7 +735,7 @@ class ClinicalCareTeamMembers(Resource):
     def post(self, user_id):
         """
         Make a new entry into a client's clinical care team using only the new team 
-        member's email. Clients may only have 6 team members stored. 
+        member's email. Clients may only have 20 team members stored (not including temporary). 
 
         Emails are checked against the database. If the email is associated with a current user, 
         the user's id is stored in the ClientClinicalCareTeam table. Otherwise, just the 
@@ -749,6 +749,8 @@ class ClinicalCareTeamMembers(Resource):
         Expected payload includes
         email : str
             Email of new care team member
+        modobio_id : str
+            Modobio ID of new care team member
         Returns
         -------
         dict
@@ -759,17 +761,27 @@ class ClinicalCareTeamMembers(Resource):
 
         user = token_auth.current_user()[0]
 
-        current_team = ClientClinicalCareTeam.query.filter_by(user_id=user_id).all()
+        current_team = ClientClinicalCareTeam.query.filter_by(user_id=user_id, is_temporary=False).all()
         current_team_emails = [x.team_member_email for x in current_team]
 
-        # prevent users from having more than 6 clinical care team members
-        if len(current_team) + len(data.get("care_team")) > 6:
+        # prevent users from having more than 20 clinical care team members
+        if len(current_team) + len(data.get("care_team")) > 20:
             raise InputError(message="Attemping to add too many team members", status_code=400)
 
         # enter new team members into client's clinical care team
         # if email is associated with a current user account, add that user's id to 
         #  the database entry
         for team_member in data.get("care_team"):
+            if not team_member["modobio_id"] and not team_member["team_member_email"]:
+                raise InputError("Either modobio_id or email must be provided for each care team member")
+            if team_member["modobio_id"]:
+                #if modobio_id has been given, find the user with that id and insert their email into the payload
+                modo_id = team_member["modobio_id"]
+                user = User.query.filter_by(modobio_id=modo_id)
+                if user:
+                    team_member["team_member_email"] = user.email
+                else:
+                    raise UserNotFound(message=f"The user with modobio_id {modo_id} does not exist")
             if team_member["team_member_email"] == user.email:
                 continue
             if team_member["team_member_email"].lower() in current_team_emails:

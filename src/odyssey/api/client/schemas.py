@@ -271,8 +271,8 @@ class ClientClinicalCareTeamInternalSchema(Schema):
     """
     Schema is used for serializing/deserializing clinical care team related payloads
     """
-    modobio_id = fields.String(dump_only=True)
-    team_member_email = fields.Email(metadata={'description': 'email for clinical care team member'})
+    modobio_id = fields.String(metadata={'description': 'Modobio ID for clinical care team member'}, required=False)
+    team_member_email = fields.Email(metadata={'description': 'email for clinical care team member'}, required=False)
     team_member_user_id = fields.Integer(metadata={'description': 'user_id for clinical care team member'}, dump_only=True)
     firstname = fields.String(dump_only=True, missing=None)
     lastname = fields.String(dump_only=True, missing=None)
