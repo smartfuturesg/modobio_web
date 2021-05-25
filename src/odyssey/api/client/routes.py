@@ -58,6 +58,7 @@ from odyssey.api.lookup.models import (
 )
 from odyssey.api.physiotherapy.models import PTHistory 
 from odyssey.api.staff.models import StaffRecentClients
+from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.api.trainer.models import FitnessQuestionnaire
 from odyssey.api.facility.models import RegisteredFacilities
 from odyssey.api.user.models import User, UserLogin, UserTokenHistory
@@ -72,6 +73,7 @@ from odyssey.api.client.schemas import(
     ClientConsultContractSchema,
     ClientIndividualContractSchema,
     ClientClinicalCareTeamSchema,
+    ClinicalCareTeamTemporaryMembersSchema,
     ClientMobileSettingsSchema,
     ClientMobilePushNotificationsSchema,
     ClientPoliciesContractSchema, 
@@ -772,9 +774,9 @@ class ClinicalCareTeamMembers(Resource):
         # if email is associated with a current user account, add that user's id to 
         #  the database entry
         for team_member in data.get("care_team"):
-            if not team_member["modobio_id"] and not team_member["team_member_email"]:
-                raise InputError("Either modobio_id or email must be provided for each care team member")
-            if team_member["modobio_id"]:
+            if 'modobio_id' not in team_member and 'team_member_email' not in team_member:
+                raise InputError(message="Either modobio_id or email must be provided for each care team member", status_code=400)
+            if 'modobio_id' in team_member:
                 #if modobio_id has been given, find the user with that id and insert their email into the payload
                 modo_id = team_member["modobio_id"]
                 user = User.query.filter_by(modobio_id=modo_id)
@@ -899,6 +901,58 @@ class ClinicalCareTeamMembers(Resource):
                     "total_items": len(current_team) }
 
         return response
+
+@ns.route('/clinical-care-team/members/temporary/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class ClinicalCareTeamTemporaryMembers(Resource):
+    """
+    Endpoints related to temporary care team members.
+    Temporary members are not considered in a user's maximum allowed team members limit (20).
+    They will lose access 180 hours after having been added to a user's care team.
+    """
+    @token_auth.login_required
+    @accepts(schema=ClinicalCareTeamTemporaryMembersSchema, api=ns)
+    @responds(schema=ClientClinicalCareTeamSchema, api=ns, status_code=201)
+    def post(self, user_id):
+        """
+        Adds a practitioner as a temporary team member to a user's care team
+        """
+        check_client_existence(user_id)
+
+        #assure that a booking exists for the given booking_id and that it is between the given client
+        #and staff user ids
+        if not TelehealthBookings.query.filter_by(idx=request.parsed_obj['booking_id'], 
+                staff_user_id=request.parsed_obj['staff_user_id'],
+                client_user_id=user_id).one_or_none():
+            raise InputError(message="The booking id given does not exist or is not the correct booking id" \
+                " for the given client and staff user_ids.", status_code=400)
+
+        #retrieve staff account, staff account must exist because of the above check
+        team_member = User.query.filter_by(user_id=request.parsed_obj['staff_user_id']).one_or_none()
+
+        db.session.add(ClientClinicalCareTeam(**{"team_member_email": team_member.email,
+                                            "team_member_user_id": team_member.user_id,
+                                            "user_id": user_id,
+                                            "is_temporary": True}))
+
+        db.session.commit()
+
+        current_team = ClientClinicalCareTeam.query.filter_by(user_id=user_id, team_member_user_id=None).all()
+
+        # prepare response with names for clinical care team members who are also users 
+        current_team_users = db.session.query(
+                                    ClientClinicalCareTeam, User.firstname, User.lastname, User.modobio_id
+                                ).filter(
+                                    ClientClinicalCareTeam.user_id == user_id
+                                ).filter(ClientClinicalCareTeam.team_member_user_id == User.user_id
+                                ).all()
+
+        for team_member in current_team_users:
+            team_member[0].__dict__.update({'firstname': team_member[1], 'lastname': team_member[2], 'modobio_id': team_member[3]})
+            current_team.append(team_member[0])
+
+        return {"care_team": current_team, "total_items": len(current_team)}
+
 
 @ns.route('/clinical-care-team/member-of/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
