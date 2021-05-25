@@ -87,7 +87,7 @@ class StaffCalendarEventsSchema(ma.SQLAlchemyAutoSchema):
         include_fk = True
 
     availability_status = fields.String(validate=validate.OneOf(EVENT_AVAILABILITY), missing='Available')
-    recurrence_type = fields.String(validate=validate.OneOf(RECURRENCE_TYPE))
+    recurrence_type = fields.String(required=False, validate=validate.OneOf(RECURRENCE_TYPE))
     all_day = fields.Boolean(missing=True)
     recurring = fields.Boolean(missing=False)
     warning = fields.String()
@@ -101,8 +101,3 @@ class StaffCalendarEventsUpdateSchema(Schema):
     event_to_update_idx = fields.Integer(required=True)
     entire_series = fields.Boolean(missing=False)
     previous_start_date = fields.Date(required=True)
-
-class StaffCalendarEventsGetSchema(Schema):
-    year = fields.Integer(required=False)
-    month = fields.Integer(validate=validate.Range(min=1, max=12, min_inclusive=True, max_inclusive=True), required=False)
-    day = fields.Integer(validate=validate.Range(min=1, max=31, min_inclusive=True, max_inclusive=True), required=False)

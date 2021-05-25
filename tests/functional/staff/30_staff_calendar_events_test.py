@@ -93,40 +93,24 @@ def test_get_events(test_client, init_database, staff_auth_header):
     THEN an events are returned, check the response is valid
     """
     #test calling get without parameters
-    payload = {}
-    response = test_client.get('/staff/calendar/2/',
-                                headers=staff_auth_header,
-                                data=dumps(payload),
-                                content_type='application/json')
+    response = test_client.get('/staff/calendar/2/', headers=staff_auth_header)
     
     assert response.status_code == 200
     
-    payload = {"year": 2020}
-    response = test_client.get('/staff/calendar/2/',
-                                headers=staff_auth_header,
-                                data=dumps(payload),
-                                content_type='application/json')
+    #"year": 2020
+    response = test_client.get('/staff/calendar/2/?year=2020', headers=staff_auth_header)
     
     assert response.status_code == 200
     assert len(response.json) == 1
 
-    payload = {"year": 2021,
-               "month": 2}
-    response = test_client.get('/staff/calendar/2/',
-                                headers=staff_auth_header,
-                                data=dumps(payload),
-                                content_type='application/json')
+    #"year": 2021, "month": 2
+    response = test_client.get('/staff/calendar/2/?year=2021&month=2', headers=staff_auth_header)
     
     assert response.status_code == 200
     assert len(response.json) == 1
 
-    payload = {"year": 2021,
-               "month": 2,
-               "day": 28}
-    response = test_client.get('/staff/calendar/2/',
-                                headers=staff_auth_header,
-                                data=dumps(payload),
-                                content_type='application/json')
+    #{"year": 2021,  "month": 2, "day": 28}
+    response = test_client.get('/staff/calendar/2/?year=2021&month=2&day=28', headers=staff_auth_header)
     
     assert response.status_code == 200
     assert len(response.json) == 1
