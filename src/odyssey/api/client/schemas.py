@@ -294,7 +294,6 @@ class UserClinicalCareTeamSchema(Schema):
     client_email = fields.String()
     authorizations = fields.Nested(ClinicalCareTeamAuthorizationsForSchema(many=True),missing=[])
 
-
 class ClinicalCareTeamMemberOfSchema(Schema):
     """
     Nests the data returned for the member-of endpoint
@@ -310,6 +309,11 @@ class ClientClinicalCareTeamSchema(Schema):
     
     care_team = fields.Nested(ClientClinicalCareTeamInternalSchema(many=True), missing=[])
     total_items = fields.Integer(dump_only=True)
+
+class ClinicalCareTeamTemporaryMembersSchema(Schema):
+
+    staff_user_id = fields.Integer()
+    booking_id = fields.Integer()
 
 class ClinicalCareTeamAuthorizaitonSchema(Schema):
     """
