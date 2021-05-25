@@ -17,6 +17,11 @@ from sqlalchemy import exc
 import flask.scaffold
 flask.helpers._endpoint_from_view_func = flask.scaffold._endpoint_from_view_func
 
+# Temporary fix
+from flask.scaffold import _endpoint_from_view_func
+import flask.helpers
+flask.helpers._endpoint_from_view_func = _endpoint_from_view_func
+
 from odyssey.config import Config
 
 db = SQLAlchemy()

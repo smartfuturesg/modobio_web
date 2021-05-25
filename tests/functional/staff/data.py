@@ -1,5 +1,4 @@
 import pathlib
-from werkzeug.datastructures import FileStorage
 
 users_staff_new_user_data = {
   "user_info": {
@@ -12,7 +11,7 @@ users_staff_new_user_data = {
   },
   "staff_info": {
     "access_roles" : [
-            "doctor"
+            "medical_doctor"
   ]
   }
 }
@@ -20,18 +19,14 @@ users_staff_new_user_data = {
 img_file = pathlib.Path(__file__).parent / 'test_profile_picture.png'
 
 staff_profile_data = {
-  'change_everything': {
-    'firstname': 'Mario',
-    'middlename': 'The',
-    'lastname': 'Plumber',
-    'biological_sex_male': 'True',
-    'bio': 'It\'s a me, Mario!',
-    'profile_picture': (img_file.as_posix() , open(img_file, mode='rb'), 'image/png')
-  },
-  'change_only_picture': {
-    'profile_picture': (img_file.as_posix() , open(img_file, mode='rb'), 'image/png')
-  },
-  'remove_picture': {
-    'profile_picture': FileStorage(filename='')
-  }
-}
+    'change_everything': {
+        'firstname': 'Mario',
+        'middlename': 'The',
+        'lastname': 'Plumber',
+        'biological_sex_male': 'True',
+        'bio': 'It\'s a me, Mario!',
+        'profile_picture': (img_file.as_posix(), 'image/png')},
+    'change_only_picture': {
+        'profile_picture': (img_file.as_posix(), 'image/png')},
+    'remove_picture': {
+        'profile_picture': None}}
