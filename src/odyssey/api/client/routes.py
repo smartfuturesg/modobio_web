@@ -244,7 +244,7 @@ class Client(Resource):
         #update both tables with request data
         client_info = request.parsed_obj['client_info']
         if client_info:
-            if 'race_infromation' in client_info:
+            if 'race_information' in client_info:
                 #send race_information through race-and-ethnicity endpoint
                 if client_info['race_information']['mother']:
                     mother = client_info['race_information']['mother']
