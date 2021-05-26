@@ -846,3 +846,10 @@ ALLOWED_IMAGE_TYPES = ('.png', '.jpg', '.jpeg', '.bmp', '.gif', '.webp', '.psd',
 
 #audio types allowed for upload
 ALLOWED_AUDIO_TYPES = ('.m4a', '.caf')
+
+### Event's Calendar constants ###
+EVENT_AVAILABILITY = ('Busy', 'Available')
+""" Availability labels for an event added to professional's calendar """
+
+RECURRENCE_TYPE = ('Daily', 'Weekly', 'Monthly', 'Yearly')
+""" Types of recurrence that may be chosen for a recurring event """

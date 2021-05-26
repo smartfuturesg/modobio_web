@@ -4,15 +4,18 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>odyssey.defaults &mdash; Odyssey version: 0.1.100 documentation</title>
+  <title>odyssey.defaults &mdash; Odyssey version: 0.5.45 documentation</title>
   
 
   
   <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
 
   
   
@@ -29,10 +32,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -64,7 +67,7 @@
             
             
               <div class="version">
-                version: 0.1.100
+                version: 0.5.45
               </div>
             
           
@@ -99,6 +102,7 @@
 <li class="toctree-l1"><a class="reference internal" href="odyssey.models.html">Database models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.schemas.html">Validation schemas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.api.html">API endpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.tasks.html">Tasks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.utils.html">Utilities</a></li>
 </ul>
 
@@ -169,107 +173,166 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-odyssey.defaults">
+  <section id="module-odyssey.defaults">
 <span id="odyssey-defaults"></span><h1>odyssey.defaults<a class="headerlink" href="#module-odyssey.defaults" title="Permalink to this headline">¶</a></h1>
 <p>Configuration defaults</p>
 <p>This file defines the configuration defaults for the entire API. It is loaded by
 <a class="reference internal" href="odyssey.config.html#module-odyssey.config" title="odyssey.config"><code class="xref py py-mod docutils literal notranslate"><span class="pre">odyssey.config</span></code></a></p>
 <dl class="py data">
-<dt id="odyssey.defaults.FLASK_DEV">
-<code class="sig-prename descclassname">odyssey.defaults.</code><code class="sig-name descname">FLASK_DEV</code><em class="property"> = 'local'</em><a class="headerlink" href="#odyssey.defaults.FLASK_DEV" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.defaults.FLASK_DEV">
+<span class="sig-prename descclassname"><span class="pre">odyssey.defaults.</span></span><span class="sig-name descname"><span class="pre">FLASK_DEV</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'local'</span></em><a class="headerlink" href="#odyssey.defaults.FLASK_DEV" title="Permalink to this definition">¶</a></dt>
 <dd><p>Determines the development environment. Can be ‘local’ or ‘remote’.</p>
 </dd></dl>
 
 <dl class="py data">
-<dt id="odyssey.defaults.S3_BUCKET_NAME">
-<code class="sig-prename descclassname">odyssey.defaults.</code><code class="sig-name descname">S3_BUCKET_NAME</code><em class="property"> = '/var/folders/sb/369pt0b13hg18d1cdbgbgp5h0000gq/T/tmpufotmcrs'</em><a class="headerlink" href="#odyssey.defaults.S3_BUCKET_NAME" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.defaults.S3_BUCKET_NAME">
+<span class="sig-prename descclassname"><span class="pre">odyssey.defaults.</span></span><span class="sig-name descname"><span class="pre">S3_BUCKET_NAME</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'/var/folders/sb/369pt0b13hg18d1cdbgbgp5h0000gq/T/tmplxrddfbj'</span></em><a class="headerlink" href="#odyssey.defaults.S3_BUCKET_NAME" title="Permalink to this definition">¶</a></dt>
 <dd><p>Name of the AWS S3 bucket where files are stored. For <code class="docutils literal notranslate"><span class="pre">FLASK_DEV=local</span></code> it is
 set to a temporary directory.</p>
 </dd></dl>
 
 <dl class="py data">
-<dt id="odyssey.defaults.DB_FLAV">
-<code class="sig-prename descclassname">odyssey.defaults.</code><code class="sig-name descname">DB_FLAV</code><em class="property"> = 'postgresql'</em><a class="headerlink" href="#odyssey.defaults.DB_FLAV" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.defaults.DB_FLAV">
+<span class="sig-prename descclassname"><span class="pre">odyssey.defaults.</span></span><span class="sig-name descname"><span class="pre">DB_FLAV</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'postgresql'</span></em><a class="headerlink" href="#odyssey.defaults.DB_FLAV" title="Permalink to this definition">¶</a></dt>
 <dd><p>Type of database.</p>
 </dd></dl>
 
 <dl class="py data">
-<dt id="odyssey.defaults.DB_USER">
-<code class="sig-prename descclassname">odyssey.defaults.</code><code class="sig-name descname">DB_USER</code><em class="property"> = ''</em><a class="headerlink" href="#odyssey.defaults.DB_USER" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.defaults.DB_USER">
+<span class="sig-prename descclassname"><span class="pre">odyssey.defaults.</span></span><span class="sig-name descname"><span class="pre">DB_USER</span></span><em class="property"> <span class="pre">=</span> <span class="pre">''</span></em><a class="headerlink" href="#odyssey.defaults.DB_USER" title="Permalink to this definition">¶</a></dt>
 <dd><p>Username for database.</p>
 </dd></dl>
 
 <dl class="py data">
-<dt id="odyssey.defaults.DB_PASS">
-<code class="sig-prename descclassname">odyssey.defaults.</code><code class="sig-name descname">DB_PASS</code><em class="property"> = ''</em><a class="headerlink" href="#odyssey.defaults.DB_PASS" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.defaults.DB_PASS">
+<span class="sig-prename descclassname"><span class="pre">odyssey.defaults.</span></span><span class="sig-name descname"><span class="pre">DB_PASS</span></span><em class="property"> <span class="pre">=</span> <span class="pre">''</span></em><a class="headerlink" href="#odyssey.defaults.DB_PASS" title="Permalink to this definition">¶</a></dt>
 <dd><p>Password for database.</p>
 </dd></dl>
 
 <dl class="py data">
-<dt id="odyssey.defaults.DB_HOST">
-<code class="sig-prename descclassname">odyssey.defaults.</code><code class="sig-name descname">DB_HOST</code><em class="property"> = 'localhost'</em><a class="headerlink" href="#odyssey.defaults.DB_HOST" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.defaults.DB_HOST">
+<span class="sig-prename descclassname"><span class="pre">odyssey.defaults.</span></span><span class="sig-name descname"><span class="pre">DB_HOST</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'localhost'</span></em><a class="headerlink" href="#odyssey.defaults.DB_HOST" title="Permalink to this definition">¶</a></dt>
 <dd><p>Hostname for database.</p>
 </dd></dl>
 
 <dl class="py data">
-<dt id="odyssey.defaults.DB_NAME">
-<code class="sig-prename descclassname">odyssey.defaults.</code><code class="sig-name descname">DB_NAME</code><em class="property"> = 'modobio'</em><a class="headerlink" href="#odyssey.defaults.DB_NAME" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.defaults.DB_NAME">
+<span class="sig-prename descclassname"><span class="pre">odyssey.defaults.</span></span><span class="sig-name descname"><span class="pre">DB_NAME</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'modobio'</span></em><a class="headerlink" href="#odyssey.defaults.DB_NAME" title="Permalink to this definition">¶</a></dt>
 <dd><p>Name of database.</p>
 </dd></dl>
 
 <dl class="py data">
-<dt id="odyssey.defaults.OURA_CLIENT_ID">
-<code class="sig-prename descclassname">odyssey.defaults.</code><code class="sig-name descname">OURA_CLIENT_ID</code><em class="property"> = ''</em><a class="headerlink" href="#odyssey.defaults.OURA_CLIENT_ID" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.defaults.OURA_CLIENT_ID">
+<span class="sig-prename descclassname"><span class="pre">odyssey.defaults.</span></span><span class="sig-name descname"><span class="pre">OURA_CLIENT_ID</span></span><em class="property"> <span class="pre">=</span> <span class="pre">''</span></em><a class="headerlink" href="#odyssey.defaults.OURA_CLIENT_ID" title="Permalink to this definition">¶</a></dt>
 <dd><p>Client ID for Oura Ring API.</p>
 </dd></dl>
 
 <dl class="py data">
-<dt id="odyssey.defaults.OURA_CLIENT_SECRET">
-<code class="sig-prename descclassname">odyssey.defaults.</code><code class="sig-name descname">OURA_CLIENT_SECRET</code><em class="property"> = ''</em><a class="headerlink" href="#odyssey.defaults.OURA_CLIENT_SECRET" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.defaults.OURA_CLIENT_SECRET">
+<span class="sig-prename descclassname"><span class="pre">odyssey.defaults.</span></span><span class="sig-name descname"><span class="pre">OURA_CLIENT_SECRET</span></span><em class="property"> <span class="pre">=</span> <span class="pre">''</span></em><a class="headerlink" href="#odyssey.defaults.OURA_CLIENT_SECRET" title="Permalink to this definition">¶</a></dt>
 <dd><p>Client secret for Oura Ring API.</p>
 </dd></dl>
 
 <dl class="py data">
-<dt id="odyssey.defaults.OURA_AUTH_URL">
-<code class="sig-prename descclassname">odyssey.defaults.</code><code class="sig-name descname">OURA_AUTH_URL</code><em class="property"> = 'https://cloud.ouraring.com/oauth/authorize'</em><a class="headerlink" href="#odyssey.defaults.OURA_AUTH_URL" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.defaults.OURA_AUTH_URL">
+<span class="sig-prename descclassname"><span class="pre">odyssey.defaults.</span></span><span class="sig-name descname"><span class="pre">OURA_AUTH_URL</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'https://cloud.ouraring.com/oauth/authorize'</span></em><a class="headerlink" href="#odyssey.defaults.OURA_AUTH_URL" title="Permalink to this definition">¶</a></dt>
 <dd><p>Authorization URL for Oura Ring API.</p>
 </dd></dl>
 
 <dl class="py data">
-<dt id="odyssey.defaults.OURA_TOKEN_URL">
-<code class="sig-prename descclassname">odyssey.defaults.</code><code class="sig-name descname">OURA_TOKEN_URL</code><em class="property"> = 'https://api.ouraring.com/oauth/token'</em><a class="headerlink" href="#odyssey.defaults.OURA_TOKEN_URL" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.defaults.OURA_TOKEN_URL">
+<span class="sig-prename descclassname"><span class="pre">odyssey.defaults.</span></span><span class="sig-name descname"><span class="pre">OURA_TOKEN_URL</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'https://api.ouraring.com/oauth/token'</span></em><a class="headerlink" href="#odyssey.defaults.OURA_TOKEN_URL" title="Permalink to this definition">¶</a></dt>
 <dd><p>Token URL for Oura Ring API.</p>
 </dd></dl>
 
 <dl class="py data">
-<dt id="odyssey.defaults.SECRET_KEY">
-<code class="sig-prename descclassname">odyssey.defaults.</code><code class="sig-name descname">SECRET_KEY</code><em class="property"> = 'dev'</em><a class="headerlink" href="#odyssey.defaults.SECRET_KEY" title="Permalink to this definition">¶</a></dt>
-<dd><p>Flask secret key, used to encrypt sessions amongst other things.
-See <a class="reference external" href="https://stackoverflow.com/questions/22463939/demystify-flask-app-secret-key">https://stackoverflow.com/questions/22463939/demystify-flask-app-secret-key</a></p>
+<dt class="sig sig-object py" id="odyssey.defaults.OURA_SCOPE">
+<span class="sig-prename descclassname"><span class="pre">odyssey.defaults.</span></span><span class="sig-name descname"><span class="pre">OURA_SCOPE</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'daily'</span></em><a class="headerlink" href="#odyssey.defaults.OURA_SCOPE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Oura resources (scopes) to request permission for.</p>
 </dd></dl>
 
 <dl class="py data">
-<dt id="odyssey.defaults.SQLALCHEMY_TRACK_MODIFICATIONS">
-<code class="sig-prename descclassname">odyssey.defaults.</code><code class="sig-name descname">SQLALCHEMY_TRACK_MODIFICATIONS</code><em class="property"> = False</em><a class="headerlink" href="#odyssey.defaults.SQLALCHEMY_TRACK_MODIFICATIONS" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.defaults.FITBIT_CLIENT_ID">
+<span class="sig-prename descclassname"><span class="pre">odyssey.defaults.</span></span><span class="sig-name descname"><span class="pre">FITBIT_CLIENT_ID</span></span><em class="property"> <span class="pre">=</span> <span class="pre">''</span></em><a class="headerlink" href="#odyssey.defaults.FITBIT_CLIENT_ID" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client ID for Fitbit API.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="odyssey.defaults.FITBIT_CLIENT_SECRET">
+<span class="sig-prename descclassname"><span class="pre">odyssey.defaults.</span></span><span class="sig-name descname"><span class="pre">FITBIT_CLIENT_SECRET</span></span><em class="property"> <span class="pre">=</span> <span class="pre">''</span></em><a class="headerlink" href="#odyssey.defaults.FITBIT_CLIENT_SECRET" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client secret for Fitbit API.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="odyssey.defaults.FITBIT_AUTH_URL">
+<span class="sig-prename descclassname"><span class="pre">odyssey.defaults.</span></span><span class="sig-name descname"><span class="pre">FITBIT_AUTH_URL</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'https://www.fitbit.com/oauth2/authorize'</span></em><a class="headerlink" href="#odyssey.defaults.FITBIT_AUTH_URL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Authorization URL for Fitbit API.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="odyssey.defaults.FITBIT_TOKEN_URL">
+<span class="sig-prename descclassname"><span class="pre">odyssey.defaults.</span></span><span class="sig-name descname"><span class="pre">FITBIT_TOKEN_URL</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'https://api.fitbit.com/oauth2/token'</span></em><a class="headerlink" href="#odyssey.defaults.FITBIT_TOKEN_URL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Token URL for Fitbit API.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="odyssey.defaults.FITBIT_SCOPE">
+<span class="sig-prename descclassname"><span class="pre">odyssey.defaults.</span></span><span class="sig-name descname"><span class="pre">FITBIT_SCOPE</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'activity</span> <span class="pre">heartrate</span> <span class="pre">nutrition</span> <span class="pre">profile</span> <span class="pre">sleep</span> <span class="pre">weight'</span></em><a class="headerlink" href="#odyssey.defaults.FITBIT_SCOPE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fitbit resources (scopes) to request permission for.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="odyssey.defaults.SECRET_KEY">
+<span class="sig-prename descclassname"><span class="pre">odyssey.defaults.</span></span><span class="sig-name descname"><span class="pre">SECRET_KEY</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'abcdefghijklmnopqrstuvwxyz0123456789'</span></em><a class="headerlink" href="#odyssey.defaults.SECRET_KEY" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flask secret key, used to encrypt sessions amongst other things.
+See <a class="reference external" href="https://stackoverflow.com/questions/22463939/demystify-flask-app-secret-key">https://stackoverflow.com/questions/22463939/demystify-flask-app-secret-key</a></p>
+<p>This secret key is also used to sign JWTs. JWTs signed with the HS256 algorith (the default),
+must have a key of at least 32 characters long. The same key must also be passed to Hasura
+as part of the <code class="docutils literal notranslate"><span class="pre">HASURA_GRAPHQL_JWT_SECRET</span></code> variable. See <code class="docutils literal notranslate"><span class="pre">hasura/README.md</span></code>.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="odyssey.defaults.SQLALCHEMY_TRACK_MODIFICATIONS">
+<span class="sig-prename descclassname"><span class="pre">odyssey.defaults.</span></span><span class="sig-name descname"><span class="pre">SQLALCHEMY_TRACK_MODIFICATIONS</span></span><em class="property"> <span class="pre">=</span> <span class="pre">False</span></em><a class="headerlink" href="#odyssey.defaults.SQLALCHEMY_TRACK_MODIFICATIONS" title="Permalink to this definition">¶</a></dt>
 <dd><p>Turn this off to prevent warnings.</p>
 </dd></dl>
 
 <dl class="py data">
-<dt id="odyssey.defaults.TESTING">
-<code class="sig-prename descclassname">odyssey.defaults.</code><code class="sig-name descname">TESTING</code><em class="property"> = False</em><a class="headerlink" href="#odyssey.defaults.TESTING" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.defaults.TESTING">
+<span class="sig-prename descclassname"><span class="pre">odyssey.defaults.</span></span><span class="sig-name descname"><span class="pre">TESTING</span></span><em class="property"> <span class="pre">=</span> <span class="pre">False</span></em><a class="headerlink" href="#odyssey.defaults.TESTING" title="Permalink to this definition">¶</a></dt>
 <dd><p>Special mode for running tests.</p>
 </dd></dl>
 
 <dl class="py data">
-<dt id="odyssey.defaults.WTF_CSRF_ENABLED">
-<code class="sig-prename descclassname">odyssey.defaults.</code><code class="sig-name descname">WTF_CSRF_ENABLED</code><em class="property"> = True</em><a class="headerlink" href="#odyssey.defaults.WTF_CSRF_ENABLED" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.defaults.WTF_CSRF_ENABLED">
+<span class="sig-prename descclassname"><span class="pre">odyssey.defaults.</span></span><span class="sig-name descname"><span class="pre">WTF_CSRF_ENABLED</span></span><em class="property"> <span class="pre">=</span> <span class="pre">True</span></em><a class="headerlink" href="#odyssey.defaults.WTF_CSRF_ENABLED" title="Permalink to this definition">¶</a></dt>
 <dd><p>Cross Site Request Forgery (CSRF) on forms, disable when testing.
 Not needed on API, to be removed with Flask app removal.</p>
 </dd></dl>
 
+<dl class="py data">
+<dt class="sig sig-object py" id="odyssey.defaults.FLASK_SKIP_DOTENV">
+<span class="sig-prename descclassname"><span class="pre">odyssey.defaults.</span></span><span class="sig-name descname"><span class="pre">FLASK_SKIP_DOTENV</span></span><em class="property"> <span class="pre">=</span> <span class="pre">True</span></em><a class="headerlink" href="#odyssey.defaults.FLASK_SKIP_DOTENV" title="Permalink to this definition">¶</a></dt>
+<dd><p>If <code class="xref py py-mod docutils literal notranslate"><span class="pre">python-dotenv</span></code> is installed, Flask will by default use it to find .env files and
+use the contents of those files as environmental variables. It uses <code class="xref py py-func docutils literal notranslate"><span class="pre">dotenv.find_dotenv()</span></code>,
+which keeps searching up the directory tree until it finds a .env file.</p>
+<p>Unfortunately, flask also makes the idiotic assumption that when a .env file is found, it must
+be in the root of the project and will change the working directory to that. As a consequence,
+<code class="docutils literal notranslate"><span class="pre">flask</span> <span class="pre">db</span> <span class="pre">...</span></code> will look for <code class="docutils literal notranslate"><span class="pre">migrations/alembic.ini</span></code> in wherever the .env file is located,
+which may not be correct at all.</p>
+<p>This setting prevents such stupid behaviour.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="odyssey.defaults.AWS_SNS_REGION">
+<span class="sig-prename descclassname"><span class="pre">odyssey.defaults.</span></span><span class="sig-name descname"><span class="pre">AWS_SNS_REGION</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'us-west-1'</span></em><a class="headerlink" href="#odyssey.defaults.AWS_SNS_REGION" title="Permalink to this definition">¶</a></dt>
+<dd><p>Our default AWS region is “us-east-2”, but SNS is not available in that region. It is now set
+up in this alternate region.</p>
+</dd></dl>
+
 <div class="toctree-wrapper compound">
 </div>
-</div>
+</section>
 
 
            </div>

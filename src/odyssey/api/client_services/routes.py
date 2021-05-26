@@ -13,7 +13,7 @@ from odyssey.api.user.schemas import UserLoginSchema, UserSchema, UserSubscripti
 from odyssey.api.user.models import User, UserLogin
 from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import REGISTRATION_PORTAL_URL
-from odyssey.utils.email import send_email_user_registration_portal
+from odyssey.utils.message import send_email_user_registration_portal
 from odyssey.utils.errors import ClientEmailInUse, InputError, UserNotFound
 
 

@@ -3,10 +3,21 @@ import os, boto3, secrets, pathlib
 from flask import request, current_app, Response
 from flask_accepts import accepts, responds
 from flask_restx import Resource
+import json, calendar, copy
+from flask.json import dumps
+from datetime import date, time, datetime, timedelta, timezone
+from dateutil import tz
+from dateutil.rrule import YEARLY, MONTHLY, WEEKLY, DAILY, rrule
+from dateutil.relativedelta import relativedelta
 
 from odyssey import db
 from odyssey.api import api
-from odyssey.api.staff.models import StaffOperationalTerritories, StaffRoles, StaffRecentClients, StaffProfile
+from odyssey.api.staff.models import (
+    StaffOperationalTerritories,
+    StaffRoles,
+    StaffRecentClients,
+    StaffProfile,
+    StaffCalendarEvents)
 from odyssey.api.user.models import User, UserLogin, UserTokenHistory
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.errors import UnauthorizedUser, StaffEmailInUse, InputError
@@ -19,8 +30,10 @@ from odyssey.api.staff.schemas import (
     StaffRolesSchema,
     StaffRecentClientsSchema,
     StaffTokenRequestSchema,
-    StaffProfilePageGetSchema
-)
+    StaffProfilePageGetSchema,
+    StaffCalendarEventsSchema,
+    StaffCalendarEventsUpdateSchema)
+from odyssey.utils.misc import check_staff_existence
 
 ns = api.namespace('staff', description='Operations related to staff members')
 
@@ -277,6 +290,7 @@ class StaffToken(Resource):
         """
         return '', 200
 
+
 @ns.route('/profile/<int:user_id>/')
 class StaffProfilePage(Resource):
     """endpoint related staff members' profile pages"""
@@ -434,3 +448,449 @@ class StaffProfilePage(Resource):
             return Response(status=204)
         else:
             return user_update
+
+
+@ns.route('/calendar/<int:user_id>/')
+class StaffCalendarEventsRoute(Resource):
+    """
+    Endpoint to manage professional's (staff) calendar events
+    """
+    @token_auth.login_required(user_type=('staff_self',))
+    @accepts(schema=StaffCalendarEventsSchema, api=ns)
+    @responds(schema=StaffCalendarEventsSchema, status_code=201, api=ns)
+    def post(self, user_id):
+        """
+        Create a new calendar event 
+        """
+        data = request.parsed_obj
+        data.user_id = user_id
+        
+        if data.end_date:
+            date_delta = data.end_date - data.start_date
+            if date_delta.total_seconds() < 0:
+                raise InputError(422, 'Event end date must be later than start date or null')
+
+        if data.all_day:
+            data.start_time = time(hour=0, minute=0, second=0,  tzinfo=tz.tzlocal())
+            data.end_time = time(hour=23, minute=59, second=59, tzinfo=tz.tzlocal())
+            
+            if data.recurring:
+                if not data.recurrence_type:
+                    raise InputError(422, 'Recurring events require recurrence type')    
+            else:
+                data.recurrence_type = None
+                if not data.end_date:
+                    raise InputError(422, 'This event requires an end date')
+
+            data.duration = timedelta(days=1)
+                
+        else:
+            data.start_time = data.start_time.replace(tzinfo=tz.tzlocal())
+            start = datetime.combine(data.start_date, data.start_time)
+            data.end_time = data.end_time.replace(tzinfo=tz.tzlocal())
+            if data.recurring:
+                end = datetime.combine(data.start_date, data.end_time)
+                if not data.recurrence_type:
+                    raise InputError(422, 'Recurring events require recurrence type')  
+            else:
+                data.recurrence_type = None
+                if not data.end_date:
+                    raise InputError(422, 'This event requires an end date')
+                end = datetime.combine(data.end_date, data.end_time)
+
+            #Event's start time must come before end time
+            delta = end - start
+            if delta.total_seconds() < 0:
+                raise InputError(422, 'Start of event must be earlier than End of event')
+            
+            data.duration = delta
+        
+        if (data.recurrence_type == 'Monthly' and data.start_date.day > 28) or (data.recurrence_type == 'Yearly' and data.start_date.month == 2 and data.start_date.day > 28):
+            data.warning = f'Some months have less than {data.start_date.day} days. Those months, the occurrence will fall on the last day of the month'
+
+        data.timezone = data.start_time.tzname()
+        db.session.add(data)
+        db.session.commit()
+        return data
+
+
+    @token_auth.login_required(user_type=('staff_self',))
+    @accepts(schema=StaffCalendarEventsUpdateSchema, api=ns)
+    @responds(schema=StaffCalendarEventsUpdateSchema, status_code=200, api=ns)
+    def put(self, user_id):
+        """
+        Update a calendar event
+
+        expects 
+        {
+            "revised_event_schema":{nested StaffCalendarEventsSchema},
+            "entire_series": bool,
+            "previous_start_date": datetime.date,
+            "event_to_update_idx": int
+        }
+        """
+        data = request.parsed_obj
+        updated_event = data['revised_event_schema']
+        updated_event_dict = request.json['revised_event_schema']
+        entire_series = data['entire_series']
+        idx = data['event_to_update_idx']
+        prev_start_date = data['previous_start_date']
+
+        #prepare edited event
+        updated_event.user_id = user_id
+        updated_event.idx = idx
+       
+        #Some validations
+        query = StaffCalendarEvents.query.filter_by(idx=idx).one_or_none()
+        if query:
+            if updated_event.end_date:
+                date_delta = updated_event.end_date - updated_event.start_date
+                if date_delta.total_seconds() < 0:
+                    raise InputError(422, 'Event end date must be later than start date or null')
+
+            if updated_event.all_day:
+                updated_event.start_time = time(hour=0, minute=0, second=0, tzinfo=tz.tzlocal())
+                updated_event.end_time = time(hour=23, minute=59, second=59, tzinfo=tz.tzlocal())
+            
+                if updated_event.recurring:
+                    if not updated_event.recurrence_type:
+                        raise InputError(422, 'Recurring events require recurrence type')
+                else:
+                    updated_event.recurrence_type = None
+                    if not updated_event.end_date:
+                        raise InputError(422, 'This event requires an end date')
+
+                updated_event.duration = timedelta(days=1)
+            else:
+                updated_event.start_time = updated_event.start_time.replace(tzinfo=tz.tzlocal())
+                start = datetime.combine(updated_event.start_date, updated_event.start_time)
+                updated_event.end_time = updated_event.end_time.replace(tzinfo=tz.tzlocal())
+                if updated_event.recurring:
+                    end = datetime.combine(updated_event.start_date, updated_event.end_time)
+                    if not updated_event.recurrence_type:
+                        raise InputError(422, 'Recurring events require recurrence type')  
+                else:
+                    updated_event.recurrence_type = None
+                    if not updated_event.end_date:
+                        raise InputError(422, 'This event requires an end date')
+                    end = datetime.combine(updated_event.end_date, updated_event.end_time)
+
+                #Event's start time must come before end time
+                delta = end - start
+                if delta.total_seconds() < 0:
+                    raise InputError(422, 'Start of event must be earlier than End of event')
+                
+                updated_event.duration = delta
+            
+            if (updated_event.recurrence_type == 'Monthly' and updated_event.start_date.day > 28) or (updated_event.recurrence_type == 'Yearly' and updated_event.start_date.month == 2 and updated_event.start_date.day > 28):
+                updated_event.warning = f'Some months have less than {updated_event.start_date.day} days. Those months, the occurrence will fall on the last day of the month'
+
+            updated_event.timezone = updated_event.start_time.tzname()
+
+            #Inputs validated, now edit db entry
+            if entire_series or (not entire_series and not query.recurring):
+                query.update(updated_event_dict)
+            
+            else: #recurring event & editing one occurence
+                #updated event is a lone, new event (can't be recurring)
+                updated_event.recurring = False
+                updated_event.recurrence_type = None
+                db.session.add(updated_event)
+
+                #create a copy of current query event, and have it start after updated occurence
+                new_recurrence = StaffCalendarEvents()
+                new_recurrence.user_id = query.user_id
+                new_recurrence.all_day = query.all_day
+                new_recurrence.availability_status = query.availability_status
+                new_recurrence.description = query.description
+                new_recurrence.location = query.location
+                new_recurrence.duration = query.duration
+                new_recurrence.recurring = query.recurring
+                new_recurrence.recurrence_type = query.recurrence_type
+                new_recurrence.start_time = query.start_time
+                new_recurrence.end_time = query.end_time
+                new_recurrence.end_date = query.end_date
+                new_recurrence.timezone = query.timezone
+
+                if query.recurrence_type == "Yearly":
+                    recurrence_delta = relativedelta(years=1)
+                elif query.recurrence_type == "Monthly":
+                    recurrence_delta = relativedelta(months=1)
+                elif query.recurrence_type == "Weekly":
+                    recurrence_delta = relativedelta(weeks=1)
+                else:
+                    recurrence_delta = relativedelta(days=1)
+
+                new_recurrence.start_date = prev_start_date + recurrence_delta
+                db.session.add(new_recurrence)
+
+                query.end_date = prev_start_date - timedelta(days=1)
+
+        else:
+            raise InputError(204, 'No such event')
+        db.session.commit()
+        return data
+
+
+    @token_auth.login_required(user_type=('staff_self',))
+    @ns.doc(params={'year': 'int',
+                'month': 'int: 1 - 12',
+                'day': 'int: 1 - 31'})
+    @responds(schema=StaffCalendarEventsSchema(many=True), status_code=200, api=ns)
+    def get(self, user_id):
+        """
+        View all calendar events
+        Accepts optional parameters year, month, day to filter by date_start field
+        if no year is provided, year defaults to current year.
+
+        Ignores all inputs other than ints for args
+        """
+        #If no year provided, the year deafults to current year
+        #startAt = request.args.get('_from', 0, type= int)
+        year = request.args.get('year', datetime.now().year, type=int)
+        month = request.args.get('month', type=int)
+        day = request.args.get('day', type=int)
+
+        if month:
+            if month < 1 or month > 12:
+                raise InputError(422, "Invalid Month")
+        
+        #if the resquest inludes a day but not a month, the month defaults to current month
+        if day:
+            if day < 1 or day > 31:
+                raise InputError(422, "Invalid Day")
+
+            if not month:
+                month = datetime.now().month
+            #verify full date is a valid date
+            try:
+                datetime(year,month,day)
+            except ValueError:
+                raise InputError(422, "Invalid Date")
+
+        query_set = set(StaffCalendarEvents.query.filter_by(user_id=user_id).order_by(StaffCalendarEvents.start_date.desc()).all())
+        new_query = query_set.copy()
+        
+        #Sort through all saved events that match the requested year, month or day
+        for event in query_set:
+            if event.recurring:
+                if event.start_date.year > year:
+                    new_query.discard(event)
+                elif event.end_date and event.end_date.year < year:
+                    new_query.discard(event)
+            else:
+                if year < event.start_date.year or year > event.end_date.year:
+                    new_query.discard(event)
+        
+        query_set = new_query.copy()
+        if month:
+            last_day_of_month = calendar.monthrange(year,month)[1]
+            for event in query_set:
+                if event.recurring:
+                    check_date_2 = datetime(year,month,1).date()
+                    try:
+                        check_date = datetime(year,month,event.start_date.day).date()
+                    except ValueError:
+                        check_date = datetime(year,month,last_day_of_month).date()
+                    
+                    if check_date < event.start_date:
+                        new_query.discard(event)
+                    elif event.end_date and check_date_2 > event.end_date:
+                        new_query.discard(event)
+                else:
+                    check_date_2 = datetime(year,month,1).date()
+                    check_date_1 = datetime(year,month,last_day_of_month).date()
+                    if (event.start_date.month != month and event.start_date == event.end_date) or event.end_date  < check_date_2 or event.start_date > check_date_1:
+                        new_query.discard(event)       
+        
+        query_set = new_query.copy()
+        if day:
+            for event in query_set:
+                if event.recurring:
+                    date_check = datetime(year,month,day).date()
+                    if date_check < event.start_date: 
+                        new_query.discard(event)
+                    elif event.end_date and date_check > event.end_date:
+                        new_query.discard(event)
+                else:
+                    if event.start_date.day != day and event.end_date < datetime(year,month,day).date():
+                        new_query.discard(event)
+        
+        payload = []
+        for event in new_query:
+            if event.recurring:
+                #produce set of occurrences
+                week_day = event.start_date.weekday()
+                if year and not month and not day:
+                    occurrence = copy.deepcopy(event)
+                    if event.recurrence_type == 'Yearly':
+                        if event.start_date.month == 2 and event.start_date.day > 28:
+                            occurrence.start_date = datetime(year,event.start_date.month,28).date()
+                        else:
+                            occurrence.start_date = datetime(year,event.start_date.month,event.start_date.day).date()
+                        payload.append(occurrence)
+                    elif event.recurrence_type == 'Monthly':
+                        if event.start_date.day <= 28:
+                            dt_start = datetime(year,1,event.start_date.day)
+                            mylist = list(rrule(MONTHLY,count=12,dtstart=dt_start))
+                        elif event.start_date.day == 31:
+                            #if start date is 31, use last day of month for all months
+                            mylist=[]
+                            for _month in range(1,13):
+                                mylist.append(datetime(year,_month,calendar.monthrange(year,_month)[1]))
+                        else:
+                            #if start date is 30 or 29, use last day only for feb 
+                            dt_start = datetime(year,1,event.start_date.day)
+                            mylist = list(rrule(MONTHLY,count=11,dtstart=dt_start))
+                            #last day of feb = calendar.monthrange(year,2)[1]
+                            mylist.append(datetime(year,2,calendar.monthrange(year,2)[1]))                    
+                        for _day in mylist:
+                            if _day.date() >= event.start_date:
+                                if not event.end_date or _day.date() <= event.end_date:
+                                    occurrence.start_date = _day.date()
+                                    payload.append(occurrence)
+                                    occurrence = copy.deepcopy(event)                       
+                    elif event.recurrence_type == 'Weekly':
+                        #count=53 for weeks in a year rounded up
+                        mylist = list(rrule(WEEKLY,count=53,byweekday=(week_day),dtstart=datetime(year,1,1)))
+                        for _day in mylist:
+                            if _day.date() >= event.start_date and _day.year == year:
+                                if not event.end_date or _day.date() <= event.end_date:
+                                    occurrence.start_date = _day.date()
+                                    payload.append(occurrence)
+                                    occurrence = copy.deepcopy(event)
+                    elif event.recurrence_type == 'Daily':
+                        #count=366 for days in a year, considering leap years
+                        mylist = list(rrule(DAILY,count=366,dtstart=datetime(year,1,1)))
+                        for _day in mylist:
+                            if _day.date() >= event.start_date and _day.year == year:
+                                if not event.end_date or _day.date() <= event.end_date:
+                                    occurrence.start_date = _day.date()
+                                    payload.append(occurrence)
+                                    occurrence = copy.deepcopy(event)
+
+                elif year and month and not day:
+                    occurrence = copy.deepcopy(event)
+                    if event.recurrence_type == 'Yearly':
+                        if event.start_date.month == month:
+                            if month == 2 and event.start_date.day > last_day_of_month:
+                                occurrence.start_date = datetime(year,month,last_day_of_month).date()
+                            else:
+                                occurrence.start_date = datetime(year,month,event.start_date.day).date()
+                            payload.append(occurrence)
+                    elif event.recurrence_type == 'Monthly':
+                        if event.start_date.day > last_day_of_month:
+                            occurrence.start_date = datetime(year,month,last_day_of_month).date()
+                        else:
+                            occurrence.start_date = datetime(year,month,event.start_date.day).date()
+                        payload.append(occurrence)
+                    elif event.recurrence_type == 'Weekly':
+                        #count = 5 as the max # of possible 'any week day' in a month
+                        mylist = list(rrule(WEEKLY,count=5,byweekday=(week_day),dtstart=datetime(year,month,1)))
+                        for _day in mylist:
+                            if _day.month == month and _day.date() >= event.start_date:
+                                if not event.end_date or _day.date() <= event.end_date:
+                                    occurrence.start_date = _day.date()
+                                    payload.append(occurrence)
+                                    occurrence = copy.deepcopy(event)
+                    elif event.recurrence_type == 'Daily':
+                        mylist = list(rrule(DAILY,count=last_day_of_month,dtstart=datetime(year,month,1)))
+                        for _day in mylist:
+                            if _day.date() >= event.start_date:
+                                if not event.end_date or _day.date() <= event.end_date:
+                                    occurrence.start_date = _day.date()
+                                    payload.append(occurrence)
+                                    occurrence = copy.deepcopy(event)
+                
+                else:
+                    specified_date = datetime(year,month,day).date()
+                    occurrence = copy.deepcopy(event)
+                    if event.recurrence_type == 'Yearly':
+                        if event.start_date.month == month and event.start_date.day == day:
+                            occurrence.start_date = specified_date
+                            payload.append(occurrence)
+                        elif event.start_date.month == month and month == 2 and event.start_date.day > last_day_of_month and specified_date.day == last_day_of_month:
+                            occurrence.start_date = specified_date
+                            payload.append(occurrence)
+                    elif event.recurrence_type == 'Monthly':
+                        if specified_date.day == event.start_date.day:
+                            occurrence.start_date = specified_date
+                            payload.append(occurrence)
+                        elif event.start_date.day > last_day_of_month and specified_date.day == last_day_of_month:
+                            occurrence.start_date = datetime(year,month,last_day_of_month)
+                            payload.append(occurrence)
+                    elif event.recurrence_type == 'Weekly':
+                        if week_day == datetime(year,month,day).weekday():
+                            occurrence.start_date = specified_date
+                            payload.append(occurrence)
+                    elif event.recurrence_type == 'Daily':
+                        occurrence = copy.deepcopy(event)
+                        occurrence.start_date = specified_date
+                        payload.append(occurrence)
+
+            else:
+                #non recurring event but spans more than 1 day (semi recurring)
+                if year and month and day and event.duration > timedelta(days=1):
+                    if datetime(year,month,day).date() == event.start_date:
+                        event.end_time = time(23,59,59)
+                    elif datetime(year,month,day).date() == event.end_date:
+                        event.start_time = time(00,00)
+                    else:
+                        event.start_time = time(00,00)
+                        event.end_time = time(23,59,59)
+                payload.append(event)
+        
+        return payload
+
+
+    @token_auth.login_required(user_type=('staff_self',))
+    @accepts(schema=StaffCalendarEventsUpdateSchema(only=("entire_series", "event_to_update_idx", "previous_start_date")), api=ns)
+    def delete(self, user_id):
+        """
+        Delete events
+        """
+        entire_series = request.parsed_obj['entire_series']
+        idx = request.parsed_obj['event_to_update_idx']
+        prev_start_date = request.parsed_obj['previous_start_date']
+
+        query = StaffCalendarEvents.query.filter_by(idx=idx).one_or_none()
+
+        if query:
+            if query.recurring and not entire_series:
+                #create a copy of current query event, and have it start after updated occurence
+                new_recurrence = StaffCalendarEvents()
+                new_recurrence.user_id = query.user_id
+                new_recurrence.all_day = query.all_day
+                new_recurrence.availability_status = query.availability_status
+                new_recurrence.description = query.description
+                new_recurrence.location = query.location
+                new_recurrence.duration = query.duration
+                new_recurrence.recurring = query.recurring
+                new_recurrence.recurrence_type = query.recurrence_type
+                new_recurrence.start_time = query.start_time
+                new_recurrence.end_time = query.end_time
+                new_recurrence.end_date = query.end_date
+                new_recurrence.timezone = query.timezone
+
+                if query.recurrence_type == "Yearly":
+                    recurrence_delta = relativedelta(years=1)
+                elif query.recurrence_type == "Monthly":
+                    recurrence_delta = relativedelta(months=1)
+                elif query.recurrence_type == "Weekly":
+                    recurrence_delta = relativedelta(weeks=1)
+                else:
+                    recurrence_delta = relativedelta(days=1)
+
+                new_recurrence.start_date = prev_start_date + recurrence_delta
+                db.session.add(new_recurrence)
+
+                query.end_date = prev_start_date - timedelta(days=1)
+
+            else:
+                db.session.delete(query)
+        
+        else: 
+            raise InputError(204, 'No such event')
+
+        db.session.commit()
+        return ("Event Deleted", 200)

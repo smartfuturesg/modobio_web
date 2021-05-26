@@ -10,8 +10,9 @@ Utilities
 .. toctree::
 
    Login <odyssey.utils.auth>
+   Messaging <odyssey.utils.message>
+   Search <odyssey.utils.search>
    Constants <odyssey.utils.constants>
    Errors <odyssey.utils.errors>
-   Email <odyssey.utils.email>
    PDF generation <odyssey.utils.pdf>
    Other <odyssey.utils.misc>
