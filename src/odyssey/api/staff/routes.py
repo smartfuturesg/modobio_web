@@ -12,7 +12,6 @@ from dateutil.relativedelta import relativedelta
 
 from odyssey import db
 from odyssey.api import api
-<<<<<<< HEAD
 from odyssey.api.staff.models import (
     StaffOperationalTerritories,
     StaffRoles,
