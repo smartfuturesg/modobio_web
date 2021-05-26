@@ -4,15 +4,18 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>odyssey.api.staff.routes &mdash; Odyssey version: 0.1.100 documentation</title>
+  <title>odyssey.api.staff.routes &mdash; Odyssey version: 0.5.45 documentation</title>
   
 
   
   <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
 
   
   
@@ -29,10 +32,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -64,7 +67,7 @@
             
             
               <div class="version">
-                version: 0.1.100
+                version: 0.5.45
               </div>
             
           
@@ -102,12 +105,16 @@
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.physiotherapy.routes.html">Physical therapist</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.trainer.routes.html">Trainer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.wearables.routes.html">Wearable devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.notifications.routes.html">Notifications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.telehealth.routes.html">Telehealth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.system.routes.html">System config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.facility.routes.html">Facilities</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.lookup.routes.html">Lookup tables</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.misc.postman.html">Postman</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.version.routes.html">Version</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.tasks.html">Tasks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.utils.html">Utilities</a></li>
 </ul>
 
@@ -178,138 +185,184 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-odyssey.api.staff.routes">
+  <section id="module-odyssey.api.staff.routes">
 <span id="odyssey-api-staff-routes"></span><h1>odyssey.api.staff.routes<a class="headerlink" href="#module-odyssey.api.staff.routes" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
-<dt id="odyssey.api.staff.routes.StaffMembers">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.staff.routes.</code><code class="sig-name descname">StaffMembers</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.StaffMembers" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.StaffMembers">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.staff.routes.</span></span><span class="sig-name descname"><span class="pre">StaffMembers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.StaffMembers" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
 <p>staff member class for creating, getting staff</p>
 <dl class="py method">
-<dt id="odyssey.api.staff.routes.StaffMembers.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.StaffMembers.get" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.StaffMembers.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.StaffMembers.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns list of staff members given query parameters</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.staff.routes.StaffMembers.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.StaffMembers.post" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.StaffMembers.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.StaffMembers.post" title="Permalink to this definition">¶</a></dt>
 <dd><p>register a new staff member</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.staff.routes.StaffMembers.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'staff_staff_members'</em><a class="headerlink" href="#odyssey.api.staff.routes.StaffMembers.endpoint" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.StaffMembers.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'staff_staff_members'</span></em><a class="headerlink" href="#odyssey.api.staff.routes.StaffMembers.endpoint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.staff.routes.StaffMembers.mediatypes">
-<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.StaffMembers.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.StaffMembers.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.StaffMembers.mediatypes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.staff.routes.StaffMembers.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'GET', 'POST'}</em><a class="headerlink" href="#odyssey.api.staff.routes.StaffMembers.methods" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.StaffMembers.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET',</span> <span class="pre">'POST'}</span></em><a class="headerlink" href="#odyssey.api.staff.routes.StaffMembers.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt id="odyssey.api.staff.routes.UpdateRoles">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.staff.routes.</code><code class="sig-name descname">UpdateRoles</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.UpdateRoles" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.UpdateRoles">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.staff.routes.</span></span><span class="sig-name descname"><span class="pre">UpdateRoles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.UpdateRoles" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
 <p>View and update roles for staff member with a given user_id</p>
 <dl class="py method">
-<dt id="odyssey.api.staff.routes.UpdateRoles.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.UpdateRoles.post" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.UpdateRoles.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.UpdateRoles.post" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.staff.routes.UpdateRoles.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.UpdateRoles.get" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.UpdateRoles.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.UpdateRoles.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get staff roles</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.staff.routes.UpdateRoles.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'staff_update_roles'</em><a class="headerlink" href="#odyssey.api.staff.routes.UpdateRoles.endpoint" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.UpdateRoles.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'staff_update_roles'</span></em><a class="headerlink" href="#odyssey.api.staff.routes.UpdateRoles.endpoint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.staff.routes.UpdateRoles.mediatypes">
-<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.UpdateRoles.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.UpdateRoles.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.UpdateRoles.mediatypes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.staff.routes.UpdateRoles.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'GET', 'POST'}</em><a class="headerlink" href="#odyssey.api.staff.routes.UpdateRoles.methods" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.UpdateRoles.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET',</span> <span class="pre">'POST'}</span></em><a class="headerlink" href="#odyssey.api.staff.routes.UpdateRoles.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt id="odyssey.api.staff.routes.RecentClients">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.staff.routes.</code><code class="sig-name descname">RecentClients</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.RecentClients" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.OperationalTerritories">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.staff.routes.</span></span><span class="sig-name descname"><span class="pre">OperationalTerritories</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.OperationalTerritories" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<p>View and update operational territories for staff member with a given user_id</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.OperationalTerritories.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.OperationalTerritories.post" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.OperationalTerritories.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.OperationalTerritories.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Responds with current operational territories for each role a staff user
+has assumed</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.OperationalTerritories.delete">
+<span class="sig-name descname"><span class="pre">delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.OperationalTerritories.delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uses the same payload as the POST request on this endpoint to delete
+entries to the operational territories database.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.OperationalTerritories.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'staff_operational_territories'</span></em><a class="headerlink" href="#odyssey.api.staff.routes.OperationalTerritories.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.OperationalTerritories.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.OperationalTerritories.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.OperationalTerritories.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'DELETE',</span> <span class="pre">'GET',</span> <span class="pre">'POST'}</span></em><a class="headerlink" href="#odyssey.api.staff.routes.OperationalTerritories.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.RecentClients">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.staff.routes.</span></span><span class="sig-name descname"><span class="pre">RecentClients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.RecentClients" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
 <p>endpoint related to the staff recent client feature</p>
 <dl class="py method">
-<dt id="odyssey.api.staff.routes.RecentClients.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.RecentClients.get" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.RecentClients.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.RecentClients.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>get the 10 most recent clients a staff member has loaded</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.staff.routes.RecentClients.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'staff_recent_clients'</em><a class="headerlink" href="#odyssey.api.staff.routes.RecentClients.endpoint" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.RecentClients.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'staff_recent_clients'</span></em><a class="headerlink" href="#odyssey.api.staff.routes.RecentClients.endpoint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.staff.routes.RecentClients.mediatypes">
-<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.RecentClients.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.RecentClients.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.RecentClients.mediatypes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.staff.routes.RecentClients.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'GET'}</em><a class="headerlink" href="#odyssey.api.staff.routes.RecentClients.methods" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.RecentClients.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET'}</span></em><a class="headerlink" href="#odyssey.api.staff.routes.RecentClients.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt id="odyssey.api.staff.routes.StaffToken">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.staff.routes.</code><code class="sig-name descname">StaffToken</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.StaffToken" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.StaffToken">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.staff.routes.</span></span><span class="sig-name descname"><span class="pre">StaffToken</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.StaffToken" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
 <p>create and revoke tokens</p>
 <dl class="py method">
-<dt id="odyssey.api.staff.routes.StaffToken.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.StaffToken.post" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.StaffToken.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.StaffToken.post" title="Permalink to this definition">¶</a></dt>
 <dd><p>generates a token for the ‘current_user’ immediately after password authentication</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.staff.routes.StaffToken.delete">
-<code class="sig-name descname">delete</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.StaffToken.delete" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.StaffToken.delete">
+<span class="sig-name descname"><span class="pre">delete</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.StaffToken.delete" title="Permalink to this definition">¶</a></dt>
 <dd><p>Deprecated 11.23.20..does nothing now</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.staff.routes.StaffToken.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'staff_staff_token'</em><a class="headerlink" href="#odyssey.api.staff.routes.StaffToken.endpoint" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.StaffToken.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'staff_staff_token'</span></em><a class="headerlink" href="#odyssey.api.staff.routes.StaffToken.endpoint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.staff.routes.StaffToken.mediatypes">
-<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.StaffToken.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.StaffToken.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.StaffToken.mediatypes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.staff.routes.StaffToken.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'DELETE', 'POST'}</em><a class="headerlink" href="#odyssey.api.staff.routes.StaffToken.methods" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.StaffToken.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'DELETE',</span> <span class="pre">'POST'}</span></em><a class="headerlink" href="#odyssey.api.staff.routes.StaffToken.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
 
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>

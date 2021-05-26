@@ -1,0 +1,475 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>odyssey.utils.message &mdash; Odyssey version: 0.5.45 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="odyssey.utils.search module" href="odyssey.utils.search.html" />
+    <link rel="prev" title="odyssey.utils.auth" href="odyssey.utils.auth.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Odyssey
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                version: 0.5.45
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="odyssey.config.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.models.html">Database models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.schemas.html">Validation schemas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.api.html">API endpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.tasks.html">Tasks</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="odyssey.utils.html">Utilities</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="odyssey.utils.auth.html">Login</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Messaging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.utils.search.html">Search</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.utils.constants.html">Constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.utils.errors.html">Errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.utils.pdf.html">PDF generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.utils.misc.html">Other</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Odyssey</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="odyssey.utils.html">Utilities</a> &raquo;</li>
+        
+      <li>odyssey.utils.message</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/odyssey/odyssey.utils.message.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <section id="module-odyssey.utils.message">
+<span id="odyssey-utils-message"></span><h1>odyssey.utils.message<a class="headerlink" href="#module-odyssey.utils.message" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="odyssey.utils.message.send_email_user_registration_portal">
+<span class="sig-prename descclassname"><span class="pre">odyssey.utils.message.</span></span><span class="sig-name descname"><span class="pre">send_email_user_registration_portal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">recipient</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">portal_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.message.send_email_user_registration_portal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Email for sending users their registration link and login details
+That were createrd by a client services staff member</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="odyssey.utils.message.send_email_password_reset">
+<span class="sig-prename descclassname"><span class="pre">odyssey.utils.message.</span></span><span class="sig-name descname"><span class="pre">send_email_password_reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">recipient</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reset_token</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.message.send_email_password_reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Email for sending users password reset portal</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="odyssey.utils.message.send_email_delete_account">
+<span class="sig-prename descclassname"><span class="pre">odyssey.utils.message.</span></span><span class="sig-name descname"><span class="pre">send_email_delete_account</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">recipient</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deleted_account</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.message.send_email_delete_account" title="Permalink to this definition">¶</a></dt>
+<dd><p>Email for notifying users of account deletion</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="odyssey.utils.message.send_test_email">
+<span class="sig-prename descclassname"><span class="pre">odyssey.utils.message.</span></span><span class="sig-name descname"><span class="pre">send_test_email</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subject</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'testing-success'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recipient</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'success&#64;simulator.amazonses.com'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.message.send_test_email" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use the AWS mailbox simulator to test different scenarios: success, bounce, complaint</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="odyssey.utils.message.send_email_no_reply">
+<span class="sig-prename descclassname"><span class="pre">odyssey.utils.message.</span></span><span class="sig-name descname"><span class="pre">send_email_no_reply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subject</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recipient</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'success&#64;simulator.amazonses.com'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body_text</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body_html</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.message.send_email_no_reply" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.utils.message.PushNotificationType">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.utils.message.</span></span><span class="sig-name descname"><span class="pre">PushNotificationType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.message.PushNotificationType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">enum.Enum</span></code></a></p>
+<p>An enumeration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.utils.message.PushNotificationType.alert">
+<span class="sig-name descname"><span class="pre">alert</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'A</span> <span class="pre">standard</span> <span class="pre">notification</span> <span class="pre">with</span> <span class="pre">a</span> <span class="pre">title</span> <span class="pre">and</span> <span class="pre">a</span> <span class="pre">body.'</span></em><a class="headerlink" href="#odyssey.utils.message.PushNotificationType.alert" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.utils.message.PushNotificationType.background">
+<span class="sig-name descname"><span class="pre">background</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'Trigger</span> <span class="pre">the</span> <span class="pre">app</span> <span class="pre">to</span> <span class="pre">reload</span> <span class="pre">data</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">background.'</span></em><a class="headerlink" href="#odyssey.utils.message.PushNotificationType.background" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.utils.message.PushNotificationType.badge">
+<span class="sig-name descname"><span class="pre">badge</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'ONLY</span> <span class="pre">set</span> <span class="pre">the</span> <span class="pre">app</span> <span class="pre">badge</span> <span class="pre">to</span> <span class="pre">the</span> <span class="pre">specified</span> <span class="pre">number,</span> <span class="pre">no</span> <span class="pre">alert.'</span></em><a class="headerlink" href="#odyssey.utils.message.PushNotificationType.badge" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.utils.message.PushNotificationType.voip">
+<span class="sig-name descname"><span class="pre">voip</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'A</span> <span class="pre">notification</span> <span class="pre">that</span> <span class="pre">will</span> <span class="pre">trigger</span> <span class="pre">a</span> <span class="pre">VoIP</span> <span class="pre">call.'</span></em><a class="headerlink" href="#odyssey.utils.message.PushNotificationType.voip" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.utils.message.PushNotification">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.utils.message.</span></span><span class="sig-name descname"><span class="pre">PushNotification</span></span><a class="headerlink" href="#odyssey.utils.message.PushNotification" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>A class for handling push notifications.</p>
+<p>To send push notifications, first register a device with <a class="reference internal" href="#odyssey.utils.message.PushNotification.register_device" title="odyssey.utils.message.PushNotification.register_device"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register_device()</span></code></a>. Once
+one or more devices are registered, a push notification can be send. Select which type
+of notification to send. Then use one of the corresponding templates in this class as
+a starting point for the content of the notification. Finally, use <a class="reference internal" href="#odyssey.utils.message.PushNotification.send" title="odyssey.utils.message.PushNotification.send"><code class="xref py py-meth docutils literal notranslate"><span class="pre">send()</span></code></a> to send
+a notification to all devices registered to the user.</p>
+<p>To create the contents of a notification, start with one of the templates below and set
+any keys you want to use. Any key set to <code class="docutils literal notranslate"><span class="pre">None</span></code> (the default), will be removed from
+the template before sending.</p>
+<p>Custom keys can be added anywhere in the dict, but typically the <code class="docutils literal notranslate"><span class="pre">aps</span></code> root key and
+all its nested keys are defined by Apple. Most likely you’ll want to add custom keys
+to the root of the template, at the same level as <code class="docutils literal notranslate"><span class="pre">aps</span></code>.</p>
+<p>For more information on Apple specific keys, see
+<a class="reference external" href="https://developer.apple.com/library/archive/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/PayloadKeyReference.html#//apple_ref/doc/uid/TP40008194-CH17-SW1">https://developer.apple.com/library/archive/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/PayloadKeyReference.html#//apple_ref/doc/uid/TP40008194-CH17-SW1</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>platforms</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – These major platforms are supported by our notification system. Also includes a debug
+“platform”. This dict maps platforms to channel names.</p></li>
+<li><p><strong>apple_alert_tmpl</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – <p>This template can be used to send alert messages to Apple devices.</p>
+<ul>
+<li><dl class="simple">
+<dt>aps (dict): root key of Apple specific payload keys.</dt><dd><ul>
+<li><dl class="simple">
+<dt>alert (dict): keys for a standard user alert message.</dt><dd><ul>
+<li><p>title (str): [required] title of the message.</p></li>
+<li><p>body (str): [required] the actual message.</p></li>
+<li><p>title-loc-key (str): a key that looks up the translation (localization) of the title in Localizable.strings.</p></li>
+<li><p>title-loc-args (list(str)): a list of strings that replace formatting specifiers in the translated title.</p></li>
+<li><p>action-loc-key (str): a key that looks up the translation or alternate text of the “View” button.</p></li>
+<li><p>loc-key (str): a key that looks up the translation (localization) of the body in Localizable.strings.</p></li>
+<li><p>loc-args (list(str)): a list of strings that replace formatting specifiers in the translated body.</p></li>
+<li><p>launch-image (str): filename of image to show while app is loading from background.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>badge (int): set app badge to this number; 0 removes badge.</p></li>
+<li><p>sound (str): filename of custom sound to play when push notification arrives.</p></li>
+<li><p>thread-id (str): [not used] app-specific identifier for grouping notifications.</p></li>
+<li><p>category (str): [not used] custom actions directly from notification center.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>custom key (any): add any custom keys to the root of this template.</p></li>
+</ul>
+</p></li>
+<li><p><strong>apple_background_tmpl</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – <p>This template can be used to trigger a background update in the app.</p>
+<ul>
+<li><dl class="simple">
+<dt>aps (dict): root key of Apple specific payload keys.</dt><dd><ul>
+<li><p>content-available (int): [required] must be set to 1.</p></li>
+<li><p>badge (int): set app badge to this number; 0 removes badge.</p></li>
+<li><p>sound (str): filename of custom sound to play when push notification arrives.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>custom key (any): add any custom keys to the root of this template.</p></li>
+</ul>
+</p></li>
+<li><p><strong>apple_badge_tmpl</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – <p>This template can be used to set the app badge to a specific number.</p>
+<ul>
+<li><dl class="simple">
+<dt>aps (dict): root key of Apple specific payload keys.</dt><dd><ul>
+<li><p>badge (int): [required] set app badge to this number; 0 removes badge.</p></li>
+<li><p>sound (str): filename of custom sound to play when push notification arrives.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>custom key (any): add any custom keys to the root of this template.</p></li>
+</ul>
+</p></li>
+<li><p><strong>apple_voip_tmpl</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – <p>This template can be used to initiate a VoIP call. The contents of this template
+are not dictated by Apple, it does not use the <code class="docutils literal notranslate"><span class="pre">aps</span></code> root key.</p>
+<ul>
+<li><p>type (str): do <strong>not</strong> change this, it must be the literal string “incoming-call”.</p></li>
+<li><dl class="simple">
+<dt>data (dict): VoIP specific information.</dt><dd><ul>
+<li><p>room_id (int): ID of the Twilio video call room.</p></li>
+<li><p>staff_id (int): staff member who is initiating the call.</p></li>
+<li><p>staff_first_name (str): first name of the staff member.</p></li>
+<li><p>staff_middle_name (str): middle name of the staff member.</p></li>
+<li><p>staff_last_name (str): last name of the staff member.</p></li>
+<li><p>booking_description (str): reason for the call.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.utils.message.PushNotification.platforms">
+<span class="sig-name descname"><span class="pre">platforms</span></span><em class="property"> <span class="pre">=</span> <span class="pre">{'android':</span> <span class="pre">'FCM',</span> <span class="pre">'apple':</span> <span class="pre">'APNS',</span> <span class="pre">'debug':</span> <span class="pre">'DEBUG/LOG'}</span></em><a class="headerlink" href="#odyssey.utils.message.PushNotification.platforms" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.utils.message.PushNotification.apple_alert_tmpl">
+<span class="sig-name descname"><span class="pre">apple_alert_tmpl</span></span><em class="property"> <span class="pre">=</span> <span class="pre">{'aps':</span> <span class="pre">{'alert':</span> <span class="pre">{'action-loc-key':</span> <span class="pre">None,</span> <span class="pre">'body':</span> <span class="pre">None,</span> <span class="pre">'launch-image':</span> <span class="pre">None,</span> <span class="pre">'loc-args':</span> <span class="pre">None,</span> <span class="pre">'loc-key':</span> <span class="pre">None,</span> <span class="pre">'title':</span> <span class="pre">None,</span> <span class="pre">'title-loc-args':</span> <span class="pre">None,</span> <span class="pre">'title-loc-key':</span> <span class="pre">None},</span> <span class="pre">'badge':</span> <span class="pre">None,</span> <span class="pre">'category':</span> <span class="pre">None,</span> <span class="pre">'sound':</span> <span class="pre">None,</span> <span class="pre">'thread-id':</span> <span class="pre">None}}</span></em><a class="headerlink" href="#odyssey.utils.message.PushNotification.apple_alert_tmpl" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.utils.message.PushNotification.apple_background_tmpl">
+<span class="sig-name descname"><span class="pre">apple_background_tmpl</span></span><em class="property"> <span class="pre">=</span> <span class="pre">{'aps':</span> <span class="pre">{'badge':</span> <span class="pre">None,</span> <span class="pre">'content-available':</span> <span class="pre">1,</span> <span class="pre">'sound':</span> <span class="pre">None}}</span></em><a class="headerlink" href="#odyssey.utils.message.PushNotification.apple_background_tmpl" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.utils.message.PushNotification.apple_badge_tmpl">
+<span class="sig-name descname"><span class="pre">apple_badge_tmpl</span></span><em class="property"> <span class="pre">=</span> <span class="pre">{'aps':</span> <span class="pre">{'badge':</span> <span class="pre">None,</span> <span class="pre">'sound':</span> <span class="pre">None}}</span></em><a class="headerlink" href="#odyssey.utils.message.PushNotification.apple_badge_tmpl" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.utils.message.PushNotification.apple_voip_tmpl">
+<span class="sig-name descname"><span class="pre">apple_voip_tmpl</span></span><em class="property"> <span class="pre">=</span> <span class="pre">{'data':</span> <span class="pre">{'booking_description':</span> <span class="pre">None,</span> <span class="pre">'room_id':</span> <span class="pre">None,</span> <span class="pre">'staff_first_name':</span> <span class="pre">None,</span> <span class="pre">'staff_id':</span> <span class="pre">None,</span> <span class="pre">'staff_last_name':</span> <span class="pre">None,</span> <span class="pre">'staff_middle_name':</span> <span class="pre">None},</span> <span class="pre">'type':</span> <span class="pre">'incoming-call'}</span></em><a class="headerlink" href="#odyssey.utils.message.PushNotification.apple_voip_tmpl" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.utils.message.PushNotification.register_device">
+<span class="sig-name descname"><span class="pre">register_device</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">device_token</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_os</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_description</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">current_endpoint</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><a class="headerlink" href="#odyssey.utils.message.PushNotification.register_device" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register a device for push notifications.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>device_token</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The device token (called registration ID on Android) obtained from the OS to allow
+push notifications.</p></li>
+<li><p><strong>device_os</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Which platform to register with. Currently supported: “apple”, “android”, or “debug”.</p></li>
+<li><p><strong>device_description</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Additional data stored with the device_token in the AWS SNS endpoint. Max length 2048.</p></li>
+<li><p><strong>current_endpoint</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Current endpoint ARN, which may or may not be active.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><em>str</em> – Endpoint ARN registered for this device.</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.9)"><strong>ValueError</strong></a> – On incorrect platform or device_description too long.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.utils.message.PushNotification.unregister_device">
+<span class="sig-name descname"><span class="pre">unregister_device</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arn</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.message.PushNotification.unregister_device" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete endpoint.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>arn</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – ARN of the device endpoint to be deleted.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.utils.message.PushNotification.send">
+<span class="sig-name descname"><span class="pre">send</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">notification_type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#odyssey.utils.message.PushNotificationType" title="odyssey.utils.message.PushNotificationType"><span class="pre">odyssey.utils.message.PushNotificationType</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">content</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><a class="headerlink" href="#odyssey.utils.message.PushNotification.send" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send a push notification to the user.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>user_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – User ID of User to send message to. Notification will be send to all
+registered devices for this user.</p></li>
+<li><p><strong>notification_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em> or </em><a class="reference internal" href="#odyssey.utils.message.PushNotificationType" title="odyssey.utils.message.PushNotificationType"><em>PushNotificationType</em></a><em>(</em><em>Enum</em><em>)</em>) – What type of notification (alert, background, badge, voip) to send.</p></li>
+<li><p><strong>content</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – Content of the push notification. See the <code class="docutils literal notranslate"><span class="pre">apple_tmpl</span></code> and <code class="docutils literal notranslate"><span class="pre">apple_voip_tmpl</span></code>
+notification templates for a place to start.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><em>dict</em> – A dict with the channel name as key and the JSON encoded string of the message
+as it was sent to the registrered device(s) as value.</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="odyssey.utils.errors.html#odyssey.utils.errors.UnknownError" title="odyssey.utils.errors.UnknownError"><strong>UnknownError</strong></a> – If the user has no registered devices or if the device is registered with an
+    unknown channel.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="odyssey.utils.search.html" class="btn btn-neutral float-right" title="odyssey.utils.search module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="odyssey.utils.auth.html" class="btn btn-neutral float-left" title="odyssey.utils.auth" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright Copyright 2019-2020 Atlantic Venture Partners, all rights reserved.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

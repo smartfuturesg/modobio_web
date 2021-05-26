@@ -4,15 +4,18 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>odyssey.api.lookup.routes &mdash; Odyssey version: 0.1.100 documentation</title>
+  <title>odyssey.api.lookup.routes &mdash; Odyssey version: 0.5.45 documentation</title>
   
 
   
   <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
 
   
   
@@ -29,10 +32,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -64,7 +67,7 @@
             
             
               <div class="version">
-                version: 0.1.100
+                version: 0.5.45
               </div>
             
           
@@ -102,12 +105,16 @@
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.physiotherapy.routes.html">Physical therapist</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.trainer.routes.html">Trainer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.wearables.routes.html">Wearable devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.notifications.routes.html">Notifications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.telehealth.routes.html">Telehealth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.system.routes.html">System config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.facility.routes.html">Facilities</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Lookup tables</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.misc.postman.html">Postman</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.version.routes.html">Version</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.tasks.html">Tasks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.utils.html">Utilities</a></li>
 </ul>
 
@@ -178,90 +185,567 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-odyssey.api.lookup.routes">
+  <section id="module-odyssey.api.lookup.routes">
 <span id="odyssey-api-lookup-routes"></span><h1>odyssey.api.lookup.routes<a class="headerlink" href="#module-odyssey.api.lookup.routes" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
-<dt id="odyssey.api.lookup.routes.LookupDrinksApi">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.lookup.routes.</code><code class="sig-name descname">LookupDrinksApi</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupDrinksApi" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupTelehealthBookingIncrements">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.lookup.routes.</span></span><span class="sig-name descname"><span class="pre">LookupTelehealthBookingIncrements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupTelehealthBookingIncrements" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<p>Returns stored booking increments.
+:returns: <em>dict</em> – JSON encoded dict.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupTelehealthBookingIncrements.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupTelehealthBookingIncrements.get" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupTelehealthBookingIncrements.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'lookup_lookup_telehealth_booking_increments'</span></em><a class="headerlink" href="#odyssey.api.lookup.routes.LookupTelehealthBookingIncrements.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupTelehealthBookingIncrements.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupTelehealthBookingIncrements.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupTelehealthBookingIncrements.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET'}</span></em><a class="headerlink" href="#odyssey.api.lookup.routes.LookupTelehealthBookingIncrements.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupTimezones">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.lookup.routes.</span></span><span class="sig-name descname"><span class="pre">LookupTimezones</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupTimezones" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
 <dl class="py method">
-<dt id="odyssey.api.lookup.routes.LookupDrinksApi.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupDrinksApi.get" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupTimezones.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupTimezones.get" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupTimezones.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'lookup_lookup_timezones'</span></em><a class="headerlink" href="#odyssey.api.lookup.routes.LookupTimezones.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupTimezones.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupTimezones.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupTimezones.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET'}</span></em><a class="headerlink" href="#odyssey.api.lookup.routes.LookupTimezones.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupTransactionTypesResource">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.lookup.routes.</span></span><span class="sig-name descname"><span class="pre">LookupTransactionTypesResource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupTransactionTypesResource" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<p>Returns stored transaction types in database by GET request.
+:returns: <em>dict</em> – JSON encoded dict.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupTransactionTypesResource.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupTransactionTypesResource.get" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupTransactionTypesResource.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'lookup_lookup_transaction_types_resource'</span></em><a class="headerlink" href="#odyssey.api.lookup.routes.LookupTransactionTypesResource.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupTransactionTypesResource.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupTransactionTypesResource.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupTransactionTypesResource.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET'}</span></em><a class="headerlink" href="#odyssey.api.lookup.routes.LookupTransactionTypesResource.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupCountryOfOperationResource">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.lookup.routes.</span></span><span class="sig-name descname"><span class="pre">LookupCountryOfOperationResource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupCountryOfOperationResource" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<p>Returns stored countries of operations in database by GET request.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><em>dict</em> – JSON encoded dict.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupCountryOfOperationResource.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupCountryOfOperationResource.get" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupCountryOfOperationResource.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'lookup_lookup_country_of_operation_resource'</span></em><a class="headerlink" href="#odyssey.api.lookup.routes.LookupCountryOfOperationResource.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupCountryOfOperationResource.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupCountryOfOperationResource.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupCountryOfOperationResource.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET'}</span></em><a class="headerlink" href="#odyssey.api.lookup.routes.LookupCountryOfOperationResource.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupTelehealthSettingsApi">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.lookup.routes.</span></span><span class="sig-name descname"><span class="pre">LookupTelehealthSettingsApi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupTelehealthSettingsApi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<p>Endpoints related to the telehealth lookup tables</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupTelehealthSettingsApi.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupTelehealthSettingsApi.get" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupTelehealthSettingsApi.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'lookup_lookup_telehealth_settings_api'</span></em><a class="headerlink" href="#odyssey.api.lookup.routes.LookupTelehealthSettingsApi.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupTelehealthSettingsApi.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupTelehealthSettingsApi.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupTelehealthSettingsApi.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET'}</span></em><a class="headerlink" href="#odyssey.api.lookup.routes.LookupTelehealthSettingsApi.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.WearablesLookUpFitbitActivityTrackersResource">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.lookup.routes.</span></span><span class="sig-name descname"><span class="pre">WearablesLookUpFitbitActivityTrackersResource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.WearablesLookUpFitbitActivityTrackersResource" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<p>Returns Fitbit activity trackers stored in the database in response to a GET request.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><em>dict</em> – JSON encoded dict.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.WearablesLookUpFitbitActivityTrackersResource.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.WearablesLookUpFitbitActivityTrackersResource.get" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.WearablesLookUpFitbitActivityTrackersResource.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'lookup_wearables_look_up_fitbit_activity_trackers_resource_2'</span></em><a class="headerlink" href="#odyssey.api.lookup.routes.WearablesLookUpFitbitActivityTrackersResource.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.WearablesLookUpFitbitActivityTrackersResource.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.WearablesLookUpFitbitActivityTrackersResource.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.WearablesLookUpFitbitActivityTrackersResource.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET'}</span></em><a class="headerlink" href="#odyssey.api.lookup.routes.WearablesLookUpFitbitActivityTrackersResource.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.WearablesLookUpAppleActivityTrackersResource">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.lookup.routes.</span></span><span class="sig-name descname"><span class="pre">WearablesLookUpAppleActivityTrackersResource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.WearablesLookUpAppleActivityTrackersResource" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<p>Returns activity Apple trackers stored in the database in response to a GET request.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><em>dict</em> – JSON encoded dict.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.WearablesLookUpAppleActivityTrackersResource.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.WearablesLookUpAppleActivityTrackersResource.get" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.WearablesLookUpAppleActivityTrackersResource.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'lookup_wearables_look_up_apple_activity_trackers_resource'</span></em><a class="headerlink" href="#odyssey.api.lookup.routes.WearablesLookUpAppleActivityTrackersResource.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.WearablesLookUpAppleActivityTrackersResource.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.WearablesLookUpAppleActivityTrackersResource.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.WearablesLookUpAppleActivityTrackersResource.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET'}</span></em><a class="headerlink" href="#odyssey.api.lookup.routes.WearablesLookUpAppleActivityTrackersResource.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.WearablesLookUpAllActivityTrackersResource">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.lookup.routes.</span></span><span class="sig-name descname"><span class="pre">WearablesLookUpAllActivityTrackersResource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.WearablesLookUpAllActivityTrackersResource" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<p>Returns activity trackers stored in the database in response to a GET request.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><em>dict</em> – JSON encoded dict.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.WearablesLookUpAllActivityTrackersResource.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.WearablesLookUpAllActivityTrackersResource.get" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.WearablesLookUpAllActivityTrackersResource.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'lookup_wearables_look_up_all_activity_trackers_resource'</span></em><a class="headerlink" href="#odyssey.api.lookup.routes.WearablesLookUpAllActivityTrackersResource.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.WearablesLookUpAllActivityTrackersResource.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.WearablesLookUpAllActivityTrackersResource.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.WearablesLookUpAllActivityTrackersResource.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET'}</span></em><a class="headerlink" href="#odyssey.api.lookup.routes.WearablesLookUpAllActivityTrackersResource.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupDrinksApi">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.lookup.routes.</span></span><span class="sig-name descname"><span class="pre">LookupDrinksApi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupDrinksApi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupDrinksApi.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupDrinksApi.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>get contents of drinks lookup table</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.lookup.routes.LookupDrinksApi.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'lookup_lookup_drinks_api'</em><a class="headerlink" href="#odyssey.api.lookup.routes.LookupDrinksApi.endpoint" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupDrinksApi.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'lookup_lookup_drinks_api'</span></em><a class="headerlink" href="#odyssey.api.lookup.routes.LookupDrinksApi.endpoint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.lookup.routes.LookupDrinksApi.mediatypes">
-<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupDrinksApi.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupDrinksApi.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupDrinksApi.mediatypes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.lookup.routes.LookupDrinksApi.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'GET'}</em><a class="headerlink" href="#odyssey.api.lookup.routes.LookupDrinksApi.methods" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupDrinksApi.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET'}</span></em><a class="headerlink" href="#odyssey.api.lookup.routes.LookupDrinksApi.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt id="odyssey.api.lookup.routes.LookupDrinkIngredientsApi">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.lookup.routes.</code><code class="sig-name descname">LookupDrinkIngredientsApi</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupDrinkIngredientsApi" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupDrinkIngredientsApi">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.lookup.routes.</span></span><span class="sig-name descname"><span class="pre">LookupDrinkIngredientsApi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupDrinkIngredientsApi" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
 <dl class="py method">
-<dt id="odyssey.api.lookup.routes.LookupDrinkIngredientsApi.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">drink_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupDrinkIngredientsApi.get" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupDrinkIngredientsApi.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">drink_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupDrinkIngredientsApi.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>get recipe of the drink denoted by drink_id</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.lookup.routes.LookupDrinkIngredientsApi.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'lookup_lookup_drink_ingredients_api'</em><a class="headerlink" href="#odyssey.api.lookup.routes.LookupDrinkIngredientsApi.endpoint" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupDrinkIngredientsApi.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'lookup_lookup_drink_ingredients_api'</span></em><a class="headerlink" href="#odyssey.api.lookup.routes.LookupDrinkIngredientsApi.endpoint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.lookup.routes.LookupDrinkIngredientsApi.mediatypes">
-<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupDrinkIngredientsApi.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupDrinkIngredientsApi.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupDrinkIngredientsApi.mediatypes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.lookup.routes.LookupDrinkIngredientsApi.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'GET'}</em><a class="headerlink" href="#odyssey.api.lookup.routes.LookupDrinkIngredientsApi.methods" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupDrinkIngredientsApi.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET'}</span></em><a class="headerlink" href="#odyssey.api.lookup.routes.LookupDrinkIngredientsApi.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt id="odyssey.api.lookup.routes.LookupGoalsApi">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.lookup.routes.</code><code class="sig-name descname">LookupGoalsApi</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupGoalsApi" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupGoalsApi">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.lookup.routes.</span></span><span class="sig-name descname"><span class="pre">LookupGoalsApi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupGoalsApi" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
 <dl class="py method">
-<dt id="odyssey.api.lookup.routes.LookupGoalsApi.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupGoalsApi.get" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupGoalsApi.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupGoalsApi.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>get contents of goals lookup table</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.lookup.routes.LookupGoalsApi.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'lookup_lookup_goals_api'</em><a class="headerlink" href="#odyssey.api.lookup.routes.LookupGoalsApi.endpoint" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupGoalsApi.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'lookup_lookup_goals_api'</span></em><a class="headerlink" href="#odyssey.api.lookup.routes.LookupGoalsApi.endpoint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.lookup.routes.LookupGoalsApi.mediatypes">
-<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupGoalsApi.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupGoalsApi.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupGoalsApi.mediatypes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.lookup.routes.LookupGoalsApi.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'GET'}</em><a class="headerlink" href="#odyssey.api.lookup.routes.LookupGoalsApi.methods" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupGoalsApi.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET'}</span></em><a class="headerlink" href="#odyssey.api.lookup.routes.LookupGoalsApi.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
 
 </dd></dl>
 
-</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupRacesApi">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.lookup.routes.</span></span><span class="sig-name descname"><span class="pre">LookupRacesApi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupRacesApi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupRacesApi.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupRacesApi.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>get contents of races lookup table</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupRacesApi.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'lookup_lookup_races_api'</span></em><a class="headerlink" href="#odyssey.api.lookup.routes.LookupRacesApi.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupRacesApi.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupRacesApi.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupRacesApi.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET'}</span></em><a class="headerlink" href="#odyssey.api.lookup.routes.LookupRacesApi.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupClinicalCareTeamResourcesApi">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.lookup.routes.</span></span><span class="sig-name descname"><span class="pre">LookupClinicalCareTeamResourcesApi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupClinicalCareTeamResourcesApi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<p>Returns available resources that can be shared within clinical care teams</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupClinicalCareTeamResourcesApi.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupClinicalCareTeamResourcesApi.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>get contents of clinical care team resources lookup table</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupClinicalCareTeamResourcesApi.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'lookup_lookup_clinical_care_team_resources_api'</span></em><a class="headerlink" href="#odyssey.api.lookup.routes.LookupClinicalCareTeamResourcesApi.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupClinicalCareTeamResourcesApi.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupClinicalCareTeamResourcesApi.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupClinicalCareTeamResourcesApi.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET'}</span></em><a class="headerlink" href="#odyssey.api.lookup.routes.LookupClinicalCareTeamResourcesApi.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupSubscriptionsApi">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.lookup.routes.</span></span><span class="sig-name descname"><span class="pre">LookupSubscriptionsApi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupSubscriptionsApi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupSubscriptionsApi.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupSubscriptionsApi.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>get contents of subscription plans lookup table</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupSubscriptionsApi.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'lookup_lookup_subscriptions_api'</span></em><a class="headerlink" href="#odyssey.api.lookup.routes.LookupSubscriptionsApi.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupSubscriptionsApi.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupSubscriptionsApi.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupSubscriptionsApi.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET'}</span></em><a class="headerlink" href="#odyssey.api.lookup.routes.LookupSubscriptionsApi.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupNotificationsApi">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.lookup.routes.</span></span><span class="sig-name descname"><span class="pre">LookupNotificationsApi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupNotificationsApi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupNotificationsApi.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupNotificationsApi.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>get contents of notification types lookup table</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupNotificationsApi.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'lookup_lookup_notifications_api'</span></em><a class="headerlink" href="#odyssey.api.lookup.routes.LookupNotificationsApi.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupNotificationsApi.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupNotificationsApi.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupNotificationsApi.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET'}</span></em><a class="headerlink" href="#odyssey.api.lookup.routes.LookupNotificationsApi.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupDefaultHealthMetricsApi">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.lookup.routes.</span></span><span class="sig-name descname"><span class="pre">LookupDefaultHealthMetricsApi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupDefaultHealthMetricsApi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<p>Endpoint for handling requests for all default health metrics</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupDefaultHealthMetricsApi.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupDefaultHealthMetricsApi.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>get contents of default health metrics types lookup table</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupDefaultHealthMetricsApi.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'lookup_lookup_default_health_metrics_api'</span></em><a class="headerlink" href="#odyssey.api.lookup.routes.LookupDefaultHealthMetricsApi.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupDefaultHealthMetricsApi.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupDefaultHealthMetricsApi.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupDefaultHealthMetricsApi.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET'}</span></em><a class="headerlink" href="#odyssey.api.lookup.routes.LookupDefaultHealthMetricsApi.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupTerritoriesofOperationApi">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.lookup.routes.</span></span><span class="sig-name descname"><span class="pre">LookupTerritoriesofOperationApi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupTerritoriesofOperationApi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<p>Endpoint for handling requests for all territories of operation</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupTerritoriesofOperationApi.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupTerritoriesofOperationApi.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>get contents of operational territories lookup table</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupTerritoriesofOperationApi.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'lookup_lookup_territoriesof_operation_api'</span></em><a class="headerlink" href="#odyssey.api.lookup.routes.LookupTerritoriesofOperationApi.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupTerritoriesofOperationApi.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupTerritoriesofOperationApi.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupTerritoriesofOperationApi.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET'}</span></em><a class="headerlink" href="#odyssey.api.lookup.routes.LookupTerritoriesofOperationApi.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupEmergencyNumbersApi">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.lookup.routes.</span></span><span class="sig-name descname"><span class="pre">LookupEmergencyNumbersApi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupEmergencyNumbersApi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<p>Endpoint that returns emergency phone number for the Ambulance service</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupEmergencyNumbersApi.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'lookup_lookup_emergency_numbers_api'</span></em><a class="headerlink" href="#odyssey.api.lookup.routes.LookupEmergencyNumbersApi.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupEmergencyNumbersApi.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupEmergencyNumbersApi.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupEmergencyNumbersApi.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET'}</span></em><a class="headerlink" href="#odyssey.api.lookup.routes.LookupEmergencyNumbersApi.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupEmergencyNumbersApi.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupEmergencyNumbersApi.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>GET request for the list of emergency numbers</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupProfessionColorsApi">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.lookup.routes.</span></span><span class="sig-name descname"><span class="pre">LookupProfessionColorsApi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupProfessionColorsApi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<p>Endpoint that returns the colors and icons associated with professions.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupProfessionColorsApi.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'lookup_lookup_profession_colors_api'</span></em><a class="headerlink" href="#odyssey.api.lookup.routes.LookupProfessionColorsApi.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupProfessionColorsApi.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupProfessionColorsApi.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupProfessionColorsApi.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET'}</span></em><a class="headerlink" href="#odyssey.api.lookup.routes.LookupProfessionColorsApi.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.lookup.routes.LookupProfessionColorsApi.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.routes.LookupProfessionColorsApi.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>get contents of profession colors lookup table</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
 
 
            </div>

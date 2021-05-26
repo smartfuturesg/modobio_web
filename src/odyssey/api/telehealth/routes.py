@@ -737,13 +737,14 @@ class MeetingRoomStatusAPI(Resource):
         """
         For status callback directly from twilio
         
-        TODO: 
-            -authorize access to this API from twilio automated callback
-            -check callback reason (we just want the status updated)
-            -update meeting status
-                -open
-                -close
-            -use TelehealthMeetingRooms table
+        TODO:
+
+        - authorize access to this API from twilio automated callback
+        - check callback reason (we just want the status updated)
+        - update meeting status
+            - open
+            - close
+        - use TelehealthMeetingRooms table
         """
     
     @token_auth.login_required
@@ -1169,10 +1170,14 @@ class TelehealthBookingDetailsApi(Resource):
         Edits one file for another, or can edit text details
 
         Expects form_data: (will ignore anything else)
-            idx:(required) int : TelehealthBookingDetails idx
-            media(optional) : file**
-            **(It will not break if multiple files are sent, but only one will be handled)
-            details(optional) : str
+
+        Parameters
+        ----------
+        idx : int (required)
+            TelehealthBookingDetails idx
+        media : file (optional)
+            It will not break if multiple files are sent, but only one will be handled.
+        details : str (optional)
         """
         #Validate index is an int and not a zero
         idx = request.form.get('idx', default=0)

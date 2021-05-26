@@ -152,5 +152,3 @@ def test_delete_booking_details(test_client, init_database, staff_auth_header):
     invalid_booking_id = 500
     response = test_client.delete(f'/telehealth/bookings/details/{invalid_booking_id}', headers=staff_auth_header)
     assert response.status_code == 200
-
-
