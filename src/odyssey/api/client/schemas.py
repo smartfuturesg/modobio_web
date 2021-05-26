@@ -258,8 +258,8 @@ class ClientDataTierSchema(ma.SQLAlchemyAutoSchema):
 class AllClientsDataTier(Schema):
 
     items = fields.Nested(ClientDataTierSchema(many=True), missing=ClientDataTierSchema().load({}))
-    total_stored_bytes = fields.Integer(description="Total bytes stored for all clients", missing=0)
-    total_items = fields.Integer(description="number of clients in this payload", missing=0)
+    total_stored_bytes = fields.Integer(metadata={'description': 'Total bytes stored for all clients'}, missing=0)
+    total_items = fields.Integer(metadata={'description': 'number of clients in this payload'}, missing=0)
 
 
 ####
@@ -318,11 +318,11 @@ class ClinicalCareTeamAuthorizaitonSchema(Schema):
     """
     user_id = fields.Integer(load_only=True)
     team_member_modobio_id = fields.String(dump_only=True)
-    team_member_user_id = fields.Integer(description="user_id for this clinical care team member")
+    team_member_user_id = fields.Integer(metadata={'description': 'user_id for this clinical care team member'})
     team_member_firstname = fields.String(dump_only=True)
     team_member_lastname = fields.String(dump_only=True)
     team_member_email = fields.Email(dump_only=True)
-    resource_id = fields.Integer(description="id for the resource. See lookup table for resource ids")
+    resource_id = fields.Integer(metadata={'description': 'id for the resource. See lookup table for resource ids'})
     display_name = fields.String(dump_only=True)
 
     @post_load
