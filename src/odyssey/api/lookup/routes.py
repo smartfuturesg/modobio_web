@@ -24,8 +24,9 @@ from odyssey.api.lookup.models import (
      LookupTransactionTypes,
      LookupNotifications,
      LookupEmergencyNumbers,
-     LookupRoles
-)
+     LookupRoles,
+     LookupMacroGoals
+     )
 from odyssey.api.lookup.schemas import (
     LookupActivityTrackersOutputSchema,
     LookupBookingTimeIncrementsOutputSchema,
@@ -45,7 +46,8 @@ from odyssey.api.lookup.schemas import (
     LookupTimezones,
     LookupTelehealthSettingsSchema,
     LookupEmergencyNumbersOutputSchema,
-    LookupRolesOutputSchema
+    LookupRolesOutputSchema,
+    LookupMacroGoalsOutputSchema
 )
 from odyssey.utils.misc import check_drink_existence
 
@@ -268,6 +270,16 @@ class LookupGoalsApi(Resource):
     def get(self):
         """get contents of goals lookup table"""
         res = LookupGoals.query.all()
+        return {'total_items': len(res), 'items': res}
+
+@ns.route('/macro-goals/')
+class LookupMacroGoalsApi(Resource):
+
+    @token_auth.login_required
+    @responds(schema=LookupMacroGoalsOutputSchema, api=ns)
+    def get(self):
+        """get contents from macro goals lookup table"""
+        res = LookupMacroGoals.query.all()
         return {'total_items': len(res), 'items': res}
 
 @ns.route('/races/')

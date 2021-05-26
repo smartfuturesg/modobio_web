@@ -209,6 +209,20 @@ class ClientInfo(db.Model):
     :type: int, foreign key('LookupGoal.goal_id')
     """
 
+    primary_macro_goal_id = db.Column(db.Integer, db.ForeignKey('LookupMacroGoals.goal_id'), nullable=True)
+    """
+    The client's primary goal for using modobio. Must be an option in the LookupMacroGoals table.
+
+    :type: int, foreign key('LookupMacroGoals.goal_id')
+    """
+
+    primary_goal_description = db.Column(db.String(300), nullable=True)
+    """
+    The client's description of primary goal for using modobio. Optional
+
+    :type: str, max length 300 
+    """
+
     primary_pharmacy_name = db.Column(db.String)
     """
     Primary Pharmacy Name
