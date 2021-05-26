@@ -4,15 +4,18 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>odyssey.api.client_services.routes &mdash; Odyssey version: 0.1.100 documentation</title>
+  <title>odyssey.api.client_services.routes &mdash; Odyssey version: 0.5.45 documentation</title>
   
 
   
   <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
 
   
   
@@ -29,10 +32,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -64,7 +67,7 @@
             
             
               <div class="version">
-                version: 0.1.100
+                version: 0.5.45
               </div>
             
           
@@ -102,12 +105,16 @@
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.physiotherapy.routes.html">Physical therapist</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.trainer.routes.html">Trainer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.wearables.routes.html">Wearable devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.notifications.routes.html">Notifications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.telehealth.routes.html">Telehealth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.system.routes.html">System config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.facility.routes.html">Facilities</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.lookup.routes.html">Lookup tables</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.misc.postman.html">Postman</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.version.routes.html">Version</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.tasks.html">Tasks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.utils.html">Utilities</a></li>
 </ul>
 
@@ -178,17 +185,17 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-odyssey.api.client_services.routes">
+  <section id="module-odyssey.api.client_services.routes">
 <span id="odyssey-api-client-services-routes"></span><h1>odyssey.api.client_services.routes<a class="headerlink" href="#module-odyssey.api.client_services.routes" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
-<dt id="odyssey.api.client_services.routes.NewUserClientServices">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.client_services.routes.</code><code class="sig-name descname">NewUserClientServices</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client_services.routes.NewUserClientServices" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.client_services.routes.NewUserClientServices">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.client_services.routes.</span></span><span class="sig-name descname"><span class="pre">NewUserClientServices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client_services.routes.NewUserClientServices" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
 <p>Create, Update, Retrieve user basic information.
 This endpoint is intended to be used by client services.</p>
 <dl class="py method">
-<dt id="odyssey.api.client_services.routes.NewUserClientServices.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client_services.routes.NewUserClientServices.post" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.client_services.routes.NewUserClientServices.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client_services.routes.NewUserClientServices.post" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create new user using only email (and/or phone number) and name. Returns a password and portal link for the new user.
 Portal link includes a portal_id which is a JWT with a 72 hour lifetime. New Users must use this link to complete their registration.</p>
 <p>This API will create a new account but not will assign the account to a user context (‘client’ or ‘staff’). To complete registration,
@@ -197,30 +204,31 @@ they may go ahead and request an API token (log in).</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.client_services.routes.NewUserClientServices.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'client-services_new_user_client_services'</em><a class="headerlink" href="#odyssey.api.client_services.routes.NewUserClientServices.endpoint" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.client_services.routes.NewUserClientServices.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'client-services_new_user_client_services'</span></em><a class="headerlink" href="#odyssey.api.client_services.routes.NewUserClientServices.endpoint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.client_services.routes.NewUserClientServices.mediatypes">
-<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client_services.routes.NewUserClientServices.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.client_services.routes.NewUserClientServices.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client_services.routes.NewUserClientServices.mediatypes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.client_services.routes.NewUserClientServices.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'POST'}</em><a class="headerlink" href="#odyssey.api.client_services.routes.NewUserClientServices.methods" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="odyssey.api.client_services.routes.NewUserClientServices.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'POST'}</span></em><a class="headerlink" href="#odyssey.api.client_services.routes.NewUserClientServices.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt id="odyssey.api.client_services.routes.RefreshRegistrationPortal">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.client_services.routes.</code><code class="sig-name descname">RefreshRegistrationPortal</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client_services.routes.RefreshRegistrationPortal" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.client_services.routes.RefreshRegistrationPortal">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.client_services.routes.</span></span><span class="sig-name descname"><span class="pre">RefreshRegistrationPortal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client_services.routes.RefreshRegistrationPortal" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
 <p>Routines related to registration portals.</p>
 <dl class="py method">
-<dt id="odyssey.api.client_services.routes.RefreshRegistrationPortal.put">
-<code class="sig-name descname">put</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client_services.routes.RefreshRegistrationPortal.put" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.client_services.routes.RefreshRegistrationPortal.put">
+<span class="sig-name descname"><span class="pre">put</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client_services.routes.RefreshRegistrationPortal.put" title="Permalink to this definition">¶</a></dt>
 <dd><p>Takes the email of a client already in the system and
 returns a fresh portal_id and registration url so the client can continue their registration.</p>
 <p>This API can be used as part of the creation of a new user account or to assign a user new
@@ -231,23 +239,24 @@ or an account that’s been updated to include a new staff or client side.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.client_services.routes.RefreshRegistrationPortal.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'client-services_refresh_registration_portal'</em><a class="headerlink" href="#odyssey.api.client_services.routes.RefreshRegistrationPortal.endpoint" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.client_services.routes.RefreshRegistrationPortal.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'client-services_refresh_registration_portal'</span></em><a class="headerlink" href="#odyssey.api.client_services.routes.RefreshRegistrationPortal.endpoint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.client_services.routes.RefreshRegistrationPortal.mediatypes">
-<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client_services.routes.RefreshRegistrationPortal.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.client_services.routes.RefreshRegistrationPortal.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client_services.routes.RefreshRegistrationPortal.mediatypes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.client_services.routes.RefreshRegistrationPortal.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'PUT'}</em><a class="headerlink" href="#odyssey.api.client_services.routes.RefreshRegistrationPortal.methods" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="odyssey.api.client_services.routes.RefreshRegistrationPortal.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'PUT'}</span></em><a class="headerlink" href="#odyssey.api.client_services.routes.RefreshRegistrationPortal.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
 
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>

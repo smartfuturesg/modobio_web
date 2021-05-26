@@ -227,18 +227,10 @@ class NotificationsPushRegistration(db.Model):
     :type: str, max length 1024
     """
 
-    provider = db.Column(db.String(25))
-    """
-    Name of the provider of the push notification service. Currently
-    'APNS' for Apple Push Notification Service, 'APNS_VOIP' for Apple
-    video call start, or 'FCM' for Firebase/Google Cloud Messaging.
-
-    :type: str, max length 25
-    """
-
     arn = db.Column(db.String(256))
     """
-    The AWS Resource Number (ARN) of the AWS SNS endpoint.
+    The AWS Resource Name (ARN) of the notification channel (AWS SNS
+    platform application).
 
     :type: str, max length 256
     """

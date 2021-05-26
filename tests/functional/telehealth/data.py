@@ -197,7 +197,7 @@ telehealth_client_staff_bookings_put_1_data = {
   'target_date': '2025-03-03',
   'booking_window_id_start_time': 100,
   'booking_window_id_end_time': 103,
-  'status': 'Completed'
+  'status': 'Client Canceled'
 }
 
 # --------------------------------------------------------------------

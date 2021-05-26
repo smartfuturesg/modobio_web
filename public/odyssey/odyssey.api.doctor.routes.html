@@ -4,15 +4,18 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>odyssey.api.doctor.routes &mdash; Odyssey version: 0.1.100 documentation</title>
+  <title>odyssey.api.doctor.routes &mdash; Odyssey version: 0.5.45 documentation</title>
   
 
   
   <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
 
   
   
@@ -29,10 +32,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -64,7 +67,7 @@
             
             
               <div class="version">
-                version: 0.1.100
+                version: 0.5.45
               </div>
             
           
@@ -102,12 +105,16 @@
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.physiotherapy.routes.html">Physical therapist</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.trainer.routes.html">Trainer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.wearables.routes.html">Wearable devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.notifications.routes.html">Notifications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.telehealth.routes.html">Telehealth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.system.routes.html">System config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.facility.routes.html">Facilities</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.lookup.routes.html">Lookup tables</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.misc.postman.html">Postman</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.version.routes.html">Version</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.tasks.html">Tasks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.utils.html">Utilities</a></li>
 </ul>
 
@@ -178,173 +185,244 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-odyssey.api.doctor.routes">
+  <section id="module-odyssey.api.doctor.routes">
 <span id="odyssey-api-doctor-routes"></span><h1>odyssey.api.doctor.routes<a class="headerlink" href="#module-odyssey.api.doctor.routes" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
-<dt id="odyssey.api.doctor.routes.MedicalGenInformation">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.doctor.routes.</code><code class="sig-name descname">MedicalGenInformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalGenInformation" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedBloodPressures">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.doctor.routes.</span></span><span class="sig-name descname"><span class="pre">MedBloodPressures</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodPressures" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedicalGenInformation.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalGenInformation.get" title="Permalink to this definition">¶</a></dt>
-<dd><p>This request gets the users personal and family history if it exists</p>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedBloodPressures.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodPressures.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>This request gets the users submitted blood pressure if it exists</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedicalGenInformation.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalGenInformation.post" title="Permalink to this definition">¶</a></dt>
-<dd><p>Post request to post the client’s onboarding personal and family history</p>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedBloodPressures.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodPressures.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>Post request to post the client’s blood pressure</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.MedicalGenInformation.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'doctor_medical_gen_information'</em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalGenInformation.endpoint" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedBloodPressures.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'doctor_med_blood_pressures'</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodPressures.endpoint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedicalGenInformation.mediatypes">
-<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalGenInformation.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedBloodPressures.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodPressures.mediatypes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.MedicalGenInformation.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'GET', 'POST'}</em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalGenInformation.methods" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedBloodPressures.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET',</span> <span class="pre">'POST'}</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodPressures.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt id="odyssey.api.doctor.routes.MedicalGeneralInformation">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.doctor.routes.</code><code class="sig-name descname">MedicalGeneralInformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalGeneralInformation" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalLookUpBloodPressureResource">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.doctor.routes.</span></span><span class="sig-name descname"><span class="pre">MedicalLookUpBloodPressureResource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalLookUpBloodPressureResource" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<p>Returns blood pressure ranges stored in the database in response to a GET request.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><em>dict</em> – JSON encoded dict.</p>
+</dd>
+</dl>
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedicalGeneralInformation.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalGeneralInformation.get" title="Permalink to this definition">¶</a></dt>
-<dd><p>This request gets the users personal and family history if it exists</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedicalGeneralInformation.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalGeneralInformation.post" title="Permalink to this definition">¶</a></dt>
-<dd><p>Post request to post the client’s onboarding personal and family history</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedicalGeneralInformation.put">
-<code class="sig-name descname">put</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalGeneralInformation.put" title="Permalink to this definition">¶</a></dt>
-<dd><p>Put request to update the client’s onboarding personal and family history</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.MedicalGeneralInformation.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'doctor_medical_general_information'</em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalGeneralInformation.endpoint" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedicalGeneralInformation.mediatypes">
-<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalGeneralInformation.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalLookUpBloodPressureResource.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalLookUpBloodPressureResource.get" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.MedicalGeneralInformation.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'GET', 'POST', 'PUT'}</em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalGeneralInformation.methods" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalLookUpBloodPressureResource.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'doctor_medical_look_up_blood_pressure_resource'</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalLookUpBloodPressureResource.endpoint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalLookUpBloodPressureResource.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalLookUpBloodPressureResource.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalLookUpBloodPressureResource.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET'}</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalLookUpBloodPressureResource.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt id="odyssey.api.doctor.routes.MedicalMedicationInformation">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.doctor.routes.</code><code class="sig-name descname">MedicalMedicationInformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalMedicationInformation" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalGenInformation">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.doctor.routes.</span></span><span class="sig-name descname"><span class="pre">MedicalGenInformation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalGenInformation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedicalMedicationInformation.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalMedicationInformation.get" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalGenInformation.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalGenInformation.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>This request gets the users personal and family history if it exists</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedicalMedicationInformation.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalMedicationInformation.post" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalGenInformation.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalGenInformation.post" title="Permalink to this definition">¶</a></dt>
 <dd><p>Post request to post the client’s onboarding personal and family history</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedicalMedicationInformation.put">
-<code class="sig-name descname">put</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalMedicationInformation.put" title="Permalink to this definition">¶</a></dt>
-<dd><p>Put request to update the client’s onboarding personal and family history</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedicalMedicationInformation.delete">
-<code class="sig-name descname">delete</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalMedicationInformation.delete" title="Permalink to this definition">¶</a></dt>
-<dd><p>Put request to update the client’s onboarding personal and family history</p>
-</dd></dl>
-
 <dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.MedicalMedicationInformation.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'doctor_medical_medication_information'</em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalMedicationInformation.endpoint" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalGenInformation.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'doctor_medical_gen_information'</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalGenInformation.endpoint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedicalMedicationInformation.mediatypes">
-<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalMedicationInformation.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalGenInformation.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalGenInformation.mediatypes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.MedicalMedicationInformation.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'DELETE', 'GET', 'POST', 'PUT'}</em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalMedicationInformation.methods" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalGenInformation.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET',</span> <span class="pre">'POST'}</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalGenInformation.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt id="odyssey.api.doctor.routes.MedicalAllergiesInformation">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.doctor.routes.</code><code class="sig-name descname">MedicalAllergiesInformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalAllergiesInformation" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalGeneralInformation">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.doctor.routes.</span></span><span class="sig-name descname"><span class="pre">MedicalGeneralInformation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalGeneralInformation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedicalAllergiesInformation.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalAllergiesInformation.get" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalGeneralInformation.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalGeneralInformation.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>This request gets the users personal and family history if it exists</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedicalAllergiesInformation.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalAllergiesInformation.post" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalGeneralInformation.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalGeneralInformation.post" title="Permalink to this definition">¶</a></dt>
 <dd><p>Post request to post the client’s onboarding personal and family history</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedicalAllergiesInformation.put">
-<code class="sig-name descname">put</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalAllergiesInformation.put" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalGeneralInformation.put">
+<span class="sig-name descname"><span class="pre">put</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalGeneralInformation.put" title="Permalink to this definition">¶</a></dt>
+<dd><p>Put request to update the client’s onboarding personal and family history</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalGeneralInformation.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'doctor_medical_general_information'</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalGeneralInformation.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalGeneralInformation.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalGeneralInformation.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalGeneralInformation.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET',</span> <span class="pre">'POST',</span> <span class="pre">'PUT'}</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalGeneralInformation.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalMedicationInformation">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.doctor.routes.</span></span><span class="sig-name descname"><span class="pre">MedicalMedicationInformation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalMedicationInformation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalMedicationInformation.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalMedicationInformation.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>This request gets the users personal and family history if it exists</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalMedicationInformation.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalMedicationInformation.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>Post request to post the client’s onboarding personal and family history</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalMedicationInformation.put">
+<span class="sig-name descname"><span class="pre">put</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalMedicationInformation.put" title="Permalink to this definition">¶</a></dt>
 <dd><p>Put request to update the client’s onboarding personal and family history</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedicalAllergiesInformation.delete">
-<code class="sig-name descname">delete</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalAllergiesInformation.delete" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalMedicationInformation.delete">
+<span class="sig-name descname"><span class="pre">delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalMedicationInformation.delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Put request to update the client’s onboarding personal and family history</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalMedicationInformation.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'doctor_medical_medication_information'</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalMedicationInformation.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalMedicationInformation.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalMedicationInformation.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalMedicationInformation.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'DELETE',</span> <span class="pre">'GET',</span> <span class="pre">'POST',</span> <span class="pre">'PUT'}</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalMedicationInformation.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalAllergiesInformation">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.doctor.routes.</span></span><span class="sig-name descname"><span class="pre">MedicalAllergiesInformation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalAllergiesInformation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalAllergiesInformation.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalAllergiesInformation.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>This request gets the users personal and family history if it exists</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalAllergiesInformation.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalAllergiesInformation.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>Post request to post the client’s onboarding personal and family history</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalAllergiesInformation.put">
+<span class="sig-name descname"><span class="pre">put</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalAllergiesInformation.put" title="Permalink to this definition">¶</a></dt>
+<dd><p>Put request to update the client’s onboarding personal and family history</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalAllergiesInformation.delete">
+<span class="sig-name descname"><span class="pre">delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalAllergiesInformation.delete" title="Permalink to this definition">¶</a></dt>
 <dd><p>delete request to update the client’s onboarding personal and family history</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.MedicalAllergiesInformation.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'doctor_medical_allergies_information'</em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalAllergiesInformation.endpoint" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalAllergiesInformation.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'doctor_medical_allergies_information'</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalAllergiesInformation.endpoint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedicalAllergiesInformation.mediatypes">
-<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalAllergiesInformation.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalAllergiesInformation.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalAllergiesInformation.mediatypes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.MedicalAllergiesInformation.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'DELETE', 'GET', 'POST', 'PUT'}</em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalAllergiesInformation.methods" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalAllergiesInformation.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'DELETE',</span> <span class="pre">'GET',</span> <span class="pre">'POST',</span> <span class="pre">'PUT'}</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalAllergiesInformation.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt id="odyssey.api.doctor.routes.MedicalLookUpSTDResource">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.doctor.routes.</code><code class="sig-name descname">MedicalLookUpSTDResource</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalLookUpSTDResource" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalLookUpSTDResource">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.doctor.routes.</span></span><span class="sig-name descname"><span class="pre">MedicalLookUpSTDResource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalLookUpSTDResource" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
 <p>Returns STD list stored in the database in response to a GET request.</p>
 <dl class="field-list simple">
@@ -353,34 +431,35 @@
 </dd>
 </dl>
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedicalLookUpSTDResource.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalLookUpSTDResource.get" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalLookUpSTDResource.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalLookUpSTDResource.get" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.MedicalLookUpSTDResource.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'doctor_medical_look_up_std_resource'</em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalLookUpSTDResource.endpoint" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalLookUpSTDResource.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'doctor_medical_look_up_std_resource'</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalLookUpSTDResource.endpoint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedicalLookUpSTDResource.mediatypes">
-<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalLookUpSTDResource.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalLookUpSTDResource.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalLookUpSTDResource.mediatypes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.MedicalLookUpSTDResource.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'GET'}</em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalLookUpSTDResource.methods" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalLookUpSTDResource.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET'}</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalLookUpSTDResource.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt id="odyssey.api.doctor.routes.MedicalSocialHist">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.doctor.routes.</code><code class="sig-name descname">MedicalSocialHist</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalSocialHist" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalSocialHist">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.doctor.routes.</span></span><span class="sig-name descname"><span class="pre">MedicalSocialHist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalSocialHist" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedicalSocialHist.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalSocialHist.get" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalSocialHist.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalSocialHist.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>This request retrieves the social history
 for client <code class="docutils literal notranslate"><span class="pre">user_id</span></code> in response to a GET request.</p>
 <p>The example returned payload will look like:</p>
@@ -416,8 +495,8 @@ for client <code class="docutils literal notranslate"><span class="pre">user_id<
 </dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedicalSocialHist.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalSocialHist.post" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalSocialHist.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalSocialHist.post" title="Permalink to this definition">¶</a></dt>
 <dd><p>This request submits the social history
 for client <code class="docutils literal notranslate"><span class="pre">user_id</span></code> in response to a POST request.</p>
 <p>The example returned payload will look like:</p>
@@ -453,95 +532,98 @@ for client <code class="docutils literal notranslate"><span class="pre">user_id<
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.MedicalSocialHist.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'doctor_medical_social_hist'</em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalSocialHist.endpoint" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalSocialHist.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'doctor_medical_social_hist'</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalSocialHist.endpoint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedicalSocialHist.mediatypes">
-<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalSocialHist.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalSocialHist.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalSocialHist.mediatypes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.MedicalSocialHist.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'GET', 'POST'}</em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalSocialHist.methods" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalSocialHist.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET',</span> <span class="pre">'POST'}</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalSocialHist.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt id="odyssey.api.doctor.routes.MedicalCondition">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.doctor.routes.</code><code class="sig-name descname">MedicalCondition</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalCondition" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalCondition">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.doctor.routes.</span></span><span class="sig-name descname"><span class="pre">MedicalCondition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalCondition" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
 <p>Returns the medical conditions currently documented in the DB</p>
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedicalCondition.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalCondition.get" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalCondition.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalCondition.get" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.MedicalCondition.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'doctor_medical_condition'</em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalCondition.endpoint" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalCondition.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'doctor_medical_condition'</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalCondition.endpoint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedicalCondition.mediatypes">
-<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalCondition.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalCondition.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalCondition.mediatypes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.MedicalCondition.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'GET'}</em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalCondition.methods" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalCondition.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET'}</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalCondition.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt id="odyssey.api.doctor.routes.MedicalFamilyHist">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.doctor.routes.</code><code class="sig-name descname">MedicalFamilyHist</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalFamilyHist" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalFamilyHist">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.doctor.routes.</span></span><span class="sig-name descname"><span class="pre">MedicalFamilyHist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalFamilyHist" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedicalFamilyHist.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalFamilyHist.get" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalFamilyHist.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalFamilyHist.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>This request gets the users personal and family history if it exists</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedicalFamilyHist.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalFamilyHist.post" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalFamilyHist.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalFamilyHist.post" title="Permalink to this definition">¶</a></dt>
 <dd><p>Post request to post the client’s onboarding personal and family history</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedicalFamilyHist.put">
-<code class="sig-name descname">put</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalFamilyHist.put" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalFamilyHist.put">
+<span class="sig-name descname"><span class="pre">put</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalFamilyHist.put" title="Permalink to this definition">¶</a></dt>
 <dd><p>Put request to update the client’s onboarding personal and family history</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.MedicalFamilyHist.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'doctor_medical_family_hist'</em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalFamilyHist.endpoint" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalFamilyHist.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'doctor_medical_family_hist'</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalFamilyHist.endpoint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedicalFamilyHist.mediatypes">
-<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalFamilyHist.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalFamilyHist.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalFamilyHist.mediatypes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.MedicalFamilyHist.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'GET', 'POST', 'PUT'}</em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalFamilyHist.methods" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalFamilyHist.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET',</span> <span class="pre">'POST',</span> <span class="pre">'PUT'}</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalFamilyHist.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt id="odyssey.api.doctor.routes.MedImaging">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.doctor.routes.</code><code class="sig-name descname">MedImaging</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedImaging" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedImaging">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.doctor.routes.</span></span><span class="sig-name descname"><span class="pre">MedImaging</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedImaging" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedImaging.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedImaging.get" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedImaging.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedImaging.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns a json file of all the medical images in the database for the specified user_id</p>
 <p>Note:
 image_path is a sharable url for an image saved in S3 Bucket,
@@ -549,8 +631,8 @@ if running locally, it is the path to a local temp file</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedImaging.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedImaging.post" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedImaging.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedImaging.post" title="Permalink to this definition">¶</a></dt>
 <dd><p>For adding one or many medical images to the database for the specified user_id</p>
 <p>Expects form-data</p>
 <p>“image”: (file_path , open(file_path, mode=’rb’), ‘Mime type’)
@@ -562,34 +644,30 @@ if running locally, it is the path to a local temp file</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.MedImaging.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'doctor_med_imaging'</em><a class="headerlink" href="#odyssey.api.doctor.routes.MedImaging.endpoint" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedImaging.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'doctor_med_imaging'</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.MedImaging.endpoint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedImaging.mediatypes">
-<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedImaging.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedImaging.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedImaging.mediatypes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.MedImaging.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'GET', 'POST'}</em><a class="headerlink" href="#odyssey.api.doctor.routes.MedImaging.methods" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedImaging.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET',</span> <span class="pre">'POST'}</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.MedImaging.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt id="odyssey.api.doctor.routes.MedBloodTest">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.doctor.routes.</code><code class="sig-name descname">MedBloodTest</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTest" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedBloodTest">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.doctor.routes.</span></span><span class="sig-name descname"><span class="pre">MedBloodTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTest" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedBloodTest.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTest.get" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedBloodTest.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTest.post" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedBloodTest.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTest.post" title="Permalink to this definition">¶</a></dt>
 <dd><p>Resource to submit a new blood test instance for the specified client.</p>
 <p>Test submissions are given a test_id which can be used to reference back
 to the results related to this submisison. Each submission may have
@@ -597,339 +675,322 @@ multiple results (e.g. in a panel)</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.MedBloodTest.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'doctor_med_blood_test'</em><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTest.endpoint" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedBloodTest.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'doctor_med_blood_test'</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTest.endpoint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedBloodTest.mediatypes">
-<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTest.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedBloodTest.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTest.mediatypes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.MedBloodTest.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'GET', 'POST'}</em><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTest.methods" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedBloodTest.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'POST'}</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTest.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt id="odyssey.api.doctor.routes.MedBloodTestAll">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.doctor.routes.</code><code class="sig-name descname">MedBloodTestAll</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTestAll" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedBloodTestAll">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.doctor.routes.</span></span><span class="sig-name descname"><span class="pre">MedBloodTestAll</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTestAll" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedBloodTestAll.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTestAll.get" title="Permalink to this definition">¶</a></dt>
-<dd><p>This resource returns every instance of blood test submissions for the
-specified user_id</p>
-<p>Test submissions relate overall submission data: test_id, date, notes, panel_type
-to the actual results. Each submission may have multiple results
-where the results can be referenced by the test_id provided in this request</p>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedBloodTestAll.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTestAll.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>This resource returns every instance of blood test submissions for the specified user_id</p>
+<p>Each test submission includes the following data:
+- date
+- test_id
+- notes
+- panel_type
+- reporter (a staff member who reported the test results)</p>
+<p>To see the actual test results for a given test, use the test_id
+to query the (GET) <cite>/bloodtest/results/&lt;int:test_id&gt;/</cite> endpoint</p>
+<p>To see test results for every blood test submission for a specified client,
+use the (GET)`/bloodtest/results/all/&lt;int:user_id&gt;/` endpoint.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.MedBloodTestAll.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'doctor_med_blood_test_all'</em><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTestAll.endpoint" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedBloodTestAll.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'doctor_med_blood_test_all'</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTestAll.endpoint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedBloodTestAll.mediatypes">
-<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTestAll.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedBloodTestAll.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTestAll.mediatypes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.MedBloodTestAll.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'GET'}</em><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTestAll.methods" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedBloodTestAll.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET'}</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTestAll.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt id="odyssey.api.doctor.routes.MedBloodTestResults">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.doctor.routes.</code><code class="sig-name descname">MedBloodTestResults</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTestResults" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedBloodTestResults">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.doctor.routes.</span></span><span class="sig-name descname"><span class="pre">MedBloodTestResults</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTestResults" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
 <p>Resource for working with a single blood test
 entry instance, test_id.</p>
 <p>Each test instance may have multiple test results.</p>
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedBloodTestResults.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">test_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTestResults.get" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedBloodTestResults.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTestResults.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns details of the test denoted by test_id as well as
 the actual results submitted.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.MedBloodTestResults.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'doctor_med_blood_test_results'</em><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTestResults.endpoint" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedBloodTestResults.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'doctor_med_blood_test_results'</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTestResults.endpoint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedBloodTestResults.mediatypes">
-<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTestResults.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedBloodTestResults.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTestResults.mediatypes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.MedBloodTestResults.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'GET'}</em><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTestResults.methods" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedBloodTestResults.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET'}</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTestResults.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt id="odyssey.api.doctor.routes.AllMedBloodTestResults">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.doctor.routes.</code><code class="sig-name descname">AllMedBloodTestResults</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.AllMedBloodTestResults" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.AllMedBloodTestResults">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.doctor.routes.</span></span><span class="sig-name descname"><span class="pre">AllMedBloodTestResults</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.AllMedBloodTestResults" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
-<p>Endpoint for returning all blood test results from a client</p>
+<p>Endpoint for returning all blood test results from a client.</p>
+<p>This includes all test submisison details along with the test
+results associated with each test submission.</p>
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.AllMedBloodTestResults.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.AllMedBloodTestResults.get" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.AllMedBloodTestResults.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.AllMedBloodTestResults.get" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.AllMedBloodTestResults.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'doctor_all_med_blood_test_results'</em><a class="headerlink" href="#odyssey.api.doctor.routes.AllMedBloodTestResults.endpoint" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.AllMedBloodTestResults.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'doctor_all_med_blood_test_results'</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.AllMedBloodTestResults.endpoint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.AllMedBloodTestResults.mediatypes">
-<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.AllMedBloodTestResults.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.AllMedBloodTestResults.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.AllMedBloodTestResults.mediatypes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.AllMedBloodTestResults.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'GET'}</em><a class="headerlink" href="#odyssey.api.doctor.routes.AllMedBloodTestResults.methods" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.AllMedBloodTestResults.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET'}</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.AllMedBloodTestResults.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt id="odyssey.api.doctor.routes.MedBloodTestResultTypes">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.doctor.routes.</code><code class="sig-name descname">MedBloodTestResultTypes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTestResultTypes" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedBloodTestResultTypes">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.doctor.routes.</span></span><span class="sig-name descname"><span class="pre">MedBloodTestResultTypes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTestResultTypes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
 <p>Returns the types of tests currently documented in the DB</p>
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedBloodTestResultTypes.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTestResultTypes.get" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedBloodTestResultTypes.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTestResultTypes.get" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.MedBloodTestResultTypes.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'doctor_med_blood_test_result_types'</em><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTestResultTypes.endpoint" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedBloodTestResultTypes.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'doctor_med_blood_test_result_types'</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTestResultTypes.endpoint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedBloodTestResultTypes.mediatypes">
-<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTestResultTypes.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedBloodTestResultTypes.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTestResultTypes.mediatypes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.MedBloodTestResultTypes.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'GET'}</em><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTestResultTypes.methods" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedBloodTestResultTypes.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET'}</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.MedBloodTestResultTypes.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt id="odyssey.api.doctor.routes.MedHistory">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.doctor.routes.</code><code class="sig-name descname">MedHistory</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedHistory" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedHistory">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.doctor.routes.</span></span><span class="sig-name descname"><span class="pre">MedHistory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedHistory" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedHistory.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedHistory.get" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedHistory.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedHistory.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns client’s medical history as a json for the user_id specified</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedHistory.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedHistory.post" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedHistory.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedHistory.post" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns client’s medical history as a json for the user_id specified</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedHistory.put">
-<code class="sig-name descname">put</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedHistory.put" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedHistory.put">
+<span class="sig-name descname"><span class="pre">put</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedHistory.put" title="Permalink to this definition">¶</a></dt>
 <dd><p>updates client’s medical history as a json for the user_id specified</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.MedHistory.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'doctor_med_history'</em><a class="headerlink" href="#odyssey.api.doctor.routes.MedHistory.endpoint" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedHistory.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'doctor_med_history'</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.MedHistory.endpoint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedHistory.mediatypes">
-<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedHistory.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedHistory.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedHistory.mediatypes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.MedHistory.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'GET', 'POST', 'PUT'}</em><a class="headerlink" href="#odyssey.api.doctor.routes.MedHistory.methods" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedHistory.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET',</span> <span class="pre">'POST',</span> <span class="pre">'PUT'}</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.MedHistory.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt id="odyssey.api.doctor.routes.MedPhysical">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.doctor.routes.</code><code class="sig-name descname">MedPhysical</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedPhysical" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedPhysical">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.doctor.routes.</span></span><span class="sig-name descname"><span class="pre">MedPhysical</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedPhysical" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedPhysical.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedPhysical.get" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedPhysical.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedPhysical.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns all client’s medical physical exams for the user_id specified</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedPhysical.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedPhysical.post" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedPhysical.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedPhysical.post" title="Permalink to this definition">¶</a></dt>
 <dd><p>creates new db entry of client’s medical physical exam as a json for the clientuser_idid specified</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.MedPhysical.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'doctor_med_physical'</em><a class="headerlink" href="#odyssey.api.doctor.routes.MedPhysical.endpoint" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedPhysical.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'doctor_med_physical'</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.MedPhysical.endpoint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedPhysical.mediatypes">
-<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedPhysical.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedPhysical.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedPhysical.mediatypes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.MedPhysical.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'GET', 'POST'}</em><a class="headerlink" href="#odyssey.api.doctor.routes.MedPhysical.methods" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedPhysical.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET',</span> <span class="pre">'POST'}</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.MedPhysical.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt id="odyssey.api.doctor.routes.AllMedInstitutes">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.doctor.routes.</code><code class="sig-name descname">AllMedInstitutes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.AllMedInstitutes" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.AllMedInstitutes">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.doctor.routes.</span></span><span class="sig-name descname"><span class="pre">AllMedInstitutes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.AllMedInstitutes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.AllMedInstitutes.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.AllMedInstitutes.get" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.AllMedInstitutes.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.AllMedInstitutes.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns all medical institutes currently in the database</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.AllMedInstitutes.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'doctor_all_med_institutes'</em><a class="headerlink" href="#odyssey.api.doctor.routes.AllMedInstitutes.endpoint" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.AllMedInstitutes.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'doctor_all_med_institutes'</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.AllMedInstitutes.endpoint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.AllMedInstitutes.mediatypes">
-<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.AllMedInstitutes.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.AllMedInstitutes.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.AllMedInstitutes.mediatypes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.AllMedInstitutes.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'GET'}</em><a class="headerlink" href="#odyssey.api.doctor.routes.AllMedInstitutes.methods" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.AllMedInstitutes.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET'}</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.AllMedInstitutes.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt id="odyssey.api.doctor.routes.ExternalMedicalRecordIDs">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.doctor.routes.</code><code class="sig-name descname">ExternalMedicalRecordIDs</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.ExternalMedicalRecordIDs" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.ExternalMedicalRecordIDs">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.doctor.routes.</span></span><span class="sig-name descname"><span class="pre">ExternalMedicalRecordIDs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.ExternalMedicalRecordIDs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.ExternalMedicalRecordIDs.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.ExternalMedicalRecordIDs.post" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.ExternalMedicalRecordIDs.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.ExternalMedicalRecordIDs.post" title="Permalink to this definition">¶</a></dt>
 <dd><p>for submitting client medical record ids from external medical institutions</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.ExternalMedicalRecordIDs.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.ExternalMedicalRecordIDs.get" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.ExternalMedicalRecordIDs.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.ExternalMedicalRecordIDs.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns all medical record ids for user_id</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.ExternalMedicalRecordIDs.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'doctor_external_medical_record_i_ds'</em><a class="headerlink" href="#odyssey.api.doctor.routes.ExternalMedicalRecordIDs.endpoint" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.ExternalMedicalRecordIDs.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'doctor_external_medical_record_i_ds'</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.ExternalMedicalRecordIDs.endpoint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.ExternalMedicalRecordIDs.mediatypes">
-<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.ExternalMedicalRecordIDs.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.ExternalMedicalRecordIDs.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.ExternalMedicalRecordIDs.mediatypes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.ExternalMedicalRecordIDs.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'GET', 'POST'}</em><a class="headerlink" href="#odyssey.api.doctor.routes.ExternalMedicalRecordIDs.methods" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.ExternalMedicalRecordIDs.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET',</span> <span class="pre">'POST'}</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.ExternalMedicalRecordIDs.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt id="odyssey.api.doctor.routes.MedicalSurgeriesAPI">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.doctor.routes.</code><code class="sig-name descname">MedicalSurgeriesAPI</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalSurgeriesAPI" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalSurgeriesAPI">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.doctor.routes.</span></span><span class="sig-name descname"><span class="pre">MedicalSurgeriesAPI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalSurgeriesAPI" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedicalSurgeriesAPI.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">client_user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalSurgeriesAPI.post" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalSurgeriesAPI.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client_user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalSurgeriesAPI.post" title="Permalink to this definition">¶</a></dt>
 <dd><p>register a client surgery in the db</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedicalSurgeriesAPI.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">client_user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalSurgeriesAPI.get" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalSurgeriesAPI.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client_user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalSurgeriesAPI.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns a list of all surgeries for the given client_user_id</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.MedicalSurgeriesAPI.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'doctor_medical_surgeries_api'</em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalSurgeriesAPI.endpoint" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalSurgeriesAPI.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'doctor_medical_surgeries_api'</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalSurgeriesAPI.endpoint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedicalSurgeriesAPI.mediatypes">
-<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalSurgeriesAPI.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalSurgeriesAPI.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalSurgeriesAPI.mediatypes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.MedicalSurgeriesAPI.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'GET', 'POST'}</em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalSurgeriesAPI.methods" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="odyssey.api.doctor.routes.MedicalSurgeriesAPI.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET',</span> <span class="pre">'POST'}</span></em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalSurgeriesAPI.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
 
 </dd></dl>
 
-<dl class="py class">
-<dt id="odyssey.api.doctor.routes.MedicalConditionsEndpoint">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.doctor.routes.</code><code class="sig-name descname">MedicalConditionsEndpoint</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalConditionsEndpoint" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
-<p>Lookup table for supported medical conditions.</p>
-<dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedicalConditionsEndpoint.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalConditionsEndpoint.get" title="Permalink to this definition">¶</a></dt>
-<dd><p>Lookup table for supported medical conditions.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><em>dict(dict(…))</em> – Nested dict, where the keys are the supported (category of)
-medical issues. The values are either another dict to specify
-a subdivision, or <code class="docutils literal notranslate"><span class="pre">null</span></code> indicating no further nesting.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.MedicalConditionsEndpoint.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'doctor_medical_conditions_endpoint'</em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalConditionsEndpoint.endpoint" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt id="odyssey.api.doctor.routes.MedicalConditionsEndpoint.mediatypes">
-<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalConditionsEndpoint.mediatypes" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.api.doctor.routes.MedicalConditionsEndpoint.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'GET'}</em><a class="headerlink" href="#odyssey.api.doctor.routes.MedicalConditionsEndpoint.methods" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-</div>
+</section>
 
 
            </div>

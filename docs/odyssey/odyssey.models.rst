@@ -33,5 +33,8 @@ Other
 .. toctree::
 
    Wearable devices <odyssey.api.wearables.models>
+   Notifications <odyssey.api.notifications.models>
+   Telehealth <odyssey.api.telehealth.models>
+   System config <odyssey.api.system.models>
    Facilities <odyssey.api.facility.models>
    Lookup tables <odyssey.api.lookup.models>

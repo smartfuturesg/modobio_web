@@ -28,6 +28,9 @@ Other
 .. toctree::
 
    Wearable devices <odyssey.api.wearables.routes>
+   Notifications <odyssey.api.notifications.routes>
+   Telehealth <odyssey.api.telehealth.routes>
+   System config <odyssey.api.system.routes>
    Facilities <odyssey.api.facility.routes>
    Lookup tables <odyssey.api.lookup.routes>
    Postman <odyssey.api.misc.postman>

@@ -8,6 +8,8 @@ from twilio.jwt.access_token import AccessToken
 from twilio.jwt.access_token.grants import VideoGrant, ChatGrant
 import random
 from werkzeug.datastructures import FileStorage
+from datetime import timedelta
+from dateutil import tz
 
 from odyssey import db
 from odyssey.api import api
@@ -15,7 +17,7 @@ from odyssey.api import api
 from odyssey.api.lookup.models import (
     LookupBookingTimeIncrements
 )
-from odyssey.api.staff.models import StaffRoles
+from odyssey.api.staff.models import StaffRoles, StaffCalendarEvents
 from odyssey.api.user.models import User
 
 from odyssey.api.telehealth.models import (
@@ -46,8 +48,9 @@ from odyssey.api.lookup.models import (
     LookupTerritoriesofOperation
 )
 from odyssey.utils.auth import token_auth
-from odyssey.utils.constants import TWILIO_ACCESS_KEY_TTL, DAY_OF_WEEK, ALLOWED_AUDIO_TYPES, ALLOWED_IMAGE_TYPES
+from odyssey.utils.constants import BOOKINGS_STATUS, TWILIO_ACCESS_KEY_TTL, DAY_OF_WEEK, ALLOWED_AUDIO_TYPES, ALLOWED_IMAGE_TYPES
 from odyssey.utils.errors import GenericNotFound, InputError, LoginNotAuthorized, UnauthorizedUser, ContentNotFound, IllegalSetting
+
 from odyssey.utils.misc import (
     check_client_existence, 
     check_staff_existence,
@@ -443,8 +446,9 @@ class TelehealthBookingsApi(Resource):
         """
         current_user, _ = token_auth.current_user()
 
-        if request.parsed_obj.booking_window_id_start_time >= request.parsed_obj.booking_window_id_end_time:
-            raise InputError(status_code=405,message='Start time must be before end time.')
+        # Allow bookings between days
+        # if request.parsed_obj.booking_window_id_start_time >= request.parsed_obj.booking_window_id_end_time:
+        #     raise InputError(status_code=405,message='Start time must be before end time.')
         
         client_user_id = request.args.get('client_user_id', type=int)
         
@@ -519,6 +523,29 @@ class TelehealthBookingsApi(Resource):
             db.session.delete(client_in_queue)
             db.session.flush()
 
+        # Same day appointment
+        if request.parsed_obj.booking_window_id_start_time < request.parsed_obj.booking_window_id_end_time:
+            end_date = request.parsed_obj.target_date
+        else:
+            # Appointment spills over to the next day
+            # 11:30pm - 12:15am
+            end_date = request.parsed_obj.target_date + timedelta(days=1)
+        lookup_times = LookupBookingTimeIncrements.query.all()
+
+        add_to_calendar = StaffCalendarEvents(user_id=request.parsed_obj.staff_user_id,
+                                              start_date=request.parsed_obj.target_date,
+                                              end_date=end_date,
+                                              start_time=lookup_times[request.parsed_obj.booking_window_id_start_time-1].start_time,
+                                              end_time=lookup_times[request.parsed_obj.booking_window_id_start_time-1].end_time,
+                                              recurring=False,
+                                              availability_status='Busy',
+                                              location='Telehealth_'+str(request.parsed_obj.idx),
+                                              description='',
+                                              all_day=False
+                                              )
+
+        db.session.add(add_to_calendar)
+
         db.session.commit()
 
         request.parsed_obj.conversation_sid = conversation_sid
@@ -538,10 +565,8 @@ class TelehealthBookingsApi(Resource):
         """
             PUT request should be used purely to update the booking STATUS.
         """
-        
         if request.parsed_obj.booking_window_id_start_time >= request.parsed_obj.booking_window_id_end_time:
             raise InputError(status_code=405,message='Start time must be before end time.')
-
 
         booking_id = request.args.get('booking_id', type=int)
         
@@ -552,10 +577,17 @@ class TelehealthBookingsApi(Resource):
             raise InputError(status_code=405,message='Could not find booking.')
 
         data = request.get_json()
-
         bookings.update(data)
+        # NOTE: status array should be referenced to BOOKINGS_STATUS in constants.py
+        status = ('Client Canceled', 'Staff Canceled')
+        # If the booking gets updated for cancelation, then delete it in the Staff's calendar
+        if data['status'] in status:
+            staff_event = StaffCalendarEvents.query.filter_by(location='Telehealth_{}'.format(booking_id)).one_or_none()
+            if staff_event:
+                db.session.delete(staff_event)
         
         db.session.commit()
+
         return 201
 
     @token_auth.login_required()
@@ -568,6 +600,7 @@ class TelehealthBookingsApi(Resource):
         '''
         if request.parsed_obj.booking_window_id_start_time >= request.parsed_obj.booking_window_id_end_time:
             raise InputError(status_code=405,message='Start time must be before end time.')
+
         client_user_id = request.args.get('client_user_id', type=int)
         
         if not client_user_id:
@@ -714,13 +747,14 @@ class MeetingRoomStatusAPI(Resource):
         """
         For status callback directly from twilio
         
-        TODO: 
-            -authorize access to this API from twilio automated callback
-            -check callback reason (we just want the status updated)
-            -update meeting status
-                -open
-                -close
-            -use TelehealthMeetingRooms table
+        TODO:
+
+        - authorize access to this API from twilio automated callback
+        - check callback reason (we just want the status updated)
+        - update meeting status
+            - open
+            - close
+        - use TelehealthMeetingRooms table
         """
     
     @token_auth.login_required
@@ -996,6 +1030,7 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
                 # end time must be after start time
                 if time['start_time'] > time['end_time']:
                     db.session.rollback()
+                    #TODO: allow availabilities between days 
                     raise InputError(status_code=405,message='Start Time must be before End Time')
                 
                 # This for loop loops through the booking increments to find where the 
@@ -1126,7 +1161,7 @@ class TelehealthBookingDetailsApi(Resource):
         booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
         if booking is None:
             raise ContentNotFound
-            
+
         #verify user trying to access details is the client or staff involved in scheulded booking
         if booking.client_user_id != token_auth.current_user()[0].user_id \
             and booking.staff_user_id != token_auth.current_user()[0].user_id:
@@ -1177,11 +1212,17 @@ class TelehealthBookingDetailsApi(Resource):
         Edits one file for another, or can edit text details
 
         Expects form_data: (will ignore anything else)
-            image: [files] (list of image files, up to 3 can be sent)
-            voice: file (one sound file can be sent)
-            details: string
 
-            (optional) : str
+        Parameters
+        ----------
+        idx : int (required)
+            TelehealthBookingDetails idx
+        image : list(file) (optional)
+            Image file(s), up to 3 can be send.
+        voice : file (optional)
+            Audio file, only 1 can be send.
+        details : str (optional)
+            Further details.
         """
         #verify the editor of details is the client or staff from schedulded booking
         booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
@@ -1224,7 +1265,7 @@ class TelehealthBookingDetailsApi(Resource):
 
         if not current_app.config['LOCAL_CONFIG']:
             #if 'images' and 'voice' are both not present, no changes will be made to the current media file
-            #if 'images' or 'voice' are present, but empty, the current media file(s) for that category will be removed        
+            #if 'images' or 'voice' are present, but empty, the current media file(s) for that category will be removed
             if files:
                 s3 = boto3.resource('s3')
                 bucket = s3.Bucket(current_app.config['S3_BUCKET_NAME'])
@@ -1234,14 +1275,14 @@ class TelehealthBookingDetailsApi(Resource):
                     'Bucket': current_app.config['S3_BUCKET_NAME'],
                     'Key': None
                 }
-        
+
                 #if images key is present, delete existing images
                 if 'images' in files:
                     bucket.objects.filter(Prefix=f'meeting_files/id{booking_id:05d}/image').delete()
 
                 #if voice key is present, delete existing recording
                 if 'voice' in files:
-                    bucket.objects.filter(Prefix=f'meeting_files/id{booking_id:05d}/voice').delete()                     
+                    bucket.objects.filter(Prefix=f'meeting_files/id{booking_id:05d}/voice').delete()
 
                 MAX_bytes = 524288000 #500 mb
                 hex_token = secrets.token_hex(4)
@@ -1256,7 +1297,7 @@ class TelehealthBookingDetailsApi(Resource):
 
                     #ensure this is not an empty file
                     if img_size > 0:
-                        #Rename image (format: 4digitRandomHex_index.img_extension) AND Save=>S3 
+                        #Rename image (format: 4digitRandomHex_index.img_extension) AND Save=>S3
                         img_extension = pathlib.Path(img.filename).suffix
                         if img_extension not in ALLOWED_IMAGE_TYPES:
                             raise InputError(422, f'{img_extension} is not an allowed file type. Allowed types are {ALLOWED_IMAGE_TYPES}')
@@ -1281,7 +1322,7 @@ class TelehealthBookingDetailsApi(Resource):
 
                     #ensure this is not an empty file
                     if recording_size > 0:
-                        #Rename voice (format: voice_4digitRandomHex_index.img_extension) AND Save=>S3 
+                        #Rename voice (format: voice_4digitRandomHex_index.img_extension) AND Save=>S3
                         recording_extension = pathlib.Path(recording.filename).suffix
                         if recording_extension not in ALLOWED_AUDIO_TYPES:
                             raise InputError(422, f'{recording_extension} is not an allowed file type. Allowed types are {ALLOWED_AUDIO_TYPES}')
@@ -1354,7 +1395,7 @@ class TelehealthBookingDetailsApi(Resource):
             raise GenericNotFound(f"No location exists with id {location_id}")
 
         data.location_id = location_id
-        
+
         payload.append(data)
 
         if not current_app.config['LOCAL_CONFIG']:
@@ -1366,7 +1407,7 @@ class TelehealthBookingDetailsApi(Resource):
 
                 s3 = boto3.resource('s3')
                 bucket = s3.Bucket(current_app.config['S3_BUCKET_NAME'])
-            
+
                 #upload images from request to s3
                 for i, img in enumerate(files.getlist('images')):
                     #Verifying image size is within a safe threashold (MAX = 500 mb)
@@ -1377,7 +1418,7 @@ class TelehealthBookingDetailsApi(Resource):
 
                     #ensure this is not an empty file
                     if img_size > 0:
-                        #Rename image (format: 4digitRandomHex_index.img_extension) AND Save=>S3 
+                        #Rename image (format: 4digitRandomHex_index.img_extension) AND Save=>S3
                         img_extension = pathlib.Path(img.filename).suffix
                         if img_extension not in ALLOWED_IMAGE_TYPES:
                             raise InputError(422, f'{img_extension} is not an allowed file type. Allowed types are {ALLOWED_IMAGE_TYPES}')
@@ -1402,7 +1443,7 @@ class TelehealthBookingDetailsApi(Resource):
 
                     #ensure this is not an empty file
                     if recording_size > 0:
-                        #Rename voice (format: voice_4digitRandomHex_index.img_extension) AND Save=>S3 
+                        #Rename voice (format: voice_4digitRandomHex_index.img_extension) AND Save=>S3
                         recording_extension = pathlib.Path(recording.filename).suffix
                         if recording_extension not in ALLOWED_AUDIO_TYPES:
                             raise InputError(422, f'{recording_extension} is not an allowed file type. Allowed types are {ALLOWED_AUDIO_TYPES}')

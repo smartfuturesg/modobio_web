@@ -64,7 +64,7 @@ from odyssey.api.trainer.models import FitnessQuestionnaire
 from odyssey.api.facility.models import RegisteredFacilities
 from odyssey.api.user.models import User, UserLogin, UserTokenHistory
 from odyssey.utils.pdf import to_pdf, merge_pdfs
-from odyssey.utils.email import send_test_email
+from odyssey.utils.message import send_test_email
 from odyssey.utils.misc import check_client_existence, check_drink_existence
 from odyssey.api.client.schemas import(
     AllClientsDataTier,
@@ -84,6 +84,7 @@ from odyssey.api.client.schemas import(
     ClientSearchOutSchema,
     ClientSubscriptionContractSchema,
     ClientAndUserInfoSchema,
+    ClientAndUserInfoPutSchema,
     ClientHeightSchema,
     ClientWeightSchema,
     ClientWaistSizeSchema,
@@ -103,6 +104,66 @@ from odyssey.api.facility.schemas import ClientSummarySchema
 
 ns = api.namespace('client', description='Operations related to clients')
 
+def process_race_and_ethnicity(user_id, mother, father):
+    def format_list(ids):
+        """
+        removes duplicate ids if present,
+        checks race_id 1 is exclusive if present
+        checks that all ids are valid
+        """
+
+        #removes duplicate ids if they were submitted
+        formatted_list = list(set(ids))
+
+        #race_id 1 (unknown) must be exclusive, a user cannot submit 'unknown' and
+        #other race(s) for a single parent
+        if 1 in formatted_list and len(formatted_list) > 1:
+            raise InputError(400, 'Race_id 1 (unknown) must be exclusive. It cannot be submitted in a list with other race ids.')
+
+        for race_id in formatted_list:
+            if not LookupRaces.query.filter_by(race_id=race_id).one_or_none():
+                raise InputError(400, f'Invalid race_id: {race_id}')
+
+        return formatted_list
+
+    #remove existing race/ethnicity info
+    for data in ClientRaceAndEthnicity.query.filter_by(user_id=user_id).all():
+        db.session.delete(data)
+    db.session.commit()
+
+    #add incoming data from request
+    if not mother:
+        #if a blank array is passed, mark as 'unknown'
+        model = ClientRaceAndEthnicitySchema().load({'is_client_mother': True, 'race_id': 1})
+        model.user_id = user_id
+        db.session.add(model)
+    else:
+        formatted_list = format_list(mother)
+        for race_id in formatted_list:
+            model = ClientRaceAndEthnicitySchema().load({
+                'race_id': race_id,
+                'is_client_mother': True
+            })
+            model.user_id = user_id
+            db.session.add(model)
+
+    if not father:
+        #if a blank array is passed, mark as 'unknown'
+        model = ClientRaceAndEthnicitySchema().load({'is_client_mother': False, 'race_id': 1})
+        model.user_id = user_id
+        db.session.add(model)
+    else:
+        formatted_list = format_list(father)
+        for race_id in formatted_list:
+            model = ClientRaceAndEthnicitySchema().load({
+                'race_id': race_id,
+                'is_client_mother': False
+            })
+            model.user_id = user_id
+            db.session.add(model)
+
+    db.session.commit()
+
 @ns.route('/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class Client(Resource):
@@ -110,7 +171,6 @@ class Client(Resource):
     @responds(schema=ClientAndUserInfoSchema, api=ns)
     def get(self, user_id):
         """returns client info table as a json for the user_id specified"""
-
         client_data = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
         user_data = User.query.filter_by(user_id=user_id).one_or_none()
         if not client_data and not user_data:
@@ -157,7 +217,7 @@ class Client(Resource):
         return {'client_info': client_info_payload, 'user_info': user_data}
 
     @token_auth.login_required
-    @accepts(schema=ClientAndUserInfoSchema, api=ns)
+    @accepts(schema=ClientAndUserInfoPutSchema, api=ns)
     @responds(schema=ClientAndUserInfoSchema, status_code=200, api=ns)
     def put(self, user_id):
         """edit client info"""
@@ -182,7 +242,22 @@ class Client(Resource):
             db.session.add(recommendation)
 
         #update both tables with request data
-        if request.parsed_obj['client_info']:
+        client_info = request.parsed_obj['client_info']
+        if client_info:
+            if 'race_infromation' in client_info:
+                #send race_information through race-and-ethnicity endpoint
+                if client_info['race_information']['mother']:
+                    mother = client_info['race_information']['mother']
+                else:
+                    mother = None
+                if client_info['race_information']['father']:
+                    father = client_info['race_information']['father']
+                else:
+                    father = None
+
+                process_race_and_ethnicity(user_id, mother, father)
+                del client_info['race_information']
+                
             client_data.update(request.parsed_obj['client_info'])
         if request.parsed_obj['user_info']:
             user_data.update(request.parsed_obj['user_info'])
@@ -197,7 +272,7 @@ class Client(Resource):
             .join(LookupRaces, LookupRaces.race_id == ClientRaceAndEthnicity.race_id) \
             .filter(ClientRaceAndEthnicity.user_id == user_id).all()
 
-        return {'client_info': client_data, 'user_info': user_data}
+        return {'client_info': client_info_payload, 'user_info': user_data}
 
 @ns.route('/summary/<int:user_id>/')
 class ClientSummary(Resource):
@@ -1487,66 +1562,18 @@ class ClientRaceAndEthnicityApi(Resource):
     @responds(schema=ClientRaceAndEthnicitySchema(many=True), api=ns, status_code=201)
     def put(self, user_id):
 
-        def format_list(ids):
-            """
-            removes duplicate ids if present,
-            checks race_id 1 is exclusive if present
-            checks that all ids are valid
-            """
-
-            #removes duplicate ids if they were submitted
-            formatted_list = list(set(ids))
-
-            #race_id 1 (unknown) must be exclusive, a user cannot submit 'unknown' and
-            #other race(s) for a single parent
-            if 1 in formatted_list and len(formatted_list) > 1:
-                raise InputError(400, 'Race_id 1 (unknown) must be exclusive. It cannot be submitted in a list with other race ids.')
-
-            for race_id in formatted_list:
-                if not LookupRaces.query.filter_by(race_id=race_id).one_or_none():
-                    raise InputError(400, f'Invalid race_id: {race_id}')
-
-            return formatted_list
-
         check_client_existence(user_id)
 
-        #remove existing race/ethnicity info
-        for data in ClientRaceAndEthnicity.query.filter_by(user_id=user_id).all():
-            db.session.delete(data)
-        db.session.commit()
-
-        #add incoming data from request
-        if not request.parsed_obj['mother']:
-            #if a blank array is passed, mark as 'unknown'
-            model = ClientRaceAndEthnicitySchema().load({'is_client_mother': True, 'race_id': 1})
-            model.user_id = user_id
-            db.session.add(model)
+        if request.parsed_obj['mother']:
+            mother = request.parsed_obj['mother']
         else:
-            formatted_list = format_list(request.parsed_obj['mother'])
-            for race_id in formatted_list:
-                model = ClientRaceAndEthnicitySchema().load({
-                    'race_id': race_id,
-                    'is_client_mother': True
-                })
-                model.user_id = user_id
-                db.session.add(model)
-
-        if not request.parsed_obj['father']:
-            #if a blank array is passed, mark as 'unknown'
-            model = ClientRaceAndEthnicitySchema().load({'is_client_mother': False, 'race_id': 1})
-            model.user_id = user_id
-            db.session.add(model)
+            mother = None
+        if request.parsed_obj['father']:
+            father = request.parsed_obj['father']
         else:
-            formatted_list = format_list(request.parsed_obj['father'])
-            for race_id in formatted_list:
-                model = ClientRaceAndEthnicitySchema().load({
-                    'race_id': race_id,
-                    'is_client_mother': False
-                })
-                model.user_id = user_id
-                db.session.add(model)
+            father = None
 
-        db.session.commit()
+        process_race_and_ethnicity(user_id, mother, father)
 
         res = db.session.query(ClientRaceAndEthnicity.is_client_mother, LookupRaces.race_id, LookupRaces.race_name) \
             .join(LookupRaces, LookupRaces.race_id == ClientRaceAndEthnicity.race_id) \
