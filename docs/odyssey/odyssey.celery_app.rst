@@ -1,7 +1,7 @@
-odyssey.utils.email
-===================
+odyssey.celery
+==============
 
-.. automodule:: odyssey.utils.email
+.. automodule:: odyssey.celery_app
    :members:
    :member-order: bysource
    :undoc-members:

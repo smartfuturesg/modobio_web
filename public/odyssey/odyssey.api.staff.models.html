@@ -4,15 +4,18 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>odyssey.api.staff.models &mdash; Odyssey version: 0.1.100 documentation</title>
+  <title>odyssey.api.staff.models &mdash; Odyssey version: 0.5.45 documentation</title>
   
 
   
   <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
 
   
   
@@ -29,10 +32,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -64,7 +67,7 @@
             
             
               <div class="version">
-                version: 0.1.100
+                version: 0.5.45
               </div>
             
           
@@ -99,12 +102,16 @@
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.physiotherapy.models.html">Physical therapist</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.trainer.models.html">Trainer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.wearables.models.html">Wearable devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.notifications.models.html">Notifications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.telehealth.models.html">Telehealth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.system.models.html">System config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.facility.models.html">Facilities</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.lookup.models.html">Lookup tables</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.schemas.html">Validation schemas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.api.html">API endpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.tasks.html">Tasks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.utils.html">Utilities</a></li>
 </ul>
 
@@ -175,20 +182,20 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-odyssey.api.staff.models">
+  <section id="module-odyssey.api.staff.models">
 <span id="odyssey-api-staff-models"></span><h1>odyssey.api.staff.models<a class="headerlink" href="#module-odyssey.api.staff.models" title="Permalink to this headline">¶</a></h1>
 <p>Database tables staff member information for the Modo Bio Staff application.
 All tables in this module are prefixed with <code class="docutils literal notranslate"><span class="pre">Staff</span></code>.</p>
 <dl class="py class">
-<dt id="odyssey.api.staff.models.StaffProfile">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.staff.models.</code><code class="sig-name descname">StaffProfile</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.models.StaffProfile" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffProfile">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.staff.models.</span></span><span class="sig-name descname"><span class="pre">StaffProfile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.models.StaffProfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
 <p>Staff member profile information table.</p>
 <p>This table stores information regarding Modo Bio
 staff member profiles.</p>
 <dl class="py attribute">
-<dt id="odyssey.api.staff.models.StaffProfile.created_at">
-<code class="sig-name descname">created_at</code><a class="headerlink" href="#odyssey.api.staff.models.StaffProfile.created_at" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffProfile.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.staff.models.StaffProfile.created_at" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creation timestamp of this row in the database.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -198,8 +205,8 @@ staff member profiles.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.staff.models.StaffProfile.updated_at">
-<code class="sig-name descname">updated_at</code><a class="headerlink" href="#odyssey.api.staff.models.StaffProfile.updated_at" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffProfile.updated_at">
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.staff.models.StaffProfile.updated_at" title="Permalink to this definition">¶</a></dt>
 <dd><p>Last update timestamp of this row in the database.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -209,8 +216,8 @@ staff member profiles.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.staff.models.StaffProfile.idx">
-<code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.api.staff.models.StaffProfile.idx" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffProfile.idx">
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.staff.models.StaffProfile.idx" title="Permalink to this definition">¶</a></dt>
 <dd><p>Table index.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -220,8 +227,8 @@ staff member profiles.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.staff.models.StaffProfile.user_id">
-<code class="sig-name descname">user_id</code><a class="headerlink" href="#odyssey.api.staff.models.StaffProfile.user_id" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffProfile.user_id">
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.staff.models.StaffProfile.user_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>User ID number, foreign key to User.user_id</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -231,8 +238,8 @@ staff member profiles.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.staff.models.StaffProfile.membersince">
-<code class="sig-name descname">membersince</code><a class="headerlink" href="#odyssey.api.staff.models.StaffProfile.membersince" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffProfile.membersince">
+<span class="sig-name descname"><span class="pre">membersince</span></span><a class="headerlink" href="#odyssey.api.staff.models.StaffProfile.membersince" title="Permalink to this definition">¶</a></dt>
 <dd><p>Member since date</p>
 <p>The date a staff member was first added to the system</p>
 <dl class="field-list simple">
@@ -243,8 +250,8 @@ staff member profiles.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.staff.models.StaffProfile.bio">
-<code class="sig-name descname">bio</code><a class="headerlink" href="#odyssey.api.staff.models.StaffProfile.bio" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffProfile.bio">
+<span class="sig-name descname"><span class="pre">bio</span></span><a class="headerlink" href="#odyssey.api.staff.models.StaffProfile.bio" title="Permalink to this definition">¶</a></dt>
 <dd><p>staff member profile biography</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -256,13 +263,13 @@ staff member profiles.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt id="odyssey.api.staff.models.StaffRecentClients">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.staff.models.</code><code class="sig-name descname">StaffRecentClients</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.models.StaffRecentClients" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffRecentClients">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.staff.models.</span></span><span class="sig-name descname"><span class="pre">StaffRecentClients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.models.StaffRecentClients" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
 <p>this table stores the last 10 clients that a staff member has loaded</p>
 <dl class="py attribute">
-<dt id="odyssey.api.staff.models.StaffRecentClients.idx">
-<code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.api.staff.models.StaffRecentClients.idx" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffRecentClients.idx">
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.staff.models.StaffRecentClients.idx" title="Permalink to this definition">¶</a></dt>
 <dd><p>Table index.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -272,8 +279,8 @@ staff member profiles.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.staff.models.StaffRecentClients.staff_user_id">
-<code class="sig-name descname">staff_user_id</code><a class="headerlink" href="#odyssey.api.staff.models.StaffRecentClients.staff_user_id" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffRecentClients.user_id">
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.staff.models.StaffRecentClients.user_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>User_id of the staff member that loaded the client</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -283,8 +290,8 @@ staff member profiles.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.staff.models.StaffRecentClients.client_user_id">
-<code class="sig-name descname">client_user_id</code><a class="headerlink" href="#odyssey.api.staff.models.StaffRecentClients.client_user_id" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffRecentClients.client_user_id">
+<span class="sig-name descname"><span class="pre">client_user_id</span></span><a class="headerlink" href="#odyssey.api.staff.models.StaffRecentClients.client_user_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>User_id of the client that was loaded</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -294,8 +301,8 @@ staff member profiles.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.staff.models.StaffRecentClients.timestamp">
-<code class="sig-name descname">timestamp</code><a class="headerlink" href="#odyssey.api.staff.models.StaffRecentClients.timestamp" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffRecentClients.timestamp">
+<span class="sig-name descname"><span class="pre">timestamp</span></span><a class="headerlink" href="#odyssey.api.staff.models.StaffRecentClients.timestamp" title="Permalink to this definition">¶</a></dt>
 <dd><p>timestamp denoting when the staff member last loaded the client</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -307,80 +314,16 @@ staff member profiles.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt id="odyssey.api.staff.models.ClientRemovalRequests">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.staff.models.</code><code class="sig-name descname">ClientRemovalRequests</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.models.ClientRemovalRequests" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
-<p>Client removal request table.</p>
-<p>Stores the history of client removal request by staff members.</p>
-<dl class="py attribute">
-<dt id="odyssey.api.staff.models.ClientRemovalRequests.idx">
-<code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.api.staff.models.ClientRemovalRequests.idx" title="Permalink to this definition">¶</a></dt>
-<dd><p>Table index.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, autoincrement</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.api.staff.models.ClientRemovalRequests.created_at">
-<code class="sig-name descname">created_at</code><a class="headerlink" href="#odyssey.api.staff.models.ClientRemovalRequests.created_at" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creation timestamp of this row in the database.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.api.staff.models.ClientRemovalRequests.updated_at">
-<code class="sig-name descname">updated_at</code><a class="headerlink" href="#odyssey.api.staff.models.ClientRemovalRequests.updated_at" title="Permalink to this definition">¶</a></dt>
-<dd><p>Last update timestamp of this row in the database.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.api.staff.models.ClientRemovalRequests.user_id">
-<code class="sig-name descname">user_id</code><a class="headerlink" href="#odyssey.api.staff.models.ClientRemovalRequests.user_id" title="Permalink to this definition">¶</a></dt>
-<dd><p>Staff member user_id number, foreign key to User.user_id</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>int, foreign key to <code class="xref py py-attr docutils literal notranslate"><span class="pre">User.user_id</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt id="odyssey.api.staff.models.ClientRemovalRequests.timestamp">
-<code class="sig-name descname">timestamp</code><a class="headerlink" href="#odyssey.api.staff.models.ClientRemovalRequests.timestamp" title="Permalink to this definition">¶</a></dt>
-<dd><p>Timestamp of the removal request.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a>, primary key</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt id="odyssey.api.staff.models.StaffRoles">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.staff.models.</code><code class="sig-name descname">StaffRoles</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.models.StaffRoles" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffRoles">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.staff.models.</span></span><span class="sig-name descname"><span class="pre">StaffRoles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.models.StaffRoles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
 <p>Stores informaiton on staff role assignments.</p>
 <p>Roles must be verified either by a manual or automatic internal review process.
 Some roles will be location based where verification is required for each locality
-(state, country etc.)</p>
-<p>Each user_id, role, and locality (state, country) will have a unique entry in this table.</p>
+(state, country etc.).</p>
 <dl class="py attribute">
-<dt id="odyssey.api.staff.models.StaffRoles.idx">
-<code class="sig-name descname">idx</code><a class="headerlink" href="#odyssey.api.staff.models.StaffRoles.idx" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffRoles.idx">
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.staff.models.StaffRoles.idx" title="Permalink to this definition">¶</a></dt>
 <dd><p>Table index.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -390,8 +333,8 @@ Some roles will be location based where verification is required for each locali
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.staff.models.StaffRoles.created_at">
-<code class="sig-name descname">created_at</code><a class="headerlink" href="#odyssey.api.staff.models.StaffRoles.created_at" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffRoles.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.staff.models.StaffRoles.created_at" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creation timestamp of this row in the database.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -401,8 +344,8 @@ Some roles will be location based where verification is required for each locali
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.staff.models.StaffRoles.updated_at">
-<code class="sig-name descname">updated_at</code><a class="headerlink" href="#odyssey.api.staff.models.StaffRoles.updated_at" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffRoles.updated_at">
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.staff.models.StaffRoles.updated_at" title="Permalink to this definition">¶</a></dt>
 <dd><p>Last update timestamp of this row in the database.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -412,8 +355,8 @@ Some roles will be location based where verification is required for each locali
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.staff.models.StaffRoles.user_id">
-<code class="sig-name descname">user_id</code><a class="headerlink" href="#odyssey.api.staff.models.StaffRoles.user_id" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffRoles.user_id">
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.staff.models.StaffRoles.user_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>Staff member user_id number, foreign key to User.user_id</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -423,8 +366,8 @@ Some roles will be location based where verification is required for each locali
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.staff.models.StaffRoles.role">
-<code class="sig-name descname">role</code><a class="headerlink" href="#odyssey.api.staff.models.StaffRoles.role" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffRoles.role">
+<span class="sig-name descname"><span class="pre">role</span></span><a class="headerlink" href="#odyssey.api.staff.models.StaffRoles.role" title="Permalink to this definition">¶</a></dt>
 <dd><p>Name of the role assignment</p>
 <p>Possible roles include:</p>
 <p>-staff_admin
@@ -434,13 +377,7 @@ Some roles will be location based where verification is required for each locali
 -trainer
 -data_science
 -doctor
--nutrition
--client_services_internal
--physical_therapist_internal
--trainer_internal
--doctor_internal
--nutrition_internal</p>
-<p>Internal roles are intended for staff members who are part of the internal application development team.</p>
+-nutrition</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
@@ -449,8 +386,8 @@ Some roles will be location based where verification is required for each locali
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.staff.models.StaffRoles.verified">
-<code class="sig-name descname">verified</code><a class="headerlink" href="#odyssey.api.staff.models.StaffRoles.verified" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffRoles.verified">
+<span class="sig-name descname"><span class="pre">verified</span></span><a class="headerlink" href="#odyssey.api.staff.models.StaffRoles.verified" title="Permalink to this definition">¶</a></dt>
 <dd><p>Weather or not the role entry is verified. Entries to this table will not inherently be
 verified.</p>
 <dl class="field-list simple">
@@ -462,7 +399,85 @@ verified.</p>
 
 </dd></dl>
 
-</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffOperationalTerritories">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.staff.models.</span></span><span class="sig-name descname"><span class="pre">StaffOperationalTerritories</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.models.StaffOperationalTerritories" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
+<p>Locations where staff members operate. Each entry is tied to a role in the StaffRoles table.
+Depending on the profession, the role-territory paid must be verified with an active identification number
+or some other internal process. Verifications will be stored in another table.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffOperationalTerritories.idx">
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.staff.models.StaffOperationalTerritories.idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Table index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffOperationalTerritories.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.staff.models.StaffOperationalTerritories.created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creation timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffOperationalTerritories.updated_at">
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.staff.models.StaffOperationalTerritories.updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Last update timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffOperationalTerritories.operational_territory_id">
+<span class="sig-name descname"><span class="pre">operational_territory_id</span></span><a class="headerlink" href="#odyssey.api.staff.models.StaffOperationalTerritories.operational_territory_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Operational subterritory from the operational territories lookup table.</p>
+<p>There will be an entry in this table for each role-operational_territory pair. For some professions, we will
+store verification IDs which may differ by sub_territory (e.g. medical doctors must have a different license to practice
+in each state).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int, foreign key to <code class="xref py py-attr docutils literal notranslate"><span class="pre">LookupTerritoriesofOperation.idx</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffOperationalTerritories.user_id">
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.staff.models.StaffOperationalTerritories.user_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Staff member user_id number, foreign key to User.user_id</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int, foreign key to <code class="xref py py-attr docutils literal notranslate"><span class="pre">User.user_id</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffOperationalTerritories.role_id">
+<span class="sig-name descname"><span class="pre">role_id</span></span><a class="headerlink" href="#odyssey.api.staff.models.StaffOperationalTerritories.role_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Role from the StaffRoles table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int, foreign key to <code class="xref py py-attr docutils literal notranslate"><span class="pre">StaffRoles.idx</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
 
 
            </div>
