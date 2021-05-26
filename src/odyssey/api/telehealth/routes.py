@@ -565,7 +565,9 @@ class TelehealthBookingsApi(Resource):
         """
             PUT request should be used purely to update the booking STATUS.
         """
-        
+        if request.parsed_obj.booking_window_id_start_time >= request.parsed_obj.booking_window_id_end_time:
+            raise InputError(status_code=405,message='Start time must be before end time.')
+
         booking_id = request.args.get('booking_id', type=int)
         
         # Check if staff and client have those times open
@@ -596,6 +598,8 @@ class TelehealthBookingsApi(Resource):
             This DELETE request is used to delete bookings. However, this table should also serve as a 
             a log of bookings, so it is up to the Backened team to use this with caution.
         '''
+        if request.parsed_obj.booking_window_id_start_time >= request.parsed_obj.booking_window_id_end_time:
+            raise InputError(status_code=405,message='Start time must be before end time.')
 
         client_user_id = request.args.get('client_user_id', type=int)
         
@@ -1157,7 +1161,7 @@ class TelehealthBookingDetailsApi(Resource):
         booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
         if booking is None:
             raise ContentNotFound
-            
+
         #verify user trying to access details is the client or staff involved in scheulded booking
         if booking.client_user_id != token_auth.current_user()[0].user_id \
             and booking.staff_user_id != token_auth.current_user()[0].user_id:
@@ -1220,14 +1224,6 @@ class TelehealthBookingDetailsApi(Resource):
         details : str (optional)
             Further details.
         """
-        #Validate index is an int and not a zero
-        idx = request.form.get('idx', default=0)
-        try: idx = int(idx)
-        except ValueError: idx = 0
-
-        if idx <= 0:
-            raise InputError(204, 'Invalid index')
-
         #verify the editor of details is the client or staff from schedulded booking
         booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
 
@@ -1269,7 +1265,7 @@ class TelehealthBookingDetailsApi(Resource):
 
         if not current_app.config['LOCAL_CONFIG']:
             #if 'images' and 'voice' are both not present, no changes will be made to the current media file
-            #if 'images' or 'voice' are present, but empty, the current media file(s) for that category will be removed        
+            #if 'images' or 'voice' are present, but empty, the current media file(s) for that category will be removed
             if files:
                 s3 = boto3.resource('s3')
                 bucket = s3.Bucket(current_app.config['S3_BUCKET_NAME'])
@@ -1279,14 +1275,14 @@ class TelehealthBookingDetailsApi(Resource):
                     'Bucket': current_app.config['S3_BUCKET_NAME'],
                     'Key': None
                 }
-        
+
                 #if images key is present, delete existing images
                 if 'images' in files:
                     bucket.objects.filter(Prefix=f'meeting_files/id{booking_id:05d}/image').delete()
 
                 #if voice key is present, delete existing recording
                 if 'voice' in files:
-                    bucket.objects.filter(Prefix=f'meeting_files/id{booking_id:05d}/voice').delete()                     
+                    bucket.objects.filter(Prefix=f'meeting_files/id{booking_id:05d}/voice').delete()
 
                 MAX_bytes = 524288000 #500 mb
                 hex_token = secrets.token_hex(4)
@@ -1301,7 +1297,7 @@ class TelehealthBookingDetailsApi(Resource):
 
                     #ensure this is not an empty file
                     if img_size > 0:
-                        #Rename image (format: 4digitRandomHex_index.img_extension) AND Save=>S3 
+                        #Rename image (format: 4digitRandomHex_index.img_extension) AND Save=>S3
                         img_extension = pathlib.Path(img.filename).suffix
                         if img_extension not in ALLOWED_IMAGE_TYPES:
                             raise InputError(422, f'{img_extension} is not an allowed file type. Allowed types are {ALLOWED_IMAGE_TYPES}')
@@ -1326,7 +1322,7 @@ class TelehealthBookingDetailsApi(Resource):
 
                     #ensure this is not an empty file
                     if recording_size > 0:
-                        #Rename voice (format: voice_4digitRandomHex_index.img_extension) AND Save=>S3 
+                        #Rename voice (format: voice_4digitRandomHex_index.img_extension) AND Save=>S3
                         recording_extension = pathlib.Path(recording.filename).suffix
                         if recording_extension not in ALLOWED_AUDIO_TYPES:
                             raise InputError(422, f'{recording_extension} is not an allowed file type. Allowed types are {ALLOWED_AUDIO_TYPES}')
@@ -1399,7 +1395,7 @@ class TelehealthBookingDetailsApi(Resource):
             raise GenericNotFound(f"No location exists with id {location_id}")
 
         data.location_id = location_id
-        
+
         payload.append(data)
 
         if not current_app.config['LOCAL_CONFIG']:
@@ -1411,7 +1407,7 @@ class TelehealthBookingDetailsApi(Resource):
 
                 s3 = boto3.resource('s3')
                 bucket = s3.Bucket(current_app.config['S3_BUCKET_NAME'])
-            
+
                 #upload images from request to s3
                 for i, img in enumerate(files.getlist('images')):
                     #Verifying image size is within a safe threashold (MAX = 500 mb)
@@ -1422,7 +1418,7 @@ class TelehealthBookingDetailsApi(Resource):
 
                     #ensure this is not an empty file
                     if img_size > 0:
-                        #Rename image (format: 4digitRandomHex_index.img_extension) AND Save=>S3 
+                        #Rename image (format: 4digitRandomHex_index.img_extension) AND Save=>S3
                         img_extension = pathlib.Path(img.filename).suffix
                         if img_extension not in ALLOWED_IMAGE_TYPES:
                             raise InputError(422, f'{img_extension} is not an allowed file type. Allowed types are {ALLOWED_IMAGE_TYPES}')
@@ -1447,7 +1443,7 @@ class TelehealthBookingDetailsApi(Resource):
 
                     #ensure this is not an empty file
                     if recording_size > 0:
-                        #Rename voice (format: voice_4digitRandomHex_index.img_extension) AND Save=>S3 
+                        #Rename voice (format: voice_4digitRandomHex_index.img_extension) AND Save=>S3
                         recording_extension = pathlib.Path(recording.filename).suffix
                         if recording_extension not in ALLOWED_AUDIO_TYPES:
                             raise InputError(422, f'{recording_extension} is not an allowed file type. Allowed types are {ALLOWED_AUDIO_TYPES}')
