@@ -212,10 +212,10 @@ def send_test_email(subject="testing-success", recipient="success@simulator.amaz
     </body>
     </html>
     """          
-    send_email_no_reply(subject=SUBJECT,recipient=RECIPIENT, body_text=BODY_TEXT, body_html=BODY_HTML)
+    send_email(subject=SUBJECT,recipient=RECIPIENT, body_text=BODY_TEXT, body_html=BODY_HTML)
 
 
-def send_email(subject=None, recipient="success@simulator.amazonses.com", body_text=None, body_html=None):
+def send_email(subject=None, recipient="success@simulator.amazonses.com", body_text=None, body_html=None, sender="no-reply@modobio.com"):
 
     # The character encoding for the email.
     CHARSET = "UTF-8"
