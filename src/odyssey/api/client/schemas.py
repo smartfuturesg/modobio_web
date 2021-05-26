@@ -346,6 +346,7 @@ class ClinicalCareTeamAuthorizaitonSchema(Schema):
     """
     user_id = fields.Integer(load_only=True)
     team_member_modobio_id = fields.String(dump_only=True)
+<<<<<<< HEAD
     team_member_user_id = fields.Integer(
         metadata={'description': 'user_id for this clinical care team member'})
     team_member_firstname = fields.String(dump_only=True)
@@ -353,6 +354,13 @@ class ClinicalCareTeamAuthorizaitonSchema(Schema):
     team_member_email = fields.Email(dump_only=True)
     resource_id = fields.Integer(
         metadata={'description': 'id for the resource. See lookup table for resource ids'})
+=======
+    team_member_user_id = fields.Integer(metadata={'description': 'user_id for this clinical care team member'})
+    team_member_firstname = fields.String(dump_only=True)
+    team_member_lastname = fields.String(dump_only=True)
+    team_member_email = fields.Email(dump_only=True)
+    resource_id = fields.Integer(metadata={'description': 'id for the resource. See lookup table for resource ids'})
+>>>>>>> release-6
     display_name = fields.String(dump_only=True)
 
     @post_load

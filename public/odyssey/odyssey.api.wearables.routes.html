@@ -4,15 +4,18 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>odyssey.api.wearables.routes &mdash; Odyssey version: 0.1.100 documentation</title>
+  <title>odyssey.api.wearables.routes &mdash; Odyssey version: 0.5.45 documentation</title>
   
 
   
   <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
 
   
   
@@ -29,17 +32,17 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="odyssey.api.facility.routes" href="odyssey.api.facility.routes.html" />
+    <link rel="next" title="odyssey.api.notifications.routes" href="odyssey.api.notifications.routes.html" />
     <link rel="prev" title="odyssey.api.trainer.routes" href="odyssey.api.trainer.routes.html" /> 
 </head>
 
@@ -64,7 +67,7 @@
             
             
               <div class="version">
-                version: 0.1.100
+                version: 0.5.45
               </div>
             
           
@@ -102,12 +105,16 @@
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.physiotherapy.routes.html">Physical therapist</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.trainer.routes.html">Trainer</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Wearable devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.notifications.routes.html">Notifications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.telehealth.routes.html">Telehealth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.system.routes.html">System config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.facility.routes.html">Facilities</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.lookup.routes.html">Lookup tables</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.misc.postman.html">Postman</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.version.routes.html">Version</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.tasks.html">Tasks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.utils.html">Utilities</a></li>
 </ul>
 
@@ -178,15 +185,15 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-odyssey.api.wearables.routes">
+  <section id="module-odyssey.api.wearables.routes">
 <span id="odyssey-api-wearables-routes"></span><h1>odyssey.api.wearables.routes<a class="headerlink" href="#module-odyssey.api.wearables.routes" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
-<dt id="odyssey.api.wearables.routes.WearablesEndpoint">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.wearables.routes.</code><code class="sig-name descname">WearablesEndpoint</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesEndpoint" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesEndpoint">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.wearables.routes.</span></span><span class="sig-name descname"><span class="pre">WearablesEndpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesEndpoint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
 <dl class="py method">
-<dt id="odyssey.api.wearables.routes.WearablesEndpoint.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesEndpoint.get" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesEndpoint.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesEndpoint.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>Wearable device information for client <code class="docutils literal notranslate"><span class="pre">user_id</span></code> in response to a GET request.</p>
 <p>This endpoint returns information on which wearables a client has. For
 each supported wearable device, two keys exist in the returned dictionary:
@@ -204,8 +211,8 @@ of the wearable device with Modo Bio was completed successfully.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.wearables.routes.WearablesEndpoint.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesEndpoint.post" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesEndpoint.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesEndpoint.post" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create new wearables information for client <code class="docutils literal notranslate"><span class="pre">user_id</span></code> in reponse to a POST request.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -218,8 +225,8 @@ of the wearable device with Modo Bio was completed successfully.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.wearables.routes.WearablesEndpoint.put">
-<code class="sig-name descname">put</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesEndpoint.put" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesEndpoint.put">
+<span class="sig-name descname"><span class="pre">put</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesEndpoint.put" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update wearables information for client <code class="docutils literal notranslate"><span class="pre">user_id</span></code> in reponse to a PUT request.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -232,30 +239,37 @@ of the wearable device with Modo Bio was completed successfully.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.wearables.routes.WearablesEndpoint.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'wearables_wearables_endpoint'</em><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesEndpoint.endpoint" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesEndpoint.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'wearables_wearables_endpoint'</span></em><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesEndpoint.endpoint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.wearables.routes.WearablesEndpoint.mediatypes">
-<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesEndpoint.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesEndpoint.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesEndpoint.mediatypes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.wearables.routes.WearablesEndpoint.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'GET', 'POST', 'PUT'}</em><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesEndpoint.methods" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesEndpoint.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET',</span> <span class="pre">'POST',</span> <span class="pre">'PUT'}</span></em><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesEndpoint.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt id="odyssey.api.wearables.routes.WearablesOuraAuthEndpoint">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.wearables.routes.</code><code class="sig-name descname">WearablesOuraAuthEndpoint</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesOuraAuthEndpoint" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesOuraOldAuthEndpoint">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.wearables.routes.</span></span><span class="sig-name descname"><span class="pre">WearablesOuraOldAuthEndpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesOuraOldAuthEndpoint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
 <dl class="py method">
-<dt id="odyssey.api.wearables.routes.WearablesOuraAuthEndpoint.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesOuraAuthEndpoint.get" title="Permalink to this definition">¶</a></dt>
-<dd><p>Oura Ring OAuth2 parameters to initialize the access grant process.</p>
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesOuraOldAuthEndpoint.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesOuraOldAuthEndpoint.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>[DEPRECATED] Oura Ring OAuth2 parameters to initialize the access grant process.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This endpoint was designed for the web-based staff app. The new endpoint should
+work with both web-based and mobile apps. Keeping this endpoint around until staff app
+has been updated.</p>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>user_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – User ID number.</p>
@@ -269,56 +283,220 @@ of the wearable device with Modo Bio was completed successfully.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.wearables.routes.WearablesOuraAuthEndpoint.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'wearables_wearables_oura_auth_endpoint'</em><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesOuraAuthEndpoint.endpoint" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesOuraOldAuthEndpoint.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'wearables_wearables_oura_old_auth_endpoint'</span></em><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesOuraOldAuthEndpoint.endpoint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.wearables.routes.WearablesOuraAuthEndpoint.mediatypes">
-<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesOuraAuthEndpoint.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesOuraOldAuthEndpoint.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesOuraOldAuthEndpoint.mediatypes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.wearables.routes.WearablesOuraAuthEndpoint.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'GET'}</em><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesOuraAuthEndpoint.methods" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesOuraOldAuthEndpoint.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET'}</span></em><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesOuraOldAuthEndpoint.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt id="odyssey.api.wearables.routes.WearablesOuraCallbackEndpoint">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.wearables.routes.</code><code class="sig-name descname">WearablesOuraCallbackEndpoint</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesOuraCallbackEndpoint" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesOuraCallbackEndpoint">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.wearables.routes.</span></span><span class="sig-name descname"><span class="pre">WearablesOuraCallbackEndpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesOuraCallbackEndpoint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
 <dl class="py method">
-<dt id="odyssey.api.wearables.routes.WearablesOuraCallbackEndpoint.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesOuraCallbackEndpoint.get" title="Permalink to this definition">¶</a></dt>
-<dd><p>Oura Ring OAuth2 callback URL</p>
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesOuraCallbackEndpoint.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesOuraCallbackEndpoint.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>[DEPRECATED] Oura Ring OAuth2 callback URL</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This endpoint was designed for the web-based staff app. The new endpoint should
+work with both web-based and mobile apps. Keeping this endpoint around until staff app
+has been updated.</p>
+</div>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.wearables.routes.WearablesOuraCallbackEndpoint.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'wearables_wearables_oura_callback_endpoint'</em><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesOuraCallbackEndpoint.endpoint" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesOuraCallbackEndpoint.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'wearables_wearables_oura_callback_endpoint'</span></em><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesOuraCallbackEndpoint.endpoint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.wearables.routes.WearablesOuraCallbackEndpoint.mediatypes">
-<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesOuraCallbackEndpoint.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesOuraCallbackEndpoint.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesOuraCallbackEndpoint.mediatypes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.wearables.routes.WearablesOuraCallbackEndpoint.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'GET'}</em><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesOuraCallbackEndpoint.methods" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesOuraCallbackEndpoint.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET'}</span></em><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesOuraCallbackEndpoint.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt id="odyssey.api.wearables.routes.WearablesFreeStyleActivateEndpoint">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.wearables.routes.</code><code class="sig-name descname">WearablesFreeStyleActivateEndpoint</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesFreeStyleActivateEndpoint" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesOuraAuthEndpoint">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.wearables.routes.</span></span><span class="sig-name descname"><span class="pre">WearablesOuraAuthEndpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesOuraAuthEndpoint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
 <dl class="py method">
-<dt id="odyssey.api.wearables.routes.WearablesFreeStyleActivateEndpoint.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesFreeStyleActivateEndpoint.get" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesOuraAuthEndpoint.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesOuraAuthEndpoint.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Oura OAuth2 parameters to initialize the access grant process.</p>
+<p>Use these parameters to initiate the OAuth2 access grant process with
+Oura. You must replace the value for <code class="docutils literal notranslate"><span class="pre">redirect_uri</span></code> with a
+valid redirect URI. The redirect URI must match the URI registered
+with Oura.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>user_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – User ID number.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><em>dict</em> – JSON encoded dict containing:
+- url
+- client_id
+- redirect_uri (must be replaced with actual URI)
+- response_type (literal word ‘code’)
+- state
+- scope (space separated string of scopes)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesOuraAuthEndpoint.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesOuraAuthEndpoint.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>Oura OAuth2 access grant code exchange.</p>
+<p>Post OAuth2 parameters here after user clicks ‘allow’ on the Oura homepage.
+This endpoint will reach out to Oura for the second part of the OAuth2
+process, exchanging the grant code for an access token and a refresh token.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Access grant code.</p></li>
+<li><p><strong>state</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – State code, must be the same code as received from <cite>GET /wearables/oura/auth</cite>.</p></li>
+<li><p><strong>redirect_uri</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The redirect URI used to come back to the frontend app after the user clicked
+‘allow’ on the Oura homepage. Must be registered with Oura.</p></li>
+<li><p><strong>scope</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The scopes the user actually selected when clicking ‘allow’. Space separated
+string of scopes. Required for Oura.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesOuraAuthEndpoint.delete">
+<span class="sig-name descname"><span class="pre">delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesOuraAuthEndpoint.delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Revoke Oura OAuth2 data sharing permissions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>user_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Modo Bio user ID.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesOuraAuthEndpoint.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'wearables_wearables_oura_auth_endpoint'</span></em><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesOuraAuthEndpoint.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesOuraAuthEndpoint.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesOuraAuthEndpoint.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesOuraAuthEndpoint.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'DELETE',</span> <span class="pre">'GET',</span> <span class="pre">'POST'}</span></em><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesOuraAuthEndpoint.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesFitbitAuthEndpoint">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.wearables.routes.</span></span><span class="sig-name descname"><span class="pre">WearablesFitbitAuthEndpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesFitbitAuthEndpoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesFitbitAuthEndpoint.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesFitbitAuthEndpoint.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fitbit OAuth2 parameters to initialize the access grant process.</p>
+<p>Use these parameters to initiate the OAuth2 access grant process with
+Fitbit. You must replace the value for <code class="docutils literal notranslate"><span class="pre">redirect_uri</span></code> with a
+valid redirect URI. The redirect URI must match the URI registered
+with Fitbit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>user_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – User ID number.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><em>dict</em> – JSON encoded dict containing:
+- url
+- client_id
+- redirect_uri (must be replaced with actual URI)
+- response_type (literal word ‘code’)
+- state
+- scope (space separated string of scopes)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesFitbitAuthEndpoint.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesFitbitAuthEndpoint.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fitbit OAuth2 access grant code exchange.</p>
+<p>Post OAuth2 parameters here after user clicks ‘allow’ on the Fitbit homepage.
+This endpoint will reach out to Fitbit for the second part of the OAuth2
+process, exchanging the grant code for an access token and a refresh token.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Access grant code.</p></li>
+<li><p><strong>state</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – State code, must be the same code as received from <cite>GET /wearables/fitbit/auth</cite>.</p></li>
+<li><p><strong>redirect_uri</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The redirect URI used to come back to the frontend app after the user clicked
+‘allow’ on the Fitbit homepage. Must be registered with Fitbit.</p></li>
+<li><p><strong>scope</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The scopes the user actually selected when clicking ‘allow’. Space separated
+string of scopes. Ignored for Fitbit.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesFitbitAuthEndpoint.delete">
+<span class="sig-name descname"><span class="pre">delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesFitbitAuthEndpoint.delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Revoke Fitbit OAuth2 data sharing permissions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>user_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Modo Bio user ID.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesFitbitAuthEndpoint.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'wearables_wearables_fitbit_auth_endpoint'</span></em><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesFitbitAuthEndpoint.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesFitbitAuthEndpoint.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesFitbitAuthEndpoint.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesFitbitAuthEndpoint.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'DELETE',</span> <span class="pre">'GET',</span> <span class="pre">'POST'}</span></em><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesFitbitAuthEndpoint.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesFreeStyleActivateEndpoint">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.wearables.routes.</span></span><span class="sig-name descname"><span class="pre">WearablesFreeStyleActivateEndpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesFreeStyleActivateEndpoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesFreeStyleActivateEndpoint.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesFreeStyleActivateEndpoint.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns CGM activation timestamp for client <code class="docutils literal notranslate"><span class="pre">user_id</span></code> in reponse to a GET request.</p>
 <p>Time data on the CGM sensor is stored as minutes since activation and as full
 timestamps in the database. Time data must be converted before it can be
@@ -335,8 +513,8 @@ request.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.wearables.routes.WearablesFreeStyleActivateEndpoint.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesFreeStyleActivateEndpoint.post" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesFreeStyleActivateEndpoint.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesFreeStyleActivateEndpoint.post" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set new activation timestamp for client <code class="docutils literal notranslate"><span class="pre">user_id</span></code> in response to POST request.</p>
 <p>When a new CGM is activated, the activation timestamp must be stored in the database.</p>
 <dl class="field-list simple">
@@ -350,29 +528,30 @@ request.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.wearables.routes.WearablesFreeStyleActivateEndpoint.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'wearables_wearables_free_style_activate_endpoint'</em><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesFreeStyleActivateEndpoint.endpoint" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesFreeStyleActivateEndpoint.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'wearables_wearables_free_style_activate_endpoint'</span></em><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesFreeStyleActivateEndpoint.endpoint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.wearables.routes.WearablesFreeStyleActivateEndpoint.mediatypes">
-<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesFreeStyleActivateEndpoint.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesFreeStyleActivateEndpoint.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesFreeStyleActivateEndpoint.mediatypes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.wearables.routes.WearablesFreeStyleActivateEndpoint.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'GET', 'POST'}</em><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesFreeStyleActivateEndpoint.methods" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesFreeStyleActivateEndpoint.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET',</span> <span class="pre">'POST'}</span></em><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesFreeStyleActivateEndpoint.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt id="odyssey.api.wearables.routes.WearablesFreeStyleEndpoint">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.api.wearables.routes.</code><code class="sig-name descname">WearablesFreeStyleEndpoint</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesFreeStyleEndpoint" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesFreeStyleEndpoint">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.wearables.routes.</span></span><span class="sig-name descname"><span class="pre">WearablesFreeStyleEndpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesFreeStyleEndpoint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
 <dl class="py method">
-<dt id="odyssey.api.wearables.routes.WearablesFreeStyleEndpoint.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesFreeStyleEndpoint.get" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesFreeStyleEndpoint.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesFreeStyleEndpoint.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return FreeStyle CGM data for client <code class="docutils literal notranslate"><span class="pre">user_id</span></code> in reponse to a GET request.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -385,9 +564,9 @@ request.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.wearables.routes.WearablesFreeStyleEndpoint.put">
-<code class="sig-name descname">put</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesFreeStyleEndpoint.put" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add CGM data for client <code class="docutils literal notranslate"><span class="pre">user_id</span></code> in reponse to a PUT request.</p>
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesFreeStyleEndpoint.patch">
+<span class="sig-name descname"><span class="pre">patch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesFreeStyleEndpoint.patch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add CGM data for client <code class="docutils literal notranslate"><span class="pre">user_id</span></code> in reponse to a PATCH request.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>user_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – User ID number.</p>
@@ -396,23 +575,24 @@ request.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.wearables.routes.WearablesFreeStyleEndpoint.endpoint">
-<code class="sig-name descname">endpoint</code><em class="property"> = 'wearables_wearables_free_style_endpoint'</em><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesFreeStyleEndpoint.endpoint" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesFreeStyleEndpoint.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'wearables_wearables_free_style_endpoint'</span></em><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesFreeStyleEndpoint.endpoint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.api.wearables.routes.WearablesFreeStyleEndpoint.mediatypes">
-<code class="sig-name descname">mediatypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesFreeStyleEndpoint.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesFreeStyleEndpoint.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesFreeStyleEndpoint.mediatypes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="odyssey.api.wearables.routes.WearablesFreeStyleEndpoint.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'GET', 'PUT'}</em><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesFreeStyleEndpoint.methods" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="odyssey.api.wearables.routes.WearablesFreeStyleEndpoint.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET',</span> <span class="pre">'PATCH'}</span></em><a class="headerlink" href="#odyssey.api.wearables.routes.WearablesFreeStyleEndpoint.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
 
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>
@@ -420,7 +600,7 @@ request.</p>
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="odyssey.api.facility.routes.html" class="btn btn-neutral float-right" title="odyssey.api.facility.routes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="odyssey.api.notifications.routes.html" class="btn btn-neutral float-right" title="odyssey.api.notifications.routes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
         <a href="odyssey.api.trainer.routes.html" class="btn btn-neutral float-left" title="odyssey.api.trainer.routes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 

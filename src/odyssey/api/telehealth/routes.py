@@ -8,6 +8,8 @@ from twilio.jwt.access_token import AccessToken
 from twilio.jwt.access_token.grants import VideoGrant, ChatGrant
 import random
 from werkzeug.datastructures import FileStorage
+from datetime import timedelta
+from dateutil import tz
 
 from odyssey import db
 from odyssey.api import api
@@ -15,7 +17,7 @@ from odyssey.api import api
 from odyssey.api.lookup.models import (
     LookupBookingTimeIncrements
 )
-from odyssey.api.staff.models import StaffRoles
+from odyssey.api.staff.models import StaffRoles, StaffCalendarEvents
 from odyssey.api.user.models import User
 
 from odyssey.api.telehealth.models import (
@@ -46,8 +48,9 @@ from odyssey.api.lookup.models import (
     LookupTerritoriesofOperation
 )
 from odyssey.utils.auth import token_auth
-from odyssey.utils.constants import TWILIO_ACCESS_KEY_TTL, DAY_OF_WEEK, ALLOWED_AUDIO_TYPES, ALLOWED_IMAGE_TYPES
+from odyssey.utils.constants import BOOKINGS_STATUS, TWILIO_ACCESS_KEY_TTL, DAY_OF_WEEK, ALLOWED_AUDIO_TYPES, ALLOWED_IMAGE_TYPES
 from odyssey.utils.errors import GenericNotFound, InputError, LoginNotAuthorized, UnauthorizedUser, ContentNotFound, IllegalSetting
+
 from odyssey.utils.misc import (
     check_client_existence, 
     check_staff_existence,
@@ -443,8 +446,9 @@ class TelehealthBookingsApi(Resource):
         """
         current_user, _ = token_auth.current_user()
 
-        if request.parsed_obj.booking_window_id_start_time >= request.parsed_obj.booking_window_id_end_time:
-            raise InputError(status_code=405,message='Start time must be before end time.')
+        # Allow bookings between days
+        # if request.parsed_obj.booking_window_id_start_time >= request.parsed_obj.booking_window_id_end_time:
+        #     raise InputError(status_code=405,message='Start time must be before end time.')
         
         client_user_id = request.args.get('client_user_id', type=int)
         
@@ -519,6 +523,29 @@ class TelehealthBookingsApi(Resource):
             db.session.delete(client_in_queue)
             db.session.flush()
 
+        # Same day appointment
+        if request.parsed_obj.booking_window_id_start_time < request.parsed_obj.booking_window_id_end_time:
+            end_date = request.parsed_obj.target_date
+        else:
+            # Appointment spills over to the next day
+            # 11:30pm - 12:15am
+            end_date = request.parsed_obj.target_date + timedelta(days=1)
+        lookup_times = LookupBookingTimeIncrements.query.all()
+
+        add_to_calendar = StaffCalendarEvents(user_id=request.parsed_obj.staff_user_id,
+                                              start_date=request.parsed_obj.target_date,
+                                              end_date=end_date,
+                                              start_time=lookup_times[request.parsed_obj.booking_window_id_start_time-1].start_time,
+                                              end_time=lookup_times[request.parsed_obj.booking_window_id_start_time-1].end_time,
+                                              recurring=False,
+                                              availability_status='Busy',
+                                              location='Telehealth_'+str(request.parsed_obj.idx),
+                                              description='',
+                                              all_day=False
+                                              )
+
+        db.session.add(add_to_calendar)
+
         db.session.commit()
 
         request.parsed_obj.conversation_sid = conversation_sid
@@ -539,10 +566,6 @@ class TelehealthBookingsApi(Resource):
             PUT request should be used purely to update the booking STATUS.
         """
         
-        if request.parsed_obj.booking_window_id_start_time >= request.parsed_obj.booking_window_id_end_time:
-            raise InputError(status_code=405,message='Start time must be before end time.')
-
-
         booking_id = request.args.get('booking_id', type=int)
         
         # Check if staff and client have those times open
@@ -552,10 +575,17 @@ class TelehealthBookingsApi(Resource):
             raise InputError(status_code=405,message='Could not find booking.')
 
         data = request.get_json()
-
         bookings.update(data)
+        # NOTE: status array should be referenced to BOOKINGS_STATUS in constants.py
+        status = ('Client Canceled', 'Staff Canceled')
+        # If the booking gets updated for cancelation, then delete it in the Staff's calendar
+        if data['status'] in status:
+            staff_event = StaffCalendarEvents.query.filter_by(location='Telehealth_{}'.format(booking_id)).one_or_none()
+            if staff_event:
+                db.session.delete(staff_event)
         
         db.session.commit()
+
         return 201
 
     @token_auth.login_required()
@@ -566,8 +596,7 @@ class TelehealthBookingsApi(Resource):
             This DELETE request is used to delete bookings. However, this table should also serve as a 
             a log of bookings, so it is up to the Backened team to use this with caution.
         '''
-        if request.parsed_obj.booking_window_id_start_time >= request.parsed_obj.booking_window_id_end_time:
-            raise InputError(status_code=405,message='Start time must be before end time.')
+
         client_user_id = request.args.get('client_user_id', type=int)
         
         if not client_user_id:
@@ -714,13 +743,14 @@ class MeetingRoomStatusAPI(Resource):
         """
         For status callback directly from twilio
         
-        TODO: 
-            -authorize access to this API from twilio automated callback
-            -check callback reason (we just want the status updated)
-            -update meeting status
-                -open
-                -close
-            -use TelehealthMeetingRooms table
+        TODO:
+
+        - authorize access to this API from twilio automated callback
+        - check callback reason (we just want the status updated)
+        - update meeting status
+            - open
+            - close
+        - use TelehealthMeetingRooms table
         """
     
     @token_auth.login_required
@@ -996,6 +1026,7 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
                 # end time must be after start time
                 if time['start_time'] > time['end_time']:
                     db.session.rollback()
+                    #TODO: allow availabilities between days 
                     raise InputError(status_code=405,message='Start Time must be before End Time')
                 
                 # This for loop loops through the booking increments to find where the 
@@ -1177,12 +1208,26 @@ class TelehealthBookingDetailsApi(Resource):
         Edits one file for another, or can edit text details
 
         Expects form_data: (will ignore anything else)
-            image: [files] (list of image files, up to 3 can be sent)
-            voice: file (one sound file can be sent)
-            details: string
 
-            (optional) : str
+        Parameters
+        ----------
+        idx : int (required)
+            TelehealthBookingDetails idx
+        image : list(file) (optional)
+            Image file(s), up to 3 can be send.
+        voice : file (optional)
+            Audio file, only 1 can be send.
+        details : str (optional)
+            Further details.
         """
+        #Validate index is an int and not a zero
+        idx = request.form.get('idx', default=0)
+        try: idx = int(idx)
+        except ValueError: idx = 0
+
+        if idx <= 0:
+            raise InputError(204, 'Invalid index')
+
         #verify the editor of details is the client or staff from schedulded booking
         booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
 

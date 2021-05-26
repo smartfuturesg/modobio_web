@@ -46,7 +46,7 @@ from odyssey.utils.errors import (
     GenericNotFound,
     InvalidVerificationCode
 )
-from odyssey.utils.email import send_email_password_reset, send_email_delete_account, send_email_verify_email
+from odyssey.utils.message import send_email_password_reset, send_email_delete_account, send_email_verify_email
 from odyssey.utils.misc import check_user_existence, check_client_existence, check_staff_existence, verify_jwt
 from odyssey.utils import search
 from odyssey import db

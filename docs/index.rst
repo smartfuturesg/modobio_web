@@ -17,6 +17,7 @@ Odyssey
    Database models <odyssey/odyssey.models>
    Validation schemas <odyssey/odyssey.schemas>
    API endpoints <odyssey/odyssey.api>
+   Tasks <odyssey/odyssey.tasks>
    Utilities <odyssey/odyssey.utils>
 
 Indices and tables

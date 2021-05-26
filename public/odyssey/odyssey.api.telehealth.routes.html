@@ -1,0 +1,729 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>odyssey.api.telehealth.routes &mdash; Odyssey version: 0.5.45 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="odyssey.api.system.routes" href="odyssey.api.system.routes.html" />
+    <link rel="prev" title="odyssey.api.notifications.routes" href="odyssey.api.notifications.routes.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Odyssey
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                version: 0.5.45
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="odyssey.config.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.models.html">Database models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.schemas.html">Validation schemas</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="odyssey.api.html">API endpoints</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.user.routes.html">User</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.client.routes.html">Client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.staff.routes.html">Staff</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.client_services.routes.html">Client services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.doctor.routes.html">Doctor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.physiotherapy.routes.html">Physical therapist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.trainer.routes.html">Trainer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.wearables.routes.html">Wearable devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.notifications.routes.html">Notifications</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Telehealth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.system.routes.html">System config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.facility.routes.html">Facilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.lookup.routes.html">Lookup tables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.misc.postman.html">Postman</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.version.routes.html">Version</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.tasks.html">Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.utils.html">Utilities</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Odyssey</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="odyssey.api.html">API endpoints</a> &raquo;</li>
+        
+      <li>odyssey.api.telehealth.routes</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/odyssey/odyssey.api.telehealth.routes.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <section id="module-odyssey.api.telehealth.routes">
+<span id="odyssey-api-telehealth-routes"></span><h1>odyssey.api.telehealth.routes<a class="headerlink" href="#module-odyssey.api.telehealth.routes" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthBookingsRoomAccessTokenApi">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.telehealth.routes.</span></span><span class="sig-name descname"><span class="pre">TelehealthBookingsRoomAccessTokenApi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthBookingsRoomAccessTokenApi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<p>This endpoint is used to GET the staff and client’s TWILIO access tokens so they can
+access their chats and videos.</p>
+<p>Here, we create the Booking Meeting Room.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthBookingsRoomAccessTokenApi.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">booking_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthBookingsRoomAccessTokenApi.get" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthBookingsRoomAccessTokenApi.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'telehealth_telehealth_bookings_room_access_token_api'</span></em><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthBookingsRoomAccessTokenApi.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthBookingsRoomAccessTokenApi.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthBookingsRoomAccessTokenApi.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthBookingsRoomAccessTokenApi.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET'}</span></em><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthBookingsRoomAccessTokenApi.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthClientTimeSelectApi">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.telehealth.routes.</span></span><span class="sig-name descname"><span class="pre">TelehealthClientTimeSelectApi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthClientTimeSelectApi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthClientTimeSelectApi.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthClientTimeSelectApi.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the list of available times a staff member is available</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthClientTimeSelectApi.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'telehealth_telehealth_client_time_select_api'</span></em><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthClientTimeSelectApi.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthClientTimeSelectApi.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthClientTimeSelectApi.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthClientTimeSelectApi.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET'}</span></em><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthClientTimeSelectApi.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthBookingsApi">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.telehealth.routes.</span></span><span class="sig-name descname"><span class="pre">TelehealthBookingsApi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthBookingsApi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<p>This API resource is used to get and post client and staff bookings.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthBookingsApi.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthBookingsApi.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the list of bookings for clients and/or staff</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthBookingsApi.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthBookingsApi.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add client and staff to a TelehealthBookings table.</p>
+<p>Responds with successful booking and conversation_id</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthBookingsApi.put">
+<span class="sig-name descname"><span class="pre">put</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthBookingsApi.put" title="Permalink to this definition">¶</a></dt>
+<dd><p>PUT request should be used purely to update the booking STATUS.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthBookingsApi.delete">
+<span class="sig-name descname"><span class="pre">delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthBookingsApi.delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>This DELETE request is used to delete bookings. However, this table should also serve as a
+a log of bookings, so it is up to the Backened team to use this with caution.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthBookingsApi.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'telehealth_telehealth_bookings_api'</span></em><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthBookingsApi.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthBookingsApi.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthBookingsApi.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthBookingsApi.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'DELETE',</span> <span class="pre">'GET',</span> <span class="pre">'POST',</span> <span class="pre">'PUT'}</span></em><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthBookingsApi.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.ProvisionMeetingRooms">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.telehealth.routes.</span></span><span class="sig-name descname"><span class="pre">ProvisionMeetingRooms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.ProvisionMeetingRooms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.ProvisionMeetingRooms.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.ProvisionMeetingRooms.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deprecated 4.15.21</p>
+<p>Create a new meeting room between the logged-in staff member
+and the client specified in the url param, user_id</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.ProvisionMeetingRooms.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'telehealth_provision_meeting_rooms'</span></em><a class="headerlink" href="#odyssey.api.telehealth.routes.ProvisionMeetingRooms.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.ProvisionMeetingRooms.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.ProvisionMeetingRooms.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.ProvisionMeetingRooms.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'POST'}</span></em><a class="headerlink" href="#odyssey.api.telehealth.routes.ProvisionMeetingRooms.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.GrantMeetingRoomAccess">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.telehealth.routes.</span></span><span class="sig-name descname"><span class="pre">GrantMeetingRoomAccess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.GrantMeetingRoomAccess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<p>For generating and retrieving meeting room access tokens</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.GrantMeetingRoomAccess.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">room_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.GrantMeetingRoomAccess.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a new Twilio access token with a grant for the meeting room id provided.
+Tokens also have a grant for the chat room between the two participants in
+the chat room.</p>
+<p>Users may only be granted access if they are one of the two participants.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.GrantMeetingRoomAccess.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'telehealth_grant_meeting_room_access'</span></em><a class="headerlink" href="#odyssey.api.telehealth.routes.GrantMeetingRoomAccess.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.GrantMeetingRoomAccess.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.GrantMeetingRoomAccess.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.GrantMeetingRoomAccess.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'POST'}</span></em><a class="headerlink" href="#odyssey.api.telehealth.routes.GrantMeetingRoomAccess.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.MeetingRoomStatusAPI">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.telehealth.routes.</span></span><span class="sig-name descname"><span class="pre">MeetingRoomStatusAPI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.MeetingRoomStatusAPI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<p>Update and check meeting room status</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.MeetingRoomStatusAPI.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.MeetingRoomStatusAPI.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>For status callback directly from twilio</p>
+<p>TODO:</p>
+<ul class="simple">
+<li><p>authorize access to this API from twilio automated callback</p></li>
+<li><p>check callback reason (we just want the status updated)</p></li>
+<li><dl class="simple">
+<dt>update meeting status</dt><dd><ul>
+<li><p>open</p></li>
+<li><p>close</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>use TelehealthMeetingRooms table</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.MeetingRoomStatusAPI.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">room_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.MeetingRoomStatusAPI.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check the meeting status</p>
+<p>should just return vital details on meeting rooms</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.MeetingRoomStatusAPI.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'telehealth_meeting_room_status_api'</span></em><a class="headerlink" href="#odyssey.api.telehealth.routes.MeetingRoomStatusAPI.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.MeetingRoomStatusAPI.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.MeetingRoomStatusAPI.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.MeetingRoomStatusAPI.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET',</span> <span class="pre">'POST'}</span></em><a class="headerlink" href="#odyssey.api.telehealth.routes.MeetingRoomStatusAPI.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthSettingsStaffAvailabilityApi">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.telehealth.routes.</span></span><span class="sig-name descname"><span class="pre">TelehealthSettingsStaffAvailabilityApi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthSettingsStaffAvailabilityApi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<p>This API resource is used to get, post the staff’s general availability</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthSettingsStaffAvailabilityApi.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthSettingsStaffAvailabilityApi.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the staff availability</p>
+<p>This should be for FE usage.</p>
+<p>Opposite of the POST request, the table stores this table as:
+user_id, day_of_week, booking_window_id
+1, ‘Monday’, 2
+1, ‘Monday’, 3
+1, ‘Monday’, 4
+1, ‘Monday’, 5
+1, ‘Monday’, 10
+1, ‘Monday’, 11
+1, ‘Monday’, 12</p>
+<p>So, now we have to convert booking_window_id back to human understandable time
+and return the payload:</p>
+<p>availability: [{‘day_of_week’: str, ‘start_time’: Time, ‘end_time’: Time}]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthSettingsStaffAvailabilityApi.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthSettingsStaffAvailabilityApi.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>Posts the staff availability</p>
+<p>The input schema is supposed to look like:</p>
+<p>availability: [{‘day_of_week’: str, ‘start_time’: Time, ‘end_time’: Time}]
+Note, availability is an array of json objects.</p>
+<p>However, we store this information in the database as user_id, day_of_week, booking_window_id
+where booking_window_id is in increments of 5 minutes.</p>
+<p>AKA, we have to convert availability to booking_window_id</p>
+<p>Example:
+user_id, day_of_week, booking_window_id
+1, ‘Monday’, 2
+1, ‘Monday’, 3
+1, ‘Monday’, 4
+1, ‘Monday’, 5
+1, ‘Monday’, 10
+1, ‘Monday’, 11
+1, ‘Monday’, 12</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthSettingsStaffAvailabilityApi.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'telehealth_telehealth_settings_staff_availability_api'</span></em><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthSettingsStaffAvailabilityApi.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthSettingsStaffAvailabilityApi.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthSettingsStaffAvailabilityApi.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthSettingsStaffAvailabilityApi.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET',</span> <span class="pre">'POST'}</span></em><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthSettingsStaffAvailabilityApi.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthGetQueueClientPoolApi">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.telehealth.routes.</span></span><span class="sig-name descname"><span class="pre">TelehealthGetQueueClientPoolApi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthGetQueueClientPoolApi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<p>This API resource is used to get, post, and delete the user’s in the queue.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthGetQueueClientPoolApi.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthGetQueueClientPoolApi.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the list of notifications for the given user_id</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthGetQueueClientPoolApi.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'telehealth_telehealth_get_queue_client_pool_api'</span></em><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthGetQueueClientPoolApi.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthGetQueueClientPoolApi.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthGetQueueClientPoolApi.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthGetQueueClientPoolApi.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET'}</span></em><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthGetQueueClientPoolApi.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthQueueClientPoolApi">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.telehealth.routes.</span></span><span class="sig-name descname"><span class="pre">TelehealthQueueClientPoolApi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthQueueClientPoolApi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<p>This API resource is used to get, post, and delete the user’s in the queue.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthQueueClientPoolApi.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthQueueClientPoolApi.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the list of notifications for the given user_id</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthQueueClientPoolApi.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthQueueClientPoolApi.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a client to the queue</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthQueueClientPoolApi.delete">
+<span class="sig-name descname"><span class="pre">delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthQueueClientPoolApi.delete" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthQueueClientPoolApi.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'telehealth_telehealth_queue_client_pool_api'</span></em><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthQueueClientPoolApi.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthQueueClientPoolApi.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthQueueClientPoolApi.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthQueueClientPoolApi.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'DELETE',</span> <span class="pre">'GET',</span> <span class="pre">'POST'}</span></em><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthQueueClientPoolApi.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthBookingDetailsApi">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.telehealth.routes.</span></span><span class="sig-name descname"><span class="pre">TelehealthBookingDetailsApi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthBookingDetailsApi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<p>This API resource is used to get, post, and delete additional details about a telehealth boooking.
+Details may include a text description, images or voice recordings</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthBookingDetailsApi.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">booking_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthBookingDetailsApi.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of details about the specified booking_id</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthBookingDetailsApi.put">
+<span class="sig-name descname"><span class="pre">put</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">booking_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthBookingDetailsApi.put" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates telehealth booking details for a specific db entry, filtered by idx
+Edits one file for another, or can edit text details</p>
+<p>Expects form_data: (will ignore anything else)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>idx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em> (</em><em>required</em><em>)</em>) – TelehealthBookingDetails idx</p></li>
+<li><p><strong>media</strong> (<em>file</em><em> (</em><em>optional</em><em>)</em>) – It will not break if multiple files are sent, but only one will be handled.</p></li>
+<li><p><strong>details</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em> (</em><em>optional</em><em>)</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthBookingDetailsApi.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">booking_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthBookingDetailsApi.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds details to a booking_id
+Accepts multiple image or voice recording files</p>
+<dl class="simple">
+<dt>Expects form-data (will ignore anything else)</dt><dd><p>media : file(s)
+details : str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthBookingDetailsApi.delete">
+<span class="sig-name descname"><span class="pre">delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">booking_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthBookingDetailsApi.delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deletes all booking details entries from db</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthBookingDetailsApi.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'telehealth_telehealth_booking_details_api'</span></em><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthBookingDetailsApi.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthBookingDetailsApi.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthBookingDetailsApi.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthBookingDetailsApi.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'DELETE',</span> <span class="pre">'GET',</span> <span class="pre">'POST',</span> <span class="pre">'PUT'}</span></em><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthBookingDetailsApi.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthChatRoomApi">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.telehealth.routes.</span></span><span class="sig-name descname"><span class="pre">TelehealthChatRoomApi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthChatRoomApi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<p>DEPRECATED 5.10.21</p>
+<p>Creates an access token for the chat room between one staff and one client user.
+Chat rooms persist through the full history of the two users so the chat history (transcript)
+will be preserved by Twilio.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthChatRoomApi.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthChatRoomApi.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates access token for already provisioned chat rooms. If no chat room exists,
+one will not be created.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>client_user_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – user_id of the client participant of the chat room.</p></li>
+<li><p><strong>staff_user_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – user_id of the staff participant of the chat room.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthChatRoomApi.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'telehealth_telehealth_chat_room_api'</span></em><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthChatRoomApi.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthChatRoomApi.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthChatRoomApi.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthChatRoomApi.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'POST'}</span></em><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthChatRoomApi.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthAllChatRoomApi">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.telehealth.routes.</span></span><span class="sig-name descname"><span class="pre">TelehealthAllChatRoomApi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthAllChatRoomApi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<p>DEPRECATED 5.10.21</p>
+<p>Endpoint for dealing with all conversations a user is a participant to within a certain context (staff or client)</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthAllChatRoomApi.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthAllChatRoomApi.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns all conversations for the user along with a token to access all chat transcripts.</p>
+<p>Conversations will only be displayed for one context or another. Meaning if the user is logged in as staff,
+they will only be returned all conversations in which they are a staff participant of.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthAllChatRoomApi.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'telehealth_telehealth_all_chat_room_api'</span></em><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthAllChatRoomApi.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthAllChatRoomApi.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthAllChatRoomApi.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.routes.TelehealthAllChatRoomApi.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET'}</span></em><a class="headerlink" href="#odyssey.api.telehealth.routes.TelehealthAllChatRoomApi.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="odyssey.api.system.routes.html" class="btn btn-neutral float-right" title="odyssey.api.system.routes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="odyssey.api.notifications.routes.html" class="btn btn-neutral float-left" title="odyssey.api.notifications.routes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright Copyright 2019-2020 Atlantic Venture Partners, all rights reserved.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
