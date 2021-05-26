@@ -53,7 +53,8 @@ from odyssey.api.lookup.models import (
     LookupClinicalCareTeamResources, 
     LookupDefaultHealthMetrics,
     LookupGoals, 
-    LookupDrinks, 
+    LookupDrinks,
+    LookupMacroGoals, 
     LookupRaces,
     LookupNotifications
 )
@@ -209,7 +210,8 @@ class Client(Resource):
        
         client_info_payload = client_data.__dict__
         client_info_payload["primary_goal"] = db.session.query(LookupGoals.goal_name).filter(client_data.primary_goal_id == LookupGoals.goal_id).one_or_none()
-
+        client_info_payload["primary_macro_goal"] = db.session.query(LookupMacroGoals.goal).filter(client_data.primary_macro_goal_id == LookupMacroGoals.goal_id).one_or_none()
+        
         client_info_payload["race_information"] = db.session.query(ClientRaceAndEthnicity.is_client_mother, LookupRaces.race_id, LookupRaces.race_name) \
             .join(LookupRaces, LookupRaces.race_id == ClientRaceAndEthnicity.race_id) \
             .filter(ClientRaceAndEthnicity.user_id == user_id).all()
@@ -228,6 +230,12 @@ class Client(Resource):
 
         if not client_data or not user_data:
             raise UserNotFound(user_id)
+        
+        #validate primary_macro_goal_id
+        if 'primary_macro_goal_id' in request.parsed_obj['client_info'].keys():
+            macro_goal = LookupMacroGoals.query.filter_by(goal_id=request.parsed_obj['client_info']['primary_macro_goal_id']).one_or_none()
+            if not macro_goal:
+                raise InputError(400, 'Invalid primary_macro_goal_id')
         
         #validate primary_goal_id if supplied and automatically create drink recommendation
         if 'primary_goal_id' in request.parsed_obj['client_info'].keys():
@@ -267,7 +275,8 @@ class Client(Resource):
         # prepare client_info payload  
         client_info_payload = client_data.__dict__
         client_info_payload["primary_goal"] = db.session.query(LookupGoals.goal_name).filter(client_data.primary_goal_id == LookupGoals.goal_id).one_or_none()
-        
+        client_info_payload['primary_macro_goal'] = db.session.query(LookupMacroGoals.goal).filter(client_data.primary_macro_goal_id == LookupMacroGoals.goal_id).one_or_none()
+
         client_info_payload["race_information"] = db.session.query(ClientRaceAndEthnicity.is_client_mother, LookupRaces.race_id, LookupRaces.race_name) \
             .join(LookupRaces, LookupRaces.race_id == ClientRaceAndEthnicity.race_id) \
             .filter(ClientRaceAndEthnicity.user_id == user_id).all()

@@ -69,6 +69,8 @@ def test_put_client_info(test_client, init_database, staff_auth_header):
     
     assert response.status_code == 200
     assert response.json["client_info"]["primary_goal"] == "('Recovery',)"
+    assert response.json["client_info"]["primary_macro_goal"] == "('Gain the best understanding I can of my health at any point in time.',)"
+    assert response.json["client_info"]["primary_goal_description"] == "To try out something new"
 
 def test_creating_new_client(test_client, init_database, staff_auth_header):
     """
