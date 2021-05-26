@@ -4,15 +4,18 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Odyssey &mdash; Odyssey version: 0.1.100 documentation</title>
+  <title>Odyssey &mdash; Odyssey version: 0.5.45 documentation</title>
   
 
   
   <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
 
   
   
@@ -29,10 +32,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -63,7 +66,7 @@
             
             
               <div class="version">
-                version: 0.1.100
+                version: 0.5.45
               </div>
             
           
@@ -93,6 +96,7 @@
 <li class="toctree-l1"><a class="reference internal" href="odyssey/odyssey.models.html">Database models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey/odyssey.schemas.html">Validation schemas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey/odyssey.api.html">API endpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey/odyssey.tasks.html">Tasks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey/odyssey.utils.html">Utilities</a></li>
 </ul>
 
@@ -161,21 +165,21 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-odyssey">
+  <section id="module-odyssey">
 <span id="odyssey"></span><h1>Odyssey<a class="headerlink" href="#module-odyssey" title="Permalink to this headline">¶</a></h1>
 <p>A staff application for the Modo Bio client journey.</p>
 <p>This is a <a class="reference external" href="https://flask.palletsprojects.com">Flask</a> based app that serves webpages to the <a class="reference external" href="https://modobio.com">ModoBio</a> staff.
 The pages contain the intake and data gathering forms for the <em>client journey</em>. The <a class="reference external" href="https://en.wikipedia.org/wiki/Odyssey">Odyssey</a>
 is of course the most famous journey of all time! 🤓</p>
 <dl class="py function">
-<dt id="odyssey.create_app">
-<code class="sig-prename descclassname">odyssey.</code><code class="sig-name descname">create_app</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.create_app" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.create_app">
+<span class="sig-prename descclassname"><span class="pre">odyssey.</span></span><span class="sig-name descname"><span class="pre">create_app</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.create_app" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize an instance of the Flask app.</p>
-<p>This function is an ‘app factory’. It creates an instance of <a class="reference external" href="https://flask.palletsprojects.com/en/1.1.x/api/#flask.Flask" title="(in Flask v1.1.x)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flask.Flask</span></code></a>.
+<p>This function is an ‘app factory’. It creates an instance of <a class="reference external" href="https://flask.palletsprojects.com/en/2.0.x/api/#flask.Flask" title="(in Flask v2.0.x)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flask.Flask</span></code></a>.
 It is the main function to call to get the program started.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>An instance of <a class="reference external" href="https://flask.palletsprojects.com/en/1.1.x/api/#flask.Flask" title="(in Flask v1.1.x)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flask.Flask</span></code></a>, with appropriate configuration.</p>
+<dd class="field-odd"><p>An instance of <a class="reference external" href="https://flask.palletsprojects.com/en/2.0.x/api/#flask.Flask" title="(in Flask v2.0.x)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flask.Flask</span></code></a>, with appropriate configuration.</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
@@ -208,6 +212,9 @@ $ flask run
 <li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.physiotherapy.models.html">Physical therapist</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.trainer.models.html">Trainer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.wearables.models.html">Wearable devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.notifications.models.html">Notifications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.telehealth.models.html">Telehealth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.system.models.html">System config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.facility.models.html">Facilities</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.lookup.models.html">Lookup tables</a></li>
 </ul>
@@ -221,6 +228,9 @@ $ flask run
 <li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.physiotherapy.schemas.html">Physical therapist</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.trainer.schemas.html">Trainer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.wearables.schemas.html">Wearable devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.notifications.schemas.html">Notifications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.telehealth.schemas.html">Telehealth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.system.schemas.html">System config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.facility.schemas.html">Facilities</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.lookup.schemas.html">Lookup tables</a></li>
 </ul>
@@ -234,32 +244,41 @@ $ flask run
 <li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.physiotherapy.routes.html">Physical therapist</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.trainer.routes.html">Trainer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.wearables.routes.html">Wearable devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.notifications.routes.html">Notifications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.telehealth.routes.html">Telehealth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.system.routes.html">System config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.facility.routes.html">Facilities</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.lookup.routes.html">Lookup tables</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.misc.postman.html">Postman</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.api.version.routes.html">Version</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey/odyssey.tasks.html">Tasks</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.celery_app.html">Celery instance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.tasks.periodic.html">Periodic tasks</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey/odyssey.utils.html">Utilities</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.utils.auth.html">Login</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.utils.message.html">Messaging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.utils.search.html">Search</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.utils.constants.html">Constants</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.utils.errors.html">Errors</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.utils.email.html">Email</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.utils.pdf.html">PDF generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey/odyssey.utils.misc.html">Other</a></li>
 </ul>
 </li>
 </ul>
 </div>
-<div class="section" id="indices-and-tables">
+<section id="indices-and-tables">
 <h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
 <li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
 <li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
 </ul>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>

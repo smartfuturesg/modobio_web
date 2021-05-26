@@ -4,15 +4,18 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Database models &mdash; Odyssey version: 0.1.100 documentation</title>
+  <title>Database models &mdash; Odyssey version: 0.5.45 documentation</title>
   
 
   
   <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
 
   
   
@@ -29,10 +32,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -64,7 +67,7 @@
             
             
               <div class="version">
-                version: 0.1.100
+                version: 0.5.45
               </div>
             
           
@@ -99,12 +102,16 @@
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.physiotherapy.models.html">Physical therapist</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.trainer.models.html">Trainer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.wearables.models.html">Wearable devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.notifications.models.html">Notifications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.telehealth.models.html">Telehealth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.system.models.html">System config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.facility.models.html">Facilities</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.lookup.models.html">Lookup tables</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.schemas.html">Validation schemas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.api.html">API endpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.tasks.html">Tasks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.utils.html">Utilities</a></li>
 </ul>
 
@@ -173,11 +180,11 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="database-models">
+  <section id="database-models">
 <span id="db-models"></span><h1>Database models<a class="headerlink" href="#database-models" title="Permalink to this headline">¶</a></h1>
-<p>All <em>entities</em> in the database are of type <strong>User</strong>. A User has a <em>login type</em> <strong>Client</strong> or <strong>Staff</strong> (or both, but only one login type per logged in session). A Staff member has one or more <em>roles</em>: <strong>client services</strong>, <strong>doctor</strong>, <strong>physical therapist</strong>, or <strong>trainer</strong>. At the moment client services does not have a dedicated table in the database.</p>
-<a class="reference internal image-reference" href="../_images/odyssey_db.png"><img alt="../_images/odyssey_db.png" class="align-center" src="../_images/odyssey_db.png" style="width: 450px;" /></a>
-<div class="section" id="entities">
+<p>All <em>identities</em> in the database are of type <strong>User</strong>. A User has a <em>persona</em> <strong>Client</strong> or <strong>Professional</strong> (or both, but only one persona can be logged in per session). A professional persona belong to a <em>group</em>, <strong>Staff</strong> or <strong>Practitioner</strong>. Within a <em>group</em>, a professional has one or more <em>roles</em>:</p>
+<a class="reference internal image-reference" href="../_images/user_roles.png"><img alt="../_images/user_roles.png" class="align-center" src="../_images/user_roles.png" style="width: 450px;" /></a>
+<section id="entities">
 <h2>Entities<a class="headerlink" href="#entities" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
@@ -186,8 +193,8 @@
 <li class="toctree-l1"><a class="reference internal" href="odyssey.api.staff.models.html">Staff</a></li>
 </ul>
 </div>
-</div>
-<div class="section" id="roles">
+</section>
+<section id="roles">
 <h2>Roles<a class="headerlink" href="#roles" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
@@ -196,18 +203,21 @@
 <li class="toctree-l1"><a class="reference internal" href="odyssey.api.trainer.models.html">Trainer</a></li>
 </ul>
 </div>
-</div>
-<div class="section" id="other">
+</section>
+<section id="other">
 <h2>Other<a class="headerlink" href="#other" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.api.wearables.models.html">Wearable devices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.api.notifications.models.html">Notifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.api.telehealth.models.html">Telehealth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.api.system.models.html">System config</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.api.facility.models.html">Facilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.api.lookup.models.html">Lookup tables</a></li>
 </ul>
 </div>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>

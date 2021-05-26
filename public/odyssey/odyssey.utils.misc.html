@@ -4,15 +4,18 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>odyssey.utils.misc &mdash; Odyssey version: 0.1.100 documentation</title>
+  <title>odyssey.utils.misc &mdash; Odyssey version: 0.5.45 documentation</title>
   
 
   
   <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
 
   
   
@@ -29,10 +32,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -63,7 +66,7 @@
             
             
               <div class="version">
-                version: 0.1.100
+                version: 0.5.45
               </div>
             
           
@@ -93,11 +96,13 @@
 <li class="toctree-l1"><a class="reference internal" href="odyssey.models.html">Database models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.schemas.html">Validation schemas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.api.html">API endpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.tasks.html">Tasks</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="odyssey.utils.html">Utilities</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="odyssey.utils.auth.html">Login</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.utils.message.html">Messaging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.utils.search.html">Search</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.utils.constants.html">Constants</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.utils.errors.html">Errors</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey.utils.email.html">Email</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.utils.pdf.html">PDF generation</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Other</a></li>
 </ul>
@@ -171,93 +176,136 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-odyssey.utils.misc">
+  <section id="module-odyssey.utils.misc">
 <span id="odyssey-utils-misc"></span><h1>odyssey.utils.misc<a class="headerlink" href="#module-odyssey.utils.misc" title="Permalink to this headline">¶</a></h1>
 <p>Utility functions for the odyssey package.</p>
 <dl class="py function">
-<dt id="odyssey.utils.misc.list_average">
-<code class="sig-prename descclassname">odyssey.utils.misc.</code><code class="sig-name descname">list_average</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">values_list</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.list_average" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.utils.misc.list_average">
+<span class="sig-prename descclassname"><span class="pre">odyssey.utils.misc.</span></span><span class="sig-name descname"><span class="pre">list_average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values_list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.list_average" title="Permalink to this definition">¶</a></dt>
 <dd><p>Helper function to clean list values before attempting to find the average</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="odyssey.utils.misc.check_client_existence">
-<code class="sig-prename descclassname">odyssey.utils.misc.</code><code class="sig-name descname">check_client_existence</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.check_client_existence" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.utils.misc.check_client_existence">
+<span class="sig-prename descclassname"><span class="pre">odyssey.utils.misc.</span></span><span class="sig-name descname"><span class="pre">check_client_existence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.check_client_existence" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check that the client is in the database
 All clients must be in the CLientInfo table before any other procedure</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="odyssey.utils.misc.check_staff_existence">
-<code class="sig-prename descclassname">odyssey.utils.misc.</code><code class="sig-name descname">check_staff_existence</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.check_staff_existence" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.utils.misc.check_staff_existence">
+<span class="sig-prename descclassname"><span class="pre">odyssey.utils.misc.</span></span><span class="sig-name descname"><span class="pre">check_staff_existence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.check_staff_existence" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check that the user is in the database and is a staff member</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="odyssey.utils.misc.check_user_existence">
-<code class="sig-prename descclassname">odyssey.utils.misc.</code><code class="sig-name descname">check_user_existence</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.check_user_existence" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.utils.misc.check_user_existence">
+<span class="sig-prename descclassname"><span class="pre">odyssey.utils.misc.</span></span><span class="sig-name descname"><span class="pre">check_user_existence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.check_user_existence" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check that the user is in the database
 All users must be in the User table before any other procedure</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="odyssey.utils.misc.check_blood_test_existence">
-<code class="sig-prename descclassname">odyssey.utils.misc.</code><code class="sig-name descname">check_blood_test_existence</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">test_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.check_blood_test_existence" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.utils.misc.check_blood_test_existence">
+<span class="sig-prename descclassname"><span class="pre">odyssey.utils.misc.</span></span><span class="sig-name descname"><span class="pre">check_blood_test_existence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.check_blood_test_existence" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check that the blood test is in the database</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="odyssey.utils.misc.check_blood_test_result_type_existence">
-<code class="sig-prename descclassname">odyssey.utils.misc.</code><code class="sig-name descname">check_blood_test_result_type_existence</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">result_name</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.check_blood_test_result_type_existence" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.utils.misc.check_blood_test_result_type_existence">
+<span class="sig-prename descclassname"><span class="pre">odyssey.utils.misc.</span></span><span class="sig-name descname"><span class="pre">check_blood_test_result_type_existence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.check_blood_test_result_type_existence" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check that a supplied blood test result type is in the database</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="odyssey.utils.misc.fetch_facility_existence">
-<code class="sig-prename descclassname">odyssey.utils.misc.</code><code class="sig-name descname">fetch_facility_existence</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">facility_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.fetch_facility_existence" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.utils.misc.fetch_facility_existence">
+<span class="sig-prename descclassname"><span class="pre">odyssey.utils.misc.</span></span><span class="sig-name descname"><span class="pre">fetch_facility_existence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">facility_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.fetch_facility_existence" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="odyssey.utils.misc.check_client_facility_relation_existence">
-<code class="sig-prename descclassname">odyssey.utils.misc.</code><code class="sig-name descname">check_client_facility_relation_existence</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em>, <em class="sig-param"><span class="n">facility_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.check_client_facility_relation_existence" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.utils.misc.check_client_facility_relation_existence">
+<span class="sig-prename descclassname"><span class="pre">odyssey.utils.misc.</span></span><span class="sig-name descname"><span class="pre">check_client_facility_relation_existence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">facility_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.check_client_facility_relation_existence" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="odyssey.utils.misc.check_medical_condition_existence">
-<code class="sig-prename descclassname">odyssey.utils.misc.</code><code class="sig-name descname">check_medical_condition_existence</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">medcon_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.check_medical_condition_existence" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.utils.misc.check_medical_condition_existence">
+<span class="sig-prename descclassname"><span class="pre">odyssey.utils.misc.</span></span><span class="sig-name descname"><span class="pre">check_medical_condition_existence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">medcon_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.check_medical_condition_existence" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="odyssey.utils.misc.check_std_existence">
-<code class="sig-prename descclassname">odyssey.utils.misc.</code><code class="sig-name descname">check_std_existence</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">std_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.check_std_existence" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.utils.misc.check_drink_existence">
+<span class="sig-prename descclassname"><span class="pre">odyssey.utils.misc.</span></span><span class="sig-name descname"><span class="pre">check_drink_existence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">drink_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.check_drink_existence" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="odyssey.utils.misc.check_std_existence">
+<span class="sig-prename descclassname"><span class="pre">odyssey.utils.misc.</span></span><span class="sig-name descname"><span class="pre">check_std_existence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">std_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.check_std_existence" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="odyssey.utils.misc.grab_twilio_credentials">
+<span class="sig-prename descclassname"><span class="pre">odyssey.utils.misc.</span></span><span class="sig-name descname"><span class="pre">grab_twilio_credentials</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.grab_twilio_credentials" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper funtion to bring up twilio credentials for API acces.
+Raises an error if one or more of the credentials are None</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="odyssey.utils.misc.generate_meeting_room_name">
+<span class="sig-prename descclassname"><span class="pre">odyssey.utils.misc.</span></span><span class="sig-name descname"><span class="pre">generate_meeting_room_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meeting_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'TELEHEALTH'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.generate_meeting_room_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates unique, internally used names for meeting rooms.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>meeting_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Meeting types will be either TELEHEALTH or CHATROOM</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="odyssey.utils.misc.create_conversation">
+<span class="sig-prename descclassname"><span class="pre">odyssey.utils.misc.</span></span><span class="sig-name descname"><span class="pre">create_conversation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">staff_user_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client_user_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">booking_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.create_conversation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provision a Twilio conversation between the staff and client users</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="odyssey.utils.misc.get_chatroom">
+<span class="sig-prename descclassname"><span class="pre">odyssey.utils.misc.</span></span><span class="sig-name descname"><span class="pre">get_chatroom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">staff_user_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client_user_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">participant_modobio_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">create_new</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.get_chatroom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deprecated 4.15.21</p>
+<p>Retrieves twilio chat room by searcing db for the user ids provided.
+If none exist creates a new room with provided.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="odyssey.utils.misc.create_twilio_access_token">
+<span class="sig-prename descclassname"><span class="pre">odyssey.utils.misc.</span></span><span class="sig-name descname"><span class="pre">create_twilio_access_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">modobio_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meeting_room_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.create_twilio_access_token" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a twilio access token for the provided modobio_id</p>
+</dd></dl>
 
 <dl class="py class">
-<dt id="odyssey.utils.misc.JSONEncoder">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.utils.misc.</code><code class="sig-name descname">JSONEncoder</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span></em>, <em class="sig-param"><span class="n">skipkeys</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">ensure_ascii</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">check_circular</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">allow_nan</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">sort_keys</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">indent</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">separators</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.JSONEncoder" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://flask.palletsprojects.com/en/1.1.x/api/#flask.json.JSONEncoder" title="(in Flask v1.1.x)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flask.json.JSONEncoder</span></code></a></p>
+<dt class="sig sig-object py" id="odyssey.utils.misc.JSONEncoder">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.utils.misc.</span></span><span class="sig-name descname"><span class="pre">JSONEncoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skipkeys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ensure_ascii</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_circular</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_nan</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort_keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">separators</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.JSONEncoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://flask.palletsprojects.com/en/2.0.x/api/#flask.json.JSONEncoder" title="(in Flask v2.0.x)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flask.json.JSONEncoder</span></code></a></p>
 <dl class="simple">
 <dt>Converts <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.date" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.date</span></code></a>,</dt><dd><p>or <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.time" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.time</span></code></a> objects to a JSON compatible ISO8601 string.</p>
 </dd>
 </dl>
-<p>This subclass of <a class="reference external" href="https://flask.palletsprojects.com/en/1.1.x/api/#flask.json.JSONEncoder" title="(in Flask v1.1.x)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flask.json.JSONEncoder</span></code></a> overrides the
+<p>This subclass of <a class="reference external" href="https://flask.palletsprojects.com/en/2.0.x/api/#flask.json.JSONEncoder" title="(in Flask v2.0.x)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flask.json.JSONEncoder</span></code></a> overrides the
 <a class="reference internal" href="#odyssey.utils.misc.JSONEncoder.default" title="odyssey.utils.misc.JSONEncoder.default"><code class="xref py py-meth docutils literal notranslate"><span class="pre">default()</span></code></a> method to convert datetime objects to ISO8601 strings,
 instead of the RFC 822 strings. RFC 822 strings are much harder to
 deserialize. Everything else is passed on to the parent class.</p>
 <dl class="py method">
-<dt id="odyssey.utils.misc.JSONEncoder.default">
-<code class="sig-name descname">default</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">obj</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.JSONEncoder.default" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.utils.misc.JSONEncoder.default">
+<span class="sig-name descname"><span class="pre">default</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.JSONEncoder.default" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert a Python object to a JSON string.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt id="odyssey.utils.misc.JSONDecoder">
-<em class="property">class </em><code class="sig-prename descclassname">odyssey.utils.misc.</code><code class="sig-name descname">JSONDecoder</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.JSONDecoder" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://flask.palletsprojects.com/en/1.1.x/api/#flask.json.JSONDecoder" title="(in Flask v1.1.x)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flask.json.JSONDecoder</span></code></a></p>
+<dt class="sig sig-object py" id="odyssey.utils.misc.JSONDecoder">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.utils.misc.</span></span><span class="sig-name descname"><span class="pre">JSONDecoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.JSONDecoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://flask.palletsprojects.com/en/2.0.x/api/#flask.json.JSONDecoder" title="(in Flask v2.0.x)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flask.json.JSONDecoder</span></code></a></p>
 <p>Deserialize JSON string into a dictionary of Python objects.</p>
-<p><a class="reference external" href="https://flask.palletsprojects.com/en/1.1.x/api/#flask.json.JSONDecoder" title="(in Flask v1.1.x)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flask.json.JSONDecoder</span></code></a> only supports a small set of types that
+<p><a class="reference external" href="https://flask.palletsprojects.com/en/2.0.x/api/#flask.json.JSONDecoder" title="(in Flask v2.0.x)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flask.json.JSONDecoder</span></code></a> only supports a small set of types that
 can be deserialized into Python objects. This class adds a set of parsers
 that can convert JSON strings into their respective Python objects.</p>
 <p>To add more functionality, simply create a new parser method below, with
@@ -273,8 +321,8 @@ automatic registration system.</p></li>
 </ol>
 <p>Of course, there should be a corresponding serializer in <a class="reference internal" href="#odyssey.utils.misc.JSONEncoder" title="odyssey.utils.misc.JSONEncoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">JSONEncoder</span></code></a>.</p>
 <dl class="py method">
-<dt id="odyssey.utils.misc.JSONDecoder.parse_datetime">
-<code class="sig-name descname">parse_datetime</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">string</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.JSONDecoder.parse_datetime" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.utils.misc.JSONDecoder.parse_datetime">
+<span class="sig-name descname"><span class="pre">parse_datetime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.JSONDecoder.parse_datetime" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert a string to a <code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code> object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -289,10 +337,10 @@ is not yet handled.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.utils.misc.JSONDecoder.parse_uuid">
-<code class="sig-name descname">parse_uuid</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">string</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.JSONDecoder.parse_uuid" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.utils.misc.JSONDecoder.parse_uuid">
+<span class="sig-name descname"><span class="pre">parse_uuid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.JSONDecoder.parse_uuid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert a string into a <a class="reference external" href="https://docs.python.org/3/library/uuid.html#uuid.UUID" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">uuid.UUID</span></code></a> object.</p>
-<p>Serializing <a class="reference external" href="https://docs.python.org/3/library/uuid.html#uuid.UUID" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">uuid.UUID</span></code></a> is supported by <a class="reference external" href="https://flask.palletsprojects.com/en/1.1.x/api/#flask.json.JSONEncoder" title="(in Flask v1.1.x)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flask.json.JSONEncoder</span></code></a>,
+<p>Serializing <a class="reference external" href="https://docs.python.org/3/library/uuid.html#uuid.UUID" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">uuid.UUID</span></code></a> is supported by <a class="reference external" href="https://flask.palletsprojects.com/en/2.0.x/api/#flask.json.JSONEncoder" title="(in Flask v2.0.x)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flask.json.JSONEncoder</span></code></a>,
 but the reverse process is not natively supported by flask. This parser adds
 support for the deserialization of UUID strings into <a class="reference external" href="https://docs.python.org/3/library/uuid.html#uuid.UUID" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">uuid.UUID</span></code></a>
 objects.</p>
@@ -307,21 +355,21 @@ objects.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="odyssey.utils.misc.JSONDecoder.parse">
-<code class="sig-name descname">parse</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">jsonobj</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.JSONDecoder.parse" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.utils.misc.JSONDecoder.parse">
+<span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jsonobj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.JSONDecoder.parse" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply the registered parsers to the Python dict.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py function">
-<dt id="odyssey.utils.misc.verify_jwt">
-<code class="sig-prename descclassname">odyssey.utils.misc.</code><code class="sig-name descname">verify_jwt</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">token</span></em>, <em class="sig-param"><span class="n">error_message</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.verify_jwt" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.utils.misc.verify_jwt">
+<span class="sig-prename descclassname"><span class="pre">odyssey.utils.misc.</span></span><span class="sig-name descname"><span class="pre">verify_jwt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refresh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.misc.verify_jwt" title="Permalink to this definition">¶</a></dt>
 <dd><p>Ensure token is signed correctly and is not yet expired
 Returns the token’s payload</p>
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>

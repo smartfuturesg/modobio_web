@@ -93,7 +93,7 @@ Not needed on API, to be removed with Flask app removal.
 
 FLASK_SKIP_DOTENV = True
 """
-If :module:`python-dotenv` is installed, Flask will by default use it to find .env files and
+If :mod:`python-dotenv` is installed, Flask will by default use it to find .env files and
 use the contents of those files as environmental variables. It uses :func:`dotenv.find_dotenv`,
 which keeps searching up the directory tree until it finds a .env file.
 
