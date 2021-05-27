@@ -20,7 +20,8 @@ from odyssey.api.lookup.models import (
     LookupTransactionTypes,
     LookupNotifications,
     LookupEmergencyNumbers,
-    LookupRoles
+    LookupRoles,
+    LookupMacroGoals
 )
 
 class LookupTermsAndConditionsOutputSchema(ma.SQLAlchemyAutoSchema):
@@ -143,6 +144,15 @@ class LookupCareTeamResourcesOutputSchema(Schema):
 
 class LookupGoalsOutputSchema(Schema):
     items = fields.Nested(LookupGoalsSchema(many=True), missing = [])
+    total_items = fields.Integer()
+
+class LookupMacroGoalsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupMacroGoals
+        exclude = ('created_at', 'updated_at')
+
+class LookupMacroGoalsOutputSchema(Schema):
+    items = fields.Nested(LookupMacroGoalsSchema(many=True), missing = [])
     total_items = fields.Integer()
 
 class LookupRacesSchema(ma.SQLAlchemyAutoSchema):
