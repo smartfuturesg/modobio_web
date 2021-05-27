@@ -36,8 +36,6 @@ client_info_put_test_data = {
     },
     "client_info": {
         "dob": "1991-10-14",
-        "zipcode": "85282",
-        "city": "Tempe",
         "receive_docs": True,
         "primary_pharmacy_name": "Maw and Paw Drugs Co.",
         "healthcare_contact": "United",
@@ -45,7 +43,6 @@ client_info_put_test_data = {
         "country": "US",
         "emergency_contact": "Emergency",
         "state": "AZ",
-        "street": "3325 S Malibu Dr.",
         "gender": "m",
         "guardianrole": "guardian role",
         "emergency_phone": "6025555555",
