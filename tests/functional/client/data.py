@@ -50,7 +50,9 @@ client_info_put_test_data = {
         "guardianname": "guardian 1",
         "healthcare_phone": "1800676blue",
         "preferred": 0,
-        "profession": "Chef"
+        "profession": "Chef",
+        "primary_macro_goal_id": 1,
+        "primary_goal_description": "To try out something new"
     }
 }
 

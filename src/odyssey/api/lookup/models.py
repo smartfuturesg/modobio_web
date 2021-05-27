@@ -683,6 +683,40 @@ class LookupGoals(db.Model):
     :type: string
     """
 
+class LookupMacroGoals(db.Model):
+    """ Static list of pre-defined primary health goals available to a client 
+    """
+
+    __tablename__ = 'LookupMacroGoals'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    goal_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Id of goal.
+
+    :type: integer, primary key, autoincrementing
+    """
+
+    goal = db.Column(db.String)
+    """
+    Name of goal.
+
+    :type: string
+    """
+
 class LookupRaces(db.Model):
     """ Static list of races that a client can choose from. 
     """
