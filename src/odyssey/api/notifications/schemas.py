@@ -30,7 +30,7 @@ class NotificationSchema(ma.SQLAlchemyAutoSchema):
         return notification_dict
 
 
-class PushRegistrationSchema(ma.SQLAlchemyAutoSchema):
+class PushRegistrationGetSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = NotificationsPushRegistration
         load_instance = True
@@ -39,11 +39,12 @@ class PushRegistrationSchema(ma.SQLAlchemyAutoSchema):
 
 class PushRegistrationPostSchema(Schema):
     device_token = fields.String(required=True)
+    device_voip_token = fields.String(required=False)
     device_id = fields.String(required=True)
     device_description = fields.String(required=True)
-    # I want to use push_platforms.keys() here, but cannot import push_platforms
-    # from odyssey.utils.message because of circular dependency.
-    device_os = fields.String(validate=validate.OneOf(['apple', 'android', 'debug']), required=True)
+    # I want to use PushNotifications.platforms.keys() here, but cannot import
+    # PushNotifications from odyssey.utils.message because of circular dependency.
+    device_os = fields.String(required=True, validate=validate.OneOf(['apple', 'android', 'debug']))
 
 
 class PushRegistrationDeleteSchema(Schema):
