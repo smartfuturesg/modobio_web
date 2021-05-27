@@ -614,9 +614,22 @@ class PushNotification:
 
         message = {channel: processed}
 
+        push_type = notification_type.name
+        if notification_type == PushNotificationType.badge:
+            push_type = PushNotificationType.alert.name
+
+        message_attr = {
+            'AWS.SNS.MOBILE.APNS.PUSH_TYPE': {
+                'DataType': 'String',
+                'StringValue': push_type
+            }
+        }
         endpoint = self.sns.PlatformEndpoint(arn=correct_arn)
         # Yes, the message got dumped twice in one day. Ouch!
-        response = endpoint.publish(TargetArn=correct_arn, Message=dumps(message))
+        response = endpoint.publish(
+            TargetArn=correct_arn,
+            Message=dumps(message),
+            MessageAttributes=message_attr)
 
         return message
 
