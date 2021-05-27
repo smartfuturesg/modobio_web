@@ -1,7 +1,7 @@
 """remove street, zipcode, and city from ClientInfo
 
 Revision ID: f363b1803f0f
-Revises: d2b96b6c933c
+Revises: dfb42380a67f
 Create Date: 2021-05-26 09:02:33.533165
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'f363b1803f0f'
-down_revision = 'd2b96b6c933c'
+down_revision = 'dfb42380a67f'
 branch_labels = None
 depends_on = None
 
