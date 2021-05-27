@@ -20,7 +20,7 @@ redis
 requests
 requests-oauthlib
 twilio
-PyJWT>=2.1.0
+PyJWT>=2.0.0
 WeasyPrint
 werkzeug
 WTForms
