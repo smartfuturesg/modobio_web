@@ -402,8 +402,9 @@ class PushNotification:
         self,
         device_token: str,
         device_os: str,
-        device_description: str,
-        current_endpoint: str=None
+        device_info: dict={},
+        current_endpoint: str=None,
+        voip: bool=False
     ) -> str:
         """ Register a device for push notifications.
 
@@ -416,11 +417,16 @@ class PushNotification:
         device_os : str
             Which platform to register with. Currently supported: "apple", "android", or "debug".
 
-        device_description : str
-            Additional data stored with the device_token in the AWS SNS endpoint. Max length 2048.
+        device_info : dict
+            Additional data stored with the device_token in the AWS SNS endpoint.
+            Max length after conversion to JSON: 2048.
 
         current_endpoint : str
-            Current endpoint ARN, which may or may not be active.
+            ARN of existing endpoint for this device token, which may or may not be active.
+
+        voip : bool
+            Whether or not this device token is for a VoIP channel. Only used by Apple devices,
+            ignored by Android devices.
 
         Returns
         -------
@@ -432,18 +438,25 @@ class PushNotification:
         ValueError
             On incorrect platform or device_description too long.
         """
-        # Some info and explanation:
+        # Glossary for AWS SNS
         #
         # https://docs.aws.amazon.com/sns/latest/dg/mobile-push-send.html
         #
-        # ARN = string representation of resources on AWS
-        # Platform Application = endpoint for a single platform channel.
-        #   example arn:aws:sns:us-west-1:393511634479:app/APNS_SANDBOX/ApplePushNotification-Dev
-        # Endpoint = endpoint for a single device within a channel.
-        #   example arn:aws:sns:us-west-1:393511634479:endpoint/APNS_SANDBOX/
-        #           ApplePushNotification-Dev/147a664a-2ca9-3109-91e6-1986d3f0d52a
+        # * ARN
+        #       String representation of resources on AWS
         #
-        # TODO: make use of endpoint params UserID and ChannelID?
+        # * Platform Application
+        #       A channel as registered with a push notification provider,
+        #       e.g. Apple APNS, or Android FCM.
+        #
+        # * Endpoint
+        #       Endpoint for a single device within a channel. Messages send to
+        #       an endpoint will be send to just that device.
+        #
+        # * Topic
+        #       A collection of endpoints. Each device/endpoint has to subscribe
+        #       to the topic. Topics can be used for general messages to all
+        #       users, e.g. tip of the day, network outages, general updates.
 
         if device_os not in self.platforms:
             raise ValueError('Device OS must be one of: {}'.format(', '.join(self.platforms.keys())))
