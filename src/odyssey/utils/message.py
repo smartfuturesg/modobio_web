@@ -266,6 +266,77 @@ def send_email(subject=None, recipient="success@simulator.amazonses.com", body_t
 # Push notifications
 #
 
+from dataclasses import dataclass
+
+@dataclass
+class EndpointARN:
+    """ AWS Resource Number (ARN) for SNS endpoints. """
+    prefix = 'arn'
+    main = 'aws'
+    resource = '' # sns
+    region = '' # us-west-1
+    account_id = '' # 393511634479
+    kind = '' # app/endpoint
+    channel = '' # APNS_VOIP
+    label = '' # AppleVoip-Dev
+    uuid = '' # for endpoints
+    is_voip = False
+    is_sandbox = False
+
+    @property
+    def arn(self) -> str:
+        """ Return the ARN as a string.
+
+        Returns
+        -------
+        str
+            The ARN as a string.
+        """
+        channel = self.channel
+        if channel == 'APNS':
+            if self.is_voip:
+                channel += '_VOIP'
+            if self.is_sandbox:
+                channel += '_SANDBOX'
+
+        uuid = ''
+        if self.kind == 'endpoint':
+            uuid = f'/{self.uuid}'
+
+        return f'{self.prefix}:{self.main}:{self.resource}:{self.region}:{self.account_id}:'
+               f'{self.kind}/{channel}/{self.label}{uuid}'
+
+    @property.setter
+    def arn(self, arn: str):
+        """ Extract endpoint parameters from an ARN string.
+
+        Parameters
+        ----------
+        arn : str
+            The ARN as a string.
+        """
+        if not arn:
+            return
+
+        aws_part, sns_part = arn.rsplit(':', maxsplit=1)
+        self.prefix, self.main, self.resource, self.region, self.account_id = aws_part.split(':')
+        if sns_part.startswith('app'):
+            self.kind, channel, self.label = sns_part.split('/')
+        elif sns_part.startswith('endpoint'):
+            self.kind, channel, self.label, self.uuid = sns_part.split('/')
+        else:
+            raise ValueError(f'ARN {arn} is neither Platform Application nor Endpoint.')
+
+        if channel.startswith('APNS'):
+            self.channel = 'APNS'
+            if '_VOIP' in channel:
+                self.is_voip = True
+            if '_SANDBOX' in channel
+                self.is_sandbox = True
+        else:
+            self.channel = channel
+
+
 class PushNotificationType(enum.Enum):
     alert = 'A standard notification with a title and a body.'
     background = 'Trigger the app to reload data in the background.'
