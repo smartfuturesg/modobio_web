@@ -79,20 +79,6 @@ class ClientInfo(db.Model):
     :type: str, max length 50
     """
 
-    street = db.Column(db.String(50))
-    """
-    Client street address.
-
-    :type: str, max length 50
-    """
-
-    city = db.Column(db.String(50))
-    """
-    Client address city.
-
-    :type: str, max length 50
-    """
-
     state = db.Column(db.String(2))
     """
     Client address state.
@@ -100,13 +86,6 @@ class ClientInfo(db.Model):
     Currently only US States. Defaults to AZ.
 
     :type: str, max length 2
-    """
-
-    zipcode = db.Column(db.String(10))
-    """
-    Client address zip code.
-
-    :type: str, max length 10
     """
 
     country = db.Column(db.String(2))
