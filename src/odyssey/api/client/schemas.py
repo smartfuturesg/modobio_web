@@ -93,9 +93,11 @@ class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
         model = ClientInfo
         exclude = ('created_at', 'updated_at', 'idx')
         dump_only = ('modobio_id', 'membersince', 'height', 'weight')
+        include_fk = True
 
     user_id = fields.Integer()
     primary_goal = fields.String()
+    primary_macro_goal = fields.String()
     race_information = fields.Nested(ClientRaceAndEthnicitySchema(many=True))
 
     @post_load
