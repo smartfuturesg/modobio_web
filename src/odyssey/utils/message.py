@@ -319,12 +319,11 @@ class PushNotification:
         - custom key (any): add any custom keys to the root of this template.
 
     apple_background_tmpl : dict
-        This template can be used to trigger a background update in the app.
+        This template can be used to trigger a background update in the app. The notification
+        may contain custom keys, but nothing else besides "content-available" in the "aps" dict.
 
         - aps (dict): root key of Apple specific payload keys.
             - content-available (int): [required] must be set to 1.
-            - badge (int): set app badge to this number; 0 removes badge.
-            - sound (str): filename of custom sound to play when push notification arrives.
         - custom key (any): add any custom keys to the root of this template.
 
     apple_badge_tmpl : dict
@@ -371,10 +370,7 @@ class PushNotification:
             'sound': None}}
 
     apple_background_tmpl = {
-        'aps': {
-            'content-available': 1,
-            'badge': None,
-            'sound': None}}
+        'aps': {'content-available': 1}}
 
     apple_badge_tmpl = {
         'aps': {

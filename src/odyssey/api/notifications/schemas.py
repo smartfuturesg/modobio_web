@@ -195,9 +195,10 @@ class ApplePushNotificationAlertPartSchema(SkipNoneSchema, HyphenSchema):
 
 
 class ApplePushNotificationBackgroundPartSchema(SkipNoneSchema, HyphenSchema):
+    class Meta:
+        unknown = EXCLUDE
+
     content_available = fields.Integer(required=True, default=1, validate=validate.Equal(1))
-    badge = fields.Integer(missing=None)
-    sound = fields.String(missing=None)
 
 
 class ApplePushNotificationBadgePartSchema(SkipNoneSchema, HyphenSchema):
