@@ -1,7 +1,7 @@
 boto3
 celery
 elasticsearch
-Flask==1.1.4
+Flask
 flask-accepts
 Flask-Cors
 flask-marshmallow
@@ -10,7 +10,7 @@ flask-restx==0.2.0
 Flask_SQLAlchemy
 Flask_WTF
 marshmallow
-marshmallow-sqlalchemy==0.25.0
+marshmallow-sqlalchemy
 psycopg2
 PyPDF2
 pytest
@@ -22,5 +22,5 @@ requests-oauthlib
 twilio
 PyJWT>=2.0.0
 WeasyPrint
-werkzeug==1.0.1
+werkzeug
 WTForms

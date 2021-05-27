@@ -7,7 +7,6 @@ from marshmallow import (
     validates, 
     validate
 )
-from marshmallow_sqlalchemy.schema.sqlalchemy_schema import auto_field
 
 from odyssey import ma
 from odyssey.api.client.models import (
