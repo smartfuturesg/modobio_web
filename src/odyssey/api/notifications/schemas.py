@@ -262,6 +262,9 @@ class ApplePushNotificationVoipDataSchema(SkipNoneSchema):
 
 
 class ApplePushNotificationVoipSchema(Schema):
+    class Meta:
+        unknown = INCLUDE
+
     type = fields.String(default='incoming-call', required=True, validate=validate.Equal('incoming-call'))
     data = fields.Nested(ApplePushNotificationVoipDataSchema, required=True)
 
