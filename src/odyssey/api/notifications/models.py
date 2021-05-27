@@ -211,6 +211,15 @@ class NotificationsPushRegistration(db.Model):
     :type: str, max length 1024
     """
 
+    device_voip_token = db.Column(db.String(1024))
+    """
+    Device token (registration ID on Android) provided by the OS to enable
+    VoIP push notifications to initiate video calls. This is used by Apple
+    devices only, ignored on Android.
+
+    :type: str, max length 1024
+    """
+
     device_id = db.Column(db.String(1024))
     """
     Unique identifier that identifies a device and persists across installations
@@ -231,6 +240,15 @@ class NotificationsPushRegistration(db.Model):
     """
     The AWS Resource Name (ARN) of the notification channel (AWS SNS
     platform application).
+
+    :type: str, max length 256
+    """
+
+    voip_arn = db.Column(db.String(256))
+    """
+    The AWS Resource Name (ARN) of the notification channel (AWS SNS
+    platform application) specifically for VoIP notifications. This is
+    used by Apple devices only, ignored on Android.
 
     :type: str, max length 256
     """
