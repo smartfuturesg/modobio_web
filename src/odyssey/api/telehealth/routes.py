@@ -302,7 +302,7 @@ class TelehealthClientTimeSelectApi(Resource):
                             'booking_window_id_start_time': time.idx,
                             'booking_window_id_end_time': time.idx+idx_delta,
                             'target_date': target_date})             
-            if len(times) > 10:
+            if len(times) >= 10:
                 keep_going = False
             # increment iterations if there are less than 10 times available
             days_from_target+=1
