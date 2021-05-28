@@ -1,7 +1,7 @@
 """Add VoIP columns to push notification registration table.
 
 Revision ID: df485c66a11a
-Revises: dfb42380a67f
+Revises: f363b1803f0f
 Create Date: 2021-05-28 15:21:01.831981
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'df485c66a11a'
-down_revision = 'dfb42380a67f'
+down_revision = 'f363b1803f0f'
 branch_labels = None
 depends_on = None
 
