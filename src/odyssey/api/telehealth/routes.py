@@ -158,13 +158,12 @@ class TelehealthClientTimeSelectApi(Resource):
         duration = client_in_queue.duration
         # convert client's target date to day_of_week
         
-        keep_going = True
         days_from_target = 0
         no_staff_available_count = 0
         times = []
 
         # 0 is Monday, 6 is Sunday
-        while keep_going:
+        while len(times)<=10:
             target_date = client_in_queue.target_date.date() + timedelta(days=days_from_target)
             weekday_id = target_date.weekday() 
             weekday_str = DAY_OF_WEEK[weekday_id]
@@ -302,9 +301,8 @@ class TelehealthClientTimeSelectApi(Resource):
                             'booking_window_id_start_time': time.idx,
                             'booking_window_id_end_time': time.idx+idx_delta,
                             'target_date': target_date})             
-            if len(times) >= 10:
-                keep_going = False
-            # increment iterations if there are less than 10 times available
+
+            # increment days_from_target if there are less than 10 times available
             days_from_target+=1
             
         times.sort(key=lambda t: t['start_time'])    
