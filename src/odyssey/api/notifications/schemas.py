@@ -42,9 +42,9 @@ class PushRegistrationPostSchema(Schema):
     device_voip_token = fields.String(required=False)
     device_id = fields.String(required=True)
     device_description = fields.String(required=True)
-    # I want to use PushNotifications.platforms.keys() here, but cannot import
-    # PushNotifications from odyssey.utils.message because of circular dependency.
-    device_os = fields.String(required=True, validate=validate.OneOf(['apple', 'android', 'debug']))
+    # I want to use PushNotificationPlatform here, but cannot import
+    # from odyssey.utils.message because of circular dependency.
+    device_platform = fields.String(required=True, validate=validate.OneOf(['apple', 'android', 'debug']))
 
 
 class PushRegistrationDeleteSchema(Schema):

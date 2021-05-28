@@ -97,7 +97,7 @@ class PushRegistrationEndpoint(Resource):
         device_description : str
             A description of the device, perhaps device name + OS name and version.
 
-        device_os : str, one of: apple, android, debug.
+        device_platform : str, one of: apple, android, debug.
             Main OS of the device. Only apple and android are supported at the moment.
             If set to debug, this endpoint will insert an entry into the database, but
             not create and actual AWS SNS notification endpoint. Instead, messages will
@@ -106,7 +106,7 @@ class PushRegistrationEndpoint(Resource):
         device_token = request.json['device_token']
         device_id = request.json['device_id']
         device_description = request.json['device_description']
-        device_os = request.json['device_os']
+        device_platform = request.json['device_platform']
         device_voip_token = request.json.get('device_voip_token')
         device_info = {
             'user_id': user_id,
@@ -129,13 +129,13 @@ class PushRegistrationEndpoint(Resource):
             # Re-registering will fix that.
             device.arn = pn.register_device(
                 device_token,
-                device_os,
+                device_platform,
                 device_info=device_info,
                 current_endpoint=device.arn)
             if device_voip_token:
                 device.voip_arn = pn.register_device(
                     device_voip_token,
-                    device_os,
+                    device_platform,
                     device_info=device_info,
                     current_endpoint=device.voip_arn,
                     voip=True)
@@ -146,12 +146,12 @@ class PushRegistrationEndpoint(Resource):
             device = NotificationsPushRegistration(user_id=user_id)
             device.arn = pn.register_device(
                 device_token,
-                device_os,
+                device_platform,
                 device_info=device_info)
             if device_voip_token:
                 device.voip_arn = pn.register_device(
                     device_voip_token,
-                    device_os,
+                    device_platform,
                     device_info=device_info,
                     voip=True)
             device.device_token = device_token
