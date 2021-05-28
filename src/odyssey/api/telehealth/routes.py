@@ -159,13 +159,13 @@ class TelehealthClientTimeSelectApi(Resource):
         # convert client's target date to day_of_week
         
         keep_going = True
-        iterations = 0
+        days_from_target = 0
         no_staff_available_count = 0
         times = []
 
         # 0 is Monday, 6 is Sunday
         while keep_going:
-            target_date = client_in_queue.target_date.date() + timedelta(days=iterations)
+            target_date = client_in_queue.target_date.date() + timedelta(days=days_from_target)
             weekday_id = target_date.weekday() 
             weekday_str = DAY_OF_WEEK[weekday_id]
 
@@ -188,7 +188,7 @@ class TelehealthClientTimeSelectApi(Resource):
 
             if not staff_availability:
                 no_staff_available_count+=1
-                iterations+=1
+                days_from_target+=1
                 if no_staff_available_count >= 7:
                     raise InputError(status_code=405,message='No staff available for the upcoming week.')
                 else:
@@ -221,7 +221,6 @@ class TelehealthClientTimeSelectApi(Resource):
                     staff_user_id_arr.append(staff_user_id)
                 # NOTE booking_window_id is the actual booking_window_id (starting at 1 NOT 0)
                 available[staff_user_id].append(availability.booking_window_id)
-
             # Now, grab all of the bookings for that client and all staff on the given target date
             # This is necessary to subtract from the staff_availability above.
             # If a client or staff cancels, then that time slot is now available
@@ -254,6 +253,7 @@ class TelehealthClientTimeSelectApi(Resource):
                 if staff_id not in removedNum:
                     removedNum[staff_id] = []
                 available[staff_id] = list(set(available[staff_id]) - set(clientBookingID))
+                available[staff_id].sort()
                 removedNum[staff_id]+=clientBookingID            
                 # for num in clientBookingID:
                 #     if num in available[staff_id]:
@@ -305,7 +305,8 @@ class TelehealthClientTimeSelectApi(Resource):
             if len(times) > 10:
                 keep_going = False
             # increment iterations if there are less than 10 times available
-            iterations+=1
+            days_from_target+=1
+            
         times.sort(key=lambda t: t['start_time'])    
         times.sort(key=lambda t: t['target_date'])
 
