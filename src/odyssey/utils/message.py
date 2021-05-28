@@ -487,9 +487,9 @@ class PushNotification:
 
     To send push notifications, first register a device with :meth:`register_device`. Once
     one or more devices are registered, a push notification can be send. Select which type
-    of notification to send. Then use one of the corresponding templates in this class as
-    a starting point for the content of the notification. Finally, use :meth:`send` to send
-    a notification to all devices registered to the user.
+    of notification to send (see :class:`PushNotificationType`). Then use one of the
+    templates in this class as a starting point for the content of the notification. Finally,
+    use :meth:`send` to send a notification to all devices registered to the user.
 
     To create the contents of a notification, start with one of the templates below and set
     any keys you want to use. Any key set to ``None`` (the default), will be removed from
@@ -501,6 +501,22 @@ class PushNotification:
 
     For more information on Apple specific keys, see
     https://developer.apple.com/library/archive/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/PayloadKeyReference.html#//apple_ref/doc/uid/TP40008194-CH17-SW1
+
+    .. glossary::
+
+        ARN
+            String representation of resources on AWS
+
+        Platform Application
+            A channel as registered with a push notification provider, e.g. Apple APNS, or Android FCM.
+
+        Endpoint
+            Endpoint for a single device within a channel. Messages send to an endpoint will be send to just that device.
+
+        Topic
+            A collection of endpoints. Each device/endpoint has to subscribe to the topic. Topics can be used for general messages to all users, e.g. tip of the day, network outages, general updates.
+
+    For more info on AWS SNS, see https://docs.aws.amazon.com/sns/latest/dg/mobile-push-send.html
 
     Attributes
     ----------
@@ -551,12 +567,13 @@ class PushNotification:
             - staff_first_name (str): first name of the staff member.
             - staff_middle_name (str): middle name of the staff member.
             - staff_last_name (str): last name of the staff member.
-    """
 
-    platforms = {
-        'apple': 'APNS',
-        'android': 'FCM',
-        'debug': 'DEBUG/LOG'}
+    sns : boto3.Resource
+        The active connection with AWS SNS through :mod:`boto3`.
+
+    channel_platapp : dict
+        Maps channel names to platform applications for all platform applications on SNS.
+    """
 
     apple_alert_tmpl = {
         'aps': {
@@ -601,12 +618,12 @@ class PushNotification:
         self.sns = boto3.resource('sns', region_name=region)
 
         apps = list(self.sns.platform_applications.all())
-        self.channel_platapp = {app.arn.split('/')[1]: app for app in apps}
+        self.channel_platapp = {EndpointARN(app.arn).channel: app for app in apps}
 
     def register_device(
         self,
         device_token: str,
-        device_os: str,
+        device_platform: PushNotificationPlatform,
         device_info: dict={},
         current_endpoint: str=None,
         voip: bool=False
@@ -619,7 +636,7 @@ class PushNotification:
             The device token (called registration ID on Android) obtained from the OS to allow
             push notifications.
 
-        device_os : str
+        device_platform : str or PushNotificationPlatform
             Which platform to register with. Currently supported: "apple", "android", or "debug".
 
         device_info : dict
@@ -643,35 +660,13 @@ class PushNotification:
         ValueError
             On incorrect platform or device_description too long.
         """
-        # Glossary for AWS SNS
-        #
-        # https://docs.aws.amazon.com/sns/latest/dg/mobile-push-send.html
-        #
-        # * ARN
-        #       String representation of resources on AWS
-        #
-        # * Platform Application
-        #       A channel as registered with a push notification provider,
-        #       e.g. Apple APNS, or Android FCM.
-        #
-        # * Endpoint
-        #       Endpoint for a single device within a channel. Messages send to
-        #       an endpoint will be send to just that device.
-        #
-        # * Topic
-        #       A collection of endpoints. Each device/endpoint has to subscribe
-        #       to the topic. Topics can be used for general messages to all
-        #       users, e.g. tip of the day, network outages, general updates.
 
-        if device_os not in self.platforms:
-            raise ValueError('Device OS must be one of: {}'.format(', '.join(self.platforms.keys())))
-
-        if len(device_description) > 2048:
-            raise ValueError('Device description must be less than 2048 characters long.')
+        if isinstance(device_platform, str):
+            device_platform = PushNotificationPlatform[device_platform]
 
         # Not a real endpoint
-        if device_os == 'debug':
-            return self.platforms[device_os]
+        if device_platform == PushNotificationPlatform.debug:
+            return device_platform.value
 
         if current_endpoint:
             # Check if current endpoint is still good, delete if not.
@@ -689,22 +684,21 @@ class PushNotification:
                     # Current endpoint still good
                     return current_endpoint
 
-        channel = self.platforms[device_os]
+        device_description = dumps(device_info)
+        if len(device_description) > 2048:
+            raise ValueError('Device info as JSON must be less than 2048 characters long.')
 
-        if device_os == 'apple':
+        channel = device_platform.value
+
+        if device_platform == PushNotificationPlatform.apple:
             # Apple has a separate channel for VoIP notifications.
-            voip_channel = 'APNS_VOIP'
+            if voip:
+                channel += '_VOIP'
 
             # Apple also has separate channels for development.
             # TODO: fix this after ticket NRV-1838 is done.
             if current_app.env == 'development':
                 channel += '_SANDBOX'
-                voip_channel += '_SANDBOX'
-
-            voip_app = self.channel_platapp[voip_channel]
-            voip_endpoint = voip_app.create_platform_endpoint(
-                    Token=device_token,
-                    CustomUserData=device_description)
 
         app = self.channel_platapp[channel]
         endpoint = app.create_platform_endpoint(
@@ -721,25 +715,7 @@ class PushNotification:
         arn : str
             ARN of the device endpoint to be deleted.
         """
-        channel = arn.split('/')[1]
-        if channel.startswith('APNS'):
-            # Apple has a separate channel for VoIP notifications.
-            voip_channel = 'APNS_VOIP'
-
-            # Apple also has separate channels for development.
-            if channel.endswith('_SANDBOX'):
-                voip_channel += '_SANDBOX'
-
-            # There must be a better way to get an endpoint
-            # given an platform application and a channel name.
-            voip_app = self.channel_platapp[voip_channel]
-            uuid = arn.split('/')[-1]
-            voip_arn = f'{voip_app.arn}/{uuid}'.replace('app', 'endpoint')
-
-            endpoint = self.sns.PlatformEndpoint(arn=voip_arn)
-            endpoint.delete()
-
-        # Won't fail if endpoints don't exist.
+        # Won't fail if endpoint doesn't exist.
         endpoint = self.sns.PlatformEndpoint(arn=arn)
         endpoint.delete()
 
@@ -786,19 +762,19 @@ class PushNotification:
                          'Connect with POST /notifications/push/register/{user_id}/ first.')
 
         for device in registered:
-            channel = device.arn.split('/')[1]
-            if channel.startswith('APNS'):
-                message = self._send_apple(device.arn, notification_type, content)
-            elif channel == 'FCM':
-                message = self._send_android(device.arn, notification_type, content)
-            elif channel == 'LOG':
+            arn = EndpointARN(device.arn)
+            if arn.channel.startswith('APNS'):
+                message = self._send_apple(device, notification_type, content)
+            elif arn.channel == 'FCM':
+                message = self._send_android(device, notification_type, content)
+            elif arn.channel == 'LOG':
                 message = self._send_log(notification_type, content)
             else:
-                raise UnknownError(f'Unknown push notification channel {channel} for user {user_id}')
+                raise UnknownError(f'Unknown push notification channel {endp.channel} for user {user_id}')
 
         return message
 
-    def _send_apple(self, arn: str, notification_type: PushNotificationType, content: dict) -> dict:
+    def _send_apple(self, device, notification_type: PushNotificationType, content: dict) -> dict:
         """ Send a push notification to an Apple device.
 
         Do not call this function directly, use :meth:`send` instead.
@@ -818,20 +794,14 @@ class PushNotification:
         except ValidationError as err:
             raise UnknownError(message='\n'.join(err.messages))
 
-        channel = arn.split('/')[1]
-        uuid = arn.split('/')[-1]
-
+        # Where to send it to?
         if notification_type == PushNotificationType.voip:
-            if channel == 'APNS':
-                channel = 'APNS_VOIP'
-            elif channel == 'APNS_SANDBOX':
-                channel = 'APNS_VOIP_SANDBOX'
+            endp = EndpointARN(device.voip_arn)
+        else:
+            endp = EndpointARN(device.arn)
 
-        app = self.channel_platapp[channel]
-        correct_arn = f'{app.arn}/{uuid}'.replace('app', 'endpoint')
-
-        message = {channel: processed}
-
+        # Message needs a special attribute to tell SNS what type it is.
+        # SNS can tell by some heuristic, but doesn't always get it right.
         push_type = notification_type.name
         if notification_type == PushNotificationType.badge:
             push_type = PushNotificationType.alert.name
@@ -842,21 +812,25 @@ class PushNotification:
                 'StringValue': push_type
             }
         }
-        endpoint = self.sns.PlatformEndpoint(arn=correct_arn)
+
+        message = {channel: processed}
+
+        endpoint = self.sns.PlatformEndpoint(arn=endp.arn)
+
         # Yes, the message got dumped twice in one day. Ouch!
         response = endpoint.publish(
-            TargetArn=correct_arn,
+            TargetArn=endp.arn,
             Message=dumps(message),
             MessageAttributes=message_attr)
 
         return message
 
-    def _send_android(self, arn: str, notification_type: PushNotificationType, content: dict) -> dict:
+    def _send_android(self, device, notification_type: PushNotificationType, content: dict) -> dict:
         """ Send a push notification to an Android device.
 
         Do not call this function directly, use :meth:`send` instead.
         """
-        pass
+        return content
 
     def _send_log(self, notification_type: PushNotificationType, content: dict) -> dict:
         """ Send a push notification to a debug log.
