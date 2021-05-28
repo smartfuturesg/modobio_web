@@ -467,7 +467,15 @@ class EndpointARN:
         return self.arn
 
 
+class PushNotificationPlatform(enum.Enum):
+    """ Enumerates push notification platforms and maps them to channels. """
+    apple = 'APNS'
+    android = 'FCM'
+    debug = 'DEBUG/LOG'
+
+
 class PushNotificationType(enum.Enum):
+    """ Enumerates the type of push notification that can be send. """
     alert = 'A standard notification with a title and a body.'
     background = 'Trigger the app to reload data in the background.'
     badge = 'ONLY set the app badge to the specified number, no alert.'
@@ -496,10 +504,6 @@ class PushNotification:
 
     Attributes
     ----------
-    platforms : dict
-        These major platforms are supported by our notification system. Also includes a debug
-        "platform". This dict maps platforms to channel names.
-
     apple_alert_tmpl : dict
         This template can be used to send alert messages to Apple devices.
 
