@@ -163,7 +163,7 @@ class TelehealthClientTimeSelectApi(Resource):
         times = []
 
         # 0 is Monday, 6 is Sunday
-        while len(times)<=10:
+        while len(times)<10:
             target_date = client_in_queue.target_date.date() + timedelta(days=days_from_target)
             weekday_id = target_date.weekday() 
             weekday_str = DAY_OF_WEEK[weekday_id]

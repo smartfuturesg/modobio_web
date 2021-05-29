@@ -36,7 +36,7 @@ def test_post_1_staff_general_availability(test_client, init_database,client_aut
     # valid times returned. If there are less than 10 appointment times, then we increment onward a day
     # and keep going until the 10 times is valid
     response = test_client.get('/telehealth/client/time-select/1/', headers=client_auth_header)
-    
+
     assert response.json['appointment_times'][0]['target_date'] == '2022-04-04'
     assert response.json['appointment_times'][1]['target_date'] == '2022-04-04'
     assert response.json['appointment_times'][2]['target_date'] == '2022-04-04'
