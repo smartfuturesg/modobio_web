@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>odyssey.api.client.models &mdash; Odyssey version: 0.5.45 documentation</title>
+  <title>odyssey.api.client.models &mdash; Odyssey version: 0.7.52 documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                version: 0.5.45
+                version: 0.7.52
               </div>
             
           
@@ -271,28 +271,6 @@ All tables in this module are prefixed with <code class="docutils literal notran
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="odyssey.api.client.models.ClientInfo.street">
-<span class="sig-name descname"><span class="pre">street</span></span><a class="headerlink" href="#odyssey.api.client.models.ClientInfo.street" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client street address.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 50</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="odyssey.api.client.models.ClientInfo.city">
-<span class="sig-name descname"><span class="pre">city</span></span><a class="headerlink" href="#odyssey.api.client.models.ClientInfo.city" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client address city.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 50</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.client.models.ClientInfo.state">
 <span class="sig-name descname"><span class="pre">state</span></span><a class="headerlink" href="#odyssey.api.client.models.ClientInfo.state" title="Permalink to this definition">¶</a></dt>
 <dd><p>Client address state.</p>
@@ -300,17 +278,6 @@ All tables in this module are prefixed with <code class="docutils literal notran
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 2</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="odyssey.api.client.models.ClientInfo.zipcode">
-<span class="sig-name descname"><span class="pre">zipcode</span></span><a class="headerlink" href="#odyssey.api.client.models.ClientInfo.zipcode" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client address zip code.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 10</p>
 </dd>
 </dl>
 </dd></dl>
@@ -427,12 +394,12 @@ All tables in this module are prefixed with <code class="docutils literal notran
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="odyssey.api.client.models.ClientInfo.race_id">
-<span class="sig-name descname"><span class="pre">race_id</span></span><a class="headerlink" href="#odyssey.api.client.models.ClientInfo.race_id" title="Permalink to this definition">¶</a></dt>
-<dd><p>Client race_id as defined in LookupRaces</p>
+<dt class="sig sig-object py" id="odyssey.api.client.models.ClientInfo.waist_size">
+<span class="sig-name descname"><span class="pre">waist_size</span></span><a class="headerlink" href="#odyssey.api.client.models.ClientInfo.waist_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Most recently reported waist size in cm.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, foreign key(LookupRaces.race_id)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -466,6 +433,28 @@ All tables in this module are prefixed with <code class="docutils literal notran
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, foreign key(‘LookupGoal.goal_id’)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.client.models.ClientInfo.primary_macro_goal_id">
+<span class="sig-name descname"><span class="pre">primary_macro_goal_id</span></span><a class="headerlink" href="#odyssey.api.client.models.ClientInfo.primary_macro_goal_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>The client’s primary goal for using modobio. Must be an option in the LookupMacroGoals table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, foreign key(‘LookupMacroGoals.goal_id’)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.client.models.ClientInfo.primary_goal_description">
+<span class="sig-name descname"><span class="pre">primary_goal_description</span></span><a class="headerlink" href="#odyssey.api.client.models.ClientInfo.primary_goal_description" title="Permalink to this definition">¶</a></dt>
+<dd><p>The client’s description of primary goal for using modobio. Optional</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 300</p>
 </dd>
 </dl>
 </dd></dl>
@@ -545,6 +534,79 @@ and <code class="docutils literal notranslate"><span class="pre">_meta</span></c
 <dt class="sig sig-object py" id="odyssey.api.client.models.update_dob">
 <span class="sig-prename descclassname"><span class="pre">odyssey.api.client.models.</span></span><span class="sig-name descname"><span class="pre">update_dob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mapper</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client.models.update_dob" title="Permalink to this definition">¶</a></dt>
 <dd><p>Listens fro any updates to ClientInfo table</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.client.models.ClientRaceAndEthnicity">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.client.models.</span></span><span class="sig-name descname"><span class="pre">ClientRaceAndEthnicity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client.models.ClientRaceAndEthnicity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
+<p>Holds information about the race and ethnicity of a client’s parents</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.client.models.ClientRaceAndEthnicity.idx">
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.client.models.ClientRaceAndEthnicity.idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Table index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.client.models.ClientRaceAndEthnicity.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.client.models.ClientRaceAndEthnicity.created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creation timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.client.models.ClientRaceAndEthnicity.updated_at">
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.client.models.ClientRaceAndEthnicity.updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Last update timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.client.models.ClientRaceAndEthnicity.user_id">
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.client.models.ClientRaceAndEthnicity.user_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Foreign key from User table</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int, foreign key to <code class="xref py py-attr docutils literal notranslate"><span class="pre">User.user_id</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.client.models.ClientRaceAndEthnicity.is_client_mother">
+<span class="sig-name descname"><span class="pre">is_client_mother</span></span><a class="headerlink" href="#odyssey.api.client.models.ClientRaceAndEthnicity.is_client_mother" title="Permalink to this definition">¶</a></dt>
+<dd><p>Denotes if this information pertains to the user’s mother or father</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>boolean</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.client.models.ClientRaceAndEthnicity.race_id">
+<span class="sig-name descname"><span class="pre">race_id</span></span><a class="headerlink" href="#odyssey.api.client.models.ClientRaceAndEthnicity.race_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Foreign key from LookupRaces table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, foreign key to :attr:’LookupRaces.race_id &lt;odyssey.models.lookup.LookupRaces.race_id&gt;’</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -1726,6 +1788,19 @@ certain clinical data.</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.client.models.ClientClinicalCareTeam.is_temporary">
+<span class="sig-name descname"><span class="pre">is_temporary</span></span><a class="headerlink" href="#odyssey.api.client.models.ClientClinicalCareTeam.is_temporary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Denotes if this team member has temporary access. This is used to give professionals access for
+a limited time prior to a scheduled telehealth appointment. Temporary team members will not count
+towards a client’s maximum allowed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -1940,7 +2015,7 @@ either automatically based on their goals or manually by staff members.</p>
 <dt class="sig sig-object py" id="odyssey.api.client.models.ClientHeightHistory">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.client.models.</span></span><span class="sig-name descname"><span class="pre">ClientHeightHistory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client.models.ClientHeightHistory" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
-<p>Stores historical height readings of client.</p>
+<p>Stores historical height measurements of clients.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.client.models.ClientHeightHistory.idx">
 <span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.client.models.ClientHeightHistory.idx" title="Permalink to this definition">¶</a></dt>
@@ -1977,7 +2052,7 @@ either automatically based on their goals or manually by staff members.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.client.models.ClientHeightHistory.user_id">
 <span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.client.models.ClientHeightHistory.user_id" title="Permalink to this definition">¶</a></dt>
-<dd><p>Id of the user for this height reading.</p>
+<dd><p>Id of the user for this height measurement.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, foreign key(‘User.user_id’)</p>
@@ -1988,7 +2063,7 @@ either automatically based on their goals or manually by staff members.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.client.models.ClientHeightHistory.height">
 <span class="sig-name descname"><span class="pre">height</span></span><a class="headerlink" href="#odyssey.api.client.models.ClientHeightHistory.height" title="Permalink to this definition">¶</a></dt>
-<dd><p>Value for this height reading in cm.</p>
+<dd><p>Value for this height measurement in cm.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
@@ -2002,7 +2077,7 @@ either automatically based on their goals or manually by staff members.</p>
 <dt class="sig sig-object py" id="odyssey.api.client.models.ClientWeightHistory">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.client.models.</span></span><span class="sig-name descname"><span class="pre">ClientWeightHistory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client.models.ClientWeightHistory" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
-<p>Stores historical weight readings of client.</p>
+<p>Stores historical weight measurements of clients.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.client.models.ClientWeightHistory.idx">
 <span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.client.models.ClientWeightHistory.idx" title="Permalink to this definition">¶</a></dt>
@@ -2039,7 +2114,7 @@ either automatically based on their goals or manually by staff members.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.client.models.ClientWeightHistory.user_id">
 <span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.client.models.ClientWeightHistory.user_id" title="Permalink to this definition">¶</a></dt>
-<dd><p>Id of the user for this height reading.</p>
+<dd><p>Id of the user for this weight measurement.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, foreign key(‘User.user_id’)</p>
@@ -2050,7 +2125,69 @@ either automatically based on their goals or manually by staff members.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.client.models.ClientWeightHistory.weight">
 <span class="sig-name descname"><span class="pre">weight</span></span><a class="headerlink" href="#odyssey.api.client.models.ClientWeightHistory.weight" title="Permalink to this definition">¶</a></dt>
-<dd><p>Value for this weight reading in g.</p>
+<dd><p>Value for this weight measurement in g.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.client.models.ClientWaistSizeHistory">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.client.models.</span></span><span class="sig-name descname"><span class="pre">ClientWaistSizeHistory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client.models.ClientWaistSizeHistory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
+<p>Stores historical waist size measurements of clients.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.client.models.ClientWaistSizeHistory.idx">
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.client.models.ClientWaistSizeHistory.idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Table index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.client.models.ClientWaistSizeHistory.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.client.models.ClientWaistSizeHistory.created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creation timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.client.models.ClientWaistSizeHistory.updated_at">
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.client.models.ClientWaistSizeHistory.updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Last update timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.client.models.ClientWaistSizeHistory.user_id">
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.client.models.ClientWaistSizeHistory.user_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Id of the user for this waist size measurement.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, foreign key(‘User.user_id’)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.client.models.ClientWaistSizeHistory.waist_size">
+<span class="sig-name descname"><span class="pre">waist_size</span></span><a class="headerlink" href="#odyssey.api.client.models.ClientWaistSizeHistory.waist_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Value for this waist size measurement in cm.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
@@ -2247,6 +2384,70 @@ be signed up as a user in order to recieve care team data from modobio.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.client.models.ClientPushNotifications">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.client.models.</span></span><span class="sig-name descname"><span class="pre">ClientPushNotifications</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client.models.ClientPushNotifications" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
+<p>This table holds the categories of push notifications that a user has enabled.
+If a notification type appears in this table for a user id, it means that user has this
+type of notification enabled.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.client.models.ClientPushNotifications.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.client.models.ClientPushNotifications.created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>timestamp for when object was created. DB server time is used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>datetime</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.client.models.ClientPushNotifications.updated_at">
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.client.models.ClientPushNotifications.updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>timestamp for when object was updated. DB server time is used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>datetime</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.client.models.ClientPushNotifications.idx">
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.client.models.ClientPushNotifications.idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Auto incrementing primary key</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.client.models.ClientPushNotifications.user_id">
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.client.models.ClientPushNotifications.user_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Id of the user that this notification belongs to</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, foreign key(‘User.user_id’)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.client.models.ClientPushNotifications.notification_type_id">
+<span class="sig-name descname"><span class="pre">notification_type_id</span></span><a class="headerlink" href="#odyssey.api.client.models.ClientPushNotifications.notification_type_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Denotes what type of notification this is as defined in the LookupNotifications table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, foreign key(‘LookupNotifications.notification_id’)</p>
 </dd>
 </dl>
 </dd></dl>

@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>odyssey.utils.constants &mdash; Odyssey version: 0.5.45 documentation</title>
+  <title>odyssey.utils.constants &mdash; Odyssey version: 0.7.52 documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                version: 0.5.45
+                version: 0.7.52
               </div>
             
           
@@ -332,7 +332,7 @@ fit under.</p>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="odyssey.utils.constants.ACCESS_ROLES">
-<span class="sig-prename descclassname"><span class="pre">odyssey.utils.constants.</span></span><span class="sig-name descname"><span class="pre">ACCESS_ROLES</span></span><em class="property"> <span class="pre">=</span> <span class="pre">('staff_admin',</span> <span class="pre">'system_admin',</span> <span class="pre">'client_services',</span> <span class="pre">'physical_therapist',</span> <span class="pre">'trainer',</span> <span class="pre">'data_science',</span> <span class="pre">'doctor',</span> <span class="pre">'nutrition')</span></em><a class="headerlink" href="#odyssey.utils.constants.ACCESS_ROLES" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">odyssey.utils.constants.</span></span><span class="sig-name descname"><span class="pre">ACCESS_ROLES</span></span><em class="property"> <span class="pre">=</span> <span class="pre">('staff_admin',</span> <span class="pre">'data_scientist',</span> <span class="pre">'community_manager',</span> <span class="pre">'physical_therapist',</span> <span class="pre">'dietitian',</span> <span class="pre">'nutritionist',</span> <span class="pre">'therapist',</span> <span class="pre">'nurse_practitioner',</span> <span class="pre">'nurse',</span> <span class="pre">'physician_assistant',</span> <span class="pre">'system_admin',</span> <span class="pre">'client_services',</span> <span class="pre">'medical_doctor',</span> <span class="pre">'trainer')</span></em><a class="headerlink" href="#odyssey.utils.constants.ACCESS_ROLES" title="Permalink to this definition">¶</a></dt>
 <dd><p>Staff members are assigned roles, see <code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.models.staff.StaffRoles</span></code>.
 This constant lists all possible staff roles.</p>
 <dl class="field-list simple">
@@ -377,6 +377,29 @@ further nesting.</p>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="odyssey.utils.constants.EMAIL_TOKEN_LIFETIME">
+<span class="sig-prename descclassname"><span class="pre">odyssey.utils.constants.</span></span><span class="sig-name descname"><span class="pre">EMAIL_TOKEN_LIFETIME</span></span><em class="property"> <span class="pre">=</span> <span class="pre">24</span></em><a class="headerlink" href="#odyssey.utils.constants.EMAIL_TOKEN_LIFETIME" title="Permalink to this definition">¶</a></dt>
+<dd><p>Email verifications token lifetime in hours.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="odyssey.utils.constants.EVENT_AVAILABILITY">
+<span class="sig-prename descclassname"><span class="pre">odyssey.utils.constants.</span></span><span class="sig-name descname"><span class="pre">EVENT_AVAILABILITY</span></span><em class="property"> <span class="pre">=</span> <span class="pre">('Busy',</span> <span class="pre">'Available')</span></em><a class="headerlink" href="#odyssey.utils.constants.EVENT_AVAILABILITY" title="Permalink to this definition">¶</a></dt>
+<dd><p>Availability labels for an event added to professional’s calendar</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="odyssey.utils.constants.RECURRENCE_TYPE">
+<span class="sig-prename descclassname"><span class="pre">odyssey.utils.constants.</span></span><span class="sig-name descname"><span class="pre">RECURRENCE_TYPE</span></span><em class="property"> <span class="pre">=</span> <span class="pre">('Daily',</span> <span class="pre">'Weekly',</span> <span class="pre">'Monthly',</span> <span class="pre">'Yearly')</span></em><a class="headerlink" href="#odyssey.utils.constants.RECURRENCE_TYPE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Types of recurrence that may be chosen for a recurring event</p>
 </dd></dl>
 
 </section>

@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>odyssey.api.notifications.routes &mdash; Odyssey version: 0.5.45 documentation</title>
+  <title>odyssey.api.notifications.routes &mdash; Odyssey version: 0.7.52 documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                version: 0.5.45
+                version: 0.7.52
               </div>
             
           
@@ -268,9 +268,10 @@
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>device_token</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The device token (called registration ID on Android) obtained from the OS to allow
 push notifications.</p></li>
+<li><p><strong>device_voip_token</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em> (</em><em>optional</em><em>)</em>) – The device token for VoIP notifications. This is used on Apple devices only.</p></li>
 <li><p><strong>device_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – A unique number that identifies the device independent of app and OS updates.</p></li>
 <li><p><strong>device_description</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – A description of the device, perhaps device name + OS name and version.</p></li>
-<li><p><strong>device_os</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><em>one of: apple</em><em>, </em><em>android</em><em>, </em><em>debug.</em>) – Main OS of the device. Only apple and android are supported at the moment.
+<li><p><strong>device_platform</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><em>one of: apple</em><em>, </em><em>android</em><em>, </em><em>debug.</em>) – Main OS of the device. Only apple and android are supported at the moment.
 If set to debug, this endpoint will insert an entry into the database, but
 not create and actual AWS SNS notification endpoint. Instead, messages will
 be sent to a debug log.</p></li>
@@ -285,6 +286,9 @@ be sent to a debug log.</p></li>
 <dd><p>Delete device token.</p>
 <p>Unregisters device token, not entire device, from the AWS SNS service
 for all topics. Then deletes device token entries from database.</p>
+<p>In case of an Apple device, it will unregister both the regular and
+the VoIP tokens. You can pass in either one and both will be
+unregistered at the same time.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>device_token</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Device token to unregister and delete.</p>

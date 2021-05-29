@@ -383,9 +383,9 @@ class EndpointARN:
     def __init__(self, arn: str=''):
         """ Instantiate an EndpointARN from an ARN string.
 
-        Parameters
-        ----------
-        arn : str (optional)
+        Keyword Arguments
+        -----------------
+        arn : str
             The ARN string to parse.
         """
         self._channel = ''
@@ -502,6 +502,12 @@ class PushNotification:
     For more information on Apple specific keys, see
     https://developer.apple.com/library/archive/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/PayloadKeyReference.html#//apple_ref/doc/uid/TP40008194-CH17-SW1
 
+    Glossary
+    --------
+
+    A short overview of terms used in setting up and sending push notifications using the
+    AWS SNS platform. For more info on AWS SNS, see https://docs.aws.amazon.com/sns/latest/dg/mobile-push-send.html
+
     .. glossary::
 
         ARN
@@ -516,57 +522,64 @@ class PushNotification:
         Topic
             A collection of endpoints. Each device/endpoint has to subscribe to the topic. Topics can be used for general messages to all users, e.g. tip of the day, network outages, general updates.
 
-    For more info on AWS SNS, see https://docs.aws.amazon.com/sns/latest/dg/mobile-push-send.html
-
     Attributes
     ----------
     apple_alert_tmpl : dict
         This template can be used to send alert messages to Apple devices.
 
-        - aps (dict): root key of Apple specific payload keys.
-            - alert (dict): keys for a standard user alert message.
-                - title (str): [required] title of the message.
-                - body (str): [required] the actual message.
-                - title-loc-key (str): a key that looks up the translation (localization) of the title in Localizable.strings.
-                - title-loc-args (list(str)): a list of strings that replace formatting specifiers in the translated title.
-                - action-loc-key (str): a key that looks up the translation or alternate text of the "View" button.
-                - loc-key (str): a key that looks up the translation (localization) of the body in Localizable.strings.
-                - loc-args (list(str)): a list of strings that replace formatting specifiers in the translated body.
-                - launch-image (str): filename of image to show while app is loading from background.
-            - badge (int): set app badge to this number; 0 removes badge.
-            - sound (str): filename of custom sound to play when push notification arrives.
-            - thread-id (str): [not used] app-specific identifier for grouping notifications.
-            - category (str): [not used] custom actions directly from notification center.
-        - custom key (any): add any custom keys to the root of this template.
+        * **aps** (dict): root key of Apple specific payload keys.
+
+            * **alert** (dict): keys for a standard user alert message.
+
+                * **title** (str): **[required]** title of the message.
+                * **body** (str): **[required]** the actual message.
+                * **title-loc-key** (str): a key that looks up the translation (localization) of the title in Localizable.strings.
+                * **title-loc-args** (list(str)): a list of strings that replace formatting specifiers in the translated title.
+                * **action-loc-key** (str): a key that looks up the translation or alternate text of the "View" button.
+                * **loc-key** (str): a key that looks up the translation (localization) of the body in Localizable.strings.
+                * **loc-args** (list(str)): a list of strings that replace formatting specifiers in the translated body.
+                * **launch-image** (str): filename of image to show while app is loading from background.
+
+            * **badge** (int): set app badge to this number; 0 removes badge.
+            * **sound** (str): filename of custom sound to play when push notification arrives.
+            * **thread-id** (str): [*not used*] app-specific identifier for grouping notifications.
+            * **category** (str): [*not used*] custom actions directly from notification center.
+
+        * **custom_key** (any): add any custom keys to the root of this template.
 
     apple_background_tmpl : dict
         This template can be used to trigger a background update in the app. The notification
         may contain custom keys, but nothing else besides "content-available" in the "aps" dict.
 
-        - aps (dict): root key of Apple specific payload keys.
-            - content-available (int): [required] must be set to 1.
-        - custom key (any): add any custom keys to the root of this template.
+        * **aps** (dict): root key of Apple specific payload keys.
+
+            * **content-available** (int): **[required]** must be set to 1.
+
+        * **custom_key** (any): add any custom keys to the root of this template.
 
     apple_badge_tmpl : dict
         This template can be used to set the app badge to a specific number.
 
-        - aps (dict): root key of Apple specific payload keys.
-            - badge (int): [required] set app badge to this number; 0 removes badge.
-            - sound (str): filename of custom sound to play when push notification arrives.
-        - custom key (any): add any custom keys to the root of this template.
+        * **aps** (dict): root key of Apple specific payload keys.
+
+            * **badge** (int): **[required]** set app badge to this number; 0 removes badge.
+            * **sound** (str): filename of custom sound to play when push notification arrives.
+
+        * **custom_key** (any): add any custom keys to the root of this template.
 
     apple_voip_tmpl : dict
         This template can be used to initiate a VoIP call. The contents of this template
         are not dictated by Apple, it does not use the ``aps`` root key.
 
-        - type (str): do **not** change this, it must be the literal string "incoming-call".
-        - data (dict): VoIP specific information.
-            - booking_id (int): ID of the Twilio video call room.
-            - booking_description (str): reason for the call.
-            - staff_id (int): staff member who is initiating the call.
-            - staff_first_name (str): first name of the staff member.
-            - staff_middle_name (str): middle name of the staff member.
-            - staff_last_name (str): last name of the staff member.
+        * **type** (str): do **not** change this, it must be the literal string "incoming-call".
+        * **data** (dict): VoIP specific information.
+
+            * **booking_id** (int): ID of the Twilio video call room.
+            * **booking_description** (str): reason for the call.
+            * **staff_id** (int): staff member who is initiating the call.
+            * **staff_first_name** (str): first name of the staff member.
+            * **staff_middle_name** (str): middle name of the staff member.
+            * **staff_last_name** (str): last name of the staff member.
 
     sns : boto3.Resource
         The active connection with AWS SNS through :mod:`boto3`.
@@ -639,6 +652,8 @@ class PushNotification:
         device_platform : str or PushNotificationPlatform
             Which platform to register with. Currently supported: "apple", "android", or "debug".
 
+        Keyword Arguments
+        -----------------
         device_info : dict
             Additional data stored with the device_token in the AWS SNS endpoint.
             Max length after conversion to JSON: 2048.
@@ -732,8 +747,8 @@ class PushNotification:
             What type of notification (alert, background, badge, voip) to send.
 
         content : dict
-            Content of the push notification. See the ``apple_tmpl`` and ``apple_voip_tmpl``
-            notification templates for a place to start.
+            Content of the push notification. See the templates in this class
+            for a place to start.
 
         Returns
         -------

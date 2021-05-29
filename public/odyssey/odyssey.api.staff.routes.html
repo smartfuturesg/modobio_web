@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>odyssey.api.staff.routes &mdash; Odyssey version: 0.5.45 documentation</title>
+  <title>odyssey.api.staff.routes &mdash; Odyssey version: 0.7.52 documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                version: 0.5.45
+                version: 0.7.52
               </div>
             
           
@@ -357,6 +357,108 @@ entries to the operational territories database.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.staff.routes.StaffToken.methods">
 <span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'DELETE',</span> <span class="pre">'POST'}</span></em><a class="headerlink" href="#odyssey.api.staff.routes.StaffToken.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.StaffProfilePage">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.staff.routes.</span></span><span class="sig-name descname"><span class="pre">StaffProfilePage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.StaffProfilePage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<p>endpoint related staff members’ profile pages</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.StaffProfilePage.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.StaffProfilePage.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>get details for a staff member’s profile page</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.StaffProfilePage.put">
+<span class="sig-name descname"><span class="pre">put</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.StaffProfilePage.put" title="Permalink to this definition">¶</a></dt>
+<dd><p>Edit details for a staff member’s profile page.</p>
+<p>Expects form data</p>
+<p>“firstname”: “string”
+“middlename”: “string”,
+“lastname”: “string”,
+“biological_sex_male”: “boolean”,
+“bio”: “string”,
+“profile_picture”: file (allowed types are ‘.png’, ‘.jpg’, ‘.jpeg’, ‘.bmp’, ‘.gif’, ‘.webp’, ‘.psd’, ‘.pdf’)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.StaffProfilePage.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'staff_staff_profile_page'</span></em><a class="headerlink" href="#odyssey.api.staff.routes.StaffProfilePage.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.StaffProfilePage.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.StaffProfilePage.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.StaffProfilePage.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET',</span> <span class="pre">'PUT'}</span></em><a class="headerlink" href="#odyssey.api.staff.routes.StaffProfilePage.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.StaffCalendarEventsRoute">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.staff.routes.</span></span><span class="sig-name descname"><span class="pre">StaffCalendarEventsRoute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.StaffCalendarEventsRoute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<p>Endpoint to manage professional’s (staff) calendar events</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.StaffCalendarEventsRoute.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.StaffCalendarEventsRoute.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new calendar event</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.StaffCalendarEventsRoute.put">
+<span class="sig-name descname"><span class="pre">put</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.StaffCalendarEventsRoute.put" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update a calendar event</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>revised_event_schema</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – A dict holding nested StaffCalendarEventsSchema.</p></li>
+<li><p><strong>entire_series</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Description missing</p></li>
+<li><p><strong>previous_start_date</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.date" title="(in Python v3.9)"><em>datetime.date</em></a>) – Date of previous start.</p></li>
+<li><p><strong>event_to_update_idx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The index of the event to update.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.StaffCalendarEventsRoute.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.StaffCalendarEventsRoute.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>View all calendar events
+Accepts optional parameters year, month, day to filter by date_start field
+if no year is provided, year defaults to current year.</p>
+<p>Ignores all inputs other than ints for args</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.StaffCalendarEventsRoute.delete">
+<span class="sig-name descname"><span class="pre">delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.StaffCalendarEventsRoute.delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete events</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.StaffCalendarEventsRoute.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'staff_staff_calendar_events_route'</span></em><a class="headerlink" href="#odyssey.api.staff.routes.StaffCalendarEventsRoute.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.StaffCalendarEventsRoute.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.routes.StaffCalendarEventsRoute.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.staff.routes.StaffCalendarEventsRoute.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'DELETE',</span> <span class="pre">'GET',</span> <span class="pre">'POST',</span> <span class="pre">'PUT'}</span></em><a class="headerlink" href="#odyssey.api.staff.routes.StaffCalendarEventsRoute.methods" title="Permalink to this definition">¶</a></dt>
 <dd><p>A list of methods this view can handle.</p>
 </dd></dl>
 

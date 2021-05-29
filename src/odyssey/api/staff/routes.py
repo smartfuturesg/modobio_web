@@ -521,13 +521,19 @@ class StaffCalendarEventsRoute(Resource):
         """
         Update a calendar event
 
-        expects 
-        {
-            "revised_event_schema":{nested StaffCalendarEventsSchema},
-            "entire_series": bool,
-            "previous_start_date": datetime.date,
-            "event_to_update_idx": int
-        }
+        Parameters
+        ----------
+        revised_event_schema : dict
+            A dict holding nested StaffCalendarEventsSchema.
+
+        entire_series : bool
+            Description missing
+
+        previous_start_date : datetime.date
+            Date of previous start.
+
+        event_to_update_idx : int
+            The index of the event to update.
         """
         data = request.parsed_obj
         updated_event = data['revised_event_schema']

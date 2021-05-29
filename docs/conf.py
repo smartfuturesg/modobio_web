@@ -59,6 +59,7 @@ html_style = 'css/custom.css'
 
 napoleon_use_ivar = True
 napoleon_use_rtype = False
+napoleon_custom_sections = ['Glossary']
 
 autodoc_default_options = {
     'no-undoc-members': True,

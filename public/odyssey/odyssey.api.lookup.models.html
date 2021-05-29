@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>odyssey.api.lookup.models &mdash; Odyssey version: 0.5.45 documentation</title>
+  <title>odyssey.api.lookup.models &mdash; Odyssey version: 0.7.52 documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                version: 0.5.45
+                version: 0.7.52
               </div>
             
           
@@ -186,6 +186,46 @@
 <span id="odyssey-api-lookup-models"></span><h1>odyssey.api.lookup.models<a class="headerlink" href="#module-odyssey.api.lookup.models" title="Permalink to this headline">¶</a></h1>
 <p>Database tables for supporting lookup tables. These tables should be static tables only used for reference,
 not to be edited at runtime.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.lookup.models.LookupTermsAndConditions">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.lookup.models.</span></span><span class="sig-name descname"><span class="pre">LookupTermsAndConditions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.models.LookupTermsAndConditions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
+<p>Holds the documententation for the terms and conditions</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.models.LookupTermsAndConditions.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.lookup.models.LookupTermsAndConditions.created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>timestamp for when object was created. DB server time is used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>datetime</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.models.LookupTermsAndConditions.idx">
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.lookup.models.LookupTermsAndConditions.idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Auto incrementing primary key</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.models.LookupTermsAndConditions.terms_and_conditions">
+<span class="sig-name descname"><span class="pre">terms_and_conditions</span></span><a class="headerlink" href="#odyssey.api.lookup.models.LookupTermsAndConditions.terms_and_conditions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Terms and Conditions</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="odyssey.api.lookup.models.LookupBookingTimeIncrements">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.lookup.models.</span></span><span class="sig-name descname"><span class="pre">LookupBookingTimeIncrements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.models.LookupBookingTimeIncrements" title="Permalink to this definition">¶</a></dt>
@@ -1204,6 +1244,57 @@ Beats Per Minute</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.lookup.models.LookupMacroGoals">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.lookup.models.</span></span><span class="sig-name descname"><span class="pre">LookupMacroGoals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.models.LookupMacroGoals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
+<p>Static list of pre-defined primary health goals available to a client</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.models.LookupMacroGoals.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.lookup.models.LookupMacroGoals.created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creation timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.models.LookupMacroGoals.updated_at">
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.lookup.models.LookupMacroGoals.updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Last update timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.models.LookupMacroGoals.goal_id">
+<span class="sig-name descname"><span class="pre">goal_id</span></span><a class="headerlink" href="#odyssey.api.lookup.models.LookupMacroGoals.goal_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Id of goal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>integer, primary key, autoincrementing</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.models.LookupMacroGoals.goal">
+<span class="sig-name descname"><span class="pre">goal</span></span><a class="headerlink" href="#odyssey.api.lookup.models.LookupMacroGoals.goal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of goal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="odyssey.api.lookup.models.LookupRaces">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.lookup.models.</span></span><span class="sig-name descname"><span class="pre">LookupRaces</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.models.LookupRaces" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
@@ -2116,13 +2207,12 @@ of US males and females accross all age categories.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="odyssey.api.lookup.models.LookupProfessionColors">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.lookup.models.</span></span><span class="sig-name descname"><span class="pre">LookupProfessionColors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.models.LookupProfessionColors" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.lookup.models.LookupRoles">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.lookup.models.</span></span><span class="sig-name descname"><span class="pre">LookupRoles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.lookup.models.LookupRoles" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
-<p>Static list of colors and icons associated with professions</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="odyssey.api.lookup.models.LookupProfessionColors.idx">
-<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.lookup.models.LookupProfessionColors.idx" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.lookup.models.LookupRoles.idx">
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.lookup.models.LookupRoles.idx" title="Permalink to this definition">¶</a></dt>
 <dd><p>Index</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -2132,8 +2222,8 @@ of US males and females accross all age categories.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="odyssey.api.lookup.models.LookupProfessionColors.created_at">
-<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.lookup.models.LookupProfessionColors.created_at" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.lookup.models.LookupRoles.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.lookup.models.LookupRoles.created_at" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creation timestamp of this row in the database.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -2143,8 +2233,8 @@ of US males and females accross all age categories.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="odyssey.api.lookup.models.LookupProfessionColors.updated_at">
-<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.lookup.models.LookupProfessionColors.updated_at" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.api.lookup.models.LookupRoles.updated_at">
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.lookup.models.LookupRoles.updated_at" title="Permalink to this definition">¶</a></dt>
 <dd><p>Last update timestamp of this row in the database.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -2154,9 +2244,9 @@ of US males and females accross all age categories.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="odyssey.api.lookup.models.LookupProfessionColors.profession_type">
-<span class="sig-name descname"><span class="pre">profession_type</span></span><a class="headerlink" href="#odyssey.api.lookup.models.LookupProfessionColors.profession_type" title="Permalink to this definition">¶</a></dt>
-<dd><p>Name of this profession.</p>
+<dt class="sig sig-object py" id="odyssey.api.lookup.models.LookupRoles.role_name">
+<span class="sig-name descname"><span class="pre">role_name</span></span><a class="headerlink" href="#odyssey.api.lookup.models.LookupRoles.role_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Internal name of this role that is used throughout the code.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>string</p>
@@ -2165,9 +2255,9 @@ of US males and females accross all age categories.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="odyssey.api.lookup.models.LookupProfessionColors.icon">
-<span class="sig-name descname"><span class="pre">icon</span></span><a class="headerlink" href="#odyssey.api.lookup.models.LookupProfessionColors.icon" title="Permalink to this definition">¶</a></dt>
-<dd><p>Icon for this profession type</p>
+<dt class="sig sig-object py" id="odyssey.api.lookup.models.LookupRoles.display_name">
+<span class="sig-name descname"><span class="pre">display_name</span></span><a class="headerlink" href="#odyssey.api.lookup.models.LookupRoles.display_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Display name of this role that should be presented in user-facing applications.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>string</p>
@@ -2176,9 +2266,76 @@ of US males and females accross all age categories.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="odyssey.api.lookup.models.LookupProfessionColors.color">
-<span class="sig-name descname"><span class="pre">color</span></span><a class="headerlink" href="#odyssey.api.lookup.models.LookupProfessionColors.color" title="Permalink to this definition">¶</a></dt>
-<dd><p>Color associated with this profession type and icon</p>
+<dt class="sig sig-object py" id="odyssey.api.lookup.models.LookupRoles.alt_role_name">
+<span class="sig-name descname"><span class="pre">alt_role_name</span></span><a class="headerlink" href="#odyssey.api.lookup.models.LookupRoles.alt_role_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of alternate user-facing names that may be utilized in the future.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.models.LookupRoles.is_practitioner">
+<span class="sig-name descname"><span class="pre">is_practitioner</span></span><a class="headerlink" href="#odyssey.api.lookup.models.LookupRoles.is_practitioner" title="Permalink to this definition">¶</a></dt>
+<dd><p>Denotes if this role is a practioner or not.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>boolean</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.models.LookupRoles.color">
+<span class="sig-name descname"><span class="pre">color</span></span><a class="headerlink" href="#odyssey.api.lookup.models.LookupRoles.color" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hex color code that denotes what color should be used to color certain UI assets for this role</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.models.LookupRoles.icon">
+<span class="sig-name descname"><span class="pre">icon</span></span><a class="headerlink" href="#odyssey.api.lookup.models.LookupRoles.icon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Icon that should be used for this profession type</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.models.LookupRoles.has_client_data_access">
+<span class="sig-name descname"><span class="pre">has_client_data_access</span></span><a class="headerlink" href="#odyssey.api.lookup.models.LookupRoles.has_client_data_access" title="Permalink to this definition">¶</a></dt>
+<dd><p>Denotes if this role has access to client data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>boolean</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.models.LookupRoles.active">
+<span class="sig-name descname"><span class="pre">active</span></span><a class="headerlink" href="#odyssey.api.lookup.models.LookupRoles.active" title="Permalink to this definition">¶</a></dt>
+<dd><p>Denotes whether a role type is currently used in the system.
+Roles will be activated in further versions when needed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>boolean</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.lookup.models.LookupRoles.notes">
+<span class="sig-name descname"><span class="pre">notes</span></span><a class="headerlink" href="#odyssey.api.lookup.models.LookupRoles.notes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Notes about this role.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>string</p>
