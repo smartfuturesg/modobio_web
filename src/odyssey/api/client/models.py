@@ -1654,3 +1654,53 @@ class ClientDataStorage(db.Model):
     
     :type: float
     """
+
+class ClientDataAccess(db.Model):
+    """ 
+    Details on how much data storage each client is using
+      
+    """
+
+    __tablename__ = 'ClientDataAccess'
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
+
+    created_at = db.Column(db.DateTime, server_default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    updated_at = db.Column(db.DateTime, server_default=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+    access_to_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
+    """
+    Client user ID number
+
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
+    """
+
+    access_from_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
+    """
+    Staff or Client user ID number to get access
+
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
+    """
+
+    temporary = db.Column(db.Boolean)
+    """
+    Temporary flag that will be used for temporary data access
+
+    :type: bool
+    """
