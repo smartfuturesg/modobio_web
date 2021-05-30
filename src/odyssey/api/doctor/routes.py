@@ -38,7 +38,8 @@ from odyssey.utils.errors import (
     IllegalSetting, 
     ContentNotFound,
     InputError,
-    MedicalConditionAlreadySubmitted
+    MedicalConditionAlreadySubmitted,
+    GenericNotFound
 )
 from odyssey.utils.misc import check_client_existence, check_staff_existence, check_blood_test_existence, check_blood_test_result_type_existence, check_user_existence, check_medical_condition_existence, check_std_existence
 from odyssey.api.doctor.schemas import (
@@ -88,9 +89,12 @@ class MedBloodPressures(Resource):
         This request gets the users submitted blood pressure if it exists
         '''
         check_client_existence(user_id)
-        bp_info = db.session.query(
-                     MedicalBloodPressures.idx,MedicalBloodPressures.systolic, MedicalBloodPressures.diastolic, MedicalBloodPressures.datetime_taken
-                    ).filter(MedicalBloodPressures.user_id==user_id).all()
+        bp_info = MedicalBloodPressures.query.filter_by(user_id=user_id).all()
+        
+        for data in bp_info:
+            reporter = User.query.filter_by(user_id=data.reporter_id).one_or_none()
+            data.reporter_firstname = reporter.firstname
+            data.reporter_lastname = reporter.lastname
 
         payload = {'items': bp_info,
                    'total_items': len(bp_info)}
@@ -105,13 +109,36 @@ class MedBloodPressures(Resource):
         '''
         # First check if the client exists
         check_client_existence(user_id)
+
         data = request.parsed_obj
         data.user_id = user_id
+        data.reporter_id =  token_auth.current_user()[0].user_id
+
         db.session.add(data)
 
         # insert results into the result table
         db.session.commit()
         return data
+
+    @token_auth.login_required(user_type=('client',))
+    @ns.doc(params={'idx': 'int',})
+    @responds(status_code=204, api=ns)
+    def delete(self, user_id):
+        '''
+        Delete request for a client's blood pressure
+        '''
+        check_client_existence(user_id)
+
+        idx = request.args.get('idx', type=int)
+        if idx:
+            result = MedicalBloodPressures.query.filter_by(idx=idx).one_or_none()
+            if result:
+                db.session.delete(result)
+                db.session.commit()
+            else:
+                raise GenericNotFound(f"The blood pressure result with idx {idx} does not exist.")
+        else:
+            raise InputError(message="idx must be an integer.")
 
 @ns.route('/lookupbloodpressureranges/')
 class MedicalLookUpBloodPressureResource(Resource):

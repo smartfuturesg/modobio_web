@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>odyssey.api.staff.models &mdash; Odyssey version: 0.5.45 documentation</title>
+  <title>odyssey.api.staff.models &mdash; Odyssey version: 0.7.53 documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                version: 0.5.45
+                version: 0.7.53
               </div>
             
           
@@ -260,6 +260,17 @@ staff member profiles.</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffProfile.profile_picture">
+<span class="sig-name descname"><span class="pre">profile_picture</span></span><a class="headerlink" href="#odyssey.api.staff.models.StaffProfile.profile_picture" title="Permalink to this definition">¶</a></dt>
+<dd><p>Profile picture for this staff member. Stored as an aws s3 key which can be retrieved when needed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -375,7 +386,7 @@ Some roles will be location based where verification is required for each locali
 -client_services
 -physical_therapist
 -trainer
--data_science
+-data_scientist
 -doctor
 -nutrition</p>
 <dl class="field-list simple">
@@ -477,6 +488,192 @@ in each state).</p>
 
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffCalendarEvents">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.staff.models.</span></span><span class="sig-name descname"><span class="pre">StaffCalendarEvents</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.staff.models.StaffCalendarEvents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
+<p>Model for events to be saved to the professional’s calendar</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffCalendarEvents.idx">
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.staff.models.StaffCalendarEvents.idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Table index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffCalendarEvents.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.staff.models.StaffCalendarEvents.created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creation timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffCalendarEvents.updated_at">
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.staff.models.StaffCalendarEvents.updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Last update timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffCalendarEvents.user_id">
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.staff.models.StaffCalendarEvents.user_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Staff member user_id number, foreign key to User.user_id.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int, foreign key to <code class="xref py py-attr docutils literal notranslate"><span class="pre">User.user_id</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffCalendarEvents.start_date">
+<span class="sig-name descname"><span class="pre">start_date</span></span><a class="headerlink" href="#odyssey.api.staff.models.StaffCalendarEvents.start_date" title="Permalink to this definition">¶</a></dt>
+<dd><p>If recurring, this is the recurrence start date,
+if not, this is the event start date</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.date" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.date</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffCalendarEvents.end_date">
+<span class="sig-name descname"><span class="pre">end_date</span></span><a class="headerlink" href="#odyssey.api.staff.models.StaffCalendarEvents.end_date" title="Permalink to this definition">¶</a></dt>
+<dd><p>If event is recurring, this is the recurrence end date,
+if not, this is the event end date</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.date" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.date</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffCalendarEvents.start_time">
+<span class="sig-name descname"><span class="pre">start_time</span></span><a class="headerlink" href="#odyssey.api.staff.models.StaffCalendarEvents.start_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Event start time</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>:class:’datetime.time’</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffCalendarEvents.end_time">
+<span class="sig-name descname"><span class="pre">end_time</span></span><a class="headerlink" href="#odyssey.api.staff.models.StaffCalendarEvents.end_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Event end time</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>:class:’datetime.time’</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffCalendarEvents.timezone">
+<span class="sig-name descname"><span class="pre">timezone</span></span><a class="headerlink" href="#odyssey.api.staff.models.StaffCalendarEvents.timezone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Local time zone name, saved at event creation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffCalendarEvents.duration">
+<span class="sig-name descname"><span class="pre">duration</span></span><a class="headerlink" href="#odyssey.api.staff.models.StaffCalendarEvents.duration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Event duration, only important for recurring events</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(in Python v3.9)">datetime.timedelta</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffCalendarEvents.all_day">
+<span class="sig-name descname"><span class="pre">all_day</span></span><a class="headerlink" href="#odyssey.api.staff.models.StaffCalendarEvents.all_day" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flag if event lasts all day or not</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffCalendarEvents.recurring">
+<span class="sig-name descname"><span class="pre">recurring</span></span><a class="headerlink" href="#odyssey.api.staff.models.StaffCalendarEvents.recurring" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flag to determine if this event is recurring</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffCalendarEvents.recurrence_type">
+<span class="sig-name descname"><span class="pre">recurrence_type</span></span><a class="headerlink" href="#odyssey.api.staff.models.StaffCalendarEvents.recurrence_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Type of recurrence for the event. Must be one of RECURRENCE_TYPE = (‘Daily’, ‘Weekly’, ‘Monthly’, ‘Yearly’)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffCalendarEvents.location">
+<span class="sig-name descname"><span class="pre">location</span></span><a class="headerlink" href="#odyssey.api.staff.models.StaffCalendarEvents.location" title="Permalink to this definition">¶</a></dt>
+<dd><p>Event’s location</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffCalendarEvents.description">
+<span class="sig-name descname"><span class="pre">description</span></span><a class="headerlink" href="#odyssey.api.staff.models.StaffCalendarEvents.description" title="Permalink to this definition">¶</a></dt>
+<dd><p>Event’s description</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.staff.models.StaffCalendarEvents.availability_status">
+<span class="sig-name descname"><span class="pre">availability_status</span></span><a class="headerlink" href="#odyssey.api.staff.models.StaffCalendarEvents.availability_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>Professional’s availabilit status through the event
+Currently, only options are in constants.py -&gt; EVENT_AVAILABILITY = (‘Busy’, ‘Available’)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 
 
@@ -493,7 +690,7 @@ in each state).</p>
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright Copyright 2019-2020 Atlantic Venture Partners, all rights reserved.
+        &#169; Copyright Copyright 2019-2021 Atlantic Venture Partners, all rights reserved.
 
     </p>
   </div>

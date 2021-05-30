@@ -23,6 +23,11 @@ sdist/
 # macOS
 .DS_Store
 
+# macOS iCloud sync messes with git repos. Sometimes copies of files
+# will suddenly appear with a numerical extention. Having .nosync in
+# the root of the repo will prevent iCloud from syncing this dir.
+.nosync
+
 # vs-code & pyenv specific
 *code-workspace
 .python-version
