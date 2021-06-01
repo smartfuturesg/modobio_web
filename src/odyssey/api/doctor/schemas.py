@@ -34,7 +34,7 @@ class MedicalBloodPressuresSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = MedicalBloodPressures
         exclude = ('created_at',)
-        dump_only = ('timestamp','idx', 'reported_by')
+        dump_only = ('timestamp','idx', 'reporter_id')
         
     timestamp = fields.DateTime()
     systolic = fields.Float(metadata={'description':'units mmHg'},required=True)

@@ -89,7 +89,7 @@ class MedBloodPressures(Resource):
         '''
         check_client_existence(user_id)
         bp_info = db.session.query(
-                     MedicalBloodPressures.idx, MedicalBloodPressures.reported_by, MedicalBloodPressures.systolic, MedicalBloodPressures.diastolic, MedicalBloodPressures.datetime_taken
+                     MedicalBloodPressures.idx, MedicalBloodPressures.reporter_id, MedicalBloodPressures.systolic, MedicalBloodPressures.diastolic, MedicalBloodPressures.datetime_taken
                     ).filter(MedicalBloodPressures.user_id==user_id).all()
 
         payload = {'items': bp_info,
@@ -108,7 +108,7 @@ class MedBloodPressures(Resource):
 
         data = request.parsed_obj
         data.user_id = user_id
-        data.reporter_id =  token_auth.current_user[0].user_id
+        data.reporter_id =  token_auth.current_user()[0].user_id
 
         db.session.add(data)
 
