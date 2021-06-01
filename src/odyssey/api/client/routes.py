@@ -1193,6 +1193,11 @@ class ClinicalCareTeamResourceAuthorization(Resource):
 
         to reject a team member from viewing data, the delete request should be used.
         """
+        current_user,_ = token_auth.current_user()
+
+        if current_user.user_id != user_id:
+            raise InputError(message="Unauthorized", status_code=401)
+
         data = request.json
 
         for dat in data.get('clinical_care_team_authorization'):
@@ -1214,6 +1219,11 @@ class ClinicalCareTeamResourceAuthorization(Resource):
         """
         Remove a previously saved authorization. Takes the same payload as the POST method.
         """
+        current_user,_ = token_auth.current_user()
+
+        if current_user.user_id != user_id:
+            raise InputError(message="Unauthorized", status_code=401)
+
         data = request.parsed_obj
 
         for dat in data.get('clinical_care_team_authorization'):
