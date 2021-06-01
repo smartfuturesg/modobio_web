@@ -1,7 +1,7 @@
 """add reporter_id to MedicalBloodPressures
 
 Revision ID: ad0512b79f09
-Revises: f363b1803f0f
+Revises: df485c66a11a
 Create Date: 2021-06-01 11:06:32.119491
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'ad0512b79f09'
-down_revision = 'f363b1803f0f'
+down_revision = 'df485c66a11a'
 branch_labels = None
 depends_on = None
 
