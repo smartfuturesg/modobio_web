@@ -1698,6 +1698,21 @@ class ClientDataAccess(db.Model):
     :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
+    access_to = db.Column(db.String)
+    """
+    This is for access to client's specific data. Blood Chemistry
+    :type: str
+    """
+
+    status = db.Column(db.String)
+    """
+    status of data access request
+    
+    ("pending","approved")
+    NOTE: "rejected" is not in the list above because rejected would just be deleted
+    :type: str
+    """
+
     temporary = db.Column(db.Boolean)
     """
     Temporary flag that will be used for temporary data access

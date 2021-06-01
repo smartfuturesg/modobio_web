@@ -247,6 +247,8 @@ def test_clinical_care_team_access(test_client, init_database, client_auth_heade
                                 headers=auth_header,
                                 content_type='application/json')
 
+    breakpoint()
     assert response.status_code == 200
+    
     
 

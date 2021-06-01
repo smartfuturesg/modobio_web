@@ -20,6 +20,7 @@ from odyssey.utils.errors import (
 from odyssey import db
 from odyssey.utils.constants import TABLE_TO_URI
 from odyssey.api.client.models import (
+    ClientDataAccess,
     ClientDataStorage,
     ClientInfo,
     ClientConsent,
@@ -66,13 +67,14 @@ from odyssey.api.facility.models import RegisteredFacilities
 from odyssey.api.user.models import User, UserLogin, UserTokenHistory
 from odyssey.utils.pdf import to_pdf, merge_pdfs
 from odyssey.utils.message import send_test_email
-from odyssey.utils.misc import check_client_existence, check_drink_existence
+from odyssey.utils.misc import check_client_existence, check_drink_existence, check_staff_existence
 from odyssey.api.client.schemas import(
     AllClientsDataTier,
     ClientAssignedDrinksSchema,
     ClientAssignedDrinksDeleteSchema,
     ClientConsentSchema,
     ClientConsultContractSchema,
+    ClientDataAccessSchema,
     ClientIndividualContractSchema,
     ClientClinicalCareTeamSchema,
     ClinicalCareTeamTemporaryMembersSchema,
@@ -1565,6 +1567,79 @@ class ClientRaceAndEthnicityApi(Resource):
             .filter(ClientRaceAndEthnicity.user_id == user_id).all()
         
         return res
+
+    @token_auth.login_required()
+    @accepts(schema=ClientRaceAndEthnicityEditSchema, api=ns)
+    @responds(schema=ClientRaceAndEthnicitySchema(many=True), api=ns, status_code=201)
+    def put(self, user_id):
+
+        check_client_existence(user_id)
+
+        if request.parsed_obj['mother']:
+            mother = request.parsed_obj['mother']
+        else:
+            mother = None
+        if request.parsed_obj['father']:
+            father = request.parsed_obj['father']
+        else:
+            father = None
+
+        process_race_and_ethnicity(user_id, mother, father)
+
+        res = db.session.query(ClientRaceAndEthnicity.is_client_mother, LookupRaces.race_id, LookupRaces.race_name) \
+            .join(LookupRaces, LookupRaces.race_id == ClientRaceAndEthnicity.race_id) \
+            .filter(ClientRaceAndEthnicity.user_id == user_id).all()
+
+        return res
+
+@ns.route('/data-access/')
+@ns.doc(params={'access_to_id': 'client user id',
+                'access_from_id': 'staff user id',
+                'status':'status of request'})
+class ClientDataAccessApi(Resource):
+    """
+    Endpoint requesting and returning data access.
+    """
+    @token_auth.login_required()
+    @responds(schema=ClientDataAccessSchema(many=True), api=ns, status_code=200)
+    def get(self,user_id):
+        check_client_existence(user_id)
+
+        res = db.session.query(ClientRaceAndEthnicity.is_client_mother, LookupRaces.race_id, LookupRaces.race_name) \
+            .join(LookupRaces, LookupRaces.race_id == ClientRaceAndEthnicity.race_id) \
+            .filter(ClientRaceAndEthnicity.user_id == user_id).all()
+        
+        return res
+
+    @token_auth.login_required(user_type=('staff',))
+    @accepts(schema=ClientDataAccessSchema, api=ns)
+    @responds(schema=ClientDataAccessSchema, api=ns, status_code=201)
+    def post(self):
+        """
+        Submits a transaction for the client identified by user_id.
+        """
+
+        # TODO must check if staff member is in clinical care team
+
+        client_user_id = request.args.get('access_to_id', type=int)
+
+        staff_user_id = request.args.get('access_from_id', type=int)
+
+        
+
+        client_user = check_client_existence(client_user_id)  
+        staff_user = check_staff_existence(staff_user_id)
+        if not client_user:
+            raise InputError(status_code=409,message='Client does not exist')
+        if not staff_user:
+            raise InputError(status_code=409,message='Staff does not exist')
+        
+
+        request.parsed_obj.user_id = user_id
+        db.session.add(request.parsed_obj)
+        db.session.commit()
+
+        return request.parsed_obj
 
     @token_auth.login_required()
     @accepts(schema=ClientRaceAndEthnicityEditSchema, api=ns)

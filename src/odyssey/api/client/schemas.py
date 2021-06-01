@@ -13,6 +13,7 @@ from odyssey.api.client.models import (
     ClientClinicalCareTeamAuthorizations,
     ClientConsent,
     ClientConsultContract,
+    ClientDataAccess,
     ClientDataStorage,
     ClientInfo,
     ClientIndividualContract, 
@@ -465,3 +466,15 @@ class ClientTransactionHistorySchema(ma.SQLAlchemyAutoSchema):
     @post_load
     def make_object(self, data, **kwargs):
         return ClientTransactionHistory(**data)
+
+class ClientDataAccessSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = ClientDataAccess
+        exclude = ('created_at','updated_at',)
+        dump_only = ('idx','access_to_id','access_from_id')
+    
+    status = fields.String(required=False,missing='pending')
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return ClientDataAccess(**data)    
