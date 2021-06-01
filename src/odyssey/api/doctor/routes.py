@@ -108,13 +108,7 @@ class MedBloodPressures(Resource):
 
         data = request.parsed_obj
         data.user_id = user_id
-        
-        #retrieve name of user submitting these results
-        if token_auth.current_user[0].user_id == user_id:
-            reported_by = 'self'
-        else:
-            reported_by = token_auth.current_user[0].firstname + token_auth.current_user[0].lastname
-        data.reported_by = reported_by
+        data.reporter_id =  token_auth.current_user[0].user_id
 
         db.session.add(data)
 
@@ -123,21 +117,20 @@ class MedBloodPressures(Resource):
         return data
 
     @token_auth.login_required(user_type=('client',))
-    @accepts(schema={'idx'})
-    @responds(status_code=200)
+    @ns.doc(params={'idx': 'int',})
+    @responds(status_code=204, api=ns)
     def delete(self, user_id):
         '''
         Delete request for a client's blood pressure
         '''
         check_client_existence(user_id)
 
-        result = MedicalBloodPressures.query.filter_by(idx=request.parsed_obj.idx).one_or_none()
+        result = MedicalBloodPressures.query.filter_by(idx=request.args.get('idx')).one_or_none()
         if result:
             db.session.delete(result)
             db.session.commit()
-            return 200
         else:
-            return 404
+            raise GenericNotFound(f"The blood pressure result with idx {request.args.get('idx')} does not exist.")
 
 @ns.route('/lookupbloodpressureranges/')
 class MedicalLookUpBloodPressureResource(Resource):

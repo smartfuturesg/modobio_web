@@ -35,11 +35,11 @@ class MedicalBloodPressures(db.Model):
     :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
-    reported_by = db.Column(db.String, nullable=False)
+    reporter_id = db.Column(db.Integer, db.ForeignKey('User.user_id'), nullable=False)
     """
-    User who reported this blood pressure reading
+    User id of the user who reported this blood pressure reading
 
-    :type: string
+    :type: int, foreign key('User.user_id')
     """
 
     systolic = db.Column(db.Float)
