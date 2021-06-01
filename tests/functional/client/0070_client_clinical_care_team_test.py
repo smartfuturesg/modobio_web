@@ -7,7 +7,7 @@ from flask_accepts.decorators.decorators import responds
 from odyssey.api.lookup.models import LookupClinicalCareTeamResources
 
 from tests.functional.client.data import clients_clinical_care_team
-from tests.functional.user.data import users_new_user_client_data
+from tests.functional.user.data import users_new_user_client_data, users_staff_member_data
 
 def test_adding_clinical_care_team(test_client, init_database, client_auth_header, staff_auth_header):
     """
@@ -112,6 +112,8 @@ def test_adding_clinical_care_team(test_client, init_database, client_auth_heade
 
     assert response.status_code == 400
 
+    
+
 def test_delete_clinical_care_team(test_client, init_database, client_auth_header):
     """
     GIVEN a api end point for adding members to a client's care team
@@ -164,7 +166,7 @@ def test_authorize_clinical_care_team(test_client, init_database, client_auth_he
     """
     total_resources = LookupClinicalCareTeamResources.query.count()
     auths = [{"team_member_user_id": team_member_user_id,"resource_id": num} for num in range(1,total_resources+1) ]
-    payload = {"clinical_care_team_authoriztion" : auths}
+    payload = {"clinical_care_team_authorization" : auths}
     
     #####
     # Authorize another client to access all clinical care team resources
@@ -178,7 +180,7 @@ def test_authorize_clinical_care_team(test_client, init_database, client_auth_he
     #####
     # Try to authorize a resource that doesnt exist
     ####
-    payload = {"clinical_care_team_authoriztion" : [{"team_member_user_id": team_member_user_id,"resource_id": 999999}]}
+    payload = {"clinical_care_team_authorization" : [{"team_member_user_id": team_member_user_id,"resource_id": 999999}]}
 
     response = test_client.post(f"/client/clinical-care-team/resource-authorization/{1}/",
                         headers=client_auth_header,
@@ -190,7 +192,7 @@ def test_authorize_clinical_care_team(test_client, init_database, client_auth_he
     #####
     # Try to authorize a resource for a client not part of the care team that doesnt exist
     ####
-    payload = {"clinical_care_team_authoriztion" : [{"team_member_user_id": 99,"resource_id": 1}]}
+    payload = {"clinical_care_team_authorization" : [{"team_member_user_id": 99,"resource_id": 1}]}
 
     response = test_client.post(f"/client/clinical-care-team/resource-authorization/{1}/",
                         headers=client_auth_header,
@@ -207,7 +209,29 @@ def test_authorize_clinical_care_team(test_client, init_database, client_auth_he
                             content_type='application/json')
 
     assert response.status_code == 200
-    assert len(response.json.get("clinical_care_team_authoriztion")) == total_resources
+    assert response.json['clinical_care_team_authorization'][0]['status'] == 'accepted'
+
+    payload = {"clinical_care_team_authorization" : [auths[0]]}
+    
+    #####
+    # client approves the first data access
+    #####
+    response = test_client.put(f"/client/clinical-care-team/resource-authorization/{1}/",
+                            headers=client_auth_header,
+                            data=dumps(payload), 
+                            content_type='application/json')
+    
+    assert response.status_code == 201
+
+    response = test_client.get(f"/client/clinical-care-team/resource-authorization/{1}/",
+                            headers=client_auth_header,
+                            content_type='application/json')
+
+    assert response.status_code == 200
+    assert response.json['clinical_care_team_authorization'][0]['status'] == 'accepted'
+    assert response.json['clinical_care_team_authorization'][1]['status'] == 'accepted'
+
+    assert len(response.json.get("clinical_care_team_authorization")) == total_resources
 
 
 def test_clinical_care_team_access(test_client, init_database, client_auth_header):

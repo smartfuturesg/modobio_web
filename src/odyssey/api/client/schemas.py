@@ -369,7 +369,7 @@ class ClinicalCareTeamAuthorizationNestedSchema(Schema):
     """
     Nests clinical care team authorization schema for API
     """
-    clinical_care_team_authoriztion = fields.Nested(ClinicalCareTeamAuthorizaitonSchema(many=True), missing=[])
+    clinical_care_team_authorization = fields.Nested(ClinicalCareTeamAuthorizaitonSchema(many=True), missing=[])
 
 class ClientGeneralMobileSettingsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
