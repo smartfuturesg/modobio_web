@@ -1,21 +1,19 @@
-from flask import request, current_app
+from flask import request
 from flask_accepts import accepts, responds
 from flask_restx import Resource
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy import or_
 
 from odyssey import db
 from odyssey.api import api
-from odyssey.api.lookup.models import LookupNotifications
 from odyssey.api.notifications.models import Notifications, NotificationsPushRegistration
 from odyssey.api.notifications.schemas import (
     NotificationSchema,
-    PushRegistrationSchema,
     PushRegistrationDeleteSchema,
+    PushRegistrationGetSchema,
     PushRegistrationPostSchema)
 from odyssey.utils.auth import token_auth
-from odyssey.utils.constants import DB_SERVER_TIME
 from odyssey.utils.message import PushNotification
-from odyssey.utils.errors import InputError, UnknownError
+from odyssey.utils.errors import InputError
 
 ns = api.namespace('notifications', description='Endpoints for all types of notifications.')
 
@@ -73,7 +71,7 @@ class NotificationsUpdateEndpoint(Resource):
 class PushRegistrationEndpoint(Resource):
 
     @token_auth.login_required
-    @responds(schema=PushRegistrationSchema(many=True), api=ns, status_code=200)
+    @responds(schema=PushRegistrationGetSchema(many=True), api=ns, status_code=200)
     def get(self, user_id):
         """ Get all device tokens for user. """
         return NotificationsPushRegistration.query.filter_by(user_id=user_id).all()
@@ -90,13 +88,16 @@ class PushRegistrationEndpoint(Resource):
             The device token (called registration ID on Android) obtained from the OS to allow
             push notifications.
 
+        device_voip_token : str (optional)
+            The device token for VoIP notifications. This is used on Apple devices only.
+
         device_id : str
             A unique number that identifies the device independent of app and OS updates.
 
         device_description : str
             A description of the device, perhaps device name + OS name and version.
 
-        device_os : str, one of: apple, android, debug.
+        device_platform : str, one of: apple, android, debug.
             Main OS of the device. Only apple and android are supported at the moment.
             If set to debug, this endpoint will insert an entry into the database, but
             not create and actual AWS SNS notification endpoint. Instead, messages will
@@ -105,8 +106,12 @@ class PushRegistrationEndpoint(Resource):
         device_token = request.json['device_token']
         device_id = request.json['device_id']
         device_description = request.json['device_description']
-        device_os = request.json['device_os']
-        device_str = f'user: {user_id}, device: {device_id}, description: {device_description}'
+        device_platform = request.json['device_platform']
+        device_voip_token = request.json.get('device_voip_token')
+        device_info = {
+            'user_id': user_id,
+            'device_id': device_id,
+            'description': device_description}
 
         pn = PushNotification()
 
@@ -119,16 +124,38 @@ class PushRegistrationEndpoint(Resource):
             .one_or_none())
 
         if device:
-            # Re-register a device, token may have changed. Even if token is the same,
+            # Token may have changed with existing device. Even if token is the same,
             # the endpoint may have been disables or settings may have changed.
             # Re-registering will fix that.
-            device.arn = pn.register_device(device_token, device_os, device_str, current_endpoint=device.arn)
+            device.arn = pn.register_device(
+                device_token,
+                device_platform,
+                device_info=device_info,
+                current_endpoint=device.arn)
+            if device_voip_token:
+                device.voip_arn = pn.register_device(
+                    device_voip_token,
+                    device_platform,
+                    device_info=device_info,
+                    current_endpoint=device.voip_arn,
+                    voip=True)
             device.device_token = device_token
+            device.device_voip_token = device_voip_token
             device.device_description = device_description
         else:
             device = NotificationsPushRegistration(user_id=user_id)
-            device.arn = pn.register_device(device_token, device_os, device_str)
+            device.arn = pn.register_device(
+                device_token,
+                device_platform,
+                device_info=device_info)
+            if device_voip_token:
+                device.voip_arn = pn.register_device(
+                    device_voip_token,
+                    device_platform,
+                    device_info=device_info,
+                    voip=True)
             device.device_token = device_token
+            device.device_voip_token = device_voip_token
             device.device_id = device_id
             device.device_description = device_description
             db.session.add(device)
@@ -144,21 +171,35 @@ class PushRegistrationEndpoint(Resource):
         Unregisters device token, not entire device, from the AWS SNS service
         for all topics. Then deletes device token entries from database.
 
+        In case of an Apple device, it will unregister both the regular and
+        the VoIP tokens. You can pass in either one and both will be
+        unregistered at the same time.
+
         Parameters
         ----------
         device_token : str
             Device token to unregister and delete.
         """
+        device_token = request.json['device_token']
+
         device = (
             NotificationsPushRegistration
             .query
             .filter_by(
-                user_id=user_id,
-                device_token=request.json['device_token'])
+                user_id=user_id)
+            .filter(
+                or_(
+                    NotificationsPushRegistration.device_token == device_token,
+                    NotificationsPushRegistration.device_voip_token == device_token))
             .one_or_none())
+
         if device:
             pn = PushNotification()
             pn.unregister_device(device.arn)
+
+            if device.voip_arn:
+                pn.unregister_device(device.voip_arn)
+
             db.session.delete(device)
             db.session.commit()
 
