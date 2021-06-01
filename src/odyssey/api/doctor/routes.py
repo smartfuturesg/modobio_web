@@ -89,7 +89,7 @@ class MedBloodPressures(Resource):
         '''
         check_client_existence(user_id)
         bp_info = db.session.query(
-                     MedicalBloodPressures.idx,MedicalBloodPressures.systolic, MedicalBloodPressures.diastolic, MedicalBloodPressures.datetime_taken
+                     MedicalBloodPressures.idx, MedicalBloodPressures.reported_by, MedicalBloodPressures.systolic, MedicalBloodPressures.diastolic, MedicalBloodPressures.datetime_taken
                     ).filter(MedicalBloodPressures.user_id==user_id).all()
 
         payload = {'items': bp_info,
@@ -105,13 +105,39 @@ class MedBloodPressures(Resource):
         '''
         # First check if the client exists
         check_client_existence(user_id)
+
         data = request.parsed_obj
         data.user_id = user_id
+        
+        #retrieve name of user submitting these results
+        if token_auth.current_user[0].user_id == user_id:
+            reported_by = 'self'
+        else:
+            reported_by = token_auth.current_user[0].firstname + token_auth.current_user[0].lastname
+        data.reported_by = reported_by
+
         db.session.add(data)
 
         # insert results into the result table
         db.session.commit()
         return data
+
+    @token_auth.login_required(user_type=('client',))
+    @accepts(schema={'idx'})
+    @responds(status_code=200)
+    def delete(self, user_id):
+        '''
+        Delete request for a client's blood pressure
+        '''
+        check_client_existence(user_id)
+
+        result = MedicalBloodPressures.query.filter_by(idx=request.parsed_obj.idx).one_or_none()
+        if result:
+            db.session.delete(result)
+            db.session.commit()
+            return 200
+        else:
+            return 404
 
 @ns.route('/lookupbloodpressureranges/')
 class MedicalLookUpBloodPressureResource(Resource):

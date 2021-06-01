@@ -34,12 +34,13 @@ class MedicalBloodPressuresSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = MedicalBloodPressures
         exclude = ('created_at',)
-        dump_only = ('timestamp','idx')
+        dump_only = ('timestamp','idx', 'reported_by')
         
     timestamp = fields.DateTime()
     systolic = fields.Float(metadata={'description':'units mmHg'},required=True)
     diastolic = fields.Float(metadata={'description':'units mmHg'},required=True)
     datetime_taken = fields.String(metadata={'description':'Date and time the blood pressure was taken'}, required=True)
+    
     @post_load
     def make_object(self, data, **kwargs):
         return MedicalBloodPressures(**data)
