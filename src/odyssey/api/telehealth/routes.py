@@ -1078,7 +1078,7 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
 @ns.route('/queue/client-pool/')
 class TelehealthGetQueueClientPoolApi(Resource):
     """
-    This API resource is used to get, post, and delete the user's in the queue.
+    This API resource is used to get all the users in the queue.
     """
     @token_auth.login_required
     @responds(schema=TelehealthQueueClientPoolOutputSchema, api=ns, status_code=200)
@@ -1099,13 +1099,13 @@ class TelehealthGetQueueClientPoolApi(Resource):
 @ns.doc(params={'user_id': 'User ID'})
 class TelehealthQueueClientPoolApi(Resource):
     """
-    This API resource is used to get, post, and delete the user's in the queue.
+    This API resource is used to get, post, and delete the users in the queue.
     """
     @token_auth.login_required
     @responds(schema=TelehealthQueueClientPoolOutputSchema, api=ns, status_code=200)
     def get(self,user_id):
         """
-        Returns the list of notifications for the given user_id
+        Returns queue details for the given user_id
         """
         # grab the whole queue
         queue = TelehealthQueueClientPool.query.filter_by(user_id=user_id).order_by(TelehealthQueueClientPool.priority.desc(),TelehealthQueueClientPool.target_date.asc()).all()
@@ -1121,7 +1121,7 @@ class TelehealthQueueClientPoolApi(Resource):
     @responds(api=ns, status_code=201)
     def post(self,user_id):
         """
-            Add a client to the queue
+        Add a client to the queue
         """
         check_client_existence(user_id)
         

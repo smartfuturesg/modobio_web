@@ -4,6 +4,8 @@ from marshmallow import (
     post_load,
     validate
 )
+from pytz import timezone
+import pytz
 from twilio.jwt import access_token
 from twilio.rest.conversations.v1 import conversation
 
@@ -113,6 +115,7 @@ class TelehealthQueueClientPoolSchema(ma.SQLAlchemyAutoSchema):
     
     duration = fields.Integer(missing=20)
     medical_gender = fields.String(validate=validate.OneOf([gender[0] for gender in GENDERS]),metadata={'description': 'Preferred Medical Professional gender'})
+    timezone = fields.String(validate=validate.OneOf(pytz.common_timezones),metadata={'description': 'Preferred Medical Professional gender'}, missing='UTC')
 
     @post_load
     def make_object(self, data, **kwargs):
