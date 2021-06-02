@@ -11,4 +11,5 @@ odyssey.tasks
 .. toctree::
 
    Celery instance <odyssey.celery_app>
+   Tasks <odyssey.tasks.tasks>
    Periodic tasks <odyssey.tasks.periodic>

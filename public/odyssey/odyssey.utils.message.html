@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>odyssey.utils.message &mdash; Odyssey version: 0.5.45 documentation</title>
+  <title>odyssey.utils.message &mdash; Odyssey version: 0.7.53 documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                version: 0.5.45
+                version: 0.7.53
               </div>
             
           
@@ -187,6 +187,12 @@ That were createrd by a client services staff member</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="odyssey.utils.message.send_email_verify_email">
+<span class="sig-prename descclassname"><span class="pre">odyssey.utils.message.</span></span><span class="sig-name descname"><span class="pre">send_email_verify_email</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">recipient</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">code</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.message.send_email_verify_email" title="Permalink to this definition">¶</a></dt>
+<dd><p>Email sent to verifiy a user’s email address.</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="odyssey.utils.message.send_email_password_reset">
 <span class="sig-prename descclassname"><span class="pre">odyssey.utils.message.</span></span><span class="sig-name descname"><span class="pre">send_email_password_reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">recipient</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reset_token</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.message.send_email_password_reset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Email for sending users password reset portal</p>
@@ -205,15 +211,247 @@ That were createrd by a client services staff member</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="odyssey.utils.message.send_email_no_reply">
-<span class="sig-prename descclassname"><span class="pre">odyssey.utils.message.</span></span><span class="sig-name descname"><span class="pre">send_email_no_reply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subject</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recipient</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'success&#64;simulator.amazonses.com'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body_text</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body_html</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.message.send_email_no_reply" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="odyssey.utils.message.send_email">
+<span class="sig-prename descclassname"><span class="pre">odyssey.utils.message.</span></span><span class="sig-name descname"><span class="pre">send_email</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subject</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recipient</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'success&#64;simulator.amazonses.com'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body_text</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body_html</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sender</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'no-reply&#64;modobio.com'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.message.send_email" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.utils.message.EndpointARN">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.utils.message.</span></span><span class="sig-name descname"><span class="pre">EndpointARN</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arn</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.message.EndpointARN" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>AWS Resource Number (ARN) for SNS application platforms and endpoints.</p>
+<p>This class takes a string representation of an ARN and parses it into endpoint
+parameters. Each parameter can be set individually. When the ARN is accessed
+it will reflect the changed parameters.</p>
+<p class="rubric">Examples</p>
+<p>The primary function of this class is to change Apple push notification
+endpoints into corresponding Apple VoIP endpoints.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ep</span> <span class="o">=</span> <span class="n">EndpointARN</span><span class="p">(</span><span class="s1">&#39;arn:aws:sns:us-west-1:393511634479:endpoint/APNS_SANDBOX/ModoBioClient/848daccf-0944-3593-bde0-7c6a9f227c47&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ep</span><span class="o">.</span><span class="n">channel</span>
+<span class="go">APNS_SANDBOX</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ep</span><span class="o">.</span><span class="n">is_voip</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ep</span><span class="o">.</span><span class="n">is_voip</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ep</span><span class="o">.</span><span class="n">channel</span>
+<span class="go">APNS_VOIP_SANDBOX</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ep</span><span class="o">.</span><span class="n">arn</span>
+<span class="go">arn:aws:sns:us-west-1:393511634479:endpoint/APNS_VOIP_SANDBOX/ModoBioClient/848daccf-0944-3593-bde0-7c6a9f227c47</span>
+</pre></div>
+</div>
+<p>It is also possible to convert a platform application into an endpoint (if the device
+UUID is known), or vice versa.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ep</span><span class="o">.</span><span class="n">is_app</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ep</span><span class="o">.</span><span class="n">is_app</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ep</span><span class="o">.</span><span class="n">arn</span>
+<span class="go">arn:aws:sns:us-west-1:393511634479:app/APNS_VOIP_SANDBOX/ModoBioClient</span>
+</pre></div>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.utils.message.EndpointARN.prefix">
+<span class="sig-name descname"><span class="pre">prefix</span></span><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></em><em class="property"> <span class="pre">=</span> <span class="pre">'arn'</span></em><a class="headerlink" href="#odyssey.utils.message.EndpointARN.prefix" title="Permalink to this definition">¶</a></dt>
+<dd><p>The prefix of the ARN, always the literal string “arn”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>“arn”</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.utils.message.EndpointARN.main">
+<span class="sig-name descname"><span class="pre">main</span></span><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></em><em class="property"> <span class="pre">=</span> <span class="pre">'aws'</span></em><a class="headerlink" href="#odyssey.utils.message.EndpointARN.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>The main part of the ARN, always the literal string “aws”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>“aws”</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.utils.message.EndpointARN.resource">
+<span class="sig-name descname"><span class="pre">resource</span></span><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></em><em class="property"> <span class="pre">=</span> <span class="pre">''</span></em><a class="headerlink" href="#odyssey.utils.message.EndpointARN.resource" title="Permalink to this definition">¶</a></dt>
+<dd><p>The resource part of the ARN, the name of the AWS resource this ARN belongs to.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p><em>empty string</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.utils.message.EndpointARN.region">
+<span class="sig-name descname"><span class="pre">region</span></span><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></em><em class="property"> <span class="pre">=</span> <span class="pre">''</span></em><a class="headerlink" href="#odyssey.utils.message.EndpointARN.region" title="Permalink to this definition">¶</a></dt>
+<dd><p>The region part of the ARN, the AWS region this ARN operates in.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p><em>empty string</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.utils.message.EndpointARN.account_id">
+<span class="sig-name descname"><span class="pre">account_id</span></span><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></em><em class="property"> <span class="pre">=</span> <span class="pre">''</span></em><a class="headerlink" href="#odyssey.utils.message.EndpointARN.account_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>The account ID part of the ARN, the account number of the user this ARN belongs to.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p><em>empty string</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.utils.message.EndpointARN.type">
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></em><em class="property"> <span class="pre">=</span> <span class="pre">''</span></em><a class="headerlink" href="#odyssey.utils.message.EndpointARN.type" title="Permalink to this definition">¶</a></dt>
+<dd><p>The type part of SNS endpoint, either “app” for Platform Application, or “endpoint” for an Endpoint.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p><em>empty string</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.utils.message.EndpointARN.label">
+<span class="sig-name descname"><span class="pre">label</span></span><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></em><em class="property"> <span class="pre">=</span> <span class="pre">''</span></em><a class="headerlink" href="#odyssey.utils.message.EndpointARN.label" title="Permalink to this definition">¶</a></dt>
+<dd><p>The label part of the ARN. This is usually set to the name of the app receiving the push notifications.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p><em>empty string</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.utils.message.EndpointARN.device">
+<span class="sig-name descname"><span class="pre">device</span></span><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></em><em class="property"> <span class="pre">=</span> <span class="pre">''</span></em><a class="headerlink" href="#odyssey.utils.message.EndpointARN.device" title="Permalink to this definition">¶</a></dt>
+<dd><p>The device part of the ARN, a UUID generated by AWS when the device endpoint was created.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p><em>empty string</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.utils.message.EndpointARN.is_app">
+<span class="sig-name descname"><span class="pre">is_app</span></span><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></em><em class="property"> <span class="pre">=</span> <span class="pre">False</span></em><a class="headerlink" href="#odyssey.utils.message.EndpointARN.is_app" title="Permalink to this definition">¶</a></dt>
+<dd><p>Whether this is an application platform. If not, this is a device endpoint.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>False</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.utils.message.EndpointARN.is_voip">
+<span class="sig-name descname"><span class="pre">is_voip</span></span><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></em><em class="property"> <span class="pre">=</span> <span class="pre">False</span></em><a class="headerlink" href="#odyssey.utils.message.EndpointARN.is_voip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Whether or not the ARN represents a VoIP application platform or endpoint.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>False</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.utils.message.EndpointARN.is_sandbox">
+<span class="sig-name descname"><span class="pre">is_sandbox</span></span><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></em><em class="property"> <span class="pre">=</span> <span class="pre">False</span></em><a class="headerlink" href="#odyssey.utils.message.EndpointARN.is_sandbox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Whether or not the ARN represents a sandboxed (development, testing) application platform or endpoint.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>False</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="odyssey.utils.message.EndpointARN.arn">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">arn</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#odyssey.utils.message.EndpointARN.arn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the ARN as a string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><em>str</em> – The ARN as a string.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="odyssey.utils.message.EndpointARN.channel">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">channel</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#odyssey.utils.message.EndpointARN.channel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the push notification channel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><em>str</em> – The channel of the platform application or endpoint.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.utils.message.PushNotificationPlatform">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.utils.message.</span></span><span class="sig-name descname"><span class="pre">PushNotificationPlatform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.message.PushNotificationPlatform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">enum.Enum</span></code></a></p>
+<p>Enumerates push notification platforms and maps them to channels.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.utils.message.PushNotificationPlatform.apple">
+<span class="sig-name descname"><span class="pre">apple</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'APNS'</span></em><a class="headerlink" href="#odyssey.utils.message.PushNotificationPlatform.apple" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.utils.message.PushNotificationPlatform.android">
+<span class="sig-name descname"><span class="pre">android</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'FCM'</span></em><a class="headerlink" href="#odyssey.utils.message.PushNotificationPlatform.android" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.utils.message.PushNotificationPlatform.debug">
+<span class="sig-name descname"><span class="pre">debug</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'DEBUG/LOG'</span></em><a class="headerlink" href="#odyssey.utils.message.PushNotificationPlatform.debug" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="odyssey.utils.message.PushNotificationType">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.utils.message.</span></span><span class="sig-name descname"><span class="pre">PushNotificationType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.message.PushNotificationType" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">enum.Enum</span></code></a></p>
-<p>An enumeration.</p>
+<p>Enumerates the type of push notification that can be send.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.utils.message.PushNotificationType.alert">
 <span class="sig-name descname"><span class="pre">alert</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'A</span> <span class="pre">standard</span> <span class="pre">notification</span> <span class="pre">with</span> <span class="pre">a</span> <span class="pre">title</span> <span class="pre">and</span> <span class="pre">a</span> <span class="pre">body.'</span></em><a class="headerlink" href="#odyssey.utils.message.PushNotificationType.alert" title="Permalink to this definition">¶</a></dt>
@@ -243,9 +481,9 @@ That were createrd by a client services staff member</p>
 <p>A class for handling push notifications.</p>
 <p>To send push notifications, first register a device with <a class="reference internal" href="#odyssey.utils.message.PushNotification.register_device" title="odyssey.utils.message.PushNotification.register_device"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register_device()</span></code></a>. Once
 one or more devices are registered, a push notification can be send. Select which type
-of notification to send. Then use one of the corresponding templates in this class as
-a starting point for the content of the notification. Finally, use <a class="reference internal" href="#odyssey.utils.message.PushNotification.send" title="odyssey.utils.message.PushNotification.send"><code class="xref py py-meth docutils literal notranslate"><span class="pre">send()</span></code></a> to send
-a notification to all devices registered to the user.</p>
+of notification to send (see <a class="reference internal" href="#odyssey.utils.message.PushNotificationType" title="odyssey.utils.message.PushNotificationType"><code class="xref py py-class docutils literal notranslate"><span class="pre">PushNotificationType</span></code></a>). Then use one of the
+templates in this class as a starting point for the content of the notification. Finally,
+use <a class="reference internal" href="#odyssey.utils.message.PushNotification.send" title="odyssey.utils.message.PushNotification.send"><code class="xref py py-meth docutils literal notranslate"><span class="pre">send()</span></code></a> to send a notification to all devices registered to the user.</p>
 <p>To create the contents of a notification, start with one of the templates below and set
 any keys you want to use. Any key set to <code class="docutils literal notranslate"><span class="pre">None</span></code> (the default), will be removed from
 the template before sending.</p>
@@ -254,93 +492,164 @@ all its nested keys are defined by Apple. Most likely you’ll want to add custo
 to the root of the template, at the same level as <code class="docutils literal notranslate"><span class="pre">aps</span></code>.</p>
 <p>For more information on Apple specific keys, see
 <a class="reference external" href="https://developer.apple.com/library/archive/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/PayloadKeyReference.html#//apple_ref/doc/uid/TP40008194-CH17-SW1">https://developer.apple.com/library/archive/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/PayloadKeyReference.html#//apple_ref/doc/uid/TP40008194-CH17-SW1</a></p>
+<p class="rubric">Glossary</p>
+<p>A short overview of terms used in setting up and sending push notifications using the
+AWS SNS platform. For more info on AWS SNS, see <a class="reference external" href="https://docs.aws.amazon.com/sns/latest/dg/mobile-push-send.html">https://docs.aws.amazon.com/sns/latest/dg/mobile-push-send.html</a></p>
+<dl class="glossary simple">
+<dt id="term-ARN">ARN<a class="headerlink" href="#term-ARN" title="Permalink to this term">¶</a></dt><dd><p>String representation of resources on AWS</p>
+</dd>
+<dt id="term-Platform-Application">Platform Application<a class="headerlink" href="#term-Platform-Application" title="Permalink to this term">¶</a></dt><dd><p>A channel as registered with a push notification provider, e.g. Apple APNS, or Android FCM.</p>
+</dd>
+<dt id="term-Endpoint">Endpoint<a class="headerlink" href="#term-Endpoint" title="Permalink to this term">¶</a></dt><dd><p>Endpoint for a single device within a channel. Messages send to an endpoint will be send to just that device.</p>
+</dd>
+<dt id="term-Topic">Topic<a class="headerlink" href="#term-Topic" title="Permalink to this term">¶</a></dt><dd><p>A collection of endpoints. Each device/endpoint has to subscribe to the topic. Topics can be used for general messages to all users, e.g. tip of the day, network outages, general updates.</p>
+</dd>
+</dl>
 <dl class="field-list simple">
 <dt class="field-odd">Variables</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>platforms</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – These major platforms are supported by our notification system. Also includes a debug
-“platform”. This dict maps platforms to channel names.</p></li>
 <li><p><strong>apple_alert_tmpl</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – <p>This template can be used to send alert messages to Apple devices.</p>
-<ul>
-<li><dl class="simple">
-<dt>aps (dict): root key of Apple specific payload keys.</dt><dd><ul>
-<li><dl class="simple">
-<dt>alert (dict): keys for a standard user alert message.</dt><dd><ul>
-<li><p>title (str): [required] title of the message.</p></li>
-<li><p>body (str): [required] the actual message.</p></li>
-<li><p>title-loc-key (str): a key that looks up the translation (localization) of the title in Localizable.strings.</p></li>
-<li><p>title-loc-args (list(str)): a list of strings that replace formatting specifiers in the translated title.</p></li>
-<li><p>action-loc-key (str): a key that looks up the translation or alternate text of the “View” button.</p></li>
-<li><p>loc-key (str): a key that looks up the translation (localization) of the body in Localizable.strings.</p></li>
-<li><p>loc-args (list(str)): a list of strings that replace formatting specifiers in the translated body.</p></li>
-<li><p>launch-image (str): filename of image to show while app is loading from background.</p></li>
-</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;aps&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s1">&#39;alert&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="s1">&#39;body&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="s1">&#39;title-loc-key&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="s1">&#39;title-loc-args&#39;</span><span class="p">:</span> <span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="s1">&#39;action-loc-key&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="s1">&#39;loc-key&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="s1">&#39;loc-args&#39;</span><span class="p">:</span> <span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="s1">&#39;launch-image&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">},</span>
+    <span class="s1">&#39;category&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="s1">&#39;thread-id&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="s1">&#39;badge&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="s1">&#39;sound&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">},</span>
+ <span class="s1">&#39;custom&#39;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">}</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">aps</dt>
+<dd class="field-odd"><p>root key of Apple specific payload keys.</p>
+</dd>
+<dt class="field-even">alert</dt>
+<dd class="field-even"><p>keys for a standard user alert message.</p>
+</dd>
+<dt class="field-odd">title</dt>
+<dd class="field-odd"><p><strong>[required]</strong> title of the message.</p>
+</dd>
+<dt class="field-even">body</dt>
+<dd class="field-even"><p><strong>[required]</strong> the actual message.</p>
+</dd>
+<dt class="field-odd">title-loc-key</dt>
+<dd class="field-odd"><p>a key that looks up the translation (localization) of the title in Localizable.strings.</p>
+</dd>
+<dt class="field-even">title-loc-args</dt>
+<dd class="field-even"><p>a list of strings that replace formatting specifiers in the translated title.</p>
+</dd>
+<dt class="field-odd">action-loc-key</dt>
+<dd class="field-odd"><p>a key that looks up the translation or alternate text of the “View” button.</p>
+</dd>
+<dt class="field-even">loc-key</dt>
+<dd class="field-even"><p>a key that looks up the translation (localization) of the body in Localizable.strings.</p>
+</dd>
+<dt class="field-odd">loc-args</dt>
+<dd class="field-odd"><p>a list of strings that replace formatting specifiers in the translated body.</p>
+</dd>
+<dt class="field-even">launch-image</dt>
+<dd class="field-even"><p>filename of image to show while app is loading from background.</p>
+</dd>
+<dt class="field-odd">badge</dt>
+<dd class="field-odd"><p>set app badge to this number; 0 removes badge.</p>
+</dd>
+<dt class="field-even">sound</dt>
+<dd class="field-even"><p>filename of custom sound to play when push notification arrives.</p>
+</dd>
+<dt class="field-odd">thread-id</dt>
+<dd class="field-odd"><p>[<em>not used</em>] app-specific identifier for grouping notifications.</p>
+</dd>
+<dt class="field-even">category</dt>
+<dd class="field-even"><p>[<em>not used</em>] custom actions directly from notification center.</p>
+</dd>
+<dt class="field-odd">custom</dt>
+<dd class="field-odd"><p>add any custom keys to the root of this template.</p>
 </dd>
 </dl>
-</li>
-<li><p>badge (int): set app badge to this number; 0 removes badge.</p></li>
-<li><p>sound (str): filename of custom sound to play when push notification arrives.</p></li>
-<li><p>thread-id (str): [not used] app-specific identifier for grouping notifications.</p></li>
-<li><p>category (str): [not used] custom actions directly from notification center.</p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><p>custom key (any): add any custom keys to the root of this template.</p></li>
-</ul>
 </p></li>
-<li><p><strong>apple_background_tmpl</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – <p>This template can be used to trigger a background update in the app.</p>
-<ul>
-<li><dl class="simple">
-<dt>aps (dict): root key of Apple specific payload keys.</dt><dd><ul>
-<li><p>content-available (int): [required] must be set to 1.</p></li>
-<li><p>badge (int): set app badge to this number; 0 removes badge.</p></li>
-<li><p>sound (str): filename of custom sound to play when push notification arrives.</p></li>
-</ul>
+<li><p><strong>apple_background_tmpl</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – <p>This template can be used to trigger a background update in the app. The notification
+may contain custom keys, but nothing else besides “content-available” in the “aps” dict.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;aps&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s1">&#39;content-available&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+ <span class="s1">&#39;custom&#39;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">}</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">content-available</dt>
+<dd class="field-odd"><p><strong>[required]</strong> must be set to 1.</p>
 </dd>
 </dl>
-</li>
-<li><p>custom key (any): add any custom keys to the root of this template.</p></li>
-</ul>
 </p></li>
-<li><p><strong>apple_badge_tmpl</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – <p>This template can be used to set the app badge to a specific number.</p>
-<ul>
-<li><dl class="simple">
-<dt>aps (dict): root key of Apple specific payload keys.</dt><dd><ul>
-<li><p>badge (int): [required] set app badge to this number; 0 removes badge.</p></li>
-<li><p>sound (str): filename of custom sound to play when push notification arrives.</p></li>
-</ul>
+<li><p><strong>apple_badge_tmpl</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – <p>This template can be used to set the app badge to a specific number. Badge may also be
+combined with “alert”, see <a class="reference internal" href="#odyssey.utils.message.PushNotification.apple_alert_tmpl" title="odyssey.utils.message.PushNotification.apple_alert_tmpl"><code class="xref py py-attr docutils literal notranslate"><span class="pre">apple_alert_tmpl</span></code></a>. Use this template to ONLY send a
+badge number update.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;aps&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s1">&#39;badge&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="s1">&#39;sound&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">},</span>
+ <span class="s1">&#39;custom&#39;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">}</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">badge</dt>
+<dd class="field-odd"><p><strong>[required]</strong> set app badge to this number; 0 removes badge.</p>
+</dd>
+<dt class="field-even">sound</dt>
+<dd class="field-even"><p>filename of custom sound to play when push notification arrives.</p>
 </dd>
 </dl>
-</li>
-<li><p>custom key (any): add any custom keys to the root of this template.</p></li>
-</ul>
 </p></li>
 <li><p><strong>apple_voip_tmpl</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – <p>This template can be used to initiate a VoIP call. The contents of this template
 are not dictated by Apple, it does not use the <code class="docutils literal notranslate"><span class="pre">aps</span></code> root key.</p>
-<ul>
-<li><p>type (str): do <strong>not</strong> change this, it must be the literal string “incoming-call”.</p></li>
-<li><dl class="simple">
-<dt>data (dict): VoIP specific information.</dt><dd><ul>
-<li><p>room_id (int): ID of the Twilio video call room.</p></li>
-<li><p>staff_id (int): staff member who is initiating the call.</p></li>
-<li><p>staff_first_name (str): first name of the staff member.</p></li>
-<li><p>staff_middle_name (str): middle name of the staff member.</p></li>
-<li><p>staff_last_name (str): last name of the staff member.</p></li>
-<li><p>booking_description (str): reason for the call.</p></li>
-</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;incoming-call&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s1">&#39;booking_id&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="s1">&#39;booking_description&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="s1">&#39;staff_id&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="s1">&#39;staff_first_name&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="s1">&#39;staff_middle_name&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="s1">&#39;staff_last_name&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">},</span>
+ <span class="s1">&#39;custom&#39;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">}</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">type</dt>
+<dd class="field-odd"><p>do not change this, it must be the literal string “incoming-call”.</p>
+</dd>
+<dt class="field-even">data</dt>
+<dd class="field-even"><p>VoIP specific information.</p>
+</dd>
+<dt class="field-odd">booking_id</dt>
+<dd class="field-odd"><p>ID of the Twilio video call room.</p>
+</dd>
+<dt class="field-even">booking_description</dt>
+<dd class="field-even"><p>reason for the call.</p>
+</dd>
+<dt class="field-odd">staff_id</dt>
+<dd class="field-odd"><p>staff member who is initiating the call.</p>
+</dd>
+<dt class="field-even">staff_first_name</dt>
+<dd class="field-even"><p>first name of the staff member.</p>
+</dd>
+<dt class="field-odd">staff_middle_name</dt>
+<dd class="field-odd"><p>middle name of the staff member.</p>
+</dd>
+<dt class="field-even">staff_last_name</dt>
+<dd class="field-even"><p>last name of the staff member.</p>
 </dd>
 </dl>
-</li>
-</ul>
 </p></li>
+<li><p><strong>sns</strong> (<em>boto3.Resource</em>) – The active connection with AWS SNS through <code class="xref py py-mod docutils literal notranslate"><span class="pre">boto3</span></code>.</p></li>
+<li><p><strong>channel_platapp</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – Maps channel names to platform applications for all platform applications on SNS.</p></li>
 </ul>
 </dd>
 </dl>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="odyssey.utils.message.PushNotification.platforms">
-<span class="sig-name descname"><span class="pre">platforms</span></span><em class="property"> <span class="pre">=</span> <span class="pre">{'android':</span> <span class="pre">'FCM',</span> <span class="pre">'apple':</span> <span class="pre">'APNS',</span> <span class="pre">'debug':</span> <span class="pre">'DEBUG/LOG'}</span></em><a class="headerlink" href="#odyssey.utils.message.PushNotification.platforms" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.utils.message.PushNotification.apple_alert_tmpl">
 <span class="sig-name descname"><span class="pre">apple_alert_tmpl</span></span><em class="property"> <span class="pre">=</span> <span class="pre">{'aps':</span> <span class="pre">{'alert':</span> <span class="pre">{'action-loc-key':</span> <span class="pre">None,</span> <span class="pre">'body':</span> <span class="pre">None,</span> <span class="pre">'launch-image':</span> <span class="pre">None,</span> <span class="pre">'loc-args':</span> <span class="pre">None,</span> <span class="pre">'loc-key':</span> <span class="pre">None,</span> <span class="pre">'title':</span> <span class="pre">None,</span> <span class="pre">'title-loc-args':</span> <span class="pre">None,</span> <span class="pre">'title-loc-key':</span> <span class="pre">None},</span> <span class="pre">'badge':</span> <span class="pre">None,</span> <span class="pre">'category':</span> <span class="pre">None,</span> <span class="pre">'sound':</span> <span class="pre">None,</span> <span class="pre">'thread-id':</span> <span class="pre">None}}</span></em><a class="headerlink" href="#odyssey.utils.message.PushNotification.apple_alert_tmpl" title="Permalink to this definition">¶</a></dt>
@@ -348,7 +657,7 @@ are not dictated by Apple, it does not use the <code class="docutils literal not
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.utils.message.PushNotification.apple_background_tmpl">
-<span class="sig-name descname"><span class="pre">apple_background_tmpl</span></span><em class="property"> <span class="pre">=</span> <span class="pre">{'aps':</span> <span class="pre">{'badge':</span> <span class="pre">None,</span> <span class="pre">'content-available':</span> <span class="pre">1,</span> <span class="pre">'sound':</span> <span class="pre">None}}</span></em><a class="headerlink" href="#odyssey.utils.message.PushNotification.apple_background_tmpl" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">apple_background_tmpl</span></span><em class="property"> <span class="pre">=</span> <span class="pre">{'aps':</span> <span class="pre">{'content-available':</span> <span class="pre">1}}</span></em><a class="headerlink" href="#odyssey.utils.message.PushNotification.apple_background_tmpl" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -358,28 +667,35 @@ are not dictated by Apple, it does not use the <code class="docutils literal not
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.utils.message.PushNotification.apple_voip_tmpl">
-<span class="sig-name descname"><span class="pre">apple_voip_tmpl</span></span><em class="property"> <span class="pre">=</span> <span class="pre">{'data':</span> <span class="pre">{'booking_description':</span> <span class="pre">None,</span> <span class="pre">'room_id':</span> <span class="pre">None,</span> <span class="pre">'staff_first_name':</span> <span class="pre">None,</span> <span class="pre">'staff_id':</span> <span class="pre">None,</span> <span class="pre">'staff_last_name':</span> <span class="pre">None,</span> <span class="pre">'staff_middle_name':</span> <span class="pre">None},</span> <span class="pre">'type':</span> <span class="pre">'incoming-call'}</span></em><a class="headerlink" href="#odyssey.utils.message.PushNotification.apple_voip_tmpl" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">apple_voip_tmpl</span></span><em class="property"> <span class="pre">=</span> <span class="pre">{'data':</span> <span class="pre">{'booking_description':</span> <span class="pre">None,</span> <span class="pre">'booking_id':</span> <span class="pre">None,</span> <span class="pre">'staff_first_name':</span> <span class="pre">None,</span> <span class="pre">'staff_id':</span> <span class="pre">None,</span> <span class="pre">'staff_last_name':</span> <span class="pre">None,</span> <span class="pre">'staff_middle_name':</span> <span class="pre">None},</span> <span class="pre">'type':</span> <span class="pre">'incoming-call'}</span></em><a class="headerlink" href="#odyssey.utils.message.PushNotification.apple_voip_tmpl" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="odyssey.utils.message.PushNotification.register_device">
-<span class="sig-name descname"><span class="pre">register_device</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">device_token</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_os</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_description</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">current_endpoint</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><a class="headerlink" href="#odyssey.utils.message.PushNotification.register_device" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">register_device</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">device_token</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_platform</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#odyssey.utils.message.PushNotificationPlatform" title="odyssey.utils.message.PushNotificationPlatform"><span class="pre">odyssey.utils.message.PushNotificationPlatform</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_info</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">current_endpoint</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">voip</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><a class="headerlink" href="#odyssey.utils.message.PushNotification.register_device" title="Permalink to this definition">¶</a></dt>
 <dd><p>Register a device for push notifications.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>device_token</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The device token (called registration ID on Android) obtained from the OS to allow
 push notifications.</p></li>
-<li><p><strong>device_os</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Which platform to register with. Currently supported: “apple”, “android”, or “debug”.</p></li>
-<li><p><strong>device_description</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Additional data stored with the device_token in the AWS SNS endpoint. Max length 2048.</p></li>
-<li><p><strong>current_endpoint</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Current endpoint ARN, which may or may not be active.</p></li>
+<li><p><strong>device_platform</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em> or </em><a class="reference internal" href="#odyssey.utils.message.PushNotificationPlatform" title="odyssey.utils.message.PushNotificationPlatform"><em>PushNotificationPlatform</em></a>) – Which platform to register with. Currently supported: “apple”, “android”, or “debug”.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><em>str</em> – Endpoint ARN registered for this device.</p>
+<dt class="field-even">Keyword Arguments</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>device_info</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – Additional data stored with the device_token in the AWS SNS endpoint.
+Max length after conversion to JSON: 2048.</p></li>
+<li><p><strong>current_endpoint</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – ARN of existing endpoint for this device token, which may or may not be active.</p></li>
+<li><p><strong>voip</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether or not this device token is for a VoIP channel. Only used by Apple devices,
+ignored by Android devices.</p></li>
+</ul>
 </dd>
-<dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.9)"><strong>ValueError</strong></a> – On incorrect platform or device_description too long.</p>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><em>str</em> – Endpoint ARN registered for this device.</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.9)"><strong>ValueError</strong></a> – On incorrect platform or device_description too long.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -405,8 +721,8 @@ push notifications.</p></li>
 <li><p><strong>user_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – User ID of User to send message to. Notification will be send to all
 registered devices for this user.</p></li>
 <li><p><strong>notification_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em> or </em><a class="reference internal" href="#odyssey.utils.message.PushNotificationType" title="odyssey.utils.message.PushNotificationType"><em>PushNotificationType</em></a><em>(</em><em>Enum</em><em>)</em>) – What type of notification (alert, background, badge, voip) to send.</p></li>
-<li><p><strong>content</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – Content of the push notification. See the <code class="docutils literal notranslate"><span class="pre">apple_tmpl</span></code> and <code class="docutils literal notranslate"><span class="pre">apple_voip_tmpl</span></code>
-notification templates for a place to start.</p></li>
+<li><p><strong>content</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – Content of the push notification. See the templates in this class
+for a place to start.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -438,7 +754,7 @@ as it was sent to the registrered device(s) as value.</p>
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright Copyright 2019-2020 Atlantic Venture Partners, all rights reserved.
+        &#169; Copyright Copyright 2019-2021 Atlantic Venture Partners, all rights reserved.
 
     </p>
   </div>

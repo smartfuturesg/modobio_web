@@ -11,10 +11,11 @@ from .data import (
     telehealth_staff_general_availability_bad_4_post_data,
     telehealth_staff_general_availability_bad_5_post_data,
     telehealth_staff_general_availability_bad_6_post_data,
-    telehealth_staff_general_availability_bad_7_post_data
+    telehealth_staff_general_availability_bad_7_post_data,
+    telehealth_queue_client_pool_8_post_data    
 )
 
-def test_post_1_staff_general_availability(test_client, init_database, staff_auth_header):
+def test_post_1_staff_general_availability(test_client, init_database,client_auth_header, staff_auth_header):
     """
     GIVEN a api end point for staff general availability
     WHEN the '/telehealth/settings/staff/availability/user_id>' resource  is requested (POST)
@@ -27,7 +28,23 @@ def test_post_1_staff_general_availability(test_client, init_database, staff_aut
                                 content_type='application/json')
     assert response.status_code == 201
 
-   
+    response = test_client.post('/telehealth/queue/client-pool/1/',
+                                headers=client_auth_header, 
+                                data=dumps(telehealth_queue_client_pool_8_post_data), 
+                                content_type='application/json')
+    # This get request was inserted here to show that there needs to be at least 10 
+    # valid times returned. If there are less than 10 appointment times, then we increment onward a day
+    # and keep going until the 10 times is valid
+    response = test_client.get('/telehealth/client/time-select/1/', headers=client_auth_header)
+
+    assert response.json['appointment_times'][0]['target_date'] == '2022-04-04'
+    assert response.json['appointment_times'][1]['target_date'] == '2022-04-04'
+    assert response.json['appointment_times'][2]['target_date'] == '2022-04-04'
+    assert response.json['appointment_times'][3]['target_date'] == '2022-04-11'
+    assert response.json['appointment_times'][6]['target_date'] == '2022-04-18'
+    assert response.json['appointment_times'][9]['target_date'] == '2022-04-25'
+    assert response.json['total_options'] == 12
+
     # 3_midnight_bug_staff_general_availability
     response = test_client.post('/telehealth/settings/staff/availability/2/',
                                 headers=staff_auth_header, 

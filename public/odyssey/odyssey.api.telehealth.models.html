@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>odyssey.api.telehealth.models module &mdash; Odyssey version: 0.5.45 documentation</title>
+  <title>odyssey.api.telehealth.models module &mdash; Odyssey version: 0.7.53 documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                version: 0.5.45
+                version: 0.7.53
               </div>
             
           
@@ -644,15 +644,23 @@ Professional type is used for what type of professional the client wants to meet
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookingDetails.details">
 <span class="sig-name descname"><span class="pre">details</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookingDetails.details" title="Permalink to this definition">¶</a></dt>
-<dd><p>client details about a booked teleheath call
-:type: str</p>
+<dd><p>client details about a booked teleheath call</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookingDetails.media">
-<span class="sig-name descname"><span class="pre">media</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookingDetails.media" title="Permalink to this definition">¶</a></dt>
-<dd><p>aws url link to media saved in S3 bucket (image or recording)
-:type: str</p>
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookingDetails.location_id">
+<span class="sig-name descname"><span class="pre">location_id</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookingDetails.location_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>client location id for this booking</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, foreign key(LookupTerritoriesofOperation.idx)</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -785,7 +793,7 @@ staff interactions.</p>
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright Copyright 2019-2020 Atlantic Venture Partners, all rights reserved.
+        &#169; Copyright Copyright 2019-2021 Atlantic Venture Partners, all rights reserved.
 
     </p>
   </div>
