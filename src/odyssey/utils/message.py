@@ -471,7 +471,7 @@ class PushNotificationPlatform(enum.Enum):
     """ Enumerates push notification platforms and maps them to channels. """
     apple = 'APNS'
     android = 'FCM'
-    debug = 'DEBUG/LOG'
+    debug = 'arn:aws::::app/DEBUG/LOG'
 
 
 class PushNotificationType(enum.Enum):
@@ -806,7 +806,7 @@ class PushNotification:
                 message = self._send_apple(device, notification_type, content)
             elif arn.channel == 'FCM':
                 message = self._send_android(device, notification_type, content)
-            elif arn.channel == 'LOG':
+            elif arn.channel == 'DEBUG':
                 message = self._send_log(notification_type, content)
             else:
                 raise UnknownError(f'Unknown push notification channel {arn.channel} for user {user_id}')
