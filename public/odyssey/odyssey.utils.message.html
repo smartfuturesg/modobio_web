@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>odyssey.utils.message &mdash; Odyssey version: 0.7.52 documentation</title>
+  <title>odyssey.utils.message &mdash; Odyssey version: 0.7.53 documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                version: 0.7.52
+                version: 0.7.53
               </div>
             
           
@@ -509,77 +509,141 @@ AWS SNS platform. For more info on AWS SNS, see <a class="reference external" hr
 <dt class="field-odd">Variables</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>apple_alert_tmpl</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – <p>This template can be used to send alert messages to Apple devices.</p>
-<ul>
-<li><p><strong>aps</strong> (dict): root key of Apple specific payload keys.</p>
-<blockquote>
-<div><ul>
-<li><p><strong>alert</strong> (dict): keys for a standard user alert message.</p>
-<blockquote>
-<div><ul class="simple">
-<li><p><strong>title</strong> (str): <strong>[required]</strong> title of the message.</p></li>
-<li><p><strong>body</strong> (str): <strong>[required]</strong> the actual message.</p></li>
-<li><p><strong>title-loc-key</strong> (str): a key that looks up the translation (localization) of the title in Localizable.strings.</p></li>
-<li><p><strong>title-loc-args</strong> (list(str)): a list of strings that replace formatting specifiers in the translated title.</p></li>
-<li><p><strong>action-loc-key</strong> (str): a key that looks up the translation or alternate text of the “View” button.</p></li>
-<li><p><strong>loc-key</strong> (str): a key that looks up the translation (localization) of the body in Localizable.strings.</p></li>
-<li><p><strong>loc-args</strong> (list(str)): a list of strings that replace formatting specifiers in the translated body.</p></li>
-<li><p><strong>launch-image</strong> (str): filename of image to show while app is loading from background.</p></li>
-</ul>
-</div></blockquote>
-</li>
-<li><p><strong>badge</strong> (int): set app badge to this number; 0 removes badge.</p></li>
-<li><p><strong>sound</strong> (str): filename of custom sound to play when push notification arrives.</p></li>
-<li><p><strong>thread-id</strong> (str): [<em>not used</em>] app-specific identifier for grouping notifications.</p></li>
-<li><p><strong>category</strong> (str): [<em>not used</em>] custom actions directly from notification center.</p></li>
-</ul>
-</div></blockquote>
-</li>
-<li><p><strong>custom_key</strong> (any): add any custom keys to the root of this template.</p></li>
-</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;aps&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s1">&#39;alert&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="s1">&#39;body&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="s1">&#39;title-loc-key&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="s1">&#39;title-loc-args&#39;</span><span class="p">:</span> <span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="s1">&#39;action-loc-key&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="s1">&#39;loc-key&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="s1">&#39;loc-args&#39;</span><span class="p">:</span> <span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="s1">&#39;launch-image&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">},</span>
+    <span class="s1">&#39;category&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="s1">&#39;thread-id&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="s1">&#39;badge&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="s1">&#39;sound&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">},</span>
+ <span class="s1">&#39;custom&#39;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">}</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">aps</dt>
+<dd class="field-odd"><p>root key of Apple specific payload keys.</p>
+</dd>
+<dt class="field-even">alert</dt>
+<dd class="field-even"><p>keys for a standard user alert message.</p>
+</dd>
+<dt class="field-odd">title</dt>
+<dd class="field-odd"><p><strong>[required]</strong> title of the message.</p>
+</dd>
+<dt class="field-even">body</dt>
+<dd class="field-even"><p><strong>[required]</strong> the actual message.</p>
+</dd>
+<dt class="field-odd">title-loc-key</dt>
+<dd class="field-odd"><p>a key that looks up the translation (localization) of the title in Localizable.strings.</p>
+</dd>
+<dt class="field-even">title-loc-args</dt>
+<dd class="field-even"><p>a list of strings that replace formatting specifiers in the translated title.</p>
+</dd>
+<dt class="field-odd">action-loc-key</dt>
+<dd class="field-odd"><p>a key that looks up the translation or alternate text of the “View” button.</p>
+</dd>
+<dt class="field-even">loc-key</dt>
+<dd class="field-even"><p>a key that looks up the translation (localization) of the body in Localizable.strings.</p>
+</dd>
+<dt class="field-odd">loc-args</dt>
+<dd class="field-odd"><p>a list of strings that replace formatting specifiers in the translated body.</p>
+</dd>
+<dt class="field-even">launch-image</dt>
+<dd class="field-even"><p>filename of image to show while app is loading from background.</p>
+</dd>
+<dt class="field-odd">badge</dt>
+<dd class="field-odd"><p>set app badge to this number; 0 removes badge.</p>
+</dd>
+<dt class="field-even">sound</dt>
+<dd class="field-even"><p>filename of custom sound to play when push notification arrives.</p>
+</dd>
+<dt class="field-odd">thread-id</dt>
+<dd class="field-odd"><p>[<em>not used</em>] app-specific identifier for grouping notifications.</p>
+</dd>
+<dt class="field-even">category</dt>
+<dd class="field-even"><p>[<em>not used</em>] custom actions directly from notification center.</p>
+</dd>
+<dt class="field-odd">custom</dt>
+<dd class="field-odd"><p>add any custom keys to the root of this template.</p>
+</dd>
+</dl>
 </p></li>
 <li><p><strong>apple_background_tmpl</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – <p>This template can be used to trigger a background update in the app. The notification
 may contain custom keys, but nothing else besides “content-available” in the “aps” dict.</p>
-<ul>
-<li><p><strong>aps</strong> (dict): root key of Apple specific payload keys.</p>
-<blockquote>
-<div><ul class="simple">
-<li><p><strong>content-available</strong> (int): <strong>[required]</strong> must be set to 1.</p></li>
-</ul>
-</div></blockquote>
-</li>
-<li><p><strong>custom_key</strong> (any): add any custom keys to the root of this template.</p></li>
-</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;aps&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s1">&#39;content-available&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+ <span class="s1">&#39;custom&#39;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">}</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">content-available</dt>
+<dd class="field-odd"><p><strong>[required]</strong> must be set to 1.</p>
+</dd>
+</dl>
 </p></li>
-<li><p><strong>apple_badge_tmpl</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – <p>This template can be used to set the app badge to a specific number.</p>
-<ul>
-<li><p><strong>aps</strong> (dict): root key of Apple specific payload keys.</p>
-<blockquote>
-<div><ul class="simple">
-<li><p><strong>badge</strong> (int): <strong>[required]</strong> set app badge to this number; 0 removes badge.</p></li>
-<li><p><strong>sound</strong> (str): filename of custom sound to play when push notification arrives.</p></li>
-</ul>
-</div></blockquote>
-</li>
-<li><p><strong>custom_key</strong> (any): add any custom keys to the root of this template.</p></li>
-</ul>
+<li><p><strong>apple_badge_tmpl</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – <p>This template can be used to set the app badge to a specific number. Badge may also be
+combined with “alert”, see <a class="reference internal" href="#odyssey.utils.message.PushNotification.apple_alert_tmpl" title="odyssey.utils.message.PushNotification.apple_alert_tmpl"><code class="xref py py-attr docutils literal notranslate"><span class="pre">apple_alert_tmpl</span></code></a>. Use this template to ONLY send a
+badge number update.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;aps&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s1">&#39;badge&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="s1">&#39;sound&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">},</span>
+ <span class="s1">&#39;custom&#39;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">}</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">badge</dt>
+<dd class="field-odd"><p><strong>[required]</strong> set app badge to this number; 0 removes badge.</p>
+</dd>
+<dt class="field-even">sound</dt>
+<dd class="field-even"><p>filename of custom sound to play when push notification arrives.</p>
+</dd>
+</dl>
 </p></li>
 <li><p><strong>apple_voip_tmpl</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – <p>This template can be used to initiate a VoIP call. The contents of this template
 are not dictated by Apple, it does not use the <code class="docutils literal notranslate"><span class="pre">aps</span></code> root key.</p>
-<ul>
-<li><p><strong>type</strong> (str): do <strong>not</strong> change this, it must be the literal string “incoming-call”.</p></li>
-<li><p><strong>data</strong> (dict): VoIP specific information.</p>
-<blockquote>
-<div><ul class="simple">
-<li><p><strong>booking_id</strong> (int): ID of the Twilio video call room.</p></li>
-<li><p><strong>booking_description</strong> (str): reason for the call.</p></li>
-<li><p><strong>staff_id</strong> (int): staff member who is initiating the call.</p></li>
-<li><p><strong>staff_first_name</strong> (str): first name of the staff member.</p></li>
-<li><p><strong>staff_middle_name</strong> (str): middle name of the staff member.</p></li>
-<li><p><strong>staff_last_name</strong> (str): last name of the staff member.</p></li>
-</ul>
-</div></blockquote>
-</li>
-</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;incoming-call&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s1">&#39;booking_id&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="s1">&#39;booking_description&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="s1">&#39;staff_id&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="s1">&#39;staff_first_name&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="s1">&#39;staff_middle_name&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="s1">&#39;staff_last_name&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">},</span>
+ <span class="s1">&#39;custom&#39;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">}</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">type</dt>
+<dd class="field-odd"><p>do not change this, it must be the literal string “incoming-call”.</p>
+</dd>
+<dt class="field-even">data</dt>
+<dd class="field-even"><p>VoIP specific information.</p>
+</dd>
+<dt class="field-odd">booking_id</dt>
+<dd class="field-odd"><p>ID of the Twilio video call room.</p>
+</dd>
+<dt class="field-even">booking_description</dt>
+<dd class="field-even"><p>reason for the call.</p>
+</dd>
+<dt class="field-odd">staff_id</dt>
+<dd class="field-odd"><p>staff member who is initiating the call.</p>
+</dd>
+<dt class="field-even">staff_first_name</dt>
+<dd class="field-even"><p>first name of the staff member.</p>
+</dd>
+<dt class="field-odd">staff_middle_name</dt>
+<dd class="field-odd"><p>middle name of the staff member.</p>
+</dd>
+<dt class="field-even">staff_last_name</dt>
+<dd class="field-even"><p>last name of the staff member.</p>
+</dd>
+</dl>
 </p></li>
 <li><p><strong>sns</strong> (<em>boto3.Resource</em>) – The active connection with AWS SNS through <code class="xref py py-mod docutils literal notranslate"><span class="pre">boto3</span></code>.</p></li>
 <li><p><strong>channel_platapp</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – Maps channel names to platform applications for all platform applications on SNS.</p></li>
@@ -690,7 +754,7 @@ as it was sent to the registrered device(s) as value.</p>
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright Copyright 2019-2020 Atlantic Venture Partners, all rights reserved.
+        &#169; Copyright Copyright 2019-2021 Atlantic Venture Partners, all rights reserved.
 
     </p>
   </div>

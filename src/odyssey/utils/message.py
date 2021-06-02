@@ -525,61 +525,85 @@ class PushNotification:
     Attributes
     ----------
     apple_alert_tmpl : dict
-        This template can be used to send alert messages to Apple devices.
+        This template can be used to send alert messages to Apple devices. ::
 
-        * **aps** (dict): root key of Apple specific payload keys.
+            {'aps': {
+                'alert': {
+                    'title': str,
+                    'body': str,
+                    'title-loc-key': str,
+                    'title-loc-args': [str],
+                    'action-loc-key': str,
+                    'loc-key': str,
+                    'loc-args': [str],
+                    'launch-image': str},
+                'category': str,
+                'thread-id': str,
+                'badge': int,
+                'sound': str},
+             'custom': dict}
 
-            * **alert** (dict): keys for a standard user alert message.
-
-                * **title** (str): **[required]** title of the message.
-                * **body** (str): **[required]** the actual message.
-                * **title-loc-key** (str): a key that looks up the translation (localization) of the title in Localizable.strings.
-                * **title-loc-args** (list(str)): a list of strings that replace formatting specifiers in the translated title.
-                * **action-loc-key** (str): a key that looks up the translation or alternate text of the "View" button.
-                * **loc-key** (str): a key that looks up the translation (localization) of the body in Localizable.strings.
-                * **loc-args** (list(str)): a list of strings that replace formatting specifiers in the translated body.
-                * **launch-image** (str): filename of image to show while app is loading from background.
-
-            * **badge** (int): set app badge to this number; 0 removes badge.
-            * **sound** (str): filename of custom sound to play when push notification arrives.
-            * **thread-id** (str): [*not used*] app-specific identifier for grouping notifications.
-            * **category** (str): [*not used*] custom actions directly from notification center.
-
-        * **custom_key** (any): add any custom keys to the root of this template.
+        :aps: root key of Apple specific payload keys.
+        :alert: keys for a standard user alert message.
+        :title: **[required]** title of the message.
+        :body: **[required]** the actual message.
+        :title-loc-key: a key that looks up the translation (localization) of the title in Localizable.strings.
+        :title-loc-args: a list of strings that replace formatting specifiers in the translated title.
+        :action-loc-key: a key that looks up the translation or alternate text of the "View" button.
+        :loc-key: a key that looks up the translation (localization) of the body in Localizable.strings.
+        :loc-args: a list of strings that replace formatting specifiers in the translated body.
+        :launch-image: filename of image to show while app is loading from background.
+        :badge: set app badge to this number; 0 removes badge.
+        :sound: filename of custom sound to play when push notification arrives.
+        :thread-id: [*not used*] app-specific identifier for grouping notifications.
+        :category: [*not used*] custom actions directly from notification center.
+        :custom: add any custom keys to the root of this template.
 
     apple_background_tmpl : dict
         This template can be used to trigger a background update in the app. The notification
-        may contain custom keys, but nothing else besides "content-available" in the "aps" dict.
+        may contain custom keys, but nothing else besides "content-available" in the "aps" dict. ::
 
-        * **aps** (dict): root key of Apple specific payload keys.
+            {'aps': {
+                'content-available': 1},
+             'custom': dict}
 
-            * **content-available** (int): **[required]** must be set to 1.
-
-        * **custom_key** (any): add any custom keys to the root of this template.
+        :content-available: **[required]** must be set to 1.
 
     apple_badge_tmpl : dict
-        This template can be used to set the app badge to a specific number.
+        This template can be used to set the app badge to a specific number. Badge may also be
+        combined with "alert", see :attr:`apple_alert_tmpl`. Use this template to ONLY send a
+        badge number update. ::
 
-        * **aps** (dict): root key of Apple specific payload keys.
+            {'aps': {
+                'badge': int,
+                'sound': str},
+             'custom': dict}
 
-            * **badge** (int): **[required]** set app badge to this number; 0 removes badge.
-            * **sound** (str): filename of custom sound to play when push notification arrives.
-
-        * **custom_key** (any): add any custom keys to the root of this template.
+        :badge: **[required]** set app badge to this number; 0 removes badge.
+        :sound: filename of custom sound to play when push notification arrives.
 
     apple_voip_tmpl : dict
         This template can be used to initiate a VoIP call. The contents of this template
-        are not dictated by Apple, it does not use the ``aps`` root key.
+        are not dictated by Apple, it does not use the ``aps`` root key. ::
 
-        * **type** (str): do **not** change this, it must be the literal string "incoming-call".
-        * **data** (dict): VoIP specific information.
+            {'type': 'incoming-call',
+             'data': {
+                'booking_id': int,
+                'booking_description': str,
+                'staff_id': int,
+                'staff_first_name': str,
+                'staff_middle_name': str,
+                'staff_last_name': str},
+             'custom': dict}
 
-            * **booking_id** (int): ID of the Twilio video call room.
-            * **booking_description** (str): reason for the call.
-            * **staff_id** (int): staff member who is initiating the call.
-            * **staff_first_name** (str): first name of the staff member.
-            * **staff_middle_name** (str): middle name of the staff member.
-            * **staff_last_name** (str): last name of the staff member.
+        :type: do not change this, it must be the literal string "incoming-call".
+        :data: VoIP specific information.
+        :booking_id: ID of the Twilio video call room.
+        :booking_description: reason for the call.
+        :staff_id: staff member who is initiating the call.
+        :staff_first_name: first name of the staff member.
+        :staff_middle_name: middle name of the staff member.
+        :staff_last_name: last name of the staff member.
 
     sns : boto3.Resource
         The active connection with AWS SNS through :mod:`boto3`.
