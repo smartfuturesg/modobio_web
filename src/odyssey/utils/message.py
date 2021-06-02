@@ -426,7 +426,7 @@ class EndpointARN:
         if self.is_app:
             self.type, self.channel, self.label = sns_part.split('/')
         else:
-            self.type, self.channel, self.label, self.uuid = sns_part.split('/')
+            self.type, self.channel, self.label, self.device = sns_part.split('/')
 
     @property
     def channel(self) -> str:
@@ -785,7 +785,7 @@ class PushNotification:
             elif arn.channel == 'LOG':
                 message = self._send_log(notification_type, content)
             else:
-                raise UnknownError(f'Unknown push notification channel {endp.channel} for user {user_id}')
+                raise UnknownError(f'Unknown push notification channel {arn.channel} for user {user_id}')
 
         return message
 
@@ -794,7 +794,7 @@ class PushNotification:
 
         Do not call this function directly, use :meth:`send` instead.
         """
-        # Check content. Don't error, just set defaults.
+        # Check content and convert to JSON.
         if notification_type == PushNotificationType.alert:
             schema = ApplePushNotificationAlertSchema
         elif notification_type == PushNotificationType.background:
@@ -824,11 +824,9 @@ class PushNotification:
         message_attr = {
             'AWS.SNS.MOBILE.APNS.PUSH_TYPE': {
                 'DataType': 'String',
-                'StringValue': push_type
-            }
-        }
+                'StringValue': push_type}}
 
-        message = {channel: processed}
+        message = {endp.channel: processed}
 
         endpoint = self.sns.PlatformEndpoint(arn=endp.arn)
 
@@ -836,6 +834,7 @@ class PushNotification:
         response = endpoint.publish(
             TargetArn=endp.arn,
             Message=dumps(message),
+            MessageStructure='json',
             MessageAttributes=message_attr)
 
         return message
