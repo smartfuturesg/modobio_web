@@ -813,8 +813,12 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
         # Both of the sorts are necessary for this conversion
         availability = TelehealthStaffAvailability.query.filter_by(user_id=user_id).\
                         order_by(TelehealthStaffAvailability.day_of_week.asc(),TelehealthStaffAvailability.booking_window_id.asc()).all()
+        
         if not availability:
             return 204
+        # timezones for all availability entries will be the same
+        tzone = availability[0].timezone
+        
         # pull the static booking window ids
         booking_increments = LookupBookingTimeIncrements.query.all()
 
@@ -978,13 +982,13 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
         # Unload ordered array in to a super array
         orderedArray = [*monArr, *tueArr, *wedArr, *thuArr, *friArr, *satArr, *sunArr]
 
-        payload = {}
+        payload = {'timezone': tzone}
         payload['availability'] = orderedArray
         return payload
 
     @token_auth.login_required
     @accepts(schema=TelehealthStaffAvailabilityOutputSchema, api=ns)
-    @responds(schema=TelehealthStaffAvailabilityOutputSchema, api=ns, status_code=201)
+    # @responds(schema=TelehealthStaffAvailabilityOutputSchema, api=ns, status_code=201) # commenting this out because there wasnt a response payload 
     def post(self,user_id):
         """
         Posts the staff availability
@@ -1033,7 +1037,8 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
 
         if request.parsed_obj['availability']:
             avail = request.parsed_obj['availability']
-            data = {}
+            tzone = request.parsed_obj['timezone']
+            data = {'user_id': user_id, 'timezone': tzone}
             # Loop through the input payload of start_time and end_times
             for time in avail:
                 # end time must be after start time
@@ -1064,7 +1069,6 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
                 for idx in range(startIdx,endIdx+1):
                     if idx not in availabilityIdxArr[time['day_of_week']]:
                         availabilityIdxArr[time['day_of_week']].append(idx)
-                        data['user_id'] = user_id
                         data['booking_window_id'] = idx
                         data['day_of_week'] = time['day_of_week']
                         data_in = TelehealthStaffAvailabilitySchema().load(data)
@@ -1124,7 +1128,7 @@ class TelehealthQueueClientPoolApi(Resource):
         Add a client to the queue
         """
         check_client_existence(user_id)
-        
+
         # Client can only have one appointment on one day:
         # GOOD: Appointment 1 Day 1, Appointment 2 Day 2
         # BAD: Appointment 1 Day 1, Appointment 2 Day 1

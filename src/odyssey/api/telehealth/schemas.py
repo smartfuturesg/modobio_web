@@ -95,6 +95,7 @@ class TelehealthStaffAvailabilityInputSchema(Schema):
 
 class TelehealthStaffAvailabilityOutputSchema(Schema):
     availability = fields.Nested(TelehealthStaffAvailabilityInputSchema(many=True), missing=[])
+    timezone = fields.String(validate=validate.OneOf(pytz.common_timezones),metadata={'description': 'optional timezone selection, defaults to UTC'}, missing='UTC')
 
 class TelehealthMeetingRoomSchema(ma.SQLAlchemyAutoSchema):
     """
@@ -115,7 +116,7 @@ class TelehealthQueueClientPoolSchema(ma.SQLAlchemyAutoSchema):
     
     duration = fields.Integer(missing=20)
     medical_gender = fields.String(validate=validate.OneOf([gender[0] for gender in GENDERS]),metadata={'description': 'Preferred Medical Professional gender'})
-    timezone = fields.String(validate=validate.OneOf(pytz.common_timezones),metadata={'description': 'Preferred Medical Professional gender'}, missing='UTC')
+    timezone = fields.String(validate=validate.OneOf(pytz.common_timezones),metadata={'description': 'optional timezone selection, defaults to UTC'}, missing='UTC')
 
     @post_load
     def make_object(self, data, **kwargs):

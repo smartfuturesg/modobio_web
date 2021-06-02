@@ -201,6 +201,13 @@ class TelehealthStaffAvailability(db.Model):
     :type: int, foreign key('LookupBookingTimeIncrements.idx')
     """
 
+    timezone = db.Column(db.String)
+    """
+    Staff's timezone setting for the current telehealth availability submisison
+
+    :type: str
+    """
+
 class TelehealthQueueClientPool(db.Model):
     """ 
     Holds all of the clients in a pool for their appointments. 
