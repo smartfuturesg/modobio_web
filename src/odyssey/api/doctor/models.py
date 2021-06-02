@@ -35,6 +35,13 @@ class MedicalBloodPressures(db.Model):
     :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
+    reporter_id = db.Column(db.Integer, db.ForeignKey('User.user_id'), nullable=False)
+    """
+    User id of the user who reported this blood pressure reading
+
+    :type: int, foreign key('User.user_id')
+    """
+
     systolic = db.Column(db.Float)
     """
     Systolic value with units mmHg

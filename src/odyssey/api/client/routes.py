@@ -875,7 +875,7 @@ class ClinicalCareTeamMembers(Resource):
             if 'modobio_id' in team_member:
                 #if modobio_id has been given, find the user with that id and insert their email into the payload
                 modo_id = team_member["modobio_id"]
-                user = User.query.filter_by(modobio_id=modo_id)
+                user = User.query.filter_by(modobio_id=modo_id).one_or_none()
                 if user:
                     team_member["team_member_email"] = user.email
                 else:
