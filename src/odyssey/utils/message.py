@@ -586,7 +586,8 @@ class PushNotification:
         This template can be used to initiate a VoIP call. The contents of this template
         are not dictated by Apple, it does not use the ``aps`` root key. ::
 
-            {'type': 'incoming-call',
+            {'aps': {},
+             'type': 'incoming-call',
              'data': {
                 'booking_id': int,
                 'booking_description': str,
@@ -596,6 +597,7 @@ class PushNotification:
                 'staff_last_name': str},
              'custom': dict}
 
+        :aps: must be present, but empty; entries in ``aps`` are ignored.
         :type: do not change this, it must be the literal string "incoming-call".
         :data: VoIP specific information.
         :booking_id: ID of the Twilio video call room.
@@ -637,6 +639,7 @@ class PushNotification:
             'sound': None}}
 
     apple_voip_tmpl = {
+        'aps': {},
         'type': 'incoming-call',
         'data': {
             'booking_id': None,
