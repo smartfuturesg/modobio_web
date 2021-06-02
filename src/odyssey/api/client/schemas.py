@@ -349,7 +349,7 @@ class ClinicalCareTeamAuthorizaitonSchema(Schema):
 
     Each instance is an entry into the ClientClinicalCareTeamAuthorizations table
     """
-    user_id = fields.Integer(load_only=True)
+    user_id = fields.Integer(dump_only=True)
     team_member_modobio_id = fields.String(dump_only=True)
     team_member_user_id = fields.Integer(
         metadata={'description': 'user_id for this clinical care team member'})

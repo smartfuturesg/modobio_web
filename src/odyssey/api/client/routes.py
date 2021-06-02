@@ -1095,7 +1095,7 @@ class ClinicalCareTeamResourceAuthorization(Resource):
     Clinical care team members must individually be given access to resources. The available options can be found
     by using the /lookup/care-team/resources/ (GET) API. 
     """
-    @token_auth.login_required()
+    @token_auth.login_required
     @accepts(schema=ClinicalCareTeamAuthorizationNestedSchema, api=ns)
     @responds(schema=ClinicalCareTeamAuthorizationNestedSchema, api=ns, status_code=201)
     def post(self, user_id):
@@ -1116,8 +1116,13 @@ class ClinicalCareTeamResourceAuthorization(Resource):
         # user_id denotes the main users
         # if the current user is not the main user (aka a random user), and they are not on the current team
         # deny them access
-        if current_user.user_id != user_id and current_user.user_id not in current_team_ids:
-            raise InputError(message="member not in care team", status_code=400)
+
+        if current_user.user_id != user_id: 
+            if current_user.user_id not in current_team_ids:
+                raise InputError(message="member not in care team", status_code=400)
+            
+            if current_user.is_client:
+                raise InputError(message="Clients cannot request other clients data", status_code=400)
 
         care_team_resources = LookupClinicalCareTeamResources.query.all()
         care_team_resources_ids = [x.resource_id for x in care_team_resources]
