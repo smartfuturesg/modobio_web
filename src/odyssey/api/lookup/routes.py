@@ -92,7 +92,7 @@ class LookupTimezones(Resource):
     @token_auth.login_required
     @responds(schema=LookupTimezones,status_code=200,api=ns)
     def get(self):
-        varArr = [tz_i for tz_i in pytz.all_timezones if 'US/' in tz_i]
+        varArr = pytz.country_timezones['us']
         payload = {'items': varArr,
                    'total_items': len(varArr) }
         return payload
