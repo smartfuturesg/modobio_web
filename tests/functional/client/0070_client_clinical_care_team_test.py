@@ -246,6 +246,14 @@ def test_authorize_clinical_care_team(test_client, init_database, client_auth_he
     
     assert response.status_code == 201
 
+    # Make a double post, expect an error
+    response = test_client.post(f"/client/clinical-care-team/resource-authorization/{1}/",
+                            headers=staff_auth_header,
+                            data=dumps(payload), 
+                            content_type='application/json')
+    
+    assert response.status_code == 400    
+
     response = test_client.get(f"/client/clinical-care-team/resource-authorization/{1}/",
                             headers=client_auth_header,
                             content_type='application/json')

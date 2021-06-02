@@ -1103,11 +1103,16 @@ class ClinicalCareTeamResourceAuthorization(Resource):
         Add new clinical care team authorizations for the specified user_id 
         """
         current_user,_ = token_auth.current_user()
+
         data = request.parsed_obj
 
         current_team_ids = db.session.query(ClientClinicalCareTeam.team_member_user_id).filter(ClientClinicalCareTeam.user_id==user_id).all()
         current_team_ids = [x[0] for x in current_team_ids if x[0] is not None]
-
+        
+        current_authorizations = db.session\
+            .query(ClientClinicalCareTeamAuthorizations.team_member_user_id,ClientClinicalCareTeamAuthorizations.resource_id)\
+            .filter_by(user_id=user_id).all()
+        
         # user_id denotes the main users
         # if the current user is not the main user (aka a random user), and they are not on the current team
         # deny them access
@@ -1116,19 +1121,25 @@ class ClinicalCareTeamResourceAuthorization(Resource):
 
         care_team_resources = LookupClinicalCareTeamResources.query.all()
         care_team_resources_ids = [x.resource_id for x in care_team_resources]
+        
+        # If you are the main user, and you are posting for your team, the authorization status is set to accepted
+        if current_user.user_id == user_id:
+            status = 'accepted'
+        # If you are a team member requesting access, then you must be approved by the main client
+        else:
+            status = 'pending'
 
         for authorization in data.get('clinical_care_team_authorization'):
             if authorization.team_member_user_id in current_team_ids and authorization.resource_id in care_team_resources_ids:
+                for member_id,resource_id in current_authorizations:
+                    if authorization.team_member_user_id == member_id and authorization.resource_id == resource_id:
+                        raise InputError(message="Member {member_id} and resource {resource_id} have already been requested", status_code=400)
+
                 authorization.user_id = user_id
-                # If you are the main user, and you are posting for your team, the authorization status is set to accepted
-                if current_user.user_id == user_id:
-                    authorization.status = 'accepted'
-                # If you are a team member requesting access, then you must be approved by the main client
-                else:
-                    authorization.status = 'pending'
+                authorization.status = status
                 db.session.add(authorization)
             else:
-                raise InputError(message="team member not in care team or resource_id is invalid", status_code=400)
+                raise InputError(message="Team member not in care team or resource_id is invalid", status_code=400)
         try:
             db.session.commit()
         except Exception as e:
@@ -1205,8 +1216,11 @@ class ClinicalCareTeamResourceAuthorization(Resource):
                                                                                 resource_id = dat['resource_id'],
                                                                                 team_member_user_id = dat['team_member_user_id']
                                                                                 ).one_or_none()
-            if authorization and authorization.status == 'pending':
-                authorization.update({'status': 'accepted'})
+            if authorization:
+                if authorization.status == 'pending':
+                    authorization.update({'status': 'accepted'})
+            else:
+                raise InputError(message="Team member or resource ID request not found", status_code=400)
 
         db.session.commit()
 
@@ -1233,6 +1247,8 @@ class ClinicalCareTeamResourceAuthorization(Resource):
                                                                                 ).one_or_none()
             if authorization:
                 db.session.delete(authorization)
+            else:
+                raise InputError(message="Team member or resource ID request not found", status_code=400)                
 
         db.session.commit()
 

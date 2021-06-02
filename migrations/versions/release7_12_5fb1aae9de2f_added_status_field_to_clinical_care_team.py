@@ -1,7 +1,7 @@
 """added status field to clinical care team
 
 Revision ID: 5fb1aae9de2f
-Revises: e024249f8efe
+Revises: 80d2dceffd79
 Create Date: 2021-06-01 01:44:50.681160
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '5fb1aae9de2f'
-down_revision = 'e024249f8efe'
+down_revision = '80d2dceffd79'
 branch_labels = None
 depends_on = None
 
