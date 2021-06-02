@@ -37,6 +37,28 @@ def test_get_1_blood_pressure_history(test_client, init_database, client_auth_he
         response = test_client.get('/doctor/bloodpressure/1/',
                                     headers=header, 
                                     content_type='application/json')
+
         assert response.status_code == 200
         assert len(response.json['items']) == 1
         assert response.json['total_items'] == 1
+
+def test_delete_blood_pressure(test_client, init_database, client_auth_header):
+    """
+    GIVEN an api end point for deleting a user's blood pressure result
+    WHEN the '/doctor/bloodpressure/<user_id>/' resource is requested (DELETE)
+    THEN check the response is valid
+    """
+    # send delete request for client blood pressure on user_id = 1 and idx = 1
+    response = test_client.delete('/doctor/bloodpressure/1/?idx=1',
+                                headers=client_auth_header)
+
+    assert response.status_code == 204
+
+    # send get request to ensure the result was deleted
+    response = test_client.get('/doctor/bloodpressure/1/',
+                            headers=client_auth_header, 
+                            content_type='application/json')
+
+    assert response.status_code == 200
+    assert len(response.json['items']) == 0
+    assert response.json['total_items'] == 0

@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>odyssey.api.user.models &mdash; Odyssey version: 0.5.45 documentation</title>
+  <title>odyssey.api.user.models &mdash; Odyssey version: 0.7.53 documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                version: 0.5.45
+                version: 0.7.53
               </div>
             
           
@@ -346,7 +346,22 @@ fully released.</p>
 <dt class="sig sig-object py" id="odyssey.api.user.models.User.deleted">
 <span class="sig-name descname"><span class="pre">deleted</span></span><a class="headerlink" href="#odyssey.api.user.models.User.deleted" title="Permalink to this definition">¶</a></dt>
 <dd><p>Flags if the user has been deleted</p>
-<p>:type:boolean</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>boolean</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.User.email_verified">
+<span class="sig-name descname"><span class="pre">email_verified</span></span><a class="headerlink" href="#odyssey.api.user.models.User.email_verified" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flags if the user has verified their email</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>boolean</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -744,6 +759,91 @@ user or the API.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserPendingEmailVerifications">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.user.models.</span></span><span class="sig-name descname"><span class="pre">UserPendingEmailVerifications</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.models.UserPendingEmailVerifications" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
+<p>Holds information about user’s who have not yet verified their email.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserPendingEmailVerifications.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.user.models.UserPendingEmailVerifications.created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>timestamp for when object was created. DB server time is used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>datetime</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserPendingEmailVerifications.updated_at">
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.user.models.UserPendingEmailVerifications.updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>timestamp for when object was updated. DB server time is used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>datetime</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserPendingEmailVerifications.idx">
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.user.models.UserPendingEmailVerifications.idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Auto incrementing primary key</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserPendingEmailVerifications.user_id">
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.user.models.UserPendingEmailVerifications.user_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Id of the user that this pending verification belongs to.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, foreign key(‘User.user_id’)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserPendingEmailVerifications.token">
+<span class="sig-name descname"><span class="pre">token</span></span><a class="headerlink" href="#odyssey.api.user.models.UserPendingEmailVerifications.token" title="Permalink to this definition">¶</a></dt>
+<dd><p>JWT token that will verify this user’s email when the link is clicked.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserPendingEmailVerifications.code">
+<span class="sig-name descname"><span class="pre">code</span></span><a class="headerlink" href="#odyssey.api.user.models.UserPendingEmailVerifications.code" title="Permalink to this definition">¶</a></dt>
+<dd><p>4 digit code that can be used in place of the token in case of problems with the token.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserPendingEmailVerifications.generate_token">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">generate_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.models.UserPendingEmailVerifications.generate_token" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a JWT with the appropriate user type and user_id</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserPendingEmailVerifications.generate_code">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">generate_code</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.models.UserPendingEmailVerifications.generate_code" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a 4 digit code</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserTokenHistory">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.user.models.</span></span><span class="sig-name descname"><span class="pre">UserTokenHistory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.models.UserTokenHistory" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
@@ -849,7 +949,7 @@ We keep track of the current refresh tokens so we may blacklist tokens as needed
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright Copyright 2019-2020 Atlantic Venture Partners, all rights reserved.
+        &#169; Copyright Copyright 2019-2021 Atlantic Venture Partners, all rights reserved.
 
     </p>
   </div>
