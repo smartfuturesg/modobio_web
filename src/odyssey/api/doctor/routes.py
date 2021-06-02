@@ -138,7 +138,7 @@ class MedBloodPressures(Resource):
             else:
                 raise GenericNotFound(f"The blood pressure result with idx {idx} does not exist.")
         else:
-            raise TypeError("idx must be an integer.")
+            raise InputError(message="idx must be an integer.")
 
 @ns.route('/lookupbloodpressureranges/')
 class MedicalLookUpBloodPressureResource(Resource):
