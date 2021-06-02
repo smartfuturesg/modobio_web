@@ -1095,7 +1095,7 @@ class ClinicalCareTeamResourceAuthorization(Resource):
     Clinical care team members must individually be given access to resources. The available options can be found
     by using the /lookup/care-team/resources/ (GET) API. 
     """
-    @token_auth.login_required(user_type=('client','staff'))
+    @token_auth.login_required()
     @accepts(schema=ClinicalCareTeamAuthorizationNestedSchema, api=ns)
     @responds(schema=ClinicalCareTeamAuthorizationNestedSchema, api=ns, status_code=201)
     def post(self, user_id):
