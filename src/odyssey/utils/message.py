@@ -736,7 +736,7 @@ class PushNotification:
 
             # Apple also has separate channels for development.
             # TODO: fix this after ticket NRV-1838 is done.
-            if current_app.env == 'development':
+            if current_app.env == 'development' or current_app.testing:
                 channel += '_SANDBOX'
 
         app = self.channel_platapp[channel]

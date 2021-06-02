@@ -1,6 +1,6 @@
 from flask.json import dumps
 
-from .data import device_token
+from .data import device
 
 def test_device_registration_post(test_client, init_database, client_auth_header):
         """
@@ -12,7 +12,7 @@ def test_device_registration_post(test_client, init_database, client_auth_header
         response = test_client.post(
             '/notifications/push/register/1/',
             headers=client_auth_header,
-            data=dumps(device_token),
+            data=dumps(device),
             content_type='application/json')
 
         assert response.status_code == 201
@@ -21,7 +21,7 @@ def test_device_registration_post(test_client, init_database, client_auth_header
         response = test_client.post(
             '/notifications/push/register/1/',
             headers=client_auth_header,
-            data=dumps(device_token),
+            data=dumps(device),
             content_type='application/json')
 
         assert response.status_code == 201
@@ -47,7 +47,7 @@ def test_device_registration_delete(test_client, init_database, client_auth_head
         WHEN the PUT /notifications/<user_id>/<notification_id>/ resource is requested,
         THEN check that the response is valid.
         """
-        d = {'device_token': device_token['device_token']}
+        d = {'device_token': device['device_token']}
 
         response = test_client.delete(
             '/notifications/push/register/1/',
