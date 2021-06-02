@@ -38,7 +38,8 @@ from odyssey.utils.errors import (
     IllegalSetting, 
     ContentNotFound,
     InputError,
-    MedicalConditionAlreadySubmitted
+    MedicalConditionAlreadySubmitted,
+    GenericNotFound
 )
 from odyssey.utils.misc import check_client_existence, check_staff_existence, check_blood_test_existence, check_blood_test_result_type_existence, check_user_existence, check_medical_condition_existence, check_std_existence
 from odyssey.api.doctor.schemas import (
@@ -88,9 +89,12 @@ class MedBloodPressures(Resource):
         This request gets the users submitted blood pressure if it exists
         '''
         check_client_existence(user_id)
-        bp_info = db.session.query(
-                     MedicalBloodPressures.idx, MedicalBloodPressures.reporter_id, MedicalBloodPressures.systolic, MedicalBloodPressures.diastolic, MedicalBloodPressures.datetime_taken
-                    ).filter(MedicalBloodPressures.user_id==user_id).all()
+        bp_info = MedicalBloodPressures.query.filter_by(user_id=user_id).all()
+        
+        for data in bp_info:
+            reporter = User.query.filter_by(user_id=data.reporter_id).one_or_none()
+            data.reporter_firstname = reporter.firstname
+            data.reporter_lastname = reporter.lastname
 
         payload = {'items': bp_info,
                    'total_items': len(bp_info)}
@@ -125,12 +129,16 @@ class MedBloodPressures(Resource):
         '''
         check_client_existence(user_id)
 
-        result = MedicalBloodPressures.query.filter_by(idx=request.args.get('idx')).one_or_none()
-        if result:
-            db.session.delete(result)
-            db.session.commit()
+        idx = request.args.get('idx', type=int)
+        if idx:
+            result = MedicalBloodPressures.query.filter_by(idx=idx).one_or_none()
+            if result:
+                db.session.delete(result)
+                db.session.commit()
+            else:
+                raise GenericNotFound(f"The blood pressure result with idx {idx} does not exist.")
         else:
-            raise GenericNotFound(f"The blood pressure result with idx {request.args.get('idx')} does not exist.")
+            raise TypeError("idx must be an integer.")
 
 @ns.route('/lookupbloodpressureranges/')
 class MedicalLookUpBloodPressureResource(Resource):
