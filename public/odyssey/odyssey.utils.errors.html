@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>odyssey.utils.errors &mdash; Odyssey version: 0.5.45 documentation</title>
+  <title>odyssey.utils.errors &mdash; Odyssey version: 0.7.53 documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                version: 0.5.45
+                version: 0.7.53
               </div>
             
           
@@ -231,7 +231,7 @@ to a 3rd party resource in an OAuth request.</p>
 
 <dl class="py exception">
 <dt class="sig sig-object py" id="odyssey.utils.errors.InputError">
-<em class="property"><span class="pre">exception</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.utils.errors.</span></span><span class="sig-name descname"><span class="pre">InputError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">status_code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.errors.InputError" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">exception</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.utils.errors.</span></span><span class="sig-name descname"><span class="pre">InputError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">status_code</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.errors.InputError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
 <p>Exception raised for errors with the input.</p>
 <p>Attributes:
@@ -368,6 +368,13 @@ for using the ModoBio APIs</p>
 </dd></dl>
 
 <dl class="py exception">
+<dt class="sig sig-object py" id="odyssey.utils.errors.EmailNotVerified">
+<em class="property"><span class="pre">exception</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.utils.errors.</span></span><span class="sig-name descname"><span class="pre">EmailNotVerified</span></span><a class="headerlink" href="#odyssey.utils.errors.EmailNotVerified" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>Used for auth.py if a user has not yet verified their email.</p>
+</dd></dl>
+
+<dl class="py exception">
 <dt class="sig sig-object py" id="odyssey.utils.errors.GenericNotFound">
 <em class="property"><span class="pre">exception</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.utils.errors.</span></span><span class="sig-name descname"><span class="pre">GenericNotFound</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.errors.GenericNotFound" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
@@ -379,6 +386,14 @@ for using the ModoBio APIs</p>
 <em class="property"><span class="pre">exception</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.utils.errors.</span></span><span class="sig-name descname"><span class="pre">MissingThirdPartyCredentials</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.errors.MissingThirdPartyCredentials" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
 <p>The server is has not been configured with the necessary credentials to access a third party API</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="odyssey.utils.errors.InvalidVerificationCode">
+<em class="property"><span class="pre">exception</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.utils.errors.</span></span><span class="sig-name descname"><span class="pre">InvalidVerificationCode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.errors.InvalidVerificationCode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>In the case that an email verification is requested but the wrong code is
+given or the code’s lifetime has expired</p>
 </dd></dl>
 
 <dl class="py function">
@@ -530,6 +545,12 @@ for using the ModoBio APIs</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="odyssey.utils.errors.error_email_not_verified">
+<span class="sig-prename descclassname"><span class="pre">odyssey.utils.errors.</span></span><span class="sig-name descname"><span class="pre">error_email_not_verified</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">error</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.errors.error_email_not_verified" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return email not verified error message and 401 status code</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="odyssey.utils.errors.error_login_not_authorized">
 <span class="sig-prename descclassname"><span class="pre">odyssey.utils.errors.</span></span><span class="sig-name descname"><span class="pre">error_login_not_authorized</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">error</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.errors.error_login_not_authorized" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a custom message and 404 status code</p>
@@ -539,6 +560,12 @@ for using the ModoBio APIs</p>
 <dt class="sig sig-object py" id="odyssey.utils.errors.register_handlers">
 <span class="sig-prename descclassname"><span class="pre">odyssey.utils.errors.</span></span><span class="sig-name descname"><span class="pre">register_handlers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.errors.register_handlers" title="Permalink to this definition">¶</a></dt>
 <dd><p>register application-wide error handling</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="odyssey.utils.errors.error_invalid_verification_code">
+<span class="sig-prename descclassname"><span class="pre">odyssey.utils.errors.</span></span><span class="sig-name descname"><span class="pre">error_invalid_verification_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">error</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.errors.error_invalid_verification_code" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a custom message and 403 status code</p>
 </dd></dl>
 
 </section>
@@ -557,7 +584,7 @@ for using the ModoBio APIs</p>
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright Copyright 2019-2020 Atlantic Venture Partners, all rights reserved.
+        &#169; Copyright Copyright 2019-2021 Atlantic Venture Partners, all rights reserved.
 
     </p>
   </div>

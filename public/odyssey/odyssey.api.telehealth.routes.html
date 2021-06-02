@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>odyssey.api.telehealth.routes &mdash; Odyssey version: 0.5.45 documentation</title>
+  <title>odyssey.api.telehealth.routes &mdash; Odyssey version: 0.7.53 documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                version: 0.5.45
+                version: 0.7.53
               </div>
             
           
@@ -560,8 +560,9 @@ Edits one file for another, or can edit text details</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>idx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em> (</em><em>required</em><em>)</em>) – TelehealthBookingDetails idx</p></li>
-<li><p><strong>media</strong> (<em>file</em><em> (</em><em>optional</em><em>)</em>) – It will not break if multiple files are sent, but only one will be handled.</p></li>
-<li><p><strong>details</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em> (</em><em>optional</em><em>)</em>) – </p></li>
+<li><p><strong>image</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>(</em><em>file</em><em>) </em><em>(</em><em>optional</em><em>)</em>) – Image file(s), up to 3 can be send.</p></li>
+<li><p><strong>voice</strong> (<em>file</em><em> (</em><em>optional</em><em>)</em>) – Audio file, only 1 can be send.</p></li>
+<li><p><strong>details</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em> (</em><em>optional</em><em>)</em>) – Further details.</p></li>
 </ul>
 </dd>
 </dl>
@@ -573,8 +574,10 @@ Edits one file for another, or can edit text details</p>
 <dd><p>Adds details to a booking_id
 Accepts multiple image or voice recording files</p>
 <dl class="simple">
-<dt>Expects form-data (will ignore anything else)</dt><dd><p>media : file(s)
-details : str</p>
+<dt>Expects form-data (will ignore anything else)</dt><dd><p>images : file(s) list of image files, up to 4
+voice : file
+details : str
+location_id (required) : id of the location the client is in</p>
 </dd>
 </dl>
 </dd></dl>
@@ -692,7 +695,7 @@ they will only be returned all conversations in which they are a staff participa
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright Copyright 2019-2020 Atlantic Venture Partners, all rights reserved.
+        &#169; Copyright Copyright 2019-2021 Atlantic Venture Partners, all rights reserved.
 
     </p>
   </div>
