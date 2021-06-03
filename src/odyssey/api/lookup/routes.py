@@ -2,6 +2,9 @@ from flask_accepts import responds
 from flask_restx import Resource
 
 import pytz
+import pathlib
+
+from flask import current_app
 
 from odyssey.api import api
 from odyssey.utils.auth import token_auth
@@ -25,7 +28,8 @@ from odyssey.api.lookup.models import (
      LookupNotifications,
      LookupEmergencyNumbers,
      LookupRoles,
-     LookupMacroGoals
+     LookupMacroGoals,
+     LookupLegalDocs
      )
 from odyssey.api.lookup.schemas import (
     LookupActivityTrackersOutputSchema,
@@ -47,7 +51,8 @@ from odyssey.api.lookup.schemas import (
     LookupTelehealthSettingsSchema,
     LookupEmergencyNumbersOutputSchema,
     LookupRolesOutputSchema,
-    LookupMacroGoalsOutputSchema
+    LookupMacroGoalsOutputSchema,
+    LookupLegalDocsOutputSchema
 )
 from odyssey.utils.misc import check_drink_existence
 
@@ -371,4 +376,20 @@ class LookupRolesApi(Resource):
     def get(self):
         """get contents of roles lookup table"""
         res = LookupRoles.query.all()
+        return {'total_items': len(res), 'items': res}
+
+@ns.route('/legal-docs/')
+class LookupLegalDocs(Resource):
+    """
+    Endpoint that returns the list of legal documents.
+    """
+    @token_auth.login_required
+    @responds(schema=LookupLegalDocsOutputSchema, status_code=200, api=ns)
+    def get(self):
+        """get contents of legal docs lookup table"""
+        res = LookupLegalDocs.query.all()
+        for doc in res:
+            html_file = pathlib.Path(current_app.static_folder) / doc.path
+            with open(html_file) as fh:
+                doc.content = fh.read()
         return {'total_items': len(res), 'items': res}

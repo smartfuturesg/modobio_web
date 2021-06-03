@@ -1398,3 +1398,50 @@ class LookupRoles(db.Model):
 
     :type: string
     """
+
+class LookupLegalDocs(db.Model):
+
+    __tablename__ = 'LookupLegalDocs'
+
+    doc_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    ID of this document
+
+    :type: integer, primary key, autoincrementing
+    """
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    Creation timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+    
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    Last update timestamp of this row in the database.
+
+    :type: :class:`datetime.datetime`
+    """
+
+
+    name = db.Column(db.String)
+    """
+    Name of this document.
+
+    :type: string
+    """
+
+    target = db.Column(db.String)
+    """
+    Target of this document. Types are 'User', 'Professional', and 'Practitioner'.
+
+    :type: string
+    """
+
+    path = db.Column(db.String)
+    """
+    Path to this document.
+
+    :type: string
+    """
