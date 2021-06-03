@@ -1,4 +1,4 @@
-from marshmallow import Schema, fields, post_load
+from marshmallow import Schema, fields, post_load, validate
 
 from odyssey import ma
 from odyssey.api.lookup.models import (
@@ -21,7 +21,8 @@ from odyssey.api.lookup.models import (
     LookupNotifications,
     LookupEmergencyNumbers,
     LookupRoles,
-    LookupMacroGoals
+    LookupMacroGoals,
+    LookupLegalDocs
 )
 
 class LookupTermsAndConditionsOutputSchema(ma.SQLAlchemyAutoSchema):
@@ -242,4 +243,16 @@ class LookupRolesSchema(ma.SQLAlchemyAutoSchema):
 
 class LookupRolesOutputSchema(Schema):
     items = fields.Nested(LookupRolesSchema(many=True), missing=[])
+    total_items = fields.Integer()
+
+class LookupLegalDocsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupLegalDocs
+        exclude = ('created_at', 'path', 'idx')
+
+    target = fields.String(validate=validate.OneOf(('User', 'Professional', 'Practitioner')))
+    content = fields.String(dump_only=True)
+
+class LookupLegalDocsOutputSchema(Schema):
+    items = fields.Nested(LookupLegalDocsSchema(many=True), missing=[])
     total_items = fields.Integer()
