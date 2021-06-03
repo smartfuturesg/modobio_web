@@ -1424,7 +1424,6 @@ class LookupLegalDocs(db.Model):
     :type: :class:`datetime.datetime`
     """
 
-
     name = db.Column(db.String)
     """
     Name of this document.

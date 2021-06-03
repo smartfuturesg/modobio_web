@@ -379,7 +379,7 @@ class LookupRolesApi(Resource):
         return {'total_items': len(res), 'items': res}
 
 @ns.route('/legal-docs/')
-class LookupLegalDocs(Resource):
+class LookupLegalDocsApi(Resource):
     """
     Endpoint that returns the list of legal documents.
     """
