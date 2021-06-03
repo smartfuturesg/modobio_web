@@ -248,7 +248,7 @@ class LookupRolesOutputSchema(Schema):
 class LookupLegalDocsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupLegalDocs
-        exclude = ('created_at', 'path', 'doc_id')
+        exclude = ('created_at', 'path', 'idx')
 
     target = fields.String(validate=validate.OneOf(('User', 'Professional', 'Practitioner')))
     content = fields.String(dump_only=True)
