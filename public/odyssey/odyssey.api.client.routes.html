@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>odyssey.api.client.routes &mdash; Odyssey version: 0.5.45 documentation</title>
+  <title>odyssey.api.client.routes &mdash; Odyssey version: 0.7.53 documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                version: 0.5.45
+                version: 0.7.53
               </div>
             
           
@@ -187,6 +187,11 @@
             
   <section id="module-odyssey.api.client.routes">
 <span id="odyssey-api-client-routes"></span><h1>odyssey.api.client.routes<a class="headerlink" href="#module-odyssey.api.client.routes" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="odyssey.api.client.routes.process_race_and_ethnicity">
+<span class="sig-prename descclassname"><span class="pre">odyssey.api.client.routes.</span></span><span class="sig-name descname"><span class="pre">process_race_and_ethnicity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mother</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">father</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client.routes.process_race_and_ethnicity" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="odyssey.api.client.routes.Client">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.client.routes.</span></span><span class="sig-name descname"><span class="pre">Client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client.routes.Client" title="Permalink to this definition">¶</a></dt>
@@ -695,7 +700,7 @@ only the client themselves may have access to these operations.</p>
 <dt class="sig sig-object py" id="odyssey.api.client.routes.ClinicalCareTeamMembers.post">
 <span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client.routes.ClinicalCareTeamMembers.post" title="Permalink to this definition">¶</a></dt>
 <dd><p>Make a new entry into a client’s clinical care team using only the new team
-member’s email. Clients may only have 6 team members stored.</p>
+member’s email. Clients may only have 20 team members stored (not including temporary).</p>
 <p>Emails are checked against the database. If the email is associated with a current user,
 the user’s id is stored in the ClientClinicalCareTeam table. Otherwise, just the
 email address is registered.</p>
@@ -705,6 +710,7 @@ email address is registered.</p>
 <li><p><strong>user_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – User ID number</p></li>
 <li><p><strong>payload includes</strong> (<em>Expected</em>) – </p></li>
 <li><p><strong>email</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Email of new care team member</p></li>
+<li><p><strong>modobio_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Modobio ID of new care team member</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -763,6 +769,37 @@ Any matches between the incoming payload and current team members in the DB will
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.client.routes.ClinicalCareTeamMembers.methods">
 <span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'DELETE',</span> <span class="pre">'GET',</span> <span class="pre">'POST'}</span></em><a class="headerlink" href="#odyssey.api.client.routes.ClinicalCareTeamMembers.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.client.routes.ClinicalCareTeamTemporaryMembers">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.client.routes.</span></span><span class="sig-name descname"><span class="pre">ClinicalCareTeamTemporaryMembers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client.routes.ClinicalCareTeamTemporaryMembers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<p>Endpoints related to temporary care team members.
+Temporary members are not considered in a user’s maximum allowed team members limit (20).
+They will lose access 180 hours after having been added to a user’s care team.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.client.routes.ClinicalCareTeamTemporaryMembers.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client.routes.ClinicalCareTeamTemporaryMembers.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a practitioner as a temporary team member to a user’s care team</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.client.routes.ClinicalCareTeamTemporaryMembers.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'client_clinical_care_team_temporary_members'</span></em><a class="headerlink" href="#odyssey.api.client.routes.ClinicalCareTeamTemporaryMembers.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.client.routes.ClinicalCareTeamTemporaryMembers.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client.routes.ClinicalCareTeamTemporaryMembers.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.client.routes.ClinicalCareTeamTemporaryMembers.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'POST'}</span></em><a class="headerlink" href="#odyssey.api.client.routes.ClinicalCareTeamTemporaryMembers.methods" title="Permalink to this definition">¶</a></dt>
 <dd><p>A list of methods this view can handle.</p>
 </dd></dl>
 
@@ -961,6 +998,42 @@ a client’s height history.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.client.routes.ClientWaistSizeApi">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.client.routes.</span></span><span class="sig-name descname"><span class="pre">ClientWaistSizeApi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client.routes.ClientWaistSizeApi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<p>Endpoints related to submitting client waist size and viewing
+a client’s waist size history.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.client.routes.ClientWaistSizeApi.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client.routes.ClientWaistSizeApi.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>Submits a new waist size for the client.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.client.routes.ClientWaistSizeApi.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client.routes.ClientWaistSizeApi.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns all waist sizes reported for a client and the dates they were reported.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.client.routes.ClientWaistSizeApi.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'client_client_waist_size_api'</span></em><a class="headerlink" href="#odyssey.api.client.routes.ClientWaistSizeApi.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.client.routes.ClientWaistSizeApi.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client.routes.ClientWaistSizeApi.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.client.routes.ClientWaistSizeApi.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET',</span> <span class="pre">'POST'}</span></em><a class="headerlink" href="#odyssey.api.client.routes.ClientWaistSizeApi.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="odyssey.api.client.routes.ClientTransactionHistoryApi">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.client.routes.</span></span><span class="sig-name descname"><span class="pre">ClientTransactionHistoryApi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client.routes.ClientTransactionHistoryApi" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
@@ -1058,6 +1131,13 @@ a client’s height history.</p>
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.client.routes.</span></span><span class="sig-name descname"><span class="pre">ClientWeightApi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client.routes.ClientWeightApi" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
 <p>Endpoint for returning the recommended health metrics for the client based on age and sex</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.client.routes.ClientWeightApi.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client.routes.ClientWeightApi.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Looks up client’s age and sex. One or both are not available, we return our best guess: the health
+metrics for a 30 year old female.</p>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.client.routes.ClientWeightApi.endpoint">
 <span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'client_client_weight_api_2'</span></em><a class="headerlink" href="#odyssey.api.client.routes.ClientWeightApi.endpoint" title="Permalink to this definition">¶</a></dt>
@@ -1074,12 +1154,39 @@ a client’s height history.</p>
 <dd><p>A list of methods this view can handle.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="odyssey.api.client.routes.ClientWeightApi.get">
-<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client.routes.ClientWeightApi.get" title="Permalink to this definition">¶</a></dt>
-<dd><p>Looks up client’s age and sex. One or both are not available, we return our best guess: the health
-metrics for a 30 year old female.</p>
 </dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.client.routes.ClientRaceAndEthnicityApi">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.client.routes.</span></span><span class="sig-name descname"><span class="pre">ClientRaceAndEthnicityApi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client.routes.ClientRaceAndEthnicityApi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<p>Endpoint for returning viewing and editing informations about a client’s race and ethnicity
+information.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.client.routes.ClientRaceAndEthnicityApi.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'client_client_race_and_ethnicity_api'</span></em><a class="headerlink" href="#odyssey.api.client.routes.ClientRaceAndEthnicityApi.endpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.client.routes.ClientRaceAndEthnicityApi.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client.routes.ClientRaceAndEthnicityApi.get" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.client.routes.ClientRaceAndEthnicityApi.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client.routes.ClientRaceAndEthnicityApi.mediatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.client.routes.ClientRaceAndEthnicityApi.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'GET',</span> <span class="pre">'PUT'}</span></em><a class="headerlink" href="#odyssey.api.client.routes.ClientRaceAndEthnicityApi.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.client.routes.ClientRaceAndEthnicityApi.put">
+<span class="sig-name descname"><span class="pre">put</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client.routes.ClientRaceAndEthnicityApi.put" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -1099,7 +1206,7 @@ metrics for a 30 year old female.</p>
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright Copyright 2019-2020 Atlantic Venture Partners, all rights reserved.
+        &#169; Copyright Copyright 2019-2021 Atlantic Venture Partners, all rights reserved.
 
     </p>
   </div>

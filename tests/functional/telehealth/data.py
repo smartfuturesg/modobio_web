@@ -59,6 +59,13 @@ telehealth_queue_client_pool_7_post_data = {
   'duration': 30
 }
 
+telehealth_queue_client_pool_8_post_data = {
+  'profession_type': 'medical_doctor',
+  'target_date': '2022-04-04T02:00:00.000',
+  'priority': False,
+  'medical_gender': 'np'
+}
+
 # --------------------------------------------------------------------
 #                     Telehealth Staff Availability
 # --------------------------------------------------------------------

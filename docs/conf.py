@@ -59,6 +59,7 @@ html_style = 'css/custom.css'
 
 napoleon_use_ivar = True
 napoleon_use_rtype = False
+napoleon_custom_sections = ['Glossary']
 
 autodoc_default_options = {
     'no-undoc-members': True,
@@ -69,7 +70,7 @@ intersphinx_mapping = {
     'flask': ('https://flask.palletsprojects.com/', None),
     'flask_migrate': ('https://flask-migrate.readthedocs.io/en/latest/', None),
     'flask_sqlalchemy': ('https://flask-sqlalchemy.palletsprojects.com/', None),
-    'flask_wtf': ('https://flask-wtf.readthedocs.io/en/stable/', None),
+    'flask_wtf': ('https://flask-wtf.readthedocs.io/', None),
     'python': ('https://docs.python.org/3/', None),
     'sqlalchemy': ('https://docs.sqlalchemy.org/', None),
     'werkzeug': ('https://werkzeug.palletsprojects.com/', None),

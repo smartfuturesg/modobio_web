@@ -157,147 +157,156 @@ class TelehealthClientTimeSelectApi(Resource):
             raise InputError(status_code=405,message='Client is not in the queue yet.')
         duration = client_in_queue.duration
         # convert client's target date to day_of_week
-        target_date = client_in_queue.target_date.date()
         
+        days_from_target = 0
+        no_staff_available_count = 0
+        times = []
+
         # 0 is Monday, 6 is Sunday
-        weekday_id = target_date.weekday()
-        weekday_str = DAY_OF_WEEK[weekday_id]
-        
-        # This should return ALL staff available on that given day.
-        # TODO, MUST INCLUDE PROFESSION TYPE FILTER, perhaps delete down low
+        while len(times)<10:
+            target_date = client_in_queue.target_date.date() + timedelta(days=days_from_target)
+            weekday_id = target_date.weekday() 
+            weekday_str = DAY_OF_WEEK[weekday_id]
 
-        if client_in_queue.medical_gender == 'm':
-            genderFlag = True
-        elif client_in_queue.medical_gender == 'f':
-            genderFlag = False
+            if client_in_queue.medical_gender == 'm':
+                genderFlag = True
+            elif client_in_queue.medical_gender == 'f':
+                genderFlag = False
 
-        if client_in_queue.medical_gender == 'np':
-            staff_availability = db.session.query(TelehealthStaffAvailability)\
-                .join(StaffRoles, StaffRoles.user_id==TelehealthStaffAvailability.user_id)\
-                    .filter(TelehealthStaffAvailability.day_of_week==weekday_str, StaffRoles.role==client_in_queue.profession_type).all()
-        else:
-            staff_availability = db.session.query(TelehealthStaffAvailability)\
-                .join(StaffRoles, StaffRoles.user_id==TelehealthStaffAvailability.user_id)\
-                    .join(User, User.user_id==TelehealthStaffAvailability.user_id)\
-                    .filter(TelehealthStaffAvailability.day_of_week==weekday_str, StaffRoles.role==client_in_queue.profession_type,User.biological_sex_male==genderFlag).all()
-        #### TESTING NOTES:
-        ####   test1 - test with weekday_str when we have 0 availabilities (check if staff_availability is empty)
-        
-        # TODO if no staff availability do something
-        if not staff_availability:
-            # If a client makes an appointment for Monday, and no staff are available,
-            # So the client updates or wants to check for appointments on Tuesday
-            # Without this delete, the Monday day will still be "first" in the client_in_queue query above
-            db.session.delete(client_in_queue)
-            db.session.commit()
-            raise InputError(status_code=405,message='No staff available')
-        # Duration is taken from the client queue.
-        # we divide it by 5 because our look up tables are in increments of 5 mintues
-        # so, this represents the number of time blocks we will need to look at.
-        # The subtract 1 is due to the indices having start_time and end_times, so 100 - 103 is 100.start_time to 103.end_time which is
-        # the 20 minute duration
-        idx_delta = int(duration/5) - 1
-        # TODO will need to incorporate timezone information
-        available = {}
+            if client_in_queue.medical_gender == 'np':
+                staff_availability = db.session.query(TelehealthStaffAvailability)\
+                    .join(StaffRoles, StaffRoles.user_id==TelehealthStaffAvailability.user_id)\
+                        .filter(TelehealthStaffAvailability.day_of_week==weekday_str, StaffRoles.role==client_in_queue.profession_type).all()
+            else:
+                staff_availability = db.session.query(TelehealthStaffAvailability)\
+                    .join(StaffRoles, StaffRoles.user_id==TelehealthStaffAvailability.user_id)\
+                        .join(User, User.user_id==TelehealthStaffAvailability.user_id)\
+                        .filter(TelehealthStaffAvailability.day_of_week==weekday_str, StaffRoles.role==client_in_queue.profession_type,User.biological_sex_male==genderFlag).all()
+            #### TESTING NOTES:
+            ####   test1 - test with weekday_str when we have 0 availabilities (check if staff_availability is empty)
 
-        staff_user_id_arr = []
-        # Loop through all staff that have indicated they are available on that day of the week
-        #
-        # The expected output is the first and last index of their time blocks, AKA:
-        # availability[staff_user_id] = [[100, 120], [145, 160]]
-        #
+            if not staff_availability:
+                no_staff_available_count+=1
+                days_from_target+=1
+                if no_staff_available_count >= 7:
+                    raise InputError(status_code=405,message='No staff available for the upcoming week.')
+                else:
+                    # continue jumps the to the top of the loop
+                    continue
+            else:
+                # reset the counter if there is a staff member
+                no_staff_available_count = 0
 
-        for availability in staff_availability:
-            staff_user_id = availability.user_id
-            if staff_user_id not in available:
-                available[staff_user_id] = []
-                staff_user_id_arr.append(staff_user_id)
-            # NOTE booking_window_id is the actual booking_window_id (starting at 1 NOT 0)
-            available[staff_user_id].append(availability.booking_window_id)
+            # Duration is taken from the client queue.
+            # we divide it by 5 because our look up tables are in increments of 5 mintues
+            # so, this represents the number of time blocks we will need to look at.
+            # The subtract 1 is due to the indices having start_time and end_times, so 100 - 103 is 100.start_time to 103.end_time which is
+            # the 20 minute duration
+            idx_delta = int(duration/5) - 1
+            # TODO will need to incorporate timezone information
+            available = {}
 
-        # Now, grab all of the bookings for that client and all staff on the given target date
-        # This is necessary to subtract from the staff_availability above.
-        # If a client or staff cancels, then that time slot is now available
-        bookings = TelehealthBookings.query.filter(TelehealthBookings.target_date==target_date,\
-                                                   TelehealthBookings.status!='Client Canceled',\
-                                                   TelehealthBookings.status!='Staff Canceled').all()
-        # Now, subtract booking times from staff availability and generate the actual times a staff member is free
-        removedNum = {}
-        clientBookingID = []
+            staff_user_id_arr = []
+            # Loop through all staff that have indicated they are available on that day of the week
+            #
+            # The expected output is the first and last index of their time blocks, AKA:
+            # availability[staff_user_id] = [[100, 120], [145, 160]]
+            #
 
-        for booking in bookings:
-            staff_id = booking.staff_user_id
-            client_id = booking.client_user_id
-            if staff_id in available:
+            for availability in staff_availability:
+                staff_user_id = availability.user_id
+                if staff_user_id not in available:
+                    available[staff_user_id] = []
+                    staff_user_id_arr.append(staff_user_id)
+                # NOTE booking_window_id is the actual booking_window_id (starting at 1 NOT 0)
+                available[staff_user_id].append(availability.booking_window_id)
+            # Now, grab all of the bookings for that client and all staff on the given target date
+            # This is necessary to subtract from the staff_availability above.
+            # If a client or staff cancels, then that time slot is now available
+            bookings = TelehealthBookings.query.filter(TelehealthBookings.target_date==target_date,\
+                                                    TelehealthBookings.status!='Client Canceled',\
+                                                    TelehealthBookings.status!='Staff Canceled').all()
+            # Now, subtract booking times from staff availability and generate the actual times a staff member is free
+            removedNum = {}
+            clientBookingID = []
+
+            for booking in bookings:
+                staff_id = booking.staff_user_id
+                client_id = booking.client_user_id
+                if staff_id in available:
+                    if staff_id not in removedNum:
+                        removedNum[staff_id] = []
+                    for num in range(booking.booking_window_id_start_time,booking.booking_window_id_end_time+1):
+                        if num in available[staff_id]:
+                            available[staff_id].remove(num)
+                            removedNum[staff_id].append(num)
+                        if client_id == user_id:
+                            clientBookingID.append(num)         
+                else:
+                    # This staff_user_id should not have availability on this day
+                    continue
+
+            # This for loop is necessary because if Client 1 already has an appointment:
+            # 3pm - 4pm, then NO other staff should offer them a time 3pm - 4pm
+            for staff_id in available:
                 if staff_id not in removedNum:
                     removedNum[staff_id] = []
-                for num in range(booking.booking_window_id_start_time,booking.booking_window_id_end_time+1):
-                    if num in available[staff_id]:
-                        available[staff_id].remove(num)
-                        removedNum[staff_id].append(num)
-                    if client_id == user_id:
-                        clientBookingID.append(num)         
-            else:
-                # This staff_user_id should not have availability on this day
-                continue
+                available[staff_id] = list(set(available[staff_id]) - set(clientBookingID))
+                available[staff_id].sort()
+                removedNum[staff_id]+=clientBookingID            
+                # for num in clientBookingID:
+                #     if num in available[staff_id]:
+                #         available[staff_id].remove(num)
+                #         removedNum[staff_id].append(num)
 
-        # This for loop is necessary because if Client 1 already has an appointment:
-        # 3pm - 4pm, then NO other staff should offer them a time 3pm - 4pm
-        for staff_id in available:
-            if staff_id not in removedNum:
-                removedNum[staff_id] = []
-            available[staff_id] = list(set(available[staff_id]) - set(clientBookingID))
-            removedNum[staff_id]+=clientBookingID            
-            # for num in clientBookingID:
-            #     if num in available[staff_id]:
-            #         available[staff_id].remove(num)
-            #         removedNum[staff_id].append(num)
-
-        # convert time IDs to actual times for clients to select
-        time_inc = LookupBookingTimeIncrements.query.all()
-        # NOTE: It might be a good idea to shuffle user_id_arr and only select up to 10 (?) staff members 
-        # to reduce the time complexity
-        # user_id_arr = [1,2,3,4,5]
-        # user_id_arr.random() -> [3,5,2,1,4]
-        # user_id_arr[0:3]
-        timeArr = {}
-        for staff_id in staff_user_id_arr:
-            if staff_id not in removedNum:
-                removedNum[staff_id] = []            
-            for idx,time_id in enumerate(available[staff_id]):                 
-                if idx + 1 < len(available[staff_id]):
-                    if available[staff_id][idx+1] - time_id < idx_delta and time_id + idx_delta < available[staff_id][-1]:
-                        # since we are accessing an array, we need to -1 because recall time_id is the ACTUAL time increment idx
-                        # and arrays are 0 indexed in python
-                        if time_inc[time_id-1].start_time.minute%15 == 0:
-                            if time_inc[time_id-1] not in timeArr:
-                                timeArr[time_inc[time_id-1]] = []
-                            if time_id+idx_delta in removedNum[staff_id]:
-                                continue
-                            else:
-                                timeArr[time_inc[time_id-1]].append(staff_id)
-                    
+            # convert time IDs to actual times for clients to select
+            time_inc = LookupBookingTimeIncrements.query.all()
+            # NOTE: It might be a good idea to shuffle user_id_arr and only select up to 10 (?) staff members 
+            # to reduce the time complexity
+            # user_id_arr = [1,2,3,4,5]
+            # user_id_arr.random() -> [3,5,2,1,4]
+            # user_id_arr[0:3]
+            timeArr = {}
+            for staff_id in staff_user_id_arr:
+                if staff_id not in removedNum:
+                    removedNum[staff_id] = []            
+                for idx,time_id in enumerate(available[staff_id]):                 
+                    if idx + 1 < len(available[staff_id]):
+                        if available[staff_id][idx+1] - time_id < idx_delta and time_id + idx_delta < available[staff_id][-1]:
+                            # since we are accessing an array, we need to -1 because recall time_id is the ACTUAL time increment idx
+                            # and arrays are 0 indexed in python
+                            if time_inc[time_id-1].start_time.minute%15 == 0:
+                                if time_inc[time_id-1] not in timeArr:
+                                    timeArr[time_inc[time_id-1]] = []
+                                if time_id+idx_delta in removedNum[staff_id]:
+                                    continue
+                                else:
+                                    timeArr[time_inc[time_id-1]].append(staff_id)
+                        
+                        else:
+                            continue
                     else:
                         continue
-                else:
+            # note, time.idx NEEDS a -1 in the append, 
+            # BECAUSE we are accessing the array where index starts at 0
+            for time in timeArr:
+                if not timeArr[time]:
                     continue
-        times = []
-        # note, time.idx NEEDS a -1 in the append, 
-        # BECAUSE we are accessing the array where index starts at 0
-        for time in timeArr:
-            if not timeArr[time]:
-                continue
-            if len(timeArr[time]) > 1:
-                random.shuffle(timeArr[time])
-            
-            times.append({'staff_user_id': timeArr[time][0],
-                        'start_time': time.start_time, 
-                        'end_time': time_inc[time.idx+idx_delta-1].end_time,
-                        'booking_window_id_start_time': time.idx,
-                        'booking_window_id_end_time': time.idx+idx_delta,
-                        'target_date': target_date})             
+                if len(timeArr[time]) > 1:
+                    random.shuffle(timeArr[time])
+                
+                times.append({'staff_user_id': timeArr[time][0],
+                            'start_time': time.start_time, 
+                            'end_time': time_inc[time.idx+idx_delta-1].end_time,
+                            'booking_window_id_start_time': time.idx,
+                            'booking_window_id_end_time': time.idx+idx_delta,
+                            'target_date': target_date})             
 
-        times.sort(key=lambda t: t['start_time'])
+            # increment days_from_target if there are less than 10 times available
+            days_from_target+=1
+            
+        times.sort(key=lambda t: t['start_time'])    
+        times.sort(key=lambda t: t['target_date'])
 
         payload = {'appointment_times': times,
                    'total_options': len(times)}
