@@ -1403,9 +1403,9 @@ class LookupLegalDocs(db.Model):
 
     __tablename__ = 'LookupLegalDocs'
 
-    doc_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
-    ID of this document
+    Index
 
     :type: integer, primary key, autoincrementing
     """

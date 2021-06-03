@@ -1,6 +1,6 @@
 delete from "LookupLegalDocs" 
-			where doc_id >= 1;
-alter sequence "LookupLegalDocs_doc_id_seq"
+			where idx >= 1;
+alter sequence "LookupLegalDocs_idx_seq"
   restart with 1;
 
 INSERT INTO "LookupLegalDocs" ("created_at", "updated_at", "name", "target", "path") 
