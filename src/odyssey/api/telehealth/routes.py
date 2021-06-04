@@ -1,4 +1,6 @@
 import os, boto3, secrets, pathlib, io
+from datetime import datetime, timedelta
+from dateutil import tz
 
 from flask import request, current_app, g
 from flask_accepts import accepts, responds
@@ -155,13 +157,14 @@ class TelehealthClientTimeSelectApi(Resource):
         client_in_queue = TelehealthQueueClientPool.query.filter_by(user_id=user_id).order_by(TelehealthQueueClientPool.priority.desc(),TelehealthQueueClientPool.target_date.asc()).first()
         if not client_in_queue:
             raise InputError(status_code=405,message='Client is not in the queue yet.')
-        duration = client_in_queue.duration
-        # convert client's target date to day_of_week
         
+        duration = client_in_queue.duration
+
         days_from_target = 0
         no_staff_available_count = 0
         times = []
 
+        # convert client's target date to day_of_week
         # 0 is Monday, 6 is Sunday
         while len(times)<10:
             target_date = client_in_queue.target_date.date() + timedelta(days=days_from_target)
@@ -203,16 +206,16 @@ class TelehealthClientTimeSelectApi(Resource):
             # The subtract 1 is due to the indices having start_time and end_times, so 100 - 103 is 100.start_time to 103.end_time which is
             # the 20 minute duration
             idx_delta = int(duration/5) - 1
-            # TODO will need to incorporate timezone information
-            available = {}
 
+            available = {}
+            staff_availability_timezone = {} # current tz info for each staff we bring up for this target date
             staff_user_id_arr = []
+
             # Loop through all staff that have indicated they are available on that day of the week
             #
             # The expected output is the first and last index of their time blocks, AKA:
             # availability[staff_user_id] = [[100, 120], [145, 160]]
             #
-
             for availability in staff_availability:
                 staff_user_id = availability.user_id
                 if staff_user_id not in available:
@@ -220,6 +223,10 @@ class TelehealthClientTimeSelectApi(Resource):
                     staff_user_id_arr.append(staff_user_id)
                 # NOTE booking_window_id is the actual booking_window_id (starting at 1 NOT 0)
                 available[staff_user_id].append(availability.booking_window_id)
+                
+                if staff_user_id not in staff_availability_timezone:
+                    staff_availability_timezone[staff_user_id] = availability.timezone
+
             # Now, grab all of the bookings for that client and all staff on the given target date
             # This is necessary to subtract from the staff_availability above.
             # If a client or staff cancels, then that time slot is now available
@@ -286,25 +293,52 @@ class TelehealthClientTimeSelectApi(Resource):
                         else:
                             continue
                     else:
-                        continue
+                        continue 
+
+            
+            ##
+            # Loop through timeArr:
+            # 1. select one staff member per time block 
+            # 2. Localize staff availablility times to client's timezone. Remove any time blocks that 
+            #    are target_day - 1 day in the client's tzimezone 
             # note, time.idx NEEDS a -1 in the append, 
             # BECAUSE we are accessing the array where index starts at 0
+            ##
+            booking_duration_delta = timedelta(minutes=5*(idx_delta+1))
             for time in timeArr:
                 if not timeArr[time]:
                     continue
                 if len(timeArr[time]) > 1:
                     random.shuffle(timeArr[time])
                 
+                # client's tz: client_in_queue.timezone
+                # staff's timezone: staff_availability_timezone[staff_user_id]
+                start_time_staff_localized = datetime.combine(
+                    target_date, 
+                    time.start_time, 
+                    tzinfo=tz.gettz(staff_availability_timezone[timeArr[time][0]]))
+                
+                start_time_client_localized = start_time_staff_localized.astimezone(tz.gettz(client_in_queue.timezone))
+                end_time_client_localized = start_time_client_localized+booking_duration_delta
+                
+                # if when localizing to client's time zone, the date changes to the day before the original 
+                # target date, do not show this availability to the client 
+                if start_time_client_localized.date() < client_in_queue.target_date.date():
+                    continue
+                
+                # respond with display start and end times for the client
+                # and booking window ids which appear as they are in the 
+                # TelehealthStaffAvailability table (not localized to the client)
                 times.append({'staff_user_id': timeArr[time][0],
-                            'start_time': time.start_time, 
-                            'end_time': time_inc[time.idx+idx_delta-1].end_time,
+                            'start_time': start_time_client_localized.time(), 
+                            'end_time': end_time_client_localized.time(),
                             'booking_window_id_start_time': time.idx,
                             'booking_window_id_end_time': time.idx+idx_delta,
                             'target_date': target_date})             
 
             # increment days_from_target if there are less than 10 times available
             days_from_target+=1
-            
+
         times.sort(key=lambda t: t['start_time'])    
         times.sort(key=lambda t: t['target_date'])
 
