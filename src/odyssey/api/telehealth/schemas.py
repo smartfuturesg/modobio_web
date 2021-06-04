@@ -81,17 +81,13 @@ class TelehealthStaffAvailabilitySchema(ma.SQLAlchemyAutoSchema):
         return TelehealthStaffAvailability(**data)  
 
 class TelehealthStaffAvailabilityInputSchema(Schema):
-    # class Meta:
-    #     model = TelehealthStaffAvailability
-    #     exclude = ('created_at',)
-    #     dump_only = ('idx', 'user_id','booking_window_id')
-
+    """
+    Schema represents input of staff availability for a time block within a day of the week
+    """
     day_of_week = fields.String(validate=validate.OneOf(DAY_OF_WEEK))
     start_time = fields.Time()
     end_time = fields.Time()
-    # @post_load
-    # def make_object(self, data, **kwargs):
-    #     return TelehealthStaffAvailability(**data)  
+ 
 
 class TelehealthStaffAvailabilityOutputSchema(Schema):
     availability = fields.Nested(TelehealthStaffAvailabilityInputSchema(many=True), missing=[])

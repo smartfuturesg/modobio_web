@@ -77,6 +77,13 @@ class TelehealthBookings(db.Model):
     :type: str
     """    
 
+    timezone = db.Column(db.String)
+    """
+    Staff's timezone setting at the time of booking. 
+
+    :type: str
+    """
+
 class TelehealthMeetingRooms(db.Model):
     """ 
     Meeting room details for one-on-one meetings between clients and medical professionals.
