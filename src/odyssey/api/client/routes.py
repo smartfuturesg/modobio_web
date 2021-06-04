@@ -875,9 +875,9 @@ class ClinicalCareTeamMembers(Resource):
             if 'modobio_id' in team_member:
                 #if modobio_id has been given, find the user with that id and insert their email into the payload
                 modo_id = team_member["modobio_id"]
-                user = User.query.filter_by(modobio_id=modo_id).one_or_none()
+                team_user = User.query.filter_by(modobio_id=modo_id).one_or_none()
                 if user:
-                    team_member["team_member_email"] = user.email
+                    team_member["team_member_email"] = team_user.email
                 else:
                     raise UserNotFound(message=f"The user with modobio_id {modo_id} does not exist")
             if team_member["team_member_email"] == user.email:
@@ -885,10 +885,10 @@ class ClinicalCareTeamMembers(Resource):
             if team_member["team_member_email"].lower() in current_team_emails:
                 continue
 
-            team_memeber_user = User.query.filter_by(email=team_member["team_member_email"].lower()).one_or_none()
-            if team_memeber_user:
+            team_member_user = User.query.filter_by(email=team_member["team_member_email"].lower()).one_or_none()
+            if team_member_user:
                 db.session.add(ClientClinicalCareTeam(**{"team_member_email": team_member["team_member_email"],
-                                                         "team_member_user_id": team_memeber_user.user_id,
+                                                         "team_member_user_id": team_member_user.user_id,
                                                          "user_id": user_id}))
             else:
                 db.session.add(ClientClinicalCareTeam(**{"team_member_email": team_member["team_member_email"],
@@ -968,11 +968,11 @@ class ClinicalCareTeamMembers(Resource):
         current_team_non_users = ClientClinicalCareTeam.query.filter_by(user_id=user_id, team_member_user_id=None).all()
         
         for team_member in current_team_non_users:
-            team_memeber_user = User.query.filter_by(email=team_member.team_member_email).one_or_none()
+            team_member_user = User.query.filter_by(email=team_member.team_member_email).one_or_none()
 
-            if team_memeber_user:
-                team_member.team_member_user_id = team_memeber_user.user_id
-                db.session.add(team_memeber_user)
+            if team_member_user:
+                team_member.team_member_user_id = team_member_user.user_id
+                db.session.add(team_member_user)
                 updates=True
 
         if updates:
