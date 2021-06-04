@@ -223,7 +223,7 @@ class TelehealthClientTimeSelectApi(Resource):
                     staff_user_id_arr.append(staff_user_id)
                 # NOTE booking_window_id is the actual booking_window_id (starting at 1 NOT 0)
                 available[staff_user_id].append(availability.booking_window_id)
-                
+
                 if staff_user_id not in staff_availability_timezone:
                     staff_availability_timezone[staff_user_id] = availability.timezone
 
@@ -1022,7 +1022,7 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
 
     @token_auth.login_required
     @accepts(schema=TelehealthStaffAvailabilityOutputSchema, api=ns)
-    # @responds(schema=TelehealthStaffAvailabilityOutputSchema, api=ns, status_code=201) # commenting this out because there wasnt a response payload 
+    @responds(api=ns, status_code=201) 
     def post(self,user_id):
         """
         Posts the staff availability
