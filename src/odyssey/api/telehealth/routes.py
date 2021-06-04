@@ -549,7 +549,7 @@ class TelehealthBookingsApi(Resource):
         request.parsed_obj.client_user_id = client_user_id
         request.parsed_obj.staff_user_id = staff_user_id
 
-        # # ensure staff still has the same availability
+        # ensure staff still has the same availability
         staff_availability = db.session.execute(
             select(TelehealthStaffAvailability).
             filter(
@@ -561,9 +561,11 @@ class TelehealthBookingsApi(Resource):
         ).scalars().all()
 
         if not staff_availability:
+            breakpoint()
             raise InputError(message="Staff does not currently have this time available")
         
         request.parsed_obj.timezone = staff_availability[0].timezone
+
         db.session.add(request.parsed_obj)
         db.session.flush()
 
@@ -600,7 +602,8 @@ class TelehealthBookingsApi(Resource):
                                               availability_status='Busy',
                                               location='Telehealth_'+str(request.parsed_obj.idx),
                                               description='',
-                                              all_day=False
+                                              all_day=False,
+                                              timezone = request.parsed_obj.timezone
                                               )
 
         db.session.add(add_to_calendar)

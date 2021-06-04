@@ -168,21 +168,22 @@ telehealth_client_staff_bookings_post_1_data = {
 
 telehealth_client_staff_bookings_post_2_data = {
   'target_date': '2025-02-07',
-  'booking_window_id_start_time': 95,
-  'booking_window_id_end_time': 98,
+  'booking_window_id_start_time': 157,
+  'booking_window_id_end_time': 160,
   'profession_type': 'medical_doctor'
 }
+#client already has appointment at this time
 telehealth_client_staff_bookings_post_3_data = {
   'target_date': '2025-02-07',
-  'booking_window_id_start_time': 95,
-  'booking_window_id_end_time': 99,
+  'booking_window_id_start_time': 157,
+  'booking_window_id_end_time': 160,
   'profession_type': 'medical_doctor'
 }
 # This should break
 telehealth_client_staff_bookings_post_4_data = {
   'target_date': '2025-02-07',
-  'booking_window_id_start_time': 97,
-  'booking_window_id_end_time': 99,
+  'booking_window_id_start_time': 105,
+  'booking_window_id_end_time': 107,
   'profession_type': 'medical_doctor'
 }
 # This should break
