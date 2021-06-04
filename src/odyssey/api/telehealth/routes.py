@@ -561,7 +561,6 @@ class TelehealthBookingsApi(Resource):
         ).scalars().all()
 
         if not staff_availability:
-            breakpoint()
             raise InputError(message="Staff does not currently have this time available")
         
         request.parsed_obj.timezone = staff_availability[0].timezone
