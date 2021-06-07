@@ -608,3 +608,57 @@ class UserTokenHistory(db.Model):
 
     :type: str
     """
+
+class UserLegalDocs(db.Model):
+    """ 
+    Stores details of which legal docs users have seen and signed or attempted to ignore.
+    If no entry exists for a given user_id and document id, that user has not yet viewed the document.
+    If an entry exists and signed = False, the user has viewed the document but did not sign it.
+
+    The primary index of this table is the
+    :attr:`idx` number.
+    """
+
+    __tablename__ = 'UserLegalDocs'
+
+    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when object was created. DB server time is used. 
+
+    :type: datetime
+    """
+
+    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    """
+    timestamp for when object was updated. DB server time is used. 
+
+    :type: datetime
+    """
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Auto incrementing primary key
+
+    :type: int, primary key
+    """
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"))
+    """
+    User ID number, foreign key to User.user_id
+
+    :type: int, foreign key
+    """
+
+    doc_id = db.Column(db.Integer, db.ForeignKey('LookupLegalDocs.idx', ondelete="CASCADE"))
+    """
+    Document ID number, foreigh key to LookupLegalDocs.idx
+
+    :type: int, foreign key
+    """
+
+    signed = db.Column(db.Boolean, default=False)
+    """
+    Denotes if the user has signed this document. If False, the user has viewed the document but no signed.
+
+    :type: boolean
+    """

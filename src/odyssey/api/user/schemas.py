@@ -3,7 +3,7 @@ from sqlalchemy.orm import load_only
 
 from odyssey import ma
 from odyssey.api.staff.schemas import StaffRolesSchema
-from odyssey.api.user.models import User, UserLogin, UserSubscriptions, UserPendingEmailVerifications
+from odyssey.api.user.models import User, UserLogin, UserSubscriptions, UserPendingEmailVerifications, UserLegalDocs
 from odyssey.utils.constants import ACCESS_ROLES
 
 """
@@ -139,3 +139,15 @@ class UserClinicalCareTeamSchema(Schema):
     client_user_id = fields.Integer()
     client_name = fields.String()
     client_email = fields.String()
+
+class UserLegalDocsSchema(ma.SQLAlchemyAutoSchema):
+
+    class Meta:
+        model = UserLegalDocs
+        exclude = ('created_at', 'updated_at', 'idx')
+
+    doc_id = fields.Integer()
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return UserLegalDocs(**data)
