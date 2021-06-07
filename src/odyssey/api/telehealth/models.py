@@ -77,7 +77,14 @@ class TelehealthBookings(db.Model):
     :type: str
     """    
 
-    timezone = db.Column(db.String)
+    client_timezone = db.Column(db.String)
+    """
+    Staff's timezone setting at the time of booking. 
+
+    :type: str
+    """
+
+    staff_timezone = db.Column(db.String)
     """
     Staff's timezone setting at the time of booking. 
 

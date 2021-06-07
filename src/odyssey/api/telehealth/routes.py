@@ -562,7 +562,9 @@ class TelehealthBookingsApi(Resource):
 
         if not staff_availability:
             raise InputError(message="Staff does not currently have this time available")
-        
+        ##
+        # Add staff and client timezones to the TelehealthBooking entry
+        ##
         request.parsed_obj.timezone = staff_availability[0].timezone
 
         db.session.add(request.parsed_obj)
