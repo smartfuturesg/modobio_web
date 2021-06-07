@@ -21,7 +21,7 @@ from .data import (
 # import pytest
 # pytest.skip('Out of TwiliCoin.', allow_module_level=True)
 
-def test_post_1_client_staff_bookings(test_client, init_database, staff_auth_header):
+def test_post_1_client_staff_bookings(test_client, init_database, staff_auth_header ):
     """
     GIVEN a api end point for client staff bookings
     WHEN the '/telehealth/bookings/<int:client_user_id>/<int:staff_user_id>/' resource  is requested (POST)
@@ -51,13 +51,26 @@ def test_post_1_client_staff_bookings(test_client, init_database, staff_auth_hea
     assert staff_events.start_date == datetime.strptime(telehealth_client_staff_bookings_post_1_data['target_date'],'%Y-%m-%d').date()
 
 
-def test_post_2_client_staff_bookings(test_client, init_database, staff_auth_header):
+def test_post_2_client_staff_bookings(test_client, init_database, staff_auth_header, client_auth_header):
     """
     GIVEN a api end point for client staff bookings
     WHEN the '/telehealth/bookings/<int:client_user_id>/<int:staff_user_id>/' resource  is requested (POST)
     THEN check the response is valid
     """
-   
+    # add client to queue first
+    queue_data = {
+                'profession_type': 'Medical Doctor',
+                'target_date': datetime.strptime(
+                    telehealth_client_staff_bookings_post_2_data.get('target_date'), '%Y-%m-%d').isoformat(),
+                'priority': False,
+                'medical_gender': 'np'
+            }
+
+    response = test_client.post('/telehealth/queue/client-pool/1/',
+                                headers=client_auth_header, 
+                                data=dumps(queue_data), 
+                                content_type='application/json')
+
     response = test_client.post('/telehealth/bookings/?client_user_id={}&staff_user_id={}'.format(1,2),
                                 headers=staff_auth_header, 
                                 data=dumps(telehealth_client_staff_bookings_post_2_data), 
@@ -69,8 +82,7 @@ def test_post_3_client_staff_bookings(test_client, init_database, staff_auth_hea
     GIVEN a api end point for client staff bookings
     WHEN the '/telehealth/bookings/<int:client_user_id>/<int:staff_user_id>/' resource  is requested (POST)
     THEN check the response is valid
-    """
-   
+    """   
     response = test_client.post('/telehealth/bookings/?client_user_id={}&staff_user_id={}'.format(1,2),
                                 headers=staff_auth_header, 
                                 data=dumps(telehealth_client_staff_bookings_post_3_data), 

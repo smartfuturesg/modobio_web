@@ -1,5 +1,7 @@
 
 import base64
+from datetime import datetime
+
 from flask.json import dumps
 import pytest
 from sqlalchemy.sql.expression import select
@@ -73,12 +75,29 @@ def test_generate_staff_availability(test_client, init_database, generate_users,
 
         assert response.status_code == 201
 
-def test_generate_bookings(test_client, init_database, staff_auth_header):
+def test_generate_bookings(test_client, init_database, client_auth_header):
     """
     GIVEN an api end point for looking client time select
     WHEN the  '/telehealth/bookings/' resource  is requested (GET)
     THEN check the response is valid
     """
+    ##
+    # Create booking 1
+    ##
+    # add client to queue first
+    queue_data = {
+                'profession_type': 'Medical Doctor',
+                'target_date': datetime.strptime(
+                    telehealth_bookings_staff_4_client_1_data.get('target_date'), '%Y-%m-%d').isoformat(),
+                'priority': False,
+                'medical_gender': 'np'
+            }
+
+    response = test_client.post('/telehealth/queue/client-pool/1/',
+                                headers=client_auth_header, 
+                                data=dumps(queue_data), 
+                                content_type='application/json')
+
 
     user = init_database.session.execute(
         select(User).where(User.user_id == staff_users[0].user_id)
@@ -100,19 +119,72 @@ def test_generate_bookings(test_client, init_database, staff_auth_header):
                                 data=dumps(telehealth_bookings_staff_4_client_1_data), 
                                 content_type='application/json')
                                 
-    assert response.status_code == 201            
+    assert response.status_code == 201    
+
+    ##
+    # Create booking 2
+    ##
+    # add client to queue first
+    queue_data = {
+                'profession_type': 'Medical Doctor',
+                'target_date': datetime.strptime(
+                    telehealth_bookings_staff_4_client_3_data.get('target_date'), '%Y-%m-%d').isoformat(),
+                'priority': False,
+                'medical_gender': 'np'
+            }
+
+    response = test_client.post('/telehealth/queue/client-pool/1/',
+                                headers=client_auth_header, 
+                                data=dumps(queue_data), 
+                                content_type='application/json')        
     
     response = test_client.post('/telehealth/bookings/?client_user_id={}&staff_user_id={}'.format(1,staff_users[0].user_id),
                                 headers=auth_header, 
                                 data=dumps(telehealth_bookings_staff_4_client_3_data), 
                                 content_type='application/json')
+                      
     assert response.status_code == 201            
 
-
+    ##
+    # Create booking 3
+    ##
+    
     # use different staff and client users. Must sign in as staff first
     user = init_database.session.execute(
         select(User).where(User.user_id == staff_users[2].user_id)
     ).one_or_none()[0]
+
+    client_4 = init_database.session.execute(
+        select(User).
+        where(User.email == 'test_remote_registration3@gmail.com')
+    ).scalars().one_or_none()
+
+     # sign in as client user 
+    valid_credentials = base64.b64encode(
+        f"{client_4.email}:{'password'}".encode(
+            "utf-8")).decode("utf-8")
+    
+    headers = {'Authorization': f'Basic {valid_credentials}'}
+    response = test_client.post('/client/token/',
+                            headers=headers, 
+                            content_type='application/json')
+    token = response.json.get('token')
+    auth_header = {'Authorization': f'Bearer {token}'}
+
+    # add client to queue first
+    queue_data = {
+                'profession_type': 'Medical Doctor',
+                'target_date': datetime.strptime(
+                    telehealth_bookings_staff_8_client_5_data.get('target_date'), '%Y-%m-%d').isoformat(),
+                'priority': False,
+                'medical_gender': 'np'
+            }
+
+    response = test_client.post(f'/telehealth/queue/client-pool/{client_4.user_id}/',
+                                headers=auth_header, 
+                                data=dumps(queue_data), 
+                                content_type='application/json')
+
     # sign in as staff user 
     valid_credentials = base64.b64encode(
         f"{user.email}:{'password'}".encode(
@@ -124,13 +196,8 @@ def test_generate_bookings(test_client, init_database, staff_auth_header):
                             content_type='application/json')
     token = response.json.get('token')
     auth_header = {'Authorization': f'Bearer {token}'}
-    
-    client_4 = init_database.session.execute(
-        select(User.user_id).
-        where(User.email == 'test_remote_registration3@gmail.com')
-    ).scalars().one_or_none()
 
-    response = test_client.post('/telehealth/bookings/?client_user_id={}&staff_user_id={}'.format(client_4,staff_users[2].user_id),
+    response = test_client.post('/telehealth/bookings/?client_user_id={}&staff_user_id={}'.format(client_4.user_id,staff_users[2].user_id),
                                 headers=auth_header, 
                                 data=dumps(telehealth_bookings_staff_8_client_5_data), 
                                 content_type='application/json')

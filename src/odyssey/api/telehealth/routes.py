@@ -446,6 +446,22 @@ class TelehealthBookingsApi(Resource):
             staff = booking.get('staff_user', staff_user)
             client = booking.get('client_user', client_user)
             book = booking.get('booking')
+            ##
+            # localize booking times to the staff or client 
+            ##
+            if g.get('user_type') == 'staff':
+                tz = book.staff_timezone
+                # bookings stored in staff timezone
+                start_time_localized = time_inc[book.booking_window_id_start_time-1].start_time
+                end_time_localized = time_inc[book.booking_window_id_end_time-1].end_time
+            else:
+                tz = book.client_timezone
+                # start_time_staff_localized = datetime.combine(
+                #     book.target_date, 
+                #     time.start_time, 
+                #     tzinfo=tz.gettz(book.staff_timezone[timeArr[time][0]]))
+                
+            
             bookings_payload.append({
                 'booking_id': book.idx,
                 'staff_user_id': staff.user_id,
@@ -565,10 +581,8 @@ class TelehealthBookingsApi(Resource):
 
         # bring up client queue details
         client_in_queue = TelehealthQueueClientPool.query.filter_by(user_id=client_user_id).one_or_none()
-
-        ##
+        
         # Add staff and client timezones to the TelehealthBooking entry
-        ##
         request.parsed_obj.staff_timezone = staff_availability[0].timezone
         request.parsed_obj.client_timezone = client_in_queue.timezone
 
@@ -596,7 +610,6 @@ class TelehealthBookingsApi(Resource):
             # 11:30pm - 12:15am
             end_date = request.parsed_obj.target_date + timedelta(days=1)
         lookup_times = LookupBookingTimeIncrements.query.all()
-
         add_to_calendar = StaffCalendarEvents(user_id=request.parsed_obj.staff_user_id,
                                               start_date=request.parsed_obj.target_date,
                                               end_date=end_date,
@@ -607,7 +620,7 @@ class TelehealthBookingsApi(Resource):
                                               location='Telehealth_'+str(request.parsed_obj.idx),
                                               description='',
                                               all_day=False,
-                                              timezone = request.parsed_obj.timezone
+                                              timezone = request.parsed_obj.staff_timezone
                                               )
 
         db.session.add(add_to_calendar)
