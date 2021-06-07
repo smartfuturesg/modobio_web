@@ -1,3 +1,20 @@
+# New requirements:
+# 
+# - remove param store
+# - two options: defaults or environment
+# - no more LOCAL_CONFIG (local/remote distinction, FLASK_DEV)
+# - interaction with FLASK_ENV?
+# - Still need for DEV only code.
+# - nicer way to access config in code?
+
+
+
+
+
+
+
+
+
 """ 
 Flask app configuration
 =======================
