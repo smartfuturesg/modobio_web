@@ -562,10 +562,15 @@ class TelehealthBookingsApi(Resource):
 
         if not staff_availability:
             raise InputError(message="Staff does not currently have this time available")
+
+        # bring up client queue details
+        client_in_queue = TelehealthQueueClientPool.query.filter_by(user_id=client_user_id).one_or_none()
+
         ##
         # Add staff and client timezones to the TelehealthBooking entry
         ##
-        request.parsed_obj.timezone = staff_availability[0].timezone
+        request.parsed_obj.staff_timezone = staff_availability[0].timezone
+        request.parsed_obj.client_timezone = client_in_queue.timezone
 
         db.session.add(request.parsed_obj)
         db.session.flush()
@@ -579,8 +584,6 @@ class TelehealthBookingsApi(Resource):
         token = create_twilio_access_token(current_user.modobio_id)
 
         # Once the booking has been successful, delete the client from the queue
-        client_in_queue = TelehealthQueueClientPool.query.filter_by(user_id=client_user_id).one_or_none()
-
         if client_in_queue:
             db.session.delete(client_in_queue)
             db.session.flush()
