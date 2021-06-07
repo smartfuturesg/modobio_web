@@ -266,6 +266,8 @@ class ApplePushNotificationVoipSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
+    # aps entry must be present, can be empty.
+    aps = fields.Dict(required=True)
     type = fields.String(default='incoming-call', required=True, validate=validate.Equal('incoming-call'))
     data = fields.Nested(ApplePushNotificationVoipDataSchema, required=True)
 
