@@ -147,6 +147,8 @@ class UserLegalDocsSchema(ma.SQLAlchemyAutoSchema):
         exclude = ('created_at', 'updated_at', 'idx')
 
     doc_id = fields.Integer()
+    doc_name = fields.String(dump_only=True)
+    doc_version = fields.Integer(dump_only=True)
 
     @post_load
     def make_object(self, data, **kwargs):

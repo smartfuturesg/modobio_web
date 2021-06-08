@@ -884,7 +884,7 @@ class UserPendingEmailVerificationsResendApi(Resource):
         
 @ns.route('/legal-docs/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class UserPendingEmailVerificationsResendApi(Resource):
+class UserLegalDocsApi(Resource):
     """
     Endpoints related to legal documents that users have viewed and signed.
     """
@@ -895,7 +895,14 @@ class UserPendingEmailVerificationsResendApi(Resource):
 
         check_user_existence(user_id)
 
-        return UserLegalDocs.query.filter_by(user_id=user_id).all()
+        docs = UserLegalDocs.query.filter_by(user_id=user_id).all()
+
+        for doc in docs:
+            doc_info = LookupLegalDocs.query.filter_by(idx=doc.doc_id).one_or_none()
+            doc.doc_name = doc_info.name
+            doc.doc_version = doc_info.version
+
+        return docs
 
     @token_auth.login_required
     @accepts(schema=UserLegalDocsSchema, api=ns)
@@ -915,6 +922,10 @@ class UserPendingEmailVerificationsResendApi(Resource):
 
         db.session.add(request.parsed_obj)
         db.session.commit()
+
+        doc_info = LookupLegalDocs.query.filter_by(idx=request.parsed_obj.doc_id).one_or_none()
+        request.parsed_obj.doc_name = doc_info.name
+        request.parsed_obj.doc_version = doc_info.version
 
         return request.parsed_obj
 
@@ -939,5 +950,9 @@ class UserPendingEmailVerificationsResendApi(Resource):
 
         doc.update(new_data)
         db.session.commit()
+
+        doc_info = LookupLegalDocs.query.filter_by(idx=doc.doc_id).one_or_none()
+        doc.doc_name = doc_info.name
+        doc.doc_version = doc_info.version
 
         return doc
