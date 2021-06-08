@@ -58,6 +58,7 @@ class TelehealthBookingsSchema(ma.SQLAlchemyAutoSchema):
     staff_first_name = fields.String(dump_only=True)
     staff_middle_name = fields.String(dump_only=True)
     staff_last_name = fields.String(dump_only=True)
+    timezone = fields.String(metadata={'description': 'tiemzone setting of the booking for the logged in user'})
 
     @post_load
     def make_object(self, data, **kwargs):

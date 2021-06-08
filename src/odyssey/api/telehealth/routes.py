@@ -450,17 +450,25 @@ class TelehealthBookingsApi(Resource):
             # localize booking times to the staff or client 
             ##
             if g.get('user_type') == 'staff':
-                tz = book.staff_timezone
+                tzone = book.staff_timezone
                 # bookings stored in staff timezone
                 start_time_localized = time_inc[book.booking_window_id_start_time-1].start_time
                 end_time_localized = time_inc[book.booking_window_id_end_time-1].end_time
             else:
-                tz = book.client_timezone
-                # start_time_staff_localized = datetime.combine(
-                #     book.target_date, 
-                #     time.start_time, 
-                #     tzinfo=tz.gettz(book.staff_timezone[timeArr[time][0]]))
+                tzone = book.client_timezone
+                start_time_staff_localized = datetime.combine(
+                    book.target_date, 
+                    time_inc[book.booking_window_id_start_time-1].start_time, 
+                    tzinfo=tz.gettz(book.staff_timezone))
                 
+                end_time_staff_localized = datetime.combine(
+                    book.target_date, 
+                    time_inc[book.booking_window_id_end_time-1].end_time, 
+                    tzinfo=tz.gettz(book.staff_timezone))
+                
+                start_time_localized = start_time_staff_localized.astimezone(tz.gettz(book.client_timezone)).time()
+                end_time_localized = end_time_staff_localized.astimezone(tz.gettz(book.client_timezone)).time()
+
             
             bookings_payload.append({
                 'booking_id': book.idx,
@@ -472,12 +480,13 @@ class TelehealthBookingsApi(Resource):
                 'client_first_name': client.firstname,
                 'client_middle_name': client.middlename,
                 'client_last_name': client.lastname,                
-                'start_time': time_inc[book.booking_window_id_start_time-1].start_time,
-                'end_time': time_inc[book.booking_window_id_end_time-1].end_time,
+                'start_time': start_time_localized,
+                'end_time': end_time_localized,
                 'target_date': book.target_date,
                 'status': book.status,
                 'profession_type': book.profession_type,
-                'conversation_sid': booking.get('conversation_sid')
+                'conversation_sid': booking.get('conversation_sid'),
+                'timezone': tzone
             })
 
         # Sort bookings by time then sort by date

@@ -4,7 +4,7 @@ from datetime import datetime
 
 from flask.json import dumps
 import pytest
-from sqlalchemy.sql.expression import select
+from sqlalchemy.sql.expression import delete, select
 
 # from tests.conftest import generate_users
 from odyssey.api.user.models import User
@@ -228,7 +228,129 @@ def test_client_time_select(test_client, init_database, client_auth_header):
 
     assert response.status_code == 200
     assert response.json['total_options'] == 53
+
+
+def test_full_system_with_timezones(test_client, init_database, staff_auth_header, client_auth_header):
+    """
+    Testing the full telehealth system:
+    1. set staff availability (UTC)
+    2. client adds to the queue (America/Phoenix)
+    3. client views availabilities and selects an appointment 
+    4. Client makes booking
+    5. client and staff view their bookings
+
+    The staff availability in UTC should be converted to the client's timezone (America/Phoenix) for display.
+    """  
+    # clear all availabilities before this
+    current_availabilities = init_database.session.execute(
+        delete(TelehealthStaffAvailability).
+        where(TelehealthStaffAvailability.idx > 0)
+    )
+    ##
+    # 1. Set staff's availability
+    ##
+    availability = {'timezone' : 'UTC',
+                    'availability' : [  {
+            "day_of_week": "Wednesday",
+            "start_time": "3:00:00",
+            "end_time": "12:00:00"
+            } 
+        ]
+    }
+    response = test_client.post(f'/telehealth/settings/staff/availability/{2}/',
+                                    headers=staff_auth_header, 
+                                    data=dumps(availability), 
+                                    content_type='application/json')
     
+    ##
+    # 2. Client requests to be added to the queue
+    ##
+    client_queue = {
+                    "profession_type": "medical_doctor",
+                    "priority": "True",
+                    "duration": 20,
+                    "medical_gender": "np",
+                    "target_date": "2024-11-6T00:00:00",
+                    "timezone": "America/Phoenix"
+            }
+
+    response = test_client.post('/telehealth/queue/client-pool/1/',
+                                headers=client_auth_header, 
+                                data=dumps(client_queue), 
+                                content_type='application/json')
+
+
+    ##
+    # 3. Client requests to view availabilities for selected target date
+    ##
+    response = test_client.get('/telehealth/client/time-select/1/', headers=client_auth_header)
+
+    assert response.status_code == 200
+    assert response.json['appointment_times'][0]['start_time'] == '00:00:00'
+    assert response.json['appointment_times'][0]['booking_window_id_start_time'] == 85
+ 
+    assert response.json['appointment_times'][-1]['start_time'] == '04:30:00'
+    assert response.json['appointment_times'][-1]['booking_window_id_start_time'] == 139
+    assert response.json['total_options'] == 19
+
+    ##
+    # 4. Client selects an appointment time
+    ##
+    # select the booking that is at 4:30 Phx time/ 11:30 UTC  
+    client_booking = {
+            'target_date': '2024-11-6',
+            'booking_window_id_start_time': response.json['appointment_times'][-1]['booking_window_id_start_time'],
+            'booking_window_id_end_time': response.json['appointment_times'][-1]['booking_window_id_end_time'],
+            'profession_type': 'medical_doctor'
+        }
+
+    response = test_client.post('/telehealth/bookings/?client_user_id={}&staff_user_id={}'.format(1,2),
+                            headers=client_auth_header, 
+                            data=dumps(client_booking), 
+                            content_type='application/json')
+                                
+
+    assert response.json['bookings'][0]['client_timezone'] == 'America/Phoenix'
+    assert response.json['bookings'][0]['staff_timezone'] == 'UTC'
+
+    booking_id = response.json['bookings'][0]['idx']
+
+    ##
+    # 4. Pull up bookings from the client and staff perspectives
+    ##
+
+    response = test_client.get('/telehealth/bookings/?client_user_id={}&staff_user_id={}'.format(1,2),
+                        headers=staff_auth_header, 
+                        data=dumps(client_booking), 
+                        content_type='application/json')
+    current_booking = (booking for booking in response.json['bookings'] if booking.booking_id == booking_id)
+
+    for booking in response.json['bookings']:
+        if booking['booking_id'] == booking_id:
+            current_booking = booking
+            break
+
+    # booking time as seen by the staff
+    assert current_booking['start_time'] == '11:30:00'
+    assert current_booking['end_time'] == '11:50:00'
+    assert current_booking['timezone'] == 'UTC'
+
+    response = test_client.get('/telehealth/bookings/?client_user_id={}&staff_user_id={}'.format(1,2),
+                        headers=client_auth_header, 
+                        data=dumps(client_booking), 
+                        content_type='application/json')
+    
+    for booking in response.json['bookings']:
+        if booking['booking_id'] == booking_id:
+            current_booking = booking
+            break
+
+    # booking time as seen by the client
+    assert current_booking['start_time'] == '04:30:00'
+    assert current_booking['end_time'] == '04:50:00'
+    assert current_booking['timezone'] == 'America/Phoenix'
+
+
 @pytest.mark.skip('This endpoint should no longer be used.')
 def test_bookings_meeting_room_access(test_client,init_database,client_auth_header, staff_auth_header):
     user_id_arr = (1,2)
