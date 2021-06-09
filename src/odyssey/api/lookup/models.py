@@ -1431,6 +1431,13 @@ class LookupLegalDocs(db.Model):
     :type: string
     """
 
+    version = db.Column(db.Integer)
+    """
+    Version # of this document.
+
+    :type: int
+    """
+
     target = db.Column(db.String)
     """
     Target of this document. Types are 'User', 'Professional', and 'Practitioner'.

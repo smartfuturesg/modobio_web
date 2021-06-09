@@ -11,7 +11,7 @@ from werkzeug.security import check_password_hash
 from odyssey.api import api
 from odyssey.api.client.schemas import ClientInfoSchema, ClientGeneralMobileSettingsSchema, ClientRaceAndEthnicitySchema
 from odyssey.api.client.models import ClientClinicalCareTeam
-from odyssey.api.lookup.models import LookupSubscriptions
+from odyssey.api.lookup.models import LookupSubscriptions, LookupLegalDocs
 from odyssey.api.staff.schemas import StaffProfileSchema, StaffRolesSchema
 from odyssey.api.user.models import (
     User,
@@ -20,7 +20,8 @@ from odyssey.api.user.models import (
     UserSubscriptions,
     UserTokenHistory,
     UserTokensBlacklist,
-    UserPendingEmailVerifications
+    UserPendingEmailVerifications,
+    UserLegalDocs
 )
 from odyssey.api.staff.models import StaffRoles
 from odyssey.api.user.schemas import (
@@ -33,7 +34,8 @@ from odyssey.api.user.schemas import (
     UserInfoSchema,
     UserSubscriptionsSchema,
     UserSubscriptionHistorySchema,
-    NewStaffUserSchema
+    NewStaffUserSchema,
+    UserLegalDocsSchema
 )
 
 from odyssey.utils.auth import token_auth, basic_auth
@@ -44,7 +46,8 @@ from odyssey.utils.errors import (
     ClientEmailInUse,
     UnauthorizedUser,
     GenericNotFound,
-    InvalidVerificationCode
+    InvalidVerificationCode,
+    IllegalSetting
 )
 from odyssey.utils.message import send_email_password_reset, send_email_delete_account, send_email_verify_email
 from odyssey.utils.misc import check_user_existence, check_client_existence, check_staff_existence, verify_jwt
@@ -879,3 +882,76 @@ class UserPendingEmailVerificationsResendApi(Resource):
 
         send_email_verify_email(recipient, token, code)
         
+@ns.route('/legal-docs/<int:user_id>/')
+class UserLegalDocsApi(Resource):
+    """
+    Endpoints related to legal documents that users have viewed and signed.
+    """
+
+    @token_auth.login_required
+    @responds(schema=UserLegalDocsSchema(many=True), api=ns, status_code=200)
+    def get(self, user_id):
+
+        check_user_existence(user_id)
+
+        docs = UserLegalDocs.query.filter_by(user_id=user_id).all()
+
+        for doc in docs:
+            doc_info = LookupLegalDocs.query.filter_by(idx=doc.doc_id).one_or_none()
+            doc.doc_name = doc_info.name
+            doc.doc_version = doc_info.version
+
+        return docs
+
+    @token_auth.login_required
+    @accepts(schema=UserLegalDocsSchema, api=ns)
+    @responds(schema=UserLegalDocsSchema, api=ns, status_code=200)
+    def post(self, user_id):
+
+        check_user_existence(user_id)
+
+        if UserLegalDocs.query.filter_by(user_id=user_id, doc_id=request.parsed_obj.doc_id).one_or_none():
+            raise IllegalSetting(message=f"A record already exists for the user with user_id {user_id}" \
+                                    f" and the doc_id {request.parsed_obj.doc_id}. Please use PUT instead.")
+
+        if not LookupLegalDocs.query.filter_by(idx=request.parsed_obj.doc_id).one_or_none():
+            raise GenericNotFound(f"There is no document with doc_id {request.parsed_obj.doc_id}")
+
+        request.parsed_obj.user_id = user_id
+
+        db.session.add(request.parsed_obj)
+        db.session.commit()
+
+        doc_info = LookupLegalDocs.query.filter_by(idx=request.parsed_obj.doc_id).one_or_none()
+        request.parsed_obj.doc_name = doc_info.name
+        request.parsed_obj.doc_version = doc_info.version
+
+        return request.parsed_obj
+
+    @token_auth.login_required
+    @accepts(schema=UserLegalDocsSchema, api=ns)
+    @responds(schema=UserLegalDocsSchema, api=ns, status_code=200)
+    def put(self, user_id):
+
+        check_user_existence(user_id)
+
+        doc = UserLegalDocs.query.filter_by(user_id=user_id, doc_id=request.parsed_obj.doc_id).one_or_none()
+
+        if not doc:
+            raise GenericNotFound(f"No record exists for the user with user_id {user_id}" \
+                                    f" and doc_id {request.parsed_obj.doc_id}. Please use POST.")
+
+        if not LookupLegalDocs.query.filter_by(idx=request.parsed_obj.doc_id).one_or_none():
+            raise GenericNotFound(f"There is no document with doc_id {request.parsed_obj.doc_id}.")
+
+        new_data = request.parsed_obj.__dict__
+        del new_data['_sa_instance_state']
+
+        doc.update(new_data)
+        db.session.commit()
+
+        doc_info = LookupLegalDocs.query.filter_by(idx=doc.doc_id).one_or_none()
+        doc.doc_name = doc_info.name
+        doc.doc_version = doc_info.version
+
+        return doc
