@@ -42,7 +42,7 @@ def send_email_user_registration_portal(recipient, password, portal_id):
     remote_registration_url = REGISTRATION_PORTAL_URL.format(portal_id)
 
     # route emails to AWS mailbox simulator when in dev environment
-    if current_app.config['LOCAL_CONFIG'] and not recipient.endswith('sde.cz'):
+    if current_app.config['DEV'] and not recipient.endswith('sde.cz'):
         recipient = "success@simulator.amazonses.com"
 
     # The email body for recipients with non-HTML email clients.
@@ -102,7 +102,7 @@ def send_email_verify_email(recipient, token, code):
         BODY_HTML = BODY_HTML.replace('XXXX', str(code))
 
     # route emails to AWS mailbox simulator when in dev environment
-    if current_app.config['LOCAL_CONFIG'] and not recipient.email.endswith('sde.cz'):
+    if current_app.config['DEV'] and not recipient.email.endswith('sde.cz'):
         send_email(subject=SUBJECT, recipient="success@simulator.amazonses.com", body_text=BODY_TEXT, body_html=BODY_HTML, sender="verify@modobio.com")
     else:
         send_email(subject=SUBJECT, recipient=recipient.email, body_text=BODY_TEXT, body_html=BODY_HTML, sender="verify@modobio.com")
@@ -119,7 +119,7 @@ def send_email_password_reset(recipient, reset_token):
     reset_password_url = PASSWORD_RESET_URL.format(reset_token)
 
     # route emails to AWS mailbox simulator when in dev environment
-    if current_app.config['LOCAL_CONFIG'] and not recipient.endswith('sde.cz'):
+    if current_app.config['DEV'] and not recipient.endswith('sde.cz'):
         recipient = "success@simulator.amazonses.com"
 
     # The email body for recipients with non-HTML email clients.

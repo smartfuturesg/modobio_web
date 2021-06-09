@@ -77,7 +77,7 @@ def create_app():
     register_handlers(app)
 
     # Unprotected route, only relevant to developers
-    if app.config['LOCAL_CONFIG']:
+    if app.config['DEV']:
         from odyssey.api.misc.postman import bp
         app.register_blueprint(bp, url_prefix='/postman')
     

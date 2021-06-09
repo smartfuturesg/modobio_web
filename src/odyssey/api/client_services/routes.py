@@ -76,12 +76,12 @@ class NewUserClientServices(Resource):
 
         send_email_user_registration_portal(user.email, password, portal_id)
 
-        if current_app.config['LOCAL_CONFIG']:
+        # DEV mode won't send an email, so return password. DEV mode ONLY.
+        if current_app.config['DEV']:
             return {'password':password,
                     'portal_id': portal_id,
                     'registration_portal_url': REGISTRATION_PORTAL_URL.format(portal_id)}
-        else:
-            return
+
 
 @ns.route("/user/registration-portal/refresh")
 class RefreshRegistrationPortal(Resource):
@@ -130,10 +130,9 @@ class RefreshRegistrationPortal(Resource):
         send_email_user_registration_portal(user.email, password, portal_id)
         
         db.session.commit()
-        
-        if current_app.config['LOCAL_CONFIG']:
+
+        # DEV mode won't send an email, so return password. DEV mode ONLY.
+        if current_app.config['DEV']:
             return {'password':password,
                     'portal_id': portal_id,
                     'registration_portal_url': REGISTRATION_PORTAL_URL.format(portal_id)}
-        else:
-            return

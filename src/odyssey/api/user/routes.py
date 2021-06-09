@@ -402,10 +402,11 @@ class PasswordResetEmail(Resource):
                                   
         send_email_password_reset(user.email, password_reset_token)
 
-        if current_app.config['LOCAL_CONFIG']:
+        # DEV mode won't send an email, so return password. DEV mode ONLY.
+        if current_app.config['DEV']:
             return jsonify({"token": password_reset_token,
                             "password_reset_url" : PASSWORD_RESET_URL.format(password_reset_token)})
-            
+
         return 200
         
 
