@@ -882,21 +882,18 @@ class MedImaging(Resource):
             img_dat.update({'reporter_firstname': data[1], 'reporter_lastname': data[2]})
             response.append(img_dat)
 
-        if not current_app.config['LOCAL_CONFIG']:
-            bucket_name = current_app.config['S3_BUCKET_NAME']
+        bucket_name = current_app.config['S3_BUCKET_NAME']
+        s3 = boto3.client('s3')
+        params = {
+            'Bucket' : bucket_name,
+            'Key' : None}
 
-            s3 = boto3.client('s3')
-            params = {
-                        'Bucket' : bucket_name,
-                        'Key' : None
-                    }
+        for img in response:
+            if img.get('image_path'):
+                params['Key'] = img.get('image_path')
+                url = s3.generate_presigned_url('get_object', Params=params, ExpiresIn=3600)
+                img['image_path'] = url
 
-            for img in response:
-                if img.get('image_path'):
-                    params['Key'] = img.get('image_path')
-                    url = s3.generate_presigned_url('get_object', Params=params, ExpiresIn=3600)
-                    img['image_path'] = url
- 
         return response
 
     #Unable to use @accepts because the input files come in a form-data, not json.
@@ -934,7 +931,9 @@ class MedImaging(Resource):
         MAX_bytes = 524288000 #500 mb
         data_list = []
         hex_token = secrets.token_hex(4)
-        
+
+        s3 = boto3.resource('s3')
+
         for i, img in enumerate(files.getlist('image')):
             mi_data = mi_schema.load(request.form)
             mi_data.user_id = user_id
@@ -952,24 +951,15 @@ class MedImaging(Resource):
             img_extension = pathlib.Path(img.filename).suffix
             img.seek(0)
 
-            if current_app.config['LOCAL_CONFIG']:
-                path = pathlib.Path(bucket_name) / f'id{user_id:05d}' / 'medical_images'
-                path.mkdir(parents=True, exist_ok=True)
-                s3key = f'{mi_data.image_type}_{date}_{hex_token}_{i}{img_extension}'
-                file_name = (path / s3key).as_posix()
-                mi_data.image_path = file_name
-                img.save(file_name)
-
-            else:
-                s3key = f'id{user_id:05d}/medical_images/{mi_data.image_type}_{date}_{hex_token}_{i}{img_extension}'
-                s3 = boto3.resource('s3')
-                s3.Bucket(bucket_name).put_object(Key= s3key, Body=img.stream) 
-                mi_data.image_path = s3key  
+            s3key = f'id{user_id:05d}/medical_images/{mi_data.image_type}_{date}_{hex_token}_{i}{img_extension}'
+            s3.Bucket(bucket_name).put_object(Key= s3key, Body=img.stream)
+            mi_data.image_path = s3key
 
             data_list.append(mi_data)
 
         db.session.add_all(data_list)  
         db.session.commit()
+
 
 @ns.route('/bloodtest/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})

@@ -136,29 +136,15 @@ def _to_pdf(req_ctx, user_id, table, template=None, form=None):
         filename = f'ModoBio_{docname}_v{doc.revision}_client{user_id:05d}_{doc.signdate}.pdf'
         bucket_name = current_app.config['S3_BUCKET_NAME']
 
-        if current_app.config['LOCAL_CONFIG']:
-            path = pathlib.Path(bucket_name) / f'id{user_id:05d}' / 'signed_documents'
-            path.mkdir(parents=True, exist_ok=True)
+        pdf_obj = io.BytesIO(pdf)
+        pdf_path = f'id{user_id:05d}/signed_documents/{filename}'
 
-            fullname = path / filename
-
-            with open(fullname, mode='wb') as fh:
-                fh.write(pdf)
-
-            pdf_path = fullname.as_posix()
-        else:
-            pdf_obj = io.BytesIO(pdf)
-            pdf_path = f'id{user_id:05d}/signed_documents/{filename}'
-
-            s3 = boto3.client('s3')
-            s3.upload_fileobj(pdf_obj, bucket_name, pdf_path)
+        s3 = boto3.client('s3')
+        s3.upload_fileobj(pdf_obj, bucket_name, pdf_path)
 
         doc.pdf_path = pdf_path
         doc.pdf_hash = pdf_hash
         local_session.commit()
-
-        if current_app.config['DEBUG']:
-            print('PDF stored at:', pdf_path)
 
     local_session.remove()
 
@@ -182,25 +168,17 @@ def merge_pdfs(documents: list, user_id: int) -> str:
 
     merger = PdfFileMerger()
     bufs = []
-    if current_app.config['LOCAL_CONFIG']:
-        for doc in documents:
-            try:
-                merger.append(doc)
-            except FileNotFoundError:
-                # Temporary file may have changed or disappeared if flask was restarted
-                pass
-    else:
-        s3 = boto3.client('s3')
-        for doc in documents:
-            doc_buf = io.BytesIO()
-            try:
-                s3.download_fileobj(bucket_name, doc, doc_buf)
-            except ClientError as e:
-                print(f'Could not download file {doc} from S3 bucket {bucket_name}: {e}')
-                continue
-            doc_buf.seek(0)
-            bufs.append(doc_buf)
-            merger.append(doc_buf)
+    s3 = boto3.client('s3')
+    for doc in documents:
+        doc_buf = io.BytesIO()
+        try:
+            s3.download_fileobj(bucket_name, doc, doc_buf)
+        except ClientError as e:
+            print(f'Could not download file {doc} from S3 bucket {bucket_name}: {e}')
+            continue
+        doc_buf.seek(0)
+        bufs.append(doc_buf)
+        merger.append(doc_buf)
 
     pdf_buf = io.BytesIO()
     merger.write(pdf_buf)
@@ -213,27 +191,15 @@ def merge_pdfs(documents: list, user_id: int) -> str:
     signdate = date.today().isoformat()
     filename = f'ModoBio_client{user_id:05d}_{signdate}.pdf'
 
-    if current_app.config['LOCAL_CONFIG']:
-        path = pathlib.Path(bucket_name) / f'id{user_id:05d}' / 'signed_documents'
-        path.mkdir(parents=True, exist_ok=True)
+    # Anything with a 'temp/' prefix in this bucket is set to be deleted after 1 day.
+    fullname = f'temp/{filename}'
 
-        fullname = path / filename
+    s3 = boto3.client('s3')
+    s3.upload_fileobj(pdf_buf, bucket_name, fullname)
 
-        with open(fullname, mode='wb') as fh:
-            fh.write(pdf_buf.read())
-
-        pdf_path = fullname.as_posix()
-    else:
-        # Anything with a 'temp/' prefix in this bucket is set to be deleted after 1 day.
-        fullname = f'temp/{filename}'
-
-        s3 = boto3.client('s3')
-        s3.upload_fileobj(pdf_buf, bucket_name, fullname)
-
-        params = {
-            'Bucket': bucket_name,
-            'Key': fullname
-        }
-        pdf_path = s3.generate_presigned_url('get_object', Params=params, ExpiresIn=3600)
+    params = {
+        'Bucket': bucket_name,
+        'Key': fullname}
+    pdf_path = s3.generate_presigned_url('get_object', Params=params, ExpiresIn=3600)
 
     return pdf_path

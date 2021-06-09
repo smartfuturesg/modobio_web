@@ -104,18 +104,16 @@ class ApiUser(Resource):
         user.deleted = True
         
         #delete files or images saved in S3 bucket for user_id
-        #when FLASK_DEV=remote
-        if not current_app.config['LOCAL_CONFIG']:
-            s3 = boto3.client('s3')
+        s3 = boto3.client('s3')
 
-            bucket_name = current_app.config['S3_BUCKET_NAME']
-            user_directory=f'id{user_id:05d}/'
+        bucket_name = current_app.config['S3_BUCKET_NAME']
+        user_directory=f'id{user_id:05d}/'
 
-            response = s3.list_objects_v2(Bucket=bucket_name, Prefix=user_directory)
-            
-            for object in response.get('Contents', []):
-                print('Deleting', object['Key'])
-                s3.delete_object(Bucket=bucket_name, Key=object['Key'])
+        response = s3.list_objects_v2(Bucket=bucket_name, Prefix=user_directory)
+
+        for object in response.get('Contents', []):
+            print('Deleting', object['Key'])
+            s3.delete_object(Bucket=bucket_name, Key=object['Key'])
         
         #delete lines with user_id in all other tables except "User" and "UserRemovalRequests"
         for table in tableList:

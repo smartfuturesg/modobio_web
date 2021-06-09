@@ -318,20 +318,16 @@ class StaffProfilePage(Resource):
         res['bio'] = profile.bio
 
         #get presigned link to this user's profile picture
-        if not current_app.config['LOCAL_CONFIG']:
-            s3key = profile.profile_picture
-            if s3key != None:
-                s3 = boto3.resource('s3')
-                params = {
-                    'Bucket' : current_app.config['S3_BUCKET_NAME'],
-                    'Key' : s3key
-                }
+        s3key = profile.profile_picture
+        if s3key != None:
+            s3 = boto3.resource('s3')
+            params = {
+                'Bucket': current_app.config['S3_BUCKET_NAME'],
+                'Key': s3key}
 
-                url = boto3.client('s3').generate_presigned_url('get_object', Params=params, ExpiresIn=3600)
-                
-                res['profile_picture'] = url
-            else:
-                res['profile_picture'] = None
+            url = boto3.client('s3').generate_presigned_url('get_object', Params=params, ExpiresIn=3600)
+
+            res['profile_picture'] = url
 
         return res
 
@@ -382,50 +378,49 @@ class StaffProfilePage(Resource):
         url = None
 
         #get profile picture and store in s3
-        if not current_app.config['LOCAL_CONFIG']:
-            if 'profile_picture' in request.files:
-                s3 = boto3.resource('s3')
-                bucket = s3.Bucket(current_app.config['S3_BUCKET_NAME'])
+        if 'profile_picture' in request.files:
+            s3 = boto3.resource('s3')
+            bucket = s3.Bucket(current_app.config['S3_BUCKET_NAME'])
 
-                #will delete anything starting with this prefix if it exists
-                #if nothing matches the prefix, nothing will happen
-                bucket.objects.filter(Prefix=f'id{user_id:05d}/profile_picture').delete()
-                url = "delete"
+            #will delete anything starting with this prefix if it exists
+            #if nothing matches the prefix, nothing will happen
+            bucket.objects.filter(Prefix=f'id{user_id:05d}/profile_picture').delete()
+            url = "delete"
 
-                #implemented as a loop to allow for multiple pictures if needed in the future
-                for i, img in enumerate(request.files.getlist('profile_picture')):
-                    #Verifying image size is within a safe threashold (MAX = 500 mb)
-                    img.seek(0, os.SEEK_END)
-                    img_size = img.tell()
-                    if img_size > 524288000:
-                        raise InputError(413, 'File too large')
+            #implemented as a loop to allow for multiple pictures if needed in the future
+            for i, img in enumerate(request.files.getlist('profile_picture')):
+                #Verifying image size is within a safe threashold (MAX = 500 mb)
+                img.seek(0, os.SEEK_END)
+                img_size = img.tell()
+                if img_size > 524288000:
+                    raise InputError(413, 'File too large')
 
-                    #make sure this is not an empty file
-                    if img_size > 0:
-                        #check that file type is one of the allowed image types
-                        img_extension = pathlib.Path(img.filename).suffix
-                        if img_extension not in ALLOWED_IMAGE_TYPES:
-                            raise InputError(422, f'{img_extension} is not an allowed file type. Allowed types are {ALLOWED_IMAGE_TYPES}')
+                #make sure this is not an empty file
+                if img_size > 0:
+                    #check that file type is one of the allowed image types
+                    img_extension = pathlib.Path(img.filename).suffix
+                    if img_extension not in ALLOWED_IMAGE_TYPES:
+                        raise InputError(422, f'{img_extension} is not an allowed file type. Allowed types are {ALLOWED_IMAGE_TYPES}')
 
-                        #Rename image (format: profile_files/id{user_id:05d}/profile_picture_4digitRandomHex.img_extension) AND Save=>S3
-                        img.seek(0)
-                        hex_token = secrets.token_hex(4)
-                        s3key = f'id{user_id:05d}/profile_picture_{hex_token}{img_extension}'
-                        bucket.put_object(Key= s3key, Body=img.stream)
+                    #Rename image (format: profile_files/id{user_id:05d}/profile_picture_4digitRandomHex.img_extension) AND Save=>S3
+                    img.seek(0)
+                    hex_token = secrets.token_hex(4)
+                    s3key = f'id{user_id:05d}/profile_picture_{hex_token}{img_extension}'
+                    bucket.put_object(Key= s3key, Body=img.stream)
 
-                        profile.profile_picture = s3key
+                    profile.profile_picture = s3key
 
-                        #get presigned url to return in response
-                        params = {
-                            'Bucket' : current_app.config['S3_BUCKET_NAME'],
-                            'Key' : s3key
-                        }
+                    #get presigned url to return in response
+                    params = {
+                        'Bucket' : current_app.config['S3_BUCKET_NAME'],
+                        'Key' : s3key
+                    }
 
-                        url = boto3.client('s3').generate_presigned_url('get_object', Params=params, ExpiresIn=3600)
+                    url = boto3.client('s3').generate_presigned_url('get_object', Params=params, ExpiresIn=3600)
 
-                    #exit loop if more than allowed number of images were given
-                    if i >= 0:
-                        break
+                #exit loop if more than allowed number of images were given
+                if i >= 0:
+                    break
 
         #update user in db
         user.update(user_update)

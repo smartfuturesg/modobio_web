@@ -670,12 +670,10 @@ class SignedDocuments(Resource):
         urls = {}
         paths = []
 
-        if not current_app.config['LOCAL_CONFIG']:
-            s3 = boto3.client('s3')
-            params = {
-                'Bucket': current_app.config['S3_BUCKET_NAME'],
-                'Key': None
-            }
+        s3 = boto3.client('s3')
+        params = {
+            'Bucket': current_app.config['S3_BUCKET_NAME'],
+            'Key': None}
 
         for table in (
             ClientPolicies,
@@ -689,16 +687,13 @@ class SignedDocuments(Resource):
                 table.query
                 .filter_by(user_id=user_id)
                 .order_by(table.idx.desc())
-                .first()
-            )
+                .first())
             if result and result.pdf_path:
                 paths.append(result.pdf_path)
-                if not current_app.config['LOCAL_CONFIG']:
-                    params['Key'] = result.pdf_path
-                    url = s3.generate_presigned_url('get_object', Params=params, ExpiresIn=600)
-                    urls[table.displayname] = url
-                else:
-                    urls[table.displayname] = result.pdf_path
+
+                params['Key'] = result.pdf_path
+                url = s3.generate_presigned_url('get_object', Params=params, ExpiresIn=600)
+                urls[table.displayname] = url
 
         concat = merge_pdfs(paths, user_id)
         urls['All documents'] = concat
