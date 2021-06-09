@@ -240,19 +240,19 @@ def create_twilio_access_token(modobio_id, meeting_room_name=None):
     """
     Generate a twilio access token for the provided modobio_id
     """
-    if not current_app.config['TESTING']:
-        twilio_credentials = grab_twilio_credentials()
-        token = AccessToken(twilio_credentials['account_sid'], 
-                        twilio_credentials['api_key'], 
-                        twilio_credentials['api_key_secret'],
-                        identity=modobio_id, 
-                        ttl=TWILIO_ACCESS_KEY_TTL)
+    if current_app.config['TESTING']:
+        return
 
-        token.add_grant(ChatGrant(service_sid=current_app.config['CONVERSATION_SERVICE_SID']))
-        if meeting_room_name:
-            token.add_grant(VideoGrant(room=meeting_room_name))
-    else:
-        return None
+    twilio_credentials = grab_twilio_credentials()
+    token = AccessToken(twilio_credentials['account_sid'],
+                    twilio_credentials['api_key'],
+                    twilio_credentials['api_key_secret'],
+                    identity=modobio_id,
+                    ttl=TWILIO_ACCESS_KEY_TTL)
+
+    token.add_grant(ChatGrant(service_sid=current_app.config['CONVERSATION_SERVICE_SID']))
+    if meeting_room_name:
+        token.add_grant(VideoGrant(room=meeting_room_name))
 
     return token.to_jwt()
 
