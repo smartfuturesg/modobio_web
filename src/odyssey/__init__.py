@@ -45,18 +45,16 @@ def create_app():
         .. code-block:: shell
 
             $ export FLASK_ENV=development
-            $ export FLASK_DEV=local
             $ export FLASK_APP=odyssey:create_app()
             $ flask run
 
         See Also
         --------
-        odyssey.config and odyssey.defaults
+        :mod:`odyssey.config` and :mod:`odyssey.defaults`.
     """
     app = Flask(__name__, static_folder="static") 
 
     app.config.from_object(Config())
-    app.config['APPLICATION_ROOT'] = '/api'
 
     db.init_app(app)
     migrate.init_app(app, db)
@@ -70,7 +68,7 @@ def create_app():
     # it is 'path' (default '/') or False to disable.
     if not app.config['SWAGGER_DOC']:
         api._doc = False
-    api.version = app.config['VERSION']
+    api.version = app.config['API_VERSION']
 
     # api and bp are connected, register after changing settings.
     app.register_blueprint(bp)
