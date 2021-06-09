@@ -7,7 +7,7 @@ from flask_accepts.decorators.decorators import responds
 from odyssey.api.lookup.models import LookupClinicalCareTeamResources
 
 from tests.functional.client.data import clients_clinical_care_team
-from tests.functional.user.data import users_new_user_client_data
+from tests.functional.user.data import users_new_user_client_data, users_staff_member_data
 
 def test_adding_clinical_care_team(test_client, init_database, client_auth_header, staff_auth_header):
     """
@@ -155,16 +155,39 @@ def test_get_clinical_care_team(test_client, init_database, client_auth_header):
 
     team_member_user_id = team_member.get('team_member_user_id') 
 
-def test_authorize_clinical_care_team(test_client, init_database, client_auth_header):
+    clients_clinical_care_team['care_team'].remove(
+        {
+            'team_member_email': 'email1@modo.com'
+        })
+    clients_clinical_care_team['care_team'].remove(
+        {
+            'team_member_email': 'email2@modo.com'}
+        )
+    clients_clinical_care_team['care_team'].remove(
+        {
+            'team_member_email': 'email3@modo.com'}
+        )          
+    clients_clinical_care_team['care_team'].extend([{
+        'team_member_email': 'staff_member@modobio.com'
+        }])    
+    response = test_client.post(f"/client/clinical-care-team/members/{1}/",
+                                headers=client_auth_header, 
+                                data=dumps(clients_clinical_care_team), 
+                                content_type='application/json')
+    assert response.status_code == 201    
+
+def test_authorize_clinical_care_team(test_client, init_database, client_auth_header,staff_auth_header):
     """
     GIVEN a api end point for authorizing the use of resources for members of a client's care team
     WHEN the '/client/clinical-care-team/resource-authorization/<user_id>' resource  is requested (POST, GET)
     THEN the client's clinical care team will have authorizations stored in the databse which are retrievable
     by the same endpoint
     """
+
     total_resources = LookupClinicalCareTeamResources.query.count()
+
     auths = [{"team_member_user_id": team_member_user_id,"resource_id": num} for num in range(1,total_resources+1) ]
-    payload = {"clinical_care_team_authoriztion" : auths}
+    payload = {"clinical_care_team_authorization" : auths}
     
     #####
     # Authorize another client to access all clinical care team resources
@@ -173,13 +196,12 @@ def test_authorize_clinical_care_team(test_client, init_database, client_auth_he
                             headers=client_auth_header,
                             data=dumps(payload), 
                             content_type='application/json')
-    
     assert response.status_code == 201
 
     #####
     # Try to authorize a resource that doesnt exist
     ####
-    payload = {"clinical_care_team_authoriztion" : [{"team_member_user_id": team_member_user_id,"resource_id": 999999}]}
+    payload = {"clinical_care_team_authorization" : [{"team_member_user_id": team_member_user_id,"resource_id": 999999}]}
 
     response = test_client.post(f"/client/clinical-care-team/resource-authorization/{1}/",
                         headers=client_auth_header,
@@ -191,7 +213,7 @@ def test_authorize_clinical_care_team(test_client, init_database, client_auth_he
     #####
     # Try to authorize a resource for a client not part of the care team that doesnt exist
     ####
-    payload = {"clinical_care_team_authoriztion" : [{"team_member_user_id": 99,"resource_id": 1}]}
+    payload = {"clinical_care_team_authorization" : [{"team_member_user_id": 99,"resource_id": 1}]}
 
     response = test_client.post(f"/client/clinical-care-team/resource-authorization/{1}/",
                         headers=client_auth_header,
@@ -208,7 +230,58 @@ def test_authorize_clinical_care_team(test_client, init_database, client_auth_he
                             content_type='application/json')
 
     assert response.status_code == 200
-    assert len(response.json.get("clinical_care_team_authoriztion")) == total_resources
+    assert response.json['clinical_care_team_authorization'][0]['status'] == 'accepted'
+
+
+    # Create payload for team_member_user_id 2 (a staff member)
+    payload = {"clinical_care_team_authorization" : [{"team_member_user_id": 2,"resource_id": 1}]}
+    
+    #####
+    # as a staff member, post for data access.
+    #####
+    response = test_client.post(f"/client/clinical-care-team/resource-authorization/{1}/",
+                            headers=staff_auth_header,
+                            data=dumps(payload), 
+                            content_type='application/json')
+    
+    assert response.status_code == 201
+
+    # Make a double post, expect an error
+    response = test_client.post(f"/client/clinical-care-team/resource-authorization/{1}/",
+                            headers=staff_auth_header,
+                            data=dumps(payload), 
+                            content_type='application/json')
+    
+    assert response.status_code == 400    
+
+    response = test_client.get(f"/client/clinical-care-team/resource-authorization/{1}/",
+                            headers=client_auth_header,
+                            content_type='application/json')
+
+    assert response.status_code == 200
+    assert response.json['clinical_care_team_authorization'][0]['status'] == 'accepted'
+    
+    # The staff member requested data access of resource id = 1 from user_id 1
+    # The status was automatically set to 'pending' 
+    for idx,info in enumerate(response.json['clinical_care_team_authorization']):
+        if info['team_member_email'] == 'staff_member@modobio.com':
+            assert response.json['clinical_care_team_authorization'][idx]['status'] == 'pending'
+
+    # Now, note the header has switched to the client_auth_header indicating we are now the client of interest
+    # We will now approve of this data access request.
+    response = test_client.put(f"/client/clinical-care-team/resource-authorization/{1}/",
+                            headers=client_auth_header,
+                            data=dumps(payload), 
+                            content_type='application/json')
+    
+    response = test_client.get(f"/client/clinical-care-team/resource-authorization/{1}/",
+                            headers=client_auth_header,
+                            content_type='application/json')
+
+    assert response.status_code == 200                            
+    for idx,info in enumerate(response.json['clinical_care_team_authorization']):
+        if info['team_member_email'] == 'staff_member@modobio.com':
+            assert response.json['clinical_care_team_authorization'][idx]['status'] == 'accepted'    
 
 
 def test_clinical_care_team_access(test_client, init_database, client_auth_header):
@@ -248,5 +321,6 @@ def test_clinical_care_team_access(test_client, init_database, client_auth_heade
                                 content_type='application/json')
 
     assert response.status_code == 200
+    
     
 

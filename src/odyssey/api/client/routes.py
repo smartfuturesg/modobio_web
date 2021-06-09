@@ -66,7 +66,7 @@ from odyssey.api.facility.models import RegisteredFacilities
 from odyssey.api.user.models import User, UserLogin, UserTokenHistory
 from odyssey.utils.pdf import to_pdf, merge_pdfs
 from odyssey.utils.message import send_test_email
-from odyssey.utils.misc import check_client_existence, check_drink_existence
+from odyssey.utils.misc import check_client_existence, check_drink_existence, check_staff_existence
 from odyssey.api.client.schemas import(
     AllClientsDataTier,
     ClientAssignedDrinksSchema,
@@ -1095,27 +1095,56 @@ class ClinicalCareTeamResourceAuthorization(Resource):
     Clinical care team members must individually be given access to resources. The available options can be found
     by using the /lookup/care-team/resources/ (GET) API. 
     """
-    @token_auth.login_required(user_type=('client',))
+    @token_auth.login_required
     @accepts(schema=ClinicalCareTeamAuthorizationNestedSchema, api=ns)
     @responds(schema=ClinicalCareTeamAuthorizationNestedSchema, api=ns, status_code=201)
     def post(self, user_id):
         """
         Add new clinical care team authorizations for the specified user_id 
         """
+        current_user,_ = token_auth.current_user()
+
         data = request.parsed_obj
 
         current_team_ids = db.session.query(ClientClinicalCareTeam.team_member_user_id).filter(ClientClinicalCareTeam.user_id==user_id).all()
         current_team_ids = [x[0] for x in current_team_ids if x[0] is not None]
+        
+        current_authorizations = db.session\
+            .query(ClientClinicalCareTeamAuthorizations.team_member_user_id,ClientClinicalCareTeamAuthorizations.resource_id)\
+            .filter_by(user_id=user_id).all()
+        
+        # user_id denotes the main users
+        # if the current user is not the main user (aka a random user), and they are not on the current team
+        # deny them access
+
+        if current_user.user_id != user_id: 
+            if current_user.user_id not in current_team_ids:
+                raise InputError(message="member not in care team", status_code=400)
+            
+            if current_user.is_client:
+                raise InputError(message="Clients cannot request other clients data", status_code=400)
 
         care_team_resources = LookupClinicalCareTeamResources.query.all()
         care_team_resources_ids = [x.resource_id for x in care_team_resources]
+        
+        # If you are the main user, and you are posting for your team, the authorization status is set to accepted
+        if current_user.user_id == user_id:
+            status = 'accepted'
+        # If you are a team member requesting access, then you must be approved by the main client
+        else:
+            status = 'pending'
 
-        for authorization in data.get('clinical_care_team_authoriztion'):
+        for authorization in data.get('clinical_care_team_authorization'):
             if authorization.team_member_user_id in current_team_ids and authorization.resource_id in care_team_resources_ids:
+                for member_id,resource_id in current_authorizations:
+                    if authorization.team_member_user_id == member_id and authorization.resource_id == resource_id:
+                        raise InputError(message="Member {member_id} and resource {resource_id} have already been requested", status_code=400)
+
                 authorization.user_id = user_id
+                authorization.status = status
                 db.session.add(authorization)
             else:
-                raise InputError(message="team member not in care team or resource_id is invalid", status_code=400)
+                raise InputError(message="Team member not in care team or resource_id is invalid", status_code=400)
         try:
             db.session.commit()
         except Exception as e:
@@ -1130,6 +1159,11 @@ class ClinicalCareTeamResourceAuthorization(Resource):
         Retrieve client's clinical care team authorizations
         """
 
+        current_user,_ = token_auth.current_user()
+
+        if current_user.user_id != user_id:
+            raise InputError(message="Unauthorized", status_code=401)
+
         data = db.session.query(
             ClientClinicalCareTeamAuthorizations.resource_id, 
             LookupClinicalCareTeamResources.display_name,
@@ -1137,7 +1171,8 @@ class ClinicalCareTeamResourceAuthorization(Resource):
             User.lastname, 
             User.email,
             User.user_id,
-            User.modobio_id
+            User.modobio_id,
+            ClientClinicalCareTeamAuthorizations.status
             ).filter(
                 ClientClinicalCareTeamAuthorizations.user_id == user_id
             ).filter(
@@ -1154,13 +1189,47 @@ class ClinicalCareTeamResourceAuthorization(Resource):
                 'team_member_lastname': row[3],
                 'team_member_email': row[4],
                 'team_member_user_id': row[5],
-                'team_member_modobio_id': row[6]}
+                'team_member_modobio_id': row[6],
+                'status': row[7]}
 
             care_team_auths.append(tmp)
         
-        payload = {'clinical_care_team_authoriztion': care_team_auths}
+        payload = {'clinical_care_team_authorization': care_team_auths}
 
         return payload
+
+    @token_auth.login_required(user_type=('client',))
+    @accepts(schema=ClinicalCareTeamAuthorizationNestedSchema, api=ns)
+    @responds(schema=ClinicalCareTeamAuthorizationNestedSchema, api=ns,status_code=201)
+    def put(self, user_id):
+        """
+        This put request is used to change the status approval from the client to team member from 
+
+        'pending' to 'approved'
+
+        to reject a team member from viewing data, the delete request should be used.
+        """
+        current_user,_ = token_auth.current_user()
+
+        if current_user.user_id != user_id:
+            raise InputError(message="Unauthorized", status_code=401)
+
+        data = request.json
+
+        for dat in data.get('clinical_care_team_authorization'):
+            authorization = ClientClinicalCareTeamAuthorizations.query.filter_by(
+                                                                                resource_id = dat['resource_id'],
+                                                                                team_member_user_id = dat['team_member_user_id']
+                                                                                ).one_or_none()
+            if authorization:
+                if authorization.status == 'pending':
+                    authorization.update({'status': 'accepted'})
+            else:
+                raise InputError(message="Team member or resource ID request not found", status_code=400)
+
+        db.session.commit()
+
+        return {}, 200
 
     @token_auth.login_required(user_type=('client',))
     @accepts(schema=ClinicalCareTeamAuthorizationNestedSchema, api=ns)
@@ -1169,15 +1238,22 @@ class ClinicalCareTeamResourceAuthorization(Resource):
         """
         Remove a previously saved authorization. Takes the same payload as the POST method.
         """
+        current_user,_ = token_auth.current_user()
+
+        if current_user.user_id != user_id:
+            raise InputError(message="Unauthorized", status_code=401)
+
         data = request.parsed_obj
 
-        for dat in data.get('clinical_care_team_authoriztion'):
+        for dat in data.get('clinical_care_team_authorization'):
             authorization = ClientClinicalCareTeamAuthorizations.query.filter_by(
                                                                                 resource_id = dat.resource_id,
                                                                                 team_member_user_id = dat.team_member_user_id
                                                                                 ).one_or_none()
             if authorization:
                 db.session.delete(authorization)
+            else:
+                raise InputError(message="Team member or resource ID request not found", status_code=400)                
 
         db.session.commit()
 
