@@ -109,3 +109,21 @@ users_subscription_data = {
   "subscription_type_id": 1,
   "subscription_status": "subscribed"
 }
+
+users_legal_docs_data = {
+  'normal_data_1': {
+    'doc_id': 1,
+    'signed': True
+  },
+  'normal_data_2': {
+    'doc_id': 1,
+    'signed': False
+  },
+  'normal_data_3': {
+    'doc_id': 2,
+    'signed': True
+  },
+  'bad_doc_id': {
+    'doc_id': 999
+  }
+}
