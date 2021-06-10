@@ -309,7 +309,6 @@ def test_full_system_with_timezones(test_client, init_database, staff_auth_heade
                             data=dumps(client_booking), 
                             content_type='application/json')
                                 
-
     assert response.json['bookings'][0]['client_timezone'] == 'America/Phoenix'
     assert response.json['bookings'][0]['staff_timezone'] == 'UTC'
 

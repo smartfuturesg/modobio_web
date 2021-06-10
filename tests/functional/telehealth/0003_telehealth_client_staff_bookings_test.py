@@ -38,7 +38,7 @@ def test_post_1_client_staff_bookings(test_client, init_database, staff_auth_hea
         select(TelehealthChatRooms).
         where(TelehealthChatRooms.staff_user_id == 2, TelehealthChatRooms.client_user_id == 1)
     ).one_or_none()[0]
-
+    
     assert response.status_code == 201
     assert conversation.staff_user_id == 2
     assert conversation.client_user_id == 1

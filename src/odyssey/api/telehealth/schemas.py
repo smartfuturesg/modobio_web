@@ -42,7 +42,8 @@ class TelehealthBookingsPUTSchema(Schema):
 class TelehealthBookingsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = TelehealthBookings
-        dump_only = ('idx', 'client_user_id','staff_user_id',)
+        dump_only = ('idx', 'client_user_id','staff_user_id')
+        exclude = ('booking_window_id_start_time_utc','booking_window_id_end_time_utc', 'target_date_utc')
         include_fk = True
 
     # booking_window_id_start_time = fields.Integer()

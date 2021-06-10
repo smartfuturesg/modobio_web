@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '45f124410e19'
-down_revision = 'e024249f8efe'
+down_revision = '80d2dceffd79'
 branch_labels = None
 depends_on = None
 
@@ -21,6 +21,11 @@ def upgrade():
     op.add_column('TelehealthBookings', sa.Column('client_timezone', sa.String(), nullable=True))
     op.add_column('TelehealthBookings', sa.Column('staff_timezone', sa.String(), nullable=True))
     op.add_column('TelehealthStaffAvailability', sa.Column('timezone', sa.String(), nullable=True))
+    op.add_column('TelehealthBookings', sa.Column('target_date_utc', sa.Date(), nullable=True))
+    op.add_column('TelehealthBookings', sa.Column('booking_window_id_start_time_utc', sa.Integer(), nullable=False))
+    op.add_column('TelehealthBookings', sa.Column('booking_window_id_end_time_utc', sa.Integer(), nullable=False))
+    op.create_foreign_key(None, 'TelehealthBookings', 'LookupBookingTimeIncrements', ['booking_window_id_end_time_utc'], ['idx'], ondelete='CASCADE')
+    op.create_foreign_key(None, 'TelehealthBookings', 'LookupBookingTimeIncrements', ['booking_window_id_start_time_utc'], ['idx'], ondelete='CASCADE')
     # ### end Alembic commands ###
 
 
@@ -29,4 +34,9 @@ def downgrade():
     op.drop_column('TelehealthStaffAvailability', 'timezone')
     op.drop_column('TelehealthBookings', 'staff_timezone')
     op.drop_column('TelehealthBookings', 'client_timezone')
+    op.drop_constraint(None, 'TelehealthBookings', type_='foreignkey')
+    op.drop_constraint(None, 'TelehealthBookings', type_='foreignkey')
+    op.drop_column('TelehealthBookings', 'booking_window_id_end_time_utc')
+    op.drop_column('TelehealthBookings', 'booking_window_id_start_time_utc')
+    op.drop_column('TelehealthBookings', 'target_date_utc')
     # ### end Alembic commands ###

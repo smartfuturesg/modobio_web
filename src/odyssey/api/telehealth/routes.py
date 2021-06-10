@@ -12,6 +12,7 @@ import random
 from werkzeug.datastructures import FileStorage
 from datetime import timedelta
 from dateutil import tz
+from dateutil.relativedelta import relativedelta
 
 from odyssey import db
 from odyssey.api import api
@@ -595,6 +596,39 @@ class TelehealthBookingsApi(Resource):
         request.parsed_obj.staff_timezone = staff_availability[0].timezone
         request.parsed_obj.client_timezone = client_in_queue.timezone
 
+        lookup_times = LookupBookingTimeIncrements.query.all()
+
+        # find target date and booking window ids in UTC
+        if request.parsed_obj.staff_timezone == 'UTC':
+            request.parsed_obj.booking_window_id_start_time_utc = request.parsed_obj.booking_window_id_start_time
+            request.parsed_obj.booking_window_id_end_time_utc = request.parsed_obj.booking_window_id_end_time
+            request.parsed_obj.target_date_utc = request.parsed_obj.target_date
+        else:
+            #Convert booking window ids to utc
+            start_time_staff_localized = datetime.combine(
+                request.parsed_obj.target_date, 
+                lookup_times[request.parsed_obj.booking_window_id_start_time-1].start_time, 
+                tzinfo=tz.gettz(request.parsed_obj.staff_timezone))
+                
+            end_time_staff_localized = datetime.combine(
+                request.parsed_obj.target_date, 
+                lookup_times[request.parsed_obj.booking_window_id_end_time-1].end_time, 
+                tzinfo=tz.gettz(request.parsed_obj.staff_timezone))
+            
+            start_time_utc_localized = start_time_staff_localized.astimezone(tz.gettz('UTC'))
+            end_time_utc_localized = end_time_staff_localized.astimezone(tz.gettz('UTC'))
+
+            request.parsed_obj.booking_window_id_start_time_utc = db.session.execute(
+                select(LookupBookingTimeIncrements.idx).
+                where(LookupBookingTimeIncrements.start_time == start_time_utc_localized.time())
+            ).scalars().one_or_none()
+            request.parsed_obj.booking_window_id_end_time_utc = db.session.execute(
+                select(LookupBookingTimeIncrements.idx).
+                where(LookupBookingTimeIncrements.end_time == end_time_utc_localized.time())
+            ).scalars().one_or_none()
+            
+            request.parsed_obj.target_date_utc = start_time_utc_localized.date()
+
         db.session.add(request.parsed_obj)
         db.session.flush()
 
@@ -618,7 +652,7 @@ class TelehealthBookingsApi(Resource):
             # Appointment spills over to the next day
             # 11:30pm - 12:15am
             end_date = request.parsed_obj.target_date + timedelta(days=1)
-        lookup_times = LookupBookingTimeIncrements.query.all()
+        
         add_to_calendar = StaffCalendarEvents(user_id=request.parsed_obj.staff_user_id,
                                               start_date=request.parsed_obj.target_date,
                                               end_date=end_date,
@@ -651,7 +685,7 @@ class TelehealthBookingsApi(Resource):
     @responds(status_code=201,api=ns)
     def put(self):
         """
-            PUT request should be used purely to update the booking STATUS.
+        PUT request should be used purely to update the booking STATUS.
         """
         if request.parsed_obj.booking_window_id_start_time >= request.parsed_obj.booking_window_id_end_time:
             raise InputError(status_code=405,message='Start time must be before end time.')
@@ -681,10 +715,12 @@ class TelehealthBookingsApi(Resource):
     @token_auth.login_required()
     @accepts(schema=TelehealthBookingsSchema, api=ns)
     @responds(status_code=201,api=ns)
+    @ns.deprecated
     def delete(self, user_id):
         '''
-            This DELETE request is used to delete bookings. However, this table should also serve as a 
-            a log of bookings, so it is up to the Backened team to use this with caution.
+        DEPRECATED 6.9.21 - Use PUT request to update booking status
+        This DELETE request is used to delete bookings. However, this table should also serve as a 
+        a log of bookings, so it is up to the Backened team to use this with caution.
         '''
         if request.parsed_obj.booking_window_id_start_time >= request.parsed_obj.booking_window_id_end_time:
             raise InputError(status_code=405,message='Start time must be before end time.')
