@@ -221,7 +221,6 @@ def init_database():
     #  give staff member all roles
     for role in ACCESS_ROLES:
         db.session.add(StaffRoles(user_id=2, role=role, verified=True))
-        
     # Add Staff Profile
     staff_profile = StaffProfile(**{"user_id": 2})
     db.session.add(staff_profile)

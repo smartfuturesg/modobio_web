@@ -39,7 +39,8 @@ from odyssey.utils.errors import (
     ContentNotFound,
     InputError,
     MedicalConditionAlreadySubmitted,
-    GenericNotFound
+    GenericNotFound,
+    UnauthorizedUser
 )
 from odyssey.utils.misc import check_client_existence, check_staff_existence, check_blood_test_existence, check_blood_test_result_type_existence, check_user_existence, check_medical_condition_existence, check_std_existence
 from odyssey.api.doctor.schemas import (
@@ -999,6 +1000,29 @@ class MedBloodTest(Resource):
         
         db.session.commit()
         return client_bt
+
+    @token_auth.login_required
+    @ns.doc(params={'test_id': 'int',})
+    @responds(status_code=204, api=ns)
+    def delete(self, user_id):
+        '''
+        Delete request for a client's blood test
+        '''
+        check_client_existence(user_id)
+
+        test_id = request.args.get('test_id', type=int)
+        if test_id:
+            result = MedicalBloodTests.query.filter_by(test_id=test_id).one_or_none()
+            if result:
+                if result.reporter_id == token_auth.current_user()[0].user_id:
+                    db.session.delete(result)
+                    db.session.commit()
+                else:
+                    raise UnauthorizedUser(message="Only the reporter of this test can delete it.")
+            else:
+                raise GenericNotFound(f"The blood test with test_id {test_id} does not exist.")
+        else:
+            raise InputError(message="test_id must be an integer.")     
 
 @ns.route('/bloodtest/all/<int:user_id>/')
 @ns.doc(params={'user_id': 'Client ID number'})

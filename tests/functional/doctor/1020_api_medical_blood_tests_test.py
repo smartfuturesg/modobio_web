@@ -106,3 +106,28 @@ def test_get_blood_test_result_types(test_client, init_database, staff_auth_head
     assert response.status_code == 200
     assert response.json['items'][0]['result_name'] == 'dihydroxyvitaminD'
     assert response.json['items'][0]['normal_max'] == 60
+
+def test_delete_blood_test(test_client, init_database, client_auth_header, staff_auth_header):
+    """
+    GIVEN an api end point for deleting a user's blood test results
+    WHEN the '/doctor/bloodtest/<user_id>/' resource is requested (DELETE)
+    THEN check the response is valid
+    """
+    # send delete request where the user attempting to delete is not the reporter, should raise 401
+    response = test_client.delete('/doctor/bloodtest/1/?test_id=1',
+                                headers=client_auth_header)
+
+    assert response.status_code == 401
+
+    # send delete request for client blood test on user_id = 1 and test_id = 1
+    response = test_client.delete('/doctor/bloodtest/1/?test_id=1',
+                                headers=staff_auth_header)
+
+    assert response.status_code == 204
+
+    # send get request to ensure the test was deleted
+    response = test_client.get('/doctor/bloodtest/results/1/',
+                            headers=client_auth_header, 
+                            content_type='application/json')
+
+    assert response.status_code == 404
