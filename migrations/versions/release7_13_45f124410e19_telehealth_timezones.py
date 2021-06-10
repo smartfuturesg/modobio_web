@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '45f124410e19'
-down_revision = '80d2dceffd79'
+down_revision = '5fb1aae9de2f'
 branch_labels = None
 depends_on = None
 
@@ -24,8 +24,8 @@ def upgrade():
     op.add_column('TelehealthBookings', sa.Column('target_date_utc', sa.Date(), nullable=True))
     op.add_column('TelehealthBookings', sa.Column('booking_window_id_start_time_utc', sa.Integer(), nullable=False))
     op.add_column('TelehealthBookings', sa.Column('booking_window_id_end_time_utc', sa.Integer(), nullable=False))
-    op.create_foreign_key(None, 'TelehealthBookings', 'LookupBookingTimeIncrements', ['booking_window_id_end_time_utc'], ['idx'], ondelete='CASCADE')
-    op.create_foreign_key(None, 'TelehealthBookings', 'LookupBookingTimeIncrements', ['booking_window_id_start_time_utc'], ['idx'], ondelete='CASCADE')
+    op.create_foreign_key('lookup_booking_time_inc_utc_end_fk', 'TelehealthBookings', 'LookupBookingTimeIncrements', ['booking_window_id_end_time_utc'], ['idx'], ondelete='CASCADE')
+    op.create_foreign_key('lookup_booking_time_inc_utc_start_fk', 'TelehealthBookings', 'LookupBookingTimeIncrements', ['booking_window_id_start_time_utc'], ['idx'], ondelete='CASCADE')
     # ### end Alembic commands ###
 
 
@@ -34,8 +34,8 @@ def downgrade():
     op.drop_column('TelehealthStaffAvailability', 'timezone')
     op.drop_column('TelehealthBookings', 'staff_timezone')
     op.drop_column('TelehealthBookings', 'client_timezone')
-    op.drop_constraint(None, 'TelehealthBookings', type_='foreignkey')
-    op.drop_constraint(None, 'TelehealthBookings', type_='foreignkey')
+    op.drop_constraint('lookup_booking_time_inc_utc_end_fk', 'TelehealthBookings', type_='foreignkey')
+    op.drop_constraint('lookup_booking_time_inc_utc_start_fk', 'TelehealthBookings', type_='foreignkey')
     op.drop_column('TelehealthBookings', 'booking_window_id_end_time_utc')
     op.drop_column('TelehealthBookings', 'booking_window_id_start_time_utc')
     op.drop_column('TelehealthBookings', 'target_date_utc')
