@@ -349,7 +349,7 @@ class ClinicalCareTeamAuthorizaitonSchema(Schema):
 
     Each instance is an entry into the ClientClinicalCareTeamAuthorizations table
     """
-    user_id = fields.Integer(load_only=True)
+    user_id = fields.Integer(dump_only=True)
     team_member_modobio_id = fields.String(dump_only=True)
     team_member_user_id = fields.Integer(
         metadata={'description': 'user_id for this clinical care team member'})
@@ -359,6 +359,7 @@ class ClinicalCareTeamAuthorizaitonSchema(Schema):
     resource_id = fields.Integer(
         metadata={'description': 'id for the resource. See lookup table for resource ids'})
     display_name = fields.String(dump_only=True)
+    status = fields.String(missing='pending',required=False)
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -368,7 +369,7 @@ class ClinicalCareTeamAuthorizationNestedSchema(Schema):
     """
     Nests clinical care team authorization schema for API
     """
-    clinical_care_team_authoriztion = fields.Nested(ClinicalCareTeamAuthorizaitonSchema(many=True), missing=[])
+    clinical_care_team_authorization = fields.Nested(ClinicalCareTeamAuthorizaitonSchema(many=True), missing=[])
 
 class ClientGeneralMobileSettingsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

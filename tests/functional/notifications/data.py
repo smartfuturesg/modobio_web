@@ -29,6 +29,7 @@ alert = {
 
 voip = {
     'content': {
+        'aps': {},
         'type': 'incoming-call',
         'data': {
             'booking_id': 1,

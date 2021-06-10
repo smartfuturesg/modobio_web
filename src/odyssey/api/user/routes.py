@@ -883,7 +883,6 @@ class UserPendingEmailVerificationsResendApi(Resource):
         send_email_verify_email(recipient, token, code)
         
 @ns.route('/legal-docs/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
 class UserLegalDocsApi(Resource):
     """
     Endpoints related to legal documents that users have viewed and signed.

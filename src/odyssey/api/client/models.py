@@ -1482,6 +1482,16 @@ class ClientClinicalCareTeamAuthorizations(db.Model):
 
     :type: int, foreign key to :attr:`LookupClinicalCareTeamResources.resource_id <odyssey.models.lookup.LookupClinicalCareTeamResources.resource_id>`
     """
+
+    status = db.Column(db.String())
+    """
+    Status of data access request
+    
+    ("pending","approved")
+    NOTE: "rejected" is not in the list above because rejected would just be deleted
+
+    :type: str
+    """
     
 class ClientTransactionHistory(db.Model):
     """ 
