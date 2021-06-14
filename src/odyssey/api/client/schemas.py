@@ -31,6 +31,7 @@ from odyssey.api.client.models import (
     ClientRaceAndEthnicity
 )
 from odyssey.api.user.schemas import UserInfoPutSchema
+from odyssey.utils.base.schemas import BaseSchema
 
 class ClientSearchItemsSchema(Schema):
     user_id = fields.Integer()
@@ -70,10 +71,9 @@ class ClientFacilitiesSchema(Schema):
     def make_object(self, data, **kwargs):
         return ClientFacilities(**data)
 
-class ClientRaceAndEthnicitySchema(ma.SQLAlchemyAutoSchema):
+class ClientRaceAndEthnicitySchema(BaseSchema):
     class Meta:
         model = ClientRaceAndEthnicity
-        exclude = ('created_at', 'updated_at', 'idx')
 
     user_id = fields.Integer(dump_only=True)
     race_id = fields.Integer()
@@ -87,10 +87,9 @@ class ClientRaceAndEthnicityEditSchema(Schema):
     mother = fields.List(fields.Integer())
     father = fields.List(fields.Integer())
 
-class ClientInfoSchema(ma.SQLAlchemyAutoSchema):
+class ClientInfoSchema(BaseSchema):
     class Meta:
         model = ClientInfo
-        exclude = ('created_at', 'updated_at', 'idx')
         dump_only = ('modobio_id', 'membersince', 'height', 'weight')
         include_fk = True
 
@@ -134,7 +133,7 @@ class NewRemoteClientSchema(Schema):
     def make_object(self, data, **kwargs):
         return ClientInfo(**data)
         
-class ClientConsentSchema(ma.SQLAlchemyAutoSchema):
+class ClientConsentSchema(BaseSchema):
     class Meta:
         model = ClientConsent
     
@@ -144,10 +143,9 @@ class ClientConsentSchema(ma.SQLAlchemyAutoSchema):
     def make_object(self, data, **kwargs):
         return ClientConsent(**data)
 
-class ClientReleaseContactsSchema(ma.SQLAlchemyAutoSchema):
+class ClientReleaseContactsSchema(BaseSchema):
     class Meta:
         model = ClientReleaseContacts
-        exclude = ('idx',)
 
     user_id = fields.Integer(missing=0)
     release_contract_id = fields.Integer()
@@ -163,7 +161,7 @@ class ClientReleaseContactsSchema(ma.SQLAlchemyAutoSchema):
         if not value in direction_values:
             raise ValidationError(f'release_direction entry invalid. Please use one of the following: {direction_values}')
 
-class ClientReleaseSchema(ma.SQLAlchemyAutoSchema):
+class ClientReleaseSchema(BaseSchema):
     class Meta:
         model = ClientRelease
 
@@ -202,7 +200,7 @@ class SignAndDateSchema(Schema):
     signdate = fields.Date(format="iso", required=True)
     signature = fields.String(required=True)
 
-class ClientSubscriptionContractSchema(ma.SQLAlchemyAutoSchema):
+class ClientSubscriptionContractSchema(BaseSchema):
     class Meta:
         model = ClientSubscriptionContract
     
@@ -216,7 +214,7 @@ class ClientSubscriptionContractSchema(ma.SQLAlchemyAutoSchema):
                     signdate=data["signdate"]
                     )
 
-class ClientConsultContractSchema(ma.SQLAlchemyAutoSchema):
+class ClientConsultContractSchema(BaseSchema):
     class Meta:
         model = ClientConsultContract
     
@@ -230,7 +228,7 @@ class ClientConsultContractSchema(ma.SQLAlchemyAutoSchema):
                     signdate=data["signdate"]
                     )
     
-class ClientPoliciesContractSchema(ma.SQLAlchemyAutoSchema):
+class ClientPoliciesContractSchema(BaseSchema):
     class Meta:
         model = ClientPolicies
     
@@ -245,7 +243,7 @@ class ClientPoliciesContractSchema(ma.SQLAlchemyAutoSchema):
                     )
     
 
-class ClientIndividualContractSchema(ma.SQLAlchemyAutoSchema):
+class ClientIndividualContractSchema(BaseSchema):
     class Meta:
         model = ClientIndividualContract
         
@@ -274,11 +272,10 @@ class ClientRegistrationStatusSchema(Schema):
     outstanding = fields.Nested(OutstandingForm(many=True))
 
 
-class ClientDataTierSchema(ma.SQLAlchemyAutoSchema):
+class ClientDataTierSchema(BaseSchema):
 
     class Meta():
         model = ClientDataStorage
-        exclude = ('idx', 'created_at')
         
 class AllClientsDataTier(Schema):
 
@@ -371,10 +368,9 @@ class ClinicalCareTeamAuthorizationNestedSchema(Schema):
     """
     clinical_care_team_authorization = fields.Nested(ClinicalCareTeamAuthorizaitonSchema(many=True), missing=[])
 
-class ClientGeneralMobileSettingsSchema(ma.SQLAlchemyAutoSchema):
+class ClientGeneralMobileSettingsSchema(BaseSchema):
     class Meta:
         model = ClientMobileSettings
-        exclude = ('created_at', 'updated_at', 'idx')
 
     user_id = fields.Integer(dump_only=True)
     date_format = fields.String(validate=validate.OneOf(('%d-%b-%Y','%b-%d-%Y','%d/%m/%Y','%m/%d/%Y')))
@@ -395,10 +391,9 @@ class ClientMobileSettingsSchema(Schema):
     general_settings = fields.Nested(ClientGeneralMobileSettingsSchema)
     push_notification_type_ids = fields.Nested(ClientMobilePushNotificationsSchema(many=True), missing=[])
         
-class ClientAssignedDrinksSchema(ma.SQLAlchemyAutoSchema):
+class ClientAssignedDrinksSchema(BaseSchema):
     class Meta:
         model = ClientAssignedDrinks
-        exclude = ('created_at', 'updated_at', 'idx')
 
     user_id = fields.Integer(dump_only=True)
     drink_id = fields.Integer()
