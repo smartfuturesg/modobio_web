@@ -22,17 +22,20 @@ from odyssey.api.lookup.models import (
     LookupEmergencyNumbers,
     LookupRoles,
     LookupMacroGoals,
-    LookupLegalDocs
+    LookupLegalDocs,
+    LookupMedicalSymptoms
 )
+from odyssey.utils.base.schemas import BaseSchema
 
-class LookupTermsAndConditionsOutputSchema(ma.SQLAlchemyAutoSchema):
+class LookupTermsAndConditionsOutputSchema(BaseSchema):
     class Meta:
         model = LookupTermsAndConditions
-        exclude = ('idx','created_at')
+
     terms_and_conditions = fields.String(dump_only=True)
 
 class LookupBookingTimeIncrementsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
+        exclude = ('created_at', 'updated_at')
         model = LookupBookingTimeIncrements
 
 class LookupBookingTimeIncrementsOutputSchema(Schema):
@@ -45,13 +48,14 @@ class LookupTimezones(Schema):
 
 class LookupProfessionalAppointmentConfirmationWindowSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
+        exclude = ('created_at', 'updated_at')
         model = LookupProfessionalAppointmentConfirmationWindow
 
 class LookupProfessionalAppointmentConfirmationWindowOutputSchema(Schema):
     items = fields.Nested(LookupProfessionalAppointmentConfirmationWindowSchema(many=True),missing=[])
     total_items = fields.Integer()
 
-class LookupTransactionTypesSchema(ma.SQLAlchemyAutoSchema):
+class LookupTransactionTypesSchema(BaseSchema):
     class Meta:
         model = LookupTransactionTypes
 
@@ -59,7 +63,7 @@ class LookupTransactionTypesOutputSchema(Schema):
     items = fields.Nested(LookupTransactionTypesSchema(many=True),missing=[])
     total_items = fields.Integer()
 
-class LookupCountriesOfOperationsSchema(ma.SQLAlchemyAutoSchema):
+class LookupCountriesOfOperationsSchema(BaseSchema):
     class Meta:
         model = LookupCountriesOfOperations
 
@@ -69,6 +73,7 @@ class LookupCountriesOfOperationsOutputSchema(Schema):
 
 class LookupClientBookingWindowSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
+        exclude = ('created_at', 'updated_at')
         model = LookupClientBookingWindow
 
 class LookupClientBookingWindowOutputSchema(Schema):
@@ -77,13 +82,14 @@ class LookupClientBookingWindowOutputSchema(Schema):
 
 class LookupTelehealthSessionDurationSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
+        exclude = ('created_at', 'updated_at')
         model = LookupTelehealthSessionDuration
 
 class LookupTelehealthSessionDurationOutputSchema(Schema):
     items = fields.Nested(LookupTelehealthSessionDurationSchema(many=True),missing=[])
     total_items = fields.Integer()
 
-class LookupActivityTrackersSchema(ma.SQLAlchemyAutoSchema):
+class LookupActivityTrackersSchema(BaseSchema):
     class Meta:
         model = LookupActivityTrackers
 
@@ -107,10 +113,9 @@ class LookupDrinksOutputSchema(Schema):
     items = fields.Nested(LookupDrinksSchema(many=True), missing = [])
     total_items = fields.Integer()
 
-class LookupDrinkIngredientsSchema(ma.SQLAlchemyAutoSchema):
+class LookupDrinkIngredientsSchema(BaseSchema):
     class Meta:
         model = LookupDrinkIngredients
-        exclude = ('idx', 'created_at', 'updated_at')
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -191,10 +196,9 @@ class LookupNotificationsSchema(ma.SQLAlchemyAutoSchema):
     def make_object(self, data, **kwargs):
         return LookupNotifications(**data)
 
-class LookupDefaultHealthMetricsSchema(ma.SQLAlchemyAutoSchema):
+class LookupDefaultHealthMetricsSchema(BaseSchema):
     class Meta:
         model = LookupDefaultHealthMetrics
-        exclude = ('created_at', 'updated_at', 'idx')
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -227,10 +231,9 @@ class LookupTelehealthSettingsSchema(Schema):
     booking_windows = fields.Nested(LookupClientBookingWindowOutputSchema, missing = [])
     confirmation_windows = fields.Nested(LookupProfessionalAppointmentConfirmationWindowOutputSchema, missing= [])
 
-class LookupEmergencyNumbersSchema(ma.SQLAlchemyAutoSchema):
+class LookupEmergencyNumbersSchema(BaseSchema):
     class Meta:
         model = LookupEmergencyNumbers
-        exclude = ('created_at', 'updated_at', 'idx')
 
 class LookupEmergencyNumbersOutputSchema(Schema):
     items = fields.Nested(LookupEmergencyNumbersSchema(many=True), missing=[])
@@ -248,11 +251,19 @@ class LookupRolesOutputSchema(Schema):
 class LookupLegalDocsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupLegalDocs
-        exclude = ('created_at', 'path', 'idx')
+        exclude = ('created_at', 'updated_at', 'path', 'idx')
 
     target = fields.String(validate=validate.OneOf(('User', 'Professional', 'Practitioner')))
     content = fields.String(dump_only=True)
 
 class LookupLegalDocsOutputSchema(Schema):
     items = fields.Nested(LookupLegalDocsSchema(many=True), missing=[])
+    total_items = fields.Integer()
+
+class LookupMedicalSymptoms(BaseSchema):
+    class Meta:
+        model = LookupMedicalSymptoms
+
+class LookupMedicalSymptomsOutputSchema(Schema):
+    items = fields.Nested(LookupMedicalSymptoms(many=True), missing=[])
     total_items = fields.Integer()
