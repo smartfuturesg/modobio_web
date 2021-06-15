@@ -14,8 +14,8 @@ Defaults
 The API is configured by settings in :mod:`odyssey.defaults`. Each parameter in defaults can
 be overridden by setting an environmental variable with the same name (all upper case).
 
-Use in code
-===========
+How to use
+==========
 
 In the rest of the API code, any of the variables set in :mod:`odyssey.defaults` can be
 called from the config dict::
@@ -53,7 +53,9 @@ Notes
 """
 
 import argparse
+import getpass
 import os
+import secrets
 import sys
 import textwrap
 
@@ -121,7 +123,7 @@ class Config:
         # self.enable_utc = True
 
         # No swagger in production.
-        self.SWAGGER_DOC = not self.DEV
+        self.SWAGGER_DOC = self.DEV
 
         # Testing is always true when running pytest.
         self.TESTING = testing
@@ -139,6 +141,15 @@ class Config:
             self.DB_URI = f'{self.DB_FLAV}://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}/{name}'
 
         self.SQLALCHEMY_DATABASE_URI = self.DB_URI
+
+        # S3 prefix
+        if self.DEV and self.AWS_S3_PREFIX == odyssey.defaults.AWS_S3_PREFIX:
+            if testing:
+                rand = secrets.token_hex(3)
+                self.AWS_S3_PREFIX = f'pytest-{rand}'
+            else:
+                username = getpass.getuser()
+                self.AWS_S3_PREFIX = f'{username}'
 
     def getvar(self, var: str) -> Any:
         """ Get a configuration setting.

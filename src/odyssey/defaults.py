@@ -120,8 +120,35 @@ Our default AWS region is "us-east-2", but SNS is not available in that region.
 Instead, it uses this alternate region.
 """
 
-S3_BUCKET_NAME = 'dev'
+AWS_S3_BUCKET = 'local-dev-393511634479'
 """ Name of the AWS S3 bucket where files are stored. """
+
+AWS_S3_PREFIX = ''
+""" Prefix (path) of files in the AWS S3 bucket.
+
+There is only one S3 bucket for development. To prevent multiple developers from
+interfering with each other, the prefix will be set to the local username during
+development. When not in development (production environment), the prefix will
+be empty.
+
+When pytest is run, the prefix will be set to "pytest-xxxxxx", where xxxxxx is a
+random 6-digit hex string. Pytest should delete this prefix when finished.
+
+Finally, prefix can be set to "temp". The buckets are configured to delete anything
+in "temp" automatically after 24 h.
+
+Set ``export AWS_S3_PREFIX=none`` in the environment to force an empty prefix, even
+during development and testing.
+
+When defining ``AWS_S3_PREFIX``, do **not** using leading or trailing /.
+"""
+
+AWS_S3_PYTEST_KEEP = False
+""" Keep files on AWS S3 after a pytest run.
+
+Set this to True (default is False) to keep files on AWS S3 after a pytest run ends.
+This may be useful to debug tests in combination with file uploads.
+"""
 
 # Twilio settings
 TWILIO_ACCOUNT_SID = ''
