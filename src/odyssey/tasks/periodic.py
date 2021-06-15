@@ -11,8 +11,6 @@ from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.api.client.models import ClientDataStorage
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
 
-
-
 @celery.task()
 def refresh_client_data_storage():
     """
@@ -102,6 +100,8 @@ def deploy_upcoming_appointment_notifications(booking_window_id_start, booking_w
 
     return 
 
+
+
 celery.conf.beat_schedule = {
     # refresh the client data storage table every day at midnight
     'add-update-client-data-storage-table': {
@@ -110,25 +110,25 @@ celery.conf.beat_schedule = {
     },
     # look for upcoming apppointment within moving windows:
     # (00:00 - 08:00)
-    'check-for-upcoming-bookings': {
+    'check-for-upcoming-bookings-00-00': {
         'task': 'odyssey.tasks.periodic.deploy_upcoming_appointment_notifications',
          'args': (1, 96),
         'schedule': crontab(hour=0, minute=0)
     },
     # (06:00 - 14:00)
-    'check-for-upcoming-bookings': {
+    'check-for-upcoming-bookings-06-00': {
         'task': 'odyssey.tasks.periodic.deploy_upcoming_appointment_notifications',
          'args': (73, 168),
         'schedule': crontab(hour=6, minute=0)
     },
     # (12:00 - 20:00)
-    'check-for-upcoming-bookings': {
+    'check-for-upcoming-bookings-12-00': {
         'task': 'odyssey.tasks.periodic.deploy_upcoming_appointment_notifications',
          'args': (145, 240),
         'schedule': crontab(hour=12, minute=0)
     },
     # (18:00 - 02:00, Next day)
-    'check-for-upcoming-bookings': {
+    'check-for-upcoming-bookings-18-00': {
         'task': 'odyssey.tasks.periodic.deploy_upcoming_appointment_notifications',
          'args': (217, 24),
         'schedule': crontab(hour=18, minute=0)

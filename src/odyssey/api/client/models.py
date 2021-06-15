@@ -13,48 +13,19 @@ from hashlib import md5
 from sqlalchemy import text, UniqueConstraint
 from sqlalchemy.orm.query import Query
 from odyssey.utils.constants import DB_SERVER_TIME, ALPHANUMERIC
+from odyssey.utils.base.models import BaseModelWithIdx, UserIdFkeyMixin
 from odyssey import db
 
 phx_tz = pytz.timezone('America/Phoenix')
 
 
-class ClientInfo(db.Model):
+class ClientInfo(BaseModelWithIdx, UserIdFkeyMixin):
     """ Client information table
 
     This table stores general information of a client.
     """
 
     __searchable__ = ['dob']
-
-    __tablename__ = 'ClientInfo'
-
-    created_at = db.Column(db.DateTime, server_default=text('clock_timestamp()'))
-    """
-    timestamp for when object was created. DB server time is used. 
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, server_default=text('clock_timestamp()'))
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    autoincrementing primary key
-
-    :type: int, primary key, autoincrement
-    """
-
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
-    """
-    User ID number, foreign key to User.user_id
-
-    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
-    """
     
     membersince = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
@@ -293,38 +264,8 @@ def update_dob(mapper, connection, target):
     from odyssey.utils.search import update_client_dob
     update_client_dob(target.user_id, target.dob)
 
-class ClientRaceAndEthnicity(db.Model):
+class ClientRaceAndEthnicity(BaseModelWithIdx, UserIdFkeyMixin):
     """ Holds information about the race and ethnicity of a client's parents """
-
-    __tablename__ = 'ClientRaceAndEthnicity'
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    user_id = db.Column(db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable = False)
-    """
-    Foreign key from User table
-
-    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
-    """
 
     is_client_mother = db.Column(db.Boolean, nullable=False)
     """
@@ -340,38 +281,8 @@ class ClientRaceAndEthnicity(db.Model):
     :type: int, foreign key to :attr:'LookupRaces.race_id <odyssey.models.lookup.LookupRaces.race_id>'
     """
 
-class ClientFacilities(db.Model):
+class ClientFacilities(BaseModelWithIdx, UserIdFkeyMixin):
     """ A mapping of client ID number to registered facility ID numbers. """
-
-    __tablename__ = 'ClientFacilities'
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    user_id = db.Column(db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable = False)
-    """
-    Foreign key from User table
-
-    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
-    """
     
     facility_id = db.Column(db.ForeignKey('RegisteredFacilities.facility_id',ondelete="CASCADE"), nullable=False)
     """
@@ -380,13 +291,11 @@ class ClientFacilities(db.Model):
     :type: int, foreign key to :attr:`RegisteredFacilities.facility_id`
     """
 
-class ClientConsent(db.Model):
+class ClientConsent(BaseModelWithIdx, UserIdFkeyMixin):
     """ Client consent form table
 
     This table stores the signature and related information of the consent form.
     """
-
-    __tablename__ = 'ClientConsent'
 
     displayname = 'Consent form'
     """
@@ -404,34 +313,6 @@ class ClientConsent(db.Model):
     date (e.g. 20200519).
 
     :type: str
-    """
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
-    """
-    User ID number.
-
-    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
     infectious_disease = db.Column(db.Boolean)
@@ -481,14 +362,12 @@ class ClientConsent(db.Model):
     :type: str, max length 40
     """
 
-class ClientRelease(db.Model):
+class ClientRelease(BaseModelWithIdx, UserIdFkeyMixin):
     """ Client release of information table
 
     This table stores the signature and related information of the
     release of information form.
     """
-
-    __tablename__ = 'ClientRelease'
 
     displayname = 'Release of information form'
     """
@@ -506,34 +385,6 @@ class ClientRelease(db.Model):
     date (e.g. 20200519).
 
     :type: str
-    """
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
-    """
-    User ID number
-
-    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
     release_of_all = db.Column(db.Boolean)
@@ -611,14 +462,12 @@ class ClientRelease(db.Model):
     :type: str, max length 40
     """
 
-class ClientPolicies(db.Model):
+class ClientPolicies(BaseModelWithIdx, UserIdFkeyMixin):
     """ Client policies table
 
     This table stores the signature and related information of the
     Modo Bio policies form.
     """
-
-    __tablename__ = 'ClientPolicies'
 
     displayname = 'Policies form'
     """
@@ -638,34 +487,6 @@ class ClientPolicies(db.Model):
     :type: str
     """
 
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
-    """
-    User ID number
-
-    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
-    """
-
     signdate = db.Column(db.Date)
     """
     Signature date.
@@ -706,14 +527,12 @@ class ClientPolicies(db.Model):
     :type: str, max length 40
     """
 
-class ClientConsultContract(db.Model):
+class ClientConsultContract(BaseModelWithIdx, UserIdFkeyMixin):
     """ Client initial consultation contract table
 
     This table stores the signature and related information for the
     initial consultation contract.
     """
-
-    __tablename__ = 'ClientConsultContract'
 
     displayname = 'Consultation contract'
     """
@@ -733,34 +552,6 @@ class ClientConsultContract(db.Model):
     :type: str
     """
 
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
-    """
-    User ID number
-
-    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
-    """
-
     signdate = db.Column(db.Date)
     """
     Signature date.
@@ -801,14 +592,12 @@ class ClientConsultContract(db.Model):
     :type: str, max length 40
     """
 
-class ClientSubscriptionContract(db.Model):
+class ClientSubscriptionContract(BaseModelWithIdx, UserIdFkeyMixin):
     """ Client subscription contract table
 
     This table stores the signature and related information for the
     subscription contract.
     """
-
-    __tablename__ = 'ClientSubscriptionContract'
 
     displayname = 'Subscription contract'
     """
@@ -828,34 +617,6 @@ class ClientSubscriptionContract(db.Model):
     :type: str
     """
 
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
-    """
-    User ID number
-
-    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
-    """
-
     signdate = db.Column(db.Date)
     """
     Signature date.
@@ -896,9 +657,7 @@ class ClientSubscriptionContract(db.Model):
     :type: str, max length 40
     """
 
-class ClientIndividualContract(db.Model):
-
-    __tablename__ = 'ClientIndividualContract'
+class ClientIndividualContract(BaseModelWithIdx, UserIdFkeyMixin):
 
     displayname = 'Individual services contract'
     """
@@ -916,34 +675,6 @@ class ClientIndividualContract(db.Model):
     date (e.g. 20200519).
 
     :type: str
-    """
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
-    """
-    User ID number
-
-    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
     doctor = db.Column(db.Boolean, default=False)
@@ -1014,33 +745,10 @@ class ClientIndividualContract(db.Model):
     :type: str, max length 40
     """
 
-class ClientReleaseContacts(db.Model):
+class ClientReleaseContacts(BaseModelWithIdx, UserIdFkeyMixin):
     """ Contact information for the release form.
 
     This table stores contact information for :attr:`ClientRelease.release_to`.
-    """
-
-    __tablename__ = 'ClientReleaseContacts'
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
     """
 
     release_contract_id = db.Column(db.Integer, db.ForeignKey('ClientRelease.idx',ondelete="CASCADE"), nullable=False)
@@ -1048,13 +756,6 @@ class ClientReleaseContacts(db.Model):
     Index of the :class:``ClientRelease`` table.
 
     :type: int, foreign key to :attr:`ClientRelease.idx`
-    """
-
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
-    """
-    User ID number
-
-    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
     release_direction = db.Column(db.String, nullable=False)
@@ -1097,44 +798,12 @@ class ClientReleaseContacts(db.Model):
     """
 
 
-class ClientClinicalCareTeam(db.Model):
+class ClientClinicalCareTeam(BaseModelWithIdx, UserIdFkeyMixin):
     """ 
     Stores emails and user_ids of clinical care team members.
     Each client may have a maximum of 6 clinical care team members. These are 
     individuals who are authorized on behalf of the client to view 
-    certain clinical data. 
-    
-      
-    """
-
-    __tablename__ = 'ClientClinicalCareTeam'
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
-    """
-    User ID number
-
-    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
+    certain clinical data.     
     """
 
     team_member_email = db.Column(db.String, nullable=True)
@@ -1160,39 +829,9 @@ class ClientClinicalCareTeam(db.Model):
     :type: bool
     """
 
-class ClientMobileSettings(db.Model):
+class ClientMobileSettings(BaseModelWithIdx, UserIdFkeyMixin):
     """
     Holds the values for mobile settings that users have enabled or disabled
-    """
-
-    __tablename__ = 'ClientMobileSettings'
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
-    """
-    User ID number
-
-    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
     use_24_hour_clock = db.Column(db.Boolean())
@@ -1249,7 +888,6 @@ class ClientMobileSettings(db.Model):
     :type: boolean
     """
 
-    #todo: allow push notifications to be allow for specific categories and not others
     enable_push_notifications = db.Column(db.Boolean())
     """
     Denotes if user has enabled push notifications
@@ -1257,42 +895,12 @@ class ClientMobileSettings(db.Model):
     :type: boolean
     """
     
-class ClientAssignedDrinks(db.Model):
+class ClientAssignedDrinks(BaseModelWithIdx, UserIdFkeyMixin):
     """
     Stores information about what nutrional beverages a client has been assigned.
     Clients will only see drinks that have been assigned to them when viewing
     the selection of nutritional beverages. Drinks can be assigned to a client
     either automatically based on their goals or manually by staff members.
-    """
-
-    __tablename__ = "ClientAssignedDrinks"
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
-    """
-    Id of the user for this assignment.
-
-    :type: int, foreign key('User.user_id')
     """
 
     drink_id = db.Column(db.Integer, db.ForeignKey('LookupDrinks.drink_id', ondelete="CASCADE"), nullable=False)
@@ -1302,39 +910,9 @@ class ClientAssignedDrinks(db.Model):
     :type: int, foreign key('LookupDrinks.drink_id)
     """
 
-class ClientHeightHistory(db.Model):
+class ClientHeightHistory(BaseModelWithIdx, UserIdFkeyMixin):
     """
     Stores historical height measurements of clients.
-    """
-
-    __tablename__ = "ClientHeightHistory"
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
-    """
-    Id of the user for this height measurement.
-
-    :type: int, foreign key('User.user_id')
     """
 
     height = db.Column(db.Integer)
@@ -1344,39 +922,9 @@ class ClientHeightHistory(db.Model):
     :type: int
     """
 
-class ClientWeightHistory(db.Model):
+class ClientWeightHistory(BaseModelWithIdx, UserIdFkeyMixin):
     """
     Stores historical weight measurements of clients.
-    """
-
-    __tablename__ = "ClientWeightHistory"
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
-    """
-    Id of the user for this weight measurement.
-
-    :type: int, foreign key('User.user_id')
     """
 
     weight = db.Column(db.Integer)
@@ -1386,39 +934,9 @@ class ClientWeightHistory(db.Model):
     :type: int
     """
 
-class ClientWaistSizeHistory(db.Model):
+class ClientWaistSizeHistory(BaseModelWithIdx, UserIdFkeyMixin):
     """
     Stores historical waist size measurements of clients.
-    """
-
-    __tablename__ = "ClientWaistSizeHistory"
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
-    """
-    Id of the user for this waist size measurement.
-
-    :type: int, foreign key('User.user_id')
     """
 
     waist_size = db.Column(db.Integer)
@@ -1428,7 +946,7 @@ class ClientWaistSizeHistory(db.Model):
     :type: int
     """
     
-class ClientClinicalCareTeamAuthorizations(db.Model):
+class ClientClinicalCareTeamAuthorizations(BaseModelWithIdx, UserIdFkeyMixin):
     """ 
     Stores clinical care team authorizations.
     One line per user, team memmber, resource combinaiton. Resource IDs come from 
@@ -1436,37 +954,7 @@ class ClientClinicalCareTeamAuthorizations(db.Model):
       
     """
 
-    __tablename__ = 'ClientClinicalCareTeamAuthorizations'
-
     __table_args__ = (UniqueConstraint('user_id', 'team_member_user_id', 'resource_id', name='care_team_auth_unique_resource_user_team_member_ids'),)
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
-    """
-    User ID number
-
-    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
-    """
 
     team_member_user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
     """
@@ -1493,40 +981,9 @@ class ClientClinicalCareTeamAuthorizations(db.Model):
     :type: str
     """
     
-class ClientTransactionHistory(db.Model):
+class ClientTransactionHistory(BaseModelWithIdx, UserIdFkeyMixin):
     """ 
     Stores history of client transactions
-      
-    """
-
-    __tablename__ = 'ClientTransactionHistory'
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
-    """
-    User ID number
-
-    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
     date = db.Column(db.DateTime, default=DB_SERVER_TIME)
@@ -1571,41 +1028,11 @@ class ClientTransactionHistory(db.Model):
     :type: string
     """
 
-class ClientPushNotifications(db.Model):
+class ClientPushNotifications(BaseModelWithIdx, UserIdFkeyMixin):
     """
     This table holds the categories of push notifications that a user has enabled.
     If a notification type appears in this table for a user id, it means that user has this
     type of notification enabled.
-    """
-
-    __tablename__ = 'ClientPushNotifications'
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    timestamp for when object was created. DB server time is used. 
-
-    :type: datetime
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    timestamp for when object was updated. DB server time is used. 
-
-    :type: datetime
-    """
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Auto incrementing primary key
-
-    :type: int, primary key
-    """
-
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
-    """
-    Id of the user that this notification belongs to
-
-    :type: int, foreign key('User.user_id')
     """
 
     notification_type_id = db.Column(db.Integer, db.ForeignKey('LookupNotifications.notification_type_id', ondelete="CASCADE"), nullable=False)
@@ -1615,40 +1042,10 @@ class ClientPushNotifications(db.Model):
     :type: int, foreign key('LookupNotifications.notification_id')
     """
 
-class ClientDataStorage(db.Model):
+class ClientDataStorage(BaseModelWithIdx, UserIdFkeyMixin):
     """ 
     Details on how much data storage each client is using
       
-    """
-
-    __tablename__ = 'ClientDataStorage'
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, server_default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, server_default=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
-    """
-    User ID number
-
-    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
     storage_tier = db.Column(db.String)
