@@ -319,13 +319,13 @@ class StaffProfilePage(Resource):
 
         #get presigned link to this user's profile picture
         s3key = profile.profile_picture
-        if s3key != None:
-            s3 = boto3.resource('s3')
+        if s3key:
+            s3 = boto3.client('s3')
             params = {
-                'Bucket': current_app.config['S3_BUCKET_NAME'],
+                'Bucket': current_app.config['AWS_S3_BUCKET'],
                 'Key': s3key}
 
-            url = boto3.client('s3').generate_presigned_url('get_object', Params=params, ExpiresIn=3600)
+            url = s3.generate_presigned_url('get_object', Params=params, ExpiresIn=3600)
 
             res['profile_picture'] = url
 
@@ -380,11 +380,14 @@ class StaffProfilePage(Resource):
         #get profile picture and store in s3
         if 'profile_picture' in request.files:
             s3 = boto3.resource('s3')
-            bucket = s3.Bucket(current_app.config['S3_BUCKET_NAME'])
+            bucket = s3.Bucket(current_app.config['AWS_S3_BUCKET'])
+            prefix = current_app.config['AWS_S3_PREFIX']
+            if prefix:
+                prefix += '/'
 
             #will delete anything starting with this prefix if it exists
             #if nothing matches the prefix, nothing will happen
-            bucket.objects.filter(Prefix=f'id{user_id:05d}/profile_picture').delete()
+            bucket.objects.filter(Prefix=f'{prefix}id{user_id:05d}/profile_picture').delete()
             url = "delete"
 
             #implemented as a loop to allow for multiple pictures if needed in the future
@@ -412,7 +415,7 @@ class StaffProfilePage(Resource):
 
                     #get presigned url to return in response
                     params = {
-                        'Bucket' : current_app.config['S3_BUCKET_NAME'],
+                        'Bucket' : current_app.config['AWS_S3_BUCKET'],
                         'Key' : s3key
                     }
 

@@ -1195,10 +1195,10 @@ class TelehealthBookingDetailsApi(Resource):
         #retrieve all files associated with this booking id
         s3prefix = f'meeting_files/id{booking_id:05d}/'
         s3 = boto3.resource('s3')
-        bucket = s3.Bucket(current_app.config['S3_BUCKET_NAME'])
+        bucket = s3.Bucket(current_app.config['AWS_S3_BUCKET'])
 
         params = {
-            'Bucket' : current_app.config['S3_BUCKET_NAME'],
+            'Bucket' : current_app.config['AWS_S3_BUCKET'],
             'Key' : None
         }
 
@@ -1275,11 +1275,11 @@ class TelehealthBookingDetailsApi(Resource):
         #if 'images' or 'voice' are present, but empty, the current media file(s) for that category will be removed
         if files:
             s3 = boto3.resource('s3')
-            bucket = s3.Bucket(current_app.config['S3_BUCKET_NAME'])
+            bucket = s3.Bucket(current_app.config['AWS_S3_BUCKET'])
 
             #used to locate and remove existing files is necessary
             params = {
-                'Bucket': current_app.config['S3_BUCKET_NAME'],
+                'Bucket': current_app.config['AWS_S3_BUCKET'],
                 'Key': None
             }
 
@@ -1412,7 +1412,7 @@ class TelehealthBookingDetailsApi(Resource):
             hex_token = secrets.token_hex(4)
 
             s3 = boto3.resource('s3')
-            bucket = s3.Bucket(current_app.config['S3_BUCKET_NAME'])
+            bucket = s3.Bucket(current_app.config['AWS_S3_BUCKET'])
 
             #upload images from request to s3
             for i, img in enumerate(files.getlist('images')):
@@ -1488,7 +1488,7 @@ class TelehealthBookingDetailsApi(Resource):
 
         #delete s3 resources for this booking id
         s3 = boto3.resource('s3')
-        bucket = s3.Bucket(current_app.config['S3_BUCKET_NAME'])
+        bucket = s3.Bucket(current_app.config['AWS_S3_BUCKET'])
         bucket.objects.filter(Prefix=f'meeting_files/id{booking_id:05d}/').delete()
 
 @ns.route('/chat-room/access-token')

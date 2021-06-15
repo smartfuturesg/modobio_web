@@ -106,7 +106,7 @@ class ApiUser(Resource):
         #delete files or images saved in S3 bucket for user_id
         s3 = boto3.client('s3')
 
-        bucket_name = current_app.config['S3_BUCKET_NAME']
+        bucket_name = current_app.config['AWS_S3_BUCKET']
         user_directory=f'id{user_id:05d}/'
 
         response = s3.list_objects_v2(Bucket=bucket_name, Prefix=user_directory)

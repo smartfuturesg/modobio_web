@@ -64,7 +64,6 @@ def to_pdf(user_id: int,
     # main thread keeps working and tries to delete the RequestContext when it
     # is finished, while the pdf thread is still running. This leads to
     # AssertionError: popped wrong app context <x> in stead of <y>.
-    # if current_app.testing:
     _executor.submit(
         _to_pdf,
         _request_ctx_stack.top.copy(),
@@ -133,14 +132,15 @@ def _to_pdf(req_ctx, user_id, table, template=None, form=None):
         user_id = int(user_id)
         docname = table.displayname.split()[0].lower()
 
+        bucket = current_app.config['AWS_S3_BUCKET']
+        prefix = current_app.config['AWS_S3_PREFIX']
+
         filename = f'ModoBio_{docname}_v{doc.revision}_client{user_id:05d}_{doc.signdate}.pdf'
-        bucket_name = current_app.config['S3_BUCKET_NAME']
+        pdf_path = f'{prefix}/id{user_id:05d}/signed_documents/{filename}'
 
-        pdf_obj = io.BytesIO(pdf)
-        pdf_path = f'id{user_id:05d}/signed_documents/{filename}'
-
-        s3 = boto3.client('s3')
-        s3.upload_fileobj(pdf_obj, bucket_name, pdf_path)
+        s3 = boto3.resource('s3')
+        bucket = s3.Bucket(bucket)
+        bucket.put_object(Body=pdf, Key=pdf_path)
 
         doc.pdf_path = pdf_path
         doc.pdf_hash = pdf_hash
@@ -164,7 +164,7 @@ def merge_pdfs(documents: list, user_id: int) -> str:
     str
         Link to merged PDF file.
     """
-    bucket_name = current_app.config['S3_BUCKET_NAME']
+    bucket_name = current_app.config['AWS_S3_BUCKET']
 
     merger = PdfFileMerger()
     bufs = []

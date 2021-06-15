@@ -883,7 +883,7 @@ class MedImaging(Resource):
             img_dat.update({'reporter_firstname': data[1], 'reporter_lastname': data[2]})
             response.append(img_dat)
 
-        bucket_name = current_app.config['S3_BUCKET_NAME']
+        bucket_name = current_app.config['AWS_S3_BUCKET']
         s3 = boto3.client('s3')
         params = {
             'Bucket' : bucket_name,
@@ -914,7 +914,7 @@ class MedImaging(Resource):
 
         """
         check_client_existence(user_id)
-        bucket_name = current_app.config['S3_BUCKET_NAME']
+        bucket_name = current_app.config['AWS_S3_BUCKET']
 
         # bring up reporting staff member
         reporter = token_auth.current_user()[0]

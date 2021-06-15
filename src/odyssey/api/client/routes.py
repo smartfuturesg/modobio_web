@@ -672,7 +672,7 @@ class SignedDocuments(Resource):
 
         s3 = boto3.client('s3')
         params = {
-            'Bucket': current_app.config['S3_BUCKET_NAME'],
+            'Bucket': current_app.config['AWS_S3_BUCKET'],
             'Key': None}
 
         for table in (
