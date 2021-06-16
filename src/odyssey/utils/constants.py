@@ -823,6 +823,13 @@ Refresh token lifetime in hours.
 :type: int
 """
 
+ORG_TOKEN_LIFETIME = 4380
+"""
+Org token lifetime in hours.
+
+:type: int
+"""
+
 EMAIL_TOKEN_LIFETIME = 24
 """
 Email verifications token lifetime in hours.

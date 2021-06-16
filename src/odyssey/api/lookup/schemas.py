@@ -267,3 +267,12 @@ class LookupMedicalSymptoms(BaseSchema):
 class LookupMedicalSymptomsOutputSchema(Schema):
     items = fields.Nested(LookupMedicalSymptoms(many=True), missing=[])
     total_items = fields.Integer()
+
+class LookupOrganizationsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupOrganizations
+        exclude = ('created_at', 'updated_at', 'token')
+
+class LookupOrganizationsOutputSchema(Schema):
+    items = fields.Nested(LookupOrganizationsSchema(many=True), missing=[])
+    total_items = fields.Integer()

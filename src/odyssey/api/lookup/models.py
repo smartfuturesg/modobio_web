@@ -3,8 +3,10 @@ Database tables for supporting lookup tables. These tables should be static tabl
 not to be edited at runtime. 
 """
 
+from flask import current_app
+
 from odyssey import db
-from odyssey.utils.constants import DB_SERVER_TIME
+from odyssey.utils.constants import DB_SERVER_TIME, ORG_TOKEN_LIFETIME
 from odyssey.utils.base.models import BaseModelWithIdx, BaseModel
 
 class LookupTermsAndConditions(BaseModelWithIdx):
@@ -1067,3 +1069,102 @@ class LookupMedicalSymptoms(BaseModelWithIdx):
 
     :type: string
     """
+
+class LookupOrganizations(BaseModel):
+    """
+    Lookup table for organizations affiliated with Modobio.
+    """
+
+    org_name = db.Column(db.String)
+    """
+    Name of this organization.
+
+    :type: string
+    """
+
+    org_id = db.Column(db.String)
+    """
+    Unique randomly generated ID for this organization.
+
+    :type: string
+    """
+
+    org_token = db.Column(db.String)
+    """
+    Token used by this organization for access. Expires after 6 months.
+
+    :type: string
+    """
+
+    @staticmethod
+    def generate_org_id(org_name: str) -> str:
+        """ Generate the user's mdobio_id.
+
+        The organization ID is a distinct ID assigned to each organization.
+        It is made up of the organization name's initial and 10 random alphanumeric
+        characters.
+
+        Parameters
+        ----------
+        org_name : str
+            Organization name.
+
+        Returns
+        -------
+        str
+            Organization ID
+        """
+        random.seed()
+        rli_hash = "".join([random.choice(ALPHANUMERIC) for i in range(10)])
+        abbrev = ""
+        for word in org_name.split():
+            abbrev += word[0]
+        return (abbrev + rli_hash).upper()
+
+    @staticmethod
+    def generate_token(org_id):
+        """
+        Generate a JWT with the appropriate org_id
+        """
+        
+        secret = current_app.config['SECRET_KEY']
+        
+        return jwt.encode({'exp': datetime.utcnow()+timedelta(hours=ORG_TOKEN_LIFETIME)), 
+                            'oid': user_org_id,
+                            }, 
+                            secret, 
+                            algorithm='HS256')
+
+    @db.event.listens_for(User, "after_insert")
+    def add_modobio_id(mapper, connection, target):
+        """
+        Listens for new entries into the LookupOrganizations table and 
+        automatically assigns an org_id to new orgs.
+
+        Parameters
+        ----------
+        mapper : ???
+            What does this do? Not used.
+
+        connection : :class:`sqlalchemy.engine.Connection`
+            Connection to the database engine.
+
+        target : :class:`sqlalchemy.schema.Table`
+            Target SQLAlchemy table, fixed to :class:`LookupOrganzations` by decorator.
+        """
+        org_id = LookupOrganizations().generate_modobio_id(org_name = target.org_name)
+        token = LookupOrganizations().generate_token(org_id)
+
+        statement = f"""UPDATE public."LookupOrganizations" 
+                    set org_id = '{org_id}'
+                    where org_name = {target.org_name};"""
+
+        connection.execute(text(statement))
+
+        from odyssey.utils.search import update_index
+        org = {
+            'org_name': target.org_name,
+            'org_id': org_id,
+            'token': token
+        }
+        update_index(org, True)
