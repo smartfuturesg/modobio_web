@@ -5,13 +5,17 @@ All tables in this module are prefixed with 'User'.
 from datetime import datetime, timedelta
 import jwt
 import random
+from sqlalchemy.orm import relation
 from werkzeug.security import generate_password_hash
 
 from flask import current_app
-from sqlalchemy import text
+from sqlalchemy import text, CheckConstraint
 
 from odyssey import db
 from odyssey.utils.constants import ALPHANUMERIC, DB_SERVER_TIME, TOKEN_LIFETIME, REFRESH_TOKEN_LIFETIME, EMAIL_TOKEN_LIFETIME
+from odyssey.utils.base.models import BaseModel, BaseModelWithIdx
+from odyssey.api.client.models import ClientInfo
+from odyssey.api.staff.models import StaffProfile
 
 class User(db.Model):
     """ 
@@ -661,4 +665,67 @@ class UserLegalDocs(db.Model):
     Denotes if the user has signed this document. If False, the user has viewed the document but no signed.
 
     :type: boolean
+    """
+
+class UserProfilePictures(BaseModelWithIdx):
+    """ 
+    Stores S3 keys to profile pictures saved in aws s3
+
+    """
+    __table_args__ = (CheckConstraint('(client_id IS NULL) != (staff_id IS NULL)'),)
+
+    client_id= db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id', ondelete="CASCADE"))
+    """
+    User ID number, foreign key to User.user_id
+
+    :type: int, foreign key
+    """
+
+    client_info = db.relationship('ClientInfo', back_populates='profile_pictures')
+    """
+    Many to one relationship with ClientInfo
+
+    :type: :class:`ClientInfo` instance
+    """
+
+    staff_id= db.Column(db.Integer, db.ForeignKey('StaffProfile.user_id', ondelete="CASCADE"))
+    """
+    User ID number, foreign key to User.user_id
+
+    :type: int, foreign key
+    """
+
+    staff_profile = db.relationship('StaffProfile', back_populates='profile_pictures')
+    """
+    Many to one relationship with StaffProfile
+
+    :type: :class:`StaffProfile` instance
+    """
+
+    image_path = db.Column(db.String, nullable=False)
+    """
+    String of image path as it is saved in S3. Required
+
+    :type: str
+    """
+
+    width = db.Column(db.Integer)
+    """
+    Width of image in pixels
+
+    :type: int
+    """
+
+    height = db.Column(db.Integer)
+    """
+    Height of image in pixels
+
+    :type: int
+    """
+    
+    original = db.Column(db.Boolean, server_default='f')
+    """
+    Boolean determining if the image is the original or not, false by default
+
+    :type: bool
     """

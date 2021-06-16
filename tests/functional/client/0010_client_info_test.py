@@ -1,12 +1,7 @@
 import base64
-import pathlib
-import time
-from datetime import datetime
-
 from flask.json import dumps
-from requests.auth import _basic_auth_str
 
-from odyssey.api.user.models import User, UserLogin, UserPendingEmailVerifications
+from odyssey.api.user.models import User, UserPendingEmailVerifications
 from odyssey.api.client.models import (
     ClientInfo,
     ClientConsent
