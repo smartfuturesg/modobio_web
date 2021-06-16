@@ -1070,7 +1070,7 @@ class LookupMedicalSymptoms(BaseModelWithIdx):
     :type: string
     """
 
-class LookupOrganizations(BaseModel):
+class LookupOrganizations(BaseModelWithIdx):
     """
     Lookup table for organizations affiliated with Modobio.
     """
@@ -1097,7 +1097,7 @@ class LookupOrganizations(BaseModel):
     """
 
     @staticmethod
-    def generate_org_id(org_name: str) -> str:
+    def generate_org_id(org_name) -> str:
         """ Generate the user's mdobio_id.
 
         The organization ID is a distinct ID assigned to each organization.
@@ -1129,42 +1129,42 @@ class LookupOrganizations(BaseModel):
         
         secret = current_app.config['SECRET_KEY']
         
-        return jwt.encode({'exp': datetime.utcnow()+timedelta(hours=ORG_TOKEN_LIFETIME)), 
+        return jwt.encode({'exp': datetime.utcnow()+timedelta(hours=ORG_TOKEN_LIFETIME), 
                             'oid': user_org_id,
                             }, 
                             secret, 
                             algorithm='HS256')
 
-    @db.event.listens_for(User, "after_insert")
-    def add_modobio_id(mapper, connection, target):
-        """
-        Listens for new entries into the LookupOrganizations table and 
-        automatically assigns an org_id to new orgs.
+@db.event.listens_for(LookupOrganizations, "after_insert")
+def add_modobio_id(mapper, connection, target):
+    """
+    Listens for new entries into the LookupOrganizations table and 
+    automatically assigns an org_id to new orgs.
 
-        Parameters
-        ----------
-        mapper : ???
-            What does this do? Not used.
+    Parameters
+    ----------
+    mapper : ???
+        What does this do? Not used.
 
-        connection : :class:`sqlalchemy.engine.Connection`
-            Connection to the database engine.
+    connection : :class:`sqlalchemy.engine.Connection`
+        Connection to the database engine.
 
-        target : :class:`sqlalchemy.schema.Table`
-            Target SQLAlchemy table, fixed to :class:`LookupOrganzations` by decorator.
-        """
-        org_id = LookupOrganizations().generate_modobio_id(org_name = target.org_name)
-        token = LookupOrganizations().generate_token(org_id)
+    target : :class:`sqlalchemy.schema.Table`
+        Target SQLAlchemy table, fixed to :class:`LookupOrganzations` by decorator.
+    """
+    org_id = LookupOrganizations().generate_modobio_id(target.org_name)
+    token = LookupOrganizations().generate_token(org_id)
 
-        statement = f"""UPDATE public."LookupOrganizations" 
-                    set org_id = '{org_id}'
-                    where org_name = {target.org_name};"""
+    statement = f"""UPDATE public."LookupOrganizations" 
+                set org_id = '{org_id}'
+                where org_name = {target.org_name};"""
 
-        connection.execute(text(statement))
+    connection.execute(text(statement))
 
-        from odyssey.utils.search import update_index
-        org = {
-            'org_name': target.org_name,
-            'org_id': org_id,
-            'token': token
-        }
-        update_index(org, True)
+    from odyssey.utils.search import update_index
+    org = {
+        'org_name': target.org_name,
+        'org_id': org_id,
+        'token': token
+    }
+    update_index(org, True)

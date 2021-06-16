@@ -23,7 +23,8 @@ from odyssey.api.lookup.models import (
     LookupRoles,
     LookupMacroGoals,
     LookupLegalDocs,
-    LookupMedicalSymptoms
+    LookupMedicalSymptoms,
+    LookupOrganizations
 )
 from odyssey.utils.base.schemas import BaseSchema
 
@@ -271,7 +272,7 @@ class LookupMedicalSymptomsOutputSchema(Schema):
 class LookupOrganizationsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupOrganizations
-        exclude = ('created_at', 'updated_at', 'token')
+        exclude = ('created_at', 'updated_at', 'org_token')
 
 class LookupOrganizationsOutputSchema(Schema):
     items = fields.Nested(LookupOrganizationsSchema(many=True), missing=[])
