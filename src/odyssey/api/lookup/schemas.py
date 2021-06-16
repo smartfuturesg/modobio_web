@@ -260,12 +260,12 @@ class LookupLegalDocsOutputSchema(Schema):
     items = fields.Nested(LookupLegalDocsSchema(many=True), missing=[])
     total_items = fields.Integer()
 
-class LookupMedicalSymptoms(BaseSchema):
+class LookupMedicalSymptomsSchema(BaseSchema):
     class Meta:
         model = LookupMedicalSymptoms
 
 class LookupMedicalSymptomsOutputSchema(Schema):
-    items = fields.Nested(LookupMedicalSymptoms(many=True), missing=[])
+    items = fields.Nested(LookupMedicalSymptomsSchema(many=True), missing=[])
     total_items = fields.Integer()
 
 class LookupOrganizationsSchema(ma.SQLAlchemyAutoSchema):
