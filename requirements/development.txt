@@ -7,7 +7,7 @@ Flask-Cors
 flask-marshmallow
 Flask-Migrate
 flask-restx
-Flask_SQLAlchemy
+Flask-SQLAlchemy
 marshmallow
 marshmallow-sqlalchemy
 psycopg2
