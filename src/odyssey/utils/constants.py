@@ -841,8 +841,18 @@ TWILIO_ACCESS_KEY_TTL = 14400
 
 BOOKINGS_STATUS = ('Completed','On-Going','Accepted','Pending Staff Acceptance','Client Canceled','Staff Canceled' )
 
-#image types allowed for upload
-ALLOWED_IMAGE_TYPES = ('.png', '.jpg', '.jpeg', '.bmp', '.gif', '.webp', '.psd', '.pdf')
+#image types allowed for upload removing: '.bmp', '.gif', '.webp', '.psd', '.pdf'
+ALLOWED_IMAGE_TYPES = ('.png', '.jpg', '.jpeg')
+
+#image resize thumbnail demensions (w, h) two-tuple
+#changed from 400x400, 250x250, 70x70 to->
+#30x30 for a very low quality, that can be used like a placeholder before the full picture loads
+#400x400 for a regular use
+#600x600 for very high quality
+IMAGE_DIMENSIONS = ((600,600),(400,400),(30,30))
+
+#image max size 10MB = 10485760 binary bytes
+IMAGE_MAX_SIZE = 10485760
 
 #audio types allowed for upload
 ALLOWED_AUDIO_TYPES = ('.m4a', '.caf')

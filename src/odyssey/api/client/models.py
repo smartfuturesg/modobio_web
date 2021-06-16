@@ -13,19 +13,26 @@ from hashlib import md5
 from sqlalchemy import text, UniqueConstraint
 from sqlalchemy.orm.query import Query
 from odyssey.utils.constants import DB_SERVER_TIME, ALPHANUMERIC
-from odyssey.utils.base.models import BaseModelWithIdx, UserIdFkeyMixin
+from odyssey.utils.base.models import BaseModelWithIdx, UserIdFkeyMixin, BaseModel
 from odyssey import db
 
 phx_tz = pytz.timezone('America/Phoenix')
 
 
-class ClientInfo(BaseModelWithIdx, UserIdFkeyMixin):
+class ClientInfo(BaseModel):
     """ Client information table
 
     This table stores general information of a client.
     """
 
     __searchable__ = ['dob']
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), primary_key=True, nullable=False)
+    """
+    User ID number, foreign key to User.user_id
+
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
+    """
     
     membersince = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
@@ -185,6 +192,13 @@ class ClientInfo(BaseModelWithIdx, UserIdFkeyMixin):
     Primary Pharmacy address
 
     :type: str
+    """
+
+    profile_pictures = db.relationship('UserProfilePictures', uselist=True, back_populates='client_info')
+    """
+    One to many relationship with UserProfilePictures
+
+    :type: :class:`UserProfilePicture` instance
     """
 
 
