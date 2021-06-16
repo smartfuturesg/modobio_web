@@ -2,8 +2,8 @@
 
 The usual `requirements.txt` file is split up in multiple files for different environments. Multiple files can be combined: `pip install -r requirements/development.txt -r requirements/testing.txt`
 
-- `development.txt`: no limits on the versions, always use the latest version for all dependencies. This allows us to quickly discover and respond to changes in the packages we depend on. The idea is to have occasional small changes that require fixing, rather than one large pile of fixes that need to be addressed all at once.
-- `production.txt`: exact version limits on all dependencies, to "freeze" the dependencies in a known working state.
+- `development.txt`: no limits on the versions, always use the latest version for all dependencies. This allows us to quickly discover and respond to changes in the packages we depend on. The idea is to have occasional small changes that require fixing, rather than one large pile of fixes that need to be addressed all at once. Contains a list of only the direct dependencies (not dependencies of dependencies) of the API.
+- `production.txt`: exact version limits on all dependencies, to "freeze" the dependencies in a known working state. Contains a full list of all packages needed to run the API.
 - `testing.txt`: additional packages for testing.
 - `documentation.txt`: additional packages for building documentation.
 
@@ -11,8 +11,28 @@ The usual `requirements.txt` file is split up in multiple files for different en
 
 Keep a list of dependencies here with date and reason why we need it. This will help in future to get rid of unneeded dependencies. Use the pip install name in this list, not the import name. This may differ in case (i.e. `pip install Flask` vs. `import flask`) or underscore (`pip install requests-oauthlib` vs `import requests_oauthlib`).
 
-|--------------------|----------------|-----------------------------|
-|Package name        |Date added      |Reason                       |
-|--------------------|----------------|-----------------------------|
-
-
+|-------------------------------|------------|------------------------------------------------|
+| Package name                  | Date added | Reason                                         |
+|-------------------------------|------------|------------------------------------------------|
+| boto3                         | 2020-05-19 | Amazon AWS SDK                                 |
+| celery                        | 2021-04-30 | Concurrent task server                         |
+| elasticsearch                 | 2021-02-25 | Full text search                               |
+| Flask                         | 2020-03-16 | Main WSGI server                               |
+| flask-accepts                 | 2020-07-27 | Simplifies use of flask-restx decorators       |
+| Flask-Cors                    | 2020-06-18 | Flask plugin for Cross-Origin Resource Sharing |
+| flask-marshmallow             | 2020-07-27 | (De)serialize at start of request              |
+| Flask-Migrate                 | 2020-06-04 | Use alembic db versioning with Flask           |
+| flask-restx                   | 2020-06-17 | Turns Flask server into REST API               |
+| Flask-SQLAlchemy              | 2020-05-19 | Integrate SQLAlchemy with Flask                |
+| marshmallow                   | 2020-07-27 | (De)serialization and validation of JSON       |
+| marshmallow-sqlalchemy        | 2020-07-27 | Generate marshmallow schemas from DB models    |
+| psycopg2                      | 2020-07-29 | Python PostgreSQL driver                       |
+| PyPDF2                        | 2020-09-08 | Manipulate (merge) PDF files                   |
+| pytz                          | 2020-07-10 | Timezone handling                              |
+| redis                         | 2021-04-30 | Stores tasks for celery                        |
+| requests                      | 2021-02-17 | HTTP connections                               |
+| requests-oauthlib             | 2020-09-04 | OAuth2 authentication                          |
+| twilio                        | 2021-03-03 | Chat and video calls                           |
+| PyJWT                         | 2020-10-06 | Javascript Web Tokens for authentication       |
+| WeasyPrint                    | 2020-07-13 | Convert HTML pages to PDF                      |
+|-------------------------------|------------|------------------------------------------------|
