@@ -11,9 +11,8 @@ The usual `requirements.txt` file is split up in multiple files for different en
 
 Keep a list of dependencies here with date and reason why we need it. This will help in future to get rid of unneeded dependencies. Use the pip install name in this list, not the import name. This may differ in case (i.e. `pip install Flask` vs. `import flask`) or underscore (`pip install requests-oauthlib` vs `import requests_oauthlib`).
 
-|-------------------------------|------------|------------------------------------------------|
 | Package name                  | Date added | Reason                                         |
-|-------------------------------|------------|------------------------------------------------|
+ -------------------------------|------------|------------------------------------------------
 | boto3                         | 2020-05-19 | Amazon AWS SDK                                 |
 | celery                        | 2021-04-30 | Concurrent task server                         |
 | elasticsearch                 | 2021-02-25 | Full text search                               |
@@ -35,4 +34,4 @@ Keep a list of dependencies here with date and reason why we need it. This will 
 | twilio                        | 2021-03-03 | Chat and video calls                           |
 | PyJWT                         | 2020-10-06 | Javascript Web Tokens for authentication       |
 | WeasyPrint                    | 2020-07-13 | Convert HTML pages to PDF                      |
-|-------------------------------|------------|------------------------------------------------|
+
