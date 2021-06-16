@@ -35,7 +35,6 @@ class StaffProfileSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = StaffProfile
 
-    idx = fields.Integer()
     user_id = fields.Integer()
     possible_roles = ACCESS_ROLES
 
@@ -48,7 +47,7 @@ class StaffProfilePageGetSchema(Schema):
     middlename = fields.String()
     lastname = fields.String()
     biological_sex_male = fields.Boolean()
-    profile_picture = fields.String()
+    profile_picture = fields.Dict(keys=fields.Str(), values=fields.Str())
     bio = fields.String(validate=validate.Length(min=1, max= 50))
 
 class StaffRolesSchema(ma.SQLAlchemyAutoSchema):
