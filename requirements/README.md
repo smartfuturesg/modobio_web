@@ -32,6 +32,6 @@ Keep a list of dependencies here with date and reason why we need it. This will 
 | requests                      | 2021-02-17 | HTTP connections                               |
 | requests-oauthlib             | 2020-09-04 | OAuth2 authentication                          |
 | twilio                        | 2021-03-03 | Chat and video calls                           |
-| PyJWT                         | 2020-10-06 | Javascript Web Tokens for authentication       |
+| PyJWT                         | 2020-10-06 | JSON Web Tokens for authentication             |
 | WeasyPrint                    | 2020-07-13 | Convert HTML pages to PDF                      |
 
