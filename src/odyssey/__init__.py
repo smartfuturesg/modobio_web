@@ -15,11 +15,6 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import exc
 
-# Temporary fix
-from flask.scaffold import _endpoint_from_view_func
-import flask.helpers
-flask.helpers._endpoint_from_view_func = _endpoint_from_view_func
-
 from odyssey.config import Config
 
 db = SQLAlchemy()
