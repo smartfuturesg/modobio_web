@@ -97,6 +97,7 @@ class ClientInfoSchema(BaseSchema):
     primary_goal = fields.String()
     primary_macro_goal = fields.String()
     race_information = fields.Nested(ClientRaceAndEthnicitySchema(many=True))
+    profile_picture = fields.Dict(keys=fields.Str(), values=fields.Str())
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -106,7 +107,7 @@ class ClientInfoPutSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientInfo
         include_fk = True
-        exclude = ('created_at', 'updated_at', 'idx', 'user_id')
+        exclude = ('created_at', 'updated_at', 'user_id')
         dump_only = ( 'membersince', 'membersince', 'height', 'weight')
 
     primary_goal = fields.String()

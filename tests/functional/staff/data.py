@@ -29,7 +29,7 @@ staff_profile_data = {
     'change_only_picture': {
         'profile_picture': (img_file.as_posix(), 'image/png')},
     'remove_picture': {
-        'profile_picture': None}}
+        'profile_picture': (None, 'image/png')}}
 
 staff_calendar_events_data = {
   "recurring":{
