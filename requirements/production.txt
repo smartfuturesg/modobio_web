@@ -3,11 +3,11 @@ amqp==5.0.6
 aniso8601==9.0.1
 attrs==21.2.0
 billiard==3.6.4.0
-boto3==1.17.95
-botocore==1.20.95
+boto3==1.17.97
+botocore==1.20.97
 cairocffi==1.2.0
 CairoSVG==2.5.2
-celery==5.1.0
+celery==5.1.1
 certifi==2021.5.30
 cffi==1.14.5
 chardet==4.0.0
@@ -40,7 +40,7 @@ marshmallow-sqlalchemy==0.26.1
 oauthlib==3.1.1
 Pillow==8.2.0
 prompt-toolkit==3.0.18
-psycopg2==2.8.6
+psycopg2==2.9.1
 pycparser==2.20
 PyJWT==1.7.1
 PyPDF2==1.26.0
@@ -56,7 +56,7 @@ s3transfer==0.4.2
 six==1.16.0
 SQLAlchemy==1.4.18
 tinycss2==1.1.0
-twilio==6.59.1
+twilio==6.60.0
 urllib3==1.26.5
 vine==5.0.0
 wcwidth==0.2.5
