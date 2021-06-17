@@ -1,6 +1,7 @@
 import boto3
 from datetime import datetime
 import math, re
+from PIL import Image
 
 from flask import request, current_app
 from flask_accepts import accepts, responds
@@ -18,7 +19,7 @@ from odyssey.utils.errors import (
     GenericNotFound
 )
 from odyssey import db
-from odyssey.utils.constants import TABLE_TO_URI
+from odyssey.utils.constants import TABLE_TO_URI, ALLOWED_IMAGE_TYPES, IMAGE_MAX_SIZE, IMAGE_DIMENSIONS
 from odyssey.api.client.models import (
     ClientDataStorage,
     ClientInfo,
@@ -63,10 +64,16 @@ from odyssey.api.staff.models import StaffRecentClients
 from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.api.trainer.models import FitnessQuestionnaire
 from odyssey.api.facility.models import RegisteredFacilities
-from odyssey.api.user.models import User, UserLogin, UserTokenHistory
+from odyssey.api.user.models import User, UserLogin, UserTokenHistory, UserProfilePictures
 from odyssey.utils.pdf import to_pdf, merge_pdfs
 from odyssey.utils.message import send_test_email
-from odyssey.utils.misc import check_client_existence, check_drink_existence, check_staff_existence
+from odyssey.utils.misc import (
+    check_client_existence, 
+    check_drink_existence, 
+    check_staff_existence,
+    FileHandling
+)
+
 from odyssey.api.client.schemas import(
     AllClientsDataTier,
     ClientAssignedDrinksSchema,
@@ -97,7 +104,8 @@ from odyssey.api.client.schemas import(
     ClientTransactionHistorySchema,
     ClientSearchItemsSchema,
     ClientRaceAndEthnicitySchema,
-    ClientRaceAndEthnicityEditSchema
+    ClientRaceAndEthnicityEditSchema,
+    ClientInfoSchema
 )
 from odyssey.api.lookup.schemas import LookupDefaultHealthMetricsSchema
 from odyssey.api.staff.schemas import StaffRecentClientsSchema
@@ -165,8 +173,107 @@ def process_race_and_ethnicity(user_id, mother, father):
 
     db.session.commit()
 
+
+@ns.route('/profile-picture/<int:user_id>/')
+class ClientProfilePicture(Resource):
+    """
+    Enpoint to edit client's profile picture
+    """
+    @token_auth.login_required(user_type=('client',))
+    @responds(schema=ClientInfoSchema(only=['user_id','profile_picture']), status_code=200, api=ns)
+    def put(self, user_id):
+        """
+        Put will be used to add new or change a profile picture for a client
+
+        Accepts form-data, will only handle one image
+        "profile_picture": file (allowed types are '.png', '.jpg', '.jpeg')
+        """
+        
+        if not ('profile_picture' in request.files and request.files['profile_picture']):  
+            raise InputError(422, "No file selected")    
+        res = {}
+        # add all files to S3 - Naming it specifically as client_profile_picture to differentiate from staff profile pic
+        # format: id{user_id:05d}/client_profile_picture/size{img.length}x{img.width}.img_extension
+        if not current_app.config['LOCAL_CONFIG']:
+            fh = FileHandling()    
+            img = request.files['profile_picture']
+            res = ClientInfo.query.filter_by(user_id=user_id).first().profile_pictures
+            _prefix = f'id{user_id:05d}/client_profile_picture'
+
+            # validate file size - safe threashold (MAX = 10 mb)
+            fh.validate_file_size(img, IMAGE_MAX_SIZE)
+            # validate file type
+            img_extension = fh.validate_file_type(img, ALLOWED_IMAGE_TYPES)
+
+            # if any, delete files with clien_profile_picture prefix
+            fh.delete_from_s3(prefix=_prefix)
+            # delete entries to UserProfilePictures in db
+            for _obj in res:
+                db.session.delete(_obj)
+            
+            # Save original to S3
+            open_img = Image.open(img)
+            img_w , img_h = open_img.size
+            original_s3key = f'{_prefix}/original{img_extension}'
+            fh.save_file_to_s3(img, original_s3key)
+            # Save original to db
+            user_profile_pic = UserProfilePictures()
+            user_profile_pic.original = True
+            user_profile_pic.client_id = user_id
+            user_profile_pic.image_path = original_s3key
+            user_profile_pic.width = img_w
+            user_profile_pic.height = img_h
+            db.session.add(user_profile_pic)
+
+            # crop new uploaded image into a square
+            squared = fh.image_crop_square(img)
+            # resize to sizes specified by the tuple of tuples in constant IMAGE_DEMENSIONS
+            for dimension in IMAGE_DIMENSIONS:
+                _img = fh.image_resize(squared, dimension)
+                # save to s3 bucket
+                _img_s3key = f'{_prefix}/{_img.filename}'
+                fh.save_file_to_s3(_img, _img_s3key)
+
+                # save to database
+                w , h = dimension
+                user_profile_pic = UserProfilePictures()
+                user_profile_pic.client_id = user_id
+                user_profile_pic.image_path = _img_s3key
+                user_profile_pic.width = w
+                user_profile_pic.height = h
+                db.session.add(user_profile_pic)
+
+            # get presigned urls
+            res = fh.get_presigned_urls(prefix = _prefix)
+            img.close()
+
+        db.session.commit()
+        return {'user_id': user_id, 'profile_picture': res}
+
+
+    @token_auth.login_required(user_type=('client',))
+    @responds(status_code=204, api=ns)
+    def delete(self, user_id):
+        """
+        Request to delete the client's profile picture
+        """
+        #if in local config, nothing will be deleted, but this request will be successful and return 204
+        if not current_app.config['LOCAL_CONFIG']:
+            fh = FileHandling()
+            _prefix = f'id{user_id:05d}/client_profile_picture'
+            # if any, delete files with clien_profile_picture prefix
+            fh.delete_from_s3(prefix=_prefix)
+            
+            # delete entries to UserProfilePictures in db
+            res = ClientInfo.query.filter_by(user_id=user_id).first().profile_pictures
+            for _obj in res:
+                db.session.delete(_obj)
+
+            db.session.commit()
+
+
+
 @ns.route('/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
 class Client(Resource):
     @token_auth.login_required
     @responds(schema=ClientAndUserInfoSchema, api=ns)
@@ -211,10 +318,16 @@ class Client(Resource):
         client_info_payload = client_data.__dict__
         client_info_payload["primary_goal"] = db.session.query(LookupGoals.goal_name).filter(client_data.primary_goal_id == LookupGoals.goal_id).one_or_none()
         client_info_payload["primary_macro_goal"] = db.session.query(LookupMacroGoals.goal).filter(client_data.primary_macro_goal_id == LookupMacroGoals.goal_id).one_or_none()
-        
         client_info_payload["race_information"] = db.session.query(ClientRaceAndEthnicity.is_client_mother, LookupRaces.race_id, LookupRaces.race_name) \
             .join(LookupRaces, LookupRaces.race_id == ClientRaceAndEthnicity.race_id) \
             .filter(ClientRaceAndEthnicity.user_id == user_id).all()
+
+        #Include profile picture in different sizes
+        profile_pics_dict = client_data.profile_pictures
+        if not current_app.config['LOCAL_CONFIG'] and profile_pics_dict:
+            fh = FileHandling()
+            _prefix = f'id{user_id:05d}/client_profile_picture'
+            client_info_payload["profile_picture"] = fh.get_presigned_urls(_prefix)
 
         return {'client_info': client_info_payload, 'user_info': user_data}
 
@@ -276,10 +389,11 @@ class Client(Resource):
         client_info_payload = client_data.__dict__
         client_info_payload["primary_goal"] = db.session.query(LookupGoals.goal_name).filter(client_data.primary_goal_id == LookupGoals.goal_id).one_or_none()
         client_info_payload['primary_macro_goal'] = db.session.query(LookupMacroGoals.goal).filter(client_data.primary_macro_goal_id == LookupMacroGoals.goal_id).one_or_none()
-
         client_info_payload["race_information"] = db.session.query(ClientRaceAndEthnicity.is_client_mother, LookupRaces.race_id, LookupRaces.race_name) \
             .join(LookupRaces, LookupRaces.race_id == ClientRaceAndEthnicity.race_id) \
             .filter(ClientRaceAndEthnicity.user_id == user_id).all()
+        
+        #Not returning profile picture since it can't be edited through PUT
 
         return {'client_info': client_info_payload, 'user_info': user_data}
 

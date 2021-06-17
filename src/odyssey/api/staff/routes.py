@@ -1,4 +1,4 @@
-import os, boto3, secrets, pathlib
+from PIL import Image
 
 from flask import request, current_app, Response
 from flask_accepts import accepts, responds
@@ -18,11 +18,11 @@ from odyssey.api.staff.models import (
     StaffRecentClients,
     StaffProfile,
     StaffCalendarEvents)
-from odyssey.api.user.models import User, UserLogin, UserTokenHistory
+from odyssey.api.user.models import User, UserLogin, UserTokenHistory, UserProfilePictures
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.errors import UnauthorizedUser, StaffEmailInUse, InputError
-from odyssey.utils.misc import check_staff_existence
-from odyssey.utils.constants import ALLOWED_IMAGE_TYPES
+from odyssey.utils.misc import check_staff_existence, FileHandling
+from odyssey.utils.constants import ALLOWED_IMAGE_TYPES, IMAGE_MAX_SIZE, IMAGE_DIMENSIONS
 from odyssey.api.user.schemas import UserSchema, StaffInfoSchema
 from odyssey.api.staff.schemas import (
     StaffOperationalTerritoriesNestedSchema,
@@ -33,7 +33,7 @@ from odyssey.api.staff.schemas import (
     StaffProfilePageGetSchema,
     StaffCalendarEventsSchema,
     StaffCalendarEventsUpdateSchema)
-from odyssey.utils.misc import check_staff_existence
+
 
 ns = api.namespace('staff', description='Operations related to staff members')
 
@@ -318,16 +318,10 @@ class StaffProfilePage(Resource):
         res['bio'] = profile.bio
 
         #get presigned link to this user's profile picture
-        s3key = profile.profile_picture
-        if s3key:
-            s3 = boto3.client('s3')
-            params = {
-                'Bucket': current_app.config['AWS_S3_BUCKET'],
-                'Key': s3key}
-
-            url = s3.generate_presigned_url('get_object', Params=params, ExpiresIn=3600)
-
-            res['profile_picture'] = url
+        res['profile_picture'] = None
+        if profile.profile_pictures:
+            fh = FileHandling()
+            res['profile_picture'] = fh.get_presigned_urls(prefix=f'id{user_id:05d}/staff_profile_picture')
 
         return res
 
@@ -343,20 +337,24 @@ class StaffProfilePage(Resource):
         "lastname": "string",
         "biological_sex_male": "boolean",
         "bio": "string",
-        "profile_picture": file (allowed types are '.png', '.jpg', '.jpeg', '.bmp', '.gif', '.webp', '.psd', '.pdf')
+        "profile_picture": file (allowed types are '.png', '.jpg', '.jpeg', '.bmp', '.gif', '.webp', '.psd')
         """
-
         #ensure this user id is for a valid staff member
         check_staff_existence(user_id)
 
+        if not request.form and not request.files:
+            raise InputError(422, "No data provided")
+
         user = User.query.filter_by(user_id=user_id).one_or_none()
         profile = StaffProfile.query.filter_by(user_id=user_id).one_or_none()
-
+        #If the field is included in the request, it will be updated or deleted.
+        #To keep all data as is, the field should not be included in request
         user_update = {}
 
         #stored here so we know if bio should be returned with the payload
-        #we don't want it returned in the key wasn't provided in the request
+        #we don't want it returned if the key wasn't provided in the request
         bio = None
+        pic = False
 
         for key in request.form:
             if key == 'bio':
@@ -374,78 +372,86 @@ class StaffProfilePage(Resource):
                         raise InputError(422, f'{key} must be a boolean. Acceptable values are \'true\', \'false\', \'True\', \'False\', \'1\', and \'0\'')
                 user_update[key] = data
 
+        # if provided, get profile picture and store in s3
+        if not current_app.config['LOCAL_CONFIG'] and 'profile_picture' in request.files:
+            # if profile_picture field was included, profile pic is removed
+            # then if image was provided, it is updated, otherwise, it remains deleted
+            fh = FileHandling()
+            _prefix = f'id{user_id:05d}/staff_profile_picture'
+            
+            # will delete anything starting with this prefix if it exists
+            # if nothing matches the prefix, nothing will happen
+            fh.delete_from_s3(prefix = _prefix)
 
-        url = None
+            # Delete from db
+            for _obj in profile.profile_pictures:
+                db.session.delete(_obj)
+                
+            pic = True
+            urls = None
 
-        #get profile picture and store in s3
-        if 'profile_picture' in request.files:
-            s3 = boto3.resource('s3')
-            bucket = s3.Bucket(current_app.config['AWS_S3_BUCKET'])
-            prefix = current_app.config['AWS_S3_PREFIX']
-            if prefix:
-                prefix += '/'
+            # when an image is provided, then the image is updated to the new one
+            # we're only allowing one profile picture for staff profile, so only one will be processed
+            img = request.files['profile_picture']
+            if img:
+                # validate file size - safe threashold (MAX = 10 mb)
+                fh.validate_file_size(img, IMAGE_MAX_SIZE)
+                # validate file type
+                img_extension = fh.validate_file_type(img, ALLOWED_IMAGE_TYPES)
 
-            #will delete anything starting with this prefix if it exists
-            #if nothing matches the prefix, nothing will happen
-            bucket.objects.filter(Prefix=f'{prefix}id{user_id:05d}/profile_picture').delete()
-            url = "delete"
+                # Save original to S3
+                open_img = Image.open(img)
+                img_w , img_h = open_img.size
+                original_s3key = f'{_prefix}/original{img_extension}'
+                fh.save_file_to_s3(img, original_s3key)
+                # Save original to db
+                user_profile_pic = UserProfilePictures()
+                user_profile_pic.original = True
+                user_profile_pic.staff_id = user_id
+                user_profile_pic.image_path = original_s3key
+                user_profile_pic.width = img_w
+                user_profile_pic.height = img_h
+                db.session.add(user_profile_pic)
 
-            #implemented as a loop to allow for multiple pictures if needed in the future
-            for i, img in enumerate(request.files.getlist('profile_picture')):
-                #Verifying image size is within a safe threashold (MAX = 500 mb)
-                img.seek(0, os.SEEK_END)
-                img_size = img.tell()
-                if img_size > 524288000:
-                    raise InputError(413, 'File too large')
+                # crop image to a square
+                squared = fh.image_crop_square(img)
 
-                #make sure this is not an empty file
-                if img_size > 0:
-                    #check that file type is one of the allowed image types
-                    img_extension = pathlib.Path(img.filename).suffix
-                    if img_extension not in ALLOWED_IMAGE_TYPES:
-                        raise InputError(422, f'{img_extension} is not an allowed file type. Allowed types are {ALLOWED_IMAGE_TYPES}')
+                # resize to sizes specified by the tuple of tuples in constant IMAGE_DEMENSIONS
+                for dimension in IMAGE_DIMENSIONS:
+                    _img = fh.image_resize(squared, dimension)
+                    # save to s3 bucket
+                    #add all 3 files to S3 - Naming it specifically as staff_profile_picture to differentiate from client profile pic
+                    #format: id{user_id:05d}/staff_profile_picture/size{img.length}x{img.width}.img_extension)
+                    _img_s3key = f'{_prefix}/{_img.filename}'
+                    fh.save_file_to_s3(_img, _img_s3key)
 
-                    #Rename image (format: profile_files/id{user_id:05d}/profile_picture_4digitRandomHex.img_extension) AND Save=>S3
-                    img.seek(0)
-                    hex_token = secrets.token_hex(4)
-                    s3key = f'id{user_id:05d}/profile_picture_{hex_token}{img_extension}'
-                    bucket.put_object(Key= s3key, Body=img.stream)
-
-                    profile.profile_picture = s3key
-
-                    #get presigned url to return in response
-                    params = {
-                        'Bucket' : current_app.config['AWS_S3_BUCKET'],
-                        'Key' : s3key
-                    }
-
-                    url = boto3.client('s3').generate_presigned_url('get_object', Params=params, ExpiresIn=3600)
-
-                #exit loop if more than allowed number of images were given
-                if i >= 0:
-                    break
+                    # save to database
+                    w , h = dimension
+                    user_profile_pic = UserProfilePictures()
+                    user_profile_pic.staff_id = user_id
+                    user_profile_pic.image_path = _img_s3key
+                    user_profile_pic.width = w
+                    user_profile_pic.height = h
+                    db.session.add(user_profile_pic)
+                
+                #get presigned urls to return in response
+                urls = fh.get_presigned_urls(prefix=_prefix)        
+                img.close()
 
         #update user in db
         user.update(user_update)
-        
+        db.session.commit()
         #add profile keys to user_update to match @responds
         if bio:
             user_update['bio'] = profile.bio
-        if url:
-            if url != "delete":
-                user_update['profile_picture'] = url
-            else:
-                #profile_picture key was provided with no file. Since this means profile picture was
-                #deleted from s3, remove the reference to it from db.
-                profile.profile_picture = None
-
-        db.session.commit()
-
+        if pic:
+            user_update['profile_picture'] = urls
+        
         if len(user_update.keys()) == 0:
             #request was successful but there is no body to return
             return Response(status=204)
-        else:
-            return user_update
+        
+        return user_update
 
 
 @ns.route('/calendar/<int:user_id>/')
