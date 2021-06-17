@@ -17,5 +17,5 @@ redis
 requests
 requests-oauthlib
 twilio
-PyJWT
+PyJWT>=2.0
 WeasyPrint
