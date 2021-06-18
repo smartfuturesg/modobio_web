@@ -214,8 +214,8 @@ telehealth_client_staff_bookings_put_1_data = {
 rec_file = pathlib.Path(__file__).parent / 'test_m4a_recording.m4a'
 img_file = pathlib.Path(__file__).parent / 'test_img_weirdmole.jpg'
 telehealth_post_booking_details = {
-    'images': (img_file.as_posix(), 'image/jpeg'),
-    'voice': (rec_file.as_posix(), 'audio/mp4'),
+    'images': (img_file.as_posix(), img_file.name, 'image/jpeg'),
+    'voice': (rec_file.as_posix(), rec_file.name, 'audio/mp4'),
     'details': 'Testing booking details',
     'location_id': 1}
 
@@ -226,8 +226,8 @@ telehealth_put_booking_details = {
         'details': 'Removed image and recording, kept description',
         'location_id': 1},
     'swap_img_rec': {
-        'images': (img_file.as_posix(), 'image/jpeg'),
-        'voice': (rec_file.as_posix(), 'audio/mp4'),
+        'images': (img_file.as_posix(), img_file.name, 'image/jpeg'),
+        'voice': (rec_file.as_posix(), rec_file.name, 'audio/mp4'),
         'details': 'Swapped files, recording is image and image is recording.',
         'location_id': 1},
     'change_text_only': {
