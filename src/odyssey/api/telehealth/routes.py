@@ -1,6 +1,7 @@
-import os, boto3, secrets, pathlib, io
+import os, boto3, secrets, pathlib
 from datetime import datetime, timedelta
 from dateutil import tz
+import random
 
 from flask import request, current_app, g
 from flask_accepts import accepts, responds
@@ -8,15 +9,9 @@ from flask_restx import Resource
 from sqlalchemy import select
 from twilio.jwt.access_token import AccessToken
 from twilio.jwt.access_token.grants import VideoGrant, ChatGrant
-import random
-from werkzeug.datastructures import FileStorage
-from datetime import timedelta
-from dateutil import tz
-from dateutil.relativedelta import relativedelta
 
 from odyssey import db
 from odyssey.api import api
-
 from odyssey.api.lookup.models import (
     LookupBookingTimeIncrements
 )
@@ -35,7 +30,6 @@ from odyssey.api.telehealth.schemas import (
     TelehealthBookingsSchema,
     TelehealthBookingsOutputSchema,
     TelehealthBookingMeetingRoomsTokensSchema,
-    TelehealthBookingsPUTSchema,
     TelehealthChatRoomAccessSchema,
     TelehealthConversationsNestedSchema, 
     TelehealthMeetingRoomSchema,
@@ -51,9 +45,8 @@ from odyssey.api.lookup.models import (
     LookupTerritoriesofOperation
 )
 from odyssey.utils.auth import token_auth
-from odyssey.utils.constants import BOOKINGS_STATUS, TWILIO_ACCESS_KEY_TTL, DAY_OF_WEEK, ALLOWED_AUDIO_TYPES, ALLOWED_IMAGE_TYPES
-from odyssey.utils.errors import GenericNotFound, InputError, LoginNotAuthorized, UnauthorizedUser, ContentNotFound, IllegalSetting
-
+from odyssey.utils.constants import TWILIO_ACCESS_KEY_TTL, DAY_OF_WEEK, ALLOWED_AUDIO_TYPES, ALLOWED_IMAGE_TYPES
+from odyssey.utils.errors import GenericNotFound, InputError, UnauthorizedUser, ContentNotFound, IllegalSetting
 from odyssey.utils.misc import (
     check_client_existence, 
     check_staff_existence,
@@ -63,6 +56,7 @@ from odyssey.utils.misc import (
     get_chatroom,
     grab_twilio_credentials
 )
+
 ns = api.namespace('telehealth', description='telehealth bookings management API')
 
 @ns.route('/bookings/meeting-room/access-token/<int:booking_id>/')
