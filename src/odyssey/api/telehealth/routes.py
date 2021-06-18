@@ -534,8 +534,16 @@ class TelehealthBookingsApi(Resource):
         check_staff_existence(staff_user_id)
 
         # Check if staff and client have those times open
-        client_bookings = TelehealthBookings.query.filter_by(client_user_id=client_user_id,target_date=request.parsed_obj.target_date).all()
-        staff_bookings = TelehealthBookings.query.filter_by(staff_user_id=staff_user_id,target_date=request.parsed_obj.target_date).all()
+        client_bookings = TelehealthBookings.query.filter(
+            TelehealthBookings.client_user_id==client_user_id,
+            TelehealthBookings.target_date==request.parsed_obj.target_date,
+            TelehealthBookings.status!='Client Canceled',
+            TelehealthBookings.status!='Staff Canceled').all()
+        staff_bookings = TelehealthBookings.query.filter(
+            TelehealthBookings.staff_user_id==staff_user_id,
+            TelehealthBookings.target_date==request.parsed_obj.target_date,
+            TelehealthBookings.status!='Client Canceled',
+            TelehealthBookings.status!='Staff Canceled').all()
 
         # This checks if the input slots have already been taken.
         if client_bookings:
