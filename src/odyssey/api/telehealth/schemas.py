@@ -4,6 +4,8 @@ from marshmallow import (
     post_load,
     validate
 )
+from pytz import timezone
+import pytz
 from twilio.jwt import access_token
 from twilio.rest.conversations.v1 import conversation
 
@@ -40,7 +42,8 @@ class TelehealthBookingsPUTSchema(Schema):
 class TelehealthBookingsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = TelehealthBookings
-        dump_only = ('idx', 'client_user_id','staff_user_id',)
+        dump_only = ('idx', 'client_user_id','staff_user_id')
+        exclude = ('booking_window_id_start_time_utc','booking_window_id_end_time_utc', 'target_date_utc')
         include_fk = True
 
     # booking_window_id_start_time = fields.Integer()
@@ -48,6 +51,8 @@ class TelehealthBookingsSchema(ma.SQLAlchemyAutoSchema):
     booking_id = fields.Integer(dump_only=True)
     start_time = fields.Time(dump_only=True)
     end_time = fields.Time(dump_only=True)
+    start_time_localized = fields.Time(dump_only=True)
+    start_time_localized = fields.Time(dump_only=True)
     status = fields.String(required=False,validate=validate.OneOf(BOOKINGS_STATUS))
     conversation_sid = fields.String(dump_only=True)
     client_first_name = fields.String(dump_only=True)
@@ -56,6 +61,7 @@ class TelehealthBookingsSchema(ma.SQLAlchemyAutoSchema):
     staff_first_name = fields.String(dump_only=True)
     staff_middle_name = fields.String(dump_only=True)
     staff_last_name = fields.String(dump_only=True)
+    timezone = fields.String(metadata={'description': 'tiemzone setting of the booking for the logged in user'})
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -79,20 +85,17 @@ class TelehealthStaffAvailabilitySchema(ma.SQLAlchemyAutoSchema):
         return TelehealthStaffAvailability(**data)  
 
 class TelehealthStaffAvailabilityInputSchema(Schema):
-    # class Meta:
-    #     model = TelehealthStaffAvailability
-    #     exclude = ('created_at',)
-    #     dump_only = ('idx', 'user_id','booking_window_id')
-
+    """
+    Schema represents input of staff availability for a time block within a day of the week
+    """
     day_of_week = fields.String(validate=validate.OneOf(DAY_OF_WEEK))
     start_time = fields.Time()
     end_time = fields.Time()
-    # @post_load
-    # def make_object(self, data, **kwargs):
-    #     return TelehealthStaffAvailability(**data)  
+ 
 
 class TelehealthStaffAvailabilityOutputSchema(Schema):
     availability = fields.Nested(TelehealthStaffAvailabilityInputSchema(many=True), missing=[])
+    timezone = fields.String(validate=validate.OneOf(pytz.common_timezones),metadata={'description': 'optional timezone selection, defaults to UTC'}, missing='UTC')
 
 class TelehealthMeetingRoomSchema(ma.SQLAlchemyAutoSchema):
     """
@@ -113,6 +116,7 @@ class TelehealthQueueClientPoolSchema(ma.SQLAlchemyAutoSchema):
     
     duration = fields.Integer(missing=20)
     medical_gender = fields.String(validate=validate.OneOf([gender[0] for gender in GENDERS]),metadata={'description': 'Preferred Medical Professional gender'})
+    timezone = fields.String(validate=validate.OneOf(pytz.common_timezones),metadata={'description': 'optional timezone selection, defaults to UTC'}, missing='UTC')
 
     @post_load
     def make_object(self, data, **kwargs):

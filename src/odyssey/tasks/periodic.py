@@ -42,7 +42,9 @@ def deploy_upcoming_appointment_notifications(booking_window_id_start, booking_w
 
     Parameters
     ----------
-    target_date : to be used if testing. Otherwise date is set using system time
+    target_date : to be used if testing. Otherwise date is set using system time (UTC)
+    booking_window_id_start: start of booking window provided in UTC
+    booking_window_id_end: end of booking window provided in UTC
     """
     # grab the current date for the queries below
     if not target_date:
@@ -54,11 +56,11 @@ def deploy_upcoming_appointment_notifications(booking_window_id_start, booking_w
         bookings_1 = db.session.execute(
             select(TelehealthBookings). 
                 where(and_(
-                TelehealthBookings.target_date==target_date, 
-                TelehealthBookings.booking_window_id_start_time >= booking_window_id_start , #18:00
+                TelehealthBookings.target_date_utc==target_date, 
+                TelehealthBookings.booking_window_id_start_time_utc >= booking_window_id_start , #18:00
                 or_( # meeting ends between 18:00 and 02:00
-                    TelehealthBookings.booking_window_id_end_time <= booking_window_id_end, #02:00
-                    TelehealthBookings.booking_window_id_end_time > booking_window_id_start),
+                    TelehealthBookings.booking_window_id_end_time_utc <= booking_window_id_end, #02:00
+                    TelehealthBookings.booking_window_id_end_time_utc > booking_window_id_start),
                 )) 
             ).scalars().all()
 
@@ -66,9 +68,9 @@ def deploy_upcoming_appointment_notifications(booking_window_id_start, booking_w
         bookings_2 = db.session.execute(
             select(TelehealthBookings). 
             where(and_(
-                TelehealthBookings.target_date==target_date+timedelta(days=1), 
-                TelehealthBookings.booking_window_id_start_time >= 0 , #00:00
-                TelehealthBookings.booking_window_id_end_time <= booking_window_id_end, #02:00
+                TelehealthBookings.target_date_utc==target_date+timedelta(days=1), 
+                TelehealthBookings.booking_window_id_start_time_utc >= 0 , #00:00
+                TelehealthBookings.booking_window_id_end_time_utc <= booking_window_id_end, #02:00
                 )) 
             ).scalars().all()
         upcoming_bookings = bookings_1 + bookings_2
@@ -76,9 +78,9 @@ def deploy_upcoming_appointment_notifications(booking_window_id_start, booking_w
         upcoming_bookings = db.session.execute(
             select(TelehealthBookings). 
             where(and_(
-                TelehealthBookings.target_date==target_date, 
-                TelehealthBookings.booking_window_id_start_time >= booking_window_id_start , 
-                TelehealthBookings.booking_window_id_end_time <= booking_window_id_end, 
+                TelehealthBookings.target_date_utc==target_date, 
+                TelehealthBookings.booking_window_id_start_time_utc >= booking_window_id_start , 
+                TelehealthBookings.booking_window_id_end_time_utc <= booking_window_id_end, 
                 )) 
             ).scalars().all()
 
@@ -91,9 +93,9 @@ def deploy_upcoming_appointment_notifications(booking_window_id_start, booking_w
         # create datetime object for scheduling tasks
         booking_start_time = db.session.execute(
                 select(LookupBookingTimeIncrements.start_time).
-                where(LookupBookingTimeIncrements.idx == booking.booking_window_id_start_time)
+                where(LookupBookingTimeIncrements.idx == booking.booking_window_id_start_time_utc)
             ).scalars().one_or_none()
-        notification_eta = datetime.combine(booking.target_date, booking_start_time) - timedelta(hours = 2)
+        notification_eta = datetime.combine(booking.target_date_utc, booking_start_time) - timedelta(hours = 2)
 
         # Deploy scheduled task to update notifications table with upcoming booking notification
         upcoming_appointment_notification_2hr.apply_async((booking.idx,),eta=notification_eta)

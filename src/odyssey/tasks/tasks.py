@@ -37,7 +37,7 @@ def upcoming_appointment_notification_2hr(booking_id):
     # look up the start time and create dt object for the notification expire time (2 hours after the appointment begins)
     start_time = db.session.execute(
         select(LookupBookingTimeIncrements.start_time).
-        where(LookupBookingTimeIncrements.idx == booking.booking_window_id_start_time)
+        where(LookupBookingTimeIncrements.idx == booking.booking_window_id_start_time_utc)
     ).scalars().one_or_none()
     
     start_dt = datetime.combine(booking.target_date, start_time)
