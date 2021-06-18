@@ -233,7 +233,6 @@ class Config:
         self.broker_url = self.getvar('CELERY_BROKER_URL', None, default=None)
         self.result_backend  = self.getvar('CELERY_BROKER_URL', None, default=None)
         self.enable_utc = True
-        # self.timezone = 'America/Phoenix'
 
     def getvar(self, var: str, param: str, decrypt: bool=True, default: Any='') -> Any:
         """ Get a configuration setting.
