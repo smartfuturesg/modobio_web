@@ -77,6 +77,41 @@ class TelehealthBookings(db.Model):
     :type: str
     """    
 
+    client_timezone = db.Column(db.String)
+    """
+    Staff's timezone setting at the time of booking. 
+
+    :type: str
+    """
+
+    staff_timezone = db.Column(db.String)
+    """
+    Staff's timezone setting at the time of booking. 
+
+    :type: str
+    """
+
+    target_date_utc = db.Column(db.Date)
+    """
+    target date converted to utc
+
+    :type: datetime
+    """
+
+    booking_window_id_start_time_utc = db.Column(db.Integer, db.ForeignKey('LookupBookingTimeIncrements.idx', ondelete="CASCADE"), nullable=False)
+    """ 
+    start time booking_window_id in UTC
+
+    :type: int, foreign key('LookupBookingTimeIncrements.idx')
+    """
+    
+    booking_window_id_end_time_utc = db.Column(db.Integer, db.ForeignKey('LookupBookingTimeIncrements.idx', ondelete="CASCADE"), nullable=False)
+    """ 
+    end time booking_window_id in UTC
+
+    :type: int, foreign key('LookupBookingTimeIncrements.idx')
+    """
+
 class TelehealthMeetingRooms(db.Model):
     """ 
     Meeting room details for one-on-one meetings between clients and medical professionals.
@@ -199,6 +234,13 @@ class TelehealthStaffAvailability(db.Model):
     booking window id
 
     :type: int, foreign key('LookupBookingTimeIncrements.idx')
+    """
+
+    timezone = db.Column(db.String)
+    """
+    Staff's timezone setting for the current telehealth availability submisison
+
+    :type: str
     """
 
 class TelehealthQueueClientPool(db.Model):
