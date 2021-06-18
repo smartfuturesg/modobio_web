@@ -5,26 +5,11 @@ not to be edited at runtime.
 
 from odyssey import db
 from odyssey.utils.constants import DB_SERVER_TIME
+from odyssey.utils.base.models import BaseModelWithIdx, BaseModel
 
-class LookupTermsAndConditions(db.Model):
+class LookupTermsAndConditions(BaseModelWithIdx):
     """ 
         Holds the documententation for the terms and conditions
-    """
-
-    __tablename__ = 'LookupTermsAndConditions'
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    timestamp for when object was created. DB server time is used. 
-
-    :type: datetime
-    """
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Auto incrementing primary key
-
-    :type: int, primary key
     """
     
     terms_and_conditions = db.Column(db.String)
@@ -34,25 +19,9 @@ class LookupTermsAndConditions(db.Model):
     :type: str
     """    
 
-class LookupBookingTimeIncrements(db.Model):
+class LookupBookingTimeIncrements(BaseModelWithIdx):
     """ 
     Holds all time increment from 00:00 to 23:55 in increments of 5 minutes
-    """
-
-    __tablename__ = 'LookupBookingTimeIncrements'
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    timestamp for when object was created. DB server time is used. 
-
-    :type: datetime
-    """
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Auto incrementing primary key
-
-    :type: int, primary key
     """
     
     start_time = db.Column(db.Time)
@@ -69,31 +38,8 @@ class LookupBookingTimeIncrements(db.Model):
     :type: datetime.time
     """
 
-class LookupProfessionalAppointmentConfirmationWindow(db.Model):
+class LookupProfessionalAppointmentConfirmationWindow(BaseModelWithIdx):
     """ Stored appointment confirmation windows for professionals in database. 
-    """
-
-    __tablename__ = 'LookupProfessionalAppointmentConfirmationWindow'
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Primary index for 
-
-    :type: int, primary key, autoincrement
     """
 
     confirmation_window = db.Column(db.Float)
@@ -104,31 +50,8 @@ class LookupProfessionalAppointmentConfirmationWindow(db.Model):
     :type: float
     """    
 
-class LookupTransactionTypes(db.Model):
+class LookupTransactionTypes(BaseModelWithIdx):
     """ Stored transaction types in database. 
-    """
-
-    __tablename__ = 'LookupTransactionTypes'
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Primary index for 
-
-    :type: int, primary key, autoincrement
     """
 
     category = db.Column(db.String)
@@ -156,31 +79,8 @@ class LookupTransactionTypes(db.Model):
     :type: str
     """        
 
-class LookupCountriesOfOperations(db.Model):
+class LookupCountriesOfOperations(BaseModelWithIdx):
     """ Stored countries of operations in database. 
-    """
-
-    __tablename__ = 'LookupCountriesOfOperations'
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Primary index for 
-
-    :type: int, primary key, autoincrement
     """
 
     country = db.Column(db.String)
@@ -190,7 +90,7 @@ class LookupCountriesOfOperations(db.Model):
     :type: str
     """
     
-class LookupTerritoriesofOperation(db.Model):
+class LookupTerritoriesofOperation(BaseModelWithIdx):
     """ 
     Territories of operaion are organized by country and then sub-territory,
     where a sub_territory is the highest level of governing region that can have
@@ -199,29 +99,6 @@ class LookupTerritoriesofOperation(db.Model):
     In the UNited States, the su_territory will be at the state level.
 
     Staff members are required to specify which territories they can operate in. 
-    """
-
-    __tablename__ = 'LookupTerritoriesofOperation'
-
-    created_at = db.Column(db.DateTime, server_default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, server_default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Primary index for 
-
-    :type: int, primary key, autoincrement
     """
 
     country = db.Column(db.String)
@@ -245,31 +122,8 @@ class LookupTerritoriesofOperation(db.Model):
     :type: str
     """
 
-class LookupClientBookingWindow(db.Model):
+class LookupClientBookingWindow(BaseModelWithIdx):
     """ Stored booking windows for the client in database. 
-    """
-
-    __tablename__ = 'LookupClientBookingWindow'
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Primary index for 
-
-    :type: int, primary key, autoincrement
     """
 
     booking_window = db.Column(db.Integer)
@@ -280,31 +134,8 @@ class LookupClientBookingWindow(db.Model):
     :type: int
     """
 
-class LookupTelehealthSessionDuration(db.Model):
+class LookupTelehealthSessionDuration(BaseModelWithIdx):
     """ Stored telehealth session durations in database. 
-    """
-
-    __tablename__ = 'LookupTelehealthSessionDuration'
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Primary index for 
-
-    :type: int, primary key, autoincrement
     """
 
     session_duration = db.Column(db.Integer)
@@ -315,24 +146,8 @@ class LookupTelehealthSessionDuration(db.Model):
     :type: int
     """
 
-class LookupActivityTrackers(db.Model):
+class LookupActivityTrackers(BaseModelWithIdx):
     """ Look up table for activity trackers and their capabilities. """
-
-    __tablename__ = 'LookupActivityTrackers'
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
 
     brand = db.Column(db.String)
     """
@@ -539,31 +354,15 @@ class LookupActivityTrackers(db.Model):
     :type: bool
     """
 
-class LookupDrinks(db.Model):
+class LookupDrinks(BaseModel):
     """ Static list of drinks that a client can purchase or be recommended. 
-    """
-
-    __tablename__ = 'LookupDrinks'
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
     """
 
     drink_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
-    Unique id for this drink.
+    Id of this drink.
 
-    :type: int, primary key, autoincrement
+    :type: integer, primary key, autoincrementing
     """
 
     primary_goal_id = db.Column(db.Integer, db.ForeignKey('LookupGoals.goal_id'), nullable=False)
@@ -580,31 +379,8 @@ class LookupDrinks(db.Model):
     :type: string
     """
 
-class LookupDrinkIngredients(db.Model):
+class LookupDrinkIngredients(BaseModelWithIdx):
     """ List of ingredients that a drink is made up of. 
-    """
-
-    __tablename__ = 'LookupDrinkIngredients'
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
     """
 
     drink_id = db.Column(db.Integer, db.ForeignKey('LookupDrinks.drink_id'), nullable=False)
@@ -649,24 +425,8 @@ class LookupDrinkIngredients(db.Model):
     :type: string
     """
 
-class LookupGoals(db.Model):
+class LookupGoals(BaseModel):
     """ Static list of goals that a client can choose from. 
-    """
-
-    __tablename__ = 'LookupGoals'
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
     """
 
     goal_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -683,24 +443,8 @@ class LookupGoals(db.Model):
     :type: string
     """
 
-class LookupMacroGoals(db.Model):
+class LookupMacroGoals(BaseModel):
     """ Static list of pre-defined primary health goals available to a client 
-    """
-
-    __tablename__ = 'LookupMacroGoals'
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
     """
 
     goal_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -717,24 +461,8 @@ class LookupMacroGoals(db.Model):
     :type: string
     """
 
-class LookupRaces(db.Model):
+class LookupRaces(BaseModel):
     """ Static list of races that a client can choose from. 
-    """
-
-    __tablename__ = 'LookupRaces'
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
     """
 
     race_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -750,24 +478,9 @@ class LookupRaces(db.Model):
 
     :type: string
     """
-class LookupSubscriptions(db.Model):
+
+class LookupSubscriptions(BaseModel):
     """ Static list of subscription plans that a user can choose from. 
-    """
-
-    __tablename__ = 'LookupSubscriptions'
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
     """
 
     sub_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -805,24 +518,8 @@ class LookupSubscriptions(db.Model):
     :type: string
     """
 
-class LookupNotifications(db.Model):
+class LookupNotifications(BaseModel):
     """ Static list of notifications types that a user can receive. """
-
-    __tablename__ = 'LookupNotifications'
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
 
     notification_type_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -865,26 +562,10 @@ class LookupNotifications(db.Model):
     """
 
 
-class LookupClinicalCareTeamResources(db.Model):
+class LookupClinicalCareTeamResources(BaseModel):
     """
     Stores all the database tables which can be accessed by a clinical care team.
     Table names are given an index in order to be referenced by other tables
-    """
-
-    __tablename__ = 'LookupClinicalCareTeamResources'
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
     """
 
     resource_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -907,7 +588,8 @@ class LookupClinicalCareTeamResources(db.Model):
     
     :type: string
     """
-class LookupDefaultHealthMetrics(db.Model):
+
+class LookupDefaultHealthMetrics(BaseModelWithIdx):
     """
     Health metric recommendations by sex and age category
     Most of this data may be obtained from one more more fitness trackers
@@ -915,22 +597,6 @@ class LookupDefaultHealthMetrics(db.Model):
     The intended use of this table is to show clients the types of goals and associated benchmarks
     they shoudld strive for. We may also venture to use the data in this table to evaluate where 
     clients stand among these metrics.  
-    """
-
-    __tablename__ = 'LookupDefaultHealthMetrics'
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
     """
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -1249,31 +915,8 @@ class LookupDefaultHealthMetrics(db.Model):
     :type: integer
     """
 
-class LookupEmergencyNumbers(db.Model):
+class LookupEmergencyNumbers(BaseModelWithIdx):
     """ Static list of emergency contact phone numbers """
-
-    __tablename__ = 'LookupEmergencyNumbers'
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Index
-
-    :type: integer, primary key, autoincrementing
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-    
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
 
     continent = db.Column(db.String)
     """
@@ -1310,30 +953,7 @@ class LookupEmergencyNumbers(db.Model):
     :type: string
     """
 
-class LookupRoles(db.Model):
-
-    __tablename__ = 'LookupRoles'
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Index
-
-    :type: integer, primary key, autoincrementing
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-    
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
+class LookupRoles(BaseModelWithIdx):
 
     role_name = db.Column(db.String)
     """
@@ -1399,30 +1019,7 @@ class LookupRoles(db.Model):
     :type: string
     """
 
-class LookupLegalDocs(db.Model):
-
-    __tablename__ = 'LookupLegalDocs'
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Index
-
-    :type: integer, primary key, autoincrementing
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-    
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
+class LookupLegalDocs(BaseModelWithIdx):
 
     name = db.Column(db.String)
     """
@@ -1448,6 +1045,25 @@ class LookupLegalDocs(db.Model):
     path = db.Column(db.String)
     """
     Path to this document.
+
+    :type: string
+    """
+
+class LookupMedicalSymptoms(BaseModelWithIdx):
+    """
+    Lookup table for medical symptoms and their ICD-10 codes.
+    """
+
+    name = db.Column(db.String)
+    """
+    Name of this symptom.
+
+    :type: string
+    """
+
+    code = db.Column(db.String)
+    """
+    ICD-10 code for this symptom.
 
     :type: string
     """
