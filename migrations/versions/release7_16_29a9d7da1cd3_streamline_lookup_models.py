@@ -1,7 +1,7 @@
 """streamline lookup models
 
 Revision ID: 29a9d7da1cd3
-Revises: a7565530c9f5
+Revises: 45f124410e19
 Create Date: 2021-06-14 12:31:40.729613
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '29a9d7da1cd3'
-down_revision = 'a7565530c9f5'
+down_revision = '45f124410e19'
 branch_labels = None
 depends_on = None
 

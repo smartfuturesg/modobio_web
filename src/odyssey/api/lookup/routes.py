@@ -420,5 +420,5 @@ class LookupMedicalSymptomssApi(Resource):
     @responds(schema=LookupOrganizationsOutputSchema, status_code=200, api=ns)
     def get(self):
         """get contents of medical symptoms lookup table"""
-        res = LookupMedicalSymptoms.query.all()
+        res = LookupOrganizations.query.all()
         return {'total_items': len(res), 'items': res}
