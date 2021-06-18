@@ -188,68 +188,67 @@ class ClientProfilePicture(Resource):
         Accepts form-data, will only handle one image
         "profile_picture": file (allowed types are '.png', '.jpg', '.jpeg')
         """
-        
         if not ('profile_picture' in request.files and request.files['profile_picture']):  
             raise InputError(422, "No file selected")    
-        res = {}
+
         # add all files to S3 - Naming it specifically as client_profile_picture to differentiate from staff profile pic
         # format: id{user_id:05d}/client_profile_picture/size{img.length}x{img.width}.img_extension
-        if not current_app.config['LOCAL_CONFIG']:
-            fh = FileHandling()    
-            img = request.files['profile_picture']
-            res = ClientInfo.query.filter_by(user_id=user_id).first().profile_pictures
-            _prefix = f'id{user_id:05d}/client_profile_picture'
+        fh = FileHandling()
+        img = request.files['profile_picture']
+        res = ClientInfo.query.filter_by(user_id=user_id).first().profile_pictures
+        _prefix = f'id{user_id:05d}/client_profile_picture'
 
-            # validate file size - safe threashold (MAX = 10 mb)
-            fh.validate_file_size(img, IMAGE_MAX_SIZE)
-            # validate file type
-            img_extension = fh.validate_file_type(img, ALLOWED_IMAGE_TYPES)
+        # validate file size - safe threashold (MAX = 10 mb)
+        fh.validate_file_size(img, IMAGE_MAX_SIZE)
+        # validate file type
+        img_extension = fh.validate_file_type(img, ALLOWED_IMAGE_TYPES)
 
-            # if any, delete files with clien_profile_picture prefix
-            fh.delete_from_s3(prefix=_prefix)
-            # delete entries to UserProfilePictures in db
-            for _obj in res:
-                db.session.delete(_obj)
-            
-            # Save original to S3
-            open_img = Image.open(img)
-            img_w , img_h = open_img.size
-            original_s3key = f'{_prefix}/original{img_extension}'
-            fh.save_file_to_s3(img, original_s3key)
-            # Save original to db
+        # if any, delete files with clien_profile_picture prefix
+        fh.delete_from_s3(prefix=_prefix)
+        # delete entries to UserProfilePictures in db
+        for _obj in res:
+            db.session.delete(_obj)
+
+        # Save original to S3
+        open_img = Image.open(img)
+        img_w, img_h = open_img.size
+        original_s3key = f'{_prefix}/original{img_extension}'
+        fh.save_file_to_s3(img, original_s3key)
+
+        # Save original to db
+        user_profile_pic = UserProfilePictures()
+        user_profile_pic.original = True
+        user_profile_pic.client_id = user_id
+        user_profile_pic.image_path = original_s3key
+        user_profile_pic.width = img_w
+        user_profile_pic.height = img_h
+        db.session.add(user_profile_pic)
+
+        # crop new uploaded image into a square
+        squared = fh.image_crop_square(img)
+
+        # resize to sizes specified by the tuple of tuples in constant IMAGE_DEMENSIONS
+        for dimension in IMAGE_DIMENSIONS:
+            _img = fh.image_resize(squared, dimension)
+            # save to s3 bucket
+            _img_s3key = f'{_prefix}/{_img.filename}'
+            fh.save_file_to_s3(_img, _img_s3key)
+
+            # save to database
+            w, h = dimension
             user_profile_pic = UserProfilePictures()
-            user_profile_pic.original = True
             user_profile_pic.client_id = user_id
-            user_profile_pic.image_path = original_s3key
-            user_profile_pic.width = img_w
-            user_profile_pic.height = img_h
+            user_profile_pic.image_path = _img_s3key
+            user_profile_pic.width = w
+            user_profile_pic.height = h
             db.session.add(user_profile_pic)
 
-            # crop new uploaded image into a square
-            squared = fh.image_crop_square(img)
-            # resize to sizes specified by the tuple of tuples in constant IMAGE_DEMENSIONS
-            for dimension in IMAGE_DIMENSIONS:
-                _img = fh.image_resize(squared, dimension)
-                # save to s3 bucket
-                _img_s3key = f'{_prefix}/{_img.filename}'
-                fh.save_file_to_s3(_img, _img_s3key)
-
-                # save to database
-                w , h = dimension
-                user_profile_pic = UserProfilePictures()
-                user_profile_pic.client_id = user_id
-                user_profile_pic.image_path = _img_s3key
-                user_profile_pic.width = w
-                user_profile_pic.height = h
-                db.session.add(user_profile_pic)
-
-            # get presigned urls
-            res = fh.get_presigned_urls(prefix = _prefix)
-            img.close()
+        # get presigned urls
+        res = fh.get_presigned_urls(prefix=_prefix)
+        img.close()
 
         db.session.commit()
         return {'user_id': user_id, 'profile_picture': res}
-
 
     @token_auth.login_required(user_type=('client',))
     @responds(status_code=204, api=ns)
@@ -257,20 +256,18 @@ class ClientProfilePicture(Resource):
         """
         Request to delete the client's profile picture
         """
-        #if in local config, nothing will be deleted, but this request will be successful and return 204
-        if not current_app.config['LOCAL_CONFIG']:
-            fh = FileHandling()
-            _prefix = f'id{user_id:05d}/client_profile_picture'
-            # if any, delete files with clien_profile_picture prefix
-            fh.delete_from_s3(prefix=_prefix)
-            
-            # delete entries to UserProfilePictures in db
-            res = ClientInfo.query.filter_by(user_id=user_id).first().profile_pictures
-            for _obj in res:
-                db.session.delete(_obj)
+        fh = FileHandling()
+        _prefix = f'id{user_id:05d}/client_profile_picture'
 
-            db.session.commit()
+        # if any, delete files with clien_profile_picture prefix
+        fh.delete_from_s3(prefix=_prefix)
 
+        # delete entries to UserProfilePictures in db
+        res = ClientInfo.query.filter_by(user_id=user_id).first().profile_pictures
+        for _obj in res:
+            db.session.delete(_obj)
+
+        db.session.commit()
 
 
 @ns.route('/<int:user_id>/')
@@ -323,8 +320,7 @@ class Client(Resource):
             .filter(ClientRaceAndEthnicity.user_id == user_id).all()
 
         #Include profile picture in different sizes
-        profile_pics_dict = client_data.profile_pictures
-        if not current_app.config['LOCAL_CONFIG'] and profile_pics_dict:
+        if client_data.profile_pictures:
             fh = FileHandling()
             _prefix = f'id{user_id:05d}/client_profile_picture'
             client_info_payload["profile_picture"] = fh.get_presigned_urls(_prefix)

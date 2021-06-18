@@ -405,9 +405,7 @@ def verify_jwt(token, error_message="", refresh=False):
 
 
 class FileHandling:
-    """ A class for handling files.
-
-    """
+    """ A class for handling files. """
 
     def __init__(self):
         """ Initiate the ImageHandling class instance
@@ -415,7 +413,10 @@ class FileHandling:
         Loads the AWS s3 bucket service as part of initialization process.
         """
         self.s3_resource = boto3.resource('s3')
-        self.s3_bucket_name = current_app.config['S3_BUCKET_NAME']
+        self.s3_bucket_name = current_app.config['AWS_S3_BUCKET']
+        self.s3_prefix = current_app.config['AWS_S3_PREFIX']
+        if self.s3_prefix and not self.s3_prefix.endswith('/'):
+            self.s3_prefix += '/'
         self.s3_bucket = self.s3_resource.Bucket(self.s3_bucket_name)
 
     def validate_file_type(self, file: FileStorage, allowed_file_types: tuple) -> str:
@@ -485,13 +486,13 @@ class FileHandling:
     def save_file_to_s3(self, file: FileStorage, filename: str):
         # Just saves, nothing returned
         file.seek(0)
-        self.s3_bucket.put_object(Key=filename ,Body=file.stream)
+        self.s3_bucket.put_object(Key=self.s3_prefix + filename, Body=file.stream)
 
     def get_presigned_urls(self, prefix) -> dict:
-        # dictionary is {filename1: url1,filename2:url2...}
+        # dictionary is {filename1: url1, filename2: url2...}
         res = {}
         params = {'Bucket': self.s3_bucket_name}
-        for file in self.s3_bucket.objects.filter(Prefix=prefix):
+        for file in self.s3_bucket.objects.filter(Prefix=self.s3_prefix + prefix):
             params['Key'] = file.key
             url = self.s3_resource.meta.client.generate_presigned_url('get_object', Params=params, ExpiresIn=3600)
             file_name = file.key.split('/')[-1]
@@ -499,4 +500,4 @@ class FileHandling:
         return res
 
     def delete_from_s3(self, prefix):
-        self.s3_bucket.objects.filter(Prefix=prefix).delete()
+        self.s3_bucket.objects.filter(Prefix=self.s3_prefix + prefix).delete()
