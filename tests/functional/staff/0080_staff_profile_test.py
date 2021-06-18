@@ -1,10 +1,4 @@
-import base64
-
 from flask import current_app
-from requests.auth import _basic_auth_str
-
-from odyssey.api.staff.models import StaffProfile
-
 from .data import staff_profile_data
 
 def test_get_staff_profile(test_client, init_database, staff_auth_header):

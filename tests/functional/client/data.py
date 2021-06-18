@@ -1,5 +1,6 @@
 import base64
 import pathlib
+from _pytest.config import filename_arg
 
 # clients_info_data = {
 #     "firstname": "Test",
@@ -25,6 +26,11 @@ import pathlib
 #     "profession": "Chef",
 #     "receive_docs": True
 # }
+
+img_file = pathlib.Path(__file__).parent / 'test_profile_picture.jpeg'
+client_profile_picture_data = {
+    'profile_picture': (img_file.as_posix(), 'test_profile_picture.jpeg')
+}
 
 client_info_put_test_data = {
     "user_info": {

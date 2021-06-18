@@ -11,37 +11,16 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from odyssey import db
 from odyssey.utils.constants import DB_SERVER_TIME
+from odyssey.utils.base.models import BaseModel
 
-class StaffProfile(db.Model):
+class StaffProfile(BaseModel):
     """ Staff member profile information table.
 
     This table stores information regarding Modo Bio
     staff member profiles.
     """
-    __tablename__ = 'StaffProfile'
 
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), primary_key=True, nullable=False)
     """
     User ID number, foreign key to User.user_id
 
@@ -64,11 +43,11 @@ class StaffProfile(db.Model):
     :type: string
     """
 
-    profile_picture = db.Column(db.String)
+    profile_pictures = db.relationship('UserProfilePictures', uselist=True, back_populates='staff_profile')
     """
-    Profile picture for this staff member. Stored as an aws s3 key which can be retrieved when needed.
+    One to many relationship with UserProfilePictures
 
-    :type: string
+    :type: :class:`UserProfilePicture` instance
     """
 
 class StaffRecentClients(db.Model):

@@ -1343,14 +1343,13 @@ class TelehealthBookingDetailsApi(Resource):
 
         Parameters
         ----------
-        idx : int (required)
-            TelehealthBookingDetails idx
         image : list(file) (optional)
             Image file(s), up to 3 can be send.
         voice : file (optional)
             Audio file, only 1 can be send.
         details : str (optional)
             Further details.
+        location_id (optional) : id of the location the client is in
         """
         #verify the editor of details is the client or staff from schedulded booking
         booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
