@@ -153,7 +153,7 @@ def send_email_delete_account(recipient, deleted_account):
     SENDER = "Modo Bio no-reply <no-reply@modobio.com>"
 
     # route emails to AWS mailbox simulator when in dev environment
-    if current_app.env == "development":
+    if current_app.config['DEV']:
         recipient = "success@simulator.amazonses.com"
 
     # The email body for recipients with non-HTML email clients.
@@ -738,8 +738,7 @@ class PushNotification:
                 channel += '_VOIP'
 
             # Apple also has separate channels for development.
-            # TODO: fix this after ticket NRV-1838 is done.
-            if current_app.env == 'development' or current_app.testing:
+            if current_app.config['DEV']:
                 channel += '_SANDBOX'
 
         app = self.channel_platapp[channel]
