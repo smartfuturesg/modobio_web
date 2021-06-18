@@ -21,15 +21,15 @@ from .data import (
 # import pytest
 # pytest.skip('Out of TwiliCoin.', allow_module_level=True)
 
-def test_post_1_client_staff_bookings(test_client, init_database, staff_auth_header ):
+def test_post_1_client_staff_bookings(test_client, init_database, client_auth_header ):
     """
     GIVEN a api end point for client staff bookings
-    WHEN the '/telehealth/bookings/<int:client_user_id>/<int:staff_user_id>/' resource  is requested (POST)
+    WHEN the '/telehealth/bookings/<int:client_user_id>&<int:staff_user_id>/' resource  is requested (POST)
     THEN check the response is valid
     """
    
     response = test_client.post('/telehealth/bookings/?client_user_id={}&staff_user_id={}'.format(1,2),
-                                headers=staff_auth_header, 
+                                headers=client_auth_header, 
                                 data=dumps(telehealth_client_staff_bookings_post_1_data), 
                                 content_type='application/json')
                                 
@@ -72,24 +72,24 @@ def test_post_2_client_staff_bookings(test_client, init_database, staff_auth_hea
                                 content_type='application/json')
 
     response = test_client.post('/telehealth/bookings/?client_user_id={}&staff_user_id={}'.format(1,2),
-                                headers=staff_auth_header, 
+                                headers=client_auth_header, 
                                 data=dumps(telehealth_client_staff_bookings_post_2_data), 
                                 content_type='application/json')
     assert response.status_code == 201    
 
-def test_post_3_client_staff_bookings(test_client, init_database, staff_auth_header):
+def test_post_3_client_staff_bookings(test_client, init_database, client_auth_header):
     """
     GIVEN a api end point for client staff bookings
     WHEN the '/telehealth/bookings/<int:client_user_id>/<int:staff_user_id>/' resource  is requested (POST)
     THEN check the response is valid
     """   
     response = test_client.post('/telehealth/bookings/?client_user_id={}&staff_user_id={}'.format(1,2),
-                                headers=staff_auth_header, 
+                                headers=client_auth_header, 
                                 data=dumps(telehealth_client_staff_bookings_post_3_data), 
                                 content_type='application/json')
     assert response.status_code == 405   
 
-def test_post_4_client_staff_bookings(test_client, init_database, staff_auth_header):
+def test_post_4_client_staff_bookings(test_client, init_database, client_auth_header):
     """
     GIVEN a api end point for client staff bookings
     WHEN the '/telehealth/bookings/<int:client_user_id>/<int:staff_user_id>/' resource  is requested (POST)
@@ -97,12 +97,12 @@ def test_post_4_client_staff_bookings(test_client, init_database, staff_auth_hea
     """
    
     response = test_client.post('/telehealth/bookings/?client_user_id={}&staff_user_id={}'.format(1,2),
-                                headers=staff_auth_header, 
+                                headers=client_auth_header, 
                                 data=dumps(telehealth_client_staff_bookings_post_3_data), 
                                 content_type='application/json')
     assert response.status_code == 405
 
-def test_post_5_client_staff_bookings(test_client, init_database, staff_auth_header):
+def test_post_5_client_staff_bookings(test_client, init_database, client_auth_header):
     """
     GIVEN a api end point for client staff bookings
     WHEN the '/telehealth/bookings/<int:client_user_id>/<int:staff_user_id>/' resource  is requested (POST)
@@ -110,12 +110,12 @@ def test_post_5_client_staff_bookings(test_client, init_database, staff_auth_hea
     """
    
     response = test_client.post('/telehealth/bookings/?client_user_id={}&staff_user_id={}'.format(1,2),
-                                headers=staff_auth_header, 
+                                headers=client_auth_header, 
                                 data=dumps(telehealth_client_staff_bookings_post_3_data), 
                                 content_type='application/json')
     assert response.status_code == 405        
 
-def test_post_6_client_staff_bookings(test_client, init_database, staff_auth_header):
+def test_post_6_client_staff_bookings(test_client, init_database, client_auth_header):
     """
     GIVEN a api end point for client staff bookings
     WHEN the '/telehealth/bookings/<int:client_user_id>/<int:staff_user_id>/' resource  is requested (POST)
@@ -123,7 +123,7 @@ def test_post_6_client_staff_bookings(test_client, init_database, staff_auth_hea
     """
    
     response = test_client.post('/telehealth/bookings/?client_user_id={}&staff_user_id={}'.format(1,2),
-                                headers=staff_auth_header, 
+                                headers=client_auth_header, 
                                 data=dumps(telehealth_client_staff_bookings_post_3_data), 
                                 content_type='application/json')
     assert response.status_code == 405

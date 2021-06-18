@@ -99,23 +99,8 @@ def test_generate_bookings(test_client, init_database, client_auth_header):
                                 content_type='application/json')
 
 
-    user = init_database.session.execute(
-        select(User).where(User.user_id == staff_users[0].user_id)
-    ).one_or_none()[0]
-    # sign in as staff user 
-    valid_credentials = base64.b64encode(
-        f"{user.email}:{'password'}".encode(
-            "utf-8")).decode("utf-8")
-    
-    headers = {'Authorization': f'Basic {valid_credentials}'}
-    response = test_client.post('/staff/token/',
-                            headers=headers, 
-                            content_type='application/json')
-    token = response.json.get('token')
-    auth_header = {'Authorization': f'Bearer {token}'}
-
     response = test_client.post('/telehealth/bookings/?client_user_id={}&staff_user_id={}'.format(1,staff_users[0].user_id),
-                                headers=auth_header, 
+                                headers=client_auth_header, 
                                 data=dumps(telehealth_bookings_staff_4_client_1_data), 
                                 content_type='application/json')
                                 
@@ -139,7 +124,7 @@ def test_generate_bookings(test_client, init_database, client_auth_header):
                                 content_type='application/json')        
     
     response = test_client.post('/telehealth/bookings/?client_user_id={}&staff_user_id={}'.format(1,staff_users[0].user_id),
-                                headers=auth_header, 
+                                headers=client_auth_header, 
                                 data=dumps(telehealth_bookings_staff_4_client_3_data), 
                                 content_type='application/json')
                       
@@ -150,10 +135,6 @@ def test_generate_bookings(test_client, init_database, client_auth_header):
     ##
     
     # use different staff and client users. Must sign in as staff first
-    user = init_database.session.execute(
-        select(User).where(User.user_id == staff_users[2].user_id)
-    ).one_or_none()[0]
-
     client_4 = init_database.session.execute(
         select(User).
         where(User.email == 'test_remote_registration3@gmail.com')
@@ -169,7 +150,7 @@ def test_generate_bookings(test_client, init_database, client_auth_header):
                             headers=headers, 
                             content_type='application/json')
     token = response.json.get('token')
-    auth_header = {'Authorization': f'Bearer {token}'}
+    client_4_auth_header = {'Authorization': f'Bearer {token}'}
 
     # add client to queue first
     queue_data = {
@@ -181,24 +162,12 @@ def test_generate_bookings(test_client, init_database, client_auth_header):
             }
 
     response = test_client.post(f'/telehealth/queue/client-pool/{client_4.user_id}/',
-                                headers=auth_header, 
+                                headers=client_4_auth_header, 
                                 data=dumps(queue_data), 
                                 content_type='application/json')
 
-    # sign in as staff user 
-    valid_credentials = base64.b64encode(
-        f"{user.email}:{'password'}".encode(
-            "utf-8")).decode("utf-8")
-    
-    headers = {'Authorization': f'Basic {valid_credentials}'}
-    response = test_client.post('/staff/token/',
-                            headers=headers, 
-                            content_type='application/json')
-    token = response.json.get('token')
-    auth_header = {'Authorization': f'Bearer {token}'}
-
     response = test_client.post('/telehealth/bookings/?client_user_id={}&staff_user_id={}'.format(client_4.user_id,staff_users[2].user_id),
-                                headers=auth_header, 
+                                headers=client_4_auth_header, 
                                 data=dumps(telehealth_bookings_staff_8_client_5_data), 
                                 content_type='application/json')
     
@@ -308,7 +277,6 @@ def test_full_system_with_timezones(test_client, init_database, staff_auth_heade
                             headers=client_auth_header, 
                             data=dumps(client_booking), 
                             content_type='application/json')
-                                
     assert response.json['bookings'][0]['client_timezone'] == 'America/Phoenix'
     assert response.json['bookings'][0]['staff_timezone'] == 'UTC'
 
@@ -323,7 +291,6 @@ def test_full_system_with_timezones(test_client, init_database, staff_auth_heade
                         data=dumps(client_booking), 
                         content_type='application/json')
     current_booking = (booking for booking in response.json['bookings'] if booking.booking_id == booking_id)
-
     for booking in response.json['bookings']:
         if booking['booking_id'] == booking_id:
             current_booking = booking

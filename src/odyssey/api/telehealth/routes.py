@@ -498,7 +498,7 @@ class TelehealthBookingsApi(Resource):
         }
         return payload
 
-    @token_auth.login_required()
+    @token_auth.login_required(user_type=('client',))
     @accepts(schema=TelehealthBookingsSchema, api=ns)
     @responds(schema=TelehealthBookingsOutputSchema, api=ns, status_code=201)
     def post(self):
@@ -617,8 +617,8 @@ class TelehealthBookingsApi(Resource):
                 lookup_times[request.parsed_obj.booking_window_id_end_time-1].end_time, 
                 tzinfo=tz.gettz(request.parsed_obj.staff_timezone))
             
-            start_time_utc_localized = start_time_staff_localized.astimezone(tz.gettz('UTC'))
-            end_time_utc_localized = end_time_staff_localized.astimezone(tz.gettz('UTC'))
+            start_time_utc_localized = start_time_staff_localized.astimezone(tz.UTC)
+            end_time_utc_localized = end_time_staff_localized.astimezone(tz.UTC)
 
             request.parsed_obj.booking_window_id_start_time_utc = db.session.execute(
                 select(LookupBookingTimeIncrements.idx).
@@ -630,9 +630,31 @@ class TelehealthBookingsApi(Resource):
             ).scalars().one_or_none()
             
             request.parsed_obj.target_date_utc = start_time_utc_localized.date()
+        
+        # find start and end time localized to client's timezone
+        # convert start, end time and target date from utc star times found above
+        if request.parsed_obj.client_timezone != request.parsed_obj.staff_timezone:
+            start_time_date_utc_localized = datetime.combine(
+                request.parsed_obj.target_date_utc, 
+                lookup_times[request.parsed_obj.booking_window_id_start_time_utc-1].start_time, 
+                tzinfo=tz.UTC)
+            
+            end_time_date_utc_localized = datetime.combine(
+                request.parsed_obj.target_date_utc, 
+                lookup_times[request.parsed_obj.booking_window_id_end_time_utc-1].end_time, 
+                tzinfo=tz.UTC)
+            
+            start_time_client_localized = start_time_date_utc_localized.astimezone(tz.gettz(request.parsed_obj.client_timezone)).time()
+            end_time_client_localized = end_time_date_utc_localized.astimezone(tz.gettz(request.parsed_obj.client_timezone)).time()
+        else:
+            start_time_client_localized = lookup_times[request.parsed_obj.booking_window_id_start_time-1].start_time
+            end_time_client_localized = lookup_times[request.parsed_obj.booking_window_id_end_time-1].end_time
 
         db.session.add(request.parsed_obj)
         db.session.flush()
+
+        request.parsed_obj.start_time_client_localized = start_time_client_localized
+        request.parsed_obj.end_time_client_localized = end_time_client_localized
 
         # create Twilio conversation and store details in TelehealthChatrooms table
         conversation_sid = create_conversation(staff_user_id = staff_user_id,
