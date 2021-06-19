@@ -1,28 +1,26 @@
-""" Download API as a Postman collection.
+from flask import current_app, json, Response
+from flask_restx import Resource, Namespace
 
-This endpoint is not part of the flask-restx based API, instead it is implemented
-as a plain Flask route. It is only available in developer mode, when run 
-with ``FLASK_DEV=local``.
+ns = Namespace('postman', description='Endpoint to download a Postman collection of the API.')
 
-When accessing this endpoint at http://localhost/api/postman, it returns a
-JSON file for download. That JSON file can be imported into Postman and provides
-a collection containing all endpoints in this API.
-"""
+@ns.route('/')
+class PostmanEndpoint(Resource):
+    @ns.doc(security=None)
+    def get(self):
+        """ Download API as a Postman collection.
 
-from flask import Blueprint, json, Response
+        This endpoint provides a convenient way to download the entire API as a Postman collection.
+        It returns a JSON file for download. That JSON file can be imported into Postman and provides
+        a collection containing all endpoints in this API.
+        """
+        data = json.dumps(ns.apis[0].as_postman(urlvars=True, swagger=True), indent=2)
 
-from odyssey.api import api
+        response = Response(
+            data,
+            mimetype='application/json',
+            direct_passthrough=True)
 
-bp = Blueprint('postman', __name__)
-
-@bp.route('/', methods=('GET',))
-def postman():
-    data = json.dumps(api.as_postman(urlvars=True, swagger=True), indent=2)
-
-    response = Response(
-        data,
-        mimetype='application/json',
-        direct_passthrough=True,
-    )
-    response.headers.set('Content-Disposition', 'attachment', filename='postman.json')
-    return response
+        version = current_app.config['API_VERSION']
+        filename = f'ModoBio API v{version}.json'
+        response.headers.set('Content-Disposition', 'attachment', filename=filename)
+        return response

@@ -39,17 +39,44 @@ authorizations = {
 bp = Blueprint('api', __name__)
 api = Api(bp, authorizations=authorizations, security='apikey')
 
-from odyssey.api.client_services import routes
-from odyssey.api.client import models, routes
-from odyssey.api.doctor import models, routes
-from odyssey.api.facility import models, routes
-from odyssey.api.lookup import models, routes
-from odyssey.api.notifications import models, routes
-from odyssey.api.physiotherapy import models, routes
-from odyssey.api.staff import models, routes
-from odyssey.api.system import models, routes
-from odyssey.api.telehealth import models, routes
-from odyssey.api.trainer import models, routes
-from odyssey.api.user import models, routes
-from odyssey.api.version import routes
-from odyssey.api.wearables import models, routes
+from odyssey.api.client_services.routes import ns
+api.add_namespace(ns)
+
+from odyssey.api.client.routes import ns
+api.add_namespace(ns)
+
+from odyssey.api.doctor.routes import ns
+api.add_namespace(ns)
+
+from odyssey.api.facility.routes import ns
+api.add_namespace(ns)
+
+from odyssey.api.lookup.routes import ns
+api.add_namespace(ns)
+
+from odyssey.api.notifications.routes import ns
+api.add_namespace(ns)
+
+from odyssey.api.physiotherapy.routes import ns
+api.add_namespace(ns)
+
+from odyssey.api.staff.routes import ns
+api.add_namespace(ns)
+
+from odyssey.api.system.routes import ns
+api.add_namespace(ns)
+
+from odyssey.api.telehealth.routes import ns
+api.add_namespace(ns)
+
+from odyssey.api.trainer.routes import ns
+api.add_namespace(ns)
+
+from odyssey.api.user.routes import ns
+api.add_namespace(ns)
+
+from odyssey.api.version.routes import ns
+api.add_namespace(ns)
+
+from odyssey.api.wearables.routes import ns
+api.add_namespace(ns)

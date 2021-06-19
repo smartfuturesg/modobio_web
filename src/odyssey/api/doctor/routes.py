@@ -4,7 +4,7 @@ from dateutil.relativedelta import relativedelta
 
 from flask import request, current_app, g
 from flask_accepts import accepts, responds
-from flask_restx import Resource, Api
+from flask_restx import Resource, Namespace, Api
 
 from odyssey import db
 from odyssey.api.lookup.models import LookupDrinks, LookupGoals
@@ -31,7 +31,6 @@ from odyssey.api.doctor.models import (
 )
 from odyssey.api.facility.models import MedicalInstitutions
 from odyssey.api.user.models import User
-from odyssey.api import api
 from odyssey.utils.auth import token_auth
 from odyssey.utils.errors import (
     UserNotFound, 
@@ -78,7 +77,7 @@ from odyssey.api.doctor.schemas import (
 )
 from odyssey.utils.constants import MEDICAL_CONDITIONS
 
-ns = api.namespace('doctor', description='Operations related to doctor')
+ns = Namespace('doctor', description='Operations related to doctor')
 
 @ns.route('/bloodpressure/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})

@@ -5,13 +5,12 @@ import random
 
 from flask import request, current_app, g
 from flask_accepts import accepts, responds
-from flask_restx import Resource
+from flask_restx import Resource, Namespace
 from sqlalchemy import select
 from twilio.jwt.access_token import AccessToken
 from twilio.jwt.access_token.grants import VideoGrant, ChatGrant
 
 from odyssey import db
-from odyssey.api import api
 from odyssey.api.lookup.models import (
     LookupBookingTimeIncrements
 )
@@ -57,7 +56,7 @@ from odyssey.utils.misc import (
     grab_twilio_credentials
 )
 
-ns = api.namespace('telehealth', description='telehealth bookings management API')
+ns = Namespace('telehealth', description='telehealth bookings management API')
 
 @ns.route('/bookings/meeting-room/access-token/<int:booking_id>/')
 @ns.doc(params={'booking_id':'booking ID'})

@@ -3,12 +3,11 @@ from datetime import datetime
 import math, re
 from PIL import Image
 
-from flask import request, current_app
+from flask import request, current_app, url_for
 from flask_accepts import accepts, responds
-from flask_restx import Resource
+from flask_restx import Resource, Namespace
 from sqlalchemy import select
 
-from odyssey.api import api
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.errors import (
     UserNotFound, 
@@ -111,7 +110,7 @@ from odyssey.api.lookup.schemas import LookupDefaultHealthMetricsSchema
 from odyssey.api.staff.schemas import StaffRecentClientsSchema
 from odyssey.api.facility.schemas import ClientSummarySchema
 
-ns = api.namespace('client', description='Operations related to clients')
+ns = Namespace('client', description='Operations related to clients')
 
 def process_race_and_ethnicity(user_id, mother, father):
     def format_list(ids):
@@ -502,10 +501,10 @@ class Clients(Resource):
                 'total_items': total_hits,
             }, 
             '_links': {
-                '_self': api.url_for(Clients, _from=startAt, per_page=per_page),
-                '_next': api.url_for(Clients, _from=startAt + per_page, per_page=per_page)
+                '_self': url_for('api.client_clients', _from=startAt, per_page=per_page),
+                '_next': url_for('api.client_clients', _from=startAt + per_page, per_page=per_page)
                 if startAt + per_page < total_hits else None,
-                '_prev': api.url_for(Clients, _from= startAt-per_page if startAt-per_page >=0 else 0, per_page=per_page)
+                '_prev': url_for('api.client_clients', _from= startAt-per_page if startAt-per_page >=0 else 0, per_page=per_page)
                 if startAt != 0 else None,
             }, 
             'items': items}

@@ -1,8 +1,7 @@
 from flask import request
 from flask_accepts import responds, accepts
-from flask_restx import Resource
+from flask_restx import Resource, Namespace
 
-from odyssey.api import api
 
 from odyssey.utils.auth import token_auth
 from odyssey.utils.errors import GenericNotFound
@@ -12,7 +11,7 @@ from odyssey.api.lookup.models import LookupCountriesOfOperations
 
 from odyssey import db
 
-ns = api.namespace('system', description='Endpoints for system functions.')
+ns = Namespace('system', description='Endpoints for system functions.')
 
 
 @ns.route('/telehealth-settings/')

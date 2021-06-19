@@ -1,12 +1,11 @@
 from flask import current_app
 from flask_accepts import responds
-from flask_restx import Resource
+from flask_restx import Resource, Namespace
 
 from odyssey import db
-from odyssey.api import api
 from odyssey.utils.auth import token_auth
 
-ns = api.namespace('version', description='Endpoint for API version.')
+ns = Namespace('version', description='Endpoint for API version.')
 
 @ns.route('/')
 class VersionEndpoint(Resource):

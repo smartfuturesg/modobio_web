@@ -4,10 +4,9 @@ import jwt
 
 from flask import current_app, request, url_for, jsonify
 from flask_accepts import accepts, responds
-from flask_restx import Resource
+from flask_restx import Resource, Namespace
 
 from odyssey import db
-from odyssey.api import api
 from odyssey.api.client_services.schemas import NewRemoteRegisterUserSchema, NewUserRegistrationPortalSchema
 from odyssey.api.user.schemas import UserLoginSchema, UserSchema, UserSubscriptionsSchema
 from odyssey.api.user.models import User, UserLogin
@@ -17,7 +16,7 @@ from odyssey.utils.message import send_email_user_registration_portal
 from odyssey.utils.errors import ClientEmailInUse, InputError, UserNotFound
 
 
-ns = api.namespace('client-services', description='Endpoints for client services operations.')
+ns = Namespace('client-services', description='Endpoints for client services operations.')
 
 @ns.route('/user/new/')
 class NewUserClientServices(Resource):

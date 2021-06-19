@@ -1,8 +1,7 @@
 from flask import request
 from flask_accepts import accepts, responds
-from flask_restx import Resource
+from flask_restx import Resource, Namespace
 
-from odyssey.api import api
 from odyssey.utils.auth import token_auth
 from odyssey.utils.errors import ContentNotFound
 from odyssey.api.client.models import ClientFacilities
@@ -14,7 +13,7 @@ from odyssey.api.user.models import User
 
 from odyssey import db
 
-ns = api.namespace('facility', description='Endpoints for registered facilities.')
+ns = Namespace('facility', description='Endpoints for registered facilities.')
 
 @ns.route('/<int:facility_id>/')
 class RegisteredFacility(Resource):

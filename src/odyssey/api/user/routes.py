@@ -4,11 +4,10 @@ import jwt
 
 from flask import current_app, request, jsonify, redirect
 from flask_accepts import accepts, responds
-from flask_restx import Resource
+from flask_restx import Resource, Namespace
 from werkzeug.security import check_password_hash
 
 
-from odyssey.api import api
 from odyssey.api.client.schemas import ClientInfoSchema, ClientGeneralMobileSettingsSchema, ClientRaceAndEthnicitySchema
 from odyssey.api.client.models import ClientClinicalCareTeam
 from odyssey.api.lookup.models import LookupSubscriptions, LookupLegalDocs
@@ -54,7 +53,7 @@ from odyssey.utils.misc import check_user_existence, check_client_existence, che
 from odyssey.utils import search
 from odyssey import db
 
-ns = api.namespace('user', description='Endpoints for user accounts.')
+ns = Namespace('user', description='Endpoints for user accounts.')
 
 
 @ns.route('/<int:user_id>/')

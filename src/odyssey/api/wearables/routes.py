@@ -4,11 +4,10 @@ from datetime import datetime, timedelta
 
 from flask import current_app, request
 from flask_accepts import accepts, responds
-from flask_restx import Resource
+from flask_restx import Resource, Namespace
 from requests_oauthlib import OAuth2Session
 from sqlalchemy.sql import text
 
-from odyssey.api import api
 from odyssey.utils.auth import token_auth
 from odyssey.utils.errors import (
     ContentNotFound,
@@ -32,7 +31,7 @@ from odyssey.api.wearables.schemas import (
 from odyssey.utils.misc import check_client_existence
 from odyssey import db
 
-ns = api.namespace('wearables', description='Endpoints for registering wearable devices.')
+ns = Namespace('wearables', description='Endpoints for registering wearable devices.')
 
 
 ###########################################################

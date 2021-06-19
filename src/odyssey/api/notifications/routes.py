@@ -1,10 +1,9 @@
 from flask import request
 from flask_accepts import accepts, responds
-from flask_restx import Resource
+from flask_restx import Resource, Namespace
 from sqlalchemy import or_
 
 from odyssey import db
-from odyssey.api import api
 from odyssey.api.notifications.models import Notifications, NotificationsPushRegistration
 from odyssey.api.notifications.schemas import (
     NotificationSchema,
@@ -15,7 +14,7 @@ from odyssey.utils.auth import token_auth
 from odyssey.utils.message import PushNotification
 from odyssey.utils.errors import InputError
 
-ns = api.namespace('notifications', description='Endpoints for all types of notifications.')
+ns = Namespace('notifications', description='Endpoints for all types of notifications.')
 
 @ns.route('/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})

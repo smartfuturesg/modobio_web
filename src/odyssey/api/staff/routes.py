@@ -2,7 +2,7 @@ from PIL import Image
 
 from flask import request, current_app, Response
 from flask_accepts import accepts, responds
-from flask_restx import Resource
+from flask_restx import Resource, Namespace
 import json, calendar, copy
 from flask.json import dumps
 from datetime import date, time, datetime, timedelta, timezone
@@ -11,7 +11,6 @@ from dateutil.rrule import YEARLY, MONTHLY, WEEKLY, DAILY, rrule
 from dateutil.relativedelta import relativedelta
 
 from odyssey import db
-from odyssey.api import api
 from odyssey.api.staff.models import (
     StaffOperationalTerritories,
     StaffRoles,
@@ -35,7 +34,7 @@ from odyssey.api.staff.schemas import (
     StaffCalendarEventsUpdateSchema)
 
 
-ns = api.namespace('staff', description='Operations related to staff members')
+ns = Namespace('staff', description='Operations related to staff members')
 
 @ns.route('/')
 #@ns.doc(params={'firstname': 'first name to search',
