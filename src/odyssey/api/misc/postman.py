@@ -1,11 +1,12 @@
 from flask import current_app, json, Response
 from flask_restx import Resource, Namespace
 
-ns = Namespace('postman', description='Endpoint to download a Postman collection of the API.')
+# Development-only namespace
+ns_dev = Namespace('postman', description='[DEV ONLY] Endpoint to download a Postman collection of the API.')
 
-@ns.route('/')
+@ns_dev.route('/')
 class PostmanEndpoint(Resource):
-    @ns.doc(security=None)
+    @ns_dev.doc(security=None)
     def get(self):
         """ Download API as a Postman collection.
 
@@ -13,7 +14,7 @@ class PostmanEndpoint(Resource):
         It returns a JSON file for download. That JSON file can be imported into Postman and provides
         a collection containing all endpoints in this API.
         """
-        data = json.dumps(ns.apis[0].as_postman(urlvars=True, swagger=True), indent=2)
+        data = json.dumps(ns_dev.apis[0].as_postman(urlvars=True, swagger=True), indent=2)
 
         response = Response(
             data,
