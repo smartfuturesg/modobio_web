@@ -29,7 +29,8 @@ from odyssey.api.lookup.models import (
      LookupEmergencyNumbers,
      LookupRoles,
      LookupMacroGoals,
-     LookupLegalDocs
+     LookupLegalDocs,
+     LookupMedicalSymptoms
      )
 from odyssey.api.lookup.schemas import (
     LookupActivityTrackersOutputSchema,
@@ -52,7 +53,9 @@ from odyssey.api.lookup.schemas import (
     LookupEmergencyNumbersOutputSchema,
     LookupRolesOutputSchema,
     LookupMacroGoalsOutputSchema,
-    LookupLegalDocsOutputSchema
+    LookupLegalDocsOutputSchema,
+    LookupNotificationsOutputSchema,
+    LookupMedicalSymptomsOutputSchema
 )
 from odyssey.utils.misc import check_drink_existence
 
@@ -97,7 +100,7 @@ class LookupTimezones(Resource):
     @token_auth.login_required
     @responds(schema=LookupTimezones,status_code=200,api=ns)
     def get(self):
-        varArr = [tz_i for tz_i in pytz.all_timezones if 'US/' in tz_i]
+        varArr = pytz.country_timezones['us']
         payload = {'items': varArr,
                    'total_items': len(varArr) }
         return payload
@@ -392,4 +395,16 @@ class LookupLegalDocsApi(Resource):
             html_file = pathlib.Path(current_app.static_folder) / doc.path
             with open(html_file) as fh:
                 doc.content = fh.read()
+        return {'total_items': len(res), 'items': res}
+
+@ns.route('/medical-symptoms/')
+class LookupMedicalSymptomssApi(Resource):
+    """
+    Endpoint that returns the list of medical symptoms.
+    """
+    @token_auth.login_required
+    @responds(schema=LookupMedicalSymptomsOutputSchema, status_code=200, api=ns)
+    def get(self):
+        """get contents of medical symptoms lookup table"""
+        res = LookupMedicalSymptoms.query.all()
         return {'total_items': len(res), 'items': res}

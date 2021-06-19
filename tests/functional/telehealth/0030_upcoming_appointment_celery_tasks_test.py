@@ -68,10 +68,24 @@ def test_upcoming_bookings_scan(test_client, init_database, staff_auth_header):
 
     # loop through all bookings in test data 
     for booking in telehealth_bookings_data_full_day:
+        #add to queue
+        queue_data = {
+                'profession_type': 'Medical Doctor',
+                'target_date': datetime.strptime(
+                    booking.get('target_date'), '%Y-%m-%d').isoformat(),
+                'priority': False,
+                'medical_gender': 'np'
+            }
+        response = test_client.post(f'/telehealth/queue/client-pool/{client.user_id}/',
+                                headers=auth_header, 
+                                data=dumps(queue_data), 
+                                content_type='application/json')
+
         response = test_client.post('/telehealth/bookings/?client_user_id={}&staff_user_id={}'.format(client.user_id,staff_member.user_id),
                                 headers=auth_header, 
                                 data=dumps(booking), 
                                 content_type='application/json')
+
         assert response.status_code == 201
 
     ###

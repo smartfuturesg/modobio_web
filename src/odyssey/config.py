@@ -117,11 +117,6 @@ class Config:
 
             setattr(self, varname, self.getvar(varname))
 
-        # celery config
-        # self.broker_url = self.getvar('CELERY_BROKER_URL')
-        # self.result_backend  = self.getvar('CELERY_BROKER_URL')
-        # self.enable_utc = True
-
         # No swagger in production.
         self.SWAGGER_DOC = self.DEV
 
@@ -138,7 +133,7 @@ class Config:
             if testing:
                 name = self.DB_NAME_TESTING
 
-            self.DB_URI = f'{self.DB_FLAV}://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}/{name}'
+            self.DB_URI = f'{self.DB_FLAV}://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}/{name}'        
 
         self.SQLALCHEMY_DATABASE_URI = self.DB_URI
 
@@ -150,6 +145,11 @@ class Config:
             else:
                 username = getpass.getuser()
                 self.AWS_S3_PREFIX = f'{username}'
+
+        # celery config
+        self.broker_url = self.getvar('CELERY_BROKER_URL', None, default=None)
+        self.result_backend  = self.getvar('CELERY_BROKER_URL', None, default=None)
+        self.enable_utc = True
 
     def getvar(self, var: str) -> Any:
         """ Get a configuration setting.
