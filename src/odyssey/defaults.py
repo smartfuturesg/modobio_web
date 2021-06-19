@@ -162,3 +162,34 @@ TWILIO_API_KEY_SECRET = ''
 
 CONVERSATION_SERVICE_SID = ''
 """ Twilio conversation serive ID number. """
+
+# Celery settings.
+CELERY_BROKER_URL = 'amqp://localhost:5672'
+""" Celery default broker URL.
+
+This must be a URL in the form of: ``transport://userid:password@hostname:port/virtual_host``
+
+This variable will be converted to ``broker_url`` (lower case) to work with
+Celery's new config system.
+"""
+
+CELERY_RESULT_BACKEND = CELERY_BROKER_URL
+""" Celery default backend to store results.
+
+The backend used to store task results (tombstones).
+
+This variable will be converted to ``result_backend`` (lower case) to work with
+Celery's new config system.
+"""
+
+CELERY_ENABLE_UTC = True
+""" Celery timezone.
+
+If enabled dates and times in messages will be converted to use the UTC timezone.
+
+Note that workers running Celery versions below 2.5 will assume a local timezone
+for all messages, so only enable if all workers have been upgraded.
+
+This variable will be converted to ``enable_utc`` (lower case) to work with
+Celery's new config system.
+"""

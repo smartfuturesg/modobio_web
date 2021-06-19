@@ -115,6 +115,16 @@ class Config:
             if varname.startswith('__') or not varname.isupper():
                 continue
 
+            # Celery expects configuration variables to be lower case and without 
+            # the celery_ prefix. That means that they will not be picked up by flask.
+            # That is fine, because they are not relevant to Flask. If there is ever a
+            # need to access these variables from Flask, simply remove 'continue' and
+            # use the upper case, celery_ prefixed version of the variables in Flask.
+            if varname.startswith('CELERY_'):
+                _, stripped = varname.split('_', maxsplit=1)
+                setattr(self, stripped.lower(), self.getvar(varname))
+                continue
+
             setattr(self, varname, self.getvar(varname))
 
         # No swagger in production.
@@ -145,11 +155,6 @@ class Config:
             else:
                 username = getpass.getuser()
                 self.AWS_S3_PREFIX = f'{username}'
-
-        # celery config
-        self.broker_url = self.getvar('CELERY_BROKER_URL', None, default=None)
-        self.result_backend  = self.getvar('CELERY_BROKER_URL', None, default=None)
-        self.enable_utc = True
 
     def getvar(self, var: str) -> Any:
         """ Get a configuration setting.
