@@ -108,12 +108,6 @@ def _update(self, form: dict):
     for k, v in form.items():
         setattr(self, k, v)
 
-# Override wtforms.DateTimeField so that it outputs <input type="date"> by default.
-import wtforms
-class DateInput(wtforms.widgets.Input):
-    input_type = 'date'
-
-
 def init_celery(app=None):
     """
     Function to prepare a celery instance. Requires the flask app instance
