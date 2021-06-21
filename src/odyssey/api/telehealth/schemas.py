@@ -52,7 +52,7 @@ class TelehealthBookingsSchema(ma.SQLAlchemyAutoSchema):
     start_time = fields.Time(dump_only=True)
     end_time = fields.Time(dump_only=True)
     start_time_localized = fields.Time(dump_only=True)
-    start_time_localized = fields.Time(dump_only=True)
+    end_time_localized = fields.Time(dump_only=True)
     status = fields.String(required=False,validate=validate.OneOf(BOOKINGS_STATUS))
     conversation_sid = fields.String(dump_only=True)
     client_first_name = fields.String(dump_only=True)

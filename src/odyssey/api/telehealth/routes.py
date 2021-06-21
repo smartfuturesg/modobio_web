@@ -655,7 +655,11 @@ class TelehealthBookingsApi(Resource):
         db.session.flush()
 
         request.parsed_obj.start_time_localized = start_time_client_localized
-        request.parsed_obj.start_time_localized = end_time_client_localized
+        request.parsed_obj.end_time_localized = end_time_client_localized
+        
+        #TODO: keeping this only to not break things on the FE for now
+        request.parsed_obj.start_time = start_time_client_localized
+        request.parsed_obj.end_time = end_time_client_localized
 
         # create Twilio conversation and store details in TelehealthChatrooms table
         conversation_sid = create_conversation(staff_user_id = staff_user_id,
