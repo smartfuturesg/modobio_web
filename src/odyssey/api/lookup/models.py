@@ -589,6 +589,13 @@ class LookupClinicalCareTeamResources(BaseModel):
     :type: string
     """
 
+    group = db.Column(db.String)
+    """
+    Grouping that a resource belongs to. e.g. medical_doctor, general etc.
+
+    :type: string
+    """
+
 class LookupDefaultHealthMetrics(BaseModelWithIdx):
     """
     Health metric recommendations by sex and age category
