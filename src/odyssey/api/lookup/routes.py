@@ -30,7 +30,8 @@ from odyssey.api.lookup.models import (
      LookupRoles,
      LookupMacroGoals,
      LookupLegalDocs,
-     LookupMedicalSymptoms
+     LookupMedicalSymptoms,
+     LookupOrganizations
      )
 from odyssey.api.lookup.schemas import (
     LookupActivityTrackersOutputSchema,
@@ -55,7 +56,8 @@ from odyssey.api.lookup.schemas import (
     LookupMacroGoalsOutputSchema,
     LookupLegalDocsOutputSchema,
     LookupNotificationsOutputSchema,
-    LookupMedicalSymptomsOutputSchema
+    LookupMedicalSymptomsOutputSchema,
+    LookupOrganizationsOutputSchema
 )
 from odyssey.utils.misc import check_drink_existence
 
@@ -407,4 +409,16 @@ class LookupMedicalSymptomssApi(Resource):
     def get(self):
         """get contents of medical symptoms lookup table"""
         res = LookupMedicalSymptoms.query.all()
+        return {'total_items': len(res), 'items': res}
+
+@ns.route('/organizations/')
+class LookupMedicalSymptomssApi(Resource):
+    """
+    Endpoint that returns the list of organizations affiliated with Modobio.
+    """
+    @token_auth.login_required
+    @responds(schema=LookupOrganizationsOutputSchema, status_code=200, api=ns)
+    def get(self):
+        """get contents of medical symptoms lookup table"""
+        res = LookupOrganizations.query.all()
         return {'total_items': len(res), 'items': res}
