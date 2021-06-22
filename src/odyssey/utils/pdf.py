@@ -13,7 +13,6 @@ from typing import Type
 
 from botocore.exceptions import ClientError
 from flask import render_template, session, current_app, _request_ctx_stack
-from flask_wtf import FlaskForm
 from PyPDF2 import PdfFileMerger
 from weasyprint import HTML, CSS
 
@@ -25,7 +24,7 @@ _executor = concurrent.futures.ThreadPoolExecutor(thread_name_prefix='PDF_')
 def to_pdf(user_id: int,
            table: Type[db.Model],
            template: str=None,
-           form: FlaskForm=None):
+           form=None):
     """ Generate and store a PDF file from a signed document.
 
     PDF generation and storage is done in a separate thread in a 'fire-and-forget'
