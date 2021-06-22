@@ -1,7 +1,7 @@
 """add LookupOrganizations table
 
 Revision ID: eee19bdb0e06
-Revises: 0b28a65fd5ea
+Revises: 45f124410e19
 Create Date: 2021-06-16 13:29:05.924508
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'eee19bdb0e06'
-down_revision = '0b28a65fd5ea'
+down_revision = '45f124410e19'
 branch_labels = None
 depends_on = None
 
