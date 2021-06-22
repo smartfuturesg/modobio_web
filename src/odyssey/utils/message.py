@@ -769,6 +769,8 @@ class PushNotification:
                             Token=device_token,
                             CustomUserData=device_description)
 
+                        break
+
         return new_endpoint.arn
 
     def unregister_device(self, arn: str):
