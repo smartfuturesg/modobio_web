@@ -715,7 +715,8 @@ class PushNotification:
             endpoint = self.sns.PlatformEndpoint(arn=current_endpoint)
             try:
                 endpoint.load()
-            except (NotFoundException, InvalidParameterException):
+            except (self.sns.meta.client.exceptions.NotFoundException,
+                    self.sns.meta.client.exceptions.InvalidParameterException):
                 # Endpoint was deleted or has different parameters.
                 endpoint.delete()
             else:
@@ -743,11 +744,34 @@ class PushNotification:
                 channel += '_SANDBOX'
 
         app = self.channel_platapp[channel]
-        endpoint = app.create_platform_endpoint(
+        try:
+            new_endpoint = app.create_platform_endpoint(
                 Token=device_token,
                 CustomUserData=device_description)
+        # Boto3 errors are incredibly stupid. You cannot import them, they are generated on the fly.
+        except self.sns.meta.client.exceptions.InvalidParameterException as err:
+            # "Endpoint xxx already exists with the same Token, but different attributes."
+            # This happens when the database was cleared, but the endpoints still exist on AWS.
+            #
+            # The offending arn is in the error message somewhere,
+            # but we'll have to do some ugly parsing to get to it.
+            msg = err.response['Error']['Message'].split()
+            for m in msg:
+                if m.startswith('arn:'):
+                    # Make sure this is a device endpoint, don't want to accidentally delete App Platform.
+                    old_arn = EndpointARN(arn=m)
+                    if not old_arn.is_app:
+                        old_endpoint = self.sns.PlatformEndpoint(arn=old_arn.arn)
+                        old_endpoint.delete()
 
-        return endpoint.arn
+                        # Now try again
+                        new_endpoint = app.create_platform_endpoint(
+                            Token=device_token,
+                            CustomUserData=device_description)
+
+                        break
+
+        return new_endpoint.arn
 
     def unregister_device(self, arn: str):
         """ Delete endpoint.
