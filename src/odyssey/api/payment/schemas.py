@@ -7,6 +7,9 @@ from odyssey.utils.base.schemas import BaseSchema
 class PaymentMethodsSchema(BaseSchema):
     class Meta:
         model = PaymentMethods
+        dump_only = ('payment_id')
+
+    token = fields.String(load_only=True, required=True)
 
     @post_load
     def make_object(self, data, **kwargs):

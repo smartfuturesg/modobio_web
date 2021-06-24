@@ -342,6 +342,20 @@ class InvalidVerificationCode(Exception):
 
         self.status_code = 403
 
+class TooManyPaymentMethods(Exception):
+    """
+    In the case that a payment method is trying to be added for a user who
+    already has at least 5 saved payment methods
+    """
+    def __init__(self, message = None):
+        Exception.__init__(self)
+        if message:
+            self.message = message
+        else:
+            self.message = "The designated user already has at least 5 saved payment methods. Please delete a method in order to add a new one."
+
+        self.status_code = 405
+
 def bad_request(message):
     return error_response(400, message)
 
@@ -514,4 +528,9 @@ def register_handlers(app):
 @api.errorhandler(InvalidVerificationCode)
 def error_invalid_verification_code(error):
     '''Return a custom message and 403 status code'''
+    return error_response(error.status_code, error.message)
+
+@api.errorhandler(TooManyPaymentMethods)
+def error_too_many_payment_methods(error):
+    '''Return a custom message and 405 status code'''
     return error_response(error.status_code, error.message)

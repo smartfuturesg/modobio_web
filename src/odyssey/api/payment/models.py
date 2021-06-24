@@ -4,16 +4,16 @@ Database tables for supporting miscellaneous functionality.
 
 from odyssey import db
 from odyssey.utils.constants import DB_SERVER_TIME
-from odyssey.utils.base models import BaseModelWithIdx, UserIdFkeyMixin
+from odyssey.utils.base.models import BaseModelWithIdx, UserIdFkeyMixin
 
 class PaymentMethods(BaseModelWithIdx, UserIdFkeyMixin):
     """
     This table links user with their saved payment methods. 
     """
 
-    token = db.Column(db.String)
+    payment_id = db.Column(db.String)
     """
-    InstaMed secure token for this payment method.
+    InstaMed payment id to reference when charging this method.
 
     :type: string
     """

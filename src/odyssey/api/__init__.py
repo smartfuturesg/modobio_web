@@ -53,3 +53,4 @@ from odyssey.api.trainer import models, routes
 from odyssey.api.user import models, routes
 from odyssey.api.version import routes
 from odyssey.api.wearables import models, routes
+from odyssey.api.payment import models, routes
