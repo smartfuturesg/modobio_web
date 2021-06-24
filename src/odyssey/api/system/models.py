@@ -6,28 +6,13 @@ from sqlalchemy import UniqueConstraint
 
 from odyssey import db
 from odyssey.utils.constants import DB_SERVER_TIME
+from odyssey.utils.base.models import BaseModelWithIdx
 
-class SystemTelehealthSessionCosts(db.Model):
+class SystemTelehealthSessionCosts(BaseModel):
     """ Teleheath session costs that can be changed by a system administrator
     """
 
-    __tablename__ = 'SystemTelehealthSessionCosts'
-
     __table_args__ = (UniqueConstraint('country', 'profession_type', name='telehealth_costs_unique_resource_country_profession'),)
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
 
     cost_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -39,6 +24,12 @@ class SystemTelehealthSessionCosts(db.Model):
     country = db.Column(db.String, nullable=False)
     """
     The country associated with this cost. Must be present in at least one entry in LookupTerritoriesOfOperation.country
+
+    :type: string
+    """
+
+    currency_symbol_and_code = db.Column(db.String, nullble=False)
+    """
 
     :type: string
     """

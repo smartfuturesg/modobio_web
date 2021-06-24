@@ -5,7 +5,7 @@ from flask_restx import Resource
 from odyssey.api import api
 
 from odyssey.utils.auth import token_auth
-from odyssey.utils.errors import GenericNotFound
+from odyssey.utils.errors import GenericNotFound, DisabledEndpoint
 from odyssey.api.system.models import SystemTelehealthSessionCosts, SystemVariables
 from odyssey.api.system.schemas import SystemTelehealthSettingsSchema
 from odyssey.api.lookup.models import LookupCountriesOfOperations
@@ -42,6 +42,11 @@ class SystemTelehealthSettingsApi(Resource):
     @accepts(schema=SystemTelehealthSettingsSchema, api=ns)
     @responds(schema=SystemTelehealthSettingsSchema, status_code=201, api=ns)
     def put(self):
+        """
+        This endpoint is temporarily disabled until further security measures are established
+        """
+        raise DisabledEndpoint 
+
         res = {'costs': []}
         for cost in request.parsed_obj['costs']:
             #if a cost for this country/profession combination does not exist, it is invalid
