@@ -3,8 +3,10 @@ Database tables for supporting lookup tables. These tables should be static tabl
 not to be edited at runtime. 
 """
 
+from flask import current_app
+
 from odyssey import db
-from odyssey.utils.constants import DB_SERVER_TIME
+from odyssey.utils.constants import DB_SERVER_TIME, ORG_TOKEN_LIFETIME
 from odyssey.utils.base.models import BaseModelWithIdx, BaseModel
 
 class LookupTermsAndConditions(BaseModelWithIdx):
@@ -1064,6 +1066,32 @@ class LookupMedicalSymptoms(BaseModelWithIdx):
     code = db.Column(db.String)
     """
     ICD-10 code for this symptom.
+
+    :type: string
+    """
+
+class LookupOrganizations(BaseModelWithIdx):
+    """
+    Lookup table for organizations affiliated with Modobio.
+    """
+
+    org_name = db.Column(db.String)
+    """
+    Name of this organization.
+
+    :type: string
+    """
+
+    org_id = db.Column(db.String)
+    """
+    Unique randomly generated ID for this organization.
+
+    :type: string
+    """
+
+    org_token = db.Column(db.String)
+    """
+    Token used by this organization for access. Expires after 6 months.
 
     :type: string
     """

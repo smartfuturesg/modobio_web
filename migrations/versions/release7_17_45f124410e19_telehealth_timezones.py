@@ -1,7 +1,7 @@
 """Add timezone fields for telehealth availability and bookings
 
 Revision ID: 45f124410e19
-Revises: e024249f8efe
+Revises: 0b28a65fd5ea
 Create Date: 2021-06-07 10:11:53.930032
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '45f124410e19'
-down_revision = 'a7565530c9f5'
+down_revision = '0b28a65fd5ea'
 branch_labels = None
 depends_on = None
 
