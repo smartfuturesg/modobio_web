@@ -10,8 +10,6 @@ from odyssey.utils.errors import TooManyPaymentMethods, GenericNotFound
 from odyssey.api.payment.models import PaymentMethods
 from odyssey.api.payment.schemas import PaymentMethodsSchema
 
-from odyssey.api.defaults import INSTAMED_API_SECRET, INSTAMED_API_KEY
-
 ns = api.namespace('payment', description='Endpoints for functions related to payments.')
 
 @ns.route('/methods/<int:user_id>/')
@@ -43,7 +41,7 @@ class PaymentMethodsApi(Resource):
                 "TerminalID": "1"
             },
             "PaymentPlanType": "SaveOnFile",
-            "InitialAmount": 0,,
+            "InitialAmount": 0,
             "PaymentMethod": "Card",
             "Card": {
                 "EntryMode": "token",
