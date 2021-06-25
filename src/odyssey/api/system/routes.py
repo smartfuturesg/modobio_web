@@ -8,7 +8,7 @@ from odyssey.utils.auth import token_auth
 from odyssey.utils.errors import GenericNotFound, DisabledEndpoint
 from odyssey.api.system.models import SystemTelehealthSessionCosts, SystemVariables
 from odyssey.api.system.schemas import SystemTelehealthSettingsSchema
-from odyssey.api.lookup.models import LookupCountriesOfOperations
+from odyssey.api.lookup.models import LookupCountriesOfOperations, LookupCurrencyTypes
 
 from odyssey import db
 
@@ -24,11 +24,15 @@ class SystemTelehealthSettingsApi(Resource):
     @responds(schema=SystemTelehealthSettingsSchema,status_code=200, api=ns)
     def get(self):
         costs = SystemTelehealthSessionCosts.query.all()
-        #numeric fields have to be returned as string
+        #fill in data from lookup table and cast decimals to string so they are json serializable
         for cost in costs:
             cost.session_cost = str(cost.session_cost)
             cost.session_min_cost = str(cost.session_min_cost)
             cost.session_max_cost = str(cost.session_max_cost)
+            cost_data = LookupCurrencyTypes.query.filter_by(idx=cost.currency_id).one_or_none()
+            cost.country = cost_data.country
+            cost.currency_symbol_and_code = cost_data.symbol_and_code
+
         session_duration = int(SystemVariables.query.filter_by(var_name='Session Duration').one_or_none().var_value)
         booking_notice_window = int(SystemVariables.query.filter_by(var_name='Booking Notice Window').one_or_none().var_value)
         confirmation_window = float(SystemVariables.query.filter_by(var_name='Confirmation Window').one_or_none().var_value)
@@ -49,8 +53,8 @@ class SystemTelehealthSettingsApi(Resource):
 
         res = {'costs': []}
         for cost in request.parsed_obj['costs']:
-            #if a cost for this country/profession combination does not exist, it is invalid
-            exists = SystemTelehealthSessionCosts.query.filter_by(profession_type=cost.profession_type, country=cost.country).one_or_none()
+            #if a cost for this currency/profession combination does not exist, it is invalid
+            exists = SystemTelehealthSessionCosts.query.filter_by(profession_type=cost.profession_type, currency_id=cost.currency_id).one_or_none()
             if exists:
                 data = cost.__dict__
                 del data['_sa_instance_state']
@@ -60,7 +64,7 @@ class SystemTelehealthSettingsApi(Resource):
                 exists.session_max_cost = str(exists.session_max_cost)                
                 res['costs'].append(exists)
             else:
-                raise GenericNotFound('No cost exists for ' + cost.country + ' ' + cost.profession_type)
+                raise GenericNotFound('No cost exists for ' + cost.country + ' ' + cost.currency_symbol_and_code)
                 
         #update session variables
         if 'session_duration' in request.parsed_obj:

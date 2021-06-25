@@ -18,6 +18,11 @@ class SystemTeleheathCostSchema(ma.SQLAlchemyAutoSchema):
     session_min_cost = fields.String()
     session_max_cost = fields.String()
 
+    currency_id = fields.Integer()
+
+    country = fields.String(dump_only=True)
+    currency_symbol_and_code = fields.String(dump_only=True)
+
     @post_load
     def make_object(self, data, **kwargs):
         return SystemTelehealthSessionCosts(**data)
