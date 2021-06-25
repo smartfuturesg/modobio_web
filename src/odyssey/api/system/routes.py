@@ -8,7 +8,7 @@ from odyssey.utils.auth import token_auth
 from odyssey.utils.errors import GenericNotFound, DisabledEndpoint
 from odyssey.api.system.models import SystemTelehealthSessionCosts, SystemVariables
 from odyssey.api.system.schemas import SystemTelehealthSettingsSchema
-from odyssey.api.lookup.models import LookupCountriesOfOperations, LookupCurrencyTypes
+from odyssey.api.lookup.models import LookupCountriesOfOperations, LookupCurrencies
 
 from odyssey import db
 
@@ -29,7 +29,7 @@ class SystemTelehealthSettingsApi(Resource):
             cost.session_cost = str(cost.session_cost)
             cost.session_min_cost = str(cost.session_min_cost)
             cost.session_max_cost = str(cost.session_max_cost)
-            cost_data = LookupCurrencyTypes.query.filter_by(idx=cost.currency_id).one_or_none()
+            cost_data = LookupCurrencies.query.filter_by(idx=cost.currency_id).one_or_none()
             cost.country = cost_data.country
             cost.currency_symbol_and_code = cost_data.symbol_and_code
 
@@ -59,12 +59,10 @@ class SystemTelehealthSettingsApi(Resource):
                 data = cost.__dict__
                 del data['_sa_instance_state']
                 exists.update(data)
-                exists.session_cost = str(exists.session_cost)
-                exists.session_min_cost = str(exists.session_min_cost)
-                exists.session_max_cost = str(exists.session_max_cost)                
+                exists.session_cost = str(exists.session_cost)          
                 res['costs'].append(exists)
             else:
-                raise GenericNotFound('No cost exists for ' + cost.country + ' ' + cost.currency_symbol_and_code)
+                raise GenericNotFound(f'No cost exists for currency_id {cost.currency_id} for profession {cost.profession_type}.')
                 
         #update session variables
         if 'session_duration' in request.parsed_obj:

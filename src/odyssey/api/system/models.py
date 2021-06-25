@@ -12,7 +12,7 @@ class SystemTelehealthSessionCosts(BaseModel):
     """ Teleheath session costs that can be changed by a system administrator
     """
 
-    __table_args__ = (UniqueConstraint('country', 'profession_type', name='telehealth_costs_unique_resource_country_profession'),)
+    __table_args__ = (UniqueConstraint('currency_id', 'profession_type', name='telehealth_costs_unique_resource_currency_id_profession'),)
 
     cost_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """

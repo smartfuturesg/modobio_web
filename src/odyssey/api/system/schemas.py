@@ -15,13 +15,13 @@ class SystemTeleheathCostSchema(ma.SQLAlchemyAutoSchema):
 
     #decimal fields are not json serializable
     session_cost = fields.String()
-    session_min_cost = fields.String()
-    session_max_cost = fields.String()
-
-    currency_id = fields.Integer()
+    session_min_cost = fields.String(dump_only=True)
+    session_max_cost = fields.String(dump_only=True)
 
     country = fields.String(dump_only=True)
     currency_symbol_and_code = fields.String(dump_only=True)
+
+    currency_id = fields.Integer()
 
     @post_load
     def make_object(self, data, **kwargs):
