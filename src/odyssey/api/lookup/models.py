@@ -1096,7 +1096,7 @@ class LookupOrganizations(BaseModelWithIdx):
     :type: string
     """
 
-class LookupCurrencyTypes(BaseModelWithIdx):
+class LookupCurrencies(BaseModelWithIdx):
     """
     Lookup table for accepted currency types.
     """

@@ -24,7 +24,8 @@ from odyssey.api.lookup.models import (
     LookupMacroGoals,
     LookupLegalDocs,
     LookupMedicalSymptoms,
-    LookupOrganizations
+    LookupOrganizations,
+    LookupCurrencies
 )
 from odyssey.utils.base.schemas import BaseSchema
 
@@ -276,4 +277,13 @@ class LookupOrganizationsSchema(ma.SQLAlchemyAutoSchema):
 
 class LookupOrganizationsOutputSchema(Schema):
     items = fields.Nested(LookupOrganizationsSchema(many=True), missing=[])
+    total_items = fields.Integer()
+
+class LookupCurrenciesSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupCurrencies
+        exclude = ('created_at', 'updated_at')
+
+class LookupCurrenciesOutputSchema(Schema):
+    items = fields.Nested(LookupCurrenciesSchema(many=True), missing=[])
     total_items = fields.Integer()
