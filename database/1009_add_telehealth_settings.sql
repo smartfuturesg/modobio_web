@@ -38,10 +38,10 @@ alter sequence "SystemTelehealthSessionCosts_cost_id_seq"
 
 INSERT INTO "SystemTelehealthSessionCosts" ("currency_id", "profession_type","session_cost","session_min_cost","session_max_cost") 
 VALUES
-(1, 'medical_doctor', 100.00, 50.00, 200.00),
-(1, 'nutritionist', 100.00, 50.00, 200.00),
-(1, 'physical_therapist', 100.00, 50.00, 200.00),
-(1, 'trainer', 100.00, 50.00, 200.00);
+(1, 'medical_doctor', 100.00, 60.00, 200.00),
+(1, 'nutritionist', 100.00, 60.00, 200.00),
+(1, 'physical_therapist', 100.00, 60.00, 200.00),
+(1, 'trainer', 100.00, 60.00, 200.00);
 
 delete from "LookupProfessionalAppointmentConfirmationWindow" 
 			where idx >= 1;
