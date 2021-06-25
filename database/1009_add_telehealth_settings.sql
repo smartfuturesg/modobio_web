@@ -22,12 +22,12 @@ delete from "SystemTelehealthSessionCosts"
 alter sequence "SystemTelehealthSessionCosts_cost_id_seq"
   restart with 1;
 
-delete from "LookupCurrencyTypes"
+delete from "LookupCurrencies"
   where idx >= 1;
-alter sequence "LookupCurrencyTypes_idx_seq"
+alter sequence "LookupCurrencies_idx_seq"
   restart with 1;
 
-INSERT INTO "LookupCurrencyTypes" ("country", "symbol_and_code")
+INSERT INTO "LookupCurrencies" ("country", "symbol_and_code")
 VALUES
 ('USA', '$ / USD');
 
@@ -36,7 +36,7 @@ delete from "SystemTelehealthSessionCosts"
 alter sequence "SystemTelehealthSessionCosts_cost_id_seq"
   restart with 1;
 
-INSERT INTO "SystemTelehealthSessionCosts" ("currency_id", "profession_type","country","session_cost","session_min_cost","session_max_cost") 
+INSERT INTO "SystemTelehealthSessionCosts" ("currency_id", "profession_type","session_cost","session_min_cost","session_max_cost") 
 VALUES
 (1, 'medical_doctor', 100.00, 50.00, 200.00),
 (1, 'nutritionist', 100.00, 50.00, 200.00),
