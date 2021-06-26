@@ -31,5 +31,8 @@ def test_put_system_telehealth_settings(test_client, init_database, staff_auth_h
                                 data=dumps(system_telehealth_data), 
                                 content_type='application/json')
 
-    assert response.status_code == 201
-    assert response.get_json()['booking_notice_window'] == 9
+    #endpoint is temporarily disabled, check for 403 status code
+    assert response.status_code == 403
+
+    #assert response.status_code == 201
+    #assert response.get_json()['booking_notice_window'] == 9
