@@ -253,10 +253,11 @@ class LookupRolesOutputSchema(Schema):
 class LookupLegalDocsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupLegalDocs
-        exclude = ('created_at', 'updated_at', 'path', 'idx')
+        exclude = ('created_at', 'updated_at', 'path')
 
     target = fields.String(validate=validate.OneOf(('User', 'Professional', 'Practitioner')))
     content = fields.String(dump_only=True)
+    idx = fields.Integer(dump_only=True)
 
 class LookupLegalDocsOutputSchema(Schema):
     items = fields.Nested(LookupLegalDocsSchema(many=True), missing=[])
