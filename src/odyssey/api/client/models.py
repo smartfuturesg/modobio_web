@@ -822,6 +822,7 @@ class ClientClinicalCareTeam(BaseModelWithIdx, UserIdFkeyMixin):
 
     team_member_email = db.Column(db.String, nullable=True)
     """
+    Deprecated 6.11.21 - all care team members will be registered users. No need to log emails
     Email address of the clinical care team member.
 
     :type: str

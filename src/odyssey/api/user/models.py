@@ -134,7 +134,7 @@ class User(db.Model):
     """
 
     @staticmethod
-    def generate_modobio_id(firstname: str, lastname: str, user_id: int) -> str:
+    def generate_modobio_id(user_id: int, firstname: str=None, lastname: str=None, email: str=None) -> str:
         """ Generate the user's mdobio_id.
 
         The modo bio identifier is used as a public user id, it
@@ -158,9 +158,13 @@ class User(db.Model):
         str
             Medical record ID
         """
-        random.seed(user_id)
         rli_hash = "".join([random.choice(ALPHANUMERIC) for i in range(10)])
-        return (firstname[0] + lastname[0] + rli_hash).upper()
+        
+        if all((firstname, lastname)):
+            salt = firstname[0] + lastname[0]
+        else:
+            salt = email[:2]
+        return (salt + rli_hash).upper()
 
 @db.event.listens_for(User, "after_insert")
 def add_modobio_id(mapper, connection, target):
@@ -181,7 +185,8 @@ def add_modobio_id(mapper, connection, target):
     """
     mb_id = User().generate_modobio_id(
             firstname = target.firstname, 
-            lastname = target.lastname, 
+            lastname = target.lastname,
+            email = target.email, 
             user_id = target.user_id)
 
     statement = f"""UPDATE public."User" 
