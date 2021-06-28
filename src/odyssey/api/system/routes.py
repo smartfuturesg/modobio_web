@@ -2,6 +2,8 @@ from flask import request
 from flask_accepts import responds, accepts
 from flask_restx import Resource
 
+from sqlalchemy import select
+
 from odyssey.api import api
 
 from odyssey.utils.auth import token_auth
@@ -23,20 +25,20 @@ class SystemTelehealthSettingsApi(Resource):
     @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
     @responds(schema=SystemTelehealthSettingsSchema,status_code=200, api=ns)
     def get(self):
-        costs = SystemTelehealthSessionCosts.query.all()
-        #fill in data from lookup table and cast decimals to string so they are json serializable
-        for cost in costs:
-            cost.session_cost = str(cost.session_cost)
-            cost.session_min_cost = str(cost.session_min_cost)
-            cost.session_max_cost = str(cost.session_max_cost)
-            cost_data = LookupCurrencies.query.filter_by(idx=cost.currency_id).one_or_none()
-            cost.country = cost_data.country
-            cost.currency_symbol_and_code = cost_data.symbol_and_code
+        costs = db.session.execute(
+            select(SystemTelehealthSessionCosts, LookupCurrencies).
+            join(LookupCurrencies, LookupCurrencies.idx == SystemTelehealthSessionCosts.currency_id)).all()
+
+        formatted_costs = []
+        for cost, lookup in costs:
+            cost.country = lookup.country
+            cost.currency_symbol_and_code = lookup.symbol_and_code
+            formatted_costs.append(cost)
 
         session_duration = int(SystemVariables.query.filter_by(var_name='Session Duration').one_or_none().var_value)
         booking_notice_window = int(SystemVariables.query.filter_by(var_name='Booking Notice Window').one_or_none().var_value)
         confirmation_window = float(SystemVariables.query.filter_by(var_name='Confirmation Window').one_or_none().var_value)
-        res = {'costs': costs,
+        res = {'costs': formatted_costs,
                 'session_duration': session_duration,
                 'booking_notice_window': booking_notice_window,
                 'confirmation_window': confirmation_window}
@@ -45,6 +47,7 @@ class SystemTelehealthSettingsApi(Resource):
     @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
     @accepts(schema=SystemTelehealthSettingsSchema, api=ns)
     @responds(schema=SystemTelehealthSettingsSchema, status_code=201, api=ns)
+    @ns.deprecated
     def put(self):
         """
         This endpoint is temporarily disabled until further security measures are established

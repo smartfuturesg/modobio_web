@@ -9,7 +9,6 @@ class SystemTeleheathCostSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = SystemTelehealthSessionCosts
         exclude = ('created_at', 'updated_at')
-        dump_only = ('session_min_cost', 'session_max_cost', 'cost_id')
 
     profession_type = fields.String(validate=validate.OneOf(ACCESS_ROLES))
 
@@ -22,6 +21,7 @@ class SystemTeleheathCostSchema(ma.SQLAlchemyAutoSchema):
     currency_symbol_and_code = fields.String(dump_only=True)
 
     currency_id = fields.Integer()
+    cost_id = fields.Integer(dump_only=True)
 
     @post_load
     def make_object(self, data, **kwargs):
