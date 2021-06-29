@@ -105,7 +105,7 @@ Some database functionality is loaded directly into PostgreSQL before starting t
 $ python database/sql_scriptrunner.py
 ```
 
-The following section is deprecated. A list of standard test users is added to the database by the SQL scripts. I'm leaving the information here in case anyone needs to a a different user for some reason.
+The following section is deprecated. A list of standard test users is added to the database by the SQL scripts. I'm leaving the information here in case anyone needs to add a different user for some reason.
 
 > Before you can log in, you will need to add a staff member to the `Staff` table in the database. At the moment there is no easy admin page to do this. First, generate a password hash. The Flask app uses the `check_password_hash()` function from the `werkzeug.security` module to check the passwords. To generate a compatible password hash, open Python and type the following.
 >
