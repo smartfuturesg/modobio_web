@@ -164,7 +164,7 @@ CONVERSATION_SERVICE_SID = ''
 """ Twilio conversation serive ID number. """
 
 # Celery settings.
-CELERY_BROKER_URL = 'amqp://localhost:5672'
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
 """ Celery default broker URL.
 
 This must be a URL in the form of: ``transport://userid:password@hostname:port/virtual_host``
