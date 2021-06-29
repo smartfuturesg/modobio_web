@@ -14,10 +14,10 @@ Hasura needs a couple of special schemas present in the database. They are creat
 
 ```sql
 CREATE EXTENSION pgcrypto;
-CREATE SCHEMA hdb_catalog AUTHORIZATION [username];
-CREATE SCHEMA hdb_views AUTHORIZATION [username];
+CREATE SCHEMA hdb_catalog AUTHORIZATION <username>;
+CREATE SCHEMA hdb_views AUTHORIZATION <username>;
 ```
-where \[username\] is the name of the database user with access from Hasura.
+where <username> is the name of the database user with access from Hasura.
 
 ### Install Hasura
 
@@ -51,7 +51,7 @@ docker run -d -p 8080:8080 \
     hasura/graphql-engine:latest
 ```
 
-- Replace `-v </path/to>` with the full path to Odyssey on your local computer. This line will create a shared folder between the hasura metadata subdirectory in this repo and `/hasura-metadata` in the docker instance. There it will be picked up automatically when Hasura is started.
+- Replace `-v </path/to>` with the full path to Odyssey on your local computer. This line will create a shared folder between the hasura metadata subdirectory in this repo and `/hasura-metadata` in the docker instance. There, it will be picked up automatically when Hasura is started.
 - `HASURA_GRAPHQL_DATABASE_URL` defaults to `modobio` on `localhost` with no user and password set. Adjust to your local settings.
 - `HASURA_GRAPHQL_ADMIN_SECRET` is set to avoid annoying nag screens. Set it to something obvious, but not in production, obviously.
 - `HASURA_APPSYNC_URL` and `HASURA_APPSYNC_KEY` must be set for remote schemas to work. The values can be found in the 1Password shared vault.
