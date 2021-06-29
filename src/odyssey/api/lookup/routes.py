@@ -30,7 +30,8 @@ from odyssey.api.lookup.models import (
      LookupMacroGoals,
      LookupLegalDocs,
      LookupMedicalSymptoms,
-     LookupOrganizations
+     LookupOrganizations,
+     LookupCurrencies
      )
 from odyssey.api.lookup.schemas import (
     LookupActivityTrackersOutputSchema,
@@ -56,7 +57,8 @@ from odyssey.api.lookup.schemas import (
     LookupLegalDocsOutputSchema,
     LookupNotificationsOutputSchema,
     LookupMedicalSymptomsOutputSchema,
-    LookupOrganizationsOutputSchema
+    LookupOrganizationsOutputSchema,
+    LookupCurrenciesOutputSchema
 )
 from odyssey.utils.misc import check_drink_existence
 
@@ -411,7 +413,7 @@ class LookupMedicalSymptomssApi(Resource):
         return {'total_items': len(res), 'items': res}
 
 @ns.route('/organizations/')
-class LookupMedicalSymptomssApi(Resource):
+class LookupOrganizationsApi(Resource):
     """
     Endpoint that returns the list of organizations affiliated with Modobio.
     """
@@ -420,4 +422,16 @@ class LookupMedicalSymptomssApi(Resource):
     def get(self):
         """get contents of medical symptoms lookup table"""
         res = LookupOrganizations.query.all()
+        return {'total_items': len(res), 'items': res}
+
+@ns.route('/currencies/')
+class LookupCurrenciesApi(Resource):
+    """
+    Endpoint that returns the list of medical symptoms.
+    """
+    @token_auth.login_required
+    @responds(schema=LookupCurrenciesOutputSchema, status_code=200, api=ns)
+    def get(self):
+        """get contents of medical symptoms lookup table"""
+        res = LookupCurrencies.query.all()
         return {'total_items': len(res), 'items': res}

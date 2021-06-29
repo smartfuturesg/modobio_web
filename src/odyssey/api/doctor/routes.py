@@ -964,7 +964,7 @@ class MedImaging(Resource):
 @ns.route('/bloodtest/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedBloodTest(Resource):
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('client', 'staff'), staff_role=('medical_doctor',), resources=('MedicalBloodTests',))
     @accepts(schema=MedicalBloodTestsInputSchema, api=ns)
     @responds(schema=MedicalBloodTestSchema, status_code=201, api=ns)
     def post(self, user_id):
@@ -1026,7 +1026,7 @@ class MedBloodTest(Resource):
 @ns.route('/bloodtest/all/<int:user_id>/')
 @ns.doc(params={'user_id': 'Client ID number'})
 class MedBloodTestAll(Resource):
-    @token_auth.login_required(resources=('MedicalBloodTests',))
+    @token_auth.login_required(user_type=('client','staff'), resources=('MedicalBloodTests',))
     @responds(schema=AllMedicalBloodTestSchema, api=ns)
     def get(self, user_id):
         """
@@ -1078,7 +1078,7 @@ class MedBloodTestResults(Resource):
 
     Each test instance may have multiple test results. 
     """
-    @token_auth.login_required(resources=('MedicalBloodTestResults', 'MedicalBloodTests'))
+    @token_auth.login_required(resources=('MedicalBloodTests',))
     @responds(schema=MedicalBloodTestResultsOutputSchema, api=ns)
     def get(self, test_id):
         """
@@ -1136,7 +1136,7 @@ class AllMedBloodTestResults(Resource):
     This includes all test submisison details along with the test
     results associated with each test submission. 
     """
-    @token_auth.login_required(resources=('MedicalBloodTestResults', 'MedicalBloodTests'))
+    @token_auth.login_required(resources=('MedicalBloodTests',))
     @responds(schema=MedicalBloodTestResultsOutputSchema, api=ns)
     def get(self, user_id):
         # pull up all tests, test results, and the test type names for this client
@@ -1261,7 +1261,7 @@ class MedHistory(Resource):
 @ns.route('/physical/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedPhysical(Resource):
-    @token_auth.login_required(resources=('MedicalPhysicals',))
+    @token_auth.login_required(staff_role=('medical_doctor',))
     @responds(schema=MedicalPhysicalExamSchema(many=True), api=ns)
     def get(self, user_id):
         """returns all client's medical physical exams for the user_id specified"""
@@ -1287,7 +1287,7 @@ class MedPhysical(Resource):
 
         return response
 
-    @token_auth.login_required
+    @token_auth.login_required(staff_role=('medical_doctor',))
     @accepts(schema=MedicalPhysicalExamSchema, api=ns)
     @responds(schema=MedicalPhysicalExamSchema, status_code=201, api=ns)
     def post(self, user_id):

@@ -1,13 +1,13 @@
 from flask import request
 from flask_accepts import responds, accepts
 from flask_restx import Resource, Namespace
-
+from sqlalchemy import select
 
 from odyssey.utils.auth import token_auth
-from odyssey.utils.errors import GenericNotFound
+from odyssey.utils.errors import GenericNotFound, DisabledEndpoint
 from odyssey.api.system.models import SystemTelehealthSessionCosts, SystemVariables
 from odyssey.api.system.schemas import SystemTelehealthSettingsSchema
-from odyssey.api.lookup.models import LookupCountriesOfOperations
+from odyssey.api.lookup.models import LookupCountriesOfOperations, LookupCurrencies
 
 from odyssey import db
 
@@ -22,16 +22,20 @@ class SystemTelehealthSettingsApi(Resource):
     @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
     @responds(schema=SystemTelehealthSettingsSchema,status_code=200, api=ns)
     def get(self):
-        costs = SystemTelehealthSessionCosts.query.all()
-        #numeric fields have to be returned as string
-        for cost in costs:
-            cost.session_cost = str(cost.session_cost)
-            cost.session_min_cost = str(cost.session_min_cost)
-            cost.session_max_cost = str(cost.session_max_cost)
+        costs = db.session.execute(
+            select(SystemTelehealthSessionCosts, LookupCurrencies).
+            join(LookupCurrencies, LookupCurrencies.idx == SystemTelehealthSessionCosts.currency_id)).all()
+
+        formatted_costs = []
+        for cost, lookup in costs:
+            cost.country = lookup.country
+            cost.currency_symbol_and_code = lookup.symbol_and_code
+            formatted_costs.append(cost)
+
         session_duration = int(SystemVariables.query.filter_by(var_name='Session Duration').one_or_none().var_value)
         booking_notice_window = int(SystemVariables.query.filter_by(var_name='Booking Notice Window').one_or_none().var_value)
         confirmation_window = float(SystemVariables.query.filter_by(var_name='Confirmation Window').one_or_none().var_value)
-        res = {'costs': costs,
+        res = {'costs': formatted_costs,
                 'session_duration': session_duration,
                 'booking_notice_window': booking_notice_window,
                 'confirmation_window': confirmation_window}
@@ -40,21 +44,25 @@ class SystemTelehealthSettingsApi(Resource):
     @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
     @accepts(schema=SystemTelehealthSettingsSchema, api=ns)
     @responds(schema=SystemTelehealthSettingsSchema, status_code=201, api=ns)
+    @ns.deprecated
     def put(self):
+        """
+        This endpoint is temporarily disabled until further security measures are established
+        """
+        raise DisabledEndpoint 
+
         res = {'costs': []}
         for cost in request.parsed_obj['costs']:
-            #if a cost for this country/profession combination does not exist, it is invalid
-            exists = SystemTelehealthSessionCosts.query.filter_by(profession_type=cost.profession_type, country=cost.country).one_or_none()
+            #if a cost for this currency/profession combination does not exist, it is invalid
+            exists = SystemTelehealthSessionCosts.query.filter_by(profession_type=cost.profession_type, currency_id=cost.currency_id).one_or_none()
             if exists:
                 data = cost.__dict__
                 del data['_sa_instance_state']
                 exists.update(data)
-                exists.session_cost = str(exists.session_cost)
-                exists.session_min_cost = str(exists.session_min_cost)
-                exists.session_max_cost = str(exists.session_max_cost)                
+                exists.session_cost = str(exists.session_cost)          
                 res['costs'].append(exists)
             else:
-                raise GenericNotFound('No cost exists for ' + cost.country + ' ' + cost.profession_type)
+                raise GenericNotFound(f'No cost exists for currency_id {cost.currency_id} for profession {cost.profession_type}.')
                 
         #update session variables
         if 'session_duration' in request.parsed_obj:

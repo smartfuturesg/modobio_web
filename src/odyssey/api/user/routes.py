@@ -5,6 +5,7 @@ import jwt
 from flask import current_app, request, jsonify, redirect
 from flask_accepts import accepts, responds
 from flask_restx import Resource, Namespace
+from sqlalchemy.sql.expression import select
 from werkzeug.security import check_password_hash
 
 
@@ -155,6 +156,33 @@ class NewStaffUser(Resource):
             if user.is_staff:
                 # user account already exists for this email and is already a staff account
                 raise StaffEmailInUse(email=user_info.get('email'))
+            elif user.is_client == False and user.is_staff == False:
+                # user is neither a staff or client user
+                # currently, this can be the case when the user has been added by another user through the clinical
+                # care team system. the user info provided will populate the already existing user entry and the 
+                # password given will overwrite the password in the UserLogin entry (if it exist)
+
+                password=user_info.get('password', None)
+                
+                if not password:
+                    raise InputError(status_code=400,message='password required')
+                
+                del user_info['password']
+                user_info['is_client'] = False
+                user_info['is_staff'] = True
+                user.update(user_info)
+                
+                user_login = db.session.execute(select(UserLogin).filter(UserLogin.user_id == user.user_id)).scalars().one_or_none()
+                if user_login:
+                    user_login.set_password(password)
+                else:
+                    user_login = UserLoginSchema().load({"user_id": user.user_id, "password": password})
+                    db.session.add(user_login)
+                
+                client_info = ClientInfoSchema().load({"user_id": user.user_id})
+                db.session.add(client_info)
+                db.session.flush()
+                verify_email = True
             else:
                 #user account exists but only the client portion of the account is defined
                 user.is_staff = True
@@ -169,6 +197,8 @@ class NewStaffUser(Resource):
                 })
                 staff_sub.user_id = user.user_id
                 db.session.add(staff_sub)
+
+                verify_email = False
         else:
             # user account does not yet exist for this email
             # require password
@@ -199,6 +229,9 @@ class NewStaffUser(Resource):
             staff_sub.user_id = user.user_id
             db.session.add(staff_sub)
 
+            verify_email = True
+
+        if verify_email:
             # generate token and code for email verifciation
             token = UserPendingEmailVerifications.generate_token(user.user_id)
             code = UserPendingEmailVerifications.generate_code()
@@ -270,11 +303,39 @@ class NewClientUser(Resource):
 
         user_info = request.get_json()     
         user_info['email'] = user_info.get('email').lower()
-        user = User.query.filter(User.email.ilike(user_info.get('email'))).first()
+        user = db.session.execute(select(User).filter(User.email == user_info.get('email').lower())).scalars().one_or_none()
         if user:
             if user.is_client:
                 # user account already exists for this email and is already a client account
                 raise ClientEmailInUse(email=user_info.get('email'))
+            elif user.is_client == False and user.is_staff == False:
+                # client is neither a staff or client user
+                # currently, this can be the case when the user has been added by another user through the clinical
+                # care team system. the user info provided will populate the already existing user entry and the 
+                # password given will overwrite the password in the UserLogin entry (if it exist)
+
+                password=user_info.get('password', None)
+                
+                if not password:
+                    raise InputError(status_code=400,message='password required')
+                
+                del user_info['password']
+                user_info['is_client'] = True
+                user_info['is_staff'] = False
+                user.update(user_info)
+                
+                user_login = db.session.execute(select(UserLogin).filter(UserLogin.user_id == user.user_id)).scalars().one_or_none()
+                if user_login:
+                    user_login.set_password(password)
+                else:
+                    user_login = UserLoginSchema().load({"user_id": user.user_id, "password": password})
+                    db.session.add(user_login)
+                
+                client_info = ClientInfoSchema().load({"user_id": user.user_id})
+                db.session.add(client_info)
+                db.session.flush()
+                verify_email = True
+
             else:
                 # user account exists but only the staff portion of the account is defined
                 #verify password matches already existing staff login info before allowing client access
@@ -287,6 +348,7 @@ class NewClientUser(Resource):
                 client_info = ClientInfoSchema().load({'user_id': user.user_id})
                 
                 db.session.add(client_info)
+                verify_email = False
         else:
             # user account does not yet exist for this email
             password=user_info.get('password', None)
@@ -303,6 +365,9 @@ class NewClientUser(Resource):
             db.session.add(client_info)
             db.session.add(user_login)
 
+            verify_email = True
+
+        if verify_email:
             # generate token and code for email verification
             token = UserPendingEmailVerifications.generate_token(user.user_id)
             code = UserPendingEmailVerifications.generate_code()

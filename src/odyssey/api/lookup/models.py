@@ -1095,3 +1095,22 @@ class LookupOrganizations(BaseModelWithIdx):
 
     :type: string
     """
+
+class LookupCurrencies(BaseModelWithIdx):
+    """
+    Lookup table for accepted currency types.
+    """
+
+    country = db.Column(db.String, nullable=False)
+    """
+    The country associated with this cost. Must be present in at least one entry in LookupTerritoriesOfOperation.country
+
+    :type: string
+    """
+
+    symbol_and_code = db.Column(db.String, nullable=False)
+    """
+    symbol (ex. $, €) and code (ex. USD, EUR)
+
+    :type: string
+    """

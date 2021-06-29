@@ -342,6 +342,20 @@ class InvalidVerificationCode(Exception):
 
         self.status_code = 403
 
+class DisabledEndpoint(Exception):
+    """
+    In the case an endpoint should be disabled but the code should remain
+    in order to reenable the endpoint in the future.
+    """
+    def __init__(self, message = None):
+        Exception.__init__(self)
+        if message:
+            self.message = message
+        else:
+            self.message = "This endpoint is disabled until further notice."
+
+        self.status_code = 403
+
 def bad_request(message):
     return error_response(400, message)
 
@@ -513,5 +527,10 @@ def register_handlers(app):
 
 @api.errorhandler(InvalidVerificationCode)
 def error_invalid_verification_code(error):
+    '''Return a custom message and 403 status code'''
+    return error_response(error.status_code, error.message)
+
+@api.errorhandler(DisabledEndpoint)
+def error_disabled_endpoint(error):
     '''Return a custom message and 403 status code'''
     return error_response(error.status_code, error.message)
