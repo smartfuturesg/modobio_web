@@ -22,11 +22,17 @@ The following servers also need to be installed and running on localhost (defaul
 - Redis (tested with 6.2.4)
 - Hasura (tested with 1.3.3, see [hasura/README.md](hasura/README.md) for installation instructions)
 
+Use your favourite package manager to install these servers on your system. How to start/stop servers will depend on your system. For SystemD-based Linux systems (including Ubuntu), use `sudo systemctl <start|stop|restart|status|reload> postgresql-13.service`.
+
+Pip should normally take care of installing all python dependencies, but some dependencies in turn depend on non-python libraries. Again, use your favourite package manager to install these dependencies. On Ubuntu Linux, run:
+
+```shell
+$ sudo apt install pkg-config libcairo2-dev libgirepository1.0-dev libpangocairo-1.0-0 postgresql-client
+```
+
 ## Pre-installation
 
 ### Prepare PostgreSQL
-
-Use your favourite package manager to install PostgreSQL on your system. [See here](https://phoenixnap.com/kb/how-to-install-postgresql-on-ubuntu) for more information on how to install PostgreSQL on Ubuntu. How to start/stop the PostgreSQL server will depend on your system. For SystemD-based Linux systems (including Ubuntu), use `sudo systemctl <start|stop|restart|status|reload> postgresql-13.service`.
 
 With PostgreSQL installed, create a new database named modobio. For convenience, add a role (user) with the same name as your login name. Because it is a local connection, you should not need a password. If that is not the case, edit `/etc/pg_hba.conf` and set the METHOD column to `trust` for all local connections.
 
@@ -36,14 +42,6 @@ $ sudo -u postgres createdb -O $USER modobio
 $ psql modobio
 modobio=> \q
 ```
-
-### External libraries
-
-Pip should normally take care of installing all python dependencies, but some dependencies in turn depend on non-python libraries. To install these on Ubuntu Linux:
-
-```shell
-$ sudo apt install pkg-config libcairo2-dev libgirepository1.0-dev libpangocairo-1.0-0 postgresql-client
-```  
 
 ### Virtual Environment
 
