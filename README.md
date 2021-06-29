@@ -13,14 +13,14 @@ Documentation for this package can be found [on GitLab Pages](http://zan.atventu
 To run Odyssey on your local computer, you will need the following installed.
 
 - Python (tested with 3.8)
-- pip (should come with Python version 3.4+, if not more info [here](https://pip.pypa.io/en/stable/installing/)). Pip will be used to install all the python dependencies, see <requirements/development.txt> for a full list of dependencies.
+- pip (should come with Python version 3.4+, if not more info [here](https://pip.pypa.io/en/stable/installing/)). Pip will be used to install all the python dependencies, see [requirements/development.txt](requirements/development.txt) for a full list of dependencies.
 
 The following servers also need to be installed and running on localhost (default ports). In the following list PostgreSQL is absolutely mandatory. The other servers may be skipped, but you will miss important functinoality and you will have to override the default configuration to get the API to run without those servers present.
 
 - PostgreSQL (tested with 13.3)
 - Elasticsearch (tested with 7.13.2)
 - Redis (tested with 6.2.4)
-- Hasura (tested with 1.3.3, see <hasura/README.md> for installation instructions)
+- Hasura (tested with 1.3.3, see [hasura/README.md](hasura/README.md) for installation instructions)
 
 ## Pre-installation
 
@@ -73,7 +73,7 @@ The server can be configured by setting environmental variables before starting 
 
 Some variables hold passwords or secrets which cannot be stored in code. They have an empty default and **must** be set in the environment before startup or the API will fail to load. The values for these can be found in the shared 1Password vault.
 
-The following list of environmental variables must be set in the environment. For more information, see <src/odyssey/default.py> or [the documentation page](http://zan.atventures.tech/odyssey/odyssey/odyssey.config.html)
+The following list of environmental variables must be set in the environment. For more information, see [src/odyssey/default.py](src/odyssey/default.py) or [the documentation page](http://zan.atventures.tech/odyssey/odyssey/odyssey.config.html)
 
 ```shell
 $ export PYTHONPATH=</path/to>/odyssey/src
