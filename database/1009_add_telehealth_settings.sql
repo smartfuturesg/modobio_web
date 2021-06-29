@@ -22,12 +22,26 @@ delete from "SystemTelehealthSessionCosts"
 alter sequence "SystemTelehealthSessionCosts_cost_id_seq"
   restart with 1;
 
-INSERT INTO "SystemTelehealthSessionCosts" ("profession_type","country","session_cost","session_min_cost","session_max_cost") 
+delete from "LookupCurrencies"
+  where idx >= 1;
+alter sequence "LookupCurrencies_idx_seq"
+  restart with 1;
+
+INSERT INTO "LookupCurrencies" ("country", "symbol_and_code")
 VALUES
-('medical_doctor', 'USA', 100.00, 50.00, 200.00),
-('nutritionist', 'USA', 100.00, 50.00, 200.00),
-('physical_therapist', 'USA', 100.00, 50.00, 200.00),
-('trainer', 'USA', 100.00, 50.00, 200.00);
+('USA', '$ / USD');
+
+delete from "SystemTelehealthSessionCosts"
+  where cost_id >= 1;
+alter sequence "SystemTelehealthSessionCosts_cost_id_seq"
+  restart with 1;
+
+INSERT INTO "SystemTelehealthSessionCosts" ("currency_id", "profession_type","session_cost","session_min_cost","session_max_cost") 
+VALUES
+(1, 'medical_doctor', 100.00, 60.00, 200.00),
+(1, 'nutritionist', 100.00, 60.00, 200.00),
+(1, 'physical_therapist', 100.00, 60.00, 200.00),
+(1, 'trainer', 100.00, 60.00, 200.00);
 
 delete from "LookupProfessionalAppointmentConfirmationWindow" 
 			where idx >= 1;

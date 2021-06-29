@@ -1,7 +1,7 @@
 system_telehealth_data = {
   "costs": [{
     "session_cost": "60.99",
-    "country": 'USA',
+    "currency_id": 1,
     "profession_type": "medical_doctor"
   }],
   "booking_notice_window":9,
