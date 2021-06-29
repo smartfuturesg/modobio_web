@@ -66,7 +66,11 @@ class BasicAuth(object):
                     -user_context either 'basic_auth' (loggin in) or 
                      pulled from token: 'client' or 'staff' 
                 3. Verify that user meets authorization requirements for the endpoint. These include
-                    - user_type: 'client', 'staff', or 'staff_self' (for staff editing their own personal details)
+                    - user_type: 
+                        - 'client', 
+                        - 'staff' 
+                        - 'staff_self' (for staff editing their own personal details)
+                        - 'modobio' anyone logged in through the modobio platform
                     - staff_role: roles specified in utils/constants
                     - internal_required: some resources are meant only for 'internal' or 'beta' users
                     
@@ -112,43 +116,43 @@ class BasicAuth(object):
         # Check if logged-in user is authorized by type (staff,client)
         # then ensure the logged_in user has role
 
+        # user is logged in  as a modobio user, they may access the endpoint
+        if user_context in ('staff', 'client') and  'modobio' in user_type:
+            return
         # if the user is logged in as staff member, follow staff authorization routine
-        if user_context == 'staff' and ('staff' in user_type or 'staff_self' in user_type):
+        elif user_context == 'staff' and ('staff' in user_type or 'staff_self' in user_type):
             if user.is_staff:
-                if staff_roles or 'staff_self' in user_type: # role-based authorization 
-                    self.staff_access_check(user, user_type, staff_roles=staff_roles)
+                if staff_roles or 'staff_self' in user_type or len(resources) > 0: # role-based authorization 
+                    self.staff_access_check(user, user_type, resources, staff_roles=staff_roles)
                 else:
                     return
             else:
-                
-                LoginNotAuthorized()
+                raise LoginNotAuthorized
         # if the user is logged in as a client, follow the client authorization routine
         elif user_context == 'client' and 'client' in user_type:
             if user.is_client:
                 self.client_access_check(user, resources)
             else:
-                raise LoginNotAuthorized()
+                raise LoginNotAuthorized
         elif user_context == 'basic_auth':
             if 'staff' in user_type and user.is_staff:
                 return
             elif 'client' in user_type and user.is_client:
                 return
             else:
-                
-                raise LoginNotAuthorized()
+                raise LoginNotAuthorized
         else:
-            
-            raise LoginNotAuthorized()
+            raise LoginNotAuthorized
 
     def client_access_check(self, user, resources):
         """
         Clients can access content in one of two scenarios:
-            1. They are attempting to access their own content. 
+            1. They are attempting to access their own content.
             2. Clients may access certain resources belonging to other users
                 who have given authorization as part of their clinical care team.
         """
 
-        requested_user_id = request.view_args.get('user_id')
+        requested_user_id = request.view_args.get('user_id', request.view_args.get('client_user_id'))
 
         if requested_user_id:
             # user is attempting to access their own data
@@ -159,15 +163,13 @@ class BasicAuth(object):
             else:
                 # ensure request is GET
                 if request.method != 'GET':
-                    
-                    raise LoginNotAuthorized()
+                    raise LoginNotAuthorized
                 # resources must be specified for endpoint designated by table name
                 # e.g. @token_auth.login_required(resources=('MedicalSocialHistory','MedicalSTDHistory'))
-                if len(resources) == 0: 
-                    
-                    raise LoginNotAuthorized()
+                if len(resources) == 0:
+                    raise LoginNotAuthorized
                 # set the context and successful authorizations list in the g object
-                g.clinical_care_context = True 
+                g.clinical_care_context = True
                 g.clinical_care_authorized_resources = []
                 # search db for this resource authorization
                 for resource in resources:
@@ -177,42 +179,105 @@ class BasicAuth(object):
                         ).filter(ClientClinicalCareTeamAuthorizations.user_id == requested_user_id
                         ).filter(ClientClinicalCareTeamAuthorizations.resource_id == LookupClinicalCareTeamResources.resource_id
                         ).filter(LookupClinicalCareTeamResources.resource_name == resource
+                        ).filter(ClientClinicalCareTeamAuthorizations.status == 'accepted'
                         ).all()
                     if len(is_authorized) == 1:
                         g.clinical_care_authorized_resources.append(resource)
                         continue
                 if len(g.clinical_care_authorized_resources) == 0:
                     # this user does not have access to this content
-                    
-                    raise LoginNotAuthorized()
+                    raise LoginNotAuthorized
         return
 
-    def staff_access_check(self, user, user_type, staff_roles=None):
-        ''' 
-        staff_access_check method will be used to determine if a Staff
-        member has the correct role to access the API 
-        Checks to see that staff memner is accessing their own resources
-        if 'staff_self' is in the user_type
+    def staff_access_check(self, user, user_type, resources, staff_roles=None):
         '''
-        # If roles are included, now do role checks
-        # If no roles were going, then all Staff has access
-        # If roles were given, check if Staff member has that role
-        
-        # bring up the soles for the staff member
+        staff_access_check method will be used to determine if a Staff
+        member has the correct role and care team priveledges to access the API
+
+        Altogether, here are the variables involved in staff member authorization:
+            - being logged in as a staff member (utype='staff' in the token payload)
+            - care team resources (e.g. token_auth.login_required(resources=('MedicalHistory',)))
+            - staff_role (e.g. token_auth.login_required(staff_role=('medical_doctor',)
+            
+        There are several scenarios which staff can access endpoints from:
+        1. Endpoint requires only a valid token. In which case, no further access checks are required
+           this function is skipped.
+
+        2. Staff is trying to access their own resources.
+            - user_id (or sometimes staff_user_id) will be a request argument
+            - 'staff_self' will be in user_type
+           Using these two pieces of info, we will just check that the logged-in
+           user is the same as the user being requested in the request argument (user_id or staff_user_id)
+
+        3a. Staff is accessing a client's resources and there are no role or resource checks specified:
+            - Just being a staff member grants access to endpoint
+
+        3b. Staff is accessing a client's resources and ONLY user_type is specified
+            - staff member must meet role requirements for all request methods
+
+        3c. Staff is accessing a client's resources and ONLY resources are specified
+            - check against resources authorized through the clinical care team system
+            -all request methods allowed if resource access check passes
+
+        3d. Staff is accessing a client's resources and BOTH resources and user_type are specified
+            - check against resources authorized through the clinical care team system
+            - if the request method != GET, staff must also meet role requirements
+                e.g. only medical_doctor role may view AND edit blood test results for a clien
+
+
+        '''
+        # bring up the roles for the staff member
         staff_user_roles = db.session.query(StaffRoles.role).filter(StaffRoles.user_id==user.user_id).all()
         staff_user_roles = [x[0] for x in staff_user_roles]
-        
+
+        requested_user_id =  request.view_args.get('user_id', request.view_args.get('client_user_id'))
+        # staff accessing their own resources
+        # request args will either contain user_id or staff_user_id which must match the logged-in user
         if 'staff_self' in user_type:
-            if request.view_args.get('user_id') != user.user_id:
-                
-                raise LoginNotAuthorized
-        if staff_roles is not None:
-            if any(role in staff_user_roles for role in staff_roles):
-                # Staff member's role matches the Role Requirement in the API
-                return None
-            else:
+            if request.view_args.get('user_id', request.view_args.get('staff_user_id')) != user.user_id:
                 raise LoginNotAuthorized
 
+        # check if resource access check is necessary
+        elif len(resources) > 0:
+            # 1. Check if staff member has resource access
+            # 2. if request method is not GET, verify role access
+
+            # set the context and successful authorizations list in the g object
+            g.clinical_care_context = True
+            g.clinical_care_authorized_resources = []
+            # search db for this resource authorization
+            for resource in resources:
+                is_authorized = db.session.query(
+                        ClientClinicalCareTeamAuthorizations.resource_id, LookupClinicalCareTeamResources.resource_name
+                    ).filter(ClientClinicalCareTeamAuthorizations.team_member_user_id == user.user_id
+                    ).filter(ClientClinicalCareTeamAuthorizations.user_id == requested_user_id
+                    ).filter(ClientClinicalCareTeamAuthorizations.resource_id == LookupClinicalCareTeamResources.resource_id
+                    ).filter(LookupClinicalCareTeamResources.resource_name == resource
+                    ).filter(ClientClinicalCareTeamAuthorizations.status == 'accepted'
+                    ).all()
+                if len(is_authorized) == 1:
+                    g.clinical_care_authorized_resources.append(resource)
+                    continue
+            if len(g.clinical_care_authorized_resources) == 0:
+                # this user does not have access to any resource in this endpoint
+                raise LoginNotAuthorized
+
+            # if the request method is not GET, verify user has role access to edit data
+            if request.method != 'GET' and staff_roles is not None:
+                if not any(role in staff_user_roles for role in staff_roles):
+                    raise LoginNotAuthorized
+
+        # check Staff member's roles match the role requirement in the endpoint
+        elif staff_roles is not None:
+            if not any(role in staff_user_roles for role in staff_roles):
+                raise LoginNotAuthorized
+
+        # Staff is accessing client resources without role or resource authorization
+        # TODO: leaving this here for debugging and (enventually) logging
+        else:
+            return
+
+        # authorization checks all end here
         return
 
     def validate_roles(self, roles, constants):

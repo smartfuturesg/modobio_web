@@ -3,11 +3,15 @@ import base64
 
 from flask.json import dumps
 from flask_accepts.decorators.decorators import responds
+from sqlalchemy import select
 
+from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations
 from odyssey.api.lookup.models import LookupClinicalCareTeamResources
+from odyssey.api.user.models import User
 
 from tests.functional.client.data import clients_clinical_care_team
 from tests.functional.user.data import users_new_user_client_data, users_staff_member_data
+from tests.functional.doctor.data import doctor_blood_tests_data
 
 def test_adding_clinical_care_team(test_client, init_database, client_auth_header, staff_auth_header):
     """
@@ -15,29 +19,61 @@ def test_adding_clinical_care_team(test_client, init_database, client_auth_heade
     WHEN the '/client/clinical-care-team/<client id>' resource  is requested to be added (POST)
     THEN the response will be the emails of the client's care team
     """
+    global team_member_staff_user_id, team_member_staff_modobio_id, team_member_client_user_id, team_member_client_modobio_id
+
+    current_user_emails = init_database.session.execute(select(User.email)).scalars().all()
+    care_team_add_emails = [x['team_member_email'] for x in clients_clinical_care_team['care_team']]
+
+    # care team members being added are not current users
+    assert len(set(current_user_emails) - set(care_team_add_emails) ) == len(current_user_emails)
     
-    clients_clinical_care_team['care_team'].append(
-        {
-            'team_member_email': users_new_user_client_data['user_info']['email']
-        })
+    team_member_staff_modobio_id, team_member_staff_user_id = init_database.session.execute(select(User.modobio_id, User.user_id).filter(User.is_staff == True)).first()
+    team_member_client_modobio_id, team_member_client_user_id = init_database.session.execute(select(User.modobio_id, User.user_id).filter(User.email == users_new_user_client_data['user_info']['email'])).one_or_none()
+
+    clients_clinical_care_team['care_team'].extend(
+        [
+            {
+            'modobio_id': team_member_staff_modobio_id
+            },
+            {
+            'modobio_id': team_member_client_modobio_id
+            }
+         ]
+    )
     
     response = test_client.post(f"/client/clinical-care-team/members/{1}/",
                                 headers=client_auth_header, 
                                 data=dumps(clients_clinical_care_team), 
                                 content_type='application/json')
 
-    assert response.status_code == 201
-    assert response.json.get("total_items") == 3
-    assert response.json.get("care_team")
+    current_user_emails_updated = init_database.session.execute(select(User.email)).scalars().all()
 
+    assert response.status_code == 201
+    assert response.json.get("total_items") == 4
+    assert response.json.get("care_team")
+    # ensure users were added through the care team system
+    assert len(set(current_user_emails_updated) - set(current_user_emails) ) == len(care_team_add_emails)
+    
+    
     #check that the person added to the client's care team above sees the client
     #when viewing the list of clients whose care team they belong to
-    response = test_client.get("/client/clinical-care-team/member-of/3/",
+    response = test_client.get(f"/client/clinical-care-team/member-of/{team_member_staff_user_id}/",
                                 headers=staff_auth_header,
                                 content_type='application/json')
     
     assert response.status_code == 200
     assert response.json['member_of_care_teams'][0]['client_user_id'] == 1
+
+
+    ###
+    # attempt to access /client/clinical-care-team/members/ as a staff member 
+    ###
+    response = test_client.post(f"/client/clinical-care-team/members/{1}/",
+                            headers=staff_auth_header, 
+                            data=dumps(clients_clinical_care_team), 
+                            content_type='application/json')
+
+    assert response.status_code == 401
 
     ###
     # Attempt to add more than 20 clinical care team members
@@ -119,9 +155,13 @@ def test_delete_clinical_care_team(test_client, init_database, client_auth_heade
     THEN the response will be 200
     """
 
-    # remove one email from the list of clinical care team members 
+    # keep these users in the care team
     clients_clinical_care_team['care_team'].remove({
-        'team_member_email': users_new_user_client_data['user_info']['email']
+        'modobio_id': team_member_staff_modobio_id
+        })
+
+    clients_clinical_care_team['care_team'].remove({
+        'modobio_id': team_member_client_modobio_id
         })
 
     response = test_client.delete(f"/client/clinical-care-team/members/{1}/",
@@ -136,45 +176,15 @@ def test_get_clinical_care_team(test_client, init_database, client_auth_header):
     GIVEN a api end point for adding members to a client's care team
     WHEN the '/client/clinical-care-team/<client id>' resource  is requested (GET)
     THEN the response will be the emails of the client's care team
-    """
-    global team_member_user_id
-
-    
+    """   
     response = test_client.get(f"/client/clinical-care-team/members/{1}/",
                                 headers=client_auth_header, 
                                 content_type='application/json')
 
-    team_member = response.json.get("care_team")[0]
+    # bring up one of the care team members
     
     assert response.status_code == 200
-    assert response.json.get("total_items") == 1
-    assert team_member.get('team_member_user_id') 
-    assert team_member.get('team_member_email') 
-    assert team_member.get('firstname') 
-    assert team_member.get('lastname') 
-
-    team_member_user_id = team_member.get('team_member_user_id') 
-
-    clients_clinical_care_team['care_team'].remove(
-        {
-            'team_member_email': 'email1@modo.com'
-        })
-    clients_clinical_care_team['care_team'].remove(
-        {
-            'team_member_email': 'email2@modo.com'}
-        )
-    clients_clinical_care_team['care_team'].remove(
-        {
-            'team_member_email': 'email3@modo.com'}
-        )          
-    clients_clinical_care_team['care_team'].extend([{
-        'team_member_email': 'staff_member@modobio.com'
-        }])    
-    response = test_client.post(f"/client/clinical-care-team/members/{1}/",
-                                headers=client_auth_header, 
-                                data=dumps(clients_clinical_care_team), 
-                                content_type='application/json')
-    assert response.status_code == 201    
+    assert response.json.get("total_items") == 4
 
 def test_authorize_clinical_care_team(test_client, init_database, client_auth_header,staff_auth_header):
     """
@@ -184,14 +194,23 @@ def test_authorize_clinical_care_team(test_client, init_database, client_auth_he
     by the same endpoint
     """
 
-    total_resources = LookupClinicalCareTeamResources.query.count()
-
-    auths = [{"team_member_user_id": team_member_user_id,"resource_id": num} for num in range(1,total_resources+1) ]
-    payload = {"clinical_care_team_authorization" : auths}
-    
     #####
     # Authorize another client to access all clinical care team resources
     #####
+    total_resources = LookupClinicalCareTeamResources.query.count()
+    auths = [{"team_member_user_id": team_member_client_user_id,"resource_id": num} for num in range(1,total_resources+1) ]
+    payload = {"clinical_care_team_authorization" : auths}
+    response = test_client.post(f"/client/clinical-care-team/resource-authorization/{1}/",
+                            headers=client_auth_header,
+                            data=dumps(payload), 
+                            content_type='application/json')
+    assert response.status_code == 201
+
+    #####
+    # Authorize a staff to access all clinical care team resources but the last one (used later on to make a request)
+    #####
+    auths = [{"team_member_user_id": team_member_staff_user_id,"resource_id": num} for num in range(1,total_resources) ]
+    payload = {"clinical_care_team_authorization" : auths}
     response = test_client.post(f"/client/clinical-care-team/resource-authorization/{1}/",
                             headers=client_auth_header,
                             data=dumps(payload), 
@@ -201,7 +220,7 @@ def test_authorize_clinical_care_team(test_client, init_database, client_auth_he
     #####
     # Try to authorize a resource that doesnt exist
     ####
-    payload = {"clinical_care_team_authorization" : [{"team_member_user_id": team_member_user_id,"resource_id": 999999}]}
+    payload = {"clinical_care_team_authorization" : [{"team_member_user_id": team_member_client_user_id,"resource_id": 999999}]}
 
     response = test_client.post(f"/client/clinical-care-team/resource-authorization/{1}/",
                         headers=client_auth_header,
@@ -233,25 +252,32 @@ def test_authorize_clinical_care_team(test_client, init_database, client_auth_he
     assert response.json['clinical_care_team_authorization'][0]['status'] == 'accepted'
 
 
-    # Create payload for team_member_user_id 2 (a staff member)
-    payload = {"clinical_care_team_authorization" : [{"team_member_user_id": 2,"resource_id": 1}]}
-    
     #####
     # as a staff member, post for data access.
+    # authorization should be pending
     #####
+    # Create payload for team_member_user_id 2 (a staff member)
+    payload = {"clinical_care_team_authorization" : [{"team_member_user_id": team_member_staff_user_id,"resource_id": total_resources}]}
+    
     response = test_client.post(f"/client/clinical-care-team/resource-authorization/{1}/",
                             headers=staff_auth_header,
                             data=dumps(payload), 
                             content_type='application/json')
-    
     assert response.status_code == 201
+
+    staff_authorization = init_database.session.execute(
+                            select(ClientClinicalCareTeamAuthorizations).
+                            filter(ClientClinicalCareTeamAuthorizations.team_member_user_id == team_member_staff_user_id,
+                                ClientClinicalCareTeamAuthorizations.resource_id == total_resources)).scalars().one_or_none()
+    
+    assert staff_authorization.status == 'pending'
 
     # Make a double post, expect an error
     response = test_client.post(f"/client/clinical-care-team/resource-authorization/{1}/",
                             headers=staff_auth_header,
                             data=dumps(payload), 
                             content_type='application/json')
-    
+
     assert response.status_code == 400    
 
     response = test_client.get(f"/client/clinical-care-team/resource-authorization/{1}/",
@@ -261,10 +287,10 @@ def test_authorize_clinical_care_team(test_client, init_database, client_auth_he
     assert response.status_code == 200
     assert response.json['clinical_care_team_authorization'][0]['status'] == 'accepted'
     
-    # The staff member requested data access of resource id = 1 from user_id 1
+    # The staff member requested data access of resource id = total_resources from user_id 1
     # The status was automatically set to 'pending' 
     for idx,info in enumerate(response.json['clinical_care_team_authorization']):
-        if info['team_member_email'] == 'staff_member@modobio.com':
+        if info['team_member_email'] == 'staff_member@modobio.com' and info['resource_id'] == total_resources:
             assert response.json['clinical_care_team_authorization'][idx]['status'] == 'pending'
 
     # Now, note the header has switched to the client_auth_header indicating we are now the client of interest
@@ -284,7 +310,7 @@ def test_authorize_clinical_care_team(test_client, init_database, client_auth_he
             assert response.json['clinical_care_team_authorization'][idx]['status'] == 'accepted'    
 
 
-def test_clinical_care_team_access(test_client, init_database, client_auth_header):
+def test_clinical_care_team_access(test_client, init_database, client_auth_header, staff_auth_header):
     """
     GIVEN a api end point for authorizing the use of resources for members of a client's care team
     WHEN any authorized resource is requested (POST, GET)
@@ -303,24 +329,62 @@ def test_clinical_care_team_access(test_client, init_database, client_auth_heade
                             headers=headers, 
                             content_type='application/json')
     token = response.json.get('token')
-    team_member_user_id = response.json.get('user_id')
-
-    auth_header = {'Authorization': f'Bearer {token}'}
+    client_care_team_auth_header = {'Authorization': f'Bearer {token}'}
     
     #####
     # Try to grab the blood tests and social history this client has submitted
+    # 1. GET,POST from the client care perspective
+    #   clients can view but cannot edit
+    # 2. Try the same requests for the authorized staff
+    #   POST request will succeed
     #####
+    
+    ###
+    # as a clinical care team client
+    ###
     response = test_client.get(f"/doctor/bloodtest/all/{1}/",
-                                headers=auth_header,
+                                headers=client_care_team_auth_header,
                                 content_type='application/json')
 
     assert response.status_code == 204 # no content submitted yet but, sucessful request
     
     response = test_client.get(f"/doctor/medicalinfo/social/{1}/",
-                                headers=auth_header,
+                                headers=client_care_team_auth_header,
                                 content_type='application/json')
 
     assert response.status_code == 200
+
+    # try adding a blood test for this client
+    response = test_client.post('/doctor/bloodtest/1/',
+                            headers=client_care_team_auth_header, 
+                            data=dumps(doctor_blood_tests_data), 
+                            content_type='application/json')
+    
+    assert response.status_code == 401
+
+    ###
+    # as a clinical care team staff
+    ###
+    response = test_client.get(f"/doctor/bloodtest/all/{1}/",
+                                headers=client_care_team_auth_header,
+                                content_type='application/json')
+
+    assert response.status_code == 204 # no content submitted yet but, sucessful request
+    
+    response = test_client.get(f"/doctor/medicalinfo/social/{1}/",
+                                headers=client_care_team_auth_header,
+                                content_type='application/json')
+
+    assert response.status_code == 200
+
+    # try adding a blood test for this client
+    response = test_client.post('/doctor/bloodtest/1/',
+                            headers=staff_auth_header, 
+                            data=dumps(doctor_blood_tests_data), 
+                            content_type='application/json')
+
+    assert response.status_code == 201
+    assert response.json['panel_type'] == doctor_blood_tests_data['panel_type']
     
     
 

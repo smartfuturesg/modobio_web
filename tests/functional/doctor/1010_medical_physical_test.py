@@ -32,7 +32,6 @@ def test_get_medical_physical(test_client, init_database, staff_auth_header):
     response = test_client.get('/doctor/physical/1/',
                                 headers=staff_auth_header, 
                                 content_type='application/json')
-                                
     assert response.status_code == 200
     assert response.json[0]['vital_weight'] == 110.0
     assert response.json[0]['abdominal_hard'] == True

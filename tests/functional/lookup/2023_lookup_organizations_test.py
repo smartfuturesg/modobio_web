@@ -2,7 +2,7 @@ from flask.json import dumps
 
 def test_get_organizations(test_client, init_database, client_auth_header):
     """
-    GIVEN a api end point for lookup medical symptoms
+    GIVEN a api end point for lookup organizations
     WHEN the '/lookup/organizations/' resource  is requested (GET)
     THEN check the response is valid
     """
