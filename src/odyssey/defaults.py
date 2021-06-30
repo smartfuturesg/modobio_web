@@ -52,9 +52,6 @@ which may not be correct at all.
 This setting prevents such stupid behaviour.
 """
 
-WHOOSHEE_DIR = '/tmp'
-""" Directory for Whooshee full text index, don't clutter the source dir. """
-
 # Database parameters
 DB_FLAV = 'postgresql'
 """ Database "flavour" or dialect. """
