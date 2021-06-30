@@ -3,12 +3,9 @@ Database tables for supporting lookup tables. These tables should be static tabl
 not to be edited at runtime. 
 """
 
-<<<<<<< HEAD
 from sqlalchemy.orm import relationship
-=======
 from flask import current_app
 
->>>>>>> 0913ae10b58ef8244b5b84bf93607233650d287b
 from odyssey import db
 from odyssey.utils.constants import DB_SERVER_TIME, ORG_TOKEN_LIFETIME
 from odyssey.utils.base.models import BaseModelWithIdx, BaseModel
