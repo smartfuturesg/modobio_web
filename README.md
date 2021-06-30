@@ -87,6 +87,28 @@ $ export FITBIT_CLIENT_ID=...
 $ export FITBIT_CLIENT_SECRET=...
 ```
 
+Depending on your local configuration, you may also need to set any of the following variables. Shown here are the default values.
+
+```shell
+$ export DB_URI=postgres://localhost/modobio
+$ export ELASTICSEARCH_URL=http://localhost:9200
+$ export CELERY_BROKER_URL=redis://localhost:6379/0
+$ export CELERY_RESULT_BACKEND=redis://localhost:6379/0
+```
+
+And finally, the API needs access to AWS. You should have a personal access key. In your home directory, create a hidden directory `.aws/`. In `.aws/` create two files: `config` and `credentials`. Enter the information in those files until they look like this:
+
+```shell
+$ cat ~/.aws/config
+[default]
+region = us-east-2
+
+$ cat ~/.aws/credentials
+[default]
+aws_access_key_id = <your_key_id>
+aws_secret_access_key = <your_key_secret>
+```
+
 ## Database migration
 
 If this is a clean, empty database, use Alembic (through flask-migrate) to push the database schemas changes to your local database.
