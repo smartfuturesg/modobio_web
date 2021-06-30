@@ -1,7 +1,7 @@
 """add PaymentMethods table
 
 Revision ID: 8f546d475e7a
-Revises: eee19bdb0e06
+Revises: 1757ded21a69
 Create Date: 2021-06-24 13:00:26.757552
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '8f546d475e7a'
-down_revision = 'eee19bdb0e06'
+down_revision = '1757ded21a69'
 branch_labels = None
 depends_on = None
 
