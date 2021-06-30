@@ -9,4 +9,5 @@ RUN apt update
 RUN apt install -y libpq-dev python3-dev build-essential libpango-1.0-0 libpangocairo-1.0-0
 
 COPY ./ /usr/src/app
-RUN pip install -r requirements.txt
+RUN pip install -U pip wheel
+RUN pip install -r requirements/production.txt -r requirements/testing.txt

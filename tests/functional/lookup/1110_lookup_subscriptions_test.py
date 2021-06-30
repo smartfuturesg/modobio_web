@@ -11,5 +11,5 @@ def test_get_subscription_types(test_client, init_database, client_auth_header):
                                 content_type='application/json')
     
     assert response.status_code == 200
-    assert response.json['items'][0]['name'] == "Unsubscribed"
-    assert response.json['items'][1]['cost'] == 10.00
+    assert response.json['items'][0]['name'] == "Team Member"
+    assert response.json['items'][1]['cost'] == 9.99

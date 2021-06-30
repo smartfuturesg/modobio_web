@@ -3,9 +3,14 @@ Database tables for supporting lookup tables. These tables should be static tabl
 not to be edited at runtime. 
 """
 
+<<<<<<< HEAD
 from sqlalchemy.orm import relationship
+=======
+from flask import current_app
+
+>>>>>>> 0913ae10b58ef8244b5b84bf93607233650d287b
 from odyssey import db
-from odyssey.utils.constants import DB_SERVER_TIME
+from odyssey.utils.constants import DB_SERVER_TIME, ORG_TOKEN_LIFETIME
 from odyssey.utils.base.models import BaseModelWithIdx, BaseModel
 
 class LookupTermsAndConditions(BaseModelWithIdx):
@@ -1100,11 +1105,17 @@ class LookupEHRPages(BaseModel):
     ID for the resource group.
 
     :type: integer, primary key, autoincrementing
+
+    :type: string
     """
 
     resource_group_name = db.Column(db.String)
     """
     Internaly used name to refer to the resource group. Will be used to define authorization requirements for specific endpoints. 
+    """
+    access_group = db.Column(db.String)
+    """
+    Grouping of resource groups by staff_role. 
 
     :type: string
     """
@@ -1115,10 +1126,47 @@ class LookupEHRPages(BaseModel):
     
     :type: string
     """
-
-    access_group = db.Column(db.String)
+class LookupOrganizations(BaseModelWithIdx):
     """
-    Grouping of resource groups by staff_role. 
+    Lookup table for organizations affiliated with Modobio.
+    """
+
+    org_name = db.Column(db.String)
+    """
+    Name of this organization.
+
+    :type: string
+    """
+
+    org_id = db.Column(db.String)
+    """
+    Unique randomly generated ID for this organization.
+
+    :type: string
+    """
+
+    org_token = db.Column(db.String)
+    """
+    Token used by this organization for access. Expires after 6 months.
+
+    :type: string
+    """
+
+class LookupCurrencies(BaseModelWithIdx):
+    """
+    Lookup table for accepted currency types.
+    """
+
+    country = db.Column(db.String, nullable=False)
+    """
+    The country associated with this cost. Must be present in at least one entry in LookupTerritoriesOfOperation.country
+
+    :type: string
+    """
+
+    symbol_and_code = db.Column(db.String, nullable=False)
+    """
+    symbol (ex. $, €) and code (ex. USD, EUR)
 
     :type: string
     """

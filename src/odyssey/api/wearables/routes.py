@@ -4,11 +4,10 @@ from datetime import datetime, timedelta
 
 from flask import current_app, request
 from flask_accepts import accepts, responds
-from flask_restx import Resource
+from flask_restx import Resource, Namespace
 from requests_oauthlib import OAuth2Session
 from sqlalchemy.sql import text
 
-from odyssey.api import api
 from odyssey.utils.auth import token_auth
 from odyssey.utils.errors import (
     ContentNotFound,
@@ -32,7 +31,7 @@ from odyssey.api.wearables.schemas import (
 from odyssey.utils.misc import check_client_existence
 from odyssey import db
 
-ns = api.namespace('wearables', description='Endpoints for registering wearable devices.')
+ns = Namespace('wearables', description='Endpoints for registering wearable devices.')
 
 
 ###########################################################
@@ -164,10 +163,6 @@ class WearablesOuraOldAuthEndpoint(Resource):
             - oura_client_id
             - oauth_state
         """
-        # FLASK_DEV=local has no access to AWS
-        if not current_app.config['OURA_CLIENT_ID']:
-            raise UnknownError(message='This endpoint does not work in local mode.')
-
         wearables = (
             Wearables.query
             .filter_by(user_id=user_id)
@@ -220,9 +215,6 @@ class WearablesOuraCallbackEndpoint(Resource):
         work with both web-based and mobile apps. Keeping this endpoint around until staff app
         has been updated.
         """
-        if not current_app.config['OURA_CLIENT_ID']:
-            raise UnknownError(message='This endpoint does not work in local mode.')
-
         check_client_existence(user_id)
 
         oura = WearablesOura.query.filter_by(user_id=user_id).one_or_none()
@@ -303,10 +295,6 @@ class WearablesOuraAuthEndpoint(Resource):
             - state
             - scope (space separated string of scopes)
         """
-        # FLASK_DEV=local has no access to AWS
-        if not current_app.config['OURA_CLIENT_ID']:
-            raise UnknownError(message='This endpoint does not work in local mode.')
-
         info = Wearables.query.filter_by(user_id=user_id).one_or_none()
         if not info:
             raise UnknownError(
@@ -366,10 +354,6 @@ class WearablesOuraAuthEndpoint(Resource):
             The scopes the user actually selected when clicking 'allow'. Space separated
             string of scopes. Required for Oura.
         """
-        # FLASK_DEV=local has no access to AWS
-        if not current_app.config['OURA_CLIENT_ID']:
-            raise UnknownError(message='This endpoint does not work in local mode.')
-
         oura = WearablesOura.query.filter_by(user_id=user_id).one_or_none()
         if not oura:
             raise UnknownError(
@@ -473,10 +457,6 @@ class WearablesFitbitAuthEndpoint(Resource):
             - state
             - scope (space separated string of scopes)
         """
-        # FLASK_DEV=local has no access to AWS
-        if not current_app.config['FITBIT_CLIENT_ID']:
-            raise UnknownError(message='This endpoint does not work in local mode.')
-
         info = Wearables.query.filter_by(user_id=user_id).one_or_none()
         if not info:
             raise UnknownError(
@@ -536,10 +516,6 @@ class WearablesFitbitAuthEndpoint(Resource):
             The scopes the user actually selected when clicking 'allow'. Space separated
             string of scopes. Ignored for Fitbit.
         """
-        # FLASK_DEV=local has no access to AWS
-        if not current_app.config['FITBIT_CLIENT_ID']:
-            raise UnknownError(message='This endpoint does not work in local mode.')
-
         fitbit = WearablesFitbit.query.filter_by(user_id=user_id).one_or_none()
         if not fitbit:
             raise UnknownError(

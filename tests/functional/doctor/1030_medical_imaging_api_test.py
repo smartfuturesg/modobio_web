@@ -1,5 +1,3 @@
-import pathlib
-
 from flask.json import dumps
 
 from odyssey.api.user.models import User, UserLogin
@@ -27,7 +25,6 @@ def test_post_medical_imaging(test_client, init_database, staff_auth_header):
 
     assert response.status_code == 201
     assert data.image_path
-    assert pathlib.Path(data.image_path).exists() 
     assert data.image_origin_location == payload['image_origin_location']
     assert data.image_type == payload['image_type']
     assert data.image_read == payload['image_read']

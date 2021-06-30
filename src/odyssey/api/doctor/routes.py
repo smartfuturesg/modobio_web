@@ -4,7 +4,7 @@ from dateutil.relativedelta import relativedelta
 
 from flask import request, current_app, g
 from flask_accepts import accepts, responds
-from flask_restx import Resource, Api
+from flask_restx import Resource, Namespace, Api
 
 from odyssey import db
 from odyssey.api.lookup.models import LookupDrinks, LookupGoals
@@ -31,7 +31,6 @@ from odyssey.api.doctor.models import (
 )
 from odyssey.api.facility.models import MedicalInstitutions
 from odyssey.api.user.models import User
-from odyssey.api import api
 from odyssey.utils.auth import token_auth
 from odyssey.utils.errors import (
     UserNotFound, 
@@ -78,7 +77,7 @@ from odyssey.api.doctor.schemas import (
 )
 from odyssey.utils.constants import MEDICAL_CONDITIONS
 
-ns = api.namespace('doctor', description='Operations related to doctor')
+ns = Namespace('doctor', description='Operations related to doctor')
 
 @ns.route('/bloodpressure/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
@@ -883,21 +882,18 @@ class MedImaging(Resource):
             img_dat.update({'reporter_firstname': data[1], 'reporter_lastname': data[2]})
             response.append(img_dat)
 
-        if not current_app.config['LOCAL_CONFIG']:
-            bucket_name = current_app.config['S3_BUCKET_NAME']
+        bucket_name = current_app.config['AWS_S3_BUCKET']
+        s3 = boto3.client('s3')
+        params = {
+            'Bucket' : bucket_name,
+            'Key' : None}
 
-            s3 = boto3.client('s3')
-            params = {
-                        'Bucket' : bucket_name,
-                        'Key' : None
-                    }
+        for img in response:
+            if img.get('image_path'):
+                params['Key'] = img.get('image_path')
+                url = s3.generate_presigned_url('get_object', Params=params, ExpiresIn=3600)
+                img['image_path'] = url
 
-            for img in response:
-                if img.get('image_path'):
-                    params['Key'] = img.get('image_path')
-                    url = s3.generate_presigned_url('get_object', Params=params, ExpiresIn=3600)
-                    img['image_path'] = url
- 
         return response
 
     #Unable to use @accepts because the input files come in a form-data, not json.
@@ -917,7 +913,7 @@ class MedImaging(Resource):
 
         """
         check_client_existence(user_id)
-        bucket_name = current_app.config['S3_BUCKET_NAME']
+        bucket_name = current_app.config['AWS_S3_BUCKET']
 
         # bring up reporting staff member
         reporter = token_auth.current_user()[0]
@@ -935,7 +931,9 @@ class MedImaging(Resource):
         MAX_bytes = 524288000 #500 mb
         data_list = []
         hex_token = secrets.token_hex(4)
-        
+
+        s3 = boto3.resource('s3')
+
         for i, img in enumerate(files.getlist('image')):
             mi_data = mi_schema.load(request.form)
             mi_data.user_id = user_id
@@ -953,29 +951,20 @@ class MedImaging(Resource):
             img_extension = pathlib.Path(img.filename).suffix
             img.seek(0)
 
-            if current_app.config['LOCAL_CONFIG']:
-                path = pathlib.Path(bucket_name) / f'id{user_id:05d}' / 'medical_images'
-                path.mkdir(parents=True, exist_ok=True)
-                s3key = f'{mi_data.image_type}_{date}_{hex_token}_{i}{img_extension}'
-                file_name = (path / s3key).as_posix()
-                mi_data.image_path = file_name
-                img.save(file_name)
-
-            else:
-                s3key = f'id{user_id:05d}/medical_images/{mi_data.image_type}_{date}_{hex_token}_{i}{img_extension}'
-                s3 = boto3.resource('s3')
-                s3.Bucket(bucket_name).put_object(Key= s3key, Body=img.stream) 
-                mi_data.image_path = s3key  
+            s3key = f'id{user_id:05d}/medical_images/{mi_data.image_type}_{date}_{hex_token}_{i}{img_extension}'
+            s3.Bucket(bucket_name).put_object(Key= s3key, Body=img.stream)
+            mi_data.image_path = s3key
 
             data_list.append(mi_data)
 
         db.session.add_all(data_list)  
         db.session.commit()
 
+
 @ns.route('/bloodtest/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedBloodTest(Resource):
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('client', 'staff'), staff_role=('medical_doctor',), resources=('MedicalBloodTests',))
     @accepts(schema=MedicalBloodTestsInputSchema, api=ns)
     @responds(schema=MedicalBloodTestSchema, status_code=201, api=ns)
     def post(self, user_id):
@@ -1037,7 +1026,7 @@ class MedBloodTest(Resource):
 @ns.route('/bloodtest/all/<int:user_id>/')
 @ns.doc(params={'user_id': 'Client ID number'})
 class MedBloodTestAll(Resource):
-    @token_auth.login_required(resources=('MedicalBloodTests',))
+    @token_auth.login_required(user_type=('client','staff'), resources=('MedicalBloodTests',))
     @responds(schema=AllMedicalBloodTestSchema, api=ns)
     def get(self, user_id):
         """
@@ -1089,7 +1078,7 @@ class MedBloodTestResults(Resource):
 
     Each test instance may have multiple test results. 
     """
-    @token_auth.login_required(resources=('MedicalBloodTestResults', 'MedicalBloodTests'))
+    @token_auth.login_required(resources=('MedicalBloodTests',))
     @responds(schema=MedicalBloodTestResultsOutputSchema, api=ns)
     def get(self, test_id):
         """
@@ -1147,7 +1136,7 @@ class AllMedBloodTestResults(Resource):
     This includes all test submisison details along with the test
     results associated with each test submission. 
     """
-    @token_auth.login_required(resources=('MedicalBloodTestResults', 'MedicalBloodTests'))
+    @token_auth.login_required(resources=('MedicalBloodTests',))
     @responds(schema=MedicalBloodTestResultsOutputSchema, api=ns)
     def get(self, user_id):
         # pull up all tests, test results, and the test type names for this client
@@ -1272,7 +1261,7 @@ class MedHistory(Resource):
 @ns.route('/physical/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedPhysical(Resource):
-    @token_auth.login_required(resources=('MedicalPhysicals',))
+    @token_auth.login_required(staff_role=('medical_doctor',))
     @responds(schema=MedicalPhysicalExamSchema(many=True), api=ns)
     def get(self, user_id):
         """returns all client's medical physical exams for the user_id specified"""
@@ -1298,7 +1287,7 @@ class MedPhysical(Resource):
 
         return response
 
-    @token_auth.login_required
+    @token_auth.login_required(staff_role=('medical_doctor',))
     @accepts(schema=MedicalPhysicalExamSchema, api=ns)
     @responds(schema=MedicalPhysicalExamSchema, status_code=201, api=ns)
     def post(self, user_id):

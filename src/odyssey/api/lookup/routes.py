@@ -1,12 +1,11 @@
 from flask_accepts import responds
-from flask_restx import Resource
+from flask_restx import Resource, Namespace
 
 import pytz
 import pathlib
 
 from flask import current_app
 
-from odyssey.api import api
 from odyssey.utils.auth import token_auth
 from odyssey.api.lookup.models import (
      LookupActivityTrackers,
@@ -31,7 +30,9 @@ from odyssey.api.lookup.models import (
      LookupRoles,
      LookupMacroGoals,
      LookupLegalDocs,
-     LookupMedicalSymptoms
+     LookupMedicalSymptoms,
+     LookupOrganizations,
+     LookupCurrencies
      )
 from odyssey.api.lookup.schemas import (
     LookupActivityTrackersOutputSchema,
@@ -57,13 +58,15 @@ from odyssey.api.lookup.schemas import (
     LookupMacroGoalsOutputSchema,
     LookupLegalDocsOutputSchema,
     LookupNotificationsOutputSchema,
-    LookupMedicalSymptomsOutputSchema
+    LookupMedicalSymptomsOutputSchema,
+    LookupOrganizationsOutputSchema,
+    LookupCurrenciesOutputSchema
 )
 from odyssey.utils.misc import check_drink_existence
 
 from odyssey import db
 
-ns = api.namespace('lookup', description='Endpoints for lookup tables.')
+ns = Namespace('lookup', description='Endpoints for lookup tables.')
 
 @ns.route('/terms-and-conditions/')
 class LookupTermsAndConditionResource(Resource):
@@ -423,4 +426,28 @@ class LookupMedicalSymptomssApi(Resource):
     def get(self):
         """get contents of medical symptoms lookup table"""
         res = LookupMedicalSymptoms.query.all()
+        return {'total_items': len(res), 'items': res}
+
+@ns.route('/organizations/')
+class LookupOrganizationsApi(Resource):
+    """
+    Endpoint that returns the list of organizations affiliated with Modobio.
+    """
+    @token_auth.login_required
+    @responds(schema=LookupOrganizationsOutputSchema, status_code=200, api=ns)
+    def get(self):
+        """get contents of medical symptoms lookup table"""
+        res = LookupOrganizations.query.all()
+        return {'total_items': len(res), 'items': res}
+
+@ns.route('/currencies/')
+class LookupCurrenciesApi(Resource):
+    """
+    Endpoint that returns the list of medical symptoms.
+    """
+    @token_auth.login_required
+    @responds(schema=LookupCurrenciesOutputSchema, status_code=200, api=ns)
+    def get(self):
+        """get contents of medical symptoms lookup table"""
+        res = LookupCurrencies.query.all()
         return {'total_items': len(res), 'items': res}

@@ -3,12 +3,11 @@ from datetime import datetime
 import math, re
 from PIL import Image
 
-from flask import request, current_app
+from flask import request, current_app, url_for
 from flask_accepts import accepts, responds
-from flask_restx import Resource
+from flask_restx import Resource, Namespace
 from sqlalchemy import select
 
-from odyssey.api import api
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.errors import (
     UserNotFound, 
@@ -111,7 +110,7 @@ from odyssey.api.lookup.schemas import LookupDefaultHealthMetricsSchema
 from odyssey.api.staff.schemas import StaffRecentClientsSchema
 from odyssey.api.facility.schemas import ClientSummarySchema
 
-ns = api.namespace('client', description='Operations related to clients')
+ns = Namespace('client', description='Operations related to clients')
 
 def process_race_and_ethnicity(user_id, mother, father):
     def format_list(ids):
@@ -188,68 +187,67 @@ class ClientProfilePicture(Resource):
         Accepts form-data, will only handle one image
         "profile_picture": file (allowed types are '.png', '.jpg', '.jpeg')
         """
-        
         if not ('profile_picture' in request.files and request.files['profile_picture']):  
             raise InputError(422, "No file selected")    
-        res = {}
+
         # add all files to S3 - Naming it specifically as client_profile_picture to differentiate from staff profile pic
         # format: id{user_id:05d}/client_profile_picture/size{img.length}x{img.width}.img_extension
-        if not current_app.config['LOCAL_CONFIG']:
-            fh = FileHandling()    
-            img = request.files['profile_picture']
-            res = ClientInfo.query.filter_by(user_id=user_id).first().profile_pictures
-            _prefix = f'id{user_id:05d}/client_profile_picture'
+        fh = FileHandling()
+        img = request.files['profile_picture']
+        res = ClientInfo.query.filter_by(user_id=user_id).first().profile_pictures
+        _prefix = f'id{user_id:05d}/client_profile_picture'
 
-            # validate file size - safe threashold (MAX = 10 mb)
-            fh.validate_file_size(img, IMAGE_MAX_SIZE)
-            # validate file type
-            img_extension = fh.validate_file_type(img, ALLOWED_IMAGE_TYPES)
+        # validate file size - safe threashold (MAX = 10 mb)
+        fh.validate_file_size(img, IMAGE_MAX_SIZE)
+        # validate file type
+        img_extension = fh.validate_file_type(img, ALLOWED_IMAGE_TYPES)
 
-            # if any, delete files with clien_profile_picture prefix
-            fh.delete_from_s3(prefix=_prefix)
-            # delete entries to UserProfilePictures in db
-            for _obj in res:
-                db.session.delete(_obj)
-            
-            # Save original to S3
-            open_img = Image.open(img)
-            img_w , img_h = open_img.size
-            original_s3key = f'{_prefix}/original{img_extension}'
-            fh.save_file_to_s3(img, original_s3key)
-            # Save original to db
+        # if any, delete files with clien_profile_picture prefix
+        fh.delete_from_s3(prefix=_prefix)
+        # delete entries to UserProfilePictures in db
+        for _obj in res:
+            db.session.delete(_obj)
+
+        # Save original to S3
+        open_img = Image.open(img)
+        img_w, img_h = open_img.size
+        original_s3key = f'{_prefix}/original{img_extension}'
+        fh.save_file_to_s3(img, original_s3key)
+
+        # Save original to db
+        user_profile_pic = UserProfilePictures()
+        user_profile_pic.original = True
+        user_profile_pic.client_id = user_id
+        user_profile_pic.image_path = original_s3key
+        user_profile_pic.width = img_w
+        user_profile_pic.height = img_h
+        db.session.add(user_profile_pic)
+
+        # crop new uploaded image into a square
+        squared = fh.image_crop_square(img)
+
+        # resize to sizes specified by the tuple of tuples in constant IMAGE_DEMENSIONS
+        for dimension in IMAGE_DIMENSIONS:
+            _img = fh.image_resize(squared, dimension)
+            # save to s3 bucket
+            _img_s3key = f'{_prefix}/{_img.filename}'
+            fh.save_file_to_s3(_img, _img_s3key)
+
+            # save to database
+            w, h = dimension
             user_profile_pic = UserProfilePictures()
-            user_profile_pic.original = True
             user_profile_pic.client_id = user_id
-            user_profile_pic.image_path = original_s3key
-            user_profile_pic.width = img_w
-            user_profile_pic.height = img_h
+            user_profile_pic.image_path = _img_s3key
+            user_profile_pic.width = w
+            user_profile_pic.height = h
             db.session.add(user_profile_pic)
 
-            # crop new uploaded image into a square
-            squared = fh.image_crop_square(img)
-            # resize to sizes specified by the tuple of tuples in constant IMAGE_DEMENSIONS
-            for dimension in IMAGE_DIMENSIONS:
-                _img = fh.image_resize(squared, dimension)
-                # save to s3 bucket
-                _img_s3key = f'{_prefix}/{_img.filename}'
-                fh.save_file_to_s3(_img, _img_s3key)
-
-                # save to database
-                w , h = dimension
-                user_profile_pic = UserProfilePictures()
-                user_profile_pic.client_id = user_id
-                user_profile_pic.image_path = _img_s3key
-                user_profile_pic.width = w
-                user_profile_pic.height = h
-                db.session.add(user_profile_pic)
-
-            # get presigned urls
-            res = fh.get_presigned_urls(prefix = _prefix)
-            img.close()
+        # get presigned urls
+        res = fh.get_presigned_urls(prefix=_prefix)
+        img.close()
 
         db.session.commit()
         return {'user_id': user_id, 'profile_picture': res}
-
 
     @token_auth.login_required(user_type=('client',))
     @responds(status_code=204, api=ns)
@@ -257,20 +255,18 @@ class ClientProfilePicture(Resource):
         """
         Request to delete the client's profile picture
         """
-        #if in local config, nothing will be deleted, but this request will be successful and return 204
-        if not current_app.config['LOCAL_CONFIG']:
-            fh = FileHandling()
-            _prefix = f'id{user_id:05d}/client_profile_picture'
-            # if any, delete files with clien_profile_picture prefix
-            fh.delete_from_s3(prefix=_prefix)
-            
-            # delete entries to UserProfilePictures in db
-            res = ClientInfo.query.filter_by(user_id=user_id).first().profile_pictures
-            for _obj in res:
-                db.session.delete(_obj)
+        fh = FileHandling()
+        _prefix = f'id{user_id:05d}/client_profile_picture'
 
-            db.session.commit()
+        # if any, delete files with clien_profile_picture prefix
+        fh.delete_from_s3(prefix=_prefix)
 
+        # delete entries to UserProfilePictures in db
+        res = ClientInfo.query.filter_by(user_id=user_id).first().profile_pictures
+        for _obj in res:
+            db.session.delete(_obj)
+
+        db.session.commit()
 
 
 @ns.route('/<int:user_id>/')
@@ -323,8 +319,7 @@ class Client(Resource):
             .filter(ClientRaceAndEthnicity.user_id == user_id).all()
 
         #Include profile picture in different sizes
-        profile_pics_dict = client_data.profile_pictures
-        if not current_app.config['LOCAL_CONFIG'] and profile_pics_dict:
+        if client_data.profile_pictures:
             fh = FileHandling()
             _prefix = f'id{user_id:05d}/client_profile_picture'
             client_info_payload["profile_picture"] = fh.get_presigned_urls(_prefix)
@@ -506,10 +501,10 @@ class Clients(Resource):
                 'total_items': total_hits,
             }, 
             '_links': {
-                '_self': api.url_for(Clients, _from=startAt, per_page=per_page),
-                '_next': api.url_for(Clients, _from=startAt + per_page, per_page=per_page)
+                '_self': url_for('api.client_clients', _from=startAt, per_page=per_page),
+                '_next': url_for('api.client_clients', _from=startAt + per_page, per_page=per_page)
                 if startAt + per_page < total_hits else None,
-                '_prev': api.url_for(Clients, _from= startAt-per_page if startAt-per_page >=0 else 0, per_page=per_page)
+                '_prev': url_for('api.client_clients', _from= startAt-per_page if startAt-per_page >=0 else 0, per_page=per_page)
                 if startAt != 0 else None,
             }, 
             'items': items}
@@ -784,12 +779,10 @@ class SignedDocuments(Resource):
         urls = {}
         paths = []
 
-        if not current_app.config['LOCAL_CONFIG']:
-            s3 = boto3.client('s3')
-            params = {
-                'Bucket': current_app.config['S3_BUCKET_NAME'],
-                'Key': None
-            }
+        s3 = boto3.client('s3')
+        params = {
+            'Bucket': current_app.config['AWS_S3_BUCKET'],
+            'Key': None}
 
         for table in (
             ClientPolicies,
@@ -803,16 +796,13 @@ class SignedDocuments(Resource):
                 table.query
                 .filter_by(user_id=user_id)
                 .order_by(table.idx.desc())
-                .first()
-            )
+                .first())
             if result and result.pdf_path:
                 paths.append(result.pdf_path)
-                if not current_app.config['LOCAL_CONFIG']:
-                    params['Key'] = result.pdf_path
-                    url = s3.generate_presigned_url('get_object', Params=params, ExpiresIn=600)
-                    urls[table.displayname] = url
-                else:
-                    urls[table.displayname] = result.pdf_path
+
+                params['Key'] = result.pdf_path
+                url = s3.generate_presigned_url('get_object', Params=params, ExpiresIn=600)
+                urls[table.displayname] = url
 
         concat = merge_pdfs(paths, user_id)
         urls['All documents'] = concat
@@ -953,6 +943,12 @@ class ClinicalCareTeamMembers(Resource):
         the user's id is stored in the ClientClinicalCareTeam table. Otherwise, just the 
         email address is registered. 
 
+        What if a client adds someone not currently a modobio user:    
+            If a user is NOT yet a modobio member, we will use the provided email to create a new user and link
+            the current authorization request to that new user. The account will be in an unverified state until that 
+            email is used as part of the account creation routine. 
+
+
         Parameters
         ----------
         user_id : int
@@ -960,7 +956,7 @@ class ClinicalCareTeamMembers(Resource):
 
         Expected payload includes
         email : str
-            Email of new care team member
+            Email of new care team member in case they are not yet a modobio user
         modobio_id : str
             Modobio ID of new care team member
         Returns
@@ -973,8 +969,14 @@ class ClinicalCareTeamMembers(Resource):
 
         user = token_auth.current_user()[0]
 
-        current_team = ClientClinicalCareTeam.query.filter_by(user_id=user_id, is_temporary=False).all()
-        current_team_emails = [x.team_member_email for x in current_team]
+        current_team = db.session.execute(
+            select(ClientClinicalCareTeam, User.email, User.modobio_id).
+            join(User, User.user_id == ClientClinicalCareTeam.team_member_user_id).
+            where(ClientClinicalCareTeam.user_id == user.user_id)
+        ).all()
+
+        current_team_emails = [x[1] for x in current_team]
+        current_team_modobio_ids = [x[2] for x in current_team]
 
         # prevent users from having more than 20 clinical care team members
         if len(current_team) + len(data.get("care_team")) > 20:
@@ -984,45 +986,63 @@ class ClinicalCareTeamMembers(Resource):
         # if email is associated with a current user account, add that user's id to 
         #  the database entry
         for team_member in data.get("care_team"):
+            
             if 'modobio_id' not in team_member and 'team_member_email' not in team_member:
                 raise InputError(message="Either modobio_id or email must be provided for each care team member", status_code=400)
-            if 'modobio_id' in team_member:
-                #if modobio_id has been given, find the user with that id and insert their email into the payload
-                modo_id = team_member["modobio_id"]
-                team_user = User.query.filter_by(modobio_id=modo_id).one_or_none()
-                if user:
-                    team_member["team_member_email"] = team_user.email
-                else:
-                    raise UserNotFound(message=f"The user with modobio_id {modo_id} does not exist")
-            if team_member["team_member_email"] == user.email:
+
+            # skip if user already part of care team
+            elif team_member.get('modobio_id', '').upper() in current_team_modobio_ids or team_member.get('team_member_email','').lower() in current_team_emails:
                 continue
-            if team_member["team_member_email"].lower() in current_team_emails:
+            
+            # user attempting to add themselves, skip.
+            elif team_member.get('modobio_id') == user.modobio_id or team_member.get('team_member_email') == user.email:
                 continue
 
-            team_member_user = User.query.filter_by(email=team_member["team_member_email"].lower()).one_or_none()
-            if team_member_user:
-                db.session.add(ClientClinicalCareTeam(**{"team_member_email": team_member["team_member_email"],
-                                                         "team_member_user_id": team_member_user.user_id,
-                                                         "user_id": user_id}))
+            # if modobio_id has been given, find the user with that id and insert their email into the payload
+            elif 'modobio_id' in team_member:
+                modo_id = team_member.get('modobio_id', '').upper()
+                team_member_user = User.query.filter_by(modobio_id=modo_id).one_or_none()
+                if team_member_user:
+                    team_member["team_member_user_id"] = team_member_user.user_id
+                else:
+                    raise UserNotFound(message=f"The user with modobio_id {modo_id} does not exist")
+           
+            # only email provided. Check if the user exists, if not, create new user
             else:
-                db.session.add(ClientClinicalCareTeam(**{"team_member_email": team_member["team_member_email"],
-                                                       "user_id": user_id}))
-            
+                team_member_user = User.query.filter_by(email=team_member["team_member_email"].lower()).one_or_none()
+                if team_member_user:
+                    team_member["team_member_user_id"] = team_member_user.user_id
+                # email is not in our system. 
+                # create a new, unverified user using the provided email
+                # user is neither staff nor client
+                else:
+                    team_member_user = User(email = team_member['team_member_email'], is_staff=False, is_client=False)
+                    db.session.add(team_member_user)
+                    db.session.flush()
+                    team_member["team_member_user_id"] = team_member_user.user_id
+                    
+            # add new team member to the clincial care team
+            db.session.add(ClientClinicalCareTeam(**{"team_member_user_id": team_member["team_member_user_id"],
+                                                    "user_id": user_id})) 
+
         db.session.commit()
 
         # prepare response with names for clinical care team members who are also users 
-        current_team = ClientClinicalCareTeam.query.filter_by(user_id=user_id, team_member_user_id=None).all() # non-users
-
+        current_team = []
         current_team_users = db.session.query(
-                                    ClientClinicalCareTeam, User.firstname, User.lastname, User.modobio_id
+                                    ClientClinicalCareTeam, User.firstname, User.lastname, User.modobio_id, User.email
                                 ).filter(
                                     ClientClinicalCareTeam.user_id == user_id
                                 ).filter(ClientClinicalCareTeam.team_member_user_id == User.user_id
                                 ).all()
         
         for team_member in current_team_users:
-            team_member[0].__dict__.update({'firstname': team_member[1], 'lastname': team_member[2], 'modobio_id': team_member[3]})
-            current_team.append(team_member[0])
+            current_team.append({
+                'firstname': team_member[1],
+                'lastname': team_member[2], 
+                'modobio_id': team_member[3],
+                'team_member_email': team_member[4],
+                'team_member_user_id':team_member[0].team_member_user_id })
         
         response = {"care_team": current_team,
                     "total_items": len(current_team) }
@@ -1076,36 +1096,24 @@ class ClinicalCareTeamMembers(Resource):
         -------
         200 OK
         """
-        updates = False
-        # check if any team members are users
-        # if so, update their entry in the care team table with their user_id
-        current_team_non_users = ClientClinicalCareTeam.query.filter_by(user_id=user_id, team_member_user_id=None).all()
-        
-        for team_member in current_team_non_users:
-            team_member_user = User.query.filter_by(email=team_member.team_member_email).one_or_none()
 
-            if team_member_user:
-                team_member.team_member_user_id = team_member_user.user_id
-                db.session.add(team_member_user)
-                updates=True
-
-        if updates:
-            db.session.commit()
-            current_team = ClientClinicalCareTeam.query.filter_by(user_id=user_id, team_member_user_id=None).all()
-        else:
-            current_team = current_team_non_users
         
         # prepare response with names for clinical care team members who are also users 
+        current_team = []
         current_team_users = db.session.query(
-                                    ClientClinicalCareTeam, User.firstname, User.lastname, User.modobio_id
+                                    ClientClinicalCareTeam, User.firstname, User.lastname, User.modobio_id, User.email
                                 ).filter(
                                     ClientClinicalCareTeam.user_id == user_id
                                 ).filter(ClientClinicalCareTeam.team_member_user_id == User.user_id
                                 ).all()
-
+        
         for team_member in current_team_users:
-            team_member[0].__dict__.update({'firstname': team_member[1], 'lastname': team_member[2], 'modobio_id': team_member[3]})
-            current_team.append(team_member[0])
+            current_team.append({
+                'firstname': team_member[1],
+                'lastname': team_member[2], 
+                'modobio_id': team_member[3],
+                'team_member_email': team_member[4],
+                'team_member_user_id':team_member[0].team_member_user_id })
         
         response = {"care_team": current_team,
                     "total_items": len(current_team) }
@@ -1163,7 +1171,6 @@ class ClinicalCareTeamTemporaryMembers(Resource):
 
         return {"care_team": current_team, "total_items": len(current_team)}
 
-
 @ns.route('/clinical-care-team/member-of/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class UserClinicalCareTeamApi(Resource):
@@ -1206,10 +1213,28 @@ class ClinicalCareTeamResourceAuthorization(Resource):
     """
     Create, update, remove, retrieve authorization of resource access for care team members.
 
-    Clinical care team members must individually be given access to resources. The available options can be found
-    by using the /lookup/care-team/resources/ (GET) API. 
+    There are 2 contexts which this API can be accessed:
+        - client (self): client is editing and viewing their own care team settings
+            -POST,GET,PUT,DELETE access
+        - staff: staff user is requesting to have resource access
+            -POST, limited access
+
+    Client users not accessing their own resource authorization are not allowed to use this endpoint.
+
+    More on staff access:
+        Staff may request resource authorization though the POST method. Resource request is logged but not yet verified until the 
+        client themselves makes a PUT request to verify the resource access. 
+        
+    Adding current modobio users to the care team:
+        Users must already be part of a client's clinical care team in order to be granted access to resources
+        Care team addition can either be done through the client/clinical-care-team/members/<int:user_id>/ POST endpooint
+        If a user is not yet part of the client's care team, we will add them ad part of the POST method. 
+
+
+    Care team resources are added by resource id coming from the LookupClinicalCareTeamResources.resource_id.    
+    The available options can be foundby using the /lookup/care-team/resources/ (GET) API. 
     """
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('client', 'staff'))
     @accepts(schema=ClinicalCareTeamAuthorizationNestedSchema, api=ns)
     @responds(schema=ClinicalCareTeamAuthorizationNestedSchema, api=ns, status_code=201)
     def post(self, user_id):
@@ -1226,39 +1251,44 @@ class ClinicalCareTeamResourceAuthorization(Resource):
         current_authorizations = db.session\
             .query(ClientClinicalCareTeamAuthorizations.team_member_user_id,ClientClinicalCareTeamAuthorizations.resource_id)\
             .filter_by(user_id=user_id).all()
-        
-        # user_id denotes the main users
-        # if the current user is not the main user (aka a random user), and they are not on the current team
-        # deny them access
 
-        if current_user.user_id != user_id: 
-            if current_user.user_id not in current_team_ids:
-                raise InputError(message="member not in care team", status_code=400)
-            
-            if current_user.is_client:
-                raise InputError(message="Clients cannot request other clients data", status_code=400)
-
+        # validate the requested resource authorizations by checking them against the lookup table
         care_team_resources = LookupClinicalCareTeamResources.query.all()
         care_team_resources_ids = [x.resource_id for x in care_team_resources]
-        
-        # If you are the main user, and you are posting for your team, the authorization status is set to accepted
-        if current_user.user_id == user_id:
-            status = 'accepted'
-        # If you are a team member requesting access, then you must be approved by the main client
-        else:
-            status = 'pending'
+        requested_resources_by_id = [x.resource_id for x in data.get('clinical_care_team_authorization')]
 
+        if len(set(requested_resources_by_id) - set(care_team_resources_ids)) > 0:
+            raise InputError(message="a resource_id was not recognized", status_code=400)
+      
+        # user_id denotes the main users
+        # if the current user is not the main user (aka a random user)
+        # they must be a staff member requesting access to resources. 
+        if current_user.user_id != user_id: 
+            # bring up all team_member_ids in payload
+            # all team members in resource request must hav ethe same id as logged-in user
+            team_member_ids = set([x.team_member_user_id for x in data.get('clinical_care_team_authorization')])
+
+            if current_user.user_id not in team_member_ids or len(team_member_ids) > 1:
+                raise InputError(message="cannot request other users be added to care team", status_code=400)
+            
+            # authorization must be validated by the client themselves
+            status = 'pending'
+        else:
+            # The logged-in user is the main user in this request
+            status = 'accepted'
+        
+        # loop through the authorization requests and add them ``
         for authorization in data.get('clinical_care_team_authorization'):
-            if authorization.team_member_user_id in current_team_ids and authorization.resource_id in care_team_resources_ids:
+            if authorization.team_member_user_id in current_team_ids:
                 for member_id,resource_id in current_authorizations:
                     if authorization.team_member_user_id == member_id and authorization.resource_id == resource_id:
-                        raise InputError(message="Member {member_id} and resource {resource_id} have already been requested", status_code=400)
+                        raise InputError(message=f"Member {member_id} and resource {resource_id} have already been requested", status_code=400)
 
                 authorization.user_id = user_id
                 authorization.status = status
                 db.session.add(authorization)
             else:
-                raise InputError(message="Team member not in care team or resource_id is invalid", status_code=400)
+                raise InputError(message="Team member not in care team", status_code=400)
         try:
             db.session.commit()
         except Exception as e:

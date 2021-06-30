@@ -2,7 +2,7 @@ from PIL import Image
 
 from flask import request, current_app, Response
 from flask_accepts import accepts, responds
-from flask_restx import Resource
+from flask_restx import Resource, Namespace
 import json, calendar, copy
 from flask.json import dumps
 from datetime import date, time, datetime, timedelta, timezone
@@ -11,7 +11,6 @@ from dateutil.rrule import YEARLY, MONTHLY, WEEKLY, DAILY, rrule
 from dateutil.relativedelta import relativedelta
 
 from odyssey import db
-from odyssey.api import api
 from odyssey.api.staff.models import (
     StaffOperationalTerritories,
     StaffRoles,
@@ -35,7 +34,7 @@ from odyssey.api.staff.schemas import (
     StaffCalendarEventsUpdateSchema)
 
 
-ns = api.namespace('staff', description='Operations related to staff members')
+ns = Namespace('staff', description='Operations related to staff members')
 
 @ns.route('/')
 #@ns.doc(params={'firstname': 'first name to search',
@@ -295,7 +294,7 @@ class StaffToken(Resource):
 class StaffProfilePage(Resource):
     """endpoint related staff members' profile pages"""
 
-    #@token_auth.login_required
+    @token_auth.login_required(user_type=('modobio',))
     @responds(schema=StaffProfilePageGetSchema, api=ns, status_code=200)
     def get(self, user_id):
         """get details for a staff member's profile page"""
@@ -316,13 +315,13 @@ class StaffProfilePage(Resource):
         profile = StaffProfile.query.filter_by(user_id=user_id).one_or_none()
 
         res['bio'] = profile.bio
-        imgs = {}
+
         #get presigned link to this user's profile picture
-        s3keys = profile.profile_pictures
         res['profile_picture'] = None
-        if not current_app.config['LOCAL_CONFIG'] and s3keys:
+        if profile.profile_pictures:
             fh = FileHandling()
-            res['profile_picture'] = fh.get_presigned_urls(prefix = f'id{user_id:05d}/staff_profile_picture')
+            res['profile_picture'] = fh.get_presigned_urls(prefix=f'id{user_id:05d}/staff_profile_picture')
+
         return res
 
     @token_auth.login_required(user_type=('staff_self',))
@@ -373,7 +372,7 @@ class StaffProfilePage(Resource):
                 user_update[key] = data
 
         # if provided, get profile picture and store in s3
-        if not current_app.config['LOCAL_CONFIG'] and 'profile_picture' in request.files:
+        if 'profile_picture' in request.files:
             # if profile_picture field was included, profile pic is removed
             # then if image was provided, it is updated, otherwise, it remains deleted
             fh = FileHandling()
@@ -381,7 +380,7 @@ class StaffProfilePage(Resource):
             
             # will delete anything starting with this prefix if it exists
             # if nothing matches the prefix, nothing will happen
-            fh.delete_from_s3(prefix = _prefix)
+            fh.delete_from_s3(prefix=_prefix)
 
             # Delete from db
             for _obj in profile.profile_pictures:
@@ -396,14 +395,16 @@ class StaffProfilePage(Resource):
             if img:
                 # validate file size - safe threashold (MAX = 10 mb)
                 fh.validate_file_size(img, IMAGE_MAX_SIZE)
+
                 # validate file type
                 img_extension = fh.validate_file_type(img, ALLOWED_IMAGE_TYPES)
 
                 # Save original to S3
                 open_img = Image.open(img)
-                img_w , img_h = open_img.size
+                img_w, img_h = open_img.size
                 original_s3key = f'{_prefix}/original{img_extension}'
                 fh.save_file_to_s3(img, original_s3key)
+
                 # Save original to db
                 user_profile_pic = UserProfilePictures()
                 user_profile_pic.original = True
@@ -426,21 +427,22 @@ class StaffProfilePage(Resource):
                     fh.save_file_to_s3(_img, _img_s3key)
 
                     # save to database
-                    w , h = dimension
+                    w, h = dimension
                     user_profile_pic = UserProfilePictures()
                     user_profile_pic.staff_id = user_id
                     user_profile_pic.image_path = _img_s3key
                     user_profile_pic.width = w
                     user_profile_pic.height = h
                     db.session.add(user_profile_pic)
-                
+
                 #get presigned urls to return in response
-                urls = fh.get_presigned_urls(prefix=_prefix)        
+                urls = fh.get_presigned_urls(prefix=_prefix)
                 img.close()
-                
+
         #update user in db
         user.update(user_update)
         db.session.commit()
+
         #add profile keys to user_update to match @responds
         if bio:
             user_update['bio'] = profile.bio
@@ -450,7 +452,7 @@ class StaffProfilePage(Resource):
         if len(user_update.keys()) == 0:
             #request was successful but there is no body to return
             return Response(status=204)
-        
+
         return user_update
 
 
