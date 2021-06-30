@@ -1,12 +1,11 @@
 from flask_accepts import responds
-from flask_restx import Resource
+from flask_restx import Resource, Namespace
 
 import pytz
 import pathlib
 
 from flask import current_app
 
-from odyssey.api import api
 from odyssey.utils.auth import token_auth
 from odyssey.api.lookup.models import (
      LookupActivityTrackers,
@@ -65,7 +64,7 @@ from odyssey.utils.misc import check_drink_existence
 
 from odyssey import db
 
-ns = api.namespace('lookup', description='Endpoints for lookup tables.')
+ns = Namespace('lookup', description='Endpoints for lookup tables.')
 
 @ns.route('/terms-and-conditions/')
 class LookupTermsAndConditionResource(Resource):

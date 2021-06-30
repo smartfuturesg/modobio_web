@@ -29,10 +29,10 @@ def test_post_subscription_contract(test_client, init_database, staff_auth_heade
     #wait for pdf generation
     time.sleep(3)
     client_subscription = ClientSubscriptionContract.query.filter_by(user_id=1).order_by(ClientSubscriptionContract.signdate.desc()).first()
+
     assert response.status_code == 201
     assert client_subscription.signdate.strftime("%Y-%m-%d") == clients_subscription_data["signdate"]
     assert client_subscription.pdf_path
-    assert pathlib.Path(client_subscription.pdf_path).exists()
 
 def test_get_subscription_contract(test_client, init_database, staff_auth_header):
     """
@@ -73,7 +73,6 @@ def test_post_consult_contract(test_client, init_database, staff_auth_header):
     assert response.status_code == 201
     assert client_consult.signdate.strftime("%Y-%m-%d") == clients_consult_data["signdate"]
     assert client_consult.pdf_path
-    assert pathlib.Path(client_consult.pdf_path).exists()
 
 def test_get_consult_contract(test_client, init_database, staff_auth_header):
     """
@@ -115,7 +114,6 @@ def test_post_policies_contract(test_client, init_database, staff_auth_header):
     assert response.status_code == 201
     assert client_policies.signdate.strftime("%Y-%m-%d") == clients_policies_data["signdate"]
     assert client_policies.pdf_path
-    assert pathlib.Path(client_policies.pdf_path).exists()
 
 def test_get_policies_contract(test_client, init_database, staff_auth_header):
     """

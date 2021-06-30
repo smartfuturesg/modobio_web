@@ -1,8 +1,11 @@
 import base64
-from datetime import datetime
+import copy
 import os
 import pytest
-import copy
+
+from datetime import datetime
+
+import boto3
 
 from flask_migrate import upgrade
 from sqlalchemy import text
@@ -252,9 +255,10 @@ def init_database():
 def test_client():
     """flask application instance (client)"""
     app = create_app()
+
     db.init_app(app)
     testing_client = app.test_client()
-    
+
     # Establish an application context before running the tests.
     ctx = app.app_context()
     ctx.push()
@@ -262,6 +266,19 @@ def test_client():
     yield testing_client
 
     ctx.pop()
+
+    # Delete files from S3 bucket
+    if not app.config['AWS_S3_PYTEST_KEEP']:
+        s3 = boto3.resource('s3')
+        bucket = s3.Bucket(app.config['AWS_S3_BUCKET'])
+
+        objects = bucket.objects.filter(Prefix=app.config['AWS_S3_PREFIX'])
+        objects = [{'Key': obj.key} for obj in objects]
+        if objects:
+            delete = {
+                'Objects': objects,
+                'Quiet': True}
+            bucket.delete_objects(Delete=delete)
 
 @pytest.fixture(scope='session')
 def staff_auth_header(test_client):

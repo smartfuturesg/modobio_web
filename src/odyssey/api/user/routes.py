@@ -4,12 +4,11 @@ import jwt
 
 from flask import current_app, request, jsonify, redirect
 from flask_accepts import accepts, responds
-from flask_restx import Resource
+from flask_restx import Resource, Namespace
 from sqlalchemy.sql.expression import select
 from werkzeug.security import check_password_hash
 
 
-from odyssey.api import api
 from odyssey.api.client.schemas import ClientInfoSchema, ClientGeneralMobileSettingsSchema, ClientRaceAndEthnicitySchema
 from odyssey.api.client.models import ClientClinicalCareTeam
 from odyssey.api.lookup.models import LookupSubscriptions, LookupLegalDocs
@@ -55,7 +54,7 @@ from odyssey.utils.misc import check_user_existence, check_client_existence, che
 from odyssey.utils import search
 from odyssey import db
 
-ns = api.namespace('user', description='Endpoints for user accounts.')
+ns = Namespace('user', description='Endpoints for user accounts.')
 
 
 @ns.route('/<int:user_id>/')
@@ -105,18 +104,16 @@ class ApiUser(Resource):
         user.deleted = True
         
         #delete files or images saved in S3 bucket for user_id
-        #when FLASK_DEV=remote
-        if not current_app.config['LOCAL_CONFIG']:
-            s3 = boto3.client('s3')
+        s3 = boto3.client('s3')
 
-            bucket_name = current_app.config['S3_BUCKET_NAME']
-            user_directory=f'id{user_id:05d}/'
+        bucket_name = current_app.config['AWS_S3_BUCKET']
+        user_directory=f'id{user_id:05d}/'
 
-            response = s3.list_objects_v2(Bucket=bucket_name, Prefix=user_directory)
-            
-            for object in response.get('Contents', []):
-                print('Deleting', object['Key'])
-                s3.delete_object(Bucket=bucket_name, Key=object['Key'])
+        response = s3.list_objects_v2(Bucket=bucket_name, Prefix=user_directory)
+
+        for object in response.get('Contents', []):
+            print('Deleting', object['Key'])
+            s3.delete_object(Bucket=bucket_name, Key=object['Key'])
         
         #delete lines with user_id in all other tables except "User" and "UserRemovalRequests"
         for table in tableList:
@@ -469,10 +466,11 @@ class PasswordResetEmail(Resource):
                                   
         send_email_password_reset(user.email, password_reset_token)
 
-        if current_app.config['LOCAL_CONFIG']:
+        # DEV mode won't send an email, so return password. DEV mode ONLY.
+        if current_app.config['DEV']:
             return jsonify({"token": password_reset_token,
                             "password_reset_url" : PASSWORD_RESET_URL.format(password_reset_token)})
-            
+
         return 200
         
 

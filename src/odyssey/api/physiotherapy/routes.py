@@ -1,16 +1,15 @@
 from flask import request
-from flask_restx import Resource, Api
+from flask_restx import Resource, Namespace, Api
 from flask_accepts import accepts , responds
 
 from odyssey.api.physiotherapy.models import Chessboard, PTHistory
 from odyssey import db
-from odyssey.api import api
 from odyssey.utils.auth import token_auth
 from odyssey.utils.errors import UserNotFound, IllegalSetting, ContentNotFound
 from odyssey.utils.misc import check_client_existence
 from odyssey.api.physiotherapy.schemas import ChessboardSchema, PTHistorySchema
 
-ns = api.namespace('physiotherapy', description='Operations related to physical therapy services')
+ns = Namespace('physiotherapy', description='Operations related to physical therapy services')
 
 @ns.route('/history/<int:user_id>/')
 class ClientPTHistory(Resource):

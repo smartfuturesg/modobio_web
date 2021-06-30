@@ -1,8 +1,7 @@
 from flask import request
-from flask_restx import Resource, Api
+from flask_restx import Resource, Namespace, Api
 from flask_accepts import accepts, responds
 
-from odyssey.api import api
 from odyssey.utils.auth import token_auth
 from odyssey.utils.errors import ContentNotFound, ContentNotFoundReturnData
 from odyssey import db
@@ -28,7 +27,7 @@ from odyssey.api.trainer.schemas import (
     PowerAssessmentSchema, 
     StrenghtAssessmentSchema
 )
-ns = api.namespace('trainer', description='Operations related to the trainer')
+ns = Namespace('trainer', description='Operations related to the trainer')
 
 @ns.route('/assessment/power/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
