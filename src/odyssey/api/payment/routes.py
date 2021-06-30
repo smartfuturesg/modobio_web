@@ -5,6 +5,7 @@ from flask_restx import Resource
 from odyssey import db
 from odyssey.api import api
 from odyssey.utils.auth import token_auth
+from odyssey.utils.constants import INSTAMED_API_KEY, INSTAMED_API_SECRET
 from odyssey.utils.misc import check_client_existence
 from odyssey.utils.errors import TooManyPaymentMethods, GenericNotFound
 from odyssey.api.payment.models import PaymentMethods
@@ -33,7 +34,7 @@ class PaymentMethodsApi(Resource):
         if PaymentMethods.query.filter_by(user_id=user_id).all() >= 5:
             raise TooManyPaymentMethods
 
-        #todo: call instamed api /rest/payment/paymentplan/
+        #ToDo: call instamed api /rest/payment/paymentplan/
         request_data = {
             "Outlet": {
                 "MerchantID": "ModoBio",
@@ -50,9 +51,10 @@ class PaymentMethodsApi(Resource):
         }
 
         response = requests.post('https://connect.instamed.com/rest/payment/paymentplan',
-                                headers={'Api-Key': current_app.config['INSTAMED_API_KEY'],
-                                         'Api-Secret': current_app.config['INSTAMED_API_SECRET'],
-                                         'Content-Type': 'application/json'})
+                                headers={'Api-Key': INSTAMED_API_KEY,
+                                         'Api-Secret': INSTAMED_API_SECRET,
+                                         'Content-Type': 'application/json'},
+                                data=request_data)
 
 
         #then store the paymentPlanId from response in db
