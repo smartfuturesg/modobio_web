@@ -963,6 +963,9 @@ class ClientWaistSizeHistory(BaseModelWithIdx, UserIdFkeyMixin):
     
 class ClientClinicalCareTeamAuthorizations(BaseModelWithIdx, UserIdFkeyMixin):
     """ 
+    DEPRECATED - 6.30.21
+    TODO: remove
+
     Stores clinical care team authorizations.
     One line per user, team memmber, resource combinaiton. Resource IDs come from 
     the LookupCareTeamTables table    
@@ -1077,30 +1080,28 @@ class ClientDataStorage(BaseModelWithIdx, UserIdFkeyMixin):
     :type: float
     """
 
-class ClientEHRAuthorizations(BaseModelWithIdx, UserIdFkeyMixin):
+class ClientEHRPageAuthorizations(BaseModelWithIdx, UserIdFkeyMixin):
     """ 
-    Authorzation for access to a client's EHR resources.
+    Stores EHR page authorizations granted by clients to other modobio users. 
 
-    One line per user, team memmber, resource group combinaiton. Resource IDs come from 
-    the LookupEHRPages.
-          
+    EHR page authorization options are found in LookupEHRPages
+
     """
 
-    __table_args__ = (UniqueConstraint('user_id', 'team_member_user_id', 'resource_group_id', name='ehr_auth_unique_resource_user_team_member_ids'),)
+    __table_args__ = (UniqueConstraint('user_id', 'team_member_user_id', 'resource_group_id', name='ehr_page_auth_unique_resource_user_team_member_ids'),)
 
     team_member_user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
     """
-    User ID number of the clinical care team member. Only modobio users may be entered into this table. With that, team members must
-    be signed up as a user in order to recieve care team data from modobio. 
+    User ID number of the care team member. 
 
     :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
     resource_group_id = db.Column(db.Integer, db.ForeignKey('LookupEHRPages.resource_group_id',ondelete="CASCADE"), nullable=False)
     """
-    Resource ID refers back to the care team resources table which stores the tables that can be accessed by care team members
+    Resource group ID refers to a grouping of electronic health record resources found on a given page in the application.  
 
-    :type: int, foreign key to :attr:`LookupClinicalCareTeamResources.resource_id <odyssey.models.lookup.LookupClinicalCareTeamResources.resource_id>`
+    :type: int, foreign key to :attr:`LookupEHRPages.resource_group_id <odyssey.models.lookup.LookupEHRPages.resource_group_id>`
     """
 
     status = db.Column(db.String())
@@ -1112,4 +1113,3 @@ class ClientEHRAuthorizations(BaseModelWithIdx, UserIdFkeyMixin):
 
     :type: str
     """
-

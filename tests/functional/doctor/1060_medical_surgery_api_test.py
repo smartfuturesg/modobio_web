@@ -38,7 +38,7 @@ def test_post_surgery(test_client, init_database, staff_auth_header):
     #should get 400 bad request
     assert response.status_code == 400
 
-def test_get_surgery(test_client, init_database, staff_auth_header):
+def test_get_surgery(test_client, init_database, client_auth_header):
     """
     GIVEN an api end point get client surgeries
     WHEN the '/doctor/surgery/' resource  is requested (GET)
@@ -47,7 +47,7 @@ def test_get_surgery(test_client, init_database, staff_auth_header):
 
     # send get request for client info on client_user_id = 1        
     response = test_client.get('/doctor/surgery/1/', 
-                            headers=staff_auth_header, 
+                            headers=client_auth_header, 
                             content_type='application/json')
     
     data = MedicalSurgeries.query.filter_by(user_id=1).first()
