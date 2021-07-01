@@ -870,9 +870,3 @@ EVENT_AVAILABILITY = ('Busy', 'Available')
 
 RECURRENCE_TYPE = ('Daily', 'Weekly', 'Monthly', 'Yearly')
 """ Types of recurrence that may be chosen for a recurring event """
-
-INSTAMED_API_KEY = 'df0dd57216e0411f822cb623560c8ed9'
-"""API Sandbox key for InstaMed API access."""
-
-INSTAMED_API_SECRET = 'gxsbVJmiWRBQ3oQz'
-"""API Sandbox secret for InstaMed API access."""
