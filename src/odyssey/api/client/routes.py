@@ -1866,7 +1866,7 @@ class ClinicalCareTeamResourceAuthorization(Resource):
         all_resource_group_ids = db.session.execute(select(LookupEHRPages.resource_group_id)).scalars().all()
         requested_resource_group_ids = [x.resource_group_id for x in data.get('ehr_page_authorizations')]
         if len(set(requested_resource_group_ids) - set(all_resource_group_ids)) > 0:
-            raise InputError(message="a resource_id was not recognized", status_code=400)
+            raise InputError(message="a resource_group_id was not recognized", status_code=400)
       
         # user_id denotes the main users
         # if the current user is not the main user (aka a random user)
@@ -1889,7 +1889,7 @@ class ClinicalCareTeamResourceAuthorization(Resource):
         for authorization in data.get('ehr_page_authorizations'):
             if authorization.team_member_user_id in current_team_ids:
                 for member_id,resource_group_id in current_authorizations:
-                    if authorization.team_member_user_id == member_id and authorization.resource_id == resource_group_id:
+                    if authorization.team_member_user_id == member_id and authorization.resource_group_id == resource_group_id:
                         db.session.rollback()
                         raise InputError(message=f"Member {member_id} and resource {resource_group_id} have already been requested", status_code=400)
 

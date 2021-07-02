@@ -2,7 +2,7 @@ import base64
 
 from flask.json import dumps
 from sqlalchemy import text
-from odyssey.api.lookup.models import LookupClinicalCareTeamResources
+from odyssey.api.lookup.models import LookupEHRPages
 
 from odyssey.api.user.models import User, UserLogin, UserRemovalRequests, UserPendingEmailVerifications
 from odyssey.api.doctor.models import MedicalImaging
@@ -63,7 +63,7 @@ def test_account_delete_request(test_client, init_database, staff_auth_header):
                                 headers=client_auth_header, 
                                 content_type='application/json')
 
-    total_resources = LookupClinicalCareTeamResources.query.count()
+    total_resources = LookupEHRPages.query.count()
     auths = [{"team_member_user_id": staff_client_id,"resource_id": num} for num in range(1,total_resources+1) ]
     payload = {"clinical_care_team_authorization" : auths}
     response = test_client.post(f"/client/clinical-care-team/resource-authorization/{client_id}/",

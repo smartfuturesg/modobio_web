@@ -6,11 +6,11 @@ from flask_accepts.decorators.decorators import responds
 from sqlalchemy import select
 
 from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations
-from odyssey.api.lookup.models import LookupClinicalCareTeamResources
+from odyssey.api.lookup.models import LookupEHRPages
 from odyssey.api.user.models import User
 
 from tests.functional.client.data import clients_clinical_care_team
-from tests.functional.user.data import users_new_user_client_data, users_staff_member_data
+from tests.functional.user.data import users_new_user_client_data
 from tests.functional.doctor.data import doctor_blood_tests_data
 
 def test_adding_clinical_care_team(test_client, init_database, client_auth_header, staff_auth_header):
@@ -197,7 +197,7 @@ def test_authorize_clinical_care_team(test_client, init_database, client_auth_he
     #####
     # Authorize another client to access all clinical care team resources
     #####
-    total_resources = LookupClinicalCareTeamResources.query.count()
+    total_resources = LookupEHRPages.query.count()
     auths = [{"team_member_user_id": team_member_client_user_id,"resource_id": num} for num in range(1,total_resources+1) ]
     payload = {"clinical_care_team_authorization" : auths}
     response = test_client.post(f"/client/clinical-care-team/resource-authorization/{1}/",
