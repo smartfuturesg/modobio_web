@@ -42,7 +42,7 @@ def send_email_user_registration_portal(recipient, password, portal_id):
     remote_registration_url = REGISTRATION_PORTAL_URL.format(portal_id)
 
     # route emails to AWS mailbox simulator when in dev environment
-    if current_app.config['DEV'] and not recipient.endswith('sde.cz'):
+    if current_app.config['DEV'] and not recipient.endswith('3pillarglobal.com'):
         recipient = "success@simulator.amazonses.com"
 
     # The email body for recipients with non-HTML email clients.
@@ -119,7 +119,7 @@ def send_email_password_reset(recipient, reset_token):
     reset_password_url = PASSWORD_RESET_URL.format(reset_token)
 
     # route emails to AWS mailbox simulator when in dev environment
-    if current_app.config['DEV'] and not recipient.endswith('sde.cz'):
+    if current_app.config['DEV'] and not recipient.endswith('3pillarglobal.com'):
         recipient = "success@simulator.amazonses.com"
 
     # The email body for recipients with non-HTML email clients.
