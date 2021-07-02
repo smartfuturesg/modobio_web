@@ -336,7 +336,7 @@ class StaffProfilePage(Resource):
         "lastname": "string",
         "biological_sex_male": "boolean",
         "bio": "string",
-        "profile_picture": file (allowed types are '.png', '.jpg', '.jpeg', '.bmp', '.gif', '.webp', '.psd')
+        "profile_picture": file (allowed types are '.png', '.jpg', '.jpeg')
         """
         #ensure this user id is for a valid staff member
         check_staff_existence(user_id)

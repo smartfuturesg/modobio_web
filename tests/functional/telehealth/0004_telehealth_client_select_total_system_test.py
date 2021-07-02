@@ -199,7 +199,7 @@ def test_client_time_select(test_client, init_database, client_auth_header):
     assert response.json['total_options'] == 53
 
 
-def test_full_system_with_timezones(test_client, init_database, staff_auth_header, client_auth_header):
+def test_full_system_with_settings(test_client, init_database, staff_auth_header, client_auth_header):
     """
     Testing the full telehealth system:
     1. set staff availability (UTC)
@@ -218,14 +218,18 @@ def test_full_system_with_timezones(test_client, init_database, staff_auth_heade
     ##
     # 1. Set staff's availability
     ##
-    availability = {'timezone' : 'UTC',
-                    'availability' : [  {
-            "day_of_week": "Wednesday",
-            "start_time": "3:00:00",
-            "end_time": "12:00:00"
-            } 
-        ]
-    }
+    availability = {
+                'settings': {
+                'timezone': 'UTC',
+                'auto_confirm': False
+                },
+                'availability' : [  {
+                "day_of_week": "Wednesday",
+                "start_time": "3:00:00",
+                "end_time": "12:00:00"
+                } 
+            ]
+        }
     response = test_client.post(f'/telehealth/settings/staff/availability/{2}/',
                                     headers=staff_auth_header, 
                                     data=dumps(availability), 
@@ -279,6 +283,7 @@ def test_full_system_with_timezones(test_client, init_database, staff_auth_heade
                             content_type='application/json')
     assert response.json['bookings'][0]['client_timezone'] == 'America/Phoenix'
     assert response.json['bookings'][0]['staff_timezone'] == 'UTC'
+    assert response.json['bookings'][0]['status'] == 'Pending Staff Acceptance'
 
     booking_id = response.json['bookings'][0]['idx']
 
