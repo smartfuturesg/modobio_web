@@ -1,7 +1,7 @@
 """EHR page auth tables
 
 Revision ID: 2f72ed31aba7
-Revises: 1757ded21a69
+Revises: 3db09f2c1960
 Create Date: 2021-06-23 16:10:46.493439
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '2f72ed31aba7'
-down_revision = '1757ded21a69'
+down_revision = '3db09f2c1960'
 branch_labels = None
 depends_on = None
 
