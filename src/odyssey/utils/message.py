@@ -102,7 +102,7 @@ def send_email_verify_email(recipient, token, code):
         BODY_HTML = BODY_HTML.replace('XXXX', str(code))
 
     # route emails to AWS mailbox simulator when in dev environment
-    if current_app.config['DEV'] and not recipient.email.endswith('sde.cz'):
+    if current_app.config['DEV'] and not recipient.email.endswith('3pillarglobal.com'):
         send_email(subject=SUBJECT, recipient="success@simulator.amazonses.com", body_text=BODY_TEXT, body_html=BODY_HTML, sender="verify@modobio.com")
     else:
         send_email(subject=SUBJECT, recipient=recipient.email, body_text=BODY_TEXT, body_html=BODY_HTML, sender="verify@modobio.com")
