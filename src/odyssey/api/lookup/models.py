@@ -1102,13 +1102,13 @@ class LookupEHRPages(BaseModel):
     ID for the resource group.
 
     :type: integer, primary key, autoincrementing
-
-    :type: string
     """
 
     resource_group_name = db.Column(db.String)
     """
     Internaly used name to refer to the resource group. Will be used to define authorization requirements for specific endpoints. 
+
+    :type: string
     """
     access_group = db.Column(db.String)
     """
