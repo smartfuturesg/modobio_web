@@ -11,7 +11,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from odyssey import db
 from odyssey.utils.constants import DB_SERVER_TIME
-from odyssey.utils.base.models import BaseModel
+from odyssey.utils.base.models import BaseModel, BaseModelWithIdx, UserIdFkeyMixin
 
 class StaffProfile(BaseModel):
     """ Staff member profile information table.
@@ -83,43 +83,13 @@ class StaffRecentClients(db.Model):
     :type: datetime
     """
 
-class StaffRoles(db.Model):
+class StaffRoles(BaseModelWithIdx, UserIdFkeyMixin):
     """ Stores informaiton on staff role assignments. 
 
     Roles must be verified either by a manual or automatic internal review process.
     Some roles will be location based where verification is required for each locality
     (state, country etc.). 
     """
-    __tablename__ = 'StaffRoles'
-    
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-    
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
-    """
-    Staff member user_id number, foreign key to User.user_id
-
-    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
-    """
-
     role = db.Column(db.String, nullable=False)
     """
     Name of the role assignment
@@ -146,35 +116,21 @@ class StaffRoles(db.Model):
     :type: bool
     """
 
+    operational_territories = db.relationship('StaffOperationalTerritories', uselist=True, back_populates='role')
+    """
+    One to many relationship with staff's opeartional territories
 
-class StaffOperationalTerritories(db.Model):
+    :type: :class:`StaffOperationalTerritories` instance list
+    """
+
+
+
+class StaffOperationalTerritories(BaseModelWithIdx, UserIdFkeyMixin):
     """ 
     Locations where staff members operate. Each entry is tied to a role in the StaffRoles table. 
     Depending on the profession, the role-territory paid must be verified with an active identification number
     or some other internal process. Verifications will be stored in another table. 
 
-    """
-    __tablename__ = 'StaffOperationalTerritories'
-    
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
     """
 
     operational_territory_id = db.Column(db.Integer, db.ForeignKey('LookupTerritoriesofOperation.idx'))
@@ -188,13 +144,6 @@ class StaffOperationalTerritories(db.Model):
     :type: int, foreign key to :attr:`LookupTerritoriesofOperation.idx <odyssey.models.lookup.LookupTerritoriesofOperation.idx>`
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
-    """
-    Staff member user_id number, foreign key to User.user_id
-
-    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
-    """
-
     role_id = db.Column(db.Integer, db.ForeignKey('StaffRoles.idx', ondelete="CASCADE"), nullable=False)
     """
     Role from the StaffRoles table. 
@@ -202,41 +151,18 @@ class StaffOperationalTerritories(db.Model):
     :type: int, foreign key to :attr:`StaffRoles.idx <odyssey.models.staff.StaffRoles.idx>`
     """
 
-class StaffCalendarEvents(db.Model):
+    role = db.relationship('StaffRoles', uselist=False, back_populates='operational_territories')
+    """
+    Many to one relationship with staff roles table
+
+    :type: :class:`StaffRoles` instance
+    """
+
+class StaffCalendarEvents(BaseModelWithIdx, UserIdFkeyMixin):
     """ 
     Model for events to be saved to the professional's calendar 
 
     """
-    __tablename__ = 'StaffCalendarEvents'
-    
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
-    """
-    Staff member user_id number, foreign key to User.user_id.
-
-    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
-    """
-
     start_date = db.Column(db.Date, nullable=False)
     """
     If recurring, this is the recurrence start date,
