@@ -364,7 +364,7 @@ class ClinicalCareTeamAuthorizaitonSchema(Schema):
     def make_object(self, data, **kwargs):
         return ClientClinicalCareTeamAuthorizations(**data)
 
-class CareTeamEHRAuthorizaitonSchema(Schema):
+class CareTeamEHRAuthorizationSchema(Schema):
     """
     Schmea for care team ehr authorization objects. 
 
@@ -397,7 +397,7 @@ class CareTeamEHRAuthorizationNestedSchema(Schema):
     """
     Nests clinical care team authorization schema for API
     """
-    ehr_page_authorizations = fields.Nested(CareTeamEHRAuthorizaitonSchema(many=True), missing=[])
+    ehr_page_authorizations = fields.Nested(CareTeamEHRAuthorizationSchema(many=True), missing=[])
 
 class ClientGeneralMobileSettingsSchema(BaseSchema):
     class Meta:
