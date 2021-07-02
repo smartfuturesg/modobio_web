@@ -9,7 +9,7 @@ from odyssey import db
 from odyssey.api import api
 from odyssey.utils.auth import token_auth
 from odyssey.utils.misc import check_client_existence
-from odyssey.utils.errors import TooManyPaymentMethods, GenericNotFound
+from odyssey.utils.errors import TooManyPaymentMethods, GenericNotFound, GenericThirdPartyError
 from odyssey.api.payment.models import PaymentMethods
 from odyssey.api.payment.schemas import PaymentMethodsSchema
 
@@ -56,6 +56,14 @@ class PaymentMethodsApi(Resource):
                                         'Api-Secret': current_app.config['INSTAMED_API_SECRET'],
                                         'Content-Type': 'application/json'},
                                 json=request_data)
+        
+        #check if instamed api raised an error
+        try:
+            response.raise_for_status()
+        except:
+            raise GenericThirdPartyError(response.status_code, response.text)
+
+        #convert response data to json (python dict)
         response_data = json.loads(response.text)
 
         #if requesting to set this method to default and user already has a default 
@@ -85,12 +93,12 @@ class PaymentMethodsApi(Resource):
 class PaymentMethodsDelete(Resource):
     @token_auth.login_required(user_type=('client',))
     @responds(schema=PaymentMethodsSchema, api=ns, status_code=204)
-    def delete(self, user_id):
+    def delete(self, idx):
         """remove an existing payment method"""
         payment = PaymentMethods.query.filter_by(idx=idx).one_or_none()
         
         if not payment:
-            raise GenericNotFound
+            raise GenericNotFound(f'No payment method exists with idx:{idx}.')
 
-        session.db.delete(payment)
-        session.db.commit()
+        db.session.delete(payment)
+        db.session.commit()

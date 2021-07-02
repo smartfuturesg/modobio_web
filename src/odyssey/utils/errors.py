@@ -372,6 +372,22 @@ class DisabledEndpoint(Exception):
 
         self.status_code = 403
 
+class GenericThirdPartyError(Exception):
+    """
+    In the case that a third party api returns an error code.
+    """
+
+    def __init__(self, status_code = None, message = None):
+        if message:
+            self.message = message
+        else:
+            self.message = "Third party api returned an error."
+
+        if status_code:
+            self.status_code = status_code
+        else:
+            self.status_code = 400
+
 def bad_request(message):
     return error_response(400, message)
 
@@ -554,4 +570,9 @@ def error_too_many_payment_methods(error):
 @api.errorhandler(DisabledEndpoint)
 def error_disabled_endpoint(error):
     '''Return a custom message and 403 status code'''
+    return error_response(error.status_code, error.message)
+
+@api.errorhandler(GenericThirdPartyError)
+def error_disabled_endpoint(error):
+    '''Return a custom message and status code'''
     return error_response(error.status_code, error.message)
