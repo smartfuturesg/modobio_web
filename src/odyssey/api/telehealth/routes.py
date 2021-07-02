@@ -23,7 +23,8 @@ from odyssey.api.telehealth.models import (
     TelehealthMeetingRooms, 
     TelehealthQueueClientPool,
     TelehealthStaffAvailability,
-    TelehealthBookingDetails
+    TelehealthBookingDetails,
+    TelehealthStaffSettings
 )
 from odyssey.api.telehealth.schemas import (
     TelehealthBookingsSchema,
@@ -38,7 +39,8 @@ from odyssey.api.telehealth.schemas import (
     TelehealthTimeSelectOutputSchema,
     TelehealthStaffAvailabilityOutputSchema,
     TelehealthBookingDetailsSchema,
-    TelehealthBookingDetailsGetSchema
+    TelehealthBookingDetailsGetSchema, 
+    TelehealthStaffSettingsSchema
 ) 
 from odyssey.api.lookup.models import (
     LookupTerritoriesofOperation
@@ -219,7 +221,7 @@ class TelehealthClientTimeSelectApi(Resource):
                 available[staff_user_id].append(availability.booking_window_id)
 
                 if staff_user_id not in staff_availability_timezone:
-                    staff_availability_timezone[staff_user_id] = availability.timezone
+                    staff_availability_timezone[staff_user_id] = availability.settings.timezone
 
             # Now, grab all of the bookings for that client and all staff on the given target date
             # This is necessary to subtract from the staff_availability above.
@@ -565,16 +567,6 @@ class TelehealthBookingsApi(Resource):
                     request.parsed_obj.booking_window_id_end_time < booking.booking_window_id_end_time:
                     raise InputError(status_code=405,message='Staff {} already has an appointment for this time.'.format(staff_user_id))        
 
-        # TODO: we need to add the concept of staff auto accept or not. When we do, we can do a query 
-        # to check the staff's auto accept setting. Right now, default it to true.
-        staffAutoAccept = True
-        if staffAutoAccept:
-            request.parsed_obj.status = 'Accepted'
-        else:
-            request.parsed_obj.status = 'Pending Staff Acceptance'
-            # TODO: here, we need to send some sort of notification to the staff member letting
-            # them know they have a booking request.
-
         request.parsed_obj.client_user_id = client_user_id
         request.parsed_obj.staff_user_id = staff_user_id
 
@@ -594,10 +586,18 @@ class TelehealthBookingsApi(Resource):
 
         # bring up client queue details
         client_in_queue = TelehealthQueueClientPool.query.filter_by(user_id=client_user_id).one_or_none()
-        
+
         # Add staff and client timezones to the TelehealthBooking entry
-        request.parsed_obj.staff_timezone = staff_availability[0].timezone
+        request.parsed_obj.staff_timezone = staff_availability[0].settings.timezone
         request.parsed_obj.client_timezone = client_in_queue.timezone
+
+        # to check the staff's auto accept setting. 
+        if staff_availability[0].settings.auto_confirm:
+            request.parsed_obj.status = 'Accepted'
+        else:
+            request.parsed_obj.status = 'Pending Staff Acceptance'
+            # TODO: here, we need to send some sort of notification to the staff member letting
+            # them know they have a booking request.
 
         lookup_times = LookupBookingTimeIncrements.query.all()
 
@@ -961,7 +961,9 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
         if not availability:
             return 204
         # timezones for all availability entries will be the same
-        tzone = availability[0].timezone
+        # return tzone and auto-confirm from TelehealthStaffSettings table
+        tzone = availability[0].settings.timezone
+        auto_confirm = availability[0].settings.auto_confirm
         
         # pull the static booking window ids
         booking_increments = LookupBookingTimeIncrements.query.all()
@@ -1126,7 +1128,7 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
         # Unload ordered array in to a super array
         orderedArray = [*monArr, *tueArr, *wedArr, *thuArr, *friArr, *satArr, *sunArr]
 
-        payload = {'timezone': tzone}
+        payload = {'settings': {'timezone': tzone, 'auto_confirm': auto_confirm}}
         payload['availability'] = orderedArray
         return payload
 
@@ -1169,6 +1171,12 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
             for time in availability:
                 db.session.delete(time)
 
+        # To conform to FE request
+        # If the staff already has information in telehealthStaffStettings, delete it and take new payload as truth
+        settings_query = TelehealthStaffSettings.query.filter_by(user_id=user_id).one_or_none()
+        if settings_query: 
+            db.session.delete(settings_query)
+
         # Create an idx dictionary array
         availabilityIdxArr = {}
         availabilityIdxArr['Monday'] = []
@@ -1181,8 +1189,16 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
 
         if request.parsed_obj['availability']:
             avail = request.parsed_obj['availability']
-            tzone = request.parsed_obj['timezone']
-            data = {'user_id': user_id, 'timezone': tzone}
+            
+            if not request.parsed_obj['settings']:  
+                raise InputError(400, 'Missing required field settings')
+            # Update tzone and auto-confirm in telehealth staff settings table once
+            settings_data = request.parsed_obj['settings']
+            settings_data.user_id = user_id
+            db.session.add(settings_data)
+
+            data = {'user_id': user_id}
+
             # Loop through the input payload of start_time and end_times
             for time in avail:
                 # end time must be after start time

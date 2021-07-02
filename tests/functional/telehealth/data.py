@@ -70,6 +70,10 @@ telehealth_queue_client_pool_8_post_data = {
 #                     Telehealth Staff Availability
 # --------------------------------------------------------------------
 telehealth_staff_general_availability_1_post_data = {
+  'settings': {
+    'timezone': 'UTC',
+    'auto_confirm': True
+  },
   'availability': [{
     'day_of_week': 'Monday',
     'start_time': '11:00:00',
@@ -77,6 +81,10 @@ telehealth_staff_general_availability_1_post_data = {
   }]
 }
 telehealth_staff_general_availability_3_post_data = {
+  'settings': {
+    'timezone': 'UTC',
+    'auto_confirm': True
+  },
   'availability': [{
     'day_of_week': 'Monday',
     'start_time': '00:00:00',
@@ -84,6 +92,10 @@ telehealth_staff_general_availability_3_post_data = {
   }]
 }
 telehealth_staff_general_availability_2_post_data = {
+  'settings': {
+    'timezone': 'UTC',
+    'auto_confirm': True
+  },
   'availability': [{
     'day_of_week': 'Monday',
     'start_time': '8:00:00',
@@ -123,6 +135,10 @@ telehealth_staff_general_availability_2_post_data = {
 }
 # Invalid inputs:
 telehealth_staff_general_availability_bad_3_post_data = {
+  'settings': {
+    'timezone': 'UTC',
+    'auto_confirm': True
+  },
   'availability': [{
     'day_of_week': 'Monday',
     'start_time': '25:00:00',
@@ -130,6 +146,10 @@ telehealth_staff_general_availability_bad_3_post_data = {
   }]
 }
 telehealth_staff_general_availability_bad_4_post_data = {
+  'settings': {
+    'timezone': 'UTC',
+    'auto_confirm': True
+  },
   'availability': [{
     'day_of_week': 'Monday',
     'start_time': '10:70:00',
@@ -137,6 +157,10 @@ telehealth_staff_general_availability_bad_4_post_data = {
   }]
 }
 telehealth_staff_general_availability_bad_5_post_data = {
+  'settings': {
+    'timezone': 'UTC',
+    'auto_confirm': True
+  },
   'availability': [{
     'day_of_week': 'Monday',
     'start_time': '-10:00:00',
@@ -144,6 +168,10 @@ telehealth_staff_general_availability_bad_5_post_data = {
   }]
 }
 telehealth_staff_general_availability_bad_6_post_data = {
+  'settings': {
+    'timezone': 'UTC',
+    'auto_confirm': True
+  },
   'availability': [{
     'day_of_week': 'Monday',
     'start_time': '10:-10:00',
@@ -151,6 +179,10 @@ telehealth_staff_general_availability_bad_6_post_data = {
   }]
 }
 telehealth_staff_general_availability_bad_7_post_data = {
+  'settings': {
+    'timezone': 'UTC',
+    'auto_confirm': True
+  },
   'availability': [{
     'day_of_week': 'Monday',
     'start_time': '10:10:00',
