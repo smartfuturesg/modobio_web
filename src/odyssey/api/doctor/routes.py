@@ -2,7 +2,7 @@ import os, boto3, secrets, pathlib
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
-from flask import request, current_app, g
+from flask import request, current_app
 from flask_accepts import accepts, responds
 from flask_restx import Resource, Namespace
 
@@ -643,13 +643,6 @@ class MedicalSocialHist(Resource):
         social_hist = MedicalSocialHistory.query.filter_by(user_id=user_id).one_or_none()
         std_hist = MedicalSTDHistory.query.filter_by(user_id=user_id).all()
 
-        # this endpoint resturns two resources which can be accessed through the clinical care team system
-        # here we check if just one of the resources is authorzied. if so, remove the resource not authorized.
-        if g.get('clinical_care_context'):
-            if 'MedicalSTDHistory' not in g.clinical_care_authorized_resources:
-                std_hist = []
-            if 'MedicalSocialHistory' not in g.clinical_care_authorized_resources:
-                social_hist = {}
         payload = {'social_history': social_hist,
                    'std_history': std_hist}
         return payload

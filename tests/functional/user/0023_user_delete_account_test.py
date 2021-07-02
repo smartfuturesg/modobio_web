@@ -64,9 +64,9 @@ def test_account_delete_request(test_client, init_database, staff_auth_header):
                                 content_type='application/json')
 
     total_resources = LookupEHRPages.query.count()
-    auths = [{"team_member_user_id": staff_client_id,"resource_id": num} for num in range(1,total_resources+1) ]
-    payload = {"clinical_care_team_authorization" : auths}
-    response = test_client.post(f"/client/clinical-care-team/resource-authorization/{client_id}/",
+    auths = [{"team_member_user_id": staff_client_id,"resource_group_id": num} for num in range(1,total_resources+1) ]
+    payload = {"ehr_page_authorizations" : auths}
+    response = test_client.post(f"/client/clinical-care-team/ehr-page-authorization/{client_id}/",
                             headers=client_auth_header,
                             data=dumps(payload), 
                             content_type='application/json')

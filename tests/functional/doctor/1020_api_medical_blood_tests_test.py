@@ -33,9 +33,9 @@ def test_post_medical_blood_test(test_client, init_database,  client_auth_header
                                 content_type='application/json')
 
     total_resources = LookupEHRPages.query.count()
-    auths = [{"team_member_user_id": 2,"resource_id": num} for num in range(1,total_resources+1) ]
-    payload = {"clinical_care_team_authorization" : auths}
-    response = test_client.post(f"/client/clinical-care-team/resource-authorization/{1}/",
+    auths = [{"team_member_user_id": 2,"resource_group_id": num} for num in range(1,total_resources+1) ]
+    payload = {"ehr_page_authorizations" : auths}
+    response = test_client.post(f"/client/clinical-care-team/ehr-page-authorization/{1}/",
                             headers=client_auth_header,
                             data=dumps(payload), 
                             content_type='application/json')

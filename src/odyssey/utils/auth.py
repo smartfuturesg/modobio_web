@@ -5,13 +5,13 @@ from flask import current_app, request, g
 from functools import wraps
 from sqlalchemy import select
 from werkzeug.datastructures import Authorization
-from werkzeug.security import safe_str_cmp, check_password_hash
+from werkzeug.security import check_password_hash
 
 from odyssey import db
-from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations, ClientEHRPageAuthorizations
+from odyssey.api.client.models import ClientEHRPageAuthorizations
 from odyssey.api.lookup.models import LookupEHRPages
 from odyssey.utils.constants import ACCESS_ROLES, DB_SERVER_TIME, USER_TYPES 
-from odyssey.utils.errors import LoginNotAuthorized, StaffNotFound, EmailNotVerified
+from odyssey.utils.errors import LoginNotAuthorized, EmailNotVerified
 from odyssey.api.staff.models import StaffRoles
 from odyssey.api.user.models import User, UserLogin, UserTokenHistory
 
