@@ -594,7 +594,8 @@ class PushNotification:
                 'staff_id': int,
                 'staff_first_name': str,
                 'staff_middle_name': str,
-                'staff_last_name': str},
+                'staff_last_name': str,
+                'staff_profile_picture: str},
              'custom': dict}
 
         :aps: must be present, but empty; entries in ``aps`` are ignored.
@@ -606,6 +607,7 @@ class PushNotification:
         :staff_first_name: first name of the staff member.
         :staff_middle_name: middle name of the staff member.
         :staff_last_name: last name of the staff member.
+        :staff_profile_picture: profile picture url of the staff member.
 
     sns : boto3.Resource
         The active connection with AWS SNS through :mod:`boto3`.
@@ -647,7 +649,8 @@ class PushNotification:
             'staff_id': None,
             'staff_first_name': None,
             'staff_middle_name': None,
-            'staff_last_name': None}}
+            'staff_last_name': None,
+            'staff_profile_picture': None}}
 
     def __init__(self):
         """ Initiate the push notification system.

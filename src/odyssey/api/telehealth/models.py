@@ -2,31 +2,16 @@
 from sqlalchemy import text
 from odyssey.utils.constants import DB_SERVER_TIME
 from odyssey import db
+from odyssey.utils.base.models import BaseModel, BaseModelWithIdx, UserIdFkeyMixin
 
 """
 Database models for all things telehealth. These tables will be used to keep track of bookings,
 meeting rooms, and other data related to telehealth meetings
 """
 
-class TelehealthBookings(db.Model):
+class TelehealthBookings(BaseModelWithIdx):
     """ 
     Holds all of the client and Staff bookings 
-    """
-
-    __tablename__ = 'TelehealthBookings'
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    timestamp for when object was created. DB server time is used. 
-
-    :type: datetime
-    """
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Auto incrementing primary key
-
-    :type: int, primary key
     """
 
     client_user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
@@ -112,27 +97,11 @@ class TelehealthBookings(db.Model):
     :type: int, foreign key('LookupBookingTimeIncrements.idx')
     """
 
-class TelehealthMeetingRooms(db.Model):
+class TelehealthMeetingRooms(BaseModel):
     """ 
     Meeting room details for one-on-one meetings between clients and medical professionals.
     Details from Twilio will be stored here, including: session identifiers, meeting access tokens 
     for both participants, and the unique room name
-    """
-
-    __tablename__ = 'TelehealthMeetingRooms'
-
-    created_at = db.Column(db.DateTime, server_default=text('clock_timestamp()'))
-    """
-    timestamp for when object was created. DB server time is used. 
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, server_default=text('clock_timestamp()'))
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
     """
 
     room_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -193,33 +162,17 @@ class TelehealthMeetingRooms(db.Model):
 
 
 
-class TelehealthStaffAvailability(db.Model):
+class TelehealthStaffAvailability(BaseModelWithIdx):
     """ 
     Holds all of the clients in a pool for their appointments. 
     This is used for BEFORE they are accepted and see their medical professional.
     """
 
-    __tablename__ = 'TelehealthStaffAvailability'
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    user_id = db.Column(db.Integer, db.ForeignKey('TelehealthStaffSettings.user_id', ondelete="CASCADE"), nullable=False)
     """
-    timestamp for when object was created. DB server time is used. 
+    staff user id TelehealthStaffSettings Foreign key
 
-    :type: datetime
-    """
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Auto incrementing primary key
-
-    :type: int, primary key
-    """
-
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
-    """
-    staff member id 
-
-    :type: int, foreign key('User.user_id')
+    :type: int, foreign key('TelehealthStaffSettings.user_id')
     """
 
     day_of_week = db.Column(db.String)
@@ -236,47 +189,18 @@ class TelehealthStaffAvailability(db.Model):
     :type: int, foreign key('LookupBookingTimeIncrements.idx')
     """
 
-    timezone = db.Column(db.String)
+    settings = db.relationship('TelehealthStaffSettings', uselist=False, back_populates='availability')
     """
-    Staff's timezone setting for the current telehealth availability submisison
+    Many to one relationshp with TelehealthStaffSettings
 
-    :type: str
+    :type: :class:`TelehealthStaffSettings` instance
     """
 
-class TelehealthQueueClientPool(db.Model):
+
+class TelehealthQueueClientPool(BaseModelWithIdx, UserIdFkeyMixin):
     """ 
     Holds all of the clients in a pool for their appointments. 
     This is used for BEFORE they are accepted and see their medical professional.
-    """
-
-    __tablename__ = 'TelehealthQueueClientPool'
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    timestamp for when object was created. DB server time is used. 
-
-    :type: datetime
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    timestamp for when object was updated. DB server time is used. 
-
-    :type: datetime
-    """
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Auto incrementing primary key
-
-    :type: int, primary key
-    """
-
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
-    """
-    Id of the user that this notification belongs to
-
-    :type: int, foreign key('User.user_id')
     """
 
     profession_type = db.Column(db.String)
@@ -324,36 +248,14 @@ class TelehealthQueueClientPool(db.Model):
     :type: str
     """
 
-class TelehealthBookingDetails(db.Model):
+class TelehealthBookingDetails(BaseModelWithIdx):
     """ 
     Table holding text, images or sound recording details about a booking
     """
 
-    __tablename__ = 'TelehealthBookingDetails'
-
     __table_args__ = (
         db.UniqueConstraint('booking_id', ),)
 
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    timestamp for when object was created. DB server time is used. 
-
-    :type: datetime
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    timestamp for when object was updated. DB server time is used. 
-
-    :type: datetime
-    """
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Auto incrementing primary key
-
-    :type: int, primary key
-    """
 
     booking_id = db.Column(db.Integer, db.ForeignKey('TelehealthBookings.idx', ondelete="CASCADE"), nullable=False)
     """
@@ -377,7 +279,7 @@ class TelehealthBookingDetails(db.Model):
     """
 
 
-class TelehealthChatRooms(db.Model):
+class TelehealthChatRooms(BaseModel):
     """ 
     Table stores details on chat rooms created through the Twiliio Conversations API.
     
@@ -385,22 +287,6 @@ class TelehealthChatRooms(db.Model):
     client-staff pair. We do this so that chat threads persist through subsequent client and
     staff interactions. 
 
-    """
-
-    __tablename__ = 'TelehealthChatRooms'
-
-    created_at = db.Column(db.DateTime, server_default=text('clock_timestamp()'))
-    """
-    timestamp for when object was created. DB server time is used. 
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, server_default=text('clock_timestamp()'))
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
     """
 
     room_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -450,4 +336,38 @@ class TelehealthChatRooms(db.Model):
     user_id of the staff participant
 
     :type: int
+    """
+
+class TelehealthStaffSettings(BaseModel):
+    """
+    Holds staff preferred settings for Telehealth appointments
+
+    """
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), primary_key=True, nullable=False)
+    """
+    User ID number, foreign key to User.user_id
+
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
+    """
+
+    auto_confirm = db.Column(db.Boolean, server_default='t')
+    """
+    Setting to determine if Staff member wants to auto confirm appointments
+
+    :type: bool
+    """
+
+    timezone = db.Column(db.String)
+    """
+    Staff's timezone setting for the current telehealth availability submisison
+
+    :type: str
+    """
+
+    availability = db.relationship('TelehealthStaffAvailability', uselist=True, back_populates="settings")
+    """
+    One to many relationship with staff availability
+
+    :type: :class:`TelehealthStaffAvailability` instance list
     """

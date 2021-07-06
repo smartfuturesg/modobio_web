@@ -3,6 +3,10 @@
 # -----------------------------------
 # Staff ID 4
 telehealth_staff_4_general_availability_post_data = {
+  'settings': {
+    'timezone': 'UTC',
+    'auto_confirm': True
+  },
   'availability': [{
     'day_of_week': 'Monday',
     'start_time': '9:00:00',
@@ -32,6 +36,10 @@ telehealth_staff_4_general_availability_post_data = {
 }
 # Staff ID 6
 telehealth_staff_6_general_availability_post_data = {
+  'settings': {
+    'timezone': 'UTC',
+    'auto_confirm': True
+  },
   'availability': [
   {
     'day_of_week': 'Saturday',
@@ -47,6 +55,10 @@ telehealth_staff_6_general_availability_post_data = {
 }
 # Staff ID 8
 telehealth_staff_8_general_availability_post_data = {
+  'settings': {
+    'timezone': 'UTC',
+    'auto_confirm': True
+  },
   'availability': [{
     'day_of_week': 'Monday',
     'start_time': '5:00:00',
@@ -66,6 +78,10 @@ telehealth_staff_8_general_availability_post_data = {
 }
 # Staff ID 10
 telehealth_staff_10_general_availability_post_data = {
+  'settings': {
+    'timezone': 'UTC',
+    'auto_confirm': True
+  },
   'availability': [{
     'day_of_week': 'Tuesday',
     'start_time': '7:00:00',
@@ -90,6 +106,10 @@ telehealth_staff_10_general_availability_post_data = {
 }
 # Staff ID 12
 telehealth_staff_12_general_availability_post_data = {
+  'settings': {
+    'timezone': 'UTC',
+    'auto_confirm': True
+  },
   'availability': [
   {
     'day_of_week': 'Saturday',
@@ -105,6 +125,10 @@ telehealth_staff_12_general_availability_post_data = {
 }
 # Staff ID 14
 telehealth_staff_14_general_availability_post_data = {
+  'settings': {
+    'timezone': 'UTC',
+    'auto_confirm': True
+  },
   'availability': [
   {
     'day_of_week': 'Tuesday',
@@ -152,6 +176,10 @@ telehealth_queue_client_3_data = {
 
 # add a new availability for staff member
 telehealth_staff_full_avilability ={
+  'settings': {
+    'timezone': 'UTC',
+    'auto_confirm': True
+  },
   'availability': [{
     'day_of_week': 'Monday',
     'start_time': '00:00:00',

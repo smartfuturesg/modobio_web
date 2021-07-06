@@ -16,7 +16,8 @@ from odyssey.api.telehealth.models import (
     TelehealthStaffAvailability,
     TelehealthMeetingRooms,
     TelehealthQueueClientPool,
-    TelehealthBookingDetails
+    TelehealthBookingDetails,
+    TelehealthStaffSettings
 )
 from odyssey.utils.constants import DAY_OF_WEEK, GENDERS, BOOKINGS_STATUS
 
@@ -77,7 +78,7 @@ class TelehealthStaffAvailabilitySchema(ma.SQLAlchemyAutoSchema):
         model = TelehealthStaffAvailability
         exclude = ('created_at',)
         dump_only = ('idx', )    
-
+        include_fk = True
     user_id = fields.Integer()
     booking_window_id = fields.Integer()    
     @post_load
@@ -92,10 +93,23 @@ class TelehealthStaffAvailabilityInputSchema(Schema):
     start_time = fields.Time()
     end_time = fields.Time()
  
+class TelehealthStaffSettingsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = TelehealthStaffSettings
+        include_fk = True
+        dump_only = ('user_id',)
+        exclude = ('created_at', 'updated_at',)
+
+    auto_confirm = fields.Boolean(required=False, metadata={'description':'auto-confirm appointments based on availability'})
+    timezone = fields.String(validate=validate.OneOf(pytz.common_timezones),metadata={'description': 'optional timezone selection, defaults to UTC'}, missing='UTC')
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return TelehealthStaffSettings(**data) 
 
 class TelehealthStaffAvailabilityOutputSchema(Schema):
     availability = fields.Nested(TelehealthStaffAvailabilityInputSchema(many=True), missing=[])
-    timezone = fields.String(validate=validate.OneOf(pytz.common_timezones),metadata={'description': 'optional timezone selection, defaults to UTC'}, missing='UTC')
+    settings = fields.Nested(TelehealthStaffSettingsSchema, missing=[])
 
 class TelehealthMeetingRoomSchema(ma.SQLAlchemyAutoSchema):
     """
