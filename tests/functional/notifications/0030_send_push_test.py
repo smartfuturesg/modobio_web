@@ -3,6 +3,7 @@ import pytest
 from flask.json import dumps
 
 from .data import device, alert, voip
+from tests.functional.staff.data import staff_profile_data
 
 @pytest.fixture(scope='session')
 def register_device(test_client, init_database, client_auth_header):
@@ -41,12 +42,27 @@ def test_send_alert(test_client, init_database, client_auth_header, register_dev
         assert response.status_code == 201
         assert response.json == {'message': alert['content']}
 
-def test_send_voip(test_client, init_database, client_auth_header, register_device):
+def test_send_voip(test_client, init_database, client_auth_header, register_device, staff_auth_header):
         """
         GIVEN an API endpoint for sending notifications,
         WHEN the POST /notifications/push/test/voip/<user_id>/ resource is requested,
         THEN check that the response is valid.
         """
+
+        # Test when the staff memeber doesn't have a profile picture
+        response = test_client.post(
+            '/notifications/push/test/voip/1/',
+            headers=client_auth_header,
+            data=dumps(voip),
+            content_type='application/json')
+        
+        assert response.status_code == 201
+        assert response.json == {'message': voip['content']}
+
+        # Test when the staff member has a profile picture
+        # Add staff profile information to test image
+        test_client.put('/staff/profile/2/', headers=staff_auth_header, data=staff_profile_data['change_everything'])
+
         response = test_client.post(
             '/notifications/push/test/voip/1/',
             headers=client_auth_header,
@@ -54,4 +70,6 @@ def test_send_voip(test_client, init_database, client_auth_header, register_devi
             content_type='application/json')
 
         assert response.status_code == 201
+        assert response.json['message']['data']['staff_profile_picture']
+        voip['content']['data']['staff_profile_picture'] = response.json['message']['data']['staff_profile_picture']
         assert response.json == {'message': voip['content']}

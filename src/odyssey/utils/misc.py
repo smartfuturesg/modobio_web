@@ -488,7 +488,8 @@ class FileHandling:
         file.seek(0)
         self.s3_bucket.put_object(Key=self.s3_prefix + filename, Body=file.stream)
 
-    def get_presigned_urls(self, prefix) -> dict:
+    def get_presigned_urls(self, prefix: str) -> dict:
+        # returns all files found with defined prefix
         # dictionary is {filename1: url1, filename2: url2...}
         res = {}
         params = {'Bucket': self.s3_bucket_name}
@@ -498,6 +499,16 @@ class FileHandling:
             file_name = file.key.split('/')[-1]
             res[file_name] = url
         return res
+    
+    def get_presigned_url(self, file_path: str) -> str:
+        # returns a single url with defined file_path
+        # if file_path doesn't exists in S3, it will return an empty string
+        params = {'Bucket': self.s3_bucket_name}
+        url = ''
+        for file in self.s3_bucket.objects.filter(Prefix=self.s3_prefix + file_path):
+            params['Key'] = file.key
+            url = self.s3_resource.meta.client.generate_presigned_url('get_object', Params=params, ExpiresIn=3600)
+        return url
 
     def delete_from_s3(self, prefix):
         self.s3_bucket.objects.filter(Prefix=self.s3_prefix + prefix).delete()
