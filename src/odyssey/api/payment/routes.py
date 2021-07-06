@@ -68,7 +68,7 @@ class PaymentMethodsApi(Resource):
 
         #if requesting to set this method to default and user already has a default 
         #payment method, remove default status from their previous default method
-        old_default = PaymentMethods.query.filter_by(user_id=user_id, is_default=True)
+        old_default = PaymentMethods.query.filter_by(user_id=user_id, is_default=True).one_or_none()
         if request.json['is_default'] and old_default:
             old_default.update({'is_default': False})
 
