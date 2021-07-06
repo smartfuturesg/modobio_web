@@ -32,5 +32,3 @@ insert into "ClientEHRPageAuthorizations" ("user_id", "team_member_user_id", "re
 (22, 14, 6, 'accepted'),
 (22, 14, 7, 'accepted'),
 (22, 14, 8, 'accepted');
-(22, 14, 8, 'accepted');
-(22, 14, 8, 'accepted');
