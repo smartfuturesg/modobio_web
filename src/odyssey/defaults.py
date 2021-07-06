@@ -190,3 +190,10 @@ for all messages, so only enable if all workers have been upgraded.
 This variable will be converted to ``enable_utc`` (lower case) to work with
 Celery's new config system.
 """
+
+# InstaMed Settings
+INSTAMED_API_KEY = ''
+""" InstaMed API access key ID number. """
+
+INSTAMED_API_SECRET = ''
+""" InstaMed API access key secret. """
