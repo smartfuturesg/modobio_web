@@ -37,4 +37,5 @@ voip = {
             'staff_id': 2,
             'staff_first_name': 'Test',
             'staff_middle_name': 'O.',
-            'staff_last_name': 'Sterone'}}}
+            'staff_last_name': 'Sterone',
+            'staff_profile_picture': ''}}}
