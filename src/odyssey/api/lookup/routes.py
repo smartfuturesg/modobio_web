@@ -326,7 +326,6 @@ class LookupClinicalCareTeamResourcesApi(Resource):
     @token_auth.login_required
     @responds(schema=LookupEHRPagesOutputSchema, api=ns)
     def get(self):
-        # breakpoint()
         """get contents of clinical care team resources lookup table"""
         res = LookupEHRPages.query.all()
         return {'total_items': len(res), 'items': res}
