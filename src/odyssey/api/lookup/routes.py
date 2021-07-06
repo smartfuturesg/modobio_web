@@ -311,7 +311,7 @@ class LookupClinicalCareTeamResourcesApi(Resource):
     To be replaced by care-team/ehr-resources/
     Returns available resources that can be shared within clinical care teams
     """
-    # @token_auth.login_required
+    @token_auth.login_required
     @responds(schema=LookupCareTeamResourcesOutputSchema, api=ns)
     def get(self):
         """get contents of clinical care team resources lookup table"""
@@ -323,7 +323,7 @@ class LookupClinicalCareTeamResourcesApi(Resource):
     """
     Returns available resources that can be shared within clinical care teams
     """
-    # @token_auth.login_required
+    @token_auth.login_required
     @responds(schema=LookupEHRPagesOutputSchema, api=ns)
     def get(self):
         # breakpoint()
