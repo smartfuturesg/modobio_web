@@ -1,15 +1,12 @@
-from itertools import count
 import boto3
 from datetime import datetime
 import math, re
 from PIL import Image
-from celery.utils.functional import first
 
 from flask import request, current_app, url_for
 from flask_accepts import accepts, responds
 from flask_restx import Resource, Namespace
-from sqlalchemy import select, or_
-from sqlalchemy.sql.expression import distinct, tuple_
+from sqlalchemy import select
 
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.errors import (
@@ -74,7 +71,6 @@ from odyssey.utils.message import send_test_email
 from odyssey.utils.misc import (
     check_client_existence, 
     check_drink_existence, 
-    check_staff_existence,
     FileHandling
 )
 
