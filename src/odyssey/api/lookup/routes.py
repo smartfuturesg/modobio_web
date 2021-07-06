@@ -15,7 +15,8 @@ from odyssey.api.lookup.models import (
      LookupCountriesOfOperations,
      LookupDefaultHealthMetrics,
      LookupDrinks, 
-     LookupDrinkIngredients, 
+     LookupDrinkIngredients,
+     LookupEHRPages, 
      LookupGoals, 
      LookupProfessionalAppointmentConfirmationWindow,
      LookupRaces,
@@ -40,7 +41,8 @@ from odyssey.api.lookup.schemas import (
     LookupCountriesOfOperationsOutputSchema,
     LookupDefaultHealthMetricsOutputSchema, 
     LookupDrinksOutputSchema, 
-    LookupDrinkIngredientsOutputSchema, 
+    LookupDrinkIngredientsOutputSchema,
+    LookupEHRPagesOutputSchema, 
     LookupGoalsOutputSchema,
     LookupRacesOutputSchema,
     LookupSubscriptionsOutputSchema,
@@ -306,6 +308,7 @@ class LookupRacesApi(Resource):
 @ns.route('/care-team/resources/')
 class LookupClinicalCareTeamResourcesApi(Resource):
     """
+    To be replaced by care-team/ehr-resources/
     Returns available resources that can be shared within clinical care teams
     """
     @token_auth.login_required
@@ -313,6 +316,18 @@ class LookupClinicalCareTeamResourcesApi(Resource):
     def get(self):
         """get contents of clinical care team resources lookup table"""
         res = LookupClinicalCareTeamResources.query.all()
+        return {'total_items': len(res), 'items': res}
+
+@ns.route('/care-team/ehr-resources/')
+class LookupClinicalCareTeamResourcesApi(Resource):
+    """
+    Returns available resources that can be shared within clinical care teams
+    """
+    @token_auth.login_required
+    @responds(schema=LookupEHRPagesOutputSchema, api=ns)
+    def get(self):
+        """get contents of clinical care team resources lookup table"""
+        res = LookupEHRPages.query.all()
         return {'total_items': len(res), 'items': res}
         
 @ns.route('/subscriptions/')

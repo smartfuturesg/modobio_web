@@ -11,6 +11,7 @@ import secrets
 from datetime import datetime, timedelta
 from hashlib import md5
 from sqlalchemy import text, UniqueConstraint
+from sqlalchemy.orm import relationship
 from sqlalchemy.orm.query import Query
 from odyssey.utils.constants import DB_SERVER_TIME, ALPHANUMERIC
 from odyssey.utils.base.models import BaseModelWithIdx, UserIdFkeyMixin, BaseModel
@@ -273,7 +274,7 @@ class ClientInfo(BaseModel):
 @db.event.listens_for(ClientInfo, "after_update")
 def update_dob(mapper, connection, target):
     """ 
-    Listens fro any updates to ClientInfo table
+    Listens for any updates to ClientInfo table
     """
     from odyssey.utils.search import update_client_dob
     update_client_dob(target.user_id, target.dob)
@@ -811,7 +812,6 @@ class ClientReleaseContacts(BaseModelWithIdx, UserIdFkeyMixin):
     :type: str
     """
 
-
 class ClientClinicalCareTeam(BaseModelWithIdx, UserIdFkeyMixin):
     """ 
     Stores emails and user_ids of clinical care team members.
@@ -963,6 +963,9 @@ class ClientWaistSizeHistory(BaseModelWithIdx, UserIdFkeyMixin):
     
 class ClientClinicalCareTeamAuthorizations(BaseModelWithIdx, UserIdFkeyMixin):
     """ 
+    DEPRECATED - 6.30.21
+    TODO: remove
+
     Stores clinical care team authorizations.
     One line per user, team memmber, resource combinaiton. Resource IDs come from 
     the LookupCareTeamTables table    
@@ -1075,4 +1078,38 @@ class ClientDataStorage(BaseModelWithIdx, UserIdFkeyMixin):
     Bytes stored by client
     
     :type: float
+    """
+
+class ClientEHRPageAuthorizations(BaseModelWithIdx, UserIdFkeyMixin):
+    """ 
+    Stores EHR page authorizations granted by clients to other modobio users. 
+
+    EHR page authorization options are found in LookupEHRPages
+
+    """
+
+    __table_args__ = (UniqueConstraint('user_id', 'team_member_user_id', 'resource_group_id', name='ehr_page_auth_unique_resource_user_team_member_ids'),)
+
+    team_member_user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
+    """
+    User ID number of the care team member. 
+
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
+    """
+
+    resource_group_id = db.Column(db.Integer, db.ForeignKey('LookupEHRPages.resource_group_id',ondelete="CASCADE"), nullable=False)
+    """
+    Resource group ID refers to a grouping of electronic health record resources found on a given page in the application.  
+
+    :type: int, foreign key to :attr:`LookupEHRPages.resource_group_id <odyssey.models.lookup.LookupEHRPages.resource_group_id>`
+    """
+
+    status = db.Column(db.String())
+    """
+    Status of data access request
+    
+    ("pending","approved")
+    NOTE: "rejected" is not in the list above because rejected would just be deleted
+
+    :type: str
     """
