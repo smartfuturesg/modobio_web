@@ -1,7 +1,7 @@
 from marshmallow import Schema, fields, post_load
 
 from odyssey import ma
-from odyssey.api.payment.models import PaymentMethods
+from odyssey.api.payment.models import PaymentMethods, PaymentStatus
 from odyssey.utils.base.schemas import BaseSchema
 
 class PaymentMethodsSchema(ma.SQLAlchemyAutoSchema):
@@ -11,3 +11,7 @@ class PaymentMethodsSchema(ma.SQLAlchemyAutoSchema):
 
     token = fields.String(load_only=True, required=True)
     expiration = fields.String(load_only=True, required=True)
+
+class PaymentStatusSchema(BaseSchema):
+    class Meta:
+        model = PaymentStatus

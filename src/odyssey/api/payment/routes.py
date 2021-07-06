@@ -90,7 +90,7 @@ class PaymentMethodsApi(Resource):
 
 
 @ns.route('/methods/<int:idx>/')
-class PaymentMethodsDelete(Resource):
+class PaymentMethodsDeleteApi(Resource):
     @token_auth.login_required(user_type=('client',))
     @responds(schema=PaymentMethodsSchema, api=ns, status_code=204)
     def delete(self, idx):
@@ -102,3 +102,22 @@ class PaymentMethodsDelete(Resource):
 
         db.session.delete(payment)
         db.session.commit()
+
+@ns.route('/status/')
+class PaymentStatusApi(Resource):
+    @token_auth.login_required(user_type=('organization'))
+    @responds(schema=PaymentStatusSchema, api=ns, status_code=200)
+    def post(self):
+        check_client_existence(request.parsed_obj.user_id)
+
+        db.session.add(request.parsed_obj)
+        db.session.commit()
+
+@ns.route('/status/<int:user_id')
+class PaymentStatusGetApi(Resource):
+    @token_auth.login_required(user_type=('client', 'staff'), access_roles=('client_services'))
+    @responds(schema=PaymentStatusSchema, api=ns, status_code=200)
+    def get(self, user_id):
+        check_client_existence(user_id)
+
+        return PaymentStatus.query.filter_by(user_id=user_id).all()

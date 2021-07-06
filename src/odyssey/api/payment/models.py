@@ -38,3 +38,33 @@ class PaymentMethods(BaseModelWithIdx, UserIdFkeyMixin):
 
     :type: boolean
     """
+
+class PaymentStatus(BaseModelWithIdx, UserIdFkeyMixin):
+
+    alias
+
+    card_present_status
+
+    current_transaction_status_code
+
+    merchant_id
+
+    original_transaction_id
+
+    original_transaction_status_code
+
+    payment_transaction_id
+
+    request_amount
+
+    save_on_file_transaction_id
+
+    statement_id
+
+    store_id
+    
+    terminal_id
+
+    transaction_action
+
+    user_id
