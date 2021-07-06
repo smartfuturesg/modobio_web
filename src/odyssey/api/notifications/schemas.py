@@ -260,6 +260,7 @@ class ApplePushNotificationVoipDataSchema(SkipNoneSchema):
     staff_first_name = fields.String(required=True)
     staff_middle_name = fields.String(missing=None)
     staff_last_name = fields.String(required=True)
+    staff_profile_picture = fields.String(missing=None)
 
 
 class ApplePushNotificationVoipSchema(Schema):
