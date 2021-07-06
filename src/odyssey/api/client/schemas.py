@@ -303,6 +303,7 @@ class ClientClinicalCareTeamInternalSchema(Schema):
     team_member_user_id = fields.Integer(metadata={'description': 'user_id for clinical care team member'}, dump_only=True)
     firstname = fields.String(dump_only=True, missing=None)
     lastname = fields.String(dump_only=True, missing=None)
+    profile_picture = fields.Dict(keys=fields.Str(), values=fields.Str(), dump_only=True, missing=None)
 
 class ClinicalCareTeamAuthorizationsForSchema(Schema):
     """
@@ -359,6 +360,7 @@ class ClinicalCareTeamAuthorizaitonSchema(Schema):
         metadata={'description': 'id for the resource. See lookup table for resource ids'})
     display_name = fields.String(dump_only=True)
     status = fields.String(missing='pending',required=False)
+    
 
     @post_load
     def make_object(self, data, **kwargs):

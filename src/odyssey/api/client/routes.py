@@ -1,12 +1,15 @@
+from itertools import count
 import boto3
 from datetime import datetime
 import math, re
 from PIL import Image
+from celery.utils.functional import first
 
 from flask import request, current_app, url_for
 from flask_accepts import accepts, responds
 from flask_restx import Resource, Namespace
-from sqlalchemy import select
+from sqlalchemy import select, or_
+from sqlalchemy.sql.expression import distinct, tuple_
 
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.errors import (
@@ -1104,19 +1107,40 @@ class ClinicalCareTeamMembers(Resource):
         # prepare response with names for clinical care team members who are also users 
         current_team = []
         current_team_users = db.session.query(
-                                    ClientClinicalCareTeam, User.firstname, User.lastname, User.modobio_id, User.email
+                                    ClientClinicalCareTeam, User.firstname, User.lastname, User.modobio_id, User.email, 
                                 ).filter(
                                     ClientClinicalCareTeam.user_id == user_id
                                 ).filter(ClientClinicalCareTeam.team_member_user_id == User.user_id
                                 ).all()
-        
+        fh = FileHandling()
         for team_member in current_team_users:
+            # bring up a profile photo for th team member
+            staff_profile_pics = db.session.execute(select(
+                UserProfilePictures.staff_id
+            ).where(
+                UserProfilePictures.staff_id==team_member[0].team_member_user_id
+            )).scalars().first()
+
+            client_profile_pics = db.session.execute(select(
+                UserProfilePictures.client_id
+            ).where(
+                UserProfilePictures.client_id==team_member[0].team_member_user_id
+            )).scalars().first()
+            if staff_profile_pics:
+                profile_pics = fh.get_presigned_urls(prefix=f'id{team_member[0].team_member_user_id:05d}/staff_profile_picture')
+            elif client_profile_pics:
+                profile_pics = fh.get_presigned_urls(prefix=f'id{team_member[0].team_member_user_id:05d}/client_profile_picture')
+            else:
+                profile_pics = None
+
             current_team.append({
                 'firstname': team_member[1],
                 'lastname': team_member[2], 
                 'modobio_id': team_member[3],
                 'team_member_email': team_member[4],
-                'team_member_user_id':team_member[0].team_member_user_id })
+                'team_member_user_id':team_member[0].team_member_user_id,
+                'profile_picture': profile_pics
+            })
         
         response = {"care_team": current_team,
                     "total_items": len(current_team) }
