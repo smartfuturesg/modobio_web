@@ -1202,7 +1202,7 @@ class UserClinicalCareTeamApi(Resource):
     
     Endpoint for viewing and managing the list of clients who have the specified user as part of their care team.
     """
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('staff_self', 'client'))
     @responds(schema=ClinicalCareTeamMemberOfSchema, api=ns, status_code=200)
     def get(self, user_id):
         """
