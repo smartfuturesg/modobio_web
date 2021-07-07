@@ -2,6 +2,7 @@
 import time 
 
 from flask.json import dumps
+from odyssey.api.payment.models import PaymentMethods
 
 from .data import (
     telehealth_staff_general_availability_1_post_data,
@@ -27,6 +28,9 @@ def test_post_1_staff_general_availability(test_client, init_database,client_aut
                                 data=dumps(telehealth_staff_general_availability_1_post_data), 
                                 content_type='application/json')
     assert response.status_code == 201
+
+    payment_method = PaymentMethods.query.filter_by(user_id=1).first()
+    telehealth_queue_client_pool_8_post_data['payment_method_id'] = payment_method.idx
 
     response = test_client.post('/telehealth/queue/client-pool/1/',
                                 headers=client_auth_header, 

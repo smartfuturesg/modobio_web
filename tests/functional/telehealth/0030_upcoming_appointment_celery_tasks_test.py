@@ -6,9 +6,14 @@ from sqlalchemy import and_, or_, select
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.notifications.models import Notifications
 from odyssey.api.telehealth.models import TelehealthBookings
+from odyssey.api.payment.models import PaymentMethods
 
 from odyssey.api.user.models import User
-from tests.functional.telehealth.client_select_data import telehealth_staff_full_avilability, telehealth_bookings_data_full_day
+from tests.functional.telehealth.client_select_data import(
+    telehealth_staff_full_avilability,
+    telehealth_bookings_data_full_day,
+    payment_method_data
+)
 
 from odyssey.tasks.periodic import deploy_upcoming_appointment_notifications
 from odyssey.tasks.tasks import upcoming_appointment_notification_2hr
@@ -66,15 +71,24 @@ def test_upcoming_bookings_scan(test_client, init_database, staff_auth_header):
     token = response.json.get('token')
     auth_header = {'Authorization': f'Bearer {token}'}
 
+    # add payment method to db
+    test_client.post(f'/payment/methods/{client.user_id}/',
+                                headers=auth_header,
+                                data=dumps(payment_method_data['normal_data']),
+                                content_type='application/json')
+    payment_method = PaymentMethods.query.filter_by(user_id=client.user_id).first()
+
     # loop through all bookings in test data 
     for booking in telehealth_bookings_data_full_day:
         #add to queue
         queue_data = {
-                'profession_type': 'Medical Doctor',
+                'profession_type': 'medical_doctor',
                 'target_date': datetime.strptime(
                     booking.get('target_date'), '%Y-%m-%d').isoformat(),
                 'priority': False,
-                'medical_gender': 'np'
+                'medical_gender': 'np',
+                'location_id': 1,
+                'payment_method_id': payment_method.idx
             }
         response = test_client.post(f'/telehealth/queue/client-pool/{client.user_id}/',
                                 headers=auth_header, 
@@ -165,7 +179,7 @@ def test_upcoming_bookings_scan(test_client, init_database, staff_auth_header):
         where(Notifications.notification_type_id == 2,
             or_(Notifications.user_id == test_booking.client_user_id, 
             Notifications.user_id == test_booking.staff_user_id))).scalars().all()
-    
+
     assert notifications[0].expires == datetime.combine(test_booking.target_date, test_booking_start_time.start_time) + timedelta(hours=2)
 
  
