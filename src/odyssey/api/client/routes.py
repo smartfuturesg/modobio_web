@@ -1207,26 +1207,26 @@ class UserClinicalCareTeamApi(Resource):
     def get(self, user_id):
         """
         returns the list of clients whose clinical care team the given user_id
-        is a part of
+        is a part of along with the permissions granted to them
         """
         res = []
         for client in ClientClinicalCareTeam.query.filter_by(team_member_user_id=user_id).all():
-            user = User.query.filter_by(user_id=client.user_id).one_or_none()
+            client_user = User.query.filter_by(user_id=client.user_id).one_or_none()
             authorizations_query = db.session.query(
-                                    ClientClinicalCareTeamAuthorizations.resource_id, 
-                                    LookupClinicalCareTeamResources.display_name
+                                    ClientEHRPageAuthorizations.resource_group_id, 
+                                    LookupEHRPages.display_name
                                 ).filter(
-                                    ClientClinicalCareTeamAuthorizations.team_member_user_id == user_id
+                                    ClientEHRPageAuthorizations.team_member_user_id == user_id
                                 ).filter(
-                                    ClientClinicalCareTeamAuthorizations.user_id == client.user_id
+                                    ClientEHRPageAuthorizations.user_id == client.user_id
                                 ).filter(
-                                    ClientClinicalCareTeamAuthorizations.resource_id == LookupClinicalCareTeamResources.resource_id
+                                    ClientEHRPageAuthorizations.resource_group_id == LookupEHRPages.resource_group_id
                                 ).all()
-            res.append({'client_user_id': user.user_id, 
-                        'client_name': ' '.join(filter(None, (user.firstname, user.middlename ,user.lastname))),
-                        'client_email': user.email,
-                        'client_modobio_id': user.modobio_id,
-                        'authorizations': [{'display_name': x[1], 'resource_id': x[0]} for x in authorizations_query]})
+            res.append({'client_user_id': client_user.user_id, 
+                        'client_name': ' '.join(filter(None, (client_user.firstname, client_user.middlename ,client_user.lastname))),
+                        'client_email': client_user.email,
+                        'client_modobio_id': client_user.modobio_id,
+                        'authorizations': [{'display_name': x[1], 'resource_group_id': x[0]} for x in authorizations_query]})
         
         return {'member_of_care_teams': res, 'total': len(res)}
 
