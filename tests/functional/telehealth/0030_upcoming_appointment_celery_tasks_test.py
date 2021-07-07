@@ -160,7 +160,7 @@ def test_upcoming_bookings_notification(test_client, init_database, staff_auth_h
     # Test upcoming appointment notification task
     #
     ##
-    global test_booking
+
     test_booking = choice(upcoming_bookings_all)
     
     test_booking_start_time = init_database.session.execute(
@@ -187,7 +187,7 @@ def test_upcoming_bookings_notification(test_client, init_database, staff_auth_h
     # Test upcoming appointment ehr permissions task
     #
     ##
-
+    test_booking = choice(upcoming_bookings_all)
     upcoming_appointment_care_team_permissions(test_booking.idx)
 
     ehr_permissions = init_database.session.execute(select(
