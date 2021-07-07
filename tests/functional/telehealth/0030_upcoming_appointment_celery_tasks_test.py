@@ -160,6 +160,7 @@ def test_upcoming_bookings_notification(test_client, init_database, staff_auth_h
     # Test upcoming appointment notification task
     #
     ##
+    global test_booking
     test_booking = choice(upcoming_bookings_all)
     
     test_booking_start_time = init_database.session.execute(
@@ -178,6 +179,10 @@ def test_upcoming_bookings_notification(test_client, init_database, staff_auth_h
     
     assert notifications[0].expires == datetime.combine(test_booking.target_date, test_booking_start_time.start_time) + timedelta(hours=2)
 
+def test_upcoming_bookings_notification(test_client, init_database, staff_auth_header):
+    """
+    Use a current booking to test the upcoming appointment ehr permissions task
+    """
     ##
     # Test upcoming appointment ehr permissions task
     #
