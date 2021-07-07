@@ -1,9 +1,11 @@
 from base64 import b64encode
 from datetime import datetime, timedelta
+from random import choice
 
 from flask.json import dumps
 from sqlalchemy import and_, or_, select
-from odyssey.api.lookup.models import LookupBookingTimeIncrements
+from odyssey.api.client.models import ClientEHRPageAuthorizations
+from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupEHRPages
 from odyssey.api.notifications.models import Notifications
 from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.api.payment.models import PaymentMethods
@@ -15,8 +17,8 @@ from tests.functional.telehealth.client_select_data import(
     payment_method_data
 )
 
-from odyssey.tasks.periodic import deploy_upcoming_appointment_notifications
-from odyssey.tasks.tasks import upcoming_appointment_notification_2hr
+from odyssey.tasks.periodic import deploy_upcoming_appointment_tasks
+from odyssey.tasks.tasks import upcoming_appointment_notification_2hr, upcoming_appointment_care_team_permissions
 
 
 
@@ -25,6 +27,8 @@ def test_upcoming_bookings_scan(test_client, init_database, staff_auth_header):
     Add availability for a staff member for two consecutive days
     Book clients to the staff member accross windows
     """
+
+    global upcoming_bookings_all
     ##
     # Submit availability for staff memeber
     ##
@@ -103,7 +107,7 @@ def test_upcoming_bookings_scan(test_client, init_database, staff_auth_header):
         assert response.status_code == 201
 
     ###
-    # Test tasks.periodic.deploy_upcoming_appointment_notifications
+    # Test tasks.periodic.deploy_upcoming_appointment_tasks
     # - scanning windows for upcoming bookings:
     #   (booking_window_id_start - booking_window_id_end, actual times)
     #   1 - 96    (00:00 - 08:00)
@@ -115,33 +119,33 @@ def test_upcoming_bookings_scan(test_client, init_database, staff_auth_header):
 
     target_date = datetime.strptime('2022-04-04', '%Y-%m-%d')
     
-    upcoming_bookings_1 = deploy_upcoming_appointment_notifications(
+    upcoming_bookings_1 = deploy_upcoming_appointment_tasks(
         target_date=target_date,
         booking_window_id_start=1,
         booking_window_id_end=96)
     
-    upcoming_bookings_2 = deploy_upcoming_appointment_notifications(
+    upcoming_bookings_2 = deploy_upcoming_appointment_tasks(
         target_date=target_date,
         booking_window_id_start=73,
         booking_window_id_end=168)
     
-    upcoming_bookings_3 = deploy_upcoming_appointment_notifications(
+    upcoming_bookings_3 = deploy_upcoming_appointment_tasks(
         target_date=target_date,
         booking_window_id_start=145,
         booking_window_id_end=240)
 
-    upcoming_bookings_4 = deploy_upcoming_appointment_notifications(
+    upcoming_bookings_4 = deploy_upcoming_appointment_tasks(
         target_date=target_date,
         booking_window_id_start=217,
         booking_window_id_end=24)
 
-    upcoming_bookings_5 = deploy_upcoming_appointment_notifications(
+    upcoming_bookings_5 = deploy_upcoming_appointment_tasks(
         booking_window_id_start=1,
         booking_window_id_end=96,
         target_date=target_date+timedelta(days=1))
 
     # no target_date set
-    upcoming_bookings_today = deploy_upcoming_appointment_notifications(
+    upcoming_bookings_today = deploy_upcoming_appointment_tasks(
         booking_window_id_start=1,
         booking_window_id_end=96)
 
@@ -156,15 +160,22 @@ def test_upcoming_bookings_scan(test_client, init_database, staff_auth_header):
     ).scalars().all()
 
     # Check to make sure all bookings were picked up
-    upcoming_all = list(set(upcoming_bookings_1+upcoming_bookings_2+upcoming_bookings_3+upcoming_bookings_4+upcoming_bookings_5))
+    upcoming_bookings_all = list(set(upcoming_bookings_1+upcoming_bookings_2+upcoming_bookings_3+upcoming_bookings_4+upcoming_bookings_5))
 
-    assert len(upcoming_all) == len(all_bookings_day_1+all_bookings_day_2)
+    assert len(upcoming_bookings_all) == len(all_bookings_day_1+all_bookings_day_2)
     assert upcoming_bookings_today == []
+
+
+def test_upcoming_bookings_notification(test_client, init_database, staff_auth_header):
+    """
+    Use a current booking to test the upcoming appointment notification task
+    """
     ##
     # Test upcoming appointment notification task
     #
     ##
-    test_booking = upcoming_bookings_4[0]
+
+    test_booking = choice(upcoming_bookings_all)
     
     test_booking_start_time = init_database.session.execute(
         select(LookupBookingTimeIncrements).
@@ -182,4 +193,26 @@ def test_upcoming_bookings_scan(test_client, init_database, staff_auth_header):
 
     assert notifications[0].expires == datetime.combine(test_booking.target_date, test_booking_start_time.start_time) + timedelta(hours=2)
 
- 
+def test_upcoming_bookings_notification(test_client, init_database, staff_auth_header):
+    """
+    Use a current booking to test the upcoming appointment ehr permissions task
+    """
+    ##
+    # Test upcoming appointment ehr permissions task
+    #
+    ##
+    test_booking = choice(upcoming_bookings_all)
+    upcoming_appointment_care_team_permissions(test_booking.idx)
+
+    ehr_permissions = init_database.session.execute(select(
+        ClientEHRPageAuthorizations
+    ).where(
+        ClientEHRPageAuthorizations.user_id == test_booking.client_user_id, 
+        ClientEHRPageAuthorizations.team_member_user_id == test_booking.staff_user_id
+    )).scalars().all()
+
+    resource_ids_needed = init_database.session.execute(select(
+        LookupEHRPages.resource_group_id
+    ).where(LookupEHRPages.access_group.in_(['general','medical_doctor']))).scalars().all()
+
+    assert len(ehr_permissions) == len(resource_ids_needed)
