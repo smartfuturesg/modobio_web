@@ -100,7 +100,9 @@ def upcoming_appointment_care_team_permissions(booking_id):
     ).where(LookupEHRPages.access_group.in_(['general','medical_doctor']))).scalars().all()
     
     # bring up booking
-    booking = db.session.execute(select(TelehealthBookings).where(TelehealthBookings.idx == booking_id)).scalars().one_or_none()
+    booking = db.session.execute(select(TelehealthBookings).where(
+        TelehealthBookings.idx == booking_id,
+        TelehealthBookings.status == 'Accepted')).scalars().one_or_none()
     
     if not booking:
         return 
