@@ -91,8 +91,6 @@ def upcoming_appointment_care_team_permissions(booking_id):
     """
     Apply temporary care team access permissions to the staff member involved in the booking 
 
-    TODO:
-    30 mins before a call is scheduled via
     """
 
     # bring up resouce_group_ids required for medical doctor visits
