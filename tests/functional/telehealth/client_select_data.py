@@ -163,11 +163,21 @@ telehealth_bookings_staff_8_client_5_data = {
 # ------------
 # client queue
 # ------------
+
+payment_method_data = {
+  'normal_data': {
+        'token': '4111111111111111',
+        'expiration': '04/25',
+        'is_default': True
+    }
+}
 telehealth_queue_client_3_data = {
   'profession_type': 'medical_doctor',
   'target_date': '2022-04-04T02:00:00.000',
   'priority': True,
-  'medical_gender': 'np'
+  'medical_gender': 'np',
+  'location_id': 1,
+  'payment_method_id': None
 }
 
 #-------

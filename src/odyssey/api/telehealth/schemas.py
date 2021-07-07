@@ -19,7 +19,7 @@ from odyssey.api.telehealth.models import (
     TelehealthBookingDetails,
     TelehealthStaffSettings
 )
-from odyssey.utils.constants import DAY_OF_WEEK, GENDERS, BOOKINGS_STATUS
+from odyssey.utils.constants import DAY_OF_WEEK, GENDERS, BOOKINGS_STATUS, ACCESS_ROLES
 
 class TelehealthBookingMeetingRoomsTokensSchema(Schema):
     twilio_token = fields.String()
@@ -62,7 +62,9 @@ class TelehealthBookingsSchema(ma.SQLAlchemyAutoSchema):
     staff_first_name = fields.String(dump_only=True)
     staff_middle_name = fields.String(dump_only=True)
     staff_last_name = fields.String(dump_only=True)
-    timezone = fields.String(metadata={'description': 'tiemzone setting of the booking for the logged in user'})
+    timezone = fields.String(metadata={'description': 'timezone setting of the booking for the logged in user'})
+    payment_method_id = fields.Integer(required=False)
+    client_location_id = fields.Integer(required=False)
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -126,11 +128,15 @@ class TelehealthQueueClientPoolSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = TelehealthQueueClientPool
         exclude = ('created_at', 'updated_at')
-        dump_only = ('idx', 'user_id')
+        dump_only = ('idx', 'user_id', 'location_name')
     
     duration = fields.Integer(missing=20)
     medical_gender = fields.String(validate=validate.OneOf([gender[0] for gender in GENDERS]),metadata={'description': 'Preferred Medical Professional gender'})
     timezone = fields.String(validate=validate.OneOf(pytz.common_timezones),metadata={'description': 'optional timezone selection, defaults to UTC'}, missing='UTC')
+    location_name = fields.String()
+    location_id = fields.Integer(required=True)
+    payment_method_id = fields.Integer(required=True, metadata={'description': 'idx from PaymentMethods selected'})
+    profession_type = fields.String(validate=validate.OneOf(ACCESS_ROLES), required=True)
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -148,8 +154,6 @@ class TelehealthBookingDetailsSchema(ma.SQLAlchemyAutoSchema):
 
 class TelehealthBookingDetailsGetSchema(Schema):
     details = fields.String()
-    location_id = fields.Integer()
-    location_name = fields.String()
     images = fields.String()
     voice = fields.String()
     

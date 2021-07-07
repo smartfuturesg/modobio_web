@@ -97,6 +97,20 @@ class TelehealthBookings(BaseModelWithIdx):
     :type: int, foreign key('LookupBookingTimeIncrements.idx')
     """
 
+    client_location_id = db.Column(db.Integer, db.ForeignKey('LookupTerritoriesofOperation.idx'), nullable=False)
+    """
+    client location id for this booking
+        :type: int, foreign key(LookupTerritoriesofOperation.idx)
+    """
+
+    payment_method_id = db.Column(db.Integer, db.ForeignKey('PaymentMethods.idx'), nullable=False)
+    """
+    client payment method selected from PaymentMethods previously set up
+
+    :type: int, foreign key(PaymentMethods.idx)
+    """
+
+
 class TelehealthMeetingRooms(BaseModel):
     """ 
     Meeting room details for one-on-one meetings between clients and medical professionals.
@@ -248,6 +262,20 @@ class TelehealthQueueClientPool(BaseModelWithIdx, UserIdFkeyMixin):
     :type: str
     """
 
+    location_id = db.Column(db.Integer, db.ForeignKey('LookupTerritoriesofOperation.idx'), nullable=False)
+    """
+    client location id for this booking request
+    :type: int, foreign key(LookupTerritoriesofOperation.idx)
+    """
+
+    payment_method_id = db.Column(db.Integer, db.ForeignKey('PaymentMethods.idx'), nullable=False)
+    """
+    client payment method selected from PaymentMethods previously set up
+
+    :type: int, foreign key(PaymentMethods.idx)
+    """
+    
+
 class TelehealthBookingDetails(BaseModelWithIdx):
     """ 
     Table holding text, images or sound recording details about a booking
@@ -271,13 +299,6 @@ class TelehealthBookingDetails(BaseModelWithIdx):
     :type: str
     """
     
-    location_id = db.Column(db.Integer, db.ForeignKey('LookupTerritoriesofOperation.idx'), nullable=False)
-    """
-    client location id for this booking
-
-    :type: int, foreign key(LookupTerritoriesofOperation.idx)
-    """
-
 
 class TelehealthChatRooms(BaseModel):
     """ 
