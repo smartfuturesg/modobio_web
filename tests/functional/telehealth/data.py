@@ -1,69 +1,94 @@
 import pathlib
 
+# Payment method data
+payment_method_data = {
+  'normal_data': {
+        'token': '4111111111111111',
+        'expiration': '04/25',
+        'is_default': True
+    }
+}
+
 # For readability
 # 1/5/2025
 # Sunday
 telehealth_queue_client_pool_1_post_data = {
-  'profession_type': 'Medical Doctor',
+  'profession_type': 'medical_doctor',
   'target_date': '2025-01-05T02:00:00.000',
   'priority': False,
-  'medical_gender': 'f'
+  'medical_gender': 'f',
+  'payment_method_id': None,
+  'location_id': 1
 }
 # 3/3/2025
 # Monday
 telehealth_queue_client_pool_2_post_data = {
-  'profession_type': 'Medical Doctor',
+  'profession_type': 'medical_doctor',
   'target_date': '2025-03-03T02:00:00.000',
   'priority': False,
-  'medical_gender': 'np'
+  'medical_gender': 'np',
+  'payment_method_id': None,
+  'location_id': 1
 }
 # 2/5/2025
 # Wednesday
 telehealth_queue_client_pool_3_post_data = {
-  'profession_type': 'Medical Doctor',
+  'profession_type': 'medical_doctor',
   'target_date': '2025-02-05T02:00:00.000',
   'priority': False,
-  'medical_gender': 'f'
+  'medical_gender': 'f',
+  'payment_method_id': None,
+  'location_id': 1
 }
 # 1/2/2025
 # Thursday
 telehealth_queue_client_pool_4_post_data = {
-  'profession_type': 'Medical Doctor',
+  'profession_type': 'medical_doctor',
   'target_date': '2025-01-02T02:00:00.000',
   'priority': False,
-  'medical_gender': 'm'
+  'medical_gender': 'm',
+  'payment_method_id': None,
+  'location_id': 1
 }
 # 4/5/2025
 # Friday
 telehealth_queue_client_pool_5_post_data = {
-  'profession_type': 'Medical Doctor',
+  'profession_type': 'medical_doctor',
   'target_date': '2025-04-05T02:00:00.000',
   'priority': False,
-  'medical_gender': 'np'
+  'medical_gender': 'np',
+  'payment_method_id': None,
+  'location_id': 1
 }
 # 2/7/2025
 # Friday
 telehealth_queue_client_pool_6_post_data = {
-  'profession_type': 'Medical Doctor',
+  'profession_type': 'medical_doctor',
   'target_date': '2025-02-07T02:00:00.000',
   'priority': True,
-  'medical_gender': 'm'
+  'medical_gender': 'm',
+  'payment_method_id': None,
+  'location_id': 1
 }
 # 2/5/2025
 # Wednesday
 telehealth_queue_client_pool_7_post_data = {
-  'profession_type': 'Medical Doctor',
+  'profession_type': 'medical_doctor',
   'target_date': '2025-02-05T02:00:00.000',
   'priority': True,
   'medical_gender': 'f',
-  'duration': 30
+  'duration': 30,
+  'payment_method_id': None,
+  'location_id': 1
 }
 
 telehealth_queue_client_pool_8_post_data = {
   'profession_type': 'medical_doctor',
   'target_date': '2022-04-04T02:00:00.000',
   'priority': False,
-  'medical_gender': 'np'
+  'medical_gender': 'np',
+  'payment_method_id': None,
+  'location_id': 1
 }
 
 # --------------------------------------------------------------------
@@ -249,26 +274,21 @@ img_file = pathlib.Path(__file__).parent / 'test_img_weirdmole.jpg'
 telehealth_post_booking_details = {
     'images': (img_file.as_posix(), img_file.name, 'image/jpeg'),
     'voice': (rec_file.as_posix(), rec_file.name, 'audio/mp4'),
-    'details': 'Testing booking details',
-    'location_id': 1}
+    'details': 'Testing booking details'}
 
 telehealth_put_booking_details = {
     'remove_img_rec': {
         'images': None,
         'voice': None,
-        'details': 'Removed image and recording, kept description',
-        'location_id': 1},
+        'details': 'Removed image and recording, kept description'},
     'swap_img_rec': {
         'images': (img_file.as_posix(), img_file.name, 'image/jpeg'),
         'voice': (rec_file.as_posix(), rec_file.name, 'audio/mp4'),
-        'details': 'Swapped files, recording is image and image is recording.',
-        'location_id': 1},
+        'details': 'Swapped files, recording is image and image is recording.'},
     'change_text_only': {
-        'details': 'Only changed text details',
-        'location_id': 1},
+        'details': 'Only changed text details'},
     'nothing_to_change': {},
     'empty_booking_details': {
         'images': None,
         'voice': None,
-        'details': '',
-        'location_id': 1}}
+        'details': ''}}

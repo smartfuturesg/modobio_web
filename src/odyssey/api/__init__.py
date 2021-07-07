@@ -57,6 +57,9 @@ api.add_namespace(ns)
 from odyssey.api.notifications.routes import ns
 api.add_namespace(ns)
 
+from odyssey.api.payment.routes import ns
+api.add_namespace(ns)
+
 from odyssey.api.physiotherapy.routes import ns
 api.add_namespace(ns)
 

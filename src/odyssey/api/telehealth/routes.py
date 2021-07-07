@@ -45,6 +45,7 @@ from odyssey.api.telehealth.schemas import (
 from odyssey.api.lookup.models import (
     LookupTerritoriesofOperation
 )
+from odyssey.api.payment.models import PaymentMethods
 from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import TWILIO_ACCESS_KEY_TTL, DAY_OF_WEEK, ALLOWED_AUDIO_TYPES, ALLOWED_IMAGE_TYPES
 from odyssey.utils.errors import GenericNotFound, InputError, UnauthorizedUser, ContentNotFound, IllegalSetting
@@ -484,7 +485,9 @@ class TelehealthBookingsApi(Resource):
                 'status': book.status,
                 'profession_type': book.profession_type,
                 'conversation_sid': booking.get('conversation_sid'),
-                'timezone': tzone
+                'timezone': tzone,
+                'client_location_id': book.client_location_id,
+                'payment_method_id': book.payment_method_id
             })
 
         # Sort bookings by time then sort by date
@@ -590,6 +593,12 @@ class TelehealthBookingsApi(Resource):
         # Add staff and client timezones to the TelehealthBooking entry
         request.parsed_obj.staff_timezone = staff_availability[0].settings.timezone
         request.parsed_obj.client_timezone = client_in_queue.timezone
+
+        # save client's location for booking
+        request.parsed_obj.client_location_id = client_in_queue.location_id
+
+        # save client's payment method
+        request.parsed_obj.payment_method_id = client_in_queue.payment_method_id
 
         # to check the staff's auto accept setting. 
         if staff_availability[0].settings.auto_confirm:
@@ -726,6 +735,17 @@ class TelehealthBookingsApi(Resource):
 
         if not bookings:
             raise InputError(status_code=405,message='Could not find booking.')
+        
+        # If client wants to change the payment method for booking
+        # Verify payment method idx is valid from PaymentMethods
+        # and that the payment method chosen has the user_id
+        payment_id = request.get_json().get('payment_method_id')
+        if payment_id and not PaymentMethods.query.filter_by(user_id=bookings.client_user_id, idx=payment_id).one_or_none():
+            raise InputError(403, "Invalid Payment Method")
+        
+        # user can't change booking location without cancelling booking and creating a new entry in the queue
+        if request.get_json().get('client_location_id'):
+            raise InputError(403, 'To change location, please create a new request')
 
         data = request.get_json()
         bookings.update(data)
@@ -1297,6 +1317,19 @@ class TelehealthQueueClientPoolApi(Resource):
         if appointment_in_queue:
             db.session.delete(appointment_in_queue)
             db.session.flush()
+        
+        # Verify location_id is valid
+        location_id = request.parsed_obj.location_id
+        location = LookupTerritoriesofOperation.query.filter_by(idx=location_id).one_or_none()
+        if not location:
+            raise GenericNotFound(f"No location exists with id {location_id}")
+        
+        # Verify payment method idx is valid from PaymentMethods
+        # and that the payment method chosen has the user_id
+        payment_id = request.parsed_obj.payment_method_id
+        verified_payment_method = PaymentMethods.query.filter_by(user_id=user_id, idx=payment_id).one_or_none()
+        if not verified_payment_method:
+            raise InputError(403, "Invalid Payment Method")
 
         request.parsed_obj.user_id = user_id
         db.session.add(request.parsed_obj)
@@ -1350,11 +1383,6 @@ class TelehealthBookingDetailsApi(Resource):
         if not booking:
             raise InputError(204, message=f'No details exist for booking id {booking_id}')
         res['details'] = booking.details
-        res['location_id'] = booking.location_id
-        location = LookupTerritoriesofOperation.query.filter_by(idx=booking.location_id).one_or_none()
-        if not location:
-            raise GenericNotFound(f"No location exists with id {location_id}")
-        res['location_name'] = location.country + " " + location.sub_territory
 
         #retrieve all files associated with this booking id
         s3prefix = f'meeting_files/id{booking_id:05d}/'
@@ -1393,7 +1421,6 @@ class TelehealthBookingDetailsApi(Resource):
             Audio file, only 1 can be send.
         details : str (optional)
             Further details.
-        location_id (optional) : id of the location the client is in
         """
         #verify the editor of details is the client or staff from schedulded booking
         booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
@@ -1410,29 +1437,14 @@ class TelehealthBookingDetailsApi(Resource):
         files = request.files #ImmutableMultiDict of key : FileStorage object
 
         #verify there's something to submit, if nothing, raise input error
-        if (not request.form.get('details') and len(files) == 0 and not request.form.get('location_id')):
+        #if (not request.form.get('details') and len(files) == 0):
+        if not 'details' in request.form and not 'images' in request.files and not 'voice' in request.files:
             raise InputError(204, message='Nothing to submit')
 
         #if 'details' is present in form, details will be updated to new string value of details
         #if 'details' is not present, details will not be affected
         if request.form.get('details'):
             query.details = request.form.get('details')
-
-        #if 'location_id' is present in form, location_id will be updated to new value
-        #if 'location_id' is not present, location_id will not be affected
-        location_id = request.form.get('location_id')
-        if location_id:
-            #verify that location id is an int
-            #it is provided as a string, so we try to cast as an int to verify
-            try:
-                int(location_id)
-            except:
-                raise InputError(422, "Location id must be an integer")
-
-            location = LookupTerritoriesofOperation.query.filter_by(idx=location_id).one_or_none()
-            if not location:
-                raise GenericNotFound(f"No location exists with id {location_id}")
-            query.location_id = location_id
 
         #if 'images' and 'voice' are both not present, no changes will be made to the current media file
         #if 'images' or 'voice' are present, but empty, the current media file(s) for that category will be removed
@@ -1512,7 +1524,7 @@ class TelehealthBookingDetailsApi(Resource):
 
 
     @token_auth.login_required
-    @responds(schema=TelehealthBookingDetailsSchema(many=True), api=ns, status_code=201)
+    @responds(schema=TelehealthBookingDetailsSchema, api=ns, status_code=201)
     def post(self, booking_id):
         """
         Adds details to a booking_id
@@ -1522,7 +1534,6 @@ class TelehealthBookingDetailsApi(Resource):
             images : file(s) list of image files, up to 4
             voice : file
             details : str
-            location_id (required) : id of the location the client is in
         """
         form = request.form
         files = request.files
@@ -1541,32 +1552,15 @@ class TelehealthBookingDetailsApi(Resource):
             raise UnauthorizedUser(message='Only the client of this booking is allowed to edit details')
 
         #verify there's something to submit, if nothing, raise input error
-        if (not form.get('details') and not form.get('location_id') and not files):
+        if (not form.get('details') and not files):
             raise InputError(204, message='Nothing to submit')
         
-        payload = []
         data = TelehealthBookingDetails()
 
         if form.get('details'):
             data.details = form.get('details')
 
         data.booking_id = booking_id
-
-        #verify that location id is an int
-        #it is provided as a string, so we try to cast as an int to verify
-        location_id = form.get('location_id')
-        try:
-            int(location_id)
-        except:
-            raise InputError(422, "Location id must be an integer")
-
-        location = LookupTerritoriesofOperation.query.filter_by(idx=location_id).one_or_none()
-        if not location:
-            raise GenericNotFound(f"No location exists with id {location_id}")
-
-        data.location_id = location_id
-
-        payload.append(data)
 
         #Saving media files into s3
         if files:
@@ -1627,9 +1621,9 @@ class TelehealthBookingDetailsApi(Resource):
                 if i >= 1:
                     break
 
-        db.session.add_all(payload)
+        db.session.add(data)
         db.session.commit()
-        return payload
+        return data
 
     @token_auth.login_required
     @responds(status_code=204)

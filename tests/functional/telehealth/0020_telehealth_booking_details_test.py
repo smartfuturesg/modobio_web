@@ -118,7 +118,6 @@ def test_get_booking_details(test_client, init_database, client_auth_header):
     response = test_client.get(f'/telehealth/bookings/details/{booking_id}', headers=client_auth_header)
     assert response.status_code == 200
     assert response.json['details'] == 'Only changed text details'
-    assert response.json['location_id'] == 1
     assert response.json['images']
 
     #Try getting booking details for booking_id that doens't exist
