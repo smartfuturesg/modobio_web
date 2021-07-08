@@ -14,7 +14,7 @@ from odyssey import db
 from odyssey.api.lookup.models import (
     LookupBookingTimeIncrements
 )
-from odyssey.api.staff.models import StaffRoles, StaffCalendarEvents
+from odyssey.api.staff.models import StaffOperationalTerritories, StaffRoles, StaffCalendarEvents
 from odyssey.api.user.models import User
 
 from odyssey.api.telehealth.models import (
@@ -175,13 +175,19 @@ class TelehealthClientTimeSelectApi(Resource):
 
             if client_in_queue.medical_gender == 'np':
                 staff_availability = db.session.query(TelehealthStaffAvailability)\
-                    .join(StaffRoles, StaffRoles.user_id==TelehealthStaffAvailability.user_id)\
-                        .filter(TelehealthStaffAvailability.day_of_week==weekday_str, StaffRoles.role==client_in_queue.profession_type).all()
+                    .join(StaffOperationalTerritories, StaffOperationalTerritories.user_id == TelehealthStaffAvailability.user_id)\
+                        .filter(TelehealthStaffAvailability.day_of_week==weekday_str, 
+                            StaffOperationalTerritories.role.has(role=client_in_queue.profession_type), 
+                            StaffOperationalTerritories.operational_territory_id == client_in_queue.location_id).all()
+
             else:
                 staff_availability = db.session.query(TelehealthStaffAvailability)\
-                    .join(StaffRoles, StaffRoles.user_id==TelehealthStaffAvailability.user_id)\
+                    .join(StaffOperationalTerritories, StaffOperationalTerritories.user_id == TelehealthStaffAvailability.user_id)\
                         .join(User, User.user_id==TelehealthStaffAvailability.user_id)\
-                        .filter(TelehealthStaffAvailability.day_of_week==weekday_str, StaffRoles.role==client_in_queue.profession_type,User.biological_sex_male==genderFlag).all()
+                            .filter(TelehealthStaffAvailability.day_of_week==weekday_str, 
+                                StaffOperationalTerritories.role.has(role=client_in_queue.profession_type), 
+                                StaffOperationalTerritories.operational_territory_id == client_in_queue.location_id,
+                                User.biological_sex_male==genderFlag).all()
             #### TESTING NOTES:
             ####   test1 - test with weekday_str when we have 0 availabilities (check if staff_availability is empty)
 
@@ -189,7 +195,7 @@ class TelehealthClientTimeSelectApi(Resource):
                 no_staff_available_count+=1
                 days_from_target+=1
                 if no_staff_available_count >= 7:
-                    raise InputError(status_code=405,message='No staff available for the upcoming week.')
+                    raise InputError(status_code=404,message='No staff available for the upcoming week.')
                 else:
                     # continue jumps the to the top of the loop
                     continue

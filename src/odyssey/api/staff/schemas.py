@@ -77,6 +77,7 @@ class StaffOperationalTerritoriesSchema(ma.SQLAlchemyAutoSchema):
         model = StaffOperationalTerritories
         exclude = ('created_at', 'updated_at', 'idx')
         include_fk = True
+        dump_only = ('user_id')
 
     user_id = fields.Integer(missing=None)
     @post_load

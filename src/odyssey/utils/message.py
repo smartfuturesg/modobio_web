@@ -595,7 +595,7 @@ class PushNotification:
                 'staff_first_name': str,
                 'staff_middle_name': str,
                 'staff_last_name': str,
-                'staff_profile_picture: str},
+                'staff_profile_picture: dict},
              'custom': dict}
 
         :aps: must be present, but empty; entries in ``aps`` are ignored.
@@ -607,7 +607,7 @@ class PushNotification:
         :staff_first_name: first name of the staff member.
         :staff_middle_name: middle name of the staff member.
         :staff_last_name: last name of the staff member.
-        :staff_profile_picture: profile picture url of the staff member.
+        :staff_profile_picture: dictionary of staff member's profile picture urls
 
     sns : boto3.Resource
         The active connection with AWS SNS through :mod:`boto3`.

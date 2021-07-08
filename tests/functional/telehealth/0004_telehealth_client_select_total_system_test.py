@@ -10,6 +10,7 @@ from sqlalchemy.sql.expression import delete, select
 from odyssey.api.user.models import User
 from odyssey.api.telehealth.models import TelehealthStaffAvailability
 from odyssey.api.payment.models import PaymentMethods
+from odyssey.api.staff.models import StaffRoles, StaffOperationalTerritories
 
 from .client_select_data import (
     telehealth_staff_4_general_availability_post_data,
@@ -68,7 +69,7 @@ def test_generate_staff_availability(test_client, init_database, generate_users,
                                 content_type='application/json')
         token = response.json.get('token')
         auth_header = {'Authorization': f'Bearer {token}'}
-  
+
         # GENERATE STAFF AVAILABILITY
         response = test_client.post(f'/telehealth/settings/staff/availability/{user.user_id}/',
                                     headers=auth_header, 
@@ -214,7 +215,7 @@ def test_client_time_select(test_client, init_database, client_auth_header):
     response = test_client.get('/telehealth/client/time-select/1/', headers=client_auth_header)
 
     assert response.status_code == 200
-    assert response.json['total_options'] == 53
+    assert response.json['total_options'] == 31
 
 
 def test_full_system_with_settings(test_client, init_database, staff_auth_header, client_auth_header):
