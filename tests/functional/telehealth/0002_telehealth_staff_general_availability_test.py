@@ -2,6 +2,7 @@
 import time 
 
 from flask.json import dumps
+from odyssey.api.staff.models import StaffRoles
 from odyssey.api.payment.models import PaymentMethods
 
 from .data import (
@@ -22,7 +23,11 @@ def test_post_1_staff_general_availability(test_client, init_database,client_aut
     WHEN the '/telehealth/settings/staff/availability/user_id>' resource  is requested (POST)
     THEN check the response is valid
     """
-   
+    # Add Staff Operational Territories to staff with user_id 2 and only for medical_doctor role
+    role = StaffRoles.query.filter_by(user_id = 2, role = 'medical_doctor').one_or_none()
+    payload = {'operational_territories': [{ 'role_id': role.idx,'operational_territory_id': 1}]}
+    test_client.post(f'/staff/operational-territories/2/', headers=staff_auth_header, data=dumps(payload), content_type='application/json')
+
     response = test_client.post('/telehealth/settings/staff/availability/2/',
                                 headers=staff_auth_header, 
                                 data=dumps(telehealth_staff_general_availability_1_post_data), 

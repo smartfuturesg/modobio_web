@@ -329,11 +329,12 @@ class ApplePushNotificationVoipTestEndpoint(Resource):
         # currently saved as size30x30.jpeg
         if content:
             staff_id = content['data']['staff_id']
+            _prefix = f'id{staff_id:05d}/staff_profile_picture'
             # Verify the staff member has a profile picture
-            profile_picture_exists = UserProfilePictures.query.filter_by(staff_id=staff_id,width=30,height=30).one_or_none()
-            if profile_picture_exists:
+            profile_pictures_exist = UserProfilePictures.query.filter_by(staff_id=staff_id).all()
+            if profile_pictures_exist:
                 fh = FileHandling()
-                url = fh.get_presigned_url(file_path=profile_picture_exists.image_path)
-                content['data']['staff_profile_picture'] = url
+                urls = fh.get_presigned_urls(prefix=_prefix)
+                content['data']['staff_profile_picture'] = urls
         msg = pn.send(user_id, 'voip', content)
         return {'message': msg}
