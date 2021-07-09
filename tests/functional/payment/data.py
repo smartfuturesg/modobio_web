@@ -27,7 +27,7 @@ payment_methods_data = {
 }
 
 payment_status_auth_header = {
-    'Authorization': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NDE2MTQ1MzcsInR0eXBlIjoib3JnYW5pemF0aW9uIiwib25hbWUiOiJJbnN0YU1lZCJ9.8W2q_UpiBdqifihCv3b2HiW2NL6QkpdHHekTkLTnrDE'
+    'Authorization': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0dHlwZSI6Im9yZ2FuaXphdGlvbiIsIm9uYW1lIjoiSW5zdGFNZWQifQ.BGQgeZ_vAO40S1rjDusPCu1DAGryyBulm1i72E9ze4Q'
 }
 
 payment_status_data = {
