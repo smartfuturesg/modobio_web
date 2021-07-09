@@ -11,5 +11,5 @@ def test_get_organizations(test_client, init_database, client_auth_header):
                                 content_type='application/json')
     
     assert response.status_code == 200
-    assert response.json['total_items'] == 2
+    assert response.json['total_items'] == 3
     assert response.json['items'][0]['org_name'] == 'Wheel'
