@@ -5,12 +5,12 @@ from flask.json import dumps
 from flask_accepts.decorators.decorators import responds
 from sqlalchemy import select
 
-from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations
-from odyssey.api.lookup.models import LookupClinicalCareTeamResources
+from odyssey.api.client.models import ClientEHRPageAuthorizations
+from odyssey.api.lookup.models import LookupEHRPages
 from odyssey.api.user.models import User
 
 from tests.functional.client.data import clients_clinical_care_team
-from tests.functional.user.data import users_new_user_client_data, users_staff_member_data
+from tests.functional.user.data import users_new_user_client_data
 from tests.functional.doctor.data import doctor_blood_tests_data
 
 def test_adding_clinical_care_team(test_client, init_database, client_auth_header, staff_auth_header):
@@ -189,7 +189,7 @@ def test_get_clinical_care_team(test_client, init_database, client_auth_header):
 def test_authorize_clinical_care_team(test_client, init_database, client_auth_header,staff_auth_header):
     """
     GIVEN a api end point for authorizing the use of resources for members of a client's care team
-    WHEN the '/client/clinical-care-team/resource-authorization/<user_id>' resource  is requested (POST, GET)
+    WHEN the '/client/clinical-care-team/ehr-page-authorization/<user_id>' resource  is requested (POST, GET)
     THEN the client's clinical care team will have authorizations stored in the databse which are retrievable
     by the same endpoint
     """
@@ -197,10 +197,10 @@ def test_authorize_clinical_care_team(test_client, init_database, client_auth_he
     #####
     # Authorize another client to access all clinical care team resources
     #####
-    total_resources = LookupClinicalCareTeamResources.query.count()
-    auths = [{"team_member_user_id": team_member_client_user_id,"resource_id": num} for num in range(1,total_resources+1) ]
-    payload = {"clinical_care_team_authorization" : auths}
-    response = test_client.post(f"/client/clinical-care-team/resource-authorization/{1}/",
+    total_resources = LookupEHRPages.query.count()
+    auths = [{"team_member_user_id": team_member_client_user_id,"resource_group_id": num} for num in range(1,total_resources+1) ]
+    payload = {"ehr_page_authorizations" : auths}
+    response = test_client.post(f"/client/clinical-care-team/ehr-page-authorization/{1}/",
                             headers=client_auth_header,
                             data=dumps(payload), 
                             content_type='application/json')
@@ -209,9 +209,9 @@ def test_authorize_clinical_care_team(test_client, init_database, client_auth_he
     #####
     # Authorize a staff to access all clinical care team resources but the last one (used later on to make a request)
     #####
-    auths = [{"team_member_user_id": team_member_staff_user_id,"resource_id": num} for num in range(1,total_resources) ]
-    payload = {"clinical_care_team_authorization" : auths}
-    response = test_client.post(f"/client/clinical-care-team/resource-authorization/{1}/",
+    auths = [{"team_member_user_id": team_member_staff_user_id,"resource_group_id": num} for num in range(1,total_resources) ]
+    payload = {"ehr_page_authorizations" : auths}
+    response = test_client.post(f"/client/clinical-care-team/ehr-page-authorization/{1}/",
                             headers=client_auth_header,
                             data=dumps(payload), 
                             content_type='application/json')
@@ -220,9 +220,9 @@ def test_authorize_clinical_care_team(test_client, init_database, client_auth_he
     #####
     # Try to authorize a resource that doesnt exist
     ####
-    payload = {"clinical_care_team_authorization" : [{"team_member_user_id": team_member_client_user_id,"resource_id": 999999}]}
+    payload = {"ehr_page_authorizations" : [{"team_member_user_id": team_member_client_user_id,"resource_group_id": 999999}]}
 
-    response = test_client.post(f"/client/clinical-care-team/resource-authorization/{1}/",
+    response = test_client.post(f"/client/clinical-care-team/ehr-page-authorization/{1}/",
                         headers=client_auth_header,
                         data=dumps(payload), 
                         content_type='application/json')
@@ -232,9 +232,9 @@ def test_authorize_clinical_care_team(test_client, init_database, client_auth_he
     #####
     # Try to authorize a resource for a client not part of the care team that doesnt exist
     ####
-    payload = {"clinical_care_team_authorization" : [{"team_member_user_id": 99,"resource_id": 1}]}
+    payload = {"ehr_page_authorizations" : [{"team_member_user_id": 99,"resource_group_id": 1}]}
 
-    response = test_client.post(f"/client/clinical-care-team/resource-authorization/{1}/",
+    response = test_client.post(f"/client/clinical-care-team/ehr-page-authorization/{1}/",
                         headers=client_auth_header,
                         data=dumps(payload), 
                         content_type='application/json')
@@ -244,12 +244,12 @@ def test_authorize_clinical_care_team(test_client, init_database, client_auth_he
     #####
     # Get authorizations
     #####
-    response = test_client.get(f"/client/clinical-care-team/resource-authorization/{1}/",
+    response = test_client.get(f"/client/clinical-care-team/ehr-page-authorization/{1}/",
                             headers=client_auth_header,
                             content_type='application/json')
 
     assert response.status_code == 200
-    assert response.json['clinical_care_team_authorization'][0]['status'] == 'accepted'
+    assert response.json['ehr_page_authorizations'][0]['status'] == 'accepted'
 
 
     #####
@@ -257,57 +257,57 @@ def test_authorize_clinical_care_team(test_client, init_database, client_auth_he
     # authorization should be pending
     #####
     # Create payload for team_member_user_id 2 (a staff member)
-    payload = {"clinical_care_team_authorization" : [{"team_member_user_id": team_member_staff_user_id,"resource_id": total_resources}]}
+    payload = {"ehr_page_authorizations" : [{"team_member_user_id": team_member_staff_user_id,"resource_group_id": total_resources}]}
     
-    response = test_client.post(f"/client/clinical-care-team/resource-authorization/{1}/",
+    response = test_client.post(f"/client/clinical-care-team/ehr-page-authorization/{1}/",
                             headers=staff_auth_header,
                             data=dumps(payload), 
                             content_type='application/json')
     assert response.status_code == 201
 
     staff_authorization = init_database.session.execute(
-                            select(ClientClinicalCareTeamAuthorizations).
-                            filter(ClientClinicalCareTeamAuthorizations.team_member_user_id == team_member_staff_user_id,
-                                ClientClinicalCareTeamAuthorizations.resource_id == total_resources)).scalars().one_or_none()
+                            select(ClientEHRPageAuthorizations).
+                            filter(ClientEHRPageAuthorizations.team_member_user_id == team_member_staff_user_id,
+                                ClientEHRPageAuthorizations.resource_group_id == total_resources)).scalars().one_or_none()
     
     assert staff_authorization.status == 'pending'
 
     # Make a double post, expect an error
-    response = test_client.post(f"/client/clinical-care-team/resource-authorization/{1}/",
+    response = test_client.post(f"/client/clinical-care-team/ehr-page-authorization/{1}/",
                             headers=staff_auth_header,
                             data=dumps(payload), 
                             content_type='application/json')
 
     assert response.status_code == 400    
 
-    response = test_client.get(f"/client/clinical-care-team/resource-authorization/{1}/",
+    response = test_client.get(f"/client/clinical-care-team/ehr-page-authorization/{1}/",
                             headers=client_auth_header,
                             content_type='application/json')
 
     assert response.status_code == 200
-    assert response.json['clinical_care_team_authorization'][0]['status'] == 'accepted'
+    assert response.json['ehr_page_authorizations'][0]['status'] == 'accepted'
     
     # The staff member requested data access of resource id = total_resources from user_id 1
     # The status was automatically set to 'pending' 
-    for idx,info in enumerate(response.json['clinical_care_team_authorization']):
-        if info['team_member_email'] == 'staff_member@modobio.com' and info['resource_id'] == total_resources:
-            assert response.json['clinical_care_team_authorization'][idx]['status'] == 'pending'
+    for idx,info in enumerate(response.json['ehr_page_authorizations']):
+        if info['team_member_email'] == 'staff_member@modobio.com' and info['resource_group_id'] == total_resources:
+            assert response.json['ehr_page_authorizations'][idx]['status'] == 'pending'
 
     # Now, note the header has switched to the client_auth_header indicating we are now the client of interest
     # We will now approve of this data access request.
-    response = test_client.put(f"/client/clinical-care-team/resource-authorization/{1}/",
+    response = test_client.put(f"/client/clinical-care-team/ehr-page-authorization/{1}/",
                             headers=client_auth_header,
                             data=dumps(payload), 
                             content_type='application/json')
     
-    response = test_client.get(f"/client/clinical-care-team/resource-authorization/{1}/",
+    response = test_client.get(f"/client/clinical-care-team/ehr-page-authorization/{1}/",
                             headers=client_auth_header,
                             content_type='application/json')
 
     assert response.status_code == 200                            
-    for idx,info in enumerate(response.json['clinical_care_team_authorization']):
+    for idx,info in enumerate(response.json['ehr_page_authorizations']):
         if info['team_member_email'] == 'staff_member@modobio.com':
-            assert response.json['clinical_care_team_authorization'][idx]['status'] == 'accepted'    
+            assert response.json['ehr_page_authorizations'][idx]['status'] == 'accepted'    
 
 
 def test_clinical_care_team_access(test_client, init_database, client_auth_header, staff_auth_header):

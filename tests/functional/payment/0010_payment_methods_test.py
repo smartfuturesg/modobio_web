@@ -99,14 +99,20 @@ def test_delete_payment_method(test_client, init_database, client_auth_header):
     """
 
     #test with valid idx
-    response = test_client.delete('/payment/methods/1/',
+    response = test_client.delete('/payment/methods/1/?idx=1',
                                 headers=client_auth_header,
                                 content_type='application/json')
-    print(response.data)
     assert response.status_code == 204
 
     #test with invalid idx
-    response = test_client.delete('/payment/methods/999/',
+    response = test_client.delete('/payment/methods/1/?idx=20',
+                                headers=client_auth_header,
+                                content_type='application/json')
+
+    assert response.status_code == 404
+
+    #test with non-numeric idx
+    response = test_client.delete('/payment/methods/1/?idx=test',
                                 headers=client_auth_header,
                                 content_type='application/json')
 

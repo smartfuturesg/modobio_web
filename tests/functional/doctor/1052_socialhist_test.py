@@ -1,10 +1,6 @@
 
-import time 
-
 from flask.json import dumps
 
-from odyssey.api.user.models import User, UserLogin
-from odyssey.api.doctor.models import MedicalHistory 
 from .data import (
     doctor_all_socialhistory_post_1_data, 
     doctor_all_socialhistory_post_2_data,
@@ -57,7 +53,6 @@ def test_get_social_medical_history(test_client, init_database, client_auth_head
         response = test_client.get('/doctor/medicalinfo/social/1/',
                                     headers=header, 
                                     content_type='application/json')
-
         assert response.status_code == 200
         assert len(response.json['std_history']) == 3
         assert response.json['social_history']['currently_smoke'] == True

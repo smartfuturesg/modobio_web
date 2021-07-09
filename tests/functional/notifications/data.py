@@ -38,4 +38,4 @@ voip = {
             'staff_first_name': 'Test',
             'staff_middle_name': 'O.',
             'staff_last_name': 'Sterone',
-            'staff_profile_picture': ''}}}
+            'staff_profile_picture': {} }}}

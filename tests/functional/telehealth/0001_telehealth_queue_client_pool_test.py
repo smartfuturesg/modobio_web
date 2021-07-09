@@ -10,8 +10,10 @@ from .data import (
     telehealth_queue_client_pool_4_post_data,
     telehealth_queue_client_pool_5_post_data,
     telehealth_queue_client_pool_6_post_data,
-    telehealth_queue_client_pool_7_post_data
+    telehealth_queue_client_pool_7_post_data,
+    payment_method_data
 )
+from odyssey.api.payment.models import PaymentMethods
 
 def test_post_1_client_appointment(test_client, init_database, client_auth_header):
     """
@@ -19,7 +21,15 @@ def test_post_1_client_appointment(test_client, init_database, client_auth_heade
     WHEN the '/telehealth/queue/client-pool/<user_id>' resource  is requested (POST)
     THEN check the response is valid
     """
-   
+    global payment_method
+    # add payment new method to db for user_id 1, set that idx as payment method to be used
+    test_client.post('/payment/methods/1/',
+                                headers=client_auth_header,
+                                data=dumps(payment_method_data['normal_data']),
+                                content_type='application/json')
+    payment_method = PaymentMethods.query.filter_by(user_id=1).first()
+    telehealth_queue_client_pool_1_post_data['payment_method_id'] = payment_method.idx
+
     response = test_client.post('/telehealth/queue/client-pool/1/',
                                 headers=client_auth_header, 
                                 data=dumps(telehealth_queue_client_pool_1_post_data), 
@@ -33,7 +43,7 @@ def test_post_2_client_appointment(test_client, init_database, client_auth_heade
     WHEN the '/telehealth/queue/client-pool/<user_id>' resource  is requested (POST)
     THEN check the response is valid
     """
-    
+    telehealth_queue_client_pool_2_post_data['payment_method_id'] = payment_method.idx
     response = test_client.post('/telehealth/queue/client-pool/1/',
                                 headers=client_auth_header, 
                                 data=dumps(telehealth_queue_client_pool_2_post_data), 
@@ -47,6 +57,8 @@ def test_post_3_client_appointment(test_client, init_database, client_auth_heade
     WHEN the '/telehealth/queue/client-pool/<user_id>' resource  is requested (POST)
     THEN check the response is valid
     """
+    telehealth_queue_client_pool_3_post_data['payment_method_id'] = payment_method.idx
+    
     response = test_client.post('/telehealth/queue/client-pool/1/',
                                 headers=client_auth_header, 
                                 data=dumps(telehealth_queue_client_pool_3_post_data), 
@@ -60,7 +72,8 @@ def test_post_4_client_appointment(test_client, init_database, client_auth_heade
     WHEN the '/telehealth/queue/client-pool/<user_id>' resource  is requested (POST)
     THEN check the response is valid
     """
-    
+    telehealth_queue_client_pool_4_post_data['payment_method_id'] = payment_method.idx
+
     response = test_client.post('/telehealth/queue/client-pool/1/',
                                 headers=client_auth_header, 
                                 data=dumps(telehealth_queue_client_pool_4_post_data), 
@@ -74,7 +87,8 @@ def test_post_5_client_appointment(test_client, init_database, client_auth_heade
     WHEN the '/telehealth/queue/client-pool/<user_id>' resource  is requested (POST)
     THEN check the response is valid
     """
-    
+    telehealth_queue_client_pool_5_post_data['payment_method_id'] = payment_method.idx
+
     response = test_client.post('/telehealth/queue/client-pool/1/',
                                 headers=client_auth_header, 
                                 data=dumps(telehealth_queue_client_pool_5_post_data), 
@@ -104,6 +118,8 @@ def test_post_6_client_appointment(test_client, init_database, client_auth_heade
     WHEN the '/telehealth/queue/client-pool/<user_id>' resource  is requested (POST)
     THEN check the response is valid
     """    
+    telehealth_queue_client_pool_6_post_data['payment_method_id'] = payment_method.idx
+    
     response = test_client.post('/telehealth/queue/client-pool/1/',
                                 headers=client_auth_header, 
                                 data=dumps(telehealth_queue_client_pool_6_post_data), 
@@ -168,6 +184,8 @@ def test_post_8_client_appointment(test_client, init_database, client_auth_heade
     WHEN the '/telehealth/queue/client-pool/<user_id>' resource  is requested (POST)
     THEN check the response is valid
     """    
+    telehealth_queue_client_pool_7_post_data['payment_method_id'] = payment_method.idx
+    
     response = test_client.post('/telehealth/queue/client-pool/1/',
                                 headers=client_auth_header, 
                                 data=dumps(telehealth_queue_client_pool_7_post_data), 

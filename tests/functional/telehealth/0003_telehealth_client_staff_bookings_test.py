@@ -6,6 +6,7 @@ from sqlalchemy import select
 
 from odyssey.api.telehealth.models import TelehealthChatRooms
 from odyssey.api.staff.models import StaffCalendarEvents
+from odyssey.api.payment.models import PaymentMethods
 
 from .data import (
     telehealth_client_staff_bookings_post_1_data,
@@ -58,12 +59,15 @@ def test_post_2_client_staff_bookings(test_client, init_database, staff_auth_hea
     THEN check the response is valid
     """
     # add client to queue first
+    payment_method = PaymentMethods.query.filter_by(user_id=1).first()
     queue_data = {
-                'profession_type': 'Medical Doctor',
+                'profession_type': 'medical_doctor',
                 'target_date': datetime.strptime(
                     telehealth_client_staff_bookings_post_2_data.get('target_date'), '%Y-%m-%d').isoformat(),
                 'priority': False,
-                'medical_gender': 'np'
+                'medical_gender': 'np',
+                'location_id': 1, 
+                'payment_method_id': payment_method.idx
             }
 
     response = test_client.post('/telehealth/queue/client-pool/1/',

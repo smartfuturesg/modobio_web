@@ -9,7 +9,8 @@ from odyssey.api.lookup.models import (
     LookupCountriesOfOperations,
     LookupDefaultHealthMetrics,
     LookupDrinks, 
-    LookupDrinkIngredients, 
+    LookupDrinkIngredients,
+    LookupEHRPages, 
     LookupGoals, 
     LookupProfessionalAppointmentConfirmationWindow,
     LookupRaces,
@@ -145,9 +146,35 @@ class LookupCareTeamResourcesSchema(ma.SQLAlchemyAutoSchema):
     def make_object(self, data, **kwargs):
         return LookupClinicalCareTeamResources(**data)
 
+class LookupCareTeamResourcesDisplayNamesSchema(ma.SQLAlchemyAutoSchema):
+    """
+    Schema only used for requrning display names, excluding resource_id
+    This will eventually replace the schema above
+
+    """
+    class Meta:
+        model = LookupClinicalCareTeamResources
+        exclude = ('created_at', 'updated_at', 'resource_name', 'resource_id')
+
 
 class LookupCareTeamResourcesOutputSchema(Schema):
     items = fields.Nested(LookupCareTeamResourcesSchema(many=True), missing = [])
+    total_items = fields.Integer()
+
+class LookupEHRPagesSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupEHRPages
+        exclude = ('created_at', 'updated_at', 'resource_group_name')
+    
+    resources = fields.Nested(LookupCareTeamResourcesDisplayNamesSchema(many=True), missing = [])
+    
+    @post_load
+    def make_object(self, data, **kwargs):
+        return LookupEHRPages(**data)
+
+
+class LookupEHRPagesOutputSchema(Schema):
+    items = fields.Nested(LookupEHRPagesSchema(many=True), missing = [])
     total_items = fields.Integer()
 
 class LookupGoalsOutputSchema(Schema):

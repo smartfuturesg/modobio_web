@@ -69,7 +69,7 @@ class PaymentMethodsApi(Resource):
 
         #if requesting to set this method to default and user already has a default 
         #payment method, remove default status from their previous default method
-        old_default = PaymentMethods.query.filter_by(user_id=user_id, is_default=True)
+        old_default = PaymentMethods.query.filter_by(user_id=user_id, is_default=True).one_or_none()
         if request.json['is_default'] and old_default:
             old_default.update({'is_default': False})
 
@@ -89,17 +89,17 @@ class PaymentMethodsApi(Resource):
 
         return payment
 
-
-@ns.route('/methods/<int:idx>/')
-class PaymentMethodsDeleteApi(Resource):
     @token_auth.login_required(user_type=('client',))
+    @ns.doc(params={'idx': 'int',})
     @responds(schema=PaymentMethodsSchema, api=ns, status_code=204)
-    def delete(self, idx):
+    def delete(self, user_id):
         """remove an existing payment method"""
-        payment = PaymentMethods.query.filter_by(idx=idx).one_or_none()
+        idx = request.args.get('idx', type=int)
+
+        payment = PaymentMethods.query.filter_by(idx=idx,user_id=user_id).one_or_none()
         
         if not payment:
-            raise GenericNotFound(f'No payment method exists with idx:{idx}.')
+            raise GenericNotFound(f'No payment method exists with idx {idx} and user id {user_id}.')
 
         db.session.delete(payment)
         db.session.commit()
