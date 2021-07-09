@@ -25,3 +25,32 @@ payment_methods_data = {
         'is_default': False
     }
 }
+
+payment_status_auth_header = {
+    'Authorization': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NDE2MTQ1MzcsInR0eXBlIjoib3JnYW5pemF0aW9uIiwib25hbWUiOiJJbnN0YU1lZCJ9.8W2q_UpiBdqifihCv3b2HiW2NL6QkpdHHekTkLTnrDE'
+}
+
+payment_status_data = {
+    'invalid_user_id': {
+        "user_id": 99,
+        "original_transaction_status_code": "C",
+        "card_present_status": "NotPresentInternet",
+        "transaction_action": "Sale",
+        "save_on_file_transaction_id": "BASJDNFSA76YASD",
+        "original_transaction_id": "HASDYF7SDFYAF",
+        "payment_transaction_id": "SDFHUASDF67IA",
+        "request_amount": "10.99",
+        "current_transaction_status_code": "C"
+    },
+    'valid_data': {
+        "user_id": 1,
+        "original_transaction_status_code": "C",
+        "card_present_status": "NotPresentInternet",
+        "transaction_action": "Sale",
+        "save_on_file_transaction_id": "BASJDNFSA76YASD",
+        "original_transaction_id": "HASDYF7SDFYAF",
+        "payment_transaction_id": "SDFHUASDF67IA",
+        "request_amount": "10.99",
+        "current_transaction_status_code": "C"
+    }
+}
