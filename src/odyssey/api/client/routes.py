@@ -1991,7 +1991,8 @@ class ClinicalCareTeamResourceAuthorization(Resource):
         for dat in data.get('ehr_page_authorizations'):
             authorization = ClientEHRPageAuthorizations.query.filter_by(
                             resource_group_id = dat['resource_group_id'],
-                            team_member_user_id = dat['team_member_user_id']
+                            team_member_user_id = dat['team_member_user_id'],
+                            user_id = user_id
                             ).one_or_none()
             if authorization:
                 if authorization.status == 'pending':
@@ -2004,7 +2005,7 @@ class ClinicalCareTeamResourceAuthorization(Resource):
         return 
 
     @token_auth.login_required(user_type=('client',))
-    @accepts(schema=ClinicalCareTeamAuthorizationNestedSchema, api=ns)
+    @accepts(schema=CareTeamEHRAuthorizationNestedSchema, api=ns)
     def delete(self, user_id):
         """
         Remove a previously saved authorization. Takes the same payload as the POST method.
@@ -2019,7 +2020,8 @@ class ClinicalCareTeamResourceAuthorization(Resource):
         for dat in data.get('clinical_care_team_authorization'):
             authorization = ClientEHRPageAuthorizations.query.filter_by(
                     resource_group_id = dat.resource_group_id,
-                    team_member_user_id = dat.team_member_user_id
+                    team_member_user_id = dat.team_member_user_id,
+                    user_id = user_id
                     ).one_or_none()
             if authorization:
                 db.session.delete(authorization)
