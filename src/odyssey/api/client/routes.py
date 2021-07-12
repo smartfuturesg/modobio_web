@@ -2017,7 +2017,7 @@ class ClinicalCareTeamResourceAuthorization(Resource):
 
         data = request.parsed_obj
 
-        for dat in data.get('clinical_care_team_authorization'):
+        for dat in data.get('ehr_page_authorizations'):
             authorization = ClientEHRPageAuthorizations.query.filter_by(
                     resource_group_id = dat.resource_group_id,
                     team_member_user_id = dat.team_member_user_id,
