@@ -18,7 +18,7 @@ class PaymentStatusSchema(ma.SQLAlchemyAutoSchema):
         exclude = ('updated_at','idx',)
 
     request_amount = fields.String()
-    user_id = fields.Integer()
+    user_id = fields.Integer(required=True)
 
     @post_load
     def make_object(self, data, **kwargs):
