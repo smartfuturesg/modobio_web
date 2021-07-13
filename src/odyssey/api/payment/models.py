@@ -96,7 +96,7 @@ class PaymentStatus(BaseModelWithIdx, UserIdFkeyMixin):
 
     request_amount = db.Column(db.Numeric(10,2), nullable=False)
     """
-    ID of this transaction as defined by InstaMed.
+    Amount of this transaction in dollars.
 
     :type: string
     """
