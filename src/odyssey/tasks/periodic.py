@@ -104,6 +104,16 @@ def deploy_upcoming_appointment_tasks(booking_window_id_start, booking_window_id
 
     return 
 
+@celery.task()
+def charge_user_telehealth():
+    #find time_id for the time corresponding to 5 minutes ago
+    now = datetime.datetime.utcnow().strftime("%H:%M:%S")
+
+    ongoing_appointments = db.session.execute(
+        select(TelehealthBookings.payment_method_id).
+        where(TelehealthBookings.status == 'On-Going', TelehealthBookings.booking_window_id_start_time_utc <= target_time_id)
+    )
+
 
 
 celery.conf.beat_schedule = {
@@ -137,4 +147,9 @@ celery.conf.beat_schedule = {
          'args': (217, 24),
         'schedule': crontab(hour=18, minute=0)
     },
+    # charge users for telehealth calls that started at least 5 minutes ago
+    'charge-user-teleheatlh': {
+        'task': 'odyssey.tasks.periodic.charge_user_telehealth',
+        'schedule': crontab(hour=0, minute=5)
+    }
 }
