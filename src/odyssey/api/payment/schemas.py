@@ -17,7 +17,7 @@ class PaymentStatusSchema(ma.SQLAlchemyAutoSchema):
         dump_only = ('created_at',)
         exclude = ('updated_at','idx',)
 
-    request_amount = fields.String()
+    request_amount = fields.Float()
     user_id = fields.Integer(required=True)
 
     @post_load
