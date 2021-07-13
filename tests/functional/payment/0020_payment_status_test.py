@@ -44,4 +44,3 @@ def test_get_payment_status(test_client, init_database, client_auth_header):
                                 content_type='application/json')
 
     assert response.status_code == 200
-    assert response.get_json()[0]['original_transaction_id'] == 'HASDYF7SDFYAF'
