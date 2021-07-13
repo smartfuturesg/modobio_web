@@ -1,6 +1,4 @@
-
-import time 
-from datetime import datetime
+from datetime import datetime, time
 from flask.json import dumps
 from sqlalchemy import select
 
@@ -50,6 +48,8 @@ def test_post_1_client_staff_bookings(test_client, init_database, client_auth_he
         where(StaffCalendarEvents.location == 'Telehealth_{}'.format(conversation.booking_id))).one_or_none()[0]
 
     assert staff_events.start_date == datetime.strptime(telehealth_client_staff_bookings_post_1_data['target_date'],'%Y-%m-%d').date()
+    assert staff_events.start_time == time(8,15)
+    assert staff_events.end_time == time(8,35)
 
 
 def test_post_2_client_staff_bookings(test_client, init_database, staff_auth_header, client_auth_header):
