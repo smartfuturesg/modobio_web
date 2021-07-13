@@ -12,7 +12,7 @@ from odyssey.utils.misc import check_client_existence
 from odyssey.utils.errors import TooManyPaymentMethods, GenericNotFound, GenericThirdPartyError, UnauthorizedUser
 from odyssey.api.lookup.models import LookupOrganizations
 from odyssey.api.payment.models import PaymentMethods, PaymentStatus
-from odyssey.api.payment.schemas import PaymentMethodsSchema, PaymentStatusSchema
+from odyssey.api.payment.schemas import PaymentMethodsSchema, PaymentStatusSchema, PaymentStatusOutputSchema
 
 ns = api.namespace('payment', description='Endpoints for functions related to payments.')
 
@@ -124,8 +124,8 @@ class PaymentStatusApi(Resource):
 @ns.route('/status/<int:user_id>/')
 class PaymentStatusGetApi(Resource):
     @token_auth.login_required(user_type=('client', 'staff',), staff_role=('client_services',))
-    @responds(schema=PaymentStatusSchema(many=True), api=ns, status_code=200)
+    @responds(schema=PaymentStatusOutputSchema, api=ns, status_code=200)
     def get(self, user_id):
         check_client_existence(user_id)
 
-        return PaymentStatus.query.filter_by(user_id=user_id).all()
+        return {'payment_statuses': PaymentStatus.query.filter_by(user_id=user_id).all()}

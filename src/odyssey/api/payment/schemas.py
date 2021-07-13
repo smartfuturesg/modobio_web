@@ -23,3 +23,7 @@ class PaymentStatusSchema(ma.SQLAlchemyAutoSchema):
     @post_load
     def make_object(self, data, **kwargs):
         return PaymentStatus(**data)
+
+class PaymentStatusOutputSchema(Schema):
+
+    payment_statuses = fields.Nested(PaymentStatusSchema(many=True))
