@@ -38,3 +38,85 @@ class PaymentMethods(BaseModelWithIdx, UserIdFkeyMixin):
 
     :type: boolean
     """
+
+class PaymentStatus(BaseModelWithIdx, UserIdFkeyMixin):
+    """
+    This table tracks payment activities processed outside of ModoBio's platform.
+    InstaMed will send payment events orignating on their platform (refunds, voids, declines, etc.) to a webhook.
+    """
+
+    card_present_status = db.Column(db.String)
+    """
+    Describes the method card information was received. Either PresentManualKey or NotPresentInternet.
+
+    :type: string
+    """
+
+    current_transaction_status_code = db.Column(db.String)
+    """
+    Describes the current status of this payment. 	Possible values:
+    C = Approved
+    V = Voided
+    CB = charge back
+    RI = Returns
+    SE = Settlement Error
+    S = Settled
+    D = Declined
+
+    :type: string
+    """
+
+    original_transaction_id = db.Column(db.String)
+    """
+    ID of the original transaction as defined by InstaMed.
+
+    :type: string
+    """
+
+    original_transaction_status_code = db.Column(db.String)
+    """
+    Describes the current status of the original transaction. 	Possible values:
+    C = Approved
+    V = Voided
+    CB = charge back
+    RI = Returns
+    SE = Settlement Error
+    S = Settled
+    D = Declined
+
+    :type: string
+    """
+
+    payment_transaction_id = db.Column(db.String)
+    """
+    ID of this transaction as defined by InstaMed.
+
+    :type: string
+    """
+
+    request_amount = db.Column(db.Numeric(10,2), nullable=False)
+    """
+    Amount of this transaction in dollars.
+
+    :type: string
+    """
+
+    save_on_file_transaction_id = db.Column(db.String)
+    """
+    ID of this transaction's SaveOnFile payment method as defined by InstaMed.
+
+    :type: string
+    """
+
+    transaction_action = db.Column(db.String)
+    """
+    Type of this transaction.
+
+    Possible values:
+    Sale
+    Chargeback
+    Return
+    Refund
+
+    :type: string
+    """

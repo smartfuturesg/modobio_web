@@ -9,9 +9,10 @@ from odyssey import db
 from odyssey.api import api
 from odyssey.utils.auth import token_auth
 from odyssey.utils.misc import check_client_existence
-from odyssey.utils.errors import TooManyPaymentMethods, GenericNotFound, GenericThirdPartyError
-from odyssey.api.payment.models import PaymentMethods
-from odyssey.api.payment.schemas import PaymentMethodsSchema
+from odyssey.utils.errors import TooManyPaymentMethods, GenericNotFound, GenericThirdPartyError, UnauthorizedUser
+from odyssey.api.lookup.models import LookupOrganizations
+from odyssey.api.payment.models import PaymentMethods, PaymentStatus
+from odyssey.api.payment.schemas import PaymentMethodsSchema, PaymentStatusSchema, PaymentStatusOutputSchema
 
 ns = api.namespace('payment', description='Endpoints for functions related to payments.')
 
@@ -102,3 +103,29 @@ class PaymentMethodsApi(Resource):
 
         db.session.delete(payment)
         db.session.commit()
+
+@ns.route('/status/')
+class PaymentStatusApi(Resource):
+    @accepts(schema=PaymentStatusSchema, api=ns)
+    @responds(schema=PaymentStatusSchema, api=ns, status_code=200)
+    def post(self):
+        check_client_existence(request.parsed_obj.user_id)
+
+        #retrieve token from header
+        org_token = request.headers.get('Authorization')
+
+        if not LookupOrganizations.query.filter_by(org_token=org_token, org_name='InstaMed').one_or_none():
+            raise UnauthorizedUser(message='Invalid organization token.')
+
+        db.session.add(request.parsed_obj)
+        db.session.commit()
+        return request.parsed_obj
+
+@ns.route('/status/<int:user_id>/')
+class PaymentStatusGetApi(Resource):
+    @token_auth.login_required(user_type=('client', 'staff',), staff_role=('client_services',))
+    @responds(schema=PaymentStatusOutputSchema, api=ns, status_code=200)
+    def get(self, user_id):
+        check_client_existence(user_id)
+
+        return {'payment_statuses': PaymentStatus.query.filter_by(user_id=user_id).all()}
