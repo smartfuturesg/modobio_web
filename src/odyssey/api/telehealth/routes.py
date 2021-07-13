@@ -701,7 +701,7 @@ class TelehealthBookingsApi(Resource):
                                               start_date=request.parsed_obj.target_date,
                                               end_date=end_date,
                                               start_time=lookup_times[request.parsed_obj.booking_window_id_start_time-1].start_time,
-                                              end_time=lookup_times[request.parsed_obj.booking_window_id_start_time-1].end_time,
+                                              end_time=lookup_times[request.parsed_obj.booking_window_id_end_time-1].end_time,
                                               recurring=False,
                                               availability_status='Busy',
                                               location='Telehealth_'+str(request.parsed_obj.idx),
@@ -729,7 +729,7 @@ class TelehealthBookingsApi(Resource):
     @responds(status_code=201,api=ns)
     def put(self):
         """
-        PUT request should be used purely to update the booking STATUS.
+        PUT request can be used to update the booking STATUS and payment_method
         """
         if request.parsed_obj.booking_window_id_start_time >= request.parsed_obj.booking_window_id_end_time:
             raise InputError(status_code=405,message='Start time must be before end time.')
@@ -742,23 +742,23 @@ class TelehealthBookingsApi(Resource):
         if not bookings:
             raise InputError(status_code=405,message='Could not find booking.')
         
+        data = request.get_json()
         # If client wants to change the payment method for booking
         # Verify payment method idx is valid from PaymentMethods
         # and that the payment method chosen has the user_id
-        payment_id = request.get_json().get('payment_method_id')
+        payment_id = data.get('payment_method_id')
         if payment_id and not PaymentMethods.query.filter_by(user_id=bookings.client_user_id, idx=payment_id).one_or_none():
             raise InputError(403, "Invalid Payment Method")
         
         # user can't change booking location without cancelling booking and creating a new entry in the queue
-        if request.get_json().get('client_location_id'):
+        if data.get('client_location_id'):
             raise InputError(403, 'To change location, please create a new request')
 
-        data = request.get_json()
         bookings.update(data)
         # NOTE: status array should be referenced to BOOKINGS_STATUS in constants.py
         status = ('Client Canceled', 'Staff Canceled')
         # If the booking gets updated for cancelation, then delete it in the Staff's calendar
-        if data['status'] in status:
+        if data.get('status') in status:
             staff_event = StaffCalendarEvents.query.filter_by(location='Telehealth_{}'.format(booking_id)).one_or_none()
             if staff_event:
                 db.session.delete(staff_event)
