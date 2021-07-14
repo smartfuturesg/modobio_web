@@ -61,7 +61,7 @@ from odyssey.api.lookup.models import (
     LookupNotifications
 )
 from odyssey.api.physiotherapy.models import PTHistory 
-from odyssey.api.staff.models import StaffRecentClients
+from odyssey.api.staff.models import StaffRecentClients, StaffRoles
 from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.api.trainer.models import FitnessQuestionnaire
 from odyssey.api.facility.models import RegisteredFacilities
@@ -1032,19 +1032,49 @@ class ClinicalCareTeamMembers(Resource):
         # prepare response with names for clinical care team members who are also users 
         current_team = []
         current_team_users = db.session.query(
-                                    ClientClinicalCareTeam, User.firstname, User.lastname, User.modobio_id, User.email
+                                    ClientClinicalCareTeam, User.firstname, User.lastname, User.modobio_id, User.email, 
                                 ).filter(
                                     ClientClinicalCareTeam.user_id == user_id
                                 ).filter(ClientClinicalCareTeam.team_member_user_id == User.user_id
                                 ).all()
-        
+        fh = FileHandling()
+
         for team_member in current_team_users:
+            staff_roles = []
+            # bring up a profile photo for th team member
+            staff_profile_pics = db.session.execute(select(
+                UserProfilePictures.staff_id, UserProfilePictures.image_path
+            ).where(
+                UserProfilePictures.staff_id==team_member[0].team_member_user_id,
+                UserProfilePictures.width == 400
+            )).one_or_none()
+
+            client_profile_pics = db.session.execute(select(
+                UserProfilePictures.client_id, UserProfilePictures.image_path
+            ).where(
+                UserProfilePictures.client_id==team_member[0].team_member_user_id,
+                UserProfilePictures.width == 400
+            )).scalars().first()
+            
+            staff_roles = db.session.execute(select(StaffRoles.role).where(StaffRoles.user_id == team_member[0].team_member_user_id)).scalars().all()
+            
+            if staff_profile_pics:
+                profile_pic = fh.get_presigned_url(file_path=staff_profile_pics[1])
+            elif client_profile_pics:
+                profile_pic = fh.get_presigned_url(file_path=client_profile_pics[1])
+            else:
+                profile_pic = None
+
             current_team.append({
                 'firstname': team_member[1],
                 'lastname': team_member[2], 
                 'modobio_id': team_member[3],
                 'team_member_email': team_member[4],
-                'team_member_user_id':team_member[0].team_member_user_id })
+                'team_member_user_id':team_member[0].team_member_user_id,
+                'profile_picture': profile_pic,
+                'staff_roles' : staff_roles,
+                'is_temporary': team_member[0].is_temporary
+            })
         
         response = {"care_team": current_team,
                     "total_items": len(current_team) }
@@ -1109,25 +1139,32 @@ class ClinicalCareTeamMembers(Resource):
                                 ).filter(ClientClinicalCareTeam.team_member_user_id == User.user_id
                                 ).all()
         fh = FileHandling()
+
         for team_member in current_team_users:
+            staff_roles = []
             # bring up a profile photo for th team member
             staff_profile_pics = db.session.execute(select(
-                UserProfilePictures.staff_id
+                UserProfilePictures.staff_id, UserProfilePictures.image_path
             ).where(
-                UserProfilePictures.staff_id==team_member[0].team_member_user_id
-            )).scalars().first()
+                UserProfilePictures.staff_id==team_member[0].team_member_user_id,
+                UserProfilePictures.width == 400
+            )).one_or_none()
 
             client_profile_pics = db.session.execute(select(
-                UserProfilePictures.client_id
+                UserProfilePictures.client_id, UserProfilePictures.image_path
             ).where(
-                UserProfilePictures.client_id==team_member[0].team_member_user_id
+                UserProfilePictures.client_id==team_member[0].team_member_user_id,
+                UserProfilePictures.width == 400
             )).scalars().first()
+            
+            staff_roles = db.session.execute(select(StaffRoles.role).where(StaffRoles.user_id == team_member[0].team_member_user_id)).scalars().all()
+            
             if staff_profile_pics:
-                profile_pics = fh.get_presigned_urls(prefix=f'id{team_member[0].team_member_user_id:05d}/staff_profile_picture')
+                profile_pic = fh.get_presigned_url(file_path=staff_profile_pics[1])
             elif client_profile_pics:
-                profile_pics = fh.get_presigned_urls(prefix=f'id{team_member[0].team_member_user_id:05d}/client_profile_picture')
+                profile_pic = fh.get_presigned_url(file_path=client_profile_pics[1])
             else:
-                profile_pics = None
+                profile_pic = None
 
             current_team.append({
                 'firstname': team_member[1],
@@ -1135,7 +1172,9 @@ class ClinicalCareTeamMembers(Resource):
                 'modobio_id': team_member[3],
                 'team_member_email': team_member[4],
                 'team_member_user_id':team_member[0].team_member_user_id,
-                'profile_picture': profile_pics
+                'profile_picture': profile_pic,
+                'staff_roles' : staff_roles,
+                'is_temporary': team_member[0].is_temporary
             })
         
         response = {"care_team": current_team,
