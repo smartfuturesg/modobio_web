@@ -315,7 +315,6 @@ class StaffProfilePage(Resource):
         profile = StaffProfile.query.filter_by(user_id=user_id).one_or_none()
 
         res['bio'] = profile.bio
-
         #get presigned link to this user's profile picture
         res['profile_picture'] = None
         if profile.profile_pictures:
@@ -340,7 +339,7 @@ class StaffProfilePage(Resource):
         """
         #ensure this user id is for a valid staff member
         check_staff_existence(user_id)
-
+        
         if not request.form and not request.files:
             raise InputError(422, "No data provided")
 
