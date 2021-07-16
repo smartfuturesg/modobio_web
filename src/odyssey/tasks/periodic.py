@@ -125,13 +125,12 @@ def cleanup_temporary_care_team():
                 ClientClinicalCareTeam.created_at <= notification_time, 
                 ClientClinicalCareTeam.created_at > expire_time,
                 ClientClinicalCareTeam.is_temporary == True)
-            )).all()
+            )).scalars().all()
 
     for notification in notifications:
-        #create notifcation that care team member temporary access is expiring
-        member = User.query.filter_by(user_id=notifcation.team_member_user_id).one_or_none()
+        #create notification that care team member temporary access is expiring
+        member = User.query.filter_by(user_id=notification.team_member_user_id).one_or_none()
         data = {
-            'user_id': notifcation.user_id,
             'notification_type_id': 14,
             'title': f'{member.firstname} {member.lastname}\'s Data Access Is About To Expire',
             'content': f'Would you like to add {member.firstname} {member.lastname} to your team? Swipe right' + \
@@ -139,8 +138,9 @@ def cleanup_temporary_care_team():
             'action': 'Redirect to team member list',
             'time_to_live': 86400
         }
-        new_notficiation = NotificationsSchema().load(data)
-        db.session.add(new_notficiation)
+        new_notificiation = NotificationSchema().load(data)
+        new_notificiation.user_id = notification.user_id
+        db.session.add(new_notificiation)
 
     #find all temporary members that are older than the 180 hour limit
     expired = db.session.execute(
@@ -149,7 +149,7 @@ def cleanup_temporary_care_team():
                 ClientClinicalCareTeam.created_at <= expire_time,
                 ClientClinicalCareTeam.is_temporary == True
             ))
-        ).all()
+        ).scalars().all()
 
     for item in expired:
         db.session.delete(item)
