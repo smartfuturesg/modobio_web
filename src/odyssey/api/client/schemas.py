@@ -306,6 +306,8 @@ class ClientClinicalCareTeamInternalSchema(Schema):
     profile_picture = fields.String(dump_only=True, missing=None)
     staff_roles = fields.List(fields.String, missing=[], dump_only=True)
     is_temporary = fields.Boolean(missing=False, dump_only=True)
+    hours_remaining = fields.Integer(required=False, dump_only=True)
+    days_remaining = fields.Integer(required=False, dump_only=True)
 
 class ClinicalCareTeamAuthorizationsForSchema(Schema):
     """
