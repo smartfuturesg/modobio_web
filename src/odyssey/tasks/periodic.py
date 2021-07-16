@@ -8,8 +8,10 @@ from sqlalchemy import and_, or_, select
 from odyssey import celery, db
 from odyssey.tasks.tasks import upcoming_appointment_care_team_permissions, upcoming_appointment_notification_2hr
 from odyssey.api.telehealth.models import TelehealthBookings
-from odyssey.api.client.models import ClientDataStorage
+from odyssey.api.client.models import ClientDataStorage, ClientClinicalCareTeam
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
+from odyssey.api.notifications.schemas import NotificationSchema
+from odyssey.api.user.models import User
 
 @celery.task()
 def refresh_client_data_storage():
@@ -104,7 +106,55 @@ def deploy_upcoming_appointment_tasks(booking_window_id_start, booking_window_id
 
     return 
 
+@celery.task()
+def cleanup_temporary_care_team():
+    """
+    This method accomplishes 2 tasks regarding temporary care team members:
 
+    -Temporary members that have less than 24 hours (>= 156 hours since being granted access)
+    remaining will trigger a notification for the user whose team they are on.
+    -Temporary members who have had access for >= 180 hours will be removed.
+    """
+    notification_time = datetime.utcnow()-timedelta(hours=156)
+    expire_time = datetime.utcnow()-timedelta(hours=180)
+
+    #find temporary members who are within 24 hours of expiration
+    notifications = db.session.execute(
+        select(ClientClinicalCareTeam). 
+                where(and_(
+                ClientClinicalCareTeam.created_at <= notification_time, 
+                ClientClinicalCareTeam.created_at > expire_time,
+                ClientClinicalCareTeam.is_temporary == True)
+            )).all()
+
+    for notification in notifications:
+        #create notifcation that care team member temporary access is expiring
+        member = User.query.filter_by(user_id=notifcation.team_member_user_id).one_or_none()
+        data = {
+            'user_id': notifcation.user_id,
+            'notification_type_id': 14,
+            'title': f'{member.firstname} {member.lastname}\'s Data Access Is About To Expire',
+            'content': f'Would you like to add {member.firstname} {member.lastname} to your team? Swipe right' + \
+                        'on their entry in your team list to make them a permanent member of your team!',
+            'action': 'Redirect to team member list',
+            'time_to_live': 86400
+        }
+        new_notficiation = NotificationsSchema().load(data)
+        db.session.add(new_notficiation)
+
+    #find all temporary members that are older than the 180 hour limit
+    expired = db.session.execute(
+        select(ClientClinicalCareTeam).
+            where(and_(
+                ClientClinicalCareTeam.created_at <= expire_time,
+                ClientClinicalCareTeam.is_temporary == True
+            ))
+        ).all()
+
+    for item in expired:
+        db.session.delete(item)
+    
+    db.session.commit()
 
 celery.conf.beat_schedule = {
     # refresh the client data storage table every day at midnight
@@ -137,4 +187,9 @@ celery.conf.beat_schedule = {
          'args': (217, 24),
         'schedule': crontab(hour=18, minute=0)
     },
+    #temporary member cleanup
+    'cleanup_temporary_care_team': {
+        'task': 'odyssey.tasks.periodic.cleanup_temporary_care_team',
+        'schedule': crontab(hour=1, minute=0)
+    }
 }
