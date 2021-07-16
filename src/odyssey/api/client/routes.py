@@ -1,5 +1,5 @@
 import boto3
-from datetime import datetime
+from datetime import datetime, timedelta
 import math, re
 from PIL import Image
 
@@ -1165,8 +1165,8 @@ class ClinicalCareTeamMembers(Resource):
                 profile_pic = fh.get_presigned_url(file_path=client_profile_pics[1])
             else:
                 profile_pic = None
-
-            current_team.append({
+            
+            member_data = {
                 'firstname': team_member[1],
                 'lastname': team_member[2], 
                 'modobio_id': team_member[3],
@@ -1175,7 +1175,16 @@ class ClinicalCareTeamMembers(Resource):
                 'profile_picture': profile_pic,
                 'staff_roles' : staff_roles,
                 'is_temporary': team_member[0].is_temporary
-            })
+            }
+
+            #calculate how much time is remaining for temporary members
+            if team_member[0].is_temporary:
+                expire_date = team_member[0].created_at + timedelta(hours=180)
+                time_remaining = expire_date - datetime.utcnow()
+                member_data['days_remaining'] = time_remaining.days
+                member_data['hours_remaining'] = time_remaining.seconds//3600
+
+            current_team.append(member_data)
         
         response = {"care_team": current_team,
                     "total_items": len(current_team) }

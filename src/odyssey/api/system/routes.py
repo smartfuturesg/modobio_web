@@ -19,7 +19,7 @@ class SystemTelehealthSettingsApi(Resource):
     """ Endpoints related to system telehealth settings.
     """
 
-    @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
+    @token_auth.login_required()
     @responds(schema=SystemTelehealthSettingsSchema,status_code=200, api=ns)
     def get(self):
         costs = db.session.execute(
