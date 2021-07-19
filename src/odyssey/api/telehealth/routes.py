@@ -319,16 +319,15 @@ class TelehealthClientTimeSelectApi(Resource):
             # BECAUSE we are accessing the array where index starts at 0
             ##
             booking_duration_delta = timedelta(minutes=5*(idx_delta+1))
-
             for time in timeArr:
-
+                
                 if not timeArr[time]:
                     continue
                 if len(timeArr[time]) > 1:
                     random.shuffle(timeArr[time])
                 
 
-                end_time_client_localized = start_time_client_localized+booking_duration_delta
+                end_time_client_localized = time+booking_duration_delta
                 
                 # respond with display start and end times for the client
                 # and booking window ids which appear as they are in the 
