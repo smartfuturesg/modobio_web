@@ -1024,7 +1024,9 @@ class ClinicalCareTeamMembers(Resource):
                     team_member["team_member_user_id"] = team_member_user.user_id
                     
             # add new team member to the clincial care team
-            db.session.add(ClientClinicalCareTeam(**{"team_member_user_id": team_member["team_member_user_id"],
+            db.session.add(ClientClinicalCareTeam(**{"created_at": datetime.utcnow(),
+                                                    "updated_at": datetime.utcnow(),
+                                                    "team_member_user_id": team_member["team_member_user_id"],
                                                     "user_id": user_id})) 
 
         db.session.commit()
@@ -1216,15 +1218,57 @@ class ClinicalCareTeamTemporaryMembers(Resource):
             raise InputError(message="The booking id given does not exist or is not the correct booking id" \
                 " for the given client and staff user_ids.", status_code=400)
 
-        #retrieve staff account, staff account must exist because of the above check
+        #ensure that this client does not already have this user as a care team member
+        if ClientClinicalCareTeam.query.filter_by(user_id=user_id, team_member_user_id=request.parsed_obj['staff_user_id']).one_or_none():
+            raise InputError(message=f'The user with user id {staff_user_id} is already on the care team of the' \
+                f'client with the user id {user_id}.')
+
+        #retrieve staff account, staff account must exist because of the above check in the bookings table
         team_member = User.query.filter_by(user_id=request.parsed_obj['staff_user_id']).one_or_none()
 
-        db.session.add(ClientClinicalCareTeam(**{"team_member_email": team_member.email,
+        db.session.add(ClientClinicalCareTeam(**{"created_at": datetime.utcnow(),
+                                            "updated_at": datetime.utcnow(),
+                                            "team_member_email": team_member.email,
                                             "team_member_user_id": team_member.user_id,
                                             "user_id": user_id,
                                             "is_temporary": True}))
 
         db.session.commit()
+
+        current_team = ClientClinicalCareTeam.query.filter_by(user_id=user_id, team_member_user_id=None).all()
+
+        # prepare response with names for clinical care team members who are also users 
+        current_team_users = db.session.query(
+                                    ClientClinicalCareTeam, User.firstname, User.lastname, User.modobio_id
+                                ).filter(
+                                    ClientClinicalCareTeam.user_id == user_id
+                                ).filter(ClientClinicalCareTeam.team_member_user_id == User.user_id
+                                ).all()
+
+        for team_member in current_team_users:
+            team_member[0].__dict__.update({'firstname': team_member[1], 'lastname': team_member[2], 'modobio_id': team_member[3]})
+            current_team.append(team_member[0])
+
+        return {"care_team": current_team, "total_items": len(current_team)}
+
+    @token_auth.login_required
+    @ns.doc(params={'team_member_user_id': 'User id of the member to make permanent.'})
+    @responds(schema=ClientClinicalCareTeamSchema, api=ns, status_code=201)
+    def put(self, user_id):
+        """
+        Update a temporary team member to a permanent team member
+        """
+        target_id = request.args.get('team_member_user_id')
+
+        team_member = ClientClinicalCareTeam.query.filter_by(user_id=user_id, team_member_user_id=target_id).one_or_none()
+
+        #if team member exists, change their status to permanent, otherwise raise an error
+        if not team_member:
+            raise InputError(message=f'The user with user id {target_id} is not on the care team for the client with' \
+                f'the user id {user_id}. Please use /client/clinical-care-team/ POST endpoint.')
+        else:
+            team_member.is_temporary = False
+            db.session.commit()
 
         current_team = ClientClinicalCareTeam.query.filter_by(user_id=user_id, team_member_user_id=None).all()
 
