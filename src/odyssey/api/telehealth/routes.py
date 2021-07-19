@@ -285,9 +285,7 @@ class TelehealthClientTimeSelectApi(Resource):
                         if available[staff_id][idx+1] - time_id < idx_delta and time_id + idx_delta < available[staff_id][-1]:
                             # since we are accessing an array, we need to -1 because recall time_id is the ACTUAL time increment idx
                             # and arrays are 0 indexed in python
-                            if time_inc[time_id-1].start_time.minute%15 == 0:
-                                if time_id+idx_delta in removedNum[staff_id]:
-                                    continue                                
+                            if time_inc[time_id-1].start_time.minute%15 == 0:                        
                                 # client's tz: client_in_queue.timezone
                                 # staff's timezone: staff_availability_timezone[staff_user_id]
                                 start_time_staff_localized = datetime.combine(
@@ -298,15 +296,14 @@ class TelehealthClientTimeSelectApi(Resource):
                                 start_time_client_localized = start_time_staff_localized.astimezone(tz.gettz(client_in_queue.timezone))                                   
                                 if start_time_client_localized not in timeArr:
                                     timeArr[start_time_client_localized] = []
+                                if time_id+idx_delta in removedNum[staff_id]:
+                                    continue                                            
                                 else:                                 
                                     # if when localizing to client's time zone, the date changes to the day before the original 
                                     # target date, do not show this availability to the client 
                                     if start_time_client_localized.date() < client_in_queue.target_date.date():
                                         continue    
-                                    breakpoint()                                
-                                    timeArr[start_time_client_localized].append({staff_id: staff_id,idx:time_inc[time_id-1].idx})                                    
-                                    # timeArr[time_inc[time_id-1]].append(staff_id)
-                        
+                                    timeArr[start_time_client_localized].append({"staff_id": staff_id,"idx":time_inc[time_id-1].idx})                                                            
                         else:
                             continue
                     else:
@@ -322,9 +319,9 @@ class TelehealthClientTimeSelectApi(Resource):
             # BECAUSE we are accessing the array where index starts at 0
             ##
             booking_duration_delta = timedelta(minutes=5*(idx_delta+1))
-            breakpoint()
+
             for time in timeArr:
-                breakpoint()
+
                 if not timeArr[time]:
                     continue
                 if len(timeArr[time]) > 1:
@@ -336,11 +333,11 @@ class TelehealthClientTimeSelectApi(Resource):
                 # respond with display start and end times for the client
                 # and booking window ids which appear as they are in the 
                 # TelehealthStaffAvailability table (not localized to the client)
-                times.append({'staff_user_id': timeArr[time][0],
+                times.append({'staff_user_id': timeArr[time][0]['staff_id'],
                             'start_time': time.time(), 
                             'end_time': end_time_client_localized.time(),
-                            'booking_window_id_start_time': time[idx],
-                            'booking_window_id_end_time': time[idx]+idx_delta,
+                            'booking_window_id_start_time': timeArr[time][0]['idx'],
+                            'booking_window_id_end_time': timeArr[time][0]['idx']+idx_delta,
                             'target_date': target_date})             
 
             # increment days_from_target if there are less than 10 times available
