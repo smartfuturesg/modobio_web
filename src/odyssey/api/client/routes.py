@@ -1254,7 +1254,7 @@ class ClinicalCareTeamTemporaryMembers(Resource):
         """
         Update a temporary team member to a permanent team member
         """
-        target_id = request.args.get('team_member_user_id')
+        target_id = request.args.get('team_member_user_id', type=int)
 
         team_member = ClientClinicalCareTeam.query.filter_by(user_id=user_id, team_member_user_id=target_id).one_or_none()
 
