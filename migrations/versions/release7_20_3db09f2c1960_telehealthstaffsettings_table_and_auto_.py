@@ -27,8 +27,6 @@ def upgrade():
     sa.ForeignKeyConstraint(['user_id'], ['User.user_id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('user_id')
     )
-    op.add_column('TelehealthBookings', sa.Column('updated_at', sa.DateTime(), server_default=sa.text('clock_timestamp()'), nullable=True))
-    op.add_column('TelehealthStaffAvailability', sa.Column('updated_at', sa.DateTime(), server_default=sa.text('clock_timestamp()'), nullable=True))
     op.drop_constraint('TelehealthStaffAvailability_user_id_fkey', 'TelehealthStaffAvailability', type_='foreignkey')
     op.create_foreign_key(None, 'TelehealthStaffAvailability', 'TelehealthStaffSettings', ['user_id'], ['user_id'], ondelete='CASCADE')
     op.drop_column('TelehealthStaffAvailability', 'timezone')
