@@ -1024,9 +1024,7 @@ class ClinicalCareTeamMembers(Resource):
                     team_member["team_member_user_id"] = team_member_user.user_id
                     
             # add new team member to the clincial care team
-            db.session.add(ClientClinicalCareTeam(**{"created_at": datetime.utcnow(),
-                                                    "updated_at": datetime.utcnow(),
-                                                    "team_member_user_id": team_member["team_member_user_id"],
+            db.session.add(ClientClinicalCareTeam(**{"team_member_user_id": team_member["team_member_user_id"],
                                                     "user_id": user_id})) 
 
         db.session.commit()
@@ -1226,9 +1224,7 @@ class ClinicalCareTeamTemporaryMembers(Resource):
         #retrieve staff account, staff account must exist because of the above check in the bookings table
         team_member = User.query.filter_by(user_id=request.parsed_obj['staff_user_id']).one_or_none()
 
-        db.session.add(ClientClinicalCareTeam(**{"created_at": datetime.utcnow(),
-                                            "updated_at": datetime.utcnow(),
-                                            "team_member_email": team_member.email,
+        db.session.add(ClientClinicalCareTeam(**{"team_member_email": team_member.email,
                                             "team_member_user_id": team_member.user_id,
                                             "user_id": user_id,
                                             "is_temporary": True}))
