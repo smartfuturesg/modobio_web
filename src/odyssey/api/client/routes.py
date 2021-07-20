@@ -1217,10 +1217,10 @@ class ClinicalCareTeamTemporaryMembers(Resource):
                 " for the given client and staff user_ids.", status_code=400)
 
         #ensure that this client does not already have this user as a care team member
-        if ClientClinicalCareTeam.query.filter_by(user_id=user_id, team_member_user_id=request.parsed_obj['staff_user_id']).one_or_none():
+        staff_user_id=request.parsed_obj['staff_user_id']
+        if ClientClinicalCareTeam.query.filter_by(user_id=user_id, team_member_user_id=staff_user_id).one_or_none():
             raise InputError(message=f'The user with user id {staff_user_id} is already on the care team of the' \
                 f'client with the user id {user_id}.')
-
         #retrieve staff account, staff account must exist because of the above check in the bookings table
         team_member = User.query.filter_by(user_id=request.parsed_obj['staff_user_id']).one_or_none()
 
