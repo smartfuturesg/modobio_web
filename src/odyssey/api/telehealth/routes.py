@@ -326,7 +326,6 @@ class TelehealthClientTimeSelectApi(Resource):
                 if len(timeArr[time]) > 1:
                     random.shuffle(timeArr[time])
                 
-
                 end_time_client_localized = time+booking_duration_delta
                 
                 # respond with display start and end times for the client

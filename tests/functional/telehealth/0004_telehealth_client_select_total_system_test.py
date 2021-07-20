@@ -286,7 +286,6 @@ def test_full_system_with_settings(test_client, init_database, staff_auth_header
     assert response.json['appointment_times'][-1]['start_time'] == '04:30:00'
     assert response.json['appointment_times'][-1]['booking_window_id_start_time'] == 139
     assert response.json['total_options'] == 19
-    breakpoint()
 
     ##
     # 4. Client selects an appointment time
