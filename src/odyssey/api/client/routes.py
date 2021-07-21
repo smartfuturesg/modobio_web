@@ -1,5 +1,5 @@
 import boto3
-from datetime import datetime
+from datetime import datetime, timedelta
 import math, re
 from PIL import Image
 
@@ -61,7 +61,7 @@ from odyssey.api.lookup.models import (
     LookupNotifications
 )
 from odyssey.api.physiotherapy.models import PTHistory 
-from odyssey.api.staff.models import StaffRecentClients
+from odyssey.api.staff.models import StaffRecentClients, StaffRoles
 from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.api.trainer.models import FitnessQuestionnaire
 from odyssey.api.facility.models import RegisteredFacilities
@@ -1032,19 +1032,49 @@ class ClinicalCareTeamMembers(Resource):
         # prepare response with names for clinical care team members who are also users 
         current_team = []
         current_team_users = db.session.query(
-                                    ClientClinicalCareTeam, User.firstname, User.lastname, User.modobio_id, User.email
+                                    ClientClinicalCareTeam, User.firstname, User.lastname, User.modobio_id, User.email, 
                                 ).filter(
                                     ClientClinicalCareTeam.user_id == user_id
                                 ).filter(ClientClinicalCareTeam.team_member_user_id == User.user_id
                                 ).all()
-        
+        fh = FileHandling()
+
         for team_member in current_team_users:
+            staff_roles = []
+            # bring up a profile photo for th team member
+            staff_profile_pics = db.session.execute(select(
+                UserProfilePictures.staff_id, UserProfilePictures.image_path
+            ).where(
+                UserProfilePictures.staff_id==team_member[0].team_member_user_id,
+                UserProfilePictures.width == 400
+            )).one_or_none()
+
+            client_profile_pics = db.session.execute(select(
+                UserProfilePictures.client_id, UserProfilePictures.image_path
+            ).where(
+                UserProfilePictures.client_id==team_member[0].team_member_user_id,
+                UserProfilePictures.width == 400
+            )).scalars().first()
+            
+            staff_roles = db.session.execute(select(StaffRoles.role).where(StaffRoles.user_id == team_member[0].team_member_user_id)).scalars().all()
+            
+            if staff_profile_pics:
+                profile_pic = fh.get_presigned_url(file_path=staff_profile_pics[1])
+            elif client_profile_pics:
+                profile_pic = fh.get_presigned_url(file_path=client_profile_pics[1])
+            else:
+                profile_pic = None
+
             current_team.append({
                 'firstname': team_member[1],
                 'lastname': team_member[2], 
                 'modobio_id': team_member[3],
                 'team_member_email': team_member[4],
-                'team_member_user_id':team_member[0].team_member_user_id })
+                'team_member_user_id':team_member[0].team_member_user_id,
+                'profile_picture': profile_pic,
+                'staff_roles' : staff_roles,
+                'is_temporary': team_member[0].is_temporary
+            })
         
         response = {"care_team": current_team,
                     "total_items": len(current_team) }
@@ -1109,34 +1139,52 @@ class ClinicalCareTeamMembers(Resource):
                                 ).filter(ClientClinicalCareTeam.team_member_user_id == User.user_id
                                 ).all()
         fh = FileHandling()
+
         for team_member in current_team_users:
+            staff_roles = []
             # bring up a profile photo for th team member
             staff_profile_pics = db.session.execute(select(
-                UserProfilePictures.staff_id
+                UserProfilePictures.staff_id, UserProfilePictures.image_path
             ).where(
-                UserProfilePictures.staff_id==team_member[0].team_member_user_id
-            )).scalars().first()
+                UserProfilePictures.staff_id==team_member[0].team_member_user_id,
+                UserProfilePictures.width == 400
+            )).one_or_none()
 
             client_profile_pics = db.session.execute(select(
-                UserProfilePictures.client_id
+                UserProfilePictures.client_id, UserProfilePictures.image_path
             ).where(
-                UserProfilePictures.client_id==team_member[0].team_member_user_id
+                UserProfilePictures.client_id==team_member[0].team_member_user_id,
+                UserProfilePictures.width == 400
             )).scalars().first()
+            
+            staff_roles = db.session.execute(select(StaffRoles.role).where(StaffRoles.user_id == team_member[0].team_member_user_id)).scalars().all()
+            
             if staff_profile_pics:
-                profile_pics = fh.get_presigned_urls(prefix=f'id{team_member[0].team_member_user_id:05d}/staff_profile_picture')
+                profile_pic = fh.get_presigned_url(file_path=staff_profile_pics[1])
             elif client_profile_pics:
-                profile_pics = fh.get_presigned_urls(prefix=f'id{team_member[0].team_member_user_id:05d}/client_profile_picture')
+                profile_pic = fh.get_presigned_url(file_path=client_profile_pics[1])
             else:
-                profile_pics = None
-
-            current_team.append({
+                profile_pic = None
+            
+            member_data = {
                 'firstname': team_member[1],
                 'lastname': team_member[2], 
                 'modobio_id': team_member[3],
                 'team_member_email': team_member[4],
                 'team_member_user_id':team_member[0].team_member_user_id,
-                'profile_picture': profile_pics
-            })
+                'profile_picture': profile_pic,
+                'staff_roles' : staff_roles,
+                'is_temporary': team_member[0].is_temporary
+            }
+
+            #calculate how much time is remaining for temporary members
+            if team_member[0].is_temporary:
+                expire_date = team_member[0].created_at + timedelta(hours=180)
+                time_remaining = expire_date - datetime.utcnow()
+                member_data['days_remaining'] = time_remaining.days
+                member_data['hours_remaining'] = time_remaining.seconds//3600
+
+            current_team.append(member_data)
         
         response = {"care_team": current_team,
                     "total_items": len(current_team) }
@@ -1168,7 +1216,12 @@ class ClinicalCareTeamTemporaryMembers(Resource):
             raise InputError(message="The booking id given does not exist or is not the correct booking id" \
                 " for the given client and staff user_ids.", status_code=400)
 
-        #retrieve staff account, staff account must exist because of the above check
+        #ensure that this client does not already have this user as a care team member
+        staff_user_id=request.parsed_obj['staff_user_id']
+        if ClientClinicalCareTeam.query.filter_by(user_id=user_id, team_member_user_id=staff_user_id).one_or_none():
+            raise InputError(message=f'The user with user id {staff_user_id} is already on the care team of the' \
+                f'client with the user id {user_id}.')
+        #retrieve staff account, staff account must exist because of the above check in the bookings table
         team_member = User.query.filter_by(user_id=request.parsed_obj['staff_user_id']).one_or_none()
 
         db.session.add(ClientClinicalCareTeam(**{"team_member_email": team_member.email,
@@ -1177,6 +1230,41 @@ class ClinicalCareTeamTemporaryMembers(Resource):
                                             "is_temporary": True}))
 
         db.session.commit()
+
+        current_team = ClientClinicalCareTeam.query.filter_by(user_id=user_id, team_member_user_id=None).all()
+
+        # prepare response with names for clinical care team members who are also users 
+        current_team_users = db.session.query(
+                                    ClientClinicalCareTeam, User.firstname, User.lastname, User.modobio_id
+                                ).filter(
+                                    ClientClinicalCareTeam.user_id == user_id
+                                ).filter(ClientClinicalCareTeam.team_member_user_id == User.user_id
+                                ).all()
+
+        for team_member in current_team_users:
+            team_member[0].__dict__.update({'firstname': team_member[1], 'lastname': team_member[2], 'modobio_id': team_member[3]})
+            current_team.append(team_member[0])
+
+        return {"care_team": current_team, "total_items": len(current_team)}
+
+    @token_auth.login_required
+    @ns.doc(params={'team_member_user_id': 'User id of the member to make permanent.'})
+    @responds(schema=ClientClinicalCareTeamSchema, api=ns, status_code=201)
+    def put(self, user_id):
+        """
+        Update a temporary team member to a permanent team member
+        """
+        target_id = request.args.get('team_member_user_id', type=int)
+
+        team_member = ClientClinicalCareTeam.query.filter_by(user_id=user_id, team_member_user_id=target_id).one_or_none()
+
+        #if team member exists, change their status to permanent, otherwise raise an error
+        if not team_member:
+            raise InputError(message=f'The user with user id {target_id} is not on the care team for the client with' \
+                f'the user id {user_id}. Please use /client/clinical-care-team/ POST endpoint.')
+        else:
+            team_member.is_temporary = False
+            db.session.commit()
 
         current_team = ClientClinicalCareTeam.query.filter_by(user_id=user_id, team_member_user_id=None).all()
 
