@@ -9,6 +9,7 @@ from flask import current_app
 from odyssey import db
 from odyssey.utils.constants import DB_SERVER_TIME, ORG_TOKEN_LIFETIME
 from odyssey.utils.base.models import BaseModelWithIdx, BaseModel
+from odyssey.api.practitioner.models import PractitionerOrganizationAffiliation
 
 class LookupTermsAndConditions(BaseModelWithIdx):
     """ 
@@ -966,11 +967,17 @@ class LookupEmergencyNumbers(BaseModelWithIdx):
 
 class LookupRoles(BaseModelWithIdx):
 
-    role_name = db.Column(db.String)
+    role_name = db.Column(db.String, unique=True)
     """
     Internal name of this role that is used throughout the code.
 
     :type: string
+    """
+
+    professionals_assigned = db.relationship('StaffRoles', uselist=True, back_populates='role_info')
+    """
+    One to many relationship with staff roles table
+    :type: :class:`StaffRoles` instance list
     """
 
     display_name = db.Column(db.String)
@@ -1147,6 +1154,12 @@ class LookupOrganizations(BaseModelWithIdx):
     Token used by this organization for access. Expires after 6 months.
 
     :type: string
+    """
+
+    practitioners_assigned = db.relationship('PractitionerOrganizationAffiliation', uselist=True, back_populates='org_info')
+    """
+    One to many relationship with pracitioner organization affiliation table
+    :type: :class:`PractitionerOrganizationAffiliation` instance list
     """
 
 class LookupCurrencies(BaseModelWithIdx):
