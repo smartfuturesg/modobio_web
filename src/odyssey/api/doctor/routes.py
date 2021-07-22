@@ -1364,7 +1364,7 @@ class MedicalSurgeriesAPI(Resource):
 
         #add request data to db
         request.parsed_obj.user_id = client_user_id
-        request.parsed_obj.reporter_user_id = token_auth.current_user()[0].user_id
+        request.parsed_obj.reporter_id = token_auth.current_user()[0].user_id
         db.session.add(request.parsed_obj)
         db.session.commit()
 

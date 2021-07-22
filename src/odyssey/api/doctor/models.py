@@ -1419,7 +1419,7 @@ class MedicalSurgeries(db.Model):
     :type: int, foreign key to User.user_id
     """
 
-    reporter_user_id = db.Column(db.Integer, db.ForeignKey('User.user_id'), nullable=False)
+    reporter_id = db.Column(db.Integer, db.ForeignKey('User.user_id'), nullable=False)
     """
     User id of the staff member that reported this surgery
 
