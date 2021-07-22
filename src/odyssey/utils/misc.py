@@ -72,10 +72,18 @@ def check_staff_existence(user_id):
         raise StaffNotFound(user_id)
     return staff
 
-def check_user_existence(user_id):
+def check_user_existence(user_id, user_type=None):
     """Check that the user is in the database
-    All users must be in the User table before any other procedure"""
-    user = User.query.filter_by(user_id=user_id, deleted=False).one_or_none()
+    If user_type is 'client', check if user_id exists in ClientInfo table.
+    If user_type is 'staff', check if user_id exists in StaffProfile table.
+    If user_type is neither of the above, just check if user_id exists in User table.
+    """
+    if user_type == 'client':
+        user = User.query.filter_by(user_id=user_id, is_client=True, deleted=False).one_or_none()
+    elif user_type == 'staff':
+        user = User.query.filter_by(user_id=user_id, is_staff=True, deleted=False).one_or_none()
+    else:
+        user = User.query.filter_by(user_id=user_id, deleted=False).one_or_none()
     if not user:
         raise UserNotFound(user_id)
     return user
