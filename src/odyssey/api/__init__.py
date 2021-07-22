@@ -63,6 +63,9 @@ api.add_namespace(ns)
 from odyssey.api.physiotherapy.routes import ns
 api.add_namespace(ns)
 
+from odyssey.api.practitioner.routes import ns
+api.add_namespace(ns)
+
 from odyssey.api.staff.routes import ns
 api.add_namespace(ns)
 
