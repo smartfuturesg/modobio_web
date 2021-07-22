@@ -16,14 +16,20 @@ class BaseResource(Resource):
     __abstract__ = True
 
     def check_user(self, user_id, user_type=None):
-        """
-        Checks if the given user_id is valid for the provided user_type.
-
+        """Check that the user is in the database
         If user_type is 'client', check if user_id exists in ClientInfo table.
         If user_type is 'staff', check if user_id exists in StaffProfile table.
         If user_type is neither of the above, just check if user_id exists in User table.
         """
-        check_user_existence(user_id, user_type)
+        if user_type == 'client':
+            user = User.query.filter_by(user_id=user_id, is_client=True, deleted=False).one_or_none()
+        elif user_type == 'staff':
+            user = User.query.filter_by(user_id=user_id, is_staff=True, deleted=False).one_or_none()
+        else:
+            user = User.query.filter_by(user_id=user_id, deleted=False).one_or_none()
+        if not user:
+            raise UserNotFound(user_id)
+        return user
 
     def set_reporter_id(self, parsed_obj):
         """
