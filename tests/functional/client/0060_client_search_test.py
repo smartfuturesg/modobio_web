@@ -1,7 +1,7 @@
 from flask import current_app
 from odyssey import db, defaults
 from odyssey.api.user.models import User
-from odyssey.api.client.models import ClientInfo
+from odyssey.api.client.models import ClientClinicalCareTeam, ClientInfo
 
 
 def test_get_client_search(test_client, init_database, staff_auth_header):
@@ -22,10 +22,13 @@ def test_get_client_search(test_client, init_database, staff_auth_header):
 
     client = db.session.query(User,ClientInfo).filter_by(is_client=True, deleted=False).join(ClientInfo).first()
     
+    # add staff to client's care team so the client can be searched
+    init_database.session.add(ClientClinicalCareTeam(team_member_user_id = 2, user_id = client[0].user_id))
+    init_database.session.commit()
+    
     queryStr = f'/client/search/?modobio_id={client.User.modobio_id}'
 
     response = test_client.get(queryStr, headers=staff_auth_header)
-    
     assert response.status_code == 200
     assert response.json['items'][0]['firstname'] == client.User.firstname
     assert response.json['items'][0]['lastname'] == client.User.lastname

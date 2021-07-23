@@ -1,4 +1,5 @@
 from flask import current_app
+from marshmallow import fields
 from odyssey.api.user.models import User
 from odyssey.api.client.models import ClientInfo
 from odyssey import db
@@ -22,7 +23,10 @@ def build_ES_indices():
             try:
                 for model in user:
                     for field in model.__searchable__:
-                        payload[field] = str(getattr(model, field))        
+                        if field == 'dob' and str(getattr(model, field)) == 'None':
+                            payload[field] = None
+                        else:
+                            payload[field] = str(getattr(model, field))        
                     _id = user[0].user_id
             except:
                 for field in user.__searchable__:

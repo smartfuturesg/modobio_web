@@ -457,14 +457,26 @@ class Clients(Resource):
                 'phone': 'phone number to search',
                 'dob': 'date of birth to search',
                 'modobio_id': 'modobio id to search'})
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('staff',))
     @responds(schema=ClientSearchOutSchema, api=ns)
     def get(self):
         """returns list of clients given query parameters,"""
         #if ELASTICSEARCH_URL isn't set, the search request will return without doing anything
         es = current_app.elasticsearch
         if not es: return
-        
+
+        current_user,_ = token_auth.current_user()
+        # bring up user_ids for care team members
+        care_team_ids = db.session.execute(select(
+            ClientClinicalCareTeam.user_id
+        ).where(
+            ClientClinicalCareTeam.team_member_user_id==current_user.user_id)
+        ).scalars().all()
+
+        # no care team members
+        if len(care_team_ids) == 0:
+            return {'items': []}
+
         #clean up and validate input data
         startAt = request.args.get('_from', 0, type= int)
         per_page = min(request.args.get('per_page', 10, type=int), 100)
@@ -484,15 +496,17 @@ class Clients(Resource):
 
         #build ES query body
         if param.get('dob'):
-            body={"query":{"bool":{"must":{"multi_match":{"query": search.strip(), "fuzziness":"AUTO:1,2", "zero_terms_query": "all"}},"filter":{"term":{"dob":param.get('dob')}}}},"from":startAt,"size":per_page}
+            body={"query":{"bool":{"must":{"multi_match":{"query": search.strip(), "fuzziness":"AUTO:1,2", "zero_terms_query": "all"}},"filter":[{"term":{"dob":param.get('dob')}},{"terms":{"user_id": [f"{id_}" for id_ in care_team_ids]} } ] }},"from":startAt,"size":per_page}
         else:
-            body={"query":{"multi_match":{"query": search.strip(), "fuzziness": "AUTO:1,2" ,"zero_terms_query": "all"}},"from":startAt,"size":per_page}
+            body={"query":{"bool":{"must":{"multi_match":{"query": search.strip(), "fuzziness": "AUTO:1,2" ,"zero_terms_query": "all"}},"filter":{"terms":{"user_id":[str(_id) for _id in care_team_ids]}}}},"from":startAt,"size":per_page}
+        
         #query ES index
         results=es.search(index="clients", body=body)
 
         #Format return data
         total_hits = results['hits']['total']['value']
         items = []
+        
         for hit in results['hits']['hits']: items.append(ClientSearchItemsSchema().load(hit['_source']))
         
         response = {
