@@ -1,7 +1,7 @@
-"""temp
+"""change MedicalSurgeries reporter_user_id to reporter_id
 
 Revision ID: 1767e00e5ece
-Revises: 57c9bb87eb62
+Revises: 6320015a4b80
 Create Date: 2021-07-21 15:56:34.239154
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '1767e00e5ece'
-down_revision = '57c9bb87eb62'
+down_revision = '6320015a4b80'
 branch_labels = None
 depends_on = None
 
