@@ -35,4 +35,4 @@ class BaseResource(Resource):
         """
         Sets the reporter_id for the given parsed_obj to the currently logged in user.
         """
-        parsed_obj.reporter_id = token_auth.current_user[0].user_id
+        parsed_obj.reporter_id = token_auth.current_user()[0].user_id

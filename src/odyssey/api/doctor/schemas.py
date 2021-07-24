@@ -25,6 +25,7 @@ from odyssey.api.doctor.models import (
 from odyssey.api.user.models import User
 from odyssey.api.facility.models import MedicalInstitutions
 from odyssey.utils.constants import MEDICAL_CONDITIONS
+from odyssey.utils.base.schemas import BaseSchema
 
 """
     Schemas for the doctor's API
@@ -72,10 +73,9 @@ class MedicalLookUpSTDSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = MedicalLookUpSTD
 
-class MedicalSTDHistorySchema(ma.SQLAlchemyAutoSchema):
+class MedicalSTDHistorySchema(BaseSchema):
     class Meta:
         model = MedicalSTDHistory
-        exclude = ('idx', 'created_at', 'updated_at')
 
     user_id = fields.Integer()
     std_id = fields.Integer()
@@ -90,7 +90,7 @@ class MedicalSTDHistoryInputSchema(Schema):
 class MedicalLookUpSTDOutputSchema(Schema):
     items = fields.Nested(MedicalLookUpSTDSchema(many=True),missing=[])
     total_items = fields.Integer()
-
+ 
 class MedicalSocialHistorySchema(Schema):
 
     # user_id = fields.Integer()
@@ -181,10 +181,9 @@ class MedicalConditionsOutputSchema(Schema):
     items = fields.Nested(MedicalConditionsSchema(many=True), missing = [])
     total_items = fields.Integer()
 
-class MedicalFamilyHistSchema(SQLAlchemyAutoSchema):
+class MedicalFamilyHistSchema(BaseSchema):
     class Meta:
         model = MedicalFamilyHistory
-        exclude = ('idx', 'created_at', 'updated_at')
 
     user_id = fields.Integer()
     medical_condition_id = fields.Integer()
