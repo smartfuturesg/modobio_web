@@ -308,6 +308,9 @@ class ClientClinicalCareTeamInternalSchema(Schema):
     is_temporary = fields.Boolean(missing=False, dump_only=True)
     hours_remaining = fields.Integer(required=False, dump_only=True)
     days_remaining = fields.Integer(required=False, dump_only=True)
+    is_staff = fields.Boolean(required=True, dump_only=True)
+    membersince = fields.Date(dump_only = True)
+    
 
 class ClinicalCareTeamAuthorizationsForSchema(Schema):
     """
@@ -325,7 +328,9 @@ class UserClinicalCareTeamSchema(Schema):
     client_name = fields.String()
     client_email = fields.String()
     authorizations = fields.Nested(ClinicalCareTeamAuthorizationsForSchema(many=True),missing=[])
-
+    client_added_date = fields.Date(dump_only=True, required=False)
+    client_profile_picture = fields.String(dump_only=True, missing=None, required = False)
+    
 class ClinicalCareTeamMemberOfSchema(Schema):
     """
     Nests the data returned for the member-of endpoint
@@ -340,6 +345,18 @@ class ClientClinicalCareTeamSchema(Schema):
     """
     
     care_team = fields.Nested(ClientClinicalCareTeamInternalSchema(many=True), missing=[])
+    total_items = fields.Integer(dump_only=True)
+
+
+class ClientClinicalCareTeamDeleteInternalSchema(Schema):
+    team_member_user_id = fields.Integer(required = True)
+
+class ClientClinicalCareTeamDeleteSchema(Schema):
+    """
+    Schema is used for nesting ClientClinicalCareTeamDeleteInternalSchema 
+    """
+    
+    care_team = fields.Nested(ClientClinicalCareTeamDeleteInternalSchema(many=True), missing=[])
     total_items = fields.Integer(dump_only=True)
 
 class ClinicalCareTeamTemporaryMembersSchema(Schema):

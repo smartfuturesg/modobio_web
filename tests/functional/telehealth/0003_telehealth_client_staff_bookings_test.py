@@ -153,7 +153,6 @@ def test_get_2_client_bookings(test_client, init_database, client_auth_header):
     response = test_client.get('/telehealth/bookings/?client_user_id={}'.format(1),
                                 headers=client_auth_header, 
                                 content_type='application/json')
-    
     assert response.status_code == 200
 
 def test_get_3_staff_client_bookings(test_client, init_database, staff_auth_header):
