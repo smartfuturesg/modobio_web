@@ -65,6 +65,8 @@ class TelehealthBookingsSchema(ma.SQLAlchemyAutoSchema):
     timezone = fields.String(metadata={'description': 'timezone setting of the booking for the logged in user'})
     payment_method_id = fields.Integer(required=False)
     client_location_id = fields.Integer(required=False)
+    client_profile_picture = fields.String(dump_only=True, metadata={'description': 'profile pic of client telehealth attendee'})
+    staff_profile_picture = fields.String(dump_only=True, metadata={'description': 'profile pic of staff telehealth attendee'})
 
     @post_load
     def make_object(self, data, **kwargs):

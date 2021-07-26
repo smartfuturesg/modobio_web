@@ -15,7 +15,7 @@ from odyssey.api.lookup.models import (
     LookupBookingTimeIncrements
 )
 from odyssey.api.staff.models import StaffOperationalTerritories, StaffRoles, StaffCalendarEvents
-from odyssey.api.user.models import User
+from odyssey.api.user.models import User, UserProfilePictures
 
 from odyssey.api.telehealth.models import (
     TelehealthBookings,
@@ -50,6 +50,7 @@ from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import TWILIO_ACCESS_KEY_TTL, DAY_OF_WEEK, ALLOWED_AUDIO_TYPES, ALLOWED_IMAGE_TYPES
 from odyssey.utils.errors import GenericNotFound, InputError, UnauthorizedUser, ContentNotFound, IllegalSetting
 from odyssey.utils.misc import (
+    FileHandling,
     check_client_existence, 
     check_staff_existence,
     create_conversation,
@@ -376,6 +377,7 @@ class TelehealthBookingsApi(Resource):
         if not client_user_id and not staff_user_id:
             raise InputError(status_code=405,message='Must include at least one staff or client ID.')
 
+        fh = FileHandling()
         ###
         # There are a few cases. In all the logged-in user must be one of the requested user_ids:
         # 1. Both staff and client IDs part of search. 
@@ -389,6 +391,8 @@ class TelehealthBookingsApi(Resource):
             # Check client existence
             client_user = check_client_existence(client_user_id)  
             staff_user = check_staff_existence(staff_user_id)
+            profile_pic_context = ('staff_profile_picture' if g.get('user_type') == 'client' 
+                                else 'client_profile_picture')
 
             # grab the whole queue
             query = db.session.execute(
@@ -405,6 +409,7 @@ class TelehealthBookingsApi(Resource):
 
         # requesting to view client bookings. Must be logged in as the client
         elif current_user.user_id == client_user_id and g.get('user_type') == 'client':
+            profile_pic_context = 'staff_profile_picture'
             # grab this client's bookings
             client_user = current_user
             # bring up booking, set the results in a dictionary
@@ -413,7 +418,7 @@ class TelehealthBookingsApi(Resource):
                 join(TelehealthChatRooms, TelehealthBookings.idx == TelehealthChatRooms.booking_id).
                 join(User, User.user_id == TelehealthBookings.staff_user_id).
                 where(
-                    TelehealthBookings.client_user_id == client_user_id,
+                    TelehealthBookings.client_user_id == client_user_id
                     ).
                 order_by(TelehealthBookings.target_date.asc())
             ).all()
@@ -422,6 +427,7 @@ class TelehealthBookingsApi(Resource):
         
         # requesting to view staff bookings. Must be logged in as the staff
         elif current_user.user_id == staff_user_id and g.get('user_type') == 'staff':
+            profile_pic_context = 'client_profile_picture'
             # grab this client's bookings
             staff_user = current_user
             # bring up booking, set the results in a dictionary
@@ -445,18 +451,41 @@ class TelehealthBookingsApi(Resource):
         bookings_payload = []
 
         for booking in bookings:
+            profile_pic = None
             staff = booking.get('staff_user', staff_user)
             client = booking.get('client_user', client_user)
             book = booking.get('booking')
+            
             ##
             # localize booking times to the staff or client 
+            # bring up profile pics
             ##
             if g.get('user_type') == 'staff':
+                # bring up profile pic for telehealth attendee that has not made this request
+                image_path = db.session.execute(select(
+                    UserProfilePictures.image_path
+                        ).where(
+                        UserProfilePictures.client_id==client.user_id,
+                        UserProfilePictures.width == 400
+                    )).scalars().one_or_none()
+                profile_pic = (fh.get_presigned_url(file_path=image_path) 
+                                if image_path else None)
+
                 tzone = book.staff_timezone
                 # bookings stored in staff timezone
                 start_time_localized = time_inc[book.booking_window_id_start_time-1].start_time
                 end_time_localized = time_inc[book.booking_window_id_end_time-1].end_time
             else:
+                # bring up profile pic for telehealth attendee that has not made this request
+                image_path = db.session.execute(select(
+                    UserProfilePictures.image_path
+                        ).where(
+                        UserProfilePictures.staff_id==staff.user_id,
+                        UserProfilePictures.width == 400
+                    )).scalars().one_or_none()
+                profile_pic = (fh.get_presigned_url(file_path=image_path) 
+                                if image_path else None)
+
                 tzone = book.client_timezone
                 start_time_staff_localized = datetime.combine(
                     book.target_date, 
@@ -492,7 +521,8 @@ class TelehealthBookingsApi(Resource):
                 'conversation_sid': booking.get('conversation_sid'),
                 'timezone': tzone,
                 'client_location_id': book.client_location_id,
-                'payment_method_id': book.payment_method_id
+                'payment_method_id': book.payment_method_id,
+                profile_pic_context: profile_pic
             })
 
         # Sort bookings by time then sort by date

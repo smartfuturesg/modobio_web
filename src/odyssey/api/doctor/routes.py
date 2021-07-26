@@ -1178,6 +1178,7 @@ class MedBloodTestResultTypes(Resource):
 
 @ns.route('/medicalhistory/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
+@ns.deprecated
 class MedHistory(Resource):
     @token_auth.login_required(resources=('medical_history',))
     @responds(schema=MedicalHistorySchema, api=ns)
