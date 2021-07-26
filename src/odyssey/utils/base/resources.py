@@ -1,7 +1,7 @@
 from flask_restx import Resource
 
 from odyssey.utils.auth import token_auth
-from odyssey.utils.misc import check_user_existence
+from odyssey.utils.errors import UserNotFound
 from odyssey.api.user.models import User
 
 class BaseResource(Resource):
