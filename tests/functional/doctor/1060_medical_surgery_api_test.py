@@ -21,7 +21,7 @@ def test_post_surgery(test_client, init_database, staff_auth_header):
                             headers=staff_auth_header, 
                             data = dumps(payload),
                             content_type='application/json')
-    
+
     data = MedicalSurgeries.query.filter_by(user_id=client_user_id).first()
     assert response.status_code == 201
     assert data.institution == payload['institution']
@@ -49,7 +49,7 @@ def test_get_surgery(test_client, init_database, client_auth_header):
     response = test_client.get('/doctor/surgery/1/', 
                             headers=client_auth_header, 
                             content_type='application/json')
-    
+
     data = MedicalSurgeries.query.filter_by(user_id=1).first()
     assert response.status_code == 200
     assert data.institution == "Our Lady of Perpetual Surgery"

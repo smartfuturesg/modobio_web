@@ -28,7 +28,7 @@ def test_post_1_general_medical_history(test_client, init_database, client_auth_
                                 headers=client_auth_header, 
                                 data=dumps(payload), 
                                 content_type='application/json')
-    
+
     assert response.status_code == 201 
 
 def test_get_1_general_medical_history(test_client, init_database, client_auth_header, staff_auth_header):
