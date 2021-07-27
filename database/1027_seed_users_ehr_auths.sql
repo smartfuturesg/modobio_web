@@ -11,9 +11,9 @@ alter sequence "ClientEHRPageAuthorizations_idx_seq"
   restart with 1;
 
 
-insert into "ClientClinicalCareTeam" ("user_id", "team_member_user_id") values
-(22, 10),
-(22, 14);
+insert into "ClientClinicalCareTeam" ("user_id", "team_member_user_id", "is_temporary") values
+(22, 10, false),
+(22, 14, false);
 
 insert into "ClientEHRPageAuthorizations" ("user_id", "team_member_user_id", "resource_group_id", "status") values
 (22, 10, 1, 'accepted'),

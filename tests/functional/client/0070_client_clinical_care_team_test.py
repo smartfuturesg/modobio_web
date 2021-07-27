@@ -5,7 +5,7 @@ from flask.json import dumps
 from flask_accepts.decorators.decorators import responds
 from sqlalchemy import select
 
-from odyssey.api.client.models import ClientEHRPageAuthorizations
+from odyssey.api.client.models import ClientClinicalCareTeam, ClientEHRPageAuthorizations
 from odyssey.api.lookup.models import LookupEHRPages
 from odyssey.api.user.models import User
 
@@ -164,8 +164,19 @@ def test_delete_clinical_care_team(test_client, init_database, client_auth_heade
         'modobio_id': team_member_client_modobio_id
         })
 
+    # bring up user_ids for care team members
+    care_team_delete_ids = init_database.session.execute(
+        select(ClientClinicalCareTeam.team_member_user_id
+        ).where(
+            ClientClinicalCareTeam.user_id == 1,
+            ClientClinicalCareTeam.team_member_user_id != team_member_staff_user_id,
+            ClientClinicalCareTeam.team_member_user_id != team_member_client_user_id
+    )).scalars().all()
+    
+    care_team_delete_payload = {'care_team' : [{'team_member_user_id': _id} for _id in care_team_delete_ids]}
+
     response = test_client.delete(f"/client/clinical-care-team/members/{1}/",
-                                data=dumps(clients_clinical_care_team),
+                                data=dumps(care_team_delete_payload),
                                 headers=client_auth_header, 
                                 content_type='application/json')
 
@@ -184,7 +195,7 @@ def test_get_clinical_care_team(test_client, init_database, client_auth_header):
     # bring up one of the care team members
     
     assert response.status_code == 200
-    assert response.json.get("total_items") == 4
+    assert response.json.get("total_items") == 2
 
 def test_authorize_clinical_care_team(test_client, init_database, client_auth_header,staff_auth_header):
     """

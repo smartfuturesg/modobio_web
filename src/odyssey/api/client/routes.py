@@ -61,7 +61,7 @@ from odyssey.api.lookup.models import (
     LookupNotifications
 )
 from odyssey.api.physiotherapy.models import PTHistory 
-from odyssey.api.staff.models import StaffRecentClients, StaffRoles
+from odyssey.api.staff.models import StaffProfile, StaffRecentClients, StaffRoles
 from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.api.trainer.models import FitnessQuestionnaire
 from odyssey.api.facility.models import RegisteredFacilities
@@ -79,6 +79,7 @@ from odyssey.api.client.schemas import(
     CareTeamEHRAuthorizationNestedSchema,
     ClientAssignedDrinksSchema,
     ClientAssignedDrinksDeleteSchema,
+    ClientClinicalCareTeamDeleteSchema,
     ClientConsentSchema,
     ClientConsultContractSchema,
     ClientIndividualContractSchema,
@@ -466,14 +467,26 @@ class Clients(BaseResource):
                 'phone': 'phone number to search',
                 'dob': 'date of birth to search',
                 'modobio_id': 'modobio id to search'})
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('staff',))
     @responds(schema=ClientSearchOutSchema, api=ns)
     def get(self):
         """returns list of clients given query parameters,"""
         #if ELASTICSEARCH_URL isn't set, the search request will return without doing anything
         es = current_app.elasticsearch
         if not es: return
-        
+
+        current_user,_ = token_auth.current_user()
+        # bring up user_ids for care team members
+        care_team_ids = db.session.execute(select(
+            ClientClinicalCareTeam.user_id
+        ).where(
+            ClientClinicalCareTeam.team_member_user_id==current_user.user_id)
+        ).scalars().all()
+
+        # no care team members
+        if len(care_team_ids) == 0:
+            return {'items': []}
+
         #clean up and validate input data
         startAt = request.args.get('_from', 0, type= int)
         per_page = min(request.args.get('per_page', 10, type=int), 100)
@@ -493,15 +506,17 @@ class Clients(BaseResource):
 
         #build ES query body
         if param.get('dob'):
-            body={"query":{"bool":{"must":{"multi_match":{"query": search.strip(), "fuzziness":"AUTO:1,2", "zero_terms_query": "all"}},"filter":{"term":{"dob":param.get('dob')}}}},"from":startAt,"size":per_page}
+            body={"query":{"bool":{"must":{"multi_match":{"query": search.strip(), "fuzziness":"AUTO:1,2", "zero_terms_query": "all"}},"filter":[{"term":{"dob":param.get('dob')}},{"terms":{"user_id": [f"{id_}" for id_ in care_team_ids]} } ] }},"from":startAt,"size":per_page}
         else:
-            body={"query":{"multi_match":{"query": search.strip(), "fuzziness": "AUTO:1,2" ,"zero_terms_query": "all"}},"from":startAt,"size":per_page}
+            body={"query":{"bool":{"must":{"multi_match":{"query": search.strip(), "fuzziness": "AUTO:1,2" ,"zero_terms_query": "all"}},"filter":{"terms":{"user_id":[str(_id) for _id in care_team_ids]}}}},"from":startAt,"size":per_page}
+        
         #query ES index
         results=es.search(index="clients", body=body)
 
         #Format return data
         total_hits = results['hits']['total']['value']
         items = []
+        
         for hit in results['hits']['hits']: items.append(ClientSearchItemsSchema().load(hit['_source']))
         
         response = {
@@ -1045,7 +1060,7 @@ class ClinicalCareTeamMembers(BaseResource):
         # prepare response with names for clinical care team members who are also users 
         current_team = []
         current_team_users = db.session.query(
-                                    ClientClinicalCareTeam, User.firstname, User.lastname, User.modobio_id, User.email, 
+                                    ClientClinicalCareTeam, User
                                 ).filter(
                                     ClientClinicalCareTeam.user_id == user_id
                                 ).filter(ClientClinicalCareTeam.team_member_user_id == User.user_id
@@ -1053,40 +1068,46 @@ class ClinicalCareTeamMembers(BaseResource):
         fh = FileHandling()
 
         for team_member in current_team_users:
-            staff_roles = []
-            # bring up a profile photo for th team member
-            staff_profile_pics = db.session.execute(select(
-                UserProfilePictures.staff_id, UserProfilePictures.image_path
-            ).where(
-                UserProfilePictures.staff_id==team_member[0].team_member_user_id,
-                UserProfilePictures.width == 400
-            )).one_or_none()
+            staff_roles = None
+            membersince = None
+            profile_pic = None
+            # bring up a profile photo and membersince date for the team member
+            staff_profile = db.session.execute(select(
+                StaffProfile
+            ).where(StaffProfile.user_id == team_member[1].user_id
+            )).scalars().one_or_none()
 
-            client_profile_pics = db.session.execute(select(
-                UserProfilePictures.client_id, UserProfilePictures.image_path
-            ).where(
-                UserProfilePictures.client_id==team_member[0].team_member_user_id,
-                UserProfilePictures.width == 400
-            )).scalars().first()
-            
-            staff_roles = db.session.execute(select(StaffRoles.role).where(StaffRoles.user_id == team_member[0].team_member_user_id)).scalars().all()
-            
-            if staff_profile_pics:
-                profile_pic = fh.get_presigned_url(file_path=staff_profile_pics[1])
-            elif client_profile_pics:
-                profile_pic = fh.get_presigned_url(file_path=client_profile_pics[1])
+            if staff_profile:
+                membersince = staff_profile.membersince
+                profile_pic_path = [pic.image_path for pic in staff_profile.profile_pictures if pic.width == 400]                
+                profile_pic = (fh.get_presigned_url(file_path=profile_pic_path[0]) if len(profile_pic_path) > 0 else None)
+                staff_roles = db.session.execute(select(StaffRoles.role).where(StaffRoles.user_id == team_member[1].user_id)).scalars().all() 
+                is_staff = True
             else:
-                profile_pic = None
+                is_staff = False
+                client_profile = db.session.execute(select(
+                    ClientInfo
+                ).where(
+                    ClientInfo.user_id == team_member[0].team_member_user_id
+                )).scalars().one_or_none()
+
+                if client_profile:
+                    membersince = client_profile.membersince
+                    profile_pic_path = [pic.image_path for pic in client_profile.profile_pictures if pic.width == 400]                
+                    profile_pic = (fh.get_presigned_url(file_path=profile_pic_path[0]) if len(profile_pic_path) > 0 else None)
+                
 
             current_team.append({
-                'firstname': team_member[1],
-                'lastname': team_member[2], 
-                'modobio_id': team_member[3],
-                'team_member_email': team_member[4],
+                'firstname': team_member[1].firstname,
+                'lastname': team_member[1].lastname, 
+                'modobio_id': team_member[1].modobio_id,
+                'team_member_email': team_member[1].email,
                 'team_member_user_id':team_member[0].team_member_user_id,
                 'profile_picture': profile_pic,
                 'staff_roles' : staff_roles,
-                'is_temporary': team_member[0].is_temporary
+                'is_temporary': team_member[0].is_temporary,
+                'membersince': membersince,
+                'is_staff': is_staff
             })
         
         response = {"care_team": current_team,
@@ -1095,7 +1116,7 @@ class ClinicalCareTeamMembers(BaseResource):
         return response
 
     @token_auth.login_required(user_type=('client',))
-    @accepts(schema=ClientClinicalCareTeamSchema, api=ns)
+    @accepts(schema=ClientClinicalCareTeamDeleteSchema, api=ns)
     def delete(self, user_id):
         """
         Remove members of a client's clinical care team using the team member's email address.
@@ -1107,8 +1128,8 @@ class ClinicalCareTeamMembers(BaseResource):
             User ID number
 
         Expected payload includes
-        email : str
-            Email of new care team member
+        team_member_user_id : int
+
         Returns
         -------
         200 OK
@@ -1116,8 +1137,12 @@ class ClinicalCareTeamMembers(BaseResource):
         
         data = request.parsed_obj
        
+
         for team_member in data.get("care_team"):
-            ClientClinicalCareTeam.query.filter_by(user_id=user_id, team_member_email=team_member['team_member_email'].lower()).delete()
+            # TODO remove one of these authorization table in a followup story
+            ClientClinicalCareTeamAuthorizations.query.filter_by(user_id=user_id, team_member_user_id = team_member.get('team_member_user_id')).delete()
+            ClientEHRPageAuthorizations.query.filter_by(user_id=user_id, team_member_user_id = team_member.get('team_member_user_id')).delete()
+            ClientClinicalCareTeam.query.filter_by(user_id=user_id, team_member_user_id = team_member.get('team_member_user_id')).delete()
             
         db.session.commit()
 
@@ -1140,13 +1165,11 @@ class ClinicalCareTeamMembers(BaseResource):
         Returns
         -------
         200 OK
-        """
-
-        
+        """        
         # prepare response with names for clinical care team members who are also users 
         current_team = []
         current_team_users = db.session.query(
-                                    ClientClinicalCareTeam, User.firstname, User.lastname, User.modobio_id, User.email, 
+                                    ClientClinicalCareTeam, User
                                 ).filter(
                                     ClientClinicalCareTeam.user_id == user_id
                                 ).filter(ClientClinicalCareTeam.team_member_user_id == User.user_id
@@ -1154,50 +1177,47 @@ class ClinicalCareTeamMembers(BaseResource):
         fh = FileHandling()
 
         for team_member in current_team_users:
-            staff_roles = []
-            # bring up a profile photo for th team member
-            staff_profile_pics = db.session.execute(select(
-                UserProfilePictures.staff_id, UserProfilePictures.image_path
-            ).where(
-                UserProfilePictures.staff_id==team_member[0].team_member_user_id,
-                UserProfilePictures.width == 400
-            )).one_or_none()
+            staff_roles = None
+            membersince = None
+            profile_pic = None
+            # bring up a profile photo and membersince date for the team member
+            staff_profile = db.session.execute(select(
+                StaffProfile
+            ).where(StaffProfile.user_id == team_member[1].user_id
+            )).scalars().one_or_none()
 
-            client_profile_pics = db.session.execute(select(
-                UserProfilePictures.client_id, UserProfilePictures.image_path
-            ).where(
-                UserProfilePictures.client_id==team_member[0].team_member_user_id,
-                UserProfilePictures.width == 400
-            )).scalars().first()
-            
-            staff_roles = db.session.execute(select(StaffRoles.role).where(StaffRoles.user_id == team_member[0].team_member_user_id)).scalars().all()
-            
-            if staff_profile_pics:
-                profile_pic = fh.get_presigned_url(file_path=staff_profile_pics[1])
-            elif client_profile_pics:
-                profile_pic = fh.get_presigned_url(file_path=client_profile_pics[1])
+            if staff_profile:
+                membersince = staff_profile.membersince
+                profile_pic_path = [pic.image_path for pic in staff_profile.profile_pictures if pic.width == 400]                
+                profile_pic = (fh.get_presigned_url(file_path=profile_pic_path[0]) if len(profile_pic_path) > 0 else None)
+                staff_roles = db.session.execute(select(StaffRoles.role).where(StaffRoles.user_id == team_member[1].user_id)).scalars().all() 
+                is_staff = True
             else:
-                profile_pic = None
-            
-            member_data = {
-                'firstname': team_member[1],
-                'lastname': team_member[2], 
-                'modobio_id': team_member[3],
-                'team_member_email': team_member[4],
+                is_staff = False
+                client_profile = db.session.execute(select(
+                    ClientInfo
+                ).where(
+                    ClientInfo.user_id == team_member[0].team_member_user_id
+                )).scalars().one_or_none()
+
+                if client_profile:
+                    membersince = client_profile.membersince
+                    profile_pic_path = [pic.image_path for pic in client_profile.profile_pictures if pic.width == 400]                
+                    profile_pic = (fh.get_presigned_url(file_path=profile_pic_path[0]) if len(profile_pic_path) > 0 else None)
+                
+
+            current_team.append({
+                'firstname': team_member[1].firstname,
+                'lastname': team_member[1].lastname, 
+                'modobio_id': team_member[1].modobio_id,
+                'team_member_email': team_member[1].email,
                 'team_member_user_id':team_member[0].team_member_user_id,
                 'profile_picture': profile_pic,
                 'staff_roles' : staff_roles,
-                'is_temporary': team_member[0].is_temporary
-            }
-
-            #calculate how much time is remaining for temporary members
-            if team_member[0].is_temporary:
-                expire_date = team_member[0].created_at + timedelta(hours=180)
-                time_remaining = expire_date - datetime.utcnow()
-                member_data['days_remaining'] = time_remaining.days
-                member_data['hours_remaining'] = time_remaining.seconds//3600
-
-            current_team.append(member_data)
+                'is_temporary': team_member[0].is_temporary,
+                'membersince': membersince,
+                'is_staff': is_staff
+            })
         
         response = {"care_team": current_team,
                     "total_items": len(current_team) }
@@ -1311,6 +1331,7 @@ class UserClinicalCareTeamApi(BaseResource):
         is a part of along with the permissions granted to them
         """
         res = []
+        fh = FileHandling()
         for client in ClientClinicalCareTeam.query.filter_by(team_member_user_id=user_id).all():
             client_user = User.query.filter_by(user_id=client.user_id).one_or_none()
             authorizations_query = db.session.query(
@@ -1323,10 +1344,19 @@ class UserClinicalCareTeamApi(BaseResource):
                                 ).filter(
                                     ClientEHRPageAuthorizations.resource_group_id == LookupEHRPages.resource_group_id
                                 ).all()
+            
+            profile_pic_path = db.session.execute(
+                select(
+                    UserProfilePictures.image_path
+                ).where(UserProfilePictures.client_id == client_user.user_id, UserProfilePictures.width == 400)
+                ).scalars().one_or_none()                
+            profile_pic = (fh.get_presigned_url(file_path=profile_pic_path) if profile_pic_path else None)
             res.append({'client_user_id': client_user.user_id, 
                         'client_name': ' '.join(filter(None, (client_user.firstname, client_user.middlename ,client_user.lastname))),
                         'client_email': client_user.email,
                         'client_modobio_id': client_user.modobio_id,
+                        'client_profile_picture': profile_pic,
+                        'client_added_date': client.created_at,
                         'authorizations': [{'display_name': x[1], 'resource_group_id': x[0]} for x in authorizations_query]})
         
         return {'member_of_care_teams': res, 'total': len(res)}
