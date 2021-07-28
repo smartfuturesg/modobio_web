@@ -310,6 +310,9 @@ class ClientClinicalCareTeamInternalSchema(Schema):
     days_remaining = fields.Integer(required=False, dump_only=True)
     is_staff = fields.Boolean(required=True, dump_only=True)
     membersince = fields.Date(dump_only = True)
+    hours_remaining = fields.Integer(required=False, dump_only=True)
+    days_remaining = fields.Integer(required=False, dump_only=True)
+
     
 
 class ClinicalCareTeamAuthorizationsForSchema(Schema):

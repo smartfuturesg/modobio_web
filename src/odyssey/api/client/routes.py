@@ -1206,7 +1206,7 @@ class ClinicalCareTeamMembers(BaseResource):
                     profile_pic = (fh.get_presigned_url(file_path=profile_pic_path[0]) if len(profile_pic_path) > 0 else None)
                 
 
-            current_team.append({
+            member_data = {
                 'firstname': team_member[1].firstname,
                 'lastname': team_member[1].lastname, 
                 'modobio_id': team_member[1].modobio_id,
@@ -1217,7 +1217,17 @@ class ClinicalCareTeamMembers(BaseResource):
                 'is_temporary': team_member[0].is_temporary,
                 'membersince': membersince,
                 'is_staff': is_staff
-            })
+            }
+
+            #calculate how much time is remaining for temporary members
+            if team_member[0].is_temporary:
+                expire_date = team_member[0].created_at + timedelta(hours=180)
+                time_remaining = expire_date - datetime.utcnow()
+                member_data['days_remaining'] = time_remaining.days
+                member_data['hours_remaining'] = time_remaining.seconds//3600
+
+
+            current_team.append(member_data)
         
         response = {"care_team": current_team,
                     "total_items": len(current_team) }
