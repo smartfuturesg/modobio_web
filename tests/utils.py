@@ -1,23 +1,37 @@
-"""
-Utility funcitons and objects for resducing redundancy when writing tests
-
-"""
+""" Utility funcitons for testing. """
 
 import base64
 
+def login(test_client, user, password='password') -> dict:
+    """ Login user, return header with token.
+    
+    Params
+    ------
+    test_client
+        The Flask.app.test_client object that runs the tests.
 
-def create_authorization_header(test_client, init_database, email, password, user_type):
-    """
-    Create a staff or client authorization header using the context of the running test provided as 
-    the first two arguments (test_client, init_database)
-    """
-    valid_credentials = base64.b64encode(
-            f"{email}:{password}".encode("utf-8")).decode("utf-8")
-    headers = {'Authorization': f'Basic {valid_credentials}'}
-    token_request_response = test_client.post(f'/{user_type}/token/',
-            headers=headers,
-            content_type='application/json')
-    token = token_request_response.json.get('token')
-    auth_header = {'Authorization': f'Bearer {token}'}
+    user
+        User model instance, can be staff or client.
 
-    return auth_header
+    password : str
+        Optional password for user, defaults to "password".
+
+    Returns
+    -------
+    dict
+        Authorization header with the access token for user.
+    """
+    creds = base64.b64encode(f'{user.email}:{password}'.encode('utf-8')).decode('utf-8')
+    header = {'Authorization': f'Basic {creds}'}
+
+    url = 'client'
+    if user.is_staff:
+        url = 'staff'
+
+    response = test_client.post(
+        f'/{url}/token/',
+        headers=header,
+        content_type='application/json')
+
+    token = response.json.get('token')
+    return {'Authorization': f'Bearer {token}'}

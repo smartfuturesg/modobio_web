@@ -6,8 +6,7 @@ wearables_data = {
     'registered_freestyle': False,
     'registered_fitbit': False,
     'registered_oura': False,
-    'registered_applewatch': False
-}
+    'registered_applewatch': False}
 
 wearables_freestyle_data = {
     'activation_timestamp': '2020-04-05T12:34:56.000',
@@ -15,9 +14,7 @@ wearables_freestyle_data = {
     'timestamps': [
         '2020-04-05T01:00:12.345678',
         '2020-04-05T02:00:00.000',
-        '2020-04-05T03:00:00.000'
-    ]
-}
+        '2020-04-05T03:00:00.000']}
 
 wearables_freestyle_more_data = {
     'activation_timestamp': '2020-04-05T12:34:56.000',
@@ -26,9 +23,7 @@ wearables_freestyle_more_data = {
         '2020-04-05T02:00:00.000',
         '2020-04-05T03:00:00.000',
         '2020-04-05T04:00:00.000',
-        '2020-04-05T05:00:00.000'
-    ]
-}
+        '2020-04-05T05:00:00.000']}
 
 # Combine previous two to check against merge
 wearables_freestyle_combo_data = {
@@ -39,24 +34,19 @@ wearables_freestyle_combo_data = {
         '2020-04-05T02:00:00.000',
         '2020-04-05T03:00:00.000',
         '2020-04-05T04:00:00.000',
-        '2020-04-05T05:00:00.000'
-    ]
-}
+        '2020-04-05T05:00:00.000']}
 
 wearables_freestyle_empty_data = {
     'activation_timestamp': '2020-04-05T12:34:56.000',
     'glucose': [],
-    'timestamps': []
-}
+    'timestamps': []}
 
 wearables_freestyle_unequal_data = {
     'activation_timestamp': '2020-04-05T12:34:56.000',
     'glucose': [6.6, 7.7, 8.8],
     'timestamps': [
         '2020-04-05T06:00:00.000',
-        '2020-04-05T07:00:00.000'
-    ]
-}
+        '2020-04-05T07:00:00.000']}
 
 wearables_freestyle_duplicate_data = {
     'activation_timestamp': '2020-04-05T12:34:56.000',
@@ -64,6 +54,4 @@ wearables_freestyle_duplicate_data = {
     'timestamps': [
         '2020-04-05T06:00:00.000',
         '2020-04-05T07:00:00.000',
-        '2020-04-05T07:00:00.000'
-    ]
-}
+        '2020-04-05T07:00:00.000']}

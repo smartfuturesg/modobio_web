@@ -50,7 +50,7 @@ INSERT INTO "ClientInfo" ("user_id") VALUES
 (22);
 
 INSERT INTO  "PaymentMethods" ("user_id", "payment_id", "payment_type", "number", "is_default") VALUES
-(22, 1, 'Visa', 1234, true);
+(22, 1, 'VISA', 1234, true);
 
 INSERT INTO "StaffProfile" ("user_id") VALUES
 (1),
