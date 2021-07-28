@@ -16,16 +16,11 @@ def test_get_client_search(test_client):
 
     assert response.status_code == 200
 
-    client_info = (test_client.db.session
-        .query(ClientInfo)
-        .filter_by(user_id=test_client.client_id)
-        .one_or_none())
-
     # Add staff to client's care team so the client can be searched
     ccct = ClientClinicalCareTeam(
         team_member_user_id=test_client.staff_id,
         user_id=test_client.client_id)
-    test_client.db.session.add()
+    test_client.db.session.add(ccct)
     test_client.db.session.commit()
 
     # Search by modobio ID
@@ -39,7 +34,6 @@ def test_get_client_search(test_client):
     assert response.json['items'][0]['email'] == test_client.client_email
     assert response.json['items'][0]['modobio_id'] == test_client.client.modobio_id
     assert response.json['items'][0]['phone_number'] == str(test_client.client.phone_number)
-    assert response.json['items'][0]['dob'] == str(client_info.dob)
 
     # Search by first name
     response = test_client.get(
