@@ -68,19 +68,20 @@ from odyssey.api.doctor.schemas import (
     MedicalSocialHistoryOutputSchema,
     MedicalSurgeriesSchema
 )
+from odyssey.utils.base.resources import BaseResource
 
 ns = Namespace('doctor', description='Operations related to doctor')
 
 @ns.route('/bloodpressure/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class MedBloodPressures(Resource):
+class MedBloodPressures(BaseResource):
     @token_auth.login_required(resources=('blood_pressure',))
     @responds(schema=MedicalBloodPressuresOutputSchema, api=ns)
     def get(self, user_id):
         '''
         This request gets the users submitted blood pressure if it exists
         '''
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
         bp_info = MedicalBloodPressures.query.filter_by(user_id=user_id).all()
         
         for data in bp_info:
@@ -100,17 +101,15 @@ class MedBloodPressures(Resource):
         Post request to post the client's blood pressure
         '''
         # First check if the client exists
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
+        super().set_reporter_id(request.parsed_obj)
 
-        data = request.parsed_obj
-        data.user_id = user_id
-        data.reporter_id =  token_auth.current_user()[0].user_id
-
-        db.session.add(data)
-
-        # insert results into the result table
+        request.parsed_obj.user_id = user_id
+        
+        db.session.add(request.parsed_obj)
         db.session.commit()
-        return data
+
+        return request.parsed_obj
 
     @token_auth.login_required(user_type=('client',), staff_role=('medical_doctor',), resources=('blood_pressure',))
     @ns.doc(params={'idx': 'int',})
@@ -119,7 +118,7 @@ class MedBloodPressures(Resource):
         '''
         Delete request for a client's blood pressure
         '''
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
 
         idx = request.args.get('idx', type=int)
         if idx:
@@ -133,7 +132,7 @@ class MedBloodPressures(Resource):
             raise InputError(message="idx must be an integer.")
 
 @ns.route('/lookupbloodpressureranges/')
-class MedicalLookUpBloodPressureResource(Resource):
+class MedicalLookUpBloodPressureResource(BaseResource):
     """ Returns blood pressure ranges stored in the database in response to a GET request.
 
     Returns
@@ -152,14 +151,15 @@ class MedicalLookUpBloodPressureResource(Resource):
 
 @ns.route('/medicalgeneralinfo/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class MedicalGenInformation(Resource):
+class MedicalGenInformation(BaseResource):
     @token_auth.login_required(resources=('medications', 'medical_history'))
     @responds(schema=MedicalGeneralInfoInputSchema(exclude=['medications.idx','allergies.idx']), api=ns)
     def get(self, user_id):
         '''
         This request gets the users personal and family history if it exists
         '''
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
+
         genInfo = MedicalGeneralInfo.query.filter_by(user_id=user_id).first()
         medications = MedicalGeneralInfoMedications.query.filter_by(user_id=user_id).all()
         allergies = MedicalGeneralInfoMedicationAllergy.query.filter_by(user_id=user_id).all()
@@ -176,7 +176,7 @@ class MedicalGenInformation(Resource):
         Post request to post the client's onboarding personal and family history
         '''
         # First check if the client exists
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
         payload = {}
 
         # If the user submits something for general history, then removes it from the payload, 
@@ -235,6 +235,7 @@ class MedicalGenInformation(Resource):
                             db.session.rollback()
                             raise InputError(status_code = 405,message='Medication frequency needs more information')
                     medication.user_id = user_id
+                    medication.reporter_id = token_auth.current_user()[0].user_id
                     db.session.add(medication)
 
                     payload['medications'].append(medication)
@@ -270,14 +271,14 @@ class MedicalGenInformation(Resource):
 
 @ns.route('/medicalinfo/general/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class MedicalGeneralInformation(Resource):
+class MedicalGeneralInformation(BaseResource):
     @token_auth.login_required(resources=('medical_history',))
     @responds(schema=MedicalGeneralInfoSchema, api=ns)
     def get(self, user_id):
         '''
         This request gets the users personal and family history if it exists
         '''
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
         genInfo = MedicalGeneralInfo.query.filter_by(user_id=user_id).first()
         payload = {'general_info': genInfo}
         return genInfo
@@ -290,7 +291,7 @@ class MedicalGeneralInformation(Resource):
         Post request to post the client's onboarding personal and family history
         '''
         # First check if the client exists
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
         
         genInfo = MedicalGeneralInfo.query.filter_by(user_id=user_id).one_or_none()
         if genInfo:
@@ -330,7 +331,7 @@ class MedicalGeneralInformation(Resource):
         '''
         Put request to update the client's onboarding personal and family history
         '''
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
 
         generalInfo = request.json
         if generalInfo:
@@ -361,14 +362,15 @@ class MedicalGeneralInformation(Resource):
 
 @ns.route('/medicalinfo/medications/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class MedicalMedicationInformation(Resource):
+class MedicalMedicationInformation(BaseResource):
     @token_auth.login_required(resources=('medications',))
     @responds(schema=MedicalMedicationsInfoInputSchema, api=ns)
     def get(self, user_id):
         '''
         This request gets the users personal and family history if it exists
         '''
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
+
         medications = MedicalGeneralInfoMedications.query.filter_by(user_id=user_id).all()
         payload = {'medications': medications}
         return payload
@@ -380,8 +382,7 @@ class MedicalMedicationInformation(Resource):
         '''
         Post request to post the client's onboarding personal and family history
         '''
-        # First check if the client exists
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
         
         payload = {}
 
@@ -403,6 +404,7 @@ class MedicalMedicationInformation(Resource):
                         if not medication.medication_times_per_freq and not medication.medication_time_units:
                             raise InputError(status_code = 405,message='Medication frequency needs more information')
                     medication.user_id = user_id
+                    medication.reporter_id = token_auth.current_user()[0].user_id
                     payload['medications'].append(medication)
                     db.session.add(medication)    
         
@@ -417,9 +419,9 @@ class MedicalMedicationInformation(Resource):
         '''
         Put request to update the client's onboarding personal and family history
         '''
-        payload = {}
+        super().check_user(user_id, user_type='client')
 
-        check_client_existence(user_id)
+        payload = {}
 
         if request.parsed_obj['medications']:
             medications = request.parsed_obj['medications']
@@ -463,7 +465,7 @@ class MedicalMedicationInformation(Resource):
         '''
         payload = {}
 
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
         
         ids_to_delete = request.parsed_obj['delete_ids']
         for ids in ids_to_delete:
@@ -477,14 +479,15 @@ class MedicalMedicationInformation(Resource):
 
 @ns.route('/medicalinfo/allergies/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class MedicalAllergiesInformation(Resource):
+class MedicalAllergiesInformation(BaseResource):
     @token_auth.login_required(resources=('medications',))
     @responds(schema=MedicalAllergiesInfoInputSchema, api=ns)
     def get(self, user_id):
         '''
         This request gets the users personal and family history if it exists
         '''
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
+
         allergies = MedicalGeneralInfoMedicationAllergy.query.filter_by(user_id=user_id).all()
         payload = {'allergies': allergies}
         return payload
@@ -497,7 +500,7 @@ class MedicalAllergiesInformation(Resource):
         Post request to post the client's onboarding personal and family history
         '''
         # First check if the client exists
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
         
         payload = {}
 
@@ -529,7 +532,7 @@ class MedicalAllergiesInformation(Resource):
         '''
         payload = {}
 
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
 
         # If the client is allergic to certain medication, they MUST tell us what
         # medication
@@ -563,7 +566,7 @@ class MedicalAllergiesInformation(Resource):
         delete request to update the client's onboarding personal and family history
         '''
 
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
         
         # If the client is allergic to certain medication, they MUST tell us what
         # medication
@@ -579,7 +582,7 @@ class MedicalAllergiesInformation(Resource):
         return 
 
 @ns.route('/lookupstd/')
-class MedicalLookUpSTDResource(Resource):
+class MedicalLookUpSTDResource(BaseResource):
     """ Returns STD list stored in the database in response to a GET request.
 
     Returns
@@ -598,7 +601,7 @@ class MedicalLookUpSTDResource(Resource):
 
 @ns.route('/medicalinfo/social/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class MedicalSocialHist(Resource):
+class MedicalSocialHist(BaseResource):
     @token_auth.login_required(resources=('medical_history',))
     @responds(schema=MedicalSocialHistoryOutputSchema, api=ns)
     def get(self, user_id):
@@ -639,7 +642,8 @@ class MedicalSocialHist(Resource):
         dict
             JSON encoded dict.
         """
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
+
         social_hist = MedicalSocialHistory.query.filter_by(user_id=user_id).one_or_none()
         std_hist = MedicalSTDHistory.query.filter_by(user_id=user_id).all()
 
@@ -688,8 +692,7 @@ class MedicalSocialHist(Resource):
         dict
             JSON encoded dict.
         """
-        # First check if the client exists
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
         # Check if this information is already in the DB
 
         payload = {}
@@ -752,7 +755,7 @@ class MedicalSocialHist(Resource):
         return payload
 
 @ns.route('/medicalconditions/')
-class MedicalCondition(Resource):
+class MedicalCondition(BaseResource):
     """
     Returns the medical conditions currently documented in the DB
     """
@@ -767,14 +770,15 @@ class MedicalCondition(Resource):
 
 @ns.route('/familyhistory/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class MedicalFamilyHist(Resource):
+class MedicalFamilyHist(BaseResource):
     @token_auth.login_required(resources=('medical_history',))
     @responds(schema=MedicalFamilyHistOutputSchema, api=ns)
     def get(self, user_id):
         '''
         This request gets the users personal and family history if it exists
         '''
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
+
         client_personalfamilyhist = MedicalFamilyHistory.query.filter_by(user_id=user_id).all()
         payload = {'items': client_personalfamilyhist,
                    'total_items': len(client_personalfamilyhist)}
@@ -787,8 +791,7 @@ class MedicalFamilyHist(Resource):
         '''
         Post request to post the client's onboarding personal and family history
         '''
-        # First check if the client exists
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
         
         # the data expected for the backend is:
         # parameter: user_id 
@@ -814,8 +817,7 @@ class MedicalFamilyHist(Resource):
         '''
         Put request to update the client's onboarding personal and family history
         '''
-        # First check if the client exists
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
         
         # the data expected for the backend is:
         # parameter: user_id 
@@ -837,7 +839,7 @@ class MedicalFamilyHist(Resource):
 
 @ns.route('/images/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class MedImaging(Resource):
+class MedImaging(BaseResource):
     @token_auth.login_required(resources=('diagnostic_imaging',))
     @responds(schema=MedicalImagingSchema(many=True), api=ns)
     def get(self, user_id):
@@ -847,7 +849,8 @@ class MedImaging(Resource):
             image_path is a sharable url for an image saved in S3 Bucket,
             if running locally, it is the path to a local temp file
         """
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
+
         query = db.session.query(
                     MedicalImaging, User.firstname, User.lastname
                 ).filter(
@@ -897,7 +900,7 @@ class MedImaging(Resource):
         "image_path": "string"
 
         """
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
         bucket_name = current_app.config['AWS_S3_BUCKET']
 
         # bring up reporting staff member
@@ -948,7 +951,7 @@ class MedImaging(Resource):
 
 @ns.route('/bloodtest/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class MedBloodTest(Resource):
+class MedBloodTest(BaseResource):
     @token_auth.login_required(staff_role=('medical_doctor',), resources=('blood_chemistry',))
     @accepts(schema=MedicalBloodTestsInputSchema, api=ns)
     @responds(schema=MedicalBloodTestSchema, status_code=201, api=ns)
@@ -960,7 +963,8 @@ class MedBloodTest(Resource):
         to the results related to this submisison. Each submission may have 
         multiple results (e.g. in a panel)
         """
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
+
         data = request.get_json()
         
         # remove results from data, commit test info without results to db
@@ -992,7 +996,7 @@ class MedBloodTest(Resource):
         '''
         Delete request for a client's blood test
         '''
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
 
         test_id = request.args.get('test_id', type=int)
         if test_id:
@@ -1010,7 +1014,7 @@ class MedBloodTest(Resource):
 
 @ns.route('/bloodtest/all/<int:user_id>/')
 @ns.doc(params={'user_id': 'Client ID number'})
-class MedBloodTestAll(Resource):
+class MedBloodTestAll(BaseResource):
     @token_auth.login_required(resources=('blood_chemistry',))
     @responds(schema=AllMedicalBloodTestSchema, api=ns)
     def get(self, user_id):
@@ -1030,7 +1034,8 @@ class MedBloodTestAll(Resource):
         To see test results for every blood test submission for a specified client, 
         use the (GET)`/bloodtest/results/all/<int:user_id>/` endpoint. 
         """
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
+
         blood_tests =  db.session.query(
                     MedicalBloodTests, User.firstname, User.lastname
                 ).filter(
@@ -1056,7 +1061,7 @@ class MedBloodTestAll(Resource):
 
 @ns.route('/bloodtest/results/<int:test_id>/')
 @ns.doc(params={'test_id': 'Test ID number'})
-class MedBloodTestResults(Resource):
+class MedBloodTestResults(BaseResource):
     """
     Resource for working with a single blood test 
     entry instance, test_id.
@@ -1070,8 +1075,8 @@ class MedBloodTestResults(Resource):
         Returns details of the test denoted by test_id as well as 
         the actual results submitted.
         """
-        #query for join of MedicalBloodTestResults and MedicalBloodTestResultTypes tables
-        check_blood_test_existence(test_id)
+        #query for join of MedicalBloodTestResults and MedicalBloodTestResultTypes table
+
         results =  db.session.query(
                 MedicalBloodTests, MedicalBloodTestResults, MedicalBloodTestResultTypes, User
                 ).join(
@@ -1085,7 +1090,7 @@ class MedBloodTestResults(Resource):
                     MedicalBloodTests.reporter_id == User.user_id
                 ).all()
         if len(results) == 0:
-            raise ContentNotFound()
+            raise GenericNotFound()
         
         # prepare response with test details   
         nested_results = {'test_id': test_id, 
@@ -1114,7 +1119,7 @@ class MedBloodTestResults(Resource):
 
 @ns.route('/bloodtest/results/all/<int:user_id>/')
 @ns.doc(params={'user_id': 'Client ID number'})
-class AllMedBloodTestResults(Resource):
+class AllMedBloodTestResults(BaseResource):
     """
     Endpoint for returning all blood test results from a client.
 
@@ -1124,6 +1129,8 @@ class AllMedBloodTestResults(Resource):
     @token_auth.login_required(resources=('blood_chemistry',))
     @responds(schema=MedicalBloodTestResultsOutputSchema, api=ns)
     def get(self, user_id):
+        super().check_user(user_id, user_type='client')
+
         # pull up all tests, test results, and the test type names for this client
         results =  db.session.query(
                         MedicalBloodTests, MedicalBloodTestResults, MedicalBloodTestResultTypes, User
@@ -1165,7 +1172,7 @@ class AllMedBloodTestResults(Resource):
 
 
 @ns.route('/bloodtest/result-types/')
-class MedBloodTestResultTypes(Resource):
+class MedBloodTestResultTypes(BaseResource):
     """
     Returns the types of tests currently documented in the DB
     """
@@ -1178,12 +1185,12 @@ class MedBloodTestResultTypes(Resource):
 
 @ns.route('/medicalhistory/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class MedHistory(Resource):
+class MedHistory(BaseResource):
     @token_auth.login_required(resources=('medical_history',))
     @responds(schema=MedicalHistorySchema, api=ns)
     def get(self, user_id):
         """returns client's medical history as a json for the user_id specified"""
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
 
         client = MedicalHistory.query.filter_by(user_id=user_id).first()
 
@@ -1197,7 +1204,7 @@ class MedHistory(Resource):
     @responds(schema=MedicalHistorySchema, status_code=201, api=ns)
     def post(self, user_id):
         """returns client's medical history as a json for the user_id specified"""
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
 
         current_med_history = MedicalHistory.query.filter_by(user_id=user_id).first()
         
@@ -1223,7 +1230,7 @@ class MedHistory(Resource):
     @responds(schema=MedicalHistorySchema, api=ns)
     def put(self, user_id):
         """updates client's medical history as a json for the user_id specified"""
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
 
         client_mh = MedicalHistory.query.filter_by(user_id=user_id).first()
 
@@ -1245,12 +1252,12 @@ class MedHistory(Resource):
 
 @ns.route('/physical/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class MedPhysical(Resource):
+class MedPhysical(BaseResource):
     @token_auth.login_required(resources=('medical_history',))
     @responds(schema=MedicalPhysicalExamSchema(many=True), api=ns)
     def get(self, user_id):
         """returns all client's medical physical exams for the user_id specified"""
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
 
         query =  db.session.query(
                 MedicalPhysicalExam, User.firstname, User.lastname
@@ -1277,7 +1284,7 @@ class MedPhysical(Resource):
     @responds(schema=MedicalPhysicalExamSchema, status_code=201, api=ns)
     def post(self, user_id):
         """creates new db entry of client's medical physical exam as a json for the clientuser_idid specified"""
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
 
         data = request.get_json()
         data["user_id"] = user_id
@@ -1299,7 +1306,7 @@ class MedPhysical(Resource):
         return response
 
 @ns.route('/medicalinstitutions/')
-class AllMedInstitutes(Resource):
+class AllMedInstitutes(BaseResource):
     @token_auth.login_required
     @responds(schema=MedicalInstitutionsSchema(many=True), api=ns)
     def get(self):
@@ -1311,12 +1318,13 @@ class AllMedInstitutes(Resource):
 
 @ns.route('/medicalinstitutions/recordid/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class ExternalMedicalRecordIDs(Resource):
+class ExternalMedicalRecordIDs(BaseResource):
     @token_auth.login_required
     @accepts(schema=MedicalExternalMREntrySchema,  api=ns)
     @responds(schema=MedicalExternalMREntrySchema,status_code=201, api=ns)
     def post(self, user_id):
         """for submitting client medical record ids from external medical institutions"""
+        super().check_user(user_id, user_type='client')
 
         data = request.get_json()
         # check for new institute names. If the institute_id is 9999, then enter 
@@ -1344,27 +1352,28 @@ class ExternalMedicalRecordIDs(Resource):
     @responds(schema=MedicalExternalMREntrySchema, api=ns)
     def get(self, user_id):
         """returns all medical record ids for user_id"""
+        super().check_user(user_id, user_type='client')
 
         client_med_record_ids = MedicalExternalMR.query.filter_by(user_id=user_id).all()
 
         return client_med_record_ids
 
 
-@ns.route('/surgery/<int:client_user_id>/')
-@ns.doc(params={'client_user_id': 'Client user ID number'})
-class MedicalSurgeriesAPI(Resource):
+@ns.route('/surgery/<int:user_id>/')
+@ns.doc(params={'user_id': 'Client user ID number'})
+class MedicalSurgeriesAPI(BaseResource):
 
     @token_auth.login_required(staff_role=('medical_doctor',), resources=('medical_history',))
     @accepts(schema=MedicalSurgeriesSchema,  api=ns)
     @responds(schema=MedicalSurgeriesSchema, status_code=201, api=ns)
-    def post(self, client_user_id):
+    def post(self, user_id):
         """register a client surgery in the db"""
         #check client and reporting staff have valid user ids
-        check_client_existence(client_user_id)
+        super().check_user(user_id, user_type='client')
+        super().set_reporter_id(request.parsed_obj)
 
         #add request data to db
-        request.parsed_obj.user_id = client_user_id
-        request.parsed_obj.reporter_user_id = token_auth.current_user()[0].user_id
+        request.parsed_obj.user_id = user_id
         db.session.add(request.parsed_obj)
         db.session.commit()
 
@@ -1372,10 +1381,11 @@ class MedicalSurgeriesAPI(Resource):
 
     @token_auth.login_required(resources=('medical_history',))
     @responds(schema=MedicalSurgeriesSchema(many=True), api=ns)
-    def get(self, client_user_id):
-        """returns a list of all surgeries for the given client_user_id"""
-        check_client_existence(client_user_id)
-        return MedicalSurgeries.query.filter_by(user_id=client_user_id).all()
+    def get(self, user_id):
+        """returns a list of all surgeries for the given user_id"""
+        super().check_user(user_id, user_type='client')
+
+        return MedicalSurgeries.query.filter_by(user_id=user_id).all()
 
 ##########################
 # This code became obsolete, because the medical lookup tables is now

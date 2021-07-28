@@ -13,10 +13,8 @@ from .data import (
 )
 
 def test_post_1_general_medical_history(test_client):
-
     payload = doctor_all_generalmedicalinfo_post_1_data
 
-    # send post request for client general medical history on user_id = 1
     response = test_client.post(
         f'/doctor/medicalgeneralinfo/{test_client.client_id}/',
         headers=test_client.client_auth_header,
@@ -26,8 +24,7 @@ def test_post_1_general_medical_history(test_client):
     assert response.status_code == 201
 
 def test_get_1_general_medical_history(test_client):
-    for header in (staff_auth_header, client_auth_header):
-        # send get request for client general medical history on user_id = 1
+    for header in (test_client.staff_auth_header, test_client.client_auth_header):
         response = test_client.get(
             f'/doctor/medicalgeneralinfo/{test_client.client_id}/',
             headers=header,
@@ -41,7 +38,6 @@ def test_get_1_general_medical_history(test_client):
 def test_post_2_general_medical_history(test_client):
     payload = doctor_all_generalmedicalinfo_post_2_data
 
-    # send post request for client general medical history on user_id = 1
     response = test_client.post(
         f'/doctor/medicalgeneralinfo/{test_client.client_id}/',
         headers=test_client.client_auth_header,
@@ -52,7 +48,6 @@ def test_post_2_general_medical_history(test_client):
 
 def test_get_2_general_medical_history(test_client):
     for header in (staff_auth_header, client_auth_header):
-        # send get request for client general medical history on user_id = 1
         response = test_client.get(
             f'/doctor/medicalgeneralinfo/{test_client.client_id}/',
             headers=header,

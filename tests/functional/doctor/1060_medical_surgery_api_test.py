@@ -17,6 +17,7 @@ def test_post_surgery(test_client):
         content_type='application/json')
 
     data = MedicalSurgeries.query.filter_by(user_id=test_client.client_id).first()
+
     assert response.status_code == 201
     assert data.institution == payload['institution']
     assert data.surgery_category == payload['surgery_category']
@@ -34,13 +35,13 @@ def test_post_surgery(test_client):
     assert response.status_code == 400
 
 def test_get_surgery(test_client):
-    # send get request for client info
     response = test_client.get(
         f'/doctor/surgery/{test_client.client_id}/',
         headers=test_client.client_auth_header,
         content_type='application/json')
 
     data = MedicalSurgeries.query.filter_by(user_id=test_client.client_id).first()
+
     assert response.status_code == 200
     assert data.institution == 'Our Lady of Perpetual Surgery'
     assert data.surgery_category == 'Heart'

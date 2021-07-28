@@ -61,7 +61,7 @@ from odyssey.api.lookup.models import (
     LookupNotifications
 )
 from odyssey.api.physiotherapy.models import PTHistory 
-from odyssey.api.staff.models import StaffRecentClients, StaffRoles
+from odyssey.api.staff.models import StaffProfile, StaffRecentClients, StaffRoles
 from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.api.trainer.models import FitnessQuestionnaire
 from odyssey.api.facility.models import RegisteredFacilities
@@ -79,6 +79,7 @@ from odyssey.api.client.schemas import(
     CareTeamEHRAuthorizationNestedSchema,
     ClientAssignedDrinksSchema,
     ClientAssignedDrinksDeleteSchema,
+    ClientClinicalCareTeamDeleteSchema,
     ClientConsentSchema,
     ClientConsultContractSchema,
     ClientIndividualContractSchema,
@@ -111,6 +112,7 @@ from odyssey.api.client.schemas import(
 from odyssey.api.lookup.schemas import LookupDefaultHealthMetricsSchema
 from odyssey.api.staff.schemas import StaffRecentClientsSchema
 from odyssey.api.facility.schemas import ClientSummarySchema
+from odyssey.utils.base.resources import BaseResource
 
 ns = Namespace('client', description='Operations related to clients')
 
@@ -176,7 +178,7 @@ def process_race_and_ethnicity(user_id, mother, father):
 
 
 @ns.route('/profile-picture/<int:user_id>/')
-class ClientProfilePicture(Resource):
+class ClientProfilePicture(BaseResource):
     """
     Enpoint to edit client's profile picture
     """
@@ -189,6 +191,8 @@ class ClientProfilePicture(Resource):
         Accepts form-data, will only handle one image
         "profile_picture": file (allowed types are '.png', '.jpg', '.jpeg')
         """
+        super().check_user(user_id, user_type='client')
+
         if not ('profile_picture' in request.files and request.files['profile_picture']):  
             raise InputError(422, "No file selected")    
 
@@ -257,6 +261,8 @@ class ClientProfilePicture(Resource):
         """
         Request to delete the client's profile picture
         """
+        super().check_user(user_id, user_type='client')
+
         fh = FileHandling()
         _prefix = f'id{user_id:05d}/client_profile_picture'
 
@@ -272,11 +278,13 @@ class ClientProfilePicture(Resource):
 
 
 @ns.route('/<int:user_id>/')
-class Client(Resource):
+class Client(BaseResource):
     @token_auth.login_required
     @responds(schema=ClientAndUserInfoSchema, api=ns)
     def get(self, user_id):
         """returns client info table as a json for the user_id specified"""
+        super().check_user(user_id, user_type='client')
+
         client_data = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
         user_data = User.query.filter_by(user_id=user_id).one_or_none()
         if not client_data and not user_data:
@@ -333,6 +341,8 @@ class Client(Resource):
     @responds(schema=ClientAndUserInfoSchema, status_code=200, api=ns)
     def put(self, user_id):
         """edit client info"""
+
+        super().check_user(user_id, user_type='client')
 
         client_data = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
         
@@ -395,7 +405,7 @@ class Client(Resource):
         return {'client_info': client_info_payload, 'user_info': user_data}
 
 @ns.route('/summary/<int:user_id>/')
-class ClientSummary(Resource):
+class ClientSummary(BaseResource):
     @token_auth.login_required
     @responds(schema=ClientSummarySchema, api=ns)
     def get(self, user_id):
@@ -425,7 +435,7 @@ class ClientSummary(Resource):
                 'phone': 'phone number to search',
                 'dob': 'date of birth to search',
                 'record_locator_id': 'record locator id to search'})
-class ClientsDepricated(Resource):
+class ClientsDepricated(BaseResource):
     @token_auth.login_required
     @responds(schema=ClientSearchOutSchema, api=ns)
     #@responds(schema=UserSchema(many=True), api=ns)
@@ -448,7 +458,7 @@ class ClientsDepricated(Resource):
         return response
 
 @ns.route('/search/')
-class Clients(Resource):
+class Clients(BaseResource):
     @ns.doc(params={'_from': 'starting at result 0, from what result to display',
                 'per_page': 'number of clients per page',
                 'firstname': 'first name to search',
@@ -457,14 +467,26 @@ class Clients(Resource):
                 'phone': 'phone number to search',
                 'dob': 'date of birth to search',
                 'modobio_id': 'modobio id to search'})
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('staff',))
     @responds(schema=ClientSearchOutSchema, api=ns)
     def get(self):
         """returns list of clients given query parameters,"""
         #if ELASTICSEARCH_URL isn't set, the search request will return without doing anything
         es = current_app.elasticsearch
         if not es: return
-        
+
+        current_user,_ = token_auth.current_user()
+        # bring up user_ids for care team members
+        care_team_ids = db.session.execute(select(
+            ClientClinicalCareTeam.user_id
+        ).where(
+            ClientClinicalCareTeam.team_member_user_id==current_user.user_id)
+        ).scalars().all()
+
+        # no care team members
+        if len(care_team_ids) == 0:
+            return {'items': []}
+
         #clean up and validate input data
         startAt = request.args.get('_from', 0, type= int)
         per_page = min(request.args.get('per_page', 10, type=int), 100)
@@ -484,15 +506,17 @@ class Clients(Resource):
 
         #build ES query body
         if param.get('dob'):
-            body={"query":{"bool":{"must":{"multi_match":{"query": search.strip(), "fuzziness":"AUTO:1,2", "zero_terms_query": "all"}},"filter":{"term":{"dob":param.get('dob')}}}},"from":startAt,"size":per_page}
+            body={"query":{"bool":{"must":{"multi_match":{"query": search.strip(), "fuzziness":"AUTO:1,2", "zero_terms_query": "all"}},"filter":[{"term":{"dob":param.get('dob')}},{"terms":{"user_id": [f"{id_}" for id_ in care_team_ids]} } ] }},"from":startAt,"size":per_page}
         else:
-            body={"query":{"multi_match":{"query": search.strip(), "fuzziness": "AUTO:1,2" ,"zero_terms_query": "all"}},"from":startAt,"size":per_page}
+            body={"query":{"bool":{"must":{"multi_match":{"query": search.strip(), "fuzziness": "AUTO:1,2" ,"zero_terms_query": "all"}},"filter":{"terms":{"user_id":[str(_id) for _id in care_team_ids]}}}},"from":startAt,"size":per_page}
+        
         #query ES index
         results=es.search(index="clients", body=body)
 
         #Format return data
         total_hits = results['hits']['total']['value']
         items = []
+        
         for hit in results['hits']['hits']: items.append(ClientSearchItemsSchema().load(hit['_source']))
         
         response = {
@@ -518,13 +542,13 @@ class Clients(Resource):
 
 @ns.route('/consent/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class ConsentContract(Resource):
+class ConsentContract(BaseResource):
     """client consent forms"""
     @token_auth.login_required
     @responds(schema=ClientConsentSchema, api=ns)
     def get(self, user_id):
         """returns the most recent consent table as a json for the user_id specified"""
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
 
         client_consent_form = ClientConsent.query.filter_by(user_id=user_id).order_by(ClientConsent.idx.desc()).first()
         
@@ -538,7 +562,7 @@ class ConsentContract(Resource):
     @responds(schema=ClientConsentSchema, status_code=201, api=ns)
     def post(self, user_id):
         """ Create client consent contract for the specified user_id """
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
 
         data = request.get_json()
         data["user_id"] = user_id
@@ -555,14 +579,14 @@ class ConsentContract(Resource):
 
 @ns.route('/release/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class ReleaseContract(Resource):
+class ReleaseContract(BaseResource):
     """Client release forms"""
 
     @token_auth.login_required
     @responds(schema=ClientReleaseSchema, api=ns)
     def get(self, user_id):
         """returns most recent client release table as a json for the user_id specified"""
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
 
         client_release_contract =  ClientRelease.query.filter_by(user_id=user_id).order_by(ClientRelease.idx.desc()).first()
 
@@ -576,7 +600,7 @@ class ReleaseContract(Resource):
     @responds(schema=ClientReleaseSchema, status_code=201, api=ns)
     def post(self, user_id):
         """create client release contract object for the specified user_id"""
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
 
         data = request.get_json()
         
@@ -612,14 +636,14 @@ class ReleaseContract(Resource):
 
 @ns.route('/policies/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class PoliciesContract(Resource):
+class PoliciesContract(BaseResource):
     """Client policies form"""
 
     @token_auth.login_required
     @responds(schema=ClientPoliciesContractSchema, api=ns)
     def get(self, user_id):
         """returns most recent client policies table as a json for the user_id specified"""
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
 
         client_policies =  ClientPolicies.query.filter_by(user_id=user_id).order_by(ClientPolicies.idx.desc()).first()
 
@@ -632,7 +656,7 @@ class PoliciesContract(Resource):
     @responds(schema=ClientPoliciesContractSchema, status_code= 201, api=ns)
     def post(self, user_id):
         """create client policies contract object for the specified user_id"""
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
 
         data = request.get_json()
         data["user_id"] = user_id
@@ -647,14 +671,14 @@ class PoliciesContract(Resource):
 
 @ns.route('/consultcontract/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class ConsultConstract(Resource):
+class ConsultConstract(BaseResource):
     """client consult contract"""
 
     @token_auth.login_required
     @responds(schema=ClientConsultContractSchema, api=ns)
     def get(self, user_id):
         """returns most recent client consultation table as a json for the user_id specified"""
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
 
         client_consult =  ClientConsultContract.query.filter_by(user_id=user_id).order_by(ClientConsultContract.idx.desc()).first()
 
@@ -667,7 +691,7 @@ class ConsultConstract(Resource):
     @responds(schema=ClientConsultContractSchema, status_code= 201, api=ns)
     def post(self, user_id):
         """create client consult contract object for the specified user_id"""
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
 
         data = request.get_json()
         data["user_id"] = user_id
@@ -682,14 +706,14 @@ class ConsultConstract(Resource):
 
 @ns.route('/subscriptioncontract/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class SubscriptionContract(Resource):
+class SubscriptionContract(BaseResource):
     """client subscription contract"""
 
     @token_auth.login_required
     @responds(schema=ClientSubscriptionContractSchema, api=ns)
     def get(self, user_id):
         """returns most recent client subscription contract table as a json for the user_id specified"""
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
 
         client_subscription =  ClientSubscriptionContract.query.filter_by(user_id=user_id).order_by(ClientSubscriptionContract.idx.desc()).first()
         if not client_subscription:
@@ -701,7 +725,7 @@ class SubscriptionContract(Resource):
     @responds(schema=ClientSubscriptionContractSchema, status_code= 201, api=ns)
     def post(self, user_id):
         """create client subscription contract object for the specified user_id"""
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
 
         data = request.get_json()
         data["user_id"] = user_id
@@ -716,14 +740,14 @@ class SubscriptionContract(Resource):
 
 @ns.route('/servicescontract/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class IndividualContract(Resource):
+class IndividualContract(BaseResource):
     """client individual services contract"""
 
     @token_auth.login_required
     @responds(schema=ClientIndividualContractSchema, api=ns)
     def get(self, user_id):
         """returns most recent client individual servies table as a json for the user_id specified"""
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
         
         client_services =  ClientIndividualContract.query.filter_by(user_id=user_id).order_by(ClientIndividualContract.idx.desc()).first()
 
@@ -736,6 +760,8 @@ class IndividualContract(Resource):
     @responds(schema=ClientIndividualContractSchema,status_code=201, api=ns)
     def post(self, user_id):
         """create client individual services contract object for the specified user_id"""
+        super().check_user(user_id, user_type='client')
+
         data = request.get_json()
         data['user_id'] = user_id
         data['revision'] = ClientIndividualContract.current_revision
@@ -749,7 +775,7 @@ class IndividualContract(Resource):
 
 @ns.route('/signeddocuments/<int:user_id>/', methods=('GET',))
 @ns.doc(params={'user_id': 'User ID number'})
-class SignedDocuments(Resource):
+class SignedDocuments(BaseResource):
     """
     API endpoint that provides access to documents signed
     by the client and stored as PDF files.
@@ -776,7 +802,7 @@ class SignedDocuments(Resource):
             Keys are the display names of the documents,
             values are URLs to the generated PDF documents.
         """
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
 
         urls = {}
         paths = []
@@ -813,7 +839,7 @@ class SignedDocuments(Resource):
 
 @ns.route('/registrationstatus/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class JourneyStatusCheck(Resource):
+class JourneyStatusCheck(BaseResource):
     """
         Returns the outstanding forms needed to complete the client journey
     """
@@ -823,7 +849,7 @@ class JourneyStatusCheck(Resource):
         """
         Returns the client's outstanding registration items and their URIs.
         """
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
 
         remaining_forms = []
 
@@ -852,7 +878,7 @@ class JourneyStatusCheck(Resource):
         return {'outstanding': remaining_forms}
 
 @ns.route('/testemail/')
-class TestEmail(Resource):
+class TestEmail(BaseResource):
     """
        Send a test email
     """
@@ -860,6 +886,7 @@ class TestEmail(Resource):
     @ns.doc(params={'recipient': 'test email recipient'})
     def get(self):
         """send a testing email"""
+        super().check_user(user_id, user_type='client')
         recipient = request.args.get('recipient')
 
         send_test_email(recipient=recipient)
@@ -867,7 +894,7 @@ class TestEmail(Resource):
         return {}, 200  
 
 @ns.route('/datastoragetiers/')
-class ClientDataStorageTiers(Resource):
+class ClientDataStorageTiers(BaseResource):
     """
        Amount of data stored on each client and their storage tier
     """
@@ -875,6 +902,7 @@ class ClientDataStorageTiers(Resource):
     @responds(schema=AllClientsDataTier, api=ns)
     def get(self):
         """Returns the total data storage for each client along with their data storage tier"""
+    
         query = db.session.execute(
             select(ClientDataStorage)
         ).scalars().all()
@@ -887,7 +915,7 @@ class ClientDataStorageTiers(Resource):
         return payload
 
 @ns.route('/token/')
-class ClientToken(Resource):
+class ClientToken(BaseResource):
     """create and revoke tokens"""
     @ns.doc(security='password')
     @basic_auth.login_required(user_type=('client',), email_required=False)
@@ -928,7 +956,7 @@ class ClientToken(Resource):
 
 @ns.route('/clinical-care-team/members/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class ClinicalCareTeamMembers(Resource):
+class ClinicalCareTeamMembers(BaseResource):
     """
     Create update and remove members of a client's clinical care team
     only the client themselves may have access to these operations.
@@ -1032,7 +1060,7 @@ class ClinicalCareTeamMembers(Resource):
         # prepare response with names for clinical care team members who are also users 
         current_team = []
         current_team_users = db.session.query(
-                                    ClientClinicalCareTeam, User.firstname, User.lastname, User.modobio_id, User.email, 
+                                    ClientClinicalCareTeam, User
                                 ).filter(
                                     ClientClinicalCareTeam.user_id == user_id
                                 ).filter(ClientClinicalCareTeam.team_member_user_id == User.user_id
@@ -1040,40 +1068,46 @@ class ClinicalCareTeamMembers(Resource):
         fh = FileHandling()
 
         for team_member in current_team_users:
-            staff_roles = []
-            # bring up a profile photo for th team member
-            staff_profile_pics = db.session.execute(select(
-                UserProfilePictures.staff_id, UserProfilePictures.image_path
-            ).where(
-                UserProfilePictures.staff_id==team_member[0].team_member_user_id,
-                UserProfilePictures.width == 400
-            )).one_or_none()
+            staff_roles = None
+            membersince = None
+            profile_pic = None
+            # bring up a profile photo and membersince date for the team member
+            staff_profile = db.session.execute(select(
+                StaffProfile
+            ).where(StaffProfile.user_id == team_member[1].user_id
+            )).scalars().one_or_none()
 
-            client_profile_pics = db.session.execute(select(
-                UserProfilePictures.client_id, UserProfilePictures.image_path
-            ).where(
-                UserProfilePictures.client_id==team_member[0].team_member_user_id,
-                UserProfilePictures.width == 400
-            )).scalars().first()
-            
-            staff_roles = db.session.execute(select(StaffRoles.role).where(StaffRoles.user_id == team_member[0].team_member_user_id)).scalars().all()
-            
-            if staff_profile_pics:
-                profile_pic = fh.get_presigned_url(file_path=staff_profile_pics[1])
-            elif client_profile_pics:
-                profile_pic = fh.get_presigned_url(file_path=client_profile_pics[1])
+            if staff_profile:
+                membersince = staff_profile.membersince
+                profile_pic_path = [pic.image_path for pic in staff_profile.profile_pictures if pic.width == 400]                
+                profile_pic = (fh.get_presigned_url(file_path=profile_pic_path[0]) if len(profile_pic_path) > 0 else None)
+                staff_roles = db.session.execute(select(StaffRoles.role).where(StaffRoles.user_id == team_member[1].user_id)).scalars().all() 
+                is_staff = True
             else:
-                profile_pic = None
+                is_staff = False
+                client_profile = db.session.execute(select(
+                    ClientInfo
+                ).where(
+                    ClientInfo.user_id == team_member[0].team_member_user_id
+                )).scalars().one_or_none()
+
+                if client_profile:
+                    membersince = client_profile.membersince
+                    profile_pic_path = [pic.image_path for pic in client_profile.profile_pictures if pic.width == 400]                
+                    profile_pic = (fh.get_presigned_url(file_path=profile_pic_path[0]) if len(profile_pic_path) > 0 else None)
+                
 
             current_team.append({
-                'firstname': team_member[1],
-                'lastname': team_member[2], 
-                'modobio_id': team_member[3],
-                'team_member_email': team_member[4],
+                'firstname': team_member[1].firstname,
+                'lastname': team_member[1].lastname, 
+                'modobio_id': team_member[1].modobio_id,
+                'team_member_email': team_member[1].email,
                 'team_member_user_id':team_member[0].team_member_user_id,
                 'profile_picture': profile_pic,
                 'staff_roles' : staff_roles,
-                'is_temporary': team_member[0].is_temporary
+                'is_temporary': team_member[0].is_temporary,
+                'membersince': membersince,
+                'is_staff': is_staff
             })
         
         response = {"care_team": current_team,
@@ -1082,7 +1116,7 @@ class ClinicalCareTeamMembers(Resource):
         return response
 
     @token_auth.login_required(user_type=('client',))
-    @accepts(schema=ClientClinicalCareTeamSchema, api=ns)
+    @accepts(schema=ClientClinicalCareTeamDeleteSchema, api=ns)
     def delete(self, user_id):
         """
         Remove members of a client's clinical care team using the team member's email address.
@@ -1094,8 +1128,8 @@ class ClinicalCareTeamMembers(Resource):
             User ID number
 
         Expected payload includes
-        email : str
-            Email of new care team member
+        team_member_user_id : int
+
         Returns
         -------
         200 OK
@@ -1103,8 +1137,12 @@ class ClinicalCareTeamMembers(Resource):
         
         data = request.parsed_obj
        
+
         for team_member in data.get("care_team"):
-            ClientClinicalCareTeam.query.filter_by(user_id=user_id, team_member_email=team_member['team_member_email'].lower()).delete()
+            # TODO remove one of these authorization table in a followup story
+            ClientClinicalCareTeamAuthorizations.query.filter_by(user_id=user_id, team_member_user_id = team_member.get('team_member_user_id')).delete()
+            ClientEHRPageAuthorizations.query.filter_by(user_id=user_id, team_member_user_id = team_member.get('team_member_user_id')).delete()
+            ClientClinicalCareTeam.query.filter_by(user_id=user_id, team_member_user_id = team_member.get('team_member_user_id')).delete()
             
         db.session.commit()
 
@@ -1127,13 +1165,11 @@ class ClinicalCareTeamMembers(Resource):
         Returns
         -------
         200 OK
-        """
-
-        
+        """        
         # prepare response with names for clinical care team members who are also users 
         current_team = []
         current_team_users = db.session.query(
-                                    ClientClinicalCareTeam, User.firstname, User.lastname, User.modobio_id, User.email, 
+                                    ClientClinicalCareTeam, User
                                 ).filter(
                                     ClientClinicalCareTeam.user_id == user_id
                                 ).filter(ClientClinicalCareTeam.team_member_user_id == User.user_id
@@ -1141,50 +1177,47 @@ class ClinicalCareTeamMembers(Resource):
         fh = FileHandling()
 
         for team_member in current_team_users:
-            staff_roles = []
-            # bring up a profile photo for th team member
-            staff_profile_pics = db.session.execute(select(
-                UserProfilePictures.staff_id, UserProfilePictures.image_path
-            ).where(
-                UserProfilePictures.staff_id==team_member[0].team_member_user_id,
-                UserProfilePictures.width == 400
-            )).one_or_none()
+            staff_roles = None
+            membersince = None
+            profile_pic = None
+            # bring up a profile photo and membersince date for the team member
+            staff_profile = db.session.execute(select(
+                StaffProfile
+            ).where(StaffProfile.user_id == team_member[1].user_id
+            )).scalars().one_or_none()
 
-            client_profile_pics = db.session.execute(select(
-                UserProfilePictures.client_id, UserProfilePictures.image_path
-            ).where(
-                UserProfilePictures.client_id==team_member[0].team_member_user_id,
-                UserProfilePictures.width == 400
-            )).scalars().first()
-            
-            staff_roles = db.session.execute(select(StaffRoles.role).where(StaffRoles.user_id == team_member[0].team_member_user_id)).scalars().all()
-            
-            if staff_profile_pics:
-                profile_pic = fh.get_presigned_url(file_path=staff_profile_pics[1])
-            elif client_profile_pics:
-                profile_pic = fh.get_presigned_url(file_path=client_profile_pics[1])
+            if staff_profile:
+                membersince = staff_profile.membersince
+                profile_pic_path = [pic.image_path for pic in staff_profile.profile_pictures if pic.width == 400]                
+                profile_pic = (fh.get_presigned_url(file_path=profile_pic_path[0]) if len(profile_pic_path) > 0 else None)
+                staff_roles = db.session.execute(select(StaffRoles.role).where(StaffRoles.user_id == team_member[1].user_id)).scalars().all() 
+                is_staff = True
             else:
-                profile_pic = None
-            
-            member_data = {
-                'firstname': team_member[1],
-                'lastname': team_member[2], 
-                'modobio_id': team_member[3],
-                'team_member_email': team_member[4],
+                is_staff = False
+                client_profile = db.session.execute(select(
+                    ClientInfo
+                ).where(
+                    ClientInfo.user_id == team_member[0].team_member_user_id
+                )).scalars().one_or_none()
+
+                if client_profile:
+                    membersince = client_profile.membersince
+                    profile_pic_path = [pic.image_path for pic in client_profile.profile_pictures if pic.width == 400]                
+                    profile_pic = (fh.get_presigned_url(file_path=profile_pic_path[0]) if len(profile_pic_path) > 0 else None)
+                
+
+            current_team.append({
+                'firstname': team_member[1].firstname,
+                'lastname': team_member[1].lastname, 
+                'modobio_id': team_member[1].modobio_id,
+                'team_member_email': team_member[1].email,
                 'team_member_user_id':team_member[0].team_member_user_id,
                 'profile_picture': profile_pic,
                 'staff_roles' : staff_roles,
-                'is_temporary': team_member[0].is_temporary
-            }
-
-            #calculate how much time is remaining for temporary members
-            if team_member[0].is_temporary:
-                expire_date = team_member[0].created_at + timedelta(hours=180)
-                time_remaining = expire_date - datetime.utcnow()
-                member_data['days_remaining'] = time_remaining.days
-                member_data['hours_remaining'] = time_remaining.seconds//3600
-
-            current_team.append(member_data)
+                'is_temporary': team_member[0].is_temporary,
+                'membersince': membersince,
+                'is_staff': is_staff
+            })
         
         response = {"care_team": current_team,
                     "total_items": len(current_team) }
@@ -1193,7 +1226,7 @@ class ClinicalCareTeamMembers(Resource):
 
 @ns.route('/clinical-care-team/members/temporary/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class ClinicalCareTeamTemporaryMembers(Resource):
+class ClinicalCareTeamTemporaryMembers(BaseResource):
     """
     Endpoints related to temporary care team members.
     Temporary members are not considered in a user's maximum allowed team members limit (20).
@@ -1206,7 +1239,7 @@ class ClinicalCareTeamTemporaryMembers(Resource):
         """
         Adds a practitioner as a temporary team member to a user's care team
         """
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
 
         #assure that a booking exists for the given booking_id and that it is between the given client
         #and staff user ids
@@ -1216,7 +1249,12 @@ class ClinicalCareTeamTemporaryMembers(Resource):
             raise InputError(message="The booking id given does not exist or is not the correct booking id" \
                 " for the given client and staff user_ids.", status_code=400)
 
-        #retrieve staff account, staff account must exist because of the above check
+        #ensure that this client does not already have this user as a care team member
+        staff_user_id=request.parsed_obj['staff_user_id']
+        if ClientClinicalCareTeam.query.filter_by(user_id=user_id, team_member_user_id=staff_user_id).one_or_none():
+            raise InputError(message=f'The user with user id {staff_user_id} is already on the care team of the' \
+                f'client with the user id {user_id}.')
+        #retrieve staff account, staff account must exist because of the above check in the bookings table
         team_member = User.query.filter_by(user_id=request.parsed_obj['staff_user_id']).one_or_none()
 
         db.session.add(ClientClinicalCareTeam(**{"team_member_email": team_member.email,
@@ -1242,9 +1280,44 @@ class ClinicalCareTeamTemporaryMembers(Resource):
 
         return {"care_team": current_team, "total_items": len(current_team)}
 
+    @token_auth.login_required
+    @ns.doc(params={'team_member_user_id': 'User id of the member to make permanent.'})
+    @responds(schema=ClientClinicalCareTeamSchema, api=ns, status_code=201)
+    def put(self, user_id):
+        """
+        Update a temporary team member to a permanent team member
+        """
+        target_id = request.args.get('team_member_user_id', type=int)
+
+        team_member = ClientClinicalCareTeam.query.filter_by(user_id=user_id, team_member_user_id=target_id).one_or_none()
+
+        #if team member exists, change their status to permanent, otherwise raise an error
+        if not team_member:
+            raise InputError(message=f'The user with user id {target_id} is not on the care team for the client with' \
+                f'the user id {user_id}. Please use /client/clinical-care-team/ POST endpoint.')
+        else:
+            team_member.is_temporary = False
+            db.session.commit()
+
+        current_team = ClientClinicalCareTeam.query.filter_by(user_id=user_id, team_member_user_id=None).all()
+
+        # prepare response with names for clinical care team members who are also users 
+        current_team_users = db.session.query(
+                                    ClientClinicalCareTeam, User.firstname, User.lastname, User.modobio_id
+                                ).filter(
+                                    ClientClinicalCareTeam.user_id == user_id
+                                ).filter(ClientClinicalCareTeam.team_member_user_id == User.user_id
+                                ).all()
+
+        for team_member in current_team_users:
+            team_member[0].__dict__.update({'firstname': team_member[1], 'lastname': team_member[2], 'modobio_id': team_member[3]})
+            current_team.append(team_member[0])
+
+        return {"care_team": current_team, "total_items": len(current_team)}
+
 @ns.route('/clinical-care-team/member-of/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class UserClinicalCareTeamApi(Resource):
+class UserClinicalCareTeamApi(BaseResource):
     """
     Clinical care teams the speficied user is part of
     
@@ -1258,6 +1331,7 @@ class UserClinicalCareTeamApi(Resource):
         is a part of along with the permissions granted to them
         """
         res = []
+        fh = FileHandling()
         for client in ClientClinicalCareTeam.query.filter_by(team_member_user_id=user_id).all():
             client_user = User.query.filter_by(user_id=client.user_id).one_or_none()
             authorizations_query = db.session.query(
@@ -1270,10 +1344,19 @@ class UserClinicalCareTeamApi(Resource):
                                 ).filter(
                                     ClientEHRPageAuthorizations.resource_group_id == LookupEHRPages.resource_group_id
                                 ).all()
+            
+            profile_pic_path = db.session.execute(
+                select(
+                    UserProfilePictures.image_path
+                ).where(UserProfilePictures.client_id == client_user.user_id, UserProfilePictures.width == 400)
+                ).scalars().one_or_none()                
+            profile_pic = (fh.get_presigned_url(file_path=profile_pic_path) if profile_pic_path else None)
             res.append({'client_user_id': client_user.user_id, 
                         'client_name': ' '.join(filter(None, (client_user.firstname, client_user.middlename ,client_user.lastname))),
                         'client_email': client_user.email,
                         'client_modobio_id': client_user.modobio_id,
+                        'client_profile_picture': profile_pic,
+                        'client_added_date': client.created_at,
                         'authorizations': [{'display_name': x[1], 'resource_group_id': x[0]} for x in authorizations_query]})
         
         return {'member_of_care_teams': res, 'total': len(res)}
@@ -1281,7 +1364,7 @@ class UserClinicalCareTeamApi(Resource):
 @ns.route('/clinical-care-team/resource-authorization/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 @ns.deprecated
-class ClinicalCareTeamResourceAuthorization(Resource):
+class ClinicalCareTeamResourceAuthorization(BaseResource):
     """
     6.29.21 - replaced by /clinical-care-team/ehr-resource-authorization/<int:user_id>/
 
@@ -1480,7 +1563,7 @@ class ClinicalCareTeamResourceAuthorization(Resource):
 
 @ns.route('/drinks/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class ClientDrinksApi(Resource):
+class ClientDrinksApi(BaseResource):
     """
     Endpoints related to nutritional beverages that are assigned to clients.
     """
@@ -1491,7 +1574,7 @@ class ClientDrinksApi(Resource):
         """
         Add an assigned drink to the client designated by user_id.
         """
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
         check_drink_existence(request.parsed_obj.drink_id)
 
         request.parsed_obj.user_id = user_id
@@ -1506,7 +1589,7 @@ class ClientDrinksApi(Resource):
         """
         Returns the list of drinks assigned to the user designated by user_id.
         """
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
 
         return ClientAssignedDrinks.query.filter_by(user_id=user_id).all()
     
@@ -1517,6 +1600,8 @@ class ClientDrinksApi(Resource):
         """
         Delete a drink assignemnt for a user with user_id and drink_id
         """
+        super().check_user(user_id, user_type='client')
+
         for drink_id in request.parsed_obj['drink_ids']:
             drink = ClientAssignedDrinks.query.filter_by(user_id=user_id, drink_id=drink_id).one_or_none()
 
@@ -1529,7 +1614,7 @@ class ClientDrinksApi(Resource):
 
 @ns.route('/mobile-settings/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class ClientMobileSettingsApi(Resource):
+class ClientMobileSettingsApi(BaseResource):
     """
     For the client to change their own mobile settings
     """
@@ -1541,7 +1626,7 @@ class ClientMobileSettingsApi(Resource):
         Set a client's mobile settings for the first time
         """
 
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
 
         if ClientMobileSettings.query.filter_by(user_id=user_id).one_or_none():
             raise IllegalSetting(message=f"Mobile settings for user_id {user_id} already exists. Please use PUT method")
@@ -1570,7 +1655,7 @@ class ClientMobileSettingsApi(Resource):
         Returns the mobile settings that a client has set.
         """
 
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
 
         gen_settings = ClientMobileSettings.query.filter_by(user_id=user_id).one_or_none()
 
@@ -1586,7 +1671,8 @@ class ClientMobileSettingsApi(Resource):
         Update a client's mobile settings
         """
 
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
+
         settings = ClientMobileSettings.query.filter_by(user_id=user_id).one_or_none()
         if not settings:
             raise IllegalSetting(message=f"Mobile settings for user_id {user_id} do not exist. Please use POST method")
@@ -1623,7 +1709,7 @@ class ClientMobileSettingsApi(Resource):
 
 @ns.route('/height/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class ClientHeightApi(Resource):
+class ClientHeightApi(BaseResource):
     """
     Endpoints related to submitting client height and viewing
     a client's height history.
@@ -1635,7 +1721,7 @@ class ClientHeightApi(Resource):
         """
         Submits a new height for the client.
         """
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
 
         request.parsed_obj.user_id = user_id
         db.session.add(request.parsed_obj)
@@ -1653,13 +1739,13 @@ class ClientHeightApi(Resource):
         """
         Returns all heights reported for a client and the dates they were reported.
         """
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
 
         return ClientHeightHistory.query.filter_by(user_id=user_id).all()
 
 @ns.route('/weight/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class ClientWeightApi(Resource):
+class ClientWeightApi(BaseResource):
     """
     Endpoints related to submitting client weight and viewing
     a client's weight history.
@@ -1671,7 +1757,7 @@ class ClientWeightApi(Resource):
         """
         Submits a new weight for the client.
         """
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
 
         request.parsed_obj.user_id = user_id
         db.session.add(request.parsed_obj)
@@ -1689,13 +1775,13 @@ class ClientWeightApi(Resource):
         """
         Returns all weights reported for a client and the dates they were reported.
         """
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
 
         return ClientWeightHistory.query.filter_by(user_id=user_id).all()
 
 @ns.route('/waist-size/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class ClientWaistSizeApi(Resource):
+class ClientWaistSizeApi(BaseResource):
     """
     Endpoints related to submitting client waist size and viewing
     a client's waist size history.
@@ -1707,7 +1793,7 @@ class ClientWaistSizeApi(Resource):
         """
         Submits a new waist size for the client.
         """
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
 
         request.parsed_obj.user_id = user_id
         db.session.add(request.parsed_obj)
@@ -1725,13 +1811,13 @@ class ClientWaistSizeApi(Resource):
         """
         Returns all waist sizes reported for a client and the dates they were reported.
         """
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
 
         return ClientWaistSizeHistory.query.filter_by(user_id=user_id).all()
 
 @ns.route('/transaction/history/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class ClientTransactionHistoryApi(Resource):
+class ClientTransactionHistoryApi(BaseResource):
     """
     Endpoints related to viewing a client's transaction history.
     """
@@ -1741,13 +1827,13 @@ class ClientTransactionHistoryApi(Resource):
         """
         Returns a list of all transactions for the given user_id.
         """
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
 
         return ClientTransactionHistory.query.filter_by(user_id=user_id).all()
 
 @ns.route('/transaction/<int:transaction_id>/')
 @ns.doc(params={'transaction_id': 'Transaction ID number'})
-class ClientTransactionApi(Resource):
+class ClientTransactionApi(BaseResource):
     """
     Viewing and editing transactions
     """
@@ -1786,7 +1872,7 @@ class ClientTransactionApi(Resource):
 
 @ns.route('/transaction/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class ClientTransactionPutApi(Resource):
+class ClientTransactionPutApi(BaseResource):
     """
     Viewing and editing transactions
     """
@@ -1797,7 +1883,7 @@ class ClientTransactionPutApi(Resource):
         """
         Submits a transaction for the client identified by user_id.
         """
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
 
         request.parsed_obj.user_id = user_id
         db.session.add(request.parsed_obj)
@@ -1807,7 +1893,7 @@ class ClientTransactionPutApi(Resource):
 
 @ns.route('/default-health-metrics/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class ClientWeightApi(Resource):
+class ClientWeightApi(BaseResource):
     """
     Endpoint for returning the recommended health metrics for the client based on age and sex
     """
@@ -1818,6 +1904,8 @@ class ClientWeightApi(Resource):
         Looks up client's age and sex. One or both are not available, we return our best guess: the health
         metrics for a 30 year old female.
         """
+        super().check_user(user_id, user_type='client')
+
         client_info = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
         user_info, _ = token_auth.current_user()
         
@@ -1844,7 +1932,7 @@ class ClientWeightApi(Resource):
 
 @ns.route('/race-and-ethnicity/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class ClientRaceAndEthnicityApi(Resource):
+class ClientRaceAndEthnicityApi(BaseResource):
     """
     Endpoint for returning viewing and editing informations about a client's race and ethnicity
     information.
@@ -1852,7 +1940,7 @@ class ClientRaceAndEthnicityApi(Resource):
     @token_auth.login_required()
     @responds(schema=ClientRaceAndEthnicitySchema(many=True), api=ns, status_code=200)
     def get(self, user_id):
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
 
         res = db.session.query(ClientRaceAndEthnicity.is_client_mother, LookupRaces.race_id, LookupRaces.race_name) \
             .join(LookupRaces, LookupRaces.race_id == ClientRaceAndEthnicity.race_id) \
@@ -1865,7 +1953,7 @@ class ClientRaceAndEthnicityApi(Resource):
     @responds(schema=ClientRaceAndEthnicitySchema(many=True), api=ns, status_code=201)
     def put(self, user_id):
 
-        check_client_existence(user_id)
+        super().check_user(user_id, user_type='client')
 
         if request.parsed_obj['mother']:
             mother = request.parsed_obj['mother']
@@ -1886,7 +1974,7 @@ class ClientRaceAndEthnicityApi(Resource):
 
 @ns.route('/clinical-care-team/ehr-page-authorization/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class ClinicalCareTeamResourceAuthorization(Resource):
+class ClinicalCareTeamResourceAuthorization(BaseResource):
     """
 
     Create, update, remove, retrieve authorization of EHR page access for care team members.
@@ -1917,6 +2005,8 @@ class ClinicalCareTeamResourceAuthorization(Resource):
         """
         Add new clinical care team authorizations for the specified user_id 
         """
+        super().check_user(user_id, user_type='client')
+
         current_user,_ = token_auth.current_user()
 
         data = request.parsed_obj
@@ -1978,6 +2068,7 @@ class ClinicalCareTeamResourceAuthorization(Resource):
         """
         Retrieve client's clinical care team authorizations
         """
+        super().check_user(user_id, user_type='client')
 
         current_user,_ = token_auth.current_user()
 
@@ -2029,6 +2120,8 @@ class ClinicalCareTeamResourceAuthorization(Resource):
 
         to reject a team member from viewing data, the delete request should be used.
         """
+        super().check_user(user_id, user_type='client')
+
         current_user,_ = token_auth.current_user()
 
         if current_user.user_id != user_id:
@@ -2058,6 +2151,8 @@ class ClinicalCareTeamResourceAuthorization(Resource):
         """
         Remove a previously saved authorization. Takes the same payload as the POST method.
         """
+        super().check_user(user_id, user_type='client')
+
         current_user,_ = token_auth.current_user()
 
         if current_user.user_id != user_id:
@@ -2079,4 +2174,3 @@ class ClinicalCareTeamResourceAuthorization(Resource):
         db.session.commit()
 
         return {}, 200
-

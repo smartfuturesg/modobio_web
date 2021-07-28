@@ -46,34 +46,34 @@ INSERT INTO "UserLogin" ("user_id", "password") VALUES
 (21, 'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1'),
 (22, 'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1');
 
-INSERT INTO "ClientInfo" ("user_id") VALUES
-(22);
+INSERT INTO "ClientInfo" ("user_id", "membersince") VALUES
+(22, '2021-01-01');
 
 INSERT INTO  "PaymentMethods" ("user_id", "payment_id", "payment_type", "number", "is_default") VALUES
 (22, 1, 'VISA', 1234, true);
 
-INSERT INTO "StaffProfile" ("user_id") VALUES
-(1),
-(2),
-(3),
-(4),
-(5),
-(6),
-(7),
-(8),
-(9),
-(10),
-(11),
-(12),
-(13),
-(14),
-(15),
-(16),
-(17),
-(18),
-(19),
-(20),
-(21);
+INSERT INTO "StaffProfile" ("user_id", "membersince") VALUES
+(1, '2021-01-01'),
+(2, '2021-01-01'),
+(3, '2021-01-01'),
+(4, '2021-01-01'),
+(5, '2021-01-01'),
+(6, '2021-01-01'),
+(7, '2021-01-01'),
+(8, '2021-01-01'),
+(9, '2021-01-01'),
+(10, '2021-01-01'),
+(11, '2021-01-01'),
+(12, '2021-01-01'),
+(13, '2021-01-01'),
+(14, '2021-01-01'),
+(15, '2021-01-01'),
+(16, '2021-01-01'),
+(17, '2021-01-01'),
+(18, '2021-01-01'),
+(19, '2021-01-01'),
+(20, '2021-01-01'),
+(21, '2021-01-01');
 
 INSERT INTO "StaffRoles" ("user_id", "role", "verified") VALUES 
 (1, 'system_admin', false), 

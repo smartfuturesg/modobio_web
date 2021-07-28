@@ -6,41 +6,13 @@ from sqlalchemy import text
 
 from odyssey.utils.constants import DB_SERVER_TIME, BLOODTEST_EVAL
 from odyssey import db
+from odyssey.utils.base.models import BaseModel, BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin
 
-class MedicalBloodPressures(db.Model):
+class MedicalBloodPressures(BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin):
     """ Blood Pressure Table
     
     This table is used for storing the client's blood pressures.
     """    
-    __tablename__ = 'MedicalBloodPressures'
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
-    """
-    User ID number
-
-    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
-    """
-
-    reporter_id = db.Column(db.Integer, db.ForeignKey('User.user_id'), nullable=False)
-    """
-    User id of the user who reported this blood pressure reading
-
-    :type: int, foreign key('User.user_id')
-    """
 
     systolic = db.Column(db.Float)
     """
@@ -63,22 +35,13 @@ class MedicalBloodPressures(db.Model):
     :type: :class: str
     """
 
-class MedicalLookUpBloodPressureRange(db.Model):
+class MedicalLookUpBloodPressureRange(BaseModelWithIdx):
     """ Medical Look Up Blood Pressure Ranges
 
     This table will store the blood pressure categories
     and ranges.
 
     Chart found from heart.org/bplevels
-    """
-
-    __tablename__ = "MedicalLookUpBloodPressureRange"
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Unique ID number identifying the results.
-
-    :type: int, primary key, autoincrement
     """
 
     category = db.Column(db.String)
@@ -111,14 +74,12 @@ class MedicalLookUpBloodPressureRange(db.Model):
     """
 
 
-class MedicalLookUpSTD(db.Model):
+class MedicalLookUpSTD(BaseModel):
     """ Medical Look Up STD
 
     This table will store the sexual transmitted diseases
     that ModoBio works with
     """
-
-    __tablename__ = "MedicalLookUpSTD"
 
     std_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -134,39 +95,10 @@ class MedicalLookUpSTD(db.Model):
     :type: str
     """
 
-class MedicalSTDHistory(db.Model):
+class MedicalSTDHistory(BaseModelWithIdx, UserIdFkeyMixin):
     """ Medical STD History
 
     This table stores the client's STD history
-    """
-    __tablename__ = 'MedicalSTDHistory'
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
-    """
-    User ID number
-
-    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
     std_id = db.Column(db.Integer, db.ForeignKey('MedicalLookUpSTD.std_id',ondelete="CASCADE"), nullable=False)
@@ -176,43 +108,14 @@ class MedicalSTDHistory(db.Model):
     :type: int, foreign key to :attr: MedicalLookUpSTD.std_id
     """
 
-class MedicalSocialHistory(db.Model):
+class MedicalSocialHistory(BaseModelWithIdx, UserIdFkeyMixin):
     """ Medical Social History
 
     This table is used for client onboarding. It is used for 
     storing the client's medical social information.
     """    
-    __tablename__ = 'MedicalSocialHistory'
 
     displayname = 'Medical General Info - Social History'
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
-    """
-    User ID number
-
-    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
-    """
 
     ever_smoked = db.Column(db.Boolean)
     """
@@ -234,7 +137,6 @@ class MedicalSocialHistory(db.Model):
 
     :type: :class:`datetime.date`
     """    
-
 
     last_smoke = db.Column(db.Integer)
     """
@@ -306,43 +208,14 @@ class MedicalSocialHistory(db.Model):
     :type: str
     """
 
-class MedicalFamilyHistory(db.Model):
+class MedicalFamilyHistory(BaseModelWithIdx, UserIdFkeyMixin):
     """ Personal and Family Medical History
 
     This table is used for client onboarding. It is used for 
     storing the client's general medical information.
     """    
-    __tablename__ = 'MedicalFamilyHistory'
 
     displayname = 'Medical General Info - Family History'
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
-    """
-    User ID number
-
-    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
-    """
 
     medical_condition_id = db.Column(db.Integer, db.ForeignKey('MedicalConditions.medical_condition_id',ondelete="CASCADE"), nullable=False)
     """
@@ -386,13 +259,11 @@ class MedicalFamilyHistory(db.Model):
     :type: bool
     """
 
-class MedicalConditions(db.Model):
+class MedicalConditions(BaseModel):
     """ Medical Conditions Table
 
     This table will store the medical conditions
     """
-
-    __tablename__ = "MedicalConditions"
 
     medical_condition_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -446,43 +317,13 @@ class MedicalConditions(db.Model):
     :type: str
     """
 
-class MedicalGeneralInfoMedicationAllergy(db.Model):
+class MedicalGeneralInfoMedicationAllergy(BaseModelWithIdx, UserIdFkeyMixin):
     """ General Medical Information.
 
     This table is used for client onboarding. It is used for 
     storing the client's general medical information.
     """    
-    __tablename__ = 'MedicalGeneralInfoMedicationAllergy'
-
     displayname = 'Medical General Info - Medication Allergies'
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
-    """
-    User ID number
-
-    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
-    """
 
     medication_name = db.Column(db.String)
     """
@@ -498,43 +339,13 @@ class MedicalGeneralInfoMedicationAllergy(db.Model):
     :type: str
     """
 
-class MedicalGeneralInfoMedications(db.Model):
+class MedicalGeneralInfoMedications(BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin):
     """ General Medical Information.
 
     This table is used for client onboarding. It is used for 
     storing the client's general medical information.
     """    
-    __tablename__ = 'MedicalGeneralInfoMedications'
-
     displayname = 'Medical General Info - Medications'
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
-    """
-    User ID number
-
-    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
-    """
 
     medication_name = db.Column(db.Text)
     """
@@ -592,43 +403,13 @@ class MedicalGeneralInfoMedications(db.Model):
     """
 
 
-class MedicalGeneralInfo(db.Model):
+class MedicalGeneralInfo(BaseModelWithIdx, UserIdFkeyMixin):
     """ General Medical Information.
 
     This table is used for client onboarding. It is used for 
     storing the client's general medical information.
     """    
-    __tablename__ = 'MedicalGeneralInfo'
-
     displayname = displayname = 'Medical General Info'
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
-    """
-    User ID number
-
-    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
-    """
 
     primary_doctor_contact_name = db.Column(db.String(50))
     """
@@ -667,49 +448,11 @@ class MedicalGeneralInfo(db.Model):
     :type: bool
     """
 
-class MedicalImaging(db.Model):
+class MedicalImaging(BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin):
     """ Medical Imaging table.
 
     This table stores the medical imaging history of a client. 
     As long as the user_id exists, we can add images to this table and search by user_id
-    """
-    __tablename__ = 'MedicalImaging'
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
-    """
-    User ID number
-
-    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
-    """
-
-    reporter_id = db.Column(db.Integer, nullable=False)
-    # TODO: convert this to refer back to userid as a foreign key
-    """
-    Staff ID number of the reporting staff member. Should be a staff member
-    with the role of 'doc' or 'docext'.
-
-    :type: int
     """
 
     image_date = db.Column(db.Date)
@@ -769,43 +512,13 @@ class MedicalImaging(db.Model):
     :type: int
     """
 
-class MedicalHistory(db.Model):
+class MedicalHistory(BaseModelWithIdx, UserIdFkeyMixin):
     """ Medical history table.
 
     This table stores the medical history of a client. The information is taken
     only once, during the initial consult.
     """
-    __tablename__ = 'MedicalHistory'
-
     displayname = 'Medical history'
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
-    """
-    User ID number
-
-    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
-    """
 
     last_examination_date = db.Column(db.Date)
     """
@@ -906,52 +619,13 @@ class MedicalHistory(db.Model):
     """
 
 
-class MedicalPhysicalExam(db.Model):
+class MedicalPhysicalExam(BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin):
     """ Medical physical exam table.
 
     This table stores the results of the physical exam of a client. The
     information is taken only once, during the initial consult.
     """
-    __tablename__ = 'MedicalPhysicalExam'
-
     displayname = 'Medical physical examination'
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
-    """
-    User ID number
-
-    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
-    """
-
-    reporter_id = db.Column(db.Integer, nullable=False)
-    # TODO: convert this to refer back to userid as a foreign key
-    """
-    Staff ID number of the reporting staff member. Should be a staff member
-    with the role of 'doc' or 'docext'.
-
-    :type: int
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
 
     timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
@@ -1147,49 +821,17 @@ class MedicalPhysicalExam(db.Model):
     """
 
 
-class MedicalBloodTests(db.Model):
+class MedicalBloodTests(BaseModel, UserIdFkeyMixin, ReporterIdFkeyMixin):
     """ Blood test table.
 
     This table stores metadata for blood tests.
     """
-
-    __tablename__ = 'MedicalBloodTests'
 
     test_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     Unique ID number identifying the test.
 
     :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
-    """
-    User ID number
-
-    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
-    """
-
-    reporter_id = db.Column(db.Integer, nullable=False)
-    # TODO: convert this to refer back to userid as a foreign key
-    """
-    Staff ID number of the reporting staff member. Should be a staff member
-    with the role of 'doc' or 'docext'.
-
-    :type: int
     """
 
     date = db.Column(db.Date)
@@ -1214,7 +856,7 @@ class MedicalBloodTests(db.Model):
     """
 
 
-class MedicalBloodTestResultTypes(db.Model):
+class MedicalBloodTestResultTypes(BaseModel):
     """ Blood test evaluation limits.
 
     Blood test values can be evaluated as lying in "normal" or "optimal"
@@ -1223,27 +865,11 @@ class MedicalBloodTestResultTypes(db.Model):
     client and stored in this table.
     """
 
-    __tablename__ = "MedicalBloodTestResultTypes"
-
     result_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     Unique ID number identifying the results.
 
     :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
     """
 
     result_name = db.Column(db.String)
@@ -1296,35 +922,12 @@ class MedicalBloodTestResultTypes(db.Model):
     """
 
 
-class MedicalBloodTestResults(db.Model):
+class MedicalBloodTestResults(BaseModelWithIdx):
     """ Blood test result data.
 
     This table holds the value of a single blood test and the
     evaluation of that value given the normal and optimal ranges
     stored in :class:`MedicalBloodTestResultTypes`.
-    """
-
-    __tablename__ = "MedicalBloodTestResults"
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
     """
 
     test_id = db.Column(db.Integer, db.ForeignKey('MedicalBloodTests.test_id', ondelete="CASCADE"), nullable=False)
@@ -1384,25 +987,9 @@ def add_rest_result_eval(mapper, connection, target):
     """
     connection.execute(text(BLOODTEST_EVAL.format(target.idx, target.result_id, target.result_value)))
 
-class MedicalSurgeries(db.Model):
-    """ History of client surgeries.
-
-    """
-
-    __tablename__ = 'MedicalSurgeries'
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
+class MedicalSurgeries(BaseModel, UserIdFkeyMixin, ReporterIdFkeyMixin):
+    """ 
+    History of client surgeries.
     """
 
     surgery_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -1410,20 +997,6 @@ class MedicalSurgeries(db.Model):
     Unique id of the surgery
 
     :type: int, primary key, autoincrementing
-    """
-
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
-    """
-    User id of the client that received this surgery
-
-    :type: int, foreign key to User.user_id
-    """
-
-    reporter_user_id = db.Column(db.Integer, db.ForeignKey('User.user_id'), nullable=False)
-    """
-    User id of the staff member that reported this surgery
-
-    :type: int, foreign key to User.user_id
     """
 
     surgery_category = db.Column(db.String, nullable=False)
@@ -1461,44 +1034,15 @@ class MedicalSurgeries(db.Model):
     :type: string
     """
 
-class MedicalExternalMR(db.Model):
-    """ External medical records table.
+class MedicalExternalMR(BaseModelWithIdx, UserIdFkeyMixin):
+    """ 
+    External medical records table.
 
     This table stores medical record ID numbers from external medical institutes. 
     """
 
-    __tablename__ = 'MedicalExternalMR'
-
     __table_args__ = (
         db.UniqueConstraint('user_id', 'med_record_id', 'institute_id'),)
-
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Table index.
-
-    :type: int, primary key, autoincrement
-    """
-
-    created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Creation timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    updated_at = db.Column(db.DateTime, default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
-    """
-    Last update timestamp of this row in the database.
-
-    :type: :class:`datetime.datetime`
-    """
-
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
-    """
-    User ID number
-
-    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
-    """
 
     med_record_id = db.Column(db.String, nullable=False)
     """

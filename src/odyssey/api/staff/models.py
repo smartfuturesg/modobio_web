@@ -12,6 +12,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from odyssey import db
 from odyssey.utils.constants import DB_SERVER_TIME
 from odyssey.utils.base.models import BaseModel, BaseModelWithIdx, UserIdFkeyMixin
+from odyssey.api.lookup.models import LookupRoles
 
 class StaffProfile(BaseModel):
     """ Staff member profile information table.
@@ -90,7 +91,7 @@ class StaffRoles(BaseModelWithIdx, UserIdFkeyMixin):
     Some roles will be location based where verification is required for each locality
     (state, country etc.). 
     """
-    role = db.Column(db.String, nullable=False)
+    role = db.Column(db.String, db.ForeignKey('LookupRoles.role_name'), nullable=False)
     """
     Name of the role assignment
 
@@ -106,6 +107,12 @@ class StaffRoles(BaseModelWithIdx, UserIdFkeyMixin):
     -nutrition
     
     :type: str
+    """
+
+    role_info = db.relationship('LookupRoles', uselist=False, back_populates='professionals_assigned')
+    """
+    Many to one relationship with Lookup Roles table
+    :type: :class:`LookupRoles` instance 
     """
 
     verified = db.Column(db.Boolean, default=False)
