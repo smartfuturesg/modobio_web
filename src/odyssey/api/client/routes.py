@@ -1079,7 +1079,7 @@ class ClinicalCareTeamMembers(BaseResource):
 
             if staff_profile:
                 membersince = staff_profile.membersince
-                profile_pic_path = [pic.image_path for pic in staff_profile.profile_pictures if pic.width == 400]                
+                profile_pic_path = [pic.image_path for pic in staff_profile.profile_pictures if pic.width == 64]                
                 profile_pic = (fh.get_presigned_url(file_path=profile_pic_path[0]) if len(profile_pic_path) > 0 else None)
                 staff_roles = db.session.execute(select(StaffRoles.role).where(StaffRoles.user_id == team_member[1].user_id)).scalars().all() 
                 is_staff = True
@@ -1093,7 +1093,7 @@ class ClinicalCareTeamMembers(BaseResource):
 
                 if client_profile:
                     membersince = client_profile.membersince
-                    profile_pic_path = [pic.image_path for pic in client_profile.profile_pictures if pic.width == 400]                
+                    profile_pic_path = [pic.image_path for pic in client_profile.profile_pictures if pic.width == 64]                
                     profile_pic = (fh.get_presigned_url(file_path=profile_pic_path[0]) if len(profile_pic_path) > 0 else None)
                 
 
@@ -1188,7 +1188,7 @@ class ClinicalCareTeamMembers(BaseResource):
 
             if staff_profile:
                 membersince = staff_profile.membersince
-                profile_pic_path = [pic.image_path for pic in staff_profile.profile_pictures if pic.width == 400]                
+                profile_pic_path = [pic.image_path for pic in staff_profile.profile_pictures if pic.width == 64]                
                 profile_pic = (fh.get_presigned_url(file_path=profile_pic_path[0]) if len(profile_pic_path) > 0 else None)
                 staff_roles = db.session.execute(select(StaffRoles.role).where(StaffRoles.user_id == team_member[1].user_id)).scalars().all() 
                 is_staff = True
@@ -1202,11 +1202,11 @@ class ClinicalCareTeamMembers(BaseResource):
 
                 if client_profile:
                     membersince = client_profile.membersince
-                    profile_pic_path = [pic.image_path for pic in client_profile.profile_pictures if pic.width == 400]                
+                    profile_pic_path = [pic.image_path for pic in client_profile.profile_pictures if pic.width == 64]                
                     profile_pic = (fh.get_presigned_url(file_path=profile_pic_path[0]) if len(profile_pic_path) > 0 else None)
                 
 
-            current_team.append({
+            member_data = {
                 'firstname': team_member[1].firstname,
                 'lastname': team_member[1].lastname, 
                 'modobio_id': team_member[1].modobio_id,
@@ -1217,7 +1217,17 @@ class ClinicalCareTeamMembers(BaseResource):
                 'is_temporary': team_member[0].is_temporary,
                 'membersince': membersince,
                 'is_staff': is_staff
-            })
+            }
+
+            #calculate how much time is remaining for temporary members
+            if team_member[0].is_temporary:
+                expire_date = team_member[0].created_at + timedelta(hours=180)
+                time_remaining = expire_date - datetime.utcnow()
+                member_data['days_remaining'] = time_remaining.days
+                member_data['hours_remaining'] = time_remaining.seconds//3600
+
+
+            current_team.append(member_data)
         
         response = {"care_team": current_team,
                     "total_items": len(current_team) }
@@ -1348,7 +1358,7 @@ class UserClinicalCareTeamApi(BaseResource):
             profile_pic_path = db.session.execute(
                 select(
                     UserProfilePictures.image_path
-                ).where(UserProfilePictures.client_id == client_user.user_id, UserProfilePictures.width == 400)
+                ).where(UserProfilePictures.client_id == client_user.user_id, UserProfilePictures.width == 64)
                 ).scalars().one_or_none()                
             profile_pic = (fh.get_presigned_url(file_path=profile_pic_path) if profile_pic_path else None)
             res.append({'client_user_id': client_user.user_id, 
