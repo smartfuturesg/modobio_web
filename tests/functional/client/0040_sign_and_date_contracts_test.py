@@ -4,12 +4,15 @@ import time
 from flask.json import dumps
 
 from odyssey.api.user.models import User, UserLogin
-from odyssey.api.client.models import ClientConsultContract, ClientPolicies ,ClientSubscriptionContract
+from odyssey.api.client.models import (
+    ClientConsultContract,
+    ClientPolicies,
+    ClientSubscriptionContract)
+
 from .data import (
     clients_policies_data,
     clients_consult_data,
-    clients_subscription_data
-)
+    clients_subscription_data)
 
 def test_post_subscription_contract(test_client):
     payload = {
