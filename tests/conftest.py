@@ -1,24 +1,17 @@
-import base64
-import copy
 import pathlib
 import pytest
 import subprocess
 import sys
 
-from datetime import datetime
-
 import boto3
 import twilio
 
 from flask_migrate import upgrade
-from sqlalchemy import text
+from sqlalchemy import select, text
 from sqlalchemy.exc import ProgrammingError
-from sqlalchemy.sql.expression import select
 
 from odyssey import create_app, db
-
 from odyssey.api.user.models import User
-from odyssey.utils.constants import ACCESS_ROLES
 from odyssey.utils.misc import grab_twilio_credentials
 from odyssey.utils.errors import MissingThirdPartyCredentials
 from odyssey.utils import search
@@ -28,9 +21,6 @@ from .utils import login
 # From database/0001_seed_users.sql
 STAFF_ID = 12   # staff@modobio.com
 CLIENT_ID = 22  # client@modobio.com
-
-pytest._migrated = False
-pytest._sqlloaded = False
 
 def setup_db(app):
     """ Set up the database for testing.
@@ -43,27 +33,23 @@ def setup_db(app):
     # Flask-migrate
     root = pathlib.Path(__file__).parent.parent
     migrations = root / 'migrations'
-    if not pytest._migrated:
-        try:
-            upgrade(directory=migrations)
-        except:
-            pytest.exit('Failed to run flask-migrate during test setup')
 
-        pytest._migrated = True
+    try:
+        upgrade(directory=migrations)
+    except:
+        pytest.exit('Failed to run flask-migrate during test setup')
 
     # Load SQL scripts.
     runner = root / 'database' / 'sql_scriptrunner.py'
     cmd = [sys.executable, runner, '--db_uri', app.config['SQLALCHEMY_DATABASE_URI']]
 
-    if not pytest._sqlloaded:
-        proc = subprocess.run(cmd, cwd=root, capture_output=True, text=True)
+    proc = subprocess.run(cmd, cwd=root, capture_output=True, text=True)
 
-        if proc.returncode != 0:
-            pytest.exit(f'Database scripts failed to run: {proc.stderr}')
+    if proc.returncode != 0:
+        pytest.exit(f'Database scripts failed to run: {proc.stderr}')
 
-        # Sending output to stderr, because that is where flask-migrate sends debug/info output.
-        print(proc.stdout, file=sys.stderr)
-        pytest._sqlloaded = True
+    # Sending output to stderr, because that is where flask-migrate sends debug/info output.
+    print(proc.stdout, file=sys.stderr)
 
     # For general testing pusposes, give 'staff@modobio.com' all roles.
     # To test access for specific roles, use different staff users from the seeded list.
@@ -153,13 +139,11 @@ def test_client():
 
             tc.client = client
             tc.client_id = client.user_id
-            tc.client_email = client.email
             tc.client_pass = '123'
             tc.client_auth_header = login(tc, client, password='123')
 
             tc.staff = staff
             tc.staff_id = staff.user_id
-            tc.staff_email = staff.email
             tc.staff_pass = '123'
             tc.staff_auth_header = login(tc, staff, password='123')
 
