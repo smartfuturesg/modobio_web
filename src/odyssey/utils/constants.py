@@ -856,7 +856,7 @@ ALLOWED_IMAGE_TYPES = ('.png', '.jpg', '.jpeg')
 #30x30 for a very low quality, that can be used like a placeholder before the full picture loads
 #400x400 for a regular use
 #600x600 for very high quality
-IMAGE_DIMENSIONS = ((600,600),(400,400),(30,30))
+IMAGE_DIMENSIONS = ((512,512),(256,256),(128,128),(64,64))
 
 #image max size 10MB = 10485760 binary bytes
 IMAGE_MAX_SIZE = 10485760
