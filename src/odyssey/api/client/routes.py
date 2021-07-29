@@ -21,7 +21,6 @@ from odyssey import db
 from odyssey.utils.constants import TABLE_TO_URI, ALLOWED_IMAGE_TYPES, IMAGE_MAX_SIZE, IMAGE_DIMENSIONS
 from odyssey.api.client.models import (
     ClientDataStorage,
-    ClientEHRPageAuthorizations,
     ClientInfo,
     ClientConsent,
     ClientConsultContract,
@@ -53,7 +52,6 @@ from odyssey.api.doctor.models import (
 from odyssey.api.lookup.models import (
     LookupClinicalCareTeamResources, 
     LookupDefaultHealthMetrics,
-    LookupEHRPages,
     LookupGoals, 
     LookupDrinks,
     LookupMacroGoals, 
@@ -76,7 +74,6 @@ from odyssey.utils.misc import (
 
 from odyssey.api.client.schemas import(
     AllClientsDataTier,
-    CareTeamEHRAuthorizationNestedSchema,
     ClientAssignedDrinksSchema,
     ClientAssignedDrinksDeleteSchema,
     ClientClinicalCareTeamDeleteSchema,
@@ -886,7 +883,6 @@ class TestEmail(BaseResource):
     @ns.doc(params={'recipient': 'test email recipient'})
     def get(self):
         """send a testing email"""
-        super().check_user(user_id, user_type='client')
         recipient = request.args.get('recipient')
 
         send_test_email(recipient=recipient)
@@ -1141,7 +1137,6 @@ class ClinicalCareTeamMembers(BaseResource):
         for team_member in data.get("care_team"):
             # TODO remove one of these authorization table in a followup story
             ClientClinicalCareTeamAuthorizations.query.filter_by(user_id=user_id, team_member_user_id = team_member.get('team_member_user_id')).delete()
-            ClientEHRPageAuthorizations.query.filter_by(user_id=user_id, team_member_user_id = team_member.get('team_member_user_id')).delete()
             ClientClinicalCareTeam.query.filter_by(user_id=user_id, team_member_user_id = team_member.get('team_member_user_id')).delete()
             
         db.session.commit()
@@ -1345,14 +1340,14 @@ class UserClinicalCareTeamApi(BaseResource):
         for client in ClientClinicalCareTeam.query.filter_by(team_member_user_id=user_id).all():
             client_user = User.query.filter_by(user_id=client.user_id).one_or_none()
             authorizations_query = db.session.query(
-                                    ClientEHRPageAuthorizations.resource_group_id, 
-                                    LookupEHRPages.display_name
+                                    ClientClinicalCareTeamAuthorizations.resource_id, 
+                                    LookupClinicalCareTeamResources.display_name
                                 ).filter(
-                                    ClientEHRPageAuthorizations.team_member_user_id == user_id
+                                    ClientClinicalCareTeamAuthorizations.team_member_user_id == user_id
                                 ).filter(
-                                    ClientEHRPageAuthorizations.user_id == client.user_id
+                                    ClientClinicalCareTeamAuthorizations.user_id == client.user_id
                                 ).filter(
-                                    ClientEHRPageAuthorizations.resource_group_id == LookupEHRPages.resource_group_id
+                                    ClientClinicalCareTeamAuthorizations.resource_id == LookupClinicalCareTeamResources.resource_id
                                 ).all()
             
             profile_pic_path = db.session.execute(
@@ -1367,17 +1362,14 @@ class UserClinicalCareTeamApi(BaseResource):
                         'client_modobio_id': client_user.modobio_id,
                         'client_profile_picture': profile_pic,
                         'client_added_date': client.created_at,
-                        'authorizations': [{'display_name': x[1], 'resource_group_id': x[0]} for x in authorizations_query]})
+                        'authorizations': [{'display_name': x[1], 'resource_id': x[0]} for x in authorizations_query]})
         
         return {'member_of_care_teams': res, 'total': len(res)}
 
 @ns.route('/clinical-care-team/resource-authorization/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-@ns.deprecated
 class ClinicalCareTeamResourceAuthorization(BaseResource):
     """
-    6.29.21 - replaced by /clinical-care-team/ehr-resource-authorization/<int:user_id>/
-
     Create, update, remove, retrieve authorization of ehr page access for care team members.
 
     There are 2 contexts which this API can be accessed:
@@ -1398,7 +1390,7 @@ class ClinicalCareTeamResourceAuthorization(BaseResource):
         If a user is not yet part of the client's care team, we will add them as part of the POST method. 
 
 
-    Care team resources are added by resource group id coming from the LookupEHRPages.resource_group_id.    
+    Care team resources are added by resource_id.    
     The available options can be foundby using the /lookup/care-team/ehr-resources/ (GET) API. 
     """
     @token_auth.login_required(user_type=('client', 'staff'))
@@ -1421,8 +1413,8 @@ class ClinicalCareTeamResourceAuthorization(BaseResource):
 
         # validate the requested resource authorizations by checking them against the lookup table
         care_team_resources = LookupClinicalCareTeamResources.query.all()
-        care_team_resources_ids = [x.resource_group_id for x in care_team_resources]
-        requested_resources_by_id = [x.resource_group_id for x in data.get('clinical_care_team_authorization')]
+        care_team_resources_ids = [x.resource_id for x in care_team_resources]
+        requested_resources_by_id = [x.resource_id for x in data.get('clinical_care_team_authorization')]
 
         if len(set(requested_resources_by_id) - set(care_team_resources_ids)) > 0:
             raise InputError(message="a resource_id was not recognized", status_code=400)
@@ -1455,12 +1447,9 @@ class ClinicalCareTeamResourceAuthorization(BaseResource):
                 authorization.status = status
                 db.session.add(authorization)
             else:
+                db.session.rollback()
                 raise InputError(message="Team member not in care team", status_code=400)
-        try:
-            db.session.commit()
-        except Exception as e:
-            raise InputError(message=e._message(), status_code=400)
-
+        db.session.commit()
         return 
 
     @token_auth.login_required(user_type=('client',))
@@ -1982,205 +1971,5 @@ class ClientRaceAndEthnicityApi(BaseResource):
 
         return res
 
-@ns.route('/clinical-care-team/ehr-page-authorization/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
-class ClinicalCareTeamResourceAuthorization(BaseResource):
-    """
 
-    Create, update, remove, retrieve authorization of EHR page access for care team members.
 
-    There are 2 contexts which this API can be accessed:
-        - client (self): client is editing and viewing their own care team settings
-            -POST,GET,PUT,DELETE access
-        - staff: staff user is requesting to have resource access
-            -POST, limited access
-
-    Client users not accessing their own resource authorization are not allowed to use this endpoint.
-
-    More on staff access:
-        Staff may request EHR authorization though the POST method. EHR page request is logged but not yet verified until the 
-        client themselves makes a PUT request to verify the resource access. 
-        
-    Adding current modobio users to the care team:
-        Users must already be part of a client's clinical care team in order to be granted access to resources
-        Care team addition can be done through the client/clinical-care-team/members/<int:user_id>/ POST endpooint
-
-    EHR page authorizations are added by resource group id coming from the LookupEHRPages.resource_group_id.    
-    The available options can be found by using the /lookup/care-team/ehr-resources/ (GET) API. 
-    """
-    @token_auth.login_required(user_type=('client', 'staff'))
-    @accepts(schema=CareTeamEHRAuthorizationNestedSchema, api=ns)
-    @responds(api=ns, status_code=201)
-    def post(self, user_id):
-        """
-        Add new clinical care team authorizations for the specified user_id 
-        """
-        super().check_user(user_id, user_type='client')
-
-        current_user,_ = token_auth.current_user()
-
-        data = request.parsed_obj
-
-        current_team_ids = db.session.execute(select(
-            ClientClinicalCareTeam.team_member_user_id
-            ).filter(ClientClinicalCareTeam.user_id==user_id)
-            ).scalars().all()
-
-        current_authorizations = db.session\
-            .query(ClientEHRPageAuthorizations.team_member_user_id,ClientEHRPageAuthorizations.resource_group_id)\
-            .filter_by(user_id=user_id).all()
-
-        # validate the requested resource authorizations by checking them against the lookup table
-        all_resource_group_ids = db.session.execute(select(LookupEHRPages.resource_group_id)).scalars().all()
-        requested_resource_group_ids = [x.resource_group_id for x in data.get('ehr_page_authorizations')]
-        if len(set(requested_resource_group_ids) - set(all_resource_group_ids)) > 0:
-            raise InputError(message="a resource_group_id was not recognized", status_code=400)
-      
-        # user_id denotes the main users
-        # if the current user is not the main user (aka a random user)
-        # they must be a staff member requesting access to resources. 
-        if current_user.user_id != user_id: 
-            # bring up all team_member_ids in payload
-            # all team members in resource request must have the same id as logged-in user
-            team_member_ids = set([x.team_member_user_id for x in data.get('ehr_page_authorizations')])
-
-            if current_user.user_id not in team_member_ids or len(team_member_ids) > 1 or not current_user.is_staff:
-                raise InputError(message="cannot request other users be added to care team", status_code=400)
-
-            # authorization must be validated by the client themselves
-            status = 'pending'
-        else:
-            # The logged-in user is the main user in this request
-            status = 'accepted'
-
-        # loop through the authorization requests and add them ``
-        for authorization in data.get('ehr_page_authorizations'):
-            if authorization.team_member_user_id in current_team_ids:
-                for member_id,resource_group_id in current_authorizations:
-                    if authorization.team_member_user_id == member_id and authorization.resource_group_id == resource_group_id:
-                        db.session.rollback()
-                        raise InputError(message=f"Member {member_id} and resource {resource_group_id} have already been requested", status_code=400)
-
-                authorization.user_id = user_id
-                authorization.status = status
-                db.session.add(authorization)
-            else:
-                db.session.rollback()
-                raise InputError(message="Team member not in care team", status_code=400)
-
-        db.session.commit()
-
-        return 
-
-    @token_auth.login_required(user_type=('client',))
-    @responds(schema=CareTeamEHRAuthorizationNestedSchema, api=ns, status_code=200)
-    def get(self, user_id):
-        """
-        Retrieve client's clinical care team authorizations
-        """
-        super().check_user(user_id, user_type='client')
-
-        current_user,_ = token_auth.current_user()
-
-        if current_user.user_id != user_id:
-            raise InputError(message="Unauthorized", status_code=401)
-
-        data = db.session.query(
-            ClientEHRPageAuthorizations.resource_group_id, 
-            LookupEHRPages.display_name,
-            User.firstname, 
-            User.lastname, 
-            User.email,
-            User.user_id,
-            User.modobio_id,
-            ClientEHRPageAuthorizations.status
-            ).filter(
-                ClientEHRPageAuthorizations.user_id == user_id
-            ).filter(
-                User.user_id == ClientEHRPageAuthorizations.team_member_user_id
-            ).filter(ClientEHRPageAuthorizations.resource_group_id == LookupEHRPages.resource_group_id
-            ).all()
-            
-        care_team_auths =[]
-        for row in data:
-            tmp = {
-                'resource_group_id': row[0],
-                'display_name': row[1],
-                'team_member_firstname': row[2],
-                'team_member_lastname': row[3],
-                'team_member_email': row[4],
-                'team_member_user_id': row[5],
-                'team_member_modobio_id': row[6],
-                'status': row[7]}
-
-            care_team_auths.append(tmp)
-        
-        payload = {'ehr_page_authorizations': care_team_auths}
-
-        return payload
-
-    @token_auth.login_required(user_type=('client',))
-    @accepts(schema=CareTeamEHRAuthorizationNestedSchema, api=ns)
-    @responds(api=ns,status_code=201)
-    def put(self, user_id):
-        """
-        This put request is used to change the status approval from the client to team member from 
-
-        'pending' to 'approved'
-
-        to reject a team member from viewing data, the delete request should be used.
-        """
-        super().check_user(user_id, user_type='client')
-
-        current_user,_ = token_auth.current_user()
-
-        if current_user.user_id != user_id:
-            raise InputError(message="Unauthorized", status_code=401)
-
-        data = request.json
-
-        for dat in data.get('ehr_page_authorizations'):
-            authorization = ClientEHRPageAuthorizations.query.filter_by(
-                            resource_group_id = dat['resource_group_id'],
-                            team_member_user_id = dat['team_member_user_id'],
-                            user_id = user_id
-                            ).one_or_none()
-            if authorization:
-                if authorization.status == 'pending':
-                    authorization.update({'status': 'accepted'})
-            else:
-                raise InputError(message="Team member or resource ID request not found", status_code=400)
-
-        db.session.commit()
-
-        return 
-
-    @token_auth.login_required(user_type=('client',))
-    @accepts(schema=CareTeamEHRAuthorizationNestedSchema, api=ns)
-    def delete(self, user_id):
-        """
-        Remove a previously saved authorization. Takes the same payload as the POST method.
-        """
-        super().check_user(user_id, user_type='client')
-
-        current_user,_ = token_auth.current_user()
-
-        if current_user.user_id != user_id:
-            raise InputError(message="Unauthorized", status_code=401)
-
-        data = request.parsed_obj
-
-        for dat in data.get('ehr_page_authorizations'):
-            authorization = ClientEHRPageAuthorizations.query.filter_by(
-                    resource_group_id = dat.resource_group_id,
-                    team_member_user_id = dat.team_member_user_id,
-                    user_id = user_id
-                    ).one_or_none()
-            if authorization:
-                db.session.delete(authorization)
-            else:
-                raise InputError(message="Team member or resource ID request not found", status_code=400)                
-
-        db.session.commit()
-
-        return {}, 200

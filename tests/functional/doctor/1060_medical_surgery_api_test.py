@@ -2,7 +2,6 @@ import pathlib
 
 from flask.json import dumps
 
-from odyssey.api.user.models import User
 from odyssey.api.doctor.models import MedicalSurgeries
 from odyssey.api.staff.models import StaffProfile
 from .data import doctor_surgery_data
@@ -12,7 +11,7 @@ def test_post_surgery(test_client):
 
     response = test_client.post(
         f'/doctor/surgery/{test_client.client_id}/',
-        headers=test_client.staff_auth_header,
+        headers=test_client.client_auth_header,
         data=dumps(payload),
         content_type='application/json')
 
@@ -27,7 +26,7 @@ def test_post_surgery(test_client):
 
     response = test_client.post(
         f'/doctor/surgery/{test_client.client_id}/',
-        headers=test_client.staff_auth_header,
+        headers=test_client.client_auth_header,
         data=dumps(payload),
         content_type='application/json')
 

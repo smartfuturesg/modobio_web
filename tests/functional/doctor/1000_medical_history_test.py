@@ -6,7 +6,6 @@ from odyssey.api.user.models import User, UserLogin
 from odyssey.api.doctor.models import MedicalHistory
 from .data import doctor_medical_history_data
 
-
 def test_post_medical_history(test_client):
     payload = doctor_medical_history_data
 
@@ -33,7 +32,6 @@ def test_put_medical_history(test_client):
 
     assert response.status_code == 200
     assert client.diagnostic_other == 'testing put'
-
 
 def test_get_medical_history(test_client):
     response = test_client.get(

@@ -49,6 +49,9 @@ INSERT INTO "UserLogin" ("user_id", "password") VALUES
 INSERT INTO "ClientInfo" ("user_id", "membersince") VALUES
 (22, '2021-01-01');
 
+INSERT INTO "UserSubscriptions" ("user_id", "is_staff", "start_date", "subscription_status", "subscription_type_id") VALUES
+(22, false, '2021-01-01', 'unsubscribed', 1);
+
 INSERT INTO  "PaymentMethods" ("user_id", "payment_id", "payment_type", "number", "is_default") VALUES
 (22, 1, 'VISA', 1234, true);
 

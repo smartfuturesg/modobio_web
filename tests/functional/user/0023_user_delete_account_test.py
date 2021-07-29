@@ -2,7 +2,7 @@ import base64
 
 from flask.json import dumps
 from sqlalchemy import select, text
-from odyssey.api.lookup.models import LookupEHRPages
+from odyssey.api.lookup.models import LookupClinicalCareTeamResources
 
 from odyssey.api.user.models import User, UserLogin, UserRemovalRequests, UserPendingEmailVerifications
 from odyssey.api.doctor.models import MedicalImaging
@@ -36,6 +36,7 @@ def test_account_delete_request(test_client):
 
     #verify newly created staff member's email
     token = UserPendingEmailVerifications.query.filter_by(user_id=staff_client_id).first().token
+
     request = test_client.get(
         f'/user/email-verification/token/{token}/')
 
@@ -64,11 +65,15 @@ def test_account_delete_request(test_client):
         headers=client_auth_header,
         content_type='application/json')
 
-    total_resources = LookupEHRPages.query.count()
-    auths = [{'team_member_user_id': staff_client_id,'resource_group_id': num} for num in range(1,total_resources+1) ]
-    payload = {'ehr_page_authorizations' : auths}
+    total_resources = LookupClinicalCareTeamResources.query.count()
+    auths = [{
+        'team_member_user_id': staff_client_id,
+        'resource_id': num}
+        for num in range(1, total_resources + 1)]
+
+    payload = {'clinical_care_team_authorization' : auths}
     response = test_client.post(
-        f'/client/clinical-care-team/ehr-page-authorization/{client_id}/',
+        f'/client/clinical-care-team/resource-authorization/{client_id}/',
         headers=client_auth_header,
         data=dumps(payload),
         content_type='application/json')
@@ -82,8 +87,8 @@ def test_account_delete_request(test_client):
         .one_or_none())[0]
 
     staff_auth_header = login(test_client, staff, password=passw)
-
     payload = doctor_medical_imaging_data
+
     response = test_client.post(
         f'/doctor/images/{client_id}/',
         headers=staff_auth_header,

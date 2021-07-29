@@ -4,8 +4,8 @@ from random import choice
 
 from flask.json import dumps
 from sqlalchemy import and_, or_, select
-from odyssey.api.client.models import ClientEHRPageAuthorizations
-from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupEHRPages
+from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations
+from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupClinicalCareTeamResources, LookupEHRPages
 from odyssey.api.notifications.models import Notifications
 from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.api.payment.models import PaymentMethods
@@ -14,8 +14,7 @@ from odyssey.api.user.models import User
 from tests.functional.telehealth.client_select_data import(
     telehealth_staff_full_availability,
     telehealth_bookings_data_full_day,
-    payment_method_data
-)
+    payment_method_data)
 
 from odyssey.tasks.periodic import deploy_upcoming_appointment_tasks
 from odyssey.tasks.tasks import upcoming_appointment_notification_2hr, upcoming_appointment_care_team_permissions
@@ -180,15 +179,24 @@ def test_upcoming_bookings_notification(test_client):
     test_booking = choice(upcoming_bookings_all)
     upcoming_appointment_care_team_permissions(test_booking.idx)
 
-    ehr_permissions = test_client.db.session.execute(select(
-        ClientEHRPageAuthorizations
-    ).where(
-        ClientEHRPageAuthorizations.user_id == test_booking.client_user_id,
-        ClientEHRPageAuthorizations.team_member_user_id == test_booking.staff_user_id
-    )).scalars().all()
+    care_team_permissions = (test_client.db.session.execute(
+        select(ClientClinicalCareTeamAuthorizations)
+        .where(
+            ClientClinicalCareTeamAuthorizations.user_id == test_booking.client_user_id,
+            ClientClinicalCareTeamAuthorizations.team_member_user_id == test_booking.staff_user_id))
+        .scalars()
+        .all())
 
-    resource_ids_needed = test_client.db.session.execute(select(
-        LookupEHRPages.resource_group_id
-    ).where(LookupEHRPages.access_group.in_(['general', 'medical_doctor']))).scalars().all()
+    resource_ids_needed = (test_client.db.session.execute(
+        select(
+            LookupClinicalCareTeamResources.resource_id,
+            LookupEHRPages.resource_group_id)
+        .join(
+            LookupEHRPages,
+            LookupEHRPages.resource_group_id == LookupClinicalCareTeamResources.resource_group_id)
+        .where(
+            LookupEHRPages.access_group.in_(['general', 'medical_doctor'])))
+        .scalars()
+        .all())
 
-    assert len(ehr_permissions) == len(resource_ids_needed)
+    assert len(care_team_permissions) == len(resource_ids_needed)

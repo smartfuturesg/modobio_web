@@ -1,6 +1,5 @@
 from flask.json import dumps
 
-from odyssey.api.user.models import User, UserLogin
 from odyssey.api.doctor.models import MedicalImaging
 from .data import doctor_medical_imaging_data
 
@@ -9,10 +8,10 @@ def test_post_medical_imaging(test_client):
 
     response = test_client.post(
         f'/doctor/images/{test_client.client_id}/',
-        headers=test_client.staff_auth_header,
+        headers=test_client.client_auth_header,
         data=payload)
 
-    data = MedicalImaging.query.filter_by(user_id=1).first()
+    data = MedicalImaging.query.filter_by(user_id=test_client.client_id).first()
 
     assert response.status_code == 201
     assert data.image_path
@@ -26,7 +25,7 @@ def test_post_medical_imaging_no_image(test_client):
 
     response = test_client.post(
         f'/doctor/images/{test_client.client_id}/',
-        headers=test_client.staff_auth_header,
+        headers=test_client.client_auth_header,
         data=payload)
 
     data = (MedicalImaging
@@ -41,7 +40,7 @@ def test_post_medical_imaging_no_image(test_client):
 def test_get_medical_imaging(test_client):
     response = test_client.get(
         f'/doctor/images/{test_client.client_id}/',
-        headers=test_client.staff_auth_header)
+        headers=test_client.client_auth_header)
 
     assert response.status_code == 200
     assert len(response.json) == 2

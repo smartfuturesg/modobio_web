@@ -1,6 +1,5 @@
 from flask.json import dumps
 
-from odyssey.api.user.models import User, UserLogin
 from tests.functional.trainer.data import trainer_medical_physical_data
 
 def test_post_medical_physical(test_client):

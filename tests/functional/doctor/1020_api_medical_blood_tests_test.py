@@ -2,7 +2,7 @@ import time
 
 from flask.json import dumps
 from sqlalchemy import delete, select
-from odyssey.api.lookup.models import LookupEHRPages
+from odyssey.api.lookup.models import LookupClinicalCareTeamResources
 
 from odyssey.api.doctor.models import MedicalBloodTests, MedicalBloodTestResults
 from .data import doctor_blood_tests_data
@@ -23,11 +23,15 @@ def test_post_medical_blood_test(test_client):
         headers=test_client.client_auth_header,
         content_type='application/json')
 
-    total_resources = LookupEHRPages.query.count()
-    auths = [{'team_member_user_id': 2,'resource_group_id': num} for num in range(1,total_resources+1) ]
+    total_resources = LookupClinicalCareTeamResources.query.count()
+    auths = [{
+        'team_member_user_id': test_client.staff_id,
+        'resource_id': num}
+        for num in range(1, total_resources + 1)]
     payload = {'ehr_page_authorizations' : auths}
+
     response = test_client.post(
-        f'/client/clinical-care-team/ehr-page-authorization/{test_client.client_id}/',
+        f'/client/clinical-care-team/resource-authorization/{test_client.client_id}/',
         headers=test_client.client_auth_header,
         data=dumps(payload),
         content_type='application/json')

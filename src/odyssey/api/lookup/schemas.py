@@ -154,7 +154,7 @@ class LookupCareTeamResourcesDisplayNamesSchema(ma.SQLAlchemyAutoSchema):
     """
     class Meta:
         model = LookupClinicalCareTeamResources
-        exclude = ('created_at', 'updated_at', 'resource_name', 'resource_id')
+        exclude = ('created_at', 'updated_at', 'resource_name')
 
 
 class LookupCareTeamResourcesOutputSchema(Schema):
@@ -164,7 +164,7 @@ class LookupCareTeamResourcesOutputSchema(Schema):
 class LookupEHRPagesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupEHRPages
-        exclude = ('created_at', 'updated_at', 'resource_group_name')
+        exclude = ('created_at', 'updated_at', 'resource_group_name', 'resource_group_id')
     
     resources = fields.Nested(LookupCareTeamResourcesDisplayNamesSchema(many=True), missing = [])
     

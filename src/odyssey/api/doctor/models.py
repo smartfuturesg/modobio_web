@@ -514,6 +514,11 @@ class MedicalImaging(BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin):
 
 class MedicalHistory(BaseModelWithIdx, UserIdFkeyMixin):
     """ Medical history table.
+        Deprecated 7.26.21
+
+        MedicalGeneralInfo, MedicalGeneralInfoMedications used instead
+
+        Medical history table.
 
     This table stores the medical history of a client. The information is taken
     only once, during the initial consult.

@@ -2,7 +2,6 @@ import time
 
 from flask.json import dumps
 
-from odyssey.api.user.models import User, UserLogin
 from odyssey.api.doctor.models import MedicalHistory, MedicalFamilyHistory
 from .data import doctor_personalfamilyhist_post_data, doctor_personalfamilyhist_put_data
 
@@ -56,13 +55,11 @@ def test_put_personalfamily_medical_history(test_client):
     assert test.myself == False
 
 def test_get_personalfamily_medical_history(test_client):
-    for header in (staff_auth_header, client_auth_header):
-        # send get request for client family history on user_id = 1
-        response = test_client.get(
-            f'/doctor/familyhistory/{test_client.client_id}/',
-            headers=header,
-            content_type='application/json')
+    response = test_client.get(
+        f'/doctor/familyhistory/{test_client.client_id}/',
+        headers=test_client.client_auth_header,
+        content_type='application/json')
 
-        assert response.status_code == 200
-        assert response.json['total_items'] == 3
-        assert len(response.json['items']) == 3
+    assert response.status_code == 200
+    assert response.json['total_items'] == 3
+    assert len(response.json['items']) == 3

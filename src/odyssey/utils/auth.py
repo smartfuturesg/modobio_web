@@ -8,8 +8,8 @@ from werkzeug.datastructures import Authorization
 from werkzeug.security import check_password_hash
 
 from odyssey import db
-from odyssey.api.client.models import ClientEHRPageAuthorizations
-from odyssey.api.lookup.models import LookupEHRPages
+from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations
+from odyssey.api.lookup.models import LookupClinicalCareTeamResources
 from odyssey.utils.constants import ACCESS_ROLES, DB_SERVER_TIME, USER_TYPES 
 from odyssey.utils.errors import LoginNotAuthorized, EmailNotVerified
 from odyssey.api.staff.models import StaffRoles
@@ -88,7 +88,6 @@ class BasicAuth(object):
 
                 if email_required and not user.email_verified:
                     raise EmailNotVerified
-
                 # If user_type exists (Staff or Client, etc)
                 # Check user and role access
                 if user_type:
@@ -174,12 +173,12 @@ class BasicAuth(object):
                 # search db for this resource authorization
                 for resource in resources:
                     is_authorized = db.session.query(
-                        ClientEHRPageAuthorizations.resource_group_id, LookupEHRPages.resource_group_name
-                    ).filter(ClientEHRPageAuthorizations.team_member_user_id == user.user_id
-                    ).filter(ClientEHRPageAuthorizations.user_id == requested_user_id
-                    ).filter(ClientEHRPageAuthorizations.resource_group_id == LookupEHRPages.resource_group_id
-                    ).filter(LookupEHRPages.resource_group_name == resource
-                    ).filter(ClientEHRPageAuthorizations.status == 'accepted'
+                        ClientClinicalCareTeamAuthorizations.resource_id, LookupClinicalCareTeamResources.resource_name
+                    ).filter(ClientClinicalCareTeamAuthorizations.team_member_user_id == user.user_id
+                    ).filter(ClientClinicalCareTeamAuthorizations.user_id == requested_user_id
+                    ).filter(ClientClinicalCareTeamAuthorizations.resource_id == LookupClinicalCareTeamResources.resource_id
+                    ).filter(LookupClinicalCareTeamResources.resource_name == resource
+                    ).filter(ClientClinicalCareTeamAuthorizations.status == 'accepted'
                     ).all()
                     if len(is_authorized) == 1:
                         g.clinical_care_authorized_resources.append(resource)
@@ -248,12 +247,12 @@ class BasicAuth(object):
             # search db for this resource authorization
             for resource in resources:
                 is_authorized = db.session.query(
-                        ClientEHRPageAuthorizations.resource_group_id, LookupEHRPages.resource_group_name
-                    ).filter(ClientEHRPageAuthorizations.team_member_user_id == user.user_id
-                    ).filter(ClientEHRPageAuthorizations.user_id == requested_user_id
-                    ).filter(ClientEHRPageAuthorizations.resource_group_id == LookupEHRPages.resource_group_id
-                    ).filter(LookupEHRPages.resource_group_name == resource
-                    ).filter(ClientEHRPageAuthorizations.status == 'accepted'
+                        ClientClinicalCareTeamAuthorizations.resource_id, LookupClinicalCareTeamResources.resource_name
+                    ).filter(ClientClinicalCareTeamAuthorizations.team_member_user_id == user.user_id
+                    ).filter(ClientClinicalCareTeamAuthorizations.user_id == requested_user_id
+                    ).filter(ClientClinicalCareTeamAuthorizations.resource_id == LookupClinicalCareTeamResources.resource_id
+                    ).filter(LookupClinicalCareTeamResources.resource_name == resource
+                    ).filter(ClientClinicalCareTeamAuthorizations.status == 'accepted'
                     ).all()
                 if len(is_authorized) == 1:
                     g.clinical_care_authorized_resources.append(resource)
@@ -361,13 +360,11 @@ class TokenAuth(BasicAuth):
     def verify_token(self, token):
         ''' verify_token is a method that is used as a decorator to store 
             the token checking process that is defined in auth.py '''
-        
         # decode and validate token 
         secret = current_app.config['SECRET_KEY']
         try:
             decoded_token = jwt.decode(token, secret, algorithms='HS256')
         except:
-            
             raise LoginNotAuthorized
 
         # ensure token is an access token type

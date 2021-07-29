@@ -24,16 +24,15 @@ def test_post_1_general_medical_history(test_client):
     assert response.status_code == 201
 
 def test_get_1_general_medical_history(test_client):
-    for header in (test_client.staff_auth_header, test_client.client_auth_header):
-        response = test_client.get(
-            f'/doctor/medicalgeneralinfo/{test_client.client_id}/',
-            headers=header,
-            content_type='application/json')
+    response = test_client.get(
+        f'/doctor/medicalgeneralinfo/{test_client.client_id}/',
+        headers=header,
+        content_type='application/json')
 
-        assert response.status_code == 200
-        assert response.json['gen_info']['primary_doctor_contact_name'] == 'Dr Guy'
-        assert len(response.json['medications']) == 2
-        assert len(response.json['allergies']) == 3
+    assert response.status_code == 200
+    assert response.json['gen_info']['primary_doctor_contact_name'] == 'Dr Guy'
+    assert len(response.json['medications']) == 2
+    assert len(response.json['allergies']) == 3
 
 def test_post_2_general_medical_history(test_client):
     payload = doctor_all_generalmedicalinfo_post_2_data
@@ -47,16 +46,15 @@ def test_post_2_general_medical_history(test_client):
     assert response.status_code == 201
 
 def test_get_2_general_medical_history(test_client):
-    for header in (staff_auth_header, client_auth_header):
-        response = test_client.get(
-            f'/doctor/medicalgeneralinfo/{test_client.client_id}/',
-            headers=header,
-            content_type='application/json')
+    response = test_client.get(
+        f'/doctor/medicalgeneralinfo/{test_client.client_id}/',
+        headers=test_client.client_auth_header,
+        content_type='application/json')
 
-        assert response.status_code == 200
-        assert response.json['gen_info']['primary_doctor_contact_name'] == 'Dr Steve'
-        assert len(response.json['medications']) == 3
-        assert len(response.json['allergies']) == 1
+    assert response.status_code == 200
+    assert response.json['gen_info']['primary_doctor_contact_name'] == 'Dr Steve'
+    assert len(response.json['medications']) == 3
+    assert len(response.json['allergies']) == 1
 
 def test_post_3_general_medical_history(test_client):
     payload = doctor_all_generalmedicalinfo_post_3_data
@@ -71,24 +69,21 @@ def test_post_3_general_medical_history(test_client):
     assert response.status_code == 405
 
 def test_get_3_general_medical_history(test_client):
-    for header in (staff_auth_header, client_auth_header):
-        # send get request for client general medical history on user_id = 1
-        response = test_client.get(
-            f'/doctor/medicalgeneralinfo/{test_client.client_id}/',
-            headers=header,
-            content_type='application/json')
+    response = test_client.get(
+        f'/doctor/medicalgeneralinfo/{test_client.client_id}/',
+        headers=test_client.client_auth_header,
+        content_type='application/json')
 
-        # previous POST request produced an error, GET request should return the same
-        # as GET test 2
-        assert response.status_code == 200
-        assert response.json['gen_info']['primary_doctor_contact_name'] == 'Dr Steve'
-        assert len(response.json['medications']) == 3
-        assert len(response.json['allergies']) == 1
+    # previous POST request produced an error, GET request should return the same
+    # as GET test 2
+    assert response.status_code == 200
+    assert response.json['gen_info']['primary_doctor_contact_name'] == 'Dr Steve'
+    assert len(response.json['medications']) == 3
+    assert len(response.json['allergies']) == 1
 
 def test_post_4_general_medical_history(test_client):
     payload = doctor_all_generalmedicalinfo_post_4_data
 
-    # send post request for client general medical history on user_id = 1
     response = test_client.post(
         f'/doctor/medicalgeneralinfo/{test_client.client_id}/',
         headers=test_client.client_auth_header,
@@ -98,25 +93,21 @@ def test_post_4_general_medical_history(test_client):
     assert response.status_code == 201
 
 def test_get_4_general_medical_history(test_client):
-    for header in (staff_auth_header, client_auth_header):
-        # send get request for client general medical history on user_id = 1
-        response = test_client.get(
-            f'/doctor/medicalgeneralinfo/{test_client.client_id}/',
-            headers=header,
-            content_type='application/json')
+    response = test_client.get(
+        f'/doctor/medicalgeneralinfo/{test_client.client_id}/',
+        headers=test_client.client_auth_header,
+        content_type='application/json')
 
-        # Remove medications from payload, so the get request should expect no medication
-        # history in it.
-        assert response.status_code == 200
-        assert response.json['gen_info']['primary_doctor_contact_name'] == 'Dr Dude'
-        assert len(response.json['medications']) == 0
-        assert len(response.json['allergies']) == 1
+    # Remove medications from payload, so the get request should expect no medication
+    # history in it.
+    assert response.status_code == 200
+    assert response.json['gen_info']['primary_doctor_contact_name'] == 'Dr Dude'
+    assert len(response.json['medications']) == 0
+    assert len(response.json['allergies']) == 1
 
 def test_post_5_general_medical_history(test_client):
-
     payload = doctor_all_generalmedicalinfo_post_5_data
 
-    # send post request for client general medical history on user_id = 1
     response = test_client.post(
         f'/doctor/medicalgeneralinfo/{test_client.client_id}/',
         headers=test_client.client_auth_header,
@@ -128,18 +119,16 @@ def test_post_5_general_medical_history(test_client):
     assert response.status_code == 405
 
 def test_get_5_general_medical_history(test_client):
-    for header in (staff_auth_header, client_auth_header):
-        # send get request for client general medical history on user_id = 1
-        response = test_client.get(
-            f'/doctor/medicalgeneralinfo/{test_client.client_id}/',
-            headers=header,
-            content_type='application/json')
+    response = test_client.get(
+        f'/doctor/medicalgeneralinfo/{test_client.client_id}/',
+        headers=header,
+        content_type='application/json')
 
-        # Removed General Info from payload BUT
-        # also removed medication name from allergies, so we should expect
-        # a DB rollback, and the GET request should be the same as
-        # test 4
-        assert response.status_code == 200
-        assert response.json['gen_info']['primary_doctor_contact_name'] == 'Dr Dude'
-        assert len(response.json['medications']) == 0
-        assert len(response.json['allergies']) == 1
+    # Removed General Info from payload BUT
+    # also removed medication name from allergies, so we should expect
+    # a DB rollback, and the GET request should be the same as
+    # test 4
+    assert response.status_code == 200
+    assert response.json['gen_info']['primary_doctor_contact_name'] == 'Dr Dude'
+    assert len(response.json['medications']) == 0
+    assert len(response.json['allergies']) == 1
