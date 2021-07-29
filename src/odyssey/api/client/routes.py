@@ -886,7 +886,6 @@ class TestEmail(BaseResource):
     @ns.doc(params={'recipient': 'test email recipient'})
     def get(self):
         """send a testing email"""
-        super().check_user(user_id, user_type='client')
         recipient = request.args.get('recipient')
 
         send_test_email(recipient=recipient)
