@@ -4,7 +4,7 @@ from odyssey.api.user.models import User, UserLogin
 from odyssey.api.doctor.models import MedicalImaging
 from .data import doctor_medical_imaging_data
 
-def test_post_medical_imaging(test_client, init_database, staff_auth_header):
+def test_post_medical_imaging(test_client, init_database, client_auth_header):
     """
     GIVEN an api end point for image upload
     WHEN the '/doctor/images/<user_id>' resource  is requested (POST)
@@ -18,7 +18,7 @@ def test_post_medical_imaging(test_client, init_database, staff_auth_header):
     # send get request for client info on user_id = 1
             
     response = test_client.post('/doctor/images/1/', 
-                            headers=staff_auth_header, 
+                            headers=client_auth_header, 
                             data = payload)
     
     data = MedicalImaging.query.filter_by(user_id=1).first()
@@ -29,7 +29,7 @@ def test_post_medical_imaging(test_client, init_database, staff_auth_header):
     assert data.image_type == payload['image_type']
     assert data.image_read == payload['image_read']
 
-def test_post_medical_imaging_no_image(test_client, init_database, staff_auth_header):
+def test_post_medical_imaging_no_image(test_client, init_database, client_auth_header):
     """
     GIVEN an api end point for image data upload, no image
     WHEN the '/doctor/images/<client id>' resource  is requested (POST)
@@ -43,14 +43,14 @@ def test_post_medical_imaging_no_image(test_client, init_database, staff_auth_he
     # send get request for client info on user_id = 1
             
     response = test_client.post('/doctor/images/1/', 
-                            headers=staff_auth_header, 
+                            headers=client_auth_header, 
                             data = payload)
     
     data = MedicalImaging.query.filter_by(user_id=1).order_by(MedicalImaging.created_at.desc()).first()
     assert response.status_code == 201
     assert data.image_read == payload['image_read']
 
-def test_get_medical_imaging(test_client, init_database, staff_auth_header):
+def test_get_medical_imaging(test_client, init_database, client_auth_header):
     """
     GIVEN an api end point for image upload
     WHEN the  '/doctor/images/<user_id>' resource  is requested (GET)
@@ -61,7 +61,7 @@ def test_get_medical_imaging(test_client, init_database, staff_auth_header):
      
 
     # send get request for client info on user_id = 1 
-    response = test_client.get('/doctor/images/1/', headers=staff_auth_header)
+    response = test_client.get('/doctor/images/1/', headers=client_auth_header)
     
     assert response.status_code == 200
     assert len(response.json) == 2

@@ -55,18 +55,17 @@ def test_put_personalfamily_medical_history(test_client, init_database, client_a
     test = MedicalFamilyHistory.query.filter_by(user_id=1,medical_condition_id=1).one_or_none()
     assert test.myself == False
 
-def test_get_personalfamily_medical_history(test_client, init_database, client_auth_header, staff_auth_header):
+def test_get_personalfamily_medical_history(test_client, init_database, client_auth_header):
     """
     GIVEN a api end point for retrieving personal and family medical history
     WHEN the  '/doctor/familyhistory/<user id>' resource  is requested (GET)
     THEN check the response is valid
     """
-    for header in (staff_auth_header, client_auth_header):
-        # send get request for client family history on user_id = 1 
-        response = test_client.get('/doctor/familyhistory/1/',
-                                    headers=header, 
-                                    content_type='application/json')
-                                    
-        assert response.status_code == 200
-        assert response.json['total_items'] == 3
-        assert len(response.json['items']) == 3
+    # send get request for client family history on user_id = 1 
+    response = test_client.get('/doctor/familyhistory/1/',
+                                headers=client_auth_header, 
+                                content_type='application/json')
+                                
+    assert response.status_code == 200
+    assert response.json['total_items'] == 3
+    assert len(response.json['items']) == 3

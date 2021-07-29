@@ -11,7 +11,7 @@ from .data import (
 
 # Test STD Look Up
 
-def test_get_std_conditions(test_client, init_database, staff_auth_header):
+def test_get_std_conditions(test_client, init_database, client_auth_header):
     """
     GIVEN an api end point for looking up stored STDs
     WHEN the  '/doctor/lookupstd/' resource  is requested (GET)
@@ -19,7 +19,7 @@ def test_get_std_conditions(test_client, init_database, staff_auth_header):
     """
 
     # send get request for client info on user_id = 1 
-    response = test_client.get('/doctor/lookupstd/', headers=staff_auth_header)
+    response = test_client.get('/doctor/lookupstd/', headers=client_auth_header)
 
     assert response.status_code == 200
     assert response.json['total_items'] == 22
@@ -40,22 +40,21 @@ def test_post_1_social_history(test_client, init_database, client_auth_header):
                                 content_type='application/json')
 
     assert response.status_code == 201
-    # assert len(response.json['stds']) == 2
 
-def test_get_social_medical_history(test_client, init_database, client_auth_header, staff_auth_header):
+def test_get_social_medical_history(test_client, init_database, client_auth_header):
     """
     GIVEN a api end point for retrieving social medical history
     WHEN the  '/doctor/medicalinfo/social/<user id>' resource  is requested (GET)
     THEN check the response is valid
     """
-    for header in (staff_auth_header, client_auth_header):
-        # send get request for client family history on user_id = 1 
-        response = test_client.get('/doctor/medicalinfo/social/1/',
-                                    headers=header, 
-                                    content_type='application/json')
-        assert response.status_code == 200
-        assert len(response.json['std_history']) == 3
-        assert response.json['social_history']['currently_smoke'] == True
+    # send get request for client family history on user_id = 1 
+    response = test_client.get('/doctor/medicalinfo/social/1/',
+                                headers=client_auth_header, 
+                                content_type='application/json')
+                                
+    assert response.status_code == 200
+    assert len(response.json['std_history']) == 3
+    assert response.json['social_history']['currently_smoke'] == True
 
 def test_post_2_social_history(test_client, init_database, client_auth_header):
     """
@@ -73,21 +72,20 @@ def test_post_2_social_history(test_client, init_database, client_auth_header):
 
     assert response.status_code == 201
     
-def test_get_2_social_medical_history(test_client, init_database, client_auth_header, staff_auth_header):
+def test_get_2_social_medical_history(test_client, init_database, client_auth_header):
     """
     GIVEN a api end point for retrieving social medical history
     WHEN the  '/doctor/medicalinfo/social/<user id>' resource  is requested (GET)
     THEN check the response is valid
     """
-    for header in (staff_auth_header, client_auth_header):
-        # send get request for client family history on user_id = 1 
-        response = test_client.get('/doctor/medicalinfo/social/1/',
-                                    headers=header, 
-                                    content_type='application/json')
+    # send get request for client family history on user_id = 1 
+    response = test_client.get('/doctor/medicalinfo/social/1/',
+                                headers=client_auth_header, 
+                                content_type='application/json')
 
-        assert response.status_code == 200
-        assert len(response.json['std_history']) == 1
-        assert response.json['social_history']['currently_smoke'] == False
+    assert response.status_code == 200
+    assert len(response.json['std_history']) == 1
+    assert response.json['social_history']['currently_smoke'] == False
 
 def test_break_post_1_social_history(test_client, init_database, client_auth_header):
     """
@@ -106,21 +104,20 @@ def test_break_post_1_social_history(test_client, init_database, client_auth_hea
     # Currently smoke is false, and do not provide last_smoke (int)
     assert response.status_code == 405
 
-def test_get_broke_1_social_medical_history(test_client, init_database, client_auth_header, staff_auth_header):
+def test_get_broke_1_social_medical_history(test_client, init_database, client_auth_header):
     """
     GIVEN a api end point for retrieving social medical history
     WHEN the  '/doctor/medicalinfo/social/<user id>' resource  is requested (GET)
     THEN check the response is valid
     """
-    for header in (staff_auth_header, client_auth_header):
-        # send get request for client family history on user_id = 1 
-        response = test_client.get('/doctor/medicalinfo/social/1/',
-                                    headers=header, 
-                                    content_type='application/json')
+    # send get request for client family history on user_id = 1 
+    response = test_client.get('/doctor/medicalinfo/social/1/',
+                                headers=client_auth_header, 
+                                content_type='application/json')
 
-        assert response.status_code == 200
-        assert len(response.json['std_history']) == 1
-        assert response.json['social_history']['currently_smoke'] == False
+    assert response.status_code == 200
+    assert len(response.json['std_history']) == 1
+    assert response.json['social_history']['currently_smoke'] == False
 
 def test_break_post_2_social_history(test_client, init_database, client_auth_header):
     """
@@ -138,21 +135,20 @@ def test_break_post_2_social_history(test_client, init_database, client_auth_hea
     # STD lookup out of range
     assert response.status_code == 405
 
-def test_get_broke_2_social_medical_history(test_client, init_database, client_auth_header, staff_auth_header):
+def test_get_broke_2_social_medical_history(test_client, init_database, client_auth_header):
     """
     GIVEN a api end point for retrieving social medical history
     WHEN the  '/doctor/medicalinfo/social/<user id>' resource  is requested (GET)
     THEN check the response is valid
     """
-    for header in (staff_auth_header, client_auth_header):
-        # send get request for client family history on user_id = 1 
-        response = test_client.get('/doctor/medicalinfo/social/1/',
-                                    headers=header, 
-                                    content_type='application/json')
+    # send get request for client family history on user_id = 1 
+    response = test_client.get('/doctor/medicalinfo/social/1/',
+                                headers=client_auth_header, 
+                                content_type='application/json')
 
-        assert response.status_code == 200
-        assert len(response.json['std_history']) == 1
-        assert response.json['social_history']['currently_smoke'] == False        
+    assert response.status_code == 200
+    assert len(response.json['std_history']) == 1
+    assert response.json['social_history']['currently_smoke'] == False        
 
 # NRV 1577, FE Bug
 def test_post_3_social_history(test_client, init_database, client_auth_header):
@@ -171,17 +167,16 @@ def test_post_3_social_history(test_client, init_database, client_auth_header):
 
     assert response.status_code == 201
     
-def test_get_3_social_medical_history(test_client, init_database, client_auth_header, staff_auth_header):
+def test_get_3_social_medical_history(test_client, init_database, client_auth_header):
     """
     GIVEN a api end point for retrieving social medical history
     WHEN the  '/doctor/medicalinfo/social/<user id>' resource  is requested (GET)
     THEN check the response is valid
     """
-    for header in (staff_auth_header, client_auth_header):
-        # send get request for client family history on user_id = 1 
-        response = test_client.get('/doctor/medicalinfo/social/1/',
-                                    headers=header, 
-                                    content_type='application/json')
+    # send get request for client family history on user_id = 1 
+    response = test_client.get('/doctor/medicalinfo/social/1/',
+                                headers=client_auth_header, 
+                                content_type='application/json')
 
-        assert response.status_code == 200
-        assert response.json['social_history']['currently_smoke'] == False
+    assert response.status_code == 200
+    assert response.json['social_history']['currently_smoke'] == False

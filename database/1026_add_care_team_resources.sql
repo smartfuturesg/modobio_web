@@ -5,8 +5,8 @@ alter sequence "LookupClinicalCareTeamResources_resource_id_seq"
 
 INSERT INTO "LookupClinicalCareTeamResources" ("resource_name", "display_name", "resource_group_id") 
 VALUES
-('MedicalBloodTestResults', 'Blood Test Results', 8),
-('MedicalBloodTests', 'Blood Tests', 8),
+('MedicalBloodTests', 'Blood Chemistry', 8),
+('MedicalConditions', 'Medical Conditions', 4),
 ('MedicalGeneralInfo', 'General Medical Information', 4),
 ('MedicalGeneralInfoMedications', 'Medications', 5),
 ('MedicalImaging', 'Medical Images', 6),
