@@ -466,7 +466,7 @@ class TelehealthBookingsApi(Resource):
                     UserProfilePictures.image_path
                         ).where(
                         UserProfilePictures.client_id==client.user_id,
-                        UserProfilePictures.width == 400
+                        UserProfilePictures.width == 128
                     )).scalars().one_or_none()
                 profile_pic = (fh.get_presigned_url(file_path=image_path) 
                                 if image_path else None)
@@ -481,7 +481,7 @@ class TelehealthBookingsApi(Resource):
                     UserProfilePictures.image_path
                         ).where(
                         UserProfilePictures.staff_id==staff.user_id,
-                        UserProfilePictures.width == 400
+                        UserProfilePictures.width == 128
                     )).scalars().one_or_none()
                 profile_pic = (fh.get_presigned_url(file_path=image_path) 
                                 if image_path else None)
