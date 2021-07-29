@@ -9,7 +9,7 @@ from .data import users_staff_passwords_data
 def test_password_recovery_link(test_client):
     response = test_client.post(
         '/user/password/forgot-password/recovery-link/',
-        data=dumps({'email': test_client.client_email}),
+        data=dumps({'email': test_client.client.email}),
         content_type='application/json')
 
     # some simple checks for validity
@@ -24,7 +24,7 @@ def test_full_password_recovery_routine(test_client):
 
     response = test_client.post(
         '/user/password/forgot-password/recovery-link/',
-        data=dumps({'email': test_client.staff_email}),
+        data=dumps({'email': test_client.staff.email}),
         content_type='application/json')
 
     ##

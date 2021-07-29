@@ -27,7 +27,7 @@ def test_upcoming_bookings_scan(test_client):
     ##
     # Submit availability for staff memeber
     ##
-    # header = login(test_client, test_client.staff_email, password=test_client.staff_pass)
+    # header = login(test_client, test_client.staff.email, password=test_client.staff_pass)
 
     # generate availability
     response = test_client.post(

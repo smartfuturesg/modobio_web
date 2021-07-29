@@ -31,7 +31,7 @@ def test_get_client_search(test_client):
     assert response.status_code == 200
     assert response.json['items'][0]['firstname'] == test_client.client.firstname
     assert response.json['items'][0]['lastname'] == test_client.client.lastname
-    assert response.json['items'][0]['email'] == test_client.client_email
+    assert response.json['items'][0]['email'] == test_client.client.email
     assert response.json['items'][0]['modobio_id'] == test_client.client.modobio_id
     assert response.json['items'][0]['phone_number'] == str(test_client.client.phone_number)
 
