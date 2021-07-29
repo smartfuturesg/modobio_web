@@ -6,13 +6,18 @@ from odyssey.api.user.models import UserSubscriptions
 
 from .data import users_subscription_data
 
-@pytest.fixture(scope='module', autouse=True)
-def add_subscription(test_client):
+# Main test user client@modobio.com already has a subscription,
+# per database/0003_seed_users.sql
+# If that changes at any point, request the below fixture in any of the tests.
+
+@pytest.fixture(scope='module')
+def subscription(test_client):
     sub = UserSubscriptions(
         user_id=test_client.client_id,
         is_staff=False,
         subscription_status='unsubscribed',
         subscription_type_id=1)
+
     test_client.db.session.add(sub)
     test_client.db.session.commit()
 
@@ -32,7 +37,6 @@ def test_put_user_subscription(test_client):
         data=dumps(users_subscription_data),
         content_type='application/json')
 
-    print(response.json)
     assert response.status_code == 201
     assert response.json['subscription_status'] == 'subscribed'
 
