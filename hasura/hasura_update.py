@@ -193,9 +193,18 @@ for schema in sorted(inspector.get_schema_names()):
         # TODO: 5.3.21 Staff and clients may only select tables for the logged-in user.
         # further permissions are currently commented out and may be updated or removed in the future
         # Tables which hold client-specific user data
+        allowed_prefixes = [
+            'Client',
+            'Medical',
+            'Notifications',
+            'PT',
+            'Trainer',
+            'User',
+            'Wearables']
+
         if (
                 any(col in permissible_columns for col in ['user_id', 'client_user_id', 'staff_user_id'])
-                and any(tablename.startswith(prefix) for prefix in ['Client', 'Medical', 'User', 'PT', 'Trainer'])
+                and any(tablename.startswith(prefix) for prefix in allowed_prefixes)
             ):
             select_permission_client = client_default_select_permission(columns=permissible_columns)
             insert_permission_client = client_default_insert_permission(columns=permissible_columns)
@@ -210,7 +219,7 @@ for schema in sorted(inspector.get_schema_names()):
         # Tables here require API in order to for the FE to work with. We will allow select access only for the following.
         elif (
                 any(col in permissible_columns for col in ['user_id','client_user_id', 'staff_user_id'])
-                and any(tablename.startswith(prefix) for prefix in ['Telehealth', 'Wearables'])
+                and any(tablename.startswith(prefix) for prefix in ['Telehealth'])
             ):
             select_permission_client = client_default_select_permission(columns=permissible_columns)
             select_permission_staff = staff_default_select_permission(columns=permissible_columns, filtered=True)
