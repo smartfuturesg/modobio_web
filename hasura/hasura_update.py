@@ -5,6 +5,7 @@ This script updates Hasura metadata. The following actions are taken:
 
 1. Track untracked tables in the database.
 2. Set custom column names, displaying snake_case columns as camelCase.
+3. Set permissions
 
 This script should be run manually by the developer after a schema update. The resulting
 changes to tables.yaml should be included in the merge.
@@ -22,14 +23,19 @@ Column name conversion does not preserve case within the string or trailing unde
 but it does preserve any number of initial underscores. It does not do any conversion if
 the string does not contain any underscores except leading underscores.
 
-Examples
---------
+Examples:
 
-first_name  -> firstName
-is_MVP      -> isMvp
-guest_      -> guest
-_hidden_var -> _hiddenVar
-_keepCase   -> _keepCase
+    first_name  -> firstName
+    is_MVP      -> isMvp
+    guest_      -> guest
+    _hidden_var -> _hiddenVar
+    _keepCase   -> _keepCase
+
+3. Set permissions
+------------------
+
+Permissions on the tables are set using default permission functions imported from `default_permissions.py`.
+See documentation there for more information.
 
 Links
 -----
@@ -189,12 +195,12 @@ for schema in sorted(inspector.get_schema_names()):
                 and any(tablename.startswith(prefix) for prefix in ['Client', 'Medical', 'User', 'PT', 'Trainer'])
             ):
             select_permission_client = client_default_select_permission(columns=permissible_columns)
-            # insert_permission_client = client_default_insert_permission(columns=permissible_columns)
-            # update_permission_client = client_default_update_permission(columns=permissible_columns)
+            insert_permission_client = client_default_insert_permission(columns=permissible_columns)
+            update_permission_client = client_default_update_permission(columns=permissible_columns)
 
             select_permission_staff = staff_default_select_permission(columns=permissible_columns, filtered=True)
-            # insert_permission_staff = staff_default_insert_permission(columns=permissible_columns)
-            # update_permission_staff = staff_default_update_permission(columns=permissible_columns)
+            insert_permission_staff = staff_default_insert_permission(columns=permissible_columns)
+            update_permission_staff = staff_default_update_permission(columns=permissible_columns)
 
         # Tables here require API in order to for the FE to work with. We will allow select access only for the following.
         elif (
