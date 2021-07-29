@@ -7,7 +7,7 @@ from odyssey.api.doctor.models import MedicalSurgeries
 from odyssey.api.staff.models import StaffProfile
 from .data import doctor_surgery_data
 
-def test_post_surgery(test_client, init_database, staff_auth_header):
+def test_post_surgery(test_client, init_database, client_auth_header):
     """
     GIVEN an api end point for image upload
     WHEN the '/doctor/images/<user_id>' resource  is requested (POST)
@@ -18,7 +18,7 @@ def test_post_surgery(test_client, init_database, staff_auth_header):
 
     client_user_id = User.query.filter_by(is_client=True).first().user_id
     response = test_client.post('/doctor/surgery/' + str(client_user_id) +'/', 
-                            headers=staff_auth_header, 
+                            headers=client_auth_header, 
                             data = dumps(payload),
                             content_type='application/json')
 
@@ -31,7 +31,7 @@ def test_post_surgery(test_client, init_database, staff_auth_header):
     payload['surgery_category'] = "Nonsense garbage category"
 
     response = test_client.post('/doctor/surgery/' + str(client_user_id) +'/', 
-                        headers=staff_auth_header, 
+                        headers=client_auth_header, 
                         data = dumps(payload),
                         content_type='application/json')
                     

@@ -2,7 +2,7 @@ import base64
 
 from flask.json import dumps
 from sqlalchemy import text
-from odyssey.api.lookup.models import LookupEHRPages
+from odyssey.api.lookup.models import LookupClinicalCareTeamResources
 
 from odyssey.api.user.models import User, UserLogin, UserRemovalRequests, UserPendingEmailVerifications
 from odyssey.api.doctor.models import MedicalImaging
@@ -46,8 +46,6 @@ def test_account_delete_request(test_client, init_database, staff_auth_header):
     staff_client_user = test_client.post('/user/client/',
             data=dumps(payload['user_info']),
             content_type='application/json')
-    
-
 
     #3. Add staff members to client's clinical care team so we can make a request to add data on their behalf
     
@@ -63,14 +61,13 @@ def test_account_delete_request(test_client, init_database, staff_auth_header):
                                 headers=client_auth_header, 
                                 content_type='application/json')
 
-    total_resources = LookupEHRPages.query.count()
-    auths = [{"team_member_user_id": staff_client_id,"resource_group_id": num} for num in range(1,total_resources+1) ]
-    payload = {"ehr_page_authorizations" : auths}
-    response = test_client.post(f"/client/clinical-care-team/ehr-page-authorization/{client_id}/",
+    total_resources = LookupClinicalCareTeamResources.query.count()
+    auths = [{"team_member_user_id": staff_client_id,"resource_id": num} for num in range(1,total_resources+1) ]
+    payload = {"clinical_care_team_authorization" : auths}
+    response = test_client.post(f"/client/clinical-care-team/resource-authorization/{client_id}/",
                             headers=client_auth_header,
                             data=dumps(payload), 
                             content_type='application/json')
-    
     #4. Add info for client user, reported by staff/client
     staff_user_auth_header = create_authorization_header(
             test_client, 
@@ -84,7 +81,6 @@ def test_account_delete_request(test_client, init_database, staff_auth_header):
             headers=staff_user_auth_header,
             data = payload)
             
-    print(response.data)
     assert response.status_code == 201
     
     #5. Delete staff/client
