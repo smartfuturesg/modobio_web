@@ -51,9 +51,9 @@ def test_post_medical_blood_test(test_client):
         data=dumps(doctor_blood_tests_data),
         content_type='application/json')
 
-    test_id_client_submit = response.json['test_id']
     assert response.status_code == 201
     assert response.json['panel_type'] == doctor_blood_tests_data['panel_type']
+    test_id_client_submit = response.json['test_id']
 
     ##
     # submit the same blood test as an authorized staff
@@ -64,9 +64,9 @@ def test_post_medical_blood_test(test_client):
         data=dumps(doctor_blood_tests_data),
         content_type='application/json')
 
-    test_id_staff_submit = response.json['test_id']
     assert response.status_code == 201
     assert response.json['panel_type'] == doctor_blood_tests_data['panel_type']
+    test_id_staff_submit = response.json['test_id']
 
 def test_get_client_blood_tests(test_client):
     # send get request for all client blood tests on user_id = client.user_id

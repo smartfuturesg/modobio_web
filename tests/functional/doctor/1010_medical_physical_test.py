@@ -24,4 +24,4 @@ def test_get_medical_physical(test_client):
     assert response.status_code == 200
     assert response.json[0]['vital_weight'] == 110.0
     assert response.json[0]['abdominal_hard'] == True
-    assert response.json[0]['reporter_lastname'] == 'testerson'
+    assert response.json[0]['reporter_lastname'] == test_client.client.lastname
