@@ -820,6 +820,8 @@ class ClientClinicalCareTeam(BaseModelWithIdx, UserIdFkeyMixin):
     certain clinical data.     
     """
 
+    __table_args__ = (UniqueConstraint('user_id', 'team_member_user_id'),)
+
     team_member_user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=True)
     """
     User ID number
@@ -835,6 +837,7 @@ class ClientClinicalCareTeam(BaseModelWithIdx, UserIdFkeyMixin):
 
     :type: bool
     """
+
 
 class ClientMobileSettings(BaseModelWithIdx, UserIdFkeyMixin):
     """
