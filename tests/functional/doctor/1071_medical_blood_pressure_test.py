@@ -1,14 +1,11 @@
-import time
-
 from flask.json import dumps
 
-from odyssey.api.doctor.models import MedicalHistory
 from .data import doctor_blood_pressures_data
 
 def test_post_1_blood_pressure_history(test_client):
     response = test_client.post(
-        '/doctor/bloodpressure/{test_client.client_id}/',
-        headers=test_client.staff_auth_header,
+        f'/doctor/bloodpressure/{test_client.client_id}/',
+        headers=test_client.client_auth_header,
         data=dumps(doctor_blood_pressures_data),
         content_type='application/json')
 
@@ -27,7 +24,7 @@ def test_get_1_blood_pressure_history(test_client):
 def test_delete_blood_pressure(test_client):
     response = test_client.delete(
         f'/doctor/bloodpressure/{test_client.client_id}/?idx=1',
-        headers=test_client.staff_auth_header)
+        headers=test_client.client_auth_header)
 
     assert response.status_code == 204
 
