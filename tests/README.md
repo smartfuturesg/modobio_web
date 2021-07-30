@@ -37,7 +37,7 @@ $ pytest --cov odyssey
 
 - Fixtures specific to only a subset of tests are located in `conftest.py` in their respective subdirectories (e.g. `functional/telehealth/conftest.py`).
 
-- Fixtures that apply only to tests in a single file, (e.g. `functional/client/0070_client_clinical_care_team_test.py`) are located in that file.
+- Fixtures that apply only to tests in a single file, (e.g. `functional/doctor/0030_external_medical_record_id_test.py`) are located in that file.
 
 - The main setup of testing loads `database/*.sql` files by calling the `sql_scriptrunner.py` script. This ensures that the database setup is exactly the same during testing as it is during development and production running.
 
