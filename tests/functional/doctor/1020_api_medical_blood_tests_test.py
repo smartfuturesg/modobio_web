@@ -2,48 +2,26 @@ import time
 
 from flask.json import dumps
 from sqlalchemy import delete, select
-from odyssey.api.lookup.models import LookupClinicalCareTeamResources
 
 from odyssey.api.doctor.models import MedicalBloodTests, MedicalBloodTestResults
 from .data import doctor_blood_tests_data
 from tests.functional.user.data import users_staff_member_data
 
-def test_post_medical_blood_test(test_client):
-    # save test_ids for following test routines
+def test_post_medical_blood_test(test_client, care_team):
+    # In this test:
+    # - Make the same blood test entry from both the client and staff perspective.
+    # - Staff must be added to the clinical care team of the client and be granted access.
+    # - Test_ids are stored for use in tests later on
+
     global test_id_staff_submit, test_id_client_submit
 
-    ##
-    # give access to all clinical care team resources
-    # delete previously assigned resources first
-    ##
-    clients_clinical_care_team = {'care_team' : [{'team_member_email': users_staff_member_data['email']}]}
-    response = test_client.post(
-        f'/client/clinical-care-team/members/{test_client.client_id}/',
-        data=dumps(clients_clinical_care_team),
-        headers=test_client.client_auth_header,
-        content_type='application/json')
-
-    total_resources = LookupClinicalCareTeamResources.query.count()
-    auths = [{
-        'team_member_user_id': test_client.staff_id,
-        'resource_id': num}
-        for num in range(1, total_resources + 1)]
-    payload = {'ehr_page_authorizations' : auths}
-
-    response = test_client.post(
-        f'/client/clinical-care-team/resource-authorization/{test_client.client_id}/',
-        headers=test_client.client_auth_header,
-        data=dumps(payload),
-        content_type='application/json')
-
-    # delete the current blood tests
+    # Delete the current blood tests, if any.
     test_client.db.session.execute(delete(MedicalBloodTestResults))
     test_client.db.session.execute(delete(MedicalBloodTests))
     test_client.db.session.commit()
 
     ##
-    # Submit blood test data as a client
-    # send post request for client info on user_id = client.user_id
+    # Submit blood test data as a client.
     ##
     response = test_client.post(
         f'/doctor/bloodtest/{test_client.client_id}/',
@@ -56,7 +34,7 @@ def test_post_medical_blood_test(test_client):
     test_id_client_submit = response.json['test_id']
 
     ##
-    # submit the same blood test as an authorized staff
+    # Submit the same blood test as an authorized staff.
     ##
     response = test_client.post(
         f'/doctor/bloodtest/{test_client.client_id}/',
@@ -91,7 +69,6 @@ def test_get_blood_test_results_all(test_client):
     assert response.json['items'][0]['panel_type'] == 'Lipids'
 
 def test_get_blood_test_results(test_client):
-    # send get request for client info on user_id = client.user_id
     response = test_client.get(
         f'/doctor/bloodtest/results/{test_id_client_submit}/',
         headers=test_client.client_auth_header,
@@ -100,9 +77,8 @@ def test_get_blood_test_results(test_client):
     assert response.status_code == 200
     assert response.json['items'][0]['results'][0]['evaluation'] == 'optimal'
     assert response.json['items'][0]['results'][1]['evaluation'] == 'normal'
-    assert response.json['items'][0]['reporter_id'] == 1
+    assert response.json['items'][0]['reporter_id'] == test_client.client_id
 
-    # send get request for client info on user_id = client.user_id
     response = test_client.get(
         f'/doctor/bloodtest/results/{test_id_staff_submit}/',
         headers=test_client.client_auth_header,
@@ -111,10 +87,9 @@ def test_get_blood_test_results(test_client):
     assert response.status_code == 200
     assert response.json['items'][0]['results'][0]['evaluation'] == 'optimal'
     assert response.json['items'][0]['results'][1]['evaluation'] == 'normal'
-    assert response.json['items'][0]['reporter_id'] == 2
+    assert response.json['items'][0]['reporter_id'] == test_client.staff_id
 
 def test_get_blood_test_result_types(test_client):
-    # send get request for client info
     response = test_client.get(
         'doctor/bloodtest/result-types/',
         headers=test_client.client_auth_header,

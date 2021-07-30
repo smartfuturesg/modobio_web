@@ -1,8 +1,8 @@
 from flask import current_app
-from odyssey.api.user.models import User
-from odyssey.api.client.models import ClientClinicalCareTeam, ClientInfo
 
-def test_get_client_search(test_client):
+def test_get_client_search(test_client, care_team):
+    # Uses care_team fixture because staff member needs authorization to search client info
+
     # Skip test if no url is set for ELASTICSEARCH_URL
     # Prevents other developers from having to set up ES if they don't need it,
     # This test will not pass if there's a url set but the service isn't running
@@ -15,13 +15,6 @@ def test_get_client_search(test_client):
         headers=test_client.staff_auth_header)
 
     assert response.status_code == 200
-
-    # Add staff to client's care team so the client can be searched
-    ccct = ClientClinicalCareTeam(
-        team_member_user_id=test_client.staff_id,
-        user_id=test_client.client_id)
-    test_client.db.session.add(ccct)
-    test_client.db.session.commit()
 
     # Search by modobio ID
     response = test_client.get(

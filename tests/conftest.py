@@ -6,12 +6,15 @@ import sys
 import boto3
 import twilio
 
+from flask.json import dumps
 from flask_migrate import upgrade
 from sqlalchemy import select, text
 from sqlalchemy.exc import ProgrammingError
 
 from odyssey import create_app, db
-from odyssey.api.user.models import User
+from odyssey.api.client.models import ClientClinicalCareTeam, ClientClinicalCareTeamAuthorizations
+from odyssey.api.lookup.models import LookupClinicalCareTeamResources
+from odyssey.api.user.models import User, UserLogin
 from odyssey.utils.misc import grab_twilio_credentials
 from odyssey.utils.errors import MissingThirdPartyCredentials
 from odyssey.utils import search
@@ -21,6 +24,10 @@ from .utils import login
 # From database/0001_seed_users.sql
 STAFF_ID = 12   # staff@modobio.com
 CLIENT_ID = 22  # client@modobio.com
+
+# For care team fixture
+USER_TM = 'test_team_member_user@modobio.com'
+NON_USER_TM = 'test_team_member_non_user@modobio.com'
 
 def setup_db(app):
     """ Set up the database for testing.
@@ -169,3 +176,145 @@ def test_client():
                 'Objects': objects,
                 'Quiet': True}
             bucket.delete_objects(Delete=delete)
+
+# Used by tests in client/ and in doctor/
+@pytest.fixture(scope='module')
+def care_team(test_client):
+    """ Add team members to client.
+
+    Adds a team member who is staff, a team member who is a client,
+    and a team members who is not a registered user.
+
+    There is currently only 1 client user in the seeded users, but that
+    is our main test client to whom we are adding team members, so a
+    new temporary user will be created for this purpose.
+
+    This yields:
+
+    - test_client.client: owner of care team
+    - care team:
+        - pro@modobio.com: existing staff member added in seed users
+        - name@modobio.com: existing staff member added in seed users
+        - test_client.staff: existing staff member, added here
+        - test_team_member_user@modobio.com: new client user, added here
+        - test_team_member_non_user@modobio.com: new team member who is not a modobio user, added here
+
+    After the fixture returns from the yield, the team members who
+    were added here will be deleted. The team members who were added
+    in the seed users will be left alone.
+
+    Yields
+    ------
+    dict
+        Dictionary containing a user_id and modobio_id for each of the newly
+        addded team members:
+        - staff_id
+        - staff_modobio_id
+        - client_id
+        - client_modobio_id
+        - non_user_id (no non_user_modobio_id)
+
+    Notes
+    -----
+
+    This fixture is entire done with database interaction. It does not make use of
+    API calls. This leaves off a layer of complexity that is properly tested in
+    the tests.
+    """
+    # Create a new client user.
+    tm_client = User(
+        email = USER_TM,
+        firstname = 'Team',
+        lastname = 'Member',
+        phone_number = '9871237766',
+        modobio_id = 'ABC123X7Y8Z9',
+        is_staff = False,
+        is_client = True,
+        email_verified = True)
+
+    test_client.db.session.add(tm_client)
+    test_client.db.session.commit()
+
+    tm_login = UserLogin(user_id=tm_client.user_id)
+    tm_login.set_password('password')
+
+    test_client.db.session.add(tm_login)
+    test_client.db.session.commit()
+
+    # Add non-user as non-login user.
+    tm_non_user = User(
+        email=NON_USER_TM,
+        is_staff=False,
+        is_client=False)
+
+    test_client.db.session.add(tm_non_user)
+    test_client.db.session.commit()
+
+    # Add members to care team
+    ccteam = []
+    for tm_id in (test_client.staff_id, tm_client.user_id, tm_non_user.user_id):
+        cct = ClientClinicalCareTeam(
+            user_id=test_client.client_id,
+            team_member_user_id=tm_id)
+        ccteam.append(cct)
+
+    test_client.db.session.add_all(ccteam)
+
+    # Add authorizations for staff member.
+    resource_ids = (test_client.db.session.execute(
+        select(LookupClinicalCareTeamResources.resource_id))
+        .scalars()
+        .all())
+
+    ccteam_auth = []
+    for resource_id in resource_ids:
+        cct_auth = ClientClinicalCareTeamAuthorizations(
+            user_id=test_client.client_id,
+            team_member_user_id=test_client.staff_id,
+            resource_id=resource_id,
+            status='accepted')
+        ccteam_auth.append(cct_auth)
+
+    test_client.db.session.add_all(ccteam_auth)
+    test_client.db.session.commit()
+
+    # Return user_ids and modobio_ids
+    yield {
+        'staff_id': test_client.staff_id,
+        'staff_modobio_id': test_client.staff.modobio_id,
+        'client_id': tm_client.user_id,
+        'client_modobio_id': tm_client.modobio_id,
+        'non_user_id': tm_non_user.user_id}
+
+    # Before we can delete care team members and authorizations,
+    # refetch them. Tests may have already deleted them.
+
+    # Delete authorizations
+    ccteam_auth = (test_client.db.session.execute(
+        select(ClientClinicalCareTeamAuthorizations)
+        .filter_by(
+            team_member_user_id=test_client.staff_id))
+        .scalars()
+        .all())
+
+    for cct_auth in ccteam_auth:
+        test_client.db.session.delete(cct_auth)
+
+    # Delete care team
+    ccteam = (test_client.db.session.execute(
+        select(ClientClinicalCareTeam)
+        .where(
+            ClientClinicalCareTeam.team_member_user_id.in_((
+                test_client.staff_id,
+                tm_client.user_id,
+                tm_non_user.user_id))))
+        .scalars()
+        .all())
+
+    for cct in ccteam:
+        test_client.db.session.delete(cct)
+
+    # Delete temp users
+    test_client.db.session.delete(tm_non_user)
+    test_client.db.session.delete(tm_client)
+    test_client.db.session.commit()

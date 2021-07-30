@@ -5,106 +5,16 @@ import pytest
 from flask.json import dumps
 from sqlalchemy import select
 
-from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations, ClientClinicalCareTeam
+from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations
 from odyssey.api.lookup.models import LookupClinicalCareTeamResources
-from odyssey.api.user.models import User, UserLogin
+from odyssey.api.user.models import User
 
 from tests.functional.doctor.data import doctor_blood_tests_data
 from tests.utils import login
 
-NON_USER_TM = 'test_team_member_non_user@modobio.com'
-USER_TM = 'test_team_member_user@modobio.com'
-
-@pytest.fixture(scope='module')
-def care_team(test_client):
-    """ Add team members to client.
-    
-    Adds a team member who is staff and a team member who is client
-    to the main testing client user. Additionally adds two team
-    members who are not registered users.
-
-    Returns
-    -------
-    dict
-        Dictionary containing a client and a staff member from the
-        database who were added to the care team of the main test
-        client user. User_id and modobio_id for each are returned.
-    """
-    # Check that client emails don't already exist in database.
-    emails = test_client.db.session.execute(select(User.email)).scalars().all()
-
-    assert NON_USER_TM not in emails
-    assert USER_TM not in emails
-
-    # Staff user to be added as team member is our main test staff user.
-    # There is currently only 1 client user in the seeded users, but that
-    # is our main test client to whom we are adding team members. Create
-    # a new client user here, who will be addded as a team member.
-    tm_client = User(
-        email = USER_TM,
-        firstname = 'Team',
-        lastname = 'Member',
-        phone_number = '9871237766',
-        modobio_id = 'ABC123X7Y8Z9',
-        is_staff = False,
-        is_client = True,
-        email_verified = True)
-
-    test_client.db.session.add(tm_client)
-    test_client.db.session.commit()
-
-    tm_login = UserLogin(user_id=tm_client.user_id)
-    tm_login.set_password('password')
-
-    test_client.db.session.add(tm_login)
-    test_client.db.session.commit()    
-
-    care_team = {
-        'care_team': [
-            {'team_member_email': NON_USER_TM},
-            {'modobio_id': test_client.staff.modobio_id},
-            {'modobio_id': tm_client.modobio_id}]}
-
-    response = test_client.post(
-        f'/client/clinical-care-team/members/{test_client.client_id}/',
-        headers=test_client.client_auth_header,
-        data=dumps(care_team),
-        content_type='application/json')
-
-    assert response.status_code == 201
-    assert response.json['total_items'] == 5
-    assert response.json['care_team']
-
-    # Find user_id for non-member user
-    non_user_id = 0
-    for member in response.json['care_team']:
-        if member['team_member_email'] == NON_USER_TM:
-            non_user_id = member['team_member_user_id']
-
-    # Return user_id for new client and our staff user who are now in the care team.
-    return {
-        'staff_id': test_client.staff_id,
-        'staff_modobio_id': test_client.staff.modobio_id,
-        'client_id': tm_client.user_id,
-        'client_modobio_id': tm_client.modobio_id,
-        'non_user_id': non_user_id}
-
-    # pro@modobio.com (10) and name@modobio.com (14) are already a care team members,
-    # per database/1027_seed_users_ehr_auths.sql
-    #
-    # modobio_test=> select idx, "ClientClinicalCareTeam".user_id, team_member_user_id, "User".email from "ClientClinicalCareTeam" join "User" on team_member_user_id = "User".user_id;
-    #
-    #  idx | user_id | team_member_user_id |             email
-    # -----+---------+---------------------+-------------------------------
-    #    1 |      22 |                  10 | pro@modobio.com
-    #    2 |      22 |                  14 | name@modobio.com
-    #    3 |      22 |                  24 | test_team_member_non_user@modobio.com
-    #    4 |      22 |                  12 | staff@modobio.com
-    #    5 |      22 |                  23 | test_team_member_user@modobio.com
-
 def test_adding_clinical_care_team(test_client, care_team):
-    # check that the person added to the client's care team above sees the client
-    # when viewing the list of clients whose care team they belong to
+    # Care team is added in fixture. Check that staff member can see
+    # that it is part of a care team.
     response = test_client.get(
         '/client/clinical-care-team/member-of/{}/'.format(care_team['staff_id']),
         headers=test_client.staff_auth_header,
@@ -130,14 +40,24 @@ def test_adding_clinical_care_team(test_client, care_team):
     long_care_team = {'care_team': [
         {'team_member_email': f'email{x:02d}@modobio.com'} for x in range(25)]}
 
-    response = test_client.post(f'/client/clinical-care-team/members/{test_client.client_id}/',
-                            headers=test_client.client_auth_header,
-                            data=dumps(long_care_team),
-                            content_type='application/json')
+    response = test_client.post(
+        f'/client/clinical-care-team/members/{test_client.client_id}/',
+        headers=test_client.client_auth_header,
+        data=dumps(long_care_team),
+        content_type='application/json')
 
     assert response.status_code == 400
 
 def test_delete_clinical_care_team(test_client, care_team):
+    # Get members before
+    response = test_client.get(
+        f'/client/clinical-care-team/members/{test_client.client_id}/',
+        headers=test_client.client_auth_header,
+        content_type='application/json')
+
+    assert response.status_code == 200
+    before = response.json['total_items']
+
     # Delete only the non-user team members: don't want to touch
     # team members added by database/1027_seed_users_ehr_auths.sql
     # add need the other two later.
@@ -153,16 +73,14 @@ def test_delete_clinical_care_team(test_client, care_team):
 
     assert response.status_code == 200
 
-def test_get_clinical_care_team(test_client, care_team):
+    # Get members again check that 1 was deleted.
     response = test_client.get(
         f'/client/clinical-care-team/members/{test_client.client_id}/',
         headers=test_client.client_auth_header,
         content_type='application/json')
 
     assert response.status_code == 200
-
-    # Was 5, deleted 1
-    assert response.json['total_items'] == 4
+    assert response.json['total_items'] == before - 1
 
 def test_authorize_clinical_care_team(test_client, care_team):
     #####
@@ -184,8 +102,23 @@ def test_authorize_clinical_care_team(test_client, care_team):
     assert response.status_code == 201
 
     #####
-    # Authorize a staff to access all clinical care team resources but the last one (used later on to make a request)
+    # Authorize a staff to access all clinical care team resources
+    # except the last one (used later on to make a request).
+    #
+    # care_team fixture already adds all authorizations for staff member,
+    # so first delete them.
     #####
+    cct_auths = (test_client.db.session.execute(
+        select(ClientClinicalCareTeamAuthorizations)
+        .filter_by(
+            team_member_user_id=test_client.staff_id))
+        .scalars()
+        .all())
+
+    for cct_auth in cct_auths:
+        test_client.db.session.delete(cct_auth)
+    test_client.db.session.commit()
+
     auths = [{
         'team_member_user_id': care_team['staff_id'],
         'resource_id': num}
