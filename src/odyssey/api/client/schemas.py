@@ -320,7 +320,7 @@ class ClinicalCareTeamAuthorizationsForSchema(Schema):
     it summarizes the authorizations a care team member has been granted 
     """
     display_name = fields.String()
-    resource_group_id = fields.Integer()
+    resource_id = fields.Integer()
 
 
 class UserClinicalCareTeamSchema(Schema):
