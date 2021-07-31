@@ -35,7 +35,7 @@ def telehealth_clients(test_client):
 
 @pytest.fixture(scope='session', autouse=True)
 def telehealth_staff(test_client):
-        """ Generate and return staff users for telehealth testing. """
+    """ Generate and return staff users for telehealth testing. """
     staffs = []
     for i in range(10):
         staff = User(
