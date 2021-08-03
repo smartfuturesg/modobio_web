@@ -122,9 +122,9 @@ class MedBloodPressures(BaseResource):
 
         idx = request.args.get('idx', type=int)
         if idx:
-            result = MedicalBloodPressures.query.filter_by(idx=idx).one_or_none()
+            result = MedicalBloodPressures.query.filter_by(user_id=user_id, idx=idx).one_or_none()
             if not result:
-                raise GenericNotFound(f"The blood pressure result with idx {idx} does not exist.")
+                raise GenericNotFound(f"The blood pressure result with user_id {user_id} and idx {idx} does not exist.")
                 
             #ensure logged in user is the reporter for this pressure reasing
             super().check_ehr_permissions(result)
@@ -1038,9 +1038,9 @@ class MedBloodTest(BaseResource):
 
         test_id = request.args.get('test_id', type=int)
         if test_id:
-            result = MedicalBloodTests.query.filter_by(test_id=test_id).one_or_none()
+            result = MedicalBloodTests.query.filter_by(user_id=user_id, test_id=test_id).one_or_none()
             if not result:
-                raise GenericNotFound(f"The blood test with test_id {test_id} does not exist.")
+                raise GenericNotFound(f"The blood test with user_id {user_id} and test_id {test_id} does not exist.")
             
             #ensure logged in user is the reporter for this test
             super().check_ehr_permissions(result)
