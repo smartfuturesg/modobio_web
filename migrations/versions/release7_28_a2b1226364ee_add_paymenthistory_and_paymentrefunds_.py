@@ -1,7 +1,7 @@
 """add PaymentHistory and PaymentRefunds tables
 
 Revision ID: a2b1226364ee
-Revises: 386b0092f0a0
+Revises: d4e1d0d3d43c
 Create Date: 2021-07-28 13:07:32.257808
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'a2b1226364ee'
-down_revision = '386b0092f0a0'
+down_revision = 'd4e1d0d3d43c'
 branch_labels = None
 depends_on = None
 
