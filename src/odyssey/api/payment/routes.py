@@ -169,19 +169,19 @@ class PaymentRefundApi(BaseResource):
         super().check_user(user_id, user_type='client')
 
         #retrieve original transaction being refunded
-        original_traction = PaymentHistory.query.filter_by(transaction_id=request.parsed_obj.transaction_id).one_or_none()
+        original_traction = PaymentHistory.query.filter_by(transaction_id=request.parsed_obj.payment_id).one_or_none()
         if not original_traction:
-            raise GenericNotFound(f'No transaction with transaction_id {transaction_id} exists.')
+            raise GenericNotFound(f'No transaction with transaction_id {request.parsed_obj.payment_id} exists.')
 
         #check if requested amount plus previous refunds of this transaction exceed the original amount
         total_refunded = 0
-        for transaction in PaymentRefunds.query.filter_by(transaction_id=request.parsed_obj.transaction_id).all():
+        for transaction in PaymentRefunds.query.filter_by(payment_id=request.parsed_obj.payment_id).all():
             total_refunded += transaction.amount
 
         if request.parsed_obj.refund_amount + total_refunded >= original_traction.amount:
             raise MethodNotAllowed(message='The requested refund amount combined with refunds already given' + \
                                             f' cannot exceed the amount of the original transaction. {total_refunded}' + \
-                                            f'has already been refunded for the transaction id {request.parsed_obj.transaction_id}.')
+                                            f'has already been refunded for the transaction id {request.parsed_obj.payment_id}.')
 
         #call instamed api
         request_data = {
