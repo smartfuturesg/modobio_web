@@ -1267,8 +1267,7 @@ class ClinicalCareTeamTemporaryMembers(BaseResource):
         #retrieve staff account, staff account must exist because of the above check in the bookings table
         team_member = User.query.filter_by(user_id=request.parsed_obj['staff_user_id']).one_or_none()
 
-        db.session.add(ClientClinicalCareTeam(**{"team_member_email": team_member.email,
-                                            "team_member_user_id": team_member.user_id,
+        db.session.add(ClientClinicalCareTeam(**{"team_member_user_id": team_member.user_id,
                                             "user_id": user_id,
                                             "is_temporary": True}))
 
