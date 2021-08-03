@@ -14,7 +14,6 @@ from odyssey.api.client.models import (
     ClientConsent,
     ClientConsultContract,
     ClientDataStorage,
-    ClientEHRPageAuthorizations,
     ClientInfo,
     ClientIndividualContract, 
     ClientPolicies,
@@ -321,7 +320,7 @@ class ClinicalCareTeamAuthorizationsForSchema(Schema):
     it summarizes the authorizations a care team member has been granted 
     """
     display_name = fields.String()
-    resource_group_id = fields.Integer()
+    resource_id = fields.Integer()
 
 
 class UserClinicalCareTeamSchema(Schema):
@@ -390,40 +389,12 @@ class ClinicalCareTeamAuthorizaitonSchema(Schema):
     def make_object(self, data, **kwargs):
         return ClientClinicalCareTeamAuthorizations(**data)
 
-class CareTeamEHRAuthorizationSchema(Schema):
-    """
-    Schmea for care team ehr authorization objects. 
-
-    Each instance is an entry into the ClientEHRPageAuthorizations table
-    """
-    user_id = fields.Integer(dump_only=True)
-    team_member_modobio_id = fields.String(dump_only=True)
-    team_member_user_id = fields.Integer(
-        metadata={'description': 'user_id for this clinical care team member'})
-    team_member_firstname = fields.String(dump_only=True)
-    team_member_lastname = fields.String(dump_only=True)
-    team_member_email = fields.Email(dump_only=True)
-    resource_group_id = fields.Integer(
-        metadata={'description': 'id for the resource. See lookup table for resource ids'})
-    display_name = fields.String(dump_only=True)
-    status = fields.String(missing='pending',required=False)
-
-    @post_load
-    def make_object(self, data, **kwargs):
-        return ClientEHRPageAuthorizations(**data)
-
 class ClinicalCareTeamAuthorizationNestedSchema(Schema):
     """
     Nests clinical care team authorization schema for API
     """
     clinical_care_team_authorization = fields.Nested(ClinicalCareTeamAuthorizaitonSchema(many=True), missing=[])
 
-
-class CareTeamEHRAuthorizationNestedSchema(Schema):
-    """
-    Nests clinical care team authorization schema for API
-    """
-    ehr_page_authorizations = fields.Nested(CareTeamEHRAuthorizationSchema(many=True), missing=[])
 
 class ClientGeneralMobileSettingsSchema(BaseSchema):
     class Meta:

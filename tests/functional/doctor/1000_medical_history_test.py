@@ -8,7 +8,7 @@ from odyssey.api.doctor.models import MedicalHistory
 from .data import doctor_medical_history_data
 
 
-def test_post_medical_history(test_client, init_database, staff_auth_header):
+def test_post_medical_history(test_client, init_database, client_auth_header):
     """
     GIVEN a api end point for medical history assessment
     WHEN the '/doctor/medicalhistory/<user_id idasdf=>' resource  is requested (POST)
@@ -22,14 +22,14 @@ def test_post_medical_history(test_client, init_database, staff_auth_header):
     
     # send get request for client info on user_id = 1 
     response = test_client.post('/doctor/medicalhistory/1/',
-                                headers=staff_auth_header, 
+                                headers=client_auth_header, 
                                 data=dumps(payload), 
                                 content_type='application/json')
     
     assert response.status_code == 201
     assert response.json['concerns'] == doctor_medical_history_data['concerns']
 
-def test_put_medical_history(test_client, init_database, staff_auth_header):
+def test_put_medical_history(test_client, init_database, client_auth_header):
     """
     GIVEN a api end point for medical history assessment
     WHEN the '/doctor/medicalhistory/<client id>/' resource  is requested (PUT)
@@ -44,7 +44,7 @@ def test_put_medical_history(test_client, init_database, staff_auth_header):
     
     # send get request for client info on user_id = 1 
     response = test_client.put('/doctor/medicalhistory/1/',
-                                headers=staff_auth_header, 
+                                headers=client_auth_header, 
                                 data=dumps(payload), 
                                 content_type='application/json')
 
@@ -54,7 +54,7 @@ def test_put_medical_history(test_client, init_database, staff_auth_header):
     assert client.diagnostic_other == "testing put"
 
 
-def test_get_medical_history(test_client, init_database, staff_auth_header):
+def test_get_medical_history(test_client, init_database, client_auth_header):
     """
     GIVEN a api end point for retrieving medical history
     WHEN the  '/doctor/medicalhistory/<client id>' resource  is requested (GET)
@@ -66,7 +66,7 @@ def test_get_medical_history(test_client, init_database, staff_auth_header):
 
     # send get request for client info on user_id = 1 
     response = test_client.get('/doctor/medicalhistory/1/',
-                                headers=staff_auth_header, 
+                                headers=client_auth_header, 
                                 content_type='application/json')
                                 
     assert response.status_code == 200
