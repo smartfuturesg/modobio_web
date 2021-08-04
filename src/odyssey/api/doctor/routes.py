@@ -111,7 +111,7 @@ class MedBloodPressures(BaseResource):
 
         return request.parsed_obj
 
-    @token_auth.login_required(user_type=('client',), staff_role=('medical_doctor',), resources=('MedicalBloodPressures',))
+    @token_auth.login_required(user_type=('client', 'staff'), staff_role=('medical_doctor',), resources=('MedicalBloodPressures',))
     @ns.doc(params={'idx': 'int',})
     @responds(status_code=204, api=ns)
     def delete(self, user_id):
@@ -122,12 +122,15 @@ class MedBloodPressures(BaseResource):
 
         idx = request.args.get('idx', type=int)
         if idx:
-            result = MedicalBloodPressures.query.filter_by(idx=idx).one_or_none()
-            if result:
-                db.session.delete(result)
-                db.session.commit()
-            else:
-                raise GenericNotFound(f"The blood pressure result with idx {idx} does not exist.")
+            result = MedicalBloodPressures.query.filter_by(user_id=user_id, idx=idx).one_or_none()
+            if not result:
+                raise GenericNotFound(f"The blood pressure result with user_id {user_id} and idx {idx} does not exist.")
+                
+            #ensure logged in user is the reporter for this pressure reasing
+            super().check_ehr_permissions(result)
+
+            db.session.delete(result)
+            db.session.commit()
         else:
             raise InputError(message="idx must be an integer.")
 
@@ -960,6 +963,29 @@ class MedImaging(BaseResource):
         db.session.add_all(data_list)  
         db.session.commit()
 
+    @ns.doc(params={'image_id': 'ID of the image to be deleted'})
+    @token_auth.login_required(staff_role=('medical_doctor',), resources=('MedicalImaging',))
+    @responds(status_code=204, api=ns)
+    def delete(self, user_id):
+        idx = request.args.get('image_id', type=int)
+        if idx:
+            data = MedicalImaging.query.filter_by(user_id=user_id, idx=idx).one_or_none()
+            if not data:
+                raise GenericNotFound(message=f'No image could be found with user_id {user_id} and image_id {idx}.')
+            
+            #ensure logged in user is the reporter for this image
+            super().check_ehr_permissions(data)
+
+            #delete image saved in S3 bucket
+            s3 = boto3.client('s3')
+            bucket_name = current_app.config['AWS_S3_BUCKET']
+            s3.delete_object(Bucket=bucket_name, Key=data.image_path)
+
+            db.session.delete(data)
+            db.session.commit()
+        else:
+            raise InputError(message="image_id must be an integer.")   
+
 
 @ns.route('/bloodtest/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
@@ -1012,15 +1038,15 @@ class MedBloodTest(BaseResource):
 
         test_id = request.args.get('test_id', type=int)
         if test_id:
-            result = MedicalBloodTests.query.filter_by(test_id=test_id).one_or_none()
-            if result:
-                if result.reporter_id == token_auth.current_user()[0].user_id:
-                    db.session.delete(result)
-                    db.session.commit()
-                else:
-                    raise UnauthorizedUser(message="Only the reporter of this test can delete it.")
-            else:
-                raise GenericNotFound(f"The blood test with test_id {test_id} does not exist.")
+            result = MedicalBloodTests.query.filter_by(user_id=user_id, test_id=test_id).one_or_none()
+            if not result:
+                raise GenericNotFound(f"The blood test with user_id {user_id} and test_id {test_id} does not exist.")
+            
+            #ensure logged in user is the reporter for this test
+            super().check_ehr_permissions(result)
+
+            db.session.delete(result)
+            db.session.commit()
         else:
             raise InputError(message="test_id must be an integer.")     
 
