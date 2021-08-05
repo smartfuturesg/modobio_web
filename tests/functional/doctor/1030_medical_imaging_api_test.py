@@ -10,8 +10,6 @@ def test_post_medical_imaging(test_client, init_database, staff_auth_header):
     WHEN the '/doctor/images/<user_id>' resource  is requested (POST)
     THEN check the response is valid
     """
-    # get staff authorization to view client data
-
     
     payload = doctor_medical_imaging_data
 
@@ -35,9 +33,7 @@ def test_post_medical_imaging_no_image(test_client, init_database, staff_auth_he
     WHEN the '/doctor/images/<client id>' resource  is requested (POST)
     THEN check the response is valid
     """
-    # get staff authorization to view client data
 
-    
     payload = doctor_medical_imaging_data
     del payload["image"]
     # send get request for client info on user_id = 1
@@ -50,18 +46,15 @@ def test_post_medical_imaging_no_image(test_client, init_database, staff_auth_he
     assert response.status_code == 201
     assert data.image_read == payload['image_read']
 
-def test_get_medical_imaging(test_client, init_database, staff_auth_header):
+def test_get_medical_imaging(test_client, init_database, client_auth_header):
     """
     GIVEN an api end point for image upload
     WHEN the  '/doctor/images/<user_id>' resource  is requested (GET)
     THEN check the response is valid
     """
-    # get staff authorization to view client data
-
-     
 
     # send get request for client info on user_id = 1 
-    response = test_client.get('/doctor/images/1/', headers=staff_auth_header)
+    response = test_client.get('/doctor/images/1/', headers=client_auth_header)
     
     assert response.status_code == 200
     assert len(response.json) == 2
@@ -69,3 +62,23 @@ def test_get_medical_imaging(test_client, init_database, staff_auth_header):
     assert response.json[0]['image_origin_location'] ==  doctor_medical_imaging_data['image_origin_location']
     assert response.json[0]['image_date'] ==  doctor_medical_imaging_data['image_date']
     assert response.json[0]['image_read'] ==  doctor_medical_imaging_data['image_read']
+
+def test_delete_medical_imaging(test_client, init_database, staff_auth_header):
+    """
+    GIVEN an api end point for deleting images
+    WHEN the '/doctor/images/<user_id>' resource is requested (DELETE)
+    THEN check the image is deleted
+    """
+
+    response = test_client.delete('/doctor/images/1/?image_id=1',
+                                    headers=staff_auth_header,
+                                    content_type='application/json')
+    assert response.status_code == 204
+
+    # send get request for to ensure image was deleted
+    response = test_client.get('/doctor/images/1/',
+                                headers=staff_auth_header,
+                                content_type='application/json')
+
+    assert response.status_code == 200
+    assert len(response.json) == 1

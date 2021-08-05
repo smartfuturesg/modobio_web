@@ -1,7 +1,8 @@
-from marshmallow import Schema, fields, post_load
+from marshmallow import Schema, fields, post_load, validate
 
 from odyssey import ma
-from odyssey.api.payment.models import PaymentMethods, PaymentStatus
+from odyssey.api.payment.models import PaymentMethods, PaymentStatus, PaymentRefunds, PaymentHistory
+from odyssey.utils.base.schemas import BaseSchema
 
 class PaymentMethodsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -27,3 +28,23 @@ class PaymentStatusSchema(ma.SQLAlchemyAutoSchema):
 class PaymentStatusOutputSchema(Schema):
 
     payment_statuses = fields.Nested(PaymentStatusSchema(many=True))
+
+class PaymentHistorySchema(BaseSchema):
+    class Meta:
+        model = PaymentHistory
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return PaymentHistory(**data)
+
+class PaymentRefundsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = PaymentRefunds
+        exclude = ('created_at', 'updated_at', 'idx')
+
+    payment_id = fields.Integer(required=True)
+    refund_reason = fields.String(validate=validate.Length(min=1))
+    
+    @post_load
+    def make_object(self, data, **kwargs):
+        return PaymentRefunds(**data)

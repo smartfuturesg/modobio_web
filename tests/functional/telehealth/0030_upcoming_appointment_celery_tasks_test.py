@@ -4,8 +4,8 @@ from random import choice
 
 from flask.json import dumps
 from sqlalchemy import and_, or_, select
-from odyssey.api.client.models import ClientEHRPageAuthorizations
-from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupEHRPages
+from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations
+from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupClinicalCareTeamResources, LookupEHRPages
 from odyssey.api.notifications.models import Notifications
 from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.api.payment.models import PaymentMethods
@@ -204,15 +204,16 @@ def test_upcoming_bookings_notification(test_client, init_database, staff_auth_h
     test_booking = choice(upcoming_bookings_all)
     upcoming_appointment_care_team_permissions(test_booking.idx)
 
-    ehr_permissions = init_database.session.execute(select(
-        ClientEHRPageAuthorizations
+    care_team_permissions = init_database.session.execute(select(
+        ClientClinicalCareTeamAuthorizations
     ).where(
-        ClientEHRPageAuthorizations.user_id == test_booking.client_user_id, 
-        ClientEHRPageAuthorizations.team_member_user_id == test_booking.staff_user_id
+        ClientClinicalCareTeamAuthorizations.user_id == test_booking.client_user_id, 
+        ClientClinicalCareTeamAuthorizations.team_member_user_id == test_booking.staff_user_id
     )).scalars().all()
 
     resource_ids_needed = init_database.session.execute(select(
-        LookupEHRPages.resource_group_id
+        LookupClinicalCareTeamResources.resource_id, LookupEHRPages.resource_group_id
+    ).join(LookupEHRPages, LookupEHRPages.resource_group_id == LookupClinicalCareTeamResources.resource_group_id
     ).where(LookupEHRPages.access_group.in_(['general','medical_doctor']))).scalars().all()
 
-    assert len(ehr_permissions) == len(resource_ids_needed)
+    assert len(care_team_permissions) == len(resource_ids_needed)
