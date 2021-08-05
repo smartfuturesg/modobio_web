@@ -1,7 +1,7 @@
 from flask_restx import Resource
 
 from odyssey.utils.auth import token_auth
-from odyssey.utils.errors import UserNotFound
+from odyssey.utils.errors import UserNotFound, UnauthorizedUser
 from odyssey.api.user.models import User
 
 class BaseResource(Resource):
@@ -36,3 +36,11 @@ class BaseResource(Resource):
         Sets the reporter_id for the given parsed_obj to the currently logged in user.
         """
         parsed_obj.reporter_id = token_auth.current_user()[0].user_id
+
+    def check_ehr_permissions(self, data):
+        """
+        Checks if the logged in user is the reporter for the given table row for the purpose
+        of edit/delete permissions on that data.
+        """
+        if data.reporter_id != token_auth.current_user()[0].user_id:
+            raise UnauthorizedUser(message="Only the reporter of this record can edit or delete it.")

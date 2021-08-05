@@ -48,3 +48,19 @@ def test_get_medical_imaging(test_client):
     assert response.json[0]['image_origin_location'] ==  doctor_medical_imaging_data['image_origin_location']
     assert response.json[0]['image_date'] ==  doctor_medical_imaging_data['image_date']
     assert response.json[0]['image_read'] ==  doctor_medical_imaging_data['image_read']
+
+def test_delete_medical_imaging(test_client):
+    response = test_client.delete(
+        f'/doctor/images/{test_client.client_id}/?image_id=1',
+        headers=test_client.client_auth_header,
+        content_type='application/json')
+
+    assert response.status_code == 204
+
+    response = test_client.get(
+        f'/doctor/images/{test_client.client_id}/',
+        headers=test_client.client_auth_header,
+        content_type='application/json')
+
+    assert response.status_code == 200
+    assert len(response.json) == 1
