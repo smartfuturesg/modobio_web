@@ -3,12 +3,12 @@ delete from "LookupTerritoriesofOperation"
 alter sequence "LookupTerritoriesofOperation_idx_seq"
   restart with 1;
 
-delete from "LookupCountriesofOperation" 
+delete from "LookupCountriesOfOperations" 
 			where idx >= 1;
-alter sequence "LookupCountriesOfOperation_idx_seq"
+alter sequence "LookupCountriesOfOperations_idx_seq"
   restart with 1;
 
-INSERT INTO "LookupCountriesOfOperation" ("country")
+INSERT INTO "LookupCountriesOfOperations" ("country")
 VALUES
 ('USA');
 

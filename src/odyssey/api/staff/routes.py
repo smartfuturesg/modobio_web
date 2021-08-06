@@ -16,10 +16,12 @@ from odyssey.api.staff.models import (
     StaffRoles,
     StaffRecentClients,
     StaffProfile,
-    StaffCalendarEvents)
+    StaffCalendarEvents,
+    StaffOffices)
 from odyssey.api.user.models import User, UserLogin, UserTokenHistory, UserProfilePictures
+from odyssey.api.lookup.models import LookupCountriesOfOperations
 from odyssey.utils.auth import token_auth, basic_auth
-from odyssey.utils.errors import UnauthorizedUser, StaffEmailInUse, InputError, MethodNotAllowed
+from odyssey.utils.errors import UnauthorizedUser, StaffEmailInUse, InputError, MethodNotAllowed, GenericNotFound
 from odyssey.utils.misc import check_staff_existence, FileHandling
 from odyssey.utils.constants import ALLOWED_IMAGE_TYPES, IMAGE_MAX_SIZE, IMAGE_DIMENSIONS
 from odyssey.api.user.schemas import UserSchema, StaffInfoSchema
@@ -33,7 +35,7 @@ from odyssey.api.staff.schemas import (
     StaffCalendarEventsSchema,
     StaffCalendarEventsUpdateSchema,
     StaffOfficesSchema)
-from odyssey.utils.base import BaseResource
+from odyssey.utils.base.resources import BaseResource
 
 
 ns = Namespace('staff', description='Operations related to staff members')
@@ -929,6 +931,8 @@ class StaffOfficesRoute(BaseResource):
         if not country:
             raise GenericNotFound(f'No country exists with the country_id {request.parsed_obj.country_id}.')
 
+        request.parsed_obj.user_id = user_id
+
         db.session.add(request.parsed_obj)
         db.session.commit()
 
@@ -941,7 +945,7 @@ class StaffOfficesRoute(BaseResource):
     @token_auth.login_required(user_type=('staff_self',))
     @accepts(schema=StaffOfficesSchema, api=ns)
     @responds(schema=StaffOfficesSchema, status_code=201, api=ns)
-    def post(self, user_id):
+    def put(self, user_id):
         """
         Update office data for a professional.
         """
@@ -971,7 +975,7 @@ class StaffOfficesRoute(BaseResource):
         Retrieve office data for a professional.
         """
 
-        office = StaffOffices.query.filter_by(user_id=user_id).one_or_none
+        office = StaffOffices.query.filter_by(user_id=user_id).one_or_none()
 
         if not office:
             raise GenericNotFound(f'No office data exists for the staff member with user id {user_id}.')

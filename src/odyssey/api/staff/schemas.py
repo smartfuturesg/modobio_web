@@ -10,7 +10,7 @@ from odyssey.api.staff.models import(
     StaffCalendarEvents,
     StaffOffices
 ) 
-from odyssey.utils.base import BaseSchema
+from odyssey.utils.base.schemas import BaseSchema
 from odyssey.utils.constants import ACCESS_ROLES, EVENT_AVAILABILITY, BOOKINGS_STATUS, RECURRENCE_TYPE
 
 """
@@ -112,12 +112,14 @@ class StaffCalendarEventsUpdateSchema(Schema):
     entire_series = fields.Boolean(missing=False)
     previous_start_date = fields.Date(required=True)
 
-class StaffOfficesSchema(BaseSchema):
+class StaffOfficesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        model = StaffOffice
-        load_only = ('country_id',)
+        model = StaffOffices
+        exclude = ('created_at', 'updated_at', 'idx')
 
+    country_id = fields.Integer(load_only=True)
     country = fields.String(dump_only=True)
+    phone_type = fields.String(validate=validate.OneOf('primary', 'cell', 'work', 'home', 'fax', 'night', 'beeper'))
 
     @post_load
     def make_object(self, data, **kwargs):
