@@ -100,16 +100,16 @@ class LookupTerritoriesofOperation(BaseModelWithIdx):
     where a sub_territory is the highest level of governing region that can have
     laws which will impact our business practices. 
 
-    In the UNited States, the su_territory will be at the state level.
+    In the United States, the sub_territory will be at the state level.
 
     Staff members are required to specify which territories they can operate in. 
     """
 
-    country = db.Column(db.String)
+    country_id = db.Column(db.Integer, db.ForeignKey('LookupCountriesOfOperations.idx'))
     """
-    countries of operations
+    Country in which this territory resides
     
-    :type: str
+    :type: int, foreign key(LookupCountriesOfOperations.idx)
     """
 
     sub_territory = db.Column(db.String)
