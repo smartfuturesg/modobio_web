@@ -119,7 +119,7 @@ class StaffOfficesSchema(ma.SQLAlchemyAutoSchema):
 
     country_id = fields.Integer(load_only=True)
     country = fields.String(dump_only=True)
-    phone_type = fields.String(validate=validate.OneOf('primary', 'cell', 'work', 'home', 'fax', 'night', 'beeper'))
+    phone_type = fields.String(validate=validate.OneOf(('primary', 'cell', 'work', 'home', 'fax', 'night', 'beeper')))
 
     @post_load
     def make_object(self, data, **kwargs):
