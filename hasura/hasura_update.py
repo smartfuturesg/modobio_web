@@ -54,7 +54,6 @@ from default_permissions import (
     client_default_update_permission,
     client_default_delete_permission,
     default_unfiltered_select_permission,
-    STAFF_SELECT_ONLY,
     staff_default_select_permission,
     staff_default_insert_permission,
     staff_default_update_permission,
@@ -66,6 +65,7 @@ from odyssey.config import database_uri
 here = pathlib.Path(__file__).parent
 hasura_tables_file = here / 'metadata' / 'tables.yaml'
 hasura_no_track_file = here / 'metadata' / 'tables-no-track.yaml'
+hasura_read_only_file = here / 'metadata' / 'tables-read-only.yaml'
 
 def first_letter(string: str) -> int:
     """ Return the index of the first non-underscore character in a string. """
@@ -135,10 +135,14 @@ db_uri = database_uri(docstring=__doc__)
 engine = create_engine(db_uri)
 inspector = inspect(engine)
 
-# Read exception file
+# Read exception files
 hasura_no_track = []
 with hasura_no_track_file.open() as fh:
     hasura_no_track = yaml.safe_load(fh)
+
+hasura_read_only = []
+with hasura_read_only_file.open() as fh:
+    hasura_read_only = yaml.safe_load(fh)
 
 hasura_tables = []
 hasura_tables_idx = {}
@@ -159,14 +163,11 @@ for schema in sorted(inspector.get_schema_names()):
         table = {
             'table': {
                 'schema': schema,
-                'name': tablename
-            },
+                'name': tablename},
             'configuration': {
-                'custom_column_names': {}
-            },
+                'custom_column_names': {}},
             'object_relationships': [],
-            'array_relationships': []
-        }
+            'array_relationships': []}
 
         # Add custom column names
         for column in inspector.get_columns(tablename, schema=schema):
@@ -202,39 +203,41 @@ for schema in sorted(inspector.get_schema_names()):
             'User',
             'Wearables']
 
-        if (
-                any(col in permissible_columns for col in ['user_id', 'client_user_id', 'staff_user_id'])
-                and any(tablename.startswith(prefix) for prefix in allowed_prefixes)
-            ):
+        if (any(col in permissible_columns for col in ['user_id', 'client_user_id', 'staff_user_id'])
+            and any(tablename.startswith(prefix) for prefix in allowed_prefixes)):
+
             select_permission_client = client_default_select_permission(columns=permissible_columns)
-            insert_permission_client = client_default_insert_permission(columns=permissible_columns)
-            update_permission_client = client_default_update_permission(columns=permissible_columns)
-            # delete_permission_client = client_default_delete_permission(columns=permissible_columns)
-
             select_permission_staff = staff_default_select_permission(columns=permissible_columns, filtered=True)
-            insert_permission_staff = staff_default_insert_permission(columns=permissible_columns)
-            update_permission_staff = staff_default_update_permission(columns=permissible_columns)
-            # delete_permission_staff = staff_default_delete_permission(columns=permissible_columns)
 
-        # Tables here require API in order to for the FE to work with. We will allow select access only for the following.
-        elif (
-                any(col in permissible_columns for col in ['user_id','client_user_id', 'staff_user_id'])
-                and any(tablename.startswith(prefix) for prefix in ['Telehealth'])
-            ):
+            if tablename not in hasura_read_only:
+                insert_permission_client = client_default_insert_permission(columns=permissible_columns)
+                update_permission_client = client_default_update_permission(columns=permissible_columns)
+                # delete_permission_client = client_default_delete_permission(columns=permissible_columns)
+
+                insert_permission_staff = staff_default_insert_permission(columns=permissible_columns)
+                update_permission_staff = staff_default_update_permission(columns=permissible_columns)
+                # delete_permission_staff = staff_default_delete_permission(columns=permissible_columns)
+
+        # Tables here require API in order to for the FE to work with.
+        # We will allow select access only for the following.
+        elif (any(col in permissible_columns for col in ['user_id','client_user_id', 'staff_user_id'])
+              and any(tablename.startswith(prefix) for prefix in ['Telehealth'])):
+
             select_permission_client = client_default_select_permission(columns=permissible_columns)
             select_permission_staff = staff_default_select_permission(columns=permissible_columns, filtered=True)
 
         # Lookup tables
         # we still have a few medical lookup tables so the Medical prefix is included here
-        elif (
-                not any(col in permissible_columns for col in ['user_id', 'client_user_id', 'staff_user_id'])
-                and any(tablename.startswith(prefix) for prefix in ['Lookup', 'Medical'])
-            ):
+        elif (not any(col in permissible_columns for col in ['user_id', 'client_user_id', 'staff_user_id'])
+              and any(tablename.startswith(prefix) for prefix in ['Lookup', 'Medical'])):
+
             select_permission_client = default_unfiltered_select_permission(
-                columns=permissible_columns, user_type = 'client')
+                columns=permissible_columns,
+                user_type='client')
 
             select_permission_staff = default_unfiltered_select_permission(
-                columns=permissible_columns, user_type = 'staff')
+                columns=permissible_columns,
+                user_type='staff')
 
         # staff specific data
         elif any(tablename.startswith(prefix) for prefix in ['Staff', 'System']):
@@ -330,9 +333,7 @@ for table in hasura_tables:
         obj = {
             'name': relationship_name,
             'using': {
-                'foreign_key_constraint_on': column
-            }
-        }
+                'foreign_key_constraint_on': column}}
 
         table['object_relationships'].append(obj)
 
@@ -360,14 +361,9 @@ for table in hasura_tables:
                     'manual_configuration': {
                         'remote_table': {
                             'schema': schema,
-                            'name': tablename
-                        },
+                            'name': tablename},
                         'column_mapping': {
-                            f_column: column
-                        }
-                    }
-                }
-            }
+                            f_column: column}}}}
 
             f_table['object_relationships'].append(obj)
         else:
@@ -392,11 +388,7 @@ for table in hasura_tables:
                         'column': column,
                         'table': {
                             'schema': schema,
-                            'name': tablename
-                        }
-                    }
-                }
-            }
+                            'name': tablename}}}}
 
             f_table['array_relationships'].append(arr)
 

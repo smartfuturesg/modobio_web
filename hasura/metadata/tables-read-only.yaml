@@ -1,0 +1,13 @@
+# List of tables that should NOT gain write (insert/update/delete) permission.
+# Please leave a reason why when adding to this list.
+
+# Notifications trigger a background task which sets the TTL on insert.
+- Notifications
+
+# ClientInfo and User tables have their Elasticsearch indices updated on isert.
+- ClientInfo
+- User
+
+# MedicalBloodTests inserts trigger an analysis of the blood test results.
+- MedicalBloodTests
+

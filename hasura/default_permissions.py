@@ -1,7 +1,4 @@
-"""
-TODO:
-***5.3.21 UPDATE**
-    All users may only access their own data. No mutation permissions are currently assigned.
+""" Default permissions for Hasura GraphQL.
 
 Hasura gives us flexibility to authorize user access through special claims embedded in our JWTs.
 These claims should summarize a user’s level of access when requesting a resource from our database.
