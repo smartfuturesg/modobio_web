@@ -1,48 +1,30 @@
-
-import time 
+import time
 
 from flask.json import dumps
 
 from odyssey.api.user.models import User, UserLogin
-from odyssey.api.trainer.models import PowerAssessment 
+from odyssey.api.trainer.models import PowerAssessment
 from .data import trainer_medical_physical_data, trainer_power_assessment_data
 
-def test_post_power_assessment(test_client, init_database, staff_auth_header):
-    """
-    GIVEN a api end point for power assessment
-    WHEN the '/trainer/assessment/power/<user_id>' resource  is requested (POST)
-    THEN check the response is valid
-    """
-    # get staff authorization to view client data
+def test_post_power_assessment(test_client):
 
-    
-    
     payload = trainer_power_assessment_data
-    # send get request for client info on user_id = 1 
-    response = test_client.post('/trainer/assessment/power/1/',
-                                headers=staff_auth_header, 
-                                data=dumps(payload), 
-                                content_type='application/json')
+    response = test_client.post(
+        f'/trainer/assessment/power/{test_client.client_id}/',
+        headers=test_client.staff_auth_header,
+        data=dumps(payload),
+        content_type='application/json')
 
     assert response.status_code == 201
     assert response.json['lower_watts_per_kg'] == trainer_power_assessment_data['lower_watts_per_kg']
     assert response.json['leg_press']['bilateral']['attempt_1'] == trainer_power_assessment_data['leg_press']['bilateral']['attempt_1']
 
-def test_get_power_assessment(test_client, init_database, staff_auth_header):
-    """
-    GIVEN a api end point for retrieving all power assessments
-    WHEN the  '/trainer/assessment/power/<user_id>' resource  is requested (GET)
-    THEN check the response is valid
-    """
-    # get staff authorization to view client data
+def test_get_power_assessment(test_client):
+    response = test_client.get(
+        f'/trainer/assessment/power/{test_client.client_id}/',
+        headers=test_client.staff_auth_header,
+        content_type='application/json')
 
-    
-
-    # send get request for client info on user_id = 1 
-    response = test_client.get('/trainer/assessment/power/1/',
-                                headers=staff_auth_header, 
-                                content_type='application/json')
-                                
     assert response.status_code == 200
     assert response.json[0]['lower_watts_per_kg'] == 100
     assert response.json[0]['leg_press']['bilateral']['attempt_1'] == 21

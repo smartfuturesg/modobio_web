@@ -2,31 +2,19 @@ from flask.json import dumps
 
 from .data import notification, notification_type, notification_update
 
-def test_notifications_post(test_client, init_database, client_auth_header):
-        """
-        GIVEN an API endpoint for creating notifications,
-        WHEN the POST /notifications/<user_id>/ resource is requested,
-        THEN check that the response is valid.
-        """
-
+def test_notifications_post(test_client):
         response = test_client.post(
-            '/notifications/1/',
-            headers=client_auth_header,
+            f'/notifications/{test_client.client_id}/',
+            headers=test_client.client_auth_header,
             data=dumps(notification),
             content_type='application/json')
 
         assert response.status_code == 201
 
-def test_notifications_get(test_client, init_database, client_auth_header):
-        """
-        GIVEN an API endpoint for retrieving notifications,
-        WHEN the GET /notifications/<user_id>/ resource is requested,
-        THEN check that the response is valid.
-        """
-
+def test_notifications_get(test_client):
         response = test_client.get(
-            '/notifications/1/',
-            headers=client_auth_header,
+            f'/notifications/{test_client.client_id}/',
+            headers=test_client.client_auth_header,
             content_type='application/json')
 
         assert response.status_code == 200
@@ -41,16 +29,10 @@ def test_notifications_get(test_client, init_database, client_auth_header):
         assert notif.get('deleted') == notification['deleted']
         assert notif.get('notification_type') == notification_type
 
-def test_notifications_put(test_client, init_database, client_auth_header):
-        """
-        GIVEN an API endpoint for updating notifications,
-        WHEN the PUT /notifications/<user_id>/<notification_id>/ resource is requested,
-        THEN check that the response is valid.
-        """
-
+def test_notifications_put(test_client):
         response = test_client.put(
-            '/notifications/1/1/',
-            headers=client_auth_header,
+            f'/notifications/{test_client.client_id}/1/',
+            headers=test_client.client_auth_header,
             data=dumps(notification_update),
             content_type='application/json')
 
@@ -58,8 +40,8 @@ def test_notifications_put(test_client, init_database, client_auth_header):
 
         # No output from PUT, check again.
         response = test_client.get(
-            '/notifications/1/',
-            headers=client_auth_header, 
+            f'/notifications/{test_client.client_id}/',
+            headers=test_client.client_auth_header,
             content_type='application/json')
 
         assert response.status_code == 200

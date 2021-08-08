@@ -1,45 +1,53 @@
+import pytest
+
 from flask.json import dumps
+
+from odyssey.api.user.models import UserSubscriptions
 
 from .data import users_subscription_data
 
+# Main test user client@modobio.com already has a subscription,
+# per database/0003_seed_users.sql
+# If that changes at any point, request the below fixture in any of the tests.
 
-def test_get_user_subscription(test_client, init_database, staff_auth_header):
-    """
-    GIVEN a api end point for user subscription (GET)
-    WHEN the '/user/subscription/' resource is requested
-    THEN check the response is valid
-    """
+@pytest.fixture(scope='module')
+def subscription(test_client):
+    sub = UserSubscriptions(
+        user_id=test_client.client_id,
+        is_staff=False,
+        subscription_status='unsubscribed',
+        subscription_type_id=1)
 
-    #test GET method on client user_id = 1
-    response = test_client.get('/user/subscription/1/',
-                                headers=staff_auth_header,
-                                content_type='application/json')
-    
+    test_client.db.session.add(sub)
+    test_client.db.session.commit()
+
+def test_get_user_subscription(test_client):
+    response = test_client.get(
+        f'/user/subscription/{test_client.client_id}/',
+        headers=test_client.client_auth_header,
+        content_type='application/json')
+
     # some simple checks for validity
     assert response.status_code == 200
 
-def test_put_user_subscription(test_client, init_database, staff_auth_header):
-    """
-    GIVEN a api end points for user subscriptions
-    WHEN the '/user/subscription/' resource is requested (PUT) 
-    THEN check the user's active subscription is udpated
-    """
-
-    response = test_client.put('/user/subscription/1/',
-                                headers=staff_auth_header,
-                                data=dumps(users_subscription_data), 
-                                content_type='application/json')
+def test_put_user_subscription(test_client):
+    response = test_client.put(
+        f'/user/subscription/{test_client.client_id}/',
+        headers=test_client.client_auth_header,
+        data=dumps(users_subscription_data),
+        content_type='application/json')
 
     assert response.status_code == 201
-    assert response.get_json()['subscription_status'] == 'subscribed'
+    assert response.json['subscription_status'] == 'subscribed'
 
     #test method with invalid subscription_type
     users_subscription_data['subscription_type_id'] = 9999
 
-    response = test_client.put('/user/subscription/1/',
-                                headers=staff_auth_header,
-                                data=dumps(users_subscription_data), 
-                                content_type='application/json')
+    response = test_client.put(
+        f'/user/subscription/{test_client.client_id}/',
+        headers=test_client.client_auth_header,
+        data=dumps(users_subscription_data),
+        content_type='application/json')
 
     assert response.status_code == 400
 
@@ -47,23 +55,18 @@ def test_put_user_subscription(test_client, init_database, staff_auth_header):
     users_subscription_data['subscription_type_id'] = 2
     users_subscription_data['is_staff'] = True
 
-    response = test_client.put('/user/subscription/1/',
-                                headers=staff_auth_header,
-                                data=dumps(users_subscription_data), 
-                                content_type='application/json')
+    response = test_client.put(
+        f'/user/subscription/{test_client.client_id}/',
+        headers=test_client.client_auth_header,
+        data=dumps(users_subscription_data),
+        content_type='application/json')
 
-    assert response.status_code == 404    
+    assert response.status_code == 404
 
-def test_get_subscription_history(test_client, init_database, staff_auth_header):
-    """
-    GIVEN a api end point for user subscription history
-    WHEN the '/user/subscription/history/' GET resource is requested
-    THEN check the response is valid
-    """
-
-    #test GET method on client user_id = 1
-    response = test_client.get('/user/subscription/history/1/',
-                                headers=staff_auth_header,
-                                content_type='application/json')
+def test_get_subscription_history(test_client):
+    response = test_client.get(
+        f'/user/subscription/history/{test_client.client_id}/',
+        headers=test_client.client_auth_header,
+        content_type='application/json')
 
     assert response.status_code == 200

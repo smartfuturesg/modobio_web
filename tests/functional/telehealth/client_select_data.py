@@ -185,7 +185,7 @@ telehealth_queue_client_3_data = {
 #--------
 
 # add a new availability for staff member
-telehealth_staff_full_avilability ={
+telehealth_staff_full_availability = {
   'settings': {
     'timezone': 'UTC',
     'auto_confirm': True

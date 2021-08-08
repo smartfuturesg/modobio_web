@@ -3,38 +3,22 @@ from flask.json import dumps
 from odyssey.api.user.models import User, UserLogin
 from .data import clients_individual_data
 
-def test_post_client_individual_contract(test_client, init_database, staff_auth_header):
-    """
-    GIVEN a api end point for posting client individual contract
-    WHEN the '/client/servicescontract/<client id>' resource  is requested (POST)
-    THEN check the response is valid
-    """
-    # get staff authorization to view client data
-    
-
+def test_post_client_individual_contract(test_client):
     payload = clients_individual_data
-    # send get request for client info on user_id = 1 
-    response = test_client.post('/client/servicescontract/1/',
-                                headers=staff_auth_header, 
-                                data=dumps(payload), 
-                                content_type='application/json')
+    response = test_client.post(
+        f'/client/servicescontract/{test_client.client_id}/',
+        headers=test_client.client_auth_header,
+        data=dumps(payload),
+        content_type='application/json')
+
     assert response.status_code == 201
     assert response.json['doctor'] == clients_individual_data['doctor']
 
-def test_get_client_individual_contract(test_client, init_database, staff_auth_header):
-    """
-    GIVEN a api end point for retrieving the client individual contract
-    WHEN the '/client/servicescontract/<client id>' resource  is requested (GET)
-    THEN check the response is valid
-    """
-    # get staff authorization to view client data
-    
+def test_get_client_individual_contract(test_client):
+    response = test_client.get(
+        f'/client/servicescontract/{test_client.client_id}/',
+        headers=test_client.client_auth_header,
+        content_type='application/json')
 
-    # send get request for client info on user_id = 1 
-    response = test_client.get('/client/servicescontract/1/',
-                                headers=staff_auth_header, 
-                                content_type='application/json')
-                                
     assert response.status_code == 200
     assert response.json['doctor'] == True
-    

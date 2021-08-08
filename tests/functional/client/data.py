@@ -146,18 +146,6 @@ clients_individual_data = {
     'signature': signature
 }
 
-clients_clinical_care_team = {
-    "care_team" : [
-        {
-            "team_member_email": "test_client@modomodo.com"
-        },
-        {
-            "team_member_email": "test_client_two@modomodo.com"
-        },
-    ]
-    
-    }
-
 clients_assigned_drinks = {
     "drink_id": 1
 }
