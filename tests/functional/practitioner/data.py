@@ -1,4 +1,3 @@
-
 pracitioner_affiliation_data = {
     'organization_1': {
         'organization_idx': 1

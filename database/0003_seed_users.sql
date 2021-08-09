@@ -53,7 +53,7 @@ INSERT INTO "UserSubscriptions" ("user_id", "is_staff", "start_date", "subscript
 (22, false, '2021-01-01', 'unsubscribed', 1);
 
 INSERT INTO  "PaymentMethods" ("user_id", "payment_id", "payment_type", "number", "is_default") VALUES
-(22, 1, 'Visa', 1234, true);
+(22, 1, 'VISA', 1234, true);
 
 INSERT INTO "StaffProfile" ("user_id", "membersince") VALUES
 (1, '2021-01-01'),
