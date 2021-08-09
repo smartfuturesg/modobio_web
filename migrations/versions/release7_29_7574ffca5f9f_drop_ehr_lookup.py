@@ -1,7 +1,7 @@
 """drop ehr lookup
 
 Revision ID: 7574ffca5f9f
-Revises: a2b1226364ee
+Revises: 8bf3a7337331
 Create Date: 2021-08-06 04:07:07.784850
 
 """
@@ -11,7 +11,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = '7574ffca5f9f'
-down_revision = 'a2b1226364ee'
+down_revision = '8bf3a7337331'
 branch_labels = None
 depends_on = None
 

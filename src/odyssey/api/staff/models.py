@@ -168,7 +168,6 @@ class StaffOperationalTerritories(BaseModelWithIdx, UserIdFkeyMixin):
 class StaffCalendarEvents(BaseModelWithIdx, UserIdFkeyMixin):
     """ 
     Model for events to be saved to the professional's calendar 
-
     """
     start_date = db.Column(db.Date, nullable=False)
     """
@@ -257,3 +256,70 @@ class StaffCalendarEvents(BaseModelWithIdx, UserIdFkeyMixin):
     :type: str
     """
 
+class StaffOffices(BaseModelWithIdx, UserIdFkeyMixin):
+    """
+    Model for information regarding a staff member's office for DoseSpot integration.
+    """
+
+    street = db.Column(db.String)
+    """
+    Street address for this office.
+
+    :type: str
+    """
+
+    city = db.Column(db.String(35))
+    """
+    City where this office resides.
+
+    :type: str
+    """
+
+    state = db.Column(db.String(35))
+    """
+    State where this office resides.
+
+    :type: str
+    """
+
+    zipcode = db.Column(db.String(20))
+    """
+    ZIP code where this office resides.
+
+    :type: str
+    """
+
+    country_id = db.Column(db.Integer, db.ForeignKey('LookupCountriesOfOperations.idx'))
+    """
+    Country where this office resides.
+
+    :type: int, foreign key(LookupCountriesOfOperations.idx)
+    """
+
+    email = db.Column(db.String(100))
+    """
+    Email address used to contact this office.
+
+    :type: str
+    """
+
+    fax = db.Column(db.String(20))
+    """
+    Fax number used by this office.
+
+    :type: str
+    """
+
+    phone = db.Column(db.String(20))
+    """
+    Phone number used by this office.
+
+    :type: str
+    """
+
+    phone_type = db.Column(db.String(7))
+    """
+    Type of phone the number belongs to. Options are: primary, cell, work, home, fax, night, beeper.
+
+    :type: str
+    """
