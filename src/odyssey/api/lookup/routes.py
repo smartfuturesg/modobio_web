@@ -16,7 +16,6 @@ from odyssey.api.lookup.models import (
      LookupDefaultHealthMetrics,
      LookupDrinks, 
      LookupDrinkIngredients,
-     LookupEHRPages, 
      LookupGoals, 
      LookupProfessionalAppointmentConfirmationWindow,
      LookupRaces,
@@ -327,8 +326,13 @@ class LookupClinicalCareTeamResourcesApi(Resource):
     @responds(schema=LookupEHRPagesOutputSchema, api=ns)
     def get(self):
         """get contents of clinical care team resources lookup table"""
-        res = LookupEHRPages.query.all()
-        return {'total_items': len(res), 'items': res}
+        care_team_resources = LookupClinicalCareTeamResources.query.all()
+
+        # add display grouping details
+        for dat in care_team_resources:
+            dat.display_grouping = dat.access_group + (f'.{dat.resource_group}' if dat.resource_group else '')
+
+        return {'total_items': len(care_team_resources), 'items': care_team_resources}
         
 @ns.route('/subscriptions/')
 class LookupSubscriptionsApi(Resource):

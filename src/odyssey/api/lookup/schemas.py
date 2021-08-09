@@ -10,7 +10,6 @@ from odyssey.api.lookup.models import (
     LookupDefaultHealthMetrics,
     LookupDrinks, 
     LookupDrinkIngredients,
-    LookupEHRPages, 
     LookupGoals, 
     LookupProfessionalAppointmentConfirmationWindow,
     LookupRaces,
@@ -146,31 +145,20 @@ class LookupCareTeamResourcesSchema(ma.SQLAlchemyAutoSchema):
     def make_object(self, data, **kwargs):
         return LookupClinicalCareTeamResources(**data)
 
-class LookupCareTeamResourcesDisplayNamesSchema(ma.SQLAlchemyAutoSchema):
-    """
-    Schema only used for requrning display names, excluding resource_id
-    This will eventually replace the schema above
-
-    """
-    class Meta:
-        model = LookupClinicalCareTeamResources
-        exclude = ('created_at', 'updated_at', 'resource_name')
-
-
 class LookupCareTeamResourcesOutputSchema(Schema):
     items = fields.Nested(LookupCareTeamResourcesSchema(many=True), missing = [])
     total_items = fields.Integer()
 
 class LookupEHRPagesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        model = LookupEHRPages
-        exclude = ('created_at', 'updated_at', 'resource_group_name', 'resource_group_id')
+        model = LookupClinicalCareTeamResources
+        exclude = ('created_at', 'updated_at', 'resource_group','access_group', 'resource_name')
     
-    resources = fields.Nested(LookupCareTeamResourcesDisplayNamesSchema(many=True), missing = [])
-    
+    display_grouping = fields.String()
+
     @post_load
     def make_object(self, data, **kwargs):
-        return LookupEHRPages(**data)
+        return LookupClinicalCareTeamResources(**data)
 
 
 class LookupEHRPagesOutputSchema(Schema):

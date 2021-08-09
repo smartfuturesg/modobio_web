@@ -27,11 +27,6 @@ insert into "ClientClinicalCareTeamAuthorizations" ("user_id", "team_member_user
 (22, 10, 9, 'accepted'),
 (22, 10, 10, 'accepted'),
 (22, 10, 11, 'accepted'),
-(22, 10, 12, 'accepted'),
-(22, 10, 13, 'accepted'),
-(22, 10, 14, 'accepted'),
-(22, 10, 15, 'accepted'),
-(22, 10, 16, 'accepted'),
 (22, 14, 1, 'accepted'),
 (22, 14, 2, 'accepted'),
 (22, 14, 3, 'accepted'),
@@ -42,9 +37,4 @@ insert into "ClientClinicalCareTeamAuthorizations" ("user_id", "team_member_user
 (22, 14, 8, 'accepted'),
 (22, 14, 9, 'accepted'),
 (22, 14, 10, 'accepted'),
-(22, 14, 11, 'accepted'),
-(22, 14, 12, 'accepted'),
-(22, 14, 13, 'accepted'),
-(22, 14, 14, 'accepted'),
-(22, 14, 15, 'accepted'),
-(22, 14, 16, 'accepted');
+(22, 14, 11, 'accepted');
