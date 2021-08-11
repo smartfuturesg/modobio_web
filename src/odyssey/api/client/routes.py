@@ -50,13 +50,15 @@ from odyssey.api.doctor.models import (
     MedicalSocialHistory
 )
 from odyssey.api.lookup.models import (
-    LookupClinicalCareTeamResources, 
+    LookupClinicalCareTeamResources,
+    LookupCountriesOfOperations,
     LookupDefaultHealthMetrics,
     LookupGoals, 
     LookupDrinks,
     LookupMacroGoals, 
     LookupRaces,
-    LookupNotifications
+    LookupNotifications,
+    LookupTerritoriesOfOperations
 )
 from odyssey.api.physiotherapy.models import PTHistory 
 from odyssey.api.staff.models import StaffProfile, StaffRecentClients, StaffRoles
@@ -324,6 +326,11 @@ class Client(BaseResource):
         client_info_payload["race_information"] = db.session.query(ClientRaceAndEthnicity.is_client_mother, LookupRaces.race_id, LookupRaces.race_name) \
             .join(LookupRaces, LookupRaces.race_id == ClientRaceAndEthnicity.race_id) \
             .filter(ClientRaceAndEthnicity.user_id == user_id).all()
+        territory = LookupTerritoriesOfOperations.query.filter_by(idx=client_data.territory_id).one_or_none()
+        if territory:
+            client_info_payload["country"] = LookupCountriesOfOperations.query.filter_by(idx=territory.country_id).one_or_none().country
+            client_info_payload["territory"] = territory.sub_territory
+            client_info_payload["territory_abbreviation"] = territory.sub_territory_abbreviation
 
         #Include profile picture in different sizes
         if client_data.profile_pictures:
@@ -366,6 +373,13 @@ class Client(BaseResource):
             recommendation.user_id = user_id
             db.session.add(recommendation)
 
+        #validate territory_id if supplied
+        if 'territory_id' in request.parsed_obj['client_info'].keys():
+            territory_id = request.parsed_obj['client_info']['territory_id']
+            territory = LookupTerritoriesOfOperations.query.filter_by(idx=territory_id).one_or_none()
+            if not territory:
+                raise GenericNotFound(f'No territory exists with the territory_id {territory_id}.')
+
         #update both tables with request data
         client_info = request.parsed_obj['client_info']
         if client_info:
@@ -396,6 +410,10 @@ class Client(BaseResource):
         client_info_payload["race_information"] = db.session.query(ClientRaceAndEthnicity.is_client_mother, LookupRaces.race_id, LookupRaces.race_name) \
             .join(LookupRaces, LookupRaces.race_id == ClientRaceAndEthnicity.race_id) \
             .filter(ClientRaceAndEthnicity.user_id == user_id).all()
+        if territory:
+            client_info_payload["country"] = LookupCountriesOfOperations.query.filter_by(idx=territory.country_id).one_or_none().country
+            client_info_payload['territory'] = territory.sub_territory
+            client_info_payload['territory_abbreviation'] = territory.sub_territory_abbreviation
         
         #Not returning profile picture since it can't be edited through PUT
 

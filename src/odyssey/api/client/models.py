@@ -58,22 +58,26 @@ class ClientInfo(BaseModel):
     :type: str, max length 50
     """
 
-    state = db.Column(db.String(2))
+    street = db.Column(db.String(70))
     """
-    Client address state.
+    Street address for this client.
 
-    Currently only US States. Defaults to AZ.
-
-    :type: str, max length 2
+    :type: str, max length 70
     """
 
-    country = db.Column(db.String(2))
+    city = db.Column(db.String(35))
     """
-    Client address country.
+    City address for this client.
 
-    Currently defaults to US.
+    :type: str, max length 35
+    """
 
-    :type: str, max length 2
+    territory_id = db.Column(db.Integer, db.ForeignKey('LookupTerritoriesOfOperations.idx'))
+    """
+    Client address territory. Foreign key gives information about both the state/province/etc. as
+    well as the country.
+
+    :type: int, foreign key(LookupTerritoriesOfOperations.idx)
     """
 
     preferred = db.Column(db.SmallInteger)
