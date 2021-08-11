@@ -137,7 +137,7 @@ staff_office_data = {
   "normal_data": {
     "city": "Phoenix",
     "phone_type": "primary",
-    "country_id": 1,
+    "territory_id": 2,
     "zipcode": "85260",
     "state": "AZ",
     "email": "string@modobio.com",
@@ -148,7 +148,7 @@ staff_office_data = {
   "normal_data_2": {
     "city": "Tucson",
     "phone_type": "home",
-    "country_id": 1,
+    "territory_id": 2,
     "zipcode": "85641",
     "state": "AZ",
     "email": "string@modobio.com",
@@ -156,10 +156,10 @@ staff_office_data = {
     "street": "123 Place St.",
     "fax": "1234569"
   },
-  "invalid_country_id": {
+  "invalid_territory_id": {
     "city": "Phoenix",
     "phone_type": "primary",
-    "country_id": 2,
+    "territory_id": 999,
     "zipcode": "85260",
     "state": "AZ",
     "email": "string@modobio.com",
@@ -170,7 +170,7 @@ staff_office_data = {
   "too_long": {
     "city": "Phoenix",
     "phone_type": "primary",
-    "country_id": 1,
+    "territory_id": 2,
     "zipcode": "85260",
     "state": "AZ",
     "email": "string@modobio.com",
@@ -181,7 +181,7 @@ staff_office_data = {
   "invalid_phone_type": {
     "city": "Phoenix",
     "phone_type": "invalid",
-    "country_id": 1,
+    "territory_id": 2,
     "zipcode": "85260",
     "state": "AZ",
     "email": "string@modobio.com",
