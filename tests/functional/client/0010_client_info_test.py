@@ -47,6 +47,7 @@ def test_put_client_info(test_client):
         headers=test_client.client_auth_header,
         data=dumps(client_info_put_test_data),
         content_type='application/json')
+    print(response.data)
 
     assert response.status_code == 200
     assert response.json["client_info"]["primary_goal"] == "('Recovery',)"

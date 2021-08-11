@@ -8,7 +8,7 @@ def test_post_staff_office(test_client):
                                 headers=test_client.staff_auth_header,
                                 data=dumps(staff_office_data['invalid_territory_id']),
                                 content_type='application/json')
-    print(response.data)
+
     # some simple checks for validity
     assert response.status_code == 404
 
