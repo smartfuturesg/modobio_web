@@ -373,13 +373,6 @@ class Client(BaseResource):
             recommendation.user_id = user_id
             db.session.add(recommendation)
 
-        #validate territory_id if supplied
-        if 'territory_id' in request.parsed_obj['client_info'].keys():
-            territory_id = request.parsed_obj['client_info']['territory_id']
-            territory = LookupTerritoriesOfOperations.query.filter_by(idx=territory_id).one_or_none()
-            if not territory:
-                raise GenericNotFound(f'No territory exists with the territory_id {territory_id}.')
-
         #update both tables with request data
         client_info = request.parsed_obj['client_info']
         if client_info:
@@ -410,7 +403,14 @@ class Client(BaseResource):
         client_info_payload["race_information"] = db.session.query(ClientRaceAndEthnicity.is_client_mother, LookupRaces.race_id, LookupRaces.race_name) \
             .join(LookupRaces, LookupRaces.race_id == ClientRaceAndEthnicity.race_id) \
             .filter(ClientRaceAndEthnicity.user_id == user_id).all()
-        if territory:
+
+        #validate territory_id if supplied
+        if 'territory_id' in request.parsed_obj['client_info'].keys():
+            territory_id = request.parsed_obj['client_info']['territory_id']
+            territory = LookupTerritoriesOfOperations.query.filter_by(idx=territory_id).one_or_none()
+            if not territory:
+                raise GenericNotFound(f'No territory exists with the territory_id {territory_id}.')
+
             client_info_payload["country"] = LookupCountriesOfOperations.query.filter_by(idx=territory.country_id).one_or_none().country
             client_info_payload['territory'] = territory.sub_territory
             client_info_payload['territory_abbreviation'] = territory.sub_territory_abbreviation
