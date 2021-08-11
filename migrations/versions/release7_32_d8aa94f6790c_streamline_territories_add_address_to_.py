@@ -30,6 +30,7 @@ def upgrade():
     )
     op.add_column('ClientInfo', sa.Column('street', sa.String(length=70), nullable=True))
     op.add_column('ClientInfo', sa.Column('city', sa.String(length=35), nullable=True))
+    op.add_column('ClientInfo', sa.Column('zipcode', sa.String(length=10), nullable=True))
     op.add_column('ClientInfo', sa.Column('territory_id', sa.Integer(), nullable=True))
     op.create_foreign_key(None, 'ClientInfo', 'LookupTerritoriesOfOperations', ['territory_id'], ['idx'])
     op.drop_column('ClientInfo', 'state')
@@ -67,6 +68,7 @@ def downgrade():
     op.drop_constraint(None, 'ClientInfo', type_='foreignkey')
     op.drop_column('ClientInfo', 'territory_id')
     op.drop_column('ClientInfo', 'city')
+    op.drop_column('ClientInfo', 'zipcode')
     op.drop_column('ClientInfo', 'street')
     op.create_table('LookupTerritoriesofOperation',
     sa.Column('created_at', postgresql.TIMESTAMP(), server_default=sa.text('clock_timestamp()'), autoincrement=False, nullable=True),

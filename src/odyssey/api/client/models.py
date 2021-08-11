@@ -72,6 +72,13 @@ class ClientInfo(BaseModel):
     :type: str, max length 35
     """
 
+    zipcode = db.Column(db.String(10))
+    """
+    Zipcode address for this client.
+
+    :type: str, max length 10
+    """
+
     territory_id = db.Column(db.Integer, db.ForeignKey('LookupTerritoriesOfOperations.idx'))
     """
     Client address territory. Foreign key gives information about both the state/province/etc. as
