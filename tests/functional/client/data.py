@@ -49,7 +49,7 @@ client_info_put_test_data = {
         "territory_id": 2,
         "street": "123 Test St.",
         "city": "Phoenix",
-        "zip": 85255,
+        "zipcode": 85255,
         "emergency_contact": "Emergency",
         "gender": "m",
         "guardianrole": "guardian role",
