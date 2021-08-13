@@ -1,7 +1,7 @@
 """medical credentials
 
 Revision ID: aabbac2cfa80
-Revises: a2b1226364ee
+Revises: 1ab60df860cc
 Create Date: 2021-08-09 11:37:34.190785
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'aabbac2cfa80'
-down_revision = 'a2b1226364ee'
+down_revision = '1ab60df860cc'
 branch_labels = None
 depends_on = None
 

@@ -33,6 +33,7 @@ from odyssey.api.facility.models import MedicalInstitutions
 from odyssey.api.user.models import User
 from odyssey.utils.auth import token_auth
 from odyssey.utils.errors import (
+    LoginNotAuthorized,
     UserNotFound, 
     IllegalSetting, 
     ContentNotFound,
@@ -72,6 +73,8 @@ from odyssey.api.doctor.schemas import (
     MedicalSocialHistoryOutputSchema,
     MedicalSurgeriesSchema
 )
+from odyssey.api.staff.models import StaffRoles
+
 from odyssey.utils.base.resources import BaseResource
 
 ns = Namespace('doctor', description='Operations related to doctor')
@@ -79,14 +82,25 @@ ns = Namespace('doctor', description='Operations related to doctor')
 @ns.route('/credentials/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedCredentials(BaseResource):
-    @token_auth.login_required(user_type=('staff_self',))
+    @token_auth.login_required(staff_role=('medical_doctor','staff_admin'))
     @responds(schema=MedicalCredentialsInputSchema,status_code=200,api=ns)
     def get(self,user_id):
         """
         GET Request for Pulling Medical Credentials for a practitioner
 
-        Staff Self 
+        User should be Staff Self and staff admin
         """
+        current_user, _ = token_auth.current_user()
+        staff_user_roles = db.session.query(StaffRoles.role).filter(StaffRoles.user_id==current_user.user_id).all()
+        staff_user_roles = [x[0] for x in staff_user_roles]
+        if current_user.user_id == user_id:
+            pass
+        else:
+            if 'staff_admin' in staff_user_roles:
+                pass
+            else:
+                raise LoginNotAuthorized
+
         query = db.session.execute(
             select(MedicalCredentials).
             where(
@@ -96,7 +110,7 @@ class MedCredentials(BaseResource):
 
         return {'items': query}
 
-    @token_auth.login_required(user_type=('staff_self',))
+    @token_auth.login_required(user_type=('staff_self',),staff_role=('medical_doctor',))
     @accepts(schema=MedicalCredentialsInputSchema, api=ns)
     @responds(schema=MedicalCredentialsInputSchema, status_code=201,api=ns)
     def post(self,user_id):
@@ -161,14 +175,14 @@ class MedCredentials(BaseResource):
                 db.session.commit()
         return payload
 
-    @token_auth.login_required
+    @token_auth.login_required(staff_role=('staff_admin',))
     @accepts(schema=MedicalCredentialsSchema,api=ns)
     @responds(status_code=201,api=ns)
     def put(self,user_id):
         """
         PUT Request for updating the status for medical credentials
 
-        User for this request should be the Community Manager
+        User for this request should be the Staff Admin
         """
 
         payload = request.json
@@ -185,16 +199,25 @@ class MedCredentials(BaseResource):
             raise InputError(status_code=405,message='Could not find those credentials')
         return
 
-    @token_auth.login_required
+    @token_auth.login_required(staff_role=('medical_doctor','staff_admin'))
     @accepts(schema=MedicalCredentialsSchema,api=ns)
     @responds(status_code=201,api=ns)
     def delete(self,user_id):
         """
         DELETE Request for deleting medical credentials
 
-        User for this request should be the Community Manager and Staff Self
+        User for this request should be the Staff Self and Staff Admin
         """
-
+        current_user, _ = token_auth.current_user()
+        staff_user_roles = db.session.query(StaffRoles.role).filter(StaffRoles.user_id==current_user.user_id).all()
+        staff_user_roles = [x[0] for x in staff_user_roles]
+        if current_user.user_id == user_id:
+            pass
+        else:
+            if 'staff_admin' in staff_user_roles:
+                pass
+            else:
+                raise LoginNotAuthorized
         payload = request.json
 
         curr_credentials = MedicalCredentials.query.filter_by(user_id=user_id,idx=payload['idx']).one_or_none()
