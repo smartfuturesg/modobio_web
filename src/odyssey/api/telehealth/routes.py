@@ -43,7 +43,7 @@ from odyssey.api.telehealth.schemas import (
     TelehealthStaffSettingsSchema
 ) 
 from odyssey.api.lookup.models import (
-    LookupTerritoriesofOperation
+    LookupTerritoriesOfOperations
 )
 from odyssey.api.payment.models import PaymentMethods
 from odyssey.utils.auth import token_auth
@@ -1355,7 +1355,7 @@ class TelehealthQueueClientPoolApi(Resource):
         
         # Verify location_id is valid
         location_id = request.parsed_obj.location_id
-        location = LookupTerritoriesofOperation.query.filter_by(idx=location_id).one_or_none()
+        location = LookupTerritoriesOfOperations.query.filter_by(idx=location_id).one_or_none()
         if not location:
             raise GenericNotFound(f"No location exists with id {location_id}")
         

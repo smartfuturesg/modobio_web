@@ -22,7 +22,7 @@ from odyssey.api.lookup.models import (
      LookupSubscriptions,
      LookupTelehealthSessionDuration,
      LookupTermsAndConditions,
-     LookupTerritoriesofOperation,
+     LookupTerritoriesOfOperations,
      LookupTransactionTypes,
      LookupNotifications,
      LookupEmergencyNumbers,
@@ -45,7 +45,7 @@ from odyssey.api.lookup.schemas import (
     LookupGoalsOutputSchema,
     LookupRacesOutputSchema,
     LookupSubscriptionsOutputSchema,
-    LookupTerritoriesofOperationOutputSchema,
+    LookupTerritoriesOfOperationsOutputSchema,
     LookupTermsAndConditionsOutputSchema,
     LookupTransactionTypesOutputSchema,
     LookupNotificationsOutputSchema,
@@ -368,15 +368,15 @@ class LookupDefaultHealthMetricsApi(Resource):
         return {'total_items': len(res), 'items': res}
 
 @ns.route('/operational-territories/')
-class LookupTerritoriesofOperationApi(Resource):
+class LookupTerritoriesOfOperationsApi(Resource):
     """
     Endpoint for handling requests for all territories of operation
     """
     @token_auth.login_required
-    @responds(schema=LookupTerritoriesofOperationOutputSchema, status_code=200, api=ns)
+    @responds(schema=LookupTerritoriesOfOperationsOutputSchema, status_code=200, api=ns)
     def get(self):
         """get contents of operational territories lookup table"""
-        res = LookupTerritoriesofOperation.query.all()
+        res = LookupTerritoriesOfOperations.query.all()
         return {'total_items': len(res), 'items': res}
 
 @ns.route('/emergency-numbers/')

@@ -19,7 +19,7 @@ from odyssey.api.staff.models import (
     StaffCalendarEvents,
     StaffOffices)
 from odyssey.api.user.models import User, UserLogin, UserTokenHistory, UserProfilePictures
-from odyssey.api.lookup.models import LookupCountriesOfOperations
+from odyssey.api.lookup.models import LookupTerritoriesOfOperations, LookupCountriesOfOperations
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.errors import UnauthorizedUser, StaffEmailInUse, InputError, MethodNotAllowed, GenericNotFound
 from odyssey.utils.misc import check_staff_existence, FileHandling
@@ -930,9 +930,9 @@ class StaffOfficesRoute(BaseResource):
         if StaffOffices.query.filter_by(user_id=user_id).one_or_none():
             raise MethodNotAllowed()
 
-        country = LookupCountriesOfOperations.query.filter_by(idx=request.parsed_obj.country_id).one_or_none()
-        if not country:
-            raise GenericNotFound(f'No country exists with the country_id {request.parsed_obj.country_id}.')
+        territory = LookupTerritoriesOfOperations.query.filter_by(idx=request.parsed_obj.territory_id).one_or_none()
+        if not territory:
+            raise GenericNotFound(f'No territory exists with the territory_id {request.parsed_obj.territory_id}.')
 
         request.parsed_obj.user_id = user_id
 
@@ -941,7 +941,9 @@ class StaffOfficesRoute(BaseResource):
 
         #fill in country name for the response
         res = request.get_json()
-        res['country'] = country.country
+        res['country'] = LookupCountriesOfOperations.query.filter_by(idx=territory.country_id).one_or_none().country
+        res['territory'] = territory.sub_territory
+        res['territory_abbreviation'] = territory.sub_territory_abbreviation
 
         return res
 
@@ -958,16 +960,18 @@ class StaffOfficesRoute(BaseResource):
         if not office:
             raise GenericNotFound(f'No office data exists for the staff member with user id {user_id}.')
 
-        country = LookupCountriesOfOperations.query.filter_by(idx=request.parsed_obj.country_id).one_or_none()
-        if not country:
-            raise GenericNotFound(f'No country exists with the country_id {request.parsed_obj.country_id}.')
+        territory = LookupTerritoriesOfOperations.query.filter_by(idx=request.parsed_obj.territory_id).one_or_none()
+        if not territory:
+            raise GenericNotFound(f'No territory exists with the territory_id {request.parsed_obj.territory_id}.')
 
         office.update(request.get_json())
         db.session.commit()
 
         #fill in country name for the response
         res = request.get_json()
-        res['country'] = country.country
+        res['country'] = LookupCountriesOfOperations.query.filter_by(idx=territory.country_id).one_or_none().country
+        res['territory'] = territory.sub_territory
+        res['territory_abbreviation'] = territory.sub_territory_abbreviation
 
         return res
 
@@ -981,9 +985,13 @@ class StaffOfficesRoute(BaseResource):
         office = StaffOffices.query.filter_by(user_id=user_id).one_or_none()
 
         if not office:
-            raise GenericNotFound(f'No office data exists for the staff member with user id {user_id}.')
+            return
+
+        territory = LookupTerritoriesOfOperations.query.filter_by(idx=office.territory_id).one_or_none()
 
         res = office.__dict__
-        res['country'] = LookupCountriesOfOperations.query.filter_by(idx=office.country_id).one_or_none().country
+        res['country'] = LookupCountriesOfOperations.query.filter_by(idx=territory.country_id).one_or_none().country
+        res['territory'] = territory.sub_territory
+        res['territory_abbreviation'] = territory.sub_territory_abbreviation
 
         return res

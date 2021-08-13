@@ -94,7 +94,7 @@ class LookupCountriesOfOperations(BaseModelWithIdx):
     :type: str
     """
     
-class LookupTerritoriesofOperation(BaseModelWithIdx):
+class LookupTerritoriesOfOperations(BaseModelWithIdx):
     """ 
     Territories of operaion are organized by country and then sub-territory,
     where a sub_territory is the highest level of governing region that can have

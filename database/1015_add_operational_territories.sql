@@ -1,6 +1,6 @@
-delete from "LookupTerritoriesofOperation" 
+delete from "LookupTerritoriesOfOperations" 
 			where idx >= 1;
-alter sequence "LookupTerritoriesofOperation_idx_seq"
+alter sequence "LookupTerritoriesOfOperations_idx_seq"
   restart with 1;
 
 delete from "LookupCountriesOfOperations" 
@@ -12,7 +12,7 @@ INSERT INTO "LookupCountriesOfOperations" ("country")
 VALUES
 ('USA');
 
-INSERT INTO "LookupTerritoriesofOperation" ("country_id", "sub_territory", "sub_territory_abbreviation") 
+INSERT INTO "LookupTerritoriesOfOperations" ("country_id", "sub_territory", "sub_territory_abbreviation") 
 VALUES
 (1, 'Alabama', 'AL'),
 (1, 'Arizona', 'AZ'),

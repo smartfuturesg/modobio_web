@@ -137,7 +137,7 @@ class StaffOperationalTerritories(BaseModelWithIdx, UserIdFkeyMixin):
 
     """
 
-    operational_territory_id = db.Column(db.Integer, db.ForeignKey('LookupTerritoriesofOperation.idx'))
+    operational_territory_id = db.Column(db.Integer, db.ForeignKey('LookupTerritoriesOfOperations.idx'))
     """
     Operational subterritory from the operational territories lookup table.
 
@@ -272,13 +272,6 @@ class StaffOffices(BaseModelWithIdx, UserIdFkeyMixin):
     :type: str
     """
 
-    state = db.Column(db.String(35))
-    """
-    State where this office resides.
-
-    :type: str
-    """
-
     zipcode = db.Column(db.String(20))
     """
     ZIP code where this office resides.
@@ -286,11 +279,12 @@ class StaffOffices(BaseModelWithIdx, UserIdFkeyMixin):
     :type: str
     """
 
-    country_id = db.Column(db.Integer, db.ForeignKey('LookupCountriesOfOperations.idx'))
+    territory_id = db.Column(db.Integer, db.ForeignKey('LookupTerritoriesOfOperations.idx'))
     """
-    Country where this office resides.
+    Client address territory. Foreign key gives information about both the state/province/etc. as
+    well as the country.
 
-    :type: int, foreign key(LookupCountriesOfOperations.idx)
+    :type: int, foreign key(LookupTerritoriesOfOperations.idx)
     """
 
     email = db.Column(db.String(100))
