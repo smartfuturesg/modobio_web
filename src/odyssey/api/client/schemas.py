@@ -98,6 +98,10 @@ class ClientInfoSchema(BaseSchema):
     primary_macro_goal = fields.String()
     race_information = fields.Nested(ClientRaceAndEthnicitySchema(many=True))
     profile_picture = fields.Dict(keys=fields.Str(), values=fields.Str())
+    territory_id = fields.Integer(load_only=True)
+    country = fields.String(dump_only=True)
+    territory = fields.String(dump_only=True)
+    territory_abbreviation = fields.String(dump_only=True)
 
     @post_load
     def make_object(self, data, **kwargs):
