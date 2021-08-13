@@ -55,10 +55,11 @@ class StaffProfilePageGetSchema(Schema):
 class StaffRolesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = StaffRoles
-        exclude = ('created_at', 'updated_at', 'idx', 'verified')
+        exclude = ('created_at', 'updated_at', 'idx')
         include_fk = True
         load_only = ('user_id',)
     role_id = fields.Integer(attribute="idx", dump_only=True)
+    granter_id = fields.Integer(load_only=True)
 
     @post_load
     def make_object(self, data, **kwargs):

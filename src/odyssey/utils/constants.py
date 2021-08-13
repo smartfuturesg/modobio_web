@@ -442,10 +442,10 @@ ACCESS_ROLES = (
     'nurse_practitioner',
     'nurse',
     'physician_assistant',
-    'system_admin',
     'client_services',
     'medical_doctor',
     'trainer',
+    'system_admin'
 )
 """
 Staff members are assigned roles, see :class:`odyssey.models.staff.StaffRoles`.

@@ -19,7 +19,7 @@ from odyssey.api.staff.models import (
     StaffCalendarEvents,
     StaffOffices)
 from odyssey.api.user.models import User, UserLogin, UserTokenHistory, UserProfilePictures
-from odyssey.api.lookup.models import LookupTerritoriesOfOperations, LookupCountriesOfOperations
+from odyssey.api.lookup.models import LookupTerritoriesOfOperations, LookupCountriesOfOperations, LookupRoles
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.errors import UnauthorizedUser, StaffEmailInUse, InputError, MethodNotAllowed, GenericNotFound
 from odyssey.utils.misc import check_staff_existence, FileHandling
@@ -108,33 +108,36 @@ class UpdateRoles(BaseResource):
 
     @token_auth.login_required(user_type=('staff',), staff_role=('staff_admin',))
     @accepts(schema=StaffInfoSchema, api=ns)
-    @responds(schmea=StaffInfoSchema, status_code=201, api=ns)
+    @responds(schema=StaffRolesSchema(many=True), status_code=201, api=ns)
     def put(self, user_id):
         """
         Update staff roles
         """
         super().check_user(user_id, user_type='staff')
-
-        role_name = request.parsed_obj.role
-        role = LookupRoles.query.filter_by(role_name=role_name).one_or_none()
-
-        #non practitioner roles can only be granted to users with a verified @modobio.com email
-        if not role.is_practitioner:
-            user = User.query.filter_by(user_id=user_id).one_or_none()
-            
-            if '@modobio.com' not in user.email or not user.email_verified:
-                raise MethodNotAllowed(message='Non practitioner roles can only be granted to user\'s ' \
-                                        + 'with a verified email with the domain @modobio.com.')
-            
+                            
+        user = User.query.filter_by(user_id=user_id).one_or_none()    
         staff_roles = db.session.query(StaffRoles.role).filter(StaffRoles.user_id==user_id).all()
         staff_roles = [x[0] for x in staff_roles]
 
-        for new_role in data['access_roles']:
-            if new_role not in staff_roles:
-                db.session.add(StaffRolesSchema().load({'user_id': user_id, 
-                                                        'role': role_name,
-                                                        'granter_id': token_auth.current_user[0].user_id}))                
+        for role in request.parsed_obj['access_roles']:
+            if role not in staff_roles:
+                if role == 'system_admin':
+                    raise MethodNotAllowed(message='The system admin role cannot be granted through this endpoint')
+
+                new_role = LookupRoles.query.filter_by(role_name=role).one_or_none()
+
+                #non practitioner roles can only be granted to users with a verified @modobio.com email
+                if not new_role.is_practitioner:
+                    if '@modobio.com' not in user.email or not user.email_verified:
+                        raise MethodNotAllowed(message='Non practitioner roles can only be granted to user\'s ' \
+                                                + 'with a verified email with the domain @modobio.com.')
+                    else:
+                        db.session.add(StaffRolesSchema().load({'user_id': user_id, 
+                                                            'role': role,
+                                                            'granter_id': token_auth.current_user()[0].user_id}))
+
         db.session.commit()
+        return StaffRoles.query.filter_by(user_id=user_id).all()
 
     @token_auth.login_required
     @responds(schema=StaffRolesSchema(many=True), status_code=200, api=ns)   

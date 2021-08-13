@@ -60,17 +60,17 @@ class UserInfoPutSchema(ma.SQLAlchemyAutoSchema):
 class StaffInfoSchema(Schema):
     """
     Staff-user specific creation payload validation
-    Currently just holds access_roles 
+    Currently just holds access_roles
     """
     access_roles = fields.List(
                     fields.String(validate=validate.OneOf(ACCESS_ROLES)), 
-                    metadata={'description': f'Access roles the new user will have. Options include: {ACCESS_ROLES}'}
+                    metadata={'description': f'Access roles the new user will have. Options include: {ACCESS_ROLES[:-1]}'}
                 )
 
     access_roles_v2 = fields.Nested(
                     StaffRolesSchema(many=True),
                     metadata={'description': f'v2 of this field now returns the internal id for the role. \
-                        Access roles the new user will have. Options include: {ACCESS_ROLES}'})
+                        Access roles the new user will have. Options include: {ACCESS_ROLES[:-1]}'})
 
 class NewClientUserSchema(Schema):
     """
