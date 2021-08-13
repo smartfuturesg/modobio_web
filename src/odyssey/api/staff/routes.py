@@ -105,31 +105,36 @@ class UpdateRoles(BaseResource):
     """
     View and update roles for staff member with a given user_id
     """
-    @token_auth.login_required
-    @accepts(schema=StaffInfoSchema, api=ns)
-    @responds(status_code=201, api=ns)   
-    def post(self, user_id):
-        staff_user, _ = token_auth.current_user()
 
-        # staff are only allowed to edit their own info
-        if staff_user.user_id != user_id:
-            raise UnauthorizedUser(message="")
-        
-        data = request.get_json()
+    @token_auth.login_required(user_type=('staff',), staff_role=('staff_admin',))
+    @accepts(schema=StaffInfoSchema, api=ns)
+    @responds(schmea=StaffInfoSchema, status_code=201, api=ns)
+    def put(self, user_id):
+        """
+        Update staff roles
+        """
+        super().check_user(user_id, user_type='staff')
+
+        role_name = request.parsed_obj.role
+        role = LookupRoles.query.filter_by(role_name=role_name).one_or_none()
+
+        #non practitioner roles can only be granted to users with a verified @modobio.com email
+        if not role.is_practitioner:
+            user = User.query.filter_by(user_id=user_id).one_or_none()
+            
+            if '@modobio.com' not in user.email or not user.email_verified:
+                raise MethodNotAllowed(message='Non practitioner roles can only be granted to user\'s ' \
+                                        + 'with a verified email with the domain @modobio.com.')
+            
         staff_roles = db.session.query(StaffRoles.role).filter(StaffRoles.user_id==user_id).all()
         staff_roles = [x[0] for x in staff_roles]
-        staff_role_schema = StaffRolesSchema()
 
-        # loop through submitted roles, add role if not already in db
-        for role in data['access_roles']:
-            if role not in staff_roles:
-                db.session.add(staff_role_schema.load(
-                    {'user_id': user_id, 
-                    'role': role}))
-        
+        for new_role in data['access_roles']:
+            if new_role not in staff_roles:
+                db.session.add(StaffRolesSchema().load({'user_id': user_id, 
+                                                        'role': role_name,
+                                                        'granter_id': token_auth.current_user[0].user_id}))                
         db.session.commit()
-        
-        return
 
     @token_auth.login_required
     @responds(schema=StaffRolesSchema(many=True), status_code=200, api=ns)   
@@ -137,11 +142,9 @@ class UpdateRoles(BaseResource):
         """
         Get staff roles
         """
-        staff_user, _ = token_auth.current_user()
-       
-        staff_roles = StaffRoles.query.filter_by(user_id = user_id)
+        super().check_user(user_id, user_type='staff')
 
-        return staff_roles
+        return StaffRoles.query.filter_by(user_id=user_id).all()
 
 @ns.route('/operational-territories/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
