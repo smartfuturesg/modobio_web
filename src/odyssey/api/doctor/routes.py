@@ -5,9 +5,11 @@ from dateutil.relativedelta import relativedelta
 from flask import g, request, current_app
 from flask_accepts import accepts, responds
 from flask_restx import Resource, Namespace
+from sqlalchemy import select
 
 from odyssey import db
 from odyssey.api.doctor.models import (
+    MedicalCredentials,
     MedicalLookUpBloodPressureRange,
     MedicalLookUpSTD,
     MedicalFamilyHistory,
@@ -45,6 +47,8 @@ from odyssey.api.doctor.schemas import (
     CheckBoxArrayDeleteSchema,
     MedicalBloodPressuresSchema,
     MedicalBloodPressuresOutputSchema,
+    MedicalCredentialsSchema,
+    MedicalCredentialsInputSchema,
     MedicalFamilyHistInputSchema,
     MedicalFamilyHistOutputSchema,
     MedicalConditionsOutputSchema,
@@ -71,6 +75,136 @@ from odyssey.api.doctor.schemas import (
 from odyssey.utils.base.resources import BaseResource
 
 ns = Namespace('doctor', description='Operations related to doctor')
+
+@ns.route('/credentials/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class MedCredentials(BaseResource):
+    @token_auth.login_required(user_type=('staff_self',))
+    @responds(schema=MedicalCredentialsInputSchema,status_code=200,api=ns)
+    def get(self,user_id):
+        """
+        GET Request for Pulling Medical Credentials for a practitioner
+
+        Staff Self 
+        """
+        query = db.session.execute(
+            select(MedicalCredentials).
+            where(
+                MedicalCredentials.user_id == user_id
+                )
+        ).scalars().all()
+
+        return {'items': query}
+
+    @token_auth.login_required(user_type=('staff_self',))
+    @accepts(schema=MedicalCredentialsInputSchema, api=ns)
+    @responds(schema=MedicalCredentialsInputSchema, status_code=201,api=ns)
+    def post(self,user_id):
+        """
+        POST Request for submitting Medical Credentials for a practitioner
+
+        User should be Staff Self
+        """
+        curr_credentials = MedicalCredentials.query.filter_by(user_id=user_id).all()
+        verified_cred = []
+        if curr_credentials:
+            for curr_cred in curr_credentials:
+                if curr_cred.status != 'Verified':
+                    db.session.delete(curr_cred)
+                    db.session.commit()
+                else:
+                    verified_cred.append(curr_cred)
+        
+        payload = request.parsed_obj
+
+        state_check = {}
+
+        for cred in payload['items']:
+
+            # This takes care of only allowing 1 state input per credential type
+            # Example:
+            # (Good) DEA - AZ, CA
+            # (Bad)  DEA - AZ, AZ
+            if cred.credential_type not in state_check:
+                state_check[cred.credential_type]=[]
+                state_check[cred.credential_type].append(cred.state)
+            else:
+                if cred.state in state_check[cred.credential_type]:
+                    # Rollback is necessary because we applied database changes above
+                    db.session.rollback()
+                    raise InputError(status_code=405,message=f'Multiple {cred.state} submissions for {cred.credential_type}. Only one credential per state is allowed')
+                else:
+                    state_check[cred.credential_type].append(cred.state)
+
+            # These are already verified, however if for SOME reason
+            # A Medical Doctor wants to update their credentials,
+            # We will update that credential and reset the status from Verified to Pending Verification
+            if verified_cred:
+                for curr_cred in verified_cred:
+                    cred_exists = False
+                    if cred.credential_type == curr_cred.credential_type:
+                        if cred.territory == curr_cred.territory and \
+                            cred.state == curr_cred.state:
+                                if cred.medical_doctor_credentials != curr_cred.medical_doctor_credentials:
+                                    # We update the medical doctor's credentials
+                                    # and we reset the status from Verified -> Pending Verification
+                                    curr_cred.update({'medical_doctor_credentials': cred.medical_doctor_credentials,'status':'Pending Verification'})
+                                cred_exists = True
+                                break
+                if not cred_exists:
+                    cred.user_id = user_id
+                    db.session.add(cred)
+                    db.session.commit()                    
+            else:
+                cred.user_id = user_id
+                db.session.add(cred)
+                db.session.commit()
+        return payload
+
+    @token_auth.login_required
+    @accepts(schema=MedicalCredentialsSchema,api=ns)
+    @responds(status_code=201,api=ns)
+    def put(self,user_id):
+        """
+        PUT Request for updating the status for medical credentials
+
+        User for this request should be the Community Manager
+        """
+
+        payload = request.json
+
+        status = ['Verified','Pending Verification', 'Rejected']
+        if payload['status'] not in status:
+            raise InputError(status_code=405,message='Status must be one of <Verified, Pending Verification, Rejected>.')
+        curr_credentials = MedicalCredentials.query.filter_by(user_id=user_id,idx=payload['idx']).one_or_none()
+
+        if curr_credentials:
+            curr_credentials.update(payload)
+            db.session.commit()
+        else:
+            raise InputError(status_code=405,message='Could not find those credentials')
+        return
+
+    @token_auth.login_required
+    @accepts(schema=MedicalCredentialsSchema,api=ns)
+    @responds(status_code=201,api=ns)
+    def delete(self,user_id):
+        """
+        DELETE Request for deleting medical credentials
+
+        User for this request should be the Community Manager and Staff Self
+        """
+
+        payload = request.json
+
+        curr_credentials = MedicalCredentials.query.filter_by(user_id=user_id,idx=payload['idx']).one_or_none()
+
+        if curr_credentials:
+            db.session.delete(curr_credentials)
+            db.session.commit()
+        else:
+            raise InputError(status_code=405,message='Could not find those credentials')
+        return
 
 @ns.route('/bloodpressure/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})

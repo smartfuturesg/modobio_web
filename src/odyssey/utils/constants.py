@@ -336,6 +336,9 @@ USSTATES = (
     ('WI', 'Wisconsin'),
     ('WY', 'Wyoming')
 )
+
+USSTATES_2 = [abbreviation for abbreviation,_ in USSTATES]
+
 """ Names of US states and their 2-letter codes.
 
 :type: tuple(tuple)

@@ -493,3 +493,80 @@ doctor_surgery_data = {
   'surgeon': 'John Q. Surgeon',
   'institution': 'Our Lady of Perpetual Surgery',
 }
+
+doctor_credentials_post_1_data = {
+  'items': [
+    {'credential_type':'npi', 'territory':'USA','medical_doctor_credentials': '123456789'},
+    {'credential_type':'dea', 'territory':'USA','state': 'AZ','medical_doctor_credentials': '183451435'}, 
+    {'credential_type':'dea', 'territory':'USA','state': 'CA','medical_doctor_credentials': '123342534'},
+    {'credential_type':'med_lic', 'territory':'USA','state': 'AZ','medical_doctor_credentials': '523746512'}, 
+    {'credential_type':'med_lic', 'territory':'USA','state': 'CA','medical_doctor_credentials': '839547692'}
+  ]
+}
+
+
+doctor_credentials_post_2_data = {
+  'items': [
+    {'credential_type':'npi', 'territory':'USA','medical_doctor_credentials': '98714234'},
+    {'credential_type':'dea', 'territory':'USA','state': 'CA','medical_doctor_credentials': '43218470'},
+    {'credential_type':'med_lic', 'territory':'USA','state': 'AZ','medical_doctor_credentials': '21323512'}, 
+  ]
+}
+
+doctor_credentials_put_1_data = {
+    'idx':9,'credential_type':'npi', 'territory':'USA','medical_doctor_credentials': '123456789','status':'Verified'
+}
+
+doctor_credentials_put_2_data = {
+    'idx': 10, 'credential_type':'dea', 'territory':'USA','state': 'AZ','medical_doctor_credentials': '183451435','status':'Verified' 
+}
+
+doctor_credentials_put_3_data = {
+    'idx': 12, 'credential_type':'med_lic', 'territory':'USA','state': 'AZ','medical_doctor_credentials': '523746512','status':'Verified' 
+}
+
+# Posting with Verified data already
+# Verified - NPI 123456789
+# Verified - DEA 183451435
+# Verified - Medical License 523746512
+doctor_credentials_post_3_data = {
+  'items': [
+    {'credential_type':'npi', 'territory':'USA','medical_doctor_credentials': '123456789'},
+    {'credential_type':'dea', 'territory':'USA','state': 'AZ','medical_doctor_credentials': '183451435'}, 
+    {'credential_type':'dea', 'territory':'USA','state': 'CA','medical_doctor_credentials': '4312079463'},
+    {'credential_type':'med_lic', 'territory':'USA','state': 'AZ','medical_doctor_credentials': '523746512'}, 
+    {'credential_type':'med_lic', 'territory':'USA','state': 'CA','medical_doctor_credentials': '85423903'}
+  ]
+}
+
+# Posting with Verified data already
+# UNverified - NPI 987654321 
+# Verified - DEA 183451435
+# Verified - Medical License 523746512
+doctor_credentials_post_4_data = {
+  'items': [
+    {'credential_type':'npi', 'territory':'USA','medical_doctor_credentials': '987654321'},
+    {'credential_type':'dea', 'territory':'USA','state': 'AZ','medical_doctor_credentials': '183451435'}, 
+    {'credential_type':'dea', 'territory':'USA','state': 'CA','medical_doctor_credentials': '4312079463'},
+    {'credential_type':'med_lic', 'territory':'USA','state': 'AZ','medical_doctor_credentials': '523746512'}, 
+    {'credential_type':'med_lic', 'territory':'USA','state': 'CA','medical_doctor_credentials': '85423903'}
+  ]
+}
+
+# Posting with Verified data already
+# UNverified - NPI 987654321 
+# UNverified - DEA 740329857
+# Verified - Medical License 523746512
+doctor_credentials_post_5_data = {
+  'items': [
+    {'credential_type':'npi', 'territory':'USA','medical_doctor_credentials': '987654321'},
+    {'credential_type':'dea', 'territory':'USA','state': 'AZ','medical_doctor_credentials': '740329857'}, 
+    {'credential_type':'dea', 'territory':'USA','state': 'CA','medical_doctor_credentials': '4312079463'},
+    {'credential_type':'med_lic', 'territory':'USA','state': 'AZ','medical_doctor_credentials': '523746512'}, 
+    {'credential_type':'med_lic', 'territory':'USA','state': 'CA','medical_doctor_credentials': '85423903'}
+  ]
+}
+
+doctor_credentials_delete_1_data = {
+    'status': 'Pending Verification', 'territory': 'USA', 'state': 'AZ', 'credential_type': 'dea', 'idx': 10
+}

@@ -4,6 +4,7 @@ from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, auto_field
 from odyssey import ma
 from odyssey.api.doctor.models import ( 
     MedicalBloodPressures,
+    MedicalCredentials,
     MedicalLookUpBloodPressureRange,
     MedicalLookUpSTD,
     MedicalGeneralInfo,
@@ -24,13 +25,36 @@ from odyssey.api.doctor.models import (
 )
 from odyssey.api.user.models import User
 from odyssey.api.facility.models import MedicalInstitutions
-from odyssey.utils.constants import MEDICAL_CONDITIONS
+from odyssey.utils.constants import MEDICAL_CONDITIONS, USSTATES_2
 from odyssey.utils.base.schemas import BaseSchema
 
 """
     Schemas for the doctor's API
 """
 
+class MedicalCredentialsGenericSchema(Schema):
+    territory = fields.String()
+    state = fields.String(validate=validate.OneOf(USSTATES_2))
+    cred = fields.String()
+
+class MedicalCredentialsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = MedicalCredentials
+        exclude = ('created_at','updated_at')
+        dump_only = ('timestamp','user_id')
+        include_fk = True
+    
+    idx = fields.Integer(required=False)
+    state = fields.String(validate=validate.OneOf(USSTATES_2),required=False)
+    status = fields.String(missing='Pending Verification')
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return MedicalCredentials(**data)
+
+class MedicalCredentialsInputSchema(Schema):
+    items = fields.Nested(MedicalCredentialsSchema(many=True))
+    
 class MedicalBloodPressuresSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = MedicalBloodPressures

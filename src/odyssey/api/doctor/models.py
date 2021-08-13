@@ -8,6 +8,47 @@ from odyssey.utils.constants import DB_SERVER_TIME, BLOODTEST_EVAL
 from odyssey import db
 from odyssey.utils.base.models import BaseModel, BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin
 
+class MedicalCredentials(BaseModelWithIdx,UserIdFkeyMixin):
+    """ Medical Credentials table
+    
+    This table is used for storing the Medical Doctor's credentials
+    """
+
+    territory = db.Column(db.String)
+    """
+    Territory the MD is submitting credentials for (USA)
+
+    :type: str
+    """
+
+    state = db.Column(db.String)
+    """
+    State the MD has medical license for
+    
+    :type: str
+    """
+
+    credential_type = db.Column(db.String)
+    """
+    <NPI, DEA, Medical License>
+
+    :type: str
+    """
+
+    medical_doctor_credentials = db.Column(db.String)
+    """
+    Staff Input values
+
+    :type: str    
+    """
+
+    status = db.Column(db.String)
+    """
+    Verifcation Status <Pending Verification, Verified, Rejected>
+
+    :type: str
+    """
+
 class MedicalBloodPressures(BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin):
     """ Blood Pressure Table
     
