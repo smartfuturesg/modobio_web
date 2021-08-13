@@ -16,10 +16,12 @@ from odyssey.api.staff.models import (
     StaffRoles,
     StaffRecentClients,
     StaffProfile,
-    StaffCalendarEvents)
+    StaffCalendarEvents,
+    StaffOffices)
 from odyssey.api.user.models import User, UserLogin, UserTokenHistory, UserProfilePictures
+from odyssey.api.lookup.models import LookupCountriesOfOperations
 from odyssey.utils.auth import token_auth, basic_auth
-from odyssey.utils.errors import UnauthorizedUser, StaffEmailInUse, InputError
+from odyssey.utils.errors import UnauthorizedUser, StaffEmailInUse, InputError, MethodNotAllowed, GenericNotFound
 from odyssey.utils.misc import check_staff_existence, FileHandling
 from odyssey.utils.constants import ALLOWED_IMAGE_TYPES, IMAGE_MAX_SIZE, IMAGE_DIMENSIONS
 from odyssey.api.user.schemas import UserSchema, StaffInfoSchema
@@ -31,7 +33,9 @@ from odyssey.api.staff.schemas import (
     StaffTokenRequestSchema,
     StaffProfilePageGetSchema,
     StaffCalendarEventsSchema,
-    StaffCalendarEventsUpdateSchema)
+    StaffCalendarEventsUpdateSchema,
+    StaffOfficesSchema)
+from odyssey.utils.base.resources import BaseResource
 
 
 ns = Namespace('staff', description='Operations related to staff members')
@@ -41,7 +45,7 @@ ns = Namespace('staff', description='Operations related to staff members')
 #                'lastname': 'last name to search',
 #                'user_id': 'user_id to search',
 #                'email': 'email to search'})
-class StaffMembers(Resource):
+class StaffMembers(BaseResource):
     """staff member class for creating, getting staff"""
     
     @token_auth.login_required
@@ -97,7 +101,7 @@ class StaffMembers(Resource):
 
 @ns.route('/roles/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class UpdateRoles(Resource):
+class UpdateRoles(BaseResource):
     """
     View and update roles for staff member with a given user_id
     """
@@ -141,7 +145,7 @@ class UpdateRoles(Resource):
 
 @ns.route('/operational-territories/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class OperationalTerritories(Resource):
+class OperationalTerritories(BaseResource):
     """
     View and update operational territories for staff member with a given user_id
     """
@@ -232,7 +236,7 @@ class OperationalTerritories(Resource):
     
 
 @ns.route('/recentclients/')
-class RecentClients(Resource):
+class RecentClients(BaseResource):
     """endpoint related to the staff recent client feature"""
     
     @token_auth.login_required
@@ -244,7 +248,7 @@ class RecentClients(Resource):
 """ Staff Token Endpoint """
 
 @ns.route('/token/')
-class StaffToken(Resource):
+class StaffToken(BaseResource):
     """create and revoke tokens"""
     @ns.doc(security='password')
     @basic_auth.login_required(user_type=('staff',), email_required=False)
@@ -291,7 +295,7 @@ class StaffToken(Resource):
 
 
 @ns.route('/profile/<int:user_id>/')
-class StaffProfilePage(Resource):
+class StaffProfilePage(BaseResource):
     """endpoint related staff members' profile pages"""
 
     @token_auth.login_required(user_type=('modobio',))
@@ -456,7 +460,7 @@ class StaffProfilePage(Resource):
 
 
 @ns.route('/calendar/<int:user_id>/')
-class StaffCalendarEventsRoute(Resource):
+class StaffCalendarEventsRoute(BaseResource):
     """
     Endpoint to manage professional's (staff) calendar events
     """
@@ -905,3 +909,78 @@ class StaffCalendarEventsRoute(Resource):
 
         db.session.commit()
         return ("Event Deleted", 200)
+
+@ns.route('/offices/<int:user_id>/')
+class StaffOfficesRoute(BaseResource):
+    """
+    Endpoint to manage professional's physical office information
+    """
+    @token_auth.login_required(user_type=('staff_self',))
+    @accepts(schema=StaffOfficesSchema, api=ns)
+    @responds(schema=StaffOfficesSchema, status_code=201, api=ns)
+    def post(self, user_id):
+        """
+        Submit office data for a professional.
+        """
+
+        #prevent POST if the user already has office data. PUT must be used instead
+        if StaffOffices.query.filter_by(user_id=user_id).one_or_none():
+            raise MethodNotAllowed()
+
+        country = LookupCountriesOfOperations.query.filter_by(idx=request.parsed_obj.country_id).one_or_none()
+        if not country:
+            raise GenericNotFound(f'No country exists with the country_id {request.parsed_obj.country_id}.')
+
+        request.parsed_obj.user_id = user_id
+
+        db.session.add(request.parsed_obj)
+        db.session.commit()
+
+        #fill in country name for the response
+        res = request.get_json()
+        res['country'] = country.country
+
+        return res
+
+    @token_auth.login_required(user_type=('staff_self',))
+    @accepts(schema=StaffOfficesSchema, api=ns)
+    @responds(schema=StaffOfficesSchema, status_code=201, api=ns)
+    def put(self, user_id):
+        """
+        Update office data for a professional.
+        """
+
+        #prevent PUT if resource does not exist. POST must be used instead.
+        office = StaffOffices.query.filter_by(user_id=user_id).one_or_none()
+        if not office:
+            raise GenericNotFound(f'No office data exists for the staff member with user id {user_id}.')
+
+        country = LookupCountriesOfOperations.query.filter_by(idx=request.parsed_obj.country_id).one_or_none()
+        if not country:
+            raise GenericNotFound(f'No country exists with the country_id {request.parsed_obj.country_id}.')
+
+        office.update(request.get_json())
+        db.session.commit()
+
+        #fill in country name for the response
+        res = request.get_json()
+        res['country'] = country.country
+
+        return res
+
+    @token_auth.login_required(user_type=('staff_self',))
+    @responds(schema=StaffOfficesSchema, status_code=200, api=ns)
+    def get(self, user_id):
+        """
+        Retrieve office data for a professional.
+        """
+
+        office = StaffOffices.query.filter_by(user_id=user_id).one_or_none()
+
+        if not office:
+            raise GenericNotFound(f'No office data exists for the staff member with user id {user_id}.')
+
+        res = office.__dict__
+        res['country'] = LookupCountriesOfOperations.query.filter_by(idx=office.country_id).one_or_none().country
+
+        return res

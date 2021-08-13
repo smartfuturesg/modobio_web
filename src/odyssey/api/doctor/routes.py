@@ -209,7 +209,7 @@ class MedCredentials(BaseResource):
 @ns.route('/bloodpressure/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedBloodPressures(BaseResource):
-    @token_auth.login_required(resources=('MedicalBloodPressures',))
+    @token_auth.login_required(resources=('blood_pressure',))
     @responds(schema=MedicalBloodPressuresOutputSchema, api=ns)
     def get(self, user_id):
         '''
@@ -227,7 +227,7 @@ class MedBloodPressures(BaseResource):
                    'total_items': len(bp_info)}
         return payload
 
-    @token_auth.login_required(staff_role=('medical_doctor',), resources=('MedicalBloodPressures',))
+    @token_auth.login_required(staff_role=('medical_doctor',), resources=('blood_pressure',))
     @accepts(schema=MedicalBloodPressuresSchema, api=ns)
     @responds(schema=MedicalBloodPressuresSchema, status_code=201, api=ns)
     def post(self, user_id):
@@ -245,7 +245,7 @@ class MedBloodPressures(BaseResource):
 
         return request.parsed_obj
 
-    @token_auth.login_required(user_type=('client', 'staff'), staff_role=('medical_doctor',), resources=('MedicalBloodPressures',))
+    @token_auth.login_required(user_type=('client', 'staff'), staff_role=('medical_doctor',), resources=('blood_pressure',))
     @ns.doc(params={'idx': 'int',})
     @responds(status_code=204, api=ns)
     def delete(self, user_id):
@@ -289,7 +289,7 @@ class MedicalLookUpBloodPressureResource(BaseResource):
 @ns.route('/medicalgeneralinfo/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedicalGenInformation(BaseResource):
-    @token_auth.login_required(resources=('MedicalGeneralInfoMedications', 'MedicalGeneralInfoMedicationAllergy', 'MedicalGeneralInfo'))
+    @token_auth.login_required(resources=('medications', 'general_medical_info'))
     @responds(schema=MedicalGeneralInfoInputSchema(exclude=['medications.idx','allergies.idx']), api=ns)
     def get(self, user_id):
         '''
@@ -302,12 +302,12 @@ class MedicalGenInformation(BaseResource):
         medications = MedicalGeneralInfoMedications.query.filter_by(user_id=user_id).all()
         allergies = MedicalGeneralInfoMedicationAllergy.query.filter_by(user_id=user_id).all()
         
-        payload = {'gen_info': (genInfo if (current_user.user_id == user_id or 'MedicalGeneralInfo' in g.get('clinical_care_authorized_resources')) else None),
-                   'medications': (medications if (current_user.user_id == user_id or 'MedicalGeneralInfoMedications' in g.get('clinical_care_authorized_resources')) else None),
-                   'allergies': (allergies if (current_user.user_id == user_id or 'MedicalGeneralInfoMedicationAllergy' in g.get('clinical_care_authorized_resources')) else None)}
+        payload = {'gen_info': (genInfo if (current_user.user_id == user_id or 'general_medical_info' in g.get('clinical_care_authorized_resources')) else None),
+                   'medications': (medications if (current_user.user_id == user_id or 'medications' in g.get('clinical_care_authorized_resources')) else None),
+                   'allergies': (allergies if (current_user.user_id == user_id or 'medications' in g.get('clinical_care_authorized_resources')) else None)}
         return payload
 
-    @token_auth.login_required(staff_role=('medical_doctor',), resources=('MedicalGeneralInfoMedications', 'MedicalGeneralInfoMedicationAllergy', 'MedicalGeneralInfo'))
+    @token_auth.login_required(staff_role=('medical_doctor',), resources=('medications', 'general_medical_info'))
     @accepts(schema=MedicalGeneralInfoInputSchema(exclude=['medications.idx','allergies.idx']), api=ns)
     @responds(schema=MedicalGeneralInfoInputSchema(exclude=['medications.idx','allergies.idx']), status_code=201, api=ns)
     def post(self, user_id):
@@ -325,12 +325,12 @@ class MedicalGenInformation(BaseResource):
         # remove the everything for that user in general history table
 
         gen_info_current = MedicalGeneralInfo.query.filter_by(user_id=user_id).one_or_none()
-        if gen_info_current and (user_is_self or 'MedicalGeneralInfo' in g.get('clinical_care_authorized_resources')):
+        if gen_info_current and (user_is_self or 'general_medical_info' in g.get('clinical_care_authorized_resources')):
             if gen_info_current:
                 db.session.delete(gen_info_current)
 
         generalInfo = request.parsed_obj['gen_info']
-        if generalInfo and (user_is_self or 'MedicalGeneralInfo' in g.get('clinical_care_authorized_resources')):
+        if generalInfo and (user_is_self or 'general_medical_info' in g.get('clinical_care_authorized_resources')):
             if generalInfo.primary_doctor_contact_name:
                 # If the client has a primary care doctor, we need either the 
                 # phone number or email
@@ -354,13 +354,13 @@ class MedicalGenInformation(BaseResource):
         # If the user submits something for medication history, then removes it from the payload, 
         # remove everything for that user in medication history table
         meds = MedicalGeneralInfoMedications.query.filter_by(user_id=user_id).all()
-        if meds and (user_is_self or 'MedicalGeneralInfoMedications' in g.get('clinical_care_authorized_resources')):
+        if meds and (user_is_self or 'medications' in g.get('clinical_care_authorized_resources')):
             if meds:
                 for med in meds:
                     db.session.delete(med)
 
         medications = request.parsed_obj['medications']
-        if medications and (user_is_self or 'MedicalGeneralInfoMedications' in g.get('clinical_care_authorized_resources')):
+        if medications and (user_is_self or 'medications' in g.get('clinical_care_authorized_resources')):
             payload['medications'] = []
             for medication in medications:
                 # If the client is taking medications, they MUST tell us what
@@ -390,12 +390,12 @@ class MedicalGenInformation(BaseResource):
         # If the client is allergic to certain medication, they MUST tell us what
         # medication
         allergies_current = MedicalGeneralInfoMedicationAllergy.query.filter_by(user_id=user_id).all()
-        if allergies_current and (user_is_self or 'MedicalGeneralInfoMedicationAllergy' in g.get('clinical_care_authorized_resources')):
+        if allergies_current and (user_is_self or 'medications' in g.get('clinical_care_authorized_resources')):
             for allergy in allergies_current:
                 db.session.delete(allergy)
 
         allergies = request.parsed_obj['allergies']
-        if allergies and (user_is_self or 'MedicalGeneralInfoMedicationAllergy' in g.get('clinical_care_authorized_resources')):
+        if allergies and (user_is_self or 'medications' in g.get('clinical_care_authorized_resources')):
             payload['allergies'] = []
 
             for allergicTo in allergies:
@@ -417,7 +417,7 @@ class MedicalGenInformation(BaseResource):
 @ns.route('/medicalinfo/general/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedicalGeneralInformation(BaseResource):
-    @token_auth.login_required(resources=('MedicalGeneralInfo',))
+    @token_auth.login_required(resources=('general_medical_info',))
     @responds(schema=MedicalGeneralInfoSchema, api=ns)
     def get(self, user_id):
         '''
@@ -428,7 +428,7 @@ class MedicalGeneralInformation(BaseResource):
         payload = {'general_info': genInfo}
         return genInfo
 
-    @token_auth.login_required(staff_role=('medical_doctor',), resources=('MedicalGeneralInfo',))
+    @token_auth.login_required(staff_role=('medical_doctor',), resources=('general_medical_info',))
     @accepts(schema=MedicalGeneralInfoSchema, api=ns)
     @responds(schema=MedicalGeneralInfoSchema, status_code=201, api=ns)
     def post(self, user_id):
@@ -469,7 +469,7 @@ class MedicalGeneralInformation(BaseResource):
         db.session.commit()
         return generalInfo
 
-    @token_auth.login_required(staff_role=('medical_doctor',), resources=('MedicalGeneralInfo',))
+    @token_auth.login_required(staff_role=('medical_doctor',), resources=('general_medical_info',))
     @accepts(schema=MedicalGeneralInfoSchema, api=ns)
     @responds(schema=MedicalGeneralInfoSchema, status_code=201, api=ns)
     def put(self, user_id):
@@ -508,7 +508,7 @@ class MedicalGeneralInformation(BaseResource):
 @ns.route('/medicalinfo/medications/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedicalMedicationInformation(BaseResource):
-    @token_auth.login_required(resources=('MedicalGeneralInfoMedications',))
+    @token_auth.login_required(resources=('medications',))
     @responds(schema=MedicalMedicationsInfoInputSchema, api=ns)
     def get(self, user_id):
         '''
@@ -520,7 +520,7 @@ class MedicalMedicationInformation(BaseResource):
         payload = {'medications': medications}
         return payload
 
-    @token_auth.login_required(staff_role=('medical_doctor',), resources=('MedicalGeneralInfoMedications',))
+    @token_auth.login_required(staff_role=('medical_doctor',), resources=('medications',))
     @accepts(schema=MedicalMedicationsInfoInputSchema(exclude=['medications.idx']), api=ns)
     @responds(schema=MedicalMedicationsInfoInputSchema, status_code=201, api=ns)
     def post(self, user_id):
@@ -557,7 +557,7 @@ class MedicalMedicationInformation(BaseResource):
         db.session.commit()
         return payload
 
-    @token_auth.login_required(staff_role=('medical_doctor',), resources=('MedicalGeneralInfoMedications',))
+    @token_auth.login_required(staff_role=('medical_doctor',), resources=('medications',))
     @accepts(schema=MedicalMedicationsInfoInputSchema, api=ns)
     @responds(schema=MedicalMedicationsInfoInputSchema, status_code=201, api=ns)
     def put(self, user_id):
@@ -601,7 +601,7 @@ class MedicalMedicationInformation(BaseResource):
         db.session.commit()
         return payload        
 
-    @token_auth.login_required(staff_role=('medical_doctor',), resources=('MedicalGeneralInfoMedications',))
+    @token_auth.login_required(staff_role=('medical_doctor',), resources=('medications',))
     @accepts(schema=CheckBoxArrayDeleteSchema, api=ns)
     @responds(status_code=201, api=ns)
     def delete(self, user_id):
@@ -625,7 +625,7 @@ class MedicalMedicationInformation(BaseResource):
 @ns.route('/medicalinfo/allergies/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedicalAllergiesInformation(BaseResource):
-    @token_auth.login_required(resources=('MedicalGeneralInfoMedicationAllergy',))
+    @token_auth.login_required(resources=('medications',))
     @responds(schema=MedicalAllergiesInfoInputSchema, api=ns)
     def get(self, user_id):
         '''
@@ -637,7 +637,7 @@ class MedicalAllergiesInformation(BaseResource):
         payload = {'allergies': allergies}
         return payload
 
-    @token_auth.login_required(staff_role=('medical_doctor',), resources=('MedicalGeneralInfoMedicationAllergy',))
+    @token_auth.login_required(staff_role=('medical_doctor',), resources=('medications',))
     @accepts(schema=MedicalAllergiesInfoInputSchema(exclude=['allergies.idx']), api=ns)
     @responds(schema=MedicalAllergiesInfoInputSchema, status_code=201, api=ns)
     def post(self, user_id):
@@ -668,7 +668,7 @@ class MedicalAllergiesInformation(BaseResource):
         db.session.commit()
         return payload
 
-    @token_auth.login_required(staff_role=('medical_doctor',), resources=('MedicalGeneralInfoMedicationAllergy',))
+    @token_auth.login_required(staff_role=('medical_doctor',), resources=('medications',))
     @accepts(schema=MedicalAllergiesInfoInputSchema, api=ns)
     @responds(schema=MedicalAllergiesInfoInputSchema, status_code=201, api=ns)
     def put(self, user_id):
@@ -703,7 +703,7 @@ class MedicalAllergiesInformation(BaseResource):
         db.session.commit()
         return payload
 
-    @token_auth.login_required(staff_role=('medical_doctor',), resources=('MedicalGeneralInfoMedicationAllergy',))
+    @token_auth.login_required(staff_role=('medical_doctor',), resources=('medications',))
     @accepts(schema=CheckBoxArrayDeleteSchema, api=ns)
     @responds(status_code=201, api=ns)
     def delete(self, user_id):
@@ -747,7 +747,7 @@ class MedicalLookUpSTDResource(BaseResource):
 @ns.route('/medicalinfo/social/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedicalSocialHist(BaseResource):
-    @token_auth.login_required(resources=('MedicalSTDHistory','MedicalSocialHistory'))
+    @token_auth.login_required(resources=('sexual_history','social_history'))
     @responds(schema=MedicalSocialHistoryOutputSchema, api=ns)
     def get(self, user_id):
         """ This request retrieves the social history
@@ -793,11 +793,11 @@ class MedicalSocialHist(BaseResource):
         social_hist = MedicalSocialHistory.query.filter_by(user_id=user_id).one_or_none()
         std_hist = MedicalSTDHistory.query.filter_by(user_id=user_id).all()
 
-        payload = {'social_history': (social_hist if (current_user.user_id == user_id or 'MedicalSocialHistory' in g.get('clinical_care_authorized_resources')) else None),
-                   'std_history': (std_hist if (current_user.user_id == user_id or 'MedicalSTDHistory' in g.get('clinical_care_authorized_resources')) else None)}
+        payload = {'social_history': (social_hist if (current_user.user_id == user_id or 'social_history' in g.get('clinical_care_authorized_resources')) else None),
+                   'std_history': (std_hist if (current_user.user_id == user_id or 'sexual_history' in g.get('clinical_care_authorized_resources')) else None)}
         return payload
 
-    @token_auth.login_required(staff_role=('medical_doctor',), resources=('MedicalSTDHistory','MedicalSocialHistory'))
+    @token_auth.login_required(staff_role=('medical_doctor',), resources=('sexual_history','social_history'))
     @accepts(schema=MedicalSocialHistoryOutputSchema, api=ns)
     @responds(schema=MedicalSocialHistoryOutputSchema, status_code=201, api=ns)
     def post(self, user_id):
@@ -849,7 +849,7 @@ class MedicalSocialHist(BaseResource):
 
         # If the user submits something for Social history, then removes it from the payload, 
         # remove the everything for that user in social history table
-        if social and (current_user.user_id == user_id or 'MedicalSocialHistory' in g.get('clinical_care_authorized_resources')):
+        if social and (current_user.user_id == user_id or 'social_history' in g.get('clinical_care_authorized_resources')):
             social_hist_current = MedicalSocialHistory.query.filter_by(user_id=user_id).one_or_none()
             if social_hist_current:
                 db.session.delete(social_hist_current)
@@ -881,7 +881,7 @@ class MedicalSocialHist(BaseResource):
         # If the user submits something for STD history, then removes it from the payload, 
         # remove their STD history from the table
         stds = request.parsed_obj['std_history']
-        if stds and (current_user.user_id == user_id or 'MedicalSTDHistory' in g.get('clinical_care_authorized_resources')):
+        if stds and (current_user.user_id == user_id or 'sexual_history' in g.get('clinical_care_authorized_resources')):
             std_history_current = MedicalSTDHistory.query.filter_by(user_id=user_id).all()
             # If the payload contains an STD for a user already, then just continue
             if std_history_current:
@@ -920,7 +920,7 @@ class MedicalCondition(BaseResource):
 @ns.route('/familyhistory/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedicalFamilyHist(BaseResource):
-    @token_auth.login_required(resources=('MedicalFamilyHistory',))
+    @token_auth.login_required(resources=('personal_medical_history',))
     @responds(schema=MedicalFamilyHistOutputSchema, api=ns)
     def get(self, user_id):
         '''
@@ -933,7 +933,7 @@ class MedicalFamilyHist(BaseResource):
                    'total_items': len(client_personalfamilyhist)}
         return payload
 
-    @token_auth.login_required(staff_role=('medical_doctor',), resources=('MedicalFamilyHistory',))
+    @token_auth.login_required(staff_role=('medical_doctor',), resources=('personal_medical_history',))
     @accepts(schema=MedicalFamilyHistInputSchema, api=ns)
     @responds(schema=MedicalFamilyHistOutputSchema, status_code=201, api=ns)
     def post(self, user_id):
@@ -959,7 +959,7 @@ class MedicalFamilyHist(BaseResource):
         db.session.commit()
         return payload
 
-    @token_auth.login_required(staff_role=('medical_doctor',), resources=('MedicalFamilyHistory',))
+    @token_auth.login_required(staff_role=('medical_doctor',), resources=('personal_medical_history',))
     @accepts(schema=MedicalFamilyHistInputSchema, api=ns)
     @responds(schema=MedicalFamilyHistOutputSchema, status_code=201, api=ns)
     def put(self, user_id):
@@ -989,7 +989,7 @@ class MedicalFamilyHist(BaseResource):
 @ns.route('/images/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedImaging(BaseResource):
-    @token_auth.login_required(resources=('MedicalImaging',))
+    @token_auth.login_required(resources=('diagnostic_imaging',))
     @responds(schema=MedicalImagingSchema(many=True), api=ns)
     def get(self, user_id):
         """returns a json file of all the medical images in the database for the specified user_id
@@ -1034,7 +1034,7 @@ class MedImaging(BaseResource):
         return response
 
     #Unable to use @accepts because the input files come in a form-data, not json.
-    @token_auth.login_required(staff_role=('medical_doctor',), resources=('MedicalImaging',))
+    @token_auth.login_required(staff_role=('medical_doctor',), resources=('diagnostic_imaging',))
     @responds(status_code=201, api=ns)
     def post(self, user_id):
         """For adding one or many medical images to the database for the specified user_id
@@ -1098,7 +1098,7 @@ class MedImaging(BaseResource):
         db.session.commit()
 
     @ns.doc(params={'image_id': 'ID of the image to be deleted'})
-    @token_auth.login_required(staff_role=('medical_doctor',), resources=('MedicalImaging',))
+    @token_auth.login_required(staff_role=('medical_doctor',), resources=('diagnostic_imaging',))
     @responds(status_code=204, api=ns)
     def delete(self, user_id):
         idx = request.args.get('image_id', type=int)
@@ -1124,7 +1124,7 @@ class MedImaging(BaseResource):
 @ns.route('/bloodtest/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedBloodTest(BaseResource):
-    @token_auth.login_required(staff_role=('medical_doctor',), resources=('MedicalBloodTests',))
+    @token_auth.login_required(staff_role=('medical_doctor',), resources=('blood_chemistry',))
     @accepts(schema=MedicalBloodTestsInputSchema, api=ns)
     @responds(schema=MedicalBloodTestSchema, status_code=201, api=ns)
     def post(self, user_id):
@@ -1161,7 +1161,7 @@ class MedBloodTest(BaseResource):
         db.session.commit()
         return client_bt
 
-    @token_auth.login_required(staff_role=('medical_doctor',), resources=('MedicalBloodTests',))
+    @token_auth.login_required(staff_role=('medical_doctor',), resources=('blood_chemistry',))
     @ns.doc(params={'test_id': 'int',})
     @responds(status_code=204, api=ns)
     def delete(self, user_id):
@@ -1187,7 +1187,7 @@ class MedBloodTest(BaseResource):
 @ns.route('/bloodtest/all/<int:user_id>/')
 @ns.doc(params={'user_id': 'Client ID number'})
 class MedBloodTestAll(BaseResource):
-    @token_auth.login_required(resources=('MedicalBloodTests',))
+    @token_auth.login_required(resources=('blood_chemistry',))
     @responds(schema=AllMedicalBloodTestSchema, api=ns)
     def get(self, user_id):
         """
@@ -1240,7 +1240,7 @@ class MedBloodTestResults(BaseResource):
 
     Each test instance may have multiple test results. 
     """
-    @token_auth.login_required(resources=('MedicalBloodTests',))
+    @token_auth.login_required(resources=('blood_chemistry',))
     @responds(schema=MedicalBloodTestResultsOutputSchema, api=ns)
     def get(self, test_id):
         """
@@ -1298,7 +1298,7 @@ class AllMedBloodTestResults(BaseResource):
     This includes all test submisison details along with the test
     results associated with each test submission. 
     """
-    @token_auth.login_required(resources=('MedicalBloodTests',))
+    @token_auth.login_required(resources=('blood_chemistry',))
     @responds(schema=MedicalBloodTestResultsOutputSchema, api=ns)
     def get(self, user_id):
         super().check_user(user_id, user_type='client')

@@ -100,16 +100,16 @@ class LookupTerritoriesofOperation(BaseModelWithIdx):
     where a sub_territory is the highest level of governing region that can have
     laws which will impact our business practices. 
 
-    In the UNited States, the su_territory will be at the state level.
+    In the United States, the sub_territory will be at the state level.
 
     Staff members are required to specify which territories they can operate in. 
     """
 
-    country = db.Column(db.String)
+    country_id = db.Column(db.Integer, db.ForeignKey('LookupCountriesOfOperations.idx'))
     """
-    countries of operations
+    Country in which this territory resides
     
-    :type: str
+    :type: int, foreign key(LookupCountriesOfOperations.idx)
     """
 
     sub_territory = db.Column(db.String)
@@ -571,7 +571,6 @@ class LookupClinicalCareTeamResources(BaseModel):
     Stores all the database tables which can be accessed by a clinical care team.
     Table names are given an index in order to be referenced by other tables
     """
-    resource_group = relationship("LookupEHRPages", back_populates="resources")
 
     resource_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -594,11 +593,19 @@ class LookupClinicalCareTeamResources(BaseModel):
     :type: string
     """
 
-    resource_group_id = db.Column(db.Integer,db.ForeignKey('LookupEHRPages.resource_group_id', ondelete="CASCADE"), nullable=False)
+    resource_group = db.Column(db.String)
     """
-    Ties table resource back to groupings of EHR resources.
+    Some resources can be grouped together for display. Otherwise this will be None
+    
+    :type: string
+    """
 
-    :type: int, foreign key to :attr:`LookupEHRPages.resource_group_id <odyssey.models.lookup.LookupEHRPages.resource_group_id>`
+    access_group = db.Column(db.String)
+    """
+    Grouping as it relates to practitioner and staff roles. Current access groups are 'general' (for generic client info which all practitioners 
+    should have access to) and 'medical_doctor' (resources specific to the medical_doctor role).
+
+    :type: string
     """
 
 class LookupDefaultHealthMetrics(BaseModelWithIdx):
@@ -1083,51 +1090,6 @@ class LookupMedicalSymptoms(BaseModelWithIdx):
     """
     ICD-10 code for this symptom.
 
-    :type: string
-    """
-
-class LookupEHRPages(BaseModel):
-    """
-    Table stores Electronic Health Record (EHR) pages which a client can authorize other clients or
-    staff to view. EHRs represent groupings of tables related through the LookupClinicalCareTeamResources table
-    with a foreign key relationship on LookupClinicalCareTeamResources.resource_group_id to LookupEHRPages.resource_group_id
-
-    EHR resource groups are further classed in to access groups which organize resources on a higher level related to
-    staff roles. e.g. the medical_doctor role will include all medical resources
-
-    In all the resource categorization heiarchy for assigning clinical care team permissions looks like:
-
-    access_group
-        resource_group
-            resource (table-level)
-    """
-
-    resources = relationship('LookupClinicalCareTeamResources', back_populates='resource_group')
-
-    resource_group_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    ID for the resource group.
-
-    :type: integer, primary key, autoincrementing
-    """
-
-    resource_group_name = db.Column(db.String)
-    """
-    Internaly used name to refer to the resource group. Will be used to define authorization requirements for specific endpoints. 
-
-    :type: string
-    """
-    access_group = db.Column(db.String)
-    """
-    Grouping of resource groups by staff_role. 
-
-    :type: string
-    """
-
-    display_name = db.Column(db.String)
-    """
-    Name of resource to display to client. We do not want table names getting passed around.
-    
     :type: string
     """
 class LookupOrganizations(BaseModelWithIdx):

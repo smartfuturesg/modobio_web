@@ -4,7 +4,7 @@ from sqlalchemy import select
 
 from odyssey import celery, db
 from odyssey.api.client.models import ClientClinicalCareTeam, ClientClinicalCareTeamAuthorizations
-from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupClinicalCareTeamResources, LookupEHRPages
+from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupClinicalCareTeamResources
 from odyssey.api.notifications.models import Notifications
 from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.api.user.models import User
@@ -95,9 +95,8 @@ def upcoming_appointment_care_team_permissions(booking_id):
     # bring up resouce_group_ids required for medical doctor visits
     # TODO: update this to align with other staff roles 
     resource_ids_needed = db.session.execute(select(
-        LookupClinicalCareTeamResources.resource_id, LookupEHRPages.resource_group_id
-    ).join(LookupEHRPages, LookupEHRPages.resource_group_id == LookupClinicalCareTeamResources.resource_group_id
-    ).where(LookupEHRPages.access_group.in_(['general','medical_doctor']))).scalars().all()
+        LookupClinicalCareTeamResources.resource_id, 
+    ).where(LookupClinicalCareTeamResources.access_group.in_(['general','medical_doctor']))).scalars().all()
 
     # bring up booking
     booking = db.session.execute(select(TelehealthBookings).where(
