@@ -28,6 +28,13 @@ class StaffProfile(BaseModel):
     :type: int, foreign key
     """
 
+    user_info = db.relationship('User', back_populates='staff_profile')
+    """
+    One-to-One relatinoship with User
+
+    :type: :class: `User` instance
+    """
+
     membersince = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     Member since date
@@ -113,6 +120,13 @@ class StaffRoles(BaseModelWithIdx, UserIdFkeyMixin):
     """
     Many to one relationship with Lookup Roles table
     :type: :class:`LookupRoles` instance 
+    """
+
+    user_info = db.relationship('User', uselist=False, back_populates='roles')
+    """
+    Many-to-One realtionship with User table
+
+    :type: :class:`User` instance
     """
 
     verified = db.Column(db.Boolean, default=False)

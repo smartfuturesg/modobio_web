@@ -104,11 +104,32 @@ class User(db.Model):
     :type: boolean
     """
 
+    staff_profile = db.relationship('StaffProfile', uselist=False, back_populates='user_info')
+    """
+    One-to-One relationship with StaffProfile
+
+    :type: :class: `StaffProfile` instance
+    """
+
+    roles = db.relationship('StaffRoles', uselist=True, back_populates='user_info')
+    """
+    One-to-Many relationship between User and StaffRoles tables
+
+    :type: :class:`StaffRoles` instance list 
+    """
+
     is_client = db.Column(db.Boolean, nullable=False)
     """
     Denotes if this user is a client. Note: a user can be both a client and a staff member.
 
     :type: boolean
+    """
+
+    client_info = db.relationship('ClientInfo', uselist=False, back_populates='user_info')
+    """
+    One-to-One relatinoship with ClientInfo
+
+    :type: :class: `ClientInfo` instance
     """
 
     is_internal = db.Column(db.Boolean, nullable=False, default=False)
