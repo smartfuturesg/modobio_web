@@ -11,7 +11,7 @@ users_staff_new_user_data = {
   },
   "staff_info": {
     "access_roles" : [
-            "medical_doctor"
+            "client_services"
   ]
   }
 }
