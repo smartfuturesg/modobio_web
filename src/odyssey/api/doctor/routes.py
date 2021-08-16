@@ -82,7 +82,7 @@ ns = Namespace('doctor', description='Operations related to doctor')
 @ns.route('/credentials/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedCredentials(BaseResource):
-    @token_auth.login_required(staff_role=('medical_doctor','staff_admin'))
+    @token_auth.login_required(staff_role=('medical_doctor','community_manager'))
     @responds(schema=MedicalCredentialsInputSchema,status_code=200,api=ns)
     def get(self,user_id):
         """
@@ -96,7 +96,7 @@ class MedCredentials(BaseResource):
         if current_user.user_id == user_id:
             pass
         else:
-            if 'staff_admin' in staff_user_roles:
+            if 'community_manager' in staff_user_roles:
                 pass
             else:
                 raise LoginNotAuthorized
@@ -175,7 +175,7 @@ class MedCredentials(BaseResource):
                 db.session.commit()
         return payload
 
-    @token_auth.login_required(staff_role=('staff_admin',))
+    @token_auth.login_required(staff_role=('community_manager',))
     @accepts(schema=MedicalCredentialsSchema,api=ns)
     @responds(status_code=201,api=ns)
     def put(self,user_id):
@@ -199,7 +199,7 @@ class MedCredentials(BaseResource):
             raise InputError(status_code=405,message='Could not find those credentials')
         return
 
-    @token_auth.login_required(staff_role=('medical_doctor','staff_admin'))
+    @token_auth.login_required(staff_role=('medical_doctor','community_manager'))
     @accepts(schema=MedicalCredentialsSchema,api=ns)
     @responds(status_code=201,api=ns)
     def delete(self,user_id):
@@ -214,7 +214,7 @@ class MedCredentials(BaseResource):
         if current_user.user_id == user_id:
             pass
         else:
-            if 'staff_admin' in staff_user_roles:
+            if 'community_manager' in staff_user_roles:
                 pass
             else:
                 raise LoginNotAuthorized
