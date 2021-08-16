@@ -9,7 +9,7 @@ from sqlalchemy import select
 from odyssey.api.lookup.models import LookupTerritoriesOfOperations
 from odyssey.api.user.models import User, UserPendingEmailVerifications, UserTokenHistory
 from odyssey.api.staff.models import StaffOperationalTerritories, StaffRoles
-from odyssey.utils.constants import ACCESS_ROLES
+from odyssey.utils.constants import STAFF_ROLES
 from .data import users_staff_new_user_data
 
 @pytest.fixture(scope='module')
@@ -121,7 +121,7 @@ def test_add_roles_to_staff(test_client, new_staff, new_staff_header):
     response = test_client.post(
         f'/staff/roles/{uid}/',
         headers=new_staff_header,
-        data=dumps({'access_roles': ACCESS_ROLES}),
+        data=dumps({'access_roles': STAFF_ROLES}),
         content_type='application/json')
 
     staff_roles = (
@@ -134,7 +134,7 @@ def test_add_roles_to_staff(test_client, new_staff, new_staff_header):
 
     # some simple checks for validity
     assert response.status_code == 201
-    assert sorted(staff_roles) == sorted(ACCESS_ROLES)
+    assert sorted(staff_roles) == sorted(STAFF_ROLES)
 
 def test_check_staff_roles(test_client, new_staff, new_staff_header):
     uid = new_staff['user_id']
@@ -153,7 +153,7 @@ def test_check_staff_roles(test_client, new_staff, new_staff_header):
 
     # some simple checks for validity
     assert response.status_code == 200
-    assert sorted(staff_roles) == sorted(ACCESS_ROLES)
+    assert sorted(staff_roles) == sorted(STAFF_ROLES)
 
 def test_add_staff_operational_territory(test_client, new_staff, new_staff_header):
     uid = new_staff['user_id']
