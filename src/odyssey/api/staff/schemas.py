@@ -118,7 +118,7 @@ class StaffOfficesSchema(ma.SQLAlchemyAutoSchema):
         model = StaffOffices
         exclude = ('created_at', 'updated_at', 'idx')
 
-    territory_id = fields.Integer(load_only=True)
+    territory_id = fields.Integer()
     country = fields.String(dump_only=True)
     territory = fields.String(dump_only=True)
     territory_abbreviation = fields.String(dump_only=True)
