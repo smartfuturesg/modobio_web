@@ -454,6 +454,19 @@ This constant lists all possible staff roles.
 :type: tuple
 """
 
+STAFF_ROLES = (
+    'staff_admin',
+    'data_scientist',
+    'community_manager',
+    'client_services'
+)
+"""
+Internal staff roles for Modobio employees. Employees with these roles must have a verified email within
+the domain @modobio.com
+
+:type: tuple
+"""
+
 MEDICAL_CONDITIONS = {
     'Autoimmune': {
         'Diabetes type 1': None,
