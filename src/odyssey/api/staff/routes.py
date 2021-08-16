@@ -103,7 +103,9 @@ class StaffMembers(BaseResource):
 @ns.doc(params={'user_id': 'User ID number'})
 class UpdateRoles(BaseResource):
     """
-    View and update roles for staff member with a given user_id
+    View and update roles for staff member with a given user_id.
+    This endpoint is only for granting internal staff roles (staff_admin,data_scientist,
+    community_manager, and client_services').
     """
 
     @token_auth.login_required(user_type=('staff',), staff_role=('staff_admin',))
@@ -121,20 +123,16 @@ class UpdateRoles(BaseResource):
 
         for role in request.parsed_obj['access_roles']:
             if role not in staff_roles:
-                if role == 'system_admin':
-                    raise MethodNotAllowed(message='The system admin role cannot be granted through this endpoint')
-
+  
                 new_role = LookupRoles.query.filter_by(role_name=role).one_or_none()
 
-                #non practitioner roles can only be granted to users with a verified @modobio.com email
-                if not new_role.is_practitioner:
-                    if '@modobio.com' not in user.email or not user.email_verified:
-                        raise MethodNotAllowed(message='Non practitioner roles can only be granted to user\'s ' \
-                                                + 'with a verified email with the domain @modobio.com.')
-                    else:
-                        db.session.add(StaffRolesSchema().load({'user_id': user_id, 
-                                                            'role': role,
-                                                            'granter_id': token_auth.current_user()[0].user_id}))
+                if '@modobio.com' not in user.email or not user.email_verified:
+                    raise MethodNotAllowed(message='Non practitioner roles can only be granted to user\'s ' \
+                                            + 'with a verified email with the domain @modobio.com.')
+                else:
+                    db.session.add(StaffRolesSchema().load({'user_id': user_id, 
+                                                        'role': role,
+                                                        'granter_id': token_auth.current_user()[0].user_id}))
 
         db.session.commit()
         return StaffRoles.query.filter_by(user_id=user_id).all()
