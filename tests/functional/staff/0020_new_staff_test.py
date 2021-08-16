@@ -19,7 +19,7 @@ def new_staff(test_client):
         headers=test_client.staff_auth_header,
         data=dumps(users_staff_new_user_data),
         content_type='application/json')
-
+    print(response.data)
     assert response.status_code == 201
 
     return response.json['user_info']
