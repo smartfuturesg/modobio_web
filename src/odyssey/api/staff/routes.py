@@ -34,7 +34,8 @@ from odyssey.api.staff.schemas import (
     StaffProfilePageGetSchema,
     StaffCalendarEventsSchema,
     StaffCalendarEventsUpdateSchema,
-    StaffOfficesSchema)
+    StaffOfficesSchema,
+    StaffInternalRolesSchema)
 from odyssey.utils.base.resources import BaseResource
 
 
@@ -109,7 +110,7 @@ class UpdateRoles(BaseResource):
     """
 
     @token_auth.login_required(user_type=('staff',), staff_role=('staff_admin',))
-    @accepts(schema=StaffInfoSchema, api=ns)
+    @accepts(schema=StaffInternalRolesSchema, api=ns)
     @responds(schema=StaffRolesSchema(many=True), status_code=201, api=ns)
     def put(self, user_id):
         """

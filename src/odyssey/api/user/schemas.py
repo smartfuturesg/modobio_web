@@ -4,7 +4,7 @@ from sqlalchemy.orm import load_only
 from odyssey import ma
 from odyssey.api.staff.schemas import StaffRolesSchema
 from odyssey.api.user.models import User, UserLogin, UserSubscriptions, UserPendingEmailVerifications, UserLegalDocs
-from odyssey.utils.constants import STAFF_ROLES
+from odyssey.utils.constants import ACCESS_ROLES
 
 """
    Schemas for user accounts
@@ -63,14 +63,14 @@ class StaffInfoSchema(Schema):
     Currently just holds access_roles
     """
     access_roles = fields.List(
-                    fields.String(validate=validate.OneOf(STAFF_ROLES)), 
-                    metadata={'description': f'Access roles the new user will have. Options include: {STAFF_ROLES}'}
+                    fields.String(validate=validate.OneOf(ACCESS_ROLES)), 
+                    metadata={'description': f'Access roles the new user will have. Options include: {ACCESS_ROLES}'}
                 )
 
     access_roles_v2 = fields.Nested(
                     StaffRolesSchema(many=True),
                     metadata={'description': f'v2 of this field now returns the internal id for the role. \
-                        Access roles the new user will have. Options include: {STAFF_ROLES}'})
+                        Access roles the new user will have. Options include: {ACCESS_ROLES}'})
 
 class NewClientUserSchema(Schema):
     """
