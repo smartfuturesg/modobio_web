@@ -6,7 +6,7 @@ import pytest
 from flask.json import dumps
 from sqlalchemy import select
 
-from odyssey.api.lookup.models import LookupTerritoriesofOperation
+from odyssey.api.lookup.models import LookupTerritoriesOfOperations
 from odyssey.api.user.models import User, UserPendingEmailVerifications, UserTokenHistory
 from odyssey.api.staff.models import StaffOperationalTerritories, StaffRoles
 from odyssey.utils.constants import ACCESS_ROLES
@@ -163,7 +163,7 @@ def test_add_staff_operational_territory(test_client, new_staff, new_staff_heade
 
     possible_territories = (
         test_client.db.session.execute(
-            select(LookupTerritoriesofOperation.idx))
+            select(LookupTerritoriesOfOperations.idx))
         .scalars()
         .all())
 
