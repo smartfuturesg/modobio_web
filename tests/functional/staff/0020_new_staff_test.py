@@ -116,11 +116,11 @@ def test_creating_new_staff_same_email(test_client):
     # 409 should be returned because user email is already in use
     assert response.status_code == 409
 
-def test_add_roles_to_staff(test_client, new_staff, new_staff_header):
+def test_add_roles_to_staff(test_client, new_staff):
     uid = new_staff['user_id']
-    response = test_client.post(
+    response = test_client.put(
         f'/staff/roles/{uid}/',
-        headers=new_staff_header,
+        headers=test_client.staff_auth_header,
         data=dumps({'access_roles': STAFF_ROLES}),
         content_type='application/json')
 
@@ -134,7 +134,7 @@ def test_add_roles_to_staff(test_client, new_staff, new_staff_header):
 
     # some simple checks for validity
     assert response.status_code == 201
-    assert sorted(staff_roles) == sorted(STAFF_ROLES)
+    assert sorted(staff_roles) == sorted(STAFF_ROLES+('medical_doctor',))
 
 def test_check_staff_roles(test_client, new_staff, new_staff_header):
     uid = new_staff['user_id']
@@ -153,7 +153,7 @@ def test_check_staff_roles(test_client, new_staff, new_staff_header):
 
     # some simple checks for validity
     assert response.status_code == 200
-    assert sorted(staff_roles) == sorted(STAFF_ROLES)
+    assert sorted(staff_roles) == sorted(STAFF_ROLES+('medical_doctor',))
 
 def test_add_staff_operational_territory(test_client, new_staff, new_staff_header):
     uid = new_staff['user_id']
