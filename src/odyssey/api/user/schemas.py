@@ -63,7 +63,7 @@ class StaffInfoSchema(Schema):
     Currently just holds access_roles
     """
     access_roles = fields.List(
-                    fields.String(validate=validate.OneOf(ACCESS_ROLES)), 
+                    fields.String(validate=validate.OneOf(STAFF_ROLES)), 
                     metadata={'description': f'Access roles the new user will have. Options include: {STAFF_ROLES}'}
                 )
 
