@@ -122,13 +122,6 @@ class StaffRoles(BaseModelWithIdx, UserIdFkeyMixin):
     :type: :class:`LookupRoles` instance 
     """
 
-    user_info = db.relationship('User', uselist=False, back_populates='roles')
-    """
-    Many-to-One realtionship with User table
-
-    :type: :class:`User` instance
-    """
-
     operational_territories = db.relationship('StaffOperationalTerritories', uselist=True, back_populates='role')
     """
     One to many relationship with staff's opeartional territories
