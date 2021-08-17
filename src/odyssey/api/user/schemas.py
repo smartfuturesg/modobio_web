@@ -60,7 +60,7 @@ class UserInfoPutSchema(ma.SQLAlchemyAutoSchema):
 class StaffInfoSchema(Schema):
     """
     Staff-user specific creation payload validation
-    Currently just holds access_roles 
+    Currently just holds access_roles
     """
     access_roles = fields.List(
                     fields.String(validate=validate.OneOf(ACCESS_ROLES)), 
