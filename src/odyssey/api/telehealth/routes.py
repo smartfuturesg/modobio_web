@@ -68,13 +68,14 @@ from odyssey.utils.base.resources import BaseResource
 ns = Namespace('telehealth', description='telehealth bookings management API')
 
 @ns.route('/bookings/meeting-room/access-token/<int:booking_id>/')
-@ns.doc(params={'booking_id':'booking ID'})
 class TelehealthBookingsRoomAccessTokenApi(Resource):
     """
     This endpoint is used to GET the staff and client's TWILIO access tokens so they can
     access their chats and videos.
 
     Here, we create the Booking Meeting Room.
+
+    Call start
     """
     @token_auth.login_required
     @responds(schema=TelehealthBookingMeetingRoomsTokensSchema,api=ns,status_code=200)
@@ -406,7 +407,7 @@ class TelehealthBookingsApi(BaseResource):
                 not ('client_services' in [role.role for role in current_user.roles]):
                 raise InputError(status_code=403, message='Logged in user must be a booking participant')
             
-            # TODO return booking & both profile pictures 
+            # return booking & both profile pictures 
             bookings = [booking]
             
         elif staff_user_id and not client_user_id:
@@ -414,7 +415,7 @@ class TelehealthBookingsApi(BaseResource):
             if not current_user.user_id == staff_user_id and not ('client_services' in [role.role for role in current_user.roles]):
                 raise InputError(status_code=403, message='Logged in user must be a booking participant')
 
-            # TODO return all bookings with given staff_user_id
+            # return all bookings with given staff_user_id
             bookings = TelehealthBookings.query.filter_by(staff_user_id = staff_user_id).\
                 order_by(TelehealthBookings.target_date.asc()).all()
 
@@ -423,7 +424,7 @@ class TelehealthBookingsApi(BaseResource):
             if not current_user.user_id == client_user_id and not ('client_services' in [role.role for role in current_user.roles]):
                 raise InputError(status_code=403, message='Logged in user must be a booking participant')
             
-            # TODO return all bookings with given client_user_ide'
+            # return all bookings with given client_user_ide'
             bookings = TelehealthBookings.query.filter_by(client_user_id = client_user_id).\
                 order_by(TelehealthBookings.target_date.asc()).all()
 
@@ -433,7 +434,7 @@ class TelehealthBookingsApi(BaseResource):
                 not ('client_services' in [role.role for role in current_user.roles]):
                 raise InputError(status_code=403, message='Logged in user must be a booking participant')
             
-            # TODO return all bookings with given client and staff user_id combination
+            # return all bookings with given client and staff user_id combination
             # grab the whole queue
             bookings = TelehealthBookings.query.filter_by(client_user_id = client_user_id, staff_user_id = staff_user_id).\
                 order_by(TelehealthBookings.target_date.asc()).all()
@@ -898,6 +899,7 @@ class ProvisionMeetingRooms(Resource):
         return meeting_room
 
 @ns.route('/meeting-room/access-token/<int:room_id>/')
+@ns.deprecated
 @ns.doc(params={'room_id': 'room ID number'})
 class GrantMeetingRoomAccess(Resource):
     """
@@ -1814,17 +1816,4 @@ class TelehealthAllChatRoomApi(Resource):
                    'twilio_token': token.to_jwt()}
             
         return payload
-
-@ns.route('/bookings/status-history/<int:booking_id>/')
-class TelehealthBookingStatusApi(BaseResource):
-    """
-    This api is used by Client Services to view the status history of a booking
-    """
-    @token_auth.login_required(user_type=('staff', ), staff_role=('client_services',))
-    @responds(schema=TelehealthBookingStatusSchema(many=True), api=ns)
-    def get(self,booking_id):
-        """
-        Returns a booking's status history
-        """
         
-        return TelehealthBookingStatus.query.filter_by(booking_id=booking_id).all()

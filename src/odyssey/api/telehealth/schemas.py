@@ -56,7 +56,7 @@ class TelehealthBookingsPUTSchema(ma.SQLAlchemyAutoSchema):
 class TelehealthChatRoomsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = TelehealthChatRooms
-        eclude = ('booking', 'booking_id', 'client_user_id', 'staff_user_id')
+        exclude = ('booking', 'booking_id', 'client_user_id', 'staff_user_id')
     
 class TelehealthUserSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

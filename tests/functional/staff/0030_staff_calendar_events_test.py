@@ -3,8 +3,8 @@ from odyssey.api.staff.models import StaffCalendarEvents
 from .data import staff_calendar_events_data
 
 # TODO: Fix endpoint, don't just skip test.
-import pytest
-pytestmark = pytest.mark.skip('Setting timezone in calendar events is broken.')
+#import pytest
+#pytestmark = pytest.mark.skip('Setting timezone in calendar events is broken.')
 
 def test_post_new_event(test_client):
     # using staff user
