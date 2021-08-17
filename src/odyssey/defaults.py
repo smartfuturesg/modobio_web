@@ -197,3 +197,10 @@ INSTAMED_API_KEY = ''
 
 INSTAMED_API_SECRET = ''
 """ InstaMed API access key secret. """
+
+# InstaMed Settings
+DOSESPOT_API_KEY = ''
+""" DoseSpot API access key ID number. """
+
+DOSESPOT_MODOBIO_ID = ''
+""" DoseSpot ModoBio ID. """
