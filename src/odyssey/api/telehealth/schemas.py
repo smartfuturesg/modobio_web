@@ -72,7 +72,14 @@ class TelehealthUserSchema(ma.SQLAlchemyAutoSchema):
 class TelehealthBookingsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = TelehealthBookings
-        exclude = ('client_user_id','staff_user_id','idx', 'booking_window_id_start_time_utc','booking_window_id_end_time_utc', 'target_date_utc')
+        exclude = ('client_user_id',
+        'staff_user_id',
+        'idx', 
+        'booking_window_id_start_time_utc',
+        'booking_window_id_end_time_utc', 
+        'target_date_utc',
+        'created_at',
+        'updated_at')
         include_fk = True
 
     booking_id = fields.Integer(dump_only=True)
@@ -89,8 +96,7 @@ class TelehealthBookingsSchema(ma.SQLAlchemyAutoSchema):
         return TelehealthBookings(**data)
 
 class TelehealthBookingsOutputSchema(Schema):
-    bookings = fields.Nested(TelehealthBookingsSchema(
-        exclude=['staff_timezone','client_timezone','booking_window_id_start_time','booking_window_id_end_time'], many=True),missing=[])
+    bookings = fields.Nested(TelehealthBookingsSchema(many=True),missing=[])
     all_bookings = fields.Integer()  
     twilio_token = fields.String()
 

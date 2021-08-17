@@ -446,8 +446,9 @@ class TelehealthBookingsApi(BaseResource):
             # localize booking times to the staff and client 
             # bring up profile pics
             ##
-            client = booking.client.__dict__.copy()
-            practitioner = booking.practitioner.__dict__.copy()
+
+            client = {**booking.client.__dict__}
+            practitioner = {**booking.practitioner.__dict__}
             
             # bookings stored in staff timezone
             practitioner['timezone'] = booking.staff_timezone
@@ -673,7 +674,7 @@ class TelehealthBookingsApi(BaseResource):
             reporter_role = 'Practitioner' if current_user.user_id == staff_user_id else 'Client',
             status = request.parsed_obj.status
         )
-        # save TelehealthBookingStutus object connected to this booking.
+        # save TelehealthBookingStatus object connected to this booking.
         db.session.add(status_history)
         db.session.flush()
 
@@ -717,9 +718,7 @@ class TelehealthBookingsApi(BaseResource):
                                               all_day=False,
                                               timezone = request.parsed_obj.staff_timezone
                                               )
-
         db.session.add(add_to_calendar)
-
         db.session.commit()
 
         request.parsed_obj.booking_id = request.parsed_obj.idx
