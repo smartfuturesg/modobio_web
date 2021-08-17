@@ -32,17 +32,17 @@ def test_get_1_credentials(test_client):
     for cred in response.json['items']:
         if cred['credential_type'] == 'npi':
             assert cred['country_id'] == 1
-            assert cred['state_id'] == None
+            assert cred['state'] == None
             assert cred['medical_doctor_credentials'] == '123456789'
         elif cred['credential_type'] == 'dea':
-            if cred['state_id'] == 2:
+            if cred['state'] == 2:
                 assert cred['medical_doctor_credentials'] == '183451435'
-            elif cred['state_id'] == 3:
+            elif cred['state'] == 3:
                 assert cred['medical_doctor_credentials'] == '123342534'
         else:
-            if cred['state_id'] == 2:
+            if cred['state'] == 2:
                 assert cred['medical_doctor_credentials'] == '523746512'
-            elif cred['state_id'] == 3:
+            elif cred['state'] == 3:
                 assert cred['medical_doctor_credentials'] == '839547692'  
         assert cred['status'] == 'Pending Verification'
           
@@ -68,7 +68,7 @@ def test_get_2_credentials(test_client):
     for cred in response.json['items']:
         if cred['credential_type'] == 'npi':
             assert cred['country_id'] == 1
-            assert cred['state_id'] == None
+            assert cred['state'] == None
             assert cred['medical_doctor_credentials'] == '98714234'
         elif cred['credential_type'] == 'dea':
 
@@ -99,17 +99,17 @@ def test_get_3_credentials(test_client):
     for cred in response.json['items']:
         if cred['credential_type'] == 'npi':
             assert cred['country_id'] == 1
-            assert cred['state_id'] == None
+            assert cred['state'] == None
             assert cred['medical_doctor_credentials'] == '123456789'
         elif cred['credential_type'] == 'dea':
-            if cred['state_id'] == 2:
+            if cred['state'] == 2:
                 assert cred['medical_doctor_credentials'] == '183451435'
-            elif cred['state_id'] == 3:
+            elif cred['state'] == 3:
                 assert cred['medical_doctor_credentials'] == '123342534'
         else:
-            if cred['state_id'] == 2:
+            if cred['state'] == 2:
                 assert cred['medical_doctor_credentials'] == '523746512'
-            elif cred['state_id'] == 3:
+            elif cred['state'] == 3:
                 assert cred['medical_doctor_credentials'] == '839547692'  
         assert cred['status'] == 'Pending Verification'      
 
@@ -156,21 +156,21 @@ def test_get_5_credentials(test_client):
     for cred in response.json['items']:
         if cred['credential_type'] == 'npi':
             assert cred['country_id'] == 1
-            assert cred['state_id'] == None
+            assert cred['state'] == None
             assert cred['medical_doctor_credentials'] == '123456789'
             assert cred['status'] == 'Verified'    
         elif cred['credential_type'] == 'dea':
-            if cred['state_id'] == 2:
+            if cred['state'] == 2:
                 assert cred['medical_doctor_credentials'] == '183451435'
                 assert cred['status'] == 'Verified' 
-            elif cred['state_id'] == 3:
+            elif cred['state'] == 3:
                 assert cred['medical_doctor_credentials'] == '123342534'
                 assert cred['status'] == 'Pending Verification' 
         else:
-            if cred['state_id'] == 2:
+            if cred['state'] == 2:
                 assert cred['medical_doctor_credentials'] == '523746512'
                 assert cred['status'] == 'Verified' 
-            elif cred['state_id'] == 3:
+            elif cred['state'] == 3:
                 assert cred['medical_doctor_credentials'] == '839547692'
                 assert cred['status'] == 'Pending Verification'    
 
@@ -194,21 +194,21 @@ def test_get_4_credentials(test_client):
     for cred in response.json['items']:
         if cred['credential_type'] == 'npi':
             assert cred['country_id'] == 1
-            assert cred['state_id'] == None
+            assert cred['state'] == None
             assert cred['medical_doctor_credentials'] == '123456789'
             assert cred['status'] == 'Verified'    
         elif cred['credential_type'] == 'dea':
-            if cred['state_id'] == 2:
+            if cred['state'] == 2:
                 assert cred['medical_doctor_credentials'] == '183451435'
                 assert cred['status'] == 'Verified' 
-            elif cred['state_id'] == 3:
+            elif cred['state'] == 3:
                 assert cred['medical_doctor_credentials'] == '4312079463'
                 assert cred['status'] == 'Pending Verification' 
         else:
-            if cred['state_id'] == 2:
+            if cred['state'] == 2:
                 assert cred['medical_doctor_credentials'] == '523746512'
                 assert cred['status'] == 'Verified' 
-            elif cred['state_id'] == 3:
+            elif cred['state'] == 3:
                 assert cred['medical_doctor_credentials'] == '85423903'
                 assert cred['status'] == 'Pending Verification'
 
@@ -232,21 +232,21 @@ def test_get_5_credentials(test_client):
     for cred in response.json['items']:
         if cred['credential_type'] == 'npi':
             assert cred['country_id'] == 1
-            assert cred['state_id'] == None
+            assert cred['state'] == None
             assert cred['medical_doctor_credentials'] == '987654321'
             assert cred['status'] == 'Pending Verification'    
         elif cred['credential_type'] == 'dea':
-            if cred['state_id'] == 2:
+            if cred['state'] == 2:
                 assert cred['medical_doctor_credentials'] == '183451435'
                 assert cred['status'] == 'Verified' 
-            elif cred['state_id'] == 3:
+            elif cred['state'] == 3:
                 assert cred['medical_doctor_credentials'] == '4312079463'
                 assert cred['status'] == 'Pending Verification' 
         else:
-            if cred['state_id'] == 2:
+            if cred['state'] == 2:
                 assert cred['medical_doctor_credentials'] == '523746512'
                 assert cred['status'] == 'Verified' 
-            elif cred['state_id'] == 3:
+            elif cred['state'] == 3:
                 assert cred['medical_doctor_credentials'] == '85423903'
                 assert cred['status'] == 'Pending Verification'                      
 
@@ -270,21 +270,21 @@ def test_get_5_credentials(test_client):
     for cred in response.json['items']:
         if cred['credential_type'] == 'npi':
             assert cred['country_id'] == 1
-            assert cred['state_id'] == None
+            assert cred['state'] == None
             assert cred['medical_doctor_credentials'] == '987654321'
             assert cred['status'] == 'Pending Verification'    
         elif cred['credential_type'] == 'dea':
-            if cred['state_id'] == 2:
+            if cred['state'] == 2:
                 assert cred['medical_doctor_credentials'] == '740329857'
                 assert cred['status'] == 'Pending Verification' 
-            elif cred['state_id'] == 3:
+            elif cred['state'] == 3:
                 assert cred['medical_doctor_credentials'] == '4312079463'
                 assert cred['status'] == 'Pending Verification' 
         else:
-            if cred['state_id'] == 2:
+            if cred['state'] == 2:
                 assert cred['medical_doctor_credentials'] == '523746512'
                 assert cred['status'] == 'Verified' 
-            elif cred['state_id'] == 3:
+            elif cred['state'] == 3:
                 assert cred['medical_doctor_credentials'] == '85423903'
                 assert cred['status'] == 'Pending Verification'     
 
@@ -303,23 +303,23 @@ def test_get_6_credentials(test_client):
         f'/doctor/credentials/{test_client.staff_id}/',
         headers=test_client.staff_auth_header,
         content_type='application/json')
-    breakpoint()
+
     assert response.status_code == 200 
     assert len(response.json['items']) == 4
     for cred in response.json['items']:
         if cred['credential_type'] == 'npi':
             assert cred['country_id'] == 1
-            assert cred['state_id'] == None
+            assert cred['state'] == None
             assert cred['medical_doctor_credentials'] == '987654321'
             assert cred['status'] == 'Pending Verification'    
         elif cred['credential_type'] == 'dea':
-            if cred['state_id'] == 3:
+            if cred['state'] == 3:
                 assert cred['medical_doctor_credentials'] == '4312079463'
                 assert cred['status'] == 'Pending Verification' 
         else:
-            if cred['state_id'] == 2:
+            if cred['state'] == 2:
                 assert cred['medical_doctor_credentials'] == '523746512'
                 assert cred['status'] == 'Verified' 
-            elif cred['state_id'] == 3:
+            elif cred['state'] == 3:
                 assert cred['medical_doctor_credentials'] == '85423903'
                 assert cred['status'] == 'Pending Verification'                             

@@ -9,7 +9,6 @@ from sqlalchemy import select
 
 from odyssey import db
 from odyssey.api.doctor.models import (
-    MedicalCredentials,
     MedicalLookUpBloodPressureRange,
     MedicalLookUpSTD,
     MedicalFamilyHistory,
@@ -74,7 +73,7 @@ from odyssey.api.doctor.schemas import (
     MedicalSurgeriesSchema
 )
 from odyssey.api.staff.models import StaffRoles
-
+from odyssey.api.practitioner.models import PractitionerCredentials
 from odyssey.utils.base.resources import BaseResource
 
 ns = Namespace('doctor', description='Operations related to doctor')
@@ -102,12 +101,11 @@ class MedCredentials(BaseResource):
                 raise LoginNotAuthorized
 
         query = db.session.execute(
-            select(MedicalCredentials).
+            select(PractitionerCredentials).
             where(
-                MedicalCredentials.user_id == user_id
+                PractitionerCredentials.user_id == user_id
                 )
         ).scalars().all()
-
         return {'items': query}
 
     @token_auth.login_required(user_type=('staff_self',),staff_role=('medical_doctor',))
@@ -119,7 +117,7 @@ class MedCredentials(BaseResource):
 
         User should be Staff Self
         """
-        curr_credentials = MedicalCredentials.query.filter_by(user_id=user_id).all()
+        curr_credentials = PractitionerCredentials.query.filter_by(user_id=user_id).all()     
         verified_cred = []
         if curr_credentials:
             for curr_cred in curr_credentials:
@@ -140,14 +138,14 @@ class MedCredentials(BaseResource):
             # (Bad)  DEA - AZ, AZ
             if cred.credential_type not in state_check:
                 state_check[cred.credential_type]=[]
-                state_check[cred.credential_type].append(cred.state_id)
+                state_check[cred.credential_type].append(cred.state)
             else:
-                if cred.state_id in state_check[cred.credential_type]:
+                if cred.state in state_check[cred.credential_type]:
                     # Rollback is necessary because we applied database changes above
                     db.session.rollback()
-                    raise InputError(status_code=405,message=f'Multiple {cred.state_id} submissions for {cred.credential_type}. Only one credential per state is allowed')
+                    raise InputError(status_code=405,message=f'Multiple {cred.state} submissions for {cred.credential_type}. Only one credential per state is allowed')
                 else:
-                    state_check[cred.credential_type].append(cred.state_id)
+                    state_check[cred.credential_type].append(cred.state)
 
             # These are already verified, however if for SOME reason
             # A Medical Doctor wants to update their credentials,
@@ -157,7 +155,7 @@ class MedCredentials(BaseResource):
                     cred_exists = False
                     if cred.credential_type == curr_cred.credential_type:
                         if cred.country_id == curr_cred.country_id and \
-                            cred.state_id == curr_cred.state_id:
+                            cred.state == curr_cred.state:
                                 if cred.medical_doctor_credentials != curr_cred.medical_doctor_credentials:
                                     # We update the medical doctor's credentials
                                     # and we reset the status from Verified -> Pending Verification
@@ -191,7 +189,7 @@ class MedCredentials(BaseResource):
         status = ['Verified','Pending Verification', 'Rejected']
         if payload['status'] not in status:
             raise InputError(status_code=405,message='Status must be one of <Verified, Pending Verification, Rejected>.')
-        curr_credentials = MedicalCredentials.query.filter_by(user_id=user_id,idx=payload['idx']).one_or_none()
+        curr_credentials = PractitionerCredentials.query.filter_by(user_id=user_id,idx=payload['idx']).one_or_none()
 
         if curr_credentials:
             curr_credentials.update(payload)
@@ -221,7 +219,7 @@ class MedCredentials(BaseResource):
                 raise LoginNotAuthorized
         payload = request.json
 
-        curr_credentials = MedicalCredentials.query.filter_by(user_id=user_id,idx=payload['idx']).one_or_none()
+        curr_credentials = PractitionerCredentials.query.filter_by(user_id=user_id,idx=payload['idx']).one_or_none()
 
         if curr_credentials:
             db.session.delete(curr_credentials)

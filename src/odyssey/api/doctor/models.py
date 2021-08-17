@@ -8,53 +8,6 @@ from odyssey.utils.constants import DB_SERVER_TIME, BLOODTEST_EVAL
 from odyssey import db
 from odyssey.utils.base.models import BaseModel, BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin
 
-class MedicalCredentials(BaseModelWithIdx,UserIdFkeyMixin):
-    """ Medical Credentials table
-    
-    This table is used for storing the Medical Doctor's credentials
-    """
-
-    country_id = db.Column(db.Integer, db.ForeignKey('LookupCountriesOfOperations.idx'))
-    """
-    Country the MD is submitting credentials for (USA)
-
-    :type: str
-    """
-
-    state_id = db.Column(db.Integer, db.ForeignKey('LookupTerritoriesOfOperations.idx'))
-    """
-    State the MD has medical license for
-    
-    :type: str
-    """
-
-    credential_type = db.Column(db.String)
-    """
-    <NPI, DEA, Medical License>
-
-    :type: str
-    """
-
-    medical_doctor_credentials = db.Column(db.String)
-    """
-    Staff Input values
-
-    :type: str    
-    """
-
-    status = db.Column(db.String)
-    """
-    Verifcation Status <Pending Verification, Verified, Rejected>
-
-    :type: str
-    """
-
-    role_id = db.Column(db.Integer, db.ForeignKey('StaffRoles.idx', ondelete="CASCADE"), nullable=False)
-    """
-    Role from the StaffRoles table. 
-
-    :type: int, foreign key to :attr:`StaffRoles.idx <odyssey.models.staff.StaffRoles.idx>`
-    """
 class MedicalBloodPressures(BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin):
     """ Blood Pressure Table
     
