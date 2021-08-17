@@ -65,9 +65,9 @@ def setup_db(app):
     roles = db.session.execute(text('SELECT role_name FROM "LookupRoles";')).scalars().all()
     tmpl = """
         INSERT INTO "StaffRoles"
-        (user_id, role, verified)
+        (user_id, role, granter_id)
         VALUES
-        ({}, '{}', 't');"""
+        ({}, '{}', 1);"""
     insert = [tmpl.format(STAFF_ID, role) for role in roles]
     db.session.execute(text(' '.join(insert)))
     db.session.commit()
