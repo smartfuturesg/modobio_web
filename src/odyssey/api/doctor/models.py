@@ -14,14 +14,14 @@ class MedicalCredentials(BaseModelWithIdx,UserIdFkeyMixin):
     This table is used for storing the Medical Doctor's credentials
     """
 
-    territory = db.Column(db.String)
+    country_id = db.Column(db.Integer, db.ForeignKey('LookupCountriesOfOperations.idx'))
     """
-    Territory the MD is submitting credentials for (USA)
+    Country the MD is submitting credentials for (USA)
 
     :type: str
     """
 
-    state = db.Column(db.String)
+    state_id = db.Column(db.Integer, db.ForeignKey('LookupTerritoriesOfOperations.idx'))
     """
     State the MD has medical license for
     
@@ -49,6 +49,12 @@ class MedicalCredentials(BaseModelWithIdx,UserIdFkeyMixin):
     :type: str
     """
 
+    role_id = db.Column(db.Integer, db.ForeignKey('StaffRoles.idx', ondelete="CASCADE"), nullable=False)
+    """
+    Role from the StaffRoles table. 
+
+    :type: int, foreign key to :attr:`StaffRoles.idx <odyssey.models.staff.StaffRoles.idx>`
+    """
 class MedicalBloodPressures(BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin):
     """ Blood Pressure Table
     

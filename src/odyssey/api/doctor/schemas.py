@@ -41,11 +41,11 @@ class MedicalCredentialsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = MedicalCredentials
         exclude = ('created_at','updated_at')
-        dump_only = ('timestamp','user_id')
+        dump_only = ('timestamp','user_id','role_id')
         include_fk = True
     
     idx = fields.Integer(required=False)
-    state = fields.String(validate=validate.OneOf(USSTATES_2),required=False)
+    state_id = fields.Integer(required=False)
     status = fields.String(missing='Pending Verification')
 
     @post_load

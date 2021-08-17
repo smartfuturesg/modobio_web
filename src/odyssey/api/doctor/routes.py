@@ -130,9 +130,8 @@ class MedCredentials(BaseResource):
                     verified_cred.append(curr_cred)
         
         payload = request.parsed_obj
-
+        curr_role = StaffRoles.query.filter_by(user_id=user_id,role='medical_doctor').one_or_none()
         state_check = {}
-
         for cred in payload['items']:
 
             # This takes care of only allowing 1 state input per credential type
@@ -141,14 +140,14 @@ class MedCredentials(BaseResource):
             # (Bad)  DEA - AZ, AZ
             if cred.credential_type not in state_check:
                 state_check[cred.credential_type]=[]
-                state_check[cred.credential_type].append(cred.state)
+                state_check[cred.credential_type].append(cred.state_id)
             else:
-                if cred.state in state_check[cred.credential_type]:
+                if cred.state_id in state_check[cred.credential_type]:
                     # Rollback is necessary because we applied database changes above
                     db.session.rollback()
-                    raise InputError(status_code=405,message=f'Multiple {cred.state} submissions for {cred.credential_type}. Only one credential per state is allowed')
+                    raise InputError(status_code=405,message=f'Multiple {cred.state_id} submissions for {cred.credential_type}. Only one credential per state is allowed')
                 else:
-                    state_check[cred.credential_type].append(cred.state)
+                    state_check[cred.credential_type].append(cred.state_id)
 
             # These are already verified, however if for SOME reason
             # A Medical Doctor wants to update their credentials,
@@ -157,8 +156,8 @@ class MedCredentials(BaseResource):
                 for curr_cred in verified_cred:
                     cred_exists = False
                     if cred.credential_type == curr_cred.credential_type:
-                        if cred.territory == curr_cred.territory and \
-                            cred.state == curr_cred.state:
+                        if cred.country_id == curr_cred.country_id and \
+                            cred.state_id == curr_cred.state_id:
                                 if cred.medical_doctor_credentials != curr_cred.medical_doctor_credentials:
                                     # We update the medical doctor's credentials
                                     # and we reset the status from Verified -> Pending Verification
@@ -166,10 +165,12 @@ class MedCredentials(BaseResource):
                                 cred_exists = True
                                 break
                 if not cred_exists:
+                    cred.role_id = curr_role.idx
                     cred.user_id = user_id
                     db.session.add(cred)
                     db.session.commit()                    
             else:
+                cred.role_id = curr_role.idx
                 cred.user_id = user_id
                 db.session.add(cred)
                 db.session.commit()

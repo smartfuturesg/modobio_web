@@ -1,8 +1,8 @@
-"""medical credentials
+"""add medical credentials
 
-Revision ID: aabbac2cfa80
-Revises: 1ab60df860cc
-Create Date: 2021-08-09 11:37:34.190785
+Revision ID: 266ee13690c2
+Revises: d8aa94f6790c
+Create Date: 2021-08-16 07:50:02.922007
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'aabbac2cfa80'
-down_revision = '1ab60df860cc'
+revision = '266ee13690c2'
+down_revision = 'd8aa94f6790c'
 branch_labels = None
 depends_on = None
 
@@ -22,12 +22,16 @@ def upgrade():
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('clock_timestamp()'), nullable=True),
     sa.Column('updated_at', sa.DateTime(), server_default=sa.text('clock_timestamp()'), nullable=True),
     sa.Column('idx', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('territory', sa.String(), nullable=True),
-    sa.Column('state', sa.String(), nullable=True),
+    sa.Column('country_id', sa.Integer(), nullable=True),
+    sa.Column('state_id', sa.Integer(), nullable=True),
     sa.Column('credential_type', sa.String(), nullable=True),
     sa.Column('medical_doctor_credentials', sa.String(), nullable=True),
     sa.Column('status', sa.String(), nullable=True),
+    sa.Column('role_id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['country_id'], ['LookupCountriesOfOperations.idx'], ),
+    sa.ForeignKeyConstraint(['role_id'], ['StaffRoles.idx'], ),
+    sa.ForeignKeyConstraint(['state_id'], ['LookupTerritoriesOfOperations.idx'], ),
     sa.ForeignKeyConstraint(['user_id'], ['User.user_id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('idx')
     )
