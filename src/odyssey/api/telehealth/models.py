@@ -143,6 +143,8 @@ class TelehealthBookingStatus(db.Model, ReporterIdFkeyMixin):
     """
     Holds all status changes a booking goes through
     """
+    __tablename__ = 'TelehealthBookingStatus'
+
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     Table index.

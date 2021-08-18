@@ -81,7 +81,6 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
     @responds(schema=TelehealthBookingMeetingRoomsTokensSchema,api=ns,status_code=200)
     def get(self,booking_id):
         # Get the current user
-        breakpoint()
         current_user, _ = token_auth.current_user()
         
         booking,chatroom = db.session.execute(
