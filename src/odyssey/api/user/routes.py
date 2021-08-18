@@ -253,7 +253,8 @@ class NewStaffUser(Resource):
         for role in staff_info.get('access_roles', []):
             db.session.add(StaffRolesSchema().load(
                                             {'user_id': user.user_id,
-                                             'role': role}
+                                             'role': role,
+                                             'granter_id': token_auth.current_user()[0].user_id}
                                             ))
 
         db.session.commit()

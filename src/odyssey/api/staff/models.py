@@ -115,14 +115,6 @@ class StaffRoles(BaseModelWithIdx, UserIdFkeyMixin):
     :type: :class:`LookupRoles` instance 
     """
 
-    verified = db.Column(db.Boolean, default=False)
-    """
-    Weather or not the role entry is verified. Entries to this table will not inherently be 
-    verified. 
-
-    :type: bool
-    """
-
     operational_territories = db.relationship('StaffOperationalTerritories', uselist=True, back_populates='role')
     """
     One to many relationship with staff's opeartional territories
@@ -143,6 +135,12 @@ class StaffRoles(BaseModelWithIdx, UserIdFkeyMixin):
 
     :type: :class:`StaffOperationalTerritories` instance list
     """            
+    granter_id = db.Column(db.Integer, db.ForeignKey('User.user_id'), nullable=False)
+    """
+    ID of the user who granted this role to this user.
+
+    :type: int, foreign key(User.user_id)
+    """
 
 class StaffOperationalTerritories(BaseModelWithIdx, UserIdFkeyMixin):
     """ 
