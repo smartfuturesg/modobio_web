@@ -81,6 +81,7 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
     @responds(schema=TelehealthBookingMeetingRoomsTokensSchema,api=ns,status_code=200)
     def get(self,booking_id):
         # Get the current user
+        breakpoint()
         current_user, _ = token_auth.current_user()
         
         booking,chatroom = db.session.execute(
@@ -124,6 +125,18 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
             meeting_room.client_access_token = token
 
         db.session.add(meeting_room)
+
+        # Create TelehealthBookingStatus object and update booking status to 'In Progress'
+        # TODO only allow practitioner to start the call and send a voip notification to client for joining the call
+        booking.status = 'In Progress'
+        status_history = TelehealthBookingStatus(
+            booking_id = booking_id,
+            reporter_id = current_user.user_id,
+            reporter_role = 'Practitioner' if current_user.user_id == booking.staff_user_id else 'Client',
+            status = 'In Progress'
+        )
+        db.session.add(status_history)
+
         db.session.commit() 
         return {'twilio_token': token,
                 'conversation_sid': chatroom.conversation_sid}
@@ -768,9 +781,12 @@ class TelehealthBookingsApi(BaseResource):
 
         new_status = data.get('status')
         if new_status:
-            # only practitioner can change status from pending to accepted or in progress
+            # Can't update status to 'In Progress' through this endpoint
+            # only practitioner can change status from pending to accepted
             # both client and practitioner can change status to canceled and completed
-            if new_status in ('Pending', 'Accepted', 'In Progress') and current_user.user_id != booking.staff_user_id:
+            if new_status == 'In Progress':
+                raise InputError(405, 'Can only update to this status on Call Start')
+            if new_status in ('Pending', 'Accepted') and current_user.user_id != booking.staff_user_id:
                 raise InputError(403, 'Only Practitioner may update to this status')
             
             # Create TelehealthBookingStatus object if the request is updating the status

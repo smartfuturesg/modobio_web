@@ -111,7 +111,7 @@ class User(db.Model):
     :type: :class: `StaffProfile` instance
     """
 
-    roles = db.relationship('StaffRoles', uselist=True, back_populates='user_info')
+    roles = db.relationship('StaffRoles', uselist=True, foreign_keys='StaffRoles.user_id')
     """
     One-to-Many relationship between User and StaffRoles tables
 
@@ -707,7 +707,7 @@ class UserProfilePictures(BaseModelWithIdx):
     :type: int, foreign key
     """
 
-    client_info = db.relationship('ClientInfo', back_populates='profile_pictures')
+    client_info = db.relationship('ClientInfo', back_populates='profile_pictures', foreign_keys=[client_id])
     """
     Many to one relationship with ClientInfo
 
@@ -721,7 +721,7 @@ class UserProfilePictures(BaseModelWithIdx):
     :type: int, foreign key
     """
 
-    staff_profile = db.relationship('StaffProfile', back_populates='profile_pictures')
+    staff_profile = db.relationship('StaffProfile', back_populates='profile_pictures', foreign_keys=[staff_id])
     """
     Many to one relationship with StaffProfile
 

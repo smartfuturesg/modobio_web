@@ -70,7 +70,7 @@ class TelehealthBookings(BaseModelWithIdx):
     :type: int, foreign key('LookupBookingTimeIncrements.idx')
     """
 
-    status_history = db.relationship('TelehealthBookingStatus', uselist=True, back_populates='')
+    status_history = db.relationship('TelehealthBookingStatus', uselist=True, back_populates='booking')
     """
     One-to-Many relationship with TelehealthBookingStatus, hitory of all statuses the booking has gone through.
 
@@ -157,7 +157,7 @@ class TelehealthBookingStatus(db.Model, ReporterIdFkeyMixin):
     :type: int, foreign key('TelehealthBookings.idx')
     """
 
-    booking = db.relationship("TelehealthBookings", uselist=False, back_populates='status_history')
+    booking = db.relationship("TelehealthBookings", uselist=False, back_populates='status_history', foreign_keys='TelehealthBookingStatus.booking_id')
     """
     Many-to-One relationship with TelehealthBookings, the full booking info object
 
