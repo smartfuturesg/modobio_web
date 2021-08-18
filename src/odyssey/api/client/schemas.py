@@ -297,6 +297,17 @@ class AllClientsDataTier(Schema):
 # Clinical Care team schemas
 ####
 
+    
+
+class ClinicalCareTeamAuthorizationsForSchema(Schema):
+    """
+    This schema is intended to be nested as part of the member-of endpoint
+    it summarizes the authorizations a care team member has been granted 
+    """
+    display_name = fields.String()
+    resource_id = fields.Integer()
+    status = fields.String()
+
 class ClientClinicalCareTeamInternalSchema(Schema):
     """
     Schema is used for serializing/deserializing clinical care team related payloads
@@ -315,17 +326,7 @@ class ClientClinicalCareTeamInternalSchema(Schema):
     membersince = fields.Date(dump_only = True)
     hours_remaining = fields.Integer(required=False, dump_only=True)
     days_remaining = fields.Integer(required=False, dump_only=True)
-
-    
-
-class ClinicalCareTeamAuthorizationsForSchema(Schema):
-    """
-    This schema is intended to be nested as part of the member-of endpoint
-    it summarizes the authorizations a care team member has been granted 
-    """
-    display_name = fields.String()
-    resource_id = fields.Integer()
-
+    authorizations = fields.Nested(ClinicalCareTeamAuthorizationsForSchema(many=True),missing=[])
 
 class UserClinicalCareTeamSchema(Schema):
 
