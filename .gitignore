@@ -44,3 +44,6 @@ pytestdebug.log
 # celery
 celerybeat-schedule.*
 celerybeat.pid
+
+# aws certificate
+*.pem
