@@ -123,7 +123,6 @@ class MedCredentials(BaseResource):
             for curr_cred in curr_credentials:
                 if curr_cred.status != 'Verified':
                     db.session.delete(curr_cred)
-                    db.session.commit()
                 else:
                     verified_cred.append(curr_cred)
         
@@ -166,12 +165,11 @@ class MedCredentials(BaseResource):
                     cred.role_id = curr_role.idx
                     cred.user_id = user_id
                     db.session.add(cred)
-                    db.session.commit()                    
             else:
                 cred.role_id = curr_role.idx
                 cred.user_id = user_id
                 db.session.add(cred)
-                db.session.commit()
+        db.session.commit()
         return payload
 
     @token_auth.login_required(staff_role=('community_manager',))
