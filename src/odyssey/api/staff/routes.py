@@ -19,7 +19,7 @@ from odyssey.api.staff.models import (
     StaffCalendarEvents,
     StaffOffices)
 from odyssey.api.user.models import User, UserLogin, UserTokenHistory, UserProfilePictures
-from odyssey.api.lookup.models import LookupTerritoriesOfOperations, LookupCountriesOfOperations
+from odyssey.api.lookup.models import LookupTerritoriesOfOperations, LookupCountriesOfOperations, LookupRoles
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.errors import UnauthorizedUser, StaffEmailInUse, InputError, MethodNotAllowed, GenericNotFound
 from odyssey.utils.misc import check_staff_existence, FileHandling
@@ -34,7 +34,8 @@ from odyssey.api.staff.schemas import (
     StaffProfilePageGetSchema,
     StaffCalendarEventsSchema,
     StaffCalendarEventsUpdateSchema,
-    StaffOfficesSchema)
+    StaffOfficesSchema,
+    StaffInternalRolesSchema)
 from odyssey.utils.base.resources import BaseResource
 
 
@@ -103,33 +104,39 @@ class StaffMembers(BaseResource):
 @ns.doc(params={'user_id': 'User ID number'})
 class UpdateRoles(BaseResource):
     """
-    View and update roles for staff member with a given user_id
+    View and update roles for staff member with a given user_id.
+    This endpoint is only for granting internal staff roles (staff_admin,data_scientist,
+    community_manager, and client_services').
     """
-    @token_auth.login_required
-    @accepts(schema=StaffInfoSchema, api=ns)
-    @responds(status_code=201, api=ns)   
-    def post(self, user_id):
-        staff_user, _ = token_auth.current_user()
 
-        # staff are only allowed to edit their own info
-        if staff_user.user_id != user_id:
-            raise UnauthorizedUser(message="")
-        
-        data = request.get_json()
+    @token_auth.login_required(user_type=('staff',), staff_role=('staff_admin',))
+    @accepts(schema=StaffInternalRolesSchema, api=ns)
+    @responds(schema=StaffRolesSchema(many=True), status_code=201, api=ns)
+    def put(self, user_id):
+        """
+        Update staff roles
+        """
+        super().check_user(user_id, user_type='staff')
+                            
+        user = User.query.filter_by(user_id=user_id).one_or_none()    
         staff_roles = db.session.query(StaffRoles.role).filter(StaffRoles.user_id==user_id).all()
         staff_roles = [x[0] for x in staff_roles]
-        staff_role_schema = StaffRolesSchema()
 
-        # loop through submitted roles, add role if not already in db
-        for role in data['access_roles']:
+        for role in request.parsed_obj['access_roles']:
             if role not in staff_roles:
-                db.session.add(staff_role_schema.load(
-                    {'user_id': user_id, 
-                    'role': role}))
-        
+  
+                new_role = LookupRoles.query.filter_by(role_name=role).one_or_none()
+
+                if '@modobio.com' not in user.email or not user.email_verified:
+                    raise MethodNotAllowed(message='Non practitioner roles can only be granted to user\'s ' \
+                                            + 'with a verified email with the domain @modobio.com.')
+                else:
+                    db.session.add(StaffRolesSchema().load({'user_id': user_id, 
+                                                        'role': role,
+                                                        'granter_id': token_auth.current_user()[0].user_id}))
+
         db.session.commit()
-        
-        return
+        return StaffRoles.query.filter_by(user_id=user_id).all()
 
     @token_auth.login_required
     @responds(schema=StaffRolesSchema(many=True), status_code=200, api=ns)   
@@ -137,11 +144,9 @@ class UpdateRoles(BaseResource):
         """
         Get staff roles
         """
-        staff_user, _ = token_auth.current_user()
-       
-        staff_roles = StaffRoles.query.filter_by(user_id = user_id)
+        super().check_user(user_id, user_type='staff')
 
-        return staff_roles
+        return StaffRoles.query.filter_by(user_id=user_id).all()
 
 @ns.route('/operational-territories/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})

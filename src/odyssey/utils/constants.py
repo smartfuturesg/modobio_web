@@ -442,14 +442,27 @@ ACCESS_ROLES = (
     'nurse_practitioner',
     'nurse',
     'physician_assistant',
-    'system_admin',
     'client_services',
     'medical_doctor',
     'trainer',
+    'system_admin'
 )
 """
 Staff members are assigned roles, see :class:`odyssey.models.staff.StaffRoles`.
 This constant lists all possible staff roles.
+
+:type: tuple
+"""
+
+STAFF_ROLES = (
+    'staff_admin',
+    'data_scientist',
+    'community_manager',
+    'client_services'
+)
+"""
+Internal staff roles for Modobio employees. Employees with these roles must have a verified email within
+the domain @modobio.com
 
 :type: tuple
 """
