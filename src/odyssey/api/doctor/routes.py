@@ -157,10 +157,12 @@ class MedCredentials(BaseResource):
                                 cred_exists = True
                                 break
                 if not cred_exists:
+                    cred.status = 'Pending Verification'
                     cred.role_id = curr_role.idx
                     cred.user_id = user_id
                     db.session.add(cred)
             else:
+                cred.status = 'Pending Verification'
                 cred.role_id = curr_role.idx
                 cred.user_id = user_id
                 db.session.add(cred)
