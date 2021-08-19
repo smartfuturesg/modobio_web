@@ -24,7 +24,7 @@ def upgrade():
     sa.Column('reporter_role', sa.String(length=20), nullable=True),
     sa.Column('status', sa.String(length=20), nullable=True),
     sa.Column('time', sa.DateTime(), server_default=sa.text('clock_timestamp()'), nullable=True),
-    sa.Column('reporter_id', sa.Integer(), nullable=False),
+    sa.Column('reporter_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['booking_id'], ['TelehealthBookings.idx'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['reporter_id'], ['User.user_id'], ),
     sa.PrimaryKeyConstraint('idx')

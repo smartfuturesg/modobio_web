@@ -139,7 +139,7 @@ class TelehealthBookings(BaseModelWithIdx):
     :type: :class: `TelehealthChatRooms` instance
     """
 
-class TelehealthBookingStatus(db.Model, ReporterIdFkeyMixin):
+class TelehealthBookingStatus(db.Model):
     """
     Holds all status changes a booking goes through
     """
@@ -164,6 +164,12 @@ class TelehealthBookingStatus(db.Model, ReporterIdFkeyMixin):
     Many-to-One relationship with TelehealthBookings, the full booking info object
 
     :type: :class:`TelehealthBookings` instance
+    """
+    reporter_id  = db.Column(db.Integer, db.ForeignKey('User.user_id'), nullable=True)
+    """
+    Reporter ID number, foreign key to User.user_id
+
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
     reporter_role = db.Column(db.String(20))
