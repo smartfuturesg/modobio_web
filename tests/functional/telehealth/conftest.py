@@ -60,14 +60,14 @@ def telehealth_staff(test_client):
             staff_role = StaffRoles(
                 user_id=staff.user_id,
                 role='medical_doctor',
-                verified=True)
+                granter_id=1)
             test_client.db.session.add(staff_role)
         else:
             for role in ACCESS_ROLES:
                 staff_role = StaffRoles(
                     user_id=staff.user_id,
                     role=role,
-                    verified=True)
+                    granter_id=1)
                 test_client.db.session.add(staff_role)
 
         test_client.db.session.commit()

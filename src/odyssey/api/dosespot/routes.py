@@ -66,12 +66,36 @@ class DoseSpotPractitionerCreation(BaseResource):
             raise InputError(status_code=405,message=res.json())
 
         user = User.query.filter_by(user_id=user_id).one_or_none()
-
         # TODO: check if the user already has a DoseSpot ID
         breakpoint()
         if not user.is_staff:
             raise InputError(status_code=405,message='User must be a practitioner')
+        
+        missing_inputs = []
 
+        staff_office = StaffOffices.query.filter_by(user_id=user_id).all()
+    
+        if not staff_office:
+            missing_inputs.append('missing_office')
+
+        # TODO: 
+        # Add if credentials are missing
+        credentials = ''
+
+        if not credentials:
+            missing_inputs.append('missing_credentials')
+        
+        if missing_inputs:
+            raise InputError(status_code=405,message='Missing')
+
+
+        # Gender
+        # 1 - Male
+        # 2 - Female
+        # 3 - Other
+
+        # Phone Type
+        # 2 - Cell
         min_payload = {'FirstName': user.firstname,
                 'LastName': user.lastname,
                 'DateOfBirth': '1995-06-13',
@@ -81,7 +105,7 @@ class DoseSpotPractitionerCreation(BaseResource):
                 'State':'AZ',
                 'ZipCode':'85212',
                 'PrimaryPhone': '4803107597',
-                'PrimaryPhoneType': 1,
+                'PrimaryPhoneType': 2,
                 'PrimaryFax': '4803107597',
                 'ClinicianRoleType': 1,
                 'NPINumber': '1296336567'
@@ -99,3 +123,100 @@ class DoseSpotPractitionerCreation(BaseResource):
     @responds(status_code=204, api=ns)
     def delete(self, user_id):
         return
+
+@ns.route('/create-patient/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class DoseSpotPractitionerCreation(BaseResource):
+
+    @token_auth.login_required
+    def get(self, user_id):
+        return 
+
+    @token_auth.login_required(user_type=('staff',),staff_role='medical_doctor')
+    # @accepts(schema=MedicalBloodPressuresSchema, api=ns)
+    # @responds(schema=MedicalBloodPressuresSchema, status_code=201, api=ns)
+    def post(self, user_id):
+        """
+        POST - Only a DoseSpot Admin will be able to use this endpoint. As a workaround
+               we have stored a DoseSpot Admin credentials so the ModoBio system will be able
+               to create the practitioner on the DoseSpot platform
+        """
+
+        # Clinician ID
+        # TODO: 
+        curr_user,_ = token_auth.current_user()
+        # clinician_id = DoseSpotPractitionerID.query.filter_by(user_id=curr_user.user_id)
+        clinician_id = ''
+        clinic_api_key = current_app.config['DOSESPOT_API_KEY']
+        modobio_id = str(current_app.config['DOSESPOT_MODOBIO_ID'])
+
+        encrypted_clinic_id = generate_encrypted_clinic_id(clinic_api_key)
+        encrypted_user_id = generate_encrypted_user_id(encrypted_clinic_id[:22],clinic_api_key,clinician_id)
+
+
+        res = get_access_token(modobio_id,encrypted_clinic_id,clinician_id,encrypted_user_id)
+
+        if res.ok:
+            access_token = res.json()['access_token']
+            headers = {'Authorization': f'Bearer {access_token}'}
+        else:
+            raise InputError(status_code=405,message=res.json())
+
+        user = User.query.filter_by(user_id=user_id).one_or_none()
+        # TODO: check if the user already has a DoseSpot ID
+        breakpoint()
+        if not user.is_staff:
+            raise InputError(status_code=405,message='User must be a practitioner')
+        
+        missing_inputs = []
+
+        staff_office = StaffOffices.query.filter_by(user_id=user_id).all()
+    
+        if not staff_office:
+            missing_inputs.append('missing_office')
+
+        # TODO: 
+        # Add if credentials are missing
+        credentials = ''
+
+        if not credentials:
+            missing_inputs.append('missing_credentials')
+        
+        if missing_inputs:
+            raise InputError(status_code=405,message='Missing')
+
+
+        # Gender
+        # 1 - Male
+        # 2 - Female
+        # 3 - Other
+
+        # Phone Type
+        # 2 - Cell
+        min_payload = {'FirstName': user.firstname,
+                'LastName': user.lastname,
+                'DateOfBirth': '1995-06-13',
+                'Gender': 1,
+                'Address1': '123 test ave',
+                'City':'Mesa',
+                'State':'AZ',
+                'ZipCode':'85212',
+                'PrimaryPhone': '4803107597',
+                'PrimaryPhoneType': 2,
+                'PrimaryFax': '4803107597',
+                'ClinicianRoleType': 1,
+                'NPINumber': '1296336567'
+                }
+
+        
+        breakpoint()
+
+        # res = requests.post('https://my.staging.dosespot.com/webapi/api/clinicians',
+        #         headers=headers,
+        #         data=min_payload)
+        return 
+
+    @token_auth.login_required(user_type=('client', 'staff'), staff_role=('medical_doctor',), resources=('blood_pressure',))
+    @responds(status_code=204, api=ns)
+    def delete(self, user_id):
+        return        

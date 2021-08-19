@@ -207,3 +207,6 @@ DOSESPOT_MODOBIO_ID = ''
 
 DOSESPOT_ADMIN_ID= ''
 """ DoseSpot Admin ID"""
+
+# mongo db
+MONGO_URI = ''
