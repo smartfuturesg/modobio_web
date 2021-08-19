@@ -241,8 +241,7 @@ def test_full_system_with_settings(test_client):
     client_booking = {
         'target_date': '2024-11-6',
         'booking_window_id_start_time': response.json['appointment_times'][-1]['booking_window_id_start_time'],
-        'booking_window_id_end_time': response.json['appointment_times'][-1]['booking_window_id_end_time'],
-        'profession_type': 'medical_doctor'}
+        'booking_window_id_end_time': response.json['appointment_times'][-1]['booking_window_id_end_time']}
 
     response = test_client.post(
         f'/telehealth/bookings/?client_user_id={test_client.client_id}&staff_user_id={test_client.staff_id}',
@@ -252,10 +251,10 @@ def test_full_system_with_settings(test_client):
 
     assert response.json['bookings'][0]['client_timezone'] == 'America/Phoenix'
     assert response.json['bookings'][0]['staff_timezone'] == 'UTC'
-    assert response.json['bookings'][0]['status'] == 'Pending Staff Acceptance'
+    assert response.json['bookings'][0]['status'] == 'Pending'
     assert response.json['bookings'][0]['payment_method_id'] == payment_method_1.idx
 
-    booking_id = response.json['bookings'][0]['idx']
+    booking_id = response.json['bookings'][0]['booking_id']
 
     ##
     # 4. Pull up bookings from the client and staff perspectives
@@ -263,7 +262,6 @@ def test_full_system_with_settings(test_client):
     response = test_client.get(
         f'/telehealth/bookings/?client_user_id={test_client.client_id}&staff_user_id={test_client.staff_id}',
         headers=test_client.staff_auth_header,
-        data=dumps(client_booking),
         content_type='application/json')
 
     current_booking = (booking for booking in response.json['bookings'] if booking.booking_id == booking_id)
@@ -273,14 +271,13 @@ def test_full_system_with_settings(test_client):
             break
 
     # booking time as seen by the staff
-    assert current_booking['start_time'] == '11:30:00'
-    assert current_booking['end_time'] == '11:50:00'
-    assert current_booking['timezone'] == 'UTC'
+    assert current_booking['practitioner']['start_time_localized'] == '11:30:00'
+    assert current_booking['practitioner']['end_time_localized'] == '11:50:00'
+    assert current_booking['practitioner']['timezone'] == 'UTC'
 
     response = test_client.get(
         f'/telehealth/bookings/?client_user_id={test_client.client_id}&staff_user_id={test_client.staff_id}',
         headers=test_client.client_auth_header,
-        data=dumps(client_booking),
         content_type='application/json')
 
     for booking in response.json['bookings']:
@@ -289,9 +286,9 @@ def test_full_system_with_settings(test_client):
             break
 
     # booking time as seen by the client
-    assert current_booking['start_time'] == '04:30:00'
-    assert current_booking['end_time'] == '04:50:00'
-    assert current_booking['timezone'] == 'America/Phoenix'
+    assert current_booking['client']['start_time_localized'] == '04:30:00'
+    assert current_booking['client']['end_time_localized'] == '04:50:00'
+    assert current_booking['client']['timezone'] == 'America/Phoenix'
 
 @pytest.mark.skip('This endpoint should no longer be used.')
 def test_bookings_meeting_room_access(test_client):

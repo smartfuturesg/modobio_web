@@ -28,6 +28,13 @@ class StaffProfile(BaseModel):
     :type: int, foreign key
     """
 
+    user_info = db.relationship('User', back_populates='staff_profile', foreign_keys='StaffProfile.user_id')
+    """
+    One-to-One relatinoship with User
+
+    :type: :class: `User` instance
+    """
+
     membersince = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     Member since date
@@ -109,7 +116,7 @@ class StaffRoles(BaseModelWithIdx, UserIdFkeyMixin):
     :type: str
     """
 
-    role_info = db.relationship('LookupRoles', uselist=False, back_populates='professionals_assigned')
+    role_info = db.relationship('LookupRoles', uselist=False, back_populates='professionals_assigned', foreign_keys='StaffRoles.role')
     """
     Many to one relationship with Lookup Roles table
     :type: :class:`LookupRoles` instance 
@@ -161,7 +168,7 @@ class StaffOperationalTerritories(BaseModelWithIdx, UserIdFkeyMixin):
     :type: int, foreign key to :attr:`StaffRoles.idx <odyssey.models.staff.StaffRoles.idx>`
     """
 
-    role = db.relationship('StaffRoles', uselist=False, back_populates='operational_territories')
+    role = db.relationship('StaffRoles', uselist=False, back_populates='operational_territories', foreign_keys='StaffOperationalTerritories.role_id')
     """
     Many to one relationship with staff roles table
 

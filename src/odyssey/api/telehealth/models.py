@@ -1,8 +1,9 @@
 
 from sqlalchemy import text
+from sqlalchemy.sql.expression import true
 from odyssey.utils.constants import DB_SERVER_TIME
 from odyssey import db
-from odyssey.utils.base.models import BaseModel, BaseModelWithIdx, UserIdFkeyMixin
+from odyssey.utils.base.models import BaseModel, BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin
 
 """
 Database models for all things telehealth. These tables will be used to keep track of bookings,
@@ -28,6 +29,20 @@ class TelehealthBookings(BaseModelWithIdx):
     :type: int, foreign key('User.user_id')
     """
 
+    client = db.relationship('User', uselist=False, foreign_keys='TelehealthBookings.client_user_id')
+    """
+    Many-to-One relationship with User
+
+    :type: :class: `User` intance
+    """
+
+    practitioner = db.relationship('User', uselist=False, foreign_keys='TelehealthBookings.staff_user_id')
+    """
+    Many-to-One relationship with User
+
+    :type: :class: `User` intance
+    """
+
     profession_type = db.Column(db.String)
     """
     Profession type, IE: doctor, trainer, nutritionist, etc
@@ -35,7 +50,7 @@ class TelehealthBookings(BaseModelWithIdx):
     :type: str:
     """
 
-    target_date = db.Column(db.Date)
+    target_date = db.Column(db.Date, nullable=False)
     """
     target date is the date of the appointment
 
@@ -53,6 +68,13 @@ class TelehealthBookings(BaseModelWithIdx):
     """ 
     end time booking_window_id
     :type: int, foreign key('LookupBookingTimeIncrements.idx')
+    """
+
+    status_history = db.relationship('TelehealthBookingStatus', uselist=True, back_populates='booking')
+    """
+    One-to-Many relationship with TelehealthBookingStatus, hitory of all statuses the booking has gone through.
+
+    :type: :class:`TelehealthBookingStatus` instance list
     """
 
     status = db.Column(db.String)
@@ -108,6 +130,67 @@ class TelehealthBookings(BaseModelWithIdx):
     client payment method selected from PaymentMethods previously set up
 
     :type: int, foreign key(PaymentMethods.idx)
+    """
+
+    chat_room = db.relationship('TelehealthChatRooms', uselist=False, back_populates='booking')
+    """
+    One-to_One relationship with TelehealthChatRooms
+
+    :type: :class: `TelehealthChatRooms` instance
+    """
+
+class TelehealthBookingStatus(db.Model):
+    """
+    Holds all status changes a booking goes through
+    """
+    __tablename__ = 'TelehealthBookingStatus'
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Table index.
+
+    :type: int, primary key, autoincrement
+    """
+
+    booking_id = db.Column(db.Integer, db.ForeignKey('TelehealthBookings.idx', ondelete="CASCADE"), nullable=False)
+    """
+    booking_id is the idx of the booking from TelehealthBookings
+
+    :type: int, foreign key('TelehealthBookings.idx')
+    """
+
+    booking = db.relationship("TelehealthBookings", uselist=False, back_populates='status_history', foreign_keys='TelehealthBookingStatus.booking_id')
+    """
+    Many-to-One relationship with TelehealthBookings, the full booking info object
+
+    :type: :class:`TelehealthBookings` instance
+    """
+    reporter_id  = db.Column(db.Integer, db.ForeignKey('User.user_id'), nullable=True)
+    """
+    Reporter ID number, foreign key to User.user_id
+
+    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
+    """
+
+    reporter_role = db.Column(db.String(20))
+    """
+    role of the user reporting the status, could be client or practitioner
+
+    :type: str, max length 20
+    """
+
+    status = db.Column(db.String(20))
+    """
+    status of the booking, should be one of constant BOOKINGS_STATUS = ('Pending', 'Accepted', 'Canceled', 'In Progress' 'Completed')
+
+    :type: str, max length 20
+    """
+
+    time = db.Column(db.DateTime, server_default=DB_SERVER_TIME)
+    """
+    date and time when the booking status was updated to current status
+
+    :type: :class:`datetime.datetime`
     """
 
 
@@ -324,6 +407,13 @@ class TelehealthChatRooms(BaseModel):
     :type: int, foreign key('TelehealthBookings.idx')
     """
 
+    booking = db.relationship('TelehealthBookings', uselist=False, back_populates='chat_room')
+    """
+    One-to-One relationship with TelehealthBookings
+
+    :type: :class: `TelehalthBookings` instance
+    """
+    
     conversation_sid = db.Column(db.String)
     """
     Conversation SID form Twilio API. Format: CHXXX
