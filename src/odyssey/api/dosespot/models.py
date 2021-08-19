@@ -8,10 +8,10 @@ from odyssey.utils.constants import DB_SERVER_TIME, BLOODTEST_EVAL
 from odyssey import db
 from odyssey.utils.base.models import BaseModel, BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin
 
-class DoseSpotUserID(BaseModelWithIdx, UserIdFkeyMixin):
-    """ DoseSpot User ID
+class DoseSpotPractitionerID(BaseModelWithIdx, UserIdFkeyMixin):
+    """ DoseSpot Practitioner ID
     
-    This table is used for storing the practitioner and patients DoseSpot User ID.
+    This table is used for storing the practitioner DoseSpot User ID.
     """    
 
     ds_user_id = db.Column(db.Integer)
@@ -26,4 +26,33 @@ class DoseSpotUserID(BaseModelWithIdx, UserIdFkeyMixin):
     DoseSpot access_token 
 
     :type: Integer
+    """
+
+    ds_notification_sso = db.Column(db.String)
+    """
+    It seems the SSO link does not have an expiration.
+
+    If it's valid, we can use it, if not, we will repopulate this field
+
+    :type: str
+    """
+
+    ds_enrollment_status = db.Column(db.String)
+    """
+    Enrollment status <enrolled, pending, rejected>
+
+    :type: str
+    """
+
+class DoseSpotPatientID(BaseModelWithIdx, UserIdFkeyMixin):
+    """ DoseSpot User ID
+    
+    This table is used for storing the patients DoseSpot User ID.
     """    
+
+    ds_user_id = db.Column(db.Integer)
+    """
+    DoseSpot User ID
+
+    :type: Integer
+    """

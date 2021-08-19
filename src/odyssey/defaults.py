@@ -204,3 +204,6 @@ DOSESPOT_API_KEY = ''
 
 DOSESPOT_MODOBIO_ID = ''
 """ DoseSpot ModoBio ID. """
+
+DOSESPOT_ADMIN_ID= ''
+""" DoseSpot Admin ID"""
