@@ -336,6 +336,9 @@ USSTATES = (
     ('WI', 'Wisconsin'),
     ('WY', 'Wyoming')
 )
+
+USSTATES_2 = [abbreviation for abbreviation,_ in USSTATES]
+
 """ Names of US states and their 2-letter codes.
 
 :type: tuple(tuple)
@@ -879,3 +882,7 @@ EVENT_AVAILABILITY = ('Busy', 'Available')
 
 RECURRENCE_TYPE = ('Daily', 'Weekly', 'Monthly', 'Yearly')
 """ Types of recurrence that may be chosen for a recurring event """
+
+CREDENTIAL_TYPE = {
+    'medical_doctor': ('npi','dea','med_lic')
+}

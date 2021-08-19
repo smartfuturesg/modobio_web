@@ -127,8 +127,14 @@ class StaffRoles(BaseModelWithIdx, UserIdFkeyMixin):
     One to many relationship with staff's opeartional territories
 
     :type: :class:`StaffOperationalTerritories` instance list
+    """ 
+    
+    credentials = db.relationship('PractitionerCredentials', uselist=True, back_populates='role')
     """
+    One to many relationship with staff's opeartional territories
 
+    :type: :class:`StaffOperationalTerritories` instance list
+    """            
     granter_id = db.Column(db.Integer, db.ForeignKey('User.user_id'), nullable=False)
     """
     ID of the user who granted this role to this user.
