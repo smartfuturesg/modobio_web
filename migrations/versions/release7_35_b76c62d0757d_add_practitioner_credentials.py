@@ -1,7 +1,7 @@
 """add practitioner credentials
 
 Revision ID: b76c62d0757d
-Revises: 16b4d89853f9
+Revises: fedd846deffe
 Create Date: 2021-08-19 09:53:30.121504
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'b76c62d0757d'
-down_revision = '16b4d89853f9'
+down_revision = 'fedd846deffe'
 branch_labels = None
 depends_on = None
 
