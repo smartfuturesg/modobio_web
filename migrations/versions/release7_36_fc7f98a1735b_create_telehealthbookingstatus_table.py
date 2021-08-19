@@ -1,7 +1,7 @@
 """Create TelehealthBookingStatus table
 
 Revision ID: fc7f98a1735b
-Revises: fedd846deffe
+Revises: b76c62d0757d
 Create Date: 2021-08-13 17:40:10.641232
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'fc7f98a1735b'
-down_revision = 'fedd846deffe'
+down_revision = 'b76c62d0757d'
 branch_labels = None
 depends_on = None
 
