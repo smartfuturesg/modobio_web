@@ -1,15 +1,27 @@
 from datetime import datetime, date, timedelta
 
 from celery.schedules import crontab
+from celery.signals import worker_ready   
+from celery.utils.log import get_task_logger
 from flask import current_app
 from sqlalchemy import delete, text
 from sqlalchemy import and_, or_, select
 
-from odyssey import celery, db
-from odyssey.tasks.tasks import upcoming_appointment_care_team_permissions, upcoming_appointment_notification_2hr
+from odyssey import celery, db, mongo
+from odyssey.tasks.base import BaseTaskWithRetry
+from odyssey.tasks.tasks import process_wheel_webhooks, upcoming_appointment_care_team_permissions, upcoming_appointment_notification_2hr
 from odyssey.api.telehealth.models import TelehealthBookings
-from odyssey.api.client.models import ClientDataStorage
+from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations, ClientDataStorage, ClientClinicalCareTeam
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
+from odyssey.api.notifications.schemas import NotificationSchema
+from odyssey.api.user.models import User
+
+from odyssey.config import Config
+
+logger = get_task_logger(__name__)
+
+# access to the config while running tasks
+config = Config()
 
 @celery.task()
 def refresh_client_data_storage():
@@ -85,7 +97,7 @@ def deploy_upcoming_appointment_tasks(booking_window_id_start, booking_window_id
             ).scalars().all()
 
     # do not deploy appointment notifications in testing
-    if current_app.config['TESTING']:
+    if config.TESTING:
         return upcoming_bookings
     
     #schedule pre-appointment tasks
@@ -105,15 +117,113 @@ def deploy_upcoming_appointment_tasks(booking_window_id_start, booking_window_id
     return 
 
 @celery.task()
-def charge_user_telehealth():
-    #find time_id for the time corresponding to 5 minutes ago
-    now = datetime.datetime.utcnow().strftime("%H:%M:%S")
+def cleanup_temporary_care_team():
+    """
+    This method accomplishes 2 tasks regarding temporary care team members:
 
-    ongoing_appointments = db.session.execute(
-        select(TelehealthBookings.payment_method_id).
-        where(TelehealthBookings.status == 'On-Going', TelehealthBookings.booking_window_id_start_time_utc <= target_time_id)
-    )
+    -Temporary members that have less than 24 hours (>= 156 hours since being granted access)
+    remaining will trigger a notification for the user whose team they are on.
+    -Temporary members who have had access for >= 180 hours will be removed.
+    """
+    notification_time = datetime.utcnow()-timedelta(hours=156)
+    expire_time = datetime.utcnow()-timedelta(hours=180)
 
+    #find temporary members who are within 24 hours of expiration
+    notifications = db.session.execute(
+        select(ClientClinicalCareTeam). 
+                where(and_(
+                ClientClinicalCareTeam.created_at <= notification_time, 
+                ClientClinicalCareTeam.created_at > expire_time,
+                ClientClinicalCareTeam.is_temporary == True)
+            )).scalars().all()
+
+    for notification in notifications:
+        #create notification that care team member temporary access is expiring
+        member = User.query.filter_by(user_id=notification.team_member_user_id).one_or_none()
+        data = {
+            'notification_type_id': 14,
+            'title': f'{member.firstname} {member.lastname}\'s Data Access Is About To Expire',
+            'content': f'Would you like to add {member.firstname} {member.lastname} to your team? Swipe right' + \
+                        'on their entry in your team list to make them a permanent member of your team!',
+            'action': 'Redirect to team member list',
+            'time_to_live': 86400
+        }
+        new_notificiation = NotificationSchema().load(data)
+        new_notificiation.user_id = notification.user_id
+        db.session.add(new_notificiation)
+
+    #find all temporary members that are older than the 180 hour limit
+    expired = db.session.execute(
+        select(ClientClinicalCareTeam).
+            where(and_(
+                ClientClinicalCareTeam.created_at <= expire_time,
+                ClientClinicalCareTeam.is_temporary == True
+            ))
+        ).scalars().all()
+
+    for item in expired:
+        # lookup granted permissions, delete those too
+        permissions = db.session.execute(select(ClientClinicalCareTeamAuthorizations
+        ).where(
+            and_(ClientClinicalCareTeamAuthorizations.team_member_user_id == item.team_member_user_id,
+            ClientClinicalCareTeamAuthorizations.user_id == item.user_id
+        ))).scalars().all()
+
+        for permission in permissions:
+            db.session.delete(permission)
+
+        db.session.delete(item)
+    
+    db.session.commit()
+
+@celery.task(base=BaseTaskWithRetry)
+def deploy_webhook_tasks(**kwargs):
+    """
+    This is a persistent background task intended to listen for new entries into the webhook database.
+    Each entry represents a webhook request from a third party service. When inserts are detected, this task will 
+    deploy a seperate task to handle the webhook request accordingly. 
+
+    The following steps are taken to ensure each request is handled:
+    1. Scan monogoDB webhooks database for any unprocessed webhooks. These will be entries which are not labeled as acknowledged
+        or processed. 
+    2. Fire off the tasks accordingly, including the full webhook payload. 
+    3. Open a change stream in order to listen to changes in the webhook database. The listener is set to only react to
+        inserts. All other operations are ignored. 
+    4. Send the full payloads to the appropriate task handler.
+
+    As this task is intended to be running constantly in the background, it is called right when the celery workers are 
+    done initializing by the `tasks.periodic.startup_tasks` function.
+
+    TODO: details on maintaining persistence in case of failures like temporary outage of mongodb. 
+    """
+    # create a change stream object on it filtering by only insert operations
+    # This step must be done first so that no entries are lost between now and the following step
+    stream = mongo.db.watch([{'$match': {'operationType': {'$in': ['insert'] }}}])
+
+    # search for currently unprocessed webhook tasks, handle them accordingly
+    # NOTE: each integration is given a colelction in the webhook database. MongoDB allows searching only one collection 
+    # at a time. So this step must be done for each integration
+    unprocessed_wheel_wh = mongo.db.wheel.find({ "$or" : [{"modobio_meta.processed":False} , {"modobio_meta.acknowleged" : False}]})
+
+    # send wheel payloads for processing
+    for wh_payload in unprocessed_wheel_wh:
+        wh_payload['_id'] = str(wh_payload['_id'])
+        logger.info("deploying task originating from wheel webhook")
+        process_wheel_webhooks.delay(wh_payload)
+
+    # open while loop waits for new inserts to the database from any collection
+    while True:
+        wh_payload = stream.try_next()
+        if wh_payload:
+            wh_payload['fullDocument']['_id'] = str(wh_payload['fullDocument']['_id'])
+            logger.info(f"deploying task originating from {wh_payload['ns']['coll']} webhook")
+            # shoot off background task for each integration accordingly 
+            if wh_payload['ns']['coll'] == 'wheel':
+                process_wheel_webhooks.delay(wh_payload['fullDocument'])
+
+@worker_ready.connect()
+def startup_tasks(**kwargs):
+    deploy_webhook_tasks.delay()
 
 
 celery.conf.beat_schedule = {
@@ -147,9 +257,9 @@ celery.conf.beat_schedule = {
          'args': (217, 24),
         'schedule': crontab(hour=18, minute=0)
     },
-    # charge users for telehealth calls that started at least 5 minutes ago
-    'charge-user-teleheatlh': {
-        'task': 'odyssey.tasks.periodic.charge_user_telehealth',
-        'schedule': crontab(hour=0, minute=5)
+    #temporary member cleanup
+    'cleanup_temporary_care_team': {
+        'task': 'odyssey.tasks.periodic.cleanup_temporary_care_team',
+        'schedule': crontab(hour=1, minute=0)
     }
 }

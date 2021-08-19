@@ -10,14 +10,13 @@ from odyssey.api.lookup.models import (
     LookupDefaultHealthMetrics,
     LookupDrinks, 
     LookupDrinkIngredients,
-    LookupEHRPages, 
     LookupGoals, 
     LookupProfessionalAppointmentConfirmationWindow,
     LookupRaces,
     LookupSubscriptions,
     LookupTelehealthSessionDuration,
     LookupTermsAndConditions,
-    LookupTerritoriesofOperation,
+    LookupTerritoriesOfOperations,
     LookupTransactionTypes,
     LookupNotifications,
     LookupEmergencyNumbers,
@@ -146,31 +145,20 @@ class LookupCareTeamResourcesSchema(ma.SQLAlchemyAutoSchema):
     def make_object(self, data, **kwargs):
         return LookupClinicalCareTeamResources(**data)
 
-class LookupCareTeamResourcesDisplayNamesSchema(ma.SQLAlchemyAutoSchema):
-    """
-    Schema only used for requrning display names, excluding resource_id
-    This will eventually replace the schema above
-
-    """
-    class Meta:
-        model = LookupClinicalCareTeamResources
-        exclude = ('created_at', 'updated_at', 'resource_name', 'resource_id')
-
-
 class LookupCareTeamResourcesOutputSchema(Schema):
     items = fields.Nested(LookupCareTeamResourcesSchema(many=True), missing = [])
     total_items = fields.Integer()
 
 class LookupEHRPagesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        model = LookupEHRPages
-        exclude = ('created_at', 'updated_at', 'resource_group_name')
+        model = LookupClinicalCareTeamResources
+        exclude = ('created_at', 'updated_at', 'resource_group','access_group', 'resource_name')
     
-    resources = fields.Nested(LookupCareTeamResourcesDisplayNamesSchema(many=True), missing = [])
-    
+    display_grouping = fields.String()
+
     @post_load
     def make_object(self, data, **kwargs):
-        return LookupEHRPages(**data)
+        return LookupClinicalCareTeamResources(**data)
 
 
 class LookupEHRPagesOutputSchema(Schema):
@@ -238,17 +226,17 @@ class LookupDefaultHealthMetricsOutputSchema(Schema):
     total_items = fields.Integer()
 
 
-class LookupTerritoriesofOperationSchema(ma.SQLAlchemyAutoSchema):
+class LookupTerritoriesOfOperationsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        model = LookupTerritoriesofOperation
+        model = LookupTerritoriesOfOperations
         exclude = ('created_at', 'updated_at')
 
     @post_load
     def make_object(self, data, **kwargs):
-        return LookupTerritoriesofOperation(**data)
+        return LookupTerritoriesOfOperations(**data)
 
-class LookupTerritoriesofOperationOutputSchema(Schema):
-    items = fields.Nested(LookupTerritoriesofOperationSchema(many=True), missing = [])
+class LookupTerritoriesOfOperationsOutputSchema(Schema):
+    items = fields.Nested(LookupTerritoriesOfOperationsSchema(many=True), missing = [])
     total_items = fields.Integer()
 
 class LookupNotificationsOutputSchema(Schema):

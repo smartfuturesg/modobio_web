@@ -1,36 +1,20 @@
-delete from "LookupTerritoriesofOperation" 
+delete from "LookupTerritoriesOfOperations" 
 			where idx >= 1;
-alter sequence "LookupTerritoriesofOperation_idx_seq"
+alter sequence "LookupTerritoriesOfOperations_idx_seq"
   restart with 1;
 
-INSERT INTO "LookupTerritoriesofOperation" ("country", "sub_territory", "sub_territory_abbreviation") 
+delete from "LookupCountriesOfOperations" 
+			where idx >= 1;
+alter sequence "LookupCountriesOfOperations_idx_seq"
+  restart with 1;
+
+INSERT INTO "LookupCountriesOfOperations" ("country")
 VALUES
-('USA', 'Alabama', 'AL'),
-('USA', 'Arizona', 'AZ'),
-('USA', 'Colorado', 'CO'),
-('USA', 'Georgia', 'GA'),
-('USA', 'Iowa', 'IA'),
-('USA', 'Idaho', 'ID'),
-('USA', 'Illinois', 'IL'),
-('USA', 'Kansas', 'KS'),
-('USA', 'Kentucky', 'KY'),
-('USA', 'Maryland', 'MD'),
-('USA', 'Maine', 'ME'),
-('USA', 'Michigan', 'MI'),
-('USA', 'Minnesota', 'MN'),
-('USA', 'Montana', 'MT'),
-('USA', 'Mississippi', 'MS'),
-('USA', 'North Dakota', 'ND'),
-('USA', 'Nebraska', 'NE'),
-('USA', 'New Hampshire', 'NH'),
-('USA', 'New Jersey', 'NJ'), 
-('USA', 'Nevada', 'NV'), 
-('USA', 'Oklahoma', 'OK'),
-('USA', 'South Dakota', 'SD'),
-('USA', 'Tennessee', 'TN'),
-('USA', 'Utah', 'UT'), 
-('USA', 'Vermont', 'VT'),
-('USA', 'Washington', 'WA'),
-('USA', 'Wisconsin', 'WI'),
-('USA', 'West Virginia', 'WV'),
-('USA', 'Wyoming', 'WY')
+('USA');
+
+INSERT INTO "LookupTerritoriesOfOperations" ("country_id", "sub_territory", "sub_territory_abbreviation") 
+VALUES
+(1, 'California', 'CA'),
+(1, 'Florida', 'FL'),
+(1, 'New York', 'NY'),
+(1, 'Texas', 'TX');

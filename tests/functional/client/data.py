@@ -46,9 +46,11 @@ client_info_put_test_data = {
         "primary_pharmacy_name": "Maw and Paw Drugs Co.",
         "healthcare_contact": "United",
         "primary_goal_id": 1,
-        "country": "US",
+        "territory_id": 2,
+        "street": "123 Test St.",
+        "city": "Phoenix",
+        "zipcode": "85255",
         "emergency_contact": "Emergency",
-        "state": "AZ",
         "gender": "m",
         "guardianrole": "guardian role",
         "emergency_phone": "6025555555",
@@ -145,18 +147,6 @@ clients_individual_data = {
     'signdate': "2020-04-05",
     'signature': signature
 }
-
-clients_clinical_care_team = {
-    "care_team" : [
-        {
-            "team_member_email": "test_client@modomodo.com"
-        },
-        {
-            "team_member_email": "test_client_two@modomodo.com"
-        },
-    ]
-    
-    }
 
 clients_assigned_drinks = {
     "drink_id": 1

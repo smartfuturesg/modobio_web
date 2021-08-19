@@ -97,10 +97,10 @@ class TelehealthBookings(BaseModelWithIdx):
     :type: int, foreign key('LookupBookingTimeIncrements.idx')
     """
 
-    client_location_id = db.Column(db.Integer, db.ForeignKey('LookupTerritoriesofOperation.idx'), nullable=False)
+    client_location_id = db.Column(db.Integer, db.ForeignKey('LookupTerritoriesOfOperations.idx'), nullable=False)
     """
     client location id for this booking
-        :type: int, foreign key(LookupTerritoriesofOperation.idx)
+        :type: int, foreign key(LookupTerritoriesOfOperations.idx)
     """
 
     payment_method_id = db.Column(db.Integer, db.ForeignKey('PaymentMethods.idx'), nullable=False)
@@ -271,10 +271,10 @@ class TelehealthQueueClientPool(BaseModelWithIdx, UserIdFkeyMixin):
     :type: str
     """
 
-    location_id = db.Column(db.Integer, db.ForeignKey('LookupTerritoriesofOperation.idx'), nullable=False)
+    location_id = db.Column(db.Integer, db.ForeignKey('LookupTerritoriesOfOperations.idx'), nullable=False)
     """
     client location id for this booking request
-    :type: int, foreign key(LookupTerritoriesofOperation.idx)
+    :type: int, foreign key(LookupTerritoriesOfOperations.idx)
     """
 
     payment_method_id = db.Column(db.Integer, db.ForeignKey('PaymentMethods.idx'), nullable=False)

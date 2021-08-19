@@ -16,14 +16,13 @@ from odyssey.api.lookup.models import (
      LookupDefaultHealthMetrics,
      LookupDrinks, 
      LookupDrinkIngredients,
-     LookupEHRPages, 
      LookupGoals, 
      LookupProfessionalAppointmentConfirmationWindow,
      LookupRaces,
      LookupSubscriptions,
      LookupTelehealthSessionDuration,
      LookupTermsAndConditions,
-     LookupTerritoriesofOperation,
+     LookupTerritoriesOfOperations,
      LookupTransactionTypes,
      LookupNotifications,
      LookupEmergencyNumbers,
@@ -46,7 +45,7 @@ from odyssey.api.lookup.schemas import (
     LookupGoalsOutputSchema,
     LookupRacesOutputSchema,
     LookupSubscriptionsOutputSchema,
-    LookupTerritoriesofOperationOutputSchema,
+    LookupTerritoriesOfOperationsOutputSchema,
     LookupTermsAndConditionsOutputSchema,
     LookupTransactionTypesOutputSchema,
     LookupNotificationsOutputSchema,
@@ -327,8 +326,13 @@ class LookupClinicalCareTeamResourcesApi(Resource):
     @responds(schema=LookupEHRPagesOutputSchema, api=ns)
     def get(self):
         """get contents of clinical care team resources lookup table"""
-        res = LookupEHRPages.query.all()
-        return {'total_items': len(res), 'items': res}
+        care_team_resources = LookupClinicalCareTeamResources.query.all()
+
+        # add display grouping details
+        for dat in care_team_resources:
+            dat.display_grouping = dat.access_group + (f'.{dat.resource_group}' if dat.resource_group else '')
+
+        return {'total_items': len(care_team_resources), 'items': care_team_resources}
         
 @ns.route('/subscriptions/')
 class LookupSubscriptionsApi(Resource):
@@ -364,15 +368,15 @@ class LookupDefaultHealthMetricsApi(Resource):
         return {'total_items': len(res), 'items': res}
 
 @ns.route('/operational-territories/')
-class LookupTerritoriesofOperationApi(Resource):
+class LookupTerritoriesOfOperationsApi(Resource):
     """
     Endpoint for handling requests for all territories of operation
     """
     @token_auth.login_required
-    @responds(schema=LookupTerritoriesofOperationOutputSchema, status_code=200, api=ns)
+    @responds(schema=LookupTerritoriesOfOperationsOutputSchema, status_code=200, api=ns)
     def get(self):
         """get contents of operational territories lookup table"""
-        res = LookupTerritoriesofOperation.query.all()
+        res = LookupTerritoriesOfOperations.query.all()
         return {'total_items': len(res), 'items': res}
 
 @ns.route('/emergency-numbers/')

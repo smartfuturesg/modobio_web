@@ -15,7 +15,7 @@ from odyssey.api.lookup.models import (
     LookupBookingTimeIncrements
 )
 from odyssey.api.staff.models import StaffOperationalTerritories, StaffRoles, StaffCalendarEvents
-from odyssey.api.user.models import User
+from odyssey.api.user.models import User, UserProfilePictures
 
 from odyssey.api.telehealth.models import (
     TelehealthBookings,
@@ -43,13 +43,14 @@ from odyssey.api.telehealth.schemas import (
     TelehealthStaffSettingsSchema
 ) 
 from odyssey.api.lookup.models import (
-    LookupTerritoriesofOperation
+    LookupTerritoriesOfOperations
 )
 from odyssey.api.payment.models import PaymentMethods
 from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import TWILIO_ACCESS_KEY_TTL, DAY_OF_WEEK, ALLOWED_AUDIO_TYPES, ALLOWED_IMAGE_TYPES
 from odyssey.utils.errors import GenericNotFound, InputError, UnauthorizedUser, ContentNotFound, IllegalSetting
 from odyssey.utils.misc import (
+    FileHandling,
     check_client_existence, 
     check_staff_existence,
     create_conversation,
@@ -285,14 +286,25 @@ class TelehealthClientTimeSelectApi(Resource):
                         if available[staff_id][idx+1] - time_id < idx_delta and time_id + idx_delta < available[staff_id][-1]:
                             # since we are accessing an array, we need to -1 because recall time_id is the ACTUAL time increment idx
                             # and arrays are 0 indexed in python
-                            if time_inc[time_id-1].start_time.minute%15 == 0:
-                                if time_inc[time_id-1] not in timeArr:
-                                    timeArr[time_inc[time_id-1]] = []
+                            if time_inc[time_id-1].start_time.minute%15 == 0:                        
+                                # client's tz: client_in_queue.timezone
+                                # staff's timezone: staff_availability_timezone[staff_user_id]
+                                start_time_staff_localized = datetime.combine(
+                                    target_date, 
+                                    time_inc[time_id-1].start_time, 
+                                    tzinfo=tz.gettz(staff_availability_timezone[staff_id]))
+                                
+                                start_time_client_localized = start_time_staff_localized.astimezone(tz.gettz(client_in_queue.timezone))                                   
+                                if start_time_client_localized not in timeArr:
+                                    timeArr[start_time_client_localized] = []
                                 if time_id+idx_delta in removedNum[staff_id]:
-                                    continue
-                                else:
-                                    timeArr[time_inc[time_id-1]].append(staff_id)
-                        
+                                    continue                                            
+                                else:                                 
+                                    # if when localizing to client's time zone, the date changes to the day before the original 
+                                    # target date, do not show this availability to the client 
+                                    if start_time_client_localized.date() < client_in_queue.target_date.date():
+                                        continue    
+                                    timeArr[start_time_client_localized].append({"staff_id": staff_id,"idx":time_inc[time_id-1].idx})                                                            
                         else:
                             continue
                     else:
@@ -309,34 +321,22 @@ class TelehealthClientTimeSelectApi(Resource):
             ##
             booking_duration_delta = timedelta(minutes=5*(idx_delta+1))
             for time in timeArr:
+                
                 if not timeArr[time]:
                     continue
                 if len(timeArr[time]) > 1:
                     random.shuffle(timeArr[time])
                 
-                # client's tz: client_in_queue.timezone
-                # staff's timezone: staff_availability_timezone[staff_user_id]
-                start_time_staff_localized = datetime.combine(
-                    target_date, 
-                    time.start_time, 
-                    tzinfo=tz.gettz(staff_availability_timezone[timeArr[time][0]]))
-                
-                start_time_client_localized = start_time_staff_localized.astimezone(tz.gettz(client_in_queue.timezone))
-                end_time_client_localized = start_time_client_localized+booking_duration_delta
-                
-                # if when localizing to client's time zone, the date changes to the day before the original 
-                # target date, do not show this availability to the client 
-                if start_time_client_localized.date() < client_in_queue.target_date.date():
-                    continue
+                end_time_client_localized = time+booking_duration_delta
                 
                 # respond with display start and end times for the client
                 # and booking window ids which appear as they are in the 
                 # TelehealthStaffAvailability table (not localized to the client)
-                times.append({'staff_user_id': timeArr[time][0],
-                            'start_time': start_time_client_localized.time(), 
+                times.append({'staff_user_id': timeArr[time][0]['staff_id'],
+                            'start_time': time.time(), 
                             'end_time': end_time_client_localized.time(),
-                            'booking_window_id_start_time': time.idx,
-                            'booking_window_id_end_time': time.idx+idx_delta,
+                            'booking_window_id_start_time': timeArr[time][0]['idx'],
+                            'booking_window_id_end_time': timeArr[time][0]['idx']+idx_delta,
                             'target_date': target_date})             
 
             # increment days_from_target if there are less than 10 times available
@@ -377,6 +377,7 @@ class TelehealthBookingsApi(Resource):
         if not client_user_id and not staff_user_id:
             raise InputError(status_code=405,message='Must include at least one staff or client ID.')
 
+        fh = FileHandling()
         ###
         # There are a few cases. In all the logged-in user must be one of the requested user_ids:
         # 1. Both staff and client IDs part of search. 
@@ -390,6 +391,8 @@ class TelehealthBookingsApi(Resource):
             # Check client existence
             client_user = check_client_existence(client_user_id)  
             staff_user = check_staff_existence(staff_user_id)
+            profile_pic_context = ('staff_profile_picture' if g.get('user_type') == 'client' 
+                                else 'client_profile_picture')
 
             # grab the whole queue
             query = db.session.execute(
@@ -406,6 +409,7 @@ class TelehealthBookingsApi(Resource):
 
         # requesting to view client bookings. Must be logged in as the client
         elif current_user.user_id == client_user_id and g.get('user_type') == 'client':
+            profile_pic_context = 'staff_profile_picture'
             # grab this client's bookings
             client_user = current_user
             # bring up booking, set the results in a dictionary
@@ -414,7 +418,7 @@ class TelehealthBookingsApi(Resource):
                 join(TelehealthChatRooms, TelehealthBookings.idx == TelehealthChatRooms.booking_id).
                 join(User, User.user_id == TelehealthBookings.staff_user_id).
                 where(
-                    TelehealthBookings.client_user_id == client_user_id,
+                    TelehealthBookings.client_user_id == client_user_id
                     ).
                 order_by(TelehealthBookings.target_date.asc())
             ).all()
@@ -423,6 +427,7 @@ class TelehealthBookingsApi(Resource):
         
         # requesting to view staff bookings. Must be logged in as the staff
         elif current_user.user_id == staff_user_id and g.get('user_type') == 'staff':
+            profile_pic_context = 'client_profile_picture'
             # grab this client's bookings
             staff_user = current_user
             # bring up booking, set the results in a dictionary
@@ -446,18 +451,41 @@ class TelehealthBookingsApi(Resource):
         bookings_payload = []
 
         for booking in bookings:
+            profile_pic = None
             staff = booking.get('staff_user', staff_user)
             client = booking.get('client_user', client_user)
             book = booking.get('booking')
+            
             ##
             # localize booking times to the staff or client 
+            # bring up profile pics
             ##
             if g.get('user_type') == 'staff':
+                # bring up profile pic for telehealth attendee that has not made this request
+                image_path = db.session.execute(select(
+                    UserProfilePictures.image_path
+                        ).where(
+                        UserProfilePictures.client_id==client.user_id,
+                        UserProfilePictures.width == 128
+                    )).scalars().one_or_none()
+                profile_pic = (fh.get_presigned_url(file_path=image_path) 
+                                if image_path else None)
+
                 tzone = book.staff_timezone
                 # bookings stored in staff timezone
                 start_time_localized = time_inc[book.booking_window_id_start_time-1].start_time
                 end_time_localized = time_inc[book.booking_window_id_end_time-1].end_time
             else:
+                # bring up profile pic for telehealth attendee that has not made this request
+                image_path = db.session.execute(select(
+                    UserProfilePictures.image_path
+                        ).where(
+                        UserProfilePictures.staff_id==staff.user_id,
+                        UserProfilePictures.width == 128
+                    )).scalars().one_or_none()
+                profile_pic = (fh.get_presigned_url(file_path=image_path) 
+                                if image_path else None)
+
                 tzone = book.client_timezone
                 start_time_staff_localized = datetime.combine(
                     book.target_date, 
@@ -493,7 +521,8 @@ class TelehealthBookingsApi(Resource):
                 'conversation_sid': booking.get('conversation_sid'),
                 'timezone': tzone,
                 'client_location_id': book.client_location_id,
-                'payment_method_id': book.payment_method_id
+                'payment_method_id': book.payment_method_id,
+                profile_pic_context: profile_pic
             })
 
         # Sort bookings by time then sort by date
@@ -701,7 +730,7 @@ class TelehealthBookingsApi(Resource):
                                               start_date=request.parsed_obj.target_date,
                                               end_date=end_date,
                                               start_time=lookup_times[request.parsed_obj.booking_window_id_start_time-1].start_time,
-                                              end_time=lookup_times[request.parsed_obj.booking_window_id_start_time-1].end_time,
+                                              end_time=lookup_times[request.parsed_obj.booking_window_id_end_time-1].end_time,
                                               recurring=False,
                                               availability_status='Busy',
                                               location='Telehealth_'+str(request.parsed_obj.idx),
@@ -729,7 +758,7 @@ class TelehealthBookingsApi(Resource):
     @responds(status_code=201,api=ns)
     def put(self):
         """
-        PUT request should be used purely to update the booking STATUS.
+        PUT request can be used to update the booking STATUS and payment_method
         """
         if request.parsed_obj.booking_window_id_start_time >= request.parsed_obj.booking_window_id_end_time:
             raise InputError(status_code=405,message='Start time must be before end time.')
@@ -742,23 +771,23 @@ class TelehealthBookingsApi(Resource):
         if not bookings:
             raise InputError(status_code=405,message='Could not find booking.')
         
+        data = request.get_json()
         # If client wants to change the payment method for booking
         # Verify payment method idx is valid from PaymentMethods
         # and that the payment method chosen has the user_id
-        payment_id = request.get_json().get('payment_method_id')
+        payment_id = data.get('payment_method_id')
         if payment_id and not PaymentMethods.query.filter_by(user_id=bookings.client_user_id, idx=payment_id).one_or_none():
             raise InputError(403, "Invalid Payment Method")
         
         # user can't change booking location without cancelling booking and creating a new entry in the queue
-        if request.get_json().get('client_location_id'):
+        if data.get('client_location_id'):
             raise InputError(403, 'To change location, please create a new request')
 
-        data = request.get_json()
         bookings.update(data)
         # NOTE: status array should be referenced to BOOKINGS_STATUS in constants.py
         status = ('Client Canceled', 'Staff Canceled')
         # If the booking gets updated for cancelation, then delete it in the Staff's calendar
-        if data['status'] in status:
+        if data.get('status') in status:
             staff_event = StaffCalendarEvents.query.filter_by(location='Telehealth_{}'.format(booking_id)).one_or_none()
             if staff_event:
                 db.session.delete(staff_event)
@@ -1326,7 +1355,7 @@ class TelehealthQueueClientPoolApi(Resource):
         
         # Verify location_id is valid
         location_id = request.parsed_obj.location_id
-        location = LookupTerritoriesofOperation.query.filter_by(idx=location_id).one_or_none()
+        location = LookupTerritoriesOfOperations.query.filter_by(idx=location_id).one_or_none()
         if not location:
             raise GenericNotFound(f"No location exists with id {location_id}")
         

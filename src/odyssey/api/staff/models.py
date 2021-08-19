@@ -12,6 +12,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from odyssey import db
 from odyssey.utils.constants import DB_SERVER_TIME
 from odyssey.utils.base.models import BaseModel, BaseModelWithIdx, UserIdFkeyMixin
+from odyssey.api.lookup.models import LookupRoles
 
 class StaffProfile(BaseModel):
     """ Staff member profile information table.
@@ -90,7 +91,7 @@ class StaffRoles(BaseModelWithIdx, UserIdFkeyMixin):
     Some roles will be location based where verification is required for each locality
     (state, country etc.). 
     """
-    role = db.Column(db.String, nullable=False)
+    role = db.Column(db.String, db.ForeignKey('LookupRoles.role_name'), nullable=False)
     """
     Name of the role assignment
 
@@ -108,12 +109,10 @@ class StaffRoles(BaseModelWithIdx, UserIdFkeyMixin):
     :type: str
     """
 
-    verified = db.Column(db.Boolean, default=False)
+    role_info = db.relationship('LookupRoles', uselist=False, back_populates='professionals_assigned')
     """
-    Weather or not the role entry is verified. Entries to this table will not inherently be 
-    verified. 
-
-    :type: bool
+    Many to one relationship with Lookup Roles table
+    :type: :class:`LookupRoles` instance 
     """
 
     operational_territories = db.relationship('StaffOperationalTerritories', uselist=True, back_populates='role')
@@ -123,7 +122,12 @@ class StaffRoles(BaseModelWithIdx, UserIdFkeyMixin):
     :type: :class:`StaffOperationalTerritories` instance list
     """
 
+    granter_id = db.Column(db.Integer, db.ForeignKey('User.user_id'), nullable=False)
+    """
+    ID of the user who granted this role to this user.
 
+    :type: int, foreign key(User.user_id)
+    """
 
 class StaffOperationalTerritories(BaseModelWithIdx, UserIdFkeyMixin):
     """ 
@@ -133,7 +137,7 @@ class StaffOperationalTerritories(BaseModelWithIdx, UserIdFkeyMixin):
 
     """
 
-    operational_territory_id = db.Column(db.Integer, db.ForeignKey('LookupTerritoriesofOperation.idx'))
+    operational_territory_id = db.Column(db.Integer, db.ForeignKey('LookupTerritoriesOfOperations.idx'))
     """
     Operational subterritory from the operational territories lookup table.
 
@@ -161,7 +165,6 @@ class StaffOperationalTerritories(BaseModelWithIdx, UserIdFkeyMixin):
 class StaffCalendarEvents(BaseModelWithIdx, UserIdFkeyMixin):
     """ 
     Model for events to be saved to the professional's calendar 
-
     """
     start_date = db.Column(db.Date, nullable=False)
     """
@@ -250,3 +253,64 @@ class StaffCalendarEvents(BaseModelWithIdx, UserIdFkeyMixin):
     :type: str
     """
 
+class StaffOffices(BaseModelWithIdx, UserIdFkeyMixin):
+    """
+    Model for information regarding a staff member's office for DoseSpot integration.
+    """
+
+    street = db.Column(db.String)
+    """
+    Street address for this office.
+
+    :type: str
+    """
+
+    city = db.Column(db.String(35))
+    """
+    City where this office resides.
+
+    :type: str
+    """
+
+    zipcode = db.Column(db.String(20))
+    """
+    ZIP code where this office resides.
+
+    :type: str
+    """
+
+    territory_id = db.Column(db.Integer, db.ForeignKey('LookupTerritoriesOfOperations.idx'))
+    """
+    Client address territory. Foreign key gives information about both the state/province/etc. as
+    well as the country.
+
+    :type: int, foreign key(LookupTerritoriesOfOperations.idx)
+    """
+
+    email = db.Column(db.String(100))
+    """
+    Email address used to contact this office.
+
+    :type: str
+    """
+
+    fax = db.Column(db.String(20))
+    """
+    Fax number used by this office.
+
+    :type: str
+    """
+
+    phone = db.Column(db.String(20))
+    """
+    Phone number used by this office.
+
+    :type: str
+    """
+
+    phone_type = db.Column(db.String(7))
+    """
+    Type of phone the number belongs to. Options are: primary, cell, work, home, fax, night, beeper.
+
+    :type: str
+    """

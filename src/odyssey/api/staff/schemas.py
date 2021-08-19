@@ -7,9 +7,11 @@ from odyssey.api.staff.models import(
     StaffProfile, 
     StaffRoles, 
     StaffRecentClients, 
-    StaffCalendarEvents
+    StaffCalendarEvents,
+    StaffOffices
 ) 
-from odyssey.utils.constants import ACCESS_ROLES, EVENT_AVAILABILITY, BOOKINGS_STATUS, RECURRENCE_TYPE
+from odyssey.utils.base.schemas import BaseSchema
+from odyssey.utils.constants import ACCESS_ROLES, STAFF_ROLES, EVENT_AVAILABILITY, BOOKINGS_STATUS, RECURRENCE_TYPE
 
 """
     Schemas for the staff API
@@ -53,10 +55,11 @@ class StaffProfilePageGetSchema(Schema):
 class StaffRolesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = StaffRoles
-        exclude = ('created_at', 'updated_at', 'idx', 'verified')
+        exclude = ('created_at', 'updated_at', 'idx')
         include_fk = True
         load_only = ('user_id',)
     role_id = fields.Integer(attribute="idx", dump_only=True)
+    granter_id = fields.Integer(load_only=True)
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -109,3 +112,23 @@ class StaffCalendarEventsUpdateSchema(Schema):
     event_to_update_idx = fields.Integer(required=True)
     entire_series = fields.Boolean(missing=False)
     previous_start_date = fields.Date(required=True)
+
+class StaffOfficesSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = StaffOffices
+        exclude = ('created_at', 'updated_at', 'idx')
+
+    territory_id = fields.Integer()
+    country = fields.String(dump_only=True)
+    territory = fields.String(dump_only=True)
+    territory_abbreviation = fields.String(dump_only=True)
+    phone_type = fields.String(validate=validate.OneOf(('primary', 'cell', 'work', 'home', 'fax', 'night', 'beeper')))
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return StaffOffices(**data)
+
+class StaffInternalRolesSchema(Schema):
+    access_roles = fields.List(
+                    fields.String(validate=validate.OneOf(STAFF_ROLES)), 
+                    metadata={'description': f'Access roles the user will have. Options include: {STAFF_ROLES}'})

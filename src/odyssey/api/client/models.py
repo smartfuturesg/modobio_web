@@ -58,22 +58,33 @@ class ClientInfo(BaseModel):
     :type: str, max length 50
     """
 
-    state = db.Column(db.String(2))
+    street = db.Column(db.String(70))
     """
-    Client address state.
+    Street address for this client.
 
-    Currently only US States. Defaults to AZ.
-
-    :type: str, max length 2
+    :type: str, max length 70
     """
 
-    country = db.Column(db.String(2))
+    city = db.Column(db.String(35))
     """
-    Client address country.
+    City address for this client.
 
-    Currently defaults to US.
+    :type: str, max length 35
+    """
 
-    :type: str, max length 2
+    zipcode = db.Column(db.String(10))
+    """
+    Zipcode address for this client.
+
+    :type: str, max length 10
+    """
+
+    territory_id = db.Column(db.Integer, db.ForeignKey('LookupTerritoriesOfOperations.idx'))
+    """
+    Client address territory. Foreign key gives information about both the state/province/etc. as
+    well as the country.
+
+    :type: int, foreign key(LookupTerritoriesOfOperations.idx)
     """
 
     preferred = db.Column(db.SmallInteger)
@@ -820,13 +831,7 @@ class ClientClinicalCareTeam(BaseModelWithIdx, UserIdFkeyMixin):
     certain clinical data.     
     """
 
-    team_member_email = db.Column(db.String, nullable=True)
-    """
-    Deprecated 6.11.21 - all care team members will be registered users. No need to log emails
-    Email address of the clinical care team member.
-
-    :type: str
-    """
+    __table_args__ = (UniqueConstraint('user_id', 'team_member_user_id'),)
 
     team_member_user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=True)
     """
@@ -843,6 +848,7 @@ class ClientClinicalCareTeam(BaseModelWithIdx, UserIdFkeyMixin):
 
     :type: bool
     """
+
 
 class ClientMobileSettings(BaseModelWithIdx, UserIdFkeyMixin):
     """
@@ -963,13 +969,9 @@ class ClientWaistSizeHistory(BaseModelWithIdx, UserIdFkeyMixin):
     
 class ClientClinicalCareTeamAuthorizations(BaseModelWithIdx, UserIdFkeyMixin):
     """ 
-    DEPRECATED - 6.30.21
-    TODO: remove
-
     Stores clinical care team authorizations.
     One line per user, team memmber, resource combinaiton. Resource IDs come from 
     the LookupCareTeamTables table    
-      
     """
 
     __table_args__ = (UniqueConstraint('user_id', 'team_member_user_id', 'resource_id', name='care_team_auth_unique_resource_user_team_member_ids'),)
@@ -1080,36 +1082,3 @@ class ClientDataStorage(BaseModelWithIdx, UserIdFkeyMixin):
     :type: float
     """
 
-class ClientEHRPageAuthorizations(BaseModelWithIdx, UserIdFkeyMixin):
-    """ 
-    Stores EHR page authorizations granted by clients to other modobio users. 
-
-    EHR page authorization options are found in LookupEHRPages
-
-    """
-
-    __table_args__ = (UniqueConstraint('user_id', 'team_member_user_id', 'resource_group_id', name='ehr_page_auth_unique_resource_user_team_member_ids'),)
-
-    team_member_user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
-    """
-    User ID number of the care team member. 
-
-    :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
-    """
-
-    resource_group_id = db.Column(db.Integer, db.ForeignKey('LookupEHRPages.resource_group_id',ondelete="CASCADE"), nullable=False)
-    """
-    Resource group ID refers to a grouping of electronic health record resources found on a given page in the application.  
-
-    :type: int, foreign key to :attr:`LookupEHRPages.resource_group_id <odyssey.models.lookup.LookupEHRPages.resource_group_id>`
-    """
-
-    status = db.Column(db.String())
-    """
-    Status of data access request
-    
-    ("pending","approved")
-    NOTE: "rejected" is not in the list above because rejected would just be deleted
-
-    :type: str
-    """

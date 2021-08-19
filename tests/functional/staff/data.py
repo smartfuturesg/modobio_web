@@ -132,3 +132,56 @@ staff_calendar_events_data = {
     }
   }
 }
+
+staff_office_data = {
+  "normal_data": {
+    "city": "Phoenix",
+    "phone_type": "primary",
+    "territory_id": 2,
+    "zipcode": "85260",
+    "email": "string@modobio.com",
+    "phone": "1234567",
+    "street": "123 Test St.",
+    "fax": "1234568"
+  },
+  "normal_data_2": {
+    "city": "Tucson",
+    "phone_type": "home",
+    "territory_id": 2,
+    "zipcode": "85641",
+    "email": "string@modobio.com",
+    "phone": "1234560",
+    "street": "123 Place St.",
+    "fax": "1234569"
+  },
+  "invalid_territory_id": {
+    "city": "Phoenix",
+    "phone_type": "primary",
+    "territory_id": 999,
+    "zipcode": "85260",
+    "email": "string@modobio.com",
+    "phone": "1234567",
+    "street": "123 Test St.",
+    "fax": "1234568"
+  },
+  "too_long": {
+    "city": "Phoenix",
+    "phone_type": "primary",
+    "territory_id": 2,
+    "zipcode": "85260",
+    "email": "string@modobio.com",
+    "phone": "111111111111111111111",
+    "street": "123 Test St.",
+    "fax": "1234568"
+  },
+  "invalid_phone_type": {
+    "city": "Phoenix",
+    "phone_type": "invalid",
+    "territory_id": 2,
+    "zipcode": "85260",
+    "email": "string@modobio.com",
+    "phone": "1234567",
+    "street": "123 Test St.",
+    "fax": "1234568"
+  }
+}

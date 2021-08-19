@@ -14,7 +14,6 @@ from odyssey.api.client.models import (
     ClientConsent,
     ClientConsultContract,
     ClientDataStorage,
-    ClientEHRPageAuthorizations,
     ClientInfo,
     ClientIndividualContract, 
     ClientPolicies,
@@ -99,6 +98,10 @@ class ClientInfoSchema(BaseSchema):
     primary_macro_goal = fields.String()
     race_information = fields.Nested(ClientRaceAndEthnicitySchema(many=True))
     profile_picture = fields.Dict(keys=fields.Str(), values=fields.Str())
+    territory_id = fields.Integer()
+    country = fields.String(dump_only=True)
+    territory = fields.String(dump_only=True)
+    territory_abbreviation = fields.String(dump_only=True)
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -294,6 +297,17 @@ class AllClientsDataTier(Schema):
 # Clinical Care team schemas
 ####
 
+    
+
+class ClinicalCareTeamAuthorizationsForSchema(Schema):
+    """
+    This schema is intended to be nested as part of the member-of endpoint
+    it summarizes the authorizations a care team member has been granted 
+    """
+    display_name = fields.String()
+    resource_id = fields.Integer()
+    status = fields.String()
+
 class ClientClinicalCareTeamInternalSchema(Schema):
     """
     Schema is used for serializing/deserializing clinical care team related payloads
@@ -303,16 +317,16 @@ class ClientClinicalCareTeamInternalSchema(Schema):
     team_member_user_id = fields.Integer(metadata={'description': 'user_id for clinical care team member'}, dump_only=True)
     firstname = fields.String(dump_only=True, missing=None)
     lastname = fields.String(dump_only=True, missing=None)
-    profile_picture = fields.Dict(keys=fields.Str(), values=fields.Str(), dump_only=True, missing=None)
-
-class ClinicalCareTeamAuthorizationsForSchema(Schema):
-    """
-    This schema is intended to be nested as part of the member-of endpoint
-    it summarizes the authorizations a care team member has been granted 
-    """
-    display_name = fields.String()
-    resource_group_id = fields.Integer()
-
+    profile_picture = fields.String(dump_only=True, missing=None)
+    staff_roles = fields.List(fields.String, missing=[], dump_only=True)
+    is_temporary = fields.Boolean(missing=False, dump_only=True)
+    hours_remaining = fields.Integer(required=False, dump_only=True)
+    days_remaining = fields.Integer(required=False, dump_only=True)
+    is_staff = fields.Boolean(required=True, dump_only=True)
+    membersince = fields.Date(dump_only = True)
+    hours_remaining = fields.Integer(required=False, dump_only=True)
+    days_remaining = fields.Integer(required=False, dump_only=True)
+    authorizations = fields.Nested(ClinicalCareTeamAuthorizationsForSchema(many=True),missing=[])
 
 class UserClinicalCareTeamSchema(Schema):
 
@@ -321,7 +335,9 @@ class UserClinicalCareTeamSchema(Schema):
     client_name = fields.String()
     client_email = fields.String()
     authorizations = fields.Nested(ClinicalCareTeamAuthorizationsForSchema(many=True),missing=[])
-
+    client_added_date = fields.Date(dump_only=True, required=False)
+    client_profile_picture = fields.String(dump_only=True, missing=None, required = False)
+    
 class ClinicalCareTeamMemberOfSchema(Schema):
     """
     Nests the data returned for the member-of endpoint
@@ -336,6 +352,18 @@ class ClientClinicalCareTeamSchema(Schema):
     """
     
     care_team = fields.Nested(ClientClinicalCareTeamInternalSchema(many=True), missing=[])
+    total_items = fields.Integer(dump_only=True)
+
+
+class ClientClinicalCareTeamDeleteInternalSchema(Schema):
+    team_member_user_id = fields.Integer(required = True)
+
+class ClientClinicalCareTeamDeleteSchema(Schema):
+    """
+    Schema is used for nesting ClientClinicalCareTeamDeleteInternalSchema 
+    """
+    
+    care_team = fields.Nested(ClientClinicalCareTeamDeleteInternalSchema(many=True), missing=[])
     total_items = fields.Integer(dump_only=True)
 
 class ClinicalCareTeamTemporaryMembersSchema(Schema):
@@ -366,40 +394,12 @@ class ClinicalCareTeamAuthorizaitonSchema(Schema):
     def make_object(self, data, **kwargs):
         return ClientClinicalCareTeamAuthorizations(**data)
 
-class CareTeamEHRAuthorizationSchema(Schema):
-    """
-    Schmea for care team ehr authorization objects. 
-
-    Each instance is an entry into the ClientEHRPageAuthorizations table
-    """
-    user_id = fields.Integer(dump_only=True)
-    team_member_modobio_id = fields.String(dump_only=True)
-    team_member_user_id = fields.Integer(
-        metadata={'description': 'user_id for this clinical care team member'})
-    team_member_firstname = fields.String(dump_only=True)
-    team_member_lastname = fields.String(dump_only=True)
-    team_member_email = fields.Email(dump_only=True)
-    resource_group_id = fields.Integer(
-        metadata={'description': 'id for the resource. See lookup table for resource ids'})
-    display_name = fields.String(dump_only=True)
-    status = fields.String(missing='pending',required=False)
-
-    @post_load
-    def make_object(self, data, **kwargs):
-        return ClientEHRPageAuthorizations(**data)
-
 class ClinicalCareTeamAuthorizationNestedSchema(Schema):
     """
     Nests clinical care team authorization schema for API
     """
     clinical_care_team_authorization = fields.Nested(ClinicalCareTeamAuthorizaitonSchema(many=True), missing=[])
 
-
-class CareTeamEHRAuthorizationNestedSchema(Schema):
-    """
-    Nests clinical care team authorization schema for API
-    """
-    ehr_page_authorizations = fields.Nested(CareTeamEHRAuthorizationSchema(many=True), missing=[])
 
 class ClientGeneralMobileSettingsSchema(BaseSchema):
     class Meta:

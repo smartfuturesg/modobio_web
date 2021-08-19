@@ -1,11 +1,12 @@
 from datetime import datetime, timedelta
+from typing import Any, Dict
 
-from sqlalchemy import or_, select
+from bson import ObjectId
+from sqlalchemy import select
 
-from odyssey import celery, db
-from odyssey.api.client.models import ClientClinicalCareTeam, ClientEHRPageAuthorizations
-from odyssey.api.client.routes import ClinicalCareTeamMembers
-from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupEHRPages
+from odyssey import celery, db, mongo
+from odyssey.api.client.models import ClientClinicalCareTeam, ClientClinicalCareTeamAuthorizations
+from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupClinicalCareTeamResources
 from odyssey.api.notifications.models import Notifications
 from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.api.user.models import User
@@ -96,9 +97,9 @@ def upcoming_appointment_care_team_permissions(booking_id):
     # bring up resouce_group_ids required for medical doctor visits
     # TODO: update this to align with other staff roles 
     resource_ids_needed = db.session.execute(select(
-        LookupEHRPages.resource_group_id
-    ).where(LookupEHRPages.access_group.in_(['general','medical_doctor']))).scalars().all()
-    
+        LookupClinicalCareTeamResources.resource_id, 
+    ).where(LookupClinicalCareTeamResources.access_group.in_(['general','medical_doctor']))).scalars().all()
+
     # bring up booking
     booking = db.session.execute(select(TelehealthBookings).where(
         TelehealthBookings.idx == booking_id,
@@ -119,13 +120,13 @@ def upcoming_appointment_care_team_permissions(booking_id):
     if care_team_staff:
         # bring up current permissions
         current_resource_auths = db.session.execute(select(
-            ClientEHRPageAuthorizations
+            ClientClinicalCareTeamAuthorizations
         ).where(
-            ClientEHRPageAuthorizations.user_id == booking.client_user_id,
-            ClientEHRPageAuthorizations.team_member_user_id == booking.staff_user_id)
+            ClientClinicalCareTeamAuthorizations.user_id == booking.client_user_id,
+            ClientClinicalCareTeamAuthorizations.team_member_user_id == booking.staff_user_id)
         ).scalars().all()
 
-        current_resource_auth_ids = [item.resource_group_id for item in current_resource_auths if item.status == 'accepted']
+        current_resource_auth_ids = [item.resource_id for item in current_resource_auths if item.status == 'accepted']
         current_resource_auth_ids_not_accepted = [item for item in current_resource_auths if item.status != 'accepted']
 
         remaining_auths = len(set(resource_ids_needed) - set(current_resource_auth_ids))
@@ -136,17 +137,17 @@ def upcoming_appointment_care_team_permissions(booking_id):
             if len(current_resource_auth_ids_not_accepted) > 0:
                 for pending_auth in current_resource_auth_ids_not_accepted:
                     pending_auth.status = 'accepted'
-                    current_resource_auth_ids.append(pending_auth.resource_group_id)
+                    current_resource_auth_ids.append(pending_auth.resource_id)
                 
                 remaining_auths = len(set(resource_ids_needed) - set(current_resource_auth_ids))
 
             # add new permissions
             if remaining_auths > 0:
-                for resource_group_id in remaining_auths:
-                    db.session.add(ClientEHRPageAuthorizations(**{
+                for resource_id in remaining_auths:
+                    db.session.add(ClientClinicalCareTeamAuthorizations(**{
                         'user_id': booking.client_user_id,
                         'team_member_user_id': booking.staff_user_id,
-                        'resource_group_id': resource_group_id
+                        'resource_id': resource_id
                     }))
         # all necessary authorizations already granted
         else:
@@ -162,14 +163,28 @@ def upcoming_appointment_care_team_permissions(booking_id):
 
         db.session.commit()
 
-        for resource_group_id in resource_ids_needed:
-            db.session.add(ClientEHRPageAuthorizations(**{
+        for resource_id in resource_ids_needed:
+            db.session.add(ClientClinicalCareTeamAuthorizations(**{
                 'user_id': booking.client_user_id,
                 'team_member_user_id': booking.staff_user_id,
-                'resource_group_id': resource_group_id
+                'resource_id': resource_id
             }))
     
     db.session.commit()
 
     return
 
+@celery.task()
+def process_wheel_webhooks(webhook_payload: Dict[str, Any]):
+    """
+    TODO: Perform the necessary action depending on the `event` field of the payload
+    
+    Update the database entry with acknowledgement that the task has been completed
+    """
+    
+    mongo.db.wheel.find_one_and_update(
+        {"_id": ObjectId(webhook_payload['_id'])}, 
+        {"$set":{"modobio_meta.processed":True, "modobio_meta.acknowledged" :True}})
+
+
+    return
