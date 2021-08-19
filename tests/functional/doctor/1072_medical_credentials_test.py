@@ -33,17 +33,17 @@ def test_get_1_credentials(test_client):
         if cred['credential_type'] == 'npi':
             assert cred['country_id'] == 1
             assert cred['state'] == None
-            assert cred['medical_doctor_credentials'] == '123456789'
+            assert cred['credentials'] == '123456789'
         elif cred['credential_type'] == 'dea':
             if cred['state'] == 2:
-                assert cred['medical_doctor_credentials'] == '183451435'
+                assert cred['credentials'] == '183451435'
             elif cred['state'] == 3:
-                assert cred['medical_doctor_credentials'] == '123342534'
+                assert cred['credentials'] == '123342534'
         else:
             if cred['state'] == 2:
-                assert cred['medical_doctor_credentials'] == '523746512'
+                assert cred['credentials'] == '523746512'
             elif cred['state'] == 3:
-                assert cred['medical_doctor_credentials'] == '839547692'  
+                assert cred['credentials'] == '839547692'  
         assert cred['status'] == 'Pending Verification'
           
 
@@ -69,13 +69,13 @@ def test_get_2_credentials(test_client):
         if cred['credential_type'] == 'npi':
             assert cred['country_id'] == 1
             assert cred['state'] == None
-            assert cred['medical_doctor_credentials'] == '98714234'
+            assert cred['credentials'] == '98714234'
         elif cred['credential_type'] == 'dea':
 
-            assert cred['medical_doctor_credentials'] == '43218470'
+            assert cred['credentials'] == '43218470'
 
         else:
-            assert cred['medical_doctor_credentials'] == '21323512'
+            assert cred['credentials'] == '21323512'
   
         assert cred['status'] == 'Pending Verification'
 # Overwrite what was written in POST 2, Reset back to POST 1 ##############################
@@ -100,17 +100,17 @@ def test_get_3_credentials(test_client):
         if cred['credential_type'] == 'npi':
             assert cred['country_id'] == 1
             assert cred['state'] == None
-            assert cred['medical_doctor_credentials'] == '123456789'
+            assert cred['credentials'] == '123456789'
         elif cred['credential_type'] == 'dea':
             if cred['state'] == 2:
-                assert cred['medical_doctor_credentials'] == '183451435'
+                assert cred['credentials'] == '183451435'
             elif cred['state'] == 3:
-                assert cred['medical_doctor_credentials'] == '123342534'
+                assert cred['credentials'] == '123342534'
         else:
             if cred['state'] == 2:
-                assert cred['medical_doctor_credentials'] == '523746512'
+                assert cred['credentials'] == '523746512'
             elif cred['state'] == 3:
-                assert cred['medical_doctor_credentials'] == '839547692'  
+                assert cred['credentials'] == '839547692'  
         assert cred['status'] == 'Pending Verification'      
 
 # Community Manager Verifies Medical Credentials ##############################
@@ -157,21 +157,21 @@ def test_get_5_credentials(test_client):
         if cred['credential_type'] == 'npi':
             assert cred['country_id'] == 1
             assert cred['state'] == None
-            assert cred['medical_doctor_credentials'] == '123456789'
+            assert cred['credentials'] == '123456789'
             assert cred['status'] == 'Verified'    
         elif cred['credential_type'] == 'dea':
             if cred['state'] == 2:
-                assert cred['medical_doctor_credentials'] == '183451435'
+                assert cred['credentials'] == '183451435'
                 assert cred['status'] == 'Verified' 
             elif cred['state'] == 3:
-                assert cred['medical_doctor_credentials'] == '123342534'
+                assert cred['credentials'] == '123342534'
                 assert cred['status'] == 'Pending Verification' 
         else:
             if cred['state'] == 2:
-                assert cred['medical_doctor_credentials'] == '523746512'
+                assert cred['credentials'] == '523746512'
                 assert cred['status'] == 'Verified' 
             elif cred['state'] == 3:
-                assert cred['medical_doctor_credentials'] == '839547692'
+                assert cred['credentials'] == '839547692'
                 assert cred['status'] == 'Pending Verification'    
 
 # Overwrite UNverified what was written in POST 3 ##############################
@@ -195,21 +195,21 @@ def test_get_4_credentials(test_client):
         if cred['credential_type'] == 'npi':
             assert cred['country_id'] == 1
             assert cred['state'] == None
-            assert cred['medical_doctor_credentials'] == '123456789'
+            assert cred['credentials'] == '123456789'
             assert cred['status'] == 'Verified'    
         elif cred['credential_type'] == 'dea':
             if cred['state'] == 2:
-                assert cred['medical_doctor_credentials'] == '183451435'
+                assert cred['credentials'] == '183451435'
                 assert cred['status'] == 'Verified' 
             elif cred['state'] == 3:
-                assert cred['medical_doctor_credentials'] == '4312079463'
+                assert cred['credentials'] == '4312079463'
                 assert cred['status'] == 'Pending Verification' 
         else:
             if cred['state'] == 2:
-                assert cred['medical_doctor_credentials'] == '523746512'
+                assert cred['credentials'] == '523746512'
                 assert cred['status'] == 'Verified' 
             elif cred['state'] == 3:
-                assert cred['medical_doctor_credentials'] == '85423903'
+                assert cred['credentials'] == '85423903'
                 assert cred['status'] == 'Pending Verification'
 
 # Overwrite VERIFIED NPI With new number ##############################
@@ -233,21 +233,21 @@ def test_get_5_credentials(test_client):
         if cred['credential_type'] == 'npi':
             assert cred['country_id'] == 1
             assert cred['state'] == None
-            assert cred['medical_doctor_credentials'] == '987654321'
+            assert cred['credentials'] == '987654321'
             assert cred['status'] == 'Pending Verification'    
         elif cred['credential_type'] == 'dea':
             if cred['state'] == 2:
-                assert cred['medical_doctor_credentials'] == '183451435'
+                assert cred['credentials'] == '183451435'
                 assert cred['status'] == 'Verified' 
             elif cred['state'] == 3:
-                assert cred['medical_doctor_credentials'] == '4312079463'
+                assert cred['credentials'] == '4312079463'
                 assert cred['status'] == 'Pending Verification' 
         else:
             if cred['state'] == 2:
-                assert cred['medical_doctor_credentials'] == '523746512'
+                assert cred['credentials'] == '523746512'
                 assert cred['status'] == 'Verified' 
             elif cred['state'] == 3:
-                assert cred['medical_doctor_credentials'] == '85423903'
+                assert cred['credentials'] == '85423903'
                 assert cred['status'] == 'Pending Verification'                      
 
 # Overwrite VERIFIED DEA AZ With new number ##############################
@@ -271,21 +271,21 @@ def test_get_5_credentials(test_client):
         if cred['credential_type'] == 'npi':
             assert cred['country_id'] == 1
             assert cred['state'] == None
-            assert cred['medical_doctor_credentials'] == '987654321'
+            assert cred['credentials'] == '987654321'
             assert cred['status'] == 'Pending Verification'    
         elif cred['credential_type'] == 'dea':
             if cred['state'] == 2:
-                assert cred['medical_doctor_credentials'] == '740329857'
+                assert cred['credentials'] == '740329857'
                 assert cred['status'] == 'Pending Verification' 
             elif cred['state'] == 3:
-                assert cred['medical_doctor_credentials'] == '4312079463'
+                assert cred['credentials'] == '4312079463'
                 assert cred['status'] == 'Pending Verification' 
         else:
             if cred['state'] == 2:
-                assert cred['medical_doctor_credentials'] == '523746512'
+                assert cred['credentials'] == '523746512'
                 assert cred['status'] == 'Verified' 
             elif cred['state'] == 3:
-                assert cred['medical_doctor_credentials'] == '85423903'
+                assert cred['credentials'] == '85423903'
                 assert cred['status'] == 'Pending Verification'     
 
 # DELETE Medical Credentials ##############################
@@ -310,16 +310,16 @@ def test_get_6_credentials(test_client):
         if cred['credential_type'] == 'npi':
             assert cred['country_id'] == 1
             assert cred['state'] == None
-            assert cred['medical_doctor_credentials'] == '987654321'
+            assert cred['credentials'] == '987654321'
             assert cred['status'] == 'Pending Verification'    
         elif cred['credential_type'] == 'dea':
             if cred['state'] == 3:
-                assert cred['medical_doctor_credentials'] == '4312079463'
+                assert cred['credentials'] == '4312079463'
                 assert cred['status'] == 'Pending Verification' 
         else:
             if cred['state'] == 2:
-                assert cred['medical_doctor_credentials'] == '523746512'
+                assert cred['credentials'] == '523746512'
                 assert cred['status'] == 'Verified' 
             elif cred['state'] == 3:
-                assert cred['medical_doctor_credentials'] == '85423903'
+                assert cred['credentials'] == '85423903'
                 assert cred['status'] == 'Pending Verification'                             
