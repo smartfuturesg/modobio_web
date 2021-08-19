@@ -23,7 +23,6 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
 class UserLoginSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = UserLogin
-        exclude = ('password_reset',)
 
     user_id = fields.Integer()
 
