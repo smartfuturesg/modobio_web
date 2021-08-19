@@ -163,4 +163,5 @@ def test_get_4_staff_client_bookings(test_client):
         content_type='application/json')
 
     assert response.status_code == 200
-    assert response.json['bookings'][1]['status'] == 'Client Canceled'
+    assert response.json['bookings'][1]['status'] == 'Cancelled'
+    assert response.json['bookings'][1]['status_history'][0]['reporter_role'] == 'Client'
