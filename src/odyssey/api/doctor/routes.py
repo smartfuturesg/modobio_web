@@ -168,7 +168,7 @@ class MedCredentials(BaseResource):
         return 
 
     @token_auth.login_required(staff_role=('community_manager',))
-    @accepts(schema=MedicalCredentialsSchema,api=ns)
+    @accepts(schema=MedicalCredentialsSchema(only=['idx','status']),api=ns)
     @responds(status_code=201,api=ns)
     def put(self,user_id):
         """
@@ -192,7 +192,7 @@ class MedCredentials(BaseResource):
         return
 
     @token_auth.login_required(staff_role=('medical_doctor','community_manager'))
-    @accepts(schema=MedicalCredentialsSchema,api=ns)
+    @accepts(schema=MedicalCredentialsSchema(only=['idx']),api=ns)
     @responds(status_code=201,api=ns)
     def delete(self,user_id):
         """
@@ -203,13 +203,10 @@ class MedCredentials(BaseResource):
         current_user, _ = token_auth.current_user()
         staff_user_roles = db.session.query(StaffRoles.role).filter(StaffRoles.user_id==current_user.user_id).all()
         staff_user_roles = [x[0] for x in staff_user_roles]
-        if current_user.user_id == user_id:
-            pass
-        else:
-            if 'community_manager' in staff_user_roles:
-                pass
-            else:
-                raise LoginNotAuthorized
+        
+        if current_user.user_id != user_id and 'community_manager' not in staff_user_roles:
+            raise LoginNotAuthorized
+
         payload = request.json
 
         curr_credentials = PractitionerCredentials.query.filter_by(user_id=user_id,idx=payload['idx']).one_or_none()

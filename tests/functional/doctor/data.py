@@ -514,15 +514,15 @@ doctor_credentials_post_2_data = {
 }
 
 doctor_credentials_put_1_data = {
-    'idx':9,'credential_type':'npi', 'country_id':1,'credentials': '123456789','status':'Verified'
+    'idx':9,'status':'Verified'
 }
 
 doctor_credentials_put_2_data = {
-    'idx': 10, 'credential_type':'dea', 'country_id':1,'state': 'AZ','credentials': '183451435','status':'Verified' 
+    'idx': 10,'status':'Verified' 
 }
 
 doctor_credentials_put_3_data = {
-    'idx': 12, 'credential_type':'med_lic', 'country_id':1,'state': 'AZ','credentials': '523746512','status':'Verified' 
+    'idx': 12,'status':'Verified' 
 }
 
 # Posting with Verified data already
@@ -568,5 +568,5 @@ doctor_credentials_post_5_data = {
 }
 
 doctor_credentials_delete_1_data = {
-    'status': 'Pending Verification', 'country_id': 1, 'state': 'AZ', 'credential_type': 'dea', 'idx': 10
+    'idx': 10
 }
