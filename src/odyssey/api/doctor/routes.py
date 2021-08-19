@@ -105,7 +105,7 @@ class MedCredentials(BaseResource):
 
     @token_auth.login_required(user_type=('staff_self',),staff_role=('medical_doctor',))
     @accepts(schema=MedicalCredentialsInputSchema, api=ns)
-    @responds(schema=MedicalCredentialsInputSchema, status_code=201,api=ns)
+    @responds(status_code=201,api=ns)
     def post(self,user_id):
         """
         POST Request for submitting Medical Credentials for a practitioner
@@ -165,7 +165,7 @@ class MedCredentials(BaseResource):
                 cred.user_id = user_id
                 db.session.add(cred)
         db.session.commit()
-        return payload
+        return 
 
     @token_auth.login_required(staff_role=('community_manager',))
     @accepts(schema=MedicalCredentialsSchema,api=ns)
