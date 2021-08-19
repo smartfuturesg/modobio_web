@@ -16,6 +16,7 @@ app = init_celery()
 # So celery workers can discover tasks, add import paths to the modules which contain tasks
 app.conf.imports = app.conf.imports + ("odyssey.tasks.periodic","odyssey.tasks.tasks")
 
+app.conf.task_routes = {"odyssey.tasks.periodic.deploy_webhook_tasks": {'queue': 'webhook_listener'}}
+
 # force celery app to verify tasks
 app.finalize()
-

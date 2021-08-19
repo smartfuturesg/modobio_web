@@ -3,7 +3,6 @@ from flask_accepts import responds
 from flask_restx import Resource, Namespace
 
 from odyssey import db
-from odyssey.utils.auth import token_auth
 
 ns = Namespace('version', description='Endpoint for API version.')
 
