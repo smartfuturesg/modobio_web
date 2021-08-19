@@ -129,7 +129,7 @@ class StaffRoles(BaseModelWithIdx, UserIdFkeyMixin):
     :type: :class:`StaffOperationalTerritories` instance list
     """ 
 
-    practitioner_rel = db.relationship('PractitionerCredentials', uselist=True, back_populates='role')
+    credentials = db.relationship('PractitionerCredentials', uselist=True, back_populates='role')
     """
     One to many relationship with staff's opeartional territories
 

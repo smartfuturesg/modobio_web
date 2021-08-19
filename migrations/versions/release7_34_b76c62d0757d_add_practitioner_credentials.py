@@ -1,8 +1,8 @@
 """add practitioner credentials
 
-Revision ID: c18c76191bb9
+Revision ID: b76c62d0757d
 Revises: 16b4d89853f9
-Create Date: 2021-08-17 14:28:29.895039
+Create Date: 2021-08-19 09:53:30.121504
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'c18c76191bb9'
+revision = 'b76c62d0757d'
 down_revision = '16b4d89853f9'
 branch_labels = None
 depends_on = None
@@ -25,10 +25,11 @@ def upgrade():
     sa.Column('country_id', sa.Integer(), nullable=True),
     sa.Column('state', sa.String(), nullable=True),
     sa.Column('credential_type', sa.String(), nullable=True),
-    sa.Column('medical_doctor_credentials', sa.String(), nullable=True),
+    sa.Column('credentials', sa.String(), nullable=True),
     sa.Column('status', sa.String(), nullable=True),
     sa.Column('role_id', sa.Integer(), nullable=False),
     sa.Column('want_to_practice', sa.Boolean(), nullable=True),
+    sa.Column('expiration_date', sa.Date(), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['country_id'], ['LookupCountriesOfOperations.idx'], ),
     sa.ForeignKeyConstraint(['role_id'], ['StaffRoles.idx'], ondelete='CASCADE'),

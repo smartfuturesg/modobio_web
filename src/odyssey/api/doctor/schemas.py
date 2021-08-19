@@ -32,10 +32,6 @@ from odyssey.utils.base.schemas import BaseSchema
     Schemas for the doctor's API
 """
 
-class MedicalCredentialsGenericSchema(Schema):
-    territory = fields.String()
-    state = fields.String(validate=validate.OneOf(USSTATES_2))
-    cred = fields.String()
 
 class MedicalCredentialsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -49,6 +45,8 @@ class MedicalCredentialsSchema(ma.SQLAlchemyAutoSchema):
     status = fields.String(missing='Pending Verification')
     credential_type = fields.String(validate=validate.OneOf(CREDENTIAL_TYPE['medical_doctor']))
     want_to_practice = fields.Boolean(required=False,missing=True)
+
+    expiration_date = fields.Date(required=False)
 
     @post_load
     def make_object(self, data, **kwargs):

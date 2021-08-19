@@ -92,13 +92,8 @@ class MedCredentials(BaseResource):
         current_user, _ = token_auth.current_user()
         staff_user_roles = db.session.query(StaffRoles.role).filter(StaffRoles.user_id==current_user.user_id).all()
         staff_user_roles = [x[0] for x in staff_user_roles]
-        if current_user.user_id == user_id:
-            pass
-        else:
-            if 'community_manager' in staff_user_roles:
-                pass
-            else:
-                raise LoginNotAuthorized
+        if current_user.user_id != user_id and 'community_manager' not in staff_user_roles:
+            raise LoginNotAuthorized
 
         query = db.session.execute(
             select(PractitionerCredentials).
@@ -155,10 +150,10 @@ class MedCredentials(BaseResource):
                     if cred.credential_type == curr_cred.credential_type:
                         if cred.country_id == curr_cred.country_id and \
                             cred.state == curr_cred.state:
-                                if cred.medical_doctor_credentials != curr_cred.medical_doctor_credentials:
+                                if cred.credentials != curr_cred.credentials:
                                     # We update the medical doctor's credentials
                                     # and we reset the status from Verified -> Pending Verification
-                                    curr_cred.update({'medical_doctor_credentials': cred.medical_doctor_credentials,'status':'Pending Verification'})
+                                    curr_cred.update({'credentials': cred.credentials,'status':'Pending Verification'})
                                 cred_exists = True
                                 break
                 if not cred_exists:

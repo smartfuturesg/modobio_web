@@ -34,7 +34,7 @@ class PractitionerCredentials(BaseModelWithIdx,UserIdFkeyMixin):
     :type: str
     """
 
-    medical_doctor_credentials = db.Column(db.String)
+    credentials = db.Column(db.String)
     """
     Staff Input values
 
@@ -70,6 +70,13 @@ class PractitionerCredentials(BaseModelWithIdx,UserIdFkeyMixin):
     This boolean is used if the practitioner WANTS to practice
 
     :type: bool
+    """
+
+    expiration_date = db.Column(db.Date)
+    """
+    Not currently used; will be used for expiration date for the license
+
+    :type: date
     """
     
 
