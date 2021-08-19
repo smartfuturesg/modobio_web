@@ -56,7 +56,7 @@ class PractitionerCredentials(BaseModelWithIdx,UserIdFkeyMixin):
 
     """
     
-    role = db.relationship('StaffRoles', uselist=False, back_populates='practitioner_rel')
+    role = db.relationship('StaffRoles', uselist=False, back_populates='credentials')
     """
     Many to one relationship with staff roles table
 
