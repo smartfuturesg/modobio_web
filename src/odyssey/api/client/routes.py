@@ -1109,7 +1109,19 @@ class ClinicalCareTeamMembers(BaseResource):
                     membersince = client_profile.membersince
                     profile_pic_path = [pic.image_path for pic in client_profile.profile_pictures if pic.width == 64]                
                     profile_pic = (fh.get_presigned_url(file_path=profile_pic_path[0]) if len(profile_pic_path) > 0 else None)
-                
+            
+            #bring up the authorizations this care team member has for the client
+            team_member_authorizations = db.session.execute(
+                select(ClientClinicalCareTeamAuthorizations, LookupClinicalCareTeamResources.display_name
+                ).join(LookupClinicalCareTeamResources, LookupClinicalCareTeamResources.resource_id == ClientClinicalCareTeamAuthorizations.resource_id
+                ).where(
+                    ClientClinicalCareTeamAuthorizations.user_id == user_id,
+                    ClientClinicalCareTeamAuthorizations.team_member_user_id == team_member[1].user_id
+                    )
+            ).all()
+
+            authorizations = [{'resource_id': auth.resource_id, 'status': auth.status, 'display_name': display_name} for auth, display_name in team_member_authorizations]
+
 
             current_team.append({
                 'firstname': team_member[1].firstname,
@@ -1121,7 +1133,8 @@ class ClinicalCareTeamMembers(BaseResource):
                 'staff_roles' : staff_roles,
                 'is_temporary': team_member[0].is_temporary,
                 'membersince': membersince,
-                'is_staff': is_staff
+                'is_staff': is_staff,
+                'authorizations': authorizations
             })
         
         response = {"care_team": current_team,
@@ -1218,6 +1231,17 @@ class ClinicalCareTeamMembers(BaseResource):
                     profile_pic_path = [pic.image_path for pic in client_profile.profile_pictures if pic.width == 64]                
                     profile_pic = (fh.get_presigned_url(file_path=profile_pic_path[0]) if len(profile_pic_path) > 0 else None)
                 
+            #bring up the authorizations this care team member has for the client
+            team_member_authorizations = db.session.execute(
+                select(ClientClinicalCareTeamAuthorizations, LookupClinicalCareTeamResources.display_name
+                ).join(LookupClinicalCareTeamResources, LookupClinicalCareTeamResources.resource_id == ClientClinicalCareTeamAuthorizations.resource_id
+                ).where(
+                    ClientClinicalCareTeamAuthorizations.user_id == user_id,
+                    ClientClinicalCareTeamAuthorizations.team_member_user_id == team_member[1].user_id
+                    )
+            ).all()
+
+            authorizations = [{'resource_id': auth.resource_id, 'status': auth.status, 'display_name': display_name} for auth, display_name in team_member_authorizations]
 
             member_data = {
                 'firstname': team_member[1].firstname,
@@ -1229,7 +1253,8 @@ class ClinicalCareTeamMembers(BaseResource):
                 'staff_roles' : staff_roles,
                 'is_temporary': team_member[0].is_temporary,
                 'membersince': membersince,
-                'is_staff': is_staff
+                'is_staff': is_staff,
+                'authorizations' : authorizations
             }
 
             #calculate how much time is remaining for temporary members

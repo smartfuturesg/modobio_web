@@ -300,6 +300,14 @@ class UserLogin(db.Model):
     :type: datetime
     """
 
+    password_reset = db.Column(db.Boolean, default=False)
+    """
+    Used to denote when a user must be forced to change their password. This should be set 
+    from a background service based on the user's desired password timeout settings.
+
+    :type: boolean
+    """
+
     last_login = db.Column(db.DateTime)
     """
     **Deprecated 4.12.21 use UserTokensHistory to find last login**
