@@ -12,6 +12,7 @@ from flask import Flask
 from flask_cors import CORS
 from flask_marshmallow import Marshmallow
 from flask_migrate import Migrate
+from flask_pymongo import PyMongo 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import ProgrammingError
 
@@ -27,6 +28,7 @@ migrate = Migrate()
 cors = CORS()
 ma = Marshmallow()
 celery = Celery()
+mongo = PyMongo()
 
 def create_app():
     """ Initialize an instance of the Flask app.
@@ -56,7 +58,6 @@ def create_app():
 
     # Load configuration.
     app.config.from_object(Config())
-
     # Initialize all extensions.
     db.init_app(app)
     migrate.init_app(app, db)
@@ -106,6 +107,9 @@ def create_app():
                     # psycopg2.errors.UndefinedTable error. Ignore UndefinedTable error.
                     if 'UndefinedTable' not in str(err):
                         raise err
+    # mongo db
+    if app.config['MONGO_URI']:
+        mongo.init_app(app)
 
     return app
 
@@ -115,15 +119,17 @@ def _update(self, form: dict):
     for k, v in form.items():
         setattr(self, k, v)
 
+
 def init_celery(app=None):
     """
     Function to prepare a celery instance. Requires the flask app instance
 
     This is called from both create_app and celery_app 
     """
+
     app = app or create_app()
     celery.config_from_object(Config())
-    
+
     class ContextTask(celery.Task):
         """Make celery tasks work with Flask app context"""
         def __call__(self, *args, **kwargs):

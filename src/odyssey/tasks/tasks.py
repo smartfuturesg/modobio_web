@@ -1,8 +1,10 @@
 from datetime import datetime, timedelta
+from typing import Any, Dict
 
+from bson import ObjectId
 from sqlalchemy import select
 
-from odyssey import celery, db
+from odyssey import celery, db, mongo
 from odyssey.api.client.models import ClientClinicalCareTeam, ClientClinicalCareTeamAuthorizations
 from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupClinicalCareTeamResources
 from odyssey.api.notifications.models import Notifications
@@ -172,3 +174,17 @@ def upcoming_appointment_care_team_permissions(booking_id):
 
     return
 
+@celery.task()
+def process_wheel_webhooks(webhook_payload: Dict[str, Any]):
+    """
+    TODO: Perform the necessary action depending on the `event` field of the payload
+    
+    Update the database entry with acknowledgement that the task has been completed
+    """
+    
+    mongo.db.wheel.find_one_and_update(
+        {"_id": ObjectId(webhook_payload['_id'])}, 
+        {"$set":{"modobio_meta.processed":True, "modobio_meta.acknowledged" :True}})
+
+
+    return
