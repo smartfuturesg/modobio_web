@@ -34,6 +34,13 @@ class ClientInfo(BaseModel):
 
     :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
+
+    user_info = db.relationship('User', back_populates='client_info')
+    """
+    One-to-One relatinoship with User
+
+    :type: :class: `User` instance
+    """
     
     membersince = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """

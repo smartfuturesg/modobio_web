@@ -18,6 +18,7 @@ from odyssey.api.staff.models import StaffOperationalTerritories, StaffRoles, St
 from odyssey.api.user.models import User, UserProfilePictures
 
 from odyssey.api.telehealth.models import (
+    TelehealthBookingStatus,
     TelehealthBookings,
     TelehealthChatRooms,
     TelehealthMeetingRooms, 
@@ -27,6 +28,7 @@ from odyssey.api.telehealth.models import (
     TelehealthStaffSettings
 )
 from odyssey.api.telehealth.schemas import (
+    TelehealthBookingStatusSchema,
     TelehealthBookingsSchema,
     TelehealthBookingsOutputSchema,
     TelehealthBookingMeetingRoomsTokensSchema,
@@ -40,7 +42,9 @@ from odyssey.api.telehealth.schemas import (
     TelehealthStaffAvailabilityOutputSchema,
     TelehealthBookingDetailsSchema,
     TelehealthBookingDetailsGetSchema, 
-    TelehealthStaffSettingsSchema
+    TelehealthStaffSettingsSchema,
+    TelehealthBookingsPUTSchema,
+    TelehealthUserSchema
 ) 
 from odyssey.api.lookup.models import (
     LookupTerritoriesOfOperations
@@ -59,17 +63,19 @@ from odyssey.utils.misc import (
     get_chatroom,
     grab_twilio_credentials
 )
+from odyssey.utils.base.resources import BaseResource
 
 ns = Namespace('telehealth', description='telehealth bookings management API')
 
 @ns.route('/bookings/meeting-room/access-token/<int:booking_id>/')
-@ns.doc(params={'booking_id':'booking ID'})
 class TelehealthBookingsRoomAccessTokenApi(Resource):
     """
     This endpoint is used to GET the staff and client's TWILIO access tokens so they can
     access their chats and videos.
 
     Here, we create the Booking Meeting Room.
+
+    Call start
     """
     @token_auth.login_required
     @responds(schema=TelehealthBookingMeetingRoomsTokensSchema,api=ns,status_code=200)
@@ -118,6 +124,18 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
             meeting_room.client_access_token = token
 
         db.session.add(meeting_room)
+
+        # Create TelehealthBookingStatus object and update booking status to 'In Progress'
+        # TODO only allow practitioner to start the call and send a voip notification to client for joining the call
+        booking.status = 'In Progress'
+        status_history = TelehealthBookingStatus(
+            booking_id = booking_id,
+            reporter_id = current_user.user_id,
+            reporter_role = 'Practitioner' if current_user.user_id == booking.staff_user_id else 'Client',
+            status = 'In Progress'
+        )
+        db.session.add(status_history)
+
         db.session.commit() 
         return {'twilio_token': token,
                 'conversation_sid': chatroom.conversation_sid}
@@ -235,8 +253,7 @@ class TelehealthClientTimeSelectApi(Resource):
             # This is necessary to subtract from the staff_availability above.
             # If a client or staff cancels, then that time slot is now available
             bookings = TelehealthBookings.query.filter(TelehealthBookings.target_date==target_date,\
-                                                    TelehealthBookings.status!='Client Canceled',\
-                                                    TelehealthBookings.status!='Staff Canceled').all()
+                                                    TelehealthBookings.status!='Cancelled').all()
             # Now, subtract booking times from staff availability and generate the actual times a staff member is free
             removedNum = {}
             clientBookingID = []
@@ -351,15 +368,15 @@ class TelehealthClientTimeSelectApi(Resource):
 
 
 @ns.route('/bookings/')
-@ns.doc(params={'client_user_id': 'Client User ID',
-                'staff_user_id' : 'Staff User ID',
-                'booking_id': 'booking_id'}) 
-class TelehealthBookingsApi(Resource):
+class TelehealthBookingsApi(BaseResource):
     """
     This API resource is used to get and post client and staff bookings.
     """     
     @token_auth.login_required
     @responds(schema=TelehealthBookingsOutputSchema, api=ns, status_code=200)
+    @ns.doc(params={'client_user_id': 'Client User ID',
+                'staff_user_id' : 'Staff User ID',
+                'booking_id': 'booking_id'}) 
     def get(self):
         """
         Returns the list of bookings for clients and/or staff
@@ -370,159 +387,121 @@ class TelehealthBookingsApi(Resource):
 
         staff_user_id = request.args.get('staff_user_id', type=int)
 
-        # make sure the requester is one of the participants
-        if not any(current_user.user_id == uid for uid in [client_user_id, staff_user_id]):
-            raise InputError(status_code=403, message='Logged in user must be a booking participant')
-        
-        if not client_user_id and not staff_user_id:
-            raise InputError(status_code=405,message='Must include at least one staff or client ID.')
+        booking_id = request.args.get('booking_id', type=int)
 
         fh = FileHandling()
+
         ###
-        # There are a few cases. In all the logged-in user must be one of the requested user_ids:
-        # 1. Both staff and client IDs part of search. 
-        # 2. Only client_id requested, logged-in user has same _user_id and context
-        # 3. Only staff_id is requested, logged-in user has same _user_id and context
-        # 4. Logged-in user does not fit requested context
+        # There are 5 cases to decide what to return:
+        # 1. booking_id is provided: other parameters are ignored, only that booking will be returned to the participating client/staff or any cs
+        # 2. No parameter provided: an error will be raised
+        # 3. Only staff_user_id provided: all bookings for the staff user will return if loggedin user = staff_user_id or cs
+        # 4. Only client_user_id provided: all bookings for the client user will return if loggedin user = client_user_id or cs
+        # 5. Both client_user_id and staff_user_id provided: all bookings with both participats return if loggedin user = staff_user_id or client_user_id or cs
+        # client_user_id | staff_user_id | booking_id
+        #       -        |      -        |      T
+        #       F        |      F        |      F      
+        #       F        |      T        |      F
+        #       T        |      F        |      F
+        #       T        |      T        |      F
         ###
-        client_user=None
-        staff_user=None
-        if client_user_id and staff_user_id:
-            # Check client existence
-            client_user = check_client_existence(client_user_id)  
-            staff_user = check_staff_existence(staff_user_id)
-            profile_pic_context = ('staff_profile_picture' if g.get('user_type') == 'client' 
-                                else 'client_profile_picture')
 
-            # grab the whole queue
-            query = db.session.execute(
-                select(TelehealthBookings, TelehealthChatRooms.conversation_sid).
-                join(TelehealthChatRooms, TelehealthBookings.idx == TelehealthChatRooms.booking_id).
-                where(
-                    TelehealthBookings.client_user_id == client_user_id,
-                    TelehealthBookings.staff_user_id == staff_user_id
-                    ).
-                order_by(TelehealthBookings.target_date.asc())
-            ).all()
+        if not (client_user_id or staff_user_id or booking_id):
+            # 2. No parameter provided, raise error
+            raise InputError(status_code=405,message='Must include at least one of (client_user_id, staff_user_id, booking_id)')
         
-            bookings = [dict(zip(('booking','conversation_sid'), dat)) for dat in query]
+        if booking_id:
+            # 1. booking_id provided, any other parameter is ignored, only returns booking to participants or cs
+            booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
+            if not booking:
+                raise ContentNotFound() 
+            if not any(current_user.user_id == uid for uid in [booking.client_user_id, booking.staff_user_id]) and \
+                not ('client_services' in [role.role for role in current_user.roles]):
+                raise InputError(status_code=403, message='Logged in user must be a booking participant')
+            
+            # return booking & both profile pictures 
+            bookings = [booking]
+            
+        elif staff_user_id and not client_user_id:
+            # 3. only staff_user_id provided, return all bookings for such user_id if loggedin user is same user or cs
+            if not current_user.user_id == staff_user_id and not ('client_services' in [role.role for role in current_user.roles]):
+                raise InputError(status_code=403, message='Logged in user must be a booking participant')
 
-        # requesting to view client bookings. Must be logged in as the client
-        elif current_user.user_id == client_user_id and g.get('user_type') == 'client':
-            profile_pic_context = 'staff_profile_picture'
-            # grab this client's bookings
-            client_user = current_user
-            # bring up booking, set the results in a dictionary
-            query = db.session.execute(
-                select(TelehealthBookings, TelehealthChatRooms.conversation_sid, User).
-                join(TelehealthChatRooms, TelehealthBookings.idx == TelehealthChatRooms.booking_id).
-                join(User, User.user_id == TelehealthBookings.staff_user_id).
-                where(
-                    TelehealthBookings.client_user_id == client_user_id
-                    ).
-                order_by(TelehealthBookings.target_date.asc())
-            ).all()
+            # return all bookings with given staff_user_id
+            bookings = TelehealthBookings.query.filter_by(staff_user_id = staff_user_id).\
+                order_by(TelehealthBookings.target_date.asc()).all()
 
-            bookings = [dict(zip(('booking','conversation_sid', 'staff_user'), dat)) for dat in query] 
-        
-        # requesting to view staff bookings. Must be logged in as the staff
-        elif current_user.user_id == staff_user_id and g.get('user_type') == 'staff':
-            profile_pic_context = 'client_profile_picture'
-            # grab this client's bookings
-            staff_user = current_user
-            # bring up booking, set the results in a dictionary
-            query = db.session.execute(
-                select(TelehealthBookings, TelehealthChatRooms.conversation_sid, User).
-                join(TelehealthChatRooms, TelehealthBookings.idx == TelehealthChatRooms.booking_id).
-                join(User, User.user_id == TelehealthBookings.client_user_id).
-                where(
-                    TelehealthBookings.staff_user_id == staff_user_id
-                    ).
-                order_by(TelehealthBookings.target_date.asc())
-            ).all()
-
-            bookings = [dict(zip(('booking','conversation_sid', 'client_user'), dat)) for dat in query] 
+        elif client_user_id and not staff_user_id:
+            # 4. only client_user_id provided, return all bookings for such user_id if loggedin user is same user or cs
+            if not current_user.user_id == client_user_id and not ('client_services' in [role.role for role in current_user.roles]):
+                raise InputError(status_code=403, message='Logged in user must be a booking participant')
+            
+            # return all bookings with given client_user_ide'
+            bookings = TelehealthBookings.query.filter_by(client_user_id = client_user_id).\
+                order_by(TelehealthBookings.target_date.asc()).all()
 
         else:
-            raise InputError(status_code=403, message='Logged in user must be a booking participant')
+            # 5. both client and user id's are provided, return bookings where both exist if loggedin is either or cs
+            if not any(current_user.user_id == uid for uid in [client_user_id, staff_user_id]) and \
+                not ('client_services' in [role.role for role in current_user.roles]):
+                raise InputError(status_code=403, message='Logged in user must be a booking participant')
+            
+            # return all bookings with given client and staff user_id combination
+            # grab the whole queue
+            bookings = TelehealthBookings.query.filter_by(client_user_id = client_user_id, staff_user_id = staff_user_id).\
+                order_by(TelehealthBookings.target_date.asc()).all()
 
         time_inc = LookupBookingTimeIncrements.query.all()
-        
         bookings_payload = []
 
         for booking in bookings:
-            profile_pic = None
-            staff = booking.get('staff_user', staff_user)
-            client = booking.get('client_user', client_user)
-            book = booking.get('booking')
-            
             ##
-            # localize booking times to the staff or client 
+            # localize booking times to the staff and client 
             # bring up profile pics
             ##
-            if g.get('user_type') == 'staff':
-                # bring up profile pic for telehealth attendee that has not made this request
-                image_path = db.session.execute(select(
-                    UserProfilePictures.image_path
-                        ).where(
-                        UserProfilePictures.client_id==client.user_id,
-                        UserProfilePictures.width == 128
-                    )).scalars().one_or_none()
-                profile_pic = (fh.get_presigned_url(file_path=image_path) 
-                                if image_path else None)
 
-                tzone = book.staff_timezone
-                # bookings stored in staff timezone
-                start_time_localized = time_inc[book.booking_window_id_start_time-1].start_time
-                end_time_localized = time_inc[book.booking_window_id_end_time-1].end_time
-            else:
-                # bring up profile pic for telehealth attendee that has not made this request
-                image_path = db.session.execute(select(
-                    UserProfilePictures.image_path
-                        ).where(
-                        UserProfilePictures.staff_id==staff.user_id,
-                        UserProfilePictures.width == 128
-                    )).scalars().one_or_none()
-                profile_pic = (fh.get_presigned_url(file_path=image_path) 
-                                if image_path else None)
-
-                tzone = book.client_timezone
-                start_time_staff_localized = datetime.combine(
-                    book.target_date, 
-                    time_inc[book.booking_window_id_start_time-1].start_time, 
-                    tzinfo=tz.gettz(book.staff_timezone))
+            client = {**booking.client.__dict__}
+            practitioner = {**booking.practitioner.__dict__}
+            
+            # bookings stored in staff timezone
+            practitioner['timezone'] = booking.staff_timezone
+            practitioner['start_time_localized'] = time_inc[booking.booking_window_id_start_time-1].start_time
+            practitioner['end_time_localized'] = time_inc[booking.booking_window_id_end_time-1].end_time
+            #return the practioner profile_picture width=128 if the logged in user is the client involved or client services
+            if current_user.user_id == booking.client_user_id or ('client_services' in [role.role for role in current_user.roles]):
+                image_paths = {pic.width: pic.image_path for pic in booking.practitioner.staff_profile.profile_pictures}
+                practitioner['profile_picture'] = (fh.get_presigned_url(image_paths[128]) if image_paths else None)
+            
+            start_time_staff_localized = datetime.combine(
+                    booking.target_date, 
+                    practitioner['start_time_localized'],
+                    tzinfo=tz.gettz(booking.staff_timezone))
                 
-                end_time_staff_localized = datetime.combine(
-                    book.target_date, 
-                    time_inc[book.booking_window_id_end_time-1].end_time, 
-                    tzinfo=tz.gettz(book.staff_timezone))
-                
-                start_time_localized = start_time_staff_localized.astimezone(tz.gettz(book.client_timezone)).time()
-                end_time_localized = end_time_staff_localized.astimezone(tz.gettz(book.client_timezone)).time()
+            end_time_staff_localized = datetime.combine(
+                booking.target_date, 
+                practitioner['end_time_localized'],
+                tzinfo=tz.gettz(booking.staff_timezone))
 
+            client['timezone'] = booking.client_timezone
+            client['start_time_localized'] = start_time_staff_localized.astimezone(tz.gettz(booking.client_timezone)).time()
+            client['end_time_localized'] = end_time_staff_localized.astimezone(tz.gettz(booking.client_timezone)).time()
+            # return the client profile_picture wdith=128 if the logged in user is the practitioner involved
+            if current_user.user_id == booking.staff_user_id:
+                image_paths = {pic.width: pic.image_path for pic in booking.client.client_info.profile_pictures}
+                client['profile_picture'] = (fh.get_presigned_url(image_paths[128]) if image_paths else None)
             
             bookings_payload.append({
-                'booking_id': book.idx,
-                'staff_user_id': staff.user_id,
-                'client_user_id': client.user_id,
-                'staff_first_name': staff.firstname,
-                'staff_middle_name': staff.middlename,
-                'staff_last_name': staff.lastname,
-                'client_first_name': client.firstname,
-                'client_middle_name': client.middlename,
-                'client_last_name': client.lastname,                
-                'start_time': start_time_localized,
-                'end_time': end_time_localized,
-                'start_time_localized': start_time_localized,
-                'end_time_localized': end_time_localized,
-                'target_date': book.target_date,
-                'status': book.status,
-                'profession_type': book.profession_type,
-                'conversation_sid': booking.get('conversation_sid'),
-                'timezone': tzone,
-                'client_location_id': book.client_location_id,
-                'payment_method_id': book.payment_method_id,
-                profile_pic_context: profile_pic
+                'booking_id': booking.idx,
+                'target_date': booking.target_date,
+                'start_time': practitioner['start_time_localized'],
+                'status': booking.status,
+                'profession_type': booking.profession_type,
+                'chat_room': booking.chat_room,
+                'client_location_id': booking.client_location_id,
+                'payment_method_id': booking.payment_method_id,
+                'status_history': booking.status_history,
+                'client': client,
+                'practitioner': practitioner
             })
 
         # Sort bookings by time then sort by date
@@ -540,8 +519,10 @@ class TelehealthBookingsApi(Resource):
         return payload
 
     @token_auth.login_required(user_type=('client',))
-    @accepts(schema=TelehealthBookingsSchema, api=ns)
+    @accepts(schema=TelehealthBookingsSchema(only=['booking_window_id_end_time', 'booking_window_id_start_time','target_date']), api=ns)
     @responds(schema=TelehealthBookingsOutputSchema, api=ns, status_code=201)
+    @ns.doc(params={'client_user_id': 'Client User ID',
+                'staff_user_id' : 'Staff User ID'}) 
     def post(self):
         """
         Add client and staff to a TelehealthBookings table.
@@ -569,22 +550,20 @@ class TelehealthBookingsApi(Resource):
             raise InputError(status_code=405, message='logged in user must be a booking participant')
 
         # Check client existence
-        check_client_existence(client_user_id)
+        super().check_user(client_user_id, user_type='client')
         
         # Check staff existence
-        check_staff_existence(staff_user_id)
+        super().check_user(staff_user_id, user_type='staff')
 
         # Check if staff and client have those times open
         client_bookings = TelehealthBookings.query.filter(
             TelehealthBookings.client_user_id==client_user_id,
             TelehealthBookings.target_date==request.parsed_obj.target_date,
-            TelehealthBookings.status!='Client Canceled',
-            TelehealthBookings.status!='Staff Canceled').all()
+            TelehealthBookings.status!='Cancelled').all()
         staff_bookings = TelehealthBookings.query.filter(
             TelehealthBookings.staff_user_id==staff_user_id,
             TelehealthBookings.target_date==request.parsed_obj.target_date,
-            TelehealthBookings.status!='Client Canceled',
-            TelehealthBookings.status!='Staff Canceled').all()
+            TelehealthBookings.status!='Cancelled').all()
 
         # This checks if the input slots have already been taken.
         if client_bookings:
@@ -635,11 +614,14 @@ class TelehealthBookingsApi(Resource):
         # save client's payment method
         request.parsed_obj.payment_method_id = client_in_queue.payment_method_id
 
-        # to check the staff's auto accept setting. 
+        # save profession type requested
+        request.parsed_obj.profession_type = client_in_queue.profession_type
+
+        # check the practitioner's auto accept setting. 
         if staff_availability[0].settings.auto_confirm:
             request.parsed_obj.status = 'Accepted'
         else:
-            request.parsed_obj.status = 'Pending Staff Acceptance'
+            request.parsed_obj.status = 'Pending'
             # TODO: here, we need to send some sort of notification to the staff member letting
             # them know they have a booking request.
 
@@ -698,6 +680,17 @@ class TelehealthBookingsApi(Resource):
         db.session.add(request.parsed_obj)
         db.session.flush()
 
+        # create TelehealthBookingStatus object
+        status_history = TelehealthBookingStatus(
+            booking_id = request.parsed_obj.idx,
+            reporter_id = current_user.user_id,
+            reporter_role = 'Practitioner' if current_user.user_id == staff_user_id else 'Client',
+            status = request.parsed_obj.status
+        )
+        # save TelehealthBookingStatus object connected to this booking.
+        db.session.add(status_history)
+        db.session.flush()
+
         request.parsed_obj.start_time_localized = start_time_client_localized
         request.parsed_obj.end_time_localized = end_time_client_localized
         
@@ -738,11 +731,10 @@ class TelehealthBookingsApi(Resource):
                                               all_day=False,
                                               timezone = request.parsed_obj.staff_timezone
                                               )
-
         db.session.add(add_to_calendar)
-
         db.session.commit()
 
+        request.parsed_obj.booking_id = request.parsed_obj.idx
         request.parsed_obj.conversation_sid = conversation_sid
         
         payload = {
@@ -754,40 +746,61 @@ class TelehealthBookingsApi(Resource):
         return payload
 
     @token_auth.login_required
-    @accepts(schema=TelehealthBookingsSchema, api=ns)
+    @accepts(schema=TelehealthBookingsPUTSchema(only=['status', 'payment_method_id']), api=ns)
     @responds(status_code=201,api=ns)
+    @ns.doc(params={'booking_id': 'booking_id'}) 
     def put(self):
         """
         PUT request can be used to update the booking STATUS and payment_method
         """
-        if request.parsed_obj.booking_window_id_start_time >= request.parsed_obj.booking_window_id_end_time:
-            raise InputError(status_code=405,message='Start time must be before end time.')
-
+        current_user, _ = token_auth.current_user()
         booking_id = request.args.get('booking_id', type=int)
-        
-        # Check if staff and client have those times open
-        bookings = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
 
-        if not bookings:
+        # Check if booking exists
+        booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
+        if not booking:
             raise InputError(status_code=405,message='Could not find booking.')
         
-        data = request.get_json()
-        # If client wants to change the payment method for booking
-        # Verify payment method idx is valid from PaymentMethods
-        # and that the payment method chosen has the user_id
-        payment_id = data.get('payment_method_id')
-        if payment_id and not PaymentMethods.query.filter_by(user_id=bookings.client_user_id, idx=payment_id).one_or_none():
-            raise InputError(403, "Invalid Payment Method")
-        
-        # user can't change booking location without cancelling booking and creating a new entry in the queue
-        if data.get('client_location_id'):
-            raise InputError(403, 'To change location, please create a new request')
+        # Verify loggedin user is part of booking
+        if not any(current_user.user_id == uid for uid in [booking.client_user_id, booking.staff_user_id]):
+            raise InputError(status_code=403, message='Logged in user must be a booking participant')
 
-        bookings.update(data)
-        # NOTE: status array should be referenced to BOOKINGS_STATUS in constants.py
-        status = ('Client Canceled', 'Staff Canceled')
+        data = request.get_json()
+
+        payment_id = data.get('payment_method_id')
+        # If user wants to change the payment method for booking
+        if payment_id: 
+            # Verify it's the client that's trying to change the payment method
+            if not current_user.user_id == booking.client_user_id:
+                raise InputError(403, 'Only Client may update Payment Method')     
+            # Verify payment method idx is valid from PaymentMethods
+            # and that the payment method chosen is registered under the client_user_id
+            if not PaymentMethods.query.filter_by(user_id=booking.client_user_id, idx=payment_id).one_or_none():
+                raise InputError(403, 'Invalid Payment Method')
+
+        new_status = data.get('status')
+        if new_status:
+            # Can't update status to 'In Progress' through this endpoint
+            # only practitioner can change status from pending to accepted
+            # both client and practitioner can change status to canceled and completed
+            if new_status == 'In Progress':
+                raise InputError(405, 'Can only update to this status on Call Start')
+            if new_status in ('Pending', 'Accepted') and current_user.user_id != booking.staff_user_id:
+                raise InputError(403, 'Only Practitioner may update to this status')
+            
+            # Create TelehealthBookingStatus object if the request is updating the status
+            status_history = TelehealthBookingStatus(
+                booking_id = booking_id,
+                reporter_id = current_user.user_id,
+                reporter_role = 'Practitioner' if current_user.user_id == booking.staff_user_id else 'Client',
+                status = new_status
+            )
+            db.session.add(status_history)
+
+        booking.update(data)
+
         # If the booking gets updated for cancelation, then delete it in the Staff's calendar
-        if data.get('status') in status:
+        if new_status == 'Cancelled':
             staff_event = StaffCalendarEvents.query.filter_by(location='Telehealth_{}'.format(booking_id)).one_or_none()
             if staff_event:
                 db.session.delete(staff_event)
@@ -901,6 +914,7 @@ class ProvisionMeetingRooms(Resource):
         return meeting_room
 
 @ns.route('/meeting-room/access-token/<int:room_id>/')
+@ns.deprecated
 @ns.doc(params={'room_id': 'room ID number'})
 class GrantMeetingRoomAccess(Resource):
     """
@@ -1404,6 +1418,7 @@ class TelehealthBookingDetailsApi(Resource):
             raise ContentNotFound
 
         #verify user trying to access details is the client or staff involved in scheulded booking
+        # TODO allow access to Client Services?
         if booking.client_user_id != token_auth.current_user()[0].user_id \
             and booking.staff_user_id != token_auth.current_user()[0].user_id:
 
@@ -1439,7 +1454,7 @@ class TelehealthBookingDetailsApi(Resource):
         
         return res
     
-    @token_auth.login_required()
+    @token_auth.login_required
     @responds(schema=TelehealthBookingDetailsSchema, api=ns, status_code=200)
     def put(self, booking_id):
         """
@@ -1816,3 +1831,4 @@ class TelehealthAllChatRoomApi(Resource):
                    'twilio_token': token.to_jwt()}
             
         return payload
+        
