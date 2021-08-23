@@ -1,4 +1,3 @@
-from logging import error
 import boto3
 from datetime import datetime, timedelta
 import math, re
