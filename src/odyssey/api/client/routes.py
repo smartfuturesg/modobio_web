@@ -3,6 +3,7 @@ import boto3
 from datetime import datetime, timedelta
 import math, re
 from PIL import Image
+from sqlalchemy.exc import SQLAlchemyError
 
 from flask import request, current_app, url_for
 from flask_accepts import accepts, responds
@@ -1409,7 +1410,6 @@ class UserClinicalCareTeamApi(BaseResource):
         
         return {'member_of_care_teams': res, 'total': len(res)}
 
-from sqlalchemy.exc import SQLAlchemyError
 @ns.route('/clinical-care-team/resource-authorization/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class ClinicalCareTeamResourceAuthorization(BaseResource):
