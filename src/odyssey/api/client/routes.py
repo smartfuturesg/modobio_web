@@ -1,3 +1,4 @@
+from logging import error
 import boto3
 from datetime import datetime, timedelta
 import math, re
@@ -1408,6 +1409,7 @@ class UserClinicalCareTeamApi(BaseResource):
         
         return {'member_of_care_teams': res, 'total': len(res)}
 
+from sqlalchemy.exc import SQLAlchemyError
 @ns.route('/clinical-care-team/resource-authorization/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class ClinicalCareTeamResourceAuthorization(BaseResource):
@@ -1429,7 +1431,7 @@ class ClinicalCareTeamResourceAuthorization(BaseResource):
     Adding current modobio users to the care team:
         Users must already be part of a client's clinical care team in order to be granted access to resources
         Care team addition can either be done through the client/clinical-care-team/members/<int:user_id>/ POST endpooint
-        If a user is not yet part of the client's care team, we will add them as part of the POST method. 
+        If a user is not yet part of the client's care team, an error is raised, must POST to /clinical-care-team/members/<int:user_id>/ to add. 
 
 
     Care team resources are added by resource_id.    
@@ -1542,7 +1544,7 @@ class ClinicalCareTeamResourceAuthorization(BaseResource):
 
     @token_auth.login_required(user_type=('client',))
     @accepts(schema=ClinicalCareTeamAuthorizationNestedSchema, api=ns)
-    @responds(schema=ClinicalCareTeamAuthorizationNestedSchema, api=ns,status_code=201)
+    @responds(api=ns,status_code=200)
     def put(self, user_id):
         """
         This put request is used to change the status approval from the client to team member from 
@@ -1559,23 +1561,24 @@ class ClinicalCareTeamResourceAuthorization(BaseResource):
         data = request.json
 
         for dat in data.get('clinical_care_team_authorization'):
-            authorization = ClientClinicalCareTeamAuthorizations.query.filter_by(
+            try:
+                authorization = ClientClinicalCareTeamAuthorizations.query.filter_by(user_id=user_id,
                                                                                 resource_id = dat['resource_id'],
                                                                                 team_member_user_id = dat['team_member_user_id']
                                                                                 ).one_or_none()
-            if authorization:
-                if authorization.status == 'pending':
-                    authorization.update({'status': 'accepted'})
-            else:
+            except SQLAlchemyError as e:
+                return e.message
+
+            if not authorization:
                 raise InputError(message="Team member or resource ID request not found", status_code=400)
+            authorization.update({'status': 'accepted'})
 
         db.session.commit()
-
-        return {}, 200
+        
 
     @token_auth.login_required(user_type=('client',))
     @accepts(schema=ClinicalCareTeamAuthorizationNestedSchema, api=ns)
-
+    @responds(status_code=200, api=ns)
     def delete(self, user_id):
         """
         Remove a previously saved authorization. Takes the same payload as the POST method.
@@ -1588,18 +1591,16 @@ class ClinicalCareTeamResourceAuthorization(BaseResource):
         data = request.parsed_obj
 
         for dat in data.get('clinical_care_team_authorization'):
-            authorization = ClientClinicalCareTeamAuthorizations.query.filter_by(
+            authorization = ClientClinicalCareTeamAuthorizations.query.filter_by(user_id=user_id,
                                                                                 resource_id = dat.resource_id,
                                                                                 team_member_user_id = dat.team_member_user_id
                                                                                 ).one_or_none()
-            if authorization:
-                db.session.delete(authorization)
-            else:
-                raise InputError(message="Team member or resource ID request not found", status_code=400)                
+            if not authorization:
+                raise InputError(message="Team member or resource ID request not found", status_code=400)
+            
+            db.session.delete(authorization)
 
         db.session.commit()
-
-        return {}, 200
 
 
 @ns.route('/drinks/<int:user_id>/')
