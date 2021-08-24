@@ -40,9 +40,9 @@ class PaymentMethodsApi(BaseResource):
 
         request_data = {
             "Outlet": {
-                "MerchantID": "InstaMed",
-                "StoreID": "1",
-                "TerminalID": "1"
+                "MerchantID": current_app.config['INSTAMED_CORPORATE_ID'],
+                "StoreID": current_app.config['INSTAMED_STORE_ID'],
+                "TerminalID": current_app.config['INSTAMED_TERMINAL_ID']
             },
             "PaymentPlanType": "SaveOnFile",
             "PaymentMethod": "Card",
@@ -53,7 +53,7 @@ class PaymentMethodsApi(BaseResource):
             }
         }
 
-        response = requests.post('https://connect.instamed.com/rest/payment/paymentplan',
+        response = requests.post(current_app.config['INSTAMED_URL'] + '/payment/paymentplan',
                                 headers={'Api-Key': current_app.config['INSTAMED_API_KEY'],
                                         'Api-Secret': current_app.config['INSTAMED_API_SECRET'],
                                         'Content-Type': 'application/json'},
@@ -186,15 +186,15 @@ class PaymentRefundApi(BaseResource):
         #call instamed api
         request_data = {
             "Outlet": {
-                "MerchantID": "InstaMed",
-                "StoreID": "1",
-                "TerminalID": "1"
+                "MerchantID": current_app.config['INSTAMED_CORPORATE_ID'],
+                "StoreID": current_app.config['INSTAMED_STORE_ID'],
+                "TerminalID": current_app.config['INSTAMED_TERMINAL_ID']
             },
             "TransactionID": original_traction.transaction_id,
             "Amount": request.parsed_obj.refund_amount
         }
 
-        response = requests.post('https://connect.instamed.com/rest/payment/refund-simple',
+        response = requests.post(current_app.config['INSTAMED_URL'] + '/api/payment/refund-simple',
                         headers={'Api-Key': current_app.config['INSTAMED_API_KEY'],
                                 'Api-Secret': current_app.config['INSTAMED_API_SECRET'],
                                 'Content-Type': 'application/json'},
