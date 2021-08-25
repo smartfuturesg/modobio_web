@@ -2,6 +2,8 @@ import os, boto3, secrets, pathlib
 from datetime import datetime, timedelta
 from dateutil import tz
 import random
+import requests
+import json
 
 from flask import request, current_app, g
 from flask_accepts import accepts, responds
@@ -45,14 +47,15 @@ from odyssey.api.telehealth.schemas import (
     TelehealthStaffSettingsSchema,
     TelehealthBookingsPUTSchema,
     TelehealthUserSchema
-) 
+)
+from odyssey.api.system.models import SystemTelehealthSessionCosts
 from odyssey.api.lookup.models import (
     LookupTerritoriesOfOperations
 )
-from odyssey.api.payment.models import PaymentMethods
+from odyssey.api.payment.models import PaymentMethods, PaymentHistory, PaymentFailedTransactions
 from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import TWILIO_ACCESS_KEY_TTL, DAY_OF_WEEK, ALLOWED_AUDIO_TYPES, ALLOWED_IMAGE_TYPES
-from odyssey.utils.errors import GenericNotFound, InputError, UnauthorizedUser, ContentNotFound, IllegalSetting
+from odyssey.utils.errors import GenericNotFound, InputError, UnauthorizedUser, ContentNotFound, IllegalSetting, GenericThirdPartyError
 from odyssey.utils.misc import (
     FileHandling,
     check_client_existence, 
@@ -135,6 +138,57 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
             status = 'In Progress'
         )
         db.session.add(status_history)
+
+        #call instamed api to charge user for this call
+        payment = PaymentMethods.query.filter_by(idx=booking.payment_method_id).one_or_none()
+        session_cost = SystemTelehealthSessionCosts.query.filter_by(profession_type='medical_doctor').one_or_none().session_cost
+
+        request_data = {
+            "Outlet": {
+                "MerchantID": current_app.config['INSTAMED_MERCHANT_ID'],
+                "StoreID": current_app.config['INSTAMED_STORE_ID'],
+                "TerminalID": current_app.config['INSTAMED_TERMINAL_ID']
+            },
+            "PaymentMethod": "OnFile",
+            "PaymentMethodID": payment.payment_id,
+            "PaymentAmount": session_cost
+        }
+
+        response = requests.post(current_app.config['INSTAMED_URL'] + '/api/payment/sale',
+                        headers={'Api-Key': current_app.config['INSTAMED_API_KEY'],
+                                'Api-Secret': current_app.config['INSTAMED_API_SECRET'],
+                                'Content-Type': 'application/json'},
+                        json=request_data)
+
+        #check if instamed api raised an error
+        try:
+            response.raise_for_status()
+        except:
+            raise GenericThirdPartyError(response.status_code, response.text)
+
+        #convert response data to json (python dict)
+        response_data = json.loads(response.text)
+
+        #check if card was declined (this is not an error as checked above as 200 is returned from InstaMed)
+        if response_data['TransactionStatus'] == 'C':
+            #transaction was successful, store in PaymentHistory
+            history = PaymentHistory(**{
+                'user_id': booking.client_user_id,
+                'payment_method_id': booking.payment_method_id,
+                'transaction_id': response_data['TransactionID'],
+                'transaction_amount': session_cost,
+            })
+            booking.is_paid=True
+            db.session.add(history)
+        else:
+            #transaction was not successful, store in PaymentFailedTransactions
+            failed = PaymentFailedTransactions(**{
+                'user_id': booking.client_user_id,
+                'transaction_id': response_data['TransactionID'],
+                'retry_attempts': 1,
+                'resolved': False
+            })
+            db.session.add(failed)
 
         db.session.commit() 
         return {'twilio_token': token,
