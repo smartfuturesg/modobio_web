@@ -40,9 +40,9 @@ class PaymentMethodsApi(BaseResource):
 
         request_data = {
             "Outlet": {
-                "MerchantID": "InstaMed",
-                "StoreID": "1",
-                "TerminalID": "1"
+                "MerchantID": "894805",
+                "StoreID": "0001",
+                "TerminalID": "0002"
             },
             "PaymentPlanType": "SaveOnFile",
             "PaymentMethod": "Card",
@@ -186,9 +186,9 @@ class PaymentRefundApi(BaseResource):
         #call instamed api
         request_data = {
             "Outlet": {
-                "MerchantID": "InstaMed",
-                "StoreID": "1",
-                "TerminalID": "1"
+                "MerchantID": "894805",
+                "StoreID": "0001",
+                "TerminalID": "0002"
             },
             "TransactionID": original_traction.transaction_id,
             "Amount": request.parsed_obj.refund_amount
