@@ -886,3 +886,5 @@ RECURRENCE_TYPE = ('Daily', 'Weekly', 'Monthly', 'Yearly')
 CREDENTIAL_TYPE = {
     'medical_doctor': ('npi','dea','med_lic')
 }
+
+DEV_EMAIL_DOMAINS = ('3pillarglobal.com', 'modobio.com', 'atventurepartners.com', 'atlanticventurepartners.tech')
