@@ -34,6 +34,13 @@ class PaymentMethods(BaseModelWithIdx, UserIdFkeyMixin):
     :type: int
     """
 
+    expiration = db.Column(db.String)
+    """
+    Expiration date of this payment method.
+
+    :type: string
+    """
+
     is_default = db.Column(db.Boolean)
     """
     Denotes if this method is the default payment method for this user.
@@ -190,4 +197,33 @@ class PaymentRefunds(BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin):
     Reason this refund was issued as reported by the staff member that issued the refund.
 
     :type: string
+    """
+
+class PaymentFailedTransactions(BaseModelWithIdx, UserIdFkeyMixin):
+    """
+    This table keeps track of payment failures. Failed payments will be retried up to 6 times.
+    If the payment has still failed after 6 attempts, the user will be unable to book telehealth
+    appointment until the failed payment has been resolved.
+    """
+
+    transaction_id = db.Column(db.String)
+    """
+    InstaMed Transaction ID.
+
+    :type: string
+    """
+
+    retry_attempts = db.Column(db.Integer)
+    """
+    Number of times this transactions has been retired.
+
+    :type: integer
+    """
+
+    resolved = db.Column(db.Boolean)
+    """
+    Denotes if this failed transaction has been resolved either via a retry attempt and 
+    manually by the user after 6 failed attempts.
+
+    :type: boolean
     """
