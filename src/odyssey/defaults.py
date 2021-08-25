@@ -52,6 +52,24 @@ which may not be correct at all.
 This setting prevents such stupid behaviour.
 """
 
+LOG_LEVEL = ''
+""" Show log message of this level and higher.
+
+Accepted levels are:
+DEBUG, INFO, AUDIT, WARNING, ERROR, CRITICAL, or any integer.
+
+If not set, it will default to INFO if FLASK_ENV=development and AUDIT otherwise. DEBUG log
+level generates an enormous amount of output (startup log without processing any requests
+is ~2.7 MB). Only use DEBUG when necessary.
+"""
+
+LOG_FORMAT_JSON = False
+""" Output logs in JSON format.
+
+By default, logging prints pre-formatted strings. This switch enables JSON output for logs,
+which is useful for AWS CloudTrail integration.
+"""
+
 # Database parameters
 DB_FLAV = 'postgresql'
 """ Database "flavour" or dialect. """

@@ -4,7 +4,9 @@ This is a `Flask <https://flask.palletsprojects.com>`_ based app that serves web
 The pages contain the intake and data gathering forms for the *client journey*. The `Odyssey <https://en.wikipedia.org/wiki/Odyssey>`_ 
 is of course the most famous journey of all time! 🤓
 """
+import logging
 import os
+import time
 
 from celery import Celery
 from elasticsearch import Elasticsearch
@@ -14,6 +16,7 @@ from flask_marshmallow import Marshmallow
 from flask_migrate import Migrate
 from flask_pymongo import PyMongo 
 from flask_sqlalchemy import SQLAlchemy
+from pythonjsonlogger import jsonlogger
 from sqlalchemy.exc import ProgrammingError
 
 # Temporary fix
@@ -22,6 +25,46 @@ import flask.helpers
 flask.helpers._endpoint_from_view_func = _endpoint_from_view_func
 
 from odyssey.config import Config
+conf = Config()
+
+# Logging configuration, before Flask() is called.
+def _audit(msg, *args, **kwargs):
+    """
+    Log a message with severity 'AUDIT' on the root logger. If the logger has
+    no handlers, call basicConfig() to add a console handler with a pre-defined
+    format.
+    """
+    logging.log(25, msg, *args, **kwargs)
+
+logging.Logger.audit = _audit
+logging.Formatter.converter = time.gmtime
+logging.Formatter.default_msec_format = '%s.%03dZ'
+logging.addLevelName(25, 'AUDIT')
+logging.captureWarnings(True)
+
+if conf.LOG_FORMAT_JSON:
+    formatter = jsonlogger.JsonFormatter()
+else:
+    fmt = '%(levelname)-8s %(asctime)s - %(name)s - %(message)s'
+    formatter = logging.Formatter(fmt=fmt)
+
+handler = logging.StreamHandler()
+handler.setFormatter(formatter)
+
+# None is for the root logger
+for name in (None, 'sqlalchemy', 'flask_cors', 'werkzeug'):
+    logger = logging.getLogger(name=name)
+    logger.addHandler(handler)
+    logger.setLevel(conf.LOG_LEVEL)
+
+# SQLAlchemy is too verbose, turn down Mapper logger
+logging.getLogger('sqlalchemy.orm.mapper.Mapper').setLevel(logging.WARNING)
+
+# Some loggers in  dependent packages don't get configured with the rest.
+# To see a list of all loggers, uncomment the following lines and run `flask run 2> /dev/null`
+#
+# import pprint
+# pprint.pprint(logging.root.manager.loggerDict)
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -56,8 +99,13 @@ def create_app():
     """
     app = Flask(__name__, static_folder="static") 
 
+
+    from flask.logging import default_handler
+    app.logger.removeHandler(default_handler)
+
     # Load configuration.
-    app.config.from_object(Config())
+    app.config.from_object(conf)
+
     # Initialize all extensions.
     db.init_app(app)
     migrate.init_app(app, db)
