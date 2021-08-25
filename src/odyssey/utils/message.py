@@ -17,7 +17,7 @@ from odyssey.api.notifications.schemas import (
     ApplePushNotificationBackgroundSchema,
     ApplePushNotificationBadgeSchema,
     ApplePushNotificationVoipSchema)
-from odyssey.utils.constants import PASSWORD_RESET_URL, REGISTRATION_PORTAL_URL
+from odyssey.utils.constants import DEV_EMAIL_DOMAINS, PASSWORD_RESET_URL, REGISTRATION_PORTAL_URL
 from odyssey.utils.errors import UnknownError
 
 SUBJECTS = {"remote_registration_portal": "Modo Bio User Registration Portal", 
@@ -42,7 +42,7 @@ def send_email_user_registration_portal(recipient, password, portal_id):
     remote_registration_url = REGISTRATION_PORTAL_URL.format(portal_id)
 
     # route emails to AWS mailbox simulator when in dev environment
-    if current_app.config['DEV'] and not recipient.endswith('3pillarglobal.com'):
+    if current_app.config['DEV'] and not any([recipient.endswith(domain) for domain in DEV_EMAIL_DOMAINS]):
         recipient = "success@simulator.amazonses.com"
 
     # The email body for recipients with non-HTML email clients.
@@ -102,7 +102,7 @@ def send_email_verify_email(recipient, token, code):
         BODY_HTML = BODY_HTML.replace('XXXX', str(code))
 
     # route emails to AWS mailbox simulator when in dev environment
-    if current_app.config['DEV'] and not recipient.email.endswith('3pillarglobal.com'):
+    if current_app.config['DEV'] and not any([recipient.email.endswith(domain) for domain in DEV_EMAIL_DOMAINS]):
         send_email(subject=SUBJECT, recipient="success@simulator.amazonses.com", body_text=BODY_TEXT, body_html=BODY_HTML, sender="verify@modobio.com")
     else:
         send_email(subject=SUBJECT, recipient=recipient.email, body_text=BODY_TEXT, body_html=BODY_HTML, sender="verify@modobio.com")
@@ -119,7 +119,7 @@ def send_email_password_reset(recipient, reset_token):
     reset_password_url = PASSWORD_RESET_URL.format(reset_token)
 
     # route emails to AWS mailbox simulator when in dev environment
-    if current_app.config['DEV'] and not recipient.endswith('3pillarglobal.com'):
+    if current_app.config['DEV'] and not any([recipient.endswith(domain) for domain in DEV_EMAIL_DOMAINS]):
         recipient = "success@simulator.amazonses.com"
 
     # The email body for recipients with non-HTML email clients.
@@ -153,7 +153,7 @@ def send_email_delete_account(recipient, deleted_account):
     SENDER = "Modo Bio no-reply <no-reply@modobio.com>"
 
     # route emails to AWS mailbox simulator when in dev environment
-    if current_app.config['DEV']:
+    if current_app.config['DEV'] and not any([recipient.endswith(domain) for domain in DEV_EMAIL_DOMAINS]):
         recipient = "success@simulator.amazonses.com"
 
     # The email body for recipients with non-HTML email clients.
