@@ -1,7 +1,8 @@
+import traceback
+
 from werkzeug.http import HTTP_STATUS_CODES
 
 from odyssey.api import api
-
 
 class UserNotFound(Exception):
     """in the case a non-existent client is being requested"""
@@ -576,3 +577,15 @@ def error_disabled_endpoint(error):
 def error_disabled_endpoint(error):
     '''Return a custom message and status code'''
     return error_response(error.status_code, error.message)
+
+@api.errorhandler(Exception)
+def internal_error(error):
+    """ Provide traceback for 'Internal Server Error' exceptions.
+
+    Internal Server Errors are thrown when a Python exception of any kind is not handled
+    by a Flask error handler. This is a last-resort catch-all for those kinds of exceptions
+    and provides a more detailed error message including traceback, than the generic '500
+    Internal Server Error.'
+    """
+    print(traceback.format_exc())
+    return error_response(500, message=str(error) + '\n' + traceback.format_exc())
