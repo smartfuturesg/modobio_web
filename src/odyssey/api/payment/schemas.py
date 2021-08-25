@@ -10,7 +10,7 @@ class PaymentMethodsSchema(ma.SQLAlchemyAutoSchema):
         dump_only = ('created_at', 'updated_at', 'idx', 'payment_id', 'payment_type', 'number')
 
     token = fields.String(load_only=True, required=True)
-    expiration = fields.String(load_only=True, required=True)
+    expiration = fields.String(required=True)
 
 class PaymentStatusSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

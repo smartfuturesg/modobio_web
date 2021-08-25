@@ -40,7 +40,7 @@ class PaymentMethodsApi(BaseResource):
 
         request_data = {
             "Outlet": {
-                "MerchantID": current_app.config['INSTAMED_CORPORATE_ID'],
+                "MerchantID": current_app.config['INSTAMED_MERCHANT_ID'],
                 "StoreID": current_app.config['INSTAMED_STORE_ID'],
                 "TerminalID": current_app.config['INSTAMED_TERMINAL_ID']
             },
@@ -79,6 +79,7 @@ class PaymentMethodsApi(BaseResource):
             'user_id': user_id,
             'payment_id': response_data['PaymentPlanID'],
             'number': response_data['CardResult']['LastFour'],
+            'expiration': request.json['expiration'],
             'payment_type': response_data['CardResult']['Type'],
             'is_default': request.json['is_default']
         }
@@ -186,7 +187,7 @@ class PaymentRefundApi(BaseResource):
         #call instamed api
         request_data = {
             "Outlet": {
-                "MerchantID": current_app.config['INSTAMED_CORPORATE_ID'],
+                "MerchantID": current_app.config['INSTAMED_MERCHANT_ID'],
                 "StoreID": current_app.config['INSTAMED_STORE_ID'],
                 "TerminalID": current_app.config['INSTAMED_TERMINAL_ID']
             },
