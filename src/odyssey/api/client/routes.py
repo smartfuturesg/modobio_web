@@ -2,6 +2,7 @@ import boto3
 from datetime import datetime, timedelta
 import math, re
 from PIL import Image
+from sqlalchemy.exc import SQLAlchemyError
 
 from flask import request, current_app, url_for
 from flask_accepts import accepts, responds
@@ -1109,7 +1110,19 @@ class ClinicalCareTeamMembers(BaseResource):
                     membersince = client_profile.membersince
                     profile_pic_path = [pic.image_path for pic in client_profile.profile_pictures if pic.width == 64]                
                     profile_pic = (fh.get_presigned_url(file_path=profile_pic_path[0]) if len(profile_pic_path) > 0 else None)
-                
+            
+            #bring up the authorizations this care team member has for the client
+            team_member_authorizations = db.session.execute(
+                select(ClientClinicalCareTeamAuthorizations, LookupClinicalCareTeamResources.display_name
+                ).join(LookupClinicalCareTeamResources, LookupClinicalCareTeamResources.resource_id == ClientClinicalCareTeamAuthorizations.resource_id
+                ).where(
+                    ClientClinicalCareTeamAuthorizations.user_id == user_id,
+                    ClientClinicalCareTeamAuthorizations.team_member_user_id == team_member[1].user_id
+                    )
+            ).all()
+
+            authorizations = [{'resource_id': auth.resource_id, 'status': auth.status, 'display_name': display_name} for auth, display_name in team_member_authorizations]
+
 
             current_team.append({
                 'firstname': team_member[1].firstname,
@@ -1121,7 +1134,8 @@ class ClinicalCareTeamMembers(BaseResource):
                 'staff_roles' : staff_roles,
                 'is_temporary': team_member[0].is_temporary,
                 'membersince': membersince,
-                'is_staff': is_staff
+                'is_staff': is_staff,
+                'authorizations': authorizations
             })
         
         response = {"care_team": current_team,
@@ -1218,6 +1232,17 @@ class ClinicalCareTeamMembers(BaseResource):
                     profile_pic_path = [pic.image_path for pic in client_profile.profile_pictures if pic.width == 64]                
                     profile_pic = (fh.get_presigned_url(file_path=profile_pic_path[0]) if len(profile_pic_path) > 0 else None)
                 
+            #bring up the authorizations this care team member has for the client
+            team_member_authorizations = db.session.execute(
+                select(ClientClinicalCareTeamAuthorizations, LookupClinicalCareTeamResources.display_name
+                ).join(LookupClinicalCareTeamResources, LookupClinicalCareTeamResources.resource_id == ClientClinicalCareTeamAuthorizations.resource_id
+                ).where(
+                    ClientClinicalCareTeamAuthorizations.user_id == user_id,
+                    ClientClinicalCareTeamAuthorizations.team_member_user_id == team_member[1].user_id
+                    )
+            ).all()
+
+            authorizations = [{'resource_id': auth.resource_id, 'status': auth.status, 'display_name': display_name} for auth, display_name in team_member_authorizations]
 
             member_data = {
                 'firstname': team_member[1].firstname,
@@ -1229,7 +1254,8 @@ class ClinicalCareTeamMembers(BaseResource):
                 'staff_roles' : staff_roles,
                 'is_temporary': team_member[0].is_temporary,
                 'membersince': membersince,
-                'is_staff': is_staff
+                'is_staff': is_staff,
+                'authorizations' : authorizations
             }
 
             #calculate how much time is remaining for temporary members
@@ -1404,7 +1430,7 @@ class ClinicalCareTeamResourceAuthorization(BaseResource):
     Adding current modobio users to the care team:
         Users must already be part of a client's clinical care team in order to be granted access to resources
         Care team addition can either be done through the client/clinical-care-team/members/<int:user_id>/ POST endpooint
-        If a user is not yet part of the client's care team, we will add them as part of the POST method. 
+        If a user is not yet part of the client's care team, an error is raised, must POST to /clinical-care-team/members/<int:user_id>/ to add. 
 
 
     Care team resources are added by resource_id.    
@@ -1517,7 +1543,7 @@ class ClinicalCareTeamResourceAuthorization(BaseResource):
 
     @token_auth.login_required(user_type=('client',))
     @accepts(schema=ClinicalCareTeamAuthorizationNestedSchema, api=ns)
-    @responds(schema=ClinicalCareTeamAuthorizationNestedSchema, api=ns,status_code=201)
+    @responds(api=ns,status_code=200)
     def put(self, user_id):
         """
         This put request is used to change the status approval from the client to team member from 
@@ -1534,23 +1560,24 @@ class ClinicalCareTeamResourceAuthorization(BaseResource):
         data = request.json
 
         for dat in data.get('clinical_care_team_authorization'):
-            authorization = ClientClinicalCareTeamAuthorizations.query.filter_by(
+            try:
+                authorization = ClientClinicalCareTeamAuthorizations.query.filter_by(user_id=user_id,
                                                                                 resource_id = dat['resource_id'],
                                                                                 team_member_user_id = dat['team_member_user_id']
                                                                                 ).one_or_none()
-            if authorization:
-                if authorization.status == 'pending':
-                    authorization.update({'status': 'accepted'})
-            else:
+            except SQLAlchemyError as e:
+                return e.message
+
+            if not authorization:
                 raise InputError(message="Team member or resource ID request not found", status_code=400)
+            authorization.update({'status': 'accepted'})
 
         db.session.commit()
-
-        return {}, 200
+        
 
     @token_auth.login_required(user_type=('client',))
     @accepts(schema=ClinicalCareTeamAuthorizationNestedSchema, api=ns)
-
+    @responds(status_code=200, api=ns)
     def delete(self, user_id):
         """
         Remove a previously saved authorization. Takes the same payload as the POST method.
@@ -1563,18 +1590,16 @@ class ClinicalCareTeamResourceAuthorization(BaseResource):
         data = request.parsed_obj
 
         for dat in data.get('clinical_care_team_authorization'):
-            authorization = ClientClinicalCareTeamAuthorizations.query.filter_by(
+            authorization = ClientClinicalCareTeamAuthorizations.query.filter_by(user_id=user_id,
                                                                                 resource_id = dat.resource_id,
                                                                                 team_member_user_id = dat.team_member_user_id
                                                                                 ).one_or_none()
-            if authorization:
-                db.session.delete(authorization)
-            else:
-                raise InputError(message="Team member or resource ID request not found", status_code=400)                
+            if not authorization:
+                raise InputError(message="Team member or resource ID request not found", status_code=400)
+            
+            db.session.delete(authorization)
 
         db.session.commit()
-
-        return {}, 200
 
 
 @ns.route('/drinks/<int:user_id>/')

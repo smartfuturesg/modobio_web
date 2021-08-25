@@ -11,6 +11,8 @@ from twilio.rest.conversations.v1 import conversation
 
 from odyssey import ma
 from odyssey.api.telehealth.models import (
+    TelehealthChatRooms,
+    TelehealthBookingStatus,
     TelehealthBookings,
     TelehealthQueueClientPool,
     TelehealthStaffAvailability,
@@ -19,6 +21,7 @@ from odyssey.api.telehealth.models import (
     TelehealthBookingDetails,
     TelehealthStaffSettings
 )
+from odyssey.api.user.models import User
 from odyssey.utils.constants import DAY_OF_WEEK, GENDERS, BOOKINGS_STATUS, ACCESS_ROLES
 
 class TelehealthBookingMeetingRoomsTokensSchema(Schema):
@@ -37,36 +40,56 @@ class TelehealthTimeSelectOutputSchema(Schema):
     appointment_times = fields.Nested(TelehealthTimeSelectSchema(many=True),missing=[])
     total_options = fields.Integer()
 
-class TelehealthBookingsPUTSchema(Schema):
-    booking_id = fields.Integer()
+class TelehealthBookingStatusSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = TelehealthBookingStatus
+        exclude = ('idx',)
+        include_fk = True
+
+class TelehealthBookingsPUTSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = TelehealthBookings
+
+    payment_method_id = fields.Integer(required=False)    
+    status = fields.String(required=False,validate=validate.OneOf(BOOKINGS_STATUS))
+
+class TelehealthChatRoomsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = TelehealthChatRooms
+        exclude = ('booking', 'booking_id', 'client_user_id', 'staff_user_id')
+    
+class TelehealthUserSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = User
+        exclude = ('email_verified','is_client','created_at','updated_at',\
+            'modobio_id','is_staff','phone_number','deleted','email','is_internal')
+
+    profile_picture = fields.String()
+    start_time_localized = fields.Time()
+    end_time_localized = fields.Time()
+    timezone = fields.String()
 
 class TelehealthBookingsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = TelehealthBookings
-        dump_only = ('idx', 'client_user_id','staff_user_id')
-        exclude = ('booking_window_id_start_time_utc','booking_window_id_end_time_utc', 'target_date_utc')
+        exclude = ('client_user_id',
+        'staff_user_id',
+        'idx', 
+        'booking_window_id_start_time_utc',
+        'booking_window_id_end_time_utc', 
+        'target_date_utc',
+        'created_at',
+        'updated_at')
         include_fk = True
 
-    # booking_window_id_start_time = fields.Integer()
-    # booking_window_id_end_time = fields.Integer()
     booking_id = fields.Integer(dump_only=True)
-    start_time = fields.Time(dump_only=True)
-    end_time = fields.Time(dump_only=True)
-    start_time_localized = fields.Time(dump_only=True)
-    end_time_localized = fields.Time(dump_only=True)
     status = fields.String(required=False,validate=validate.OneOf(BOOKINGS_STATUS))
-    conversation_sid = fields.String(dump_only=True)
-    client_first_name = fields.String(dump_only=True)
-    client_middle_name = fields.String(dump_only=True)
-    client_last_name = fields.String(dump_only=True)
-    staff_first_name = fields.String(dump_only=True)
-    staff_middle_name = fields.String(dump_only=True)
-    staff_last_name = fields.String(dump_only=True)
-    timezone = fields.String(metadata={'description': 'timezone setting of the booking for the logged in user'})
+    status_history = fields.Nested(TelehealthBookingStatusSchema(many=True), dump_only=True)
+    chat_room = fields.Nested(TelehealthChatRoomsSchema(only=['conversation_sid', 'room_name', 'room_status']), dump_only=True)
+    client = fields.Nested(TelehealthUserSchema, dump_only=True)
+    practitioner = fields.Nested(TelehealthUserSchema, dump_only=True)
     payment_method_id = fields.Integer(required=False)
     client_location_id = fields.Integer(required=False)
-    client_profile_picture = fields.String(dump_only=True, metadata={'description': 'profile pic of client telehealth attendee'})
-    staff_profile_picture = fields.String(dump_only=True, metadata={'description': 'profile pic of staff telehealth attendee'})
 
     @post_load
     def make_object(self, data, **kwargs):

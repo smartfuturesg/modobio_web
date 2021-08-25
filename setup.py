@@ -28,6 +28,7 @@ setup(
         'Flask-Cors',
         'flask-marshmallow',
         'Flask-Migrate',
+        'Flask-PyMongo',
         'flask-restx',
         'Flask_SQLAlchemy',
         'marshmallow',
