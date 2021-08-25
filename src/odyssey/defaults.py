@@ -205,8 +205,12 @@ DOSESPOT_API_KEY = ''
 DOSESPOT_MODOBIO_ID = ''
 """ DoseSpot ModoBio ID. """
 
-DOSESPOT_ADMIN_ID= ''
+DOSESPOT_ENCRYPTED_MODOBIO_ID = ''
+
+DOSESPOT_ADMIN_ID = ''
 """ DoseSpot Admin ID"""
+
+DOSESPOT_ENCRYPTED_ADMIN_ID = ''
 
 # mongo db
 MONGO_URI = ''

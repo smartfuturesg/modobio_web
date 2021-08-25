@@ -114,12 +114,12 @@ import requests
 # import requests
 
 ALPHANUMERIC = "ABCDFGHJKLMNPQRSTVWXYZ0123456789"
-clinic_key = 'WKUSNMSUQ5TUKFYCNSDC744YYMX3QSSH'
+# clinic_key = 'WKUSNMSUQ5TUKFYCNSDC744YYMX3QSSH'
 
-# Steve Admin ID
-clinician_id = '229187'
-char_len = 32
-clinic_id = '30871'
+# # Steve Admin ID
+# clinician_id = '229187'
+# char_len = 32
+# clinic_id = '30871'
 
 def generate_encrypted_clinic_id(clinic_key,char_len=32):
     """
@@ -166,7 +166,11 @@ def generate_encrypted_user_id(rand_phrase,clinic_key,clinician_id):
 
     return encrypted_str
 
-def generate_sso(clinic_id, clinician_id, encrypted_clinic_id_url, encrypted_user_id_url, patient_id=None):
+def generate_sso(clinic_id, clinician_id, encrypted_clinic_id, encrypted_user_id, patient_id=None):
+    encrypted_clinic_id_url = encrypted_clinic_id.replace('/','%2F')
+    encrypted_clinic_id_url = encrypted_clinic_id_url.replace('+','%2B')            
+    encrypted_user_id_url = encrypted_user_id.replace('/','%2F')
+    encrypted_user_id_url = encrypted_user_id_url.replace('+','%2B')    
     URL = f'http://my.staging.dosespot.com/LoginSingleSignOn.aspx?SingleSignOnClinicId={clinic_id}&SingleSignOnUserId={clinician_id}&SingleSignOnPhraseLength=32&SingleSignOnCode={encrypted_clinic_id_url}&SingleSignOnUserIdVerify={encrypted_user_id_url}'
     if(patient_id):
         URL = URL+f'&PatientId={patient_id}'
@@ -175,14 +179,14 @@ def generate_sso(clinic_id, clinician_id, encrypted_clinic_id_url, encrypted_use
     return URL
 
 
-encrypted_clinic_id = generate_encrypted_clinic_id(clinic_key,char_len)
-encrypted_clinic_id_url = encrypted_clinic_id.replace('/','%2F')
-encrypted_clinic_id_url = encrypted_clinic_id_url.replace('+','%2B')
-encrypted_user_id = generate_encrypted_user_id(encrypted_clinic_id[:22],clinic_key,clinician_id)
-encrypted_user_id_url = encrypted_user_id.replace('/','%2F')
-encrypted_user_id_url = encrypted_user_id_url.replace('+','%2B')
+# encrypted_clinic_id = generate_encrypted_clinic_id(clinic_key,char_len)
+# encrypted_clinic_id_url = encrypted_clinic_id.replace('/','%2F')
+# encrypted_clinic_id_url = encrypted_clinic_id_url.replace('+','%2B')
+# encrypted_user_id = generate_encrypted_user_id(encrypted_clinic_id[:22],clinic_key,clinician_id)
+# encrypted_user_id_url = encrypted_user_id.replace('/','%2F')
+# encrypted_user_id_url = encrypted_user_id_url.replace('+','%2B')
 
-clinician_sso_URL = generate_sso(clinic_id, clinician_id, encrypted_clinic_id_url, encrypted_user_id_url)
+# clinician_sso_URL = generate_sso(clinic_id, clinician_id, encrypted_clinic_id_url, encrypted_user_id_url)
 
 # patient_id = '18048851'
 # patient_portal_URL = generate_sso(clinic_id, clinician_id, encrypted_clinic_id_url, encrypted_user_id_url,patient_id=patient_id)
@@ -199,9 +203,9 @@ def get_access_token(clinic_id,encrypted_clinic_id,clinician_id,encrypted_user_i
                     data=payload)
     return res
 
-res = get_access_token(clinic_id,encrypted_clinic_id,clinician_id,encrypted_user_id)
+# res = get_access_token(clinic_id,encrypted_clinic_id,clinician_id,encrypted_user_id)
 
-access_token = res.json()['access_token']
+# access_token = res.json()['access_token']
 
 def create_clinician(access_token):
     headers = {'Authorization': f'Bearer {access_token}'}
@@ -264,12 +268,12 @@ def create_clinician(access_token):
                'ClinicianRoleType': 1,
                'NPINumber': '1296336567'
                }                
-    res = requests.post('https://my.staging.dosespot.com/webapi/api/clinicians',
-                    headers=headers,
-                    data=min_payload)
+               
+    # res = requests.post('https://my.staging.dosespot.com/webapi/api/clinicians',
+    #                 headers=headers,
+    #                 data=min_payload)
     
-    return res
-
-res = create_clinician(access_token)
-print(res.json())
+    return 
+# res = create_clinician(access_token)
+# print(res.json())
 # breakpoint()

@@ -18,6 +18,16 @@ def test_post_1_ds_practitioner_create(test_client):
 
     assert response.status_code == 201
 
+def test_post_1_ds_patient_create(test_client):
+    payload = {}
+    response = test_client.post(
+        f'/dosespot/create-patient/{test_client.client_id}/',
+        headers=test_client.staff_auth_header,
+        data=dumps(payload),
+        content_type='application/json')
+
+    assert response.status_code == 201
+
 # def test_get_1_blood_pressure_history(test_client):
 #     response = test_client.get(
 #         f'/doctor/bloodpressure/{test_client.client_id}/',
