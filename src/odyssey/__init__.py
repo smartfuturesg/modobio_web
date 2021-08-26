@@ -47,7 +47,8 @@ handler.setFormatter(formatter)
 # None is for the root logger
 for name in (None, 'sqlalchemy', 'flask_cors', 'werkzeug'):
     logger = logging.getLogger(name=name)
-    logger.addHandler(handler)
+    if not logger.hasHandlers():
+        logger.addHandler(handler)
     logger.setLevel(conf.LOG_LEVEL)
 
 # SQLAlchemy is too verbose, turn down several loggers
