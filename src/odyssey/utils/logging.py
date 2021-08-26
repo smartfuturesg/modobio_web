@@ -1,3 +1,7 @@
+"""
+This module handles logging for the API. It should be called before :class:`Flask` is instantiated.
+"""
+
 import logging
 import time
 from flask.json import dumps
@@ -37,11 +41,11 @@ class JsonFormatter(logging.Formatter):
         return True
 
     def format(self, record: logging.LogRecord) -> str:
-        """ Format ``logging.LogRecord`` as a JSON string.
+        """ Format :class:`logging.LogRecord` as a JSON string.
 
         Params
         ------
-        record : logging.LogRecord
+        record : :class:`logging.LogRecord`
             The LogRecord instance to be formatted.
 
         Returns
