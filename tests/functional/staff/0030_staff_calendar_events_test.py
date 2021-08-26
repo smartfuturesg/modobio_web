@@ -9,7 +9,7 @@ import pytest
 username = pwd.getpwuid(os.getuid()).pw_name
 pytestmark = pytest.mark.skipif(
     username == 'zan',
-    reasone='For some reason this tests only fails for me. Disable until I have time to fix it.')
+    reason='For some reason this tests only fails for me. Disable until I have time to fix it.')
 
 def test_post_new_event(test_client):
     # using staff user
