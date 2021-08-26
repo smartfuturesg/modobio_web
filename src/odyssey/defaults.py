@@ -58,9 +58,7 @@ LOG_LEVEL = ''
 Accepted levels are:
 DEBUG, INFO, AUDIT, WARNING, ERROR, CRITICAL, or any integer.
 
-If not set, it will default to INFO if FLASK_ENV=development and AUDIT otherwise. DEBUG log
-level generates an enormous amount of output (startup log without processing any requests
-is ~2.7 MB). Only use DEBUG when necessary.
+If not set, it will default to DEBUG if FLASK_ENV=development and AUDIT otherwise.
 """
 
 LOG_FORMAT_JSON = False
