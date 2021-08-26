@@ -605,7 +605,7 @@ class TelehealthBookingsApi(BaseResource):
         client_in_queue = TelehealthQueueClientPool.query.filter_by(user_id=client_user_id).one_or_none()
 
         if not client_in_queue:
-            raise InputError(message="Client not in yet queue")
+            raise InputError(message="Client not yet in queue")
         # Add staff and client timezones to the TelehealthBooking entry
         request.parsed_obj.staff_timezone = staff_availability[0].settings.timezone
         request.parsed_obj.client_timezone = client_in_queue.timezone
