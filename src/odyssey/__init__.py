@@ -50,8 +50,13 @@ for name in (None, 'sqlalchemy', 'flask_cors', 'werkzeug'):
     logger.addHandler(handler)
     logger.setLevel(conf.LOG_LEVEL)
 
-# SQLAlchemy is too verbose, turn down Mapper logger
-logging.getLogger('sqlalchemy.orm.mapper.Mapper').setLevel(logging.WARNING)
+# SQLAlchemy is too verbose, turn down several loggers
+for name in (
+    'sqlalchemy.orm.mapper.Mapper',
+    'sqlalchemy.orm.relationships.RelationshipProperty',
+    'sqlalchemy.orm.strategies.LazyLoader'
+):
+    logging.getLogger(name).setLevel(logging.WARNING)
 
 # Instantiate Flask extensions.
 db = SQLAlchemy()
@@ -86,10 +91,6 @@ def create_app():
         :mod:`odyssey.config` and :mod:`odyssey.defaults`.
     """
     app = Flask(__name__, static_folder="static") 
-
-
-    from flask.logging import default_handler
-    app.logger.removeHandler(default_handler)
 
     # Load configuration.
     app.config.from_object(conf)
