@@ -37,6 +37,14 @@ else:
 handler = logging.StreamHandler()
 handler.setFormatter(formatter)
 
+# Root logger
+logger = logging.getLogger()
+logger.setLevel(conf.LOG_LEVEL)
+
+# Add handler only once, prevent messages from being duplicated.
+if not logger.hasHandlers():
+    logger.addHandler(handler)
+
 # Some loggers in dependent packages don't get configured with the rest.
 # To see a list of all available loggers, uncomment the following lines,
 # run `flask run 2> /dev/null`, and add to the list below.
@@ -44,12 +52,8 @@ handler.setFormatter(formatter)
 # import pprint
 # pprint.pprint(logging.root.manager.loggerDict)
 
-# None is for the root logger
-for name in (None, 'sqlalchemy', 'flask_cors', 'werkzeug'):
-    logger = logging.getLogger(name=name)
-    if not logger.hasHandlers():
-        logger.addHandler(handler)
-    logger.setLevel(conf.LOG_LEVEL)
+for name in ('sqlalchemy', 'flask_cors', 'werkzeug'):
+    logging.getLogger(name=name).setLevel(conf.LOG_LEVEL)
 
 # SQLAlchemy is too verbose, turn down several loggers
 for name in (
