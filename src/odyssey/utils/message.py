@@ -39,7 +39,7 @@ def send_email_user_registration_portal(recipient, password, portal_id):
 
     SENDER = "Modo Bio no-reply <no-reply@modobio.com>"
 
-    remote_registration_url = f'{api.base_url}{REGISTRATION_PORTAL_URL.format(portal_id)}'
+    remote_registration_url = REGISTRATION_PORTAL_URL.format(api.base_url,portal_id)
 
     # route emails to AWS mailbox simulator when in dev environment
     if current_app.config['DEV'] and not any([recipient.endswith(domain) for domain in DEV_EMAIL_DOMAINS]):
@@ -116,7 +116,7 @@ def send_email_password_reset(recipient, reset_token):
     
     SENDER = "Modo Bio no-reply <no-reply@modobio.com>"
 
-    reset_password_url = f'{api.base_url}{PASSWORD_RESET_URL.format(reset_token)}'
+    reset_password_url = PASSWORD_RESET_URL.format(api.base_url,reset_token)
 
     # route emails to AWS mailbox simulator when in dev environment
     if current_app.config['DEV'] and not any([recipient.endswith(domain) for domain in DEV_EMAIL_DOMAINS]):

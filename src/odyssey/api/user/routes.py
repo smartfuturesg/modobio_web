@@ -470,7 +470,7 @@ class PasswordResetEmail(Resource):
         # DEV mode won't send an email, so return password. DEV mode ONLY.
         if current_app.config['DEV']:
             return jsonify({"token": password_reset_token,
-                            "password_reset_url" : f'{api.base_url}{PASSWORD_RESET_URL.format(password_reset_token)}'})
+                            "password_reset_url" : PASSWORD_RESET_URL.format(api.base_url,password_reset_token)})
 
         return 200
         

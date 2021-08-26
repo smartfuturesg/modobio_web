@@ -853,11 +853,11 @@ Email verifications token lifetime in hours.
 :type: int
 """
 
-#base url in prod would be www.modobio.com, left blank to accomodate to different app branches (dev,prod,demo...)
-REGISTRATION_PORTAL_URL = "user/registration-portal?portal_id={}"
+#base url in prod would be www.modobio.com/, left blank to accomodate to different app branches (dev,prod,demo...)
+REGISTRATION_PORTAL_URL = "{}user/registration-portal?portal_id={}"
 
-#base url in prod would be www.modobio.com, left blank to accomodate to different app branches (dev,prod,demo...)
-PASSWORD_RESET_URL = "password/reset?reset_token={}"
+#base url in prod would be www.modobio.com/, left blank to accomodate to different app branches (dev,prod,demo...)
+PASSWORD_RESET_URL = "{}password/reset?reset_token={}"
 
 DAY_OF_WEEK = ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday')
 
