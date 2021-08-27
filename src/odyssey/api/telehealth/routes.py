@@ -604,6 +604,8 @@ class TelehealthBookingsApi(BaseResource):
         # bring up client queue details
         client_in_queue = TelehealthQueueClientPool.query.filter_by(user_id=client_user_id).one_or_none()
 
+        if not client_in_queue:
+            raise InputError(message="Client not yet in queue")
         # Add staff and client timezones to the TelehealthBooking entry
         request.parsed_obj.staff_timezone = staff_availability[0].settings.timezone
         request.parsed_obj.client_timezone = client_in_queue.timezone
@@ -691,15 +693,8 @@ class TelehealthBookingsApi(BaseResource):
         db.session.add(status_history)
         db.session.flush()
 
-        request.parsed_obj.start_time_localized = start_time_client_localized
-        request.parsed_obj.end_time_localized = end_time_client_localized
-        
-        #TODO: keeping this only to not break things on the FE for now
-        request.parsed_obj.start_time = start_time_client_localized
-        request.parsed_obj.end_time = end_time_client_localized
-
         # create Twilio conversation and store details in TelehealthChatrooms table
-        conversation_sid = create_conversation(staff_user_id = staff_user_id,
+        create_conversation(staff_user_id = staff_user_id,
                             client_user_id = client_user_id,
                             booking_id=request.parsed_obj.idx)
 
@@ -734,15 +729,35 @@ class TelehealthBookingsApi(BaseResource):
         db.session.add(add_to_calendar)
         db.session.commit()
 
-        request.parsed_obj.booking_id = request.parsed_obj.idx
-        request.parsed_obj.conversation_sid = conversation_sid
-        
+        booking = TelehealthBookings.query.filter_by(idx=request.parsed_obj.idx).first()
+        client = {**booking.client.__dict__}
+        client['timezone'] = booking.client_timezone
+        client['start_time_localized'] = start_time_client_localized
+        client['end_time_localized'] = end_time_client_localized
+        practitioner = {**booking.practitioner.__dict__}
+        practitioner['timezone'] = booking.staff_timezone
+        practitioner['start_time_localized'] = lookup_times[request.parsed_obj.booking_window_id_start_time-1].start_time
+        practitioner['end_time_localized'] = lookup_times[request.parsed_obj.booking_window_id_end_time-1].end_time
+
         payload = {
             'all_bookings': 1,
             'twilio_token': token,
-            'bookings':[request.parsed_obj] 
+            'bookings':[
+                {
+                'booking_id': booking.idx,
+                'target_date': booking.target_date,
+                'start_time': practitioner['start_time_localized'],
+                'status': booking.status,
+                'profession_type': booking.profession_type,
+                'chat_room': booking.chat_room,
+                'client_location_id': booking.client_location_id,
+                'payment_method_id': booking.payment_method_id,
+                'status_history': booking.status_history,
+                'client': client,
+                'practitioner': practitioner
+                }
+            ] 
         }
-
         return payload
 
     @token_auth.login_required

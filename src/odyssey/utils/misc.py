@@ -176,6 +176,7 @@ def create_conversation(staff_user_id, client_user_id, booking_id):
 
     room_name = generate_meeting_room_name(meeting_type='CHATROOM')
     # create conversation through twilio api, add participants by modobio_id
+    # TODO catch possible errors from calling Twilio
     conversation = client.conversations.conversations.create(
         friendly_name=room_name
     )
