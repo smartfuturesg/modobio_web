@@ -154,10 +154,12 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
             "PaymentAmount": session_cost
         }
 
-        response = requests.post(current_app.config['INSTAMED_URL'] + '/api/payment/sale',
-                        headers={'Api-Key': current_app.config['INSTAMED_API_KEY'],
+        request_headers = {'Api-Key': current_app.config['INSTAMED_API_KEY'],
                                 'Api-Secret': current_app.config['INSTAMED_API_SECRET'],
-                                'Content-Type': 'application/json'},
+                                'Content-Type': 'application/json'}
+
+        response = requests.post(current_app.config['INSTAMED_URL'] + '/api/payment/sale',
+                        headers=request_headers,
                         json=request_data)
 
         #check if instamed api raised an error

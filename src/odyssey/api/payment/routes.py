@@ -53,10 +53,12 @@ class PaymentMethodsApi(BaseResource):
             }
         }
 
-        response = requests.post(current_app.config['INSTAMED_URL'] + '/payment/paymentplan',
-                                headers={'Api-Key': current_app.config['INSTAMED_API_KEY'],
+        request_headers = {'Api-Key': current_app.config['INSTAMED_API_KEY'],
                                         'Api-Secret': current_app.config['INSTAMED_API_SECRET'],
-                                        'Content-Type': 'application/json'},
+                                        'Content-Type': 'application/json'}
+
+        response = requests.post(current_app.config['INSTAMED_URL'] + '/payment/paymentplan',
+                                headers=request_headers,
                                 json=request_data)
         
         #check if instamed api raised an error
@@ -195,10 +197,12 @@ class PaymentRefundApi(BaseResource):
             "Amount": request.parsed_obj.refund_amount
         }
 
-        response = requests.post(current_app.config['INSTAMED_URL'] + '/api/payment/refund-simple',
-                        headers={'Api-Key': current_app.config['INSTAMED_API_KEY'],
+        request_headers = {'Api-Key': current_app.config['INSTAMED_API_KEY'],
                                 'Api-Secret': current_app.config['INSTAMED_API_SECRET'],
-                                'Content-Type': 'application/json'},
+                                'Content-Type': 'application/json'}
+
+        response = requests.post(current_app.config['INSTAMED_URL'] + '/payment/refund-simple',
+                        headers=request_headers,
                         json=request_data)
         
         #check if instamed api raised an error
