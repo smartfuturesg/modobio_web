@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import boto3
 from datetime import datetime, timedelta
 import math, re

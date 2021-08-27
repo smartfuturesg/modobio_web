@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger(__name__)
 
 from sqlalchemy import text
 from sqlalchemy.sql.expression import true

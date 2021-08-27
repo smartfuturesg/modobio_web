@@ -1,4 +1,6 @@
 """ Utility functions for the odyssey package. """
+import logging
+logger = logging.getLogger(__name__)
 
 from datetime import datetime, date, time
 import os

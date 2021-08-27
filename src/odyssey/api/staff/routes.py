@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from PIL import Image
 
 from flask import request, current_app, Response

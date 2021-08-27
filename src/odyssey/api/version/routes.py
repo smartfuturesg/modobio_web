@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from flask import current_app
 from flask_accepts import responds
 from flask_restx import Resource, Namespace

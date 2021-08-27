@@ -2,6 +2,8 @@
 Database tables for the practitioner system portion of the Modo Bio Staff application.
 All tables in this module are prefixed with 'Practitioner'.
 """
+import logging
+logger = logging.getLogger(__name__)
 
 from odyssey import db
 from odyssey.utils.base.models import BaseModel, BaseModelWithIdx, UserIdFkeyMixin

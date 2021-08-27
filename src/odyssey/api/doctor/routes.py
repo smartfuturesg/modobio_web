@@ -1,4 +1,8 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import os, boto3, secrets, pathlib
+
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 

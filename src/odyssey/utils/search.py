@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from flask import current_app
 from marshmallow import fields
 from odyssey.api.user.models import User

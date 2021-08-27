@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import base64
 import secrets
 from datetime import datetime, timedelta

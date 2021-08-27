@@ -2,6 +2,8 @@
 Database tables staff member information for the Modo Bio Staff application.
 All tables in this module are prefixed with ``Staff``.
 """
+import logging
+logger = logging.getLogger(__name__)
 
 import base64
 from datetime import datetime, timedelta

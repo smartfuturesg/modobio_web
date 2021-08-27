@@ -2,6 +2,9 @@
 Database tables for the user system portion of the Modo Bio Staff application.
 All tables in this module are prefixed with 'User'.
 """
+import logging
+logger = logging.getLogger(__name__)
+
 from datetime import datetime, timedelta
 import jwt
 import random

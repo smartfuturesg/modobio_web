@@ -1,6 +1,8 @@
 """
 This module handles the generation and storage of PDF files for signed documents.
 """
+import logging
+logger = logging.getLogger(__name__)
 
 import boto3
 import concurrent.futures

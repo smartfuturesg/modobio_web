@@ -2,6 +2,9 @@
 Database tables for the client intake portion of the Modo Bio Staff application.
 All tables in this module are prefixed with ``Client``.
 """
+import logging
+logger = logging.getLogger(__name__)
+
 import base64
 import os
 import pytz

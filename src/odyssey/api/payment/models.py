@@ -1,6 +1,9 @@
 """
 Database tables for supporting miscellaneous functionality. 
 """
+import logging
+logger = logging.getLogger(__name__)
+
 from sqlalchemy.orm import relationship
 from sqlalchemy import CheckConstraint
 

@@ -2,6 +2,8 @@
 Database tables for the wearable devices section of the Modo Bio API.
 All tables in this module are prefixed with 'Wearables'.
 """
+import logging
+logger = logging.getLogger(__name__)
 
 from sqlalchemy.dialects.postgresql import ARRAY
 
