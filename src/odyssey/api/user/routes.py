@@ -8,7 +8,7 @@ from flask_restx import Resource, Namespace
 from sqlalchemy.sql.expression import select
 from werkzeug.security import check_password_hash
 
-
+from odyssey.api import api
 from odyssey.api.client.schemas import ClientInfoSchema, ClientGeneralMobileSettingsSchema, ClientRaceAndEthnicitySchema
 from odyssey.api.client.models import ClientClinicalCareTeam
 from odyssey.api.lookup.models import LookupSubscriptions, LookupLegalDocs
@@ -470,7 +470,7 @@ class PasswordResetEmail(Resource):
         # DEV mode won't send an email, so return password. DEV mode ONLY.
         if current_app.config['DEV']:
             return jsonify({"token": password_reset_token,
-                            "password_reset_url" : PASSWORD_RESET_URL.format(password_reset_token)})
+                            "password_reset_url" : PASSWORD_RESET_URL.format(api.base_url,password_reset_token)})
 
         return 200
         
