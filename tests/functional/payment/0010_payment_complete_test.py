@@ -87,7 +87,8 @@ def test_payment_system(test_client):
 
     assert response.status_code == 201
 
-    f'/payment/methods/{test_client.client_id}/',
+    response = test_client.post(
+        f'/payment/methods/{test_client.client_id}/',
         headers=test_client.client_auth_header,
         data=dumps(payment_methods_data['normal_data_3']),
         content_type='application/json')
