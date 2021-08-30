@@ -160,3 +160,24 @@ def test_payment_system(test_client):
     assert response[0]['payment_method_id'] == 1
 
     """Step 7 Process Refunds"""
+
+    response = test_client.post(
+        f'/payment/refunds/{test_client.client_id}/',
+        headers = test_client.client_auth_header,
+        content_type='application.json')
+
+    assert response.status_code == 201
+
+    response = test_client.post(
+        f'/payment/refunds/{test_client.client_id}/',
+        headers = test_client.client_auth_header,
+        content_type='application.json')
+
+    assert response.status_code == 201
+
+    response = test_client.post(
+        f'/payment/refunds/{test_client.client_id}/',
+        headers = test_client.client_auth_header,
+        content_type='application.json')
+
+    assert response.status_code == 405

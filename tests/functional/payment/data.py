@@ -62,3 +62,9 @@ payment_booking_data = {
         'booking_window_id_end_time': 103,
         'payment_method_id': 1
     }
+
+payment_refund_data = {
+    'payment_id': 1,
+    'refund_reason': 'test',
+    'refund_amount': 30
+}
