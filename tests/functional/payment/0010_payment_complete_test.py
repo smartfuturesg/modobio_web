@@ -18,7 +18,6 @@ This file will be a complete test of the payment system.  In order to accomplish
 We also have to cover all possible error cases during all of the above steps.
 """
 
-
 def test_payment_system(test_client):
 
     """Step 1 Add Payment Methods"""
