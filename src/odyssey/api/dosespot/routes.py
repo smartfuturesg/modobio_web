@@ -6,6 +6,7 @@ from dateutil.relativedelta import relativedelta
 
 from flask import g, request, current_app
 from flask_accepts import accepts, responds
+from flask.json import dumps
 from flask_restx import Resource, Namespace
 
 from odyssey import db
@@ -13,6 +14,10 @@ from odyssey import db
 from odyssey.api.dosespot.models import (
     DoseSpotPractitionerID,
     DoseSpotPatientID
+)
+from odyssey.api.dosespot.schemas import (
+    DoseSpotCreatePractitionerSchema,
+    DoseSpotCreatePatientSchema
 )
 from odyssey.api.lookup.models import (
     LookupTerritoriesOfOperations,
@@ -49,13 +54,14 @@ class DoseSpotPractitionerCreation(BaseResource):
 
     @token_auth.login_required
     # @accepts(schema=MedicalBloodPressuresSchema, api=ns)
-    # @responds(schema=MedicalBloodPressuresSchema, status_code=201, api=ns)
+    @responds(status_code=201, api=ns)
     def post(self, user_id):
         """
         POST - Only a DoseSpot Admin will be able to use this endpoint. As a workaround
                we have stored a DoseSpot Admin credentials so the ModoBio system will be able
                to create the practitioner on the DoseSpot platform
         """
+
         ds_practitioner = DoseSpotPractitionerID.query.filter_by(user_id=user_id).one_or_none()
         admin_id = str(current_app.config['DOSESPOT_ADMIN_ID'])
         clinic_api_key = current_app.config['DOSESPOT_API_KEY']
@@ -84,27 +90,25 @@ class DoseSpotPractitionerCreation(BaseResource):
             
             missing_inputs = []
 
-            staff_office = StaffOffices.query.filter_by(user_id=user_id).all()
-        
+            staff_office = StaffOffices.query.filter_by(user_id=user_id).one_or_none()
+
             if not staff_office:
                 missing_inputs.append(1)
 
-            credentials = PractitionerCredentials.query.filter_by(user_id=user_id).all()
+            credentials = PractitionerCredentials.query.filter_by(user_id=user_id,credential_type='npi').one_or_none()
 
-            med_lic = []
-            dea = []
+            npi_number = ''
             if not credentials:
                 missing_inputs.append(2)
-            else:
-                for cred in credentials:
-                    if cred.status == 'Verified':
-                        if cred.credential_type == 'npi':
-                            npi_number = cred.credentials
-                        elif cred.credential_type == 'dea':
-                            dea.append(json.dumps({'DEANumber':cred.credentials,'State':cred.state,'ClinicId':modobio_id}))                    
-                        else:
-                            med_lic.append(json.dumps({'LicenseNumber':cred.credentials,'State':cred.state,'ClinicId':modobio_id}))                    
-                        
+            else:              
+                if credentials.status == 'Verified':
+                    npi_number = credentials.credentials
+                else:
+                    raise InputError(status_code=405,message='NPI number has not been verified yet.')
+
+
+            if not npi_number:
+                missing_inputs.append(2)                        
             
             if missing_inputs:
                 if [1,2] in missing_inputs:
@@ -112,49 +116,47 @@ class DoseSpotPractitionerCreation(BaseResource):
                 elif 1 in missing_inputs:
                     raise InputError(status_code=406,message='Missing Office Information')
                 else:
-                    raise InputError(status_code=407,message='Missing Practitioner Credentials')
+                    raise InputError(status_code=407,message='Missing Practitioner Credentials, Needs at least NPI number.')
 
-
-            # Gender
-            # 1 - Male
-            # 2 - Female
-            # 3 - Other
-            if user.client_info.gender == 'm':
-                gender = 1
-            elif user.client_info.gender == 'f':
-                gender = 2
-            else:
-                gender = 3
-
+            state = LookupTerritoriesOfOperations.query.filter_by(idx=staff_office.territory_id).one_or_none()
+            
+            
             # Phone Type
             # 2 - Cell
+
+            # NOTE:
+            # If dea and med_lic are empty [], the request works
+            # Having trouble sending dea and med_lic to the endpoint
+            # HOWEVER, DoseSpot does not require that info, and ModoBio
+            # will not be working with controlled substances, so DEA is also unnecessary.
+            breakpoint()
+
             min_payload = {'FirstName': user.firstname,
                     'LastName': user.lastname,
                     'DateOfBirth': '1995-06-13',
-                    'Gender': 1,
-                    'Address1': '123 test ave',
-                    'City':'Mesa',
-                    'State':'AZ',
-                    'ZipCode':'85212',
-                    'PrimaryPhone': '4803107597',
+                    'Address1': staff_office.street,
+                    'City':staff_office.city,
+                    'State':state.sub_territory_abbreviation,
+                    'ZipCode':staff_office.zipcode,
+                    'PrimaryPhone': staff_office.phone,
                     'PrimaryPhoneType': 2,
-                    'PrimaryFax': '4803107597',
+                    'PrimaryFax': staff_office.phone,
                     'ClinicianRoleType': 1,
                     'NPINumber': npi_number,
-                    'DEANumbers': dea,
-                    'MedicalLicenseNumbers': med_lic,
+                    'DEANumbers': [],
+                    'MedicalLicenseNumbers': [],
                     'Active': True
                     }
+            breakpoint()
 
-            res = requests.post('https://my.staging.dosespot.com/webapi/api/clinicians',
-                    headers=headers,
-                    data=min_payload)
+            res = requests.post('https://my.staging.dosespot.com/webapi/api/clinicians',headers=headers,data=min_payload)
 
             # If res is okay, store credentials
-            if res.ok:
-                ds_practitioner_id = DoseSpotPractitionerID().load(
-                                                {'ds_encrypted_user_id': True,
-                                                 'ds_user_id': True,
+            if res.ok and res.json()['Result']['ResultCode'] != 'ERROR':
+                ds_encrypted_user_id = generate_encrypted_user_id(encrypted_clinic_id[:22],clinic_api_key,str(res.json()['Id']))
+                ds_practitioner_id = DoseSpotCreatePractitionerSchema().load(
+                                                {'ds_encrypted_user_id': ds_encrypted_user_id,
+                                                 'ds_user_id': res.json()['Id'],
                                                  'ds_enrollment_status': 'pending'
                                                  })
                 ds_practitioner_id.user_id = user_id
@@ -178,7 +180,7 @@ class DoseSpotPatientCreation(BaseResource):
 
     @token_auth.login_required(user_type=('staff',),staff_role=('medical_doctor',))
     # @accepts(schema=MedicalBloodPressuresSchema, api=ns)
-    # @responds(schema=MedicalBloodPressuresSchema, status_code=201, api=ns)
+    @responds(status_code=201, api=ns)
     def post(self, user_id):
         """
         POST - Only a ModoBio Practitioners will be able to use this endpoint. As a workaround
@@ -204,6 +206,7 @@ class DoseSpotPatientCreation(BaseResource):
         encrypted_user_id = ds_clinician.ds_encrypted_user_id        
 
         # If the patient does not exist in DoseSpot System yet
+
         if not ds_patient_id:
             # Create the patient in the DoseSpot System
 
@@ -229,6 +232,9 @@ class DoseSpotPatientCreation(BaseResource):
             else:
                 gender = 3
 
+            #TODO remove
+            user.phone_number = '4803107597'
+
             state = LookupTerritoriesOfOperations.query.filter_by(idx=user.client_info.territory_id).one_or_none()
             # Phone Type
             # 2 - Cell
@@ -247,9 +253,9 @@ class DoseSpotPatientCreation(BaseResource):
             res = requests.post('https://my.staging.dosespot.com/webapi/api/patients',
                 headers=headers,
                 data=min_payload)
-
-            if res.ok:
-                ds_patient_id = DoseSpotPatientID().load({'ds_user_id': True})
+            
+            if res.ok and res.json()['Result']['ResultCode'] != 'ERROR':
+                ds_patient_id = DoseSpotCreatePatientSchema().load({'ds_user_id': res.json()['Id']})
                 ds_patient_id.user_id = user_id
                 db.session.add(ds_patient_id)
             else:

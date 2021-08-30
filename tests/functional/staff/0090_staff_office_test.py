@@ -90,3 +90,12 @@ def test_put_staff_profile(test_client):
     assert response.json['country'] == 'USA'
     assert response.json['city'] == 'Tucson'
     assert response.json['phone'] == '1234560'
+
+def test_post_1_ds_practitioner_create(test_client):
+    payload = {}
+    response = test_client.post(
+        f'/dosespot/create-practioner/{test_client.staff_id}/',
+        headers=test_client.staff_auth_header,
+        data=dumps(payload),
+        content_type='application/json')
+    assert response.status_code == 201    
