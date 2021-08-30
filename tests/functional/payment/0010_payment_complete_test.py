@@ -104,7 +104,7 @@ def test_payment_system(test_client):
 
     assert response.status_code == 200
     assert len(response) == 5
-    assert response[0]['expiration'] = '04/25'
+    assert response[0]['expiration'] == '04/25'
 
     """Step 3 Delete Payment Methods"""
 
