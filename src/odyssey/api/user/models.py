@@ -3,7 +3,6 @@ Database tables for the user system portion of the Modo Bio Staff application.
 All tables in this module are prefixed with 'User'.
 """
 from datetime import datetime, timedelta
-from flask_restx.utils import default_id
 import jwt
 import random
 from sqlalchemy.orm import relation

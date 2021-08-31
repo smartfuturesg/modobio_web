@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from sys import breakpointhook
 import boto3
 import jwt
 
