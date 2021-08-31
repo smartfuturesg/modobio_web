@@ -198,5 +198,17 @@ INSTAMED_API_KEY = ''
 INSTAMED_API_SECRET = ''
 """ InstaMed API access key secret. """
 
+INSTAMED_MERCHANT_ID = '894805'
+""" InstaMed API merchant ID number. """
+
+INSTAMED_STORE_ID = '0001'
+""" InstaMed API store ID number. """
+
+INSTAMED_TERMINAL_ID = '0002'
+""" InstaMed API terminal ID number. """
+
+INSTAMED_URL = ''
+""" InstaMed API URL. """
+
 # mongo db
 MONGO_URI = ''
