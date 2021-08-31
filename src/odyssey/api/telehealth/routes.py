@@ -54,7 +54,7 @@ from odyssey.api.lookup.models import (
 )
 from odyssey.api.payment.models import PaymentMethods, PaymentHistory, PaymentFailedTransactions
 from odyssey.utils.auth import token_auth
-from odyssey.utils.constants import TWILIO_ACCESS_KEY_TTL, DAY_OF_WEEK, ALLOWED_AUDIO_TYPES, ALLOWED_IMAGE_TYPES
+from odyssey.utils.constants import TWILIO_ACCESS_KEY_TTL, DAY_OF_WEEK, ALLOWED_AUDIO_TYPES, ALLOWED_IMAGE_TYPES, INSTAMED_OUTLET
 from odyssey.utils.errors import GenericNotFound, InputError, UnauthorizedUser, ContentNotFound, IllegalSetting, GenericThirdPartyError
 from odyssey.utils.misc import (
     FileHandling,
@@ -145,11 +145,7 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
         session_cost = SystemTelehealthSessionCosts.query.filter_by(profession_type='medical_doctor').one_or_none().session_cost
 
         request_data = {
-            "Outlet": {
-                "MerchantID": current_app.config['INSTAMED_MERCHANT_ID'],
-                "StoreID": current_app.config['INSTAMED_STORE_ID'],
-                "TerminalID": current_app.config['INSTAMED_TERMINAL_ID']
-            },
+            "Outlet": INSTAMED_OUTLET,
             "PaymentMethod": "OnFile",
             "PaymentMethodID": str(payment.payment_id),
             "Amount": str(session_cost)
@@ -159,7 +155,7 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
                                 'Api-Secret': current_app.config['INSTAMED_API_SECRET'],
                                 'Content-Type': 'application/json'}
 
-        response = requests.post(current_app.config['INSTAMED_URL'] + '/payment/sale',
+        response = requests.post('https://connect.instamed.com/rest/payment/sale',
                         headers=request_headers,
                         json=request_data)
 

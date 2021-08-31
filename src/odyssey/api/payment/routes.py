@@ -54,7 +54,7 @@ class PaymentMethodsApi(BaseResource):
                                         'Api-Secret': current_app.config['INSTAMED_API_SECRET'],
                                         'Content-Type': 'application/json'}
 
-        response = requests.post(current_app.config['INSTAMED_URL'] + '/payment/paymentplan',
+        response = requests.post('https://connect.instamed.com/rest/payment/paymentplan',
                                 headers=request_headers,
                                 json=request_data)
         
@@ -200,7 +200,7 @@ class PaymentRefundPostApi(BaseResource):
                                 'Api-Secret': current_app.config['INSTAMED_API_SECRET'],
                                 'Content-Type': 'application/json'}
 
-        response = requests.post(current_app.config['INSTAMED_URL'] + '/payment/refund-simple',
+        response = requests.post('https://connect.instamed.com/rest/payment/refund-simple',
                         headers=request_headers,
                         json=request_data)
         
