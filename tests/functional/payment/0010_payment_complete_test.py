@@ -3,6 +3,7 @@ from flask.json import dumps
 from .data import payment_methods_data, payment_booking_data
 
 from odyssey.api.telehealth.models import TelehealthBookings
+from odyssey import db
 
 """
 This file will be a complete test of the payment system.  In order to accomplish this we need to:
