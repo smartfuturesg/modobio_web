@@ -344,7 +344,7 @@ def test_bookings_meeting_room_access(test_client):
             data=dumps(payment_refund_data),
             content_type='application.json'
         )
-
+        print(response.data)
         assert response.status_code == 201
 
         response = test_client.get(
