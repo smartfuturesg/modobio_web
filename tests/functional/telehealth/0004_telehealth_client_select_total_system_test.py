@@ -338,15 +338,13 @@ def test_bookings_meeting_room_access(test_client):
 
         #process refunds for the payment
 
-        transaction_id = response.json[0]['idx']
-
         response = test_client.post(
-            f'/payment/refunds/{test_client.client_id}/?transaction_id={transaction_id}',
+            f'/payment/refunds/{test_client.client_id}/',
             headers=test_client.staff_auth_header,
             data=dumps(payment_refund_data),
             content_type='application.json'
         )
-
+        print(response.data)
         assert response.status_code == 201
 
         response = test_client.get(
@@ -354,13 +352,13 @@ def test_bookings_meeting_room_access(test_client):
             headers=test_client.staff_auth_header,
             content_type='application.json'
         )
-
+        print(response.data)
         assert response.status_code == 200
         assert response.json[0]['refund_amount'] == '50.00'
         assert response.json[0]['refund_reason'] == "Testtesttesttesttest"
 
         response = test_client.post(
-            f'/payment/refunds/{test_client.client_id}/?transaction_id={transaction_id}',
+            f'/payment/refunds/{test_client.client_id}/',
             headers=test_client.staff_auth_header,
             data=dumps(payment_refund_data),
             content_type='application.json'
@@ -382,7 +380,7 @@ def test_bookings_meeting_room_access(test_client):
         #2 refund POSTs
 
         response = test_client.post(
-            f'/payment/refunds/{test_client.client_id}/?transaction_id={transaction_id}',
+            f'/payment/refunds/{test_client.client_id}/',
             headers=test_client.staff_auth_header,
             data=dumps(payment_refund_data),
             content_type='application.json'
