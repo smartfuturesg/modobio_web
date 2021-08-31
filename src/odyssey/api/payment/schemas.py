@@ -46,7 +46,7 @@ class PaymentRefundsSchema(ma.SQLAlchemyAutoSchema):
 
     payment_id = fields.Integer(required=True)
     refund_amount = fields.String()
-    refund_reason = fields.String(validate=validate.Length(min=1))
+    refund_reason = fields.String(validate=validate.Length(min=21))
     
     @post_load
     def make_object(self, data, **kwargs):
