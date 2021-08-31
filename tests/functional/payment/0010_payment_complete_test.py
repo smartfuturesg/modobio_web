@@ -129,7 +129,7 @@ def test_payment_system(test_client):
         content_type='application.json')
 
     assert response.status_code == 200
-    assert len(response) == 4
+    assert len(response.json) == 4
 
     """Step 4 Create Booking"""
 
