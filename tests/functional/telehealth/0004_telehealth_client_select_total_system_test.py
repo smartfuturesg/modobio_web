@@ -389,7 +389,7 @@ def test_bookings_meeting_room_access(test_client):
 
         assert response.status_code == 405
 
-                response = test_client.get(
+        response = test_client.get(
             f'/payment/refunds/{test_client.client_id}/',
             headers=auth_header,
             content_type='application.json'
