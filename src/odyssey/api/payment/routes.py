@@ -179,7 +179,7 @@ class PaymentRefundApi(BaseResource):
         for transaction in PaymentRefunds.query.filter_by(payment_id=payment_id).all():
             total_refunded += float(transaction.refund_amount)
 
-        if float(request.parsed_obj.refund_amount) + total_refunded >= float(original_traction.transaction_amount):
+        if float(request.parsed_obj.refund_amount) + total_refunded > float(original_traction.transaction_amount):
             raise MethodNotAllowed(message='The requested refund amount combined with refunds already given' + \
                                             f' cannot exceed the amount of the original transaction. {total_refunded}' + \
                                             f'has already been refunded for the transaction id {payment_id}.')
