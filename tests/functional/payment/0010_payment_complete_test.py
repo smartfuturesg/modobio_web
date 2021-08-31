@@ -103,7 +103,7 @@ def test_payment_system(test_client):
         content_type='application.json')
 
     assert response.status_code == 200
-    assert len(response) == 5
+    assert len(response.json) == 5
     assert response[0]['expiration'] == '04/25'
 
     """Step 3 Delete Payment Methods"""
