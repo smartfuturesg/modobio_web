@@ -317,7 +317,7 @@ def test_bookings_meeting_room_access(test_client):
         auth_header = {'Authorization': f'Bearer {token}'}
 
         response = test_client.get(
-        f'/telehealth/bookings/meeting-room/access-token/{test_client.client_id}/', headers=test_client.staff_access_token)
+        f'/telehealth/bookings/meeting-room/access-token/{test_client.client_id}/', headers=test_client.staff_auth_header)
 
         assert response.status_code == 200
 
