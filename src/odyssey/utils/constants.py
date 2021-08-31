@@ -889,3 +889,9 @@ CREDENTIAL_TYPE = {
 }
 
 DEV_EMAIL_DOMAINS = ('3pillarglobal.com', 'modobio.com', 'atventurepartners.com', 'atlanticventurepartners.tech')
+
+INSTAMED_OUTLET = {
+                "MerchantID": '894805',
+                "StoreID": '0001',
+                "TerminalID": '0002'
+            }

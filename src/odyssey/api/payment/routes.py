@@ -8,6 +8,7 @@ from flask_restx import Resource
 from odyssey import db
 from odyssey.api import api
 from odyssey.utils.auth import token_auth
+from odyssey.utils.constants import INSTAMED_OUTLET
 from odyssey.utils.misc import check_client_existence
 from odyssey.utils.errors import TooManyPaymentMethods, GenericNotFound, GenericThirdPartyError, UnauthorizedUser, MethodNotAllowed
 from odyssey.utils.base.resources import BaseResource
@@ -39,11 +40,7 @@ class PaymentMethodsApi(BaseResource):
             raise TooManyPaymentMethods
 
         request_data = {
-            "Outlet": {
-                "MerchantID": current_app.config['INSTAMED_MERCHANT_ID'],
-                "StoreID": current_app.config['INSTAMED_STORE_ID'],
-                "TerminalID": current_app.config['INSTAMED_TERMINAL_ID']
-            },
+            "Outlet": INSTAMED_OUTLET,
             "PaymentPlanType": "SaveOnFile",
             "PaymentMethod": "Card",
             "Card": {
@@ -185,11 +182,7 @@ class PaymentRefundApi(BaseResource):
 
         #call instamed api
         request_data = {
-            "Outlet": {
-                "MerchantID": current_app.config['INSTAMED_MERCHANT_ID'],
-                "StoreID": current_app.config['INSTAMED_STORE_ID'],
-                "TerminalID": current_app.config['INSTAMED_TERMINAL_ID']
-            },
+            "Outlet": INSTAMED_OUTLET,
             "TransactionID": original_traction.transaction_id,
             "Amount": request.parsed_obj.refund_amount
         }
