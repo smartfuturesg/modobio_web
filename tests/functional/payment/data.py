@@ -60,6 +60,9 @@ payment_booking_data = {
         'target_date': '2025-01-05T02:00:00.000',
         'booking_window_id_start_time': 100,
         'booking_window_id_end_time': 103,
+        'booking_window_id_start_time_utc': 100,
+        'booking_window_id_end_time_utc': 103,
+        'client_location_id': 1,
         'payment_method_id': 1
     }
 
