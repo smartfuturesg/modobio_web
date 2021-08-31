@@ -250,8 +250,8 @@ def test_full_system_with_settings(test_client):
         data=dumps(client_booking),
         content_type='application/json')
 
-    assert response.json['bookings'][0]['client_timezone'] == 'America/Phoenix'
-    assert response.json['bookings'][0]['staff_timezone'] == 'UTC'
+    assert response.json['bookings'][0]['client']['timezone'] == 'America/Phoenix'
+    assert response.json['bookings'][0]['practitioner']['timezone'] == 'UTC'
     assert response.json['bookings'][0]['status'] == 'Pending'
     assert response.json['bookings'][0]['payment_method_id'] == payment_method_1.idx
 

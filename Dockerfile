@@ -11,3 +11,5 @@ RUN apt install -y libpq-dev python3-dev build-essential libpango-1.0-0 libpango
 COPY ./ /usr/src/app
 RUN pip install -U pip wheel
 RUN pip install -r requirements/production.txt -r requirements/testing.txt
+
+#Test
