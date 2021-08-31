@@ -118,7 +118,7 @@ def test_generate_bookings(test_client, telehealth_staff, telehealth_clients):
     response = test_client.post(
         f'/payment/methods/{client_4.user_id}/',
         headers=client_4_auth_header,
-        data=dumps(payment_method_data['normal_data']),
+        data=dumps(payment_method_data),
         content_type='application/json')
 
     payment_method = PaymentMethods.query.filter_by(user_id=client_4.user_id).first()
