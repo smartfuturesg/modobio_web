@@ -334,7 +334,7 @@ def test_bookings_meeting_room_access(test_client):
             content_type='application.json')
 
         assert response.status_code == 200
-        assert response.json[0]['transaction_amount'] == 60
+        assert response.json[0]['transaction_amount'] == '100.00'
         assert response.json[0]['payment_method_id'] == 1
 
         #process refunds for the payment
@@ -355,8 +355,8 @@ def test_bookings_meeting_room_access(test_client):
         )
 
         assert response.status_code == 200
-        assert response.json[0]['refund_amount'] == 30
-        assert response.json[0]['refund_reason'] == "Test"
+        assert response.json[0]['refund_amount'] == '50.00'
+        assert response.json[0]['refund_reason'] == "Testtesttesttesttest"
 
         response = test_client.post(
             f'/payment/refunds/{test_client.client_id}/',
@@ -377,7 +377,7 @@ def test_bookings_meeting_room_access(test_client):
         assert len(response.json) == 2
 
         #third try should error because we are trying to refund more than the original purchase amount
-        #the purchase was $60, and $60 total has been refunded over the course of the previous
+        #the purchase was $100 and $100 total has been refunded over the course of the previous
         #2 refund POSTs
 
         response = test_client.post(

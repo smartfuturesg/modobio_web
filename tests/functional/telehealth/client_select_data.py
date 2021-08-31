@@ -275,7 +275,7 @@ payment_method_data = {
 }
 
 payment_refund_data = {
-  "refund_amount": 30,
+  "refund_amount":50,
   "payment_id": 1,
-  "payment_reason": "Test"
+  "payment_reason": "Testtesttesttesttest"
 }
