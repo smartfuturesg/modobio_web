@@ -273,3 +273,9 @@ payment_method_data = {
   'expiration': '04/25',
   'is_default':True
 }
+
+payment_refund_data = {
+  "refund_amount": 30,
+  "payment_id": 1,
+  "payment_reason": "Test"
+}

@@ -26,7 +26,8 @@ from .client_select_data import (
     telehealth_bookings_staff_4_client_3_data,
     telehealth_bookings_staff_8_client_5_data,
     telehealth_queue_client_3_data,
-    payment_method_data
+    payment_method_data,
+    payment_refund_data
 )
 
 def test_generate_staff_availability(test_client, telehealth_staff):
@@ -335,6 +336,67 @@ def test_bookings_meeting_room_access(test_client):
         assert response.status_code == 200
         assert response.json[0].transaction_amount == 60
         assert response.json[0].payment_method_id == 1
+
+        #process refunds for the payment
+
+        response = test_client.post(
+            f'/payment/refunds/{test_client.client_id}/',
+            headers=auth_header,
+            data=dumps(payment_refund_data),
+            content_type='application.json'
+        )
+
+        assert response.status_code == 201
+
+        response = test_client.get(
+            f'/payment/refunds/{test_client.client_id}/',
+            headers=auth_header,
+            content_type='application.json'
+        )
+
+        assert response.status_code == 200
+        assert response.json[0].refund_amount == 30
+        assert response.json[0].refund_reason == "Test"
+
+        response = test_client.post(
+            f'/payment/refunds/{test_client.client_id}/',
+            headers=auth_header,
+            data=dumps(payment_refund_data),
+            content_type='application.json'
+        )
+
+        assert response.status_code == 201
+
+        response = test_client.get(
+            f'/payment/refunds/{test_client.client_id}/',
+            headers=auth_header,
+            content_type='application.json'
+        )
+
+        assert response.status_code == 200
+        assert len(response.json) == 2
+
+        #third try should error because we are trying to refund more than the original purchase amount
+        #the purchase was $60, and $60 total has been refunded over the course of the previous
+        #2 refund POSTs
+
+        response = test_client.post(
+            f'/payment/refunds/{test_client.client_id}/',
+            headers=auth_header,
+            data=dumps(payment_refund_data),
+            content_type='application.json'
+        )
+
+        assert response.status_code == 405
+
+                response = test_client.get(
+            f'/payment/refunds/{test_client.client_id}/',
+            headers=auth_header,
+            content_type='application.json'
+        )
+
+        assert response.status_code == 200
+        assert len(response.json) == 2
 
 
 def test_delete_generated_users(test_client):
