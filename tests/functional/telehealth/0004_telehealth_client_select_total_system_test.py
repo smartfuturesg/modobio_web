@@ -318,7 +318,7 @@ def test_bookings_meeting_room_access(test_client):
 
         response = test_client.get(
         f'/telehealth/bookings/meeting-room/access-token/{test_client.client_id}/', headers=test_client.client_auth_header)
-        
+        print(response.data)
         assert response.status_code == 200
 
         """Below will test the following payment features that required a booking to be accessed
