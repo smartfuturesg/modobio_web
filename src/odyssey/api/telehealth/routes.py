@@ -142,7 +142,7 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
         msg = pn.apple_voip_tmpl
         msg['data']['booking_id'] = booking_id
         msg['data']['booking_description'] = 'Modo Bio telehealth appointment'
-        msg['data']['staff_id'] = booking.staff_client_id
+        msg['data']['staff_id'] = booking.staff_user_id
         msg['data']['staff_first_name'] = booking.practitioner.firstname
         msg['data']['staff_middle_name'] = booking.practitioner.middlename
         msg['data']['staff_last_name'] = booking.practitioner.lastname
@@ -154,15 +154,14 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
                 continue
 
             url = fh.get_presigned_url(pic.image_path)
-            name = pic.image_path.split('/')[-1]
-            urls[pic.image_path] = url
+            urls[pic.height] = url
 
         msg['data']['staff_profile_picture'] = urls
 
         pn.send(booking.client_user_id, PushNotificationType.voip, msg)
 
         return {'twilio_token': token,
-                'conversation_sid': booking.chatroom.conversation_sid}
+                'conversation_sid': booking.chat_room.conversation_sid}
 
 @ns.route('/client/time-select/<int:user_id>/')
 @ns.doc(params={'user_id': 'Client user ID'})
