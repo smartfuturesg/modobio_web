@@ -291,7 +291,6 @@ def test_full_system_with_settings(test_client):
     assert current_booking['client']['end_time_localized'] == '04:50:00'
     assert current_booking['client']['timezone'] == 'America/Phoenix'
 
-@pytest.mark.skip('This endpoint should no longer be used.')
 def test_bookings_meeting_room_access(test_client):
     user_id_arr = (1,2)
     for user_id in user_id_arr:
