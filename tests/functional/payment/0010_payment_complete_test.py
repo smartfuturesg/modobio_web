@@ -149,6 +149,8 @@ def test_payment_system(test_client):
         headers = test_client.staff_auth_header,
         content_type='application.json')
 
+
+    print(response.data)
     assert response.status_code == 200
 
     """Step 6 View History"""
