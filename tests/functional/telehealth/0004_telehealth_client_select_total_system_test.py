@@ -315,9 +315,27 @@ def test_bookings_meeting_room_access(test_client):
         content_type='application/json')
         token = response.json.get('token')
         auth_header = {'Authorization': f'Bearer {token}'}
+
         response = test_client.get(
         f'/telehealth/bookings/meeting-room/access-token/{test_client.client_id}/', headers=auth_header)
+        
         assert response.status_code == 200
+
+        """Below will test the following payment features that required a booking to be accessed
+           before it was possible to test them
+        """
+
+        #check payment was successful for the booking
+
+        response = test_client.get(
+            f'/payment/history/{test_client.client_id}/',
+            headers=auth_header,
+            content_type='application.json')
+
+        assert response.status_code == 200
+        assert response.json[0].transaction_amount == 60
+        assert response.json[0].payment_method_id == 1
+
 
 def test_delete_generated_users(test_client):
     assert 1 == 1
