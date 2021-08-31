@@ -13,8 +13,8 @@ from odyssey.api.payment.models import PaymentMethods
 from odyssey.api.user.models import User
 from tests.functional.telehealth.client_select_data import(
     telehealth_staff_full_availability,
-    telehealth_bookings_data_full_day,
-    payment_method_data)
+    telehealth_bookings_data_full_day
+    )
 
 from odyssey.tasks.periodic import deploy_upcoming_appointment_tasks
 from odyssey.tasks.tasks import upcoming_appointment_notification_2hr, upcoming_appointment_care_team_permissions
@@ -37,13 +37,6 @@ def test_upcoming_bookings_scan(test_client):
     ##
     # Sign in as a client, book appointments with the staff member above
     ##
-
-    # add payment method to db
-    # test_client.post(
-    #     f'/payment/methods/{client.user_id}/',
-    #     headers=auth_header,
-    #     data=dumps(payment_method_data['normal_data']),
-    #     content_type='application/json')
     payment_method = PaymentMethods.query.filter_by(user_id=test_client.client_id).first()
 
     # loop through all bookings in test data

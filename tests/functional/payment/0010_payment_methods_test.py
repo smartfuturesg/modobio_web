@@ -1,14 +1,6 @@
 from flask.json import dumps
 
 from .data import payment_methods_data, payment_booking_data
-from tests.functional.telehealth.client_select_data import (
-    telehealth_staff_4_general_availability_post_data,
-    telehealth_staff_6_general_availability_post_data,
-    telehealth_staff_8_general_availability_post_data,
-    telehealth_staff_10_general_availability_post_data,
-    telehealth_staff_12_general_availability_post_data,
-    telehealth_staff_14_general_availability_post_data
-)
 
 from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey import db
