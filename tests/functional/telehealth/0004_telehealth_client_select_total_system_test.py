@@ -9,7 +9,7 @@ from sqlalchemy.sql.expression import delete, select
 
 # from tests.conftest import generate_users
 from odyssey.api.user.models import User
-from odyssey.api.telehealth.models import TelehealthStaffAvailability
+from odyssey.api.telehealth.models import TelehealthStaffAvailability, TelehealthBookings
 from odyssey.api.payment.models import PaymentMethods
 from odyssey.api.staff.models import StaffRoles, StaffOperationalTerritories
 
