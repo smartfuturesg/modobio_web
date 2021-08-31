@@ -3,6 +3,7 @@ Database tables for the user system portion of the Modo Bio Staff application.
 All tables in this module are prefixed with 'User'.
 """
 from datetime import datetime, timedelta
+from flask_restx.utils import default_id
 import jwt
 import random
 from sqlalchemy.orm import relation
@@ -643,6 +644,48 @@ class UserTokenHistory(db.Model):
     ua_string = db.Column(db.String)
     """
     Stores contents of user-agent string
+
+    :type: str
+    """
+
+class UserResetPasswordRequestHistory(db.Model):
+    """
+    Stores a history of password reset requests
+    """
+
+    __tablename__ = 'UserResetPasswordRequestHistory'
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Auto incrementing primary key
+
+    :type: int, primary key
+    """
+
+    requested_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
+    """
+    timestamp for when request is submitted
+
+    :type: datetime
+    """
+
+    email = db.Column(db.String(75))
+    """
+    email provided with password reset request
+
+    :type: str, max length 75
+    """
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=True)
+    """
+    user_id connected to email provided if it exists, otherwise blank
+
+    :type: str
+    """
+
+    ua_string = db.Column(db.String)
+    """
+    Stores contents of user-agent string for device submitting request
 
     :type: str
     """
