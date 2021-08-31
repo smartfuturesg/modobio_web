@@ -9,7 +9,7 @@ def test_post_payment_method(test_client):
         headers=test_client.client_auth_header,
         data=dumps(payment_methods_data['invalid_card']),
         content_type='application/json')
-
+    print(response.data)
     assert response.status_code == 400
 
     #test with expired card, should raise 400
