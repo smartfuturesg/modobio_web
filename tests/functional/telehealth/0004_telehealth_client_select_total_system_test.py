@@ -334,8 +334,8 @@ def test_bookings_meeting_room_access(test_client):
             content_type='application.json')
 
         assert response.status_code == 200
-        assert response.json[0].transaction_amount == 60
-        assert response.json[0].payment_method_id == 1
+        assert response.json[0]['transaction_amount'] == 60
+        assert response.json[0]['payment_method_id'] == 1
 
         #process refunds for the payment
 
@@ -355,8 +355,8 @@ def test_bookings_meeting_room_access(test_client):
         )
 
         assert response.status_code == 200
-        assert response.json[0].refund_amount == 30
-        assert response.json[0].refund_reason == "Test"
+        assert response.json[0]['refund_amount'] == 30
+        assert response.json[0]['refund_reason'] == "Test"
 
         response = test_client.post(
             f'/payment/refunds/{test_client.client_id}/',
