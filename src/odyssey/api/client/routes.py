@@ -1387,6 +1387,7 @@ class UserClinicalCareTeamApi(BaseResource):
             client_user = User.query.filter_by(user_id=client.user_id).one_or_none()
             authorizations_query = db.session.query(
                                     ClientClinicalCareTeamAuthorizations.resource_id, 
+                                    ClientClinicalCareTeamAuthorizations.status, 
                                     LookupClinicalCareTeamResources.display_name
                                 ).filter(
                                     ClientClinicalCareTeamAuthorizations.team_member_user_id == user_id
@@ -1408,7 +1409,7 @@ class UserClinicalCareTeamApi(BaseResource):
                         'client_modobio_id': client_user.modobio_id,
                         'client_profile_picture': profile_pic,
                         'client_added_date': client.created_at,
-                        'authorizations': [{'display_name': x[1], 'resource_id': x[0]} for x in authorizations_query]})
+                        'authorizations': [{'display_name': x[2], 'resource_id': x[0], 'status': x[1]} for x in authorizations_query]})
         
         return {'member_of_care_teams': res, 'total': len(res)}
 
