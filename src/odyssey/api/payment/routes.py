@@ -50,7 +50,7 @@ class PaymentMethodsApi(BaseResource):
             }
         }
 
-        response = requests.post(current_app.config['INSTAMED_URL'] + '/payment/paymentplan',
+        response = requests.post('https://connect.instamed.com/rest/payment/paymentplan',
                                 headers={'Api-Key': current_app.config['INSTAMED_API_KEY'],
                                         'Api-Secret': current_app.config['INSTAMED_API_SECRET'],
                                         'Content-Type': 'application/json'},
@@ -187,7 +187,7 @@ class PaymentRefundApi(BaseResource):
             "Amount": request.parsed_obj.refund_amount
         }
 
-        response = requests.post(current_app.config['INSTAMED_URL'] + '/payment/refund-simple',
+        response = requests.post('https://connect.instamed.com/rest/payment/refund-simple',
                         headers={'Api-Key': current_app.config['INSTAMED_API_KEY'],
                                 'Api-Secret': current_app.config['INSTAMED_API_SECRET'],
                                 'Content-Type': 'application/json'},

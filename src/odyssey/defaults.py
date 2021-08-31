@@ -198,8 +198,5 @@ INSTAMED_API_KEY = ''
 INSTAMED_API_SECRET = ''
 """ InstaMed API access key secret. """
 
-INSTAMED_URL = ''
-""" InstaMed API URL. """
-
 # mongo db
 MONGO_URI = ''
