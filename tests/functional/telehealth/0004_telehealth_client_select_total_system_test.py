@@ -335,7 +335,6 @@ def test_bookings_meeting_room_access(test_client):
 
         assert response.status_code == 200
         assert response.json[0]['transaction_amount'] == '100.00'
-        assert response.json[0]['payment_method_id'] == 1
 
         #process refunds for the payment
 
