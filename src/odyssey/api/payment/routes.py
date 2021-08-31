@@ -137,7 +137,7 @@ class PaymentStatusGetApi(BaseResource):
 @ns.route('/history/<int:user_id>/')
 class PaymentHistoryApi(BaseResource):
     @token_auth.login_required(user_type=('client', 'staff',), staff_role=('client_services',))
-    @responds(schema=PaymentHistorySchema, api=ns, status_code=200)
+    @responds(schema=PaymentHistorySchema(many=True), api=ns, status_code=200)
     def get(self, user_id):
         """
         Returns a list of transactions for the given user_id.
@@ -147,11 +147,10 @@ class PaymentHistoryApi(BaseResource):
         return  PaymentHistory.query.filter_by(user_id=user_id).all()
 
 @ns.route('/refunds/<int:user_id>/')
-@ns.doc(params={'transaction_id': "ID of the transaction to be refunded"})
-class PaymentRefundApi(BaseResource):
+class PaymentRefundGetApi(BaseResource):
 
     @token_auth.login_required(user_type=('client', 'staff',), staff_role=('client_services',))
-    @responds(schema=PaymentRefundsSchema, api=ns, status_code=200)
+    @responds(schema=PaymentRefundsSchema(many=True), api=ns, status_code=200)
     def get(self, user_id):
         """
         Returns all refunds that have been issued for the given user_id
@@ -160,7 +159,11 @@ class PaymentRefundApi(BaseResource):
 
         return PaymentRefunds.query.filter_by(user_id=user_id).all()
 
-    @token_auth.login_required(user_type=('client', 'staff',), staff_role=('client_services',))
+@ns.route('/refunds/<int:user_id>/')
+@ns.doc(params={'transaction_id': "ID of the transaction to be refunded"})
+class PaymentRefundPostApi(BaseResource):
+
+    @token_auth.login_required(user_type=('staff',), staff_role=('client_services',))
     @accepts(schema=PaymentRefundsSchema, api=ns)
     @responds(schema=PaymentRefundsSchema, api=ns, status_code=201)
     def post(self, user_id):
@@ -168,23 +171,26 @@ class PaymentRefundApi(BaseResource):
         Issue a refund for a user. Multiple refunds may be issued for a single transaction, but the
         total amount refunded cannot exceed the amount of the original transaction.
         """
-
+        
         super().check_user(user_id, user_type='client')
 
+        transaction_id = request.args.get('transaction_id', type=int)
+        transaction_id_str = str(transaction_id)
+
         #retrieve original transaction being refunded
-        original_traction = PaymentHistory.query.filter_by(transaction_id=request.parsed_obj.payment_id).one_or_none()
+        original_traction = PaymentHistory.query.filter_by(idx=transaction_id).one_or_none()
         if not original_traction:
-            raise GenericNotFound(f'No transaction with transaction_id {request.parsed_obj.payment_id} exists.')
+            raise GenericNotFound(f'No transaction with transaction_id {transaction_id_str} exists.')
 
         #check if requested amount plus previous refunds of this transaction exceed the original amount
-        total_refunded = 0
-        for transaction in PaymentRefunds.query.filter_by(payment_id=request.parsed_obj.payment_id).all():
-            total_refunded += transaction.amount
+        total_refunded = 0.00
+        for transaction in PaymentRefunds.query.filter_by(payment_id=transaction_id).all():
+            total_refunded += float(transaction.refund_amount)
 
-        if request.parsed_obj.refund_amount + total_refunded >= original_traction.amount:
+        if float(request.parsed_obj.refund_amount) + total_refunded >= float(original_traction.transaction_amount):
             raise MethodNotAllowed(message='The requested refund amount combined with refunds already given' + \
                                             f' cannot exceed the amount of the original transaction. {total_refunded}' + \
-                                            f'has already been refunded for the transaction id {request.parsed_obj.payment_id}.')
+                                            f'has already been refunded for the transaction id {transaction_id_str}.')
 
         #call instamed api
         request_data = {
@@ -212,6 +218,7 @@ class PaymentRefundApi(BaseResource):
             raise GenericThirdPartyError(response.status_code, response.text)
 
         request.parsed_obj.user_id = user_id
+        request.parsed_obj.reporter_id = token_auth.current_user()[0].user_id
         db.session.add(request.parsed_obj)
         db.session.commit()
 

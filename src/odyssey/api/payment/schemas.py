@@ -33,6 +33,8 @@ class PaymentHistorySchema(BaseSchema):
     class Meta:
         model = PaymentHistory
 
+    transaction_amount = fields.String()
+
     @post_load
     def make_object(self, data, **kwargs):
         return PaymentHistory(**data)
@@ -43,6 +45,7 @@ class PaymentRefundsSchema(ma.SQLAlchemyAutoSchema):
         exclude = ('created_at', 'updated_at', 'idx')
 
     payment_id = fields.Integer(required=True)
+    refund_amount = fields.String()
     refund_reason = fields.String(validate=validate.Length(min=1))
     
     @post_load

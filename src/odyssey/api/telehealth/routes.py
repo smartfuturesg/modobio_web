@@ -84,6 +84,7 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
     @responds(schema=TelehealthBookingMeetingRoomsTokensSchema,api=ns,status_code=200)
     def get(self,booking_id):
         # Get the current user
+
         current_user, _ = token_auth.current_user()
         
         booking,chatroom = db.session.execute(
@@ -150,15 +151,15 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
                 "TerminalID": current_app.config['INSTAMED_TERMINAL_ID']
             },
             "PaymentMethod": "OnFile",
-            "PaymentMethodID": payment.payment_id,
-            "PaymentAmount": session_cost
+            "PaymentMethodID": str(payment.payment_id),
+            "Amount": str(session_cost)
         }
 
         request_headers = {'Api-Key': current_app.config['INSTAMED_API_KEY'],
                                 'Api-Secret': current_app.config['INSTAMED_API_SECRET'],
                                 'Content-Type': 'application/json'}
 
-        response = requests.post(current_app.config['INSTAMED_URL'] + '/api/payment/sale',
+        response = requests.post(current_app.config['INSTAMED_URL'] + '/payment/sale',
                         headers=request_headers,
                         json=request_data)
 
