@@ -319,7 +319,7 @@ def test_bookings_meeting_room_access(test_client):
         room_id = TelehealthBookings.query.filter_by(client_user_id=test_client.client_id, staff_user_id=test_client.staff_id).first().idx
         response = test_client.get(
         f'/telehealth/bookings/meeting-room/access-token/{room_id}/', headers=test_client.staff_auth_header)
-        print(response.data)
+
         assert response.status_code == 200
 
         """Below will test the payment features that required a booking to be accessed
@@ -330,7 +330,7 @@ def test_bookings_meeting_room_access(test_client):
 
         response = test_client.get(
             f'/payment/history/{test_client.client_id}/',
-            headers=auth_header,
+            headers=test_client.client_auth_header,
             content_type='application.json')
 
         assert response.status_code == 200
@@ -341,7 +341,7 @@ def test_bookings_meeting_room_access(test_client):
 
         response = test_client.post(
             f'/payment/refunds/{test_client.client_id}/',
-            headers=auth_header,
+            headers=test_client.staff_auth_header,
             data=dumps(payment_refund_data),
             content_type='application.json'
         )
@@ -350,7 +350,7 @@ def test_bookings_meeting_room_access(test_client):
 
         response = test_client.get(
             f'/payment/refunds/{test_client.client_id}/',
-            headers=auth_header,
+            headers=test_client.staff_auth_header,
             content_type='application.json'
         )
 
@@ -360,7 +360,7 @@ def test_bookings_meeting_room_access(test_client):
 
         response = test_client.post(
             f'/payment/refunds/{test_client.client_id}/',
-            headers=auth_header,
+            headers=test_client.staff_auth_header,
             data=dumps(payment_refund_data),
             content_type='application.json'
         )
@@ -369,7 +369,7 @@ def test_bookings_meeting_room_access(test_client):
 
         response = test_client.get(
             f'/payment/refunds/{test_client.client_id}/',
-            headers=auth_header,
+            headers=test_client.client_auth_header,
             content_type='application.json'
         )
 
@@ -382,7 +382,7 @@ def test_bookings_meeting_room_access(test_client):
 
         response = test_client.post(
             f'/payment/refunds/{test_client.client_id}/',
-            headers=auth_header,
+            headers=test_client.staff_auth_header,
             data=dumps(payment_refund_data),
             content_type='application.json'
         )
@@ -391,7 +391,7 @@ def test_bookings_meeting_room_access(test_client):
 
         response = test_client.get(
             f'/payment/refunds/{test_client.client_id}/',
-            headers=auth_header,
+            headers=test_client.client_auth_header,
             content_type='application.json'
         )
 
