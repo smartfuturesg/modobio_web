@@ -316,9 +316,10 @@ def test_bookings_meeting_room_access(test_client):
         token = response.json.get('token')
         auth_header = {'Authorization': f'Bearer {token}'}
 
+        room_id = TelehealthBookings.query.filter_by(client_user_id=test_client.client_id, staff_user_id=test_client.staff_id).one_or_none().idx
         response = test_client.get(
-        f'/telehealth/bookings/meeting-room/access-token/{test_client.client_id}/', headers=test_client.staff_auth_header)
-        print(response.data)
+        f'/telehealth/bookings/meeting-room/access-token/{room_id}/', headers=test_client.staff_auth_header)
+
         assert response.status_code == 200
 
         """Below will test the payment features that required a booking to be accessed
