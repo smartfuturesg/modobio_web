@@ -124,6 +124,55 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
 
         if g.user_type == 'staff':
             meeting_room.staff_access_token = token
+
+            #call instamed api to charge user for this call
+            payment = PaymentMethods.query.filter_by(idx=booking.payment_method_id).one_or_none()
+            session_cost = SystemTelehealthSessionCosts.query.filter_by(profession_type='medical_doctor').one_or_none().session_cost
+
+            request_data = {
+                "Outlet": INSTAMED_OUTLET,
+                "PaymentMethod": "OnFile",
+                "PaymentMethodID": str(payment.payment_id),
+                "Amount": str(session_cost)
+            }
+
+            request_headers = {'Api-Key': current_app.config['INSTAMED_API_KEY'],
+                                    'Api-Secret': current_app.config['INSTAMED_API_SECRET'],
+                                    'Content-Type': 'application/json'}
+
+            response = requests.post('https://connect.instamed.com/rest/payment/sale',
+                            headers=request_headers,
+                            json=request_data)
+
+            #check if instamed api raised an error
+            try:
+                response.raise_for_status()
+            except:
+                raise GenericThirdPartyError(response.status_code, response.text)
+
+            #convert response data to json (python dict)
+            response_data = json.loads(response.text)
+
+            #check if card was declined (this is not an error as checked above as 200 is returned from InstaMed)
+            if response_data['TransactionStatus'] == 'C':
+                #transaction was successful, store in PaymentHistory
+                history = PaymentHistory(**{
+                    'user_id': booking.client_user_id,
+                    'payment_method_id': booking.payment_method_id,
+                    'transaction_id': response_data['TransactionID'],
+                    'transaction_amount': session_cost,
+                })
+                booking.is_paid=True
+                db.session.add(history)
+            else:
+                #transaction was not successful, store in PaymentFailedTransactions
+                failed = PaymentFailedTransactions(**{
+                    'user_id': booking.client_user_id,
+                    'transaction_id': response_data['TransactionID'],
+                    'retry_attempts': 1,
+                    'resolved': False
+                })
+                db.session.add(failed)
         elif g.user_type == 'client':
             meeting_room.client_access_token = token
 
@@ -139,55 +188,6 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
             status = 'In Progress'
         )
         db.session.add(status_history)
-
-        #call instamed api to charge user for this call
-        payment = PaymentMethods.query.filter_by(idx=booking.payment_method_id).one_or_none()
-        session_cost = SystemTelehealthSessionCosts.query.filter_by(profession_type='medical_doctor').one_or_none().session_cost
-
-        request_data = {
-            "Outlet": INSTAMED_OUTLET,
-            "PaymentMethod": "OnFile",
-            "PaymentMethodID": str(payment.payment_id),
-            "Amount": str(session_cost)
-        }
-
-        request_headers = {'Api-Key': current_app.config['INSTAMED_API_KEY'],
-                                'Api-Secret': current_app.config['INSTAMED_API_SECRET'],
-                                'Content-Type': 'application/json'}
-
-        response = requests.post('https://connect.instamed.com/rest/payment/sale',
-                        headers=request_headers,
-                        json=request_data)
-
-        #check if instamed api raised an error
-        try:
-            response.raise_for_status()
-        except:
-            raise GenericThirdPartyError(response.status_code, response.text)
-
-        #convert response data to json (python dict)
-        response_data = json.loads(response.text)
-
-        #check if card was declined (this is not an error as checked above as 200 is returned from InstaMed)
-        if response_data['TransactionStatus'] == 'C':
-            #transaction was successful, store in PaymentHistory
-            history = PaymentHistory(**{
-                'user_id': booking.client_user_id,
-                'payment_method_id': booking.payment_method_id,
-                'transaction_id': response_data['TransactionID'],
-                'transaction_amount': session_cost,
-            })
-            booking.is_paid=True
-            db.session.add(history)
-        else:
-            #transaction was not successful, store in PaymentFailedTransactions
-            failed = PaymentFailedTransactions(**{
-                'user_id': booking.client_user_id,
-                'transaction_id': response_data['TransactionID'],
-                'retry_attempts': 1,
-                'resolved': False
-            })
-            db.session.add(failed)
 
         db.session.commit() 
         return {'twilio_token': token,
