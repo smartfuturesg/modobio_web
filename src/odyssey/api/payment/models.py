@@ -201,9 +201,9 @@ class PaymentRefunds(BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin):
 
 class PaymentFailedTransactions(BaseModelWithIdx, UserIdFkeyMixin):
     """
-    This table keeps track of payment failures. Failed payments will be retried up to 6 times.
-    If the payment has still failed after 6 attempts, the user will be unable to book telehealth
-    appointment until the failed payment has been resolved.
+    This table keeps track of payment failures. For now, this table will just serve
+    as a log for us for informational purposes. In the future, it may be leveraged to
+    blacklist users from creating future appointments until the failed payment is resolved.
     """
 
     transaction_id = db.Column(db.String)
@@ -211,19 +211,4 @@ class PaymentFailedTransactions(BaseModelWithIdx, UserIdFkeyMixin):
     InstaMed Transaction ID.
 
     :type: string
-    """
-
-    retry_attempts = db.Column(db.Integer)
-    """
-    Number of times this transactions has been retired.
-
-    :type: integer
-    """
-
-    resolved = db.Column(db.Boolean)
-    """
-    Denotes if this failed transaction has been resolved either via a retry attempt and 
-    manually by the user after 6 failed attempts.
-
-    :type: boolean
     """

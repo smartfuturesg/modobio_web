@@ -168,9 +168,7 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
                 #transaction was not successful, store in PaymentFailedTransactions
                 failed = PaymentFailedTransactions(**{
                     'user_id': booking.client_user_id,
-                    'transaction_id': response_data['TransactionID'],
-                    'retry_attempts': 1,
-                    'resolved': False
+                    'transaction_id': response_data['TransactionID']
                 })
                 db.session.add(failed)
         elif g.user_type == 'client':

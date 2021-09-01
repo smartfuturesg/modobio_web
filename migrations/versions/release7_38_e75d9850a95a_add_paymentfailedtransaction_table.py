@@ -1,8 +1,8 @@
-"""Add PaymentFailedTransactions table
+"""Add PaymentFailedTransaction table
 
-Revision ID: 7910b7931824
-Revises: fc7f98a1735b
-Create Date: 2021-08-25 14:20:37.287701
+Revision ID: e75d9850a95a
+Revises: 10bc815f355e
+Create Date: 2021-09-01 14:10:30.958419
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '7910b7931824'
-down_revision = 'fc7f98a1735b'
+revision = 'e75d9850a95a'
+down_revision = '10bc815f355e'
 branch_labels = None
 depends_on = None
 
@@ -23,8 +23,6 @@ def upgrade():
     sa.Column('updated_at', sa.DateTime(), server_default=sa.text('clock_timestamp()'), nullable=True),
     sa.Column('idx', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('transaction_id', sa.String(), nullable=True),
-    sa.Column('retry_attempts', sa.Integer(), nullable=True),
-    sa.Column('resolved', sa.Boolean(), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['User.user_id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('idx')
