@@ -1,26 +1,34 @@
-INSERT INTO "User" ("email", "firstname", "lastname", "is_staff", "is_client", "is_internal", "modobio_id", "deleted", "email_verified", "biological_sex_male") VALUES 
-('sys@modobio.com', 'Sys', 'User', true, false, true,'VFRGH3YSM412', false, true, true),
-('doc@modobio.com', 'Doc', 'User', true, false, true, 'KW99TSVWP812', false, true, true),
-('docext@modobio.com', 'DocExt', 'User', true, false, false, 'PUR27NVP3012', false, true, false),
-('physio@modobio.com', 'Physio', 'User', true, false, true, 'FG86DG4Q3J12', false, true, false),
-('physioext@modobio.com', 'PhysioExt', 'User', true, false, false, 'TQ9N2M9SMQ12', false, true, true),
-('nutri@modobio.com', 'Nutri', 'User', true, false, true, 'RW0QZK442F12', false, true, false),
-('nutriext@modobio.com', 'NutriExt', 'User', true, false, false, 'FPQLX97G6K12', false, true, true),
-('train@modobio.com', 'Train', 'User', true, false, true, 'QE6RS1875312', false, true, false),
-('trainext@modobio.com', 'TrainExt', 'User', true, false, false, 'FL6SB69RQW12', false, true, true),
-('pro@modobio.com', 'Pro', 'User', true, false, true, 'EXK7322KFN12', false, true, true),
-('proext@modobio.com', 'ProExt', 'User', true, false, false, 'FXF0450R7X12', false, true, false),
-('staff@modobio.com', 'Staff', 'User', true, false, true, 'BHBCBZBW4K12', false, true, false),
-('cservice@modobio.com', 'ClientServices', 'User', true, false, true, 'BX4NW9897R12', false, true, true),
-('name@modobio.com', 'FirstName', 'LastName', true, false, true, 'XFB1SN3GM512', false, true, true),
-('david.kubos@sde.cz', 'David', 'Kubos', true, false, true, 'EJP05FH60512', false, true, true),
-('tomas.blazek@sde.cz', 'Tomas', 'Blazek', true, false, true, 'MT5M08SCL612', false, true, true),
-('aneta.opletalova@sde.cz', 'Aneta', 'Opletalova', true, false, true, 'OF0K861W7J12', false, true, false),
-('jakub.freywald@sde.cz', 'Jakub', 'Freywald', true, false, true, 'UJPH98Q8KP12', false, true, true),
-('matej.kubinec@sde.cz', 'Matej', 'Kubinec', true, false, true, 'JAF04LYTZN12', false, true, true),
-('sebastian.brostl@sde.cz', 'Sebastian', 'Brostl', true, false, true, 'VLCZG2Z2ZL12', false, true, true),
-('lukas.krajci@sde.cz', 'Lukas', 'Krajci', true, false, true, 'VS071YRSQ912', false, true, true),
-('client@modobio.com', 'Test', 'Client', false, true, false, 'TC12JASDFF12', false, true, false);
+INSERT INTO "User" ("user_id", "email", "firstname", "lastname", "is_staff", "is_client", "is_internal", "modobio_id", "deleted", "email_verified", "biological_sex_male") VALUES 
+(1, 'sys@modobio.com', 'Sys', 'User', true, false, true,'VFRGH3YSM412', false, true, true),
+(2, 'doc@modobio.com', 'Doc', 'User', true, false, true, 'KW99TSVWP812', false, true, true),
+(3, 'docext@modobio.com', 'DocExt', 'User', true, false, false, 'PUR27NVP3012', false, true, false),
+(4, 'physio@modobio.com', 'Physio', 'User', true, false, true, 'FG86DG4Q3J12', false, true, false),
+(5, 'physioext@modobio.com', 'PhysioExt', 'User', true, false, false, 'TQ9N2M9SMQ12', false, true, true),
+(6, 'nutri@modobio.com', 'Nutri', 'User', true, false, true, 'RW0QZK442F12', false, true, false),
+(7, 'nutriext@modobio.com', 'NutriExt', 'User', true, false, false, 'FPQLX97G6K12', false, true, true),
+(8, 'train@modobio.com', 'Train', 'User', true, false, true, 'QE6RS1875312', false, true, false),
+(9, 'trainext@modobio.com', 'TrainExt', 'User', true, false, false, 'FL6SB69RQW12', false, true, true),
+(10, 'pro@modobio.com', 'Pro', 'User', true, false, true, 'EXK7322KFN12', false, true, true),
+(11, 'proext@modobio.com', 'ProExt', 'User', true, false, false, 'FXF0450R7X12', false, true, false),
+(12, 'staff@modobio.com', 'Staff', 'User', true, false, true, 'BHBCBZBW4K12', false, true, false),
+(13, 'cservice@modobio.com', 'ClientServices', 'User', true, false, true, 'BX4NW9897R12', false, true, true),
+(14, 'name@modobio.com', 'FirstName', 'LastName', true, false, true, 'XFB1SN3GM512', false, true, true),
+(15, 'david.kubos@sde.cz', 'David', 'Kubos', true, false, true, 'EJP05FH60512', false, true, true),
+(16, 'tomas.blazek@sde.cz', 'Tomas', 'Blazek', true, false, true, 'MT5M08SCL612', false, true, true),
+(17, 'aneta.opletalova@sde.cz', 'Aneta', 'Opletalova', true, false, true, 'OF0K861W7J12', false, true, false),
+(18, 'jakub.freywald@sde.cz', 'Jakub', 'Freywald', true, false, true, 'UJPH98Q8KP12', false, true, true),
+(19, 'matej.kubinec@sde.cz', 'Matej', 'Kubinec', true, false, true, 'JAF04LYTZN12', false, true, true),
+(20, 'sebastian.brostl@sde.cz', 'Sebastian', 'Brostl', true, false, true, 'VLCZG2Z2ZL12', false, true, true),
+(21, 'lukas.krajci@sde.cz', 'Lukas', 'Krajci', true, false, true, 'VS071YRSQ912', false, true, true),
+(22, 'client@modobio.com', 'Test', 'Client', false, true, false, 'TC12JASDFF12', false, true, false),
+(30, 'alejandro.lorenzo+wheel_clinician_md1@atlanticventurepartners.tech', 'Modo Bio', 'MD1', true, false, false, 'MD52MAVDIF41', false, true, false),
+(31, 'alejandro.lorenzo+wheel_clinician_md2@atlanticventurepartners.tech', 'Modo Bio', 'MD2', true, false, false, 'MD43LBUEHG32', false, true, true),
+(32, 'alejandro.lorenzo+wheel_clinician_np1@atlanticventurepartners.tech', 'Modo Bio', 'NP1', true, false, false, 'NP34KCTFGH23', false, true, false),
+(33, 'alejandro.lorenzo+wheel_clinician_np2@atlanticventurepartners.tech', 'Modo Bio', 'NP2', true, false, false, 'NP25JDSGFI14', false, true, true);
+
+ALTER SEQUENCE "User_user_id_seq"
+		RESTART WITH 34;
+
 
 INSERT INTO "UserLogin" ("user_id", "password") VALUES 
 (1, 'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1'), 
@@ -44,7 +52,11 @@ INSERT INTO "UserLogin" ("user_id", "password") VALUES
 (19, 'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1'), 
 (20, 'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1'), 
 (21, 'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1'),
-(22, 'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1');
+(22, 'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1'),
+(30, 'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1'), 
+(31, 'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1'), 
+(32, 'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1'),
+(33, 'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1');
 
 INSERT INTO "ClientInfo" ("user_id", "membersince") VALUES
 (22, '2021-01-01');
@@ -76,7 +88,11 @@ INSERT INTO "StaffProfile" ("user_id", "membersince") VALUES
 (18, '2021-01-01'),
 (19, '2021-01-01'),
 (20, '2021-01-01'),
-(21, '2021-01-01');
+(21, '2021-01-01'),
+(30, '2021-01-01'),
+(31, '2021-01-01'),
+(32, '2021-01-01'),
+(33, '2021-01-01');
 
 INSERT INTO "StaffRoles" ("user_id", "role", "granter_id") VALUES 
 (1, 'system_admin', 14), 
@@ -153,4 +169,14 @@ INSERT INTO "StaffRoles" ("user_id", "role", "granter_id") VALUES
 (21, 'medical_doctor', 14), 
 (21, 'physical_therapist', 14), 
 (21, 'nutritionist', 14), 
-(21, 'trainer', 14);
+(30, 'medical_doctor', 14),
+(31, 'medical_doctor', 14), 
+(32, 'nurse_practitioner', 14), 
+(33, 'nurse_practitioner', 14); 
+
+
+insert into "TelehealthStaffSettings" ("user_id", "auto_confirm", "timezone") Values
+(30, true, 'UTC'),
+(31, true, 'UTC'),
+(32, true, 'UTC'),
+(33, true, 'UTC');

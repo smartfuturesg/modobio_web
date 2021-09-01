@@ -64,12 +64,14 @@ def test_upcoming_bookings_scan(test_client):
             data=dumps(queue_data),
             content_type='application/json')
 
+        assert response.status_code == 201
+        
         response = test_client.post(
             f'/telehealth/bookings/?client_user_id={test_client.client_id}&staff_user_id={test_client.staff_id}',
             headers=test_client.client_auth_header,
             data=dumps(booking),
             content_type='application/json')
-
+ 
         assert response.status_code == 201
 
     ###

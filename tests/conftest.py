@@ -72,6 +72,7 @@ def setup_db(app):
     db.session.execute(text(' '.join(insert)))
     db.session.commit()
 
+
     # Add elastic search index
     search.build_ES_indices()
 
