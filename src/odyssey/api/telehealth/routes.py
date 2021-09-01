@@ -51,6 +51,7 @@ from odyssey.integrations.wheel import Wheel
 from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import TELEHEALTH_BOOKING_LEAD_TIME_HRS, TWILIO_ACCESS_KEY_TTL, DAY_OF_WEEK, ALLOWED_AUDIO_TYPES, ALLOWED_IMAGE_TYPES
 from odyssey.utils.errors import GenericNotFound, InputError, UnauthorizedUser, ContentNotFound, IllegalSetting
+from odyssey.utils.message import PushNotification, PushNotificationType
 from odyssey.utils.misc import (
     FileHandling,
     check_client_existence, 
@@ -76,20 +77,15 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
     Call start
     """
     @token_auth.login_required
-    @responds(schema=TelehealthBookingMeetingRoomsTokensSchema,api=ns,status_code=200)
-    def get(self,booking_id):
+    @responds(schema=TelehealthBookingMeetingRoomsTokensSchema, api=ns, status_code=200)
+    def get(self, booking_id):
         # Get the current user
         current_user, _ = token_auth.current_user()
         
-        booking,chatroom = db.session.execute(
-            select(TelehealthBookings,TelehealthChatRooms).
-            join(TelehealthChatRooms,TelehealthBookings.idx==TelehealthChatRooms.booking_id).
-            where(
-                TelehealthBookings.idx == booking_id,
-                )).one_or_none()
+        booking = TelehealthBookings.query.get(booking_id)
 
         if not booking:
-            raise InputError(status_code=405,message='Meeting does not exist yet.')
+            raise InputError(status_code=405, message='Meeting does not exist yet.')
 
         # make sure the requester is one of the participants
         if not any(current_user.user_id == uid for uid in [booking.client_user_id, booking.staff_user_id]):
@@ -104,9 +100,11 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
                 )).scalar()
         
         if not meeting_room:
-            meeting_room = TelehealthMeetingRooms(booking_id=booking_id,staff_user_id=booking.staff_user_id, client_user_id=booking.client_user_id)
+            meeting_room = TelehealthMeetingRooms(
+                booking_id=booking_id,
+                staff_user_id=booking.staff_user_id,
+                client_user_id=booking.client_user_id)
             meeting_room.room_name = generate_meeting_room_name()
-        
 
         # Create access token for users to access the Twilio API
         # Add grant for video room access using meeting room name just created
@@ -124,19 +122,44 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
         db.session.add(meeting_room)
 
         # Create TelehealthBookingStatus object and update booking status to 'In Progress'
-        # TODO only allow practitioner to start the call and send a voip notification to client for joining the call
         booking.status = 'In Progress'
         status_history = TelehealthBookingStatus(
-            booking_id = booking_id,
-            reporter_id = current_user.user_id,
-            reporter_role = 'Practitioner' if current_user.user_id == booking.staff_user_id else 'Client',
-            status = 'In Progress'
+            booking_id=booking_id,
+            reporter_id=current_user.user_id,
+            reporter_role='Practitioner' if current_user.user_id == booking.staff_user_id else 'Client',
+            status='In Progress'
         )
         db.session.add(status_history)
-
         db.session.commit() 
+
+        # Send push notification to user. Do this as late as possible, have everything else ready.
+        pn = PushNotification()
+
+        # TODO: at the moment only Apple is supported. When Android is needed,
+        # update PushNotification class and templates, then change here.
+        msg = pn.apple_voip_tmpl
+        msg['data']['booking_id'] = booking_id
+        msg['data']['booking_description'] = 'Modo Bio telehealth appointment'
+        msg['data']['staff_id'] = booking.staff_user_id
+        msg['data']['staff_first_name'] = booking.practitioner.firstname
+        msg['data']['staff_middle_name'] = booking.practitioner.middlename
+        msg['data']['staff_last_name'] = booking.practitioner.lastname
+
+        urls = {}
+        fh = FileHandling()
+        for pic in booking.practitioner.staff_profile.profile_pictures:
+            if pic.original:
+                continue
+
+            url = fh.get_presigned_url(pic.image_path)
+            urls[pic.height] = url
+
+        msg['data']['staff_profile_picture'] = urls
+
+        pn.send(booking.client_user_id, PushNotificationType.voip, msg)
+
         return {'twilio_token': token,
-                'conversation_sid': chatroom.conversation_sid}
+                'conversation_sid': booking.chat_room.conversation_sid}
 
 @ns.route('/client/time-select/<int:user_id>/')
 @ns.doc(params={'user_id': 'Client user ID'})
