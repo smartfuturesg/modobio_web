@@ -8,7 +8,6 @@ def test_get_default_health_metrics(test_client):
         f'/client/default-health-metrics/{test_client.client_id}/',
         headers=test_client.client_auth_header,
         content_type='application/json')
-
     assert response.status_code == 200
     assert response.json['sex'] == 'm'
     assert response.json['age'] == 30
@@ -39,6 +38,7 @@ def test_get_default_health_metrics(test_client):
     token = verification.token
 
     response = test_client.get(f'/user/email-verification/token/{token}/')
+    
     assert response.status_code == 200
 
     valid_credentials = base64.b64encode(f'{new_client["email"]}:123'.encode('utf-8')).decode('utf-8')
