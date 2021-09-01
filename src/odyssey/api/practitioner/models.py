@@ -95,9 +95,17 @@ class PractitionerOrganizationAffiliation(BaseModelWithIdx, UserIdFkeyMixin):
     :type: int, foreign key to :attr:`LookupOrganizations.org_id <odyssey.models.lookup.LookupOrganizations.org_id>`
     """
 
+    affiliate_user_id = db.Column(db.String, nullable=True)
+    """
+    User identifier assigned by the affiliate organization. 
+    
+    :type: str
+    """
+    
     org_info = db.relationship('LookupOrganizations', uselist=False, back_populates='practitioners_assigned')
     """
     Many to one relationship with Lookup Organizations table
     
     :type: :class:`LookupOrganizations` instance 
     """
+

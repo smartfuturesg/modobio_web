@@ -80,7 +80,6 @@ class TelehealthBookingsSchema(ma.SQLAlchemyAutoSchema):
         'idx', 
         'booking_window_id_start_time_utc',
         'booking_window_id_end_time_utc', 
-        'target_date_utc',
         'created_at',
         'updated_at')
         include_fk = True
@@ -93,6 +92,7 @@ class TelehealthBookingsSchema(ma.SQLAlchemyAutoSchema):
     practitioner = fields.Nested(TelehealthUserSchema, dump_only=True)
     payment_method_id = fields.Integer(required=False)
     client_location_id = fields.Integer(required=False)
+    start_time_utc = fields.Time()
 
     @post_load
     def make_object(self, data, **kwargs):
