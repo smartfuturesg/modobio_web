@@ -228,12 +228,11 @@ def test_full_system_with_settings(test_client):
 
     assert response.status_code == 200
     assert response.json['appointment_times'][0]['start_time'] == '00:00:00'
-    assert response.json['appointment_times'][0]['booking_window_id_start_time'] == 85
+    assert response.json['appointment_times'][0]['booking_window_id_start_time'] == 1
 
     assert response.json['appointment_times'][-1]['start_time'] == '04:30:00'
-    assert response.json['appointment_times'][-1]['booking_window_id_start_time'] == 139
+    assert response.json['appointment_times'][-1]['booking_window_id_start_time'] == 55
     assert response.json['total_options'] == 19
-
     ##
     # 4. Client selects an appointment time
     ##
@@ -257,19 +256,16 @@ def test_full_system_with_settings(test_client):
     booking_id = response.json['bookings'][0]['booking_id']
 
     ##
-    # 4. Pull up bookings from the client and staff perspectives
+    # 5. Pull up bookings from the client and staff perspectives
     ##
     response = test_client.get(
         f'/telehealth/bookings/?client_user_id={test_client.client_id}&staff_user_id={test_client.staff_id}',
         headers=test_client.staff_auth_header,
         content_type='application/json')
-
-    current_booking = (booking for booking in response.json['bookings'] if booking.booking_id == booking_id)
     for booking in response.json['bookings']:
         if booking['booking_id'] == booking_id:
             current_booking = booking
             break
-
     # booking time as seen by the staff
     assert current_booking['practitioner']['start_time_localized'] == '11:30:00'
     assert current_booking['practitioner']['end_time_localized'] == '11:50:00'
