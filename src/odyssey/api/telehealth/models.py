@@ -52,7 +52,7 @@ class TelehealthBookings(BaseModelWithIdx):
 
     target_date = db.Column(db.Date, nullable=False)
     """
-    target date is the date of the appointment
+    target date is the date of the appointment in client's timezone
 
     :type: datetime
     """

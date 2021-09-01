@@ -198,5 +198,10 @@ INSTAMED_API_KEY = ''
 INSTAMED_API_SECRET = ''
 """ InstaMed API access key secret. """
 
+# Wheel settings
+WHEEL_API_TOKEN = ''
+WHEEL_MD_CONSULT_RATE = '7161c1e9-69a6-4430-a7ef-04593300f48a'
+WHEEL_NP_CONSULT_RATE = '9c36e5c6-ed91-4546-a847-c649c81db265'
+
 # mongo db
 MONGO_URI = ''

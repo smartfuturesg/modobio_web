@@ -8,7 +8,7 @@ def test_post_practitioner_affiliations(test_client):
         headers=test_client.staff_auth_header,
         data=dumps(pracitioner_affiliation_data['organization_1']),
         content_type='application/json')
-
+        
     assert response.status_code == 201
 
     # post affiliation to organization with invalid idx

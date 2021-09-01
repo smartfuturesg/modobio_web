@@ -18,7 +18,8 @@ class PractitionerOrganizationAffiliationSchema(ma.SQLAlchemyAutoSchema):
 
     org_info = fields.Nested(LookupOrganizationsSchema(many=False), missing=[], dump_only=True)
     organization_idx = fields.Integer(required=True)
-
+    affiliate_user_id = fields.String()
+    
     @post_load
     def make_object(self, data, **kwargs):
         return PractitionerOrganizationAffiliation(**data)
