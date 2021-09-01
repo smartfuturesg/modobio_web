@@ -890,6 +890,9 @@ CREDENTIAL_TYPE = {
 
 DEV_EMAIL_DOMAINS = ('3pillarglobal.com', 'modobio.com', 'atventurepartners.com', 'atlanticventurepartners.tech')
 
+# bookings must be made this many hours in advance
+TELEHEALTH_BOOKING_LEAD_TIME_HRS = 8
+
 INSTAMED_OUTLET = {
                 "MerchantID": '894805',
                 "StoreID": '0001',

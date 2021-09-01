@@ -1,5 +1,5 @@
 import os, boto3, secrets, pathlib
-from datetime import datetime, timedelta
+from datetime import datetime, time, timedelta
 from dateutil import tz
 import random
 import requests
@@ -9,6 +9,7 @@ from flask import request, current_app, g
 from flask_accepts import accepts, responds
 from flask_restx import Resource, Namespace
 from sqlalchemy import select
+from sqlalchemy.sql.expression import and_, or_
 from twilio.jwt.access_token import AccessToken
 from twilio.jwt.access_token.grants import VideoGrant, ChatGrant
 
@@ -16,9 +17,8 @@ from odyssey import db
 from odyssey.api.lookup.models import (
     LookupBookingTimeIncrements
 )
-from odyssey.api.staff.models import StaffOperationalTerritories, StaffRoles, StaffCalendarEvents
-from odyssey.api.user.models import User, UserProfilePictures
-
+from odyssey.api.staff.models import StaffOperationalTerritories, StaffCalendarEvents
+from odyssey.api.user.models import User
 from odyssey.api.telehealth.models import (
     TelehealthBookingStatus,
     TelehealthBookings,
@@ -30,7 +30,6 @@ from odyssey.api.telehealth.models import (
     TelehealthStaffSettings
 )
 from odyssey.api.telehealth.schemas import (
-    TelehealthBookingStatusSchema,
     TelehealthBookingsSchema,
     TelehealthBookingsOutputSchema,
     TelehealthBookingMeetingRoomsTokensSchema,
@@ -54,8 +53,9 @@ from odyssey.api.lookup.models import (
 )
 from odyssey.api.payment.models import PaymentMethods, PaymentHistory, PaymentFailedTransactions
 from odyssey.utils.auth import token_auth
-from odyssey.utils.constants import TWILIO_ACCESS_KEY_TTL, DAY_OF_WEEK, ALLOWED_AUDIO_TYPES, ALLOWED_IMAGE_TYPES, INSTAMED_OUTLET
 from odyssey.utils.errors import GenericNotFound, InputError, UnauthorizedUser, ContentNotFound, IllegalSetting, GenericThirdPartyError
+from odyssey.integrations.wheel import Wheel
+from odyssey.utils.constants import TELEHEALTH_BOOKING_LEAD_TIME_HRS, TWILIO_ACCESS_KEY_TTL, DAY_OF_WEEK, ALLOWED_AUDIO_TYPES, ALLOWED_IMAGE_TYPES, INSTAMED_OUTLET
 from odyssey.utils.misc import (
     FileHandling,
     check_client_existence, 
@@ -108,7 +108,7 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
             where(
                 TelehealthMeetingRooms.booking_id == booking_id,
                 )).scalar()
-
+        
         if not meeting_room:
             meeting_room = TelehealthMeetingRooms(booking_id=booking_id,staff_user_id=booking.staff_user_id, client_user_id=booking.client_user_id)
             meeting_room.room_name = generate_meeting_room_name()
@@ -121,7 +121,7 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
         # meeting type (group by default), participant limit , callbacks
         
         token = create_twilio_access_token(current_user.modobio_id, meeting_room_name=meeting_room.room_name)
-
+        
         if g.user_type == 'staff':
             meeting_room.staff_access_token = token
 
@@ -175,7 +175,7 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
                 db.session.add(failed)
         elif g.user_type == 'client':
             meeting_room.client_access_token = token
-
+        
         db.session.add(meeting_room)
 
         # Create TelehealthBookingStatus object and update booking status to 'In Progress'
@@ -195,16 +195,17 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
 
 @ns.route('/client/time-select/<int:user_id>/')
 @ns.doc(params={'user_id': 'Client user ID'})
-class TelehealthClientTimeSelectApi(Resource):                               
-    
+class TelehealthClientTimeSelectApi(Resource):   
+
     @token_auth.login_required
     @responds(schema=TelehealthTimeSelectOutputSchema,api=ns, status_code=200)
-    def get(self,user_id):
+    def get(self, user_id):
         """
-        Returns the list of available times a staff member is available
-        """
-        # Check if the client exists
+        Checks the booking requirements stored in the client queue
 
+        Responds with available booking times localized to the client's timezone
+        """
+        
         #### TESTING NOTES:
         ####   test1 - call with non-existent user_id
         ####   test2 - call with deleted user (user_id exists, but user shouldn't have access to anything)
@@ -227,43 +228,101 @@ class TelehealthClientTimeSelectApi(Resource):
         if not client_in_queue:
             raise InputError(status_code=405,message='Client is not in the queue yet.')
         
-        duration = client_in_queue.duration
+        time_inc = LookupBookingTimeIncrements.query.all()
+        
+        time_idx_dict = {item.start_time.isoformat() : item.idx for item in time_inc} # {datetime.time: booking_availability_id}
+        ##
+        #  Wheel availability request
+        ##
+        wheel = Wheel()
 
+        duration = client_in_queue.duration
         days_from_target = 0
         no_staff_available_count = 0
         times = []
 
-        # convert client's target date to day_of_week
-        # 0 is Monday, 6 is Sunday
-        while len(times)<10:
-            target_date = client_in_queue.target_date.date() + timedelta(days=days_from_target)
-            weekday_id = target_date.weekday() 
-            weekday_str = DAY_OF_WEEK[weekday_id]
+        time_now_utc = datetime.now(tz.UTC)
+        time_now_client_localized = time_now_utc.astimezone(tz.gettz(client_in_queue.timezone))
 
+        # window of possible appointment times spans the full target date
+        # localize the start and end times to the client's timezone, 
+        # NOTE: wheel will respond with availabilities in UTC but will respect the TZ of requested window 
+        target_start_datetime_client_local =  datetime.combine(client_in_queue.target_date, time(0, tzinfo=tz.gettz(client_in_queue.timezone)))
+        
+        # if request was for a time in the past, use the present time + booking lead time window
+        if target_start_datetime_client_local < time_now_client_localized:
+            target_start_datetime_client_local = time_now_client_localized + timedelta(hours=TELEHEALTH_BOOKING_LEAD_TIME_HRS+1)
+            target_start_datetime_client_local = target_start_datetime_client_local.replace(minute=0, second=0, microsecond=0)
+
+        while len(times) < 10:
+            # convert client's target date to day_of_week
+            # 0 is Monday, 6 is Sunday
+
+            # target booking window localized to the client's tzone
+            target_start_datetime = target_start_datetime_client_local + timedelta(days_from_target)
+            target_end_datetime = target_start_datetime + timedelta(hours=24)
+            
+            # localize target time range to utc
+            target_start_datetime_utc = target_start_datetime.astimezone(tz.UTC)
+            target_end_datetime_utc = target_end_datetime.astimezone(tz.UTC)
+
+            # taret time indexes in UTC
+            target_start_idx_utc = time_idx_dict[target_start_datetime_utc.strftime('%H:%M:%S')]
+            target_end_idx_utc = time_idx_dict[target_end_datetime_utc.strftime('%H:%M:%S')]
+            
+            target_start_weekday_utc = DAY_OF_WEEK[target_start_datetime_utc.weekday()]
+            target_end_weekday_utc = DAY_OF_WEEK[target_end_datetime_utc.weekday()]
+
+            # Query wheel for available practitioners on target date in client's tzone
+            # TODO: when wheel is ready, add sex to this availability check
+            wheel_practitioner_availabilities = wheel.available_timeslots(target_time_range = (target_start_datetime_utc, target_end_datetime_utc))
+                    
+            available = wheel_practitioner_availabilities  # availability dictionary {date: {user_id : [booking time idxs]}
+            staff_availability_timezone =  {_user_id: 'UTC' for _user_id in wheel_practitioner_availabilities} # current tz info for each staff we bring up for this target date
+
+            # gender preference for availability query below
             if client_in_queue.medical_gender == 'm':
                 genderFlag = True
             elif client_in_queue.medical_gender == 'f':
                 genderFlag = False
 
+            # query staff availabilites filtering by day of week, role, operation location, and gender
+            # staff availbilities are stored in UTC time which may be different from the client's tz
+            # to handle this case, we make this query knowing that availabilities may span two days 
             if client_in_queue.medical_gender == 'np':
                 staff_availability = db.session.query(TelehealthStaffAvailability)\
                     .join(StaffOperationalTerritories, StaffOperationalTerritories.user_id == TelehealthStaffAvailability.user_id)\
-                        .filter(TelehealthStaffAvailability.day_of_week==weekday_str, 
+                        .filter(
+                            or_(
+                                and_(
+                                    TelehealthStaffAvailability.day_of_week == target_start_weekday_utc,
+                                    TelehealthStaffAvailability.booking_window_id >= target_start_idx_utc),
+                                and_(
+                                    TelehealthStaffAvailability.day_of_week == target_end_weekday_utc,
+                                    TelehealthStaffAvailability.booking_window_id < target_end_idx_utc))                                
+                        ).filter(              
                             StaffOperationalTerritories.role.has(role=client_in_queue.profession_type), 
-                            StaffOperationalTerritories.operational_territory_id == client_in_queue.location_id).all()
-
+                            StaffOperationalTerritories.operational_territory_id == client_in_queue.location_id
+                        ).all()
             else:
                 staff_availability = db.session.query(TelehealthStaffAvailability)\
                     .join(StaffOperationalTerritories, StaffOperationalTerritories.user_id == TelehealthStaffAvailability.user_id)\
                         .join(User, User.user_id==TelehealthStaffAvailability.user_id)\
-                            .filter(TelehealthStaffAvailability.day_of_week==weekday_str, 
+                        .filter(
+                            or_(
+                                and_(
+                                    TelehealthStaffAvailability.day_of_week == target_start_weekday_utc,
+                                    TelehealthStaffAvailability.booking_window_id >= target_start_idx_utc),
+                                and_(
+                                    TelehealthStaffAvailability.day_of_week == target_end_weekday_utc,
+                                    TelehealthStaffAvailability.booking_window_id < target_end_idx_utc))
+                        ).filter( 
                                 StaffOperationalTerritories.role.has(role=client_in_queue.profession_type), 
                                 StaffOperationalTerritories.operational_territory_id == client_in_queue.location_id,
-                                User.biological_sex_male==genderFlag).all()
-            #### TESTING NOTES:
-            ####   test1 - test with weekday_str when we have 0 availabilities (check if staff_availability is empty)
-
-            if not staff_availability:
+                                User.biological_sex_male==genderFlag
+                        ).all()
+            
+            if not staff_availability and not available:
                 no_staff_available_count+=1
                 days_from_target+=1
                 if no_staff_available_count >= 7:
@@ -274,113 +333,122 @@ class TelehealthClientTimeSelectApi(Resource):
             else:
                 # reset the counter if there is a staff member
                 no_staff_available_count = 0
-
+            
             # Duration is taken from the client queue.
             # we divide it by 5 because our look up tables are in increments of 5 mintues
             # so, this represents the number of time blocks we will need to look at.
             # The subtract 1 is due to the indices having start_time and end_times, so 100 - 103 is 100.start_time to 103.end_time which is
             # the 20 minute duration
             idx_delta = int(duration/5) - 1
-
-            available = {}
-            staff_availability_timezone = {} # current tz info for each staff we bring up for this target date
-            staff_user_id_arr = []
-
-            # Loop through all staff that have indicated they are available on that day of the week
-            #
-            # The expected output is the first and last index of their time blocks, AKA:
-            # availability[staff_user_id] = [[100, 120], [145, 160]]
-            #
+           
+            ###
+            # Take all staff availabilities and organize them into a dictionary:
+            #       { target_date_utc : {staff_user_id : [booking_increment_ids]} }
+            ###
             for availability in staff_availability:
+                availability_date = (target_start_datetime_utc.date() if availability.day_of_week == target_start_weekday_utc else target_end_datetime_utc.date())
                 staff_user_id = availability.user_id
-                if staff_user_id not in available:
-                    available[staff_user_id] = []
-                    staff_user_id_arr.append(staff_user_id)
+                if availability_date not in available:
+                    available[availability_date] = {}
+                if staff_user_id not in available[availability_date]:
+                    available[availability_date][staff_user_id] = []
                 # NOTE booking_window_id is the actual booking_window_id (starting at 1 NOT 0)
-                available[staff_user_id].append(availability.booking_window_id)
+                available[availability_date][staff_user_id].append(availability.booking_window_id)
 
                 if staff_user_id not in staff_availability_timezone:
                     staff_availability_timezone[staff_user_id] = availability.settings.timezone
+            ###
+            # Bring up current bookings for the target date.
+            # Remove booking time blocks from the staff_availability dictionary so we know the times that the staff is free
+            # If the client has a booking on the same day, that time block will not be available for another booking. 
+            ###
+            # search bookings between client's availability window
+            bookings = db.session.execute(
+                select(TelehealthBookings
+                ).where(or_(
+                    TelehealthBookings.target_date_utc == target_start_datetime_utc.date(),
+                    TelehealthBookings.target_date_utc == target_end_datetime_utc.date())
+                ).where(TelehealthBookings.status.in_(('Accepted', 'Pending')))
+            ).scalars().all()
 
-            # Now, grab all of the bookings for that client and all staff on the given target date
-            # This is necessary to subtract from the staff_availability above.
-            # If a client or staff cancels, then that time slot is now available
-            bookings = TelehealthBookings.query.filter(TelehealthBookings.target_date==target_date,\
-                                                    TelehealthBookings.status!='Cancelled').all()
             # Now, subtract booking times from staff availability and generate the actual times a staff member is free
-            removedNum = {}
-            clientBookingID = []
+            removedNum = {target_start_datetime_utc.date():{}} # {date: {user_id : [booking_ids blocked]}}
+            clientBookingID = {target_start_datetime_utc.date(): []}
+            if target_start_datetime_utc.date() != target_end_datetime_utc.date():
+                removedNum[target_end_datetime_utc.date()] = {} 
+                clientBookingID[target_end_datetime_utc.date()]= []
 
             for booking in bookings:
                 staff_id = booking.staff_user_id
                 client_id = booking.client_user_id
-                if staff_id in available:
-                    if staff_id not in removedNum:
-                        removedNum[staff_id] = []
-                    for num in range(booking.booking_window_id_start_time,booking.booking_window_id_end_time+1):
-                        if num in available[staff_id]:
-                            available[staff_id].remove(num)
-                            removedNum[staff_id].append(num)
+                if staff_id in available[booking.target_date_utc]:
+                    if staff_id not in removedNum[booking.target_date_utc]:
+                        removedNum[booking.target_date_utc][staff_id] = []
+                    # loop though time increments in booking and remove them from availability
+                    # NOTE: booking_window_id_start/end_time are in the staff member's TZ
+                    for num in range(booking.booking_window_id_start_time_utc,booking.booking_window_id_end_time_utc+1):
+                        if num in available[booking.target_date_utc][staff_id]:
+                            available[booking.target_date_utc][staff_id].remove(num)
+                            removedNum[booking.target_date_utc][staff_id].append(num)
+                        # store client booked times so we dont show these times to the client
                         if client_id == user_id:
-                            clientBookingID.append(num)         
+                            clientBookingID[booking.target_date_utc].append(num)         
                 else:
                     # This staff_user_id should not have availability on this day
                     continue
+            # if client is already booked for the target date, remove this time block from all availabilities.  
+            for booking_date, booking_timeslots in clientBookingID.items():
+                for staff_id in available.get(booking_date,[]):
+                    if staff_id not in removedNum[booking_date]:
+                        removedNum[booking_date][staff_id] = []
+                    available[booking_date][staff_id] = list(set(available[booking_date][staff_id]) - set(booking_timeslots))
+                    available[booking_date][staff_id].sort()
+                    removedNum[booking_date][staff_id].extend(booking_timeslots)            
 
-            # This for loop is necessary because if Client 1 already has an appointment:
-            # 3pm - 4pm, then NO other staff should offer them a time 3pm - 4pm
-            for staff_id in available:
-                if staff_id not in removedNum:
-                    removedNum[staff_id] = []
-                available[staff_id] = list(set(available[staff_id]) - set(clientBookingID))
-                available[staff_id].sort()
-                removedNum[staff_id]+=clientBookingID            
-                # for num in clientBookingID:
-                #     if num in available[staff_id]:
-                #         available[staff_id].remove(num)
-                #         removedNum[staff_id].append(num)
+            ###
+            # Take 5 minute time blocks and convert them into appointment timeslots with a 20-minute duration
+            ###
 
-            # convert time IDs to actual times for clients to select
-            time_inc = LookupBookingTimeIncrements.query.all()
             # NOTE: It might be a good idea to shuffle user_id_arr and only select up to 10 (?) staff members 
             # to reduce the time complexity
             # user_id_arr = [1,2,3,4,5]
             # user_id_arr.random() -> [3,5,2,1,4]
             # user_id_arr[0:3]
-            timeArr = {}
-            for staff_id in staff_user_id_arr:
-                if staff_id not in removedNum:
-                    removedNum[staff_id] = []            
-                for idx,time_id in enumerate(available[staff_id]):                 
-                    if idx + 1 < len(available[staff_id]):
-                        if available[staff_id][idx+1] - time_id < idx_delta and time_id + idx_delta < available[staff_id][-1]:
-                            # since we are accessing an array, we need to -1 because recall time_id is the ACTUAL time increment idx
-                            # and arrays are 0 indexed in python
-                            if time_inc[time_id-1].start_time.minute%15 == 0:                        
-                                # client's tz: client_in_queue.timezone
-                                # staff's timezone: staff_availability_timezone[staff_user_id]
-                                start_time_staff_localized = datetime.combine(
-                                    target_date, 
-                                    time_inc[time_id-1].start_time, 
-                                    tzinfo=tz.gettz(staff_availability_timezone[staff_id]))
-                                
-                                start_time_client_localized = start_time_staff_localized.astimezone(tz.gettz(client_in_queue.timezone))                                   
-                                if start_time_client_localized not in timeArr:
-                                    timeArr[start_time_client_localized] = []
-                                if time_id+idx_delta in removedNum[staff_id]:
-                                    continue                                            
-                                else:                                 
-                                    # if when localizing to client's time zone, the date changes to the day before the original 
-                                    # target date, do not show this availability to the client 
-                                    if start_time_client_localized.date() < client_in_queue.target_date.date():
-                                        continue    
-                                    timeArr[start_time_client_localized].append({"staff_id": staff_id,"idx":time_inc[time_id-1].idx})                                                            
-                        else:
-                            continue
-                    else:
-                        continue 
+            timeArr = {} # client localized booking times, should only be for the target date the client specified 
+            for target_date, staff_availability in available.items():
+                for staff_id in staff_availability:
+                    if staff_id not in removedNum[target_date]:
+                        removedNum[target_date][staff_id] = []            
+                    for idx,time_id in enumerate(available[target_date][staff_id]):                 
+                        if idx + 1 < len(available[target_date][staff_id]):
+                            if available[target_date][staff_id][idx+1] - time_id < idx_delta and time_id + idx_delta < available[target_date][staff_id][-1]:
+                                # since we are accessing an array, we need to -1 because recall time_id is the ACTUAL time increment idx
+                                # and arrays are 0 indexed in python
+                                if time_inc[time_id-1].start_time.minute%15 == 0: 
 
-            
+                                    # client's tz: client_in_queue.timezone
+                                    # staff's timezone: staff_availability_timezone[staff_user_id]
+                                    start_time_utc = datetime.combine(
+                                        target_date, 
+                                        time_inc[time_id-1].start_time, 
+                                        tzinfo=tz.UTC)
+                                    
+                                    start_time_client_localized = start_time_utc.astimezone(tz.gettz(client_in_queue.timezone))         
+                                    time_idx_dict[start_time_client_localized.strftime('%H:%M:%S')]
+                                    if start_time_client_localized not in timeArr:
+                                        timeArr[start_time_client_localized] = []
+                                    
+                                    if time_id+idx_delta in removedNum[target_date][staff_id]:
+                                        continue                                            
+                                    else:                                 
+                                        # if when localizing to client's time zone, the date changes to the day before the original 
+                                        # target date, do not show this availability to the client 
+                                        timeArr[start_time_client_localized].append({"staff_id": staff_id,"idx":time_idx_dict[start_time_client_localized.strftime('%H:%M:%S')]})                                                            
+                            else:
+                                continue
+                        else:
+                            continue 
+
             ##
             # Loop through timeArr:
             # 1. select one staff member per time block 
@@ -390,24 +458,23 @@ class TelehealthClientTimeSelectApi(Resource):
             # BECAUSE we are accessing the array where index starts at 0
             ##
             booking_duration_delta = timedelta(minutes=5*(idx_delta+1))
-            for time in timeArr:
-                
-                if not timeArr[time]:
+            for _time in timeArr:
+                if not timeArr[_time]:
                     continue
-                if len(timeArr[time]) > 1:
-                    random.shuffle(timeArr[time])
+                if len(timeArr[_time]) > 1:
+                    random.shuffle(timeArr[_time])
                 
-                end_time_client_localized = time+booking_duration_delta
+                end_time_client_localized = _time+booking_duration_delta
                 
                 # respond with display start and end times for the client
                 # and booking window ids which appear as they are in the 
                 # TelehealthStaffAvailability table (not localized to the client)
-                times.append({'staff_user_id': timeArr[time][0]['staff_id'],
-                            'start_time': time.time(), 
+                times.append({'staff_user_id': timeArr[_time][0]['staff_id'],
+                            'start_time': _time.time(), 
                             'end_time': end_time_client_localized.time(),
-                            'booking_window_id_start_time': timeArr[time][0]['idx'],
-                            'booking_window_id_end_time': timeArr[time][0]['idx']+idx_delta,
-                            'target_date': target_date})             
+                            'booking_window_id_start_time': timeArr[_time][0]['idx'],
+                            'booking_window_id_end_time': timeArr[_time][0]['idx']+idx_delta,
+                            'target_date': _time.date()})             
 
             # increment days_from_target if there are less than 10 times available
             days_from_target+=1
@@ -516,28 +583,31 @@ class TelehealthBookingsApi(BaseResource):
             client = {**booking.client.__dict__}
             practitioner = {**booking.practitioner.__dict__}
             
+
             # bookings stored in staff timezone
             practitioner['timezone'] = booking.staff_timezone
-            practitioner['start_time_localized'] = time_inc[booking.booking_window_id_start_time-1].start_time
-            practitioner['end_time_localized'] = time_inc[booking.booking_window_id_end_time-1].end_time
             #return the practioner profile_picture width=128 if the logged in user is the client involved or client services
             if current_user.user_id == booking.client_user_id or ('client_services' in [role.role for role in current_user.roles]):
                 image_paths = {pic.width: pic.image_path for pic in booking.practitioner.staff_profile.profile_pictures}
                 practitioner['profile_picture'] = (fh.get_presigned_url(image_paths[128]) if image_paths else None)
             
-            start_time_staff_localized = datetime.combine(
-                    booking.target_date, 
-                    practitioner['start_time_localized'],
-                    tzinfo=tz.gettz(booking.staff_timezone))
+
+            start_time_utc = datetime.combine(
+                    booking.target_date_utc, 
+                    time_inc[booking.booking_window_id_start_time_utc-1].start_time,
+                    tzinfo=tz.UTC)
                 
-            end_time_staff_localized = datetime.combine(
-                booking.target_date, 
-                practitioner['end_time_localized'],
-                tzinfo=tz.gettz(booking.staff_timezone))
+            end_time_utc = datetime.combine(
+                booking.target_date_utc, 
+                time_inc[booking.booking_window_id_end_time_utc-1].end_time,
+                tzinfo=tz.UTC)
+            
+            practitioner['start_time_localized'] = start_time_utc.astimezone(tz.gettz(booking.staff_timezone)).time()
+            practitioner['end_time_localized'] = end_time_utc.astimezone(tz.gettz(booking.staff_timezone)).time()
 
             client['timezone'] = booking.client_timezone
-            client['start_time_localized'] = start_time_staff_localized.astimezone(tz.gettz(booking.client_timezone)).time()
-            client['end_time_localized'] = end_time_staff_localized.astimezone(tz.gettz(booking.client_timezone)).time()
+            client['start_time_localized'] = start_time_utc.astimezone(tz.gettz(booking.client_timezone)).time()
+            client['end_time_localized'] = end_time_utc.astimezone(tz.gettz(booking.client_timezone)).time()
             # return the client profile_picture wdith=128 if the logged in user is the practitioner involved
             if current_user.user_id == booking.staff_user_id:
                 image_paths = {pic.width: pic.image_path for pic in booking.client.client_info.profile_pictures}
@@ -545,8 +615,8 @@ class TelehealthBookingsApi(BaseResource):
             
             bookings_payload.append({
                 'booking_id': booking.idx,
-                'target_date': booking.target_date,
-                'start_time': practitioner['start_time_localized'],
+                'target_date_utc': booking.target_date_utc,
+                'start_time_utc': start_time_utc.time(),
                 'status': booking.status,
                 'profession_type': booking.profession_type,
                 'chat_room': booking.chat_room,
@@ -558,8 +628,8 @@ class TelehealthBookingsApi(BaseResource):
             })
 
         # Sort bookings by time then sort by date
-        bookings_payload.sort(key=lambda t: t['start_time'])
-        bookings_payload.sort(key=lambda t: t['target_date'])
+        bookings_payload.sort(key=lambda t: t['start_time_utc'])
+        bookings_payload.sort(key=lambda t: t['target_date_utc'])
         
         # create twilio access token with chat grant 
         token = create_twilio_access_token(current_user.modobio_id)
@@ -580,13 +650,15 @@ class TelehealthBookingsApi(BaseResource):
         """
         Add client and staff to a TelehealthBookings table.
 
+        Request body includes date and time localized to the client
+
         Responds with successful booking and conversation_id 
         """
         current_user, _ = token_auth.current_user()
 
-        # Allow bookings between days
-        # if request.parsed_obj.booking_window_id_start_time >= request.parsed_obj.booking_window_id_end_time:
-        #     raise InputError(status_code=405,message='Start time must be before end time.')
+        # Do not allow bookings between days
+        if request.parsed_obj.booking_window_id_start_time >= request.parsed_obj.booking_window_id_end_time:
+            raise InputError(status_code=405,message='Start time must be before end time.')
         
         client_user_id = request.args.get('client_user_id', type=int)
         
@@ -608,59 +680,83 @@ class TelehealthBookingsApi(BaseResource):
         # Check staff existence
         super().check_user(staff_user_id, user_type='staff')
 
+        time_inc = LookupBookingTimeIncrements.query.all()
+        start_time_idx_dict = {item.start_time.isoformat() : item.idx for item in time_inc} # {datetime.time: booking_availability_id}
+        # bring up client queue details
+        client_in_queue = TelehealthQueueClientPool.query.filter_by(user_id=client_user_id).one_or_none()
+        if not client_in_queue:
+            raise InputError(message="client not yet in queue")
+
+        # Localize the requested booking date and time to UTC
+        duration_idx = request.parsed_obj.booking_window_id_end_time - request.parsed_obj.booking_window_id_start_time
+        target_start_datetime_utc = datetime.combine(
+                                request.parsed_obj.target_date, 
+                                time_inc[request.parsed_obj.booking_window_id_start_time-1].start_time, 
+                                tzinfo=tz.gettz(client_in_queue.timezone)).astimezone(tz.UTC)
+        target_end_datetime_utc = target_start_datetime_utc + timedelta(minutes=5*(duration_idx+1))
+        target_start_time_idx_utc = start_time_idx_dict[target_start_datetime_utc.strftime('%H:%M:%S')]
+        target_end_time_idx_utc = target_start_time_idx_utc + duration_idx
+       
         # Check if staff and client have those times open
         client_bookings = TelehealthBookings.query.filter(
             TelehealthBookings.client_user_id==client_user_id,
-            TelehealthBookings.target_date==request.parsed_obj.target_date,
+            TelehealthBookings.target_date_utc==target_start_datetime_utc.date(),
             TelehealthBookings.status!='Cancelled').all()
         staff_bookings = TelehealthBookings.query.filter(
             TelehealthBookings.staff_user_id==staff_user_id,
-            TelehealthBookings.target_date==request.parsed_obj.target_date,
+            TelehealthBookings.target_date_utc==target_start_datetime_utc.date(),
             TelehealthBookings.status!='Cancelled').all()
 
         # This checks if the input slots have already been taken.
+        # using utc times to remain consistent 
         if client_bookings:
             for booking in client_bookings:
-                if request.parsed_obj.booking_window_id_start_time >= booking.booking_window_id_start_time and\
-                    request.parsed_obj.booking_window_id_start_time < booking.booking_window_id_end_time:
+                if target_start_time_idx_utc >= booking.booking_window_id_start_time_utc and\
+                    target_start_time_idx_utc < booking.booking_window_id_end_time_utc:
                     raise InputError(status_code=405,message='Client {} already has an appointment for this time.'.format(client_user_id))
-                elif request.parsed_obj.booking_window_id_end_time > booking.booking_window_id_start_time and\
-                    request.parsed_obj.booking_window_id_end_time < booking.booking_window_id_end_time:
+                elif target_end_time_idx_utc > booking.booking_window_id_start_time_utc and\
+                    target_end_time_idx_utc < booking.booking_window_id_end_time_utc:
                     raise InputError(status_code=405,message='Client {} already has an appointment for this time.'.format(client_user_id))
 
         if staff_bookings:
             for booking in staff_bookings:
-                if request.parsed_obj.booking_window_id_start_time >= booking.booking_window_id_start_time and\
-                    request.parsed_obj.booking_window_id_start_time < booking.booking_window_id_end_time:
+                if target_start_time_idx_utc >= booking.booking_window_id_start_time_utc and\
+                    target_start_time_idx_utc < booking.booking_window_id_end_time_utc:
                     raise InputError(status_code=405,message='Staff {} already has an appointment for this time.'.format(staff_user_id))
-                elif request.parsed_obj.booking_window_id_end_time > booking.booking_window_id_start_time and\
-                    request.parsed_obj.booking_window_id_end_time < booking.booking_window_id_end_time:
+                elif target_end_time_idx_utc > booking.booking_window_id_start_time_utc and\
+                    target_end_time_idx_utc < booking.booking_window_id_end_time_utc:
                     raise InputError(status_code=405,message='Staff {} already has an appointment for this time.'.format(staff_user_id))        
 
         request.parsed_obj.client_user_id = client_user_id
         request.parsed_obj.staff_user_id = staff_user_id
 
+        ##
         # ensure staff still has the same availability
-        staff_availability = db.session.execute(
-            select(TelehealthStaffAvailability).
-            filter(
-                TelehealthStaffAvailability.booking_window_id.in_(
-                    [request.parsed_obj.booking_window_id_start_time,request.parsed_obj.booking_window_id_end_time]),
-                TelehealthStaffAvailability.day_of_week == DAY_OF_WEEK[request.parsed_obj.target_date.weekday()],
-                TelehealthStaffAvailability.user_id == staff_user_id
-                )
-        ).scalars().all()
+        # if staff is a wheel clinician, query wheel for their current availability
+        ##
+        wheel = Wheel()
+        wheel_clinician_ids = wheel.clinician_ids(key='user_id') 
+        if staff_user_id in wheel_clinician_ids:
+            staff_availability = wheel.available_timeslots(
+                target_time_range=(target_start_datetime_utc, target_end_datetime_utc+timedelta(minutes=5)), 
+                clinician_id=wheel_clinician_ids[staff_user_id])[target_start_datetime_utc.date()].get(staff_user_id)
+        else:
+            staff_availability = db.session.execute(
+                select(TelehealthStaffAvailability).
+                filter(
+                    TelehealthStaffAvailability.booking_window_id.in_(
+                        [target_start_time_idx_utc,target_end_time_idx_utc]),
+                    TelehealthStaffAvailability.day_of_week == DAY_OF_WEEK[target_start_datetime_utc.weekday()],
+                    TelehealthStaffAvailability.user_id == staff_user_id
+                    )
+            ).scalars().all()
 
         if not staff_availability:
             raise InputError(message="Staff does not currently have this time available")
-
-        # bring up client queue details
-        client_in_queue = TelehealthQueueClientPool.query.filter_by(user_id=client_user_id).one_or_none()
-
-        if not client_in_queue:
-            raise InputError(message="Client not yet in queue")
+        
         # Add staff and client timezones to the TelehealthBooking entry
-        request.parsed_obj.staff_timezone = staff_availability[0].settings.timezone
+        staff_settings = db.session.execute(select(TelehealthStaffSettings).where(TelehealthStaffSettings.user_id == staff_user_id)).scalar_one_or_none()
+        request.parsed_obj.staff_timezone = staff_settings.timezone
         request.parsed_obj.client_timezone = client_in_queue.timezone
 
         # save client's location for booking
@@ -673,7 +769,7 @@ class TelehealthBookingsApi(BaseResource):
         request.parsed_obj.profession_type = client_in_queue.profession_type
 
         # check the practitioner's auto accept setting. 
-        if staff_availability[0].settings.auto_confirm:
+        if staff_settings.auto_confirm:
             request.parsed_obj.status = 'Accepted'
         else:
             request.parsed_obj.status = 'Pending'
@@ -683,55 +779,21 @@ class TelehealthBookingsApi(BaseResource):
         lookup_times = LookupBookingTimeIncrements.query.all()
 
         # find target date and booking window ids in UTC
-        if request.parsed_obj.staff_timezone == 'UTC':
-            request.parsed_obj.booking_window_id_start_time_utc = request.parsed_obj.booking_window_id_start_time
-            request.parsed_obj.booking_window_id_end_time_utc = request.parsed_obj.booking_window_id_end_time
-            request.parsed_obj.target_date_utc = request.parsed_obj.target_date
-        else:
-            #Convert booking window ids to utc
-            start_time_staff_localized = datetime.combine(
-                request.parsed_obj.target_date, 
-                lookup_times[request.parsed_obj.booking_window_id_start_time-1].start_time, 
-                tzinfo=tz.gettz(request.parsed_obj.staff_timezone))
-                
-            end_time_staff_localized = datetime.combine(
-                request.parsed_obj.target_date, 
-                lookup_times[request.parsed_obj.booking_window_id_end_time-1].end_time, 
-                tzinfo=tz.gettz(request.parsed_obj.staff_timezone))
-            
-            start_time_utc_localized = start_time_staff_localized.astimezone(tz.UTC)
-            end_time_utc_localized = end_time_staff_localized.astimezone(tz.UTC)
-
-            request.parsed_obj.booking_window_id_start_time_utc = db.session.execute(
-                select(LookupBookingTimeIncrements.idx).
-                where(LookupBookingTimeIncrements.start_time == start_time_utc_localized.time())
-            ).scalars().one_or_none()
-            request.parsed_obj.booking_window_id_end_time_utc = db.session.execute(
-                select(LookupBookingTimeIncrements.idx).
-                where(LookupBookingTimeIncrements.end_time == end_time_utc_localized.time())
-            ).scalars().one_or_none()
-            
-            request.parsed_obj.target_date_utc = start_time_utc_localized.date()
+        
+        request.parsed_obj.booking_window_id_start_time_utc = target_start_time_idx_utc
+        request.parsed_obj.booking_window_id_end_time_utc = target_end_time_idx_utc
+        request.parsed_obj.target_date_utc = target_start_datetime_utc.date()
         
         # find start and end time localized to client's timezone
         # convert start, end time and target date from utc star times found above
-        if request.parsed_obj.client_timezone != request.parsed_obj.staff_timezone:
-            start_time_date_utc_localized = datetime.combine(
-                request.parsed_obj.target_date_utc, 
-                lookup_times[request.parsed_obj.booking_window_id_start_time_utc-1].start_time, 
-                tzinfo=tz.UTC)
+        if request.parsed_obj.client_timezone != 'UTC':
             
-            end_time_date_utc_localized = datetime.combine(
-                request.parsed_obj.target_date_utc, 
-                lookup_times[request.parsed_obj.booking_window_id_end_time_utc-1].end_time, 
-                tzinfo=tz.UTC)
-            
-            start_time_client_localized = start_time_date_utc_localized.astimezone(tz.gettz(request.parsed_obj.client_timezone)).time()
-            end_time_client_localized = end_time_date_utc_localized.astimezone(tz.gettz(request.parsed_obj.client_timezone)).time()
+            start_time_client_localized = target_start_datetime_utc.astimezone(tz.gettz(request.parsed_obj.client_timezone)).time()
+            end_time_client_localized = target_end_datetime_utc.astimezone(tz.gettz(request.parsed_obj.client_timezone)).time()
         else:
-            start_time_client_localized = lookup_times[request.parsed_obj.booking_window_id_start_time-1].start_time
-            end_time_client_localized = lookup_times[request.parsed_obj.booking_window_id_end_time-1].end_time
-
+            start_time_client_localized = target_start_datetime_utc.time()
+            end_time_client_localized = target_end_datetime_utc.time()
+        
         db.session.add(request.parsed_obj)
         db.session.flush()
 
@@ -758,26 +820,29 @@ class TelehealthBookingsApi(BaseResource):
         if client_in_queue:
             db.session.delete(client_in_queue)
             db.session.flush()
-
-        # Same day appointment
-        if request.parsed_obj.booking_window_id_start_time < request.parsed_obj.booking_window_id_end_time:
-            end_date = request.parsed_obj.target_date
+     
+        ##
+        # Populate staff calendar with booking
+        # localize to staff timezone first
+        ##
+        if staff_settings.timezone != 'UTC':
+            booking_start_staff_localized = target_start_datetime_utc.astimezone(tz.gettz(staff_settings.timezone))
+            booking_end_staff_localized = target_end_datetime_utc.astimezone(tz.gettz(staff_settings.timezone))
         else:
-            # Appointment spills over to the next day
-            # 11:30pm - 12:15am
-            end_date = request.parsed_obj.target_date + timedelta(days=1)
-        
+            booking_start_staff_localized = target_start_datetime_utc
+            booking_end_staff_localized = target_end_datetime_utc
+
         add_to_calendar = StaffCalendarEvents(user_id=request.parsed_obj.staff_user_id,
-                                              start_date=request.parsed_obj.target_date,
-                                              end_date=end_date,
-                                              start_time=lookup_times[request.parsed_obj.booking_window_id_start_time-1].start_time,
-                                              end_time=lookup_times[request.parsed_obj.booking_window_id_end_time-1].end_time,
+                                              start_date=booking_start_staff_localized.date(),
+                                              end_date=booking_end_staff_localized.date(),
+                                              start_time=booking_start_staff_localized.strftime('%H:%M:%S'),
+                                              end_time=booking_end_staff_localized.strftime('%H:%M:%S'),
                                               recurring=False,
                                               availability_status='Busy',
                                               location='Telehealth_'+str(request.parsed_obj.idx),
                                               description='',
                                               all_day=False,
-                                              timezone = request.parsed_obj.staff_timezone
+                                              timezone = staff_settings.timezone
                                               )
         db.session.add(add_to_calendar)
         db.session.commit()

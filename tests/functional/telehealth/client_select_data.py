@@ -257,9 +257,9 @@ telehealth_bookings_data_full_day = [
   'booking_window_id_end_time': 253
 },
 {
-  'target_date': '2022-04-04',
-  'booking_window_id_start_time': 287,
-  'booking_window_id_end_time': 1
+  'target_date': '2022-04-05',
+  'booking_window_id_start_time': 12,
+  'booking_window_id_end_time': 15
 },
 {
   'target_date': '2022-04-05',
