@@ -331,7 +331,6 @@ class NewClientUser(Resource):
                 else:
                     user_login = UserLoginSchema().load({"user_id": user.user_id, "password": password})
                     db.session.add(user_login)
-                
                 client_info = ClientInfoSchema().load({"user_id": user.user_id})
                 db.session.add(client_info)
                 db.session.flush()
@@ -351,6 +350,7 @@ class NewClientUser(Resource):
                 db.session.add(client_info)
                 verify_email = False
         else:
+
             # user account does not yet exist for this email
             password=user_info.get('password', None)
             if not password:

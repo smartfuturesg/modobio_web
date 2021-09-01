@@ -51,7 +51,7 @@ def update_client_dob(user_id:int, dob:str):
     client = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
     
     if client:
-        if str(client.dob) != dob:
+        if str(client.user_info.dob) != dob:
             update_body = {
                 "script":{
                     "source":"ctx._source.dob = params.dob",

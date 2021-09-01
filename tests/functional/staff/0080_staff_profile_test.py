@@ -16,6 +16,7 @@ def test_put_staff_profile(test_client):
         data=staff_profile_data['change_everything'])
 
     # some simple checks for validity
+
     assert response.status_code == 200
     assert response.json['firstname'] == 'Mario'
     assert response.json['middlename'] == 'The'
@@ -23,6 +24,7 @@ def test_put_staff_profile(test_client):
     assert response.json['biological_sex_male'] == True
     assert response.json['bio'] == 'It\'s a me, Mario!'
     assert response.json['profile_picture'] != None
+    assert response.json['dob'] == '1995-06-14'
 
     #get profile and ensure fields have been updated
     response = test_client.get(

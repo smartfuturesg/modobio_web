@@ -42,6 +42,7 @@ def test_put_client_info(test_client):
     assert client.guardianname == 'Testy'
 
     # test full payload of updates to client info data
+
     response = test_client.put(
         f'/client/{test_client.client_id}/',
         headers=test_client.client_auth_header,
@@ -104,3 +105,13 @@ def test_creating_new_client(test_client):
         content_type='application/json')
 
     assert response.status_code == 401
+
+def test_get_2_client_info(test_client):
+    response = test_client.get(
+        f'/client/{test_client.client_id}/',
+        headers=test_client.client_auth_header)
+
+    assert response.status_code == 200
+    assert response.json['user_info']['user_id'] == test_client.client_id
+    assert response.json['user_info']['modobio_id']
+    assert response.json['user_info']['dob'] == response.json['client_info']['dob']

@@ -21,7 +21,7 @@ class User(db.Model):
     """ 
     Stores details to relating to user account not related to the login system
     """
-    __searchable__ = ['modobio_id', 'email', 'phone_number', 'firstname', 'lastname', 'user_id']
+    __searchable__ = ['modobio_id', 'email', 'phone_number', 'firstname', 'lastname', 'user_id','dob']
 
     __tablename__ = 'User'
 
@@ -153,6 +153,13 @@ class User(db.Model):
 
     :type: boolean
     """
+    
+    dob = db.Column(db.Date)
+    """
+    User date of birth.
+
+    :type: :class:`datetime.date`
+    """
 
     @staticmethod
     def generate_modobio_id(user_id: int, firstname: str=None, lastname: str=None, email: str=None) -> str:
@@ -186,6 +193,14 @@ class User(db.Model):
         else:
             salt = email[:2]
         return (salt + rli_hash).upper()
+
+@db.event.listens_for(User, "after_update")
+def update_dob(mapper, connection, target):
+    """ 
+    Listens for any updates to User table
+    """
+    from odyssey.utils.search import update_client_dob
+    update_client_dob(target.user_id, target.dob)
 
 @db.event.listens_for(User, "after_insert")
 def add_modobio_id(mapper, connection, target):
