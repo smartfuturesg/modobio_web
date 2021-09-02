@@ -9,19 +9,13 @@ from .data import (
     telehealth_queue_client_pool_4_post_data,
     telehealth_queue_client_pool_5_post_data,
     telehealth_queue_client_pool_6_post_data,
-    telehealth_queue_client_pool_7_post_data,
-    payment_method_data
+    telehealth_queue_client_pool_7_post_data
 )
 from odyssey.api.payment.models import PaymentMethods
 
 def test_post_1_client_appointment(test_client):
     global payment_method
-    # add payment new method to db for user_id 1, set that idx as payment method to be used
-    test_client.post(
-        f'/payment/methods/{test_client.client_id}/',
-        headers=test_client.client_auth_header,
-        data=dumps(payment_method_data['normal_data']),
-        content_type='application/json')
+
     payment_method = PaymentMethods.query.filter_by(user_id=test_client.client_id).first()
     telehealth_queue_client_pool_1_post_data['payment_method_id'] = payment_method.idx
 

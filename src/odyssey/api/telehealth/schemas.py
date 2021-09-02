@@ -127,7 +127,7 @@ class TelehealthStaffSettingsSchema(ma.SQLAlchemyAutoSchema):
         dump_only = ('user_id',)
         exclude = ('created_at', 'updated_at',)
 
-    auto_confirm = fields.Boolean(required=False, metadata={'description':'auto-confirm appointments based on availability'})
+    auto_confirm = fields.Boolean(required=True, metadata={'description':'auto-confirm appointments based on availability'})
     timezone = fields.String(validate=validate.OneOf(pytz.common_timezones),metadata={'description': 'optional timezone selection, defaults to UTC'}, missing='UTC')
 
     @post_load
@@ -136,7 +136,7 @@ class TelehealthStaffSettingsSchema(ma.SQLAlchemyAutoSchema):
 
 class TelehealthStaffAvailabilityOutputSchema(Schema):
     availability = fields.Nested(TelehealthStaffAvailabilityInputSchema(many=True), missing=[])
-    settings = fields.Nested(TelehealthStaffSettingsSchema, missing=[])
+    settings = fields.Nested(TelehealthStaffSettingsSchema, required=True)
 
 class TelehealthMeetingRoomSchema(ma.SQLAlchemyAutoSchema):
     """

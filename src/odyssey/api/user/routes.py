@@ -7,6 +7,7 @@ from flask_accepts import accepts, responds
 from flask_restx import Resource, Namespace
 from sqlalchemy.sql.expression import select
 from werkzeug.security import check_password_hash
+from user_agents import parse
 
 from odyssey.api import api
 from odyssey.api.client.schemas import ClientInfoSchema, ClientGeneralMobileSettingsSchema, ClientRaceAndEthnicitySchema
@@ -21,7 +22,8 @@ from odyssey.api.user.models import (
     UserTokenHistory,
     UserTokensBlacklist,
     UserPendingEmailVerifications,
-    UserLegalDocs
+    UserLegalDocs, 
+    UserResetPasswordRequestHistory
 )
 from odyssey.api.staff.models import StaffRoles
 from odyssey.api.user.schemas import (
@@ -453,24 +455,46 @@ class PasswordResetEmail(Resource):
             response 200 OK
         """
         email = request.parsed_obj['email']
+        if not email:
+            raise InputError(status_code=400, message='Please provide your email address')
 
+        # collect user agent string from request headers
+        ua_string = request.headers.get('User-Agent')
+        user_agent = parse(ua_string)
+
+        request_history = UserResetPasswordRequestHistory()
+        request_history.ua_string = ua_string
+        request_history.email = email
+
+        # verify the email provided belongs to a user
         user = User.query.filter_by(email=email.lower()).first()
-        
-        if not email or not user:
+        if not user:
+            db.session.add(request_history)
+            db.session.commit()
             return 200
+        
+        request_history.user_id = user.user_id
+        db.session.add(request_history)
+        db.session.commit()
+
+        # use python library user_agents to determine if ua_string belongs to a mobile device or not
+        if user_agent.is_mobile or user_agent.is_tablet:
+            url_scheme = 'com.modobio.modobioclient:/'
+        else:
+            url_scheme = f'https://{current_app.config["DOMAIN_NAME"]}'
 
         secret = current_app.config['SECRET_KEY']
         password_reset_token = jwt.encode({'exp': datetime.utcnow()+timedelta(minutes = 15), 
                                   'sid': user.user_id}, 
                                   secret, 
-                                  algorithm='HS256')
-                                  
-        send_email_password_reset(user.email, password_reset_token)
+                                  algorithm='HS256')       
+                
+        send_email_password_reset(user.email, password_reset_token, url_scheme)
 
         # DEV mode won't send an email, so return password. DEV mode ONLY.
         if current_app.config['DEV']:
             return jsonify({"token": password_reset_token,
-                            "password_reset_url" : PASSWORD_RESET_URL.format(api.base_url,password_reset_token)})
+                            "password_reset_url" : PASSWORD_RESET_URL.format(url_scheme,password_reset_token)})
 
         return 200
         

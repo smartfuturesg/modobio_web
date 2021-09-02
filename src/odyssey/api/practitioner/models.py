@@ -19,7 +19,7 @@ class PractitionerCredentials(BaseModelWithIdx,UserIdFkeyMixin):
     :type: str
     """
 
-    state = db.Column(db.String)
+    state = db.Column(db.String(2))
     """
     State the MD has medical license for
     
