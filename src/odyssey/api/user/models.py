@@ -799,7 +799,7 @@ class UserProfilePictures(BaseModelWithIdx):
     :type: int
     """
     
-    original = db.Column(db.Boolean, server_default='f')
+    original = db.Column(db.Boolean, server_default='false')
     """
     Boolean determining if the image is the original or not, false by default
 

@@ -290,7 +290,6 @@ class TelehealthClientTimeSelectApi(Resource):
             # taret time indexes in UTC
             target_start_idx_utc = time_idx_dict[target_start_datetime_utc.strftime('%H:%M:%S')]
             target_end_idx_utc = time_idx_dict[target_end_datetime_utc.strftime('%H:%M:%S')]
-            
             target_start_weekday_utc = DAY_OF_WEEK[target_start_datetime_utc.weekday()]
             target_end_weekday_utc = DAY_OF_WEEK[target_end_datetime_utc.weekday()]
 
