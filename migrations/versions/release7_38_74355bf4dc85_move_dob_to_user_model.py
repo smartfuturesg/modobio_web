@@ -1,7 +1,7 @@
 """move dob to user model
 
 Revision ID: 74355bf4dc85
-Revises: e2b6481157b2
+Revises: 10bc815f355e
 Create Date: 2021-08-31 01:35:50.309122
 
 """
@@ -11,7 +11,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = '74355bf4dc85'
-down_revision = 'e2b6481157b2'
+down_revision = '10bc815f355e'
 branch_labels = None
 depends_on = None
 
