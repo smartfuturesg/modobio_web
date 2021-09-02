@@ -1,7 +1,7 @@
 """Add PaymentFailedTransaction table
 
 Revision ID: e75d9850a95a
-Revises: 10bc815f355e
+Revises: 2f4b0cc846a3
 Create Date: 2021-09-01 14:10:30.958419
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'e75d9850a95a'
-down_revision = '10bc815f355e'
+down_revision = '2f4b0cc846a3'
 branch_labels = None
 depends_on = None
 
