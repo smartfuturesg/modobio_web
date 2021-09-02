@@ -776,6 +776,12 @@ class TelehealthBookingsApi(BaseResource):
         
         # Add staff and client timezones to the TelehealthBooking entry
         staff_settings = db.session.execute(select(TelehealthStaffSettings).where(TelehealthStaffSettings.user_id == staff_user_id)).scalar_one_or_none()
+        
+        # TODO: set a notification for the staff member so they know to update their settings
+        if not staff_settings:
+            staff_settings = TelehealthStaffSettings(timezone='UTC', auto_confirm = False, user_id = staff_user_id)
+            db.session.add(staff_settings)
+
         request.parsed_obj.staff_timezone = staff_settings.timezone
         request.parsed_obj.client_timezone = client_in_queue.timezone
 
@@ -1385,6 +1391,13 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
         check_staff_existence(user_id)
         # grab the static list of booking window id's
         booking_increments = LookupBookingTimeIncrements.query.all()
+
+        # prevent wheel clinicians from submitting telehealth availability
+        wheel = Wheel()
+        wheel_clinician_ids = wheel.clinician_ids(key='user_id') 
+        if user_id in wheel_clinician_ids and request.parsed_obj['availability']:
+            raise InputError(message = "This practitioner may only edit their telehealth settings. Not availability")
+
         # Get the staff's availability
         availability = TelehealthStaffAvailability.query.filter_by(user_id=user_id).all()
         # If the staff already has information in it, delete it, and take the new payload as

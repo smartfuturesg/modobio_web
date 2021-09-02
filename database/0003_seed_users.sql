@@ -21,10 +21,10 @@ INSERT INTO "User" ("user_id", "email", "firstname", "lastname", "is_staff", "is
 (20, 'sebastian.brostl@sde.cz', 'Sebastian', 'Brostl', true, false, true, 'VLCZG2Z2ZL12', false, true, true),
 (21, 'lukas.krajci@sde.cz', 'Lukas', 'Krajci', true, false, true, 'VS071YRSQ912', false, true, true),
 (22, 'client@modobio.com', 'Test', 'Client', false, true, false, 'TC12JASDFF12', false, true, false),
-(30, 'alejandro.lorenzo+wheel_clinician_md1@atlanticventurepartners.tech', 'Modo Bio', 'MD1', true, false, false, 'MD52MAVDIF41', false, true, false),
-(31, 'alejandro.lorenzo+wheel_clinician_md2@atlanticventurepartners.tech', 'Modo Bio', 'MD2', true, false, false, 'MD43LBUEHG32', false, true, true),
-(32, 'alejandro.lorenzo+wheel_clinician_np1@atlanticventurepartners.tech', 'Modo Bio', 'NP1', true, false, false, 'NP34KCTFGH23', false, true, false),
-(33, 'alejandro.lorenzo+wheel_clinician_np2@atlanticventurepartners.tech', 'Modo Bio', 'NP2', true, false, false, 'NP25JDSGFI14', false, true, true);
+(30, 'wheelclinicianmd1@modobio.com', 'Modo Bio', 'MD1', true, false, false, 'MD52MAVDIF41', false, true, false),
+(31, 'wheelclinicianmd2@modobio.com', 'Modo Bio', 'MD2', true, false, false, 'MD43LBUEHG32', false, true, true),
+(32, 'wheelcliniciannp1@modobio.com', 'Modo Bio', 'NP1', true, false, false, 'NP34KCTFGH23', false, true, false),
+(33, 'wheelcliniciannp2@modobio.com', 'Modo Bio', 'NP2', true, false, false, 'NP25JDSGFI14', false, true, true);
 
 ALTER SEQUENCE "User_user_id_seq"
 		RESTART WITH 34;
