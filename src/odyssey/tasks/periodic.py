@@ -69,8 +69,8 @@ def deploy_upcoming_appointment_tasks(booking_window_id_start, booking_window_id
             select(TelehealthBookings). 
                 where(and_(
                 TelehealthBookings.target_date_utc==target_date, 
-                TelehealthBookings.booking_window_id_start_time_utc >= booking_window_id_start , #18:00
-                or_( # meeting ends between 18:00 and 02:00
+                TelehealthBookings.booking_window_id_start_time_utc >= booking_window_id_start , # ex. 18:00
+                or_( #ex  meeting ends between 18:00 and 02:00
                     TelehealthBookings.booking_window_id_end_time_utc <= booking_window_id_end, #02:00
                     TelehealthBookings.booking_window_id_end_time_utc > booking_window_id_start),
                 )) 

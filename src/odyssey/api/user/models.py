@@ -53,7 +53,7 @@ class User(db.Model):
     :type: str
     """
 
-    email = db.Column(db.String(50), unique=True)
+    email = db.Column(db.String(75), unique=True)
     """
     Email address.
 
