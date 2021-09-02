@@ -45,7 +45,7 @@ def test_post_1_client_staff_bookings(test_client):
         .where(
             StaffCalendarEvents.location == f'Telehealth_{conversation.booking_id}'))
         .one_or_none()[0])
-
+        
     assert staff_events.start_date == datetime.strptime(telehealth_client_staff_bookings_post_1_data['target_date'],'%Y-%m-%d').date()
     assert staff_events.start_time == time(8, 15)
     assert staff_events.end_time == time(8, 35)
@@ -82,8 +82,7 @@ def test_post_3_client_staff_bookings(test_client):
         headers=test_client.client_auth_header,
         data=dumps(telehealth_client_staff_bookings_post_3_data),
         content_type='application/json')
-
-    assert response.status_code == 405
+    assert response.status_code == 400
 
 def test_post_4_client_staff_bookings(test_client):
     response = test_client.post(
@@ -92,7 +91,7 @@ def test_post_4_client_staff_bookings(test_client):
         data=dumps(telehealth_client_staff_bookings_post_3_data),
         content_type='application/json')
 
-    assert response.status_code == 405
+    assert response.status_code == 400
 
 def test_post_5_client_staff_bookings(test_client):
     response = test_client.post(
@@ -101,7 +100,7 @@ def test_post_5_client_staff_bookings(test_client):
         data=dumps(telehealth_client_staff_bookings_post_3_data),
         content_type='application/json')
 
-    assert response.status_code == 405
+    assert response.status_code == 400
 
 def test_post_6_client_staff_bookings(test_client):
     response = test_client.post(
@@ -110,7 +109,7 @@ def test_post_6_client_staff_bookings(test_client):
         data=dumps(telehealth_client_staff_bookings_post_3_data),
         content_type='application/json')
 
-    assert response.status_code == 405
+    assert response.status_code == 400
 
 def test_get_1_staff_bookings(test_client):
     response = test_client.get(
