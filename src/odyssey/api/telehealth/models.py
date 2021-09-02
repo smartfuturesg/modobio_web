@@ -132,6 +132,15 @@ class TelehealthBookings(BaseModelWithIdx):
     :type: int, foreign key(PaymentMethods.idx)
     """
 
+    is_paid = db.Column(db.Boolean, default=False)
+    """
+    Denotes if the client has been charged for this booking yet. Clients will be automatically charged
+    for a booking when it's status is "On-Going" and the start time is 5 minutes or more later than 
+    the current time when checked by the periodic task "charge-user-telehealth".
+
+    :type: boolean
+    """
+    
     chat_room = db.relationship('TelehealthChatRooms', uselist=False, back_populates='booking')
     """
     One-to_One relationship with TelehealthChatRooms

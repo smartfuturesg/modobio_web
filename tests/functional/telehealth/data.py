@@ -1,14 +1,5 @@
 import pathlib
 
-# Payment method data
-payment_method_data = {
-  'normal_data': {
-        'token': '4111111111111111',
-        'expiration': '04/25',
-        'is_default': True
-    }
-}
-
 # For readability
 # 1/5/2025
 # Sunday
