@@ -10,7 +10,8 @@ def build_ES_indices():
     if not es: return
 
     queries = []
-    clients = db.session.query(User, ClientInfo).filter_by(is_client=True, deleted=False).join(ClientInfo).order_by(User.lastname.asc(), User.firstname.asc()).all()
+    # clients = db.session.query(User, ClientInfo).filter_by(is_client=True, deleted=False).join(ClientInfo).order_by(User.lastname.asc(), User.firstname.asc()).all()
+    clients = db.session.query(User).filter_by(is_client=True, deleted=False).order_by(User.lastname.asc(), User.firstname.asc()).all()    
     staff = db.session.query(User).filter_by(is_staff=True, deleted=False).order_by(User.lastname.asc(), User.firstname.asc()).all()
     queries.append(('clients',clients))
     queries.append(('staff', staff))
