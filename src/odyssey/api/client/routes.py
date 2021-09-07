@@ -333,6 +333,11 @@ class Client(BaseResource):
             client_info_payload["territory"] = territory.sub_territory
             client_info_payload["territory_abbreviation"] = territory.sub_territory_abbreviation
 
+        # TODO: When FE updates code, we can remove this 9/1/2021
+        # This is redundant, however, necessary to 
+        # keep to not have the FE change any code on their side
+        client_info_payload["dob"] = user_data.dob
+
         #Include profile picture in different sizes
         if client_data.profile_pictures:
             fh = FileHandling()
@@ -377,6 +382,7 @@ class Client(BaseResource):
         #update both tables with request data
         client_info = request.parsed_obj['client_info']
         if client_info:
+            
             if 'race_information' in client_info:
                 #send race_information through race-and-ethnicity endpoint
                 if client_info['race_information']['mother']:
@@ -390,8 +396,13 @@ class Client(BaseResource):
 
                 process_race_and_ethnicity(user_id, mother, father)
                 del client_info['race_information']
-                
-            client_data.update(request.parsed_obj['client_info'])
+
+            if 'dob' in client_info and 'dob' not in request.parsed_obj['user_info']:
+                dob = client_info['dob']
+                del client_info['dob']
+                user_data.update({'dob':dob})
+
+            client_data.update(client_info)
         if request.parsed_obj['user_info']:
             user_data.update(request.parsed_obj['user_info'])
 
@@ -404,6 +415,8 @@ class Client(BaseResource):
         client_info_payload["race_information"] = db.session.query(ClientRaceAndEthnicity.is_client_mother, LookupRaces.race_id, LookupRaces.race_name) \
             .join(LookupRaces, LookupRaces.race_id == ClientRaceAndEthnicity.race_id) \
             .filter(ClientRaceAndEthnicity.user_id == user_id).all()
+        if 'dob' in client_info:
+            client_info_payload['dob'] = dob
 
         #validate territory_id if supplied
         if 'territory_id' in request.parsed_obj['client_info'].keys():
@@ -438,7 +451,7 @@ class ClientSummary(BaseResource):
             facilities.append(RegisteredFacilities.query.filter_by(facility_id=item).first())
             
         data = {"firstname": user.firstname, "middlename": user.middlename, "lastname": user.lastname,
-                "user_id": user.user_id, "dob": client.dob, "membersince": client.membersince, "facilities": facilities}
+                "user_id": user.user_id, "dob": client.user_info.dob, "membersince": client.membersince, "facilities": facilities}
         return data
 
 @ns.route('/clientsearch/')
@@ -1959,8 +1972,8 @@ class ClientWeightApi(BaseResource):
         else: # default to female
             sex = 'f'
         
-        if client_info.dob:
-            years_old = round((datetime.now().date()-client_info.dob).days/365.25)
+        if client_info.user_info.dob:
+            years_old = round((datetime.now().date()-client_info.user_info.dob).days/365.25)
         else: # default to 30 years old if not dob is present
             years_old = 30
 
