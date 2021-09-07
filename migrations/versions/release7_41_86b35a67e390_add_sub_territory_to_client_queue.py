@@ -1,7 +1,7 @@
 """Add sub_territory to client queue
 
 Revision ID: 86b35a67e390
-Revises: e75d9850a95a
+Revises: 74355bf4dc85
 Create Date: 2021-09-03 16:12:54.535906
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '86b35a67e390'
-down_revision = 'e75d9850a95a'
+down_revision = '74355bf4dc85'
 branch_labels = None
 depends_on = None
 
