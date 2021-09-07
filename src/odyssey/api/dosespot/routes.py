@@ -61,7 +61,7 @@ class DoseSpotPractitionerCreation(BaseResource):
                we have stored a DoseSpot Admin credentials so the ModoBio system will be able
                to create the practitioner on the DoseSpot platform
         """
-
+        breakpoint()
         ds_practitioner = DoseSpotPractitionerID.query.filter_by(user_id=user_id).one_or_none()
         admin_id = str(current_app.config['DOSESPOT_ADMIN_ID'])
         clinic_api_key = current_app.config['DOSESPOT_API_KEY']
@@ -89,6 +89,7 @@ class DoseSpotPractitionerCreation(BaseResource):
                 raise InputError(status_code=405,message='User must be a practitioner')
             
             missing_inputs = []
+
 
             staff_office = StaffOffices.query.filter_by(user_id=user_id).one_or_none()
 
