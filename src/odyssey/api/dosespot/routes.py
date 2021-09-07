@@ -61,7 +61,6 @@ class DoseSpotPractitionerCreation(BaseResource):
                we have stored a DoseSpot Admin credentials so the ModoBio system will be able
                to create the practitioner on the DoseSpot platform
         """
-        breakpoint()
         ds_practitioner = DoseSpotPractitionerID.query.filter_by(user_id=user_id).one_or_none()
         admin_id = str(current_app.config['DOSESPOT_ADMIN_ID'])
         clinic_api_key = current_app.config['DOSESPOT_API_KEY']
@@ -130,7 +129,6 @@ class DoseSpotPractitionerCreation(BaseResource):
             # Having trouble sending dea and med_lic to the endpoint
             # HOWEVER, DoseSpot does not require that info, and ModoBio
             # will not be working with controlled substances, so DEA is also unnecessary.
-            breakpoint()
 
             min_payload = {'FirstName': user.firstname,
                     'LastName': user.lastname,
@@ -148,8 +146,7 @@ class DoseSpotPractitionerCreation(BaseResource):
                     'MedicalLicenseNumbers': [],
                     'Active': True
                     }
-            breakpoint()
-
+                    
             res = requests.post('https://my.staging.dosespot.com/webapi/api/clinicians',headers=headers,data=min_payload)
 
             # If res is okay, store credentials
