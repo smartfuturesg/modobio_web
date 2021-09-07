@@ -51,6 +51,7 @@ from odyssey.api.system.models import SystemTelehealthSessionCosts
 from odyssey.api.lookup.models import (
     LookupTerritoriesOfOperations
 )
+from odyssey.api.practitioner.models import PractitionerCredentials
 from odyssey.api.payment.models import PaymentMethods, PaymentHistory, PaymentFailedTransactions
 from odyssey.utils.auth import token_auth
 from odyssey.utils.errors import GenericNotFound, InputError, UnauthorizedUser, ContentNotFound, IllegalSetting, GenericThirdPartyError
@@ -311,7 +312,7 @@ class TelehealthClientTimeSelectApi(Resource):
             # to handle this case, we make this query knowing that availabilities may span two days 
             if client_in_queue.medical_gender == 'np':
                 staff_availability = db.session.query(TelehealthStaffAvailability)\
-                    .join(StaffOperationalTerritories, StaffOperationalTerritories.user_id == TelehealthStaffAvailability.user_id)\
+                    .join(PractitionerCredentials, PractitionerCredentials.user_id == TelehealthStaffAvailability.user_id)\
                         .filter(
                             or_(
                                 and_(
@@ -321,12 +322,13 @@ class TelehealthClientTimeSelectApi(Resource):
                                     TelehealthStaffAvailability.day_of_week == target_end_weekday_utc,
                                     TelehealthStaffAvailability.booking_window_id < target_end_idx_utc))                                
                         ).filter(              
-                            StaffOperationalTerritories.role.has(role=client_in_queue.profession_type), 
-                            StaffOperationalTerritories.operational_territory_id == client_in_queue.location_id
+                            PractitionerCredentials.role.has(role=client_in_queue.profession_type), 
+                            PractitionerCredentials.country_id == client_in_queue.location_id,
+                            PractitionerCredentials.state == client_in_queue.sub_territory
                         ).all()
             else:
                 staff_availability = db.session.query(TelehealthStaffAvailability)\
-                    .join(StaffOperationalTerritories, StaffOperationalTerritories.user_id == TelehealthStaffAvailability.user_id)\
+                    .join(StaffOperationalTerritories, PractitionerCredentials.user_id == TelehealthStaffAvailability.user_id)\
                         .join(User, User.user_id==TelehealthStaffAvailability.user_id)\
                         .filter(
                             or_(
@@ -337,8 +339,9 @@ class TelehealthClientTimeSelectApi(Resource):
                                     TelehealthStaffAvailability.day_of_week == target_end_weekday_utc,
                                     TelehealthStaffAvailability.booking_window_id < target_end_idx_utc))
                         ).filter( 
-                                StaffOperationalTerritories.role.has(role=client_in_queue.profession_type), 
-                                StaffOperationalTerritories.operational_territory_id == client_in_queue.location_id,
+                                PractitionerCredentials.role.has(role=client_in_queue.profession_type), 
+                                PractitionerCredentials.country_id == client_in_queue.location_id,
+                                PractitionerCredentials.state == client_in_queue.sub_territory,
                                 User.biological_sex_male==genderFlag
                         ).all()
             
