@@ -65,6 +65,7 @@ def test_generate_bookings(test_client, telehealth_staff, telehealth_clients):
         'priority': False,
         'medical_gender': 'np',
         'location_id': 1,
+        'sub_territory': 'AZ',
         'payment_method_id': payment_method_1.idx}
 
     response = test_client.post(
@@ -92,6 +93,7 @@ def test_generate_bookings(test_client, telehealth_staff, telehealth_clients):
         'priority': False,
         'medical_gender': 'np',
         'location_id': 1,
+        'sub_territory': 'AZ',
         'payment_method_id': payment_method_1.idx}
 
     response = test_client.post(
@@ -132,6 +134,7 @@ def test_generate_bookings(test_client, telehealth_staff, telehealth_clients):
         'priority': False,
         'medical_gender': 'np',
         'location_id': 1,
+        'sub_territory': 'AZ',
         'payment_method_id': payment_method.idx}
 
     response = test_client.post(
@@ -212,6 +215,7 @@ def test_full_system_with_settings(test_client):
         "target_date": "2024-11-6T00:00:00",
         "timezone": "America/Phoenix",
         'location_id': 1,
+        'sub_territory': 'AZ',
         'payment_method_id': payment_method_1.idx}
 
     response = test_client.post(

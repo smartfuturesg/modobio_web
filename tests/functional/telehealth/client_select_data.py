@@ -167,6 +167,7 @@ telehealth_queue_client_3_data = {
   'priority': True,
   'medical_gender': 'np',
   'location_id': 1,
+  'sub_territory': 'AZ',
   'payment_method_id': None
 }
 

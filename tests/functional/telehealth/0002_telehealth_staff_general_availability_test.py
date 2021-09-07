@@ -60,7 +60,7 @@ def test_post_1_staff_general_availability(test_client):
     response = test_client.get(
         f'/telehealth/client/time-select/{test_client.client_id}/',
         headers=test_client.client_auth_header)
-        
+
     assert response.json['appointment_times'][0]['target_date'] == '2022-04-04'
     assert response.json['appointment_times'][1]['target_date'] == '2022-04-04'
     assert response.json['appointment_times'][2]['target_date'] == '2022-04-04'

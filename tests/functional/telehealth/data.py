@@ -9,7 +9,8 @@ telehealth_queue_client_pool_1_post_data = {
   'priority': False,
   'medical_gender': 'f',
   'payment_method_id': None,
-  'location_id': 1
+  'location_id': 1,
+  'sub_territory': 'AZ'
 }
 # 3/3/2025
 # Monday
@@ -19,7 +20,8 @@ telehealth_queue_client_pool_2_post_data = {
   'priority': False,
   'medical_gender': 'np',
   'payment_method_id': None,
-  'location_id': 1
+  'location_id': 1,
+  'sub_territory': 'AZ'
 }
 # 2/5/2025
 # Wednesday
@@ -29,7 +31,8 @@ telehealth_queue_client_pool_3_post_data = {
   'priority': False,
   'medical_gender': 'f',
   'payment_method_id': None,
-  'location_id': 1
+  'location_id': 1,
+  'sub_territory': 'AZ'
 }
 # 1/2/2025
 # Thursday
@@ -39,7 +42,8 @@ telehealth_queue_client_pool_4_post_data = {
   'priority': False,
   'medical_gender': 'm',
   'payment_method_id': None,
-  'location_id': 1
+  'location_id': 1,
+  'sub_territory': 'AZ'
 }
 # 4/5/2025
 # Friday
@@ -49,7 +53,8 @@ telehealth_queue_client_pool_5_post_data = {
   'priority': False,
   'medical_gender': 'np',
   'payment_method_id': None,
-  'location_id': 1
+  'location_id': 1,
+  'sub_territory': 'AZ'
 }
 # 2/7/2025
 # Friday
@@ -59,7 +64,8 @@ telehealth_queue_client_pool_6_post_data = {
   'priority': True,
   'medical_gender': 'm',
   'payment_method_id': None,
-  'location_id': 1
+  'location_id': 1,
+  'sub_territory': 'AZ'
 }
 # 2/5/2025
 # Wednesday
@@ -70,7 +76,8 @@ telehealth_queue_client_pool_7_post_data = {
   'medical_gender': 'f',
   'duration': 30,
   'payment_method_id': None,
-  'location_id': 1
+  'location_id': 1,
+  'sub_territory': 'AZ'
 }
 
 telehealth_queue_client_pool_8_post_data = {
@@ -79,7 +86,8 @@ telehealth_queue_client_pool_8_post_data = {
   'priority': False,
   'medical_gender': 'np',
   'payment_method_id': None,
-  'location_id': 1
+  'location_id': 1,
+  'sub_territory': 'AZ'
 }
 
 # --------------------------------------------------------------------
