@@ -7,7 +7,8 @@ users_staff_new_user_data = {
     "lastname": "Staff",
     "email": "test_this_user_staff@modobio.com",
     "phone_number": "1111111112",
-    "password": "password"
+    "password": "password",
+    "dob": '1995-6-13'
   },
   "staff_info": {
     "access_roles" : [
@@ -25,6 +26,7 @@ staff_profile_data = {
         'lastname': 'Plumber',
         'biological_sex_male': 'True',
         'bio': 'It\'s a me, Mario!',
+        'dob': '1995-06-14',
         'profile_picture': (img_file.as_posix(), img_file.name, 'image/png')},
     'change_only_picture': {
         'profile_picture': (img_file.as_posix(), img_file.name, 'image/png')},
