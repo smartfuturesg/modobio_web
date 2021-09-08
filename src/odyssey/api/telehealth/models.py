@@ -360,14 +360,6 @@ class TelehealthQueueClientPool(BaseModelWithIdx, UserIdFkeyMixin):
     :type: int, foreign key(LookupTerritoriesOfOperations.idx)
     """
 
-    sub_territory = db.Column(db.String(2))
-    """
-    Sub territory of the client for this booking request. Needed to match clients to professionals that
-    have credentials submitted to practice in their sub territory.
-
-    :type: str(2)
-    """
-
     payment_method_id = db.Column(db.Integer, db.ForeignKey('PaymentMethods.idx'), nullable=False)
     """
     client payment method selected from PaymentMethods previously set up

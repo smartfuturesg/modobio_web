@@ -160,7 +160,6 @@ class TelehealthQueueClientPoolSchema(ma.SQLAlchemyAutoSchema):
     timezone = fields.String(validate=validate.OneOf(pytz.common_timezones),metadata={'description': 'optional timezone selection, defaults to UTC'}, missing='UTC')
     location_name = fields.String()
     location_id = fields.Integer(required=True)
-    sub_territory = fields.String(validate=validate.OneOf(USSTATES_2), required=True)
     payment_method_id = fields.Integer(required=True, metadata={'description': 'idx from PaymentMethods selected'})
     profession_type = fields.String(validate=validate.OneOf(ACCESS_ROLES), required=True)
 

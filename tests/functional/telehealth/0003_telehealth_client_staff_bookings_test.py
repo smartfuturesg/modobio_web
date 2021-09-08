@@ -60,7 +60,6 @@ def test_post_2_client_staff_bookings(test_client):
         'priority': False,
         'medical_gender': 'np',
         'location_id': 1,
-        'sub_territory': 'AZ',
         'payment_method_id': payment_method.idx}
 
     response = test_client.post(
