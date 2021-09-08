@@ -59,8 +59,8 @@ class JsonFormatter(logging.Formatter):
             - line: line number in file `path` where log was created
             - timestamp: ISO 8601 formatted string, in UTC, of timestamp when log was created
             - message: the actual log message
-            - error: error message if any
-            - trace: traceback if any
+            - error: traceback of error
+            - trace: traceback of logger, only useful when debugging logging and error handling
         """
         error = ''
         if record.exc_info:
