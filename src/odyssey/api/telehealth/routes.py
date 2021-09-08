@@ -5,6 +5,8 @@ import os, boto3, secrets, pathlib
 from datetime import datetime, time, timedelta
 from dateutil import tz
 import random
+import requests
+import json
 
 from flask import request, current_app, g
 from flask_accepts import accepts, responds
@@ -43,17 +45,20 @@ from odyssey.api.telehealth.schemas import (
     TelehealthTimeSelectOutputSchema,
     TelehealthStaffAvailabilityOutputSchema,
     TelehealthBookingDetailsSchema,
-    TelehealthBookingDetailsGetSchema,
-    TelehealthBookingsPUTSchema
-) 
+    TelehealthBookingDetailsGetSchema, 
+    TelehealthStaffSettingsSchema,
+    TelehealthBookingsPUTSchema,
+    TelehealthUserSchema
+)
+from odyssey.api.system.models import SystemTelehealthSessionCosts
 from odyssey.api.lookup.models import (
     LookupTerritoriesOfOperations
 )
-from odyssey.api.payment.models import PaymentMethods
-from odyssey.integrations.wheel import Wheel
+from odyssey.api.payment.models import PaymentMethods, PaymentHistory, PaymentFailedTransactions
 from odyssey.utils.auth import token_auth
-from odyssey.utils.constants import TELEHEALTH_BOOKING_LEAD_TIME_HRS, TWILIO_ACCESS_KEY_TTL, DAY_OF_WEEK, ALLOWED_AUDIO_TYPES, ALLOWED_IMAGE_TYPES
-from odyssey.utils.errors import GenericNotFound, InputError, UnauthorizedUser, ContentNotFound, IllegalSetting
+from odyssey.utils.errors import GenericNotFound, InputError, UnauthorizedUser, ContentNotFound, IllegalSetting, GenericThirdPartyError
+from odyssey.integrations.wheel import Wheel
+from odyssey.utils.constants import TELEHEALTH_BOOKING_LEAD_TIME_HRS, TWILIO_ACCESS_KEY_TTL, DAY_OF_WEEK, ALLOWED_AUDIO_TYPES, ALLOWED_IMAGE_TYPES, INSTAMED_OUTLET
 from odyssey.utils.message import PushNotification, PushNotificationType
 from odyssey.utils.misc import (
     FileHandling,
@@ -83,6 +88,7 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
     @responds(schema=TelehealthBookingMeetingRoomsTokensSchema, api=ns, status_code=200)
     def get(self, booking_id):
         # Get the current user
+
         current_user, _ = token_auth.current_user()
         
         booking = TelehealthBookings.query.get(booking_id)
@@ -119,6 +125,53 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
         
         if g.user_type == 'staff':
             meeting_room.staff_access_token = token
+
+            #call instamed api to charge user for this call
+            payment = PaymentMethods.query.filter_by(idx=booking.payment_method_id).one_or_none()
+            session_cost = SystemTelehealthSessionCosts.query.filter_by(profession_type='medical_doctor').one_or_none().session_cost
+
+            request_data = {
+                "Outlet": INSTAMED_OUTLET,
+                "PaymentMethod": "OnFile",
+                "PaymentMethodID": str(payment.payment_id),
+                "Amount": str(session_cost)
+            }
+
+            request_headers = {'Api-Key': current_app.config['INSTAMED_API_KEY'],
+                                    'Api-Secret': current_app.config['INSTAMED_API_SECRET'],
+                                    'Content-Type': 'application/json'}
+
+            response = requests.post('https://connect.instamed.com/rest/payment/sale',
+                            headers=request_headers,
+                            json=request_data)
+
+            #check if instamed api raised an error
+            try:
+                response.raise_for_status()
+            except:
+                raise GenericThirdPartyError(response.status_code, response.text)
+
+            #convert response data to json (python dict)
+            response_data = json.loads(response.text)
+
+            #check if card was declined (this is not an error as checked above as 200 is returned from InstaMed)
+            if response_data['TransactionStatus'] == 'C':
+                #transaction was successful, store in PaymentHistory
+                history = PaymentHistory(**{
+                    'user_id': booking.client_user_id,
+                    'payment_method_id': booking.payment_method_id,
+                    'transaction_id': response_data['TransactionID'],
+                    'transaction_amount': session_cost,
+                })
+                booking.is_paid=True
+                db.session.add(history)
+            else:
+                #transaction was not successful, store in PaymentFailedTransactions
+                failed = PaymentFailedTransactions(**{
+                    'user_id': booking.client_user_id,
+                    'transaction_id': response_data['TransactionID']
+                })
+                db.session.add(failed)
         elif g.user_type == 'client':
             meeting_room.client_access_token = token
         
@@ -240,7 +293,6 @@ class TelehealthClientTimeSelectApi(Resource):
             # taret time indexes in UTC
             target_start_idx_utc = time_idx_dict[target_start_datetime_utc.strftime('%H:%M:%S')]
             target_end_idx_utc = time_idx_dict[target_end_datetime_utc.strftime('%H:%M:%S')]
-            
             target_start_weekday_utc = DAY_OF_WEEK[target_start_datetime_utc.weekday()]
             target_end_weekday_utc = DAY_OF_WEEK[target_end_datetime_utc.weekday()]
 
@@ -727,6 +779,12 @@ class TelehealthBookingsApi(BaseResource):
         
         # Add staff and client timezones to the TelehealthBooking entry
         staff_settings = db.session.execute(select(TelehealthStaffSettings).where(TelehealthStaffSettings.user_id == staff_user_id)).scalar_one_or_none()
+        
+        # TODO: set a notification for the staff member so they know to update their settings
+        if not staff_settings:
+            staff_settings = TelehealthStaffSettings(timezone='UTC', auto_confirm = False, user_id = staff_user_id)
+            db.session.add(staff_settings)
+
         request.parsed_obj.staff_timezone = staff_settings.timezone
         request.parsed_obj.client_timezone = client_in_queue.timezone
 
@@ -1336,6 +1394,13 @@ class TelehealthSettingsStaffAvailabilityApi(Resource):
         check_staff_existence(user_id)
         # grab the static list of booking window id's
         booking_increments = LookupBookingTimeIncrements.query.all()
+
+        # prevent wheel clinicians from submitting telehealth availability
+        wheel = Wheel()
+        wheel_clinician_ids = wheel.clinician_ids(key='user_id') 
+        if user_id in wheel_clinician_ids and request.parsed_obj['availability']:
+            raise InputError(message = "This practitioner may only edit their telehealth settings. Not availability")
+
         # Get the staff's availability
         availability = TelehealthStaffAvailability.query.filter_by(user_id=user_id).all()
         # If the staff already has information in it, delete it, and take the new payload as

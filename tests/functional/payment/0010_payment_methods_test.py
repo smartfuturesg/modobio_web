@@ -1,8 +1,12 @@
 from flask.json import dumps
 
-from .data import payment_methods_data
+from .data import payment_methods_data, payment_booking_data
 
-def test_post_payment_method(test_client):
+from odyssey.api.telehealth.models import TelehealthBookings
+from odyssey import db
+
+def test_payment_methods_post(test_client):
+
     #test with invalid card #, should raise 400
     response = test_client.post(
         f'/payment/methods/{test_client.client_id}/',
@@ -44,7 +48,14 @@ def test_post_payment_method(test_client):
     assert response.json['is_default'] == True
 
     # Test adding too many payment methods, should return 405 when attemping to add 6th payment
-    # First card was added by database/0001_seed_users.sql
+    response = test_client.post(
+        f'/payment/methods/{test_client.client_id}/',
+        headers=test_client.client_auth_header,
+        data=dumps(payment_methods_data['normal_data_3']),
+        content_type='application/json')
+
+    assert response.status_code == 201
+
     response = test_client.post(
         f'/payment/methods/{test_client.client_id}/',
         headers=test_client.client_auth_header,
@@ -69,39 +80,38 @@ def test_post_payment_method(test_client):
 
     assert response.status_code == 405
 
-def test_get_payment_method(test_client):
+def test_payment_methods_get(test_client):
+
     response = test_client.get(
         f'/payment/methods/{test_client.client_id}/',
-        headers=test_client.client_auth_header,
-        content_type='application/json')
+        headers = test_client.client_auth_header,
+        content_type='application.json')
 
     assert response.status_code == 200
-    assert response.json[1]['payment_type'] == 'VISA'
-    assert response.json[1]['is_default'] == False
-    assert response.json[2]['payment_type'] == 'MC'
-    assert response.json[2]['is_default'] == True
+    assert len(response.json) == 5
+    assert response.json[0]['expiration'] == '04/25'
 
-def test_delete_payment_method(test_client):
-    #test with valid idx
+def test_payment_methods_delete(test_client):
+
+    #attempt to delete with invalid idx
     response = test_client.delete(
-        f'/payment/methods/{test_client.client_id}/?idx=1',
-        headers=test_client.client_auth_header,
-        content_type='application/json')
+        f'/payment/methods/{test_client.client_id}/?idx=999',
+        headers = test_client.client_auth_header,
+        content_type='application.json')
+
+    assert response.status_code == 404
+
+    response = test_client.delete(
+        f'/payment/methods/{test_client.client_id}/?idx=5',
+        headers = test_client.client_auth_header,
+        content_type='application.json')
 
     assert response.status_code == 204
 
-    #test with invalid idx
-    response = test_client.delete(
-        f'/payment/methods/{test_client.client_id}/?idx=20',
-        headers=test_client.client_auth_header,
-        content_type='application/json')
+    response = test_client.get(
+        f'/payment/methods/{test_client.client_id}/',
+        headers = test_client.client_auth_header,
+        content_type='application.json')
 
-    assert response.status_code == 404
-
-    #test with non-numeric idx
-    response = test_client.delete(
-        f'/payment/methods/{test_client.client_id}/?idx=test',
-        headers=test_client.client_auth_header,
-        content_type='application/json')
-
-    assert response.status_code == 404
+    assert response.status_code == 200
+    assert len(response.json) == 4

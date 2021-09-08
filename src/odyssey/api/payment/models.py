@@ -37,6 +37,13 @@ class PaymentMethods(BaseModelWithIdx, UserIdFkeyMixin):
     :type: int
     """
 
+    expiration = db.Column(db.String)
+    """
+    Expiration date of this payment method.
+
+    :type: string
+    """
+
     is_default = db.Column(db.Boolean)
     """
     Denotes if this method is the default payment method for this user.
@@ -191,6 +198,20 @@ class PaymentRefunds(BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin):
     refund_reason = db.Column(db.String)
     """
     Reason this refund was issued as reported by the staff member that issued the refund.
+
+    :type: string
+    """
+
+class PaymentFailedTransactions(BaseModelWithIdx, UserIdFkeyMixin):
+    """
+    This table keeps track of payment failures. For now, this table will just serve
+    as a log for us for informational purposes. In the future, it may be leveraged to
+    blacklist users from creating future appointments until the failed payment is resolved.
+    """
+
+    transaction_id = db.Column(db.String)
+    """
+    InstaMed Transaction ID.
 
     :type: string
     """

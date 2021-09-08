@@ -83,7 +83,7 @@ class NewUserClientServices(Resource):
         if current_app.config['DEV']:
             return {'password':password,
                     'portal_id': portal_id,
-                    'registration_portal_url': REGISTRATION_PORTAL_URL.format(api.base_url,portal_id)}
+                    'registration_portal_url': REGISTRATION_PORTAL_URL.format(portal_id)}
 
 
 @ns.route("/user/registration-portal/refresh")
@@ -138,4 +138,4 @@ class RefreshRegistrationPortal(Resource):
         if current_app.config['DEV']:
             return {'password':password,
                     'portal_id': portal_id,
-                    'registration_portal_url': REGISTRATION_PORTAL_URL.format(api.base_url,portal_id)}
+                    'registration_portal_url': REGISTRATION_PORTAL_URL.format(portal_id)}

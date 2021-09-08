@@ -161,13 +161,6 @@ telehealth_bookings_staff_8_client_5_data = {
 # client queue
 # ------------
 
-payment_method_data = {
-  'normal_data': {
-        'token': '4111111111111111',
-        'expiration': '04/25',
-        'is_default': True
-    }
-}
 telehealth_queue_client_3_data = {
   'profession_type': 'medical_doctor',
   'target_date': '2022-04-04T02:00:00.000',
@@ -275,3 +268,14 @@ telehealth_bookings_data_full_day = [
 }
 ]
 
+payment_method_data = {
+  'token': '4111111111111111',
+  'expiration': '04/25',
+  'is_default':True
+}
+
+payment_refund_data = {
+  "refund_amount":"50.00",
+  "payment_id": 1,
+  "refund_reason": "abcdefghijklmnopqrstuvwxyz"
+}

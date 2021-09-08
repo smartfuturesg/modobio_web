@@ -9,7 +9,7 @@ from sqlalchemy.sql.expression import delete, select
 
 # from tests.conftest import generate_users
 from odyssey.api.user.models import User
-from odyssey.api.telehealth.models import TelehealthStaffAvailability
+from odyssey.api.telehealth.models import TelehealthStaffAvailability, TelehealthBookings
 from odyssey.api.payment.models import PaymentMethods
 from odyssey.api.staff.models import StaffRoles, StaffOperationalTerritories
 
@@ -26,7 +26,8 @@ from .client_select_data import (
     telehealth_bookings_staff_4_client_3_data,
     telehealth_bookings_staff_8_client_5_data,
     telehealth_queue_client_3_data,
-    payment_method_data
+    payment_method_data,
+    payment_refund_data
 )
 
 def test_generate_staff_availability(test_client, telehealth_staff):
@@ -118,7 +119,7 @@ def test_generate_bookings(test_client, telehealth_staff, telehealth_clients):
     response = test_client.post(
         f'/payment/methods/{client_4.user_id}/',
         headers=client_4_auth_header,
-        data=dumps(payment_method_data['normal_data']),
+        data=dumps(payment_method_data),
         content_type='application/json')
 
     payment_method = PaymentMethods.query.filter_by(user_id=client_4.user_id).first()
@@ -286,7 +287,6 @@ def test_full_system_with_settings(test_client):
     assert current_booking['client']['end_time_localized'] == '04:50:00'
     assert current_booking['client']['timezone'] == 'America/Phoenix'
 
-@pytest.mark.skip('This endpoint should no longer be used.')
 def test_bookings_meeting_room_access(test_client):
     user_id_arr = (1,2)
     for user_id in user_id_arr:
@@ -311,9 +311,87 @@ def test_bookings_meeting_room_access(test_client):
         content_type='application/json')
         token = response.json.get('token')
         auth_header = {'Authorization': f'Bearer {token}'}
+
+        room_id = TelehealthBookings.query.filter_by(client_user_id=test_client.client_id, staff_user_id=test_client.staff_id).first().idx
         response = test_client.get(
-        f'/telehealth/bookings/meeting-room/access-token/{test_client.client_id}/', headers=auth_header)
+        f'/telehealth/bookings/meeting-room/access-token/{room_id}/', headers=test_client.staff_auth_header)
+
         assert response.status_code == 200
+
+    """Below will test the payment features that required a booking to be accessed
+        before it was possible to test them
+    """
+
+    #check payment was successful for the booking
+
+    response = test_client.get(
+        f'/payment/history/{test_client.client_id}/',
+        headers=test_client.client_auth_header,
+        content_type='application.json')
+
+    assert response.status_code == 200
+    assert response.json[0]['transaction_amount'] == '100.00'
+
+    #process refunds for the payment
+    response = test_client.post(
+        f'/payment/refunds/{test_client.client_id}/',
+        headers=test_client.staff_auth_header,
+        data=dumps(payment_refund_data),
+        content_type='application.json'
+    )
+
+    assert response.status_code == 201
+
+    response = test_client.get(
+        f'/payment/refunds/{test_client.client_id}/',
+        headers=test_client.staff_auth_header,
+        content_type='application.json'
+    )
+
+    assert response.status_code == 200
+    assert response.json[0]['refund_amount'] == '50.00'
+    assert response.json[0]['refund_reason'] == "abcdefghijklmnopqrstuvwxyz"
+
+    response = test_client.post(
+        f'/payment/refunds/{test_client.client_id}/',
+        headers=test_client.staff_auth_header,
+        data=dumps(payment_refund_data),
+        content_type='application.json'
+    )
+    print(response.data)
+    assert response.status_code == 201
+
+    response = test_client.get(
+        f'/payment/refunds/{test_client.client_id}/',
+        headers=test_client.client_auth_header,
+        content_type='application.json'
+    )
+
+    assert response.status_code == 200
+    assert len(response.json) == 2
+
+    #third try should error because we are trying to refund more than the original purchase amount
+    #the purchase was $100 and $100 total has been refunded over the course of the previous
+    #2 refund POSTs
+
+    response = test_client.post(
+        f'/payment/refunds/{test_client.client_id}/',
+        headers=test_client.staff_auth_header,
+        data=dumps(payment_refund_data),
+        content_type='application.json'
+    )
+
+    assert response.status_code == 405
+
+    response = test_client.get(
+        f'/payment/refunds/{test_client.client_id}/',
+        headers=test_client.client_auth_header,
+        content_type='application.json'
+    )
+
+    assert response.status_code == 200
+    assert len(response.json) == 2
+
 
 def test_delete_generated_users(test_client):
     assert 1 == 1

@@ -23,7 +23,6 @@ def test_post_medical_record_ids(test_client):
         data=dumps(payload),
         content_type='application/json')
 
-    print(response)
     assert response.status_code == 201
     assert response.json['record_locators'][0]['med_record_id'] == doctor_clients_external_medical_records_data['record_locators'][0]['med_record_id']
 

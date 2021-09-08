@@ -96,6 +96,7 @@ class ClientInfoSchema(BaseSchema):
         dump_only = ('modobio_id', 'membersince', 'height', 'weight')
         include_fk = True
 
+    dob = fields.Date()
     user_id = fields.Integer()
     primary_goal = fields.String()
     primary_macro_goal = fields.String()
@@ -116,7 +117,8 @@ class ClientInfoPutSchema(ma.SQLAlchemyAutoSchema):
         include_fk = True
         exclude = ('created_at', 'updated_at', 'user_id')
         dump_only = ( 'membersince', 'membersince', 'height', 'weight')
-
+    
+    dob = fields.Date()
     primary_goal = fields.String()
     race_information = fields.Nested(ClientRaceAndEthnicityEditSchema)
 

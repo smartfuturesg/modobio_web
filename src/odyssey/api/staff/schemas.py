@@ -54,6 +54,7 @@ class StaffProfilePageGetSchema(Schema):
     biological_sex_male = fields.Boolean()
     profile_picture = fields.Dict(keys=fields.Str(), values=fields.Str())
     bio = fields.String(validate=validate.Length(min=1, max= 50))
+    dob = fields.Date()
 
 class StaffRolesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

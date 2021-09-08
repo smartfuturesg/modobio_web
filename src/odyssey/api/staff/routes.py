@@ -351,7 +351,7 @@ class StaffProfilePage(BaseResource):
         """
         #ensure this user id is for a valid staff member
         check_staff_existence(user_id)
-        
+
         if not request.form and not request.files:
             raise InputError(422, "No data provided")
 
@@ -380,6 +380,8 @@ class StaffProfilePage(BaseResource):
                         data = False
                     else:
                         raise InputError(422, f'{key} must be a boolean. Acceptable values are \'true\', \'false\', \'True\', \'False\', \'1\', and \'0\'')
+                if key == 'dob':
+                    data = datetime.strptime(data,'%Y-%m-%d')
                 user_update[key] = data
 
         # if provided, get profile picture and store in s3

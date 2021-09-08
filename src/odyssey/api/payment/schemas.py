@@ -13,7 +13,7 @@ class PaymentMethodsSchema(ma.SQLAlchemyAutoSchema):
         dump_only = ('created_at', 'updated_at', 'idx', 'payment_id', 'payment_type', 'number')
 
     token = fields.String(load_only=True, required=True)
-    expiration = fields.String(load_only=True, required=True)
+    expiration = fields.String(required=True)
 
 class PaymentStatusSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -36,6 +36,8 @@ class PaymentHistorySchema(BaseSchema):
     class Meta:
         model = PaymentHistory
 
+    transaction_amount = fields.String()
+
     @post_load
     def make_object(self, data, **kwargs):
         return PaymentHistory(**data)
@@ -46,7 +48,8 @@ class PaymentRefundsSchema(ma.SQLAlchemyAutoSchema):
         exclude = ('created_at', 'updated_at', 'idx')
 
     payment_id = fields.Integer(required=True)
-    refund_reason = fields.String(validate=validate.Length(min=1))
+    refund_amount = fields.String()
+    refund_reason = fields.String(validate=validate.Length(min=21))
     
     @post_load
     def make_object(self, data, **kwargs):

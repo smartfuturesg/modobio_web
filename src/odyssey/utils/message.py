@@ -41,8 +41,8 @@ def send_email_user_registration_portal(recipient, password, portal_id):
     SUBJECT = SUBJECTS["remote_registration_portal"]
 
     SENDER = "Modo Bio no-reply <no-reply@modobio.com>"
-
-    remote_registration_url = REGISTRATION_PORTAL_URL.format(api.base_url,portal_id)
+    # TODO consider editing url according to environment being used, and if it will open the web app or mobile app.
+    remote_registration_url = REGISTRATION_PORTAL_URL.format(portal_id)
 
     # route emails to AWS mailbox simulator when in dev environment
     if current_app.config['DEV'] and not any([recipient.endswith(domain) for domain in DEV_EMAIL_DOMAINS]):
@@ -110,7 +110,7 @@ def send_email_verify_email(recipient, token, code):
     else:
         send_email(subject=SUBJECT, recipient=recipient.email, body_text=BODY_TEXT, body_html=BODY_HTML, sender="verify@modobio.com")
 
-def send_email_password_reset(recipient, reset_token):
+def send_email_password_reset(recipient, reset_token, url_scheme):
     """
     Email for sending users password reset portal
     """
@@ -119,7 +119,7 @@ def send_email_password_reset(recipient, reset_token):
     
     SENDER = "Modo Bio no-reply <no-reply@modobio.com>"
 
-    reset_password_url = PASSWORD_RESET_URL.format(api.base_url,reset_token)
+    reset_password_url = PASSWORD_RESET_URL.format(url_scheme,reset_token)
 
     # route emails to AWS mailbox simulator when in dev environment
     if current_app.config['DEV'] and not any([recipient.endswith(domain) for domain in DEV_EMAIL_DOMAINS]):

@@ -29,8 +29,6 @@ class ClientInfo(BaseModel):
     This table stores general information of a client.
     """
 
-    __searchable__ = ['dob']
-
     user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), primary_key=True, nullable=False)
     """
     User ID number, foreign key to User.user_id
@@ -139,13 +137,6 @@ class ClientInfo(BaseModel):
     :type: str, max length 1
     """
 
-    dob = db.Column(db.Date)
-    """
-    Client date of birth.
-
-    :type: :class:`datetime.date`
-    """
-
     height = db.Column(db.Integer)
     """
     Most recently reported height in cm.
@@ -246,7 +237,7 @@ class ClientInfo(BaseModel):
             'user_id': self.user_id,
             'firstname': user.firstname,
             'lastname': user.lastname,
-            'dob': self.dob,
+            'dob': user.dob,
             'phone': user.phone_number,
             'email': user.email
         }
@@ -292,13 +283,6 @@ class ClientInfo(BaseModel):
             }
         return data, resources
 
-@db.event.listens_for(ClientInfo, "after_update")
-def update_dob(mapper, connection, target):
-    """ 
-    Listens for any updates to ClientInfo table
-    """
-    from odyssey.utils.search import update_client_dob
-    update_client_dob(target.user_id, target.dob)
 
 class ClientRaceAndEthnicity(BaseModelWithIdx, UserIdFkeyMixin):
     """ Holds information about the race and ethnicity of a client's parents """
