@@ -185,31 +185,33 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
         db.session.add(status_history)
         db.session.commit() 
 
-        # Send push notification to user. Do this as late as possible, have everything else ready.
-        pn = PushNotification()
+        # Send push notification to user, only if this endpoint is accessed by staff.
+        # Do this as late as possible, have everything else ready.
+        if g.user_type == 'staff':
+            pn = PushNotification()
 
-        # TODO: at the moment only Apple is supported. When Android is needed,
-        # update PushNotification class and templates, then change here.
-        msg = pn.apple_voip_tmpl
-        msg['data']['booking_id'] = booking_id
-        msg['data']['booking_description'] = 'Modo Bio telehealth appointment'
-        msg['data']['staff_id'] = booking.staff_user_id
-        msg['data']['staff_first_name'] = booking.practitioner.firstname
-        msg['data']['staff_middle_name'] = booking.practitioner.middlename
-        msg['data']['staff_last_name'] = booking.practitioner.lastname
+            # TODO: at the moment only Apple is supported. When Android is needed,
+            # update PushNotification class and templates, then change here.
+            msg = pn.apple_voip_tmpl
+            msg['data']['booking_id'] = booking_id
+            msg['data']['booking_description'] = 'Modo Bio telehealth appointment'
+            msg['data']['staff_id'] = booking.staff_user_id
+            msg['data']['staff_first_name'] = booking.practitioner.firstname
+            msg['data']['staff_middle_name'] = booking.practitioner.middlename
+            msg['data']['staff_last_name'] = booking.practitioner.lastname
 
-        urls = {}
-        fh = FileHandling()
-        for pic in booking.practitioner.staff_profile.profile_pictures:
-            if pic.original:
-                continue
+            urls = {}
+            fh = FileHandling()
+            for pic in booking.practitioner.staff_profile.profile_pictures:
+                if pic.original:
+                    continue
 
-            url = fh.get_presigned_url(pic.image_path)
-            urls[pic.height] = url
+                url = fh.get_presigned_url(pic.image_path)
+                urls[pic.height] = url
 
-        msg['data']['staff_profile_picture'] = urls
+            msg['data']['staff_profile_picture'] = urls
 
-        pn.send(booking.client_user_id, PushNotificationType.voip, msg)
+            pn.send(booking.client_user_id, PushNotificationType.voip, msg)
 
         return {'twilio_token': token,
                 'conversation_sid': booking.chat_room.conversation_sid}
