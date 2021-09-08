@@ -1,13 +1,17 @@
-import traceback
+import logging
 
+from werkzeug.exceptions import InternalServerError, HTTPException
 from werkzeug.http import HTTP_STATUS_CODES
 
 from odyssey.api import api
 
-class UserNotFound(Exception):
+logger = logging.getLogger(__name__)
+
+
+class UserNotFound(HTTPException):
     """in the case a non-existent client is being requested"""
     def __init__(self, user_id=None, message = None):
-        Exception.__init__(self)
+        super().__init__(description=message)
         if message:
             self.message = message
         else:
@@ -15,10 +19,10 @@ class UserNotFound(Exception):
 
         self.status_code = 404
 
-class ExamNotFound(Exception):
+class ExamNotFound(HTTPException):
     """in the case a non-existent client is being requested"""
     def __init__(self, examid, message = None):
-        Exception.__init__(self)
+        super().__init__(description=message)
         if message:
             self.message = message
         else:
@@ -26,10 +30,10 @@ class ExamNotFound(Exception):
 
         self.status_code = 404
 
-class TransactionNotFound(Exception):
+class TransactionNotFound(HTTPException):
     """in the case a non-existent client is being requested"""
     def __init__(self, idx, message = None):
-        Exception.__init__(self)
+        super().__init__(description=message)
         if message:
             self.message = message
         else:
@@ -37,17 +41,17 @@ class TransactionNotFound(Exception):
 
         self.status_code = 404
 
-class ContentNotFound(Exception):
+class ContentNotFound(HTTPException):
     """in the case a non-existent resource is requested"""
     def __init__(self):
-        Exception.__init__(self)
+        super().__init__(description=message)
         
         self.message = ""
         
         self.status_code = 204
 
 
-class MethodNotAllowed(Exception):
+class MethodNotAllowed(HTTPException):
     """ Exception for the case a resource already exists in response to a POST request. """
     def __init__(self, *args, message=None, **kwargs):
         super().__init__(*args, **kwargs)
@@ -58,7 +62,7 @@ class MethodNotAllowed(Exception):
         self.status_code = 405
 
 
-class ClientDeniedAccess(Exception):
+class ClientDeniedAccess(HTTPException):
     """ Exception for the case a client denied access
         to a 3rd party resource in an OAuth request.
     """
@@ -68,7 +72,7 @@ class ClientDeniedAccess(Exception):
         self.status_code = 409
 
 
-class UnknownError(Exception):
+class UnknownError(HTTPException):
     """ Exception for an unknown error. """
     def __init__(self, *args, message=None, **kwargs):
         super().__init__()
@@ -78,7 +82,7 @@ class UnknownError(Exception):
             self.message = 'Unknown error occured'
         self.status_code = 400
 
-class InputError(Exception):
+class InputError(HTTPException):
     """ Exception raised for errors with the input.
 
         Attributes:
@@ -89,29 +93,29 @@ class InputError(Exception):
     def __init__(self, status_code=None, message=None):
         super().__init__()
         if message:
-            self.message = message
+            self.description = message
         else:
-            self.message = 'Input error'
+            self.description = 'Input error'
         
         if status_code:
-            self.status_code = status_code
+            self.code = status_code
         else:
-            self.status_code = 400
+            self.code = 400
 
-class ContentNotFoundReturnData(Exception):
+class ContentNotFoundReturnData(HTTPException):
     """Special case for when a resource has not yet been created but the client must see other data to proceed"""
     def __init__(self, data=None, user_id = None):
-        Exception.__init__(self)
+        super().__init__(description=message)
         data.update({"user_id": user_id})
         self.status_code = 200
         self.message = "no instance of resource exists yet"
 
         self.data = data
 
-class UnauthorizedUser(Exception):
+class UnauthorizedUser(HTTPException):
     """in the case a staff member is trying to access resources they are not permitted to"""
     def __init__(self, email=None, message = None):
-        Exception.__init__(self)
+        super().__init__(description=message)
         if message:
             self.message = message
         else:
@@ -120,10 +124,10 @@ class UnauthorizedUser(Exception):
         self.status_code = 401
 
 
-class ClientAlreadyExists(Exception):
+class ClientAlreadyExists(HTTPException):
     """in the case a staff member is trying to create a new client when the client already exists"""
     def __init__(self, identification=None, message = None):
-        Exception.__init__(self)
+        super().__init__(description=message)
         if message:
             self.message = message
         else:
@@ -131,10 +135,10 @@ class ClientAlreadyExists(Exception):
 
         self.status_code = 409
 
-class MedicalConditionNotFound(Exception):
+class MedicalConditionNotFound(HTTPException):
     """Used if a medical condition is not found"""
     def __init__(self, medical_condition_id, message = None):
-        Exception.__init__(self)
+        super().__init__(description=message)
         if message:
             self.message = message
         else:
@@ -142,10 +146,10 @@ class MedicalConditionNotFound(Exception):
 
         self.status_code = 409
 
-class STDNotFound(Exception):
+class STDNotFound(HTTPException):
     """Used if a STD is not found in DB"""
     def __init__(self, std_id, message = None):
-        Exception.__init__(self)
+        super().__init__(description=message)
         if message:
             self.message = message
         else:
@@ -153,10 +157,10 @@ class STDNotFound(Exception):
 
         self.status_code = 409        
 
-class MedicalConditionAlreadySubmitted(Exception):
+class MedicalConditionAlreadySubmitted(HTTPException):
     """Used if a medical condition is already submitted for a user"""
     def __init__(self,user_id, medical_condition_id, message = None):
-        Exception.__init__(self)
+        super().__init__(description=message)
         if message:
             self.message = message
         else:
@@ -164,20 +168,20 @@ class MedicalConditionAlreadySubmitted(Exception):
 
         self.status_code = 409
 
-class RelationAlreadyExists(Exception):
+class RelationAlreadyExists(HTTPException):
     """in the case a client is trying to be associated with a facility where this relationship is already defined"""
     def __init__(self, client_identification=None, facility_identification=None, message=None):
-        Exception.__init__(self)
+        super().__init__(description=message)
         if message:
             self.message = message
         else:
             self.message = f'The client identified by, {client_identification} is already associated with the facility identified by {facility_identification}.'
         self.status_code = 409
 
-class StaffEmailInUse(Exception):
+class StaffEmailInUse(HTTPException):
     """in the case a staff member is creating a staff account with the same email"""
     def __init__(self, email, message = None):
-        Exception.__init__(self)
+        super().__init__(description=message)
         if message:
             self.message = message
         else:
@@ -185,10 +189,10 @@ class StaffEmailInUse(Exception):
 
         self.status_code = 409
 
-class ClientEmailInUse(Exception):
+class ClientEmailInUse(HTTPException):
     """in the case a staff member is creating a client account with the same email"""
     def __init__(self, email, message = None):
-        Exception.__init__(self)
+        super().__init__(description=message)
         if message:
             self.message = message
         else:
@@ -197,10 +201,10 @@ class ClientEmailInUse(Exception):
         self.status_code = 409
 
 
-class ClientNotFound(Exception):
+class ClientNotFound(HTTPException):
     """in the case a staff member is trying to edit a client that does not exist"""
     def __init__(self, identification=None, message = None):
-        Exception.__init__(self)
+        super().__init__(description=message)
         if message:
             self.message = message
         else:
@@ -208,10 +212,10 @@ class ClientNotFound(Exception):
 
         self.status_code = 404
 
-class TestNotFound(Exception):
+class TestNotFound(HTTPException):
     """in the case that blood test results are requested for a test id that does not exist"""
     def __init__(self, identification=None, message = None):
-        Exception.__init__(self)
+        super().__init__(description=message)
         if message:
             self.message = message
         else:
@@ -219,10 +223,10 @@ class TestNotFound(Exception):
 
         self.status_code = 404
 
-class ResultTypeNotFound(Exception):
+class ResultTypeNotFound(HTTPException):
     """in the case that blood test result type is given where that result type does not exist"""
     def __init__(self, identification=None, message = None):
-        Exception.__init__(self)
+        super().__init__(description=message)
         if message:
             self.message = message
         else:
@@ -230,10 +234,10 @@ class ResultTypeNotFound(Exception):
 
         self.status_code = 404
 
-class FacilityNotFound(Exception):
+class FacilityNotFound(HTTPException):
     """in the case a staff member is trying to edit a client that does not exist"""
     def __init__(self, identification=None, message = None):
-        Exception.__init__(self)
+        super().__init__(description=message)
         if message:
             self.message = message
         else:
@@ -241,10 +245,10 @@ class FacilityNotFound(Exception):
 
         self.status_code = 404
 
-class DrinkNotFound(Exception):
+class DrinkNotFound(HTTPException):
     """in the case that drink_id is given where that drink_id does not exist"""
     def __init__(self, identification=None, message = None):
-        Exception.__init__(self)
+        super().__init__(description=message)
         if message:
             self.message = message
         else:
@@ -252,10 +256,10 @@ class DrinkNotFound(Exception):
 
         self.status_code = 404
 
-class IllegalSetting(Exception):
+class IllegalSetting(HTTPException):
     """in the case an API request includes a setting or parameter that is not allowed"""
     def __init__(self, param=None, message = None):
-        Exception.__init__(self)
+        super().__init__(description=message)
         if message:
             self.message = message
         else:
@@ -263,10 +267,10 @@ class IllegalSetting(Exception):
 
         self.status_code = 400
 
-class InsufficientInputs(Exception):
+class InsufficientInputs(HTTPException):
     """in the case that the input does not have enough data"""
     def __init__(self, message = None):
-        Exception.__init__(self)
+        super().__init__(description=message)
         if message:
             self.message = message
         else:
@@ -274,10 +278,10 @@ class InsufficientInputs(Exception):
 
         self.status_code = 405
 
-class StaffNotFound(Exception):
+class StaffNotFound(HTTPException):
     """in the case a non-existent staff member is being requested"""
     def __init__(self, user_id=None, message = None):
-        Exception.__init__(self)
+        super().__init__(description=message)
         if message:
             self.message = message
         else:
@@ -285,11 +289,11 @@ class StaffNotFound(Exception):
 
         self.status_code = 404
 
-class LoginNotAuthorized(Exception):
+class LoginNotAuthorized(HTTPException):
     """Used for auth.py if a user does not have certain authorizations
        for using the ModoBio APIs"""
     def __init__(self, message = None):
-        Exception.__init__(self)
+        super().__init__(description=message)
         if message:
             self.message = message
         else:
@@ -297,20 +301,20 @@ class LoginNotAuthorized(Exception):
 
         self.status_code = 401
 
-class EmailNotVerified(Exception):
+class EmailNotVerified(HTTPException):
     """Used for auth.py if a user has not yet verified their email."""
     def __init__(self):
-        Exception.__init__(self)
+        super().__init__(description=message)
         self.message = "User email address has not yet been verified"
 
         self.status_code = 401
 
-class GenericNotFound(Exception):
+class GenericNotFound(HTTPException):
     """
     When requesting an item from the database which does not exist
     """
     def __init__(self, message = None):
-        Exception.__init__(self)
+        super().__init__(description=message)
         if message:
             self.message = message
         else:
@@ -318,10 +322,10 @@ class GenericNotFound(Exception):
 
         self.status_code = 404
 
-class MissingThirdPartyCredentials(Exception):
+class MissingThirdPartyCredentials(HTTPException):
     """The server is has not been configured with the necessary credentials to access a third party API"""
     def __init__(self, message = None):
-        Exception.__init__(self)
+        super().__init__(description=message)
         if message:
             self.message = message
         else:
@@ -329,13 +333,13 @@ class MissingThirdPartyCredentials(Exception):
 
         self.status_code = 500
 
-class InvalidVerificationCode(Exception):
+class InvalidVerificationCode(HTTPException):
     """
     In the case that an email verification is requested but the wrong code is
     given or the code's lifetime has expired
     """
     def __init__(self, message = None):
-        Exception.__init__(self)
+        super().__init__(description=message)
         if message:
             self.message = message
         else:
@@ -343,14 +347,14 @@ class InvalidVerificationCode(Exception):
 
         self.status_code = 403
 
-class TooManyPaymentMethods(Exception):
+class TooManyPaymentMethods(HTTPException):
     """
     In the case that a payment method is trying to be added for a user who
     already has at least 5 saved payment methods
     """
 
     def __init__(self, message = None):
-        Exception.__init__(self)
+        super().__init__(description=message)
         if message:
             self.message = message
         else:
@@ -358,14 +362,14 @@ class TooManyPaymentMethods(Exception):
 
         self.status_code = 405
 
-class DisabledEndpoint(Exception):
+class DisabledEndpoint(HTTPException):
     """
     In the case an endpoint should be disabled but the code should remain
     in order to reenable the endpoint in the future.
     """
 
     def __init__(self, message = None):
-        Exception.__init__(self)
+        super().__init__(description=message)
         if message:
             self.message = message
         else:
@@ -373,7 +377,7 @@ class DisabledEndpoint(Exception):
 
         self.status_code = 403
 
-class GenericThirdPartyError(Exception):
+class GenericThirdPartyError(HTTPException):
     """
     In the case that a third party api returns an error code.
     """
@@ -389,203 +393,84 @@ class GenericThirdPartyError(Exception):
         else:
             self.status_code = 400
 
-def bad_request(message):
-    return error_response(400, message)
 
-def error_response(status_code, message=None, data = None):
-    response = {'error': HTTP_STATUS_CODES.get(status_code, 'Unknown error')}
-    if data:
-        response.update(data)
-    if message:
-        response['message'] = message
-    response['status_code'] = status_code
-    return response, status_code
+# Custom errors should not be needed in the code. All errors are eventually
+# standard HTTP error codes and only a few are really relevant. However,
+# in case a need for a custom error arises in the future, here is an example.
+# Take a look at werkzeug.exceptions first, to see which HTTPException-derived
+# errors already exist before creating a new, custom error.
+#
+# class APIError(HTTPException):
+#     def __init__(self, message='input error', status_code=400):
+#         super().__init__(description=message)
+#         self.code = status_code
 
-@api.errorhandler(UserNotFound)
-def error_user_does_not_exist(error):
-    '''Return a custom message and 400 status code'''
-    return error_response(error.status_code, error.message)
 
-@api.errorhandler(ClientNotFound)
-def error_client_not_found(error):
-    '''Return a custom message and 400 status code'''
-    return error_response(error.status_code, error.message)
+@api.errorhandler(HTTPException)
+def http_exception_handler(error) -> tuple:
+    """ Create a JSON response from any HTTPException.
 
-@api.errorhandler(TestNotFound)
-def error_test_not_found(error):
-    '''Return a custom message and 400 status code'''
-    return error_response(error.status_code, error.message)
+    :class:`werkzeug.exceptions.HTTPException`s are handled by default by flask-restx,
+    but this handler adds extra information to the error response. It also logs the
+    error, including the error traceback. It is logged at the :attr:`logging.INFO` level,
+    because it is a handled error, i.e. the message is forwarded to the user.
 
-@api.errorhandler(ExamNotFound)
-def error_exam_not_found(error):
-    '''Return a custom message and 400 status code'''
-    return error_response(error.status_code, error.message)
+    This handles :class:`werkzeug.exceptions.HTTPException`s and **all it's subclasses**.
 
-@api.errorhandler(TransactionNotFound)
-def error_transaction_not_found(error):
-    '''Return a custom message and 400 status code'''
-    return error_response(error.status_code, error.message)
+    Params
+    ------
+    error : :class:`werkzeug.exceptions.HTTPException`
+        The error raised in the code. Must be a subclass of :class:`werkzeug.exceptions.HTTPException`.
+        If an extra parameter ``data`` (``dict``) exists on the error object, it will be merged into
+        the response.
 
-@api.errorhandler(FacilityNotFound)
-def error_exam_not_found(error):
-    '''Return a custom message and 400 status code'''
-    return error_response(error.status_code, error.message)
+    Returns
+    -------
+    dict
+        Response as dict, flask-restx will turn it into JSON.
 
-@api.errorhandler(ResultTypeNotFound)
-def error_result_type_not_found(error):
-    '''Return a custom message and 400 status code'''
-    return error_response(error.status_code, error.message)
-
-@api.errorhandler(ContentNotFound)
-def error_content_not_found(error):
-    '''Return a custom message and 204 status code'''
-    return error_response(error.status_code, error.message)
-
-@api.errorhandler(ContentNotFoundReturnData)
-def error_content_not_found(error):
-    '''Return a custom message with extra data in payload and 201 status code'''
-    return error_response(error.status_code, error.message, error.data)
-
-@api.errorhandler(MethodNotAllowed)
-def error_method_not_allowed(error):
-    """Return a custom message and 405 status code"""
-    return error_response(error.status_code, error.message)
-
-@api.errorhandler(ClientDeniedAccess)
-def error_client_denied_access(error):
-    """Return a custom message and 409 status code"""
-    return error_response(error.status_code, error.message)
-
-@api.errorhandler(UnknownError)
-def error_unknown(error):
-    """Return a custom message and 400 status code"""
-    return error_response(error.status_code, error.message)
-
-@api.errorhandler(InputError)
-def error_input(error):
-    """Return a custom message and status code"""
-    return error_response(error.status_code, error.message)
-
-@api.errorhandler(IllegalSetting)
-def error_illegal_setting(error):
-    '''Return a custom message and 400 status code'''
-    return error_response(error.status_code, error.message)
-
-@api.errorhandler(UnauthorizedUser)
-def error_unauthorized_user(error):
-    '''Return a custom message and 400 status code'''
-    return error_response(error.status_code, error.message)
-
-@api.errorhandler(ClientAlreadyExists)
-def error_client_already_exists(error):
-    '''Return a custom message and 409 status code'''
-    return error_response(error.status_code, error.message)
-
-@api.errorhandler(MedicalConditionNotFound)
-def error_medical_condition_not_found(error):
-    '''Return a custom message and 409 status code'''
-    return error_response(error.status_code, error.message)
-
-@api.errorhandler(STDNotFound)
-def error_std_not_found(error):
-    '''Return a custom message and 409 status code'''
-    return error_response(error.status_code, error.message)    
-
-@api.errorhandler(MedicalConditionAlreadySubmitted)
-def error_medical_condition_already_submitted(error):
-    '''Return a custom message and 409 status code'''
-    return error_response(error.status_code, error.message)  
-
-@api.errorhandler(RelationAlreadyExists)
-def error_relation_already_exists(error):
-    '''Return a custom message and 409 status code'''
-    return error_response(error.status_code, error.message)
-
-@api.errorhandler(StaffEmailInUse)
-def error_staff_email_in_use(error):
-    '''Return a custom message and 409 status code'''
-    return error_response(error.status_code, error.message)
-
-@api.errorhandler(ClientEmailInUse)
-def error_client_email_in_use(error):
-    '''Return a custom message and 409 status code'''
-    return error_response(error.status_code, error.message)
-
-@api.errorhandler(InsufficientInputs)
-def error_insufficient_inputs(error):
-    '''Return a custom message and 405 status code'''
-    return error_response(error.status_code, error.message)
-
-@api.errorhandler(StaffNotFound)
-def error_staff_id_does_not_exist(error):
-    '''Return a custom message and 400 status code'''
-    return error_response(error.status_code, error.message)
-
-@api.errorhandler(DrinkNotFound)
-def error_drink_id_does_not_exist(error):
-    '''Return a custom message and 400 status code'''
-    return error_response(error.status_code, error.message)
-
-@api.errorhandler(LoginNotAuthorized)
-def error_login_not_authorized(error):
-    '''Return a custom message and 401 status code'''
-    return error_response(error.status_code, error.message)
-
-@api.errorhandler(EmailNotVerified)
-def error_email_not_verified(error):
-    '''Return email not verified error message and 401 status code'''
-    return error_response(error.status_code, error.message)
-
-@api.errorhandler(MissingThirdPartyCredentials)
-def error_login_not_authorized(error):
-    '''Return a custom message and 500 status code'''
-    return error_response(error.status_code, error.message)
-
-@api.errorhandler(GenericNotFound)
-def error_login_not_authorized(error):
-    '''Return a custom message and 404 status code'''
-    return error_response(error.status_code, error.message)
-
-def register_handlers(app):
-    """register application-wide error handling"""
-    @app.errorhandler(400)
-    def default_error_handler(error):
-        '''Default error handler'''
-        return  error_response(getattr(error, 'code', 500), str(error)) 
-
-    @app.errorhandler(Exception)
-    def api_default_error_handler(error):
-        '''Default error handler for api'''
-        return  error_response(getattr(error, 'code', 500), str(error)) 
-
-@api.errorhandler(InvalidVerificationCode)
-def error_invalid_verification_code(error):
-    '''Return a custom message and 403 status code'''
-    return error_response(error.status_code, error.message)
-
-@api.errorhandler(TooManyPaymentMethods)
-def error_too_many_payment_methods(error):
-    '''Return a custom message and 405 status code'''
-    return error_response(error.status_code, error.message)
-
-@api.errorhandler(DisabledEndpoint)
-def error_disabled_endpoint(error):
-    '''Return a custom message and 403 status code'''
-    return error_response(error.status_code, error.message)
-
-@api.errorhandler(GenericThirdPartyError)
-def error_disabled_endpoint(error):
-    '''Return a custom message and status code'''
-    return error_response(error.status_code, error.message)
+    int
+        HTTP status code for error.
+    """
+    response = getattr(error, 'data', {})
+    response['status_code'] = error.code
+    response['message'] = error.description
+    response['error'] = HTTP_STATUS_CODES.get(error.code, 'Unknown error')
+    logger.info(error.description, exc_info=True)
+    return response, error.code
 
 @api.errorhandler(Exception)
-def internal_error(error):
-    """ Provide traceback for 'Internal Server Error' exceptions.
+def exception_handler(error):
+    """ Create a JSON response from any :class:`Exception` that is not handled by :func:`http_exception_handler`.
 
-    Internal Server Errors are thrown when a Python exception of any kind is not handled
-    by a Flask error handler. This is a last-resort catch-all for those kinds of exceptions
-    and provides a more detailed error message including traceback, than the generic '500
-    Internal Server Error.'
+    Flask usuaslly turns any unhandled :class:`Exception` into a
+    :class:`werkzeug.exceptions.InternalServerError`, but does not provide any further
+    information as to where the exception was raised. This handler returns a 500
+    (Internal server error) as expected, but also logs the error with traceback.
+    It is logged at :attr:`logging.ERROR` level, because it is an unhandled error,
+    i.e. something unexpected went wrong in the background and the user does not
+    need to be informed what that is.
+
+    This handles :class:`Exception`s and **all it's subclasses**, that are not otherwise
+    handled by :func:`http_exception_handler`.
+
+    Params
+    ------
+    error : :class:`Exception`
+        The error raised in the code. If an extra parameter ``data`` (``dict``) exists on the
+        error object, it will be merged into the response.
+
+    Returns
+    -------
+    dict
+        Response as dict, flask-restx will turn it into JSON.
+
+    int
+        HTTP status code. Always 500, internal server error.
     """
-    print(traceback.format_exc())
-    return error_response(500, message=str(error) + '\n' + traceback.format_exc())
+    response = getattr(error, 'data', {})
+    response['status_code'] = 500
+    response['message'] = 'Internal server error'
+    response['error'] = 'Internal server error'
+    logger.exception(error, stack_info=True)
+    return response, 500

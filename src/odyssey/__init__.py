@@ -130,9 +130,6 @@ def create_app():
     # Api is registered through a blueprint, Api.init_app() is not needed.
     # https://flask-restx.readthedocs.io/en/latest/scaling.html#use-with-blueprints
     app.register_blueprint(bp)
-
-    from odyssey.utils.errors import register_handlers
-    register_handlers(app)
     
     # Elasticsearch setup.
     app.elasticsearch = None
