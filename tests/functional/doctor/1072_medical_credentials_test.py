@@ -121,7 +121,6 @@ def test_put_1_credentials(test_client):
         headers=test_client.staff_auth_header,
         data=dumps(doctor_credentials_put_1_data),
         content_type='application/json')
-    print(response.data)
 
     assert response.status_code == 201    
 
