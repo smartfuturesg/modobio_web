@@ -1,10 +1,12 @@
 import random
 from dateutil import parser
+from flask_restx.fields import DateTime
 
 from odyssey.api.staff.models import StaffOperationalTerritories, StaffProfile, StaffRoles
 from io import BytesIO
 from PIL import Image
 import requests
+import uuid
 
 from flask import current_app
 from sqlalchemy import select
@@ -14,8 +16,8 @@ from odyssey import db
 from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupOrganizations, LookupTerritoriesOfOperations
 from odyssey.api.practitioner.models import PractitionerCredentials, PractitionerOrganizationAffiliation
 from odyssey.api.telehealth.models import TelehealthStaffSettings
-from odyssey.utils.errors import GenericThirdPartyError, InputError
 from odyssey.api.user.models import User, UserLogin, UserProfilePictures
+from odyssey.utils.errors import GenericThirdPartyError, InputError
 from odyssey.utils.constants import ALLOWED_IMAGE_TYPES, ALPHANUMERIC, IMAGE_DIMENSIONS, IMAGE_MAX_SIZE
 from odyssey.utils.misc import FileHandling
 
@@ -132,9 +134,67 @@ class Wheel:
         else:
             return {item.affiliate_user_id : item.user_id for item in query}
 
+
+    def make_booking_request(self, staff_user_id: int, client_user_id: int, location_id: int, booking_id: int, booking_start_time: DateTime):
+        """
+        Make request to wheel for booking using the provided user_id
+        
+        Responds
+        --------
+        (booking_external_id: str, consult_url_deeplink: str)
+        """
+
+        # bring up staff user. Get wheel id
+        staff_user = db.session.execute(select(User).where(User.user_id == staff_user_id)).scalar_one_or_none()
+
+        # bring up client, get modobio_id
+        client_user = db.session.execute(select(User).where(User.user_id == client_user_id)).scalar_one_or_none()
+        # use location_id to get the state abbreviation
+
+        state = db.session.execute(select(LookupTerritoriesOfOperations.sub_territory_abbreviation).where(LookupTerritoriesOfOperations.idx==location_id)).scalar_one_or_none()
+
+        # get practitioner wheel id
+        wheel_clinician_id = db.session.execute(select(PractitionerOrganizationAffiliation.affiliate_user_id
+        ).where(PractitionerOrganizationAffiliation.user_id == staff_user_id)).scalar_one_or_none()
+
+        # booking_external_id 
+        booking_external_id = uuid.uuid4()
+
+        consult_url_deeplink = f'https://{current_app.config["DOMAIN_NAME"]}/telehealth?clientId={client_user_id}&bookingId={booking_id}'
+
+        payload =  {
+            "consult_id" : str(booking_external_id),
+            "consult_url": consult_url_deeplink,
+            "patient_id": client_user.modobio_id,
+            "state": state,
+            "consult_rate_id": self.wheel_md_consult_rate,
+            "appointment": {
+                "clinician_id" : wheel_clinician_id,
+                "start_at": booking_start_time.isoformat()
+            }
+        }
+
+        url = self.url_base+ f"/v1/consults"
+
+        response = requests.post(
+                url,
+                headers={'x-api-key': self.wheel_api_token,
+                'Content-Type': 'application/json'},
+                json = payload
+            )
+
+        # errors with booking a consultation are fatal. 
+        # TODO: Consider making this a recoverable situation by retrying
+        try:
+            response.raise_for_status()
+        except Exception as e:
+            raise GenericThirdPartyError(status_code = response.status_code, message=response.json())
+
+        return booking_external_id, consult_url_deeplink
+        
     def physician_roster(self):
         """
-        Query wheel's API to find timeslots for a specific datetime range
+        responds with wheel's full clinician roster
         """
 
         clinicians = []
