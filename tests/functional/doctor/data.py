@@ -568,9 +568,6 @@ doctor_credentials_post_5_data = {
 }
 
 doctor_credentials_delete_1_data = {
-    'idx': 10
-}
-
-doctor_credentials_put_4_data = {
     'idx': 18
 }
+
