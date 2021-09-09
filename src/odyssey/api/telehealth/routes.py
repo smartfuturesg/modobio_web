@@ -51,6 +51,7 @@ from odyssey.api.system.models import SystemTelehealthSessionCosts
 from odyssey.api.lookup.models import (
     LookupTerritoriesOfOperations
 )
+from odyssey.api.practitioner.models import PractitionerCredentials
 from odyssey.api.payment.models import PaymentMethods, PaymentHistory, PaymentFailedTransactions
 from odyssey.utils.auth import token_auth
 from odyssey.utils.errors import GenericNotFound, InputError, UnauthorizedUser, ContentNotFound, IllegalSetting, GenericThirdPartyError
@@ -305,43 +306,46 @@ class TelehealthClientTimeSelectApi(Resource):
                 genderFlag = True
             elif client_in_queue.medical_gender == 'f':
                 genderFlag = False
+
+            # get 2 letter text abbreviation for operational territory in order to match it with the
+            # PractitionerCredentials table
+            client_location = LookupTerritoriesOfOperations.query.filter_by(idx=client_in_queue.location_id).one_or_none().sub_territory_abbreviation
+
             # query staff availabilites filtering by day of week, role, operation location, and gender
             # staff availbilities are stored in UTC time which may be different from the client's tz
             # to handle this case, we make this query knowing that availabilities may span two days 
             if client_in_queue.medical_gender == 'np':
-                staff_availability = db.session.execute(select(TelehealthStaffAvailability
-                    ).join(StaffOperationalTerritories, StaffOperationalTerritories.user_id == TelehealthStaffAvailability.user_id
-                    ).join(StaffRoles, StaffRoles.user_id == TelehealthStaffAvailability.user_id 
-                    ).filter(
-                        or_(
-                            and_(
-                                TelehealthStaffAvailability.day_of_week == target_start_weekday_utc,
-                                TelehealthStaffAvailability.booking_window_id >= target_start_idx_utc),
-                            and_(
-                                TelehealthStaffAvailability.day_of_week == target_end_weekday_utc,
-                                TelehealthStaffAvailability.booking_window_id < target_end_idx_utc))                                
-                    ).filter(   
-                        StaffRoles.role == client_in_queue.profession_type,           
-                        StaffOperationalTerritories.operational_territory_id == client_in_queue.location_id
-                    )).scalars().all()
+                staff_availability = db.session.query(TelehealthStaffAvailability)\
+                    .join(PractitionerCredentials, PractitionerCredentials.user_id == TelehealthStaffAvailability.user_id)\
+                        .filter(
+                            or_(
+                                and_(
+                                    TelehealthStaffAvailability.day_of_week == target_start_weekday_utc,
+                                    TelehealthStaffAvailability.booking_window_id >= target_start_idx_utc),
+                                and_(
+                                    TelehealthStaffAvailability.day_of_week == target_end_weekday_utc,
+                                    TelehealthStaffAvailability.booking_window_id < target_end_idx_utc))                                
+                        ).filter(              
+                            PractitionerCredentials.role.has(role=client_in_queue.profession_type), 
+                            PractitionerCredentials.state == client_location
+                        ).all()
             else:
-                staff_availability = db.session.execute(select(TelehealthStaffAvailability
-                    ).join(StaffOperationalTerritories, StaffOperationalTerritories.user_id == TelehealthStaffAvailability.user_id
-                    ).join(StaffRoles, StaffRoles.user_id == TelehealthStaffAvailability.user_id 
-                    ).join(User, User.user_id==TelehealthStaffAvailability.user_id
-                    ).filter(
-                        or_(
-                            and_(
-                                TelehealthStaffAvailability.day_of_week == target_start_weekday_utc,
-                                TelehealthStaffAvailability.booking_window_id >= target_start_idx_utc),
-                            and_(
-                                TelehealthStaffAvailability.day_of_week == target_end_weekday_utc,
-                                TelehealthStaffAvailability.booking_window_id < target_end_idx_utc))                                
-                    ).filter(   
-                        StaffRoles.role == client_in_queue.profession_type,           
-                        StaffOperationalTerritories.operational_territory_id == client_in_queue.location_id,
-                        User.biological_sex_male==genderFlag
-                    )).scalars().all()
+                staff_availability = db.session.query(TelehealthStaffAvailability)\
+                    .join(StaffOperationalTerritories, PractitionerCredentials.user_id == TelehealthStaffAvailability.user_id)\
+                        .join(User, User.user_id==TelehealthStaffAvailability.user_id)\
+                        .filter(
+                            or_(
+                                and_(
+                                    TelehealthStaffAvailability.day_of_week == target_start_weekday_utc,
+                                    TelehealthStaffAvailability.booking_window_id >= target_start_idx_utc),
+                                and_(
+                                    TelehealthStaffAvailability.day_of_week == target_end_weekday_utc,
+                                    TelehealthStaffAvailability.booking_window_id < target_end_idx_utc))
+                        ).filter( 
+                                PractitionerCredentials.role.has(role=client_in_queue.profession_type), 
+                                PractitionerCredentials.state == client_location,
+                                User.biological_sex_male==genderFlag
+                        ).all()
             
             if not staff_availability and not available:
                 no_staff_available_count+=1

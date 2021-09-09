@@ -22,7 +22,7 @@ from odyssey.api.telehealth.models import (
     TelehealthStaffSettings
 )
 from odyssey.api.user.models import User
-from odyssey.utils.constants import DAY_OF_WEEK, GENDERS, BOOKINGS_STATUS, ACCESS_ROLES
+from odyssey.utils.constants import DAY_OF_WEEK, GENDERS, BOOKINGS_STATUS, ACCESS_ROLES, USSTATES_2
 
 class TelehealthBookingMeetingRoomsTokensSchema(Schema):
     twilio_token = fields.String()

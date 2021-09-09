@@ -1,8 +1,15 @@
---add operational territories for seed users pro@modobio.com and name@modobio.com
+--add operational territories for seed users pro@modobio.com and name@modobio.com 
+--NOTE: StaffOperationalTerritories is obsolete, but will be kept in until we can safely remove it
+--PractitionerCredentials will take its place, so it is also filled out here
 
 delete from "StaffOperationalTerritories" 
 			where idx >= 1;
 alter sequence "StaffOperationalTerritories_idx_seq"
+  restart with 1;
+  
+delete from "PractitionerCredentials" 
+			where idx >= 1;
+alter sequence "PractitionerCredentials_idx_seq"
   restart with 1;
 
 
@@ -31,3 +38,13 @@ insert into "StaffOperationalTerritories" ("user_id", "operational_territory_id"
 (33, 2 ,78),
 (33, 3 ,78),
 (33, 4 ,78);
+
+insert into "PractitionerCredentials" ("user_id", "country_id", "state", "credential_type", "credentials", "status", "role_id", "want_to_practice") values
+(10, 1, Null, 'npi', '123456789', 'Verified', 13, True),
+(10, 1, 'AZ', 'dea', '183451435', 'Verified', 13, True),
+(10, 1, 'CA', 'dea', '123342534', 'Verified', 13, True),
+(10, 1, 'AZ', 'med_lic', '523746512', 'Verified', 13, True),
+(10, 1, 'CA', 'med_lic', '839547692', 'Verified', 13, True),
+(14, 1, Null, 'npi', '98714234', 'Verified', 13, True),
+(14, 1, 'CA', 'dea', '43218470', 'Verified', 13, True),
+(14, 1, 'AZ', 'med_lic', '21323512', 'Verified', 13, True);
