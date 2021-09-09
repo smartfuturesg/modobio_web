@@ -17,7 +17,7 @@ from odyssey import db
 from odyssey.api.lookup.models import (
     LookupBookingTimeIncrements
 )
-from odyssey.api.staff.models import StaffOperationalTerritories, StaffCalendarEvents
+from odyssey.api.staff.models import StaffOperationalTerritories, StaffCalendarEvents, StaffRoles
 from odyssey.api.user.models import User
 from odyssey.api.telehealth.models import (
     TelehealthBookingStatus,
@@ -274,7 +274,7 @@ class TelehealthClientTimeSelectApi(Resource):
         if target_start_datetime_client_local < time_now_client_localized:
             target_start_datetime_client_local = time_now_client_localized + timedelta(hours=TELEHEALTH_BOOKING_LEAD_TIME_HRS+1)
             target_start_datetime_client_local = target_start_datetime_client_local.replace(minute=0, second=0, microsecond=0)
-
+        
         while len(times) < 10:
             # convert client's target date to day_of_week
             # 0 is Monday, 6 is Sunday
@@ -305,42 +305,43 @@ class TelehealthClientTimeSelectApi(Resource):
                 genderFlag = True
             elif client_in_queue.medical_gender == 'f':
                 genderFlag = False
-
             # query staff availabilites filtering by day of week, role, operation location, and gender
             # staff availbilities are stored in UTC time which may be different from the client's tz
             # to handle this case, we make this query knowing that availabilities may span two days 
             if client_in_queue.medical_gender == 'np':
-                staff_availability = db.session.query(TelehealthStaffAvailability)\
-                    .join(StaffOperationalTerritories, StaffOperationalTerritories.user_id == TelehealthStaffAvailability.user_id)\
-                        .filter(
-                            or_(
-                                and_(
-                                    TelehealthStaffAvailability.day_of_week == target_start_weekday_utc,
-                                    TelehealthStaffAvailability.booking_window_id >= target_start_idx_utc),
-                                and_(
-                                    TelehealthStaffAvailability.day_of_week == target_end_weekday_utc,
-                                    TelehealthStaffAvailability.booking_window_id < target_end_idx_utc))                                
-                        ).filter(              
-                            StaffOperationalTerritories.role.has(role=client_in_queue.profession_type), 
-                            StaffOperationalTerritories.operational_territory_id == client_in_queue.location_id
-                        ).all()
+                staff_availability = db.session.execute(select(TelehealthStaffAvailability
+                    ).join(StaffOperationalTerritories, StaffOperationalTerritories.user_id == TelehealthStaffAvailability.user_id
+                    ).join(StaffRoles, StaffRoles.user_id == TelehealthStaffAvailability.user_id 
+                    ).filter(
+                        or_(
+                            and_(
+                                TelehealthStaffAvailability.day_of_week == target_start_weekday_utc,
+                                TelehealthStaffAvailability.booking_window_id >= target_start_idx_utc),
+                            and_(
+                                TelehealthStaffAvailability.day_of_week == target_end_weekday_utc,
+                                TelehealthStaffAvailability.booking_window_id < target_end_idx_utc))                                
+                    ).filter(   
+                        StaffRoles.role == client_in_queue.profession_type,           
+                        StaffOperationalTerritories.operational_territory_id == client_in_queue.location_id
+                    )).scalars().all()
             else:
-                staff_availability = db.session.query(TelehealthStaffAvailability)\
-                    .join(StaffOperationalTerritories, StaffOperationalTerritories.user_id == TelehealthStaffAvailability.user_id)\
-                        .join(User, User.user_id==TelehealthStaffAvailability.user_id)\
-                        .filter(
-                            or_(
-                                and_(
-                                    TelehealthStaffAvailability.day_of_week == target_start_weekday_utc,
-                                    TelehealthStaffAvailability.booking_window_id >= target_start_idx_utc),
-                                and_(
-                                    TelehealthStaffAvailability.day_of_week == target_end_weekday_utc,
-                                    TelehealthStaffAvailability.booking_window_id < target_end_idx_utc))
-                        ).filter( 
-                                StaffOperationalTerritories.role.has(role=client_in_queue.profession_type), 
-                                StaffOperationalTerritories.operational_territory_id == client_in_queue.location_id,
-                                User.biological_sex_male==genderFlag
-                        ).all()
+                staff_availability = db.session.execute(select(TelehealthStaffAvailability
+                    ).join(StaffOperationalTerritories, StaffOperationalTerritories.user_id == TelehealthStaffAvailability.user_id
+                    ).join(StaffRoles, StaffRoles.user_id == TelehealthStaffAvailability.user_id 
+                    ).join(User, User.user_id==TelehealthStaffAvailability.user_id
+                    ).filter(
+                        or_(
+                            and_(
+                                TelehealthStaffAvailability.day_of_week == target_start_weekday_utc,
+                                TelehealthStaffAvailability.booking_window_id >= target_start_idx_utc),
+                            and_(
+                                TelehealthStaffAvailability.day_of_week == target_end_weekday_utc,
+                                TelehealthStaffAvailability.booking_window_id < target_end_idx_utc))                                
+                    ).filter(   
+                        StaffRoles.role == client_in_queue.profession_type,           
+                        StaffOperationalTerritories.operational_territory_id == client_in_queue.location_id,
+                        User.biological_sex_male==genderFlag
+                    )).scalars().all()
             
             if not staff_availability and not available:
                 no_staff_available_count+=1
@@ -717,7 +718,16 @@ class TelehealthBookingsApi(BaseResource):
         target_start_time_idx_utc = start_time_idx_dict[target_start_datetime_utc.strftime('%H:%M:%S')]
         target_end_time_idx_utc = target_start_time_idx_utc + duration_idx
        
-        # Check if staff and client have those times open
+        ###
+        # Check to see the client and staff still have the requested time slot available
+        # - current bookings
+        # - staff availability
+        #       - if staff from wheel, query wheel for availability
+        #       - else, check the StaffAvailability table 
+        ###
+        
+        # Bring up the current bookings for the staff and client
+        # check to make sure there are no conflicts with the requested appointment time
         client_bookings = TelehealthBookings.query.filter(
             TelehealthBookings.client_user_id==client_user_id,
             TelehealthBookings.target_date_utc==target_start_datetime_utc.date(),
@@ -747,9 +757,6 @@ class TelehealthBookingsApi(BaseResource):
                     target_end_time_idx_utc < booking.booking_window_id_end_time_utc:
                     raise InputError(status_code=405,message='Staff {} already has an appointment for this time.'.format(staff_user_id))        
 
-        request.parsed_obj.client_user_id = client_user_id
-        request.parsed_obj.staff_user_id = staff_user_id
-
         ##
         # ensure staff still has the same availability
         # if staff is a wheel clinician, query wheel for their current availability
@@ -773,7 +780,11 @@ class TelehealthBookingsApi(BaseResource):
 
         if not staff_availability:
             raise InputError(message="Staff does not currently have this time available")
-        
+
+        # staff and client may proceed with scheduling the booking, create the booking and response object
+        request.parsed_obj.client_user_id = client_user_id
+        request.parsed_obj.staff_user_id = staff_user_id
+
         # Add staff and client timezones to the TelehealthBooking entry
         staff_settings = db.session.execute(select(TelehealthStaffSettings).where(TelehealthStaffSettings.user_id == staff_user_id)).scalar_one_or_none()
         
@@ -802,10 +813,8 @@ class TelehealthBookingsApi(BaseResource):
             # TODO: here, we need to send some sort of notification to the staff member letting
             # them know they have a booking request.
 
-        lookup_times = LookupBookingTimeIncrements.query.all()
-
-        # find target date and booking window ids in UTC
         
+        # find target date and booking window ids in UTC
         request.parsed_obj.booking_window_id_start_time_utc = target_start_time_idx_utc
         request.parsed_obj.booking_window_id_end_time_utc = target_end_time_idx_utc
         request.parsed_obj.target_date_utc = target_start_datetime_utc.date()
@@ -813,7 +822,6 @@ class TelehealthBookingsApi(BaseResource):
         # find start and end time localized to client's timezone
         # convert start, end time and target date from utc star times found above
         if request.parsed_obj.client_timezone != 'UTC':
-            
             start_time_client_localized = target_start_datetime_utc.astimezone(tz.gettz(request.parsed_obj.client_timezone)).time()
             end_time_client_localized = target_end_datetime_utc.astimezone(tz.gettz(request.parsed_obj.client_timezone)).time()
         else:
@@ -822,6 +830,13 @@ class TelehealthBookingsApi(BaseResource):
         
         db.session.add(request.parsed_obj)
         db.session.flush()
+
+
+        # if the staff memebr is a wheel clinician, make booking request to wheel API
+        booking_url = None
+        if staff_user_id in wheel_clinician_ids:
+            external_booking_id, booking_url = wheel.make_booking_request(staff_user_id, client_user_id, client_in_queue.location_id, request.parsed_obj.idx, target_start_datetime_utc)
+            request.parsed_obj.external_booking_id = external_booking_id
 
         # create TelehealthBookingStatus object
         status_history = TelehealthBookingStatus(
@@ -880,8 +895,8 @@ class TelehealthBookingsApi(BaseResource):
         client['end_time_localized'] = end_time_client_localized
         practitioner = {**booking.practitioner.__dict__}
         practitioner['timezone'] = booking.staff_timezone
-        practitioner['start_time_localized'] = lookup_times[request.parsed_obj.booking_window_id_start_time-1].start_time
-        practitioner['end_time_localized'] = lookup_times[request.parsed_obj.booking_window_id_end_time-1].end_time
+        practitioner['start_time_localized'] = time_inc[request.parsed_obj.booking_window_id_start_time-1].start_time
+        practitioner['end_time_localized'] = time_inc[request.parsed_obj.booking_window_id_end_time-1].end_time
 
         payload = {
             'all_bookings': 1,
@@ -898,7 +913,8 @@ class TelehealthBookingsApi(BaseResource):
                 'payment_method_id': booking.payment_method_id,
                 'status_history': booking.status_history,
                 'client': client,
-                'practitioner': practitioner
+                'practitioner': practitioner,
+                'booking_url': booking_url
                 }
             ] 
         }
