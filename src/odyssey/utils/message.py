@@ -130,16 +130,13 @@ def send_email_password_reset(recipient, reset_token, url_scheme):
                 )
                 
     # The HTML body of the email.
-    BODY_HTML = f"""<html>
-    <head></head>
-    <body>
-    <h1>You have requested to reset your password</h1>
-    <p>Please visit the secure portal below to reset your password:
-    <br>{reset_password_url} 
-    <br>If you have not requested to have your password reset, please contact your admin.
-    </body>
-    </html>
-    """     
+    # Get HTML from file and insert recipient information
+    HTML_FILE = pathlib.Path(current_app.static_folder) / 'password-reset.html'
+    with open(HTML_FILE) as fh:
+        BODY_HTML = fh.read()
+        BODY_HTML = BODY_HTML.replace('[user-first-name]', recipient.firstname)
+        BODY_HTML = BODY_HTML.replace('[user-email]', recipient.email)
+        BODY_HTML = BODY_HTML.replace('[password-reset-link]', reset_password_url) 
 
     send_email(subject=SUBJECT, recipient=recipient, body_text=BODY_TEXT, body_html=BODY_HTML, sender=SENDER)
 
