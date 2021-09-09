@@ -43,10 +43,20 @@ def test_post_staff_office(test_client):
     assert response.json['city'] == 'Phoenix'
     assert response.json['phone'] == '4804389574'
 
-    # There is a Database listener waiting for both medical credentials and staff office.
-    # Once those are done, the system will automatically try to onboard the practitioner.
-    ds_practitioner = DoseSpotPractitionerID.query.filter_by(user_id=test_client.staff_id).one_or_none()
-    assert ds_practitioner != None
+    # # There is a Database listener waiting for both medical credentials and staff office.
+    # # Once those are done, the system will automatically try to onboard the practitioner.
+    # ds_practitioner = DoseSpotPractitionerID.query.filter_by(user_id=test_client.staff_id).one_or_none()
+    # assert ds_practitioner != None
+
+def test_post_2_ds_practitioner_create(test_client):
+    payload = {}
+    response = test_client.post(
+        f'/dosespot/create-practioner/{test_client.staff_id}/',
+        headers=test_client.staff_auth_header,
+        data=dumps(payload),
+        content_type='application/json')
+
+    assert response.status_code == 201
 
 def test_get_1_ds_practitioner_notification_sso(test_client):
     response = test_client.get(f'/dosespot/notifications/{test_client.staff_id}/',
