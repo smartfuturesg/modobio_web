@@ -514,15 +514,15 @@ doctor_credentials_post_2_data = {
 }
 
 doctor_credentials_put_1_data = {
-    'idx':9,'status':'Verified'
+    'idx':17,'status':'Verified'
 }
 
 doctor_credentials_put_2_data = {
-    'idx': 10,'status':'Verified' 
+    'idx': 18,'status':'Verified' 
 }
 
 doctor_credentials_put_3_data = {
-    'idx': 12,'status':'Verified' 
+    'idx': 19,'status':'Verified' 
 }
 
 # Posting with Verified data already
@@ -572,5 +572,5 @@ doctor_credentials_delete_1_data = {
 }
 
 doctor_credentials_put_4_data = {
-    'idx': 9,'status':'Verified' 
+    'idx': 18
 }
