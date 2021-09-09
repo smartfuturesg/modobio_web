@@ -123,11 +123,15 @@ def send_email_password_reset(recipient, reset_token, url_scheme):
         recipient = "success@simulator.amazonses.com"
 
     # The email body for recipients with non-HTML email clients.
-    BODY_TEXT = ("You have requested to reset your password\r\n"
-                "Please visit the secure portal below to reset your password:\n"
-                f"{reset_password_url}\n\n"
-                "If you have not requested to have your password reset, please contact your admin."
-                )
+    BODY_TEXT = (f'Hello {recipient.name},\r\n' +
+                f'We received a request to reset the account password associated with {recipient.email}.\n'
+                'Password Reset Instruction\n\n'
+                'If you have not requested this please consider any or all of the following:\n\n'
+                'Manually navigate to your Modo Bio application, log in to your account and change your password.\n'
+                'Contact support@modobio.com and inform them of the issue.\n\n'
+                'If you have requested a password reset, please click the following link to reset your account password. Be aware that this will change your password for both your mobile application and your access to your practitioner account if you have one set up.\n\n'
+                f'{reset_password_url}\n\n'
+                'Please check that this email was sent from no-reply@modobio.com')
                 
     # The HTML body of the email.
     # Get HTML from file and insert recipient information
