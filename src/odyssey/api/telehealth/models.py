@@ -1,6 +1,7 @@
 import logging
 logger = logging.getLogger(__name__)
 
+from flask_restx.fields import String
 from sqlalchemy import text
 from sqlalchemy.sql.expression import true
 from odyssey.utils.constants import DB_SERVER_TIME
@@ -141,6 +142,13 @@ class TelehealthBookings(BaseModelWithIdx):
     the current time when checked by the periodic task "charge-user-telehealth".
 
     :type: boolean
+    """
+
+    external_booking_id = db.Column(db.String(36), nullable = True)
+    """
+    UUID of booking used for external reference. Only used when booking external physicians (wheel).
+
+    :type: str
     """
     
     chat_room = db.relationship('TelehealthChatRooms', uselist=False, back_populates='booking')

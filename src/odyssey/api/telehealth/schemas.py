@@ -25,7 +25,7 @@ from odyssey.api.telehealth.models import (
     TelehealthStaffSettings
 )
 from odyssey.api.user.models import User
-from odyssey.utils.constants import DAY_OF_WEEK, GENDERS, BOOKINGS_STATUS, ACCESS_ROLES
+from odyssey.utils.constants import DAY_OF_WEEK, GENDERS, BOOKINGS_STATUS, ACCESS_ROLES, USSTATES_2
 
 class TelehealthBookingMeetingRoomsTokensSchema(Schema):
     twilio_token = fields.String()
@@ -93,6 +93,7 @@ class TelehealthBookingsSchema(ma.SQLAlchemyAutoSchema):
     payment_method_id = fields.Integer(required=False)
     client_location_id = fields.Integer(required=False)
     start_time_utc = fields.Time()
+    booking_url = fields.String()
 
     @post_load
     def make_object(self, data, **kwargs):
