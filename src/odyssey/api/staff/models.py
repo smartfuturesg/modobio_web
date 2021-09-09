@@ -343,6 +343,6 @@ def ds_onboard_practitioner(mapper, connection, target):
 
     if verified_npi and not ds_practitioner:
         try:
-            onboard_practitioner(target.user_id)    
+            onboard_practitioner(target.user_id,db_trigger=True)    
         except:
             return

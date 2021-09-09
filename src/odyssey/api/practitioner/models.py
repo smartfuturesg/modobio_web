@@ -122,6 +122,6 @@ def ds_onboard_practitioner(mapper, connection, target):
 
     if (staff_office and verified_npi) and not ds_practitioner:
         try:
-            onboard_practitioner(target.user_id)    
+            onboard_practitioner(target.user_id,db_trigger=True)    
         except:
             return

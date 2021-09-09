@@ -104,7 +104,7 @@ def generate_sso(clinic_id, clinician_id, encrypted_clinic_id, encrypted_user_id
         URL = URL+'&RefillsErrors=1'
     return URL
 
-def onboard_practitioner(user_id):
+def onboard_practitioner(user_id,db_trigger=False):
     """
     POST - Only a DoseSpot Admin will be able to use this endpoint. As a workaround
             we have stored a DoseSpot Admin credentials so the ModoBio system will be able
@@ -212,6 +212,8 @@ def onboard_practitioner(user_id):
                                                 })
             ds_practitioner_id.user_id = user_id
             db.session.add(ds_practitioner_id)
+            if db_trigger == False:
+                db.session.commit()
         else:
             raise InputError(status_code=405,message=res.json())
     return

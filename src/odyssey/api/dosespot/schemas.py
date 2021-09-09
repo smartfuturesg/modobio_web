@@ -14,6 +14,9 @@ from odyssey.utils.base.schemas import BaseSchema
     Schemas for the DoseSpot's API
 """
 
+class DoseSpotPrescribeSSO(Schema):
+    url = fields.String()
+
 class DoseSpotCreatePractitionerSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = DoseSpotPractitionerID

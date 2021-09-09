@@ -1,7 +1,7 @@
 """dosespot migration
 
 Revision ID: ffb51e6a3aec
-Revises: 74355bf4dc85
+Revises: 0bebaad7e4a1
 Create Date: 2021-09-03 16:02:11.994307
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'ffb51e6a3aec'
-down_revision = '74355bf4dc85'
+down_revision = '0bebaad7e4a1'
 branch_labels = None
 depends_on = None
 

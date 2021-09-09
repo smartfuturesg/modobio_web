@@ -123,7 +123,8 @@ def test_post_1_ds_patient_prescribe(test_client):
 
     assert response.status_code == 201
     global patient_sso
-    patient_sso = response.json
+    patient_sso = response.json['url']
+    
 
 def test_post_2_ds_patient_prescribe(test_client):
     payload = {}
@@ -134,7 +135,7 @@ def test_post_2_ds_patient_prescribe(test_client):
         content_type='application/json')
     
     assert response.status_code == 201
-    assert response.json == patient_sso
+    assert response.json['url'] == patient_sso
 
 def test_get_1_ds_practitioner_notification_sso(test_client):
     response = test_client.get(f'/dosespot/notifications/{test_client.staff_id}/',
