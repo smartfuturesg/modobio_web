@@ -5,6 +5,7 @@ All tables in this module are prefixed with ``Staff``.
 
 import base64
 from datetime import datetime, timedelta
+from logging import error
 import os
 
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -327,3 +328,21 @@ class StaffOffices(BaseModelWithIdx, UserIdFkeyMixin):
 
     :type: str
     """
+
+@db.event.listens_for(StaffOffices, "after_insert")
+def ds_onboard_practitioner(mapper, connection, target):
+    """ 
+    Listens for any updates to User table
+    """
+    from odyssey.utils.dosespot import onboard_practitioner
+    from odyssey.api.practitioner.models import PractitionerCredentials
+    from odyssey.api.dosespot.models import DoseSpotPractitionerID
+
+    verified_npi = PractitionerCredentials.query.filter_by(user_id=target.user_id,credential_type='npi',status='Verified').one_or_none()
+    ds_practitioner = DoseSpotPractitionerID.query.filter_by(user_id=target.user_id).one_or_none()
+
+    if verified_npi and not ds_practitioner:
+        try:
+            onboard_practitioner(target.user_id)    
+        except:
+            return

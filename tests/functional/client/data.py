@@ -34,7 +34,7 @@ client_profile_picture_data = {
 
 client_info_put_test_data = {
     "user_info": {
-        "phone_number": "1111111111",
+        "phone_number": "4809234764",
         "biological_sex_male": True,
         "firstname": "Tester",
         "middlename": "Name",
