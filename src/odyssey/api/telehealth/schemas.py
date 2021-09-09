@@ -90,6 +90,7 @@ class TelehealthBookingsSchema(ma.SQLAlchemyAutoSchema):
     payment_method_id = fields.Integer(required=False)
     client_location_id = fields.Integer(required=False)
     start_time_utc = fields.Time()
+    booking_url = fields.String()
 
     @post_load
     def make_object(self, data, **kwargs):
