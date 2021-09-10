@@ -1,4 +1,5 @@
 import random
+from typing import Tuple
 from dateutil import parser
 from flask_restx.fields import DateTime
 
@@ -15,7 +16,7 @@ from werkzeug.datastructures import FileStorage
 from odyssey import db
 from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupOrganizations, LookupTerritoriesOfOperations
 from odyssey.api.practitioner.models import PractitionerCredentials, PractitionerOrganizationAffiliation
-from odyssey.api.telehealth.models import TelehealthStaffSettings
+from odyssey.api.telehealth.models import TelehealthBookings, TelehealthStaffSettings
 from odyssey.api.user.models import User, UserLogin, UserProfilePictures
 from odyssey.utils.errors import GenericThirdPartyError, InputError
 from odyssey.utils.constants import ALLOWED_IMAGE_TYPES, ALPHANUMERIC, IMAGE_DIMENSIONS, IMAGE_MAX_SIZE
@@ -36,7 +37,7 @@ class Wheel:
         self.wheel_org_idx = db.session.execute(select(LookupOrganizations.idx).where(LookupOrganizations.org_name == 'Wheel')).scalars().one_or_none()
 
 
-    def available_timeslots(self, target_time_range, clinician_id=''):
+    def available_timeslots(self, target_time_range, location_id, clinician_id=''):
         """
         Query wheel's API to find timeslots for a specific datetime range.
         Wheel URI: /v1/consult_rates/<consult_rate>/timeslots
@@ -46,6 +47,9 @@ class Wheel:
         ------
         target_time_range: (datetime, datetime)
             tuple containing the start and end datetimes of the target booking window in UTC
+        
+        location_id:
+            where the client is located. Converted to state abbreviation for wheel request
 
         clinician_id
             optional wheel_clinician_id of the clinician
@@ -58,9 +62,9 @@ class Wheel:
         
         TODO: add practitioner sex to query when wheel has implemented the feature
         """
-        # skip wheel during testing
-        if current_app.config['TESTING']:
-            return {}
+
+        # use location_id to get the state abbreviation
+        state = db.session.execute(select(LookupTerritoriesOfOperations.sub_territory_abbreviation).where(LookupTerritoriesOfOperations.idx==location_id)).scalar_one_or_none()
              
         target_start_datetime_utc, target_end_datetime_utc =  target_time_range
 
@@ -86,7 +90,8 @@ class Wheel:
                 params={'start': target_start_datetime_utc.isoformat(), 
                         'end': target_end_datetime_utc.isoformat(), 
                         'page': page, 
-                        'clinician_id': clinician_id}
+                        'clinician_id': clinician_id,
+                        'state': state}
             )
             
             try:
@@ -149,8 +154,8 @@ class Wheel:
 
         # bring up client, get modobio_id
         client_user = db.session.execute(select(User).where(User.user_id == client_user_id)).scalar_one_or_none()
+        
         # use location_id to get the state abbreviation
-
         state = db.session.execute(select(LookupTerritoriesOfOperations.sub_territory_abbreviation).where(LookupTerritoriesOfOperations.idx==location_id)).scalar_one_or_none()
 
         # get practitioner wheel id
@@ -419,4 +424,26 @@ class Wheel:
 
             db.session.commit()
 
+    def cancel_booking(self, external_booking_id):
+        """
+        Cancel the wheel consultation using PATCH v1/consults/<external_booking_id>/cancel
 
+        Expected response is 200 OK and payload of {"status": "success"}
+        """
+
+        url = self.url_base+ f"/v1/consults/{external_booking_id}/cancel"
+
+        response = requests.patch(
+                url,
+                headers={'x-api-key': self.wheel_api_token,
+                'Content-Type': 'application/json'},
+            )
+
+        # user must attempt this request again later
+        # TODO: Consider making this a recoverable situation by retrying
+        try:
+            response.raise_for_status()
+        except Exception as e:
+            raise GenericThirdPartyError(status_code = response.status_code, message=response.json())
+
+        return
