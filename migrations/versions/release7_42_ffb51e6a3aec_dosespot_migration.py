@@ -32,8 +32,6 @@ def upgrade():
     sa.Column('updated_at', sa.DateTime(), server_default=sa.text('clock_timestamp()'), nullable=True),
     sa.Column('idx', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('ds_user_id', sa.Integer(), nullable=True),
-    sa.Column('ds_access_token', sa.String(), nullable=True),
-    sa.Column('ds_notification_sso', sa.String(), nullable=True),
     sa.Column('ds_enrollment_status', sa.String(), nullable=True),
     sa.Column('ds_encrypted_user_id', sa.String(), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=False),

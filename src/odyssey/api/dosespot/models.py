@@ -21,22 +21,6 @@ class DoseSpotPractitionerID(BaseModelWithIdx, UserIdFkeyMixin):
     :type: Integer
     """
 
-    ds_access_token = db.Column(db.String)
-    """
-    DoseSpot access_token 
-
-    :type: Integer
-    """
-
-    ds_notification_sso = db.Column(db.String)
-    """
-    It seems the SSO link does not have an expiration.
-
-    If it's valid, we can use it, if not, we will repopulate this field
-
-    :type: str
-    """
-
     ds_enrollment_status = db.Column(db.String)
     """
     Enrollment status <enrolled, pending, rejected>
