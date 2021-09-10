@@ -489,7 +489,7 @@ class PasswordResetEmail(Resource):
                                   secret, 
                                   algorithm='HS256')       
                 
-        send_email_password_reset(user.email, password_reset_token, url_scheme)
+        send_email_password_reset(user, password_reset_token, url_scheme)
 
         # DEV mode won't send an email, so return password. DEV mode ONLY.
         if current_app.config['DEV']:
