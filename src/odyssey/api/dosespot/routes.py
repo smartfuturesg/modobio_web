@@ -35,7 +35,7 @@ from odyssey.utils.base.resources import BaseResource
 
 ns = Namespace('dosespot', description='Operations related to DoseSpot')
 
-@ns.route('/create-practioner/<int:user_id>/')
+@ns.route('/create-practitioner/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class DoseSpotPractitionerCreation(BaseResource):
 

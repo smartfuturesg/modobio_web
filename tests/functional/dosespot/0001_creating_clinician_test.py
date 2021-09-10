@@ -8,7 +8,7 @@ from tests.functional.staff.data import staff_office_data
 # def test_post_1_ds_practitioner_create(test_client):
 #     payload = {}
 #     response = test_client.post(
-#         f'/dosespot/create-practioner/{test_client.staff_id}/',
+#         f'/dosespot/create-practitioner/{test_client.staff_id}/',
 #         headers=test_client.staff_auth_header,
 #         data=dumps(payload),
 #         content_type='application/json')
@@ -29,7 +29,7 @@ from tests.functional.staff.data import staff_office_data
 # def test_post_2_ds_practitioner_create(test_client):
 #     payload = {}
 #     response = test_client.post(
-#         f'/dosespot/create-practioner/{test_client.staff_id}/',
+#         f'/dosespot/create-practitioner/{test_client.staff_id}/',
 #         headers=test_client.staff_auth_header,
 #         data=dumps(payload),
 #         content_type='application/json')

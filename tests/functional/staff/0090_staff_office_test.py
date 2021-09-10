@@ -51,7 +51,7 @@ def test_post_staff_office(test_client):
 def test_post_2_ds_practitioner_create(test_client):
     payload = {}
     response = test_client.post(
-        f'/dosespot/create-practioner/{test_client.staff_id}/',
+        f'/dosespot/create-practitioner/{test_client.staff_id}/',
         headers=test_client.staff_auth_header,
         data=dumps(payload),
         content_type='application/json')
@@ -116,7 +116,7 @@ def test_put_staff_profile(test_client):
 def test_post_2_ds_practitioner_create(test_client):
     payload = {}
     response = test_client.post(
-        f'/dosespot/create-practioner/{test_client.staff_id}/',
+        f'/dosespot/create-practitioner/{test_client.staff_id}/',
         headers=test_client.staff_auth_header,
         data=dumps(payload),
         content_type='application/json')
