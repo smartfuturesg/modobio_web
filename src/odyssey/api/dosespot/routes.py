@@ -38,12 +38,7 @@ ns = Namespace('dosespot', description='Operations related to DoseSpot')
 @ns.route('/create-practitioner/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class DoseSpotPractitionerCreation(BaseResource):
-
-    @token_auth.login_required
-    def get(self, user_id):
-        return 
-
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('staff',),staff_role=('medical_doctor',))
     @responds(status_code=201, api=ns)
     def post(self, user_id):
         """
@@ -53,18 +48,8 @@ class DoseSpotPractitionerCreation(BaseResource):
         """
         return onboard_practitioner(user_id)
 
-    @token_auth.login_required(user_type=('client', 'staff'), staff_role=('medical_doctor',), resources=('blood_pressure',))
-    @responds(status_code=204, api=ns)
-    def delete(self, user_id):
-        return
-
 @ns.route('/prescribe/<int:user_id>/')
 class DoseSpotPatientCreation(BaseResource):
-
-    @token_auth.login_required
-    def get(self, user_id):
-        return 
-
     @token_auth.login_required(user_type=('staff',),staff_role=('medical_doctor',))
     @responds(schema=DoseSpotPrescribeSSO,status_code=201, api=ns)
     def post(self, user_id):
@@ -151,11 +136,6 @@ class DoseSpotPatientCreation(BaseResource):
 
         return {'url': generate_sso(modobio_clinic_id, str(ds_clinician.ds_user_id), encrypted_clinic_id, encrypted_user_id,patient_id=ds_patient_id.ds_user_id)}
 
-    @token_auth.login_required(user_type=('client', 'staff'), staff_role=('medical_doctor',), resources=('blood_pressure',))
-    @responds(status_code=204, api=ns)
-    def delete(self, user_id):
-        return       
-
 @ns.route('/notifications/<int:user_id>/')
 class DoseSpotNotificationSSO(BaseResource):
 
@@ -180,13 +160,43 @@ class DoseSpotNotificationSSO(BaseResource):
 
         return {'url': generate_sso(modobio_clinic_id, str(ds_clinician.ds_user_id), encrypted_clinic_id, encrypted_user_id)}
 
-    @token_auth.login_required(user_type=('staff',),staff_role=('medical_doctor',))
-    # @accepts(schema=MedicalBloodPressuresSchema, api=ns)
-    # @responds(schema=MedicalBloodPressuresSchema, status_code=201, api=ns)
-    def post(self, user_id):
-        return
+@ns.route('/enrollment-status/<int:user_id>/')
+class DoseSpotNotificationSSO(BaseResource):
 
-    @token_auth.login_required(user_type=('client', 'staff'), staff_role=('medical_doctor',), resources=('blood_pressure',))
-    @responds(status_code=204, api=ns)
-    def delete(self, user_id):
-        return        
+    @token_auth.login_required(user_type=('staff',),staff_role=('medical_doctor',))
+    @responds(schema=DoseSpotPrescribeSSO,status_code=200, api=ns)
+    def get(self, user_id):
+        """
+        GET - Only a ModoBio Practitioners will be able to use this endpoint. This endpoint is used
+              to return their enrollment status
+        """
+
+        ds_practitioner = DoseSpotPractitionerID.query.filter_by(user_id=user_id).one_or_none()
+        if not ds_practitioner:
+            raise InputError(status_code=405,message='This Practitioner does not have a DoseSpot account.')
+        admin_id = str(current_app.config['DOSESPOT_ADMIN_ID'])
+        clinic_api_key = current_app.config['DOSESPOT_API_KEY']
+        modobio_id = str(current_app.config['DOSESPOT_MODOBIO_ID'])
+
+        # generating keys for ADMIN
+        encrypted_clinic_id = current_app.config['DOSESPOT_ENCRYPTED_MODOBIO_ID']
+        encrypted_user_id = current_app.config['DOSESPOT_ENCRYPTED_ADMIN_ID']
+        res = get_access_token(modobio_id,encrypted_clinic_id,admin_id,encrypted_user_id)
+        if res.ok:
+            access_token = res.json()['access_token']
+            headers = {'Authorization': f'Bearer {access_token}'}
+        else:
+            raise InputError(status_code=405,message=res.json())
+
+        res = requests.get(f'https://my.staging.dosespot.com/webapi/api/clinicians/{ds_practitioner.ds_user_id}/registrationStatus',headers=headers)
+        if res.ok:
+            """
+            Section 4.2.10 Registration type in DoseSpot RESTful API Guide
+            Return Items:
+            1 - Pending
+            3 - Remove
+            """
+            if res.json()['Item']!=0:
+                pass
+        return 
+

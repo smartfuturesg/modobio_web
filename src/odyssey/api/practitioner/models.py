@@ -110,7 +110,9 @@ class PractitionerOrganizationAffiliation(BaseModelWithIdx, UserIdFkeyMixin):
 @db.event.listens_for(PractitionerCredentials, "after_insert")
 def ds_onboard_practitioner(mapper, connection, target):
     """ 
-    Listens for any updates to User table
+    Listens for any updates to PractitionerCredentials table
+
+    If any updates occur, we will try to automatically onboard that MD to to the DS platform
     """
     from odyssey.utils.dosespot import onboard_practitioner
     from odyssey.api.staff.models import StaffOffices

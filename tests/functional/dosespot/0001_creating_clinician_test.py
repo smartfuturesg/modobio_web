@@ -69,3 +69,9 @@ from tests.functional.staff.data import staff_office_data
 #     staff_office = StaffOffices.query.filter_by(user_id = test_client.staff_id).one_or_none()
 #     db.session.delete(staff_office)
 #     db.session.commit()
+
+def test_get_1_ds_practitioner_registration_status(test_client):
+    response = test_client.get(f'/dosespot/enrollment-status/{test_client.staff_id}/',
+                                headers=test_client.staff_auth_header)
+
+    assert response.status_code == 200    

@@ -35,13 +35,7 @@ from odyssey.api.user.models import User
 from odyssey.utils.auth import token_auth
 
 from odyssey.utils.errors import (
-    UserNotFound, 
-    IllegalSetting, 
-    ContentNotFound,
     InputError,
-    MedicalConditionAlreadySubmitted,
-    GenericNotFound,
-    UnauthorizedUser
 )
 
 def generate_encrypted_clinic_id(clinic_key,char_len=32):
@@ -90,9 +84,11 @@ def generate_encrypted_user_id(rand_phrase,clinic_key,clinician_id):
     return encrypted_str
 
 def generate_sso(clinic_id, clinician_id, encrypted_clinic_id, encrypted_user_id, patient_id=None):
-    # This is to generate the Single Sign On link for the practitioner.
-    # WITH patient_id -> SSO will take the practitioner to prescribe to the patient on DS platform
-    # NO patient_id -> SSO will take the practitioner to DS notifications
+    """
+    This is to generate the Single Sign On link for the practitioner.
+    WITH patient_id -> SSO will take the practitioner to prescribe to the patient on DS platform
+    NO patient_id -> SSO will take the practitioner to DS notifications
+    """
     encrypted_clinic_id_url = encrypted_clinic_id.replace('/','%2F')
     encrypted_clinic_id_url = encrypted_clinic_id_url.replace('+','%2B')            
     encrypted_user_id_url = encrypted_user_id.replace('/','%2F')
