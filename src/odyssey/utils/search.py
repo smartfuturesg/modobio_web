@@ -50,7 +50,6 @@ def update_client_dob(user_id:int, dob:str):
     if not es: return
     
     client = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
-    
     if client:
         if str(client.user_info.dob) != dob:
             update_body = {

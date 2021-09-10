@@ -200,7 +200,8 @@ def update_dob(mapper, connection, target):
     Listens for any updates to User table
     """
     from odyssey.utils.search import update_client_dob
-    update_client_dob(target.user_id, target.dob)
+    if target.dob:
+        update_client_dob(target.user_id, target.dob)
 
 @db.event.listens_for(User, "after_insert")
 def add_modobio_id(mapper, connection, target):
