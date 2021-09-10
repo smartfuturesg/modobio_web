@@ -298,10 +298,20 @@ class TelehealthClientTimeSelectApi(Resource):
 
             # Query wheel for available practitioners on target date in client's tzone
             # TODO: when wheel is ready, add sex to this availability check
-            wheel_practitioner_availabilities = wheel.available_timeslots(target_time_range = (target_start_datetime_utc, target_end_datetime_utc))
-                    
-            available = wheel_practitioner_availabilities  # availability dictionary {date: {user_id : [booking time idxs]}
-            staff_availability_timezone =  {_user_id: 'UTC' for _user_id in wheel_practitioner_availabilities} # current tz info for each staff we bring up for this target date
+            
+            wheel_practitioner_availabilities = wheel.available_timeslots(
+                target_time_range = (target_start_datetime_utc, target_end_datetime_utc), 
+                location_id=client_in_queue.location_id)
+
+            # allow wheel request during testing but, do not add clinician availabilities to response.
+            # We only have one wheel sandbox which can get very messy if we include booking wheel test clinicians
+            # as part of our test routines.  
+            if current_app.config['TESTING']:
+                available = {}
+                staff_availability_timezone = {}
+            else:    
+                available = wheel_practitioner_availabilities  # availability dictionary {date: {user_id : [booking time idxs]}
+                staff_availability_timezone =  {_user_id: 'UTC' for _user_id in wheel_practitioner_availabilities} # current tz info for each staff we bring up for this target date
 
             # gender preference for availability query below
             if client_in_queue.medical_gender == 'm':
@@ -333,7 +343,7 @@ class TelehealthClientTimeSelectApi(Resource):
                         ).all()
             else:
                 staff_availability = db.session.query(TelehealthStaffAvailability)\
-                    .join(StaffOperationalTerritories, PractitionerCredentials.user_id == TelehealthStaffAvailability.user_id)\
+                    .join(PractitionerCredentials, PractitionerCredentials.user_id == TelehealthStaffAvailability.user_id)\
                         .join(User, User.user_id==TelehealthStaffAvailability.user_id)\
                         .filter(
                             or_(
@@ -771,7 +781,8 @@ class TelehealthBookingsApi(BaseResource):
         wheel_clinician_ids = wheel.clinician_ids(key='user_id') 
         if staff_user_id in wheel_clinician_ids:
             staff_availability = wheel.available_timeslots(
-                target_time_range=(target_start_datetime_utc, target_end_datetime_utc+timedelta(minutes=5)), 
+                target_time_range = (target_start_datetime_utc, target_end_datetime_utc+timedelta(minutes=5)), 
+                location_id = client_in_queue.location_id,
                 clinician_id=wheel_clinician_ids[staff_user_id])[target_start_datetime_utc.date()].get(staff_user_id)
         else:
             staff_availability = db.session.execute(
@@ -966,9 +977,14 @@ class TelehealthBookingsApi(BaseResource):
             # both client and practitioner can change status to canceled and completed
             if new_status == 'In Progress':
                 raise InputError(405, 'Can only update to this status on Call Start')
-            if new_status in ('Pending', 'Accepted') and current_user.user_id != booking.staff_user_id:
+            elif new_status in ('Pending', 'Accepted') and current_user.user_id != booking.staff_user_id:
                 raise InputError(403, 'Only Practitioner may update to this status')
             
+            if new_status == 'Cancelled' and booking.external_booking_id:
+                # cancel appointment on wheel system if the staff memebr is a wheel practitioner
+                wheel = Wheel()
+                wheel.cancel_booking(booking.external_booking_id)
+                
             # Create TelehealthBookingStatus object if the request is updating the status
             status_history = TelehealthBookingStatus(
                 booking_id = booking_id,
@@ -977,6 +993,7 @@ class TelehealthBookingsApi(BaseResource):
                 status = new_status
             )
             db.session.add(status_history)
+
 
         booking.update(data)
 
