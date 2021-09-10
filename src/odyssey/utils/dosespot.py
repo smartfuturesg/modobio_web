@@ -212,6 +212,7 @@ def onboard_practitioner(user_id,db_trigger=False):
                                                 })
             ds_practitioner_id.user_id = user_id
             db.session.add(ds_practitioner_id)
+            db.session.flush()
             if db_trigger == False:
                 db.session.commit()
         else:

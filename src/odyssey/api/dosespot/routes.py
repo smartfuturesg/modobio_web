@@ -144,6 +144,7 @@ class DoseSpotPatientCreation(BaseResource):
                 ds_patient_id = DoseSpotCreatePatientSchema().load({'ds_user_id': res.json()['Id']})
                 ds_patient_id.user_id = user_id
                 db.session.add(ds_patient_id)
+                db.session.commit()
             else:
                 # There was an error creating the patient in DoseSpot system
                 raise InputError(status_code=405,message=res.json())
