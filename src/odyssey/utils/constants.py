@@ -858,7 +858,7 @@ REGISTRATION_PORTAL_URL = "www.modobio.com/user/registration-portal?portal_id={}
 
 #base url in prod would be www.modobio.com/, left blank to accomodate to different app branches (dev,prod,demo...)
 #{DOMAIN_NAME: modobio.com, dev...}, {reset token}
-PASSWORD_RESET_URL = "{}/user/password/forgot-password/reset?reset_token={}"
+PASSWORD_RESET_URL = "{}/user/password/reset?reset_token={}"
 
 DAY_OF_WEEK = ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday')
 
