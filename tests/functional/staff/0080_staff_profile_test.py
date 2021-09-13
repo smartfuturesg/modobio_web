@@ -38,6 +38,8 @@ def test_put_staff_profile(test_client):
     assert response.json['biological_sex_male'] == True
     assert response.json['bio'] == 'It\'s a me, Mario!'
     assert response.json['profile_picture'] != None
+    assert response.json['dob'] == '1995-06-14'
+
 
     #test changing only the picture
     response = test_client.put(
