@@ -72,9 +72,6 @@ class WearablesEndpoint(Resource):
             .filter_by(user_id=user_id)
             .one_or_none())
 
-        if not wearables:
-            raise ContentNotFound
-
         return wearables
 
     @token_auth.login_required(user_type=('client',))
@@ -170,12 +167,6 @@ class WearablesOuraOldAuthEndpoint(Resource):
             Wearables.query
             .filter_by(user_id=user_id)
             .one_or_none())
-
-        # TODO: Disable this check until frontend has a way of setting has_oura
-        #
-        # wearables = Wearables.query.filter_by(user_id=user_id).one_or_none()
-        # if not wearables or not wearables.has_oura:
-        #     raise ContentNotFound
 
         oura_id = current_app.config['OURA_CLIENT_ID']
         state = secrets.token_urlsafe(24)
@@ -629,9 +620,6 @@ class WearablesFreeStyleActivateEndpoint(Resource):
             .filter_by(user_id=user_id)
             .one_or_none())
 
-        if not cgm:
-            raise ContentNotFound
-
         return cgm
 
     @token_auth.login_required(user_type=('client',))
@@ -693,9 +681,6 @@ class WearablesFreeStyleEndpoint(Resource):
             WearablesFreeStyle.query
             .filter_by(user_id=user_id)
             .one_or_none())
-
-        if not cgm:
-            raise ContentNotFound
 
         return cgm
 
