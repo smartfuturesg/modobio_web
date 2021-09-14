@@ -216,3 +216,6 @@ it will default to localhost:5000/
 The purpose of the variable is to produce clickable URLs specific to the domain being used
 ie. production (modobio.com), dev r7 (dev-r0-7.modobio.com) 
 """
+
+# Google ReCaptcha api secret
+GOOGLE_RECAPTCHA_SECRET = ""

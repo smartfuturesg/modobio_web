@@ -1,6 +1,8 @@
 from datetime import datetime, timedelta
 import boto3
 import jwt
+import requests
+import json
 
 from flask import current_app, request, jsonify, redirect
 from flask_accepts import accepts, responds
@@ -442,6 +444,7 @@ class PasswordResetEmail(Resource):
     """Password reset endpoints."""
     
     @accepts(schema=UserPasswordRecoveryContactSchema, api=ns)
+    @responds(schema=UserPasswordRecoveryContactSchema, status_code=200, api=ns)
     def post(self):
         """begin a password reset session. 
             Staff member unable to log in will request a password reset
@@ -457,6 +460,21 @@ class PasswordResetEmail(Resource):
         email = request.parsed_obj['email']
         if not email:
             raise InputError(status_code=400, message='Please provide your email address')
+
+        # verify provided captcha key with google recaptcha api
+        request_data = {
+            'secret': current_app.config['GOOGLE_RECAPTCHA_SECRET'],
+            'response': request.parsed_obj['captcha_key']
+        }
+
+        response = requests.post('https://www.google.com/recaptcha/api/siteverify',
+                json=request_data)
+
+        res = json.loads(response.text)
+
+        # if captcha verification failed, return here rather than starting the password reset process
+        if not res['success']:
+            return res
 
         # collect user agent string from request headers
         ua_string = request.headers.get('User-Agent')
@@ -493,10 +511,10 @@ class PasswordResetEmail(Resource):
 
         # DEV mode won't send an email, so return password. DEV mode ONLY.
         if current_app.config['DEV']:
-            return jsonify({"token": password_reset_token,
-                            "password_reset_url" : PASSWORD_RESET_URL.format(url_scheme,password_reset_token)})
+            res['token'] = password_reset_token
+            res['password_reset_url'] = PASSWORD_RESET_URL.format(url_scheme,password_reset_token)
 
-        return 200
+        return res
         
 
 @ns.route('/password/forgot-password/reset')
