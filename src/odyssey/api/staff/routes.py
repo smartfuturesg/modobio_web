@@ -316,7 +316,8 @@ class StaffProfilePage(BaseResource):
             'firstname': user.firstname,
             'middlename': user.middlename,
             'lastname': user.lastname,
-            'biological_sex_male': user.biological_sex_male
+            'biological_sex_male': user.biological_sex_male,
+            'dob': user.dob
         }
 
         #as long as a staff member exists(checked above), they have a profile 
