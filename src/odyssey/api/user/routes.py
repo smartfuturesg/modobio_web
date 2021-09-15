@@ -461,20 +461,24 @@ class PasswordResetEmail(Resource):
         if not email:
             raise InputError(status_code=400, message='Please provide your email address')
 
-        # verify provided captcha key with google recaptcha api
-        request_data = {
-            'secret': current_app.config['GOOGLE_RECAPTCHA_SECRET'],
-            'response': request.parsed_obj['captcha_key']
-        }
 
-        response = requests.post('https://www.google.com/recaptcha/api/siteverify',
-                json=request_data)
+        # verify provided captcha key with google recaptcha api, only done outside of dev
+        if not current_app.config['DEV']:
+            request_data = {
+                'secret': current_app.config['GOOGLE_RECAPTCHA_SECRET'],
+                'response': request.parsed_obj['captcha_key']
+            }
 
-        res = json.loads(response.text)
+            response = requests.post('https://www.google.com/recaptcha/api/siteverify',
+                    headers={'Content-Type': 'application/x-www-form-urlencoded'},
+                    data=request_data)
 
-        # if captcha verification failed, return here rather than starting the password reset process
-        if not res['success']:
-            return res
+            res = json.loads(response.text)
+            res['error_codes'] = res['error-codes']
+
+            # if captcha verification failed, return here rather than starting the password reset process
+            if not res['success']:
+                return res
 
         # collect user agent string from request headers
         ua_string = request.headers.get('User-Agent')
