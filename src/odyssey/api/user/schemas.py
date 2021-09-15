@@ -96,7 +96,7 @@ class UserPasswordRecoveryContactSchema(Schema):
         currently just email but may be expanded to include sms
     """
     email = fields.Email(required=True, load_only=True)
-    captcha_key = fields.String(required=True, load_only=True)
+    captcha_key = fields.String(load_only=True)
     success = fields.Boolean(dump_only=True)
     challenge_ts = fields.DateTime(dump_only=True)
     hostname = fields.String(dump_only=True)

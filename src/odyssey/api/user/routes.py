@@ -461,7 +461,7 @@ class PasswordResetEmail(Resource):
         if not email:
             raise InputError(status_code=400, message='Please provide your email address')
 
-
+        res = {}
         # verify provided captcha key with google recaptcha api, only done outside of dev
         if not current_app.config['DEV']:
             request_data = {
