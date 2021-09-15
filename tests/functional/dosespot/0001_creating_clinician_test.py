@@ -75,3 +75,26 @@ from tests.functional.staff.data import staff_office_data
 #                                 headers=test_client.staff_auth_header)
 
 #     assert response.status_code == 200    
+
+def test_get_ds_pharmacies(test_client):
+    response = test_client.get('/dosespot/pharmacies/',
+                                headers=test_client.client_auth_header)
+    assert response.status_code == 201
+
+def test_get_patient_ds_pharmacies(test_client):
+    response = test_client.get(f'/dosespot/pharmacies/{test_client.client_id}/',
+                                headers=test_client.client_auth_header)
+
+    assert response.status_code == 200
+
+def test_post_patient_ds_pharmacies(test_client):
+    response = test_client.post(f'/dosespot/pharmacies/{test_client.client_id}/',
+                                headers=test_client.staff_auth_header)
+
+    assert response.status_code == 200        
+
+def test_get_patient_ds_pharmacies(test_client):
+    response = test_client.get(f'/dosespot/pharmacies/{test_client.client_id}/',
+                                headers=test_client.client_auth_header)
+
+    assert response.status_code == 200    

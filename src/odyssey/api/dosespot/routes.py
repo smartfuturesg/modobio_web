@@ -30,7 +30,7 @@ from odyssey.utils.auth import token_auth
 from odyssey.utils.errors import (
     InputError,
 )
-from odyssey.utils.dosespot import generate_sso, get_access_token, onboard_practitioner
+from odyssey.utils.dosespot import generate_encrypted_user_id,generate_sso, get_access_token, onboard_practitioner
 from odyssey.utils.base.resources import BaseResource
 
 ns = Namespace('dosespot', description='Operations related to DoseSpot')
@@ -72,9 +72,9 @@ class DoseSpotPatientCreation(BaseResource):
         ds_patient_id = DoseSpotPatientID.query.filter_by(user_id=user_id).one_or_none()
 
         modobio_clinic_id = str(current_app.config['DOSESPOT_MODOBIO_ID'])
-
+        clinic_api_key = current_app.config['DOSESPOT_API_KEY']
         encrypted_clinic_id = current_app.config['DOSESPOT_ENCRYPTED_MODOBIO_ID']
-        encrypted_user_id = ds_clinician.ds_encrypted_user_id        
+        encrypted_user_id = generate_encrypted_user_id(encrypted_clinic_id[:22],clinic_api_key,str(ds_clinician.ds_user_id))
 
         # If the patient does not exist in DoseSpot System yet
         if not ds_patient_id:
@@ -89,8 +89,7 @@ class DoseSpotPatientCreation(BaseResource):
                 headers = {'Authorization': f'Bearer {access_token}'}
             else:
                 raise InputError(status_code=405,message=res.json())
-
-
+                
             # Create patient in DoseSpot here
             # Gender
             # 1 - Male
@@ -188,15 +187,144 @@ class DoseSpotNotificationSSO(BaseResource):
         else:
             raise InputError(status_code=405,message=res.json())
 
-        res = requests.get(f'https://my.staging.dosespot.com/webapi/api/clinicians/{ds_practitioner.ds_user_id}/registrationStatus',headers=headers)
+        res = requests.get(f'https://my.staging.dosespot.com/webapi/api/clinicians/{ds_practitioner.ds_user_id}',headers=headers)
         if res.ok:
             """
             Section 4.2.10 Registration type in DoseSpot RESTful API Guide
             Return Items:
             1 - Pending
             3 - Remove
+
+            Confirmed = True means DoseSpot has verified the NPI number
             """
             if res.json()['Item']!=0:
+                if res.json()['Item']['Confirmed'] == True:
+                    pass
+        return 
+
+@ns.route('/pharmacies/')
+class DoseSpotPharmacies(BaseResource):
+
+    @token_auth.login_required()
+    # @responds(schema=DoseSpotPrescribeSSO,status_code=200, api=ns)
+    def get(self):
+        """
+        GET - Only a ModoBio Practitioners will be able to use this endpoint. This endpoint is used
+              to return their enrollment status
+        """
+        #ADMIN - GET Pharmacies WORKS
+
+        # ds_patient = DoseSpotPatientID.query.filter_by(user_id=user_id).one_or_none()
+        # if not ds_patient:
+        #     raise InputError(status_code=405,message='This patient does not have a DoseSpot account.')
+        admin_id = str(current_app.config['DOSESPOT_ADMIN_ID'])
+        modobio_id = str(current_app.config['DOSESPOT_MODOBIO_ID'])
+
+        encrypted_clinic_id = current_app.config['DOSESPOT_ENCRYPTED_MODOBIO_ID']
+        encrypted_user_id = current_app.config['DOSESPOT_ENCRYPTED_ADMIN_ID']
+
+        res = get_access_token(modobio_id,encrypted_clinic_id,admin_id,encrypted_user_id)
+        if res.ok:
+            access_token = res.json()['access_token']
+            headers = {'Authorization': f'Bearer {access_token}'}
+        else:
+            raise InputError(status_code=405,message=res.json())
+
+        # TODO Make these inputs
+        zipcode = 85255
+        state = 'AZ'
+
+        res = requests.get(f'https://my.staging.dosespot.com/webapi/api/pharmacies/search?zip={zipcode}&state={state}',headers=headers)
+        """
+        Section 4.2.10 Registration type in DoseSpot RESTful API Guide
+        Return Items:
+        1 - Pending
+        3 - Remove
+
+        Confirmed = True means DoseSpot has verified the NPI number
+        """
+        if res.json()['Item']!=0:
+            if res.json()['Item']['Confirmed'] == True:
                 pass
         return 
 
+
+@ns.route('/pharmacies/<int:user_id>/')
+class DoseSpotPatientPharmacies(BaseResource):
+
+    @token_auth.login_required()
+    # @responds(schema=DoseSpotPrescribeSSO,status_code=200, api=ns)
+    def get(self, user_id):
+        """
+        GET - Only a ModoBio Practitioners will be able to use this endpoint. This endpoint is used
+              to return their enrollment status
+        """
+        
+        # ADMIN - Cannot GET, look in to PROXY user
+        breakpoint()
+        ds_patient = DoseSpotPatientID.query.filter_by(user_id=user_id).one_or_none()
+        if not ds_patient:
+            raise InputError(status_code=405,message='This patient does not have a DoseSpot account.')
+        admin_id = str(current_app.config['DOSESPOT_ADMIN_ID'])
+        clinic_api_key = current_app.config['DOSESPOT_API_KEY']
+        modobio_id = str(current_app.config['DOSESPOT_MODOBIO_ID'])
+
+        # generating keys for ADMIN
+        encrypted_clinic_id = current_app.config['DOSESPOT_ENCRYPTED_MODOBIO_ID']
+        encrypted_user_id = current_app.config['DOSESPOT_ENCRYPTED_ADMIN_ID']
+        res = get_access_token(modobio_id,encrypted_clinic_id,admin_id,encrypted_user_id)
+        if res.ok:
+            access_token = res.json()['access_token']
+            headers = {'Authorization': f'Bearer {access_token}'}
+        else:
+            raise InputError(status_code=405,message=res.json())
+
+        res = requests.get(f'https://my.staging.dosespot.com/webapi/api/patients/{ds_patient.ds_user_id}/pharmacies',headers=headers)
+        breakpoint()
+        """
+        Section 4.2.10 Registration type in DoseSpot RESTful API Guide
+        Return Items:
+        1 - Pending
+        3 - Remove
+
+        Confirmed = True means DoseSpot has verified the NPI number
+        """
+        if res.json()['Item']!=0:
+            if res.json()['Item']['Confirmed'] == True:
+                pass
+        return 
+
+    @token_auth.login_required()
+    @responds(schema=DoseSpotPrescribeSSO,status_code=201, api=ns)
+    def post(self, user_id):
+        """
+        POST - Only a ModoBio Practitioners will be able to use this endpoint. As a workaround
+               we have stored a ModoBio Practitioners credentials so the ModoBio system will be able
+               to create the practitioner on the DoseSpot platform
+        """
+
+        # This user is the patient
+        user = User.query.filter_by(user_id=user_id).one_or_none()
+
+        # # DoseSpotPatientID
+        ds_patient_id = DoseSpotPatientID.query.filter_by(user_id=user_id).one_or_none()
+        
+        # ADMIN - WORKS
+        admin_id = str(current_app.config['DOSESPOT_ADMIN_ID'])
+        modobio_clinic_id = str(current_app.config['DOSESPOT_MODOBIO_ID'])
+
+        encrypted_clinic_id = current_app.config['DOSESPOT_ENCRYPTED_MODOBIO_ID']
+        encrypted_user_id = current_app.config['DOSESPOT_ENCRYPTED_ADMIN_ID']
+        res = get_access_token(modobio_clinic_id,encrypted_clinic_id,admin_id,encrypted_user_id)
+
+        if res.ok:
+            access_token = res.json()['access_token']
+            headers = {'Authorization': f'Bearer {access_token}'}
+        else:
+            raise InputError(status_code=405,message=res.json())
+        #TODO take this as input
+        pharmacy_id = 276
+
+        res = requests.post(f'https://my.staging.dosespot.com/webapi/api/patients/{ds_patient_id.ds_user_id}/pharmacies/{pharmacy_id}',headers=headers)
+
+        return
