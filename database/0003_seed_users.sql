@@ -118,6 +118,7 @@ INSERT INTO "StaffRoles" ("user_id", "role", "granter_id") VALUES
 (14, 'physical_therapist', 14), 
 (14, 'nutritionist', 14), 
 (14, 'trainer', 14), 
+(14, 'community_manager',14),
 (15, 'system_admin', 14), 
 (15, 'staff_admin', 14), 
 (15, 'client_services', 14), 

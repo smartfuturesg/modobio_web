@@ -17,6 +17,12 @@ from odyssey.utils.base.schemas import BaseSchema
 class DoseSpotPrescribeSSO(Schema):
     url = fields.String()
 
+class DoseSpotPharmacySelect(Schema):
+    pharmacy_id = fields.String()
+
+class DoseSpotPharmacyNestedSelect(Schema):
+    items = fields.Nested(DoseSpotPharmacySelect(many=True))
+
 class DoseSpotCreatePractitionerSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = DoseSpotPractitionerID

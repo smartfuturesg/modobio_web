@@ -174,7 +174,7 @@ def onboard_practitioner(user_id,db_trigger=False):
         # Having trouble sending dea and med_lic to the endpoint
         # HOWEVER, DoseSpot does not require that info, and ModoBio
         # will not be working with controlled substances, so DEA is also unnecessary.
-
+        
         min_payload = {'FirstName': user.firstname,
                 'LastName': user.lastname,
                 'DateOfBirth': user.dob,
@@ -191,7 +191,7 @@ def onboard_practitioner(user_id,db_trigger=False):
                 'MedicalLicenseNumbers': [],
                 'Active': True
                 }
-                
+
         res = requests.post('https://my.staging.dosespot.com/webapi/api/clinicians',headers=headers,data=min_payload)
 
         # If res is okay, store credentials
@@ -214,6 +214,78 @@ def onboard_practitioner(user_id,db_trigger=False):
         else:
             raise InputError(status_code=405,message=res.json())
     return
+
+def onboard_patient(patient_id:int,practitioner_id:int):
+    """
+    Create the patient in the DoseSpot System
+    """ 
+    # PROXY_USER - CAN Create patient on DS platform
+    # Practitioner_id = 0 means use a Proxy User
+    if practitioner_id == 0:
+        auth_id = str(232322)
+    else:
+        ds_clinician = DoseSpotPractitionerID.query.filter_by(user_id=practitioner_id).one_or_none()
+        auth_id = str(ds_clinician.user_id)
+    modobio_clinic_id = str(current_app.config['DOSESPOT_MODOBIO_ID'])
+    clinic_api_key = current_app.config['DOSESPOT_API_KEY']
+    encrypted_clinic_id = current_app.config['DOSESPOT_ENCRYPTED_MODOBIO_ID']
+      
+    
+    encrypted_user_id = generate_encrypted_user_id(encrypted_clinic_id[:22],clinic_api_key,auth_id)    
+    res = get_access_token(modobio_clinic_id,encrypted_clinic_id,auth_id,encrypted_user_id)
+
+    if res.ok:
+        access_token = res.json()['access_token']
+        headers = {'Authorization': f'Bearer {access_token}'}
+    else:
+        raise InputError(status_code=405,message=res.json())
+    # This user is the patient
+    user = User.query.filter_by(user_id=patient_id).one_or_none()
+    
+    # Create patient in DoseSpot here
+    # Gender
+    # 1 - Male
+    # 2 - Female
+    # 3 - Other
+    if user.client_info.gender == 'm':
+        gender = 1
+    elif user.client_info.gender == 'f':
+        gender = 2
+    else:
+        gender = 3
+    state = LookupTerritoriesOfOperations.query.filter_by(idx=user.client_info.territory_id).one_or_none()
+    # Phone Type
+    # 2 - Cell
+    min_payload = {'FirstName': user.firstname,
+            'LastName': user.lastname,
+            'DateOfBirth': user.dob.strftime('%Y-%m-%d'),
+            'Gender': gender,
+            'Address1': user.client_info.street,
+            'City':user.client_info.city,
+            'State':state.sub_territory_abbreviation,
+            'ZipCode':user.client_info.zipcode,
+            'PrimaryPhone': user.phone_number,
+            'PrimaryPhoneType': 2,
+            'Active': True
+            }
+    
+    res = requests.post('https://my.staging.dosespot.com/webapi/api/patients',
+        headers=headers,
+        data=min_payload)
+
+    if res.ok:
+        if 'Result' in res.json():
+            if 'ResultCode' in res.json()['Result']:
+                if res.json()['Result']['ResultCode'] != 'OK':
+                    raise InputError(status_code=405,message=res.json())                
+        ds_patient = DoseSpotCreatePatientSchema().load({'ds_user_id': res.json()['Id']})
+        ds_patient.user_id = patient_id
+        db.session.add(ds_patient)
+        db.session.commit()
+    else:
+        # There was an error creating the patient in DoseSpot system
+        raise InputError(status_code=405,message=res.json())
+    return ds_patient
 
 def get_access_token(clinic_id,encrypted_clinic_id,clinician_id,encrypted_user_id):
     payload = {'grant_type': 'password','Username':clinician_id,'Password':encrypted_user_id}

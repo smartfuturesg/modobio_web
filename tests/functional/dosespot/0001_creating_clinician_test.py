@@ -12,89 +12,53 @@ from tests.functional.staff.data import staff_office_data
 #         headers=test_client.staff_auth_header,
 #         data=dumps(payload),
 #         content_type='application/json')
-#     # Error because there has not been a StaffOffice yet
-#     assert response.status_code == 406
-
-# def test_post_1_create_staff_office(test_client):
-#     payload = deepcopy(staff_office_data['normal_data'])
-#     # phone number must not be sequential like 1234.. or repeating 1111.. etc
-#     # phone number also must be 10 characters long
-#     payload['phone'] = '6354523890'
-#     response = test_client.post(f'/staff/offices/{test_client.staff_id}/',
-#                                 headers=test_client.staff_auth_header,
-#                                 data=dumps(payload),
-#                                 content_type='application/json')
-#     assert response.status_code == 201
-
-# def test_post_2_ds_practitioner_create(test_client):
-#     payload = {}
-#     response = test_client.post(
-#         f'/dosespot/create-practitioner/{test_client.staff_id}/',
-#         headers=test_client.staff_auth_header,
-#         data=dumps(payload),
-#         content_type='application/json')
-
-#     assert response.status_code == 201
-
-# def test_post_1_ds_patient_prescribe(test_client):
-#     payload = {}
-#     response = test_client.post(
-#         f'/dosespot/prescribe/{test_client.client_id}/',
-#         headers=test_client.staff_auth_header,
-#         data=dumps(payload),
-#         content_type='application/json')
-
-#     assert response.status_code == 201
-#     global patient_sso
-#     patient_sso = response.json
-
-# def test_post_2_ds_patient_prescribe(test_client):
-#     payload = {}
-#     response = test_client.post(
-#         f'/dosespot/prescribe/{test_client.client_id}/',
-#         headers=test_client.staff_auth_header,
-#         data=dumps(payload),
-#         content_type='application/json')
-    
-#     assert response.status_code == 201
-#     assert response.json == patient_sso
-
-# def test_get_1_ds_practitioner_notification_sso(test_client):
-#     response = test_client.get(f'/dosespot/notifications/{test_client.staff_id}/',
-#                                 headers=test_client.staff_auth_header)
 
 #     assert response.status_code == 200
 
-# def test_delete_clean_staff_offices(test_client):
-#     staff_office = StaffOffices.query.filter_by(user_id = test_client.staff_id).one_or_none()
-#     db.session.delete(staff_office)
-#     db.session.commit()
+# def test_get_ds_pharmacies(test_client):
+#     response = test_client.get('/dosespot/pharmacies/',
+#                                 headers=test_client.client_auth_header)
+#     assert response.status_code == 201
 
-# def test_get_1_ds_practitioner_registration_status(test_client):
-#     response = test_client.get(f'/dosespot/enrollment-status/{test_client.staff_id}/',
-#                                 headers=test_client.staff_auth_header)
+# def test_get_patient_ds_pharmacies(test_client):
+#     response = test_client.get(f'/dosespot/pharmacies/{test_client.client_id}/',
+#                                 headers=test_client.client_auth_header)
+
+#     assert response.status_code == 200
+
+#TODO: Later problem
+# def test_get_ds_patient_allergies(test_client):
+#     response = test_client.get(f'/dosespot/allergies/{test_client.client_id}/',
+#                                 headers=test_client.client_auth_header)
 
 #     assert response.status_code == 200    
 
-def test_get_ds_pharmacies(test_client):
-    response = test_client.get('/dosespot/pharmacies/',
+def test_get_select_ds_pharmacies(test_client):
+    response = test_client.get(f'/dosespot/select/pharmacies/{test_client.client_id}/',
                                 headers=test_client.client_auth_header)
-    assert response.status_code == 201
-
-def test_get_patient_ds_pharmacies(test_client):
-    response = test_client.get(f'/dosespot/pharmacies/{test_client.client_id}/',
-                                headers=test_client.client_auth_header)
-
-    assert response.status_code == 200
-
-def test_post_patient_ds_pharmacies(test_client):
-    response = test_client.post(f'/dosespot/pharmacies/{test_client.client_id}/',
-                                headers=test_client.staff_auth_header)
-
-    assert response.status_code == 200        
-
-def test_get_patient_ds_pharmacies(test_client):
-    response = test_client.get(f'/dosespot/pharmacies/{test_client.client_id}/',
-                                headers=test_client.client_auth_header)
-
     assert response.status_code == 200    
+    assert len(response.json) == 100
+
+def test_get_patient_ds_pharmacies(test_client):
+    response = test_client.get(f'/dosespot/pharmacies/{test_client.client_id}/',
+                                headers=test_client.client_auth_header)
+    assert response.status_code == 200    
+
+# def test_post_patient_ds_pharmacies(test_client):
+#     payload = {'items':[{'pharmacy_id': 5},
+#                         {'pharmacy_id': 276},
+#                         {'pharmacy_id': 1000}]}
+
+#     response = test_client.post(f'/dosespot/pharmacies/{test_client.client_id}/',
+#                                 dumps=payload,
+#                                 headers=test_client.client_auth_header)
+#     breakpoint()
+#     assert response.status_code == 200        
+
+# def test_get_patient_ds_pharmacies(test_client):
+#     response = test_client.get(f'/dosespot/pharmacies/{test_client.client_id}/',
+#                                 headers=test_client.client_auth_header)
+#     breakpoint()
+    
+#     assert response.status_code == 200 
+#     assert len(response.json) == 3   

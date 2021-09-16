@@ -107,7 +107,7 @@ class PractitionerOrganizationAffiliation(BaseModelWithIdx, UserIdFkeyMixin):
     :type: :class:`LookupOrganizations` instance 
     """
 
-@db.event.listens_for(PractitionerCredentials, "after_insert")
+@db.event.listens_for(PractitionerCredentials, "after_update")
 def ds_onboard_practitioner(mapper, connection, target):
     """ 
     Listens for any updates to PractitionerCredentials table
