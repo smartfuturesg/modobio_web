@@ -95,7 +95,14 @@ class UserPasswordRecoveryContactSchema(Schema):
     """contact methods for password recovery.
         currently just email but may be expanded to include sms
     """
-    email = fields.Email(required=True)
+    email = fields.Email(required=True, load_only=True)
+    captcha_key = fields.String(load_only=True)
+    success = fields.Boolean(dump_only=True)
+    challenge_ts = fields.DateTime(dump_only=True)
+    hostname = fields.String(dump_only=True)
+    error_codes = fields.List(fields.String(), dump_only=True)
+    token = fields.String(dump_only=True)
+    password_reset_url = fields.String(dump_only=True)
 
 class UserPasswordResetSchema(Schema):
     #TODO Validate password strength
