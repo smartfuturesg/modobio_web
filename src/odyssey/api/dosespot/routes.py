@@ -50,7 +50,7 @@ class DoseSpotPractitionerCreation(BaseResource):
 @ns.route('/prescribe/<int:user_id>/')
 class DoseSpotPatientCreation(BaseResource):
     @token_auth.login_required(user_type=('staff',),staff_role=('medical_doctor',))
-    @responds(schema=DoseSpotPrescribeSSO,status_code=201, api=ns)
+    @responds(schema=DoseSpotPrescribeSSO,status_code=200, api=ns)
     def get(self, user_id):
         """
         GET - DoseSpot Patient prescribed medications
@@ -89,7 +89,7 @@ class DoseSpotPatientCreation(BaseResource):
             if res.json()['Item']['Confirmed'] == True:
                 pass
         return         
-
+    @responds(schema=DoseSpotPrescribeSSO,status_code=201,api=ns)
     def post(self, user_id):
         """
         POST - Only a ModoBio Practitioners will be able to use this endpoint. As a workaround
@@ -286,8 +286,6 @@ class DoseSpotPatientPharmacies(BaseResource):
             raise InputError(status_code=405,message=res.json())
         
         # Get the client's pharmacies to delete
-        breakpoint()
-
         res = requests.get(f'https://my.staging.dosespot.com/webapi/api/patients/{ds_patient.ds_user_id}/pharmacies',headers=headers)
 
         for item in res.json()['Items']:
