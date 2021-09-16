@@ -22,7 +22,7 @@ from odyssey.utils import search
 from .utils import login
 
 # From database/0001_seed_users.sql
-STAFF_ID = 12   # name@modobio.com
+STAFF_ID = 12   # staff@modobio.com
 CLIENT_ID = 22  # client@modobio.com
 
 # For care team fixture
