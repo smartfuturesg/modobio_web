@@ -86,7 +86,6 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
     @responds(schema=TelehealthBookingMeetingRoomsTokensSchema, api=ns, status_code=200)
     def get(self, booking_id):
         # Get the current user
-
         current_user, _ = token_auth.current_user()
         
         booking = TelehealthBookings.query.get(booking_id)
@@ -170,6 +169,14 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
                     'transaction_id': response_data['TransactionID']
                 })
                 db.session.add(failed)
+            ##
+            # If the booking is with a wheel practitioner
+            # send a consult start request to wheel
+            ##
+            if booking.external_booking_id:
+                wheel = Wheel()
+                wheel.start_consult(booking.external_booking_id)
+
         elif g.user_type == 'client':
             meeting_room.client_access_token = token
         
@@ -2037,3 +2044,45 @@ class TelehealthAllChatRoomApi(Resource):
             
         return payload
         
+@ns.route('/bookings/complete/<int:booking_id>/')
+class TelehealthBookingsRoomAccessTokenApi(Resource):
+    """
+    API for completing bookings
+    """
+    @token_auth.login_required(user_type=('staff',))
+    @responds(api=ns, status_code=200)
+    def put(self, booking_id):
+        """
+        Complete the booking by:
+        - send booking complete request to wheel
+        - update booking status in TelehealthBookings
+        """
+        booking = db.session.execute(select(TelehealthBookings).where(
+            TelehealthBookings.idx == booking_id,
+            TelehealthBookings.status == 'In Progress')).scalars().one_or_none()
+        if not booking:
+            raise InputError(status_code=405, message='Meeting does not exist yet or has not yes begun')
+
+        current_user, _ = token_auth.current_user()
+
+        # make sure the requester is one of the participants
+        if not current_user.user_id == booking.staff_user_id:
+            raise InputError(status_code=405, message='logged in user must be a booking participant')
+        
+        if booking.external_booking_id:
+            wheel = Wheel()
+            wheel.complete_consult(booking.external_booking_id)
+        
+
+        booking.status = 'Completed'
+
+        status_history = TelehealthBookingStatus(
+            booking_id=booking_id,
+            reporter_id=current_user.user_id,
+            reporter_role='Practitioner',
+            status='Completed'
+        )
+        db.session.add(status_history)
+        db.session.commit() 
+
+        return 

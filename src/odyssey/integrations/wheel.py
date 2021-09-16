@@ -1,7 +1,7 @@
 import random
 from typing import Tuple
 from dateutil import parser
-from flask_restx.fields import DateTime
+from flask_restx.fields import Date, DateTime
 
 from odyssey.api.staff.models import StaffOperationalTerritories, StaffProfile, StaffRoles
 from io import BytesIO
@@ -37,7 +37,7 @@ class Wheel:
         self.wheel_org_idx = db.session.execute(select(LookupOrganizations.idx).where(LookupOrganizations.org_name == 'Wheel')).scalars().one_or_none()
 
 
-    def available_timeslots(self, target_time_range, location_id, clinician_id=''):
+    def available_timeslots(self, target_time_range: Tuple[DateTime, DateTime], location_id: int, clinician_id: str = ''):
         """
         Query wheel's API to find timeslots for a specific datetime range.
         Wheel URI: /v1/consult_rates/<consult_rate>/timeslots
@@ -424,7 +424,7 @@ class Wheel:
 
             db.session.commit()
 
-    def cancel_booking(self, external_booking_id):
+    def cancel_booking(self, external_booking_id: str):
         """
         Cancel the wheel consultation using PATCH v1/consults/<external_booking_id>/cancel
 
@@ -432,6 +432,60 @@ class Wheel:
         """
 
         url = self.url_base+ f"/v1/consults/{external_booking_id}/cancel"
+
+        response = requests.patch(
+                url,
+                headers={'x-api-key': self.wheel_api_token,
+                'Content-Type': 'application/json'},
+            )
+
+        # user must attempt this request again later
+        # TODO: Consider making this a recoverable situation by retrying
+        try:
+            response.raise_for_status()
+        except Exception as e:
+            raise GenericThirdPartyError(status_code = response.status_code, message=response.json())
+
+        return
+
+    def start_consult(self, external_booking_id: str):
+        """
+        Send a consult start request to wheel. 
+
+        Params
+        -------
+        external_booking_id: 
+            Booking reference id from TelehealthBookings.external_booking_id
+        """
+
+        url = self.url_base+ f"/v1/consults/{external_booking_id}/start"
+
+        response = requests.patch(
+                url,
+                headers={'x-api-key': self.wheel_api_token,
+                'Content-Type': 'application/json'},
+            )
+
+        # user must attempt this request again later
+        # TODO: Consider making this a recoverable situation by retrying
+        try:
+            response.raise_for_status()
+        except Exception as e:
+            raise GenericThirdPartyError(status_code = response.status_code, message=response.json())
+
+        return
+
+    def complete_consult(self, external_booking_id: str):
+        """
+        Send a consult complete request to wheel. 
+
+        Params
+        -------
+        external_booking_id: 
+            Booking reference id from TelehealthBookings.external_booking_id
+        """
+
+        url = self.url_base+ f"/v1/consults/{external_booking_id}/complete"
 
         response = requests.patch(
                 url,
