@@ -503,7 +503,7 @@ class PasswordResetEmail(Resource):
         if user_agent.is_mobile or user_agent.is_tablet:
             url_scheme = 'com.modobio.modobioclient:/'
         else:
-            url_scheme = f'https://{current_app.config["DOMAIN_NAME"]}'
+            url_scheme = f'https://{current_app.config["FRONT_END_DOMAIN_NAME"]}'
 
         secret = current_app.config['SECRET_KEY']
         password_reset_token = jwt.encode({'exp': datetime.utcnow()+timedelta(minutes = 15), 
