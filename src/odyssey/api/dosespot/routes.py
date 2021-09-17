@@ -45,8 +45,11 @@ class DoseSpotPractitionerCreation(BaseResource):
                we have stored a DoseSpot Admin credentials so the ModoBio system will be able
                to create the practitioner on the DoseSpot platform
         """
-        return onboard_practitioner(user_id)
-
+        res = onboard_practitioner(user_id)
+        if res == 201:
+            db.session.commit()
+        return res
+        
 @ns.route('/prescribe/<int:user_id>/')
 class DoseSpotPatientCreation(BaseResource):
     @token_auth.login_required(user_type=('staff',),staff_role=('medical_doctor',))

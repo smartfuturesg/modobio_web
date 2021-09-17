@@ -348,3 +348,23 @@ def ds_onboard_practitioner(mapper, connection, target):
             onboard_practitioner(target.user_id,db_trigger=True)    
         except:
             return
+
+@db.event.listens_for(StaffOffices, "after_update")
+def ds_onboard_practitioner(mapper, connection, target):
+    """ 
+    Listens for any updates to StaffOffice table
+
+    If any updates occur, we will try to automatically onboard that MD to to the DS platform
+    """
+    from odyssey.utils.dosespot import onboard_practitioner
+    from odyssey.api.practitioner.models import PractitionerCredentials
+    from odyssey.api.dosespot.models import DoseSpotPractitionerID
+
+    verified_npi = PractitionerCredentials.query.filter_by(user_id=target.user_id,credential_type='npi',status='Verified').one_or_none()
+    ds_practitioner = DoseSpotPractitionerID.query.filter_by(user_id=target.user_id).one_or_none()
+
+    if verified_npi and not ds_practitioner:
+        try:
+            onboard_practitioner(target.user_id,db_trigger=True)    
+        except:
+            return            
