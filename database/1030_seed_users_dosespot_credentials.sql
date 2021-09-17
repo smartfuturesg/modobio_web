@@ -19,10 +19,5 @@ insert into "DoseSpotPatientID" ("user_id", "ds_user_id") values
 (22, 18090700);
 
 
-delete from "ClientInfo" 
-			where idx >= 1;
-alter sequence "ClientInfo_idx_seq"
-  restart with 1;
-
 insert into "ClientInfo" ("user_id","territory_id") values
 (22,1);
