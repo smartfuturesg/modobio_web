@@ -306,7 +306,7 @@ class TelehealthClientTimeSelectApi(Resource):
             # Query wheel for available practitioners on target date in client's tzone
             # TODO: when wheel is ready, add sex to this availability check
             
-            wheel_practitioner_availabilities = wheel.available_timeslots(
+            wheel_practitioner_availabilities = wheel.openings(
                 target_time_range = (target_start_datetime_utc, target_end_datetime_utc), 
                 location_id=client_in_queue.location_id)
 
@@ -451,6 +451,8 @@ class TelehealthClientTimeSelectApi(Resource):
 
             ###
             # Take 5 minute time blocks and convert them into appointment timeslots with a 20-minute duration
+            # Loop through available time blocks by target date, staff_id
+            # 
             ###
 
             # NOTE: It might be a good idea to shuffle user_id_arr and only select up to 10 (?) staff members 
@@ -458,40 +460,48 @@ class TelehealthClientTimeSelectApi(Resource):
             # user_id_arr = [1,2,3,4,5]
             # user_id_arr.random() -> [3,5,2,1,4]
             # user_id_arr[0:3]
+
             timeArr = {} # client localized booking times, should only be for the target date the client specified 
+
             for target_date, staff_availability in available.items():
                 for staff_id in staff_availability:
                     if staff_id not in removedNum[target_date]:
-                        removedNum[target_date][staff_id] = []            
-                    for idx,time_id in enumerate(available[target_date][staff_id]):                 
-                        if idx + 1 < len(available[target_date][staff_id]):
-                            if available[target_date][staff_id][idx+1] - time_id < idx_delta and time_id + idx_delta < available[target_date][staff_id][-1]:
+                        removedNum[target_date][staff_id] = []  
+
+                    # loop through available time blocks
+                    #          
+                    for idx,time_id in enumerate(available[target_date][staff_id]):  
+                        # if not at end of availability list               
+                        if idx + idx_delta < len(available[target_date][staff_id]):
+                            # If there is a continuous block of time equal to the desired meeting duration
+                            if available[target_date][staff_id][idx+idx_delta] - time_id == idx_delta:
                                 # since we are accessing an array, we need to -1 because recall time_id is the ACTUAL time increment idx
                                 # and arrays are 0 indexed in python
+                                # booking start time options should be every 15 mins
                                 if time_inc[time_id-1].start_time.minute%15 == 0: 
-
                                     # client's tz: client_in_queue.timezone
-                                    # staff's timezone: staff_availability_timezone[staff_user_id]
+                                    # staff availabilities stored in UTC
                                     start_time_utc = datetime.combine(
                                         target_date, 
                                         time_inc[time_id-1].start_time, 
                                         tzinfo=tz.UTC)
                                     
-                                    start_time_client_localized = start_time_utc.astimezone(tz.gettz(client_in_queue.timezone))         
-                                    time_idx_dict[start_time_client_localized.strftime('%H:%M:%S')]
+                                    start_time_client_localized = start_time_utc.astimezone(tz.gettz(client_in_queue.timezone))     
+
+                                    # add this start time to the timeArr dict
                                     if start_time_client_localized not in timeArr:
                                         timeArr[start_time_client_localized] = []
-                                    
+
+                                    # ensure the staff does not have any overlapping bookings and can fulfill the pre/post booking buffer of 5 mins
+                                    # if this staff does not have the time blocks open, do not add them to the timeArr dict
                                     if time_id+idx_delta in removedNum[target_date][staff_id]:
                                         continue                                            
                                     else:                                 
-                                        # if when localizing to client's time zone, the date changes to the day before the original 
-                                        # target date, do not show this availability to the client 
                                         timeArr[start_time_client_localized].append({"staff_id": staff_id,"idx":time_idx_dict[start_time_client_localized.strftime('%H:%M:%S')]})                                                            
                             else:
                                 continue
                         else:
-                            continue 
+                            break 
 
             ##
             # Loop through timeArr:
@@ -787,8 +797,8 @@ class TelehealthBookingsApi(BaseResource):
         wheel = Wheel()
         wheel_clinician_ids = wheel.clinician_ids(key='user_id') 
         if staff_user_id in wheel_clinician_ids:
-            staff_availability = wheel.available_timeslots(
-                target_time_range = (target_start_datetime_utc, target_end_datetime_utc+timedelta(minutes=5)), 
+            staff_availability = wheel.openings(
+                target_time_range = (target_start_datetime_utc-timedelta(minutes=5), target_end_datetime_utc+timedelta(minutes=5)), 
                 location_id = client_in_queue.location_id,
                 clinician_id=wheel_clinician_ids[staff_user_id])[target_start_datetime_utc.date()].get(staff_user_id)
         else:
@@ -919,8 +929,8 @@ class TelehealthBookingsApi(BaseResource):
         client['end_time_localized'] = end_time_client_localized
         practitioner = {**booking.practitioner.__dict__}
         practitioner['timezone'] = booking.staff_timezone
-        practitioner['start_time_localized'] = time_inc[request.parsed_obj.booking_window_id_start_time-1].start_time
-        practitioner['end_time_localized'] = time_inc[request.parsed_obj.booking_window_id_end_time-1].end_time
+        practitioner['start_time_localized'] = booking_start_staff_localized.time()
+        practitioner['end_time_localized'] = booking_end_staff_localized.time()
 
         payload = {
             'all_bookings': 1,
