@@ -18,7 +18,7 @@ class DoseSpotPrescribeSSO(Schema):
     url = fields.String()
 
 class DoseSpotPharmacySelect(Schema):
-    pharmacy_id = fields.String()
+    pharmacy_id = fields.Integer()
 
 class DoseSpotPharmacyNestedSelect(Schema):
     items = fields.Nested(DoseSpotPharmacySelect(many=True))

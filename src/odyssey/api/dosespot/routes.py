@@ -255,13 +255,14 @@ class DoseSpotPatientPharmacies(BaseResource):
         return res.json()['Items']
 
     @token_auth.login_required()
-    @accepts(schema=DoseSpotPharmacyNestedSelect)
+    @accepts(schema=DoseSpotPharmacyNestedSelect,api=ns)
     def post(self, user_id):
         """
         POST - The pharmacies the Modobio client has selected (at most 3.)
-   
+               We delete the existing pharmacy selection, and populate with the selected choices
                DoseSpot Admin credentials will be used for this endpoint
         """
+
         payload = request.json
         if len(payload['items'])>3:
             raise InputError(status_code=405,message='Can only select up to 3 pharmacies.')
@@ -285,15 +286,30 @@ class DoseSpotPatientPharmacies(BaseResource):
         else:
             raise InputError(status_code=405,message=res.json())
         
+        # CANNOT DELETE BECAUSE YOU MUST BE A PROXY User
+        #----------------------------------
         # Get the client's pharmacies to delete
-        res = requests.get(f'https://my.staging.dosespot.com/webapi/api/patients/{ds_patient.ds_user_id}/pharmacies',headers=headers)
+        
+        proxy_user = str(232322)        
+        clinic_api_key = current_app.config['DOSESPOT_API_KEY']
+        proxy_encrypted_user_id = generate_encrypted_user_id(encrypted_clinic_id[:22],clinic_api_key,proxy_user)
+        proxy_res = get_access_token(modobio_clinic_id,encrypted_clinic_id,proxy_user,proxy_encrypted_user_id)
+        if proxy_res.ok:
+            proxy_access_token = proxy_res.json()['access_token']
+            proxy_headers = {'Authorization': f'Bearer {proxy_access_token}'}
+        else:
+            raise InputError(status_code=405,message=res.json())
+
+        
+        res = requests.get(f'https://my.staging.dosespot.com/webapi/api/patients/{ds_patient.ds_user_id}/pharmacies',headers=proxy_headers)
 
         for item in res.json()['Items']:
             pharm_id = item['PharmacyId']
-            res = requests.delete(f'https://my.staging.dosespot.com/webapi/api/patients/{ds_patient.ds_user_id}/pharmacies/{pharm_id}',headers=headers)
+            res = requests.delete(f'https://my.staging.dosespot.com/webapi/api/patients/{ds_patient.ds_user_id}/pharmacies/{pharm_id}',headers=proxy_headers)
  
 
-        for pharm_id in payload['items']:
+        for item in payload['items']:
+            pharm_id = item['pharmacy_id']
             res = requests.post(f'https://my.staging.dosespot.com/webapi/api/patients/{ds_patient.ds_user_id}/pharmacies/{pharm_id}',headers=headers)
-        
+            breakpoint()
         return
