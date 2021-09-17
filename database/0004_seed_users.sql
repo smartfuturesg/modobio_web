@@ -58,8 +58,8 @@ INSERT INTO "UserLogin" ("user_id", "password") VALUES
 (32, 'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1'),
 (33, 'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1');
 
-INSERT INTO "ClientInfo" ("user_id", "membersince") VALUES
-(22, '2021-01-01');
+INSERT INTO "ClientInfo" ("user_id", "membersince","territory_id","zipcode") VALUES
+(22, '2021-01-01',1,85255);
 
 INSERT INTO "UserSubscriptions" ("user_id", "is_staff", "start_date", "subscription_status", "subscription_type_id") VALUES
 (22, false, '2021-01-01', 'unsubscribed', 1);
