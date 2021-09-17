@@ -220,12 +220,12 @@ WHEEL_NP_CONSULT_RATE = '9c36e5c6-ed91-4546-a847-c649c81db265'
 MONGO_URI = ''
 
 # Calling host base uri 
-DOMAIN_NAME = 'localhost:5000'
+FRONT_END_DOMAIN_NAME = ''
 """ Default name of calling domain
-
-If flask_env == development and this variable isn't set in the env, 
-it will default to localhost:5000/
 
 The purpose of the variable is to produce clickable URLs specific to the domain being used
 ie. production (modobio.com), dev r7 (dev-r0-7.modobio.com) 
 """
+
+# Google ReCaptcha api secret
+GOOGLE_RECAPTCHA_SECRET = ""
