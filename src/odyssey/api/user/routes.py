@@ -9,7 +9,6 @@ from flask_accepts import accepts, responds
 from flask_restx import Resource, Namespace
 from sqlalchemy.sql.expression import select
 from werkzeug.security import check_password_hash
-from user_agents import parse
 
 from odyssey.api import api
 from odyssey.api.client.schemas import ClientInfoSchema, ClientGeneralMobileSettingsSchema, ClientRaceAndEthnicitySchema
@@ -482,8 +481,8 @@ class PasswordResetEmail(Resource):
 
         # collect user agent string from request headers
         ua_string = request.headers.get('User-Agent')
-        user_agent = parse(ua_string)
 
+        # TODO save request history in logs, not db
         request_history = UserResetPasswordRequestHistory()
         request_history.ua_string = ua_string
         request_history.email = email
@@ -499,11 +498,9 @@ class PasswordResetEmail(Resource):
         db.session.add(request_history)
         db.session.commit()
 
-        # use python library user_agents to determine if ua_string belongs to a mobile device or not
-        if user_agent.is_mobile or user_agent.is_tablet:
-            url_scheme = 'com.modobio.modobioclient:/'
-        else:
-            url_scheme = f'https://{current_app.config["FRONT_END_DOMAIN_NAME"]}'
+        # url_scheme specific to version of app requesting it. 
+        # For mobile, this should be a universal link that tries to open the app
+        url_scheme = f'https://{current_app.config["FRONT_END_DOMAIN_NAME"]}'
 
         secret = current_app.config['SECRET_KEY']
         password_reset_token = jwt.encode({'exp': datetime.utcnow()+timedelta(minutes = 15), 
