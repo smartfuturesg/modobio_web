@@ -449,7 +449,9 @@ class PasswordResetEmail(Resource):
         """begin a password reset session. 
             Staff member unable to log in will request a password reset
             with only their email. Emails will be checked for exact match in the database
-            to a staff member. 
+            to a staff member. If outside of the dev environment, a Google ReCaptcha response
+            must be provided. If a recaptcha response is not provided in the dev environment, captcha
+            verification will be skipped.
     
             If the email exists, a signed JWT is created; encoding the token's expiration 
             time and the user_id. The code will be placed into this URL <url for password reset>
@@ -462,8 +464,9 @@ class PasswordResetEmail(Resource):
             raise InputError(status_code=400, message='Please provide your email address')
 
         res = {}
-        # verify provided captcha key with google recaptcha api, only done outside of dev
-        if not current_app.config['DEV']:
+
+        # verify Google ReCaptcha - optional if in dev environment, otherwise required. () for clarity
+        if (current_app.config['DEV'] and 'captcha_key' in request.parsed_obj) or not current_app.config['DEV']:
             request_data = {
                 'secret': current_app.config['GOOGLE_RECAPTCHA_SECRET'],
                 'response': request.parsed_obj['captcha_key']
