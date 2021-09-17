@@ -18,6 +18,3 @@ alter sequence "DoseSpotPatientID_idx_seq"
 insert into "DoseSpotPatientID" ("user_id", "ds_user_id") values
 (22, 18090700);
 
-
-insert into "ClientInfo" ("user_id","territory_id") values
-(22,1);
