@@ -166,7 +166,7 @@ class DoseSpotNotificationSSO(BaseResource):
             access_token = res.json()['access_token']
             headers = {'Authorization': f'Bearer {access_token}'}
         else:
-            raise InputError(status_code=405,message=res.json())
+            raise InputError(status_code=406,message='Could not create')
 
         res = requests.get(f'https://my.staging.dosespot.com/webapi/api/clinicians/{ds_practitioner.ds_user_id}',headers=headers)
         if res.ok:
