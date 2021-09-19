@@ -201,7 +201,7 @@ class DoseSpotSelectPharmacies(BaseResource):
             access_token = res.json()['access_token']
             headers = {'Authorization': f'Bearer {access_token}'}
         else:
-            raise InputError(status_code=405,message=res.json())
+            raise InputError(status_code=403,message=res.json())
 
         user = User.query.filter_by(user_id=user_id).one_or_none()
         state = LookupTerritoriesOfOperations.query.filter_by(idx=user.client_info.territory_id).one_or_none()
