@@ -166,7 +166,7 @@ class DoseSpotNotificationSSO(BaseResource):
             access_token = res.json()['access_token']
             headers = {'Authorization': f'Bearer {access_token}'}
         else:
-            raise InputError(status_code=406,message='Could not create')
+            raise InputError(status_code=405,message='Could not create')
 
         res = requests.get(f'https://my.staging.dosespot.com/webapi/api/clinicians/{ds_practitioner.ds_user_id}',headers=headers)
         if res.ok:
@@ -190,9 +190,12 @@ class DoseSpotSelectPharmacies(BaseResource):
         """
         admin_id = str(current_app.config['DOSESPOT_ADMIN_ID'])
         modobio_id = str(current_app.config['DOSESPOT_MODOBIO_ID'])
+        clinic_api_key = current_app.config['DOSESPOT_API_KEY']
 
         encrypted_clinic_id = current_app.config['DOSESPOT_ENCRYPTED_MODOBIO_ID']
         encrypted_user_id = current_app.config['DOSESPOT_ENCRYPTED_ADMIN_ID']
+        encrypted_user_id = generate_encrypted_user_id(encrypted_clinic_id[:22],clinic_api_key,admin_id)    
+
         res = get_access_token(modobio_id,encrypted_clinic_id,admin_id,encrypted_user_id)
         if res.ok:
             access_token = res.json()['access_token']
