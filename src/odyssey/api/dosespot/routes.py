@@ -195,14 +195,14 @@ class DoseSpotSelectPharmacies(BaseResource):
             access_token = res.json()['access_token']
             headers = {'Authorization': f'Bearer {access_token}'}
         else:
-            raise InputError(status_code=402,message=res.json())
+            raise InputError(status_code=407,message=res.json())
 
         user = User.query.filter_by(user_id=user_id).one_or_none()
         state = LookupTerritoriesOfOperations.query.filter_by(idx=user.client_info.territory_id).one_or_none()
 
         res = requests.get(f'https://my.staging.dosespot.com/webapi/api/pharmacies/search?zip={user.client_info.zipcode}&state={state.sub_territory_abbreviation}',headers=headers)
         if not res.ok:
-            raise InputError(status_code=407,message=res.json())
+            raise InputError(status_code=402,message=res.json())
         return res.json()['Items']
 
 @ns.route('/pharmacies/<int:user_id>/')
