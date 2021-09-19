@@ -1,8 +1,4 @@
-import os, boto3, secrets, pathlib, json
 import requests
-
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
 
 from flask import g, request, current_app
 from flask_accepts import accepts, responds
@@ -13,7 +9,8 @@ from odyssey import db
 
 from odyssey.api.dosespot.models import (
     DoseSpotPractitionerID,
-    DoseSpotPatientID
+    DoseSpotPatientID,
+    DoseSpotProxyID
 )
 from odyssey.api.dosespot.schemas import (
     DoseSpotPrescribeSSO,
@@ -29,7 +26,7 @@ from odyssey.utils.auth import token_auth
 from odyssey.utils.errors import (
     InputError,
 )
-from odyssey.utils.dosespot import generate_encrypted_user_id,generate_sso, get_access_token, onboard_practitioner, onboard_patient
+from odyssey.utils.dosespot import generate_encrypted_user_id,generate_sso, get_access_token, onboard_practitioner, onboard_patient, onboard_proxy_user
 from odyssey.utils.base.resources import BaseResource
 
 ns = Namespace('dosespot', description='Operations related to DoseSpot')
@@ -49,7 +46,7 @@ class DoseSpotPractitionerCreation(BaseResource):
         if res == 201:
             db.session.commit()
         return res
-        
+
 @ns.route('/prescribe/<int:user_id>/')
 class DoseSpotPatientCreation(BaseResource):
     @token_auth.login_required(user_type=('staff',),staff_role=('medical_doctor',))
@@ -58,6 +55,8 @@ class DoseSpotPatientCreation(BaseResource):
         """
         GET - DoseSpot Patient prescribed medications
         """
+
+        # TODO: Do we need this yet? Implement start and end dates
         ds_patient = DoseSpotPatientID.query.filter_by(user_id=user_id).one_or_none()
         if not ds_patient:
             raise InputError(status_code=405,message='This patient does not have a DoseSpot account.')
@@ -69,7 +68,10 @@ class DoseSpotPatientCreation(BaseResource):
         encrypted_user_id = current_app.config['DOSESPOT_ENCRYPTED_ADMIN_ID']
 
         # PROXY_USER
-        proxy_user = str(232322)
+        # proxy_user = str(232322)
+        proxy_user = DoseSpotProxyID.query.one_or_none()
+        if not proxy_user:
+            proxy_user = onboard_proxy_user()        
         encrypted_user_id = generate_encrypted_user_id(encrypted_clinic_id[:22],clinic_api_key,proxy_user)
 
         res = get_access_token(modobio_id,encrypted_clinic_id,proxy_user,encrypted_user_id)
@@ -80,18 +82,9 @@ class DoseSpotPatientCreation(BaseResource):
             raise InputError(status_code=405,message=res.json())
 
         res = requests.get(f'https://my.staging.dosespot.com/webapi/api/patients/{ds_patient.ds_user_id}/pharmacies',headers=headers)
-        """
-        Section 4.2.10 Registration type in DoseSpot RESTful API Guide
-        Return Items:
-        1 - Pending
-        3 - Remove
 
-        Confirmed = True means DoseSpot has verified the NPI number
-        """
-        if res.json()['Item']!=0:
-            if res.json()['Item']['Confirmed'] == True:
-                pass
-        return         
+        return   
+    @token_auth.login_required(user_type=('staff',),staff_role=('medical_doctor',))      
     @responds(schema=DoseSpotPrescribeSSO,status_code=201,api=ns)
     def post(self, user_id):
         """
@@ -105,9 +98,6 @@ class DoseSpotPatientCreation(BaseResource):
         ds_clinician = DoseSpotPractitionerID.query.filter_by(user_id=curr_user.user_id).one_or_none()
         if not ds_clinician:
             raise InputError(status_code=405,message='This Practitioner does not have a DoseSpot account.')
-
-        # This user is the patient
-        user = User.query.filter_by(user_id=user_id).one_or_none()
 
         # DoseSpotPatientID
         ds_patient = DoseSpotPatientID.query.filter_by(user_id=user_id).one_or_none()
@@ -132,7 +122,6 @@ class DoseSpotNotificationSSO(BaseResource):
         GET - Only a ModoBio Practitioners will be able to use this endpoint. This endpoint is used
               to return the SSO Link 
         """
-
         # Clinician ID 
         curr_suer,_ = token_auth.current_user()
         ds_clinician = DoseSpotPractitionerID.query.filter_by(user_id=user_id).one_or_none()
@@ -148,7 +137,6 @@ class DoseSpotNotificationSSO(BaseResource):
 
 @ns.route('/enrollment-status/<int:user_id>/')
 class DoseSpotNotificationSSO(BaseResource):
-
     @token_auth.login_required(user_type=('staff',),staff_role=('medical_doctor',))
     @responds(schema=DoseSpotPrescribeSSO,status_code=200, api=ns)
     def get(self, user_id):
@@ -160,8 +148,11 @@ class DoseSpotNotificationSSO(BaseResource):
         ds_practitioner = DoseSpotPractitionerID.query.filter_by(user_id=user_id).one_or_none()
         if not ds_practitioner:
             raise InputError(status_code=405,message='This Practitioner does not have a DoseSpot account.')
+        
+        if ds_practitioner.enrollment_status == 'enrolled':
+            return {'status': ds_practitioner.ds_enrollment_status}
+
         admin_id = str(current_app.config['DOSESPOT_ADMIN_ID'])
-        clinic_api_key = current_app.config['DOSESPOT_API_KEY']
         modobio_id = str(current_app.config['DOSESPOT_MODOBIO_ID'])
 
         # generating keys for ADMIN
@@ -182,11 +173,11 @@ class DoseSpotNotificationSSO(BaseResource):
                     ds_practitioner.update({'ds_enrollment_status':'enrolled'})
                     db.session.commit()
                     ds_practitioner.ds_enrollment_status = 'enrolled'
-        return {'enrollment_status': ds_practitioner.ds_enrollment_status}
+        return {'status': ds_practitioner.ds_enrollment_status}
 
 @ns.route('/select/pharmacies/<int:user_id>/')
 class DoseSpotSelectPharmacies(BaseResource):
-    @token_auth.login_required()
+    @token_auth.login_required(user_type=('client',))
     def get(self,user_id):
         """
         GET - This is to display to the Modobio client the pharmacies available to them
@@ -216,8 +207,7 @@ class DoseSpotSelectPharmacies(BaseResource):
 
 @ns.route('/pharmacies/<int:user_id>/')
 class DoseSpotPatientPharmacies(BaseResource):
-    @token_auth.login_required()
-    # @responds(schema=DoseSpotPrescribeSSO,status_code=200, api=ns)
+    @token_auth.login_required(user_type=('client',))
     def get(self, user_id):
         """
         GET - The pharmacies the Modobio client has selected (at most 3.)
@@ -240,11 +230,13 @@ class DoseSpotPatientPharmacies(BaseResource):
         encrypted_clinic_id = current_app.config['DOSESPOT_ENCRYPTED_MODOBIO_ID']
         encrypted_user_id = current_app.config['DOSESPOT_ENCRYPTED_ADMIN_ID']
 
-        # TODO: store PROXY_USER
-        proxy_user = str(232322)
-        encrypted_user_id = generate_encrypted_user_id(encrypted_clinic_id[:22],clinic_api_key,proxy_user)
+        proxy_user = DoseSpotProxyID.query.one_or_none()
+        if not proxy_user:
+            proxy_user = onboard_proxy_user()
+        
+        encrypted_user_id = generate_encrypted_user_id(encrypted_clinic_id[:22],clinic_api_key,str(proxy_user.ds_proxy_id))
 
-        res = get_access_token(modobio_id,encrypted_clinic_id,proxy_user,encrypted_user_id)
+        res = get_access_token(modobio_id,encrypted_clinic_id,str(proxy_user.ds_proxy_id),encrypted_user_id)
         if res.ok:
             access_token = res.json()['access_token']
             headers = {'Authorization': f'Bearer {access_token}'}
@@ -257,24 +249,23 @@ class DoseSpotPatientPharmacies(BaseResource):
             raise InputError(status_code=405,message=res.json())
         return res.json()['Items']
 
-    @token_auth.login_required()
+    @token_auth.login_required(user_type=('client',))
     @accepts(schema=DoseSpotPharmacyNestedSelect,api=ns)
+    @responds(status_code=201,api=ns)
     def post(self, user_id):
         """
         POST - The pharmacies the Modobio client has selected (at most 3.)
                We delete the existing pharmacy selection, and populate with the selected choices
                DoseSpot Admin credentials will be used for this endpoint
         """
-
         payload = request.json
         if len(payload['items'])>3:
             raise InputError(status_code=405,message='Can only select up to 3 pharmacies.')
-        # This user is the patient
-        user = User.query.filter_by(user_id=user_id).one_or_none()
-
         # # DoseSpotPatientID
         ds_patient = DoseSpotPatientID.query.filter_by(user_id=user_id).one_or_none()
-        
+        if not ds_patient:
+            ds_patient = onboard_patient(user_id,0)
+
         # ADMIN - WORKS
         admin_id = str(current_app.config['DOSESPOT_ADMIN_ID'])
         modobio_clinic_id = str(current_app.config['DOSESPOT_MODOBIO_ID'])
@@ -289,30 +280,26 @@ class DoseSpotPatientPharmacies(BaseResource):
         else:
             raise InputError(status_code=405,message=res.json())
         
-        # CANNOT DELETE BECAUSE YOU MUST BE A PROXY User
-        #----------------------------------
-        # Get the client's pharmacies to delete
+        proxy_user = DoseSpotProxyID.query.one_or_none()
+        if not proxy_user:
+            proxy_user = onboard_proxy_user()        
         
-        proxy_user = str(232322)        
         clinic_api_key = current_app.config['DOSESPOT_API_KEY']
-        proxy_encrypted_user_id = generate_encrypted_user_id(encrypted_clinic_id[:22],clinic_api_key,proxy_user)
-        proxy_res = get_access_token(modobio_clinic_id,encrypted_clinic_id,proxy_user,proxy_encrypted_user_id)
+        proxy_encrypted_user_id = generate_encrypted_user_id(encrypted_clinic_id[:22],clinic_api_key,str(proxy_user.ds_proxy_id))
+        proxy_res = get_access_token(modobio_clinic_id,encrypted_clinic_id,str(proxy_user.ds_proxy_id),proxy_encrypted_user_id)
         if proxy_res.ok:
             proxy_access_token = proxy_res.json()['access_token']
             proxy_headers = {'Authorization': f'Bearer {proxy_access_token}'}
         else:
             raise InputError(status_code=405,message=res.json())
 
-        
         res = requests.get(f'https://my.staging.dosespot.com/webapi/api/patients/{ds_patient.ds_user_id}/pharmacies',headers=proxy_headers)
 
         for item in res.json()['Items']:
             pharm_id = item['PharmacyId']
             res = requests.delete(f'https://my.staging.dosespot.com/webapi/api/patients/{ds_patient.ds_user_id}/pharmacies/{pharm_id}',headers=proxy_headers)
  
-
         for item in payload['items']:
             pharm_id = item['pharmacy_id']
             res = requests.post(f'https://my.staging.dosespot.com/webapi/api/patients/{ds_patient.ds_user_id}/pharmacies/{pharm_id}',headers=headers)
-            breakpoint()
         return

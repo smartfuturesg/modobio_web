@@ -2,7 +2,6 @@ import random
 import hashlib
 import base64
 import requests
-import os, boto3, secrets, pathlib, json
 import requests
 
 from datetime import datetime
@@ -14,7 +13,7 @@ from flask.json import dumps
 from flask_restx import Resource, Namespace
 from odyssey import db
 
-from odyssey.utils.constants import ALPHANUMERIC
+from odyssey.utils.constants import ALPHANUMERIC, MODOBIO_ADDRESS
 
 from odyssey.api.dosespot.models import (
     DoseSpotPractitionerID,
@@ -22,7 +21,8 @@ from odyssey.api.dosespot.models import (
 )
 from odyssey.api.dosespot.schemas import (
     DoseSpotCreatePractitionerSchema,
-    DoseSpotCreatePatientSchema
+    DoseSpotCreatePatientSchema,
+    DoseSpotCreateProxyUserSchema
 )
 from odyssey.api.lookup.models import (
     LookupTerritoriesOfOperations,
@@ -100,12 +100,34 @@ def generate_sso(clinic_id, clinician_id, encrypted_clinic_id, encrypted_user_id
         URL = URL+'&RefillsErrors=1'
     return URL
 
-def onboard_practitioner(user_id,db_trigger=False):
+def onboard_practitioner(user_id):
     """
     POST - Only a DoseSpot Admin will be able to use this endpoint. As a workaround
             we have stored a DoseSpot Admin credentials so the ModoBio system will be able
             to create the practitioner on the DoseSpot platform
     """
+
+    user = User.query.filter_by(user_id=user_id).one_or_none()
+
+    if not user.is_staff:
+        raise InputError(status_code=405,message='User must be a practitioner')
+
+    staff_office = StaffOffices.query.filter_by(user_id=user_id).one_or_none()
+
+    if not staff_office:
+        raise InputError(status_code=405,message='Missing Staff Office')
+
+    credentials = PractitionerCredentials.query.filter_by(user_id=user_id,credential_type='npi').one_or_none()
+
+    if not credentials:
+        raise InputError(status_code=405,message='Need to input NPI number.')
+    else:              
+        if credentials.status == 'Verified':
+            npi_number = credentials.credentials
+        else:
+            raise InputError(status_code=405,message='NPI number has not been verified yet.')
+
+
     ds_practitioner = DoseSpotPractitionerID.query.filter_by(user_id=user_id).one_or_none()
     admin_id = str(current_app.config['DOSESPOT_ADMIN_ID'])
     clinic_api_key = current_app.config['DOSESPOT_API_KEY']
@@ -126,45 +148,8 @@ def onboard_practitioner(user_id,db_trigger=False):
             headers = {'Authorization': f'Bearer {access_token}'}
         else:
             raise InputError(status_code=405,message=res.json())
-
-        user = User.query.filter_by(user_id=user_id).one_or_none()
-
-        if not user.is_staff:
-            raise InputError(status_code=405,message='User must be a practitioner')
         
-        missing_inputs = []
-
-
-        staff_office = StaffOffices.query.filter_by(user_id=user_id).one_or_none()
-
-        if not staff_office:
-            missing_inputs.append(1)
-
-        credentials = PractitionerCredentials.query.filter_by(user_id=user_id,credential_type='npi').one_or_none()
-
-        npi_number = ''
-        if not credentials:
-            missing_inputs.append(2)
-        else:              
-            if credentials.status == 'Verified':
-                npi_number = credentials.credentials
-            else:
-                raise InputError(status_code=405,message='NPI number has not been verified yet.')
-
-
-        if not npi_number:
-            missing_inputs.append(2)                        
-        
-        if missing_inputs:
-            if [1,2] in missing_inputs:
-                raise InputError(status_code=405,message='Missing both Office Information and Practitioner Credentials')
-            elif 1 in missing_inputs:
-                raise InputError(status_code=406,message='Missing Office Information')
-            else:
-                raise InputError(status_code=407,message='Missing Practitioner Credentials, Needs at least NPI number.')
-
         state = LookupTerritoriesOfOperations.query.filter_by(idx=staff_office.territory_id).one_or_none()
-        
         
         # Phone Type
         # 2 - Cell
@@ -175,6 +160,10 @@ def onboard_practitioner(user_id,db_trigger=False):
         # HOWEVER, DoseSpot does not require that info, and ModoBio
         # will not be working with controlled substances, so DEA is also unnecessary.
         
+        # clin_role_type - 1 = Prescribing Clinician
+        # phone_type - 2 = cell
+        clin_role_type = 1
+        phone_type = 2
         min_payload = {'FirstName': user.firstname,
                 'LastName': user.lastname,
                 'DateOfBirth': user.dob,
@@ -183,9 +172,9 @@ def onboard_practitioner(user_id,db_trigger=False):
                 'State':state.sub_territory_abbreviation,
                 'ZipCode':staff_office.zipcode,
                 'PrimaryPhone': staff_office.phone,
-                'PrimaryPhoneType': 2,
+                'PrimaryPhoneType': phone_type,
                 'PrimaryFax': staff_office.phone,
-                'ClinicianRoleType': 1,
+                'ClinicianRoleType': clin_role_type,
                 'NPINumber': npi_number,
                 'DEANumbers': [],
                 'MedicalLicenseNumbers': [],
@@ -253,6 +242,7 @@ def onboard_patient(patient_id:int,practitioner_id:int):
     state = LookupTerritoriesOfOperations.query.filter_by(idx=user.client_info.territory_id).one_or_none()
     # Phone Type
     # 2 - Cell
+    phone_type = 2
     min_payload = {'FirstName': user.firstname,
             'LastName': user.lastname,
             'DateOfBirth': user.dob.strftime('%Y-%m-%d'),
@@ -262,7 +252,7 @@ def onboard_patient(patient_id:int,practitioner_id:int):
             'State':state.sub_territory_abbreviation,
             'ZipCode':user.client_info.zipcode,
             'PrimaryPhone': user.phone_number,
-            'PrimaryPhoneType': 2,
+            'PrimaryPhoneType': phone_type,
             'Active': True
             }
     
@@ -283,6 +273,65 @@ def onboard_patient(patient_id:int,practitioner_id:int):
         # There was an error creating the patient in DoseSpot system
         raise InputError(status_code=405,message=res.json())
     return ds_patient
+
+def onboard_proxy_user():
+    """
+    POST - Only a DoseSpot Admin will be able to use this endpoint. As a workaround
+            we have stored a DoseSpot Admin credentials so the ModoBio system will be able
+            to create the practitioner on the DoseSpot platform
+    """
+    admin_id = str(current_app.config['DOSESPOT_ADMIN_ID'])
+    modobio_id = str(current_app.config['DOSESPOT_MODOBIO_ID'])
+
+    encrypted_clinic_id = current_app.config['DOSESPOT_ENCRYPTED_MODOBIO_ID']
+    encrypted_user_id = current_app.config['DOSESPOT_ENCRYPTED_ADMIN_ID']
+
+    # Get access token for the Admin
+    res = get_access_token(modobio_id,encrypted_clinic_id,admin_id,encrypted_user_id)
+
+    if res.ok:
+        access_token = res.json()['access_token']
+        headers = {'Authorization': f'Bearer {access_token}'}
+    else:
+        raise InputError(status_code=405,message=res.json())
+    
+    # Phone Type
+    # 2 - Cell
+    phone_type = 2
+    # clin_role_type
+    # 1 - Prescribing Practitioner
+    # 6 - Proxy user
+    clin_role_type = 6
+    min_payload = {'FirstName': MODOBIO_ADDRESS['firstname'],
+            'LastName': MODOBIO_ADDRESS['lastname'],
+            'DateOfBirth': MODOBIO_ADDRESS['dob'],
+            'Address1': MODOBIO_ADDRESS['street'],
+            'Address2': MODOBIO_ADDRESS['street2'],
+            'City':MODOBIO_ADDRESS['city'],
+            'State':MODOBIO_ADDRESS['state'],
+            'ZipCode':MODOBIO_ADDRESS['zipcode'],
+            'PrimaryPhone': MODOBIO_ADDRESS['phone'],
+            'PrimaryPhoneType': phone_type,
+            'PrimaryFax': MODOBIO_ADDRESS['phone'],
+            'ClinicianRoleType': clin_role_type,
+            'Active': True
+            }
+
+    res = requests.post('https://my.staging.dosespot.com/webapi/api/clinicians',headers=headers,data=min_payload)
+
+    # If res is okay, store credentials
+    if res.ok:
+        if 'Result' in res.json():
+            if 'ResultCode' in res.json()['Result']:
+                if res.json()['Result']['ResultCode'] != 'OK':
+                    raise InputError(status_code=405,message=res.json())
+        ds_proxy_user = DoseSpotCreateProxyUserSchema().load(
+                                        {'ds_proxy_id': res.json()['Id']})
+        db.session.add(ds_proxy_user)
+        db.session.commit()
+    else:
+        raise InputError(status_code=405,message=res.json())
+    return ds_proxy_user
 
 def get_access_token(clinic_id,encrypted_clinic_id,clinician_id,encrypted_user_id):
     payload = {'grant_type': 'password','Username':clinician_id,'Password':encrypted_user_id}

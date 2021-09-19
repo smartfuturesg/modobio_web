@@ -2,12 +2,6 @@
 Database tables staff member information for the Modo Bio Staff application.
 All tables in this module are prefixed with ``Staff``.
 """
-
-import base64
-from datetime import datetime, timedelta
-from logging import error
-import os
-
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from odyssey import db
@@ -345,7 +339,7 @@ def ds_onboard_practitioner(mapper, connection, target):
 
     if verified_npi and not ds_practitioner:
         try:
-            onboard_practitioner(target.user_id,db_trigger=True)    
+            onboard_practitioner(target.user_id)    
         except:
             return
 
@@ -365,6 +359,6 @@ def ds_onboard_practitioner(mapper, connection, target):
 
     if verified_npi and not ds_practitioner:
         try:
-            onboard_practitioner(target.user_id,db_trigger=True)    
+            onboard_practitioner(target.user_id)    
         except:
             return            

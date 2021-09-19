@@ -1,18 +1,19 @@
-from marshmallow import Schema, fields, post_load, validate, pre_dump, validates, ValidationError
-from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, auto_field
+from marshmallow import Schema, fields, post_load
 
 from odyssey import ma
 from odyssey.api.dosespot.models import ( 
     DoseSpotPractitionerID,
-    DoseSpotPatientID
+    DoseSpotPatientID,
+    DoseSpotProxyID
 )
-from odyssey.api.user.models import User
-from odyssey.utils.constants import MEDICAL_CONDITIONS
 from odyssey.utils.base.schemas import BaseSchema
 
 """
     Schemas for the DoseSpot's API
 """
+
+class DoseSpotEnrollmentSchema(Schema):
+    status = fields.String()
 
 class DoseSpotPrescribeSSO(Schema):
     url = fields.String()
@@ -23,6 +24,14 @@ class DoseSpotPharmacySelect(Schema):
 class DoseSpotPharmacyNestedSelect(Schema):
     items = fields.Nested(DoseSpotPharmacySelect(many=True))
 
+class DoseSpotCreateProxyUserSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = DoseSpotProxyID
+        exclude = ('created_at',)
+        dump_only = ('idx',)
+    @post_load
+    def make_object(self,data,**kwargs):
+        return DoseSpotProxyID(**data)
 class DoseSpotCreatePractitionerSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = DoseSpotPractitionerID
