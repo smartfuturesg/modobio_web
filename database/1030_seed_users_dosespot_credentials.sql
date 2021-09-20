@@ -6,8 +6,8 @@ alter sequence "DoseSpotPractitionerID_idx_seq"
   restart with 1;
 
 
-insert into "DoseSpotPractitionerID" ("user_id", "ds_user_id", "ds_encrypted_user_id","ds_enrollment_status") values
-(12, 231937, '9WwYAEtZcb8t5yne+Ep1Ex7vd9RN1wwXjShReN0yFtG6dmEZuGcrEUV5YCqNRQNQUzm6VHOqo4cvx1PxA642Cg','pending');
+insert into "DoseSpotPractitionerID" ("user_id", "ds_user_id", "ds_enrollment_status") values
+(12, 231937, 'pending');
 
 delete from "DoseSpotPatientID" 
 			where idx >= 1;

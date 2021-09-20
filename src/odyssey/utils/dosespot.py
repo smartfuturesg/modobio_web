@@ -2,15 +2,8 @@ import random
 import hashlib
 import base64
 import requests
-import requests
 
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
-
-from flask import g, request, current_app
-from flask_accepts import accepts, responds
-from flask.json import dumps
-from flask_restx import Resource, Namespace
+from flask import current_app
 from odyssey import db
 
 from odyssey.utils.constants import ALPHANUMERIC, MODOBIO_ADDRESS
@@ -128,7 +121,6 @@ def onboard_practitioner(user_id):
         else:
             raise InputError(status_code=405,message='NPI number has not been verified yet.')
 
-
     ds_practitioner = DoseSpotPractitionerID.query.filter_by(user_id=user_id).one_or_none()
     admin_id = str(current_app.config['DOSESPOT_ADMIN_ID'])
     clinic_api_key = current_app.config['DOSESPOT_API_KEY']
@@ -190,12 +182,10 @@ def onboard_practitioner(user_id):
                 if 'ResultCode' in res.json()['Result']:
                     if res.json()['Result']['ResultCode'] != 'OK':
                         raise InputError(status_code=405,message=res.json())
-            ds_encrypted_user_id = generate_encrypted_user_id(encrypted_clinic_id[:22],clinic_api_key,str(res.json()['Id']))
             ds_practitioner_id = DoseSpotCreatePractitionerSchema().load(
-                                            {'ds_encrypted_user_id': ds_encrypted_user_id,
-                                                'ds_user_id': res.json()['Id'],
-                                                'ds_enrollment_status': 'pending'
-                                                })
+                                            {'ds_user_id': res.json()['Id'],
+                                             'ds_enrollment_status': 'pending'
+                                            })
             ds_practitioner_id.user_id = user_id
             db.session.add(ds_practitioner_id)
         else:

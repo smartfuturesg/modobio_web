@@ -12,6 +12,9 @@ from odyssey.utils.base.schemas import BaseSchema
     Schemas for the DoseSpot's API
 """
 
+class DoseSpotEnrollmentGET(Schema):
+    status = fields.String()
+
 class DoseSpotEnrollmentSchema(Schema):
     status = fields.String()
 

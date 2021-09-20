@@ -61,7 +61,6 @@ def test_post_2_ds_practitioner_create(test_client):
 def test_get_1_ds_practitioner_notification_sso(test_client):
     response = test_client.get(f'/dosespot/notifications/{test_client.staff_id}/',
                                 headers=test_client.staff_auth_header)
-
     assert response.status_code == 200
 
 def test_get_staff_office(test_client):
@@ -150,5 +149,4 @@ def test_post_2_ds_patient_prescribe(test_client):
 def test_get_1_ds_practitioner_notification_sso(test_client):
     response = test_client.get(f'/dosespot/notifications/{test_client.staff_id}/',
                                 headers=test_client.staff_auth_header)
-
     assert response.status_code == 200

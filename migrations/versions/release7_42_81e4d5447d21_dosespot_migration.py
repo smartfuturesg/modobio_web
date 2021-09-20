@@ -40,7 +40,6 @@ def upgrade():
     sa.Column('idx', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('ds_user_id', sa.Integer(), nullable=True),
     sa.Column('ds_enrollment_status', sa.String(), nullable=True),
-    sa.Column('ds_encrypted_user_id', sa.String(), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['User.user_id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('idx')

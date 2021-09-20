@@ -35,3 +35,12 @@ def test_get_patient_ds_pharmacies(test_client):
                                 headers=test_client.client_auth_header)
     assert response.status_code == 200 
     assert len(response.json) == 2  
+
+def test_get_patient_ds_prescriptions(test_client):
+    start_date='2021-01-01'
+    end_date='2021-09-18'
+    response = test_client.get(f'/dosespot/prescribe/{test_client.client_id}/?start_date={start_date}&end_date={end_date}',
+                                headers=test_client.client_auth_header)
+
+    assert response.status_code == 200 
+

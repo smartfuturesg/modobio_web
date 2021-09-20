@@ -1,4 +1,5 @@
 import requests
+import datetime
 
 from flask import g, request, current_app
 from flask_accepts import accepts, responds
@@ -14,7 +15,8 @@ from odyssey.api.dosespot.models import (
 )
 from odyssey.api.dosespot.schemas import (
     DoseSpotPrescribeSSO,
-    DoseSpotPharmacyNestedSelect
+    DoseSpotPharmacyNestedSelect,
+    DoseSpotEnrollmentGET
 )
 from odyssey.api.lookup.models import (
     LookupTerritoriesOfOperations,
@@ -32,7 +34,6 @@ from odyssey.utils.base.resources import BaseResource
 ns = Namespace('dosespot', description='Operations related to DoseSpot')
 
 @ns.route('/create-practitioner/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
 class DoseSpotPractitionerCreation(BaseResource):
     @token_auth.login_required(user_type=('staff',),staff_role=('medical_doctor',))
     @responds(status_code=201, api=ns)
@@ -49,41 +50,50 @@ class DoseSpotPractitionerCreation(BaseResource):
 
 @ns.route('/prescribe/<int:user_id>/')
 class DoseSpotPatientCreation(BaseResource):
-    @token_auth.login_required(user_type=('staff',),staff_role=('medical_doctor',))
-    @responds(schema=DoseSpotPrescribeSSO,status_code=200, api=ns)
+    @token_auth.login_required(user_type=('staff','client'),staff_role=('medical_doctor',))
+    @responds(status_code=200, api=ns)
+    @ns.doc(params={'start_date': 'prescriptions start range date',
+                'end_date':'prescriptions end range date'})
     def get(self, user_id):
         """
         GET - DoseSpot Patient prescribed medications
         """
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
 
-        # TODO: Do we need this yet? Implement start and end dates
+        if not start_date or not end_date:
+            raise InputError(status_code=405,message='Must input both start and end dates')
+ 
         ds_patient = DoseSpotPatientID.query.filter_by(user_id=user_id).one_or_none()
         if not ds_patient:
-            raise InputError(status_code=405,message='This patient does not have a DoseSpot account.')
+            ds_patient = onboard_patient(user_id,0)
+
         clinic_api_key = current_app.config['DOSESPOT_API_KEY']
         modobio_id = str(current_app.config['DOSESPOT_MODOBIO_ID'])
 
         # generating keys for ADMIN
         encrypted_clinic_id = current_app.config['DOSESPOT_ENCRYPTED_MODOBIO_ID']
-        encrypted_user_id = current_app.config['DOSESPOT_ENCRYPTED_ADMIN_ID']
 
         # PROXY_USER
         # proxy_user = str(232322)
         proxy_user = DoseSpotProxyID.query.one_or_none()
         if not proxy_user:
             proxy_user = onboard_proxy_user()        
-        encrypted_user_id = generate_encrypted_user_id(encrypted_clinic_id[:22],clinic_api_key,proxy_user)
+        encrypted_user_id = generate_encrypted_user_id(encrypted_clinic_id[:22],clinic_api_key,str(proxy_user.ds_proxy_id))
 
-        res = get_access_token(modobio_id,encrypted_clinic_id,proxy_user,encrypted_user_id)
+        res = get_access_token(modobio_id,encrypted_clinic_id,str(proxy_user.ds_proxy_id),encrypted_user_id)
         if res.ok:
             access_token = res.json()['access_token']
             headers = {'Authorization': f'Bearer {access_token}'}
         else:
             raise InputError(status_code=405,message=res.json())
 
-        res = requests.get(f'https://my.staging.dosespot.com/webapi/api/patients/{ds_patient.ds_user_id}/pharmacies',headers=headers)
+        res = requests.get(f'https://my.staging.dosespot.com/webapi/api/patients/{ds_patient.ds_user_id}/prescriptions?startDate={start_date}&endDate={end_date}',
+                headers=headers)
 
-        return   
+        if not res.ok:
+            raise InputError(status_code=405,message=res.json())
+        return res.json()['Items']
     @token_auth.login_required(user_type=('staff',),staff_role=('medical_doctor',))      
     @responds(schema=DoseSpotPrescribeSSO,status_code=201,api=ns)
     def post(self, user_id):
@@ -129,16 +139,17 @@ class DoseSpotNotificationSSO(BaseResource):
             raise InputError(status_code=405,message='This Practitioner does not have a DoseSpot account.')
 
         modobio_clinic_id = str(current_app.config['DOSESPOT_MODOBIO_ID'])
+        clinic_api_key = current_app.config['DOSESPOT_API_KEY']
 
         encrypted_clinic_id = current_app.config['DOSESPOT_ENCRYPTED_MODOBIO_ID']
-        encrypted_user_id = str(ds_clinician.ds_encrypted_user_id)
+        encrypted_user_id = generate_encrypted_user_id(encrypted_clinic_id[:22],clinic_api_key,str(ds_clinician.ds_user_id))
 
         return {'url': generate_sso(modobio_clinic_id, str(ds_clinician.ds_user_id), encrypted_clinic_id, encrypted_user_id)}
 
 @ns.route('/enrollment-status/<int:user_id>/')
 class DoseSpotNotificationSSO(BaseResource):
     @token_auth.login_required(user_type=('staff',),staff_role=('medical_doctor',))
-    @responds(schema=DoseSpotPrescribeSSO,status_code=200, api=ns)
+    @responds(schema=DoseSpotEnrollmentGET,status_code=200, api=ns)
     def get(self, user_id):
         """
         GET - Only a ModoBio Practitioners will be able to use this endpoint. This endpoint is used
@@ -149,7 +160,7 @@ class DoseSpotNotificationSSO(BaseResource):
         if not ds_practitioner:
             raise InputError(status_code=405,message='This Practitioner does not have a DoseSpot account.')
         
-        if ds_practitioner.enrollment_status == 'enrolled':
+        if ds_practitioner.ds_enrollment_status == 'enrolled':
             return {'status': ds_practitioner.ds_enrollment_status}
 
         admin_id = str(current_app.config['DOSESPOT_ADMIN_ID'])
@@ -158,7 +169,6 @@ class DoseSpotNotificationSSO(BaseResource):
 
         # generating keys for ADMIN
         encrypted_clinic_id = current_app.config['DOSESPOT_ENCRYPTED_MODOBIO_ID']
-        # encrypted_user_id = current_app.config['DOSESPOT_ENCRYPTED_ADMIN_ID']
         encrypted_user_id = generate_encrypted_user_id(encrypted_clinic_id[:22],clinic_api_key,admin_id)    
 
         res = get_access_token(modobio_id,encrypted_clinic_id,admin_id,encrypted_user_id)
@@ -193,7 +203,6 @@ class DoseSpotSelectPharmacies(BaseResource):
         clinic_api_key = current_app.config['DOSESPOT_API_KEY']
 
         encrypted_clinic_id = current_app.config['DOSESPOT_ENCRYPTED_MODOBIO_ID']
-        encrypted_user_id = current_app.config['DOSESPOT_ENCRYPTED_ADMIN_ID']
         encrypted_user_id = generate_encrypted_user_id(encrypted_clinic_id[:22],clinic_api_key,admin_id)    
 
         res = get_access_token(modobio_id,encrypted_clinic_id,admin_id,encrypted_user_id)
@@ -234,7 +243,6 @@ class DoseSpotPatientPharmacies(BaseResource):
 
         # generating keys for ADMIN
         encrypted_clinic_id = current_app.config['DOSESPOT_ENCRYPTED_MODOBIO_ID']
-        encrypted_user_id = current_app.config['DOSESPOT_ENCRYPTED_ADMIN_ID']
 
         proxy_user = DoseSpotProxyID.query.one_or_none()
         if not proxy_user:

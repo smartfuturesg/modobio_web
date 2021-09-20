@@ -25,14 +25,6 @@ class DoseSpotPractitionerID(BaseModelWithIdx, UserIdFkeyMixin):
     :type: str
     """
 
-    ds_encrypted_user_id = db.Column(db.String)
-    """
-    Encrypted user ID for DoseSpot
-
-    :type: str
-    """
-    
-
 class DoseSpotPatientID(BaseModelWithIdx, UserIdFkeyMixin):
     """ DoseSpot Patient ID
     
