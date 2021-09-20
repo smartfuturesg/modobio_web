@@ -17,7 +17,8 @@ from odyssey.utils.constants import ALPHANUMERIC, MODOBIO_ADDRESS
 
 from odyssey.api.dosespot.models import (
     DoseSpotPractitionerID,
-    DoseSpotPatientID
+    DoseSpotPatientID,
+    DoseSpotProxyID
 )
 from odyssey.api.dosespot.schemas import (
     DoseSpotCreatePractitionerSchema,
@@ -208,7 +209,9 @@ def onboard_patient(patient_id:int,practitioner_id:int):
     # PROXY_USER - CAN Create patient on DS platform
     # Practitioner_id = 0 means use a Proxy User
     if practitioner_id == 0:
-        auth_id = str(232322)
+        proxy_user = DoseSpotProxyID.query.one_or_none()
+        if not proxy_user:
+            proxy_user = onboard_proxy_user()
     else:
         ds_clinician = DoseSpotPractitionerID.query.filter_by(user_id=practitioner_id).one_or_none()
         auth_id = str(ds_clinician.user_id)
