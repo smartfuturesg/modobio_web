@@ -194,14 +194,6 @@ class User(db.Model):
             salt = email[:2]
         return (salt + rli_hash).upper()
 
-@db.event.listens_for(User, "after_update")
-def update_dob(mapper, connection, target):
-    """ 
-    Listens for any updates to User table
-    """
-    from odyssey.utils.search import update_client_dob
-    update_client_dob(target.user_id, target.dob)
-
 @db.event.listens_for(User, "after_insert")
 def add_modobio_id(mapper, connection, target):
     """
@@ -240,7 +232,8 @@ def add_modobio_id(mapper, connection, target):
         'modobio_id': mb_id,
         'user_id': target.user_id,
         'is_client': target.is_client,
-        'is_staff': target.is_staff
+        'is_staff': target.is_staff,
+        'dob': target.dob
     }
     update_index(user, True)
 
@@ -259,7 +252,8 @@ def update_ES_index(mapper, connection, target):
         'modobio_id': target.modobio_id,
         'user_id': target.user_id,
         'is_client': target.is_client,
-        'is_staff': target.is_staff
+        'is_staff': target.is_staff,
+        'dob': target.dob
     }
     update_index(user, False)
 

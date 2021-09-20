@@ -559,7 +559,7 @@ doctor_credentials_post_4_data = {
 # Verified - Medical License 523746512
 doctor_credentials_post_5_data = {
   'items': [
-    {'credential_type':'npi', 'country_id':1,'credentials': '987654321'},
+    {'credential_type':'npi', 'country_id':1,'credentials': '1296336567'},
     {'credential_type':'dea', 'country_id':1,'state': 'AZ','credentials': '740329857'}, 
     {'credential_type':'dea', 'country_id':1,'state': 'CA','credentials': '4312079463'},
     {'credential_type':'med_lic', 'country_id':1,'state': 'AZ','credentials': '523746512'}, 
@@ -567,6 +567,11 @@ doctor_credentials_post_5_data = {
   ]
 }
 
+
 doctor_credentials_delete_1_data = {
     'idx': 18
+}
+
+doctor_credentials_put_4_data = {
+    'idx': 17,'status':'Verified' 
 }

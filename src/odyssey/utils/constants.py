@@ -899,3 +899,15 @@ INSTAMED_OUTLET = {
                 "StoreID": '0001',
                 "TerminalID": '0002'
             }
+
+MODOBIO_ADDRESS = {
+    "firstname": "Modo",
+    "lastname": "Bio",
+    "dob": "1995-06-13",
+    "street": "14275 N 8th St",
+    "street2": "Suite 115",
+    "city": "Scottsdale",
+    "state": "AZ",
+    "zipcode": "85260",
+    "phone": "4806810406"
+}
