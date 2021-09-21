@@ -37,7 +37,7 @@ def test_post_booking_details(test_client):
         f'/telehealth/bookings/details/{booking_id}',
         headers=test_client.client_auth_header,
         data=payload)
-    print(response.data)
+
     assert response.status_code == 201
 
     #add booking details on the same id with POST, should fail

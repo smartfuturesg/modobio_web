@@ -41,7 +41,7 @@ def test_get_medical_imaging(test_client):
     response = test_client.get(
         f'/doctor/images/{test_client.client_id}/',
         headers=test_client.client_auth_header)
-    print(response.data)
+
     assert response.status_code == 200
     assert len(response.json) == 2
     assert response.json[0]['image_type'] ==  doctor_medical_imaging_data['image_type']
@@ -61,6 +61,6 @@ def test_delete_medical_imaging(test_client):
         f'/doctor/images/{test_client.client_id}/',
         headers=test_client.client_auth_header,
         content_type='application/json')
-    print(response.data)
+
     assert response.status_code == 200
     assert len(response.json) == 1
