@@ -267,8 +267,8 @@ class Wheel:
         # booking_external_id 
         booking_external_id = uuid.uuid4()
 
-        consult_url_deeplink = f'https://{current_app.config["DOMAIN_NAME"]}/telehealth?clientId={client_user_id}&bookingId={booking_id}'
-
+        consult_url_deeplink = f'https://{current_app.config["FRONT_END_DOMAIN_NAME"]}/telehealth?clientId={client_user_id}&bookingId={booking_id}'
+        
         payload =  {
             "consult_id" : str(booking_external_id),
             "consult_url": consult_url_deeplink,

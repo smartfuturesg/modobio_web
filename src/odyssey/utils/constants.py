@@ -857,7 +857,7 @@ Email verifications token lifetime in hours.
 REGISTRATION_PORTAL_URL = "www.modobio.com/user/registration-portal?portal_id={}"
 
 #base url in prod would be www.modobio.com/, left blank to accomodate to different app branches (dev,prod,demo...)
-#{DOMAIN_NAME: modobio.com, dev...}, {reset token}
+#{FRONT_END_DOMAIN_NAME: modobio.com, dev...}, {reset token}
 PASSWORD_RESET_URL = "{}/resetPassword?reset_token={}"
 
 DAY_OF_WEEK = ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday')
