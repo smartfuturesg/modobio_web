@@ -836,10 +836,7 @@ class SignedDocuments(BaseResource):
         urls = {}
         paths = []
 
-        s3 = boto3.client('s3')
-        params = {
-            'Bucket': current_app.config['AWS_S3_BUCKET'],
-            'Key': None}
+        fh = FileHandling()
 
         for table in (
             ClientPolicies,
@@ -857,8 +854,7 @@ class SignedDocuments(BaseResource):
             if result and result.pdf_path:
                 paths.append(result.pdf_path)
 
-                params['Key'] = result.pdf_path
-                url = s3.generate_presigned_url('get_object', Params=params, ExpiresIn=600)
+                url = fh.get_presigned_url(result.pdf_path)
                 urls[table.displayname] = url
 
         concat = merge_pdfs(paths, user_id)

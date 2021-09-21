@@ -1658,8 +1658,8 @@ class TelehealthBookingDetailsApi(Resource):
         fh = FileHandling()
         
         prefix = f'meeting_files/id{booking_id:05d}/'
-        res['voice'] = fh.get_presigned_urls(prefix=_prefix + 'voice')
-        res['images'] = fh.get_presigned_urls(prefix=_prefix + 'image')
+        res['voice'] = fh.get_presigned_urls(prefix=prefix + 'voice')
+        res['images'] = fh.get_presigned_urls(prefix=prefix + 'image')
         
         return res
     
