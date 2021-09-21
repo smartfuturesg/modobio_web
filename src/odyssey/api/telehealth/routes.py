@@ -56,7 +56,15 @@ from odyssey.api.payment.models import PaymentMethods, PaymentHistory, PaymentFa
 from odyssey.utils.auth import token_auth
 from odyssey.utils.errors import GenericNotFound, InputError, UnauthorizedUser, ContentNotFound, IllegalSetting, GenericThirdPartyError
 from odyssey.integrations.wheel import Wheel
-from odyssey.utils.constants import TELEHEALTH_BOOKING_LEAD_TIME_HRS, TWILIO_ACCESS_KEY_TTL, DAY_OF_WEEK, ALLOWED_AUDIO_TYPES, ALLOWED_IMAGE_TYPES, INSTAMED_OUTLET
+from odyssey.utils.constants import (
+    TELEHEALTH_BOOKING_LEAD_TIME_HRS,
+    TWILIO_ACCESS_KEY_TTL,
+    DAY_OF_WEEK,
+    ALLOWED_AUDIO_TYPES,
+    ALLOWED_IMAGE_TYPES,
+    IMAGE_MAX_SIZE,
+    INSTAMED_OUTLET
+) 
 from odyssey.utils.message import PushNotification, PushNotificationType
 from odyssey.utils.misc import (
     FileHandling,
@@ -1657,22 +1665,11 @@ class TelehealthBookingDetailsApi(Resource):
         res['details'] = booking.details
 
         #retrieve all files associated with this booking id
-        s3prefix = f'meeting_files/id{booking_id:05d}/'
-        s3 = boto3.resource('s3')
-        bucket = s3.Bucket(current_app.config['AWS_S3_BUCKET'])
-
-        params = {
-            'Bucket' : current_app.config['AWS_S3_BUCKET'],
-            'Key' : None
-        }
-
-        for media in bucket.objects.filter(Prefix=s3prefix):
-            params['Key'] = media.key
-            url = boto3.client('s3').generate_presigned_url('get_object', Params=params, ExpiresIn=3600)
-            if 'voice' in media.key:
-                res['voice'] = url
-            else:
-                res['images'] = res['images'] + [url]
+        fh = FileHandling()
+        
+        prefix = f'meeting_files/id{booking_id:05d}/'
+        res['voice'] = fh.get_presigned_urls(prefix=prefix + 'voice')
+        res['images'] = fh.get_presigned_urls(prefix=prefix + 'image')
         
         return res
     
@@ -1721,74 +1718,46 @@ class TelehealthBookingDetailsApi(Resource):
         #if 'images' and 'voice' are both not present, no changes will be made to the current media file
         #if 'images' or 'voice' are present, but empty, the current media file(s) for that category will be removed
         if files:
-            s3 = boto3.resource('s3')
-            bucket = s3.Bucket(current_app.config['AWS_S3_BUCKET'])
-
-            #used to locate and remove existing files is necessary
-            params = {
-                'Bucket': current_app.config['AWS_S3_BUCKET'],
-                'Key': None
-            }
-
+            fh = FileHandling()
+        
             #if images key is present, delete existing images
             if 'images' in files:
-                bucket.objects.filter(Prefix=f'meeting_files/id{booking_id:05d}/image').delete()
+                fh.delete_from_s3(prefix=f'meeting_files/id{booking_id:05d}/image')
 
             #if voice key is present, delete existing recording
             if 'voice' in files:
-                bucket.objects.filter(Prefix=f'meeting_files/id{booking_id:05d}/voice').delete()
+                fh.delete_from_s3(prefix=f'meeting_files/id{booking_id:05d}/voice')
 
-            MAX_bytes = 524288000 #500 mb
             hex_token = secrets.token_hex(4)
 
-            #add each image supplied to s3 bucket for this meeting
+            #upload images from request to s3
             for i, img in enumerate(files.getlist('images')):
-                #Verifying image size is within a safe threashold (MAX = 500 mb)
-                img.seek(0, os.SEEK_END)
-                img_size = img.tell()
-                if img_size > MAX_bytes:
-                    raise InputError(413, 'File too large')
+                # validate file size - safe threashold (MAX = 10 mb)
+                fh.validate_file_size(img, IMAGE_MAX_SIZE)
+                # validate file type
+                img_extension = fh.validate_file_type(img, ALLOWED_IMAGE_TYPES)
 
-                #ensure this is not an empty file
-                if img_size > 0:
-                    #Rename image (format: 4digitRandomHex_index.img_extension) AND Save=>S3
-                    img_extension = pathlib.Path(img.filename).suffix
-                    if img_extension not in ALLOWED_IMAGE_TYPES:
-                        raise InputError(422, f'{img_extension} is not an allowed file type. Allowed types are {ALLOWED_IMAGE_TYPES}')
-
-                    img.seek(0)
-
-                    s3key = f'meeting_files/id{booking_id:05d}/image_{hex_token}_{i}{img_extension}'
-                    bucket.put_object(Key=s3key, Body=img.stream)
+                s3key = f'meeting_files/id{booking_id:05d}/image_{hex_token}_{i}{img_extension}'
+                fh.save_file_to_s3(img, s3key)
 
                 #exit loop if this is the 4th picture, as that is the max allowed
                 #setup this way to allow us to easily change the allowed number in the future
                 if i >= 3:
                     break
 
-            #upload new voice file to S3
+            #upload voice recording from request to S3
             for i, recording in enumerate(files.getlist('voice')):
-                #Verifying recording size is within a safe threashold (MAX = 500 mb)
-                recording.seek(0, os.SEEK_END)
-                recording_size = recording.tell()
-                if recording_size > MAX_bytes:
-                    raise InputError(413, 'File too large')
+                # validate file size - safe threashold (MAX = 10 mb)
+                fh.validate_file_size(recording, IMAGE_MAX_SIZE)
+                # validate file type
+                recording_extension = fh.validate_file_type(recording, ALLOWED_AUDIO_TYPES)
 
-                #ensure this is not an empty file
-                if recording_size > 0:
-                    #Rename voice (format: voice_4digitRandomHex_index.img_extension) AND Save=>S3
-                    recording_extension = pathlib.Path(recording.filename).suffix
-                    if recording_extension not in ALLOWED_AUDIO_TYPES:
-                        raise InputError(422, f'{recording_extension} is not an allowed file type. Allowed types are {ALLOWED_AUDIO_TYPES}')
-
-                    recording.seek(0)
-
-                    s3key = f'meeting_files/id{booking_id:05d}/voice_{hex_token}_{i}{recording_extension}'
-                    bucket.put_object(Key= s3key, Body=recording.stream)
+                s3key = f'meeting_files/id{booking_id:05d}/voice_{hex_token}_{i}{recording_extension}'
+                fh.save_file_to_s3(recording, s3key)
 
                 #exit loop if this is the 1st recording, as that is the max allowed
                 #setup this way to allow us to easily change the allowed number in the future
-                if i >= 3:
+                if i >= 1:
                     break
 
         db.session.commit()
@@ -1836,32 +1805,18 @@ class TelehealthBookingDetailsApi(Resource):
 
         #Saving media files into s3
         if files:
-            MAX_bytes = 524288000 #500 mb
-            data_list = []
+            fh = FileHandling()
             hex_token = secrets.token_hex(4)
-
-            s3 = boto3.resource('s3')
-            bucket = s3.Bucket(current_app.config['AWS_S3_BUCKET'])
 
             #upload images from request to s3
             for i, img in enumerate(files.getlist('images')):
-                #Verifying image size is within a safe threashold (MAX = 500 mb)
-                img.seek(0, os.SEEK_END)
-                img_size = img.tell()
-                if img_size > MAX_bytes:
-                    raise InputError(413, 'File too large')
+                # validate file size - safe threashold (MAX = 10 mb)
+                fh.validate_file_size(img, IMAGE_MAX_SIZE)
+                # validate file type
+                img_extension = fh.validate_file_type(img, ALLOWED_IMAGE_TYPES)
 
-                #ensure this is not an empty file
-                if img_size > 0:
-                    #Rename image (format: 4digitRandomHex_index.img_extension) AND Save=>S3
-                    img_extension = pathlib.Path(img.filename).suffix
-                    if img_extension not in ALLOWED_IMAGE_TYPES:
-                        raise InputError(422, f'{img_extension} is not an allowed file type. Allowed types are {ALLOWED_IMAGE_TYPES}')
-
-                    img.seek(0)
-
-                    s3key = f'meeting_files/id{booking_id:05d}/image_{hex_token}_{i}{img_extension}'
-                    bucket.put_object(Key= s3key, Body=img.stream)
+                s3key = f'meeting_files/id{booking_id:05d}/image_{hex_token}_{i}{img_extension}'
+                fh.save_file_to_s3(img, s3key)
 
                 #exit loop if this is the 4th picture, as that is the max allowed
                 #setup this way to allow us to easily change the allowed number in the future
@@ -1870,23 +1825,13 @@ class TelehealthBookingDetailsApi(Resource):
 
             #upload voice recording from request to S3
             for i, recording in enumerate(files.getlist('voice')):
-                #Verifying recording size is within a safe threashold (MAX = 500 mb)
-                recording.seek(0, os.SEEK_END)
-                recording_size = recording.tell()
-                if recording_size > MAX_bytes:
-                    raise InputError(413, 'File too large')
+                # validate file size - safe threashold (MAX = 10 mb)
+                fh.validate_file_size(recording, IMAGE_MAX_SIZE)
+                # validate file type
+                recording_extension = fh.validate_file_type(recording, ALLOWED_AUDIO_TYPES)
 
-                #ensure this is not an empty file
-                if recording_size > 0:
-                    #Rename voice (format: voice_4digitRandomHex_index.img_extension) AND Save=>S3
-                    recording_extension = pathlib.Path(recording.filename).suffix
-                    if recording_extension not in ALLOWED_AUDIO_TYPES:
-                        raise InputError(422, f'{recording_extension} is not an allowed file type. Allowed types are {ALLOWED_AUDIO_TYPES}')
-
-                    recording.seek(0)
-
-                    s3key = f'meeting_files/id{booking_id:05d}/voice_{hex_token}_{i}{recording_extension}'
-                    bucket.put_object(Key= s3key, Body=recording.stream)
+                s3key = f'meeting_files/id{booking_id:05d}/voice_{hex_token}_{i}{recording_extension}'
+                fh.save_file_to_s3(recording, s3key)
 
                 #exit loop if this is the 1st recording, as that is the max allowed
                 #setup this way to allow us to easily change the allowed number in the future
@@ -1916,9 +1861,8 @@ class TelehealthBookingDetailsApi(Resource):
         db.session.commit()
 
         #delete s3 resources for this booking id
-        s3 = boto3.resource('s3')
-        bucket = s3.Bucket(current_app.config['AWS_S3_BUCKET'])
-        bucket.objects.filter(Prefix=f'meeting_files/id{booking_id:05d}/').delete()
+        fh = FileHandling()
+        fh.delete_from_s3(prefix=f'meeting_files/id{booking_id:05d}/')
 
 @ns.route('/chat-room/access-token')
 @ns.deprecated
