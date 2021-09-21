@@ -119,7 +119,7 @@ class DoseSpotPatientCreation(BaseResource):
 
         # If the patient does not exist in DoseSpot System yet
         if not ds_patient:
-            ds_patient = onboard_patient(user_id,curr_user.user_id)
+            ds_patient = onboard_patient(user_id,0)
 
         return {'url': generate_sso(modobio_clinic_id, str(ds_clinician.ds_user_id), encrypted_clinic_id, encrypted_user_id,patient_id=ds_patient.ds_user_id)}
 
@@ -275,6 +275,16 @@ class DoseSpotPatientPharmacies(BaseResource):
         payload = request.json
         if len(payload['items'])>3:
             raise InputError(status_code=405,message='Can only select up to 3 pharmacies.')
+
+        primary_pharm_count = 0
+        for item in payload['items']:
+            if item['primary_pharm']:
+                primary_pharm_count+=1
+            if primary_pharm_count > 1:
+                raise InputError(status_code=405,message='Must select only 1 pharmacy to be set as primary')
+        if primary_pharm_count == 0:
+            raise InputError(status_code=405,message='Must select 1 pharmacy to be set as primary')
+
         # # DoseSpotPatientID
         ds_patient = DoseSpotPatientID.query.filter_by(user_id=user_id).one_or_none()
         if not ds_patient:
@@ -315,5 +325,6 @@ class DoseSpotPatientPharmacies(BaseResource):
  
         for item in payload['items']:
             pharm_id = item['pharmacy_id']
-            res = requests.post(f'https://my.staging.dosespot.com/webapi/api/patients/{ds_patient.ds_user_id}/pharmacies/{pharm_id}',headers=headers)
+            primary_flag = {'SetAsPrimary': item['primary_pharm']}
+            res = requests.post(f'https://my.staging.dosespot.com/webapi/api/patients/{ds_patient.ds_user_id}/pharmacies/{pharm_id}',headers=headers,data=primary_flag)
         return
