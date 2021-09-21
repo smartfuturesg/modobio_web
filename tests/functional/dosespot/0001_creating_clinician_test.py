@@ -44,3 +44,8 @@ def test_get_patient_ds_prescriptions(test_client):
 
     assert response.status_code == 200 
 
+def test_post_patient_prescription(test_client):
+    response = test_client.post(f'/dosespot/prescribe/{test_client.client_id}/',
+                                headers=test_client.staff_auth_header)
+    
+    assert response.status_code == 201

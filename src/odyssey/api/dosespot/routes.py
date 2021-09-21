@@ -119,7 +119,7 @@ class DoseSpotPatientCreation(BaseResource):
 
         # If the patient does not exist in DoseSpot System yet
         if not ds_patient:
-            ds_patient = onboard_patient(user_id,curr_user.user_id)
+            ds_patient = onboard_patient(user_id,0)
 
         return {'url': generate_sso(modobio_clinic_id, str(ds_clinician.ds_user_id), encrypted_clinic_id, encrypted_user_id,patient_id=ds_patient.ds_user_id)}
 
