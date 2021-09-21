@@ -2,11 +2,13 @@ import pytest
 from datetime import datetime, timedelta
 import random
 from dateutil import tz
+import pytest
 
 import pytest
 
 from odyssey.integrations.wheel import Wheel
 
+@pytest.mark.skip
 def test_clinician_roster_request(test_client):
     """
     Bring up the clinician roster from the sandbox environment
@@ -19,6 +21,35 @@ def test_clinician_roster_request(test_client):
     full_roster = wheel.physician_roster()
 
     assert len(full_roster) == 4
+
+@pytest.mark.skip
+def test_wheel_clinician_openings(test_client):
+    """
+    Test:
+    - Use the wheel API wrappper to find the availability of the MD clinicians
+    - For date range 12.30.21-12.31.21
+
+    Expected Result:
+    There are two test MD clinicians available on the sandbox. This test will check to ensure
+    those clinicians have the expected availability for a date in the future. 
+
+    Test clinicians should be availble between 00:00-05:00 and 13:00-23:59 every day
+
+    The wrapper class will convert the response to 5 minute time blocks which reference the LookupBookingTimeIncrements
+    table. 
+    """
+
+    wheel = Wheel()
+
+    start_time_range = datetime(year=2021, month=12, day=29, hour=23, minute=50, second=0)
+    end_time_range = start_time_range + timedelta(hours=24, minutes=20) # accounts for appointment end buffer
+
+    availability = wheel.openings(target_time_range=(start_time_range, end_time_range), location_id=1)
+    
+    assert 31 in availability[start_time_range.date()]
+    assert 30 in availability[start_time_range.date()]
+    assert len(availability[start_time_range.date()][31]) == 380
+    assert len(availability[start_time_range.date()][30]) == 380
 
 @pytest.mark.skip('Wheel changed their api, will be fixed later')
 def test_wheel_clinician_avialability(test_client):

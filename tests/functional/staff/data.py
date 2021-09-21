@@ -142,9 +142,9 @@ staff_office_data = {
     "territory_id": 2,
     "zipcode": "85260",
     "email": "string@modobio.com",
-    "phone": "1234567",
+    "phone": "4804389574",
     "street": "123 Test St.",
-    "fax": "1234568"
+    "fax": "4804389574"
   },
   "normal_data_2": {
     "city": "Tucson",
@@ -152,9 +152,9 @@ staff_office_data = {
     "territory_id": 2,
     "zipcode": "85641",
     "email": "string@modobio.com",
-    "phone": "1234560",
+    "phone": "4804389575",
     "street": "123 Place St.",
-    "fax": "1234569"
+    "fax": "4804389575"
   },
   "invalid_territory_id": {
     "city": "Phoenix",
