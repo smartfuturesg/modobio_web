@@ -162,9 +162,9 @@ def test_client_time_select(test_client):
     response = test_client.get(
         f'/telehealth/client/time-select/{test_client.client_id}/',
         headers=test_client.client_auth_header)
-
+        
     assert response.status_code == 200
-    assert response.json['total_options'] == 31
+    assert response.json['total_options'] == 30
 
 def test_full_system_with_settings(test_client):
     """
@@ -312,11 +312,12 @@ def test_bookings_meeting_room_access(test_client):
         token = response.json.get('token')
         auth_header = {'Authorization': f'Bearer {token}'}
 
-        room_id = TelehealthBookings.query.filter_by(client_user_id=test_client.client_id, staff_user_id=test_client.staff_id).first().idx
+        booking = TelehealthBookings.query.filter_by(client_user_id=test_client.client_id, staff_user_id=test_client.staff_id).first()
         response = test_client.get(
-        f'/telehealth/bookings/meeting-room/access-token/{room_id}/', headers=test_client.staff_auth_header)
+        f'/telehealth/bookings/meeting-room/access-token/{booking.idx}/', headers=test_client.staff_auth_header)
 
         assert response.status_code == 200
+
 
     """Below will test the payment features that required a booking to be accessed
         before it was possible to test them
@@ -391,6 +392,14 @@ def test_bookings_meeting_room_access(test_client):
 
     assert response.status_code == 200
     assert len(response.json) == 2
+
+    ###
+    # Complete the booking
+    ###
+    response = test_client.put(
+        f'/telehealth/bookings/complete/{booking.idx}/', headers=test_client.staff_auth_header)
+    assert response.status_code == 200
+
 
 
 def test_delete_generated_users(test_client):

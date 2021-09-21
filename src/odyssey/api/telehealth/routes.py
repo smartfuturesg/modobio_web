@@ -59,7 +59,15 @@ from odyssey.api.payment.models import PaymentMethods, PaymentHistory, PaymentFa
 from odyssey.utils.auth import token_auth
 from odyssey.utils.errors import GenericNotFound, InputError, UnauthorizedUser, ContentNotFound, IllegalSetting, GenericThirdPartyError
 from odyssey.integrations.wheel import Wheel
-from odyssey.utils.constants import TELEHEALTH_BOOKING_LEAD_TIME_HRS, TWILIO_ACCESS_KEY_TTL, DAY_OF_WEEK, ALLOWED_AUDIO_TYPES, ALLOWED_IMAGE_TYPES, INSTAMED_OUTLET
+from odyssey.utils.constants import (
+    TELEHEALTH_BOOKING_LEAD_TIME_HRS,
+    TWILIO_ACCESS_KEY_TTL,
+    DAY_OF_WEEK,
+    ALLOWED_AUDIO_TYPES,
+    ALLOWED_IMAGE_TYPES,
+    IMAGE_MAX_SIZE,
+    INSTAMED_OUTLET
+) 
 from odyssey.utils.message import PushNotification, PushNotificationType
 from odyssey.utils.misc import (
     FileHandling,
@@ -89,7 +97,6 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
     @responds(schema=TelehealthBookingMeetingRoomsTokensSchema, api=ns, status_code=200)
     def get(self, booking_id):
         # Get the current user
-
         current_user, _ = token_auth.current_user()
         
         booking = TelehealthBookings.query.get(booking_id)
@@ -173,6 +180,14 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
                     'transaction_id': response_data['TransactionID']
                 })
                 db.session.add(failed)
+            ##
+            # If the booking is with a wheel practitioner
+            # send a consult start request to wheel
+            ##
+            if booking.external_booking_id:
+                wheel = Wheel()
+                wheel.start_consult(booking.external_booking_id)
+
         elif g.user_type == 'client':
             meeting_room.client_access_token = token
         
@@ -302,7 +317,7 @@ class TelehealthClientTimeSelectApi(Resource):
             # Query wheel for available practitioners on target date in client's tzone
             # TODO: when wheel is ready, add sex to this availability check
             
-            wheel_practitioner_availabilities = wheel.available_timeslots(
+            wheel_practitioner_availabilities = wheel.openings(
                 target_time_range = (target_start_datetime_utc, target_end_datetime_utc), 
                 location_id=client_in_queue.location_id)
 
@@ -447,6 +462,8 @@ class TelehealthClientTimeSelectApi(Resource):
 
             ###
             # Take 5 minute time blocks and convert them into appointment timeslots with a 20-minute duration
+            # Loop through available time blocks by target date, staff_id
+            # 
             ###
 
             # NOTE: It might be a good idea to shuffle user_id_arr and only select up to 10 (?) staff members 
@@ -454,40 +471,48 @@ class TelehealthClientTimeSelectApi(Resource):
             # user_id_arr = [1,2,3,4,5]
             # user_id_arr.random() -> [3,5,2,1,4]
             # user_id_arr[0:3]
+
             timeArr = {} # client localized booking times, should only be for the target date the client specified 
+
             for target_date, staff_availability in available.items():
                 for staff_id in staff_availability:
                     if staff_id not in removedNum[target_date]:
-                        removedNum[target_date][staff_id] = []            
-                    for idx,time_id in enumerate(available[target_date][staff_id]):                 
-                        if idx + 1 < len(available[target_date][staff_id]):
-                            if available[target_date][staff_id][idx+1] - time_id < idx_delta and time_id + idx_delta < available[target_date][staff_id][-1]:
+                        removedNum[target_date][staff_id] = []  
+
+                    # loop through available time blocks
+                    #          
+                    for idx,time_id in enumerate(available[target_date][staff_id]):  
+                        # if not at end of availability list               
+                        if idx + idx_delta < len(available[target_date][staff_id]):
+                            # If there is a continuous block of time equal to the desired meeting duration
+                            if available[target_date][staff_id][idx+idx_delta] - time_id == idx_delta:
                                 # since we are accessing an array, we need to -1 because recall time_id is the ACTUAL time increment idx
                                 # and arrays are 0 indexed in python
+                                # booking start time options should be every 15 mins
                                 if time_inc[time_id-1].start_time.minute%15 == 0: 
-
                                     # client's tz: client_in_queue.timezone
-                                    # staff's timezone: staff_availability_timezone[staff_user_id]
+                                    # staff availabilities stored in UTC
                                     start_time_utc = datetime.combine(
                                         target_date, 
                                         time_inc[time_id-1].start_time, 
                                         tzinfo=tz.UTC)
                                     
-                                    start_time_client_localized = start_time_utc.astimezone(tz.gettz(client_in_queue.timezone))         
-                                    time_idx_dict[start_time_client_localized.strftime('%H:%M:%S')]
+                                    start_time_client_localized = start_time_utc.astimezone(tz.gettz(client_in_queue.timezone))     
+
+                                    # add this start time to the timeArr dict
                                     if start_time_client_localized not in timeArr:
                                         timeArr[start_time_client_localized] = []
-                                    
+
+                                    # ensure the staff does not have any overlapping bookings and can fulfill the pre/post booking buffer of 5 mins
+                                    # if this staff does not have the time blocks open, do not add them to the timeArr dict
                                     if time_id+idx_delta in removedNum[target_date][staff_id]:
                                         continue                                            
                                     else:                                 
-                                        # if when localizing to client's time zone, the date changes to the day before the original 
-                                        # target date, do not show this availability to the client 
                                         timeArr[start_time_client_localized].append({"staff_id": staff_id,"idx":time_idx_dict[start_time_client_localized.strftime('%H:%M:%S')]})                                                            
                             else:
                                 continue
                         else:
-                            continue 
+                            break 
 
             ##
             # Loop through timeArr:
@@ -783,8 +808,8 @@ class TelehealthBookingsApi(BaseResource):
         wheel = Wheel()
         wheel_clinician_ids = wheel.clinician_ids(key='user_id') 
         if staff_user_id in wheel_clinician_ids:
-            staff_availability = wheel.available_timeslots(
-                target_time_range = (target_start_datetime_utc, target_end_datetime_utc+timedelta(minutes=5)), 
+            staff_availability = wheel.openings(
+                target_time_range = (target_start_datetime_utc-timedelta(minutes=5), target_end_datetime_utc+timedelta(minutes=5)), 
                 location_id = client_in_queue.location_id,
                 clinician_id=wheel_clinician_ids[staff_user_id])[target_start_datetime_utc.date()].get(staff_user_id)
         else:
@@ -915,8 +940,8 @@ class TelehealthBookingsApi(BaseResource):
         client['end_time_localized'] = end_time_client_localized
         practitioner = {**booking.practitioner.__dict__}
         practitioner['timezone'] = booking.staff_timezone
-        practitioner['start_time_localized'] = time_inc[request.parsed_obj.booking_window_id_start_time-1].start_time
-        practitioner['end_time_localized'] = time_inc[request.parsed_obj.booking_window_id_end_time-1].end_time
+        practitioner['start_time_localized'] = booking_start_staff_localized.time()
+        practitioner['end_time_localized'] = booking_end_staff_localized.time()
 
         payload = {
             'all_bookings': 1,
@@ -1643,22 +1668,11 @@ class TelehealthBookingDetailsApi(Resource):
         res['details'] = booking.details
 
         #retrieve all files associated with this booking id
-        s3prefix = f'meeting_files/id{booking_id:05d}/'
-        s3 = boto3.resource('s3')
-        bucket = s3.Bucket(current_app.config['AWS_S3_BUCKET'])
-
-        params = {
-            'Bucket' : current_app.config['AWS_S3_BUCKET'],
-            'Key' : None
-        }
-
-        for media in bucket.objects.filter(Prefix=s3prefix):
-            params['Key'] = media.key
-            url = boto3.client('s3').generate_presigned_url('get_object', Params=params, ExpiresIn=3600)
-            if 'voice' in media.key:
-                res['voice'] = url
-            else:
-                res['images'] = res['images'] + [url]
+        fh = FileHandling()
+        
+        prefix = f'meeting_files/id{booking_id:05d}/'
+        res['voice'] = fh.get_presigned_urls(prefix=prefix + 'voice')
+        res['images'] = fh.get_presigned_urls(prefix=prefix + 'image')
         
         return res
     
@@ -1707,74 +1721,46 @@ class TelehealthBookingDetailsApi(Resource):
         #if 'images' and 'voice' are both not present, no changes will be made to the current media file
         #if 'images' or 'voice' are present, but empty, the current media file(s) for that category will be removed
         if files:
-            s3 = boto3.resource('s3')
-            bucket = s3.Bucket(current_app.config['AWS_S3_BUCKET'])
-
-            #used to locate and remove existing files is necessary
-            params = {
-                'Bucket': current_app.config['AWS_S3_BUCKET'],
-                'Key': None
-            }
-
+            fh = FileHandling()
+        
             #if images key is present, delete existing images
             if 'images' in files:
-                bucket.objects.filter(Prefix=f'meeting_files/id{booking_id:05d}/image').delete()
+                fh.delete_from_s3(prefix=f'meeting_files/id{booking_id:05d}/image')
 
             #if voice key is present, delete existing recording
             if 'voice' in files:
-                bucket.objects.filter(Prefix=f'meeting_files/id{booking_id:05d}/voice').delete()
+                fh.delete_from_s3(prefix=f'meeting_files/id{booking_id:05d}/voice')
 
-            MAX_bytes = 524288000 #500 mb
             hex_token = secrets.token_hex(4)
 
-            #add each image supplied to s3 bucket for this meeting
+            #upload images from request to s3
             for i, img in enumerate(files.getlist('images')):
-                #Verifying image size is within a safe threashold (MAX = 500 mb)
-                img.seek(0, os.SEEK_END)
-                img_size = img.tell()
-                if img_size > MAX_bytes:
-                    raise InputError(413, 'File too large')
+                # validate file size - safe threashold (MAX = 10 mb)
+                fh.validate_file_size(img, IMAGE_MAX_SIZE)
+                # validate file type
+                img_extension = fh.validate_file_type(img, ALLOWED_IMAGE_TYPES)
 
-                #ensure this is not an empty file
-                if img_size > 0:
-                    #Rename image (format: 4digitRandomHex_index.img_extension) AND Save=>S3
-                    img_extension = pathlib.Path(img.filename).suffix
-                    if img_extension not in ALLOWED_IMAGE_TYPES:
-                        raise InputError(422, f'{img_extension} is not an allowed file type. Allowed types are {ALLOWED_IMAGE_TYPES}')
-
-                    img.seek(0)
-
-                    s3key = f'meeting_files/id{booking_id:05d}/image_{hex_token}_{i}{img_extension}'
-                    bucket.put_object(Key=s3key, Body=img.stream)
+                s3key = f'meeting_files/id{booking_id:05d}/image_{hex_token}_{i}{img_extension}'
+                fh.save_file_to_s3(img, s3key)
 
                 #exit loop if this is the 4th picture, as that is the max allowed
                 #setup this way to allow us to easily change the allowed number in the future
                 if i >= 3:
                     break
 
-            #upload new voice file to S3
+            #upload voice recording from request to S3
             for i, recording in enumerate(files.getlist('voice')):
-                #Verifying recording size is within a safe threashold (MAX = 500 mb)
-                recording.seek(0, os.SEEK_END)
-                recording_size = recording.tell()
-                if recording_size > MAX_bytes:
-                    raise InputError(413, 'File too large')
+                # validate file size - safe threashold (MAX = 10 mb)
+                fh.validate_file_size(recording, IMAGE_MAX_SIZE)
+                # validate file type
+                recording_extension = fh.validate_file_type(recording, ALLOWED_AUDIO_TYPES)
 
-                #ensure this is not an empty file
-                if recording_size > 0:
-                    #Rename voice (format: voice_4digitRandomHex_index.img_extension) AND Save=>S3
-                    recording_extension = pathlib.Path(recording.filename).suffix
-                    if recording_extension not in ALLOWED_AUDIO_TYPES:
-                        raise InputError(422, f'{recording_extension} is not an allowed file type. Allowed types are {ALLOWED_AUDIO_TYPES}')
-
-                    recording.seek(0)
-
-                    s3key = f'meeting_files/id{booking_id:05d}/voice_{hex_token}_{i}{recording_extension}'
-                    bucket.put_object(Key= s3key, Body=recording.stream)
+                s3key = f'meeting_files/id{booking_id:05d}/voice_{hex_token}_{i}{recording_extension}'
+                fh.save_file_to_s3(recording, s3key)
 
                 #exit loop if this is the 1st recording, as that is the max allowed
                 #setup this way to allow us to easily change the allowed number in the future
-                if i >= 3:
+                if i >= 1:
                     break
 
         db.session.commit()
@@ -1822,32 +1808,18 @@ class TelehealthBookingDetailsApi(Resource):
 
         #Saving media files into s3
         if files:
-            MAX_bytes = 524288000 #500 mb
-            data_list = []
+            fh = FileHandling()
             hex_token = secrets.token_hex(4)
-
-            s3 = boto3.resource('s3')
-            bucket = s3.Bucket(current_app.config['AWS_S3_BUCKET'])
 
             #upload images from request to s3
             for i, img in enumerate(files.getlist('images')):
-                #Verifying image size is within a safe threashold (MAX = 500 mb)
-                img.seek(0, os.SEEK_END)
-                img_size = img.tell()
-                if img_size > MAX_bytes:
-                    raise InputError(413, 'File too large')
+                # validate file size - safe threashold (MAX = 10 mb)
+                fh.validate_file_size(img, IMAGE_MAX_SIZE)
+                # validate file type
+                img_extension = fh.validate_file_type(img, ALLOWED_IMAGE_TYPES)
 
-                #ensure this is not an empty file
-                if img_size > 0:
-                    #Rename image (format: 4digitRandomHex_index.img_extension) AND Save=>S3
-                    img_extension = pathlib.Path(img.filename).suffix
-                    if img_extension not in ALLOWED_IMAGE_TYPES:
-                        raise InputError(422, f'{img_extension} is not an allowed file type. Allowed types are {ALLOWED_IMAGE_TYPES}')
-
-                    img.seek(0)
-
-                    s3key = f'meeting_files/id{booking_id:05d}/image_{hex_token}_{i}{img_extension}'
-                    bucket.put_object(Key= s3key, Body=img.stream)
+                s3key = f'meeting_files/id{booking_id:05d}/image_{hex_token}_{i}{img_extension}'
+                fh.save_file_to_s3(img, s3key)
 
                 #exit loop if this is the 4th picture, as that is the max allowed
                 #setup this way to allow us to easily change the allowed number in the future
@@ -1856,23 +1828,13 @@ class TelehealthBookingDetailsApi(Resource):
 
             #upload voice recording from request to S3
             for i, recording in enumerate(files.getlist('voice')):
-                #Verifying recording size is within a safe threashold (MAX = 500 mb)
-                recording.seek(0, os.SEEK_END)
-                recording_size = recording.tell()
-                if recording_size > MAX_bytes:
-                    raise InputError(413, 'File too large')
+                # validate file size - safe threashold (MAX = 10 mb)
+                fh.validate_file_size(recording, IMAGE_MAX_SIZE)
+                # validate file type
+                recording_extension = fh.validate_file_type(recording, ALLOWED_AUDIO_TYPES)
 
-                #ensure this is not an empty file
-                if recording_size > 0:
-                    #Rename voice (format: voice_4digitRandomHex_index.img_extension) AND Save=>S3
-                    recording_extension = pathlib.Path(recording.filename).suffix
-                    if recording_extension not in ALLOWED_AUDIO_TYPES:
-                        raise InputError(422, f'{recording_extension} is not an allowed file type. Allowed types are {ALLOWED_AUDIO_TYPES}')
-
-                    recording.seek(0)
-
-                    s3key = f'meeting_files/id{booking_id:05d}/voice_{hex_token}_{i}{recording_extension}'
-                    bucket.put_object(Key= s3key, Body=recording.stream)
+                s3key = f'meeting_files/id{booking_id:05d}/voice_{hex_token}_{i}{recording_extension}'
+                fh.save_file_to_s3(recording, s3key)
 
                 #exit loop if this is the 1st recording, as that is the max allowed
                 #setup this way to allow us to easily change the allowed number in the future
@@ -1902,9 +1864,8 @@ class TelehealthBookingDetailsApi(Resource):
         db.session.commit()
 
         #delete s3 resources for this booking id
-        s3 = boto3.resource('s3')
-        bucket = s3.Bucket(current_app.config['AWS_S3_BUCKET'])
-        bucket.objects.filter(Prefix=f'meeting_files/id{booking_id:05d}/').delete()
+        fh = FileHandling()
+        fh.delete_from_s3(prefix=f'meeting_files/id{booking_id:05d}/')
 
 @ns.route('/chat-room/access-token')
 @ns.deprecated
@@ -2040,3 +2001,45 @@ class TelehealthAllChatRoomApi(Resource):
             
         return payload
         
+@ns.route('/bookings/complete/<int:booking_id>/')
+class TelehealthBookingsRoomAccessTokenApi(Resource):
+    """
+    API for completing bookings
+    """
+    @token_auth.login_required(user_type=('staff',))
+    @responds(api=ns, status_code=200)
+    def put(self, booking_id):
+        """
+        Complete the booking by:
+        - send booking complete request to wheel
+        - update booking status in TelehealthBookings
+        """
+        booking = db.session.execute(select(TelehealthBookings).where(
+            TelehealthBookings.idx == booking_id,
+            TelehealthBookings.status == 'In Progress')).scalars().one_or_none()
+        if not booking:
+            raise InputError(status_code=405, message='Meeting does not exist yet or has not yes begun')
+
+        current_user, _ = token_auth.current_user()
+
+        # make sure the requester is one of the participants
+        if not current_user.user_id == booking.staff_user_id:
+            raise InputError(status_code=405, message='logged in user must be a booking participant')
+        
+        if booking.external_booking_id:
+            wheel = Wheel()
+            wheel.complete_consult(booking.external_booking_id)
+        
+
+        booking.status = 'Completed'
+
+        status_history = TelehealthBookingStatus(
+            booking_id=booking_id,
+            reporter_id=current_user.user_id,
+            reporter_role='Practitioner',
+            status='Completed'
+        )
+        db.session.add(status_history)
+        db.session.commit() 
+
+        return 

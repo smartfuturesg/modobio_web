@@ -9,6 +9,7 @@ from .data import (
     doctor_credentials_put_1_data,
     doctor_credentials_put_2_data,
     doctor_credentials_put_3_data,
+    doctor_credentials_put_4_data,
     doctor_credentials_delete_1_data
 )
 
@@ -271,7 +272,7 @@ def test_get_5_credentials(test_client):
         if cred['credential_type'] == 'npi':
             assert cred['country_id'] == 1
             assert cred['state'] == None
-            assert cred['credentials'] == '987654321'
+            assert cred['credentials'] == '1296336567'
             assert cred['status'] == 'Pending Verification'    
         elif cred['credential_type'] == 'dea':
             if cred['state'] == 2:
@@ -310,7 +311,7 @@ def test_get_6_credentials(test_client):
         if cred['credential_type'] == 'npi':
             assert cred['country_id'] == 1
             assert cred['state'] == None
-            assert cred['credentials'] == '987654321'
+            assert cred['credentials'] == '1296336567'
             assert cred['status'] == 'Pending Verification'    
         elif cred['credential_type'] == 'dea':
             if cred['state'] == 3:
@@ -322,4 +323,40 @@ def test_get_6_credentials(test_client):
                 assert cred['status'] == 'Verified' 
             elif cred['state'] == 3:
                 assert cred['credentials'] == '85423903'
-                assert cred['status'] == 'Pending Verification'                             
+                assert cred['status'] == 'Pending Verification'      
+
+# Verify NPI number
+def test_put_4_credentials(test_client):
+    response = test_client.put(
+        f'/doctor/credentials/{test_client.staff_id}/',
+        headers=test_client.staff_auth_header,
+        data=dumps(doctor_credentials_put_4_data),
+        content_type='application/json')
+
+    assert response.status_code == 201
+
+def test_get_7_credentials(test_client):
+    response = test_client.get(
+        f'/doctor/credentials/{test_client.staff_id}/',
+        headers=test_client.staff_auth_header,
+        content_type='application/json')
+
+    assert response.status_code == 200 
+    assert len(response.json['items']) == 4
+    for cred in response.json['items']:
+        if cred['credential_type'] == 'npi':
+            assert cred['country_id'] == 1
+            assert cred['state'] == None
+            assert cred['credentials'] == '1296336567'
+            assert cred['status'] == 'Verified'    
+        elif cred['credential_type'] == 'dea':
+            if cred['state'] == 3:
+                assert cred['credentials'] == '4312079463'
+                assert cred['status'] == 'Pending Verification' 
+        else:
+            if cred['state'] == 2:
+                assert cred['credentials'] == '523746512'
+                assert cred['status'] == 'Verified' 
+            elif cred['state'] == 3:
+                assert cred['credentials'] == '85423903'
+                assert cred['status'] == 'Pending Verification'                                           

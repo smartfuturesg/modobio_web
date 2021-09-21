@@ -429,6 +429,7 @@ class FileHandling:
         if self.s3_prefix and not self.s3_prefix.endswith('/'):
             self.s3_prefix += '/'
         self.s3_bucket = self.s3_resource.Bucket(self.s3_bucket_name)
+        mimetypes.add_type('audio/mp4', '.m4a')
 
     def validate_file_type(self, file: FileStorage, allowed_file_types: tuple) -> str:
         # validate the file is allowed

@@ -214,6 +214,19 @@ INSTAMED_API_KEY = ''
 INSTAMED_API_SECRET = ''
 """ InstaMed API access key secret. """
 
+# InstaMed Settings
+DOSESPOT_API_KEY = ''
+""" DoseSpot API access key ID number. """
+
+DOSESPOT_MODOBIO_ID = ''
+""" DoseSpot ModoBio ID. """
+
+DOSESPOT_ENCRYPTED_MODOBIO_ID = ''
+
+DOSESPOT_ADMIN_ID = ''
+""" DoseSpot Admin ID"""
+
+DOSESPOT_ENCRYPTED_ADMIN_ID = ''
 # Wheel settings
 WHEEL_API_TOKEN = ''
 WHEEL_MD_CONSULT_RATE = '7161c1e9-69a6-4430-a7ef-04593300f48a'
@@ -223,12 +236,12 @@ WHEEL_NP_CONSULT_RATE = '9c36e5c6-ed91-4546-a847-c649c81db265'
 MONGO_URI = ''
 
 # Calling host base uri 
-DOMAIN_NAME = 'localhost:5000'
+FRONT_END_DOMAIN_NAME = ''
 """ Default name of calling domain
-
-If flask_env == development and this variable isn't set in the env, 
-it will default to localhost:5000/
 
 The purpose of the variable is to produce clickable URLs specific to the domain being used
 ie. production (modobio.com), dev r7 (dev-r0-7.modobio.com) 
 """
+
+# Google ReCaptcha api secret
+GOOGLE_RECAPTCHA_SECRET = ""

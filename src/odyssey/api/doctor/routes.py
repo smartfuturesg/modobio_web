@@ -45,7 +45,14 @@ from odyssey.utils.errors import (
     GenericNotFound,
     UnauthorizedUser
 )
-from odyssey.utils.misc import check_client_existence, check_blood_test_existence, check_blood_test_result_type_existence, check_medical_condition_existence
+from odyssey.utils.misc import (
+    check_client_existence,
+    check_blood_test_existence,
+    check_blood_test_result_type_existence,
+    check_medical_condition_existence,
+    FileHandling
+)
+from odyssey.utils.constants import ALLOWED_IMAGE_TYPES, IMAGE_MAX_SIZE
 from odyssey.api.doctor.schemas import (
     AllMedicalBloodTestSchema,
     CheckBoxArrayDeleteSchema,
@@ -1037,17 +1044,11 @@ class MedImaging(BaseResource):
             img_dat.update({'reporter_firstname': data[1], 'reporter_lastname': data[2]})
             response.append(img_dat)
 
-        bucket_name = current_app.config['AWS_S3_BUCKET']
-        s3 = boto3.client('s3')
-        params = {
-            'Bucket' : bucket_name,
-            'Key' : None}
-
+        #get presigned link for AWS for each image being returned
+        fh = FileHandling()
         for img in response:
             if img.get('image_path'):
-                params['Key'] = img.get('image_path')
-                url = s3.generate_presigned_url('get_object', Params=params, ExpiresIn=3600)
-                img['image_path'] = url
+                img['image_path'] = fh.get_presigned_url(img.get('image_path'))
 
         return response
 
@@ -1068,7 +1069,6 @@ class MedImaging(BaseResource):
 
         """
         super().check_user(user_id, user_type='client')
-        bucket_name = current_app.config['AWS_S3_BUCKET']
 
         # bring up reporting staff member
         reporter = token_auth.current_user()[0]
@@ -1083,31 +1083,29 @@ class MedImaging(BaseResource):
             return 
 
         files = request.files #ImmutableMultiDict of key : FileStorage object
-        MAX_bytes = 524288000 #500 mb
         data_list = []
         hex_token = secrets.token_hex(4)
 
-        s3 = boto3.resource('s3')
+        # add all files to S3
+        # format: id{user_id:05d}/medical_images/img_type_date_hex_token_i.img_extension
+        fh = FileHandling()
+        img = request.files['image']
+        _prefix = f'id{user_id:05d}/medical_images'
 
         for i, img in enumerate(files.getlist('image')):
+            # validate file size - safe threashold (MAX = 10 mb)
+            fh.validate_file_size(img, IMAGE_MAX_SIZE)
+            # validate file type
+            img_extension = fh.validate_file_type(img, ALLOWED_IMAGE_TYPES)
+
             mi_data = mi_schema.load(request.form)
             mi_data.user_id = user_id
             mi_data.reporter_id = reporter.user_id
             date = mi_data.image_date
 
-            #Verifying image size is within a safe threashold (MAX = 500 mb)
-            img.seek(0, os.SEEK_END)
-            img_size = img.tell()
-            mi_data.image_size = img_size
-            if img_size > MAX_bytes:
-                raise InputError(413, 'File too large')
-
-            #Rename image (format: imageType_Y-M-d_4digitRandomHex_index.img_extension) AND Save=>S3 
-            img_extension = pathlib.Path(img.filename).suffix
-            img.seek(0)
-
-            s3key = f'id{user_id:05d}/medical_images/{mi_data.image_type}_{date}_{hex_token}_{i}{img_extension}'
-            s3.Bucket(bucket_name).put_object(Key= s3key, Body=img.stream)
+            # Save image to S3
+            s3key = f'{_prefix}/{mi_data.image_type}_{date}_{hex_token}_{i}{img_extension}'
+            fh.save_file_to_s3(img, s3key)
             mi_data.image_path = s3key
 
             data_list.append(mi_data)
@@ -1120,6 +1118,7 @@ class MedImaging(BaseResource):
     @responds(status_code=204, api=ns)
     def delete(self, user_id):
         idx = request.args.get('image_id', type=int)
+
         if idx:
             data = MedicalImaging.query.filter_by(user_id=user_id, idx=idx).one_or_none()
             if not data:
@@ -1129,9 +1128,8 @@ class MedImaging(BaseResource):
             super().check_ehr_permissions(data)
 
             #delete image saved in S3 bucket
-            s3 = boto3.client('s3')
-            bucket_name = current_app.config['AWS_S3_BUCKET']
-            s3.delete_object(Bucket=bucket_name, Key=data.image_path)
+            fh = FileHandling()
+            fh.delete_from_s3(prefix=data.image_path)
 
             db.session.delete(data)
             db.session.commit()

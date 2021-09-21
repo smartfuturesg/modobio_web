@@ -1,7 +1,8 @@
+from datetime import timedelta
 import random
 from typing import Tuple
 from dateutil import parser
-from flask_restx.fields import DateTime
+from flask_restx.fields import Date, DateTime
 
 from odyssey.api.staff.models import StaffOperationalTerritories, StaffProfile, StaffRoles
 from io import BytesIO
@@ -37,7 +38,7 @@ class Wheel:
         self.wheel_org_idx = db.session.execute(select(LookupOrganizations.idx).where(LookupOrganizations.org_name == 'Wheel')).scalars().one_or_none()
 
 
-    def available_timeslots(self, target_time_range, location_id, clinician_id=''):
+    def available_timeslots(self, target_time_range: Tuple[DateTime, DateTime], location_id: int, clinician_id: str = ''):
         """
         Query wheel's API to find timeslots for a specific datetime range.
         Wheel URI: /v1/consult_rates/<consult_rate>/timeslots
@@ -101,11 +102,13 @@ class Wheel:
                 
             results = dat.json()
             page = (page + 1 if results['links'].get('next') else False)
+
             for availability in results['data']:
                 
                 start_at = parser.isoparse(availability['start_at'])
                 start_at_idx = start_time_idx_dict.get(start_at.time().strftime('%H:%M:%S'))
-                availability_idx_range = [i for i in range(start_at_idx, start_at_idx + 4)]
+
+                availability_idx_range = [*range(start_at_idx, start_at_idx + 4)]
                 target_date_utc = start_at.date()
 
                 for practitioner in availability['clinicians']:
@@ -115,6 +118,105 @@ class Wheel:
                     else:
                         wheel_practitioner_availabilities[target_date_utc][loaded_wheel_practitioners[practitioner['id']]].extend(availability_idx_range)
         
+        return wheel_practitioner_availabilities
+    
+    def openings(self, target_time_range, location_id, clinician_id=''):
+        """
+        Query wheel's API to find timeslots for a specific datetime range.
+        Wheel URI: /v1/consult_rates/<consult_rate>/openings
+
+        The API will respond with blocks of continuous openings at least 30 minutes in duration. 
+
+        Params
+        ------
+        target_time_range: (datetime, datetime)
+            tuple containing the start and end datetimes of the target booking window in UTC
+        
+        location_id:
+            where the client is located. Converted to state abbreviation for wheel request
+
+        clinician_id
+            optional wheel_clinician_id of the clinician
+        
+        Returns
+        -------
+        dict
+        of available time increments: {user_id : [booking_availability_ids]}
+  
+        
+        TODO: add practitioner sex to query when wheel has implemented the feature
+        """
+
+        # use location_id to get the state abbreviation
+        state = db.session.execute(select(LookupTerritoriesOfOperations.sub_territory_abbreviation).where(LookupTerritoriesOfOperations.idx==location_id)).scalar_one_or_none()
+             
+        target_start_datetime_utc, target_end_datetime_utc =  target_time_range
+
+        time_inc = LookupBookingTimeIncrements.query.all()
+        
+        start_time_idx_dict = {item.start_time.isoformat() : item.idx for item in time_inc} # {datetime.time: booking_availability_id}
+        wheel_practitioner_availabilities = {} # {target_date_utc: {user_id : [booking_availability_ids]}}
+        loaded_wheel_practitioners = Wheel.clinician_ids(key='wheel_clinician_id') # {wheel_uid : modobio_user_id}
+        
+        # wheel_practitioner_availabilities stores utc times which may differ from the client's timezone
+        # availabilities may be between two or more days in utc 
+        wheel_practitioner_availabilities[target_start_datetime_utc.date()] = {}
+        if target_start_datetime_utc.date() != target_end_datetime_utc.date():
+            date_diff = (target_end_datetime_utc.date() - target_start_datetime_utc.date()).days
+            for days in range(1, date_diff+1):
+                wheel_practitioner_availabilities[target_start_datetime_utc.date()+ timedelta(days=days)] = {}
+
+        page = 1
+        uri = self.url_base+ f"/v1/consult_rates/{self.wheel_md_consult_rate}/openings"
+        while page:
+            dat = requests.get(
+                uri,
+                headers={'x-api-key': self.wheel_api_token,
+                'Content-Type': 'application/json'},
+                params={'start': target_start_datetime_utc.isoformat(), 
+                        'end': target_end_datetime_utc.isoformat(), 
+                        'page': page, 
+                        'clinician_id': clinician_id,
+                        'state': state}
+            )
+            try:
+                dat.raise_for_status()
+            except Exception as e:
+                raise GenericThirdPartyError(status_code = dat.status_code, message=dat.json())
+                
+            results = dat.json()
+            page = (page + 1 if results['links'].get('next') else False)
+
+            #loop through current openings
+            # format:         {
+            #     "clinician_id": "",
+            #     "clinician_name": "",
+            #     "start_at": "2021-09-20T23:55:00.000+00:00",
+            #     "end_at": "2021-09-21T00:35:00.000+00:00"
+            # }
+            for availability in results['data']:
+                
+                start_at = parser.isoparse(availability['start_at'])
+                end_at = parser.isoparse(availability['end_at'])
+                start_at_idx = start_time_idx_dict.get(start_at.time().strftime('%H:%M:%S'))
+                end_at_idx = start_time_idx_dict.get(end_at.time().strftime('%H:%M:%S')) - 1 
+
+                # organize availability time blocks into the correct dates. Always utc
+                # availability_idx_range: {date: [booking_increment_idxs]}
+                availability_idx_range = {}
+                if start_at_idx > end_at_idx:
+                    availability_idx_range[start_at.date()] = [*range(start_at_idx, start_time_idx_dict['23:55:00'] + 1)]
+                    availability_idx_range[end_at.date()] = [*range(1, end_at_idx + 1)]
+                else:
+                    availability_idx_range[start_at.date()] = [*range(start_at_idx, end_at_idx + 1)]
+
+                # add availability for this practitioner to the wheel_practitioner_availabilities dict
+                for date_, availability_idxs in availability_idx_range.items():
+                    if not wheel_practitioner_availabilities[date_].get(loaded_wheel_practitioners[availability['clinician_id']]):
+                        wheel_practitioner_availabilities[date_][loaded_wheel_practitioners[availability['clinician_id']]] = availability_idxs
+                    else:
+                        wheel_practitioner_availabilities[date_][loaded_wheel_practitioners[availability['clinician_id']]].extend(availability_idxs)
+                
         return wheel_practitioner_availabilities
 
     @staticmethod
@@ -165,8 +267,8 @@ class Wheel:
         # booking_external_id 
         booking_external_id = uuid.uuid4()
 
-        consult_url_deeplink = f'https://{current_app.config["DOMAIN_NAME"]}/telehealth?clientId={client_user_id}&bookingId={booking_id}'
-
+        consult_url_deeplink = f'https://{current_app.config["FRONT_END_DOMAIN_NAME"]}/telehealth?clientId={client_user_id}&bookingId={booking_id}'
+        
         payload =  {
             "consult_id" : str(booking_external_id),
             "consult_url": consult_url_deeplink,
@@ -424,7 +526,7 @@ class Wheel:
 
             db.session.commit()
 
-    def cancel_booking(self, external_booking_id):
+    def cancel_booking(self, external_booking_id: str):
         """
         Cancel the wheel consultation using PATCH v1/consults/<external_booking_id>/cancel
 
@@ -432,6 +534,60 @@ class Wheel:
         """
 
         url = self.url_base+ f"/v1/consults/{external_booking_id}/cancel"
+
+        response = requests.patch(
+                url,
+                headers={'x-api-key': self.wheel_api_token,
+                'Content-Type': 'application/json'},
+            )
+
+        # user must attempt this request again later
+        # TODO: Consider making this a recoverable situation by retrying
+        try:
+            response.raise_for_status()
+        except Exception as e:
+            raise GenericThirdPartyError(status_code = response.status_code, message=response.json())
+
+        return
+
+    def start_consult(self, external_booking_id: str):
+        """
+        Send a consult start request to wheel. 
+
+        Params
+        -------
+        external_booking_id: 
+            Booking reference id from TelehealthBookings.external_booking_id
+        """
+
+        url = self.url_base+ f"/v1/consults/{external_booking_id}/start"
+
+        response = requests.patch(
+                url,
+                headers={'x-api-key': self.wheel_api_token,
+                'Content-Type': 'application/json'},
+            )
+
+        # user must attempt this request again later
+        # TODO: Consider making this a recoverable situation by retrying
+        try:
+            response.raise_for_status()
+        except Exception as e:
+            raise GenericThirdPartyError(status_code = response.status_code, message=response.json())
+
+        return
+
+    def complete_consult(self, external_booking_id: str):
+        """
+        Send a consult complete request to wheel. 
+
+        Params
+        -------
+        external_booking_id: 
+            Booking reference id from TelehealthBookings.external_booking_id
+        """
+
+        url = self.url_base+ f"/v1/consults/{external_booking_id}/complete"
 
         response = requests.patch(
                 url,
