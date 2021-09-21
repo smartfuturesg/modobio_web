@@ -23,6 +23,7 @@ class DoseSpotPrescribeSSO(Schema):
 
 class DoseSpotPharmacySelect(Schema):
     pharmacy_id = fields.Integer()
+    primary_pharm = fields.Boolean(default=False)
 
 class DoseSpotPharmacyNestedSelect(Schema):
     items = fields.Nested(DoseSpotPharmacySelect(many=True))

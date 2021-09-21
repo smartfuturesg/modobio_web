@@ -19,9 +19,12 @@ def test_get_patient_ds_pharmacies(test_client):
     assert response.status_code == 200    
 
 def test_post_patient_ds_pharmacies(test_client):
-    payload = {'items':[{'pharmacy_id': 5},
-                        {'pharmacy_id': 276},
-                        {'pharmacy_id': 1000}]}
+    payload = {'items':[{'pharmacy_id': 5,
+                         'primary_pharm': False},
+                        {'pharmacy_id': 276,
+                         'primary_pharm': False},
+                        {'pharmacy_id': 1000,
+                         'primary_pharm': True}]}
 
     response = test_client.post(f'/dosespot/pharmacies/{test_client.client_id}/',
                                 data=dumps(payload),
@@ -43,6 +46,12 @@ def test_get_patient_ds_prescriptions(test_client):
                                 headers=test_client.client_auth_header)
 
     assert response.status_code == 200 
+
+def test_get_patient_ds_pharmacies(test_client):
+    response = test_client.get(f'/dosespot/pharmacies/{test_client.client_id}/',
+                                headers=test_client.client_auth_header)
+    assert response.status_code == 200 
+    assert len(response.json) == 2  
 
 def test_post_patient_prescription(test_client):
     response = test_client.post(f'/dosespot/prescribe/{test_client.client_id}/',
