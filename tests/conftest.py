@@ -1,4 +1,6 @@
+from datetime import datetime, timedelta
 import pathlib
+import uuid
 import pytest
 import subprocess
 import sys
@@ -14,6 +16,8 @@ from sqlalchemy.exc import ProgrammingError
 from odyssey import create_app, db
 from odyssey.api.client.models import ClientClinicalCareTeam, ClientClinicalCareTeamAuthorizations
 from odyssey.api.lookup.models import LookupClinicalCareTeamResources
+from odyssey.api.payment.models import PaymentMethods
+from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.api.user.models import User, UserLogin
 from odyssey.utils.misc import grab_twilio_credentials
 from odyssey.utils.errors import MissingThirdPartyCredentials
@@ -319,3 +323,53 @@ def care_team(test_client):
     test_client.db.session.delete(tm_non_user)
     test_client.db.session.delete(tm_client)
     test_client.db.session.commit()
+
+
+
+# Used by tests in client/ and in doctor/
+@pytest.fixture(scope='module')
+def wheel_telehealth_booking(test_client):
+    """ 
+    Create a new telehealth booking between one of the wheel test users and client user 22
+
+    Yields
+    ------
+    TelehealthBookings obj        
+
+    """
+
+    # prepare a payment method to be used
+    pm = PaymentMethods(
+        payment_id = '123456789',
+        payment_type = 'VISA',
+        number = 123,
+        expiration = '05/26',
+        is_default = True,
+        user_id = 22
+    )
+
+    test_client.db.session.add(pm)
+    test_client.db.session.flush()
+
+
+    # # make a telehealth booking by direct db call
+    target_date = datetime.now() + timedelta(days=1)
+
+    booking = TelehealthBookings(
+        staff_user_id = 30,
+        client_user_id = 22,
+        target_date = target_date.date(),
+        booking_window_id_start_time = 1,
+        booking_window_id_end_time = 4,
+        booking_window_id_start_time_utc = 1,
+        booking_window_id_end_time_utc = 4,
+        client_location_id = 1,
+        payment_method_id = pm.idx,
+        external_booking_id = uuid.uuid4()
+    )
+
+    
+    test_client.db.session.add(booking)
+    test_client.db.session.commit()
+
+    yield booking
