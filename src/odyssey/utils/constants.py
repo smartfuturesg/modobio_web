@@ -900,6 +900,10 @@ INSTAMED_OUTLET = {
                 "TerminalID": '0002'
             }
 
+INSTAMED_REQUEST_HEADER = {'Api-Key': current_app.config['INSTAMED_API_KEY'],
+                                'Api-Secret': current_app.config['INSTAMED_API_SECRET'],
+                                'Content-Type': 'application/json'}
+
 MODOBIO_ADDRESS = {
     "firstname": "Modo",
     "lastname": "Bio",
