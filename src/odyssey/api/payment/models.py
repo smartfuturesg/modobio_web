@@ -206,9 +206,33 @@ class PaymentFailedTransactions(BaseModelWithIdx, UserIdFkeyMixin):
     blacklist users from creating future appointments until the failed payment is resolved.
     """
 
-    transaction_id = db.Column(db.String)
+    payment_method = relationship("PaymentMethods", backref="PaymentFailedTransactions")
     """
-    InstaMed Transaction ID.
+    Relationship to PaymentMethods
+    """
 
-    :type: string
+    payment_method_id = db.Column(db.Integer, db.ForeignKey('PaymentMethods.idx', ondelete='SET NULL'))
+    """
+    Foreign key to the payment method used for this payment.
+
+    :type: int, foreignkey(PaymentMethods.idx)
+    """
+
+    booking = relationship("TelehealthBookings", backref="PaymentFailedTransactions")
+    """
+    Relationship to TelehealthBookings
+    """
+
+    booking_id = db.Column(db.Integer, db.ForeignKey('TelehealthBookings.idx'), ondelete='SET NULL')
+    """
+    Foreign key to the booking associated with this failed transaction.
+    
+    :type: int, foreignkey(TelehealthBookings.idx)
+    """
+
+    retries = db.Column(db.Integer, default=1)
+    """
+    Number of times this transaction has been retried.
+
+    :type: integer
     """
