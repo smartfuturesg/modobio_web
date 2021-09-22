@@ -133,11 +133,12 @@ class TelehealthBookings(BaseModelWithIdx):
     :type: int, foreign key(PaymentMethods.idx)
     """
 
-    is_paid = db.Column(db.Boolean, default=False)
+    charged = db.Column(db.Boolean, default=False)
     """
-    Denotes if the client has been charged for this booking yet. Clients will be automatically charged
-    for a booking when it's status is "On-Going" and the start time is 5 minutes or more later than 
-    the current time when checked by the periodic task "charge-user-telehealth".
+    Denotes if the system has attempted to charge the client for this bookings yet. Even if a charge
+    is unsuccessful, this will be set to true to denote that the booking was attempted to be charged
+    by the inital charge task. Unsuccessful bookings that have attempted to be charged once will then
+    be dealt with in the PaymentFailedTransactions table.
 
     :type: boolean
     """
