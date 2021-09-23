@@ -13,7 +13,7 @@ from odyssey.integrations.wheel import Wheel
 from odyssey.tasks.tasks import process_wheel_webhooks
 
 # @pytest.mark.skip
-def test_wheel_webhooks(test_client, wheel_telehealth_booking):
+def test_wheel_webhooks(test_client, telehealth_booking):
     """
     Webhooks sent from wheel all have the same format:
 
@@ -25,7 +25,7 @@ def test_wheel_webhooks(test_client, wheel_telehealth_booking):
     }
     """
     global booking
-    booking = wheel_telehealth_booking
+    booking = telehealth_booking
 
     payload = {
         'clinician_id': 'a98f3ccb-093c-4831-a612-8d403589ae9f', 

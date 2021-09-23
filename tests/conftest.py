@@ -328,7 +328,7 @@ def care_team(test_client):
 
 # Used by tests in client/ and in doctor/
 @pytest.fixture(scope='module')
-def wheel_telehealth_booking(test_client):
+def telehealth_booking(test_client, wheel = False):
     """ 
     Create a new telehealth booking between one of the wheel test users and client user 22
 
@@ -356,7 +356,7 @@ def wheel_telehealth_booking(test_client):
     target_date = datetime.now() + timedelta(days=1)
 
     booking = TelehealthBookings(
-        staff_user_id = 30,
+        staff_user_id = 30 if wheel else 1,
         client_user_id = 22,
         target_date = target_date.date(),
         booking_window_id_start_time = 1,
