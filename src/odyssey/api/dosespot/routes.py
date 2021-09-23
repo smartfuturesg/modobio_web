@@ -165,7 +165,7 @@ class DoseSpotNotificationSSO(BaseResource):
 
         url = generate_sso(modobio_clinic_id, str(ds_clinician.ds_user_id), encrypted_clinic_id, encrypted_user_id)
         
-        ds_notification_type = 17
+        ds_notification_type = 17 # DoseSpot Notification ID
         ds_notification = Notifications.query.filter_by(user_id=user_id,notification_type_id=ds_notification_type).one_or_none()
         if not ds_notification:
             ds_notification = Notifications(
