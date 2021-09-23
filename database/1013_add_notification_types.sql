@@ -20,4 +20,5 @@ VALUES
 ('Community', 'people.svg', 'pink', 'red'),
 ('Clinical Care Team', 'family.svg', 'white', 'pink'),
 ('Staff Administration', 'social-history.svg', 'black', 'white'),
-('System Administration', 'setting.svg', 'black', 'white');
+('System Administration', 'setting.svg', 'black', 'white'),
+('DoseSpot Notifications', 'doctor.svg', 'black', 'white');

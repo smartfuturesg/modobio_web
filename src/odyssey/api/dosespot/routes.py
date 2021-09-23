@@ -22,6 +22,8 @@ from odyssey.api.lookup.models import (
     LookupTerritoriesOfOperations,
 )
 
+from odyssey.api.notifications.models import Notifications
+
 from odyssey.api.user.models import User
 from odyssey.utils.auth import token_auth
 
@@ -132,8 +134,8 @@ class DoseSpotNotificationSSO(BaseResource):
         GET - Only a ModoBio Practitioners will be able to use this endpoint. This endpoint is used
               to return the SSO Link 
         """
-        # Clinician ID 
-        curr_suer,_ = token_auth.current_user()
+        
+        curr_user,_ = token_auth.current_user()
         ds_clinician = DoseSpotPractitionerID.query.filter_by(user_id=user_id).one_or_none()
         if not ds_clinician:
             raise InputError(status_code=405,message='This Practitioner does not have a DoseSpot account.')
@@ -144,7 +146,43 @@ class DoseSpotNotificationSSO(BaseResource):
         encrypted_clinic_id = current_app.config['DOSESPOT_ENCRYPTED_MODOBIO_ID']
         encrypted_user_id = generate_encrypted_user_id(encrypted_clinic_id[:22],clinic_api_key,str(ds_clinician.ds_user_id))
 
-        return {'url': generate_sso(modobio_clinic_id, str(ds_clinician.ds_user_id), encrypted_clinic_id, encrypted_user_id)}
+        res = get_access_token(modobio_clinic_id,encrypted_clinic_id,str(ds_clinician.ds_user_id),encrypted_user_id)
+        if res.ok:
+            access_token = res.json()['access_token']
+            headers = {'Authorization': f'Bearer {access_token}'}
+        else:
+            raise InputError(status_code=405,message='Could not create')
+        
+        res = requests.get('https://my.staging.dosespot.com/webapi/api/notifications/counts',headers=headers)
+        
+        notification_count = 0
+        if res.ok:
+            for key in res.json():
+                if key != 'Result':
+                    notification_count+=res.json()[key]
+        else:
+            raise InputError(status_code=405,message=res.json())
+
+        url = generate_sso(modobio_clinic_id, str(ds_clinician.ds_user_id), encrypted_clinic_id, encrypted_user_id)
+        
+        ds_notification_type = 17
+        ds_notification = Notifications.query.filter_by(user_id=user_id,notification_type_id=ds_notification_type).one_or_none()
+        if not ds_notification:
+            ds_notification = Notifications(
+                notification_type_id=ds_notification_type, # DoseSpot Notification
+                user_id=user_id,
+                title=f"You have {notification_count} DoseSpot Notifications.",
+                content="Click this notification to be brought to the DoseSpot platform to view notifications.",
+                action=url,
+                time_to_live = 0 
+            )
+            db.session.add(ds_notification)
+        else:
+            ds_notification.update({'title': f"You have {notification_count} DoseSpot Notifications."})
+
+        db.session.commit()
+
+        return {'url': url}
 
 @ns.route('/enrollment-status/<int:user_id>/')
 class DoseSpotNotificationSSO(BaseResource):
