@@ -103,7 +103,7 @@ def test_wheel_webhooks(test_client, wheel_telehealth_booking):
 
     assert booking.status == 'Completed'
     assert booking_stauts_latest.status == 'Completed'
-    assert latest_notification.notification_type_id == 2
+    assert latest_notification.notification_type_id == 3
 
 
     ###
