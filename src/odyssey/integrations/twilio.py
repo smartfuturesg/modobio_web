@@ -52,17 +52,38 @@ class Twilio():
 
         Returns
         ------
-        messages: Dict
+        transcript: List[Dict]
+        {
+            idx: int,
+            body: str,
+            media: List[Dict],
+            author: str -> modobio_id 
+            date_created: DateTime
+            date_updated: DateTime
+            attributes: str
+        }
         """
+        transcript = []
 
+        # response from API is a list of message objects
         messages = self.client.conversations \
                  .conversations(conversation_sid) \
                  .messages \
                  .list()
 
-        breakpoint()
-        
-        return messages
+        # construct response with just the necessary details of each message
+        for message in messages:
+            transcript.append({
+                'index': message.index,
+                'body': message.body,
+                'media': message.media,
+                'author': message.author,
+                'date_created': message.date_created,
+                'date_updated': message.date_updated,
+                'attributes': message.attributes
+            })
+
+        return transcript
 
 
     def get_booking_transcript(self, booking_id: int): 
@@ -83,7 +104,9 @@ class Twilio():
         ).where(TelehealthChatRooms.booking_id == booking_id)
         ).scalars().one_or_none()
 
-        messages = self.get_conversation_messages(telehealth_chat.conversation_sid)
+        transcript = self.get_conversation_messages(telehealth_chat.conversation_sid)
+
+        return transcript
 
 
     def create_twilio_access_token(self, modobio_id:str, meeting_room_name: str = None):
@@ -173,12 +196,13 @@ class Twilio():
             client_user_id=booking.client_user_id,
             booking_id = booking_id)
 
+        conversation_sid = self.create_conversation(booking.staff_user_id, booking.client_user_id)
 
         # create chatroom entry into DB
-        new_chat_room.conversation_sid = conversation.sid
+        new_chat_room.conversation_sid = conversation_sid
         db.session.add(new_chat_room)
 
-        return conversation.sid
+        return conversation_sid
 
     def send_message(self, user_id: int, conversation_sid: str, message_body: str):
         """
