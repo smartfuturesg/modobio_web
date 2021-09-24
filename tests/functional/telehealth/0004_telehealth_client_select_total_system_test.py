@@ -318,6 +318,13 @@ def test_bookings_meeting_room_access(test_client):
 
         assert response.status_code == 200
 
+    ###
+    # Complete the booking
+    ###
+    response = test_client.put(
+        f'/telehealth/bookings/complete/{booking.idx}/', headers=test_client.staff_auth_header)
+    assert response.status_code == 200
+
 
 """
     The below code about testing the transaction portion of bookings has been removed because the charge
@@ -398,13 +405,6 @@ def test_bookings_meeting_room_access(test_client):
     assert response.status_code == 200
     assert len(response.json) == 2
 """
-
-    ###
-    # Complete the booking
-    ###
-    response = test_client.put(
-        f'/telehealth/bookings/complete/{booking.idx}/', headers=test_client.staff_auth_header)
-    assert response.status_code == 200
 
 
 
