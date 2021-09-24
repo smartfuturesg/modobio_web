@@ -3,6 +3,7 @@ import random
 
 from flask import current_app
 from sqlalchemy.sql.expression import or_, select
+from twilio.base.exceptions import TwilioRestException
 from twilio.jwt.access_token import AccessToken
 from twilio.jwt.access_token.grants import ChatGrant, VideoGrant
 from twilio.rest import Client
@@ -101,8 +102,8 @@ class Twilio():
 
         # bring up the chat room 
         telehealth_chat = db.session.execute(select(TelehealthChatRooms
-        ).where(TelehealthChatRooms.booking_id == booking_id)
-        ).scalars().one_or_none()
+            ).where(TelehealthChatRooms.booking_id == booking_id)
+            ).scalars().one_or_none()
 
         transcript = self.get_conversation_messages(telehealth_chat.conversation_sid)
 
@@ -185,6 +186,7 @@ class Twilio():
         booking_id: TelehealthBookings.idx for bringing up booking details.
 
         Returns
+        conversation_sid
         ------
         """
         # bring up the booking
@@ -232,11 +234,16 @@ class Twilio():
         if not chat_room or not user:
           raise InputError(message="cannot find conversation or user not a conversation participant")
         
-
-        self.client.conversations \
-                .conversations(conversation_sid) \
-                .messages \
-                .create(author= user.modobio_id, body=message_body)
+        try:
+            self.client.conversations \
+                    .conversations(conversation_sid) \
+                    .messages \
+                    .create(author= user.modobio_id, body=message_body)
+        except Exception as e:
+            # intended to catch errors when message is sent to a closed conversation
+            raise e
+        
+        return
         
     def delete_conversation(self, conversation_sid: str):
         """
@@ -255,6 +262,25 @@ class Twilio():
 
         return
 
+    def close_telehealth_chatroom(self, booking_id):
+        """
+        Update the conversation state to closed
+        
+        Params
+        ------
+        booking_id
+
+        """
+        # bring up the chat room 
+        telehealth_chat = db.session.execute(select(TelehealthChatRooms
+            ).where(TelehealthChatRooms.booking_id == booking_id)
+            ).scalars().one_or_none()
+
+        self.client.conversations \
+                     .conversations(telehealth_chat.conversation_sid) \
+                     .update(state='closed')
+
+        return
 
 
 

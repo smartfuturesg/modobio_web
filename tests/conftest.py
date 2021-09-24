@@ -19,6 +19,7 @@ from odyssey.api.lookup.models import LookupClinicalCareTeamResources
 from odyssey.api.payment.models import PaymentMethods
 from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.api.user.models import User, UserLogin
+from odyssey.integrations.twilio import Twilio
 from odyssey.utils.misc import grab_twilio_credentials
 from odyssey.utils.errors import MissingThirdPartyCredentials
 from odyssey.utils import search
@@ -369,7 +370,16 @@ def telehealth_booking(test_client, wheel = False):
     )
 
     
+    
     test_client.db.session.add(booking)
-    test_client.db.session.commit()
+    test_client.db.session.flush()
+
+    # add booking transcript
+    twilio = Twilio()
+    conversation_sid = twilio.create_telehealth_chatroom(booking.idx)
 
     yield booking
+
+    # delete chatroom and booking
+    test_client.db.session.delete(booking)
+    twilio.delete_conversation(conversation_sid)
