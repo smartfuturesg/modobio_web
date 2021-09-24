@@ -319,9 +319,14 @@ def test_bookings_meeting_room_access(test_client):
         assert response.status_code == 200
 
 
-    """Below will test the payment features that required a booking to be accessed
-        before it was possible to test them
-    """
+"""
+    The below code about testing the transaction portion of bookings has been removed because the charge
+    no longer occurs at this point. It will remain commented until tests for the new payment system
+    are created.
+
+    Below will test the payment features that required a booking to be accessed
+    before it was possible to test them
+
 
     #check payment was successful for the booking
 
@@ -392,6 +397,7 @@ def test_bookings_meeting_room_access(test_client):
 
     assert response.status_code == 200
     assert len(response.json) == 2
+"""
 
     ###
     # Complete the booking
