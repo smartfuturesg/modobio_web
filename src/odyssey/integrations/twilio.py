@@ -2,6 +2,7 @@ import os
 import random
 
 from flask import current_app
+import requests
 from sqlalchemy.sql.expression import or_, select
 from twilio.base.exceptions import TwilioRestException
 from twilio.jwt.access_token import AccessToken
@@ -13,7 +14,7 @@ from odyssey.api.telehealth.models import TelehealthBookings, TelehealthChatRoom
 from odyssey import db
 from odyssey.api.user.models import User
 from odyssey.utils.constants import ALPHANUMERIC, TWILIO_ACCESS_KEY_TTL
-from odyssey.utils.errors import InputError, MissingThirdPartyCredentials
+from odyssey.utils.errors import GenericThirdPartyError, InputError, MissingThirdPartyCredentials
 
 
 class Twilio():
@@ -23,6 +24,7 @@ class Twilio():
         self.client = Client(self.twilio_credentials['api_key'], 
                      self.twilio_credentials['api_key_secret'],
                      self.twilio_credentials['account_sid'])
+        self.conversation_service_sid = current_app.config['CONVERSATION_SERVICE_SID']  
 
     @staticmethod
     def grab_twilio_credentials():
@@ -206,7 +208,7 @@ class Twilio():
 
         return conversation_sid
 
-    def send_message(self, user_id: int, conversation_sid: str, message_body: str):
+    def send_message(self, user_id: int, conversation_sid: str, message_body: str=None, media_sid: str=None):
         """
         Add a message to the conversation on behalf of the user in user_id. 
 
@@ -216,6 +218,7 @@ class Twilio():
         user_id: conversation participant
         conversation_sid: twilio id for the conversation to be deleted
         message_body: message text. 
+        media_sid: sid of the media file attached to this message
 
         Returns
         ------
@@ -238,7 +241,7 @@ class Twilio():
             self.client.conversations \
                     .conversations(conversation_sid) \
                     .messages \
-                    .create(author= user.modobio_id, body=message_body)
+                    .create(author= user.modobio_id, body=message_body, media_sid=media_sid)
         except Exception as e:
             # intended to catch errors when message is sent to a closed conversation
             raise e
@@ -282,5 +285,59 @@ class Twilio():
 
         return
 
+    def get_media(self, media_sid: str):
+        """
+        Retrieve a media url from 
+
+        Params
+        ------
+
+        Response
+        ------
+        str: contents of image download
+        """
+
+        response = requests.get(f"https://mcs.us1.twilio.com/v1/Services/{self.conversation_service_sid}/Media/{media_sid}/Content", 
+                            auth = (self.twilio_credentials['api_key'], self.twilio_credentials['api_key_secret']),
+                            stream=True)
+        # TODO: log this
+        try:
+            response.raise_for_status()
+        except Exception as e:
+            raise GenericThirdPartyError(status_code = response.status_code, message=response.json())                    
+
+        return response.content
+    
+    
+    def upload_media(self, media_path: str):
+        """
+        Upload a media file to twilio. Twilio responds with details on the media object they store on their end. We can use the sid in the response to 
+        add the media file to a conversation. 
+
+        Note: this is only used for testing
+
+        Params
+        ------
+        media_path: relative path to media file
+
+        Response
+        ------
+        media_sid
+        """
+        with open(media_path, 'rb') as f:
+            data = f.read()
+    
+        response = requests.post(f"https://mcs.us1.twilio.com/v1/Services/{self.conversation_service_sid}/Media", 
+                            auth = (self.twilio_credentials['api_key'], self.twilio_credentials['api_key_secret']),
+                            headers={'Content-Type': 'image/jpeg'},
+                            data=data)
+        try:
+            response.raise_for_status()
+        except Exception as e:
+            raise GenericThirdPartyError(status_code = response.status_code, message=response.json())                    
+
+        return response.json()['sid']
+
+    
 
 
