@@ -3,7 +3,6 @@ from datetime import datetime, date, timedelta, timezone
 from celery.schedules import crontab
 from celery.signals import worker_ready   
 from celery.utils.log import get_task_logger
-from flask import current_app
 from sqlalchemy import delete, text
 from sqlalchemy import and_, or_, select
 
@@ -17,7 +16,7 @@ from odyssey.api.notifications.schemas import NotificationSchema
 from odyssey.api.payment.models import PaymentFailedTransactions, PaymentMethods
 from odyssey.api.system.models import SystemTelehealthSessionCosts
 from odyssey.api.user.models import User
-from odyssey.utils.constants import INSTAMED_OUTLET, INSTAMED_REQUEST_HEADER
+from odyssey.utils.constants import INSTAMED_OUTLET
 
 from odyssey.config import Config
 
@@ -260,8 +259,12 @@ def charge_user_telehealth():
             "Amount": str(session_cost)
         }
 
+        request_header = {'Api-Key': current_app.config['INSTAMED_API_KEY'],
+                                'Api-Secret': current_app.config['INSTAMED_API_SECRET'],
+                                'Content-Type': 'application/json'}
+
         response = requests.post('https://connect.instamed.com/rest/payment/sale',
-                        headers=INSTAMED_REQUEST_HEADER,
+                        headers=request_header,
                         json=request_data)
 
         #check if instamed api raised an error
@@ -292,8 +295,12 @@ def charge_user_telehealth():
                     "Amount": str(response_data['PartialApprovalAmount'])
                 }
 
+                request_header = {'Api-Key': current_app.config['INSTAMED_API_KEY'],
+                        'Api-Secret': current_app.config['INSTAMED_API_SECRET'],
+                        'Content-Type': 'application/json'}
+
                 response = requests.post('https://connect.instamed.com/rest/payment/refund',
-                                headers=INSTAMED_REQUEST_HEADER,
+                                headers=request_header,
                                 json=request_data)
 
                 #TODO: log if refund was unsuccessful
@@ -346,8 +353,12 @@ def charge_unsuccessful_bookings():
             "Amount": str(session_cost)
         }
 
+        request_header = {'Api-Key': current_app.config['INSTAMED_API_KEY'],
+                        'Api-Secret': current_app.config['INSTAMED_API_SECRET'],
+                        'Content-Type': 'application/json'}
+
         response = requests.post('https://connect.instamed.com/rest/payment/sale',
-                        headers=INSTAMED_REQUEST_HEADER,
+                        headers=request_header,
                         json=request_data)
 
         #check if instamed api raised an error
@@ -373,8 +384,12 @@ def charge_unsuccessful_bookings():
                     "Amount": str(response_data['PartialApprovalAmount'])
                 }
 
+                request_header = {'Api-Key': current_app.config['INSTAMED_API_KEY'],
+                        'Api-Secret': current_app.config['INSTAMED_API_SECRET'],
+                        'Content-Type': 'application/json'}
+
                 response = requests.post('https://connect.instamed.com/rest/payment/refund',
-                                headers=INSTAMED_REQUEST_HEADER,
+                                headers=request_header,
                                 json=request_data)
 
                 #TODO: log if refund was unsuccessful
