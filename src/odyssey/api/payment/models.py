@@ -223,7 +223,7 @@ class PaymentFailedTransactions(BaseModelWithIdx, UserIdFkeyMixin):
     Relationship to TelehealthBookings
     """
 
-    booking_id = db.Column(db.Integer, db.ForeignKey('TelehealthBookings.idx'), ondelete='SET NULL')
+    booking_id = db.Column(db.Integer, db.ForeignKey('TelehealthBookings.idx', ondelete='SET NULL'))
     """
     Foreign key to the booking associated with this failed transaction.
     
