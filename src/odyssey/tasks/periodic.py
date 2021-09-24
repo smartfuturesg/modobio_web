@@ -274,6 +274,9 @@ def charge_user_telehealth():
                 'transaction_id': response_data['TransactionID']
             })
             db.session.add(failed)
+            db.session.commit()
+            booking.charged = True
+            return
 
         #convert response data to json (python dict)
         response_data = json.loads(response.text)
@@ -317,9 +320,9 @@ def charge_user_telehealth():
                 'transaction_id': response_data['TransactionID']
             })
             db.session.add(failed)
-        #booking is marked as charged even if unsuccessful. Failed charges will be dealt with in the
-        #below task.
+
         booking.charged=True
+
     db.session.commit()
 
 @celery.task()
@@ -332,10 +335,68 @@ def charge_unsuccessful_bookings():
     """
 
     transactions = PaymentFailedTransactions.query.filter(PaymentFailedTransactions.retries < 6).all()
-    
+    session_cost = SystemTelehealthSessionCosts.query.filter_by(profession_type='medical_doctor').one_or_none().session_cost
+
     for transaction in transactions:
         #attempt to charge this transaction
-        
+        request_data = {
+            "Outlet": INSTAMED_OUTLET,
+            "PaymentMethod": "OnFile",
+            "PaymentMethodID": str(transaction.payment_method.payment_id),
+            "Amount": str(session_cost)
+        }
+
+        response = requests.post('https://connect.instamed.com/rest/payment/sale',
+                        headers=INSTAMED_REQUEST_HEADER,
+                        json=request_data)
+
+        #check if instamed api raised an error
+        try:
+            response.raise_for_status()
+        except:
+            #transaction was not successful, increment attempt count
+            transaction.retries += 1
+            db.session.commit()
+            return
+
+        #convert response data to json (python dict)
+        response_data = json.loads(response.text)
+
+        #check if card was declined (this is not an error as checked above as 200 is returned from InstaMed)
+        if response_data['TransactionStatus'] == 'C':
+            if response_data['IsPartiallyApproved']:
+                #refund partial amount and log as an unsuccessful payment
+                request_data = {
+                    "Outlet": INSTAMED_OUTLET,
+                    "PaymentMethod": "OnFile",
+                    "PaymentMethodID": str(payment.payment_id),
+                    "Amount": str(response_data['PartialApprovalAmount'])
+                }
+
+                response = requests.post('https://connect.instamed.com/rest/payment/refund',
+                                headers=INSTAMED_REQUEST_HEADER,
+                                json=request_data)
+
+                #TODO: log if refund was unsuccessful
+
+                #increment retry count
+                transaction.retries += 1
+            else:
+                #transaction was successful, store in PaymentHistory
+                history = PaymentHistory(**{
+                    'user_id': booking.client_user_id,
+                    'payment_method_id': booking.payment_method_id,
+                    'transaction_id': response_data['TransactionID'],
+                    'transaction_amount': session_cost,
+                })
+                db.session.add(history)
+                #delete failed payment now that it has been resolved
+                db.session.delete(transaction)
+        else:
+            #transaction was not successful, increment retry count
+            transaction.retries += 1
+
+    db.session.commit()
 
 celery.conf.beat_schedule = {
     # refresh the client data storage table every day at midnight
