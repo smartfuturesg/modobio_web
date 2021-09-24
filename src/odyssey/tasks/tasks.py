@@ -2,13 +2,15 @@ from datetime import datetime, timedelta
 from typing import Any, Dict
 
 from bson import ObjectId
+from flask_migrate import current_app
 from sqlalchemy import select
 
 from odyssey import celery, db, mongo
 from odyssey.api.client.models import ClientClinicalCareTeam, ClientClinicalCareTeamAuthorizations
 from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupClinicalCareTeamResources
 from odyssey.api.notifications.models import Notifications
-from odyssey.api.telehealth.models import TelehealthBookings
+from odyssey.api.practitioner.models import PractitionerOrganizationAffiliation
+from odyssey.api.telehealth.models import TelehealthBookingStatus, TelehealthBookings
 from odyssey.api.user.models import User
 
 @celery.task()
@@ -181,10 +183,127 @@ def process_wheel_webhooks(webhook_payload: Dict[str, Any]):
     
     Update the database entry with acknowledgement that the task has been completed
     """
+    # bring up the booking in the request
+    # if booking does not exist and env != production, skip
+    # note, dev mongo db is shared between devlopers, dev environment, and testing environment
+    booking = db.session.execute(select(TelehealthBookings
+            ).where(TelehealthBookings.external_booking_id == webhook_payload['consult_id'] )).scalars().one_or_none()
+    if not booking:
+        # possible the request came from another dev instance since our db is not persistent
+        if current_app.config['DEV'] or current_app.config['TESTING']:
+            mongo.db.wheel.find_one_and_update(
+            {"_id": ObjectId(webhook_payload['_id'])}, 
+            {"$set":{"modobio_meta.processed":False, "modobio_meta.acknowledged" : True}})
+            return
+        else:
+            # booking somehow was lost in the prod environment, not good
+            #TODO: log errors when logger is ready
+            return
+
+    ##
+    # Handle the webhook request depending on the event field in the payload
+    #
+    ##
+
+    # sent when clinician recieves notification of the consultation 2-24hrs inadvance. no action
+    if webhook_payload['event'] == 'consult.assigned':
+        pass
+
+    # consult.unassigned:  consult is cancelled on wheel's end, must enact cancellation proceedure
+    # clinician.unavailable: the practitioner is no longer available for the booking. treat as a cancellation
+    # clinician.no_show: clinician does not enter booking within 10 minutes of their scheduled start time 
+    # consult.voided: Sent in rare occasions when wheel clinicians cannot complete the consultation 
+    elif webhook_payload['event'] in ('consult.unassigned',  'clinician.no_show', 'clinician.unavailable', 'consult.voided'):
+        
+        # update booking status to cancelled
+        booking.status = 'Canceled'
+
+        # create an entry into the TelehealthBookingStatus table
+        status_history = TelehealthBookingStatus(
+                booking_id = booking.idx,
+                reporter_id = booking.staff_user_id,
+                reporter_role = 'Practitioner',
+                status = 'Canceled'
+            )
+        db.session.add(status_history)
+        
+        staff_user = db.session.execute(
+            select(User
+            ).where(User.user_id == booking.staff_user_id)).scalars().one_or_none()
+        
+        # add notification to client
+        expires_at = datetime.utcnow()+timedelta(days=2)
+        client_notification = Notifications(
+            user_id=booking.client_user_id,
+            title="Your telehealth appointment has been canceled",
+            content=f"Your telehealth appointment with {staff_user.firstname+' '+staff_user.lastname} has been canceled. Please reschedule.",
+            expires = expires_at,
+            notification_type_id = 2 #Scheduling
+        )
+
+        db.session.add(client_notification)
+
+        db.session.commit()
+
+    # the practitioner opened the deeplink to the booking and is now reviewing documents
+    elif webhook_payload['event'] == 'assignment.accepted':
+
+        # create an entry into the TelehealthBookingStatus table
+        status_history = TelehealthBookingStatus(
+                booking_id = booking.idx,
+                reporter_id = booking.staff_user_id,
+                reporter_role = 'Practitioner',
+                status = 'Document Review'
+            )
+        db.session.add(status_history)
+
+        # update booking status to cancelled
+        booking.status = 'Document Review'
+
+        db.session.commit()
     
-    mongo.db.wheel.find_one_and_update(
-        {"_id": ObjectId(webhook_payload['_id'])}, 
-        {"$set":{"modobio_meta.processed":True, "modobio_meta.acknowledged" :True}})
+    # patient.no_show: patient did not enter booking within 10 minutes of their scheduled start time 
+    elif webhook_payload['event'] == 'patient.no_show':
 
+        # update booking status to completed
+        booking.status = 'Completed'
 
+        # create an entry into the TelehealthBookingStatus table
+        status_history = TelehealthBookingStatus(
+                booking_id = booking.idx,
+                reporter_id = booking.staff_user_id,
+                reporter_role = 'Client',
+                status = 'Completed'
+            )
+        db.session.add(status_history)
+        
+        staff_user = db.session.execute(
+            select(User
+            ).where(User.user_id == booking.staff_user_id)).scalars().one_or_none()
+            
+        # add notification to client
+        expires_at = datetime.utcnow()+timedelta(days=2)
+        client_notification = Notifications(
+            user_id=booking.client_user_id,
+            title="Your telehealth appointment has been completed",
+            content=f"Your telehealth appointment with {staff_user.firstname+' '+staff_user.lastname} has been completed.",
+            expires = expires_at,
+            notification_type_id = 2 #Scheduling
+        )
+        db.session.add(client_notification)
+
+        db.session.commit()
+    
+    # no event field recognized, should be logged. 
+    else:
+        return
+
+    # finally, set webhook entry to processed
+    if current_app.config['TESTING']:
+        return
+    else:
+        mongo.db.wheel.find_one_and_update(
+            {"_id": ObjectId(webhook_payload['_id'])}, 
+            {"$set":{"modobio_meta.processed":True, "modobio_meta.acknowledged" :True}})
+         
     return

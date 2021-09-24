@@ -98,7 +98,7 @@ class UserPasswordRecoveryContactSchema(Schema):
     email = fields.Email(required=True, load_only=True)
     captcha_key = fields.String(load_only=True)
     success = fields.Boolean(dump_only=True)
-    challenge_ts = fields.DateTime(dump_only=True)
+    challenge_ts = fields.String(dump_only=True)
     hostname = fields.String(dump_only=True)
     error_codes = fields.List(fields.String(), dump_only=True)
     token = fields.String(dump_only=True)

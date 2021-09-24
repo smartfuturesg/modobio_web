@@ -202,6 +202,7 @@ def onboard_patient(patient_id:int,practitioner_id:int):
         proxy_user = DoseSpotProxyID.query.one_or_none()
         if not proxy_user:
             proxy_user = onboard_proxy_user()
+        auth_id = str(proxy_user.ds_proxy_id)
     else:
         ds_clinician = DoseSpotPractitionerID.query.filter_by(user_id=practitioner_id).one_or_none()
         auth_id = str(ds_clinician.user_id)
