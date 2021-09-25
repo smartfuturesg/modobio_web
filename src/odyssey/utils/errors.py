@@ -291,25 +291,25 @@ class StaffNotFound(HTTPException):
 
         self.code = 404
 
-class LoginNotAuthorized(HTTPException):
-    """Used for auth.py if a user does not have certain authorizations
-       for using the ModoBio APIs"""
-    def __init__(self, message = ''):
-        super().__init__(description=message)
-        if message:
-            self.message = message
-        else:
-            self.message = 'Not Authorized'
-
-        self.code = 401
-
-class EmailNotVerified(HTTPException):
-    """Used for auth.py if a user has not yet verified their email."""
-    def __init__(self):
-        super().__init__(description=message)
-        self.message = "User email address has not yet been verified"
-
-        self.code = 401
+# class LoginNotAuthorized(HTTPException):
+#     """Used for auth.py if a user does not have certain authorizations
+#        for using the ModoBio APIs"""
+#     def __init__(self, message = ''):
+#         super().__init__(description=message)
+#         if message:
+#             self.message = message
+#         else:
+#             self.message = 'Not Authorized'
+#
+#         self.code = 401
+#
+# class EmailNotVerified(HTTPException):
+#     """Used for auth.py if a user has not yet verified their email."""
+#     def __init__(self):
+#         super().__init__(description=message)
+#         self.message = "User email address has not yet been verified"
+#
+#         self.code = 401
 
 class GenericNotFound(HTTPException):
     """

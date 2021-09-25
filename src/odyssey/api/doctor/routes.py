@@ -10,6 +10,7 @@ from flask import g, request, current_app
 from flask_accepts import accepts, responds
 from flask_restx import Resource, Namespace
 from sqlalchemy import select
+from werkzeug.exceptions import Unauthorized
 
 from odyssey import db
 from odyssey.api.doctor.models import (
@@ -36,7 +37,6 @@ from odyssey.api.facility.models import MedicalInstitutions
 from odyssey.api.user.models import User
 from odyssey.utils.auth import token_auth
 from odyssey.utils.errors import (
-    LoginNotAuthorized,
     UserNotFound, 
     IllegalSetting, 
     ContentNotFound,
@@ -104,7 +104,7 @@ class MedCredentials(BaseResource):
         staff_user_roles = db.session.query(StaffRoles.role).filter(StaffRoles.user_id==current_user.user_id).all()
         staff_user_roles = [x[0] for x in staff_user_roles]
         if current_user.user_id != user_id and 'community_manager' not in staff_user_roles:
-            raise LoginNotAuthorized
+            raise Unauthorized
 
         query = db.session.execute(
             select(PractitionerCredentials).
@@ -218,7 +218,7 @@ class MedCredentials(BaseResource):
         staff_user_roles = [x[0] for x in staff_user_roles]
         
         if current_user.user_id != user_id and 'community_manager' not in staff_user_roles:
-            raise LoginNotAuthorized
+            raise Unauthorized
 
         payload = request.json
 
