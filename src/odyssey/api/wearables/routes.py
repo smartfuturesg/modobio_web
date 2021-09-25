@@ -7,15 +7,12 @@ from datetime import datetime, timedelta
 
 from flask import current_app, request
 from flask_accepts import accepts, responds
-from flask_restx import Resource, Namespace
+from flask_restx import Namespace
 from requests_oauthlib import OAuth2Session
 from sqlalchemy.sql import text
 
+from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.auth import token_auth
-from odyssey.utils.errors import (
-    ContentNotFound,
-    MethodNotAllowed,
-    UnknownError)
 
 from odyssey.api.wearables.models import (
     Wearables,
@@ -45,7 +42,7 @@ ns = Namespace('wearables', description='Endpoints for registering wearable devi
 
 @ns.route('/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class WearablesEndpoint(Resource):
+class WearablesEndpoint(BaseResource):
     @token_auth.login_required
     @responds(schema=WearablesSchema, status_code=200, api=ns)
     def get(self, user_id):
@@ -90,14 +87,6 @@ class WearablesEndpoint(Resource):
         dict
             JSON encoded dict.
         """
-        wearables = (
-            Wearables.query
-            .filter_by(user_id=user_id)
-            .one_or_none())
-
-        if wearables:
-            raise MethodNotAllowed
-
         request.parsed_obj.user_id = user_id
         db.session.add(request.parsed_obj)
         db.session.commit()
@@ -112,18 +101,8 @@ class WearablesEndpoint(Resource):
         ----------
         user_id : int
             User ID number.
-
-        Returns
-        -------
-        dict
-            JSON encoded dict.
         """
         query = Wearables.query.filter_by(user_id=user_id)
-        wearables = query.one_or_none()
-
-        if not wearables:
-            raise ContentNotFound
-
         data = WearablesSchema().dump(request.parsed_obj)
         query.update(data)
         db.session.commit()
@@ -138,7 +117,7 @@ class WearablesEndpoint(Resource):
 @ns.route('/oura-old/auth/<int:user_id>/')
 @ns.deprecated
 @ns.doc(params={'user_id': 'User ID number'})
-class WearablesOuraOldAuthEndpoint(Resource):
+class WearablesOuraOldAuthEndpoint(BaseResource):
     @token_auth.login_required
     @responds(schema=WearablesOuraAuthSchema, status_code=200, api=ns)
     def get(self, user_id):
@@ -196,7 +175,7 @@ class WearablesOuraOldAuthEndpoint(Resource):
     'redirect_uri': 'OAuth2 redirect URI',
     'scope': 'The accepted scope of information: email, personal, and/or daily'
 })
-class WearablesOuraCallbackEndpoint(Resource):
+class WearablesOuraCallbackEndpoint(BaseResource):
     @token_auth.login_required
     @responds(status_code=200, api=ns)
     def get(self, user_id):
@@ -262,7 +241,7 @@ class WearablesOuraCallbackEndpoint(Resource):
 
 @ns.route('/oura/auth/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class WearablesOuraAuthEndpoint(Resource):
+class WearablesOuraAuthEndpoint(BaseResource):
     @token_auth.login_required(user_type=('client',))
     @responds(schema=WearablesOAuthGetSchema, status_code=200, api=ns)
     def get(self, user_id):
@@ -424,7 +403,7 @@ class WearablesOuraAuthEndpoint(Resource):
 
 @ns.route('/fitbit/auth/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class WearablesFitbitAuthEndpoint(Resource):
+class WearablesFitbitAuthEndpoint(BaseResource):
     @token_auth.login_required(user_type=('client',))
     @responds(schema=WearablesOAuthGetSchema, status_code=200, api=ns)
     def get(self, user_id):
@@ -594,7 +573,7 @@ class WearablesFitbitAuthEndpoint(Resource):
 
 @ns.route('/freestyle/activate/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class WearablesFreeStyleActivateEndpoint(Resource):
+class WearablesFreeStyleActivateEndpoint(BaseResource):
     @token_auth.login_required(user_type=('client',))
     @responds(schema=WearablesFreeStyleActivateSchema, status_code=200, api=ns)
     def get(self, user_id):
@@ -661,7 +640,7 @@ class WearablesFreeStyleActivateEndpoint(Resource):
 
 @ns.route('/freestyle/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class WearablesFreeStyleEndpoint(Resource):
+class WearablesFreeStyleEndpoint(BaseResource):
     @token_auth.login_required(user_type=('client',))
     @responds(schema=WearablesFreeStyleSchema, status_code=200, api=ns)
     def get(self, user_id):
