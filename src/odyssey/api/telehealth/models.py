@@ -200,7 +200,7 @@ class TelehealthBookingStatus(db.Model):
 
     status = db.Column(db.String(20))
     """
-    status of the booking, should be one of constant BOOKINGS_STATUS = ('Pending', 'Accepted', 'Canceled', 'In Progress' 'Completed')
+    status of the booking, should be one of constant BOOKINGS_STATUS = ('Pending', 'Accepted', 'Canceled', 'In Progress' 'Completed', 'Document Review')
 
     :type: str, max length 20
     """

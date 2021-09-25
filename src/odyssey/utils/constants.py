@@ -867,7 +867,7 @@ DAY_OF_WEEK = ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday
 
 TWILIO_ACCESS_KEY_TTL = 14400
 
-BOOKINGS_STATUS = ('Pending', 'Accepted', 'Cancelled', 'In Progress', 'Completed')
+BOOKINGS_STATUS = ('Pending', 'Accepted', 'Cancelled', 'In Progress', 'Completed', 'Document Review')
 
 #image types allowed for upload removing: '.bmp', '.gif', '.webp', '.psd', '.pdf'
 ALLOWED_IMAGE_TYPES = ('.png', '.jpg', '.jpeg')
