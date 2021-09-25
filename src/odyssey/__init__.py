@@ -55,8 +55,9 @@ if not logger.hasHandlers():
 for name in ('sqlalchemy', 'flask_cors', 'werkzeug'):
     logging.getLogger(name=name).setLevel(conf.LOG_LEVEL)
 
-# SQLAlchemy is too verbose, turn down several loggers
+# SQLAlchemy and elasticsearch are too verbose, turn down several loggers
 for name in (
+    'elasticsearch',
     'sqlalchemy.orm.mapper.Mapper',
     'sqlalchemy.orm.relationships.RelationshipProperty',
     'sqlalchemy.orm.strategies.LazyLoader'
