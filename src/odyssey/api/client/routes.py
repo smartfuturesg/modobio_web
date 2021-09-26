@@ -1590,7 +1590,6 @@ class ClinicalCareTeamResourceAuthorization(BaseResource):
 
     @token_auth.login_required(user_type=('client',))
     @accepts(schema=ClinicalCareTeamAuthorizationNestedSchema, api=ns)
-    @responds(status_code=200, api=ns)
     def delete(self, user_id):
         """
         Remove a previously saved authorization. Takes the same payload as the POST method.
@@ -1649,7 +1648,6 @@ class ClientDrinksApi(BaseResource):
     
     @token_auth.login_required(user_type=('staff',), staff_role=('medical_doctor', 'nutritionist'))
     @accepts(schema=ClientAssignedDrinksDeleteSchema, api=ns)
-    @responds(schema=ClientAssignedDrinksSchema, api=ns, status_code=204)
     def delete(self, user_id):
         """
         Delete a drink assignemnt for a user with user_id and drink_id
@@ -1658,11 +1656,8 @@ class ClientDrinksApi(BaseResource):
 
         for drink_id in request.parsed_obj['drink_ids']:
             drink = ClientAssignedDrinks.query.filter_by(user_id=user_id, drink_id=drink_id).one_or_none()
-
-            if not drink:
-                raise ContentNotFound()
-
-            db.session.delete(drink)
+            if drink:
+                db.session.delete(drink)
         
         db.session.commit()
 
