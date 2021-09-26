@@ -5,9 +5,10 @@ from datetime import datetime, timedelta
 import secrets
 import jwt
 
-from flask import current_app, request, url_for, jsonify
+from flask import current_app, request
 from flask_accepts import accepts, responds
-from flask_restx import Resource, Namespace
+from flask_restx import Namespace
+from werkzeug.exceptions import BadRequest
 
 from odyssey import db
 from odyssey.api import api
@@ -15,15 +16,14 @@ from odyssey.api.client_services.schemas import NewRemoteRegisterUserSchema, New
 from odyssey.api.user.schemas import UserLoginSchema, UserSchema, UserSubscriptionsSchema
 from odyssey.api.user.models import User, UserLogin
 from odyssey.utils.auth import token_auth
+from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.constants import REGISTRATION_PORTAL_URL
 from odyssey.utils.message import send_email_user_registration_portal
-from odyssey.utils.errors import ClientEmailInUse, InputError, UserNotFound
-
 
 ns = Namespace('client-services', description='Endpoints for client services operations.')
 
 @ns.route('/user/new/')
-class NewUserClientServices(Resource):
+class NewUserClientServices(BaseResource):
     """
     Create, Update, Retrieve user basic information. 
     This endpoint is intended to be used by client services. 
@@ -45,10 +45,11 @@ class NewUserClientServices(Resource):
         data = request.parsed_obj
         user_type = data.get('user_type')
         del data['user_type']
-        user = User.query.filter(User.email.ilike(data.get('email').lower())).first()
+        email = data.get('email', '')
+        user = User.query.filter(User.email.ilike(email.lower())).first()
         if user:
-            raise ClientEmailInUse(email=(data.get('email')))
-        password = data.get('email')[:2] + secrets.token_hex(8)
+            raise BadRequest(f'Email {email} already in use.')
+        password = email[:2] + secrets.token_hex(8)
         data['is_client'] = False
         data['is_staff'] = False
         user = UserSchema().load(data)
@@ -87,7 +88,7 @@ class NewUserClientServices(Resource):
 
 
 @ns.route("/user/registration-portal/refresh")
-class RefreshRegistrationPortal(Resource):
+class RefreshRegistrationPortal(BaseResource):
     """
     Routines related to registration portals.
 
@@ -111,12 +112,12 @@ class RefreshRegistrationPortal(Resource):
         email = request.parsed_args.get('email')
         user_type = request.parsed_args.get('user_type')
         if user_type not in ('staff', 'client'):
-            raise InputError
+            raise BadRequest('Wrong user type.')
 
         user = User.query.filter_by(email=email.lower()).one_or_none()
         if not user:
-            raise UserNotFound(message='')
-    
+            raise BadRequest('User not found.')
+
         # reset the user's password, send that password as part of the registration portal email
         user_login = UserLogin.query.filter_by(user_id=user.user_id).one_or_none()
         password = user.email[:2] + secrets.token_hex(8)
