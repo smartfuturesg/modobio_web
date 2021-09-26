@@ -1620,6 +1620,9 @@ class ClientDrinksApi(BaseResource):
     """
     Endpoints related to nutritional beverages that are assigned to clients.
     """
+    # Multiple drinks per user, allow multiple POSTs
+    __check_resource__ = False
+
     @token_auth.login_required(user_type=('staff',), staff_role=('medical_doctor', 'nutritionist'))
     @accepts(schema=ClientAssignedDrinksSchema, api=ns)
     @responds(schema=ClientAssignedDrinksSchema, api=ns, status_code=201)
