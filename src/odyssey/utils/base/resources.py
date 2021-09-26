@@ -6,6 +6,7 @@ from functools import wraps
 
 from flask import request
 from flask_restx import Resource
+from sqlalchemy.exc import InvalidRequestError
 from werkzeug.exceptions import BadRequest, Unauthorized
 
 from odyssey.utils.auth import token_auth
@@ -152,7 +153,10 @@ class BaseResource(Resource):
                 return func(*args, **kwargs)
 
             table = schema.Meta.model
-            exists = table.query.filter_by(**request.view_args).one_or_none()
+            try:
+                exists = table.query.filter_by(**request.view_args).one_or_none()
+            except InvalidRequestError:
+                return func(*args, **kwargs)
 
             if exists and request.method.lower() in ('post',):
                 raise BadRequest('The resource you are trying to create (POST) already exists. '
