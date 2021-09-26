@@ -7,6 +7,7 @@ import json
 from flask import request, current_app
 from flask_accepts import accepts, responds
 from flask_restx import Resource
+from werkzeug.exceptions import BadRequest
 
 from odyssey import db
 from odyssey.api import api
@@ -23,7 +24,9 @@ ns = api.namespace('payment', description='Endpoints for functions related to pa
 
 @ns.route('/methods/<int:user_id>/')
 class PaymentMethodsApi(BaseResource):
-    
+    # Multiple payment methods per user allowed
+    __check_resource__ = False
+
     @token_auth.login_required(user_type=('client',))
     @responds(schema=PaymentMethodsSchema(many=True), api=ns)
     def get(self, user_id):
@@ -60,12 +63,12 @@ class PaymentMethodsApi(BaseResource):
         response = requests.post('https://connect.instamed.com/rest/payment/paymentplan',
                                 headers=request_headers,
                                 json=request_data)
-        
+
         #check if instamed api raised an error
         try:
             response.raise_for_status()
         except:
-            raise GenericThirdPartyError(response.status_code, response.text)
+            raise BadRequest(f'Instamed returned the following error: {response.text}')
 
         #convert response data to json (python dict)
         response_data = json.loads(response.text)

@@ -10,6 +10,7 @@ from flask_accepts import accepts, responds
 from flask_restx import Namespace
 from requests_oauthlib import OAuth2Session
 from sqlalchemy.sql import text
+from werkzeug.exceptions import BadRequest
 
 from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.auth import token_auth
@@ -192,9 +193,9 @@ class WearablesOuraCallbackEndpoint(BaseResource):
 
         oura = WearablesOura.query.filter_by(user_id=user_id).one_or_none()
         if not oura:
-            raise UnknownError(
-                message=f'user_id {user_id} not found in WearablesOura table. '
-                         'Connect to /wearables/oura/auth first.')
+            raise BadRequest(
+                f'user_id {user_id} not found in WearablesOura table. '
+                f'Connect to /wearables/oura/auth first.')
 
         oauth_state = request.args.get('state')
         oauth_grant_code = request.args.get('code')
@@ -202,10 +203,10 @@ class WearablesOuraCallbackEndpoint(BaseResource):
         scope = request.args.get('scope')
 
         if oauth_state != oura.oauth_state:
-            raise UnknownError(message='OAuth state changed between requests.')
+            raise BadRequest('OAuth state changed between requests.')
 
         if not scope or 'daily' not in scope:
-            raise UnknownError(message='You must agree to share at least the sleep and activity data.')
+            raise BadRequest('You must agree to share at least the sleep and activity data.')
 
         # Exchange access grant code for access token
         oura_id = current_app.config['OURA_CLIENT_ID']
@@ -223,7 +224,7 @@ class WearablesOuraCallbackEndpoint(BaseResource):
                 include_client_id=True,
                 client_secret=oura_secret)
         except Exception as e:
-            raise UnknownError(message=f'Error while exchanging grant code for access token: {e}')
+            raise BadRequest(f'Error while exchanging grant code for access token: {e}')
 
         # Everything was successful
         oura.access_token = oauth_reply['access_token']
@@ -270,9 +271,9 @@ class WearablesOuraAuthEndpoint(BaseResource):
         """
         info = Wearables.query.filter_by(user_id=user_id).one_or_none()
         if not info:
-            raise UnknownError(
-                message=f'user_id {user_id} not found in Wearables table. '
-                         'Connect to POST /wearables first.')
+            raise BadRequest(
+                f'user_id {user_id} not found in Wearables table. '
+                f'Connect to POST /wearables first.')
 
         state = secrets.token_urlsafe(24)
 
@@ -329,12 +330,12 @@ class WearablesOuraAuthEndpoint(BaseResource):
         """
         oura = WearablesOura.query.filter_by(user_id=user_id).one_or_none()
         if not oura:
-            raise UnknownError(
-                message=f'user_id {user_id} not found in WearablesOura table. '
-                         'Connect to GET /wearables/oura/auth first.')
+            raise BadRequest(
+                f'user_id {user_id} not found in WearablesOura table. '
+                f'Connect to GET /wearables/oura/auth first.')
 
         if request.parsed_obj['state'] != oura.oauth_state:
-            raise UnknownError(message='OAuth state changed between requests.')
+            raise BadRequest('OAuth state changed between requests.')
 
         # Oura ring returns selected scope with redirect.
         # Not requiring email or personal
@@ -343,7 +344,7 @@ class WearablesOuraAuthEndpoint(BaseResource):
 
         if scope.intersection(minimal_scope) != minimal_scope:
             msg = 'You must agree to share at least: {}.'.format(', '.join(minimal_scope))
-            raise UnknownError(message=msg)
+            raise BadRequest(msg)
 
         # Exchange access grant code for access token
         client_id = current_app.config['OURA_CLIENT_ID']
@@ -361,7 +362,7 @@ class WearablesOuraAuthEndpoint(BaseResource):
                 include_client_id=True,
                 client_secret=client_secret)
         except Exception as e:
-            raise UnknownError(message=f'Error while exchanging grant code for access token: {e}')
+            raise BadRequest(f'Error while exchanging grant code for access token: {e}')
 
         # Everything was successful
         oura.access_token = oauth_reply['access_token']
@@ -432,9 +433,9 @@ class WearablesFitbitAuthEndpoint(BaseResource):
         """
         info = Wearables.query.filter_by(user_id=user_id).one_or_none()
         if not info:
-            raise UnknownError(
-                message=f'user_id {user_id} not found in Wearables table. '
-                         'Connect to POST /wearables first.')
+            raise BadRequest(
+                f'user_id {user_id} not found in Wearables table. '
+                f'Connect to POST /wearables first.')
 
         state = secrets.token_urlsafe(24)
 
@@ -491,12 +492,12 @@ class WearablesFitbitAuthEndpoint(BaseResource):
         """
         fitbit = WearablesFitbit.query.filter_by(user_id=user_id).one_or_none()
         if not fitbit:
-            raise UnknownError(
-                message=f'user_id {user_id} not found in WearablesFitbit table. '
-                         'Connect to GET /wearables/fitbit/auth first.')
+            raise BadRequest(
+                f'user_id {user_id} not found in WearablesFitbit table. '
+                f'Connect to GET /wearables/fitbit/auth first.')
 
         if request.parsed_obj['state'] != fitbit.oauth_state:
-            raise UnknownError(message='OAuth state changed between requests.')
+            raise BadRequest('OAuth state changed between requests.')
 
         # Exchange access grant code for access token
         client_id = current_app.config['FITBIT_CLIENT_ID']
@@ -518,12 +519,12 @@ class WearablesFitbitAuthEndpoint(BaseResource):
                 client_secret=client_secret,
                 headers = {'Authorization': f'Basic {auth_str}'})
         except Exception as e:
-            raise UnknownError(message=f'Error while exchanging grant code for access token: {e}')
+            raise BadRequest(f'Error while exchanging grant code for access token: {e}')
 
         # Fitbit sends errors in body with a 200 response.
         if not oauth_reply.get('success', True):
             msg = oauth_reply['errors'][0]['message']
-            raise UnknownError(message=f'fitbit.com returned error: {msg}')
+            raise BadRequest(f'fitbit.com returned error: {msg}')
 
         # Not requiring location, settings, or social
         minimal_scope = set(current_app.config['FITBIT_SCOPE'].split())
@@ -531,7 +532,7 @@ class WearablesFitbitAuthEndpoint(BaseResource):
 
         if scope.intersection(minimal_scope) != minimal_scope:
             msg = 'You must agree to share at least: {}.'.format(', '.join(minimal_scope))
-            raise UnknownError(message=msg)
+            raise BadRequest(msg)
 
         # Everything was successful
         fitbit.access_token = oauth_reply['access_token']
@@ -682,25 +683,25 @@ class WearablesFreeStyleEndpoint(BaseResource):
         if not cgm:
             msg =  f'FreeStyle Libre for client {user_id} has not yet been activated. '
             msg += f'Send a POST request to /wearables/freestyle/activate/ first.'
-            raise UnknownError(message=msg)
+            raise BadRequest(msg)
 
         if cgm.activation_timestamp != request.parsed_obj.activation_timestamp:
             msg =  f'Activation timestamp {request.parsed_obj.activation_timestamp} does not '
             msg += f'match current activation timestamp {cgm.activation_timestamp}. '
             msg += f'Send a GET request to /wearables/freestyle/activate/ first.'
-            raise UnknownError(message=msg)
+            raise BadRequest(msg)
 
         tstamps = request.parsed_obj.timestamps
         glucose = request.parsed_obj.glucose
 
         if len(tstamps) != len(glucose):
-            raise UnknownError(message='Data arrays not equal length.')
+            raise BadRequest('Data arrays not equal length.')
 
         if not tstamps:
             return
 
         if len(tstamps) != len(set(tstamps)):
-            raise UnknownError(message='Duplicate timestamps in data.')
+            raise BadRequest('Duplicate timestamps in data.')
 
         # Sort data
         if tstamps != sorted(tstamps):
