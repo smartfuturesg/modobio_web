@@ -2,11 +2,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 from flask import request
-from flask_restx import Resource, Namespace, Api
+from flask_restx import Namespace
 from flask_accepts import accepts, responds
 
-from odyssey.utils.auth import token_auth
-from odyssey.utils.errors import ContentNotFound, ContentNotFoundReturnData
 from odyssey import db
 from odyssey.api.doctor.models import MedicalPhysicalExam
 from odyssey.api.trainer.models import (
@@ -19,7 +17,6 @@ from odyssey.api.trainer.models import (
     PowerAssessment,
     StrengthAssessment 
 )
-from odyssey.utils.misc import check_client_existence
 from odyssey.api.trainer.schemas import (
     FitnessQuestionnaireSchema,
     HeartAssessmentSchema,
@@ -30,11 +27,15 @@ from odyssey.api.trainer.schemas import (
     PowerAssessmentSchema, 
     StrenghtAssessmentSchema
 )
+from odyssey.utils.auth import token_auth
+from odyssey.utils.base.resources import BaseResource
+from odyssey.utils.misc import check_client_existence
+
 ns = Namespace('trainer', description='Operations related to the trainer')
 
 @ns.route('/assessment/power/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class Power(Resource):
+class Power(BaseResource):
     """GET and POST power assessments for the client"""
     @token_auth.login_required
     @responds(schema=PowerAssessmentSchema(many=True), api=ns)
@@ -50,9 +51,12 @@ class Power(Resource):
                 vital_weight = None
             else:
                 vital_weight = recent_physical.vital_weight
-            data_dict = {"vital_weight": vital_weight}
-            raise ContentNotFoundReturnData(user_id=user_id, data=data_dict)
-        
+            data_dict = {
+                'vital_weight': vital_weight,
+                'user_id': user_id}
+            # raise ContentNotFoundReturnData(user_id=user_id, data=data_dict)
+            return data_dict
+
         return all_entries
 
     @token_auth.login_required
@@ -76,7 +80,7 @@ class Power(Resource):
 
 @ns.route('/assessment/strength/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class Strength(Resource):
+class Strength(BaseResource):
     """GET and POST strength assessments for the client"""
     @token_auth.login_required
     @responds(schema=StrenghtAssessmentSchema(many=True), api=ns)
@@ -85,9 +89,6 @@ class Strength(Resource):
         check_client_existence(user_id)
 
         all_entries = StrengthAssessment.query.filter_by(user_id=user_id).order_by(StrengthAssessment.timestamp.asc()).all()
-
-        if len(all_entries) == 0:
-            raise ContentNotFound()
         
         return all_entries
 
@@ -113,7 +114,7 @@ class Strength(Resource):
 
 @ns.route('/assessment/movement/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class Movement(Resource):
+class Movement(BaseResource):
     """GET and POST movement assessments for the client"""
     @token_auth.login_required
     @responds(schema=MovementAssessmentSchema(many=True), api=ns)
@@ -122,9 +123,6 @@ class Movement(Resource):
         check_client_existence(user_id)
 
         all_entries = MovementAssessment.query.filter_by(user_id=user_id).order_by(MovementAssessment.timestamp.asc()).all()
-
-        if len(all_entries) == 0:
-            raise ContentNotFound()
         
         return all_entries
 
@@ -149,7 +147,7 @@ class Movement(Resource):
 
 @ns.route('/assessment/heart/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class Heart(Resource):
+class Heart(BaseResource):
     """GET and POST movement assessments for the client"""
 
     @token_auth.login_required
@@ -166,8 +164,11 @@ class Heart(Resource):
                 vital_heartrate = None
             else:
                 vital_heartrate = recent_physical.vital_heartrate
-            data_dict = {"vital_heartrate": vital_heartrate}
-            raise ContentNotFoundReturnData(user_id=user_id, data=data_dict)
+            data_dict = {
+                'vital_heartrate': vital_heartrate,
+                'user_id': user_id}
+            # raise ContentNotFoundReturnData(user_id=user_id, data=data_dict)
+            return data_dict
 
         return all_entries
 
@@ -191,7 +192,7 @@ class Heart(Resource):
     
 @ns.route('/assessment/moxy/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class Moxy(Resource):    
+class Moxy(BaseResource):    
     """GET and POST moxy assessments for the client"""
 
     @token_auth.login_required
@@ -201,9 +202,6 @@ class Moxy(Resource):
         check_client_existence(user_id)
 
         all_entries = MoxyAssessment.query.filter_by(user_id=user_id).order_by(MoxyAssessment.timestamp.asc()).all()
-
-        if len(all_entries) == 0:
-            raise ContentNotFound()
         
         return all_entries
 
@@ -226,7 +224,7 @@ class Moxy(Resource):
 
 @ns.route('/assessment/lungcapacity/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class LungCapacity(Resource):    
+class LungCapacity(BaseResource):    
     """GET and POST moxy assessments for the client"""
 
     @token_auth.login_required
@@ -243,9 +241,11 @@ class LungCapacity(Resource):
                 vital_weight=None
             else:
                 vital_weight = recent_physical.vital_weight
-            data_dict = {"vital_weight": vital_weight}
-            raise ContentNotFoundReturnData(user_id=user_id, data=data_dict)
-        
+            data_dict = {
+                'vital_weight': vital_weight,
+                'user_id': user_id}
+            # raise ContentNotFoundReturnData(user_id=user_id, data=data_dict)
+            return data_dict
         
         return all_entries
 
@@ -268,7 +268,7 @@ class LungCapacity(Resource):
 
 @ns.route('/assessment/moxyrip/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class MoxyRipAssessment(Resource):    
+class MoxyRipAssessment(BaseResource):    
     """GET and POST moxy rip assessments for the client"""
 
     @token_auth.login_required
@@ -285,8 +285,11 @@ class MoxyRipAssessment(Resource):
                 vital_weight=None
             else:
                 vital_weight = recent_physical.vital_weight
-            data_dict = {"vital_weight": vital_weight}
-            raise ContentNotFoundReturnData(user_id=user_id, data=data_dict)
+            data_dict = {
+                'vital_weight': vital_weight,
+                'user_id': user_id}
+            # raise ContentNotFoundReturnData(user_id=user_id, data=data_dict)
+            return data_dict
         
         return all_entries
 
@@ -309,7 +312,7 @@ class MoxyRipAssessment(Resource):
 
 @ns.route('/questionnaire/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class InitialQuestionnaire(Resource):    
+class InitialQuestionnaire(BaseResource):    
     """GET and POST initial fitness questionnaire"""
 
     @token_auth.login_required
@@ -319,9 +322,6 @@ class InitialQuestionnaire(Resource):
         check_client_existence(user_id)
 
         client_fq = FitnessQuestionnaire.query.filter_by(user_id=user_id).order_by(FitnessQuestionnaire.idx.desc()).first()
-
-        if not client_fq:
-            raise ContentNotFound()
         
         return client_fq
 
