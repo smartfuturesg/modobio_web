@@ -1658,10 +1658,10 @@ class ClientDrinksApi(BaseResource):
         super().check_user(user_id, user_type='client')
 
         for drink_id in request.parsed_obj['drink_ids']:
-            drink = ClientAssignedDrinks.query.filter_by(user_id=user_id, drink_id=drink_id).one_or_none()
-            if drink:
+            drinks = ClientAssignedDrinks.query.filter_by(user_id=user_id, drink_id=drink_id).all()
+            for drink in drinks:
                 db.session.delete(drink)
-        
+
         db.session.commit()
 
 @ns.route('/mobile-settings/<int:user_id>/')
