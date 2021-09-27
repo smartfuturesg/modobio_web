@@ -3,22 +3,21 @@ logger = logging.getLogger(__name__)
 
 from flask import request
 from flask_accepts import responds, accepts
-from flask_restx import Resource, Namespace
+from flask_restx import Namespace
 from sqlalchemy import select
-
-from odyssey.utils.auth import token_auth
-from odyssey.utils.errors import GenericNotFound, DisabledEndpoint
-from odyssey.api.system.models import SystemTelehealthSessionCosts, SystemVariables
-from odyssey.api.system.schemas import SystemTelehealthSettingsSchema
-from odyssey.api.lookup.models import LookupCountriesOfOperations, LookupCurrencies
+from werkzeug.exceptions import BadRequest
 
 from odyssey import db
+from odyssey.api.lookup.models import LookupCountriesOfOperations, LookupCurrencies
+from odyssey.api.system.models import SystemTelehealthSessionCosts, SystemVariables
+from odyssey.api.system.schemas import SystemTelehealthSettingsSchema
+from odyssey.utils.auth import token_auth
+from odyssey.utils.base.resources import BaseResource
 
 ns = Namespace('system', description='Endpoints for system functions.')
 
-
 @ns.route('/telehealth-settings/')
-class SystemTelehealthSettingsApi(Resource):
+class SystemTelehealthSettingsApi(BaseResource):
     """ Endpoints related to system telehealth settings.
     """
 
@@ -46,13 +45,13 @@ class SystemTelehealthSettingsApi(Resource):
 
     @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
     @accepts(schema=SystemTelehealthSettingsSchema, api=ns)
-    @responds(schema=SystemTelehealthSettingsSchema, status_code=201, api=ns)
+    # @responds(schema=SystemTelehealthSettingsSchema, status_code=201, api=ns)
     @ns.deprecated
     def put(self):
         """
         This endpoint is temporarily disabled until further security measures are established
         """
-        raise DisabledEndpoint 
+        return 'This endpoint is disabled until further notice.', 403
 
         res = {'costs': []}
         for cost in request.parsed_obj['costs']:
@@ -65,8 +64,10 @@ class SystemTelehealthSettingsApi(Resource):
                 exists.session_cost = str(exists.session_cost)          
                 res['costs'].append(exists)
             else:
-                raise GenericNotFound(f'No cost exists for currency_id {cost.currency_id} for profession {cost.profession_type}.')
-                
+                raise BadRequest(
+                    f'No cost found for currency {cost.currency_id} '
+                    f'and profession {cost.profession_type}.')
+
         #update session variables
         if 'session_duration' in request.parsed_obj:
             ses_dur = SystemVariables.query.filter_by(var_name='Session Duration').one_or_none()
