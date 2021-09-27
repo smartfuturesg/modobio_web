@@ -84,7 +84,7 @@ from odyssey.utils.base.resources import BaseResource
 ns = Namespace('telehealth', description='telehealth bookings management API')
 
 @ns.route('/bookings/meeting-room/access-token/<int:booking_id>/')
-class TelehealthBookingsRoomAccessTokenApi(Resource):
+class TelehealthBookingsRoomAccessTokenApi(BaseResource):
     """
     This endpoint is used to GET the staff and client's TWILIO access tokens so they can
     access their chats and videos.
@@ -100,7 +100,6 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
         current_user, _ = token_auth.current_user()
         
         booking = TelehealthBookings.query.get(booking_id)
-
         if not booking:
             raise InputError(status_code=405, message='Meeting does not exist yet.')
 
@@ -190,7 +189,7 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
 
         elif g.user_type == 'client':
             meeting_room.client_access_token = token
-        
+
         db.session.add(meeting_room)
 
         # Create TelehealthBookingStatus object and update booking status to 'In Progress'
@@ -229,7 +228,6 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
                 urls[pic.height] = url
 
             msg['data']['staff_profile_picture'] = urls
-
             pn.send(booking.client_user_id, PushNotificationType.voip, msg)
 
         return {'twilio_token': token,
