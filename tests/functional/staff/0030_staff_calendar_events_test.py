@@ -2,15 +2,6 @@ from flask.json import dumps
 from odyssey.api.staff.models import StaffCalendarEvents
 from .data import staff_calendar_events_data
 
-import os
-import pwd
-import pytest
-
-username = pwd.getpwuid(os.getuid()).pw_name
-pytestmark = pytest.mark.skipif(
-    username == 'zan',
-    reason='For some reason this tests only fails for me. Disable until I have time to fix it.')
-
 def test_post_new_event(test_client):
     # using staff user
     # post daily event
@@ -56,7 +47,7 @@ def test_post_new_event(test_client):
         data=dumps(staff_calendar_events_data['recurring']['invalid_event']),
         content_type='application/json')
 
-    assert response.status_code == 422
+    assert response.status_code == 400
 
     # post non-recurring event
     response = test_client.post(
