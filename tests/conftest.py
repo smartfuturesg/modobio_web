@@ -12,6 +12,7 @@ from flask.json import dumps
 from flask_migrate import upgrade
 from sqlalchemy import select, text
 from sqlalchemy.exc import ProgrammingError
+from twilio.base.exceptions import TwilioRestException
 
 from odyssey import create_app, db
 from odyssey.api.client.models import ClientClinicalCareTeam, ClientClinicalCareTeamAuthorizations
@@ -382,4 +383,8 @@ def telehealth_booking(test_client, wheel = False):
 
     # delete chatroom and booking
     test_client.db.session.delete(booking)
-    twilio.delete_conversation(conversation_sid)
+    try:
+        twilio.delete_conversation(conversation_sid)
+    except TwilioRestException:
+        # conversation was already removed as part of a test
+        pass

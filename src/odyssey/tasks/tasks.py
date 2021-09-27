@@ -365,13 +365,17 @@ def store_telehealth_transcript(booking_id: int):
 
                 
 
-
     payload = {
         'booking_id': booking.idx,
         'transcript': transcript
     }
+
     # insert transcript into mongo db under the telehealth_transcripts collection
-    mongo.db.telehealth_transcripts.insert(payload)
+    if not current_app.config['TESTING']:
+        breakpoint()
+        mongo.db.telehealth_transcripts.insert(payload)
     
     # delete the conversation from twilio
-    # twilio.delete_conversation(booking.chat_room.conversation_sid)
+
+    twilio.delete_conversation(booking.chat_room.conversation_sid)
+
