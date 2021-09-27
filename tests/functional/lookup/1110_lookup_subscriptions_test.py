@@ -7,5 +7,5 @@ def test_get_subscription_types(test_client):
         content_type='application/json')
 
     assert response.status_code == 200
-    assert response.json['items'][0]['name'] == "Team Member"
-    assert response.json['items'][1]['cost'] == 9.99
+    assert response.json['items'][0]['name'] == "Monthly"
+    assert response.json['items'][1]['cost'] == 98.00
