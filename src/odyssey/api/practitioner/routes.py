@@ -3,23 +3,27 @@ logger = logging.getLogger(__name__)
 
 from flask import request, current_app, Response
 from flask_accepts import accepts, responds
-from flask_restx import Resource, Namespace
-from odyssey import db
+from flask_restx import Namespace
+from werkzeug.exceptions import BadRequest
 
-from odyssey.utils.auth import token_auth
+from odyssey import db
 from odyssey.api.practitioner.models import PractitionerOrganizationAffiliation
 from odyssey.api.practitioner.schemas import PractitionerOrganizationAffiliationSchema
 from odyssey.api.staff.models import StaffRoles
 from odyssey.api.lookup.models import LookupOrganizations
-from odyssey.utils.errors import InputError
+from odyssey.utils.auth import token_auth
+from odyssey.utils.base.resources import BaseResource
 
 ns = Namespace('practitioner', description='Operations related to practitioners')
 
 @ns.route('/affiliations/<int:user_id>/')
-class PractitionerOganizationAffiliationAPI(Resource):
+class PractitionerOganizationAffiliationAPI(BaseResource):
     """
     Endpoint for Staff Admin to assign, edit and remove Practitioner's organization affiliations
     """
+    # Multiple origanizations per practitioner possible
+    __check_resource__ = False
+
     @token_auth.login_required(user_type = ('staff',), staff_role = ('staff_admin',))
     @responds(schema=PractitionerOrganizationAffiliationSchema(many=True), status_code=200, api=ns)
     def get(self, user_id):
@@ -46,15 +50,16 @@ class PractitionerOganizationAffiliationAPI(Resource):
         # validate organization_id 
         organizations = [org.idx for org in LookupOrganizations.query.all()]
         if data.organization_idx not in organizations:
-            raise InputError(400, 'Invalid Organization Index')
+            raise BadRequest('Invalid organization.')
         
         # verify user_id has a practitioner role (will also raise error if user_id doesn't exist or is client)
         if True not in [role.role_info.is_practitioner for role in StaffRoles.query.filter_by(user_id=user_id).all()]:
-            raise InputError(400, 'Not a Practitioner')
+            raise BadRequest('Not a practitioner.')
         
         # verify the practitioner is not already affiliated with same organization
         if data.organization_idx in [org.organization_idx for org in PractitionerOrganizationAffiliation.query.filter_by(user_id=user_id).all()]:
-            raise InputError(400, f'Practitioner is already affiliated with organization_idx {data.organization_idx}')
+            raise BadRequest(
+                f'Practitioner is already affiliated with organization {data.organization_idx}.')
 
         # Add an affiliation to PractitionerOrganizationAffiliation table
         data.user_id = user_id
@@ -81,7 +86,7 @@ class PractitionerOganizationAffiliationAPI(Resource):
         if 'organization_idx' in request.args:
             # validate organization_idx is a valid integer, if it was provided at all 
             if not request.args['organization_idx'].isnumeric():
-                raise InputError(400, 'organization_idx must be a positive integer')
+                raise BadRequest('Organization_idx must be a positive integer.')
 
             # if organization_idx is valid int delete that affiliation, 
             # if the idx doesn't exist, nothing will happen
