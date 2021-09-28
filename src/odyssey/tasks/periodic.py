@@ -13,7 +13,7 @@ from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations, ClientDataStorage, ClientClinicalCareTeam
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.notifications.schemas import NotificationSchema
-from odyssey.api.payment.models import PaymentFailedTransactions, PaymentMethods
+from odyssey.api.payment.models import PaymentMethods
 from odyssey.api.system.models import SystemTelehealthSessionCosts
 from odyssey.api.user.models import User
 from odyssey.utils.constants import INSTAMED_OUTLET
@@ -227,6 +227,21 @@ def deploy_webhook_tasks(**kwargs):
 def startup_tasks(**kwargs):
     deploy_webhook_tasks.delay()
 
+def cancel_telehealth_appointment(booking):
+    """
+    Used by the charge task to cancel an appointment in the event a payment is unsuccessful
+    """
+
+    #update booking status to cancelled
+    status = TelehealthBookingStatus.query.filter_by(booking_id=booking.idx).one_or_none()
+    status.status = 'Canceled'
+
+    #TODO: Create notification/send email(?) to user that their appointment was cancelled due
+    #to a failed payment
+    booking.charged = True
+    db.session.commit()
+
+
 @celery.task()
 def charge_user_telehealth():
     """
@@ -272,19 +287,14 @@ def charge_user_telehealth():
             response.raise_for_status()
         except:
             #transaction was not successful, store in PaymentFailedTransactions
-            failed = PaymentFailedTransactions(**{
-                'user_id': booking.client_user_id,
-                'transaction_id': response_data['TransactionID']
-            })
-            db.session.add(failed)
-            db.session.commit()
-            booking.charged = True
+            cancel_telehealth_appointment(booking)
             return
 
         #convert response data to json (python dict)
         response_data = json.loads(response.text)
 
-        #check if card was declined (this is not an error as checked above as 200 is returned from InstaMed)
+        #check if card was declined or partially approved
+        #(this is not an error as checked above since 200 is returned from InstaMed)
         if response_data['TransactionStatus'] == 'C':
             if response_data['IsPartiallyApproved']:
                 #refund partial amount and log as an unsuccessful payment
@@ -305,12 +315,9 @@ def charge_user_telehealth():
 
                 #TODO: log if refund was unsuccessful
 
-                #store in PaymentFailedTransactions
-                failed = PaymentFailedTransactions(**{
-                    'user_id': booking.client_user_id,
-                    'transaction_id': response_data['TransactionID']
-                })
-                db.session.add(failed)
+                cancel_telehealth_appointment(booking)
+                return
+
             else:
                 #transaction was successful, store in PaymentHistory
                 history = PaymentHistory(**{
@@ -320,96 +327,10 @@ def charge_user_telehealth():
                     'transaction_amount': session_cost,
                 })
                 db.session.add(history)
+                booking.charged = True
         else:
-            #transaction was not successful, store in PaymentFailedTransactions
-            failed = PaymentFailedTransactions(**{
-                'user_id': booking.client_user_id,
-                'transaction_id': response_data['TransactionID']
-            })
-            db.session.add(failed)
-
-        booking.charged=True
-
-    db.session.commit()
-
-@celery.task()
-def charge_unsuccessful_bookings():
-    """
-    This task will run every hour and will attempt to charge for telehealth bookings that failed
-    to be charge by the above task. When an unsuccessful charge has been failed a total of 6 times,
-    this task will no longer attempt to charge. Instead, the user will have the unsuccessful charge
-    on their account and will be unable to book new appointments until it is resolved.
-    """
-
-    transactions = PaymentFailedTransactions.query.filter(PaymentFailedTransactions.retries < 6).all()
-    session_cost = SystemTelehealthSessionCosts.query.filter_by(profession_type='medical_doctor').one_or_none().session_cost
-
-    for transaction in transactions:
-        #attempt to charge this transaction
-        request_data = {
-            "Outlet": INSTAMED_OUTLET,
-            "PaymentMethod": "OnFile",
-            "PaymentMethodID": str(transaction.payment_method.payment_id),
-            "Amount": str(session_cost)
-        }
-
-        request_header = {'Api-Key': current_app.config['INSTAMED_API_KEY'],
-                        'Api-Secret': current_app.config['INSTAMED_API_SECRET'],
-                        'Content-Type': 'application/json'}
-
-        response = requests.post('https://connect.instamed.com/rest/payment/sale',
-                        headers=request_header,
-                        json=request_data)
-
-        #check if instamed api raised an error
-        try:
-            response.raise_for_status()
-        except:
-            #transaction was not successful, increment attempt count
-            transaction.retries += 1
-            db.session.commit()
-            return
-
-        #convert response data to json (python dict)
-        response_data = json.loads(response.text)
-
-        #check if card was declined (this is not an error as checked above as 200 is returned from InstaMed)
-        if response_data['TransactionStatus'] == 'C':
-            if response_data['IsPartiallyApproved']:
-                #refund partial amount and log as an unsuccessful payment
-                request_data = {
-                    "Outlet": INSTAMED_OUTLET,
-                    "PaymentMethod": "OnFile",
-                    "PaymentMethodID": str(payment.payment_id),
-                    "Amount": str(response_data['PartialApprovalAmount'])
-                }
-
-                request_header = {'Api-Key': current_app.config['INSTAMED_API_KEY'],
-                        'Api-Secret': current_app.config['INSTAMED_API_SECRET'],
-                        'Content-Type': 'application/json'}
-
-                response = requests.post('https://connect.instamed.com/rest/payment/refund',
-                                headers=request_header,
-                                json=request_data)
-
-                #TODO: log if refund was unsuccessful
-
-                #increment retry count
-                transaction.retries += 1
-            else:
-                #transaction was successful, store in PaymentHistory
-                history = PaymentHistory(**{
-                    'user_id': booking.client_user_id,
-                    'payment_method_id': booking.payment_method_id,
-                    'transaction_id': response_data['TransactionID'],
-                    'transaction_amount': session_cost,
-                })
-                db.session.add(history)
-                #delete failed payment now that it has been resolved
-                db.session.delete(transaction)
-        else:
-            #transaction was not successful, increment retry count
-            transaction.retries += 1
+            #transaction was declined
+            cancel_telehealth_appointment(booking)
 
     db.session.commit()
 
@@ -453,10 +374,5 @@ celery.conf.beat_schedule = {
     'charge_user_telehealth': {
         'task': 'odyssey.tasks.periodic.charge_user_telehealth',
         'schedule': crontab(hour=0, minute=5)
-    },
-    #telehealth failed payments
-    'charge_unsuccessful_bookings': {
-        'task': 'odyssey.tasks.periodic.charge_unsuccessful_bookings',
-        'schedule': crontab(hour=1, minute=0)
     }
 }
