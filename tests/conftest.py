@@ -13,12 +13,13 @@ from flask_migrate import upgrade
 from sqlalchemy import select, text
 from sqlalchemy.exc import ProgrammingError
 from twilio.base.exceptions import TwilioRestException
+from werkzeug import test
 
 from odyssey import create_app, db
 from odyssey.api.client.models import ClientClinicalCareTeam, ClientClinicalCareTeamAuthorizations
 from odyssey.api.lookup.models import LookupClinicalCareTeamResources
 from odyssey.api.payment.models import PaymentMethods
-from odyssey.api.telehealth.models import TelehealthBookings
+from odyssey.api.telehealth.models import TelehealthBookings, TelehealthChatRooms
 from odyssey.api.user.models import User, UserLogin
 from odyssey.integrations.twilio import Twilio
 from odyssey.utils.misc import grab_twilio_credentials
@@ -329,7 +330,7 @@ def care_team(test_client):
 
 
 # Used by tests in client/ and in doctor/
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='function')
 def telehealth_booking(test_client, wheel = False):
     """ 
     Create a new telehealth booking between one of the wheel test users and client user 22
@@ -379,10 +380,19 @@ def telehealth_booking(test_client, wheel = False):
     twilio = Twilio()
     conversation_sid = twilio.create_telehealth_chatroom(booking.idx)
 
+    test_client.db.session.commit()
+
     yield booking
 
-    # delete chatroom and booking
+    # delete chatroom, booking, and payment method
+    chat_room = test_client.db.session.execute(select(TelehealthChatRooms).where(TelehealthChatRooms.booking_id == booking.idx)).scalars().one_or_none()
+    
+    test_client.db.session.delete(chat_room)
     test_client.db.session.delete(booking)
+    test_client.db.session.flush()
+    
+    test_client.db.session.delete(pm)
+    test_client.db.session.commit()
     try:
         twilio.delete_conversation(conversation_sid)
     except TwilioRestException:

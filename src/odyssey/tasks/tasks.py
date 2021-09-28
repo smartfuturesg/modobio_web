@@ -329,6 +329,7 @@ def store_telehealth_transcript(booking_id: int):
     twilio = Twilio()
 
     # bring up booking
+    # For now, the boooking state does not matter. 
     booking = db.session.execute(select(TelehealthBookings
         ).where(TelehealthBookings.idx == booking_id)).scalars().one_or_none()
 
@@ -372,10 +373,10 @@ def store_telehealth_transcript(booking_id: int):
 
     # insert transcript into mongo db under the telehealth_transcripts collection
     if not current_app.config['TESTING']:
-        breakpoint()
         mongo.db.telehealth_transcripts.insert(payload)
     
     # delete the conversation from twilio
 
     twilio.delete_conversation(booking.chat_room.conversation_sid)
 
+    return payload

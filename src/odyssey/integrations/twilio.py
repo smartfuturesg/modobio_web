@@ -199,7 +199,7 @@ class Twilio():
             staff_user_id=booking.staff_user_id,
             client_user_id=booking.client_user_id,
             booking_id = booking_id)
-
+        
         conversation_sid = self.create_conversation(booking.staff_user_id, booking.client_user_id)
 
         # create chatroom entry into DB
