@@ -52,7 +52,7 @@ from odyssey.api.lookup.models import (
     LookupTerritoriesOfOperations
 )
 from odyssey.api.practitioner.models import PractitionerCredentials
-from odyssey.api.payment.models import PaymentMethods, PaymentHistory, PaymentFailedTransactions
+from odyssey.api.payment.models import PaymentMethods, PaymentHistory
 from odyssey.utils.auth import token_auth
 from odyssey.utils.errors import GenericNotFound, InputError, UnauthorizedUser, ContentNotFound, IllegalSetting, GenericThirdPartyError
 from odyssey.integrations.wheel import Wheel
