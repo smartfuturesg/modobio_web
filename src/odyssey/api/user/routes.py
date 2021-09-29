@@ -468,8 +468,9 @@ class PasswordResetEmail(Resource):
                     data=request_data)
 
             res = json.loads(response.text)
-            res['error_codes'] = res['error-codes']
-
+            if 'error-codes' in res:
+                res['error_codes'] = res['error-codes']
+                
             # if captcha verification failed, return here rather than starting the password reset process
             if not res['success']:
                 return res
