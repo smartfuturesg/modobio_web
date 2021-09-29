@@ -147,6 +147,8 @@ class PaymentHistoryApi(BaseResource):
 
 @ns.route('/refunds/<int:user_id>/')
 class PaymentRefundApi(BaseResource):
+    # Multiple refunds allowed
+    __check_resource__ = False
 
     @token_auth.login_required(user_type=('client', 'staff',), staff_role=('client_services',))
     @responds(schema=PaymentRefundsSchema(many=True), api=ns, status_code=200)
