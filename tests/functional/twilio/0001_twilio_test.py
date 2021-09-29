@@ -154,4 +154,35 @@ def test_conversation_cache_scheduler(test_client, telehealth_booking):
 
     # test the scheduler 
     bookings = deploy_appointment_transcript_store_tasks(booking.target_date)
+
+
+def test_telehealth_transcript_get(test_client, telehealth_booking):
+    """
     
+    """
+    booking = telehealth_booking
+
+    twilio = Twilio()
+
+    conversation_sid = booking.chat_room.conversation_sid
+
+    # add test image file to twilio 
+    media_sid = twilio.upload_media(media_path='tests/functional/telehealth/test_img_weirdmole.jpg')
+
+    # add a few messages
+    #staff
+    twilio.send_message(
+        user_id = booking.staff_user_id, 
+        conversation_sid = conversation_sid,
+        message_body = "testingtesting")
+
+    
+    # add media file to conversation transcript
+    twilio.send_message(
+        user_id = booking.client_user_id, 
+        conversation_sid = conversation_sid,
+        media_sid = media_sid)
+
+
+    # test the scheduler 
+    bookings = deploy_appointment_transcript_store_tasks(booking.target_date)

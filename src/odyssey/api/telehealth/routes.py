@@ -13,7 +13,7 @@ from sqlalchemy.sql.expression import and_, or_
 from twilio.jwt.access_token import AccessToken
 from twilio.jwt.access_token.grants import VideoGrant, ChatGrant
 
-from odyssey import db
+from odyssey import db, mongo
 from odyssey.api.lookup.models import (
     LookupBookingTimeIncrements
 )
@@ -2040,3 +2040,30 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
         db.session.commit() 
 
         return 
+
+@ns.route('/bookings/transcript/<int:booking_id>/')
+class TelehealthBookingsRoomAccessTokenApi(Resource):
+    """
+    Operations related to stored telehealth transcripts
+    """
+    @token_auth.login_required()
+    @responds(api=ns, status_code=200)
+    def get(booking_id):
+        """
+        Retrieve messages from booking transscripts that have been stored on modobio's end
+        """
+        current_user, _ = token_auth.current_user()
+        
+        booking = TelehealthBookings.query.get(booking_id)
+
+        if not booking:
+            raise InputError(status_code=405, message='Meeting does not exist yet.')
+
+        # make sure the requester is one of the participants
+        if not any(current_user.user_id == uid for uid in [booking.client_user_id, booking.staff_user_id]):
+            raise InputError(status_code=405, message='logged in user must be a booking participant')
+
+        transcript = mongo.db.telehealth_transcripts.find({"booking_id": booking_id})
+
+        return transcript
+
