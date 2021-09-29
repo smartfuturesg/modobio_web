@@ -323,8 +323,6 @@ def store_telehealth_transcript(booking_id: int):
     Params
     ------
     booking_id
-
-
     """
     twilio = Twilio()
 
@@ -378,5 +376,10 @@ def store_telehealth_transcript(booking_id: int):
     # delete the conversation from twilio
 
     twilio.delete_conversation(booking.chat_room.conversation_sid)
+
+    # delete the conversation sid entry
+    booking.chat_room.conversation_sid = None
+
+    db.session.commit()
 
     return payload

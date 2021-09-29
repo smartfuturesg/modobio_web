@@ -17,11 +17,12 @@ from werkzeug import test
 
 from odyssey import create_app, db
 from odyssey.api.client.models import ClientClinicalCareTeam, ClientClinicalCareTeamAuthorizations
-from odyssey.api.lookup.models import LookupClinicalCareTeamResources
+from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupClinicalCareTeamResources
 from odyssey.api.payment.models import PaymentMethods
 from odyssey.api.telehealth.models import TelehealthBookings, TelehealthChatRooms
 from odyssey.api.user.models import User, UserLogin
 from odyssey.integrations.twilio import Twilio
+from odyssey.utils.constants import TELEHEALTH_BOOKING_LEAD_TIME_HRS
 from odyssey.utils.misc import grab_twilio_credentials
 from odyssey.utils.errors import MissingThirdPartyCredentials
 from odyssey.utils import search
@@ -355,17 +356,32 @@ def telehealth_booking(test_client, wheel = False):
     test_client.db.session.flush()
 
 
-    # # make a telehealth booking by direct db call
-    target_date = datetime.now() + timedelta(days=1)
+    # make a telehealth booking by direct db call
+    # booking is made with minimum lead time
+    target_datetime = datetime.now() + timedelta(hours=TELEHEALTH_BOOKING_LEAD_TIME_HRS)
+    target_datetime = target_datetime.replace(minute = 45, second=0)
+    time_inc = LookupBookingTimeIncrements.query.all()
+        
+    start_time_idx_dict = {item.start_time.isoformat() : item.idx for item in time_inc} # {datetime.time: booking_availability_id}
+    
+    booking_start_idx = start_time_idx_dict.get(target_datetime.time().strftime('%H:%M:%S'))
+
+    # below is to account for bookings starting at the very end of the day so that the booking end time
+    # falls on the following day
+    if time_inc[-1].idx - (booking_start_idx + 3) < 0:
+        booking_end_idx = time_inc[-1].idx - (booking_start_idx + 3)
+    else:
+        booking_end_idx = booking_start_idx + 3
 
     booking = TelehealthBookings(
         staff_user_id = 30 if wheel else 1,
         client_user_id = 22,
-        target_date = target_date.date(),
-        booking_window_id_start_time = 1,
-        booking_window_id_end_time = 4,
-        booking_window_id_start_time_utc = 1,
-        booking_window_id_end_time_utc = 4,
+        target_date = target_datetime.date(),
+        target_date_utc = target_datetime.date(),
+        booking_window_id_start_time = booking_start_idx,
+        booking_window_id_end_time = booking_end_idx,
+        booking_window_id_start_time_utc = booking_start_idx,
+        booking_window_id_end_time_utc = booking_end_idx,
         client_location_id = 1,
         payment_method_id = pm.idx,
         external_booking_id = uuid.uuid4()
