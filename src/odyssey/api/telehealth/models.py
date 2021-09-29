@@ -466,6 +466,15 @@ class TelehealthChatRooms(BaseModel):
     :type: int
     """
 
+    transcript_object_id = db.Column(db.String)
+    """
+    Object id for telehealth transcript entry on mongo db
+
+    :type: str
+    """
+
+
+
 class TelehealthStaffSettings(BaseModel):
     """
     Holds staff preferred settings for Telehealth appointments

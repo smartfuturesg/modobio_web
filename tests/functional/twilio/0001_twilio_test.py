@@ -115,7 +115,7 @@ def test_conversation_cache(test_client, telehealth_booking):
     assert stored_transcript['transcript'][1]['media'][0]['s3_path'] == f"id00022/telehealth/{booking.idx}/transcript/images/0.jpeg"
     
 
-
+@pytest.mark.skip
 def test_conversation_cache_scheduler(test_client, telehealth_booking):
     """
     Test the conversation cache task which takes a booking_id and stores the conversation on mongo_db. All media is stored in an s3 bucket.
@@ -155,10 +155,10 @@ def test_conversation_cache_scheduler(test_client, telehealth_booking):
     # test the scheduler 
     bookings = deploy_appointment_transcript_store_tasks(booking.target_date)
 
-
+@pytest.mark.skip
 def test_telehealth_transcript_get(test_client, telehealth_booking):
     """
-    
+
     """
     booking = telehealth_booking
 

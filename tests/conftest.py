@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 import pathlib
 import uuid
+from bson import ObjectId
 import pytest
 import subprocess
 import sys
@@ -15,7 +16,7 @@ from sqlalchemy.exc import ProgrammingError
 from twilio.base.exceptions import TwilioRestException
 from werkzeug import test
 
-from odyssey import create_app, db
+from odyssey import create_app, db, mongo
 from odyssey.api.client.models import ClientClinicalCareTeam, ClientClinicalCareTeamAuthorizations
 from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupClinicalCareTeamResources
 from odyssey.api.payment.models import PaymentMethods
@@ -403,6 +404,10 @@ def telehealth_booking(test_client, wheel = False):
     # delete chatroom, booking, and payment method
     chat_room = test_client.db.session.execute(select(TelehealthChatRooms).where(TelehealthChatRooms.booking_id == booking.idx)).scalars().one_or_none()
     
+    # remove transcript from mongo db
+    if chat_room.transcript_object_id:
+        mongo.db.telehealth_transcripts.find_one_and_delete({"_id": ObjectId(chat_room.transcript_object_id)})
+
     test_client.db.session.delete(chat_room)
     test_client.db.session.delete(booking)
     test_client.db.session.flush()

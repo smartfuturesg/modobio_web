@@ -1,4 +1,5 @@
 import os, boto3, secrets, pathlib
+from bson import ObjectId
 from datetime import datetime, time, timedelta
 from dateutil import tz
 import random
@@ -2063,7 +2064,8 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
         if not any(current_user.user_id == uid for uid in [booking.client_user_id, booking.staff_user_id]):
             raise InputError(status_code=405, message='logged in user must be a booking participant')
 
-        transcript = mongo.db.telehealth_transcripts.find({"booking_id": booking_id})
+        
+        transcript = mongo.db.telehealth_transcripts.find({"_id": ObjectId(booking.chat_room.transcript_object_id)})
 
         return transcript
 
