@@ -16,27 +16,7 @@ from .data import (
     telehealth_queue_client_pool_8_post_data
 )
 
-def test_post_1_staff_general_availability(test_client):
-    # Add Staff Operational Territories to staff with user_id 2 and only for medical_doctor role
-    role = (
-        StaffRoles
-        .query
-        .filter_by(
-            user_id=test_client.staff_id,
-            role='medical_doctor')
-        .one_or_none())
-
-    payload = {
-        'operational_territories': [{
-            'role_id': role.idx,
-            'operational_territory_id': 1}]}
-
-    test_client.post(
-        f'/staff/operational-territories/{test_client.staff_id}/',
-        headers=test_client.staff_auth_header,
-        data=dumps(payload),
-        content_type='application/json')
-
+def test_post_1_staff_general_availability(test_client, payment_method, staff_territory, staff_credentials):
     response = test_client.post(
         f'/telehealth/settings/staff/availability/{test_client.staff_id}/',
         headers=test_client.staff_auth_header,
@@ -45,7 +25,6 @@ def test_post_1_staff_general_availability(test_client):
 
     assert response.status_code == 201
 
-    payment_method = PaymentMethods.query.filter_by(user_id=test_client.client_id).first()
     telehealth_queue_client_pool_8_post_data['payment_method_id'] = payment_method.idx
 
     response = test_client.post(
@@ -60,7 +39,7 @@ def test_post_1_staff_general_availability(test_client):
     response = test_client.get(
         f'/telehealth/client/time-select/{test_client.client_id}/',
         headers=test_client.client_auth_header)
-        
+
     assert response.json['appointment_times'][0]['target_date'] == '2022-04-04'
     assert response.json['appointment_times'][1]['target_date'] == '2022-04-04'
     assert response.json['appointment_times'][2]['target_date'] == '2022-04-04'
@@ -330,7 +309,7 @@ def test_invalid_post_7_staff_general_availability(test_client):
         data=dumps(telehealth_staff_general_availability_bad_7_post_data),
         content_type='application/json')
 
-    assert response.status_code == 405
+    assert response.status_code == 400
 
 def test_get_7_staff_availability(test_client):
     response = test_client.get(

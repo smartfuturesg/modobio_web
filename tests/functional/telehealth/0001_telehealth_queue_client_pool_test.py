@@ -11,12 +11,8 @@ from .data import (
     telehealth_queue_client_pool_6_post_data,
     telehealth_queue_client_pool_7_post_data
 )
-from odyssey.api.payment.models import PaymentMethods
 
-def test_post_1_client_appointment(test_client):
-    global payment_method
-
-    payment_method = PaymentMethods.query.filter_by(user_id=test_client.client_id).first()
+def test_post_1_client_appointment(test_client, payment_method):
     telehealth_queue_client_pool_1_post_data['payment_method_id'] = payment_method.idx
 
     response = test_client.post(
@@ -27,7 +23,7 @@ def test_post_1_client_appointment(test_client):
 
     assert response.status_code == 201
 
-def test_post_2_client_appointment(test_client):
+def test_post_2_client_appointment(test_client, payment_method):
     telehealth_queue_client_pool_2_post_data['payment_method_id'] = payment_method.idx
     response = test_client.post(
         f'/telehealth/queue/client-pool/{test_client.client_id}/',
@@ -37,7 +33,7 @@ def test_post_2_client_appointment(test_client):
 
     assert response.status_code == 201
 
-def test_post_3_client_appointment(test_client):
+def test_post_3_client_appointment(test_client, payment_method):
     telehealth_queue_client_pool_3_post_data['payment_method_id'] = payment_method.idx
 
     response = test_client.post(
@@ -48,7 +44,7 @@ def test_post_3_client_appointment(test_client):
 
     assert response.status_code == 201
 
-def test_post_4_client_appointment(test_client):
+def test_post_4_client_appointment(test_client, payment_method):
     telehealth_queue_client_pool_4_post_data['payment_method_id'] = payment_method.idx
 
     response = test_client.post(
@@ -59,7 +55,7 @@ def test_post_4_client_appointment(test_client):
 
     assert response.status_code == 201
 
-def test_post_5_client_appointment(test_client):
+def test_post_5_client_appointment(test_client, payment_method):
     telehealth_queue_client_pool_5_post_data['payment_method_id'] = payment_method.idx
 
     response = test_client.post(
@@ -70,7 +66,7 @@ def test_post_5_client_appointment(test_client):
 
     assert response.status_code == 201
 
-def test_get_1_client_appointment_queue(test_client):
+def test_get_1_client_appointment_queue(test_client, payment_method):
     for header in (test_client.staff_auth_header, test_client.client_auth_header):
         response = test_client.get(
             '/telehealth/queue/client-pool/',
@@ -83,7 +79,7 @@ def test_get_1_client_appointment_queue(test_client):
                 response.json['queue'][0]['priority']] == ['2025-04-05T02:00:00', False]
         assert response.json['total_queue'] == 1
 
-def test_post_6_client_appointment(test_client):
+def test_post_6_client_appointment(test_client, payment_method):
     telehealth_queue_client_pool_6_post_data['payment_method_id'] = payment_method.idx
 
     response = test_client.post(
@@ -131,10 +127,9 @@ def test_delete_1_client_appointment_queue(test_client):
         headers=test_client.client_auth_header,
         content_type='application/json')
 
-    # 405 because client 1 is no longer in the queue
-    assert response.status_code == 405
+    assert response.status_code == 204
 
-def test_post_8_client_appointment(test_client):
+def test_post_8_client_appointment(test_client, payment_method):
     telehealth_queue_client_pool_7_post_data['payment_method_id'] = payment_method.idx
 
     response = test_client.post(
@@ -169,8 +164,7 @@ def test_delete_2_client_appointment_queue(test_client):
         headers=test_client.client_auth_header,
         content_type='application/json')
 
-    # The client with that payload does not exist in the table
-    assert response.status_code == 405
+    assert response.status_code == 204
 
 def test_get_5_client_appointment_queue(test_client):
     for header in (test_client.staff_auth_header, test_client.client_auth_header):
@@ -200,3 +194,15 @@ def test_get_1_specific_client_appointment_queue(test_client):
                 response.json['queue'][0]['priority']] == ['2025-02-05T02:00:00', True]
         assert response.json['queue'][0]['duration'] == 30
         assert response.json['total_queue'] == 1
+
+def test_delete_7_client_appointment(test_client, payment_method):
+    # Delete remaining
+    telehealth_queue_client_pool_7_post_data['payment_method_id'] = payment_method.idx
+
+    response = test_client.delete(
+        f'/telehealth/queue/client-pool/{test_client.client_id}/',
+        headers=test_client.client_auth_header,
+        data=dumps(telehealth_queue_client_pool_7_post_data),
+        content_type='application/json')
+
+    assert response.status_code == 204
