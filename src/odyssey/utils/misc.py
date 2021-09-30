@@ -444,7 +444,7 @@ class FileHandling:
         file.seek(0, os.SEEK_END)
         file_size = file.tell()
         if file_size > max_file_size:
-            raise RequestEntityTooLarge(f'File {file.name} exeeds maximum file size.')
+            raise RequestEntityTooLarge(f'File {file.name} exceeds maximum file size.')
 
     def image_crop_square(self, file: FileStorage) -> FileStorage:
         # validate_file_type(...) is an image
