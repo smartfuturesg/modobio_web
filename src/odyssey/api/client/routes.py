@@ -187,7 +187,7 @@ class ClientProfilePicture(BaseResource):
         Accepts form-data, will only handle one image
         "profile_picture": file (allowed types are '.png', '.jpg', '.jpeg')
         """
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         if not ('profile_picture' in request.files and request.files['profile_picture']):  
             raise BadRequest('No file selected.')
@@ -257,7 +257,7 @@ class ClientProfilePicture(BaseResource):
         """
         Request to delete the client's profile picture
         """
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         fh = FileHandling()
         _prefix = f'id{user_id:05d}/client_profile_picture'
@@ -279,7 +279,7 @@ class Client(BaseResource):
     @responds(schema=ClientAndUserInfoSchema, api=ns)
     def get(self, user_id):
         """returns client info table as a json for the user_id specified"""
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         client_data = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
         user_data = User.query.filter_by(user_id=user_id).one_or_none()
@@ -348,7 +348,7 @@ class Client(BaseResource):
     def put(self, user_id):
         """edit client info"""
 
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         client_data = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
         
@@ -572,7 +572,7 @@ class ConsentContract(BaseResource):
     @responds(schema=ClientConsentSchema, api=ns)
     def get(self, user_id):
         """returns the most recent consent table as a json for the user_id specified"""
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         client_consent_form = (
             ClientConsent
@@ -590,7 +590,7 @@ class ConsentContract(BaseResource):
     @responds(schema=ClientConsentSchema, status_code=201, api=ns)
     def post(self, user_id):
         """ Create client consent contract for the specified user_id """
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         data = request.get_json()
         data["user_id"] = user_id
@@ -614,7 +614,7 @@ class ReleaseContract(BaseResource):
     @responds(schema=ClientReleaseSchema, api=ns)
     def get(self, user_id):
         """returns most recent client release table as a json for the user_id specified"""
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         client_release_contract = (
             ClientRelease
@@ -632,7 +632,7 @@ class ReleaseContract(BaseResource):
     @responds(schema=ClientReleaseSchema, status_code=201, api=ns)
     def post(self, user_id):
         """create client release contract object for the specified user_id"""
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         data = request.get_json()
         
@@ -675,7 +675,7 @@ class PoliciesContract(BaseResource):
     @responds(schema=ClientPoliciesContractSchema, api=ns)
     def get(self, user_id):
         """returns most recent client policies table as a json for the user_id specified"""
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         client_policies = (
             ClientPolicies
@@ -693,7 +693,7 @@ class PoliciesContract(BaseResource):
     @responds(schema=ClientPoliciesContractSchema, status_code= 201, api=ns)
     def post(self, user_id):
         """create client policies contract object for the specified user_id"""
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         data = request.get_json()
         data["user_id"] = user_id
@@ -715,7 +715,7 @@ class ConsultConstract(BaseResource):
     @responds(schema=ClientConsultContractSchema, api=ns)
     def get(self, user_id):
         """returns most recent client consultation table as a json for the user_id specified"""
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         client_consult = (
             ClientConsultContract
@@ -733,7 +733,7 @@ class ConsultConstract(BaseResource):
     @responds(schema=ClientConsultContractSchema, status_code= 201, api=ns)
     def post(self, user_id):
         """create client consult contract object for the specified user_id"""
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         data = request.get_json()
         data["user_id"] = user_id
@@ -755,7 +755,7 @@ class SubscriptionContract(BaseResource):
     @responds(schema=ClientSubscriptionContractSchema, api=ns)
     def get(self, user_id):
         """returns most recent client subscription contract table as a json for the user_id specified"""
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         client_subscription = (
             ClientSubscriptionContract
@@ -773,7 +773,7 @@ class SubscriptionContract(BaseResource):
     @responds(schema=ClientSubscriptionContractSchema, status_code= 201, api=ns)
     def post(self, user_id):
         """create client subscription contract object for the specified user_id"""
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         data = request.get_json()
         data["user_id"] = user_id
@@ -795,7 +795,7 @@ class IndividualContract(BaseResource):
     @responds(schema=ClientIndividualContractSchema, api=ns)
     def get(self, user_id):
         """returns most recent client individual servies table as a json for the user_id specified"""
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
         
         client_services = (
             ClientIndividualContract
@@ -813,7 +813,7 @@ class IndividualContract(BaseResource):
     @responds(schema=ClientIndividualContractSchema,status_code=201, api=ns)
     def post(self, user_id):
         """create client individual services contract object for the specified user_id"""
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         data = request.get_json()
         data['user_id'] = user_id
@@ -855,7 +855,7 @@ class SignedDocuments(BaseResource):
             Keys are the display names of the documents,
             values are URLs to the generated PDF documents.
         """
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         urls = {}
         paths = []
@@ -898,7 +898,7 @@ class JourneyStatusCheck(BaseResource):
         """
         Returns the client's outstanding registration items and their URIs.
         """
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         remaining_forms = []
 
@@ -1321,7 +1321,7 @@ class ClinicalCareTeamTemporaryMembers(BaseResource):
         """
         Adds a practitioner as a temporary team member to a user's care team
         """
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         #assure that a booking exists for the given booking_id and that it is between the given client
         #and staff user ids
@@ -1651,7 +1651,7 @@ class ClientDrinksApi(BaseResource):
         """
         Add an assigned drink to the client designated by user_id.
         """
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
         check_drink_existence(request.parsed_obj.drink_id)
 
         request.parsed_obj.user_id = user_id
@@ -1666,7 +1666,7 @@ class ClientDrinksApi(BaseResource):
         """
         Returns the list of drinks assigned to the user designated by user_id.
         """
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         return ClientAssignedDrinks.query.filter_by(user_id=user_id).all()
     
@@ -1676,7 +1676,7 @@ class ClientDrinksApi(BaseResource):
         """
         Delete a drink assignemnt for a user with user_id and drink_id
         """
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         for drink_id in request.parsed_obj['drink_ids']:
             drinks = ClientAssignedDrinks.query.filter_by(user_id=user_id, drink_id=drink_id).all()
@@ -1699,7 +1699,7 @@ class ClientMobileSettingsApi(BaseResource):
         Set a client's mobile settings for the first time
         """
 
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         gen_settings = request.parsed_obj['general_settings']
         gen_settings.user_id = user_id
@@ -1725,7 +1725,7 @@ class ClientMobileSettingsApi(BaseResource):
         Returns the mobile settings that a client has set.
         """
 
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         gen_settings = ClientMobileSettings.query.filter_by(user_id=user_id).one_or_none()
 
@@ -1740,7 +1740,7 @@ class ClientMobileSettingsApi(BaseResource):
         """
         Update a client's mobile settings
         """
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         settings = ClientMobileSettings.query.filter_by(user_id=user_id).one_or_none()
 
@@ -1788,7 +1788,7 @@ class ClientHeightApi(BaseResource):
         """
         Submits a new height for the client.
         """
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         request.parsed_obj.user_id = user_id
         db.session.add(request.parsed_obj)
@@ -1806,7 +1806,7 @@ class ClientHeightApi(BaseResource):
         """
         Returns all heights reported for a client and the dates they were reported.
         """
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         return ClientHeightHistory.query.filter_by(user_id=user_id).all()
 
@@ -1824,7 +1824,7 @@ class ClientWeightApi(BaseResource):
         """
         Submits a new weight for the client.
         """
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         request.parsed_obj.user_id = user_id
         db.session.add(request.parsed_obj)
@@ -1842,7 +1842,7 @@ class ClientWeightApi(BaseResource):
         """
         Returns all weights reported for a client and the dates they were reported.
         """
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         return ClientWeightHistory.query.filter_by(user_id=user_id).all()
 
@@ -1860,7 +1860,7 @@ class ClientWaistSizeApi(BaseResource):
         """
         Submits a new waist size for the client.
         """
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         request.parsed_obj.user_id = user_id
         db.session.add(request.parsed_obj)
@@ -1878,7 +1878,7 @@ class ClientWaistSizeApi(BaseResource):
         """
         Returns all waist sizes reported for a client and the dates they were reported.
         """
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         return ClientWaistSizeHistory.query.filter_by(user_id=user_id).all()
 
@@ -1894,7 +1894,7 @@ class ClientTransactionHistoryApi(BaseResource):
         """
         Returns a list of all transactions for the given user_id.
         """
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         return ClientTransactionHistory.query.filter_by(user_id=user_id).all()
 
@@ -1943,7 +1943,7 @@ class ClientTransactionPutApi(BaseResource):
         """
         Submits a transaction for the client identified by user_id.
         """
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         request.parsed_obj.user_id = user_id
         db.session.add(request.parsed_obj)
@@ -1964,7 +1964,7 @@ class ClientWeightApi(BaseResource):
         Looks up client's age and sex. One or both are not available, we return our best guess: the health
         metrics for a 30 year old female.
         """
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         client_info = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
         user_info, _ = token_auth.current_user()
@@ -2000,7 +2000,7 @@ class ClientRaceAndEthnicityApi(BaseResource):
     @token_auth.login_required()
     @responds(schema=ClientRaceAndEthnicitySchema(many=True), api=ns, status_code=200)
     def get(self, user_id):
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         res = db.session.query(ClientRaceAndEthnicity.is_client_mother, LookupRaces.race_id, LookupRaces.race_name) \
             .join(LookupRaces, LookupRaces.race_id == ClientRaceAndEthnicity.race_id) \
@@ -2013,7 +2013,7 @@ class ClientRaceAndEthnicityApi(BaseResource):
     @responds(schema=ClientRaceAndEthnicitySchema(many=True), api=ns, status_code=201)
     def put(self, user_id):
 
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         if request.parsed_obj['mother']:
             mother = request.parsed_obj['mother']

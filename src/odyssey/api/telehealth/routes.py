@@ -763,10 +763,10 @@ class TelehealthBookingsApi(BaseResource):
             raise BadRequest('You must be a participant in this booking.')
 
         # Check client existence
-        super().check_user(client_user_id, user_type='client')
+        self.check_user(client_user_id, user_type='client')
 
         # Check staff existence
-        super().check_user(staff_user_id, user_type='staff')
+        self.check_user(staff_user_id, user_type='staff')
 
         time_inc = LookupBookingTimeIncrements.query.all()
         start_time_idx_dict = {item.start_time.isoformat() : item.idx for item in time_inc} # {datetime.time: booking_availability_id}

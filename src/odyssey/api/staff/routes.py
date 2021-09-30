@@ -129,7 +129,7 @@ class UpdateRoles(BaseResource):
         """
         Update staff roles
         """
-        super().check_user(user_id, user_type='staff')
+        self.check_user(user_id, user_type='staff')
                             
         user = User.query.filter_by(user_id=user_id).one_or_none()    
         staff_roles = db.session.query(StaffRoles.role).filter(StaffRoles.user_id==user_id).all()
@@ -158,7 +158,7 @@ class UpdateRoles(BaseResource):
         """
         Get staff roles
         """
-        super().check_user(user_id, user_type='staff')
+        self.check_user(user_id, user_type='staff')
 
         return StaffRoles.query.filter_by(user_id=user_id).all()
 
