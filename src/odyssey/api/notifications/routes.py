@@ -78,6 +78,8 @@ class NotificationsUpdateEndpoint(BaseResource):
 @ns.route('/push/register/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class PushRegistrationEndpoint(BaseResource):
+    # Multiple devices per user allowed
+    __check_resource__ = False
 
     @token_auth.login_required
     @responds(schema=PushRegistrationGetSchema(many=True), api=ns, status_code=200)
