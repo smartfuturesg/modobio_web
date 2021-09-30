@@ -29,30 +29,24 @@ from twilio.rest import Client
 from twilio.jwt.access_token import AccessToken
 from twilio.jwt.access_token.grants import ChatGrant, VideoGrant
 from werkzeug.datastructures import FileStorage
+from werkzeug.exceptions import (
+    BadRequest,
+    RequestEntityTooLarge,
+    Unauthorized,
+    UnsupportedMediaType)
 
 from odyssey import db
-from odyssey.api.lookup.models import LookupDrinks
 from odyssey.api.client.models import ClientFacilities
-from odyssey.api.doctor.models import MedicalBloodTests, MedicalBloodTestResultTypes, MedicalConditions, MedicalLookUpSTD
+from odyssey.api.doctor.models import (
+    MedicalBloodTests,
+    MedicalBloodTestResultTypes,
+    MedicalConditions,
+    MedicalLookUpSTD)
 from odyssey.api.facility.models import RegisteredFacilities
+from odyssey.api.lookup.models import LookupDrinks
 from odyssey.api.telehealth.models import TelehealthChatRooms
 from odyssey.api.user.models import User, UserTokenHistory
 from odyssey.utils.constants import ALLOWED_IMAGE_TYPES, ALPHANUMERIC, TWILIO_ACCESS_KEY_TTL
-from odyssey.utils.errors import (
-    ClientNotFound, 
-    FacilityNotFound, 
-    MedicalConditionNotFound, MethodNotAllowed,
-    MissingThirdPartyCredentials,
-    RelationAlreadyExists, 
-    ResultTypeNotFound,
-    TestNotFound, 
-    UnauthorizedUser,
-    UserNotFound, 
-    StaffNotFound,
-    DrinkNotFound,
-    STDNotFound,
-    InputError
-)
 
 _uuid_rx = re.compile(r'[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}', flags=re.IGNORECASE)
 
@@ -70,14 +64,14 @@ def check_client_existence(user_id):
     All clients must be in the CLientInfo table before any other procedure"""
     client = User.query.filter_by(user_id=user_id, is_client=True, deleted=False).one_or_none()
     if not client:
-        raise ClientNotFound(user_id)
+        raise Unauthorized
     return client
 
 def check_staff_existence(user_id):
     """Check that the user is in the database and is a staff member"""
     staff = User.query.filter_by(user_id=user_id, is_staff=True, deleted=False).one_or_none()
     if not staff:
-        raise StaffNotFound(user_id)
+        raise Unauthorized
     return staff
 
 def check_user_existence(user_id, user_type=None):
@@ -93,47 +87,46 @@ def check_user_existence(user_id, user_type=None):
     else:
         user = User.query.filter_by(user_id=user_id, deleted=False).one_or_none()
     if not user:
-        raise UserNotFound(user_id)
+        raise Unauthorized
     return user
 
 def check_blood_test_existence(test_id):
     """Check that the blood test is in the database"""
     test = MedicalBloodTests.query.filter_by(test_id=test_id).one_or_none()
     if not test:
-        raise TestNotFound(test_id)
+        raise BadRequest(f'Blood test {test_id} not found.')
 
 def check_blood_test_result_type_existence(result_name):
     """Check that a supplied blood test result type is in the database"""
     result = MedicalBloodTestResultTypes.query.filter_by(result_name=result_name).one_or_none()
     if not result:
-        raise ResultTypeNotFound(result_name)
+        raise BadRequest(f'Blood test result {result_name} not found.')
 
 def fetch_facility_existence(facility_id):
     facility = RegisteredFacilities.query.filter_by(facility_id=facility_id).one_or_none()
     if not facility:
-        raise FacilityNotFound(facility_id)
-    else:
-        return facility
+        raise BadRequest(f'Facility {facility_id} not found.')
+    return facility
 
 def check_client_facility_relation_existence(user_id, facility_id):
     relation = ClientFacilities.query.filter_by(user_id=user_id,facility_id=facility_id).one_or_none()
     if relation:
-        raise RelationAlreadyExists(user_id, facility_id)
+        raise BadRequest(f'Client already associated with facility {facility_id}.')
 
 def check_medical_condition_existence(medcon_id):
     medcon = MedicalConditions.query.filter_by(medical_condition_id=medcon_id).one_or_none()
     if not medcon:
-        raise MedicalConditionNotFound(medcon_id)
+        raise BadRequest(f'Medical condition {medcon_id} not found.')
 
 def check_drink_existence(drink_id):
     drink = LookupDrinks.query.filter_by(drink_id=drink_id).one_or_none()
     if not drink:
-        raise DrinkNotFound(drink_id)
+        raise BadRequest(f'Drink {drink_id} not found.')
         
 def check_std_existence(std_id):
     std = MedicalLookUpSTD.query.filter_by(std_id=std_id).one_or_none()
     if not std:
-        raise STDNotFound(std_id)
+        raise BadRequest(f'STD {std_id} not found.')
 
 def grab_twilio_credentials():
     """
@@ -145,7 +138,7 @@ def grab_twilio_credentials():
     twilio_api_key_secret = current_app.config['TWILIO_API_KEY_SECRET']
 
     if any(x is None for x in [twilio_account_sid,twilio_api_key_sid,twilio_api_key_secret]):
-        raise MissingThirdPartyCredentials(message="Twilio API credentials have not been configured")
+        raise BadRequest('Twilio API credentials not found.')
 
     return {'account_sid':twilio_account_sid,
             'api_key': twilio_api_key_sid,
@@ -248,7 +241,7 @@ def get_chatroom(staff_user_id, client_user_id, participant_modobio_id, create_n
         db.session.add(new_chat_room)
     else:
         # no chat room exists and a new one will not be created
-        raise MethodNotAllowed(message="no chat room exists. Please create one.")
+        raise BadRequest('Chat room does not exist.')
     # Add participant to chat room using their modobio_id
     try:
         conversation.participants.create(identity=participant_modobio_id)
@@ -416,7 +409,7 @@ def verify_jwt(token, error_message="", refresh=False):
                                         ua_string = request.headers.get('User-Agent')))
             db.session.commit()
             
-        raise UnauthorizedUser(message=error_message)
+        raise Unauthorized(error_message)
 
     return decoded_token
 
@@ -441,7 +434,8 @@ class FileHandling:
         # validate the file is allowed
         file_extension = mimetypes.guess_extension(file.mimetype)
         if file_extension not in allowed_file_types:
-            raise InputError(422, f'{file_extension} is not an allowed file type. Allowed types are {allowed_file_types}')
+            raise UnsupportedMediaType(
+                f'File {file.name} not allowed. Allowed types are {allowed_file_types}.')
 
         return file_extension
 
@@ -450,7 +444,7 @@ class FileHandling:
         file.seek(0, os.SEEK_END)
         file_size = file.tell()
         if file_size > max_file_size:
-            raise InputError(413, 'File too large')
+            raise RequestEntityTooLarge(f'File {file.name} exeeds maximum file size.')
 
     def image_crop_square(self, file: FileStorage) -> FileStorage:
         # validate_file_type(...) is an image
