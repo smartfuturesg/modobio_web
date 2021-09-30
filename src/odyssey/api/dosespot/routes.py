@@ -24,12 +24,14 @@ from odyssey.api.lookup.models import (
 
 from odyssey.api.user.models import User
 from odyssey.utils.auth import token_auth
-
-from odyssey.utils.errors import (
-    InputError,
-)
-from odyssey.utils.dosespot import generate_encrypted_user_id,generate_sso, get_access_token, onboard_practitioner, onboard_patient, onboard_proxy_user
 from odyssey.utils.base.resources import BaseResource
+from odyssey.utils.dosespot import (
+    generate_encrypted_user_id,
+    generate_sso,
+    get_access_token,
+    onboard_patient,
+    onboard_practitioner,
+    onboard_proxy_user)
 
 ns = Namespace('dosespot', description='Operations related to DoseSpot')
 

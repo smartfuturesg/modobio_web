@@ -119,8 +119,9 @@ def test_post_2_ds_practitioner_create(test_client):
         headers=test_client.staff_auth_header,
         data=dumps(payload),
         content_type='application/json')
+
     # This user should already be in the DS system
-    assert response.status_code == 405
+    assert response.status_code == 400
 
 def test_post_1_ds_patient_prescribe(test_client):
     payload = {}
