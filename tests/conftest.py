@@ -350,7 +350,7 @@ def telehealth_booking(test_client, wheel = False):
         number = 123,
         expiration = '05/26',
         is_default = True,
-        user_id = 22
+        user_id = test_client.client_id
     )
 
     test_client.db.session.add(pm)
@@ -376,7 +376,7 @@ def telehealth_booking(test_client, wheel = False):
 
     booking = TelehealthBookings(
         staff_user_id = 30 if wheel else 1,
-        client_user_id = 22,
+        client_user_id = test_client.client_id,
         target_date = target_datetime.date(),
         target_date_utc = target_datetime.date(),
         booking_window_id_start_time = booking_start_idx,

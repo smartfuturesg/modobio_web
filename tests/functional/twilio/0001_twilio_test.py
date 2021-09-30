@@ -8,9 +8,7 @@ from odyssey.tasks.periodic import deploy_appointment_transcript_store_tasks
 from odyssey.tasks.tasks import store_telehealth_transcript
 
 
-IMG_SID='MEcfe48b95ffd08e4823728544753af3d8'
 
-@pytest.mark.skip
 def test_twilio_wrapper(test_client, telehealth_booking):
     """
     Test the twilio wrapper
@@ -73,7 +71,6 @@ def test_twilio_wrapper(test_client, telehealth_booking):
 
     assert True
 
-
 def test_conversation_cache(test_client, telehealth_booking):
     """
     Test the conversation cache task which takes a booking_id and stores the conversation on mongo_db. All media is stored in an s3 bucket.
@@ -115,7 +112,6 @@ def test_conversation_cache(test_client, telehealth_booking):
     assert stored_transcript['transcript'][1]['media'][0]['s3_path'] == f"id00022/telehealth/{booking.idx}/transcript/images/0.jpeg"
     
 
-@pytest.mark.skip
 def test_conversation_cache_scheduler(test_client, telehealth_booking):
     """
     Test the conversation cache task which takes a booking_id and stores the conversation on mongo_db. All media is stored in an s3 bucket.
@@ -155,10 +151,16 @@ def test_conversation_cache_scheduler(test_client, telehealth_booking):
     # test the scheduler 
     bookings = deploy_appointment_transcript_store_tasks(booking.target_date)
 
-@pytest.mark.skip
 def test_telehealth_transcript_get(test_client, telehealth_booking):
     """
+    Testing the API for retrieving telehealth transcripts stored on the modobio end. Only bookings which have 
+    passed the post-booking review period will have transcripts stored. 
 
+    Test:
+    -create new booking
+    -add messages, one of those messages contains media
+    -run the teask to store the transcipt (tested above)
+    -query GET /telehealth/bookings/transcript/{booking.idx}/
     """
     booking = telehealth_booking
 
@@ -183,6 +185,14 @@ def test_telehealth_transcript_get(test_client, telehealth_booking):
         conversation_sid = conversation_sid,
         media_sid = media_sid)
 
+    stored_transcript = store_telehealth_transcript(booking.idx)
 
-    # test the scheduler 
-    bookings = deploy_appointment_transcript_store_tasks(booking.target_date)
+    response = test_client.get(
+        f'/telehealth/bookings/transcript/{booking.idx}/',
+        headers=test_client.client_auth_header
+    )
+
+    assert response.status_code == 200
+    assert len(response.json['transcript'][1]['media']) == 1
+    assert response.json['transcript'][1]['media'][0]['content_type'] == 'image/jpeg'
+    

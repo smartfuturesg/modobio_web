@@ -46,6 +46,7 @@ from odyssey.api.telehealth.schemas import (
     TelehealthBookingDetailsGetSchema, 
     TelehealthStaffSettingsSchema,
     TelehealthBookingsPUTSchema,
+    TelehealthTranscriptsSchema,
     TelehealthUserSchema
 )
 from odyssey.api.system.models import SystemTelehealthSessionCosts
@@ -2048,8 +2049,8 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
     Operations related to stored telehealth transcripts
     """
     @token_auth.login_required()
-    @responds(api=ns, status_code=200)
-    def get(booking_id):
+    @responds(api=ns, schema = TelehealthTranscriptsSchema, status_code=200)
+    def get(self, booking_id):
         """
         Retrieve messages from booking transscripts that have been stored on modobio's end
         """
@@ -2065,7 +2066,17 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
             raise InputError(status_code=405, message='logged in user must be a booking participant')
 
         
-        transcript = mongo.db.telehealth_transcripts.find({"_id": ObjectId(booking.chat_room.transcript_object_id)})
+        transcript = mongo.db.telehealth_transcripts.find_one({"_id": ObjectId(booking.chat_room.transcript_object_id)})
 
+        fh = FileHandling()
+
+        for message_idx, message in enumerate(transcript.get('transcript',[])):
+            if message['media']:
+                for media_idx, media in enumerate(message['media']):
+                    _prefix = media['s3_path']
+                    s3_link = fh.get_presigned_urls(prefix=_prefix)
+
+                    media['media_link'] = [val for val in s3_link.values()][0]
+                    transcript['transcript'][message_idx]['media'][media_idx] = media
         return transcript
 
