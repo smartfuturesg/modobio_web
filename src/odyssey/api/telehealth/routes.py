@@ -6,7 +6,7 @@ import random
 import requests
 import json
 
-from flask import request, current_app, g
+from flask import request, current_app, g, url_for
 from flask_accepts import accepts, responds
 from flask_restx import Resource, Namespace
 from sqlalchemy import select
@@ -677,6 +677,13 @@ class TelehealthBookingsApi(BaseResource):
                 image_paths = {pic.width: pic.image_path for pic in booking.client.client_info.profile_pictures}
                 client['profile_picture'] = (fh.get_presigned_url(image_paths[128]) if image_paths else None)
             
+            # if the associated chat room has an id for the mongo db entry of the transcript, generate a link to retrieve the 
+            # transcript messages
+            if booking.chat_room.transcript_object_id:
+                transcript_url = request.url_root[:-1] + url_for('api.telehealth_telehealth_transcripts', booking_id = booking.idx)
+            else: 
+                transcript_url = None
+
             bookings_payload.append({
                 'booking_id': booking.idx,
                 'target_date_utc': booking.target_date_utc,
@@ -688,7 +695,8 @@ class TelehealthBookingsApi(BaseResource):
                 'payment_method_id': booking.payment_method_id,
                 'status_history': booking.status_history,
                 'client': client,
-                'practitioner': practitioner
+                'practitioner': practitioner,
+                'transcript_url': transcript_url
             })
 
         # Sort bookings by time then sort by date
@@ -2044,7 +2052,7 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
         return 
 
 @ns.route('/bookings/transcript/<int:booking_id>/')
-class TelehealthBookingsRoomAccessTokenApi(Resource):
+class TelehealthTranscripts(Resource):
     """
     Operations related to stored telehealth transcripts
     """

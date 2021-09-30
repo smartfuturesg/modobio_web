@@ -91,6 +91,7 @@ class TelehealthBookingsSchema(ma.SQLAlchemyAutoSchema):
     client_location_id = fields.Integer(required=False)
     start_time_utc = fields.Time()
     booking_url = fields.String()
+    transcript_url = fields.String()
 
     @post_load
     def make_object(self, data, **kwargs):
