@@ -410,6 +410,9 @@ def telehealth_booking(test_client, wheel = False):
     if chat_room.transcript_object_id:
         test_client.mongo.db.telehealth_transcripts.find_one_and_delete({"_id": ObjectId(chat_room.transcript_object_id)})
 
+    for status in booking.status_history:
+        test_client.db.session.delete(status)
+        
     test_client.db.session.delete(chat_room)
     test_client.db.session.delete(booking)
     test_client.db.session.flush()
