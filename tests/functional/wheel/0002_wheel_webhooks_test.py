@@ -65,7 +65,7 @@ def test_wheel_webhooks(test_client, wheel_telehealth_booking):
     
     assert booking.status == 'Canceled'
     assert booking_stauts_latest.status == 'Canceled'
-    assert latest_notification.notification_type_id == 2
+    assert latest_notification.notification_type_id == 3
 
     ###
     # Event: 'assignment.accepted',  
@@ -103,7 +103,7 @@ def test_wheel_webhooks(test_client, wheel_telehealth_booking):
 
     assert booking.status == 'Completed'
     assert booking_stauts_latest.status == 'Completed'
-    assert latest_notification.notification_type_id == 2
+    assert latest_notification.notification_type_id == 3
 
 
     ###

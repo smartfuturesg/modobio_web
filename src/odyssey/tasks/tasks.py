@@ -54,14 +54,14 @@ def upcoming_appointment_notification_2hr(booking_id):
         select(Notifications).
         where(Notifications.user_id == staff_user.user_id, 
               Notifications.expires == expires_at, 
-              Notifications.notification_type_id == 2)
+              Notifications.notification_type_id == 3)
         ).scalars().one_or_none()
     
     existing_client_notification = db.session.execute(
         select(Notifications).
         where(Notifications.user_id == client_user.user_id, 
               Notifications.expires == expires_at, 
-              Notifications.notification_type_id == 2)
+              Notifications.notification_type_id == 3)
         ).scalars().one_or_none()
     
     # create the staff and client notification entries
@@ -71,7 +71,7 @@ def upcoming_appointment_notification_2hr(booking_id):
             title="You have a telehealth appointment in 2 hours",
             content=f"Your telehealth appointment with {client_user.firstname+' '+client_user.lastname} is in 2 hours. Please review your client's medical information before taking the call.",
             expires = expires_at,
-            notification_type_id = 2 #Scheduling
+            notification_type_id = 3 #Scheduling
         )
         db.session.add(staff_notification)
     
@@ -81,7 +81,7 @@ def upcoming_appointment_notification_2hr(booking_id):
             title="You have a telehealth appointment in 2 hours",
             content=f"Your telehealth appointment with {staff_user.firstname+' '+staff_user.lastname} is in 2 hours. Please ensure your medical information is up to date before taking the call.",
             expires = expires_at,
-            notification_type_id = 2 #Scheduling
+            notification_type_id = 3 #Scheduling
         )
         db.session.add(client_notification)
 
@@ -238,7 +238,7 @@ def process_wheel_webhooks(webhook_payload: Dict[str, Any]):
             title="Your telehealth appointment has been canceled",
             content=f"Your telehealth appointment with {staff_user.firstname+' '+staff_user.lastname} has been canceled. Please reschedule.",
             expires = expires_at,
-            notification_type_id = 2 #Scheduling
+            notification_type_id = 3 #Scheduling
         )
 
         db.session.add(client_notification)
@@ -288,7 +288,7 @@ def process_wheel_webhooks(webhook_payload: Dict[str, Any]):
             title="Your telehealth appointment has been completed",
             content=f"Your telehealth appointment with {staff_user.firstname+' '+staff_user.lastname} has been completed.",
             expires = expires_at,
-            notification_type_id = 2 #Scheduling
+            notification_type_id = 3 #Scheduling
         )
         db.session.add(client_notification)
 
