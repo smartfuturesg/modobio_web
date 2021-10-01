@@ -108,8 +108,8 @@ def create_app():
                     if 'UndefinedTable' not in str(err):
                         raise err
     # mongo db
-    if app.config['MONGO_URI']:
-        mongo.init_app(app)
+    mongo.init_app(app)
+    # if app.config['MONGO_URI']:
 
     return app
 
