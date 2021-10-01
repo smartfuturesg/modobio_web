@@ -309,5 +309,10 @@ celery.conf.beat_schedule = {
     'cleanup_temporary_care_team': {
         'task': 'odyssey.tasks.periodic.cleanup_temporary_care_team',
         'schedule': crontab(hour=1, minute=0)
+    },
+    # search for telehealth transcripts that need to be stored, deploy those storage tasks
+    'appointment_transcript_store_scheduler': {
+        'task': 'odyssey.tasks.periodic.deploy_appointment_transcript_store_tasks',
+        'schedule': crontab(hour=0, minute=10)
     }
 }
