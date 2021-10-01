@@ -1,4 +1,8 @@
+import requests
+import json
+
 from datetime import datetime, date, timedelta, timezone
+from flask import current_app
 
 from celery.schedules import crontab
 from celery.signals import worker_ready   
@@ -13,7 +17,7 @@ from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations, ClientDataStorage, ClientClinicalCareTeam
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.notifications.schemas import NotificationSchema
-from odyssey.api.payment.models import PaymentMethods
+from odyssey.api.payment.models import PaymentMethods, PaymentHistory
 from odyssey.api.system.models import SystemTelehealthSessionCosts
 from odyssey.api.user.models import User
 from odyssey.utils.constants import INSTAMED_OUTLET
@@ -250,21 +254,19 @@ def charge_user_telehealth():
     payment method saved to the booking. Unsuccessful charges will be retried up to 6 times in the
     below task.
     """
-    
     #get all bookings that are sheduled <24 hours away and have not been charged yet
     target_time = datetime.now(timezone.utc) + timedelta(hours=24)
     target_time_window = LookupBookingTimeIncrements.query                    \
         .filter(LookupBookingTimeIncrements.start_time <= target_time.time(), \
-        LookupBookingTimeIncrements.end_time >= target_time.time()).one_or_none()
-
+        LookupBookingTimeIncrements.end_time >= target_time.time()).one_or_none().idx
     bookings = TelehealthBookings.query.filter(TelehealthBookings.charged == False) \
         .filter(or_(
-            and_(TelehealthBookings.booking_window_id_start_time_utc <= target_time_window, TelehealthBookings.target_date_utc == datetime.today()),
-            and_(TelehealthBookings.booking_window_id_start_time_utc >= target_time_window, TelehealthBookings.target_date_utc == target_time.date())
+            and_(TelehealthBookings.booking_window_id_start_time_utc >= target_time_window, TelehealthBookings.target_date_utc == datetime.today().date()),
+            and_(TelehealthBookings.booking_window_id_start_time_utc <= target_time_window, TelehealthBookings.target_date_utc == target_time.date())
         )).all()
     
     for booking in bookings:
-        payment = PaymentMethods.query.filter_by(idx=booking.payment_method_id)
+        payment = PaymentMethods.query.filter_by(idx=booking.payment_method_id).one_or_none()
         session_cost = SystemTelehealthSessionCosts.query.filter_by(profession_type='medical_doctor').one_or_none().session_cost
 
         request_data = {
