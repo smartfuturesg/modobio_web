@@ -12,7 +12,7 @@ from odyssey.api.telehealth.models import TelehealthBookingStatus
 from odyssey.integrations.wheel import Wheel
 from odyssey.tasks.tasks import process_wheel_webhooks
 
-# @pytest.mark.skip
+@pytest.mark.skip
 def test_wheel_webhooks(test_client, wheel_telehealth_booking):
     """
     Webhooks sent from wheel all have the same format:
