@@ -67,7 +67,7 @@ from odyssey.api.telehealth.schemas import (
 from odyssey.api.user.models import User
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
-from odyssey.integrations.wheel import Wheel
+# from odyssey.integrations.wheel import Wheel
 from odyssey.utils.constants import (
     TELEHEALTH_BOOKING_LEAD_TIME_HRS,
     TWILIO_ACCESS_KEY_TTL,
@@ -190,13 +190,15 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
                     'transaction_id': response_data['TransactionID']
                 })
                 db.session.add(failed)
+            
+            ##### WHEEL #####    
             ##
             # If the booking is with a wheel practitioner
             # send a consult start request to wheel
             ##
-            if booking.external_booking_id:
-                wheel = Wheel()
-                wheel.start_consult(booking.external_booking_id)
+            # if booking.external_booking_id and False:
+            #     wheel = Wheel()
+            #     wheel.start_consult(booking.external_booking_id)
 
         elif g.user_type == 'client':
             meeting_room.client_access_token = token
@@ -293,7 +295,8 @@ class TelehealthClientTimeSelectApi(BaseResource):
         ##
         #  Wheel availability request
         ##
-        wheel = Wheel()
+        # wheel = Wheel() 
+        #########################
 
         duration = client_in_queue.duration
         days_from_target = 0
@@ -331,22 +334,27 @@ class TelehealthClientTimeSelectApi(BaseResource):
             target_start_weekday_utc = DAY_OF_WEEK[target_start_datetime_utc.weekday()]
             target_end_weekday_utc = DAY_OF_WEEK[target_end_datetime_utc.weekday()]
 
-            # Query wheel for available practitioners on target date in client's tzone
-            # TODO: when wheel is ready, add sex to this availability check
-
-            wheel_practitioner_availabilities = wheel.openings(
-                target_time_range = (target_start_datetime_utc, target_end_datetime_utc),
-                location_id=client_in_queue.location_id)
+            ######### WHEEL ###########
+            # # Query wheel for available practitioners on target date in client's tzone
+            # # TODO: when wheel is ready, add sex to this availability check
+            
+            # wheel_practitioner_availabilities = wheel.openings(
+            #     target_time_range = (target_start_datetime_utc, target_end_datetime_utc), 
+            #     location_id=client_in_queue.location_id)
 
             # allow wheel request during testing but, do not add clinician availabilities to response.
             # We only have one wheel sandbox which can get very messy if we include booking wheel test clinicians
-            # as part of our test routines.
-            if current_app.config['TESTING']:
-                available = {}
-                staff_availability_timezone = {}
-            else:
-                available = wheel_practitioner_availabilities  # availability dictionary {date: {user_id : [booking time idxs]}
-                staff_availability_timezone =  {_user_id: 'UTC' for _user_id in wheel_practitioner_availabilities} # current tz info for each staff we bring up for this target date
+            # as part of our test routines.  
+            # if current_app.config['TESTING']:
+            #     available = {}
+            #     staff_availability_timezone = {}
+            # else:    
+            #     available = wheel_practitioner_availabilities  # availability dictionary {date: {user_id : [booking time idxs]}
+            #     staff_availability_timezone =  {_user_id: 'UTC' for _user_id in wheel_practitioner_availabilities} # current tz info for each staff we bring up for this target date
+            ######### WHEEL ###########
+
+            available = {}
+            staff_availability_timezone = {}
 
             # gender preference for availability query below
             if client_in_queue.medical_gender == 'm':
@@ -826,9 +834,11 @@ class TelehealthBookingsApi(BaseResource):
         # ensure staff still has the same availability
         # if staff is a wheel clinician, query wheel for their current availability
         ##
-        wheel = Wheel()
-        wheel_clinician_ids = wheel.clinician_ids(key='user_id')
-        if staff_user_id in wheel_clinician_ids:
+        ########### WHEEL #########
+        # wheel = Wheel()
+        # wheel_clinician_ids = wheel.clinician_ids(key='user_id') 
+
+        if False: #staff_user_id in wheel_clinician_ids:
             staff_availability = wheel.openings(
                 target_time_range = (target_start_datetime_utc-timedelta(minutes=5), target_end_datetime_utc+timedelta(minutes=5)),
                 location_id = client_in_queue.location_id,
@@ -900,9 +910,10 @@ class TelehealthBookingsApi(BaseResource):
 
         # if the staff memebr is a wheel clinician, make booking request to wheel API
         booking_url = None
-        if staff_user_id in wheel_clinician_ids:
-            external_booking_id, booking_url = wheel.make_booking_request(staff_user_id, client_user_id, client_in_queue.location_id, request.parsed_obj.idx, target_start_datetime_utc)
-            request.parsed_obj.external_booking_id = external_booking_id
+        ######### WHEEL ##########
+        # if staff_user_id in wheel_clinician_ids:
+        #     external_booking_id, booking_url = wheel.make_booking_request(staff_user_id, client_user_id, client_in_queue.location_id, request.parsed_obj.idx, target_start_datetime_utc)
+        #     request.parsed_obj.external_booking_id = external_booking_id
 
         # create TelehealthBookingStatus object
         status_history = TelehealthBookingStatus(
@@ -1027,16 +1038,17 @@ class TelehealthBookingsApi(BaseResource):
             # only practitioner can change status from pending to accepted
             # both client and practitioner can change status to canceled and completed
             if new_status == 'In Progress':
-                raise BadRequest('This status can only be updated at the start fo a call.')
+                raise BadRequest('This status can only be updated at the start of a call.')
 
             elif (new_status in ('Pending', 'Accepted') and
                   current_user.user_id != booking.staff_user_id):
                 raise Unauthorized('Only practitioner can update this status.')
-
-            if new_status == 'Cancelled' and booking.external_booking_id:
-                # cancel appointment on wheel system if the staff memebr is a wheel practitioner
-                wheel = Wheel()
-                wheel.cancel_booking(booking.external_booking_id)
+            
+            ##### WHEEL #####    
+            # if new_status == 'Cancelled' and booking.external_booking_id:
+            #     # cancel appointment on wheel system if the staff memebr is a wheel practitioner
+            #     wheel = Wheel()
+            #     wheel.cancel_booking(booking.external_booking_id)
 
             # Create TelehealthBookingStatus object if the request is updating the status
             status_history = TelehealthBookingStatus(
@@ -1483,11 +1495,12 @@ class TelehealthSettingsStaffAvailabilityApi(BaseResource):
         # grab the static list of booking window id's
         booking_increments = LookupBookingTimeIncrements.query.all()
 
+        ######### WHEEL #########
         # prevent wheel clinicians from submitting telehealth availability
-        wheel = Wheel()
-        wheel_clinician_ids = wheel.clinician_ids(key='user_id')
-        if user_id in wheel_clinician_ids and request.parsed_obj['availability']:
-            raise BadRequest('You can only edit your telehealth settings, not availability.')
+        # wheel = Wheel()
+        # wheel_clinician_ids = wheel.clinician_ids(key='user_id')
+        # if user_id in wheel_clinician_ids and request.parsed_obj['availability']:
+        #     raise BadRequest('You can only edit your telehealth settings, not availability.')
 
         # Get the staff's availability
         availability = TelehealthStaffAvailability.query.filter_by(user_id=user_id).all()
@@ -2058,10 +2071,10 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
         if not current_user.user_id == booking.staff_user_id:
             raise Unauthorized('You must be a participant in this booking.')
 
-        if booking.external_booking_id:
-            wheel = Wheel()
-            wheel.complete_consult(booking.external_booking_id)
-
+        ##### WHEEL #####        
+        # if booking.external_booking_id:
+        #     wheel = Wheel()
+        #     wheel.complete_consult(booking.external_booking_id)
 
         booking.status = 'Completed'
 

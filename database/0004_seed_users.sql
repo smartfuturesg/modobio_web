@@ -20,11 +20,11 @@ INSERT INTO "User" ("user_id", "email", "firstname", "lastname", "is_staff", "is
 (19, 'matej.kubinec@sde.cz', 'Matej', 'Kubinec', true, false, true, 'JAF04LYTZN12', false, true, true, '1990-06-19'),
 (20, 'sebastian.brostl@sde.cz', 'Sebastian', 'Brostl', true, false, true, 'VLCZG2Z2ZL12', false, true, true, '1990-06-20'),
 (21, 'lukas.krajci@sde.cz', 'Lukas', 'Krajci', true, false, true, 'VS071YRSQ912', false, true, true, '1990-06-21'),
-(22, 'client@modobio.com', 'Test', 'Client', false, true, false, 'TC12JASDFF12', false, true, false, '1990-06-22'),
-(30, 'wheelclinicianmd1@modobio.com', 'Modo Bio', 'MD1', true, false, false, 'MD52MAVDIF41', false, true, false, '1990-06-23'),
-(31, 'wheelclinicianmd2@modobio.com', 'Modo Bio', 'MD2', true, false, false, 'MD43LBUEHG32', false, true, true, '1990-06-24'),
-(32, 'wheelcliniciannp1@modobio.com', 'Modo Bio', 'NP1', true, false, false, 'NP34KCTFGH23', false, true, false, '1990-06-25'),
-(33, 'wheelcliniciannp2@modobio.com', 'Modo Bio', 'NP2', true, false, false, 'NP25JDSGFI14', false, true, true, '1990-06-26');
+(22, 'client@modobio.com', 'Test', 'Client', false, true, false, 'TC12JASDFF12', false, true, false, '1990-06-22');
+-- (30, 'wheelclinicianmd1@modobio.com', 'Modo Bio', 'MD1', true, false, false, 'MD52MAVDIF41', false, true, false, '1990-06-23'),
+-- (31, 'wheelclinicianmd2@modobio.com', 'Modo Bio', 'MD2', true, false, false, 'MD43LBUEHG32', false, true, true, '1990-06-24'),
+-- (32, 'wheelcliniciannp1@modobio.com', 'Modo Bio', 'NP1', true, false, false, 'NP34KCTFGH23', false, true, false, '1990-06-25'),
+-- (33, 'wheelcliniciannp2@modobio.com', 'Modo Bio', 'NP2', true, false, false, 'NP25JDSGFI14', false, true, true, '1990-06-26');
 
 ALTER SEQUENCE "User_user_id_seq"
 		RESTART WITH 34;
@@ -52,11 +52,11 @@ INSERT INTO "UserLogin" ("user_id", "password") VALUES
 (19, 'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1'), 
 (20, 'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1'), 
 (21, 'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1'),
-(22, 'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1'),
-(30, 'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1'), 
-(31, 'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1'), 
-(32, 'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1'),
-(33, 'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1');
+(22, 'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1');
+-- (30, 'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1'), 
+-- (31, 'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1'), 
+-- (32, 'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1'),
+-- (33, 'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1');
 
 INSERT INTO "ClientInfo" ("user_id", "membersince","territory_id","zipcode") VALUES
 (22, '2021-01-01',1,85255);
@@ -85,11 +85,11 @@ INSERT INTO "StaffProfile" ("user_id", "membersince") VALUES
 (18, '2021-01-01'),
 (19, '2021-01-01'),
 (20, '2021-01-01'),
-(21, '2021-01-01'),
-(30, '2021-01-01'),
-(31, '2021-01-01'),
-(32, '2021-01-01'),
-(33, '2021-01-01');
+(21, '2021-01-01');
+-- (30, '2021-01-01'),
+-- (31, '2021-01-01'),
+-- (32, '2021-01-01'),
+-- (33, '2021-01-01');
 
 INSERT INTO "StaffRoles" ("user_id", "role", "granter_id") VALUES 
 (1, 'system_admin', 14), 
@@ -166,15 +166,15 @@ INSERT INTO "StaffRoles" ("user_id", "role", "granter_id") VALUES
 (21, 'client_services', 14), 
 (21, 'medical_doctor', 14), 
 (21, 'physical_therapist', 14), 
-(21, 'nutritionist', 14), 
-(30, 'medical_doctor', 14),
-(31, 'medical_doctor', 14), 
-(32, 'nurse_practitioner', 14), 
-(33, 'nurse_practitioner', 14); 
+(21, 'nutritionist', 14); 
+-- (30, 'medical_doctor', 14),
+-- (31, 'medical_doctor', 14), 
+-- (32, 'nurse_practitioner', 14), 
+-- (33, 'nurse_practitioner', 14); 
 
 
-insert into "TelehealthStaffSettings" ("user_id", "auto_confirm", "timezone") Values
-(30, true, 'UTC'),
-(31, true, 'UTC'),
-(32, true, 'UTC'),
-(33, true, 'UTC');
+-- insert into "TelehealthStaffSettings" ("user_id", "auto_confirm", "timezone") Values
+-- (30, true, 'UTC'),
+-- (31, true, 'UTC'),
+-- (32, true, 'UTC'),
+-- (33, true, 'UTC');
