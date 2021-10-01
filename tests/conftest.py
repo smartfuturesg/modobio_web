@@ -154,6 +154,8 @@ def test_client():
             # into the test_client instance as parameters.
             tc.db = db
 
+            tc.mongo = mongo
+
             tc.client = client
             tc.client_id = client.user_id
             tc.client_pass = '123'
@@ -335,7 +337,7 @@ def care_team(test_client):
 @pytest.fixture(scope='function')
 def telehealth_booking(test_client, wheel = False):
     """ 
-    Create a new telehealth booking between one of the wheel test users and client user 22
+    Create a new telehealth booking between one of the test users and client user 22
 
     Yields
     ------
@@ -406,7 +408,7 @@ def telehealth_booking(test_client, wheel = False):
     
     # remove transcript from mongo db
     if chat_room.transcript_object_id:
-        mongo.db.telehealth_transcripts.find_one_and_delete({"_id": ObjectId(chat_room.transcript_object_id)})
+        test_client.mongo.db.telehealth_transcripts.find_one_and_delete({"_id": ObjectId(chat_room.transcript_object_id)})
 
     test_client.db.session.delete(chat_room)
     test_client.db.session.delete(booking)

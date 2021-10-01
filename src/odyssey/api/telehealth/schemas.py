@@ -223,7 +223,7 @@ class TelehealthTranscriptsMessage(Schema):
     index = fields.Integer()
     body = fields.String()
     author = fields.String()
-    attributed = fields.String()
+    attributes = fields.String()
     date_created = fields.DateTime()
     date_updated = fields.DateTime()
 
