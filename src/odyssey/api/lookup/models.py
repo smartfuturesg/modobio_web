@@ -1127,6 +1127,9 @@ class LookupOrganizations(BaseModelWithIdx):
 class LookupCurrencies(BaseModelWithIdx):
     """
     Lookup table for accepted currency types.
+
+    9/30/2021 - Added the notion of minimum and maximum rate
+                the practitioner will charge their client
     """
 
     country = db.Column(db.String, nullable=False)
@@ -1142,3 +1145,24 @@ class LookupCurrencies(BaseModelWithIdx):
 
     :type: string
     """
+
+    min_rate = db.Column(db.Integer)
+    """
+    Minimum HOURLY rate the practitioner can charge
+    
+    :type: int
+    """
+
+    max_rate = db.Column(db.Integer)
+    """
+    Maximum HOURLY rate the practitioner can charge
+    
+    :type: int
+    """
+    
+    increment = db.Column(db.Integer)
+    """
+    Increment from min_rate up to max_rate
+
+    :type: int
+    """    

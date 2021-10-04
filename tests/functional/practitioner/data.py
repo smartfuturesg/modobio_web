@@ -12,3 +12,9 @@ pracitioner_affiliation_data = {
         'affiliate_user_id': '123'
     }
 }
+
+pracitioner_consultation_rate_data = {
+    'items': [
+        {'role': 'medical_doctor','rate': 65}
+        ]
+}
