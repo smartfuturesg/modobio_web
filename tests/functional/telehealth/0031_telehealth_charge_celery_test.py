@@ -10,7 +10,7 @@ from odyssey.api.payment.models import PaymentMethods, PaymentHistory
 
 from .client_select_data import payment_refund_data
 
-from odyssey.tasks.periodic import charge_user_telehealth
+from odyssey.tasks.periodic import find_chargable_bookings
 
 """
 This test intends to test the full payment system. In order to accomplish this, we must:
@@ -55,7 +55,7 @@ def test_bookings_payment(test_client):
     db.session.add(booking)
     db.session.commit()
 
-    charge_user_telehealth()
+    find_chargable_bookings()
 
     #retrieve the latest booking between these 2 users, which is the one we inserted above
     updated_booking = TelehealthBookings.query.filter_by(idx=booking.idx).one_or_none()
