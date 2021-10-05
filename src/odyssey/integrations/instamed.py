@@ -102,7 +102,7 @@ class Instamed:
 
         return response.json()
 
-    def charge_user(self, transaction_id, amount):
+    def charge_user(self, payment_id, amount, booking):
         """
         Charge a user.
         InstaMed URI: /payment/sale
@@ -110,22 +110,24 @@ class Instamed:
 
         Params
         ------
-        transaction_id: (string)
-            InstaMed ID for the transaction to be refunded
+        payment_id: (string)
+            ID of the payment method to be charged
         
         amount: (string)
             amount of money to be charged
+
+        booking: (TelehealthBookings object)
+            the booking for which this payment is associated with
         
         Returns
         -------
         dict of information regarding the sale
         """
-        breakpoint()
         request_data = {
             "Outlet": self.outlet,
             "PaymentMethod": "OnFile",
-            "PaymentMethodID": str(payment.payment_id),
-            "Amount": str(session_cost)
+            "PaymentMethodID": str(payment_id),
+            "Amount": str(amount)
         }
 
         response = requests.post(self.url_base + '/payment/sale',
@@ -148,7 +150,7 @@ class Instamed:
         if response_data['TransactionStatus'] == 'C':
             if response_data['IsPartiallyApproved']:
                 #refund partial amount and log as an unsuccessful payment
-                self.refund_payment(payment.payment_id, response_data['PartialApprovalAmount'])
+                self.refund_payment(transaction_id, response_data['PartialApprovalAmount'])
 
                 #TODO: log if refund was unsuccessful
 
@@ -160,7 +162,7 @@ class Instamed:
                     'user_id': booking.client_user_id,
                     'payment_method_id': booking.payment_method_id,
                     'transaction_id': response_data['TransactionID'],
-                    'transaction_amount': session_cost,
+                    'transaction_amount': amount
                 })
                 db.session.add(history)
                 booking.charged = True

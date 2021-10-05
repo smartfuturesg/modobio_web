@@ -14,6 +14,7 @@ from odyssey.api.practitioner.models import PractitionerOrganizationAffiliation
 from odyssey.api.system.models import SystemTelehealthSessionCosts
 from odyssey.api.telehealth.models import TelehealthBookingStatus, TelehealthBookings
 from odyssey.api.user.models import User
+from odyssey.integrations.instamed import Instamed
 
 @celery.task()
 def upcoming_appointment_notification_2hr(booking_id):
@@ -322,4 +323,4 @@ def charge_telehealth_appointment(booking_id):
     payment = PaymentMethods.query.filter_by(idx=booking.payment_method_id).one_or_none()
     session_cost = SystemTelehealthSessionCosts.query.filter_by(profession_type='medical_doctor').one_or_none().session_cost
 
-    Instamed().charge_user(payment.payment_id, session_cost)
+    Instamed().charge_user(payment.payment_id, session_cost, booking)
