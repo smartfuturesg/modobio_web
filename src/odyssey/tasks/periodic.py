@@ -1,4 +1,8 @@
+import requests
+import json
+
 from datetime import datetime, date, timedelta, timezone
+from flask import current_app
 
 from celery.schedules import crontab
 from celery.signals import worker_ready   
@@ -8,15 +12,14 @@ from sqlalchemy import and_, or_, select
 
 from odyssey import celery, db, mongo
 from odyssey.tasks.base import BaseTaskWithRetry
-from odyssey.tasks.tasks import process_wheel_webhooks, upcoming_appointment_care_team_permissions, upcoming_appointment_notification_2hr
+from odyssey.tasks.tasks import process_wheel_webhooks, upcoming_appointment_care_team_permissions, upcoming_appointment_notification_2hr, charge_telehealth_appointment
 from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations, ClientDataStorage, ClientClinicalCareTeam
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.notifications.schemas import NotificationSchema
-from odyssey.api.payment.models import PaymentMethods
 from odyssey.api.system.models import SystemTelehealthSessionCosts
 from odyssey.api.user.models import User
-from odyssey.utils.constants import INSTAMED_OUTLET
+from odyssey.utils.misc import cancel_telehealth_appointment
 
 from odyssey.config import Config
 
@@ -227,112 +230,27 @@ def deploy_webhook_tasks(**kwargs):
 def startup_tasks(**kwargs):
     deploy_webhook_tasks.delay()
 
-def cancel_telehealth_appointment(booking):
-    """
-    Used by the charge task to cancel an appointment in the event a payment is unsuccessful
-    """
-
-    #update booking status to cancelled
-    status = TelehealthBookingStatus.query.filter_by(booking_id=booking.idx).one_or_none()
-    status.status = 'Canceled'
-
-    #TODO: Create notification/send email(?) to user that their appointment was cancelled due
-    #to a failed payment
-    booking.charged = True
-    db.session.commit()
-
-
 @celery.task()
-def charge_user_telehealth():
+def find_chargable_bookings():
     """
     This task will scan the TelehealthBookings table for appointments that are not yet paid and
     are less than 24 hours away. It will then charge the user for the appointment using the 
-    payment method saved to the booking. Unsuccessful charges will be retried up to 6 times in the
-    below task.
+    payment method saved to the booking.
     """
-    
     #get all bookings that are sheduled <24 hours away and have not been charged yet
     target_time = datetime.now(timezone.utc) + timedelta(hours=24)
     target_time_window = LookupBookingTimeIncrements.query                    \
         .filter(LookupBookingTimeIncrements.start_time <= target_time.time(), \
-        LookupBookingTimeIncrements.end_time >= target_time.time()).one_or_none()
-
+        LookupBookingTimeIncrements.end_time >= target_time.time()).one_or_none().idx
     bookings = TelehealthBookings.query.filter(TelehealthBookings.charged == False) \
         .filter(or_(
-            and_(TelehealthBookings.booking_window_id_start_time_utc <= target_time_window, TelehealthBookings.target_date_utc == datetime.today()),
-            and_(TelehealthBookings.booking_window_id_start_time_utc >= target_time_window, TelehealthBookings.target_date_utc == target_time.date())
+            and_(TelehealthBookings.booking_window_id_start_time_utc >= target_time_window, TelehealthBookings.target_date_utc == datetime.today().date()),
+            and_(TelehealthBookings.booking_window_id_start_time_utc <= target_time_window, TelehealthBookings.target_date_utc == target_time.date())
         )).all()
     
     for booking in bookings:
-        payment = PaymentMethods.query.filter_by(idx=booking.payment_method_id)
-        session_cost = SystemTelehealthSessionCosts.query.filter_by(profession_type='medical_doctor').one_or_none().session_cost
+        charge_telehealth_appointment.apply_async((booking.idx,), eta=datetime.now())
 
-        request_data = {
-            "Outlet": INSTAMED_OUTLET,
-            "PaymentMethod": "OnFile",
-            "PaymentMethodID": str(payment.payment_id),
-            "Amount": str(session_cost)
-        }
-
-        request_header = {'Api-Key': current_app.config['INSTAMED_API_KEY'],
-                                'Api-Secret': current_app.config['INSTAMED_API_SECRET'],
-                                'Content-Type': 'application/json'}
-
-        response = requests.post('https://connect.instamed.com/rest/payment/sale',
-                        headers=request_header,
-                        json=request_data)
-
-        #check if instamed api raised an error
-        try:
-            response.raise_for_status()
-        except:
-            #transaction was not successful, store in PaymentFailedTransactions
-            cancel_telehealth_appointment(booking)
-            return
-
-        #convert response data to json (python dict)
-        response_data = json.loads(response.text)
-
-        #check if card was declined or partially approved
-        #(this is not an error as checked above since 200 is returned from InstaMed)
-        if response_data['TransactionStatus'] == 'C':
-            if response_data['IsPartiallyApproved']:
-                #refund partial amount and log as an unsuccessful payment
-                request_data = {
-                    "Outlet": INSTAMED_OUTLET,
-                    "PaymentMethod": "OnFile",
-                    "PaymentMethodID": str(payment.payment_id),
-                    "Amount": str(response_data['PartialApprovalAmount'])
-                }
-
-                request_header = {'Api-Key': current_app.config['INSTAMED_API_KEY'],
-                        'Api-Secret': current_app.config['INSTAMED_API_SECRET'],
-                        'Content-Type': 'application/json'}
-
-                response = requests.post('https://connect.instamed.com/rest/payment/refund',
-                                headers=request_header,
-                                json=request_data)
-
-                #TODO: log if refund was unsuccessful
-
-                cancel_telehealth_appointment(booking)
-                return
-
-            else:
-                #transaction was successful, store in PaymentHistory
-                history = PaymentHistory(**{
-                    'user_id': booking.client_user_id,
-                    'payment_method_id': booking.payment_method_id,
-                    'transaction_id': response_data['TransactionID'],
-                    'transaction_amount': session_cost,
-                })
-                db.session.add(history)
-                booking.charged = True
-        else:
-            #transaction was declined
-            cancel_telehealth_appointment(booking)
-
-    db.session.commit()
 
 celery.conf.beat_schedule = {
     # refresh the client data storage table every day at midnight
@@ -371,8 +289,8 @@ celery.conf.beat_schedule = {
         'schedule': crontab(hour=1, minute=0)
     },
     #telehealth appointment charging
-    'charge_user_telehealth': {
-        'task': 'odyssey.tasks.periodic.charge_user_telehealth',
+    'find_chargable_bookings': {
+        'task': 'odyssey.tasks.periodic.find_chargable_bookings',
         'schedule': crontab(hour=0, minute=5)
     }
 }

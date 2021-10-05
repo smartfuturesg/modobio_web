@@ -522,3 +522,25 @@ class FileHandling:
 
     def delete_from_s3(self, prefix):
         self.s3_bucket.objects.filter(Prefix=self.s3_prefix + prefix).delete()
+
+def cancel_telehealth_appointment(booking):
+    """
+    Used to cancel an appointment in the event a payment is unsuccessful
+    """
+
+    #update booking status to cancelled and updated charged flag so task won't try to charge again
+    booking.status = 'Canceled'
+    booking.charged = True
+
+    #add new status to status history table
+    db.session.add(TelehealthBookingStatus(
+            booking_id=booking.idx,
+            reporter_id=None,
+            reporter_role='System',
+            status='Canceled'
+        )) 
+
+    #TODO: Create notification/send email(?) to user that their appointment was cancelled due
+    #to a failed payment
+
+    db.session.commit()
