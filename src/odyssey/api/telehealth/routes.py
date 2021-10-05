@@ -136,7 +136,8 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
             session_cost = SystemTelehealthSessionCosts.query.filter_by(profession_type='medical_doctor').one_or_none().session_cost
 
             # TODO: Amount will be updated to grabbing the practitioner's set 
-            #       consultation rate
+            #       consultation rate AT booking
+            # vvvvvvv this is wrong, we must use the agreed upon stored rate, but this is the idea
             consult_rate = curr_role = StaffRoles.query.filter_by(user_id=current_user.user_id,role='medical_doctor').one_or_none().consult_rate
 
             request_data = {
@@ -153,7 +154,7 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
             response = requests.post('https://connect.instamed.com/rest/payment/sale',
                             headers=request_headers,
                             json=request_data)
-
+            breakpoint()
             #check if instamed api raised an error
             try:
                 response.raise_for_status()
