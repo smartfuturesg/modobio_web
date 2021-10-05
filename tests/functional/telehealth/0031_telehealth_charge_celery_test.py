@@ -1,3 +1,4 @@
+import pytest
 from datetime import datetime, time, timezone, timedelta
 from random import choice
 
@@ -22,7 +23,8 @@ Check that the payment was triggered through the payment history table
 Refund the payment
 Check that the refund was successful
 """
-
+@pytest.mark.usefixtures('celery_session_app')
+@pytest.mark.usefixtures('celery_session_worker')
 def test_bookings_payment(test_client):
     #force a booking in less than 24 hours into bookings table
     payment_method_id = PaymentMethods.query.filter_by(user_id=test_client.client_id).first().idx
