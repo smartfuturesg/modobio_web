@@ -32,6 +32,10 @@ def test_bookings_payment(test_client):
         .filter(LookupBookingTimeIncrements.start_time <= target_time.time(), \
         LookupBookingTimeIncrements.end_time >= target_time.time()).one_or_none().idx
 
+    #prevent a time slot that would loop to the next day
+    if target_time_id >= 285:
+        target_time_id == 284
+
     booking_data = {
         'client_user_id': test_client.client_id,
         'staff_user_id': test_client.staff_id,
