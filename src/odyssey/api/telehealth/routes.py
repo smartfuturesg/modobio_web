@@ -135,6 +135,10 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
             payment = PaymentMethods.query.filter_by(idx=booking.payment_method_id).one_or_none()
             session_cost = SystemTelehealthSessionCosts.query.filter_by(profession_type='medical_doctor').one_or_none().session_cost
 
+            # TODO: Amount will be updated to grabbing the practitioner's set 
+            #       consultation rate
+            consult_rate = curr_role = StaffRoles.query.filter_by(user_id=current_user.user_id,role='medical_doctor').one_or_none().consult_rate
+
             request_data = {
                 "Outlet": INSTAMED_OUTLET,
                 "PaymentMethod": "OnFile",

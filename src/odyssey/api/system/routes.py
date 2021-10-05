@@ -28,6 +28,7 @@ class SystemTelehealthSettingsApi(Resource):
 
         practitioner_rates = LookupCurrencies.query.one_or_none()
         formatted_costs = []
+        #TODO: Will we take this out?
         for cost, lookup in costs:
             cost.country = lookup.country
             cost.currency_symbol_and_code = lookup.symbol_and_code
