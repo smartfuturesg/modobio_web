@@ -331,7 +331,7 @@ def test_bookings_meeting_room_access(test_client):
         content_type='application.json')
 
     assert response.status_code == 200
-    assert response.json[0]['transaction_amount'] == '160.00'
+    assert response.json[0]['transaction_amount'] == '100.00'
 
     #process refunds for the payment
     response = test_client.post(
