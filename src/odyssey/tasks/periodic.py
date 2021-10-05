@@ -248,6 +248,10 @@ def find_chargable_bookings():
             and_(TelehealthBookings.booking_window_id_start_time_utc <= target_time_window, TelehealthBookings.target_date_utc == target_time.date())
         )).all()
     
+    # do not deploy charge task in testing
+    if config.TESTING:
+        return bookings
+
     for booking in bookings:
         charge_telehealth_appointment.apply_async((booking.idx,), eta=datetime.now())
 

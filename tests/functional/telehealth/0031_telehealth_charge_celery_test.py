@@ -1,6 +1,4 @@
-import pytest
 from datetime import datetime, time, timezone, timedelta
-from random import choice
 
 from flask.json import dumps
 
@@ -12,6 +10,7 @@ from odyssey.api.payment.models import PaymentMethods, PaymentHistory
 from .client_select_data import payment_refund_data
 
 from odyssey.tasks.periodic import find_chargable_bookings
+from odyssey.tasks.tasks import charge_telehealth_appointment
 
 """
 This test intends to test the full payment system. In order to accomplish this, we must:
@@ -23,8 +22,6 @@ Check that the payment was triggered through the payment history table
 Refund the payment
 Check that the refund was successful
 """
-@pytest.mark.usefixtures('celery_session_app')
-@pytest.mark.usefixtures('celery_session_worker')
 def test_bookings_payment(test_client):
     #force a booking in less than 24 hours into bookings table
     payment_method_id = PaymentMethods.query.filter_by(user_id=test_client.client_id).first().idx
@@ -57,7 +54,11 @@ def test_bookings_payment(test_client):
     db.session.add(booking)
     db.session.commit()
 
-    find_chargable_bookings()
+    #run celery tasks to find and charge bookings
+    bookings = find_chargable_bookings()
+    assert len(bookings) == 1
+
+    charge_telehealth_appointment(booking.idx)
 
     #retrieve the latest booking between these 2 users, which is the one we inserted above
     updated_booking = TelehealthBookings.query.filter_by(idx=booking.idx).one_or_none()
