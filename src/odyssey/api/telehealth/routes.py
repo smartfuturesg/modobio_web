@@ -154,7 +154,7 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
             response = requests.post('https://connect.instamed.com/rest/payment/sale',
                             headers=request_headers,
                             json=request_data)
-            breakpoint()
+
             #check if instamed api raised an error
             try:
                 response.raise_for_status()
