@@ -7,8 +7,8 @@ from flask_restx import Resource
 
 from odyssey import db
 from odyssey.api import api
+from odyssey.integrations.instamed import Instamed
 from odyssey.utils.auth import token_auth
-from odyssey.utils.constants import INSTAMED_OUTLET
 from odyssey.utils.misc import check_client_existence
 from odyssey.utils.errors import TooManyPaymentMethods, GenericNotFound, GenericThirdPartyError, UnauthorizedUser, MethodNotAllowed
 from odyssey.utils.base.resources import BaseResource
@@ -39,33 +39,9 @@ class PaymentMethodsApi(BaseResource):
         if len(PaymentMethods.query.filter_by(user_id=user_id).all()) >= 5:
             raise TooManyPaymentMethods
 
-        request_data = {
-            "Outlet": INSTAMED_OUTLET,
-            "PaymentPlanType": "SaveOnFile",
-            "PaymentMethod": "Card",
-            "Card": {
-                "EntryMode": "key",
-                "CardNumber": request.json['token'],
-                "Expiration": request.json['expiration']
-            }
-        }
+        im = Instamed()
 
-        request_headers = {'Api-Key': current_app.config['INSTAMED_API_KEY'],
-                                        'Api-Secret': current_app.config['INSTAMED_API_SECRET'],
-                                        'Content-Type': 'application/json'}
-
-        response = requests.post('https://connect.instamed.com/rest/payment/paymentplan',
-                                headers=request_headers,
-                                json=request_data)
-        
-        #check if instamed api raised an error
-        try:
-            response.raise_for_status()
-        except:
-            raise GenericThirdPartyError(response.status_code, response.text)
-
-        #convert response data to json (python dict)
-        response_data = json.loads(response.text)
+        response_data = im.add_payment_method(request.json['token'], request.json['expiration'])
 
         #if requesting to set this method to default and user already has a default 
         #payment method, remove default status from their previous default method
@@ -170,8 +146,8 @@ class PaymentRefundApi(BaseResource):
         payment_id = request.parsed_obj.payment_id
 
         #retrieve original transaction being refunded
-        original_traction = PaymentHistory.query.filter_by(idx=payment_id).one_or_none()
-        if not original_traction:
+        original_transaction = PaymentHistory.query.filter_by(idx=payment_id).one_or_none()
+        if not original_transaction:
             raise GenericNotFound(f'No transaction with transaction_id {payment_id} exists.')
 
         #check if requested amount plus previous refunds of this transaction exceed the original amount
@@ -179,31 +155,13 @@ class PaymentRefundApi(BaseResource):
         for transaction in PaymentRefunds.query.filter_by(payment_id=payment_id).all():
             total_refunded += float(transaction.refund_amount)
     
-        if (float(request.parsed_obj.refund_amount) + total_refunded) > float(original_traction.transaction_amount):
+        if (float(request.parsed_obj.refund_amount) + total_refunded) > float(original_transaction.transaction_amount):
             raise MethodNotAllowed(message='The requested refund amount combined with refunds already given' + \
                                             f' cannot exceed the amount of the original transaction. {total_refunded}' + \
                                             f' has already been refunded for the transaction id {payment_id}.')
 
-        #call instamed api
-        request_data = {
-            "Outlet": INSTAMED_OUTLET,
-            "TransactionID": original_traction.transaction_id,
-            "Amount": request.parsed_obj.refund_amount
-        }
-
-        request_headers = {'Api-Key': current_app.config['INSTAMED_API_KEY'],
-                                'Api-Secret': current_app.config['INSTAMED_API_SECRET'],
-                                'Content-Type': 'application/json'}
-
-        response = requests.post('https://connect.instamed.com/rest/payment/refund-simple',
-                        headers=request_headers,
-                        json=request_data)
-        
-        #check if instamed api raised an error
-        try:
-            response.raise_for_status()
-        except:
-            raise GenericThirdPartyError(response.status_code, response.text)
+        im = Instamed()
+        im.refund_payment(original_transaction.transaction_id, request.parsed_obj.refund_amount)
 
         request.parsed_obj.user_id = user_id
         request.parsed_obj.reporter_id = token_auth.current_user()[0].user_id
