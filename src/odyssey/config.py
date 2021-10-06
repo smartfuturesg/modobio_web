@@ -139,7 +139,7 @@ class Config:
 
         # Logging
         if not self.LOG_LEVEL:
-            self.LOG_LEVEL = 'AUDIT'
+            self.LOG_LEVEL = 'INFO'
             if self.DEV:
                 self.LOG_LEVEL = 'DEBUG'
 
