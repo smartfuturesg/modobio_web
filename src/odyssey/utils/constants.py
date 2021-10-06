@@ -442,7 +442,6 @@ ACCESS_ROLES = (
     'dietitian',
     'nutritionist',
     'therapist',
-    'nurse_practitioner',
     'nurse',
     'physician_assistant',
     'client_services',
