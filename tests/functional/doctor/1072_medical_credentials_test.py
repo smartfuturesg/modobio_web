@@ -359,4 +359,33 @@ def test_get_7_credentials(test_client):
                 assert cred['status'] == 'Verified' 
             elif cred['state'] == 3:
                 assert cred['credentials'] == '85423903'
-                assert cred['status'] == 'Pending Verification'                                           
+                assert cred['status'] == 'Pending Verification'               
+                
+def test_get_8_credentials(test_client):
+    # Should be the same as test_get_7_credentials,
+    # But this is the client being able to retrieve
+    # the practitioner's credentials
+    response = test_client.get(
+        f'/doctor/credentials/{test_client.staff_id}/',
+        headers=test_client.client_auth_header,
+        content_type='application/json')
+
+    assert response.status_code == 200 
+    assert len(response.json['items']) == 4
+    for cred in response.json['items']:
+        if cred['credential_type'] == 'npi':
+            assert cred['country_id'] == 1
+            assert cred['state'] == None
+            assert cred['credentials'] == '1296336567'
+            assert cred['status'] == 'Verified'    
+        elif cred['credential_type'] == 'dea':
+            if cred['state'] == 3:
+                assert cred['credentials'] == '4312079463'
+                assert cred['status'] == 'Pending Verification' 
+        else:
+            if cred['state'] == 2:
+                assert cred['credentials'] == '523746512'
+                assert cred['status'] == 'Verified' 
+            elif cred['state'] == 3:
+                assert cred['credentials'] == '85423903'
+                assert cred['status'] == 'Pending Verification' 

@@ -88,7 +88,7 @@ ns = Namespace('doctor', description='Operations related to doctor')
 @ns.route('/credentials/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedCredentials(BaseResource):
-    @token_auth.login_required(staff_role=('medical_doctor','community_manager'))
+    @token_auth.login_required(user_type=('staff','client'),staff_role=('medical_doctor','community_manager'))
     @responds(schema=MedicalCredentialsInputSchema,status_code=200,api=ns)
     def get(self,user_id):
         """
