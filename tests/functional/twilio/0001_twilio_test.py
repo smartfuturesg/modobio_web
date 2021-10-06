@@ -239,6 +239,4 @@ def test_telehealth_bookings_get(test_client, telehealth_booking):
 
     assert response.status_code == 200
     assert response.json['bookings'][0]['transcript_url']
-    # assert len(response.json['transcript'][1]['media']) == 1
-    # assert response.json['transcript'][1]['media'][0]['content_type'] == 'image/jpeg'
     
