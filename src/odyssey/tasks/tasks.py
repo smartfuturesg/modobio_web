@@ -322,7 +322,7 @@ def store_telehealth_transcript(booking_id: int):
 
     Params
     ------
-    booking_id
+    booking_id: TelehealthBookings.idx for a booking that has been completed and is beyond the telehealth review period. 
     """
     twilio = Twilio()
 
@@ -336,18 +336,19 @@ def store_telehealth_transcript(booking_id: int):
     
     transcript = twilio.get_booking_transcript(booking.idx)
 
+    # s3 bucket path for the media associated with this booking transcript
     transcript_images_prefix = f'id{booking.client_user_id:05d}/telehealth/{booking_id}/transcript/images'
 
+    # if there is media present in the transcript, store it in an s3 bucket
     fh = FileHandling()
-    
     for idx, message in enumerate(transcript):
         img_id = 0
         if message['media']:
             for media_idx, media in enumerate(message['media']):
+                # download media from twilio 
                 media_content = twilio.get_media(media['sid'])
+
                 img = BytesIO(media_content)
-                
-                
                 img_extension = '.' + imghdr.what('', media_content)
 
                 tmp = Image.open(img)
@@ -361,8 +362,6 @@ def store_telehealth_transcript(booking_id: int):
                 media['s3_path'] = save_file_path_s3 #+ f'{img_id}{img_extension}'
                 transcript[idx]['media'][media_idx] = media
                 img_id+=1
-
-                
 
     payload = {
         'booking_id': booking.idx,
