@@ -399,8 +399,8 @@ class LookupRolesApi(Resource):
     @token_auth.login_required
     @responds(schema=LookupRolesOutputSchema, status_code=200, api=ns)
     def get(self):
-        """get contents of roles lookup table"""
-        res = LookupRoles.query.all()
+        """get contents of active roles in lookup table"""
+        res = LookupRoles.query.filter_by(active=True).all()
         return {'total_items': len(res), 'items': res}
 
 @ns.route('/legal-docs/')
