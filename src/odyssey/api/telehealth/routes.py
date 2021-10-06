@@ -731,11 +731,11 @@ class TelehealthBookingsApi(BaseResource):
         client_bookings = TelehealthBookings.query.filter(
             TelehealthBookings.client_user_id==client_user_id,
             TelehealthBookings.target_date_utc==target_start_datetime_utc.date(),
-            TelehealthBookings.status!='Cancelled').all()
+            TelehealthBookings.status!='Canceled').all()
         staff_bookings = TelehealthBookings.query.filter(
             TelehealthBookings.staff_user_id==staff_user_id,
             TelehealthBookings.target_date_utc==target_start_datetime_utc.date(),
-            TelehealthBookings.status!='Cancelled').all()
+            TelehealthBookings.status!='Canceled').all()
 
         # This checks if the input slots have already been taken.
         # using utc times to remain consistent 
@@ -968,7 +968,7 @@ class TelehealthBookingsApi(BaseResource):
                 raise InputError(403, 'Only Practitioner may update to this status')
             
             ##### WHEEL #####    
-            # if new_status == 'Cancelled' and booking.external_booking_id:
+            # if new_status == 'Canceled' and booking.external_booking_id:
             #     # cancel appointment on wheel system if the staff memebr is a wheel practitioner
             #     wheel = Wheel()
             #     wheel.cancel_booking(booking.external_booking_id)
@@ -986,7 +986,7 @@ class TelehealthBookingsApi(BaseResource):
         booking.update(data)
 
         # If the booking gets updated for cancelation, then delete it in the Staff's calendar
-        if new_status == 'Cancelled':
+        if new_status == 'Canceled':
             staff_event = StaffCalendarEvents.query.filter_by(location='Telehealth_{}'.format(booking_id)).one_or_none()
             if staff_event:
                 db.session.delete(staff_event)

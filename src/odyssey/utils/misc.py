@@ -528,7 +528,7 @@ def cancel_telehealth_appointment(booking):
     Used to cancel an appointment in the event a payment is unsuccessful
     """
 
-    #update booking status to cancelled and updated charged flag so task won't try to charge again
+    #update booking status to canceled and updated charged flag so task won't try to charge again
     booking.status = 'Canceled'
     booking.charged = True
 
@@ -540,7 +540,7 @@ def cancel_telehealth_appointment(booking):
             status='Canceled'
         )) 
 
-    #TODO: Create notification/send email(?) to user that their appointment was cancelled due
+    #TODO: Create notification/send email(?) to user that their appointment was canceled due
     #to a failed payment
 
     db.session.commit()

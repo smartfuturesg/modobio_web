@@ -212,13 +212,13 @@ def process_wheel_webhooks(webhook_payload: Dict[str, Any]):
     if webhook_payload['event'] == 'consult.assigned':
         pass
 
-    # consult.unassigned:  consult is cancelled on wheel's end, must enact cancellation proceedure
+    # consult.unassigned:  consult is canceled on wheel's end, must enact cancellation proceedure
     # clinician.unavailable: the practitioner is no longer available for the booking. treat as a cancellation
     # clinician.no_show: clinician does not enter booking within 10 minutes of their scheduled start time 
     # consult.voided: Sent in rare occasions when wheel clinicians cannot complete the consultation 
     elif webhook_payload['event'] in ('consult.unassigned',  'clinician.no_show', 'clinician.unavailable', 'consult.voided'):
         
-        # update booking status to cancelled
+        # update booking status to canceled
         booking.status = 'Canceled'
 
         # create an entry into the TelehealthBookingStatus table
@@ -260,7 +260,7 @@ def process_wheel_webhooks(webhook_payload: Dict[str, Any]):
             )
         db.session.add(status_history)
 
-        # update booking status to cancelled
+        # update booking status to canceled
         booking.status = 'Document Review'
 
         db.session.commit()
