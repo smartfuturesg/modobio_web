@@ -1,63 +1,42 @@
-from __future__ import with_statement
-
 import logging
-from logging.config import fileConfig
 import os
 import sys
 
 import boto3
+
+from alembic import context
+from flask import current_app
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from odyssey.config import Config
 
-from alembic import context
+logger = logging.getLogger(__name__)
 
-# this is the Alembic Config object, which provides
-# access to the values within the .ini file in use.
+# Load config from alembic.ini
+# Even though all of our configuration comes from odyssey.config,
+# this config object will still hold the config for alembic.
 config = context.config
 
-# Interpret the config file for Python logging.
-# This line sets up loggers basically.
-fileConfig(config.config_file_name)
-logger = logging.getLogger('alembic.env')
+# Load config from the API.
+current_app.config.from_object(Config())
+db_uri = current_app.config['SQLALCHEMY_DATABASE_URI']
 
-# add your model's MetaData object here
-# for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
-from flask import current_app
-# config.set_main_option(
-#     'sqlalchemy.url',
-#     str(current_app.extensions['migrate'].db.engine.url).replace('%', '%%'))
+# Load metadata from sqlalchemy
 target_metadata = current_app.extensions['migrate'].db.metadata
 
-# other values from the config, defined by the needs of env.py,
-# can be acquired:
-# my_important_option = config.get_main_option("my_important_option")
-# ... etc.
-
-# change the database user to the master user for the purpose of editing schemas
-# Use config.py from main Flask app to get the database URI
-current_app.config.from_object(Config())
-
-db_connection_string = current_app.config['SQLALCHEMY_DATABASE_URI']
-
 if not current_app.config['TESTING']: 
-    print(f"\n***\nUpdating/querying database using the following connection string: \n {db_connection_string}")
-    print("continue? [Y,n]")
+    print(f'\n***\nUpdating the database at URI: \n {db_uri}')
+    print('Continue? [Y,n]')
     answer = input()
 
-    if answer not in ['y', 'Y']:
+    if answer not in ('y', 'Y'):
         sys.exit()
 
-config.set_main_option(
-    'sqlalchemy.url',
-    db_connection_string)
-
+config.set_main_option('sqlalchemy.url', db_uri)
 
 def run_migrations_offline():
-    """Run migrations in 'offline' mode.
+    """ Run migrations in 'offline' mode.
 
     This configures the context with just a URL
     and not an Engine, though an Engine is acceptable
@@ -66,26 +45,24 @@ def run_migrations_offline():
 
     Calls to context.execute() here emit the given string to the
     script output.
-
     """
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
-        url=url, target_metadata=target_metadata, literal_binds=True,
-        compare_type=True
-    )
+        url=url,
+        target_metadata=target_metadata,
+        literal_binds=True,
+        compare_type=True)
 
     with context.begin_transaction():
         context.run_migrations()
 
-
 def run_migrations_online():
-    """Run migrations in 'online' mode.
+    """ Run migrations in 'online' mode.
 
     In this scenario we need to create an Engine
     and associate a connection with the context.
-
     """
-    
+
     # this callback is used to prevent an auto-migration from being generated
     # when there are no changes to the schema
     # reference: http://alembic.zzzcomputing.com/en/latest/cookbook.html
@@ -99,8 +76,7 @@ def run_migrations_online():
     connectable = engine_from_config(
         config.get_section(config.config_ini_section),
         prefix='sqlalchemy.',
-        poolclass=pool.NullPool,
-    )
+        poolclass=pool.NullPool)
 
     with connectable.connect() as connection:
         context.configure(
@@ -108,8 +84,7 @@ def run_migrations_online():
             target_metadata=target_metadata,
             process_revision_directives=process_revision_directives,
             compare_type=True,
-            **current_app.extensions['migrate'].configure_args
-        )
+            **current_app.extensions['migrate'].configure_args)
 
         with context.begin_transaction():
             if current_app.config['TESTING']: 
