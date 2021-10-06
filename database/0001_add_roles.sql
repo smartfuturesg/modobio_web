@@ -7,10 +7,10 @@ INSERT INTO "LookupRoles" ("created_at", "updated_at","role_name","display_name"
 
 VALUES
 ('NOW()','NOW()','beautician','Beautician','esthetician','Beautician.svg',True,True,False),
-('NOW()','NOW()','chef','Chef',NULL,'ChefP.svg'True,True,True),
+('NOW()','NOW()','chef','Chef',NULL,'ChefP.svg',True,True,True),
 ('NOW()','NOW()','client_services','Client Services',NULL,'CommunityM.svg',False,True,True),
 ('NOW()','NOW()','community_manager','Community Manager','ambassador',NULL,False,False,True),
-('NOW()','NOW()','data_scientist','Data Scientist'NULL,NULL,False,False,False),
+('NOW()','NOW()','data_scientist','Data Scientist',NULL,NULL,False,False,False),
 ('NOW()','NOW()','dietitian','Dietitian',NULL,'DietitianP.svg',True,True,True),
 ('NOW()','NOW()','medical_doctor','Medical Doctor','physician, clinician','MedicalDoctorP.svg',True,True,True),
 ('NOW()','NOW()','nurse','Nurse',NULL,'NurseP.svg',True,True,False),
