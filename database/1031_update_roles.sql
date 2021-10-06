@@ -3,7 +3,7 @@ DELETE FROM "LookupRoles" WHERE 'role_name' = 'nurse_practitioner';
 DELETE FROM "LookupRoles" WHERE 'role_name' = 'physician_assistant';
 
 --remove notion of color
-ALTER TABLE "LookupRoles" DROP COLUMN 'color';
+UPDATE "LookupRoles" SET 'color' = NULL;
 
 --insert new roles
 INSERT INTO "LookupRoles" ("created_at", "updated_at","role_name","display_name","alt_role_name","icon","is_practitioner","has_client_data_access","active") 
