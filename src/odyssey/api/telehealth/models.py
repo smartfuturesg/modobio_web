@@ -472,9 +472,7 @@ class TelehealthChatRooms(BaseModel):
 
     :type: str
     """
-
-
-
+    
 class TelehealthStaffSettings(BaseModel):
     """
     Holds staff preferred settings for Telehealth appointments

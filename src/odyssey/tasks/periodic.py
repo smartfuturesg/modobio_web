@@ -3,7 +3,6 @@ from datetime import datetime, date, timedelta
 from celery.schedules import crontab
 from celery.signals import worker_ready   
 from celery.utils.log import get_task_logger
-from flask import current_app
 from sqlalchemy import delete, text
 from sqlalchemy import and_, or_, select
 
@@ -125,20 +124,19 @@ def deploy_appointment_transcript_store_tasks(target_date=None):
     to the booking transcript. After this window, we will lock the conversation on twilio and store the transcript on the modobio end. 
 
     This task uses the TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS constant to scan the database for bookings which are
-    approaching the end of the transcipt review window. The database is queried for bookings on a target date that falls
-    int(TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS/24) days prior to the current day. Tasks to store transcipts are then schedueld
+    approaching the end of the transcipt review window. The database is queried for bookings that fall on a target date
+     int(TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS/24) days prior to the current day. Tasks to store transcipts are then schedueld
     approximately TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS following the start of the telehealth booking.
-
     
     Parameters
     ----------
     target_date : Date the bookings took place. This will be a date sometime in the past as we are looking for bookings which have been completed. 
-                to be used if testing. Otherwise date is set using system time (UTC)
+                To be used if testing. Otherwise date is set using system time (UTC)
  
     """
     # grab the current date for the queries below
     if not target_date:
-        target_date = date.today() - int(TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS/24)
+        target_date = datetime.utcnow().date() - timedelta(days = int(TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS/24))
 
     time_inc = LookupBookingTimeIncrements.query.all()
     

@@ -2087,11 +2087,12 @@ class TelehealthTranscripts(Resource):
         if not any(current_user.user_id == uid for uid in [booking.client_user_id, booking.staff_user_id]):
             raise InputError(status_code=405, message='logged in user must be a booking participant')
 
-        
+        # bring up the transcript messages from mongo db
         transcript = mongo.db.telehealth_transcripts.find_one({"_id": ObjectId(booking.chat_room.transcript_object_id)})
 
-        fh = FileHandling()
 
+        # if there is any media in the transcript, generate a link to the download from the user's s3 bucket
+        fh = FileHandling()
         for message_idx, message in enumerate(transcript.get('transcript',[])):
             if message['media']:
                 for media_idx, media in enumerate(message['media']):
@@ -2100,5 +2101,6 @@ class TelehealthTranscripts(Resource):
 
                     media['media_link'] = [val for val in s3_link.values()][0]
                     transcript['transcript'][message_idx]['media'][media_idx] = media
+                    
         return transcript
 
