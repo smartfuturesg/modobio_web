@@ -55,14 +55,19 @@ if not logger.hasHandlers():
 for name in ('sqlalchemy', 'flask_cors', 'werkzeug'):
     logging.getLogger(name=name).setLevel(conf.LOG_LEVEL)
 
-# SQLAlchemy and elasticsearch are too verbose, turn down several loggers
-for name in (
-    'elasticsearch',
-    'sqlalchemy.orm.mapper.Mapper',
-    'sqlalchemy.orm.relationships.RelationshipProperty',
-    'sqlalchemy.orm.strategies.LazyLoader'
-):
-    logging.getLogger(name).setLevel(logging.WARNING)
+# SQLAlchemy and elasticsearch are too verbose, fine tune several loggers.
+logging.getLogger('elasticsearch').setLevel(logging.WARN)
+logging.getLogger('sqlalchemy.orm.path_registry').setLevel(logging.INFO)
+logging.getLogger('sqlalchemy.orm.mapper.Mapper').setLevel(logging.WARN)
+logging.getLogger('sqlalchemy.orm.relationships.RelationshipProperty').setLevel(logging.WARN)
+logging.getLogger('sqlalchemy.orm.strategies.LazyLoader').setLevel(logging.WARN)
+logging.getLogger('sqlalchemy.pool').setLevel(logging.INFO)
+
+# **WARNING**: sqlalchemy.engine.Engine at DEBUG level logs every row
+# stored in/fetched from DB, including password hashes. Don't ever do that.
+# If you must see what's going on while developing, comment this out.
+# Otherwise, keep this at INFO level.
+logging.getLogger('sqlalchemy.engine.Engine').setLevel(logging.INFO)
 
 # Instantiate Flask extensions.
 db = SQLAlchemy()
