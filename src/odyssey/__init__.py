@@ -55,19 +55,24 @@ if not logger.hasHandlers():
 for name in ('sqlalchemy', 'flask_cors', 'werkzeug'):
     logging.getLogger(name=name).setLevel(conf.LOG_LEVEL)
 
-# SQLAlchemy and elasticsearch are too verbose, fine tune several loggers.
-logging.getLogger('elasticsearch').setLevel(logging.WARN)
-logging.getLogger('sqlalchemy.orm.path_registry').setLevel(logging.INFO)
-logging.getLogger('sqlalchemy.orm.mapper.Mapper').setLevel(logging.WARN)
-logging.getLogger('sqlalchemy.orm.relationships.RelationshipProperty').setLevel(logging.WARN)
-logging.getLogger('sqlalchemy.orm.strategies.LazyLoader').setLevel(logging.WARN)
-logging.getLogger('sqlalchemy.pool').setLevel(logging.INFO)
+log_level_num = logging.getLevelName(conf.LOG_LEVEL)
 
-# **WARNING**: sqlalchemy.engine.Engine at DEBUG level logs every row
-# stored in/fetched from DB, including password hashes. Don't ever do that.
-# If you must see what's going on while developing, comment this out.
-# Otherwise, keep this at INFO level.
-logging.getLogger('sqlalchemy.engine.Engine').setLevel(logging.INFO)
+# SQLAlchemy and elasticsearch are too verbose, fine tune several loggers.
+if log_level_num < logging.WARN:
+    logging.getLogger('elasticsearch').setLevel(logging.WARN)
+    logging.getLogger('sqlalchemy.orm.mapper.Mapper').setLevel(logging.WARN)
+    logging.getLogger('sqlalchemy.orm.relationships.RelationshipProperty').setLevel(logging.WARN)
+    logging.getLogger('sqlalchemy.orm.strategies.LazyLoader').setLevel(logging.WARN)
+
+if log_level_num < logging.INFO:
+    logging.getLogger('sqlalchemy.orm.path_registry').setLevel(logging.INFO)
+    logging.getLogger('sqlalchemy.pool').setLevel(logging.INFO)
+
+    # **WARNING**: sqlalchemy.engine.Engine at DEBUG level logs every row
+    # stored in/fetched from DB, including password hashes. Don't ever do that.
+    # If you must see what's going on while developing, comment this out.
+    # Otherwise, keep this at INFO level.
+    logging.getLogger('sqlalchemy.engine.Engine').setLevel(logging.INFO)
 
 # Instantiate Flask extensions.
 db = SQLAlchemy()
