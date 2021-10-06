@@ -1264,7 +1264,8 @@ class ClinicalCareTeamMembers(BaseResource):
                 'is_temporary': team_member[0].is_temporary,
                 'membersince': membersince,
                 'is_staff': is_staff,
-                'authorizations' : authorizations
+                'authorizations' : authorizations,
+                'bio': team_member[1].staff_profile.bio if team_member[1].is_staff else None
             }
 
             #calculate how much time is remaining for temporary members
