@@ -78,7 +78,7 @@ def test_payment_methods_post(test_client):
         data=dumps(payment_methods_data['normal_data_3']),
         content_type='application/json')
 
-    assert response.status_code == 405
+    assert response.status_code == 400
 
 def test_payment_methods_get(test_client):
 
@@ -99,7 +99,7 @@ def test_payment_methods_delete(test_client):
         headers = test_client.client_auth_header,
         content_type='application.json')
 
-    assert response.status_code == 404
+    assert response.status_code == 204
 
     response = test_client.delete(
         f'/payment/methods/{test_client.client_id}/?idx=5',

@@ -21,7 +21,7 @@ def test_post_client_assigned_drink(test_client):
         data=dumps(clients_assigned_drinks),
         content_type='application/json')
 
-    assert response.status_code == 404
+    assert response.status_code == 400
 
 def test_get_client_assigned_drinks(test_client):
     response = test_client.get(
