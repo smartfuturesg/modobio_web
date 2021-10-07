@@ -15,6 +15,6 @@ pracitioner_affiliation_data = {
 
 pracitioner_consultation_rate_data = {
     'items': [
-        {'role': 'medical_doctor','rate': 65}
+        {'role': 'medical_doctor','rate': 100}
         ]
 }

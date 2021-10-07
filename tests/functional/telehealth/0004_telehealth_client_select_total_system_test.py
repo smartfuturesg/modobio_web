@@ -350,7 +350,7 @@ def test_bookings_meeting_room_access(test_client):
     )
 
     assert response.status_code == 200
-    assert response.json[0]['refund_amount'] == '30.00'
+    assert response.json[0]['refund_amount'] == '50.00'
     assert response.json[0]['refund_reason'] == "abcdefghijklmnopqrstuvwxyz"
 
     response = test_client.post(

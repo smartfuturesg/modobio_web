@@ -133,18 +133,17 @@ class TelehealthBookingsRoomAccessTokenApi(Resource):
 
             #call instamed api to charge user for this call
             payment = PaymentMethods.query.filter_by(idx=booking.payment_method_id).one_or_none()
-            session_cost = SystemTelehealthSessionCosts.query.filter_by(profession_type='medical_doctor').one_or_none().session_cost
 
             # TODO: Amount will be updated to grabbing the practitioner's set 
             #       consultation rate AT booking
             # vvvvvvv this is wrong, we must use the agreed upon stored rate, but this is the idea
-            consult_rate = curr_role = StaffRoles.query.filter_by(user_id=current_user.user_id,role='medical_doctor').one_or_none().consult_rate
+            consult_rate = StaffRoles.query.filter_by(user_id=current_user.user_id,role='medical_doctor').one_or_none().consult_rate
 
             request_data = {
                 "Outlet": INSTAMED_OUTLET,
                 "PaymentMethod": "OnFile",
                 "PaymentMethodID": str(payment.payment_id),
-                "Amount": str(session_cost)
+                "Amount": str(consult_rate)
             }
 
             request_headers = {'Api-Key': current_app.config['INSTAMED_API_KEY'],
@@ -885,6 +884,22 @@ class TelehealthBookingsApi(BaseResource):
             start_time_client_localized = target_start_datetime_utc.time()
             end_time_client_localized = target_end_datetime_utc.time()
         
+        # consultation rate to booking
+        consult_rate = StaffRoles.query.filter_by(user_id=staff_user_id,role=client_in_queue.profession_type).one_or_none().consult_rate
+        
+        pre_post_buffer = timedelta(minutes=10)
+        telehealth_meeting_time = timedelta(minutes=5*(duration_idx+1))
+
+        # Calculate time for display:
+        # consulte_rate is in hours
+        # 30 minutes -> 0.5*consult_rate
+        # 60 minutes -> 1*consulte_rate
+        # 90 minutes -> 1.5*consulte_rate
+        rate = consult_rate*(pre_post_buffer+telehealth_meeting_time)/timedelta(minutes=60)
+        
+        request.parsed_obj.consult_rate = rate
+
+
         db.session.add(request.parsed_obj)
         db.session.flush()
 
