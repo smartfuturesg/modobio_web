@@ -1146,18 +1146,18 @@ class LookupCurrencies(BaseModelWithIdx):
     :type: string
     """
 
-    min_rate = db.Column(db.Integer)
+    min_rate = db.Column(db.Float)
     """
     Minimum HOURLY rate the practitioner can charge
     
-    :type: int
+    :type: float
     """
 
-    max_rate = db.Column(db.Integer)
+    max_rate = db.Column(db.Float)
     """
     Maximum HOURLY rate the practitioner can charge
     
-    :type: int
+    :type: float
     """
     
     increment = db.Column(db.Integer)

@@ -17,6 +17,6 @@ def test_get_practitioner_consultation_rates(test_client):
         content_type='application/json')
 
     assert response.status_code == 200
-    for item in response.json:
+    for item in response.json['items']:
         if item['role'] == 'medical_doctor':
-            assert item['rate'] == 100
+            assert item['rate'] == 100.00

@@ -13,7 +13,7 @@ from odyssey.api.lookup.schemas import LookupOrganizationsSchema
 
 class PractitionerConsultationRateSchema(Schema):
     role = fields.String()
-    rate = fields.Integer()
+    rate = fields.Float()
 
 class PractitionerConsultationRateInputSchema(Schema):
     items = fields.Nested(PractitionerConsultationRateSchema(many=True),missing = [])

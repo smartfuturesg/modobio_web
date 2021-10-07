@@ -137,11 +137,11 @@ class StaffRoles(BaseModelWithIdx, UserIdFkeyMixin):
     :type: int, foreign key(User.user_id)
     """
 
-    consult_rate = db.Column(db.Numeric)
+    consult_rate = db.Column(db.Float)
     """
     Consultation rate for the practitioner
 
-    :type: Numeric
+    :type: float
     """
 
 class StaffOperationalTerritories(BaseModelWithIdx, UserIdFkeyMixin):

@@ -156,11 +156,11 @@ class TelehealthBookings(BaseModelWithIdx):
     :type: :class: `TelehealthChatRooms` instance
     """
 
-    consult_rate = db.Column(db.Numeric)
+    consult_rate = db.Column(db.Float)
     """
     HOURLY practitioner consultation rate
 
-    :type: Numeric
+    :type: float
     """
 
 class TelehealthBookingStatus(db.Model):
