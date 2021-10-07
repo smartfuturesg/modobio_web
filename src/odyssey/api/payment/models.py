@@ -198,17 +198,3 @@ class PaymentRefunds(BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin):
 
     :type: string
     """
-
-class PaymentFailedTransactions(BaseModelWithIdx, UserIdFkeyMixin):
-    """
-    This table keeps track of payment failures. For now, this table will just serve
-    as a log for us for informational purposes. In the future, it may be leveraged to
-    blacklist users from creating future appointments until the failed payment is resolved.
-    """
-
-    transaction_id = db.Column(db.String)
-    """
-    InstaMed Transaction ID.
-
-    :type: string
-    """

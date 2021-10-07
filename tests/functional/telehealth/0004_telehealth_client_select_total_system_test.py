@@ -318,89 +318,12 @@ def test_bookings_meeting_room_access(test_client):
 
         assert response.status_code == 200
 
-
-    """Below will test the payment features that required a booking to be accessed
-        before it was possible to test them
-    """
-
-    #check payment was successful for the booking
-
-    response = test_client.get(
-        f'/payment/history/{test_client.client_id}/',
-        headers=test_client.client_auth_header,
-        content_type='application.json')
-
-    assert response.status_code == 200
-    assert response.json[0]['transaction_amount'] == '100.00'
-
-    #process refunds for the payment
-    response = test_client.post(
-        f'/payment/refunds/{test_client.client_id}/',
-        headers=test_client.staff_auth_header,
-        data=dumps(payment_refund_data),
-        content_type='application.json'
-    )
-
-    assert response.status_code == 201
-
-    response = test_client.get(
-        f'/payment/refunds/{test_client.client_id}/',
-        headers=test_client.staff_auth_header,
-        content_type='application.json'
-    )
-
-    assert response.status_code == 200
-    assert response.json[0]['refund_amount'] == '50.00'
-    assert response.json[0]['refund_reason'] == "abcdefghijklmnopqrstuvwxyz"
-
-    response = test_client.post(
-        f'/payment/refunds/{test_client.client_id}/',
-        headers=test_client.staff_auth_header,
-        data=dumps(payment_refund_data),
-        content_type='application.json'
-    )
-
-    assert response.status_code == 201
-
-    response = test_client.get(
-        f'/payment/refunds/{test_client.client_id}/',
-        headers=test_client.client_auth_header,
-        content_type='application.json'
-    )
-
-    assert response.status_code == 200
-    assert len(response.json) == 2
-
-    #third try should error because we are trying to refund more than the original purchase amount
-    #the purchase was $100 and $100 total has been refunded over the course of the previous
-    #2 refund POSTs
-
-    response = test_client.post(
-        f'/payment/refunds/{test_client.client_id}/',
-        headers=test_client.staff_auth_header,
-        data=dumps(payment_refund_data),
-        content_type='application.json'
-    )
-
-    assert response.status_code == 405
-
-    response = test_client.get(
-        f'/payment/refunds/{test_client.client_id}/',
-        headers=test_client.client_auth_header,
-        content_type='application.json'
-    )
-
-    assert response.status_code == 200
-    assert len(response.json) == 2
-
     ###
     # Complete the booking
     ###
     response = test_client.put(
         f'/telehealth/bookings/complete/{booking.idx}/', headers=test_client.staff_auth_header)
     assert response.status_code == 200
-
-
 
 def test_delete_generated_users(test_client):
     assert 1 == 1
