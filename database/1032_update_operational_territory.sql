@@ -1,8 +1,14 @@
---remove territories from StaffOperationalTerritoriesFirst to avoid foreign key errors
+--remove territories from StaffOperationalTerritories
 DELETE FROM "StaffOperationalTerritories" WHERE "operational_territory_id" IN (1, 3, 4);
+
+--temporarily suspend constaints while updating foreign keys
+SET session_replication_role = 'replica';
 
 --delete all territories except for Florida, then change Florida's idx to 1 and restart sequence
 DELETE FROM "LookupTerritoriesOfOperations" WHERE "idx" IN (1, 3, 4);
 UPDATE "LookupTerritoriesOfOperations" SET "idx" = 1 WHERE "idx" = 2;
 ALTER SEQUENCE "LookupTerritoriesOfOperations_idx_seq"
   restart with 2;
+  
+--restore constraints
+SET session_replication_role = 'origin';
