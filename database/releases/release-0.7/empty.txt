@@ -1,0 +1,1 @@
+Move files from 'current/' to this subdirectory when starting the next release. Delete this file.
