@@ -27,9 +27,9 @@ delete from "LookupCurrencies"
 alter sequence "LookupCurrencies_idx_seq"
   restart with 1;
 
-INSERT INTO "LookupCurrencies" ("country", "symbol_and_code","min_rate","max_rate","increment")
+INSERT INTO "LookupCurrencies" ("country", "symbol_and_code")
 VALUES
-('USA', '$ / USD',30,500,5);
+('USA', '$ / USD');
 
 delete from "SystemTelehealthSessionCosts"
   where cost_id >= 1;
