@@ -1,4 +1,6 @@
 """ Schemas for the wearables API """
+import logging
+logger = logging.getLogger(__name__)
 
 from marshmallow import Schema, fields
 

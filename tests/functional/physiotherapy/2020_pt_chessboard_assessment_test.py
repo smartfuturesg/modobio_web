@@ -14,7 +14,7 @@ def test_post_chessboard_assessment(test_client):
         headers=test_client.staff_auth_header,
         content_type='application/json')
 
-    assert response.status_code == 204
+    assert response.status_code == 200
 
     payload = trainer_chessboard_assessment_data
     response = test_client.post(

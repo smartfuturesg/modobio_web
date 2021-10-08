@@ -8,8 +8,10 @@ app.conf
 Possible configuration options here: https://docs.celeryproject.org/en/stable/userguide/configuration.html#configuration
 
 """
-from odyssey import init_celery
+import logging
+logger = logging.getLogger(__name__)
 
+from odyssey import init_celery
 
 app = init_celery()
 

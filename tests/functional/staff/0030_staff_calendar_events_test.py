@@ -2,10 +2,6 @@ from flask.json import dumps
 from odyssey.api.staff.models import StaffCalendarEvents
 from .data import staff_calendar_events_data
 
-# TODO: Fix endpoint, don't just skip test.
-#import pytest
-#pytestmark = pytest.mark.skip('Setting timezone in calendar events is broken.')
-
 def test_post_new_event(test_client):
     # using staff user
     # post daily event
@@ -51,7 +47,7 @@ def test_post_new_event(test_client):
         data=dumps(staff_calendar_events_data['recurring']['invalid_event']),
         content_type='application/json')
 
-    assert response.status_code == 422
+    assert response.status_code == 400
 
     # post non-recurring event
     response = test_client.post(

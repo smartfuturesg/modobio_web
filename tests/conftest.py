@@ -14,6 +14,7 @@ from flask.json import dumps
 from flask_migrate import upgrade
 from sqlalchemy import select, text
 from sqlalchemy.exc import ProgrammingError
+from werkzeug.exceptions import BadRequest
 
 from odyssey import create_app, db
 from odyssey.api.client.models import ClientClinicalCareTeam, ClientClinicalCareTeamAuthorizations
@@ -22,7 +23,6 @@ from odyssey.api.payment.models import PaymentMethods
 from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.api.user.models import User, UserLogin
 from odyssey.utils.misc import grab_twilio_credentials
-from odyssey.utils.errors import MissingThirdPartyCredentials
 from odyssey.utils import search
 
 from .utils import login
@@ -117,7 +117,7 @@ def clear_twilio(modobio_ids=None):
 
     try:
         twilio_credentials = grab_twilio_credentials()
-    except MissingThirdPartyCredentials:
+    except BadRequest:
         return
 
     client = twilio.rest.Client(
