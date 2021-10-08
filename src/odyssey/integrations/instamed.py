@@ -2,6 +2,7 @@ import requests
 
 from flask import current_app
 
+from odyssey.utils.misc import cancel_telehealth_appointment
 from odyssey.utils.errors import GenericThirdPartyError
 from odyssey.api.payment.models import PaymentHistory
 
