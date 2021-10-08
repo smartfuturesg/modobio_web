@@ -834,7 +834,6 @@ class TelehealthBookingsApi(BaseResource):
         # consultation rate to booking
         consult_rate = StaffRoles.query.filter_by(user_id=staff_user_id,role=client_in_queue.profession_type).one_or_none().consult_rate
         
-        pre_post_buffer = timedelta(minutes=10)
         telehealth_meeting_time = timedelta(minutes=5*(duration_idx+1))
 
         # Calculate time for display:
@@ -842,7 +841,7 @@ class TelehealthBookingsApi(BaseResource):
         # 30 minutes -> 0.5*consult_rate
         # 60 minutes -> 1*consulte_rate
         # 90 minutes -> 1.5*consulte_rate
-        rate = consult_rate*(pre_post_buffer+telehealth_meeting_time)/timedelta(minutes=60)
+        rate = consult_rate*(telehealth_meeting_time)/timedelta(minutes=60)
         
         request.parsed_obj.consult_rate = rate
 
