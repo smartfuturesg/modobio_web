@@ -27,7 +27,7 @@ from odyssey.api.lookup.models import LookupDrinks
 from odyssey.api.client.models import ClientFacilities
 from odyssey.api.doctor.models import MedicalBloodTests, MedicalBloodTestResultTypes, MedicalConditions, MedicalLookUpSTD
 from odyssey.api.facility.models import RegisteredFacilities
-from odyssey.api.telehealth.models import TelehealthChatRooms
+from odyssey.api.telehealth.models import TelehealthChatRooms, TelehealthBookingStatus
 from odyssey.api.user.models import User, UserTokenHistory
 from odyssey.utils.constants import ALLOWED_IMAGE_TYPES, ALPHANUMERIC, TWILIO_ACCESS_KEY_TTL
 from odyssey.utils.errors import (
