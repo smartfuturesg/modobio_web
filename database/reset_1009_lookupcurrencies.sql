@@ -1,8 +1,17 @@
-delete from "LookupCurrencies"
-  where idx >= 1;
-alter sequence "LookupCurrencies_idx_seq"
-  restart with 1;
+ALTER TABLE "LookupCurrencies"
+ADD COLUMN "min_rate" Float,
+ADD COLUMN "max_rate" Float,
+ADD COLUMN "increment" Integer;
 
-INSERT INTO "LookupCurrencies" ("country", "symbol_and_code","min_rate","max_rate","increment")
-VALUES
-('USA', '$ / USD',30,500,5);
+UPDATE "LookupCurrencies"
+SET min_rate = 30.00
+WHERE idx = 1;
+
+UPDATE "LookupCurrencies"
+SET max_rate = 500.00
+WHERE idx = 1;
+
+UPDATE "LookupCurrencies"
+SET increment = 5
+WHERE idx = 1;
+
