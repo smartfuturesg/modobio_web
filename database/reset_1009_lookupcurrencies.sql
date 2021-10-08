@@ -1,7 +1,7 @@
 ALTER TABLE "LookupCurrencies"
-ADD COLUMN "min_rate" Float,
-ADD COLUMN "max_rate" Float,
-ADD COLUMN "increment" Integer;
+ADD COLUMN IF NOT EXISTS "min_rate" Float,
+ADD COLUMN IF NOT EXISTS "max_rate" Float,
+ADD COLUMN IF NOT EXISTS "increment" Integer;
 
 UPDATE "LookupCurrencies"
 SET min_rate = 30.00
