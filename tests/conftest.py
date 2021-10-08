@@ -1,9 +1,11 @@
-from datetime import datetime, timedelta
+import os
 import pathlib
-import uuid
 import pytest
 import subprocess
 import sys
+import uuid
+
+from datetime import datetime, timedelta
 
 import boto3
 import twilio
@@ -54,7 +56,7 @@ def setup_db(app):
     runner = root / 'database' / 'sql_scriptrunner.py'
     cmd = [sys.executable, runner, '--db_uri', app.config['SQLALCHEMY_DATABASE_URI']]
 
-    proc = subprocess.run(cmd, cwd=root, capture_output=True, text=True)
+    proc = subprocess.run(cmd, cwd=root, capture_output=True, text=True, env=os.environ)
 
     if proc.returncode != 0:
         pytest.exit(f'Database scripts failed to run: {proc.stderr}')
