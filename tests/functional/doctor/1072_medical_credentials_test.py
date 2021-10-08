@@ -15,7 +15,7 @@ from .data import (
 
 def test_post_1_credentials(test_client):
     response = test_client.post(
-        f'/doctor/credentials/{test_client.staff_id}/',
+        f'/doctor/credentials/?user_id={test_client.staff_id}',
         headers=test_client.staff_auth_header,
         data=dumps(doctor_credentials_post_1_data),
         content_type='application/json')
@@ -24,7 +24,7 @@ def test_post_1_credentials(test_client):
 
 def test_get_1_credentials(test_client):
     response = test_client.get(
-        f'/doctor/credentials/{test_client.staff_id}/',
+        f'/doctor/credentials/?user_id={test_client.staff_id}',
         headers=test_client.staff_auth_header,
         content_type='application/json')
 
@@ -52,7 +52,7 @@ def test_get_1_credentials(test_client):
 # Overwrite what was written in POST 1 ##############################
 def test_post_2_credentials(test_client):
     response = test_client.post(
-        f'/doctor/credentials/{test_client.staff_id}/',
+        f'/doctor/credentials/?user_id={test_client.staff_id}',
         headers=test_client.staff_auth_header,
         data=dumps(doctor_credentials_post_2_data),
         content_type='application/json')
@@ -60,7 +60,7 @@ def test_post_2_credentials(test_client):
 
 def test_get_2_credentials(test_client):
     response = test_client.get(
-        f'/doctor/credentials/{test_client.staff_id}/',
+        f'/doctor/credentials/?user_id={test_client.staff_id}',
         headers=test_client.staff_auth_header,
         content_type='application/json')
 
@@ -82,7 +82,7 @@ def test_get_2_credentials(test_client):
 # Overwrite what was written in POST 2, Reset back to POST 1 ##############################
 def test_post_3_credentials(test_client):
     response = test_client.post(
-        f'/doctor/credentials/{test_client.staff_id}/',
+        f'/doctor/credentials/?user_id={test_client.staff_id}',
         headers=test_client.staff_auth_header,
         data=dumps(doctor_credentials_post_1_data),
         content_type='application/json')
@@ -91,7 +91,7 @@ def test_post_3_credentials(test_client):
 
 def test_get_3_credentials(test_client):
     response = test_client.get(
-        f'/doctor/credentials/{test_client.staff_id}/',
+        f'/doctor/credentials/?user_id={test_client.staff_id}',
         headers=test_client.staff_auth_header,
         content_type='application/json')
 
@@ -118,7 +118,7 @@ def test_get_3_credentials(test_client):
 # Verifies NPI Number
 def test_put_1_credentials(test_client):
     response = test_client.put(
-        f'/doctor/credentials/{test_client.staff_id}/',
+        f'/doctor/credentials/?user_id={test_client.staff_id}',
         headers=test_client.staff_auth_header,
         data=dumps(doctor_credentials_put_1_data),
         content_type='application/json')
@@ -128,7 +128,7 @@ def test_put_1_credentials(test_client):
 # Verifies DEA Number
 def test_put_2_credentials(test_client):
     response = test_client.put(
-        f'/doctor/credentials/{test_client.staff_id}/',
+        f'/doctor/credentials/?user_id={test_client.staff_id}',
         headers=test_client.staff_auth_header,
         data=dumps(doctor_credentials_put_2_data),
         content_type='application/json')
@@ -138,7 +138,7 @@ def test_put_2_credentials(test_client):
 # Verifies Medical License Number
 def test_put_3_credentials(test_client):
     response = test_client.put(
-        f'/doctor/credentials/{test_client.staff_id}/',
+        f'/doctor/credentials/?user_id={test_client.staff_id}',
         headers=test_client.staff_auth_header,
         data=dumps(doctor_credentials_put_3_data),
         content_type='application/json')
@@ -148,7 +148,7 @@ def test_put_3_credentials(test_client):
 # Get credentials with updated verification status
 def test_get_5_credentials(test_client):
     response = test_client.get(
-        f'/doctor/credentials/{test_client.staff_id}/',
+        f'/doctor/credentials/?user_id={test_client.staff_id}',
         headers=test_client.staff_auth_header,
         content_type='application/json')
 
@@ -178,7 +178,7 @@ def test_get_5_credentials(test_client):
 # Overwrite UNverified what was written in POST 3 ##############################
 def test_post_4_credentials(test_client):
     response = test_client.post(
-        f'/doctor/credentials/{test_client.staff_id}/',
+        f'/doctor/credentials/?user_id={test_client.staff_id}',
         headers=test_client.staff_auth_header,
         data=dumps(doctor_credentials_post_3_data),
         content_type='application/json')
@@ -186,7 +186,7 @@ def test_post_4_credentials(test_client):
 
 def test_get_4_credentials(test_client):
     response = test_client.get(
-        f'/doctor/credentials/{test_client.staff_id}/',
+        f'/doctor/credentials/?user_id={test_client.staff_id}',
         headers=test_client.staff_auth_header,
         content_type='application/json')
 
@@ -216,7 +216,7 @@ def test_get_4_credentials(test_client):
 # Overwrite VERIFIED NPI With new number ##############################
 def test_post_5_credentials(test_client):
     response = test_client.post(
-        f'/doctor/credentials/{test_client.staff_id}/',
+        f'/doctor/credentials/?user_id={test_client.staff_id}',
         headers=test_client.staff_auth_header,
         data=dumps(doctor_credentials_post_4_data),
         content_type='application/json')
@@ -224,7 +224,7 @@ def test_post_5_credentials(test_client):
 
 def test_get_5_credentials(test_client):
     response = test_client.get(
-        f'/doctor/credentials/{test_client.staff_id}/',
+        f'/doctor/credentials/?user_id={test_client.staff_id}',
         headers=test_client.staff_auth_header,
         content_type='application/json')
 
@@ -254,7 +254,7 @@ def test_get_5_credentials(test_client):
 # Overwrite VERIFIED DEA AZ With new number ##############################
 def test_post_5_credentials(test_client):
     response = test_client.post(
-        f'/doctor/credentials/{test_client.staff_id}/',
+        f'/doctor/credentials/?user_id={test_client.staff_id}',
         headers=test_client.staff_auth_header,
         data=dumps(doctor_credentials_post_5_data),
         content_type='application/json')
@@ -262,7 +262,7 @@ def test_post_5_credentials(test_client):
 
 def test_get_5_credentials(test_client):
     response = test_client.get(
-        f'/doctor/credentials/{test_client.staff_id}/',
+        f'/doctor/credentials/?user_id={test_client.staff_id}',
         headers=test_client.staff_auth_header,
         content_type='application/json')
 
@@ -292,7 +292,7 @@ def test_get_5_credentials(test_client):
 # DELETE Medical Credentials ##############################
 def test_delete_1_credentials(test_client):
     response = test_client.delete(
-        f'/doctor/credentials/{test_client.staff_id}/',
+        f'/doctor/credentials/?user_id={test_client.staff_id}',
         headers=test_client.staff_auth_header,
         data=dumps(doctor_credentials_delete_1_data),
         content_type='application/json')
@@ -301,7 +301,7 @@ def test_delete_1_credentials(test_client):
 
 def test_get_6_credentials(test_client):
     response = test_client.get(
-        f'/doctor/credentials/{test_client.staff_id}/',
+        f'/doctor/credentials/?user_id={test_client.staff_id}',
         headers=test_client.staff_auth_header,
         content_type='application/json')
 
@@ -328,7 +328,7 @@ def test_get_6_credentials(test_client):
 # Verify NPI number
 def test_put_4_credentials(test_client):
     response = test_client.put(
-        f'/doctor/credentials/{test_client.staff_id}/',
+        f'/doctor/credentials/?user_id={test_client.staff_id}',
         headers=test_client.staff_auth_header,
         data=dumps(doctor_credentials_put_4_data),
         content_type='application/json')
@@ -337,7 +337,7 @@ def test_put_4_credentials(test_client):
 
 def test_get_7_credentials(test_client):
     response = test_client.get(
-        f'/doctor/credentials/{test_client.staff_id}/',
+        f'/doctor/credentials/?user_id={test_client.staff_id}',
         headers=test_client.staff_auth_header,
         content_type='application/json')
 
@@ -359,4 +359,34 @@ def test_get_7_credentials(test_client):
                 assert cred['status'] == 'Verified' 
             elif cred['state'] == 3:
                 assert cred['credentials'] == '85423903'
-                assert cred['status'] == 'Pending Verification'                                           
+                assert cred['status'] == 'Pending Verification'               
+                
+def test_get_8_credentials(test_client):
+    # Should be the same as test_get_7_credentials,
+    # But this is the client being able to retrieve
+    # the practitioner's credentials
+
+    response = test_client.get(
+        f'/doctor/credentials/?user_id={test_client.staff_id}',
+        headers=test_client.client_auth_header,
+        content_type='application/json')
+
+    assert response.status_code == 200 
+    assert len(response.json['items']) == 4
+    for cred in response.json['items']:
+        if cred['credential_type'] == 'npi':
+            assert cred['country_id'] == 1
+            assert cred['state'] == None
+            assert cred['credentials'] == '1296336567'
+            assert cred['status'] == 'Verified'    
+        elif cred['credential_type'] == 'dea':
+            if cred['state'] == 3:
+                assert cred['credentials'] == '4312079463'
+                assert cred['status'] == 'Pending Verification' 
+        else:
+            if cred['state'] == 2:
+                assert cred['credentials'] == '523746512'
+                assert cred['status'] == 'Verified' 
+            elif cred['state'] == 3:
+                assert cred['credentials'] == '85423903'
+                assert cred['status'] == 'Pending Verification' 
