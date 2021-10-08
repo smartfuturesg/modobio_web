@@ -158,6 +158,14 @@ flask run
 
 The app will keep running in the terminal and give extensive debug output. If all is well, navigate your browser to http://localhost:5000. More info on running Flask apps [here](https://flask.palletsprojects.com/en/1.1.x/quickstart/).
 
+## Logging
+
+Odyssey makes use of the standard Python `logging` package. A root logger is created in [src/odyssey/__init__.py]. The logging level is set by `LOG_LEVEL` in [src/odyssey/defaults.py] and defaults to `DEBUG` for development and testing and `INFO` for production. The logger prints to stderr in plain text format. In production, `LOG_FORMAT_JSON` is set and the output format changes to JSON. The level and output format can be changed in the environment. For more information on the different log levels, see [logging howto](https://docs.python.org/3/howto/logging.html).
+
+In addition to the default logging levels, an `AUDIT` level is defined in Odyssey. The `AUDIT` level lies between `WARNING` and `INFO` (integer value 25) and is used to store messages about the state of Odyssey that need to be preserved, such as successful payments, connection and duration of telehealth calls, etc. A function `logging.audit()` is defined on the root logger with the same signature as `logging.debug()` et al.
+
+The default log level of `DEBUG` can generate a very large amount of output, especially on startup. In order to silence the output of Flask, set `LOG_LEVEL` to a higher level, e.g. `WARNING`. On the other hand, if you are trying to discover a bug, you may want to keep te level at `DEBUG` but instead capture the output to search for specific output afterwards. In that case, start the API with `$ flask run 2> odyssey.log`.
+
 # Docker
 
 If you have Docker installed, you can bring up a local, ready to go instance of this application by running the following commands.

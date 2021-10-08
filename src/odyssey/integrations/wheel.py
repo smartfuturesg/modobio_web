@@ -13,13 +13,13 @@ import uuid
 from flask import current_app
 from sqlalchemy import select
 from werkzeug.datastructures import FileStorage
+from werkzeug.exceptions import BadRequest
 
 from odyssey import db
 from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupOrganizations, LookupTerritoriesOfOperations
 from odyssey.api.practitioner.models import PractitionerCredentials, PractitionerOrganizationAffiliation
 from odyssey.api.telehealth.models import TelehealthBookings, TelehealthStaffSettings
 from odyssey.api.user.models import User, UserLogin, UserProfilePictures
-from odyssey.utils.errors import GenericThirdPartyError, InputError
 from odyssey.utils.constants import ALLOWED_IMAGE_TYPES, ALPHANUMERIC, IMAGE_DIMENSIONS, IMAGE_MAX_SIZE
 from odyssey.utils.misc import FileHandling
 
@@ -98,8 +98,9 @@ class Wheel:
             try:
                 dat.raise_for_status()
             except Exception as e:
-                raise GenericThirdPartyError(status_code = dat.status_code, message=dat.json())
-                
+                resp = dat.json()
+                raise BadRequest(f'Wheel returned the following error: {resp}.')
+
             results = dat.json()
             page = (page + 1 if results['links'].get('next') else False)
 
@@ -182,7 +183,8 @@ class Wheel:
             try:
                 dat.raise_for_status()
             except Exception as e:
-                raise GenericThirdPartyError(status_code = dat.status_code, message=dat.json())
+                resp = dat.json()
+                raise BadRequest(f'Wheel returned the following error: {resp}.')
                 
             results = dat.json()
             page = (page + 1 if results['links'].get('next') else False)
@@ -227,7 +229,8 @@ class Wheel:
             values: wheel_clinician_id or user_id 
         """
         if key not in ('user_id', 'wheel_clinician_id'):
-            raise InputError(message='invalid request for wheel clinician id dictionary key')
+            # This should probably be a python error and not be propagated to the frontend.
+            raise BadRequest('Unknown key {key}.')
 
         query = db.session.execute(
             select(PractitionerOrganizationAffiliation
@@ -295,7 +298,8 @@ class Wheel:
         try:
             response.raise_for_status()
         except Exception as e:
-            raise GenericThirdPartyError(status_code = response.status_code, message=response.json())
+            resp = response.json()
+            raise BadRequest(f'Wheel returned the following error: {resp}.')
 
         return booking_external_id, consult_url_deeplink
         
@@ -546,7 +550,8 @@ class Wheel:
         try:
             response.raise_for_status()
         except Exception as e:
-            raise GenericThirdPartyError(status_code = response.status_code, message=response.json())
+            resp = response.json()
+            raise BadRequest(f'Wheel returned the following error: {resp}.')
 
         return
 
@@ -573,7 +578,8 @@ class Wheel:
         try:
             response.raise_for_status()
         except Exception as e:
-            raise GenericThirdPartyError(status_code = response.status_code, message=response.json())
+            resp = response.json()
+            raise BadRequest(f'Wheel returned the following error: {resp}.')
 
         return
 
@@ -600,6 +606,7 @@ class Wheel:
         try:
             response.raise_for_status()
         except Exception as e:
-            raise GenericThirdPartyError(status_code = response.status_code, message=response.json())
+            resp = response.json()
+            raise BadRequest(f'Wheel returned the following error: {resp}.')
 
         return

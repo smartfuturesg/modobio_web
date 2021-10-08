@@ -31,7 +31,7 @@ def test_put_client_profile_picture(test_client):
         f'/client/profile-picture/{test_client.client_id}/',
         headers=test_client.client_auth_header)
 
-    assert response.status_code == 422
+    assert response.status_code == 400
 
 def test_delete_client_profile_picture(test_client):
     # Test a staff member trying to delete client profile picture

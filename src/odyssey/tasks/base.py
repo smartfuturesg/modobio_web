@@ -1,5 +1,7 @@
-import celery
+import logging
+logger = logging.getLogger(__name__)
 
+import celery
 
 class BaseTaskWithRetry(celery.Task):
     """

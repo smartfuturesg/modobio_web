@@ -1,16 +1,25 @@
-from PIL import Image
+import calendar
+import copy
+import json
+import logging
 
-from flask import request, current_app, Response
-from flask_accepts import accepts, responds
-from flask_restx import Resource, Namespace
-import json, calendar, copy
-from flask.json import dumps
 from datetime import date, time, datetime, timedelta, timezone
+
 from dateutil import tz
-from dateutil.rrule import YEARLY, MONTHLY, WEEKLY, DAILY, rrule
 from dateutil.relativedelta import relativedelta
+from dateutil.rrule import YEARLY, MONTHLY, WEEKLY, DAILY, rrule
+from flask import request, current_app, Response
+from flask.json import dumps
+from flask_accepts import accepts, responds
+from flask_restx import Namespace
+from PIL import Image
+from werkzeug.exceptions import BadRequest
 
 from odyssey import db
+from odyssey.api.lookup.models import (
+    LookupTerritoriesOfOperations,
+    LookupCountriesOfOperations,
+    LookupRoles)
 from odyssey.api.staff.models import (
     StaffOperationalTerritories,
     StaffRoles,
@@ -18,13 +27,6 @@ from odyssey.api.staff.models import (
     StaffProfile,
     StaffCalendarEvents,
     StaffOffices)
-from odyssey.api.user.models import User, UserLogin, UserTokenHistory, UserProfilePictures
-from odyssey.api.lookup.models import LookupTerritoriesOfOperations, LookupCountriesOfOperations, LookupRoles
-from odyssey.utils.auth import token_auth, basic_auth
-from odyssey.utils.errors import UnauthorizedUser, StaffEmailInUse, InputError, MethodNotAllowed, GenericNotFound
-from odyssey.utils.misc import check_staff_existence, FileHandling
-from odyssey.utils.constants import ALLOWED_IMAGE_TYPES, IMAGE_MAX_SIZE, IMAGE_DIMENSIONS
-from odyssey.api.user.schemas import UserSchema, StaffInfoSchema
 from odyssey.api.staff.schemas import (
     StaffOperationalTerritoriesNestedSchema,
     StaffProfileSchema, 
@@ -36,8 +38,18 @@ from odyssey.api.staff.schemas import (
     StaffCalendarEventsUpdateSchema,
     StaffOfficesSchema,
     StaffInternalRolesSchema)
+from odyssey.api.user.models import (
+    User,
+    UserLogin,
+    UserTokenHistory,
+    UserProfilePictures)
+from odyssey.api.user.schemas import UserSchema, StaffInfoSchema
+from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.base.resources import BaseResource
+from odyssey.utils.constants import ALLOWED_IMAGE_TYPES, IMAGE_MAX_SIZE, IMAGE_DIMENSIONS
+from odyssey.utils.misc import check_staff_existence, FileHandling
 
+logger = logging.getLogger(__name__)
 
 ns = Namespace('staff', description='Operations related to staff members')
 
@@ -58,26 +70,27 @@ class StaffMembers(BaseResource):
         # the model.
         return User.query.filter_by(is_staff=True)
 
-    
     @token_auth.login_required
     @accepts(schema=StaffProfileSchema, api=ns)
     @responds(schema=StaffProfileSchema, status_code=201, api=ns)     
     def post(self):
         """register a new staff member"""
         data = request.get_json() or {}
+        email = data.get('email')
+
         #check if this email is already being used. If so raise 409 conflict error 
-        staff = User.query.filter_by(email=data.get('email')).first()
+        staff = User.query.filter_by(email=email).first()
         if staff:
-            raise StaffEmailInUse(email=data.get('email'))
+            raise BadRequest('Email {email} already in use.')
 
         ## TODO: rework Role suppression
         # system_admin: permisison to create staff admin.
         # staff_admin:  can create all other roles except staff/systemadmin
         # if data.get('is_system_admin'):
-        #     raise UnauthorizedUser(message=f"Staff member with email {token_auth.current_user()[0].email} is unauthorized to create a system administrator role.")
+        #     raise Unauthorized(f"Staff member with email {token_auth.current_user()[0].email} is unauthorized to create a system administrator role.")
 
         # if data.get('is_admin') and token_auth.current_user()[0].get_admin_role() != 'sys_admin':
-        #     raise UnauthorizedUser(message=f"Staff member with email {token_auth.current_user()[0].email} is unauthorized to create a staff administrator role. \
+        #     raise Unauthorized(f"Staff member with email {token_auth.current_user()[0].email} is unauthorized to create a staff administrator role. \
         #                          Please contact system admin")
    
         #remove user data from staff data
@@ -116,7 +129,7 @@ class UpdateRoles(BaseResource):
         """
         Update staff roles
         """
-        super().check_user(user_id, user_type='staff')
+        self.check_user(user_id, user_type='staff')
                             
         user = User.query.filter_by(user_id=user_id).one_or_none()    
         staff_roles = db.session.query(StaffRoles.role).filter(StaffRoles.user_id==user_id).all()
@@ -128,8 +141,9 @@ class UpdateRoles(BaseResource):
                 new_role = LookupRoles.query.filter_by(role_name=role).one_or_none()
 
                 if '@modobio.com' not in user.email or not user.email_verified:
-                    raise MethodNotAllowed(message='Non practitioner roles can only be granted to user\'s ' \
-                                            + 'with a verified email with the domain @modobio.com.')
+                    raise BadRequest(
+                        'Non-practitioner roles can only be granted to users '
+                        'with a verified @modobio.com address.')
                 else:
                     db.session.add(StaffRolesSchema().load({'user_id': user_id, 
                                                         'role': role,
@@ -144,7 +158,7 @@ class UpdateRoles(BaseResource):
         """
         Get staff roles
         """
-        super().check_user(user_id, user_type='staff')
+        self.check_user(user_id, user_type='staff')
 
         return StaffRoles.query.filter_by(user_id=user_id).all()
 
@@ -162,7 +176,8 @@ class OperationalTerritories(BaseResource):
 
         # staff are only allowed to edit their own info
         if staff_user.user_id != user_id:
-            raise UnauthorizedUser(message="")
+            raise Unauthorized
+
         data = request.parsed_obj
         # current operational territories
         current_territories = db.session.query(
@@ -188,7 +203,7 @@ class OperationalTerritories(BaseResource):
                     db.session.add(territory)
                 else:
                     db.session.rollback()
-                    raise UnauthorizedUser(message="the staff member does not have this role")
+                    raise Unauthorized('Staff member does not have this role.')
 
         db.session.commit()
         
@@ -352,7 +367,7 @@ class StaffProfilePage(BaseResource):
         check_staff_existence(user_id)
 
         if not request.form and not request.files:
-            raise InputError(422, "No data provided")
+            raise BadRequest('No data provided.')
 
         user = User.query.filter_by(user_id=user_id).one_or_none()
         profile = StaffProfile.query.filter_by(user_id=user_id).one_or_none()
@@ -378,7 +393,7 @@ class StaffProfilePage(BaseResource):
                     elif data in ('false', 'False', '0'):
                         data = False
                     else:
-                        raise InputError(422, f'{key} must be a boolean. Acceptable values are \'true\', \'false\', \'True\', \'False\', \'1\', and \'0\'')
+                        raise BadRequest(f'Invalid value for {key}.')
                 if key == 'dob':
                     data = datetime.strptime(data,'%Y-%m-%d')
                 user_update[key] = data
@@ -473,6 +488,9 @@ class StaffCalendarEventsRoute(BaseResource):
     """
     Endpoint to manage professional's (staff) calendar events
     """
+    # Multiple events per staff member allowed
+    __check_resource__ = False
+
     @token_auth.login_required(user_type=('staff_self',))
     @accepts(schema=StaffCalendarEventsSchema, api=ns)
     @responds(schema=StaffCalendarEventsSchema, status_code=201, api=ns)
@@ -486,7 +504,7 @@ class StaffCalendarEventsRoute(BaseResource):
         if data.end_date:
             date_delta = data.end_date - data.start_date
             if date_delta.total_seconds() < 0:
-                raise InputError(422, 'Event end date must be later than start date or null')
+                raise BadRequest('Event end date must be later than start date or null.')
 
         if data.all_day:
             data.start_time = time(hour=0, minute=0, second=0,  tzinfo=tz.tzlocal())
@@ -494,11 +512,11 @@ class StaffCalendarEventsRoute(BaseResource):
             
             if data.recurring:
                 if not data.recurrence_type:
-                    raise InputError(422, 'Recurring events require recurrence type')    
+                    raise BadRequest('Recurring events require recurrence type.')
             else:
                 data.recurrence_type = None
                 if not data.end_date:
-                    raise InputError(422, 'This event requires an end date')
+                    raise BadRequest('This event requires an end date.')
 
             data.duration = timedelta(days=1)
                 
@@ -509,17 +527,17 @@ class StaffCalendarEventsRoute(BaseResource):
             if data.recurring:
                 end = datetime.combine(data.start_date, data.end_time)
                 if not data.recurrence_type:
-                    raise InputError(422, 'Recurring events require recurrence type')  
+                    raise BadRequest('Recurring events require recurrence type.')
             else:
                 data.recurrence_type = None
                 if not data.end_date:
-                    raise InputError(422, 'This event requires an end date')
+                    raise BadRequest('This event requires an end date.')
                 end = datetime.combine(data.end_date, data.end_time)
 
             #Event's start time must come before end time
             delta = end - start
             if delta.total_seconds() < 0:
-                raise InputError(422, 'Start of event must be earlier than End of event')
+                raise BadRequest('Start of event must be earlier than End of event.')
             
             data.duration = delta
         
@@ -530,7 +548,6 @@ class StaffCalendarEventsRoute(BaseResource):
         db.session.add(data)
         db.session.commit()
         return data
-
 
     @token_auth.login_required(user_type=('staff_self',))
     @accepts(schema=StaffCalendarEventsUpdateSchema, api=ns)
@@ -570,7 +587,7 @@ class StaffCalendarEventsRoute(BaseResource):
             if updated_event.end_date:
                 date_delta = updated_event.end_date - updated_event.start_date
                 if date_delta.total_seconds() < 0:
-                    raise InputError(422, 'Event end date must be later than start date or null')
+                    raise BadRequest('Event end date must be later than start date or null.')
 
             if updated_event.all_day:
                 updated_event.start_time = time(hour=0, minute=0, second=0, tzinfo=tz.tzlocal())
@@ -578,11 +595,11 @@ class StaffCalendarEventsRoute(BaseResource):
             
                 if updated_event.recurring:
                     if not updated_event.recurrence_type:
-                        raise InputError(422, 'Recurring events require recurrence type')
+                        raise BadRequest('Recurring events require recurrence type.')
                 else:
                     updated_event.recurrence_type = None
                     if not updated_event.end_date:
-                        raise InputError(422, 'This event requires an end date')
+                        raise BadRequest('This event requires an end date.')
 
                 updated_event.duration = timedelta(days=1)
             else:
@@ -592,17 +609,17 @@ class StaffCalendarEventsRoute(BaseResource):
                 if updated_event.recurring:
                     end = datetime.combine(updated_event.start_date, updated_event.end_time)
                     if not updated_event.recurrence_type:
-                        raise InputError(422, 'Recurring events require recurrence type')  
+                        raise BadRequest('Recurring events require recurrence type.')
                 else:
                     updated_event.recurrence_type = None
                     if not updated_event.end_date:
-                        raise InputError(422, 'This event requires an end date')
+                        raise BadRequest('This event requires an end date.')
                     end = datetime.combine(updated_event.end_date, updated_event.end_time)
 
                 #Event's start time must come before end time
                 delta = end - start
                 if delta.total_seconds() < 0:
-                    raise InputError(422, 'Start of event must be earlier than End of event')
+                    raise BadRequest('Start of event must be earlier than End of event.')
                 
                 updated_event.duration = delta
             
@@ -651,7 +668,7 @@ class StaffCalendarEventsRoute(BaseResource):
                 query.end_date = prev_start_date - timedelta(days=1)
 
         else:
-            raise InputError(204, 'No such event')
+            raise BadRequest('Event not found.')
         db.session.commit()
         return data
 
@@ -677,12 +694,12 @@ class StaffCalendarEventsRoute(BaseResource):
 
         if month:
             if month < 1 or month > 12:
-                raise InputError(422, "Invalid Month")
+                raise BadRequest('Invalid month.')
         
         #if the resquest inludes a day but not a month, the month defaults to current month
         if day:
             if day < 1 or day > 31:
-                raise InputError(422, "Invalid Day")
+                raise BadRequest('Invalid day')
 
             if not month:
                 month = datetime.now().month
@@ -690,7 +707,7 @@ class StaffCalendarEventsRoute(BaseResource):
             try:
                 datetime(year,month,day)
             except ValueError:
-                raise InputError(422, "Invalid Date")
+                raise BadRequest('Invalid date.')
 
         query_set = set(StaffCalendarEvents.query.filter_by(user_id=user_id).order_by(StaffCalendarEvents.start_date.desc()).all())
         new_query = query_set.copy()
@@ -914,7 +931,7 @@ class StaffCalendarEventsRoute(BaseResource):
                 db.session.delete(query)
         
         else: 
-            raise InputError(204, 'No such event')
+            raise BadRequest('Event not found.')
 
         db.session.commit()
         return ("Event Deleted", 200)
@@ -931,14 +948,9 @@ class StaffOfficesRoute(BaseResource):
         """
         Submit office data for a professional.
         """
-
-        #prevent POST if the user already has office data. PUT must be used instead
-        if StaffOffices.query.filter_by(user_id=user_id).one_or_none():
-            raise MethodNotAllowed()
-
         territory = LookupTerritoriesOfOperations.query.filter_by(idx=request.parsed_obj.territory_id).one_or_none()
         if not territory:
-            raise GenericNotFound(f'No territory exists with the territory_id {request.parsed_obj.territory_id}.')
+            raise BadRequest(f'Territory {request.parsed_obj.territory_id} not found.')
 
         request.parsed_obj.user_id = user_id
 
@@ -960,21 +972,17 @@ class StaffOfficesRoute(BaseResource):
         """
         Update office data for a professional.
         """
-
-        #prevent PUT if resource does not exist. POST must be used instead.
         office = StaffOffices.query.filter_by(user_id=user_id).one_or_none()
-        if not office:
-            raise GenericNotFound(f'No office data exists for the staff member with user id {user_id}.')
 
         territory = LookupTerritoriesOfOperations.query.filter_by(idx=request.parsed_obj.territory_id).one_or_none()
         if not territory:
-            raise GenericNotFound(f'No territory exists with the territory_id {request.parsed_obj.territory_id}.')
+            raise BadRequest(f'Territory {request.parsed_obj.territory_id} not found.')
 
-        office.update(request.get_json())
+        office.update(request.json)
         db.session.commit()
 
         #fill in country name for the response
-        res = request.get_json()
+        res = request.json
         res['country'] = LookupCountriesOfOperations.query.filter_by(idx=territory.country_id).one_or_none().country
         res['territory'] = territory.sub_territory
         res['territory_abbreviation'] = territory.sub_territory_abbreviation

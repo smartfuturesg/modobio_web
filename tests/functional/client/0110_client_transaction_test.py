@@ -25,7 +25,7 @@ def test_put_client_transaction(test_client):
     transaction_1_name = transaction_1.name
 
     response = test_client.put(
-        f'/client/transaction/1/',
+        '/client/transaction/1/',
         headers=test_client.client_auth_header,
         data=dumps(clients_transactions[1]),
         content_type='application/json')

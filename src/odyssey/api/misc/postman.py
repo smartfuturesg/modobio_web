@@ -1,11 +1,16 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from flask import current_app, json, Response
-from flask_restx import Resource, Namespace
+from flask_restx import Namespace
+
+from odyssey.utils.base.resources import BaseResource
 
 # Development-only namespace
 ns_dev = Namespace('postman', description='[DEV ONLY] Endpoint to download a Postman collection of the API.')
 
 @ns_dev.route('/')
-class PostmanEndpoint(Resource):
+class PostmanEndpoint(BaseResource):
     @ns_dev.doc(security=None)
     def get(self):
         """ Download API as a Postman collection.

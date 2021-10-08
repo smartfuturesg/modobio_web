@@ -15,7 +15,7 @@ def test_post_pt_history(test_client):
         f'/physiotherapy/history/{test_client.client_id}/',
         headers=test_client.staff_auth_header,
         content_type='application/json')
-    assert response.status_code == 204
+    assert response.status_code == 200
 
     # For coverage, raise a UserNotFound error
     response = test_client.put(
@@ -24,7 +24,7 @@ def test_post_pt_history(test_client):
         data=dumps(payload),
         content_type='application/json')
 
-    assert response.status_code == 404
+    assert response.status_code == 400
 
     response = test_client.post(
         f'/physiotherapy/history/{test_client.client_id}/',

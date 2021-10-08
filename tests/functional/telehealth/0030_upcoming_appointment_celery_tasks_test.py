@@ -8,7 +8,6 @@ from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations
 from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupClinicalCareTeamResources
 from odyssey.api.notifications.models import Notifications
 from odyssey.api.telehealth.models import TelehealthBookings
-from odyssey.api.payment.models import PaymentMethods
 
 from odyssey.api.user.models import User
 from tests.functional.telehealth.client_select_data import(
@@ -21,7 +20,7 @@ from odyssey.tasks.tasks import upcoming_appointment_notification_2hr, upcoming_
 
 # from odyssey.tests.utils import login
 
-def test_upcoming_bookings_scan(test_client):
+def test_upcoming_bookings_scan(test_client, payment_method):
     global upcoming_bookings_all
     ##
     # Submit availability for staff memeber
@@ -33,11 +32,6 @@ def test_upcoming_bookings_scan(test_client):
         headers=test_client.staff_auth_header,
         data=dumps(telehealth_staff_full_availability),
         content_type='application/json')
-
-    ##
-    # Sign in as a client, book appointments with the staff member above
-    ##
-    payment_method = PaymentMethods.query.filter_by(user_id=test_client.client_id).first()
 
     # loop through all bookings in test data
     for booking in telehealth_bookings_data_full_day:

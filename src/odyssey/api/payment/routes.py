@@ -1,16 +1,19 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import requests
 import json
 
 from flask import request, current_app
 from flask_accepts import accepts, responds
 from flask_restx import Resource
+from werkzeug.exceptions import BadRequest, Unauthorized
 
 from odyssey import db
 from odyssey.api import api
 from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import INSTAMED_OUTLET
 from odyssey.utils.misc import check_client_existence
-from odyssey.utils.errors import TooManyPaymentMethods, GenericNotFound, GenericThirdPartyError, UnauthorizedUser, MethodNotAllowed
 from odyssey.utils.base.resources import BaseResource
 from odyssey.api.lookup.models import LookupOrganizations
 from odyssey.api.payment.models import PaymentMethods, PaymentStatus, PaymentHistory, PaymentRefunds
@@ -20,12 +23,14 @@ ns = api.namespace('payment', description='Endpoints for functions related to pa
 
 @ns.route('/methods/<int:user_id>/')
 class PaymentMethodsApi(BaseResource):
-    
+    # Multiple payment methods per user allowed
+    __check_resource__ = False
+
     @token_auth.login_required(user_type=('client',))
     @responds(schema=PaymentMethodsSchema(many=True), api=ns)
     def get(self, user_id):
         """get user payment methods"""
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         return PaymentMethods.query.filter_by(user_id=user_id).all()
 
@@ -34,10 +39,10 @@ class PaymentMethodsApi(BaseResource):
     @responds(schema=PaymentMethodsSchema, api=ns, status_code=201)
     def post(self, user_id):
         """add a new payment method"""
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         if len(PaymentMethods.query.filter_by(user_id=user_id).all()) >= 5:
-            raise TooManyPaymentMethods
+            raise BadRequest('Maximum number of payment methods reached.')
 
         request_data = {
             "Outlet": INSTAMED_OUTLET,
@@ -57,12 +62,12 @@ class PaymentMethodsApi(BaseResource):
         response = requests.post('https://connect.instamed.com/rest/payment/paymentplan',
                                 headers=request_headers,
                                 json=request_data)
-        
+
         #check if instamed api raised an error
         try:
             response.raise_for_status()
         except:
-            raise GenericThirdPartyError(response.status_code, response.text)
+            raise BadRequest(f'Instamed returned the following error: {response.text}')
 
         #convert response data to json (python dict)
         response_data = json.loads(response.text)
@@ -97,26 +102,23 @@ class PaymentMethodsApi(BaseResource):
         """remove an existing payment method"""
         idx = request.args.get('idx', type=int)
 
-        payment = PaymentMethods.query.filter_by(idx=idx,user_id=user_id).one_or_none()
-        
-        if not payment:
-            raise GenericNotFound(f'No payment method exists with idx {idx} and user id {user_id}.')
-
-        db.session.delete(payment)
-        db.session.commit()
+        payment = PaymentMethods.query.filter_by(idx=idx, user_id=user_id).one_or_none()
+        if payment:
+            db.session.delete(payment)
+            db.session.commit()
 
 @ns.route('/status/')
 class PaymentStatusApi(BaseResource):
     @accepts(schema=PaymentStatusSchema, api=ns)
     @responds(schema=PaymentStatusSchema, api=ns, status_code=200)
     def post(self):
-        super().check_user(request.parsed_obj.user_id, user_type='client')
+        self.check_user(request.parsed_obj.user_id, user_type='client')
 
         #retrieve token from header
         org_token = request.headers.get('Authorization')
 
         if not LookupOrganizations.query.filter_by(org_token=org_token, org_name='InstaMed').one_or_none():
-            raise UnauthorizedUser(message='Invalid organization token.')
+            raise Unauthorized('Invalid organization token.')
 
         db.session.add(request.parsed_obj)
         db.session.commit()
@@ -127,7 +129,7 @@ class PaymentStatusGetApi(BaseResource):
     @token_auth.login_required(user_type=('client', 'staff',), staff_role=('client_services',))
     @responds(schema=PaymentStatusOutputSchema, api=ns, status_code=200)
     def get(self, user_id):
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         return {'payment_statuses': PaymentStatus.query.filter_by(user_id=user_id).all()}
 
@@ -139,12 +141,14 @@ class PaymentHistoryApi(BaseResource):
         """
         Returns a list of transactions for the given user_id.
         """
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         return  PaymentHistory.query.filter_by(user_id=user_id).all()
 
 @ns.route('/refunds/<int:user_id>/')
 class PaymentRefundApi(BaseResource):
+    # Multiple refunds allowed
+    __check_resource__ = False
 
     @token_auth.login_required(user_type=('client', 'staff',), staff_role=('client_services',))
     @responds(schema=PaymentRefundsSchema(many=True), api=ns, status_code=200)
@@ -152,7 +156,7 @@ class PaymentRefundApi(BaseResource):
         """
         Returns all refunds that have been issued for the given user_id
         """
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         return PaymentRefunds.query.filter_by(user_id=user_id).all()
 
@@ -165,14 +169,14 @@ class PaymentRefundApi(BaseResource):
         total amount refunded cannot exceed the amount of the original transaction.
         """
         
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         payment_id = request.parsed_obj.payment_id
 
         #retrieve original transaction being refunded
         original_traction = PaymentHistory.query.filter_by(idx=payment_id).one_or_none()
         if not original_traction:
-            raise GenericNotFound(f'No transaction with transaction_id {payment_id} exists.')
+            raise BadRequest(f'Transaction {payment_id} not found.')
 
         #check if requested amount plus previous refunds of this transaction exceed the original amount
         total_refunded = 0.00
@@ -180,9 +184,10 @@ class PaymentRefundApi(BaseResource):
             total_refunded += float(transaction.refund_amount)
     
         if (float(request.parsed_obj.refund_amount) + total_refunded) > float(original_traction.transaction_amount):
-            raise MethodNotAllowed(message='The requested refund amount combined with refunds already given' + \
-                                            f' cannot exceed the amount of the original transaction. {total_refunded}' + \
-                                            f' has already been refunded for the transaction id {payment_id}.')
+            raise BadRequest(
+                f'The requested refund amount combined with refunds already given '
+                f'cannot exceed the amount of the original transaction. {total_refunded} '
+                f'has already been refunded for the transaction id {payment_id}.')
 
         #call instamed api
         request_data = {
@@ -203,7 +208,7 @@ class PaymentRefundApi(BaseResource):
         try:
             response.raise_for_status()
         except:
-            raise GenericThirdPartyError(response.status_code, response.text)
+            raise BadRequest(f'Instamed returned the following error: {response.text}')
 
         request.parsed_obj.user_id = user_id
         request.parsed_obj.reporter_id = token_auth.current_user()[0].user_id

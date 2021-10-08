@@ -69,7 +69,7 @@ def test_break_post_1_social_history(test_client):
         content_type='application/json')
 
     # Currently smoke is false, and do not provide last_smoke (int)
-    assert response.status_code == 405
+    assert response.status_code == 400
 
 def test_get_broke_1_social_medical_history(test_client):
     response = test_client.get(
@@ -92,7 +92,7 @@ def test_break_post_2_social_history(test_client):
         content_type='application/json')
 
     # STD lookup out of range
-    assert response.status_code == 405
+    assert response.status_code == 400
 
 def test_get_broke_2_social_medical_history(test_client):
     response = test_client.get(

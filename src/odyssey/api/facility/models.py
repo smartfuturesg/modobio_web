@@ -1,6 +1,8 @@
 """
 Database tables for supporting miscellaneous functionality. 
 """
+import logging
+logger = logging.getLogger(__name__)
 
 from odyssey import db
 from odyssey.utils.constants import DB_SERVER_TIME
