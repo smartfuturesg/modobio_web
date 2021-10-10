@@ -1,20 +1,17 @@
-import os
 import random
 
 from flask import current_app
 import requests
 from sqlalchemy.sql.expression import or_, select
-from twilio.base.exceptions import TwilioRestException
 from twilio.jwt.access_token import AccessToken
 from twilio.jwt.access_token.grants import ChatGrant, VideoGrant
 from twilio.rest import Client
-from twilio.rest.conversations.v1 import conversation
-from odyssey.api.telehealth.models import TelehealthBookings, TelehealthChatRooms
+from werkzeug.exceptions import BadRequest
 
 from odyssey import db
+from odyssey.api.telehealth.models import TelehealthBookings, TelehealthChatRooms
 from odyssey.api.user.models import User
 from odyssey.utils.constants import ALPHANUMERIC, TWILIO_ACCESS_KEY_TTL
-from odyssey.utils.errors import GenericThirdPartyError, InputError, MissingThirdPartyCredentials
 
 
 class Twilio():
@@ -37,7 +34,7 @@ class Twilio():
         twilio_api_key_secret = current_app.config['TWILIO_API_KEY_SECRET']
 
         if any(x is None for x in [twilio_account_sid,twilio_api_key_sid,twilio_api_key_secret]):
-            raise MissingThirdPartyCredentials(message="Twilio API credentials have not been configured")
+            raise BadRequest("Twilio API credentials have not been configured")
 
         return {'account_sid':twilio_account_sid,
                 'api_key': twilio_api_key_sid,
@@ -235,7 +232,7 @@ class Twilio():
                 TelehealthChatRooms.client_user_id == user_id))).scalars().one_or_none()
        
         if not chat_room or not user:
-          raise InputError(message="cannot find conversation or user not a conversation participant")
+          raise BadRequest("cannot find conversation or user not a conversation participant")
         
         try:
             self.client.conversations \
@@ -304,7 +301,7 @@ class Twilio():
         try:
             response.raise_for_status()
         except Exception as e:
-            raise GenericThirdPartyError(status_code = response.status_code, message=response.json())                    
+            raise BadRequest(message=response.json())                    
 
         return response.content
     
@@ -334,7 +331,7 @@ class Twilio():
         try:
             response.raise_for_status()
         except Exception as e:
-            raise GenericThirdPartyError(status_code = response.status_code, message=response.json())                    
+            raise BadRequest(response.text)                    
 
         return response.json()['sid']
 
