@@ -2,6 +2,9 @@
 Database tables for the doctor's portion of the Modo Bio Staff application.
 All tables in this module are prefixed with ``Medical``.
 """
+import logging
+logger = logging.getLogger(__name__)
+
 from sqlalchemy import text
 
 from odyssey.utils.constants import DB_SERVER_TIME, BLOODTEST_EVAL

@@ -137,6 +137,12 @@ class Config:
         if version and self.API_VERSION == odyssey.defaults.API_VERSION:
             self.API_VERSION = version
 
+        # Logging
+        if not self.LOG_LEVEL:
+            self.LOG_LEVEL = 'INFO'
+            if self.DEV:
+                self.LOG_LEVEL = 'DEBUG'
+
         # Database URI.
         if not self.DB_URI:
             name = self.DB_NAME
@@ -204,24 +210,18 @@ class Config:
 
         return getattr(odyssey.defaults, var, None)
 
+def database_parser() -> argparse.ArgumentParser:
+    """ Return CLI parser for database arguments.
 
-def database_uri(docstring: str='') -> str:
-    """ Database selection, for use in scripts not under control of Flask.
-
-    Parameters
-    ----------
-    docstring : str
-        Pass in the doctring of the script in which this function is used. The docstring
-        will be prepended to the help text of this function. It will show up on the
-        command line when the calling script is run without parameters.
+    For use in scripts that need to access the database, but are not under control
+    of Flask. Use this function for full control over and extension of command line
+    parameters. For the database URI as a string without further control, use
+    :func:`database_uri`.
 
     Returns
     -------
-    str
-        URI of the database.
-
-    Notes
-    -----
+    argparse.ArgumentParser
+        Command line argument parser, useful for extending functionality.
     """
 
     help_text = """
@@ -239,16 +239,31 @@ def database_uri(docstring: str='') -> str:
     The commandline argument takes precedence over ``DB_URI``, which in turn takes
     precedence over the partial parameters. Defaults are taken from :mod:`odyssey.defaults`
     """
-    database_uri.__doc__ += help_text
+    conf = Config()
 
     parser = argparse.ArgumentParser(
-        description=docstring + textwrap.dedent(help_text),
-        formatter_class=argparse.RawDescriptionHelpFormatter
-    )
-    parser.add_argument('--db_uri', help="Database URI postgres://<user>:<pass>@<host>/<db>")
+        description=textwrap.dedent(help_text),
+        formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument(
+        '--db_uri',
+        default=conf.DB_URI,
+        help='Database URI postgres://<user>:<pass>@<host>/<db>')
+
+    return parser
+
+def database_uri() -> str:
+    """ Database URI as a string.
+
+    For use in scripts that need to access the database, but are not under control
+    of Flask. For more control over the options and an extendible command line
+    parser, use :func:`database_parser`.
+
+    Returns
+    -------
+    str
+        URI of the database.
+    """
+    parser = database_parser()
     args = parser.parse_args()
 
-    conf = Config()
-    db_uri = args.db_uri or conf.DB_URI
-
-    return db_uri
+    return args.db_uri

@@ -1,7 +1,11 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from flask import request
 from flask_accepts import accepts, responds
-from flask_restx import Resource, Namespace
+from flask_restx import Namespace
 from sqlalchemy import or_
+from werkzeug.exceptions import BadRequest
 
 from odyssey import db
 from odyssey.api.notifications.models import Notifications, NotificationsPushRegistration
@@ -15,8 +19,8 @@ from odyssey.api.notifications.schemas import (
     ApplePushNotificationBadgeTestSchema,
     ApplePushNotificationVoipTestSchema)
 from odyssey.utils.auth import token_auth
+from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.message import PushNotification
-from odyssey.utils.errors import InputError
 from odyssey.utils.misc import FileHandling
 from odyssey.api.user.models import UserProfilePictures
 
@@ -24,7 +28,7 @@ ns = Namespace('notifications', description='Endpoints for all types of notifica
 
 @ns.route('/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class NotificationsEndpoint(Resource):
+class NotificationsEndpoint(BaseResource):
 
     @token_auth.login_required
     @responds(schema=NotificationSchema(many=True), api=ns, status_code=200)
@@ -46,7 +50,7 @@ class NotificationsEndpoint(Resource):
 @ns.doc(params={
     'user_id': 'User ID number',
     'notification_id': 'Notification ID number'})
-class NotificationsUpdateEndpoint(Resource):
+class NotificationsUpdateEndpoint(BaseResource):
 
     @token_auth.login_required
     @accepts(schema=NotificationSchema, api=ns)
@@ -63,7 +67,7 @@ class NotificationsUpdateEndpoint(Resource):
             .one_or_none())
 
         if not notification:
-            raise InputError(400, 'Wrong notification_id or user_id.')
+            raise BadRequest('Wrong notification_id or user_id.')
 
         request.parsed_obj.user_id = user_id
         request.parsed_obj.notification_id = notification_id
@@ -73,7 +77,9 @@ class NotificationsUpdateEndpoint(Resource):
 
 @ns.route('/push/register/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class PushRegistrationEndpoint(Resource):
+class PushRegistrationEndpoint(BaseResource):
+    # Multiple devices per user allowed
+    __check_resource__ = False
 
     @token_auth.login_required
     @responds(schema=PushRegistrationGetSchema(many=True), api=ns, status_code=200)
@@ -216,7 +222,7 @@ ns_dev = Namespace(
     description='[DEV ONLY] Endpoints for testing sending of push notifications.')
 
 @ns_dev.route('/alert/<int:user_id>/')
-class ApplePushNotificationAlertTestEndpoint(Resource):
+class ApplePushNotificationAlertTestEndpoint(BaseResource):
 
     @token_auth.login_required
     @accepts(schema=ApplePushNotificationAlertTestSchema, api=ns_dev)
@@ -244,7 +250,7 @@ class ApplePushNotificationAlertTestEndpoint(Resource):
 
 
 @ns_dev.route('/background/<int:user_id>/')
-class ApplePushNotificationBackgroundTestEndpoint(Resource):
+class ApplePushNotificationBackgroundTestEndpoint(BaseResource):
 
     @token_auth.login_required
     @accepts(schema=ApplePushNotificationBackgroundTestSchema, api=ns_dev)
@@ -272,7 +278,7 @@ class ApplePushNotificationBackgroundTestEndpoint(Resource):
 
 
 @ns_dev.route('/badge/<int:user_id>/')
-class ApplePushNotificationBadgeTestEndpoint(Resource):
+class ApplePushNotificationBadgeTestEndpoint(BaseResource):
 
     @token_auth.login_required
     @accepts(schema=ApplePushNotificationBadgeTestSchema, api=ns_dev)
@@ -300,7 +306,7 @@ class ApplePushNotificationBadgeTestEndpoint(Resource):
 
 
 @ns_dev.route('/voip/<int:user_id>/')
-class ApplePushNotificationVoipTestEndpoint(Resource):
+class ApplePushNotificationVoipTestEndpoint(BaseResource):
 
     @token_auth.login_required
     @accepts(schema=ApplePushNotificationVoipTestSchema, api=ns_dev)

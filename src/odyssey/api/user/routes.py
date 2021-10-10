@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from datetime import datetime, timedelta
 import boto3
 import jwt
@@ -9,11 +12,17 @@ from flask_accepts import accepts, responds
 from flask_restx import Resource, Namespace
 from sqlalchemy.sql.expression import select
 from werkzeug.security import check_password_hash
+from werkzeug.exceptions import BadRequest, Unauthorized
 
+from odyssey import db
 from odyssey.api import api
-from odyssey.api.client.schemas import ClientInfoSchema, ClientGeneralMobileSettingsSchema, ClientRaceAndEthnicitySchema
 from odyssey.api.client.models import ClientClinicalCareTeam
+from odyssey.api.client.schemas import (
+    ClientInfoSchema,
+    ClientGeneralMobileSettingsSchema,
+    ClientRaceAndEthnicitySchema)
 from odyssey.api.lookup.models import LookupSubscriptions, LookupLegalDocs
+from odyssey.api.staff.models import StaffRoles
 from odyssey.api.staff.schemas import StaffProfileSchema, StaffRolesSchema
 from odyssey.api.user.models import (
     User,
@@ -26,7 +35,6 @@ from odyssey.api.user.models import (
     UserLegalDocs, 
     UserResetPasswordRequestHistory
 )
-from odyssey.api.staff.models import StaffRoles
 from odyssey.api.user.schemas import (
     UserSchema, 
     UserLoginSchema,
@@ -40,29 +48,27 @@ from odyssey.api.user.schemas import (
     NewStaffUserSchema,
     UserLegalDocsSchema
 )
-
-from odyssey.utils.auth import token_auth, basic_auth
-from odyssey.utils.constants import PASSWORD_RESET_URL, DB_SERVER_TIME
-from odyssey.utils.errors import (
-    InputError,
-    StaffEmailInUse,
-    ClientEmailInUse,
-    UnauthorizedUser,
-    GenericNotFound,
-    InvalidVerificationCode,
-    IllegalSetting
-)
-from odyssey.utils.message import send_email_password_reset, send_email_delete_account, send_email_verify_email
-from odyssey.utils.misc import check_user_existence, check_client_existence, check_staff_existence, verify_jwt, FileHandling
 from odyssey.utils import search
-from odyssey import db
+from odyssey.utils.auth import token_auth, basic_auth
+from odyssey.utils.base.resources import BaseResource
+from odyssey.utils.constants import PASSWORD_RESET_URL, DB_SERVER_TIME
+from odyssey.utils.message import (
+    send_email_password_reset,
+    send_email_delete_account,
+    send_email_verify_email)
+from odyssey.utils.misc import (
+    check_user_existence,
+    check_client_existence,
+    check_staff_existence,
+    verify_jwt,
+    FileHandling)
 
 ns = Namespace('user', description='Endpoints for user accounts.')
 
 
 @ns.route('/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class ApiUser(Resource):
+class ApiUser(BaseResource):
     
     @token_auth.login_required
     @responds(schema=UserSchema, api=ns)
@@ -125,7 +131,7 @@ class ApiUser(Resource):
         return {'message': f'User with id {user_id} has been removed'}
 
 @ns.route('/staff/')
-class NewStaffUser(Resource):
+class NewStaffUser(BaseResource):
     @token_auth.login_required
     @accepts(schema=NewStaffUserSchema, api=ns)
     @responds(schema=NewStaffUserSchema, status_code=201, api=ns)
@@ -142,15 +148,16 @@ class NewStaffUser(Resource):
         
         # Check if user exists already
         user_info = data.get('user_info')
-        #input email made to lowercase to prevet future issues with authentication
-        user_info['email'] = user_info.get('email').lower()
+        #input email made to lowercase to prevent future issues with authentication
+        email = user_info['email'] = user_info.get('email').lower()
         staff_info = data.get('staff_info')
 
-        user = User.query.filter(User.email.ilike(user_info.get('email'))).first()
+        user = User.query.filter(User.email.ilike(email)).first()
         if user:
             if user.is_staff:
                 # user account already exists for this email and is already a staff account
-                raise StaffEmailInUse(email=user_info.get('email'))
+                raise BadRequest('Email address {email} already exists.')
+
             elif user.is_client == False and user.is_staff == False:
                 # user is neither a staff or client user
                 # currently, this can be the case when the user has been added by another user through the clinical
@@ -160,7 +167,7 @@ class NewStaffUser(Resource):
                 password=user_info.get('password', None)
                 
                 if not password:
-                    raise InputError(status_code=400,message='password required')
+                    raise BadRequest('Password required.')
                 
                 del user_info['password']
                 user_info['is_client'] = False
@@ -199,7 +206,8 @@ class NewStaffUser(Resource):
             # require password
             password = user_info.get('password', None)
             if not password:
-                raise InputError(status_code=400,message='password required')
+                raise BadRequest('Password required.')
+
             del user_info['password']
             
             user_info["is_client"] = False
@@ -264,7 +272,7 @@ class NewStaffUser(Resource):
 
 @ns.route('/staff/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class StaffUserInfo(Resource):
+class StaffUserInfo(BaseResource):
     @token_auth.login_required
     @responds(schema=NewStaffUserSchema, status_code=200, api=ns)
     def get(self, user_id):
@@ -286,7 +294,7 @@ class StaffUserInfo(Resource):
         return payload
 
 @ns.route('/client/')
-class NewClientUser(Resource):
+class NewClientUser(BaseResource):
     @accepts(schema=UserInfoSchema, api=ns)
     @responds(schema=NewClientUserSchema, status_code=201, api=ns)
     def post(self): 
@@ -298,12 +306,12 @@ class NewClientUser(Resource):
         """
 
         user_info = request.get_json()     
-        user_info['email'] = user_info.get('email').lower()
-        user = db.session.execute(select(User).filter(User.email == user_info.get('email').lower())).scalars().one_or_none()
+        email = user_info['email'] = user_info.get('email').lower()
+        user = db.session.execute(select(User).filter(User.email == email)).scalars().one_or_none()
         if user:
             if user.is_client:
                 # user account already exists for this email and is already a client account
-                raise ClientEmailInUse(email=user_info.get('email'))
+                raise BadRequest('Email address {email} already exists.')
             elif user.is_client == False and user.is_staff == False:
                 # client is neither a staff or client user
                 # currently, this can be the case when the user has been added by another user through the clinical
@@ -313,7 +321,7 @@ class NewClientUser(Resource):
                 password=user_info.get('password', None)
                 
                 if not password:
-                    raise InputError(status_code=400,message='password required')
+                    raise BadRequest('Password required.')
                 
                 del user_info['password']
                 user_info['is_client'] = True
@@ -349,7 +357,8 @@ class NewClientUser(Resource):
             # user account does not yet exist for this email
             password=user_info.get('password', None)
             if not password:
-                raise InputError(status_code=400,message='password required')
+                raise BadRequest('Password required.')
+
             del user_info['password']
             user_info['is_client'] = True
             user_info['is_staff'] = False
@@ -431,7 +440,7 @@ class NewClientUser(Resource):
         return payload
 
 @ns.route('/password/forgot-password/recovery-link/')
-class PasswordResetEmail(Resource):
+class PasswordResetEmail(BaseResource):
     """Password reset endpoints."""
     
     @accepts(schema=UserPasswordRecoveryContactSchema, api=ns)
@@ -452,7 +461,7 @@ class PasswordResetEmail(Resource):
         """
         email = request.parsed_obj['email']
         if not email:
-            raise InputError(status_code=400, message='Please provide your email address')
+            raise BadRequest('Email address required.')
 
         res = {}
 
@@ -516,7 +525,7 @@ class PasswordResetEmail(Resource):
 
 @ns.route('/password/forgot-password/reset')
 @ns.doc(params={'reset_token': "token from password reset endpoint"})
-class ResetPassword(Resource):
+class ResetPassword(BaseResource):
     """Reset the user's password."""
 
     @accepts(schema=UserPasswordResetSchema, api=ns)
@@ -532,7 +541,7 @@ class ResetPassword(Resource):
         try:
             decoded_token = jwt.decode(reset_token, secret, algorithms='HS256')
         except jwt.ExpiredSignatureError:
-            raise UnauthorizedUser(message="Token authorization expired")
+            raise Unauthorized('Token authorization expired.')
 
         # bring up the staff member and reset their password
         pswd = request.parsed_obj['password']
@@ -545,7 +554,7 @@ class ResetPassword(Resource):
         return 200
 
 @ns.route('/password/update/')
-class ChangePassword(Resource):
+class ChangePassword(BaseResource):
     """Reset the user's password."""
     @token_auth.login_required
     @accepts(schema=UserPasswordUpdateSchema, api=ns)
@@ -561,16 +570,13 @@ class ChangePassword(Resource):
         if check_password_hash(user_login.password, request.parsed_obj['current_password']):
             user_login.set_password(request.parsed_obj['new_password'])
         else:
-            raise UnauthorizedUser(message="please enter the correct current password \
-                                      otherwise, visit the password recovery endpoint \
-                                      /staff/password/forgot-password/recovery-link")
-        db.session.commit()
+            raise Unauthorized
 
-        return 200
+        db.session.commit()
 
 @ns.route('/token/refresh')
 @ns.doc(params={'refresh_token': "token from password reset endpoint"})
-class RefreshToken(Resource):
+class RefreshToken(BaseResource):
     """User refesh token to issue a new token with a 1 hr TTL"""
     def post(self):
         """
@@ -586,7 +592,7 @@ class RefreshToken(Resource):
                                         event='refresh',
                                         ua_string = request.headers.get('User-Agent')))
             db.session.commit()
-            raise InputError(message="invalid token", status_code=401)
+            raise Unauthorized('Invalid refresh token.')
 
         # check that the token is valid
         decoded_token = verify_jwt(refresh_token, refresh=True)
@@ -611,7 +617,7 @@ class RefreshToken(Resource):
 
 @ns.route('/registration-portal/verify')
 @ns.doc(params={'portal_id': "registration portal id"})
-class VerifyPortalId(Resource):
+class VerifyPortalId(BaseResource):
     """
     Verify registration portal id and update user type
     
@@ -633,7 +639,7 @@ class VerifyPortalId(Resource):
         user = User.query.filter_by(user_id=decoded_token['uid']).one_or_none()
         
         if not user:
-            raise UnauthorizedUser
+            raise Unauthorized
 
         if decoded_token['utype'] == 'client':
             user.is_client = True
@@ -650,7 +656,7 @@ class VerifyPortalId(Resource):
 
 @ns.route('/subscription/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class UserSubscriptionApi(Resource):
+class UserSubscriptionApi(BaseResource):
 
     @token_auth.login_required
     @responds(schema=UserSubscriptionsSchema(many=True), api=ns, status_code=200)
@@ -679,7 +685,7 @@ class UserSubscriptionApi(Resource):
         new_sub_info =  LookupSubscriptions.query.filter_by(sub_id=request.parsed_obj.subscription_type_id).one_or_none()
             
         if not new_sub_info:
-            raise InputError(400, 'Invalid subscription_type_id.')
+            raise BadRequest('Invalid subscription type.')
 
         #update end_date for user's previous subscription
         #NOTE: users always have a subscription, even a brand new account will have an entry
@@ -706,7 +712,7 @@ class UserSubscriptionApi(Resource):
 
 @ns.route('/subscription/history/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class UserSubscriptionHistoryApi(Resource):
+class UserSubscriptionHistoryApi(BaseResource):
 
     @token_auth.login_required
     @responds(schema=UserSubscriptionHistorySchema, api=ns, status_code=200)
@@ -733,7 +739,7 @@ class UserSubscriptionHistoryApi(Resource):
         return res
 
 @ns.route('/logout/')
-class UserLogoutApi(Resource):
+class UserLogoutApi(BaseResource):
 
     @token_auth.login_required
     def post(self):
@@ -769,7 +775,7 @@ from odyssey.api.notifications.schemas import NotificationSchema
 @ns.route('/notifications/<int:user_id>/')
 @ns.deprecated
 @ns.doc(params={'user_id': 'User ID number'})
-class UserNotificationsApi(Resource):
+class UserNotificationsApi(BaseResource):
     @token_auth.login_required
     @responds(
         api=ns,
@@ -783,7 +789,7 @@ class UserNotificationsApi(Resource):
 @ns.route('/notifications/<int:idx>/')
 @ns.deprecated
 @ns.doc(params={'idx': 'Notification idx number'})
-class UserNotificationsPutApi(Resource):
+class UserNotificationsPutApi(BaseResource):
     @token_auth.login_required
     @accepts(schema=NotificationSchema, api=ns)
     @responds(
@@ -797,7 +803,7 @@ class UserNotificationsPutApi(Resource):
 
 @ns.route('/email-verification/token/<string:token>/')
 @ns.doc(params={'token': 'Email verification token'})
-class UserPendingEmailVerificationsTokenApi(Resource):
+class UserPendingEmailVerificationsTokenApi(BaseResource):
 
     @responds(status_code=200)
     def get(self, token):
@@ -811,12 +817,12 @@ class UserPendingEmailVerificationsTokenApi(Resource):
         try:
             decoded_token = jwt.decode(token, secret, algorithms='HS256')
         except jwt.ExpiredSignatureError:
-            raise UnauthorizedUser(message="Token authorization expired")
+            raise Unauthorized('Email verification token expired.')
 
         verification = UserPendingEmailVerifications.query.filter_by(token=token).one_or_none()
 
         if not verification:
-            raise UnauthorizedUser(message="Invalid email verification token authorization")
+            raise Unauthorized('Email verification token not found.')
 
         #token was valid, remove the pending request, update user account and return 200
         user = User.query.filter_by(user_id=verification.user_id).one_or_none()
@@ -828,18 +834,15 @@ class UserPendingEmailVerificationsTokenApi(Resource):
 
 @ns.route('/email-verification/code/<int:user_id>/')
 @ns.doc(params={'code': 'Email verification code'})
-class UserPendingEmailVerificationsCodeApi(Resource):
+class UserPendingEmailVerificationsCodeApi(BaseResource):
 
     @responds(status_code=200)
     def post(self, user_id):
 
         verification = UserPendingEmailVerifications.query.filter_by(user_id=user_id).one_or_none()
 
-        if not verification:
-            raise GenericNotFound("There is no pending email verification for user ID " + str(user_id))
-
-        if verification.code != request.args.get('code'):
-            raise InvalidVerificationCode
+        if not verification or verification.code != request.args.get('code'):
+            raise Unauthorized('Email verification failed.')
 
         # Decode and validate token. Code should expire the same time the token does.
         secret = current_app.config['SECRET_KEY']
@@ -847,7 +850,7 @@ class UserPendingEmailVerificationsCodeApi(Resource):
         try:
             decoded_token = jwt.decode(verification.token, secret, algorithms='HS256')
         except jwt.ExpiredSignatureError:
-            raise UnauthorizedUser(message="Code has expired")
+            raise Unauthorized('Email verification token expired.')
 
         #code was valid, remove the pending request, update user account and return 200
         db.session.delete(verification)
@@ -859,7 +862,7 @@ class UserPendingEmailVerificationsCodeApi(Resource):
 
 @ns.route('/email-verification/resend/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class UserPendingEmailVerificationsResendApi(Resource):
+class UserPendingEmailVerificationsResendApi(BaseResource):
     """
     If a user waited too long to verify their email and their token/code have expired,
     they can use this endpoint to create another token/code and send another email. This 
@@ -871,7 +874,7 @@ class UserPendingEmailVerificationsResendApi(Resource):
         verification = UserPendingEmailVerifications.query.filter_by(user_id=user_id).one_or_none()
             
         if not verification:
-            raise GenericNotFound("There is no pending email verification for user ID " + str(user_id))
+            raise Unauthorized('Email verification failed.')
 
         # create a new token and code for this user
         token = UserPendingEmailVerifications.generate_token(user_id)
@@ -892,7 +895,7 @@ class UserPendingEmailVerificationsResendApi(Resource):
 
         
 @ns.route('/legal-docs/<int:user_id>/')
-class UserLegalDocsApi(Resource):
+class UserLegalDocsApi(BaseResource):
     """
     Endpoints related to legal documents that users have viewed and signed.
     """
@@ -920,11 +923,10 @@ class UserLegalDocsApi(Resource):
         check_user_existence(user_id)
 
         if UserLegalDocs.query.filter_by(user_id=user_id, doc_id=request.parsed_obj.doc_id).one_or_none():
-            raise IllegalSetting(message=f"A record already exists for the user with user_id {user_id}" \
-                                    f" and the doc_id {request.parsed_obj.doc_id}. Please use PUT instead.")
+            raise BadRequest(f'Document {request.parsed_obj.doc_id} already exists.')
 
         if not LookupLegalDocs.query.filter_by(idx=request.parsed_obj.doc_id).one_or_none():
-            raise GenericNotFound(f"There is no document with doc_id {request.parsed_obj.doc_id}")
+            raise BadRequest(f'Document {request.parsed_obj.doc_id} not found.')
 
         request.parsed_obj.user_id = user_id
 
@@ -947,11 +949,10 @@ class UserLegalDocsApi(Resource):
         doc = UserLegalDocs.query.filter_by(user_id=user_id, doc_id=request.parsed_obj.doc_id).one_or_none()
 
         if not doc:
-            raise GenericNotFound(f"No record exists for the user with user_id {user_id}" \
-                                    f" and doc_id {request.parsed_obj.doc_id}. Please use POST.")
+            raise BadRequest(f'Document {request.parsed_obj.doc_id} already exists.')
 
         if not LookupLegalDocs.query.filter_by(idx=request.parsed_obj.doc_id).one_or_none():
-            raise GenericNotFound(f"There is no document with doc_id {request.parsed_obj.doc_id}.")
+            raise BadRequest(f'Document {request.parsed_obj.doc_id} not found.')
 
         new_data = request.parsed_obj.__dict__
         del new_data['_sa_instance_state']

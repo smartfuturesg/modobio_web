@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from datetime import datetime, timedelta
 from io import BytesIO
 from typing import Any, Dict

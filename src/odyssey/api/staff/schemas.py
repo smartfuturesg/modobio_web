@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from marshmallow import Schema, fields, post_load, validate
 from sqlalchemy.orm import load_only
 from odyssey import ma
