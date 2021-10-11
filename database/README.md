@@ -9,4 +9,5 @@ The naming convention below should be followed.
 
 - 0xxx data insert, table creation
 - 1xxx stored procedures and functions
+- 2xxx update content or tables
 - 9xxx.py python SQL templates which need variable replacement before execution.
