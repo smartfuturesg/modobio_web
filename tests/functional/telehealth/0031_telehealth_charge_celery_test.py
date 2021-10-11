@@ -60,7 +60,7 @@ def test_bookings_payment(test_client):
 
     #run celery tasks to find and charge bookings
     bookings = find_chargable_bookings()
-    assert len(bookings) == 1
+    assert len(bookings) == 2
 
     charge_telehealth_appointment(booking.idx)
 
@@ -125,7 +125,7 @@ def test_bookings_payment(test_client):
         content_type='application.json'
     )
 
-    assert response.status_code == 405
+    assert response.status_code == 400
 
     response = test_client.get(
         f'/payment/refunds/{test_client.client_id}/',

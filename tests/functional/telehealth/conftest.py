@@ -197,7 +197,7 @@ def booking(test_client, payment_method):
         booking_window_id_end_time_utc=14,
         client_location_id=1,
         payment_method_id=payment_method.idx,
-        is_paid=False)
+        charged=False)
 
     test_client.db.session.add(bk)
     test_client.db.session.commit()
