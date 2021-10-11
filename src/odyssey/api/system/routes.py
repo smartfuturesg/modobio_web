@@ -34,7 +34,7 @@ class SystemTelehealthSettingsApi(Resource):
             cost.currency_symbol_and_code = lookup.symbol_and_code
             cost.session_min_cost = practitioner_rates.min_rate,
             cost.session_max_cost = practitioner_rates.max_rate,
-            cost.session_cost = 0.00 # 0 because the System Admin no longer controls the rates. Rates are set by the practitioner
+            cost.session_cost = 100.00 # TODO, this is useless now, but will be kept for a few more stories 10/11/2021
             formatted_costs.append(cost)
 
         session_duration = int(SystemVariables.query.filter_by(var_name='Session Duration').one_or_none().var_value)

@@ -55,7 +55,7 @@ def telehealth_staff(test_client):
         staff_login = UserLogin(user_id=staff.user_id)
         staff_login.set_password('password')
         test_client.db.session.add(staff_login)
-        consult_rate = 100
+        consult_rate = 100.00
         if i < 5:
             staff_role = StaffRoles(
                 user_id=staff.user_id,
