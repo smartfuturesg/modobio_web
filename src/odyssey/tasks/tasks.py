@@ -12,9 +12,12 @@ from odyssey import celery, db, mongo
 from odyssey.api.client.models import ClientClinicalCareTeam, ClientClinicalCareTeamAuthorizations
 from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupClinicalCareTeamResources
 from odyssey.api.notifications.models import Notifications
+from odyssey.api.payment.models import PaymentMethods
 from odyssey.api.practitioner.models import PractitionerOrganizationAffiliation
+from odyssey.api.system.models import SystemTelehealthSessionCosts
 from odyssey.api.telehealth.models import TelehealthBookingStatus, TelehealthBookings
 from odyssey.api.user.models import User
+from odyssey.integrations.instamed import Instamed
 
 @celery.task()
 def upcoming_appointment_notification_2hr(booking_id):
@@ -212,13 +215,13 @@ def process_wheel_webhooks(webhook_payload: Dict[str, Any]):
     if webhook_payload['event'] == 'consult.assigned':
         pass
 
-    # consult.unassigned:  consult is cancelled on wheel's end, must enact cancellation proceedure
+    # consult.unassigned:  consult is canceled on wheel's end, must enact cancellation proceedure
     # clinician.unavailable: the practitioner is no longer available for the booking. treat as a cancellation
     # clinician.no_show: clinician does not enter booking within 10 minutes of their scheduled start time 
     # consult.voided: Sent in rare occasions when wheel clinicians cannot complete the consultation 
     elif webhook_payload['event'] in ('consult.unassigned',  'clinician.no_show', 'clinician.unavailable', 'consult.voided'):
         
-        # update booking status to cancelled
+        # update booking status to canceled
         booking.status = 'Canceled'
 
         # create an entry into the TelehealthBookingStatus table
@@ -260,7 +263,7 @@ def process_wheel_webhooks(webhook_payload: Dict[str, Any]):
             )
         db.session.add(status_history)
 
-        # update booking status to cancelled
+        # update booking status to canceled
         booking.status = 'Document Review'
 
         db.session.commit()
@@ -310,3 +313,17 @@ def process_wheel_webhooks(webhook_payload: Dict[str, Any]):
             {"$set":{"modobio_meta.processed":True, "modobio_meta.acknowledged" :True}})
          
     return
+
+@celery.task()
+def charge_telehealth_appointment(booking_id):
+    """
+    This task will go through the process of attemping to charge a user for a telehealth booking.
+    If the payment is unsuccesful, the booking will be canceled.
+
+    TODO: Notify user of the canceled booking via email/notfication
+    """
+    booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
+    payment = PaymentMethods.query.filter_by(idx=booking.payment_method_id).one_or_none()
+    session_cost = SystemTelehealthSessionCosts.query.filter_by(profession_type='medical_doctor').one_or_none().session_cost
+
+    Instamed().charge_user(payment.payment_id, session_cost, booking)

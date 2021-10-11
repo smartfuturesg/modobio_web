@@ -174,12 +174,5 @@ def test_get_4_staff_client_bookings(test_client, booking):
         content_type='application/json')
 
     assert response.status_code == 200
-
-    response_booking = None
-    for bk in response.json['bookings']:
-        if bk['booking_id'] == booking.idx:
-            response_booking = bk
-            break
-
-    assert response_booking['status'] == booking.status
-    assert response_booking['status_history'][0]['reporter_role'] == booking.status_history[0].reporter_role
+    assert response.json['bookings'][0]['status'] == 'Canceled'
+    assert response.json['bookings'][0]['status_history'][0]['reporter_role'] == 'Practitioner'
