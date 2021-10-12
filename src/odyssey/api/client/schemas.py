@@ -332,6 +332,7 @@ class ClientClinicalCareTeamInternalSchema(Schema):
     hours_remaining = fields.Integer(required=False, dump_only=True)
     days_remaining = fields.Integer(required=False, dump_only=True)
     authorizations = fields.Nested(ClinicalCareTeamAuthorizationsForSchema(many=True),missing=[])
+    bio = fields.String(required=False,dump_only=True)
 
 class UserClinicalCareTeamSchema(Schema):
 

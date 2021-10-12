@@ -28,8 +28,7 @@ from odyssey.api.lookup.models import (
 from odyssey.api.lookup.models import LookupTerritoriesOfOperations
 from odyssey.api.payment.models import (
     PaymentMethods,
-    PaymentHistory,
-    PaymentFailedTransactions)
+    PaymentHistory)
 from odyssey.api.practitioner.models import PractitionerCredentials
 from odyssey.api.staff.models import (
     StaffOperationalTerritories,
@@ -65,6 +64,12 @@ from odyssey.api.telehealth.schemas import (
     TelehealthUserSchema
 )
 from odyssey.api.user.models import User
+from odyssey.api.system.models import SystemTelehealthSessionCosts
+from odyssey.api.lookup.models import (
+    LookupTerritoriesOfOperations
+)
+from odyssey.api.practitioner.models import PractitionerCredentials
+from odyssey.api.payment.models import PaymentMethods, PaymentHistory
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
 # from odyssey.integrations.wheel import Wheel
@@ -74,8 +79,7 @@ from odyssey.utils.constants import (
     DAY_OF_WEEK,
     ALLOWED_AUDIO_TYPES,
     ALLOWED_IMAGE_TYPES,
-    IMAGE_MAX_SIZE,
-    INSTAMED_OUTLET
+    IMAGE_MAX_SIZE
 )
 from odyssey.utils.message import PushNotification, PushNotificationType
 from odyssey.utils.misc import (
@@ -144,54 +148,6 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
         if g.user_type == 'staff':
             meeting_room.staff_access_token = token
 
-            #call instamed api to charge user for this call
-            payment = PaymentMethods.query.filter_by(idx=booking.payment_method_id).one_or_none()
-            session_cost = SystemTelehealthSessionCosts.query.filter_by(profession_type='medical_doctor').one_or_none().session_cost
-
-            request_data = {
-                "Outlet": INSTAMED_OUTLET,
-                "PaymentMethod": "OnFile",
-                "PaymentMethodID": str(payment.payment_id),
-                "Amount": str(session_cost)
-            }
-
-            request_headers = {'Api-Key': current_app.config['INSTAMED_API_KEY'],
-                                    'Api-Secret': current_app.config['INSTAMED_API_SECRET'],
-                                    'Content-Type': 'application/json'}
-
-            response = requests.post('https://connect.instamed.com/rest/payment/sale',
-                            headers=request_headers,
-                            json=request_data)
-
-            #check if instamed api raised an error
-            try:
-                response.raise_for_status()
-            except:
-                raise BadRequest(f'Instamed returned the following error: {response.text}')
-
-            #convert response data to json (python dict)
-            response_data = json.loads(response.text)
-
-            #check if card was declined (this is not an error as checked above as 200 is returned from InstaMed)
-            if response_data['TransactionStatus'] == 'C':
-                #transaction was successful, store in PaymentHistory
-                history = PaymentHistory(**{
-                    'user_id': booking.client_user_id,
-                    'payment_method_id': booking.payment_method_id,
-                    'transaction_id': response_data['TransactionID'],
-                    'transaction_amount': session_cost,
-                })
-                booking.is_paid=True
-                db.session.add(history)
-            else:
-                #transaction was not successful, store in PaymentFailedTransactions
-                failed = PaymentFailedTransactions(**{
-                    'user_id': booking.client_user_id,
-                    'transaction_id': response_data['TransactionID']
-                })
-                db.session.add(failed)
-            
-            ##### WHEEL #####    
             ##
             # If the booking is with a wheel practitioner
             # send a consult start request to wheel
@@ -806,11 +762,11 @@ class TelehealthBookingsApi(BaseResource):
         client_bookings = TelehealthBookings.query.filter(
             TelehealthBookings.client_user_id==client_user_id,
             TelehealthBookings.target_date_utc==target_start_datetime_utc.date(),
-            TelehealthBookings.status!='Cancelled').all()
+            TelehealthBookings.status!='Canceled').all()
         staff_bookings = TelehealthBookings.query.filter(
             TelehealthBookings.staff_user_id==staff_user_id,
             TelehealthBookings.target_date_utc==target_start_datetime_utc.date(),
-            TelehealthBookings.status!='Cancelled').all()
+            TelehealthBookings.status!='Canceled').all()
 
         # This checks if the input slots have already been taken.
         # using utc times to remain consistent
@@ -1045,7 +1001,7 @@ class TelehealthBookingsApi(BaseResource):
                 raise Unauthorized('Only practitioner can update this status.')
             
             ##### WHEEL #####    
-            # if new_status == 'Cancelled' and booking.external_booking_id:
+            # if new_status == 'Canceled' and booking.external_booking_id:
             #     # cancel appointment on wheel system if the staff memebr is a wheel practitioner
             #     wheel = Wheel()
             #     wheel.cancel_booking(booking.external_booking_id)
@@ -1063,7 +1019,7 @@ class TelehealthBookingsApi(BaseResource):
         booking.update(data)
 
         # If the booking gets updated for cancelation, then delete it in the Staff's calendar
-        if new_status == 'Cancelled':
+        if new_status == 'Canceled':
             staff_event = StaffCalendarEvents.query.filter_by(location='Telehealth_{}'.format(booking_id)).one_or_none()
             if staff_event:
                 db.session.delete(staff_event)
