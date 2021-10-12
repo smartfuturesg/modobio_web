@@ -139,8 +139,7 @@ class TelehealthBookings(BaseModelWithIdx):
     """
     Denotes if the system has attempted to charge the client for this bookings yet. Even if a charge
     is unsuccessful, this will be set to true to denote that the booking was attempted to be charged
-    by the inital charge task. Unsuccessful bookings that have attempted to be charged once will then
-    be dealt with in the PaymentFailedTransactions table.
+    by the inital charge task.
 
     :type: boolean
     """

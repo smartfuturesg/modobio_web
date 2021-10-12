@@ -2,7 +2,7 @@ import requests
 
 from flask import current_app
 
-from odyssey.utils.errors import GenericThirdPartyError
+from werkzeug.exceptions import BadRequest
 from odyssey.api.payment.models import PaymentHistory
 
 from odyssey import db
@@ -62,7 +62,7 @@ class Instamed:
         try:
             response.raise_for_status()
         except:
-            raise GenericThirdPartyError(response.status_code, response.text)
+            raise BadRequest(f'Instamed returned the following error: {response.text}')
 
         return response.json()
     
@@ -98,7 +98,7 @@ class Instamed:
         try:
             response.raise_for_status()
         except:
-            raise GenericThirdPartyError(response.status_code, response.text)
+            raise BadRequest(f'Instamed returned the following error: {response.text}')
 
         return response.json()
 
@@ -138,7 +138,7 @@ class Instamed:
         try:
             response.raise_for_status()
         except:
-            #transaction was not successful, store in PaymentFailedTransactions
+            #transaction was not successful, cancel booking
             cancel_telehealth_appointment(booking)
             return
 
