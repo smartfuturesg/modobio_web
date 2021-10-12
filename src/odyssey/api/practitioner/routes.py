@@ -32,7 +32,7 @@ class PractitionerConsultationRates(Resource):
 
         items = []
         for role in staff_user_roles:
-            items.append({'role': role.role,'rate': role.consult_rate})
+            items.append({'role': role.role,'rate': str(role.consult_rate)})
 
         return {'items': items}
     
@@ -47,7 +47,6 @@ class PractitionerConsultationRates(Resource):
         staff_user_roles = db.session.query(StaffRoles).filter(StaffRoles.user_id==user_id).all()
         
         payload = request.json
-
         lookup_role = {}
         for roleObj in staff_user_roles:
             if roleObj.role not in lookup_role:
@@ -59,8 +58,8 @@ class PractitionerConsultationRates(Resource):
         
         for pract in payload['items']:
             if pract['role'] in lookup_role:
-                if pract['rate']%inc == 0:
-                    lookup_role[pract['role']].update({'consult_rate':pract['rate']})
+                if float(pract['rate'])%inc == 0:
+                    lookup_role[pract['role']].update({'consult_rate':float(pract['rate'])})
                 else:
                     raise InputError(status_code=405,message='Cost is not valid')
             else:
