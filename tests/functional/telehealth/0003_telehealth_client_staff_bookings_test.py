@@ -172,7 +172,7 @@ def test_get_4_staff_client_bookings(test_client, booking):
         f'&staff_user_id={test_client.staff_id}',
         headers=test_client.staff_auth_header,
         content_type='application/json')
-
+        
     assert response.status_code == 200
 
     response_booking = None

@@ -370,7 +370,7 @@ class TelehealthClientTimeSelectApi(BaseResource):
             # get 2 letter text abbreviation for operational territory in order to match it with the
             # PractitionerCredentials table
             client_location = LookupTerritoriesOfOperations.query.filter_by(idx=client_in_queue.location_id).one_or_none().sub_territory_abbreviation
-
+            
             # query staff availabilites filtering by day of week, role, operation location, and gender
             # staff availbilities are stored in UTC time which may be different from the client's tz
             # to handle this case, we make this query knowing that availabilities may span two days
