@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from flask import current_app
 from odyssey.api.user.models import User
 from odyssey.api.client.models import ClientInfo

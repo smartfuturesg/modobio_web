@@ -1,4 +1,8 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import os, boto3, secrets, pathlib
+
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
@@ -6,6 +10,7 @@ from flask import g, request, current_app
 from flask_accepts import accepts, responds
 from flask_restx import Resource, Namespace
 from sqlalchemy import select
+from werkzeug.exceptions import BadRequest, Unauthorized
 
 from odyssey import db
 from odyssey.api.doctor.models import (
@@ -31,16 +36,6 @@ from odyssey.api.doctor.models import (
 from odyssey.api.facility.models import MedicalInstitutions
 from odyssey.api.user.models import User
 from odyssey.utils.auth import token_auth
-from odyssey.utils.errors import (
-    LoginNotAuthorized,
-    UserNotFound, 
-    IllegalSetting, 
-    ContentNotFound,
-    InputError,
-    MedicalConditionAlreadySubmitted,
-    GenericNotFound,
-    UnauthorizedUser
-)
 from odyssey.utils.misc import (
     check_client_existence,
     check_blood_test_existence,
@@ -85,22 +80,29 @@ from odyssey.utils.base.resources import BaseResource
 
 ns = Namespace('doctor', description='Operations related to doctor')
 
-@ns.route('/credentials/<int:user_id>/')
+@ns.route('/credentials/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedCredentials(BaseResource):
-    @token_auth.login_required(staff_role=('medical_doctor','community_manager'))
+    @token_auth.login_required(user_type=('staff','client'),staff_role=('medical_doctor','community_manager'))
     @responds(schema=MedicalCredentialsInputSchema,status_code=200,api=ns)
-    def get(self,user_id):
+    def get(self):
         """
         GET Request for Pulling Medical Credentials for a practitioner
 
-        User should be Staff Self and staff admin
+        User should be Staff Self and community manager
         """
+
+        user_id = request.args.get('user_id',type=int)
+        if not user_id:
+            raise InputError(status_code=405,message='Missing User ID.')
+
         current_user, _ = token_auth.current_user()
-        staff_user_roles = db.session.query(StaffRoles.role).filter(StaffRoles.user_id==current_user.user_id).all()
-        staff_user_roles = [x[0] for x in staff_user_roles]
-        if current_user.user_id != user_id and 'community_manager' not in staff_user_roles:
-            raise LoginNotAuthorized
+
+        if current_user.is_staff:
+            staff_user_roles = db.session.query(StaffRoles.role).filter(StaffRoles.user_id==current_user.user_id).all()
+            staff_user_roles = [x[0] for x in staff_user_roles]            
+            if current_user.user_id != user_id and 'community_manager' not in staff_user_roles:
+                raise LoginNotAuthorized
 
         query = db.session.execute(
             select(PractitionerCredentials).
@@ -110,15 +112,21 @@ class MedCredentials(BaseResource):
         ).scalars().all()
         return {'items': query}
 
-    @token_auth.login_required(user_type=('staff_self',),staff_role=('medical_doctor',))
+    @token_auth.login_required(user_type=('staff',),staff_role=('medical_doctor',))
     @accepts(schema=MedicalCredentialsInputSchema, api=ns)
     @responds(status_code=201,api=ns)
-    def post(self,user_id):
+    def post(self):
         """
         POST Request for submitting Medical Credentials for a practitioner
 
         User should be Staff Self
         """
+
+        user_id = request.args.get('user_id',type=int)
+        if not user_id:
+            raise InputError(status_code=405,message='Missing User ID.')
+        
+
         curr_credentials = PractitionerCredentials.query.filter_by(user_id=user_id).all()     
         verified_cred = []
         if curr_credentials:
@@ -144,7 +152,8 @@ class MedCredentials(BaseResource):
                 if cred.state in state_check[cred.credential_type]:
                     # Rollback is necessary because we applied database changes above
                     db.session.rollback()
-                    raise InputError(status_code=405,message=f'Multiple {cred.state} submissions for {cred.credential_type}. Only one credential per state is allowed')
+                    raise BadRequest(f'Multiple {cred.state} submissions for {cred.credential_type}. '
+                                     f'Only one credential per state is allowed')
                 else:
                     state_check[cred.credential_type].append(cred.state)
 
@@ -179,7 +188,7 @@ class MedCredentials(BaseResource):
     @token_auth.login_required(staff_role=('community_manager',))
     @accepts(schema=MedicalCredentialsSchema(only=['idx','status']),api=ns)
     @responds(status_code=201,api=ns)
-    def put(self,user_id):
+    def put(self):
         """
         PUT Request for updating the status for medical credentials
 
@@ -187,34 +196,42 @@ class MedCredentials(BaseResource):
         """
 
         payload = request.json
-
+        user_id = request.args.get('user_id',type=int)
+        if not user_id:
+            raise InputError(status_code=405,message='Missing User ID.')
+        
         status = ['Verified','Pending Verification', 'Rejected']
         if payload['status'] not in status:
-            raise InputError(status_code=405,message='Status must be one of <Verified, Pending Verification, Rejected>.')
+            raise BadRequest('Status must be one of {}.'.format(', '.join(status)))
+
         curr_credentials = PractitionerCredentials.query.filter_by(user_id=user_id,idx=payload['idx']).one_or_none()
 
         if curr_credentials:
             curr_credentials.update(payload)
             db.session.commit()
         else:
-            raise InputError(status_code=405,message='Could not find those credentials')
+            raise BadRequest('Credentials not found.')
         return
 
     @token_auth.login_required(staff_role=('medical_doctor','community_manager'))
     @accepts(schema=MedicalCredentialsSchema(only=['idx']),api=ns)
     @responds(status_code=201,api=ns)
-    def delete(self,user_id):
+    def delete(self):
         """
         DELETE Request for deleting medical credentials
 
         User for this request should be the Staff Self and Staff Admin
         """
+        user_id = request.args.get('user_id',type=int)
+        if not user_id:
+            raise InputError(status_code=405,message='Missing User ID.')
+                
         current_user, _ = token_auth.current_user()
         staff_user_roles = db.session.query(StaffRoles.role).filter(StaffRoles.user_id==current_user.user_id).all()
         staff_user_roles = [x[0] for x in staff_user_roles]
         
         if current_user.user_id != user_id and 'community_manager' not in staff_user_roles:
-            raise LoginNotAuthorized
+            raise Unauthorized
 
         payload = request.json
 
@@ -224,7 +241,7 @@ class MedCredentials(BaseResource):
             db.session.delete(curr_credentials)
             db.session.commit()
         else:
-            raise InputError(status_code=405,message='Could not find those credentials')
+            raise BadRequest('Credentials not found.')
         return
 
 @ns.route('/bloodpressure/<int:user_id>/')
@@ -236,7 +253,7 @@ class MedBloodPressures(BaseResource):
         '''
         This request gets the users submitted blood pressure if it exists
         '''
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
         bp_info = MedicalBloodPressures.query.filter_by(user_id=user_id).all()
         
         for data in bp_info:
@@ -256,8 +273,8 @@ class MedBloodPressures(BaseResource):
         Post request to post the client's blood pressure
         '''
         # First check if the client exists
-        super().check_user(user_id, user_type='client')
-        super().set_reporter_id(request.parsed_obj)
+        self.check_user(user_id, user_type='client')
+        self.set_reporter_id(request.parsed_obj)
 
         request.parsed_obj.user_id = user_id
         
@@ -273,21 +290,21 @@ class MedBloodPressures(BaseResource):
         '''
         Delete request for a client's blood pressure
         '''
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         idx = request.args.get('idx', type=int)
         if idx:
             result = MedicalBloodPressures.query.filter_by(user_id=user_id, idx=idx).one_or_none()
             if not result:
-                raise GenericNotFound(f"The blood pressure result with user_id {user_id} and idx {idx} does not exist.")
-                
+                raise BadRequest(f'Blood pressure result {idx} not found.')
+
             #ensure logged in user is the reporter for this pressure reasing
-            super().check_ehr_permissions(result)
+            self.check_ehr_permissions(result)
 
             db.session.delete(result)
             db.session.commit()
         else:
-            raise InputError(message="idx must be an integer.")
+            raise BadRequest('idx must be an integer.')
 
 @ns.route('/lookupbloodpressureranges/')
 class MedicalLookUpBloodPressureResource(BaseResource):
@@ -316,7 +333,7 @@ class MedicalGenInformation(BaseResource):
         '''
         This request gets the users personal and family history if it exists
         '''
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
         current_user, _ = token_auth.current_user()
         
         genInfo = MedicalGeneralInfo.query.filter_by(user_id=user_id).first()
@@ -339,7 +356,7 @@ class MedicalGenInformation(BaseResource):
         user_is_self = (True if current_user.user_id == user_id else False)
 
         # First check if the client exists
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
         payload = {}
 
         # If the user submits something for general history, then removes it from the payload, 
@@ -358,14 +375,16 @@ class MedicalGenInformation(BaseResource):
                 if not generalInfo.primary_doctor_contact_phone and \
                     not generalInfo.primary_doctor_contact_email:
                     db.session.rollback()
-                    raise InputError(status_code = 405,message='If a primary doctor name is given, the client must also\
-                                        provide the doctors phone number or email')      
+                    raise BadRequest('If a primary doctor name is given, the client must also '
+                                     'provide the doctors phone number or email')
+
             if generalInfo.blood_type or generalInfo.blood_type_positive is not None:
                 # if the client starts by indication which blood type they have or the sign
                 # they also need the other.
                 if generalInfo.blood_type is None or generalInfo.blood_type_positive is None:
                     db.session.rollback()
-                    raise InputError(status_code = 405,message='If bloodtype or sign is given, client must provide both.')
+                    raise BadRequest('If bloodtype or sign is given, client must provide both.')
+
             generalInfo.user_id = user_id
             db.session.add(generalInfo)
 
@@ -388,17 +407,19 @@ class MedicalGenInformation(BaseResource):
                 # medication
                 if medication.medication_name is None:
                     db.session.rollback()
-                    raise InputError(status_code = 405, message='Medication Name Required')
+                    raise BadRequest('Medication name required.')
                 else:
                     # If the client gives a medication dosage, they must also give 
                     # the units
                     if medication.medication_dosage and medication.medication_units is None:
                         db.session.rollback()
-                        raise InputError(status_code = 405,message='Medication dosage requires units')
+                        raise BadRequest('Medication dosage units required.')
+
                     if medication.medication_freq:
                         if medication.medication_times_per_freq is None and medication.medication_time_units is None:
                             db.session.rollback()
-                            raise InputError(status_code = 405,message='Medication frequency needs more information')
+                            raise BadRequest('Medication frequency and time unit required.')
+
                     medication.user_id = user_id
                     medication.reporter_id = token_auth.current_user()[0].user_id
                     db.session.add(medication)
@@ -424,7 +445,7 @@ class MedicalGenInformation(BaseResource):
                     # If the client indicates they have an allergy to a medication
                     # they must AT LEAST send the name of the medication they are allergic to
                     db.session.rollback()
-                    raise InputError(status_code = 405,message='Must need the name of the medication client is allergic to.')
+                    raise BadRequest('Name of medication with allergic reaction required.')
                 else:
                     allergicTo.user_id = user_id
                     payload['allergies'].append(allergicTo)
@@ -444,7 +465,7 @@ class MedicalGeneralInformation(BaseResource):
         '''
         This request gets the users personal and family history if it exists
         '''
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
         genInfo = MedicalGeneralInfo.query.filter_by(user_id=user_id).first()
         payload = {'general_info': genInfo}
         return genInfo
@@ -457,11 +478,7 @@ class MedicalGeneralInformation(BaseResource):
         Post request to post the client's onboarding personal and family history
         '''
         # First check if the client exists
-        super().check_user(user_id, user_type='client')
-        
-        genInfo = MedicalGeneralInfo.query.filter_by(user_id=user_id).one_or_none()
-        if genInfo:
-            raise InputError(status_code=405,message='Please use put request.')
+        self.check_user(user_id, user_type='client')
 
         generalInfo = request.parsed_obj
         if generalInfo:
@@ -470,14 +487,14 @@ class MedicalGeneralInformation(BaseResource):
                 # phone number or email
                 if not generalInfo.primary_doctor_contact_phone and \
                     not generalInfo.primary_doctor_contact_email:
-                    raise InputError(status_code = 405,message='If a primary doctor name is given, the client must also\
-                                        provide the doctors phone number or email')      
-            
+                    raise BadRequest('If a primary doctor name is given, the client must also '
+                                     'provide the doctors phone number or email')
+
             if generalInfo.blood_type or generalInfo.blood_type_positive:
                 # if the client starts by indication which blood type they have or the sign
                 # they also need the other.
                 if generalInfo.blood_type is None or generalInfo.blood_type_positive is None:
-                    raise InputError(status_code = 405,message='If bloodtype or sign is given, client must provide both.')
+                    raise BadRequest('If bloodtype or sign is given, client must provide both.')
                 else:
                     generalInfo.user_id = user_id
             db.session.add(generalInfo)
@@ -497,7 +514,7 @@ class MedicalGeneralInformation(BaseResource):
         '''
         Put request to update the client's onboarding personal and family history
         '''
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         generalInfo = request.json
         if generalInfo:
@@ -507,20 +524,18 @@ class MedicalGeneralInformation(BaseResource):
                 # phone number or email
                 if not generalInfo.get('primary_doctor_contact_phone') and \
                     not generalInfo.get('primary_doctor_contact_email'):
-                    raise InputError(status_code = 405,message='If a primary doctor name is given, the client must also\
-                                        provide the doctors phone number or email')      
+                    raise BadRequest('If a primary doctor name is given, the client must also '
+                                     'provide the doctors phone number or email')
+
             if generalInfo.get('blood_type') or generalInfo.get('blood_type_positive'):
                 # if the client starts by indication which blood type they have or the sign
                 # they also need the other.
                 if generalInfo.get('blood_type') is None or generalInfo.get('blood_type_positive') is None:
-                    raise InputError(status_code = 405,message='If bloodtype or sign is given, client must provide both.')
+                    raise BadRequest('If bloodtype or sign is given, client must provide both.')
                 else:
                     generalInfo['user_id'] = user_id
             genInfo = MedicalGeneralInfo.query.filter_by(user_id=user_id).one_or_none()
-            if genInfo:
-                genInfo.update(generalInfo)
-            else:
-                raise ContentNotFound
+            genInfo.update(generalInfo)
         
         # insert results into the result table
         db.session.commit()
@@ -535,7 +550,7 @@ class MedicalMedicationInformation(BaseResource):
         '''
         This request gets the users personal and family history if it exists
         '''
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         medications = MedicalGeneralInfoMedications.query.filter_by(user_id=user_id).all()
         payload = {'medications': medications}
@@ -548,7 +563,7 @@ class MedicalMedicationInformation(BaseResource):
         '''
         Post request to post the client's onboarding personal and family history
         '''
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
         
         payload = {}
 
@@ -560,15 +575,16 @@ class MedicalMedicationInformation(BaseResource):
                 # If the client is taking medications, they MUST tell us what
                 # medication
                 if not medication.medication_name:
-                    raise InputError(status_code = 405, message='Medication Name Required')
+                    raise BadRequest('Medication name required.')
                 else:
                     # If the client gives a medication dosage, they must also give 
                     # the units
                     if medication.medication_dosage and not medication.medication_units:
-                        raise InputError(status_code = 405,message='Medication dosage requires units')
+                        raise BadRequest('Medication dosage units required.')
+
                     if medication.medication_freq:
                         if not medication.medication_times_per_freq and not medication.medication_time_units:
-                            raise InputError(status_code = 405,message='Medication frequency needs more information')
+                            raise BadRequest('Medication frequency and time unit required.')
                     medication.user_id = user_id
                     medication.reporter_id = token_auth.current_user()[0].user_id
                     payload['medications'].append(medication)
@@ -585,7 +601,7 @@ class MedicalMedicationInformation(BaseResource):
         '''
         Put request to update the client's onboarding personal and family history
         '''
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         payload = {}
 
@@ -596,15 +612,17 @@ class MedicalMedicationInformation(BaseResource):
                 # If the client is taking medications, they MUST tell us what
                 # medication
                 if not medication.medication_name:
-                    raise InputError(status_code = 405, message='Medication Name Required')
+                    raise BadRequest('Medication name required.')
                 else:
                     # If the client gives a medication dosage, they must also give 
                     # the units
                     if medication.medication_dosage and not medication.medication_units:
-                        raise InputError(status_code = 405,message='Medication dosage requires units')
+                        raise BadRequest('Medication dosage units required.')
+
                     if medication.medication_freq:
                         if not medication.medication_times_per_freq and not medication.medication_time_units:
-                            raise InputError(status_code = 405,message='Medication frequency needs more information')
+                            raise BadRequest('Medication frequency and time unit required.')
+
                     medication.__dict__['user_id'] = user_id
                     # If medication and user are in it already, then send an update
                     # else, add it to the db
@@ -612,9 +630,8 @@ class MedicalMedicationInformation(BaseResource):
                     if medicationInDB:
                         del medication.__dict__['_sa_instance_state']
                         medicationInDB.update(medication.__dict__)
-                    
                     else: 
-                        raise ContentNotFound
+                        raise BadRequest('Medication table not found, use POST first.')
                     
                     payload['medications'].append(medication)
         
@@ -631,7 +648,7 @@ class MedicalMedicationInformation(BaseResource):
         '''
         payload = {}
 
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
         
         ids_to_delete = request.parsed_obj['delete_ids']
         for ids in ids_to_delete:
@@ -652,7 +669,7 @@ class MedicalAllergiesInformation(BaseResource):
         '''
         This request gets the users personal and family history if it exists
         '''
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         allergies = MedicalGeneralInfoMedicationAllergy.query.filter_by(user_id=user_id).all()
         payload = {'allergies': allergies}
@@ -666,7 +683,7 @@ class MedicalAllergiesInformation(BaseResource):
         Post request to post the client's onboarding personal and family history
         '''
         # First check if the client exists
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
         
         payload = {}
 
@@ -679,7 +696,7 @@ class MedicalAllergiesInformation(BaseResource):
                 if not allergicTo.medication_name:
                     # If the client indicates they have an allergy to a medication
                     # they must AT LEAST send the name of the medication they are allergic to
-                    raise InputError(status_code = 405,message='Must need the name of the medication client is allergic to.')
+                    raise BadRequest('Name of medication with allergic reaction required.')
                 else:
                     allergicTo.user_id = user_id
                     payload['allergies'].append(allergicTo)
@@ -698,7 +715,7 @@ class MedicalAllergiesInformation(BaseResource):
         '''
         payload = {}
 
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         # If the client is allergic to certain medication, they MUST tell us what
         # medication
@@ -709,7 +726,7 @@ class MedicalAllergiesInformation(BaseResource):
                 if not allergicTo.medication_name:
                     # If the client indicates they have an allergy to a medication
                     # they must AT LEAST send the name of the medication they are allergic to
-                    raise InputError(status_code = 405,message='Must need the name of the medication client is allergic to.')
+                    raise BadRequest('Name of medication with allergic reaction required.')
                 else:
                     allergicTo.__dict__['user_id'] = user_id
                     allergyInDB = MedicalGeneralInfoMedicationAllergy.query.filter_by(user_id=user_id).filter_by(idx=allergicTo.idx).one_or_none() 
@@ -732,7 +749,7 @@ class MedicalAllergiesInformation(BaseResource):
         delete request to update the client's onboarding personal and family history
         '''
 
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
         
         # If the client is allergic to certain medication, they MUST tell us what
         # medication
@@ -809,7 +826,7 @@ class MedicalSocialHist(BaseResource):
             JSON encoded dict.
         """
         current_user, _ = token_auth.current_user()
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         social_hist = MedicalSocialHistory.query.filter_by(user_id=user_id).one_or_none()
         std_hist = MedicalSTDHistory.query.filter_by(user_id=user_id).all()
@@ -860,7 +877,7 @@ class MedicalSocialHist(BaseResource):
             JSON encoded dict.
         """
         current_user, _ = token_auth.current_user()
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
         # Check if this information is already in the DB
 
         # Check if this information is already in the DB
@@ -885,7 +902,7 @@ class MedicalSocialHist(BaseResource):
                     if social.last_smoke or social.last_smoke_time:
                         if social.last_smoke is None or social.last_smoke_time is None: 
                             db.session.rollback()
-                            raise InputError(status_code=405, message='User must include when they last smoked, and include the time frame months or years.')
+                            raise BadRequest('Date of last smoked and duration required.')
                         
                         if(social.last_smoke_time == 'days'):
                             social.__dict__['last_smoke_date'] = datetime.now() - relativedelta(months=social.last_smoke) 
@@ -915,7 +932,8 @@ class MedicalSocialHist(BaseResource):
                 stdInDB = MedicalLookUpSTD.query.filter_by(std_id=std.std_id).one_or_none()
                 if not stdInDB:
                     db.session.rollback()
-                    raise InputError(status_code=405,message='STD ID not found in the database.')
+                    raise BadRequest('STD ID not found.')
+
                 std.user_id = user_id
                 db.session.add(std)
                 payload['std_history'].append(std)
@@ -947,7 +965,7 @@ class MedicalFamilyHist(BaseResource):
         '''
         This request gets the users personal and family history if it exists
         '''
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         client_personalfamilyhist = MedicalFamilyHistory.query.filter_by(user_id=user_id).all()
         payload = {'items': client_personalfamilyhist,
@@ -961,7 +979,7 @@ class MedicalFamilyHist(BaseResource):
         '''
         Post request to post the client's onboarding personal and family history
         '''
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
         
         # the data expected for the backend is:
         # parameter: user_id 
@@ -971,7 +989,9 @@ class MedicalFamilyHist(BaseResource):
             check_medical_condition_existence(result.medical_condition_id)
             user_and_medcon = MedicalFamilyHistory.query.filter_by(user_id=user_id).filter_by(medical_condition_id=result.medical_condition_id).one_or_none()
             if user_and_medcon:
-                raise MedicalConditionAlreadySubmitted(user_id,result.medical_condition_id)
+                raise BadRequest(f'Medical condition {result.medical_condition_id} '
+                                 f'already exists for user {user_id}.')
+
             result.user_id = user_id
             db.session.add(result)
         payload = {'items': request.parsed_obj['conditions'],
@@ -987,7 +1007,7 @@ class MedicalFamilyHist(BaseResource):
         '''
         Put request to update the client's onboarding personal and family history
         '''
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
         
         # the data expected for the backend is:
         # parameter: user_id 
@@ -996,7 +1016,6 @@ class MedicalFamilyHist(BaseResource):
             check_medical_condition_existence(result.medical_condition_id)
             user_and_medcon = MedicalFamilyHistory.query.filter_by(user_id=user_id).filter_by(medical_condition_id=result.medical_condition_id).one_or_none()
             if user_and_medcon:
-                # raise ContentNotFound()
                 user_and_medcon.update(request.json['conditions'][idx])
             else:
                 result.user_id = user_id
@@ -1019,7 +1038,7 @@ class MedImaging(BaseResource):
             image_path is a sharable url for an image saved in S3 Bucket,
             if running locally, it is the path to a local temp file
         """
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         query = db.session.query(
                     MedicalImaging, User.firstname, User.lastname
@@ -1028,10 +1047,6 @@ class MedImaging(BaseResource):
                 ).filter(
                     MedicalImaging.reporter_id == User.user_id
                 ).all()
-        
-        # if no tests have been submitted
-        if not query:
-            raise ContentNotFound()
         
         # prepare response with reporter info
         response = []
@@ -1064,7 +1079,7 @@ class MedImaging(BaseResource):
         "image_path": "string"
 
         """
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         # bring up reporting staff member
         reporter = token_auth.current_user()[0]
@@ -1118,10 +1133,10 @@ class MedImaging(BaseResource):
         if idx:
             data = MedicalImaging.query.filter_by(user_id=user_id, idx=idx).one_or_none()
             if not data:
-                raise GenericNotFound(message=f'No image could be found with user_id {user_id} and image_id {idx}.')
-            
+                raise BadRequest(f'Image {idx} not found.')
+
             #ensure logged in user is the reporter for this image
-            super().check_ehr_permissions(data)
+            self.check_ehr_permissions(data)
 
             #delete image saved in S3 bucket
             fh = FileHandling()
@@ -1130,7 +1145,7 @@ class MedImaging(BaseResource):
             db.session.delete(data)
             db.session.commit()
         else:
-            raise InputError(message="image_id must be an integer.")   
+            raise BadRequest("image_id must be an integer.")   
 
 
 @ns.route('/bloodtest/<int:user_id>/')
@@ -1147,7 +1162,7 @@ class MedBloodTest(BaseResource):
         to the results related to this submisison. Each submission may have 
         multiple results (e.g. in a panel)
         """
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         data = request.get_json()
         
@@ -1180,21 +1195,19 @@ class MedBloodTest(BaseResource):
         '''
         Delete request for a client's blood test
         '''
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         test_id = request.args.get('test_id', type=int)
         if test_id:
             result = MedicalBloodTests.query.filter_by(user_id=user_id, test_id=test_id).one_or_none()
-            if not result:
-                raise GenericNotFound(f"The blood test with user_id {user_id} and test_id {test_id} does not exist.")
-            
+
             #ensure logged in user is the reporter for this test
-            super().check_ehr_permissions(result)
+            self.check_ehr_permissions(result)
 
             db.session.delete(result)
             db.session.commit()
         else:
-            raise InputError(message="test_id must be an integer.")     
+            raise BadRequest("test_id must be an integer.")     
 
 @ns.route('/bloodtest/all/<int:user_id>/')
 @ns.doc(params={'user_id': 'Client ID number'})
@@ -1218,7 +1231,7 @@ class MedBloodTestAll(BaseResource):
         To see test results for every blood test submission for a specified client, 
         use the (GET)`/bloodtest/results/all/<int:user_id>/` endpoint. 
         """
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         blood_tests =  db.session.query(
                     MedicalBloodTests, User.firstname, User.lastname
@@ -1228,8 +1241,6 @@ class MedBloodTestAll(BaseResource):
                     MedicalBloodTests.user_id == user_id
                 ).all()
 
-        if not blood_tests:
-            raise ContentNotFound()
         # prepare response items with reporter name from User table
         response = []
         for test in blood_tests:
@@ -1273,9 +1284,10 @@ class MedBloodTestResults(BaseResource):
                 ).filter(
                     MedicalBloodTests.reporter_id == User.user_id
                 ).all()
-        if len(results) == 0:
-            raise GenericNotFound()
-        
+
+        if not results:
+            return
+
         # prepare response with test details   
         nested_results = {'test_id': test_id, 
                           'date' : results[0][0].date,
@@ -1313,7 +1325,7 @@ class AllMedBloodTestResults(BaseResource):
     @token_auth.login_required(resources=('blood_chemistry',))
     @responds(schema=MedicalBloodTestResultsOutputSchema, api=ns)
     def get(self, user_id):
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         # pull up all tests, test results, and the test type names for this client
         results =  db.session.query(
@@ -1375,13 +1387,9 @@ class MedHistory(BaseResource):
     @responds(schema=MedicalHistorySchema, api=ns)
     def get(self, user_id):
         """returns client's medical history as a json for the user_id specified"""
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         client = MedicalHistory.query.filter_by(user_id=user_id).first()
-
-        if not client:
-            raise ContentNotFound()
-
         return client
 
     @token_auth.login_required(staff_role=('medical_doctor',))
@@ -1389,15 +1397,11 @@ class MedHistory(BaseResource):
     @responds(schema=MedicalHistorySchema, status_code=201, api=ns)
     def post(self, user_id):
         """returns client's medical history as a json for the user_id specified"""
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         current_med_history = MedicalHistory.query.filter_by(user_id=user_id).first()
-        
-        if current_med_history:
-            raise IllegalSetting(message=f"Medical History for user_id {user_id} already exists. Please use PUT method")
 
-
-        data = request.get_json()
+        data = request.json
         data["user_id"] = user_id
 
         mh_schema = MedicalHistorySchema()
@@ -1415,15 +1419,12 @@ class MedHistory(BaseResource):
     @responds(schema=MedicalHistorySchema, api=ns)
     def put(self, user_id):
         """updates client's medical history as a json for the user_id specified"""
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         client_mh = MedicalHistory.query.filter_by(user_id=user_id).first()
 
-        if not client_mh:
-            raise UserNotFound(user_id, message = f"The client with id: {user_id} does not yet have a medical history in the database")
-        
         # get payload and update the current instance followd by db commit
-        data = request.get_json()
+        data = request.json
         
         data['last_examination_date'] = datetime.strptime(data['last_examination_date'], "%Y-%m-%d")
             
@@ -1442,7 +1443,7 @@ class MedPhysical(BaseResource):
     @responds(schema=MedicalPhysicalExamSchema(many=True), api=ns)
     def get(self, user_id):
         """returns all client's medical physical exams for the user_id specified"""
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         query =  db.session.query(
                 MedicalPhysicalExam, User.firstname, User.lastname
@@ -1452,8 +1453,6 @@ class MedPhysical(BaseResource):
                     MedicalPhysicalExam.reporter_id == User.user_id
                 ).all()
 
-        if not query:
-            raise ContentNotFound()
         # prepare response with staff name and medical physical data
         
         response = []
@@ -1469,7 +1468,7 @@ class MedPhysical(BaseResource):
     @responds(schema=MedicalPhysicalExamSchema, status_code=201, api=ns)
     def post(self, user_id):
         """creates new db entry of client's medical physical exam as a json for the clientuser_idid specified"""
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         data = request.get_json()
         data["user_id"] = user_id
@@ -1509,7 +1508,7 @@ class ExternalMedicalRecordIDs(BaseResource):
     @responds(schema=MedicalExternalMREntrySchema,status_code=201, api=ns)
     def post(self, user_id):
         """for submitting client medical record ids from external medical institutions"""
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         data = request.get_json()
         # check for new institute names. If the institute_id is 9999, then enter 
@@ -1537,7 +1536,7 @@ class ExternalMedicalRecordIDs(BaseResource):
     @responds(schema=MedicalExternalMREntrySchema, api=ns)
     def get(self, user_id):
         """returns all medical record ids for user_id"""
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         client_med_record_ids = MedicalExternalMR.query.filter_by(user_id=user_id).all()
 
@@ -1554,8 +1553,8 @@ class MedicalSurgeriesAPI(BaseResource):
     def post(self, user_id):
         """register a client surgery in the db"""
         #check client and reporting staff have valid user ids
-        super().check_user(user_id, user_type='client')
-        super().set_reporter_id(request.parsed_obj)
+        self.check_user(user_id, user_type='client')
+        self.set_reporter_id(request.parsed_obj)
 
         #add request data to db
         request.parsed_obj.user_id = user_id
@@ -1568,7 +1567,7 @@ class MedicalSurgeriesAPI(BaseResource):
     @responds(schema=MedicalSurgeriesSchema(many=True), api=ns)
     def get(self, user_id):
         """returns a list of all surgeries for the given user_id"""
-        super().check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type='client')
 
         return MedicalSurgeries.query.filter_by(user_id=user_id).all()
 

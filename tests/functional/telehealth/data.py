@@ -244,7 +244,7 @@ telehealth_client_staff_bookings_post_6_data = {
 }
 
 telehealth_client_staff_bookings_put_1_data = {
-  'status': 'Cancelled'
+  'status': 'Canceled'
 }
 
 # --------------------------------------------------------------------

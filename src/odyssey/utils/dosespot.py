@@ -4,10 +4,10 @@ import base64
 import requests
 
 from flask import current_app
+from werkzeug.exceptions import BadRequest
+
 from odyssey import db
-
 from odyssey.utils.constants import ALPHANUMERIC, MODOBIO_ADDRESS
-
 from odyssey.api.dosespot.models import (
     DoseSpotPractitionerID,
     DoseSpotPatientID,
@@ -27,10 +27,6 @@ from odyssey.api.staff.models import (
 )
 from odyssey.api.user.models import User
 from odyssey.utils.auth import token_auth
-
-from odyssey.utils.errors import (
-    InputError,
-)
 
 def generate_encrypted_clinic_id(clinic_key,char_len=32):
     """
@@ -104,22 +100,22 @@ def onboard_practitioner(user_id):
     user = User.query.filter_by(user_id=user_id).one_or_none()
 
     if not user.is_staff:
-        raise InputError(status_code=405,message='User must be a practitioner')
+        raise BadRequest('User must be a practitioner')
 
     staff_office = StaffOffices.query.filter_by(user_id=user_id).one_or_none()
 
     if not staff_office:
-        raise InputError(status_code=405,message='Missing Staff Office')
+        raise BadRequest('Staff office not found.')
 
     credentials = PractitionerCredentials.query.filter_by(user_id=user_id,credential_type='npi').one_or_none()
 
     if not credentials:
-        raise InputError(status_code=405,message='Need to input NPI number.')
-    else:              
+        raise BadRequest('NPI number not found.')
+    else:
         if credentials.status == 'Verified':
             npi_number = credentials.credentials
         else:
-            raise InputError(status_code=405,message='NPI number has not been verified yet.')
+            raise BadRequest('NPI number has not been verified yet.')
 
     ds_practitioner = DoseSpotPractitionerID.query.filter_by(user_id=user_id).one_or_none()
     admin_id = str(current_app.config['DOSESPOT_ADMIN_ID'])
@@ -131,7 +127,7 @@ def onboard_practitioner(user_id):
     encrypted_user_id = current_app.config['DOSESPOT_ENCRYPTED_ADMIN_ID']
 
     if ds_practitioner:
-        raise InputError(status_code=405,message='Practitioner is already in the DoseSpot System.')
+        raise BadRequest('Practitioner is already in the DoseSpot System.')
     else:
         # Get access token for the Admin
         res = get_access_token(modobio_id,encrypted_clinic_id,admin_id,encrypted_user_id)
@@ -140,7 +136,8 @@ def onboard_practitioner(user_id):
             access_token = res.json()['access_token']
             headers = {'Authorization': f'Bearer {access_token}'}
         else:
-            raise InputError(status_code=405,message=res.json())
+            res_json = res.json()
+            raise BadRequest('DoseSpot returned the following error: {res_json}.')
         
         state = LookupTerritoriesOfOperations.query.filter_by(idx=staff_office.territory_id).one_or_none()
         
@@ -174,22 +171,26 @@ def onboard_practitioner(user_id):
                 'Active': True
                 }
 
-        res = requests.post('https://my.staging.dosespot.com/webapi/api/clinicians',headers=headers,data=min_payload)
+        res = requests.post(
+            'https://my.staging.dosespot.com/webapi/api/clinicians',
+            headers=headers,
+            data=min_payload)
 
         # If res is okay, store credentials
+        res_json = res.json()
         if res.ok:
-            if 'Result' in res.json():
-                if 'ResultCode' in res.json()['Result']:
-                    if res.json()['Result']['ResultCode'] != 'OK':
-                        raise InputError(status_code=405,message=res.json())
+            if 'Result' in res_json:
+                if 'ResultCode' in res_json['Result']:
+                    if res_json['Result']['ResultCode'] != 'OK':
+                        raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
             ds_practitioner_id = DoseSpotCreatePractitionerSchema().load(
-                                            {'ds_user_id': res.json()['Id'],
+                                            {'ds_user_id': res_json['Id'],
                                              'ds_enrollment_status': 'pending'
                                             })
             ds_practitioner_id.user_id = user_id
             db.session.add(ds_practitioner_id)
         else:
-            raise InputError(status_code=405,message=res.json())
+            raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
     return 201
 
 def onboard_patient(patient_id:int,practitioner_id:int):
@@ -214,11 +215,12 @@ def onboard_patient(patient_id:int,practitioner_id:int):
     encrypted_user_id = generate_encrypted_user_id(encrypted_clinic_id[:22],clinic_api_key,auth_id)    
     res = get_access_token(modobio_clinic_id,encrypted_clinic_id,auth_id,encrypted_user_id)
 
+    res_json = res.json()
     if res.ok:
-        access_token = res.json()['access_token']
+        access_token = res_json['access_token']
         headers = {'Authorization': f'Bearer {access_token}'}
     else:
-        raise InputError(status_code=405,message=res.json())
+        raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
     # This user is the patient
     user = User.query.filter_by(user_id=patient_id).one_or_none()
     
@@ -254,18 +256,19 @@ def onboard_patient(patient_id:int,practitioner_id:int):
         headers=headers,
         data=min_payload)
 
+    res_json = res.json()
     if res.ok:
-        if 'Result' in res.json():
-            if 'ResultCode' in res.json()['Result']:
-                if res.json()['Result']['ResultCode'] != 'OK':
-                    raise InputError(status_code=405,message=res.json())                
-        ds_patient = DoseSpotCreatePatientSchema().load({'ds_user_id': res.json()['Id']})
+        if 'Result' in res_json:
+            if 'ResultCode' in res_json['Result']:
+                if res_json['Result']['ResultCode'] != 'OK':
+                    raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
+        ds_patient = DoseSpotCreatePatientSchema().load({'ds_user_id': res_json['Id']})
         ds_patient.user_id = patient_id
         db.session.add(ds_patient)
         db.session.commit()
     else:
         # There was an error creating the patient in DoseSpot system
-        raise InputError(status_code=405,message=res.json())
+        raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
     return ds_patient
 
 def onboard_proxy_user():
@@ -283,11 +286,12 @@ def onboard_proxy_user():
     # Get access token for the Admin
     res = get_access_token(modobio_id,encrypted_clinic_id,admin_id,encrypted_user_id)
 
+    res_json = res.json()
     if res.ok:
-        access_token = res.json()['access_token']
+        access_token = res_json['access_token']
         headers = {'Authorization': f'Bearer {access_token}'}
     else:
-        raise InputError(status_code=405,message=res.json())
+        raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
     
     # Phone Type
     # 2 - Cell
@@ -311,20 +315,24 @@ def onboard_proxy_user():
             'Active': True
             }
 
-    res = requests.post('https://my.staging.dosespot.com/webapi/api/clinicians',headers=headers,data=min_payload)
+    res = requests.post(
+        'https://my.staging.dosespot.com/webapi/api/clinicians',
+        headers=headers,
+        data=min_payload)
 
     # If res is okay, store credentials
+    res_json = res.json()
     if res.ok:
-        if 'Result' in res.json():
-            if 'ResultCode' in res.json()['Result']:
-                if res.json()['Result']['ResultCode'] != 'OK':
-                    raise InputError(status_code=405,message=res.json())
+        if 'Result' in res_json:
+            if 'ResultCode' in res_json['Result']:
+                if res_json['Result']['ResultCode'] != 'OK':
+                    raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
         ds_proxy_user = DoseSpotCreateProxyUserSchema().load(
-                                        {'ds_proxy_id': res.json()['Id']})
+                                        {'ds_proxy_id': res_json['Id']})
         db.session.add(ds_proxy_user)
         db.session.commit()
     else:
-        raise InputError(status_code=405,message=res.json())
+        raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
     return ds_proxy_user
 
 def get_access_token(clinic_id,encrypted_clinic_id,clinician_id,encrypted_user_id):
@@ -333,4 +341,3 @@ def get_access_token(clinic_id,encrypted_clinic_id,clinician_id,encrypted_user_i
                     auth=(clinic_id, encrypted_clinic_id),
                     data=payload)
     return res
-

@@ -2,6 +2,8 @@
 Database tables for the physical therapist's portion of the Modo Bio Staff application.
 All tables in this module are prefixed with ``PT``.
 """
+import logging
+logger = logging.getLogger(__name__)
 
 from odyssey import db
 from odyssey.utils.constants import DB_SERVER_TIME

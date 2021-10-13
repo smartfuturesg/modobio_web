@@ -2,6 +2,9 @@
 Database tables for supporting lookup tables. These tables should be static tables only used for reference,
 not to be edited at runtime. 
 """
+import logging
+logger = logging.getLogger(__name__)
+
 from sqlalchemy import UniqueConstraint
 
 from odyssey import db

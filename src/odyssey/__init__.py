@@ -4,7 +4,9 @@ This is a `Flask <https://flask.palletsprojects.com>`_ based app that serves web
 The pages contain the intake and data gathering forms for the *client journey*. The `Odyssey <https://en.wikipedia.org/wiki/Odyssey>`_ 
 is of course the most famous journey of all time! 🤓
 """
+import logging
 import os
+import time
 
 from celery import Celery
 from elasticsearch import Elasticsearch
@@ -21,8 +23,58 @@ from flask.scaffold import _endpoint_from_view_func
 import flask.helpers
 flask.helpers._endpoint_from_view_func = _endpoint_from_view_func
 
+from odyssey.utils.logging import JsonFormatter
 from odyssey.config import Config
+conf = Config()
 
+# Configure logging before Flask() is called.
+if conf.LOG_FORMAT_JSON:
+    formatter = JsonFormatter()
+else:
+    fmt = '%(levelname)-8s - %(asctime)s - %(name)s - %(message)s'
+    formatter = logging.Formatter(fmt=fmt)
+
+handler = logging.StreamHandler()
+handler.setFormatter(formatter)
+
+# Root logger
+logger = logging.getLogger()
+logger.setLevel(conf.LOG_LEVEL)
+
+# Add handler only once, prevent messages from being duplicated.
+if not logger.hasHandlers():
+    logger.addHandler(handler)
+
+# Some loggers in dependent packages don't get configured with the rest.
+# To see a list of all available loggers, uncomment the following lines,
+# run `flask run 2> /dev/null`, and add to the list below.
+#
+# import pprint
+# pprint.pprint(logging.root.manager.loggerDict)
+
+for name in ('sqlalchemy', 'flask_cors', 'werkzeug'):
+    logging.getLogger(name=name).setLevel(conf.LOG_LEVEL)
+
+log_level_num = logging.getLevelName(conf.LOG_LEVEL)
+
+# SQLAlchemy and elasticsearch are too verbose, fine tune several loggers.
+if log_level_num < logging.WARN:
+    logging.getLogger('elasticsearch').setLevel(logging.WARN)
+    logging.getLogger('sqlalchemy.orm.mapper.Mapper').setLevel(logging.WARN)
+    logging.getLogger('sqlalchemy.orm.relationships.RelationshipProperty').setLevel(logging.WARN)
+    logging.getLogger('sqlalchemy.orm.strategies.LazyLoader').setLevel(logging.WARN)
+
+if log_level_num < logging.INFO:
+    logging.getLogger('sqlalchemy.orm.path_registry').setLevel(logging.INFO)
+    logging.getLogger('sqlalchemy.pool').setLevel(logging.INFO)
+
+    # **WARNING**: sqlalchemy.engine.Engine at DEBUG level logs every row
+    # stored in/fetched from DB, including password hashes. Don't ever do that.
+    # If you must see what's going on while developing, comment this out.
+    # Otherwise, keep this at INFO level.
+    logging.getLogger('sqlalchemy.engine.Engine').setLevel(logging.INFO)
+
+# Instantiate Flask extensions.
 db = SQLAlchemy()
 migrate = Migrate()
 cors = CORS()
@@ -57,7 +109,8 @@ def create_app():
     app = Flask(__name__, static_folder="static") 
 
     # Load configuration.
-    app.config.from_object(Config())
+    app.config.from_object(conf)
+
     # Initialize all extensions.
     db.init_app(app)
     migrate.init_app(app, db)
@@ -88,9 +141,6 @@ def create_app():
     # Api is registered through a blueprint, Api.init_app() is not needed.
     # https://flask-restx.readthedocs.io/en/latest/scaling.html#use-with-blueprints
     app.register_blueprint(bp)
-
-    from odyssey.utils.errors import register_handlers
-    register_handlers(app)
     
     # Elasticsearch setup.
     app.elasticsearch = None

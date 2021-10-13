@@ -52,6 +52,22 @@ which may not be correct at all.
 This setting prevents such stupid behaviour.
 """
 
+LOG_LEVEL = ''
+""" Show log message of this level and higher.
+
+Accepted levels are:
+DEBUG, INFO, AUDIT, WARNING, ERROR, CRITICAL, or any integer.
+
+If not set, it will default to DEBUG if FLASK_ENV=development and AUDIT otherwise.
+"""
+
+LOG_FORMAT_JSON = False
+""" Output logs in JSON format.
+
+By default, logging prints pre-formatted strings. This switch enables JSON output for logs,
+which is useful for AWS CloudTrail integration.
+"""
+
 # Database parameters
 DB_FLAV = 'postgresql'
 """ Database "flavour" or dialect. """
@@ -198,7 +214,7 @@ INSTAMED_API_KEY = ''
 INSTAMED_API_SECRET = ''
 """ InstaMed API access key secret. """
 
-# InstaMed Settings
+# Dosespot Settings
 DOSESPOT_API_KEY = ''
 """ DoseSpot API access key ID number. """
 

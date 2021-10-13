@@ -4,14 +4,14 @@ from flask.json import dumps
 from odyssey.api.dosespot.models import DoseSpotPractitionerID
 
 def test_post_staff_office(test_client):
-    #test with invalid territory id, should return 404
+    #test with invalid territory id, should return 400
     response = test_client.post(f'/staff/offices/{test_client.staff_id}/',
                                 headers=test_client.staff_auth_header,
                                 data=dumps(staff_office_data['invalid_territory_id']),
                                 content_type='application/json')
 
     # some simple checks for validity
-    assert response.status_code == 404
+    assert response.status_code == 400
 
     #test with a field that exceeds its maximum length, should return 400
     response = test_client.post(f'/staff/offices/{test_client.staff_id}/',
@@ -73,14 +73,14 @@ def test_get_staff_office(test_client):
     assert response.json['phone'] == '4804389574'
 
 def test_put_staff_profile(test_client):
-    #test with invalid country id, should return 404
+    #test with invalid country id, should return 400
     response = test_client.put(f'/staff/offices/{test_client.staff_id}/',
                                 headers=test_client.staff_auth_header,
                                 data=dumps(staff_office_data['invalid_territory_id']),
                                 content_type='application/json')
     
     # some simple checks for validity
-    assert response.status_code == 404
+    assert response.status_code == 400
 
     #test with a field that exceeds its maximum length, should return 400
     response = test_client.put(f'/staff/offices/{test_client.staff_id}/',
@@ -119,8 +119,9 @@ def test_post_2_ds_practitioner_create(test_client):
         headers=test_client.staff_auth_header,
         data=dumps(payload),
         content_type='application/json')
+
     # This user should already be in the DS system
-    assert response.status_code == 405
+    assert response.status_code == 400
 
 def test_post_1_ds_patient_prescribe(test_client):
     payload = {}

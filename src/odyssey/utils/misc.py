@@ -1,50 +1,52 @@
 """ Utility functions for the odyssey package. """
+import logging
+logger = logging.getLogger(__name__)
 
-from datetime import datetime, date, time
-import os
+import ast
+import boto3
+import inspect
 import jwt
+import mimetypes
+import os
 import random
 import re
 import statistics
+import textwrap
+import typing as t
 import uuid
-import boto3
-import mimetypes
-from PIL import Image
-from werkzeug.datastructures import FileStorage
+
+import pprint
+
+from datetime import datetime, date, time
 from io import BytesIO
 
 from flask import current_app, request
 import flask.json
+from PIL import Image
 from sqlalchemy import select
 from twilio.base.exceptions import TwilioRestException
 from twilio.rest import Client
 from twilio.jwt.access_token import AccessToken
 from twilio.jwt.access_token.grants import ChatGrant, VideoGrant
 from werkzeug.datastructures import FileStorage
+from werkzeug.exceptions import (
+    BadRequest,
+    RequestEntityTooLarge,
+    Unauthorized,
+    UnsupportedMediaType)
 
 from odyssey import db
-from odyssey.api.lookup.models import LookupDrinks
 from odyssey.api.client.models import ClientFacilities
-from odyssey.api.doctor.models import MedicalBloodTests, MedicalBloodTestResultTypes, MedicalConditions, MedicalLookUpSTD
+from odyssey.api.doctor.models import (
+    MedicalBloodTests,
+    MedicalBloodTestResultTypes,
+    MedicalConditions,
+    MedicalLookUpSTD)
 from odyssey.api.facility.models import RegisteredFacilities
+from odyssey.api.lookup.models import LookupDrinks
 from odyssey.api.telehealth.models import TelehealthChatRooms
 from odyssey.api.user.models import User, UserTokenHistory
 from odyssey.utils.constants import ALLOWED_IMAGE_TYPES, ALPHANUMERIC, TWILIO_ACCESS_KEY_TTL
-from odyssey.utils.errors import (
-    ClientNotFound, 
-    FacilityNotFound, 
-    MedicalConditionNotFound, MethodNotAllowed,
-    MissingThirdPartyCredentials,
-    RelationAlreadyExists, 
-    ResultTypeNotFound,
-    TestNotFound, 
-    UnauthorizedUser,
-    UserNotFound, 
-    StaffNotFound,
-    DrinkNotFound,
-    STDNotFound,
-    InputError
-)
 
 _uuid_rx = re.compile(r'[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}', flags=re.IGNORECASE)
 
@@ -62,14 +64,14 @@ def check_client_existence(user_id):
     All clients must be in the CLientInfo table before any other procedure"""
     client = User.query.filter_by(user_id=user_id, is_client=True, deleted=False).one_or_none()
     if not client:
-        raise ClientNotFound(user_id)
+        raise Unauthorized
     return client
 
 def check_staff_existence(user_id):
     """Check that the user is in the database and is a staff member"""
     staff = User.query.filter_by(user_id=user_id, is_staff=True, deleted=False).one_or_none()
     if not staff:
-        raise StaffNotFound(user_id)
+        raise Unauthorized
     return staff
 
 def check_user_existence(user_id, user_type=None):
@@ -85,47 +87,46 @@ def check_user_existence(user_id, user_type=None):
     else:
         user = User.query.filter_by(user_id=user_id, deleted=False).one_or_none()
     if not user:
-        raise UserNotFound(user_id)
+        raise Unauthorized
     return user
 
 def check_blood_test_existence(test_id):
     """Check that the blood test is in the database"""
     test = MedicalBloodTests.query.filter_by(test_id=test_id).one_or_none()
     if not test:
-        raise TestNotFound(test_id)
+        raise BadRequest(f'Blood test {test_id} not found.')
 
 def check_blood_test_result_type_existence(result_name):
     """Check that a supplied blood test result type is in the database"""
     result = MedicalBloodTestResultTypes.query.filter_by(result_name=result_name).one_or_none()
     if not result:
-        raise ResultTypeNotFound(result_name)
+        raise BadRequest(f'Blood test result {result_name} not found.')
 
 def fetch_facility_existence(facility_id):
     facility = RegisteredFacilities.query.filter_by(facility_id=facility_id).one_or_none()
     if not facility:
-        raise FacilityNotFound(facility_id)
-    else:
-        return facility
+        raise BadRequest(f'Facility {facility_id} not found.')
+    return facility
 
 def check_client_facility_relation_existence(user_id, facility_id):
     relation = ClientFacilities.query.filter_by(user_id=user_id,facility_id=facility_id).one_or_none()
     if relation:
-        raise RelationAlreadyExists(user_id, facility_id)
+        raise BadRequest(f'Client already associated with facility {facility_id}.')
 
 def check_medical_condition_existence(medcon_id):
     medcon = MedicalConditions.query.filter_by(medical_condition_id=medcon_id).one_or_none()
     if not medcon:
-        raise MedicalConditionNotFound(medcon_id)
+        raise BadRequest(f'Medical condition {medcon_id} not found.')
 
 def check_drink_existence(drink_id):
     drink = LookupDrinks.query.filter_by(drink_id=drink_id).one_or_none()
     if not drink:
-        raise DrinkNotFound(drink_id)
+        raise BadRequest(f'Drink {drink_id} not found.')
         
 def check_std_existence(std_id):
     std = MedicalLookUpSTD.query.filter_by(std_id=std_id).one_or_none()
     if not std:
-        raise STDNotFound(std_id)
+        raise BadRequest(f'STD {std_id} not found.')
 
 def grab_twilio_credentials():
     """
@@ -137,7 +138,7 @@ def grab_twilio_credentials():
     twilio_api_key_secret = current_app.config['TWILIO_API_KEY_SECRET']
 
     if any(x is None for x in [twilio_account_sid,twilio_api_key_sid,twilio_api_key_secret]):
-        raise MissingThirdPartyCredentials(message="Twilio API credentials have not been configured")
+        raise BadRequest('Twilio API credentials not found.')
 
     return {'account_sid':twilio_account_sid,
             'api_key': twilio_api_key_sid,
@@ -240,7 +241,7 @@ def get_chatroom(staff_user_id, client_user_id, participant_modobio_id, create_n
         db.session.add(new_chat_room)
     else:
         # no chat room exists and a new one will not be created
-        raise MethodNotAllowed(message="no chat room exists. Please create one.")
+        raise BadRequest('Chat room does not exist.')
     # Add participant to chat room using their modobio_id
     try:
         conversation.participants.create(identity=participant_modobio_id)
@@ -408,7 +409,7 @@ def verify_jwt(token, error_message="", refresh=False):
                                         ua_string = request.headers.get('User-Agent')))
             db.session.commit()
             
-        raise UnauthorizedUser(message=error_message)
+        raise Unauthorized(error_message)
 
     return decoded_token
 
@@ -433,7 +434,8 @@ class FileHandling:
         # validate the file is allowed
         file_extension = mimetypes.guess_extension(file.mimetype)
         if file_extension not in allowed_file_types:
-            raise InputError(422, f'{file_extension} is not an allowed file type. Allowed types are {allowed_file_types}')
+            raise UnsupportedMediaType(
+                f'File {file.name} not allowed. Allowed types are {allowed_file_types}.')
 
         return file_extension
 
@@ -442,7 +444,7 @@ class FileHandling:
         file.seek(0, os.SEEK_END)
         file_size = file.tell()
         if file_size > max_file_size:
-            raise InputError(413, 'File too large')
+            raise RequestEntityTooLarge(f'File {file.name} exceeds maximum file size.')
 
     def image_crop_square(self, file: FileStorage) -> FileStorage:
         # validate_file_type(...) is an image
@@ -522,3 +524,251 @@ class FileHandling:
 
     def delete_from_s3(self, prefix):
         self.s3_bucket.objects.filter(Prefix=self.s3_prefix + prefix).delete()
+
+
+class DecoratorVisitor(ast.NodeVisitor):
+    """ Find decorators placed on functions or classes. """
+    decorators = []
+
+    def visit_FunctionDef(self, node):
+        """ For a node that is a :class:`ast.FunctionDef`, collect its decorators. """
+        self.decorators.extend(node.decorator_list)
+
+    def visit_ClassDef(self, node):
+        """ For a node that is a :class:`ast.ClassDef`, collect its decorators. """
+        self.decorators.extend(node.decorator_list)
+
+
+def find_decorator_value(
+        function: t.Callable,
+        decorator: str,
+        argument: int=None,
+        keyword: str=None
+    ) -> t.Any:
+    """ Return the value of an argument or keyword passed to a decorator placed on a function or class.
+
+    For example, in the code ::
+
+        class SomeEndpoint(BaseResource):
+            @accepts(schema=SomeSchema)
+            def post(self):
+                ...
+
+        schema = find_decorator_value(SomeEndpoint.post, decorator='accepts', keyword='schema')
+
+    :func:`find_decorator_value` will find the decorator :func:`@accepts` which is decorating
+    :func:`post()` and return the value ``SomeSchema`` passed to the argument :attr:`schema`.
+
+    This function can also find positional arguments passed into the decorator::
+
+        class SomeEndpoint(BaseResource):
+            # incorrect use of @accepts for this example only
+            @accepts('x', 3, SomeSchema)
+            def post(self):
+                ...
+
+        schema = find_decorator_value(SomeEndpoint.post, decorator='accepts', argument=2)
+
+    will return the same ``SomeSchema`` object as the first example.
+
+    Params
+    ------
+    function : Callable
+        A function, method, or class which has a decorator on it.
+
+    decorator : str
+        The name of the decorator to search for.
+
+    argument : int
+        The index of the positional argument passed into the decorator. Mutually exclusive
+        with the ``keyword`` argument, must provide exactly one.
+
+    keyword : str
+        The name of the keyword argument passed into the decorator. Mutually exclusive
+        with the ``argument`` argument, must provide exactly one.
+
+    Returns
+    -------
+    Any
+        The value of the parameter as passed into the decorator. Can be any Python object.
+
+    Raises
+    ------
+    ValueError
+        Raised when called with incorrect arguments.
+
+    TypeError
+        Raised when :attr:`decorator` is not found or when :attr:`argument` or :attr:`keyword`
+        are not found in the decorator.
+    """
+    # Check parameters
+    if (keyword is None and argument is None) or (keyword is not None and argument is not None):
+        raise ValueError('You must provide exactly one of "keyword" or "argument".')
+
+    if argument is not None and not isinstance(argument, int):
+        raise ValueError('Parameter "argument" must be integer.')
+
+    if keyword is not None and not isinstance(keyword, str):
+        raise ValueError('Parameter "keyword" must be string.')
+
+    if decorator.startswith('@'):
+        decorator = decorator[1:]
+
+    # Get actual function, not the one wrapped by a decorator
+    top_func = inspect.unwrap(function)
+
+    # Get source code of function/class definition, convert to AST representation.
+    extralines = []
+    if inspect.isclass(top_func):
+        # inspect.getsource(classobj) does NOT include decorators, unlike functions and methods.
+        # Get previous lines if any of them include '@'
+        wholefile, lineno = inspect.findsource(top_func.__class__)
+        lineno -= 1
+        while lineno >= 0:
+            line = wholefile[lineno].strip()
+            if line.startswith('@'):
+                extralines.append(wholefile[lineno])
+                lineno -= 1
+                continue
+
+            # It is legal to intersperse decorators with empty lines and comments.
+            # Keep searching in that case.
+            if (not line or line.startswith('#')):
+                lineno -= 1
+                continue
+
+            break
+
+    code = inspect.getsource(top_func)
+    code = '\n'.join(extralines) + code
+    code = textwrap.dedent(code)
+    tree = ast.parse(code)
+
+    # Find decorators
+    visitor = DecoratorVisitor()
+    visitor.visit(tree)
+
+    # Decorators can be called in 4 different ways.
+    # Each way is represented differently in AST.
+    #
+    # 1. @aaa               Name(id='aaa')
+    # 2. @aaa(1, kw=2)      Call(func=Name(id='aaa'),
+    #                           args=[Constant(value=1)],
+    #                           keywords=[keyword(arg='kw', value=Constant(value=2))])
+    # 3. @AAA.aaa           Attribute(value=Name(id='AAA'), attr='aaa')
+    # 4. @AAA.aaa(1, kw=2)  Call(func=Attribute(value=Name(id='AAA'), attr='aaa'),
+    #                           args=[Constant(value=3)],
+    #                           keywords=[keyword(arg='kw', value=Constant(value=2)))
+
+    # Map decorator names to AST nodes
+    decos = {}
+    for deco in visitor.decorators:
+        if isinstance(deco, ast.Name):
+            deco_name = deco.id
+        elif isinstance(deco, ast.Attribute):
+            deco_name = deco.value.id + '.' + deco.attr
+        elif isinstance(deco, ast.Call):
+            if isinstance(deco.func, ast.Name):
+                deco_name = deco.func.id
+            elif isinstance(deco.func, ast.Attribute):
+                deco_name = deco.func.value.id + '.' + deco.func.attr
+            else:
+                raise TypeError(f'Unknown decorator Call type found {deco}.')
+        else:
+            raise TypeError(f'Unknown decorator type found {deco}.')
+
+        decos[deco_name] = deco
+
+    if decorator not in decos:
+        raise TypeError(f'Decorator {decorator} not found on {function}.')
+
+    # Continue with the requested decorator
+    deco = decos[decorator]
+
+    # Find the AST node that represents either the argument or the keyword value.
+    value = None
+    if argument is not None:
+        if not hasattr(deco, 'args'):
+            raise TypeError(f'Decorator @{deco_name} has no positional arguments.')
+
+        try:
+            value = deco.args[argument]
+        except IndexError:
+            argno = len(deco.args)
+            raise TypeError(f'Decorator @{deco_name} has only {argno} argument(s).')
+    else:
+        if not hasattr(deco, 'keywords'):
+            raise TypeError(f'Decorator @{deco_name} has no keyword arguments.')
+
+        kws = {kw.arg: kw.value for kw in deco.keywords}
+        if keyword not in kws:
+            raise TypeError(f'Keyword {keyword} not found in decorator @{deco_name}.')
+
+        value = kws[keyword]
+
+    # Get actual object from AST node; this is where it gets really hard.
+    #
+    # At this point we have an AST representation of the value passed in to the
+    # decorator, either by argument or by keyword. We want the actual object of
+    # that value, not just the AST representation. I don't know how to get that.
+    #
+    # I tried to analyze the frame stack (inspect.stack()). Calling frames hold
+    # references to objects in memory. However, the stack is linear going from
+    # the main caller (__main__ or thread start or something similar) to the
+    # current frame. Another decorator that was called and finshed is no longer
+    # on the stack.
+    #
+    # For now this will return only a few simple cases. It will not raise an
+    # error for missing cases as there are too many, simply return None.
+
+    if isinstance(value, ast.Constant):
+        # int, str, or None
+        return value.value
+    elif isinstance(value, (ast.List, ast.Tuple, ast.Set)):
+        # Only support collections of Constant, nothing nested or more complicated.
+        if not all([isinstance(elt, ast.Constant) for elt in value.elts]):
+            return
+
+        elts = [elt.value for elt in value.elts]
+        if isinstance(value, ast.List):
+            return elts
+        elif isinstance(value, ast.Tuple):
+            return tuple(elts)
+        else:
+            return set(elts)
+    elif isinstance(value, ast.Dict):
+        # Only support simple dicts where both keys and values are Constant.
+        if not all([isinstance(elt, ast.Constant) for elt in value.keys + value.values]):
+            return
+
+        return {k.value: v.value for k, v in zip(value.keys, value.values)}
+    elif isinstance(value, ast.Name):
+        # Value is a variable name, which means it must be defined or imported.
+        # See if it's defined in the globals section of the function/class
+        # on which the decorator was placed.
+        # TODO: widen search, maybe go up the tree to search in globals for nested
+        # function/class definitions, all the way up to module.
+        if value.id in top_func.__globals__:
+            return top_func.__globals__[value.id]
+            
+def cancel_telehealth_appointment(booking):
+    """
+    Used to cancel an appointment in the event a payment is unsuccessful
+    """
+
+    #update booking status to canceled and updated charged flag so task won't try to charge again
+    booking.status = 'Canceled'
+    booking.charged = True
+
+    #add new status to status history table
+    db.session.add(TelehealthBookingStatus(
+            booking_id=booking.idx,
+            reporter_id=None,
+            reporter_role='System',
+            status='Canceled'
+        )) 
+
+    #TODO: Create notification/send email(?) to user that their appointment was canceled due
+    #to a failed payment
+
+    db.session.commit()

@@ -1,19 +1,27 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from datetime import datetime, date, timedelta
+import requests
+import json
+
+from datetime import datetime, date, timedelta, timezone
+from flask import current_app
 
 from celery.schedules import crontab
 from celery.signals import worker_ready   
 from celery.utils.log import get_task_logger
-from flask import current_app
 from sqlalchemy import delete, text
 from sqlalchemy import and_, or_, select
 
 from odyssey import celery, db, mongo
 from odyssey.tasks.base import BaseTaskWithRetry
-from odyssey.tasks.tasks import process_wheel_webhooks, upcoming_appointment_care_team_permissions, upcoming_appointment_notification_2hr
+from odyssey.tasks.tasks import process_wheel_webhooks, upcoming_appointment_care_team_permissions, upcoming_appointment_notification_2hr, charge_telehealth_appointment
 from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations, ClientDataStorage, ClientClinicalCareTeam
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.notifications.schemas import NotificationSchema
+from odyssey.api.system.models import SystemTelehealthSessionCosts
 from odyssey.api.user.models import User
 
 from odyssey.config import Config
@@ -225,6 +233,31 @@ def deploy_webhook_tasks(**kwargs):
 def startup_tasks(**kwargs):
     deploy_webhook_tasks.delay()
 
+@celery.task()
+def find_chargable_bookings():
+    """
+    This task will scan the TelehealthBookings table for appointments that are not yet paid and
+    are less than 24 hours away. It will then charge the user for the appointment using the 
+    payment method saved to the booking.
+    """
+    #get all bookings that are sheduled <24 hours away and have not been charged yet
+    target_time = datetime.now(timezone.utc) + timedelta(hours=24)
+    target_time_window = LookupBookingTimeIncrements.query                    \
+        .filter(LookupBookingTimeIncrements.start_time <= target_time.time(), \
+        LookupBookingTimeIncrements.end_time >= target_time.time()).one_or_none().idx
+    bookings = TelehealthBookings.query.filter(TelehealthBookings.charged == False) \
+        .filter(or_(
+            and_(TelehealthBookings.booking_window_id_start_time_utc >= target_time_window, TelehealthBookings.target_date_utc == datetime.today().date()),
+            and_(TelehealthBookings.booking_window_id_start_time_utc <= target_time_window, TelehealthBookings.target_date_utc == target_time.date())
+        )).all()
+    
+    # do not deploy charge task in testing
+    if config.TESTING:
+        return bookings
+
+    for booking in bookings:
+        charge_telehealth_appointment.apply_async((booking.idx,), eta=datetime.now())
+
 
 celery.conf.beat_schedule = {
     # refresh the client data storage table every day at midnight
@@ -261,5 +294,10 @@ celery.conf.beat_schedule = {
     'cleanup_temporary_care_team': {
         'task': 'odyssey.tasks.periodic.cleanup_temporary_care_team',
         'schedule': crontab(hour=1, minute=0)
+    },
+    #telehealth appointment charging
+    'find_chargable_bookings': {
+        'task': 'odyssey.tasks.periodic.find_chargable_bookings',
+        'schedule': crontab(hour=0, minute=5)
     }
 }

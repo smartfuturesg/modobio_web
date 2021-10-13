@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from marshmallow import Schema, fields, validate
 
 class NewRemoteRegisterUserSchema(Schema):
