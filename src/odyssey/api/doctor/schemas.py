@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from marshmallow import Schema, fields, post_load, validate, pre_dump, validates, ValidationError
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, auto_field
 

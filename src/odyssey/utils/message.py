@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import enum
 import pathlib
 
@@ -9,6 +12,7 @@ from botocore.exceptions import ClientError
 from flask import current_app
 from flask.json import dumps
 from marshmallow import ValidationError
+from werkzeug.exceptions import BadRequest
 
 from odyssey.api import api
 from odyssey.api.notifications.models import NotificationsPushRegistration
@@ -18,7 +22,6 @@ from odyssey.api.notifications.schemas import (
     ApplePushNotificationBadgeSchema,
     ApplePushNotificationVoipSchema)
 from odyssey.utils.constants import DEV_EMAIL_DOMAINS, PASSWORD_RESET_URL, REGISTRATION_PORTAL_URL
-from odyssey.utils.errors import UnknownError
 
 SUBJECTS = {"remote_registration_portal": "Modo Bio User Registration Portal", 
             "password_reset": "Modo bio password reset request - temporary link",
@@ -784,6 +787,10 @@ class PushNotification:
         arn : str
             ARN of the device endpoint to be deleted.
         """
+        # Not a real endpoint
+        if arn == PushNotificationPlatform.debug.value:
+            return
+
         # Won't fail if endpoint doesn't exist.
         endpoint = self.sns.PlatformEndpoint(arn=arn)
         endpoint.delete()
@@ -812,7 +819,7 @@ class PushNotification:
 
         Raises
         ------
-        UnknownError
+        :class:`werkzeug.exceptions.BadRequest`
             If the user has no registered devices or if the device is registered with an
             unknown channel.
         """
@@ -826,9 +833,9 @@ class PushNotification:
             .all())
 
         if not registered:
-            raise UnknownError(
-                message=f'User {user_id} does not have any registered devices.'
-                         'Connect with POST /notifications/push/register/{user_id}/ first.')
+            raise BadRequest(
+                f'User {user_id} does not have any registered devices.'
+                f'Connect with POST /notifications/push/register/{user_id}/ first.')
 
         for device in registered:
             arn = EndpointARN(device.arn)
@@ -839,7 +846,7 @@ class PushNotification:
             elif arn.channel == 'DEBUG':
                 message = self._send_log(notification_type, content)
             else:
-                raise UnknownError(f'Unknown push notification channel {arn.channel} for user {user_id}')
+                raise BadRequest(f'Unknown push notification channel {arn.channel} for user {user_id}')
 
         return message
 
@@ -861,7 +868,7 @@ class PushNotification:
         try:
             processed = schema().dumps(content)
         except ValidationError as err:
-            raise UnknownError(message='\n'.join(err.messages))
+            raise BadRequest('\n'.join(err.messages))
 
         # Where to send it to?
         if notification_type == PushNotificationType.voip:

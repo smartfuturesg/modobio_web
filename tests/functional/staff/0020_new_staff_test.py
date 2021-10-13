@@ -112,8 +112,7 @@ def test_creating_new_staff_same_email(test_client):
         data=dumps(users_staff_new_user_data),
         content_type='application/json')
 
-    # 409 should be returned because user email is already in use
-    assert response.status_code == 409
+    assert response.status_code == 400
 
 def test_add_roles_to_staff(test_client, new_staff):
     uid = new_staff['user_id']

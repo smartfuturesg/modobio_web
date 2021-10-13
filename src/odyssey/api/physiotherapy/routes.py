@@ -1,29 +1,29 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from flask import request
-from flask_restx import Resource, Namespace, Api
+from flask_restx import Namespace, Api
 from flask_accepts import accepts , responds
 
 from odyssey.api.physiotherapy.models import Chessboard, PTHistory
+from odyssey.api.physiotherapy.schemas import ChessboardSchema, PTHistorySchema
 from odyssey import db
 from odyssey.utils.auth import token_auth
-from odyssey.utils.errors import UserNotFound, IllegalSetting, ContentNotFound
+from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.misc import check_client_existence
-from odyssey.api.physiotherapy.schemas import ChessboardSchema, PTHistorySchema
 
 ns = Namespace('physiotherapy', description='Operations related to physical therapy services')
 
 @ns.route('/history/<int:user_id>/')
-class ClientPTHistory(Resource):
+class ClientPTHistory(BaseResource):
     """GET, POST, PUT for pt history data"""
     @token_auth.login_required
     @responds(schema=PTHistorySchema)
     def get(self, user_id):
         """returns most recent pt history"""
         check_client_existence(user_id)
-        client_pt = PTHistory.query.filter_by(
-                        user_id=user_id).first()
-        
-        if not client_pt:
-            raise ContentNotFound() 
+        client_pt = PTHistory.query.filter_by(user_id=user_id).first()
+
         return client_pt
 
     @token_auth.login_required
@@ -36,14 +36,10 @@ class ClientPTHistory(Resource):
         data = request.get_json()
 
         #check to see if there is already an entry for pt history
-        current_pt_history = PTHistory.query.filter_by(
-                        user_id=user_id).first()
-
-        if current_pt_history:
-            raise IllegalSetting(message=f"PT History for user_id {user_id} already exists. Please use PUT method")
+        current_pt_history = PTHistory.query.filter_by(user_id=user_id).first()
 
         data['user_id'] = user_id
-        
+
         #create a new entry into the pt history table
         client_pt = PTHistorySchema().load(data)
 
@@ -61,11 +57,8 @@ class ClientPTHistory(Resource):
 
         client_pt = PTHistory.query.filter_by(user_id=user_id).first()
 
-        if not client_pt:
-            raise UserNotFound(user_id, message = f"The client with id: {user_id} does not yet have a pt history in the database")
-
         # get payload and update the current instance followed by db commit
-        data = request.get_json()
+        data = request.json
 
         client_pt.update(data)
         db.session.commit()
@@ -73,7 +66,7 @@ class ClientPTHistory(Resource):
         return client_pt
 
 @ns.route('/chessboard/<int:user_id>/')
-class ClientChessboard(Resource):
+class ClientChessboard(BaseResource):
     """GET, POST for chessboard assesssment data
     note that clients will have multiple entries as they progress through the program
     Trainers may update some or all fields. The backend will store every update as a new row
@@ -85,9 +78,6 @@ class ClientChessboard(Resource):
         check_client_existence(user_id)
 
         all_entries = Chessboard.query.filter_by(user_id=user_id).order_by(Chessboard.timestamp.asc()).all()
-
-        if len(all_entries) == 0:
-            raise ContentNotFound()
         
         return all_entries
 

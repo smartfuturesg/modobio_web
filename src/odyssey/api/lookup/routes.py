@@ -1,12 +1,12 @@
-from flask_accepts import responds
-from flask_restx import Resource, Namespace
-
-import pytz
+import logging
 import pathlib
+import pytz
 
 from flask import current_app
+from flask_accepts import responds
+from flask_restx import Namespace
 
-from odyssey.utils.auth import token_auth
+from odyssey import db
 from odyssey.api.lookup.models import (
      LookupActivityTrackers,
      LookupBookingTimeIncrements,
@@ -61,14 +61,16 @@ from odyssey.api.lookup.schemas import (
     LookupOrganizationsOutputSchema,
     LookupCurrenciesOutputSchema
 )
+from odyssey.utils.auth import token_auth
+from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.misc import check_drink_existence
 
-from odyssey import db
+logger = logging.getLogger(__name__)
 
 ns = Namespace('lookup', description='Endpoints for lookup tables.')
 
 @ns.route('/terms-and-conditions/')
-class LookupTermsAndConditionResource(Resource):
+class LookupTermsAndConditionResource(BaseResource):
     """ Returns the Terms and Conditions
     """
     @responds(schema=LookupTermsAndConditionsOutputSchema,status_code=200,api=ns)
@@ -82,7 +84,7 @@ class LookupTermsAndConditionResource(Resource):
         return payload
 
 @ns.route('/telehealth/booking-increments/')
-class LookupTelehealthBookingIncrements(Resource):
+class LookupTelehealthBookingIncrements(BaseResource):
     """ Returns stored booking increments.
     Returns
     -------
@@ -100,7 +102,7 @@ class LookupTelehealthBookingIncrements(Resource):
         return payload
 
 @ns.route('/timezones/')
-class LookupTimezones(Resource):
+class LookupTimezones(BaseResource):
     @token_auth.login_required
     @responds(schema=LookupTimezones,status_code=200,api=ns)
     def get(self):
@@ -110,7 +112,7 @@ class LookupTimezones(Resource):
         return payload
 
 @ns.route('/business/transaction-types/')
-class LookupTransactionTypesResource(Resource):
+class LookupTransactionTypesResource(BaseResource):
     """ Returns stored transaction types in database by GET request.
     Returns
     -------
@@ -129,7 +131,7 @@ class LookupTransactionTypesResource(Resource):
 
 
 @ns.route('/business/countries-of-operations/')
-class LookupCountryOfOperationResource(Resource):
+class LookupCountryOfOperationResource(BaseResource):
     """ Returns stored countries of operations in database by GET request.
 
     Returns
@@ -149,7 +151,7 @@ class LookupCountryOfOperationResource(Resource):
         return payload
 
 @ns.route('/business/telehealth-settings/')
-class LookupTelehealthSettingsApi(Resource):
+class LookupTelehealthSettingsApi(BaseResource):
     """ Endpoints related to the telehealth lookup tables """
 
     @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
@@ -172,7 +174,7 @@ class LookupTelehealthSettingsApi(Resource):
         }
 
 @ns.route('/activity-trackers/misc/')
-class WearablesLookUpFitbitActivityTrackersResource(Resource):
+class WearablesLookUpFitbitActivityTrackersResource(BaseResource):
     """ Returns misc activity trackers stored in the database in response to a GET request.
 
     Returns
@@ -194,7 +196,7 @@ class WearablesLookUpFitbitActivityTrackersResource(Resource):
         return payload
 
 @ns.route('/activity-trackers/fitbit/')
-class WearablesLookUpFitbitActivityTrackersResource(Resource):
+class WearablesLookUpFitbitActivityTrackersResource(BaseResource):
     """ Returns Fitbit activity trackers stored in the database in response to a GET request.
 
     Returns
@@ -212,7 +214,7 @@ class WearablesLookUpFitbitActivityTrackersResource(Resource):
         return payload
 
 @ns.route('/activity-trackers/apple/')
-class WearablesLookUpAppleActivityTrackersResource(Resource):
+class WearablesLookUpAppleActivityTrackersResource(BaseResource):
     """ Returns activity Apple trackers stored in the database in response to a GET request.
 
     Returns
@@ -230,7 +232,7 @@ class WearablesLookUpAppleActivityTrackersResource(Resource):
         return payload
 
 @ns.route('/activity-trackers/all/')
-class WearablesLookUpAllActivityTrackersResource(Resource):
+class WearablesLookUpAllActivityTrackersResource(BaseResource):
     """ Returns activity trackers stored in the database in response to a GET request.
 
     Returns
@@ -248,7 +250,7 @@ class WearablesLookUpAllActivityTrackersResource(Resource):
         return payload
 
 @ns.route('/drinks/')
-class LookupDrinksApi(Resource):
+class LookupDrinksApi(BaseResource):
     
     @token_auth.login_required
     @responds(schema=LookupDrinksOutputSchema, api=ns)
@@ -263,7 +265,7 @@ class LookupDrinksApi(Resource):
 
 @ns.route('/drinks/ingredients/<int:drink_id>/')
 @ns.doc('Id of the desired drink')
-class LookupDrinkIngredientsApi(Resource):
+class LookupDrinkIngredientsApi(BaseResource):
 
     @token_auth.login_required
     @responds(schema=LookupDrinkIngredientsOutputSchema, api=ns)
@@ -275,7 +277,7 @@ class LookupDrinkIngredientsApi(Resource):
         return {'total_items': len(res), 'items': res}
 
 @ns.route('/goals/')
-class LookupGoalsApi(Resource):
+class LookupGoalsApi(BaseResource):
 
     @token_auth.login_required
     @responds(schema=LookupGoalsOutputSchema, api=ns)
@@ -285,7 +287,7 @@ class LookupGoalsApi(Resource):
         return {'total_items': len(res), 'items': res}
 
 @ns.route('/macro-goals/')
-class LookupMacroGoalsApi(Resource):
+class LookupMacroGoalsApi(BaseResource):
 
     @token_auth.login_required
     @responds(schema=LookupMacroGoalsOutputSchema, api=ns)
@@ -295,7 +297,7 @@ class LookupMacroGoalsApi(Resource):
         return {'total_items': len(res), 'items': res}
 
 @ns.route('/races/')
-class LookupRacesApi(Resource):
+class LookupRacesApi(BaseResource):
 
     @token_auth.login_required
     @responds(schema=LookupRacesOutputSchema, api=ns)
@@ -305,7 +307,7 @@ class LookupRacesApi(Resource):
         return {'total_items': len(res), 'items': res}
 
 @ns.route('/care-team/resources/')
-class LookupClinicalCareTeamResourcesApi(Resource):
+class LookupClinicalCareTeamResourcesApi(BaseResource):
     """
     To be replaced by care-team/ehr-resources/
     Returns available resources that can be shared within clinical care teams
@@ -318,7 +320,7 @@ class LookupClinicalCareTeamResourcesApi(Resource):
         return {'total_items': len(res), 'items': res}
 
 @ns.route('/care-team/ehr-resources/')
-class LookupClinicalCareTeamResourcesApi(Resource):
+class LookupClinicalCareTeamResourcesApi(BaseResource):
     """
     Returns available resources that can be shared within clinical care teams
     """
@@ -335,7 +337,7 @@ class LookupClinicalCareTeamResourcesApi(Resource):
         return {'total_items': len(care_team_resources), 'items': care_team_resources}
         
 @ns.route('/subscriptions/')
-class LookupSubscriptionsApi(Resource):
+class LookupSubscriptionsApi(BaseResource):
 
     @token_auth.login_required
     @responds(schema=LookupSubscriptionsOutputSchema, api=ns)
@@ -345,7 +347,7 @@ class LookupSubscriptionsApi(Resource):
         return {'total_items': len(res), 'items': res}
 
 @ns.route('/notifications/')
-class LookupNotificationsApi(Resource):
+class LookupNotificationsApi(BaseResource):
 
     @token_auth.login_required
     @responds(schema=LookupNotificationsOutputSchema, api=ns)
@@ -355,7 +357,7 @@ class LookupNotificationsApi(Resource):
         return {'total_items': len(res), 'items': res}
 
 @ns.route('/default-health-metrics/')
-class LookupDefaultHealthMetricsApi(Resource):
+class LookupDefaultHealthMetricsApi(BaseResource):
     """
     Endpoint for handling requests for all default health metrics
     """
@@ -368,7 +370,7 @@ class LookupDefaultHealthMetricsApi(Resource):
         return {'total_items': len(res), 'items': res}
 
 @ns.route('/operational-territories/')
-class LookupTerritoriesOfOperationsApi(Resource):
+class LookupTerritoriesOfOperationsApi(BaseResource):
     """
     Endpoint for handling requests for all territories of operation
     """
@@ -380,7 +382,7 @@ class LookupTerritoriesOfOperationsApi(Resource):
         return {'total_items': len(res), 'items': res}
 
 @ns.route('/emergency-numbers/')
-class LookupEmergencyNumbersApi(Resource):
+class LookupEmergencyNumbersApi(BaseResource):
     """
     Endpoint that returns emergency phone number for the Ambulance service
     """
@@ -392,7 +394,7 @@ class LookupEmergencyNumbersApi(Resource):
         return {'total_items': len(res), 'items': res}
 
 @ns.route('/roles/')
-class LookupRolesApi(Resource):
+class LookupRolesApi(BaseResource):
     """
     Endpoint that returns the roles that exist for users.
     """
@@ -404,7 +406,7 @@ class LookupRolesApi(Resource):
         return {'total_items': len(res), 'items': res}
 
 @ns.route('/legal-docs/')
-class LookupLegalDocsApi(Resource):
+class LookupLegalDocsApi(BaseResource):
     """
     Endpoint that returns the list of legal documents.
     """
@@ -420,7 +422,7 @@ class LookupLegalDocsApi(Resource):
         return {'total_items': len(res), 'items': res}
 
 @ns.route('/medical-symptoms/')
-class LookupMedicalSymptomssApi(Resource):
+class LookupMedicalSymptomssApi(BaseResource):
     """
     Endpoint that returns the list of medical symptoms.
     """
@@ -432,7 +434,7 @@ class LookupMedicalSymptomssApi(Resource):
         return {'total_items': len(res), 'items': res}
 
 @ns.route('/organizations/')
-class LookupOrganizationsApi(Resource):
+class LookupOrganizationsApi(BaseResource):
     """
     Endpoint that returns the list of organizations affiliated with Modobio.
     """
@@ -444,7 +446,7 @@ class LookupOrganizationsApi(Resource):
         return {'total_items': len(res), 'items': res}
 
 @ns.route('/currencies/')
-class LookupCurrenciesApi(Resource):
+class LookupCurrenciesApi(BaseResource):
     """
     Endpoint that returns the list of medical symptoms.
     """

@@ -2,6 +2,8 @@
 Database tables for the trainer's portion of the Modo Bio Staff application.
 All tables in this module are prefixed with ``Trainer``.
 """
+import logging
+logger = logging.getLogger(__name__)
 
 from datetime import datetime
 
