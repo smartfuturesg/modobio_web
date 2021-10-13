@@ -3,6 +3,7 @@ from werkzeug.exceptions import BadRequest
 
 from flask import current_app
 
+from werkzeug.exceptions import BadRequest
 from odyssey.api.payment.models import PaymentHistory
 
 from odyssey import db
@@ -138,7 +139,7 @@ class Instamed:
         try:
             response.raise_for_status()
         except:
-            #transaction was not successful, store in PaymentFailedTransactions
+            #transaction was not successful, cancel booking
             cancel_telehealth_appointment(booking)
             return
 

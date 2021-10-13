@@ -63,6 +63,7 @@ from odyssey.api.telehealth.schemas import (
     TelehealthBookingsPUTSchema,
     TelehealthUserSchema
 )
+from odyssey.api.user.models import User
 from odyssey.api.system.models import SystemTelehealthSessionCosts
 from odyssey.api.lookup.models import (
     LookupTerritoriesOfOperations
@@ -79,7 +80,7 @@ from odyssey.utils.constants import (
     ALLOWED_AUDIO_TYPES,
     ALLOWED_IMAGE_TYPES,
     IMAGE_MAX_SIZE
-) 
+)
 from odyssey.utils.message import PushNotification, PushNotificationType
 from odyssey.utils.misc import (
     FileHandling,
