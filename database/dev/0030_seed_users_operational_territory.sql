@@ -15,13 +15,7 @@ alter sequence "PractitionerCredentials_idx_seq"
 
 insert into "StaffOperationalTerritories" ("user_id", "operational_territory_id", "role_id") values
 (10,1,10),
-(10,2,10),
-(10,3,10),
-(10,4,10),
-(14,1,11),
-(14,2,11),
-(14,3,11),
-(14,4,11);
+(14,1,11);
 -- (30, 1 ,75),
 -- (30, 2 ,75),
 -- (30, 3 ,75),
