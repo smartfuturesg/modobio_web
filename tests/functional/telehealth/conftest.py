@@ -103,7 +103,6 @@ def payment_method(test_client):
             'expiration': '04/25',
             'is_default': True}),
         content_type='application/json')
-
     pm = PaymentMethods.query.filter_by(user_id=test_client.client_id).first()
 
     yield pm

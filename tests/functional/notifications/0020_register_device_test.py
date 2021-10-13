@@ -27,6 +27,7 @@ def test_device_registration_get(test_client):
 
         assert response.status_code == 200
         assert type(response.json) == list
+        
         assert len(response.json) == 1
 
 def test_device_registration_delete(test_client):

@@ -31,7 +31,7 @@ from odyssey.utils.misc import grab_twilio_credentials
 from odyssey.utils import search
 
 # import fixtures from telehealth
-from tests.functional.telehealth.conftest import *
+# from tests.functional.telehealth.conftest import *
 
 from .utils import login
 
