@@ -31,7 +31,7 @@ def telehealth_clients(test_client):
             middlename='O.',
             lastname='Sterone',
             email=f'client{i}@example.com',
-            phone_number=f'911111111{i}',
+            phone_number=f'91111111{i}',
             is_staff=False,
             is_client=True,
             email_verified=True,
@@ -184,9 +184,8 @@ def register_device(test_client):
     test_client.db.session.delete(device)
     test_client.db.session.commit()
 
-# @pytest.fixture()
-@contextmanager
-def _booking(test_client, payment_method):
+@pytest.fixture(scope='session')
+def booking(test_client, payment_method):
     """ Create a telehealth booking, needed for testing. """
     tomorrow = date.today() + timedelta(days=1)
 
@@ -260,12 +259,3 @@ def _booking(test_client, payment_method):
         # conversation was already removed as part of a test
         pass
 
-@pytest.fixture(scope='function')
-def booking_tmp(test_client, payment_method):
-    with _booking(test_client, payment_method) as result:
-        yield result
-
-@pytest.fixture(scope='session')
-def booking(test_client, payment_method):
-    with _booking(test_client, payment_method) as result:
-        yield result
