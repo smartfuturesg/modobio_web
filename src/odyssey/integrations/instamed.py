@@ -1,4 +1,5 @@
 import requests
+from werkzeug.exceptions import BadRequest
 
 from flask import current_app
 

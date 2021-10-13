@@ -1,6 +1,7 @@
 import logging
 logger = logging.getLogger(__name__)
 
+from datetime import datetime, date, timedelta
 import requests
 import json
 
@@ -22,7 +23,6 @@ from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.notifications.schemas import NotificationSchema
 from odyssey.api.system.models import SystemTelehealthSessionCosts
 from odyssey.api.user.models import User
-from odyssey.utils.misc import cancel_telehealth_appointment
 
 from odyssey.config import Config
 

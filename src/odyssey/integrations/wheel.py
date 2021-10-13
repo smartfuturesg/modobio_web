@@ -364,7 +364,7 @@ class Wheel:
         StaffProfile: bio, memebrsince (added automatically by db)
         """
 
-        roles_mapper = {'md': 'medical_doctor', 'np': 'nurse_practitioner'}
+        roles_mapper = {'md': 'medical_doctor', 'np': 'nurse'}
         full_roster = self.physician_roster()
         
         wheel_physician_ids = Wheel.clinician_ids(key='wheel_clinician_id')
