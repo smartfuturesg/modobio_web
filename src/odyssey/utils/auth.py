@@ -88,7 +88,7 @@ class BasicAuth(object):
                     raise Unauthorized
 
                 if email_required and not user.email_verified:
-                    raise Badrequest('Please verify your email address.')
+                    raise BadRequest('Please verify your email address.')
 
                 # If user_type exists (Staff or Client, etc)
                 # Check user and role access
