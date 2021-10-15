@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from marshmallow import fields, validate, Schema
 from marshmallow.decorators import post_load
 from sqlalchemy import select

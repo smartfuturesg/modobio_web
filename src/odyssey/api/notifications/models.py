@@ -2,6 +2,8 @@
 Database tables for the notifications section of the Modo Bio API.
 All tables in this module are prefixed with 'Notifications'.
 """
+import logging
+logger = logging.getLogger(__name__)
 
 from datetime import datetime, timedelta
 

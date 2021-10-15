@@ -20,7 +20,7 @@ def test_post_payment_status(test_client):
         data=dumps(payment_status_data['invalid_user_id']),
         content_type='application/json')
 
-    assert response.status_code == 404
+    assert response.status_code == 400
 
     response = test_client.post(
         '/payment/status/',

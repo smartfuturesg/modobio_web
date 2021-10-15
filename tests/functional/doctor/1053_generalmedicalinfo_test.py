@@ -65,7 +65,7 @@ def test_post_3_general_medical_history(test_client):
         content_type='application/json')
 
     # should produce an error
-    assert response.status_code == 405
+    assert response.status_code == 400
 
 def test_get_3_general_medical_history(test_client):
     response = test_client.get(
@@ -115,7 +115,7 @@ def test_post_5_general_medical_history(test_client):
 
     # Post an invalid request,
     # allergies field missing medication name.
-    assert response.status_code == 405
+    assert response.status_code == 400
 
 def test_get_5_general_medical_history(test_client):
     response = test_client.get(

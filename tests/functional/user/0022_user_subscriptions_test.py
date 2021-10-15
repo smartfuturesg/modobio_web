@@ -61,7 +61,7 @@ def test_put_user_subscription(test_client):
         data=dumps(users_subscription_data),
         content_type='application/json')
 
-    assert response.status_code == 404
+    assert response.status_code == 401
 
 def test_get_subscription_history(test_client):
     response = test_client.get(

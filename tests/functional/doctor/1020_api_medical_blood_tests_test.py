@@ -127,17 +127,11 @@ def test_delete_blood_test(test_client):
         headers=test_client.client_auth_header)
     assert response.status_code == 204
 
-    # repeat last request, fail 404
-    response = test_client.delete(
-        f'/doctor/bloodtest/{test_client.client_id}/?test_id={test_id_client_submit}',
-        headers=test_client.client_auth_header)
-
-    assert response.status_code == 404
-
     # send get request to ensure the test was deleted
     response = test_client.get(
         f'/doctor/bloodtest/results/{test_id_client_submit}/',
         headers=test_client.client_auth_header,
         content_type='application/json')
 
-    assert response.status_code == 404
+    assert response.status_code == 200
+    assert not response.json

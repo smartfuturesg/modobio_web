@@ -1,13 +1,17 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from flask import current_app
 from flask_accepts import responds
-from flask_restx import Resource, Namespace
+from flask_restx import Namespace
 
 from odyssey import db
+from odyssey.utils.base.resources import BaseResource
 
 ns = Namespace('version', description='Endpoint for API version.')
 
 @ns.route('/')
-class VersionEndpoint(Resource):
+class VersionEndpoint(BaseResource):
     @ns.doc(security=None)
     @responds(
         {'name': 'version', 'type': str},

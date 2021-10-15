@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from sqlalchemy.ext.declarative import declared_attr
 
 from odyssey import db
